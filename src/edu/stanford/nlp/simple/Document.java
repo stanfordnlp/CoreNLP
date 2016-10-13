@@ -906,7 +906,8 @@ public class Document {
     }
     // Run annotator
     Annotator parse = ((props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultParse : getOrCreate(AnnotatorFactories.parse(props, backend))).get();
-    if (parse.requires().contains(CoreAnnotations.PartOfSpeechAnnotation.class)) {
+    if (parse.requires().contains(CoreAnnotations.PartOfSpeechAnnotation.class) || System.getenv("CORENLP_HOST") != null) {
+      // Run the POS tagger if we are (or may be) using the shift reduce parser
       runPOS(props);
     } else {
       sentences();

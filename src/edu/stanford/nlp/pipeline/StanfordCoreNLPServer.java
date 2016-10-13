@@ -340,6 +340,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
   /**
    * A handler to let the caller know if the server is alive AND ready to respond to requests.
+   * The canonical use-case for this is for Kubernetes readiness checks.
    */
   protected static class ReadyHandler implements HttpHandler {
     /** If true, the server is runnning and ready for requets. */
@@ -377,6 +378,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * A handler to let the caller know if the server is alive,
    * but not necessarily ready to respond to requests.
+   * The canonical use-case for this is for Kubernetes liveness checks.
    */
   protected static class LiveHandler implements HttpHandler {
     @Override
@@ -1206,7 +1208,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Fill arguments
     ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer();
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer();  // must come after filling global options
     ArgumentParser.fillOptions(server, args);
     log("    Threads: " + ArgumentParser.threads);
 
