@@ -61,10 +61,10 @@ public class StanfordCoreNLPServer implements Runnable {
   protected String username = null;
   @ArgumentParser.Option(name="password", gloss="The password component of a username/password basic auth credential")
   protected String password = null;
-  @ArgumentParser.Option(name="lazy", gloss="If true, don't precompute the models on loading the server")
-  protected boolean lazy = true;
   @ArgumentParser.Option(name="annotators", gloss="The default annotators to run over a given sentence.")
   protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,regexner,kbp";
+  @ArgumentParser.Option(name="preload", gloss="Cache the following annotators on startup")
+  protected static String preloadedAnnotators = "";
 
   protected final String shutdownKey;
 
@@ -102,7 +102,8 @@ public class StanfordCoreNLPServer implements Runnable {
 
   /**
    * Create a new Stanford CoreNLP Server, with the default parameters
-   * @throws IOException
+   *
+   * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer() throws IOException {
     defaultProps = PropertiesUtils.asProperties(
@@ -926,7 +927,7 @@ public class StanfordCoreNLPServer implements Runnable {
           TregexPattern p = TregexPattern.compile(pattern);
 
           // Run Tregex
-          return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
+          return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) ->
             docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
                 Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
                 //sentWriter.set("tree", tree.pennString());
@@ -936,14 +937,14 @@ public class StanfordCoreNLPServer implements Runnable {
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i++), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
                     matchWriter.set("match", matcher.getMatch().pennString());
-                    matchWriter.set("namedNodes", matcher.getNodeNames().stream().map(nodeName -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeWriter) -> {
-                      namedNodeWriter.set(nodeName, matcher.getNode(nodeName).pennString());
-                    }));
+                    matchWriter.set("namedNodes", matcher.getNodeNames().stream().map(nodeName -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeWriter) ->
+                      namedNodeWriter.set(nodeName, matcher.getNode(nodeName).pennString())
+                    ));
                   });
 
                 }
-            }));
-          }), doc);
+            }))
+          ), doc);
         } catch (Exception e) {
           e.printStackTrace();
           try {
@@ -1110,12 +1111,14 @@ public class StanfordCoreNLPServer implements Runnable {
     }
 
     // Pre-load the models
-    if (!server.lazy) {
-      Properties props = server.defaultProps;
+    if (StanfordCoreNLPServer.preloadedAnnotators != null && !"".equals(StanfordCoreNLPServer.preloadedAnnotators.trim())) {
+      Properties props = new Properties();
+      server.defaultProps.entrySet().forEach(entry -> props.setProperty(entry.getKey().toString(), entry.getValue().toString()));
+      props.setProperty("annotators", StanfordCoreNLPServer.preloadedAnnotators);
       try {
         new StanfordCoreNLP(props);
       } catch (Throwable ignored) {
-        err("Could not pre-cache annotators in server; encountered exception:");
+        err("Could not pre-load annotators in server; encountered exception:");
         ignored.printStackTrace();
       }
     }
