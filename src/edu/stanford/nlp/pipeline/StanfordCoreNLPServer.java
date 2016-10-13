@@ -17,6 +17,7 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -29,6 +30,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -47,6 +49,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected HttpServer server;
   @ArgumentParser.Option(name="port", gloss="The port to run the server on")
   protected int serverPort = 9000;
+  @ArgumentParser.Option(name="status_port", gloss="The port to serve the status check endpoints on. If different from the server port, this will run in a separate thread.")
+  protected int statusPort = serverPort;
   @ArgumentParser.Option(name="timeout", gloss="The default timeout, in milliseconds")
   protected int timeoutMilliseconds = 15000;
   @ArgumentParser.Option(name="strict", gloss="If true, obey strict HTTP standards (e.g., with encoding)")
@@ -330,6 +334,60 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.close();
     }
   }
+
+
+  /**
+   * A handler to let the caller know if the server is alive AND ready to respond to requests.
+   */
+  protected static class ReadyHandler implements HttpHandler {
+    /** If true, the server is runnning and ready for requets. */
+    public final AtomicBoolean serverReady;
+    /** The creation time of this handler. This is used to tell the caller how long we've been waiting for. */
+    public final long startTime;
+
+    /** The trivial constructor. */
+    public ReadyHandler(AtomicBoolean serverReady) {
+      this.serverReady = serverReady;
+      this.startTime = System.currentTimeMillis();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+      // Return a simple text message that says pong.
+      httpExchange.getResponseHeaders().set("Content-type", "text/plain");
+      String response;
+      int status;
+      if (this.serverReady.get()) {
+        response = "ready\n";
+        status = HTTP_OK;
+      } else {
+        response = "server is not ready yet. uptime=" + Redwood.formatTimeDifference(System.currentTimeMillis() - this.startTime) + "\n";
+        status = HTTP_UNAVAILABLE;
+      }
+      httpExchange.sendResponseHeaders(status, response.getBytes().length);
+      httpExchange.getResponseBody().write(response.getBytes());
+      httpExchange.close();
+    }
+  }
+
+
+  /**
+   * A handler to let the caller know if the server is alive,
+   * but not necessarily ready to respond to requests.
+   */
+  protected static class LiveHandler implements HttpHandler {
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+      // Return a simple text message that says pong.
+      httpExchange.getResponseHeaders().set("Content-type", "text/plain");
+      String response = "live\n";
+      httpExchange.sendResponseHeaders(HTTP_OK, response.getBytes().length);
+      httpExchange.getResponseBody().write(response.getBytes());
+      httpExchange.close();
+    }
+  }
+
 
   /**
    * Sending the appropriate shutdown key will gracefully shutdown the server.
@@ -1016,6 +1074,39 @@ public class StanfordCoreNLPServer implements Runnable {
 
 
   /**
+   * If we have a separate liveness port, start a server on a separate thread pool whose only
+   * job is to watch for when the CoreNLP server becomes ready.
+   * This will also immediately signal liveness.
+   *
+   * @param live The boolean to track when CoreNLP has initialized and the server is ready
+   *             to serve requests.
+   */
+  private void livenessServer(AtomicBoolean live) {
+    if (this.serverPort != this.statusPort) {
+      try {
+        // Create the server
+        if (this.ssl) {
+          server = addSSLContext(HttpsServer.create(new InetSocketAddress(statusPort), 0)); // 0 is the default 'backlog'
+        } else {
+          server = HttpServer.create(new InetSocketAddress(statusPort), 0); // 0 is the default 'backlog'
+        }
+        // Add the two status endpoints
+        withAuth(server.createContext("/live", new LiveHandler()), Optional.empty());
+        withAuth(server.createContext("/ready", new ReadyHandler(live)), Optional.empty());
+        // Start the server
+        ExecutorService statusExecutor = Executors.newFixedThreadPool(2);  // give the status executor its own thread pool
+        server.setExecutor(statusExecutor);
+        server.start();
+        // Server started
+        log("Liveness server started at " + server.getAddress());
+      } catch (IOException e) {
+        err("Could not start liveness server. This will probably result in very bad things happening soon.", e);
+      }
+    }
+  }
+
+
+  /**
    * Returns the implementing Http server.
    */
   public Optional<HttpServer> getServer() {
@@ -1023,13 +1114,16 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
 
-  /** @see StanfordCoreNLPServer#run(Optional, Predicate, Consumer, StanfordCoreNLPServer.FileHandler, boolean) */
+
+  /** @see StanfordCoreNLPServer#run(Optional, Predicate, Consumer, StanfordCoreNLPServer.FileHandler, boolean, AtomicBoolean) */
   @Override
   public void run() {
     // Set the static page handler
     try {
+      AtomicBoolean live = new AtomicBoolean(false);
+      this.livenessServer(live);
       FileHandler homepage = new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.html");
-      run(Optional.empty(), req -> true, obj -> {}, homepage, false);
+      run(Optional.empty(), req -> true, obj -> {}, homepage, false, live);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -1056,7 +1150,12 @@ public class StanfordCoreNLPServer implements Runnable {
    * Run the server.
    * This method registers the handlers, and initializes the HTTP server.
    */
-  public void run(Optional<Pair<String,String>> basicAuth, Predicate<Properties> authenticator, Consumer<FinishedRequest> callback, FileHandler homepage, boolean https) {
+  public void run(Optional<Pair<String,String>> basicAuth,
+                  Predicate<Properties> authenticator,
+                  Consumer<FinishedRequest> callback,
+                  FileHandler homepage,
+                  boolean https,
+                  AtomicBoolean live) {
     try {
       if (https) {
         server = addSSLContext(HttpsServer.create(new InetSocketAddress(serverPort), 0)); // 0 is the default 'backlog'
@@ -1072,8 +1171,14 @@ public class StanfordCoreNLPServer implements Runnable {
       withAuth(server.createContext("/corenlp-parseviewer.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-parseviewer.js", "application/javascript")), basicAuth);
       withAuth(server.createContext("/ping", new PingHandler()), Optional.empty());
       withAuth(server.createContext("/shutdown", new ShutdownHandler()), basicAuth);
+      if (this.serverPort == this.statusPort) {
+        withAuth(server.createContext("/live", new LiveHandler()), Optional.empty());
+        withAuth(server.createContext("/ready", new ReadyHandler(live)), Optional.empty());
+
+      }
       server.setExecutor(serverExecutor);
       server.start();
+      live.set(true);
       log("StanfordCoreNLPServer listening at " + server.getAddress());
     } catch (IOException e) {
       e.printStackTrace();
@@ -1101,6 +1206,10 @@ public class StanfordCoreNLPServer implements Runnable {
     ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
     StanfordCoreNLPServer server = new StanfordCoreNLPServer();
     ArgumentParser.fillOptions(server, args);
+
+    // Start the liveness server
+    AtomicBoolean live = new AtomicBoolean(false);
+    server.livenessServer(live);
 
     // Create the homepage
     FileHandler homepage;
@@ -1132,9 +1241,9 @@ public class StanfordCoreNLPServer implements Runnable {
     // Run the server
     log("Starting server...");
     if (server.ssl) {
-      server.run(credentials, req -> true, res -> {}, homepage, true);
+      server.run(credentials, req -> true, res -> {}, homepage, true, live);
     } else {
-      server.run(credentials, req -> true, res -> {}, homepage, false);
+      server.run(credentials, req -> true, res -> {}, homepage, false, live);
 
     }
   }
