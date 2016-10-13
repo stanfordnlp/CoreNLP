@@ -277,6 +277,31 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
 
   /**
+   * Run the client, pulling credentials from the environment.
+   * Throws an IllegalStateException if the required environment variables aren't set.
+   * These are:
+   *
+   * <ul>
+   *   <li>CORENLP_HOST</li>
+   *   <li>CORENLP_KEY</li>
+   *   <li>CORENLP_SECRET</li>
+   * </ul>
+   *
+   * @throws IllegalStateException Thrown if we could not read the required environment variables.
+   */
+  @SuppressWarnings("unused")
+  public StanfordCoreNLPClient(Properties properties) throws IllegalStateException {
+    this(properties,
+        Optional.ofNullable(System.getenv("CORENLP_HOST")).orElseThrow(() -> new IllegalStateException("Environment variable CORENLP_HOST not specified")),
+        Optional.ofNullable(System.getenv("CORENLP_HOST")).map(x -> x.startsWith("http://") ? 80 : 443).orElse(443),
+        1,
+        Optional.ofNullable(System.getenv("CORENLP_KEY")).orElse(null),
+        Optional.ofNullable(System.getenv("CORENLP_SECRET")).orElse(null)
+      );
+  }
+
+
+  /**
    * Run on a single backend.
    *
    * @see StanfordCoreNLPClient (Properties, List)
