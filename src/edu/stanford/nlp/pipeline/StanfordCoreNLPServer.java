@@ -78,7 +78,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * The thread pool for the HTTP server.
    */
-  private final ExecutorService serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
+  private final ExecutorService serverExecutor;
   /**
    * To prevent grossly wasteful over-creation of pipeline objects, cache the last
    * few we created, until the garbage collector decides we can kill them.
@@ -87,7 +87,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * An executor to time out CoreNLP execution with.
    */
-  private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
+  private final ExecutorService corenlpExecutor;
 
 
   /**
@@ -110,7 +110,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer() throws IOException {
-    defaultProps = PropertiesUtils.asProperties(
+    this.defaultProps = PropertiesUtils.asProperties(
         "annotators", defaultAnnotators,  // Run these annotators by default
         "mention.type", "dep",  // Use dependency trees with coref by default
         "coref.mode",  "statistical",  // Use the new coref
@@ -121,6 +121,8 @@ public class StanfordCoreNLPServer implements Runnable {
         "parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz",  // SR scales linearly with sentence length. Good for a server!
         "parse.binaryTrees", "true",  // needed for the Sentiment annotator
         "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
+    this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
+    this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
 
     // Generate and write a shutdown key
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -1206,6 +1208,7 @@ public class StanfordCoreNLPServer implements Runnable {
     ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
     StanfordCoreNLPServer server = new StanfordCoreNLPServer();
     ArgumentParser.fillOptions(server, args);
+    log("    Threads: " + ArgumentParser.threads);
 
     // Start the liveness server
     AtomicBoolean live = new AtomicBoolean(false);
