@@ -55,6 +55,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected boolean quiet = false;
   @ArgumentParser.Option(name="ssl", gloss="If true, start the server with an [insecure!] SSL connection")
   protected boolean ssl = false;
+  @ArgumentParser.Option(name="key", gloss="The *.jks key file to load, if -ssl is enabled. By default, it'll load the dummy key from the jar (but this is, of course, insecure!)")
+  protected static String key = "edu/stanford/nlp/pipeline/corenlp.jks";
   @ArgumentParser.Option(name="username", gloss="The username component of a username/password basic auth credential")
   protected String username = null;
   @ArgumentParser.Option(name="password", gloss="The password component of a username/password basic auth credential")
@@ -979,10 +981,14 @@ public class StanfordCoreNLPServer implements Runnable {
 
 
   private static HttpsServer addSSLContext(HttpsServer server) {
-    log("Adding SSL context to server");
+    log("Adding SSL context to server; key=" + StanfordCoreNLPServer.key);
     try {
       KeyStore ks = KeyStore.getInstance("JKS");
-      ks.load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/corenlp.jks"), "corenlp".toCharArray());
+      if (StanfordCoreNLPServer.key != null && IOUtils.existsInClasspathOrFileSystem(StanfordCoreNLPServer.key)) {
+        ks.load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(key), "corenlp".toCharArray());
+      } else {
+        throw new IllegalArgumentException("Could not find SSL keystore at " + StanfordCoreNLPServer.key);
+      }
       KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
       kmf.init(ks, "corenlp".toCharArray());
       SSLContext sslContext = SSLContext.getInstance("TLS");
