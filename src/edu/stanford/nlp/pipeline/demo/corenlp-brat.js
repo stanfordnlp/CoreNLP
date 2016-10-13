@@ -928,8 +928,7 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent(
-        '{"annotators": "' + annotators() + '", "date": "' + date() + '"' +
-        ', "sutime.includeRange": "true", "coref.md.type": "dep", "coref.mode": "statistical"}'),
+        '{"annotators": "' + annotators() + '", "date": "' + date() + '"}'),
       data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
