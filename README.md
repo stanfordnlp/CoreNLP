@@ -23,6 +23,11 @@ The most recent models associated with the code in the HEAD of this repository c
 Some of the larger (English) models -- like the shift-reduce parser and WikiDict -- are not distributed with our default models jar. 
 The most recent version of these models can be found [here](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar).
 
+We distribute models for other languages as well, including [Arabic](http://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar),
+[Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar),
+[German]((http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar),
+and [Spanish](stanford-spanish-corenlp-models-current.jar)
+
 For information about making contributions to Stanford CoreNLP, see the file [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Questions about CoreNLP can either be posted on StackOverflow with the tag [stanford-nlp](http://stackoverflow.com/questions/tagged/stanford-nlp), 
