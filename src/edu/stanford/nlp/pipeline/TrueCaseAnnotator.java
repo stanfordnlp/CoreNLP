@@ -95,11 +95,10 @@ public class TrueCaseAnnotator implements Annotator  {
       // classify tokens for each sentence
       for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-
         List<CoreLabel> output = this.trueCaser.classifySentence(tokens);
+        for (int i = 0; i < tokens.size(); ++i) {
 
-        for (int i = 0, size = tokens.size(); i < size; i++) {
-          // add the truecaser tag to each token
+          // add the named entity tag to each token
           String neTag = output.get(i).get(CoreAnnotations.AnswerAnnotation.class);
           tokens.get(i).set(CoreAnnotations.TrueCaseAnnotation.class, neTag);
           setTrueCaseText(tokens.get(i));
@@ -123,17 +122,14 @@ public class TrueCaseAnnotator implements Annotator  {
         trueCaseText = text.toLowerCase();
         break;
       case "INIT_UPPER":
-        trueCaseText = Character.toTitleCase(text.charAt(0)) + text.substring(1).toLowerCase();
+        trueCaseText = text.substring(0, 1).toUpperCase() + text.substring(1);
         break;
       case "O":
         // The model predicted mixed case, so lookup the map:
-        if (mixedCaseMap.containsKey(text)) {
+        if (mixedCaseMap.containsKey(text))
           trueCaseText = mixedCaseMap.get(text);
-        }
-        // else leave it as it was?
         break;
     }
-    // System.err.println(text + " was classified as " + trueCase + " and so became " + trueCaseText);
 
     l.set(CoreAnnotations.TrueCaseTextAnnotation.class, trueCaseText);
   }
