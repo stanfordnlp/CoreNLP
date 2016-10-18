@@ -25,7 +25,7 @@ The most recent version of these models can be found [here](http://nlp.stanford.
 
 We distribute models for other languages as well, including [Arabic](http://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar),
 [Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar), 
-[French](http://nlp.stanford.edu/software/stanford-french-models-current.jar), 
+[French](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar), 
 [German](http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar),
 and [Spanish](stanford-spanish-corenlp-models-current.jar)
 
