@@ -27,7 +27,7 @@ We distribute models for other languages as well, including [Arabic](http://nlp.
 [Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar), 
 [French](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar), 
 [German](http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar),
-and [Spanish](stanford-spanish-corenlp-models-current.jar)
+and [Spanish](http://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar)
 
 For information about making contributions to Stanford CoreNLP, see the file [CONTRIBUTING.md](CONTRIBUTING.md).
 
