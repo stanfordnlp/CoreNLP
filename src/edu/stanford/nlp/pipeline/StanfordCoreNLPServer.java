@@ -650,14 +650,22 @@ public class StanfordCoreNLPServer implements Runnable {
       }
 
       // check to see if a specific language was set, use language specific properties
-      if (urlProperties.containsKey("pipelineLanguage")) {
-        String languagePropertiesFile = LanguageInfo.getLanguagePropertiesFile(urlProperties.get("pipelineLanguage"));
-        Properties languageSpecificProperties = new Properties();
-        try {
-          languageSpecificProperties.load(StanfordCoreNLPServer.class.getResourceAsStream(languagePropertiesFile));
-          PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
-        } catch (IOException e) {
-          err("Failure to load language specific properties.");
+      String language = urlParams.getOrDefault("pipelineLanguage", urlProperties.getOrDefault("pipelineLanguage", "default"));
+      if (language != null && !"default".equals(language)) {
+        String languagePropertiesFile = LanguageInfo.getLanguagePropertiesFile(language);
+        if (languagePropertiesFile != null) {
+          Properties languageSpecificProperties = new Properties();
+          try {
+            languageSpecificProperties.load(StanfordCoreNLPServer.class.getResourceAsStream(languagePropertiesFile));
+            PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
+          } catch (IOException e) {
+            err("Failure to load language specific properties.");
+          }
+        } else {
+          try {
+            respondError("Invalid language: '" + language + "'", httpExchange);
+          } catch (IOException e) { warn(e); }
+          return new Properties();
         }
       }
 
