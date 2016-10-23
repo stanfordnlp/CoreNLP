@@ -1098,8 +1098,6 @@ public class StanfordCoreNLPServer implements Runnable {
         withAuth(server.createContext("/live", new LiveHandler()), Optional.empty());
         withAuth(server.createContext("/ready", new ReadyHandler(live)), Optional.empty());
         // Start the server
-        ExecutorService statusExecutor = Executors.newFixedThreadPool(2);  // give the status executor its own thread pool
-        server.setExecutor(statusExecutor);
         server.start();
         // Server started
         log("Liveness server started at " + server.getAddress());

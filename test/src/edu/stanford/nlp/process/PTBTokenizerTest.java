@@ -57,9 +57,7 @@ public class PTBTokenizerTest {
     "I dunno.",
       "The o-kay was received by the anti-acquisition front on its foolishness-filled fish market.",
       "We ran the pre-tests through the post-scripted centrifuge.",
-      "School-aged parents should be aware of the unique problems that they face.",
-      "I dispute Art. 53 of the convention.",
-      "I like Art. And I like History.",
+      "School-aged parents should be aware of the unique problems that they face."
   };
 
   private final String[][] ptbGold = {
@@ -112,8 +110,6 @@ public class PTBTokenizerTest {
       {"The", "o-kay", "was", "received", "by", "the", "anti-acquisition", "front", "on", "its", "foolishness-filled", "fish", "market", "."},
       {"We", "ran", "the", "pre-tests", "through", "the", "post-scripted", "centrifuge", "."},
       {"School-aged", "parents", "should", "be", "aware", "of", "the", "unique", "problems", "that", "they", "face","."},
-      { "I", "dispute", "Art.", "53", "of", "the", "convention", "." },
-      { "I", "like", "Art", ".", "And", "I", "like", "History", "." },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -166,9 +162,6 @@ public class PTBTokenizerTest {
       {"The", "o-kay", "was", "received", "by", "the", "anti-acquisition", "front", "on", "its", "foolishness", "-", "filled", "fish", "market", "."},
       {"We", "ran", "the", "pre-tests", "through", "the", "post-scripted", "centrifuge", "."},
       {"School", "-", "aged", "parents", "should", "be", "aware", "of", "the", "unique", "problems", "that", "they", "face","."},
-      { "I", "dispute", "Art.", "53", "of", "the", "convention", "." },
-      { "I", "like", "Art", ".", "And", "I", "like", "History", "." },
-
   };
 
   @Test
@@ -463,7 +456,6 @@ public class PTBTokenizerTest {
     "20°C is 68°F because 0℃ is 32℉",
     "a.jpg a-b.jpg a.b.jpg a-b.jpg a_b.jpg a-b-c.jpg 0-1-2.jpg a-b/c-d_e.jpg a-b/c-9a9_9a.jpg\n",
     "#hashtag #Azərbaycanca #mûǁae #Čeština #日本語ハッシュタグ #1 #23 #Trump2016 @3 @acl_2016",
-          "Sect. 793 of the Penal Code",
   };
 
   private final String[][] mtGold = {
@@ -475,7 +467,6 @@ public class PTBTokenizerTest {
     { "20", "°C", "is", "68", "°F", "because", "0", "℃", "is", "32", "℉" },
     { "a.jpg", "a-b.jpg", "a.b.jpg", "a-b.jpg", "a_b.jpg", "a-b-c.jpg", "0-1-2.jpg", "a-b/c-d_e.jpg", "a-b/c-9a9_9a.jpg"},
     { "#hashtag", "#Azərbaycanca", "#mûǁae", "#Čeština", "#日本語ハッシュタグ", "#", "1", "#", "23", "#Trump2016", "@", "3", "@acl_2016" },
-          { "Sect.", "793", "of", "the", "Penal", "Code" },
   };
 
   @Test
