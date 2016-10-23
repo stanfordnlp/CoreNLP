@@ -125,7 +125,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
   private CorefMentionFinder getMentionFinder(Properties props, HeadFinder headFinder)
           throws ClassNotFoundException, IOException {
 
-    switch (CorefProperties.mdType(props)) {
+    switch (CorefProperties.getMDType(props)) {
       case DEPENDENCY:
         mdName = "dependency";
         return new DependencyCorefMentionFinder(props);

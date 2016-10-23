@@ -208,7 +208,7 @@ public class CorefProperties {
     String defaultMD;
     if (getLanguage(props).equals(Locale.ENGLISH)) {
       // defaultMD for English should be RULE since this is highest performing score for scoref
-      defaultMD = "RULE";
+      defaultMD = useConstituencyParse(props) ? "RULE" : "DEPENDENCY";
     } else if (getLanguage(props).equals(Locale.CHINESE)) {
       // defaultMD for Chinese should be RULE for now
       defaultMD = "RULE";
@@ -429,16 +429,6 @@ public class CorefProperties {
 
   public static int maxMentionDistanceWithStringMatch(Properties props) {
     return PropertiesUtils.getInt(props, "coref.maxMentionDistanceWithStringMatch", 500);
-  }
-
-  // type of algorithm for mention detection
-  public static MentionDetectionType mdType(Properties props) {
-    String type = PropertiesUtils.getString(props, "coref.md.type",
-            useConstituencyParse(props) ? "RULE" : "dep");
-    if (type.equalsIgnoreCase("dep")) {
-      type = "DEPENDENCY";
-    }
-    return MentionDetectionType.valueOf(type.toUpperCase());
   }
 
   // use a more liberal policy for Chinese mention detection
