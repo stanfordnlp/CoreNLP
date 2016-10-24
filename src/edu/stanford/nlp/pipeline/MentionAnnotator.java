@@ -76,6 +76,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
 
       ));
     } catch (Exception e) {
+      e.printStackTrace();
       log.info("Error with building coref mention annotator!");
     }
   }
