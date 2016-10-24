@@ -14,7 +14,7 @@ public class NeuralCorefProperties {
   public static String modelPath(Properties props) {
     String defaultPath = "edu/stanford/nlp/models/coref/neural/" +
         (CorefProperties.getLanguage(props) == Locale.CHINESE ? "chinese" : "english") +
-        (CorefProperties.conll(props) ? "-model-conll" : "-model-conll") + ".ser.gz";
+        (CorefProperties.conll(props) ? "-model-conll" : "-model-default") + ".ser.gz";
     return PropertiesUtils.getString(props, "coref.neural.modelPath", defaultPath);
   }
 

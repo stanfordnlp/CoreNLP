@@ -14,6 +14,10 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
 
+/**
+ * Loads the data used to train {@link Clusterer}.
+ * @author Kevin Clark
+ */
 public class ClustererDataLoader {
   public static class ClustererDoc {
     public final int id;

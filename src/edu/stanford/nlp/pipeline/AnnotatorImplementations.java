@@ -220,12 +220,7 @@ public class AnnotatorImplementations  {
     Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_MENTION + ".",
             true);
-    // handle default for coref.useConstituencyParse based on whether parse is used or not
-    String[] annotatorsList = properties.getProperty("annotators","").replaceAll("\\s+","").split(",");
-    if (Arrays.asList(annotatorsList).contains(Annotator.STANFORD_PARSE) &&
-            !corefProperties.containsKey(Annotator.STANFORD_COREF+".useConstituencyParse")) {
-      corefProperties.setProperty(Annotator.STANFORD_COREF+".useConstituencyParse", "true");
-    }
+
     Properties allPropsForCoref = new Properties();
     allPropsForCoref.putAll(corefProperties);
     allPropsForCoref.putAll(mentionProperties);
@@ -239,13 +234,6 @@ public class AnnotatorImplementations  {
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
             true);
-    // handle default for coref.useConstituencyParse based on whether parse is used or not
-    String[] annotatorsList = properties.getProperty("annotators","").replaceAll("\\s+","").split(",");
-    // check if parse being used and nothing is set for coref.usedConstituencyParse
-    if (Arrays.asList(annotatorsList).contains(Annotator.STANFORD_PARSE) &&
-            !corefProperties.containsKey(Annotator.STANFORD_COREF+".useConstituencyParse")) {
-      corefProperties.setProperty(Annotator.STANFORD_COREF+".useConstituencyParse", "true");
-    }
     Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_MENTION + ".",
             true);
