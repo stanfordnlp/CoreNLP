@@ -6,6 +6,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.Mention;
+
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -13,7 +14,7 @@ import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * Similar to {@link edu.stanford.nlp.ling.CoreAnnotations}, 
+ * Similar to {@link edu.stanford.nlp.ling.CoreAnnotations},
  * but this class contains
  * annotations made specifically for storing Coref data.  This is kept
  * separate from CoreAnnotations so that systems which only need
@@ -79,7 +80,7 @@ public class CorefCoreAnnotations {
       return ErasureUtils.uncheckedCast(Set.class);
     }
   }
-  
+
   /**
    * CorefChainID - CorefChain map
    */

@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
-import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.coref.data.InputDoc;
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.io.IOUtils;
@@ -218,7 +217,7 @@ public class CoNLLDocumentReader implements DocReader  {
 
     public boolean annotateTreeCoref = false;     // Annotate tree with CorefMentionAnnotation
     public boolean annotateTreeNer = false;       // Annotate tree with NamedEntityAnnotation
-    
+
     public Locale lang = Locale.ENGLISH;
 
     public String backgroundNerTag = "O";        // Background NER tag
@@ -249,7 +248,7 @@ public class CoNLLDocumentReader implements DocReader  {
     public String documentID;
     String partNo;
     public String filename;
-    
+
     public List<List<String[]>> sentenceWordLists = new ArrayList<>();
 
     Annotation annotation;
@@ -1020,7 +1019,7 @@ public class CoNLLDocumentReader implements DocReader  {
   /** Reads and dumps output, mainly for debugging. */
   public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
-    boolean debug = CorefProperties.debug(props);
+    boolean debug = false;
     String filepath = props.getProperty("i");
     String outfile = props.getProperty("o");
     if (filepath == null || outfile == null) {
@@ -1077,12 +1076,12 @@ public class CoNLLDocumentReader implements DocReader  {
     if (conllDoc == null) return null;
 
     Annotation anno = conllDoc.getAnnotation();
-    
+
     // conll doc has constituency tree but doesn't have dependency tree
     setDependencyTree(anno);
-    
+
     List<List<Mention>> allGoldMentions = extractGoldMentions(conllDoc);
-    
+
     // store some useful information in docInfo for later
     Map<String, String> docInfo = makeDocInfo(conllDoc);
 
@@ -1097,20 +1096,20 @@ public class CoNLLDocumentReader implements DocReader  {
     docInfo.put("DOC_PART", conllDoc.partNo);
     docInfo.put("DOC_ID_PART", conllDoc.documentIdPart);
     docInfo.put("DOC_FILE", conllDoc.filename);
-    
+
     return docInfo;
   }
 
   private void setDependencyTree(Annotation anno) {
     List<CoreMap> sentences = anno.get(SentencesAnnotation.class);
-    
+
     for(CoreMap sentence : sentences) {
       Tree tree = sentence.get(TreeAnnotation.class);
       if (tree==null) continue;
-      
+
       SemanticGraph deps = null;
       SemanticGraph basicDeps = null;
-      
+
       if (options.lang == Locale.CHINESE) {
         final boolean threadSafe = true;
 
@@ -1120,7 +1119,7 @@ public class CoNLLDocumentReader implements DocReader  {
             GrammaticalStructure.Extras.NONE,
             threadSafe,
             null);
-        
+
         basicDeps = SemanticGraphFactory.makeFromTree(
             new ChineseGrammaticalStructure(tree, Filters.acceptFilter(), chineseHeadFinder),
             SemanticGraphFactory.Mode.BASIC,
@@ -1131,7 +1130,7 @@ public class CoNLLDocumentReader implements DocReader  {
         deps = SemanticGraphFactory.generateEnhancedDependencies(tree);
         basicDeps = SemanticGraphFactory.generateUncollapsedDependencies(tree);
       }
-      
+
       sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
       sentence.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, deps);
     }

@@ -43,9 +43,9 @@ public class CategoricalFeatureExtractor {
     Mention m1 = document.predictedMentionsByID.get(pair.first);
     Mention m2 = document.predictedMentionsByID.get(pair.second);
     List<Integer> featureVals = pairwiseFeatures(document, m1, m2, dictionaries, conll);
-    SimpleMatrix features = new SimpleMatrix(featureVals.size() + 1, 1);
+    SimpleMatrix features = new SimpleMatrix(featureVals.size(), 1);
     for (int i = 0; i < featureVals.size(); i++) {
-      features.set(i + 1, featureVals.get(i));
+      features.set(i, featureVals.get(i));
     }
     features = NeuralUtils.concatenate(features,
         encodeDistance(m2.sentNum - m1.sentNum),
@@ -54,11 +54,8 @@ public class CategoricalFeatureExtractor {
           m1.sentNum == m2.sentNum && m1.endIndex > m2.startIndex ? 1 : 0}}),
         getMentionFeatures(m1, document, mentionsByHeadIndex),
         getMentionFeatures(m2, document, mentionsByHeadIndex),
-        featurizeGenre(document));
+        encodeGenre(document));
 
-    // replicating a bug in the python code
-    features.set(0, 0, features.get(features.numRows() - 1, 0));
-    features = features.extractMatrix(0, features.numRows() - 1, 0, 1);
     return features;
   }
 
@@ -84,7 +81,7 @@ public class CategoricalFeatureExtractor {
       Map<Integer, List<Mention>> mentionsByHeadIndex) {
     return NeuralUtils.concatenate(
         getMentionFeatures(m, document, mentionsByHeadIndex),
-        featurizeGenre(document)
+        encodeGenre(document)
     );
   }
 
@@ -119,8 +116,9 @@ public class CategoricalFeatureExtractor {
     return m;
   }
 
-  private SimpleMatrix featurizeGenre(Document document) {
-    return NeuralUtils.oneHot(
-        conll ? genres.get(document.docInfo.get("DOC_ID").split("/")[0]) : 3, genres.size());
+  private SimpleMatrix encodeGenre(Document document) {
+    return conll ? NeuralUtils.oneHot(
+        genres.get(document.docInfo.get("DOC_ID").split("/")[0]), genres.size()) :
+          new SimpleMatrix(1, 1);
   }
 }
