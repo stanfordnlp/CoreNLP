@@ -107,24 +107,24 @@ public class ChineseCorefBenchmarkSlowITest extends TestCase {
     Counter<String> highResults = new ClassicCounter<String>();
     Counter<String> expectedResults = new ClassicCounter<String>();
 
-    setLowHighExpected(lowResults, highResults, expectedResults, MENTION_TP, 12550, 12700, 12600); // In 2015 was: 12370
+    setLowHighExpected(lowResults, highResults, expectedResults, MENTION_TP, 12550, 12700, 12596); // In 2015 was: 12370
     setLowHighExpected(lowResults, highResults, expectedResults, MENTION_F1, 55.7, 56.0, 55.88); // In 2015 was: 55.59
 
-    setLowHighExpected(lowResults, highResults, expectedResults, MUC_TP, 6050, 6100, 6063);  // In 2015 was: 5958
-    setLowHighExpected(lowResults, highResults, expectedResults, MUC_F1, 58.30, 58.80, 58.48); // In 2015 was: 57.87
+    setLowHighExpected(lowResults, highResults, expectedResults, MUC_TP, 6050, 6100, 6065);  // In 2015 was: 5958
+    setLowHighExpected(lowResults, highResults, expectedResults, MUC_F1, 58.30, 58.80, 58.52); // In 2015 was: 57.87
 
-    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_TP, 6990, 7110.00, 7100.92); // In 2015 was: 6936.32
-    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_F1, 51.60, 52.00, 51.86); // In 2015 was: 51.07
+    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_TP, 6990, 7110.00, 7026.39); // In 2015 was: 6936.32
+    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_F1, 51.60, 52.10, 52.08); // In 2015 was: 51.07
 
-    setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_TP, 8220, 8260, 8242); // In 2015 was: 8074
-    setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_F1, 55.50, 56.00, 55.77); // In 2015 was: 55.10
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_TP, 8220, 8260, 8224); // In 2015 was: 8074
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_F1, 55.40, 56.00, 55.43); // In 2015 was: 55.10
 
-    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_TP, 2250.00, 2300.00, 2272.52); // In 2015 was: 2205.72
-    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_F1, 51.50, 52.00, 51.52); // In 2015 was: 50.62
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_TP, 2250.00, 2300.00, 2296.06); // In 2015 was: 2205.72
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_F1, 51.30, 52.00, 51.33); // In 2015 was: 50.62
 
-    setLowHighExpected(lowResults, highResults, expectedResults, BLANC_F1, 46.75, 47.25, 47.00); // In 2015 was: 46.19
+    setLowHighExpected(lowResults, highResults, expectedResults, BLANC_F1, 46.00, 47.25, 46.68); // In 2015 was: 46.19
 
-    setLowHighExpected(lowResults, highResults, expectedResults, CONLL_SCORE, 53.75, 54.00, 53.95); // In 2015 was: 53.19
+    setLowHighExpected(lowResults, highResults, expectedResults, CONLL_SCORE, 53.75, 54.00, 53.98); // In 2015 was: 53.19
 
     BenchmarkingHelper.benchmarkResults(results, lowResults, highResults, expectedResults);
   }
