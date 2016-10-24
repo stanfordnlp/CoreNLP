@@ -124,7 +124,7 @@ public class ChineseCorefBenchmarkSlowITest extends TestCase {
 
     setLowHighExpected(lowResults, highResults, expectedResults, BLANC_F1, 46.00, 47.25, 46.68); // In 2015 was: 46.19
 
-    setLowHighExpected(lowResults, highResults, expectedResults, CONLL_SCORE, 53.75, 54.00, 54.01); // In 2015 was: 53.19
+    setLowHighExpected(lowResults, highResults, expectedResults, CONLL_SCORE, 53.75, 54.10, 54.01); // In 2015 was: 53.19
 
     BenchmarkingHelper.benchmarkResults(results, lowResults, highResults, expectedResults);
   }
