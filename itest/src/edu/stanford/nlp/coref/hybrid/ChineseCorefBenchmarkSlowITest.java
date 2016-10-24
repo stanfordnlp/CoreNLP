@@ -47,9 +47,9 @@ public class ChineseCorefBenchmarkSlowITest extends TestCase {
     String currentDir = System.getProperty("user.dir");
     System.err.println("Current dir using System:" +currentDir);
 
-    String[] corefArgs = { "-props", "edu/stanford/nlp/coref/hybrid/properties/zh-conll.properties",
-            '-' + CorefProperties.LOG_PROP, baseLogFile,
-            '-' + CorefProperties.PATH_OUTPUT_PROP, WORK_DIR_FILE.toString()+File.separator };
+    String[] corefArgs = { "-props", "edu/stanford/nlp/coref/hybrid/properties/zh-dcoref-conll.properties",
+            '-' + HybridCorefProperties.LOG_PROP, baseLogFile,
+            '-' + CorefProperties.OUTPUT_PATH_PROP, WORK_DIR_FILE.toString()+File.separator };
 
     Properties props = StringUtils.argsToProperties(corefArgs);
     System.err.println("Running coref with arguments:");
