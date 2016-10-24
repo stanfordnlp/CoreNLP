@@ -1,7 +1,7 @@
 // Takes Stanford CoreNLP JSON output (var data = ... in data.js)
 // and uses brat to render everything.
 
-// var serverAddress = 'http://localhost:9000';
+//var serverAddress = 'http://localhost:9000';
 var serverAddress = '';
 
 // Load Brat libraries
@@ -300,6 +300,8 @@ function render(data) {
       color = posColor(type);
     } else if (name == 'NER') {
       color = nerColor(coarseType);
+    } else if (name == 'NNER') {
+      color = nerColor(coarseType);
     } else if (name == 'COREF') {
       color = '#FFE000';
     } else if (name == 'ENTITY') {
@@ -377,6 +379,7 @@ function render(data) {
   var lemmaEntities = [];
   // (ner)
   var nerEntities = [];
+  var nerEntitiesNormalized = [];
   // (sentiment)
   var sentimentEntities = [];
   // (entitylinking)
@@ -456,8 +459,6 @@ function render(data) {
         return index;
       }
       processParseTree(parseTree, 0);
-      console.log(parseEntities);
-      console.log(parseRels);
       cparseEntities = cparseEntities.concat(cparseEntities, parseEntities);
       cparseRelations = cparseRelations.concat(parseRels);
     }
@@ -511,8 +512,13 @@ function render(data) {
         if (ner == 'O') continue;
         var j = i;
         while (j < tokens.length - 1 && tokens[j+1].ner == ner) j++;
-        addEntityType('NER', normalizedNER, ner);
-        nerEntities.push(['NER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        addEntityType('NER', ner, ner);
+        nerEntities.push(['NER_' + sentI + '_' + i, ner, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        if (ner != normalizedNER) {
+          addEntityType('NNER', normalizedNER, ner);
+          nerEntities.push(['NNER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+
+        }
         i = j;
       }
     }
@@ -928,7 +934,8 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent(
-        '{"annotators": "' + annotators() + '", "date": "' + date() + '"}'),
+        '{"annotators": "' + annotators() + '", "date": "' + date() + '"}') +
+        '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
@@ -940,7 +947,6 @@ $(document).ready(function() {
           // Process constituency parse
           var constituencyParseProcessor = new ConstituencyParseProcessor();
           constituencyParseProcessor.process(data);
-          console.log(data);
           // Empty divs
           $('#annotations').empty();
           // Re-render divs
