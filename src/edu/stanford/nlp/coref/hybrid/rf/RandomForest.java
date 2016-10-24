@@ -8,15 +8,15 @@ import edu.stanford.nlp.util.Index;
 
 public class RandomForest implements Serializable {
   private static final long serialVersionUID = -2736377471905671276L;
-  
+
   public final DecisionTree[] trees;
   public final Index<String> featureIndex;
-  
+
   public RandomForest(Index<String> featureIndex, int numTrees) {
     this.featureIndex = featureIndex;
     this.trees = new DecisionTree[numTrees];
   }
-  
+
   public double probabilityOfTrue(RVFDatum<Boolean,String> datum) {
     return probabilityOfTrue(datum.asFeaturesCounter());
   }

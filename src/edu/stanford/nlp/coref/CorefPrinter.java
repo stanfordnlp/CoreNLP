@@ -14,14 +14,6 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
-import edu.stanford.nlp.util.logging.Redwood;
-
-
-import java.text.DecimalFormat;
-import java.util.logging.*;
-import java.util.regex.*;
-
-
 /**
  * Class for printing out coreference output.
  * @author Heeyoung Lee
@@ -36,9 +28,9 @@ public class CorefPrinter {
     List<List<Mention>> orderedMentions = gold ? document.goldMentions : document.predictedMentions;
     if (filterSingletons) {
       orderedMentions = orderedMentions.stream().map(
-              ml -> ml.stream().filter(m -> document.corefClusters.get(m.corefClusterID) != null &&
-                      document.corefClusters.get(m.corefClusterID).getCorefMentions().size() > 1)
-                      .collect(Collectors.toList()))
+          ml -> ml.stream().filter(m -> document.corefClusters.get(m.corefClusterID) != null &&
+            document.corefClusters.get(m.corefClusterID).size() > 1)
+            .collect(Collectors.toList()))
           .collect(Collectors.toList());
     }
     return CorefPrinter.printConllOutput(document, orderedMentions, gold);
@@ -113,5 +105,4 @@ public class CorefPrinter {
 
     return sb.toString();
   }
-
 }

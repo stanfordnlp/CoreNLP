@@ -9,7 +9,7 @@ The Stanford CoreNLP code is written in Java and licensed under the GNU General 
 
 1. cd CoreNLP ; ant
 
-#### How To Create A Jar 
+#### How To Create A Jar
 
 1. compile the code
 2. cd CoreNLP/classes ; jar -cf ../stanford-corenlp.jar edu
@@ -20,16 +20,16 @@ You can find more explanation and documentation on [the Stanford CoreNLP homepag
 
 The most recent models associated with the code in the HEAD of this repository can be found [here](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar).
 
-Some of the larger (English) models -- like the shift-reduce parser and WikiDict -- are not distributed with our default models jar. 
+Some of the larger (English) models -- like the shift-reduce parser and WikiDict -- are not distributed with our default models jar.
 The most recent version of these models can be found [here](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar).
 
 We distribute models for other languages as well, including [Arabic](http://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar),
-[Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar), 
-[French](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar), 
+[Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar),
+[French](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar),
 [German](http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar),
-and [Spanish](stanford-spanish-corenlp-models-current.jar)
+and [Spanish](http://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar).
 
 For information about making contributions to Stanford CoreNLP, see the file [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Questions about CoreNLP can either be posted on StackOverflow with the tag [stanford-nlp](http://stackoverflow.com/questions/tagged/stanford-nlp), 
+Questions about CoreNLP can either be posted on StackOverflow with the tag [stanford-nlp](http://stackoverflow.com/questions/tagged/stanford-nlp),
   or on the [mailing lists](http://nlp.stanford.edu/software/corenlp.shtml#Mail).

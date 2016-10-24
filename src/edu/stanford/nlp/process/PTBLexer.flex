@@ -756,10 +756,10 @@ ACRONYM = ({ACRO})\.
  * Otherwise, they aren't recognized as abbreviations (unless they also
  * appear in ABBREV1 or ABBREV2).
  * est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa.
- * "Art(s)." is for "article(s)" -- common in legal context
+ * "Art(s)." is for "article(s)" -- common in legal context, Sec(t). for section(s)
  */
 /* Maybe also "op." for "op. cit." but also get a photo op. */
-ABBREV3 = (ca|figs?|prop|nos?|arts?|bldg|prop|pp|op)\.
+ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|bldg|prop|pp|op)\.
 /* Case for south/north before a few places. */
 ABBREVSN = So\.|No\.
 

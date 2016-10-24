@@ -18,6 +18,11 @@
   margin-top: 1ex;
 }
 
+.label {
+  color: #777777;
+  font-size: small;
+}
+
 .footer {
   bottom: 0;
   width: 100%;

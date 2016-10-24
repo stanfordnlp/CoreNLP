@@ -5,12 +5,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import edu.stanford.nlp.coref.CorefDocumentProcessor;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Pair;
 
-public class FeatureExtractorRunner implements DocumentProcessor {
+/**
+ * Runs feature extraction over coreference documents.
+ * @author Kevin Clark
+ */
+public class FeatureExtractorRunner implements CorefDocumentProcessor {
   private final FeatureExtractor extractor;
   private final Compressor<String> compressor;
 

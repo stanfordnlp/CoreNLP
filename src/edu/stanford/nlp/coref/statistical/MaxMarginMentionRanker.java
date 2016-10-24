@@ -3,8 +3,13 @@ package edu.stanford.nlp.coref.statistical;
 import java.util.Map;
 
 import edu.stanford.nlp.coref.statistical.SimpleLinearClassifier.Loss;
+
 import edu.stanford.nlp.stats.Counter;
 
+/**
+ * A max-margin mention-ranking coreference model.
+ * @author Kevin Clark
+ */
 public class MaxMarginMentionRanker extends PairwiseModel {
   public enum ErrorType {
     FN(0), FN_PRON(1), FL(2), WL(3);
