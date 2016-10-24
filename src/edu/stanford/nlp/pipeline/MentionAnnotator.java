@@ -93,15 +93,10 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
     if (docID.contains("nw") && corefProperties.getProperty("coref.input.type", "raw").equals("conll") &&
             CorefProperties.getLanguage(corefProperties) == Locale.CHINESE &&
             PropertiesUtils.getBool(corefProperties,"coref.specialCaseNewswire")) {
-      System.out.println("Special casing newswire!");
-      CorefProperties.setRemoveNestedMentions(corefProperties, false);
       corefProperties.setProperty("removeNestedMentions", "false");
     } else {
-      CorefProperties.setRemoveNestedMentions(corefProperties, true);
       corefProperties.setProperty("removeNestedMentions", "true");
     }
-    System.out.println("in mention annotator");
-    System.out.println("value of removeNestedMentions: "+corefProperties.getProperty("removeNestedMentions"));
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
     int mentionIndex = 0;
     int currIndex = 0;
