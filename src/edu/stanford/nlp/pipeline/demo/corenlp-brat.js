@@ -1,8 +1,8 @@
 // Takes Stanford CoreNLP JSON output (var data = ... in data.js)
 // and uses brat to render everything.
 
-var serverAddress = 'http://localhost:9000';
-//var serverAddress = '';
+//var serverAddress = 'http://localhost:9000';
+var serverAddress = '';
 
 // Load Brat libraries
 var bratLocation = 'https://storage.googleapis.com/corenlp/js/brat';
