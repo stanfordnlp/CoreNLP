@@ -278,7 +278,12 @@ function ConstituencyParseProcessor() {
 /**
  * Render a given JSON data structure
  */
-function render(data) {
+function render(data, reverse) {
+  // Tweak arguments
+  if (typeof reverse !== 'boolean') {
+    reverse = false;
+  }
+
   // Error checks
   if (typeof data.sentences === 'undefined') { return; }
 
@@ -702,16 +707,23 @@ function render(data) {
    * to a Div, if it exists.
    */
   function embed(container, entities, relations, reverse) {
-    if (typeof reverse !== 'boolean') {
-      reverse = true;
-    }
+    var text = currentText;
     if (reverse) {
-      entities.reverse();
+      var length = currentText.length;
+      for (var i = 0; i < entities.length; ++i) {
+        var offsets = entities[i][2][0];
+        var tmp = length - offsets[0];
+        offsets[0] = length - offsets[1];
+        offsets[1] = tmp;
+      }
+      text = text.split("").reverse().join("");
     }
+    console.log(text);
+    console.log(entities);
     if ($('#' + container).length > 0) {
       Util.embed(container,
                  {entity_types: entityTypes, relation_types: relationTypes},
-                 {text: currentText, entities: entities, relations: relations}
+                 {text: text, entities: entities, relations: relations}
                 );
     }
   }
@@ -1015,7 +1027,8 @@ $(document).ready(function() {
           $('.corenlp_error').remove();  // Clear error messages
           $('#annotations').show();
           // Render
-          render(data);
+          var reverse = $('#language').val() === 'ar';
+          render(data, reverse);
           // Render patterns
           $('#annotations').append('<h4 class="red" style="margin-top: 4ex;">CoreNLP Tools:</h4>');  // TODO(gabor) a strange place to add this header to
           $('#patterns_row').show();
