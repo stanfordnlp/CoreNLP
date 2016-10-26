@@ -15,6 +15,10 @@ import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 
+/**
+ * Extracts word-embedding features from mentions.
+ * @author Kevin Clark
+ */
 public class EmbeddingExtractor {
   private final boolean conll;
   private final Embedding staticWordEmbeddings;

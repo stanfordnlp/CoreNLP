@@ -91,7 +91,8 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
     if (docID == null) {
       docID = "";
     }
-    if (docID.contains("nw") && corefProperties.getProperty("coref.input.type", "raw").equals("conll") &&
+    if (docID.contains("nw") && (CorefProperties.conll(corefProperties)
+        || corefProperties.getProperty("coref.input.type", "raw").equals("conll")) &&
             CorefProperties.getLanguage(corefProperties) == Locale.CHINESE &&
             PropertiesUtils.getBool(corefProperties,"coref.specialCaseNewswire")) {
       corefProperties.setProperty("removeNestedMentions", "false");
