@@ -701,7 +701,13 @@ function render(data) {
    * Helper function to render a given set of entities / relations
    * to a Div, if it exists.
    */
-  function embed(container, entities, relations) {
+  function embed(container, entities, relations, reverse) {
+    if (typeof reverse !== 'boolean') {
+      reverse = true;
+    }
+    if (reverse) {
+      entities.reverse();
+    }
     if ($('#' + container).length > 0) {
       Util.embed(container,
                  {entity_types: entityTypes, relation_types: relationTypes},
@@ -897,6 +903,26 @@ $(document).ready(function() {
   $('.chosen-select').chosen();
   $('.chosen-container').css('width', '100%');
 
+
+  // Language-specific changes
+  $('#language').on('change', function() {
+    $('#text').attr('dir', '');
+    if ($('#language').val() === 'ar') {
+      $('#text').attr('dir', 'rtl');
+      $('#text').attr('placeholder', 'على سبيل المثال، قفز الثعلب البني السريع فوق الكلب الكسول.');
+    } else if ($('#language').val() === 'en') {
+      $('#text').attr('placeholder', 'e.g., The quick brown fox jumped over the lazy dog.');
+    } else if ($('#language').val() === 'zh') {
+      $('#text').attr('placeholder', '例如，快速的棕色狐狸跳過了懶惰的狗。');
+    } else if ($('#language').val() === 'fr') {
+      $('#text').attr('placeholder', 'Par exemple, le renard brun rapide a sauté sur le chien paresseux.');
+    } else if ($('#language').val() === 'de') {
+      $('#text').attr('placeholder', 'Z. B. sprang der schnelle braune Fuchs über den faulen Hund.');
+    } else if ($('#language').val() === 'es') {
+      $('#text').attr('placeholder', 'por ejemplo, el rápido zorro marrón saltó sobre el perro perezoso.');
+    }
+  });
+
   // Submit on shift-enter
   $('#text').keydown(function (event) {
     if (event.keyCode == 13) {
@@ -921,7 +947,7 @@ $(document).ready(function() {
     // Get the text to annotate
     currentQuery = $('#text').val();
     if (currentQuery.trim() == '') {
-      currentQuery = 'The quick brown fox jumped over the lazy dog.';
+      currentQuery = $('#text').attr('placeholder');
       $('#text').val(currentQuery);
     }
     // Update the UI
