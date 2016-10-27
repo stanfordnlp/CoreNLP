@@ -189,7 +189,7 @@ public class SieveCoreferenceSystem  {
     sieveClassNames = sievePasses.trim().split(",\\s*");
     sieves = new DeterministicCorefSieve[sieveClassNames.length];
     for(int i = 0; i < sieveClassNames.length; i ++){
-      sieves[i] = (DeterministicCorefSieve) Class.forName("edu.stanford.nlp.coref.deterministic.sievepasses."+sieveClassNames[i]).getConstructor().newInstance();
+      sieves[i] = (DeterministicCorefSieve) Class.forName("edu.stanford.nlp.dcoref.sievepasses."+sieveClassNames[i]).getConstructor().newInstance();
       sieves[i].init(props);
     }
 
