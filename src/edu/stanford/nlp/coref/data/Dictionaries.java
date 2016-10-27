@@ -381,7 +381,7 @@ public class Dictionaries  {
    * <br>
    * The list is converted from raw text and numbers to a serialized
    * map, which saves quite a bit of time loading.
-   * See ConvertGenderFile
+   * See edu.stanford.nlp.dcoref.util.ConvertGenderFile
    */
 /*
   private void loadGenderNumber(String file, String neutralWordsFile) {
