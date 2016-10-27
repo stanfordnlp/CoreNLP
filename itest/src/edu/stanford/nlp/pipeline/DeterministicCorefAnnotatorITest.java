@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.CorefChain.CorefMention;
-import edu.stanford.nlp.dcoref.Constants;
+import edu.stanford.nlp.coref.deterministic.Constants;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;

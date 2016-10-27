@@ -1,64 +1,23 @@
-package edu.stanford.nlp.coref.docreader;
+package edu.stanford.nlp.coref.deterministic;
+import edu.stanford.nlp.util.logging.Redwood;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-import edu.stanford.nlp.coref.data.InputDoc;
-import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
-import edu.stanford.nlp.trees.GrammaticalStructure;
-import edu.stanford.nlp.trees.HeadFinder;
-import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
-import edu.stanford.nlp.trees.ModCollinsHeadFinder;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
-import edu.stanford.nlp.trees.TreeNormalizer;
-import edu.stanford.nlp.trees.Trees;
-import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
-import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinder;
-import edu.stanford.nlp.util.AbstractIterator;
-import edu.stanford.nlp.util.CollectionFactory;
-import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Filters;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Triple;
-import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.*;
+
+import java.io.*;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * Read _conll file format from CoNLL2011.  See http://conll.bbn.com/index.php/data.html.
@@ -84,12 +43,12 @@ import edu.stanford.nlp.util.logging.Redwood;
  * 12:N   	Predicate Arguments 	There is one column each of predicate argument structure information for the predicate mentioned in Column 7.
  * N   	Coreference 	Coreference chain information encoded in a parenthesis structure.
  *
- * @author Angel Chang, Heeyoung Lee
+ * @author Angel Chang
  */
-public class CoNLLDocumentReader implements DocReader  {
+public class CoNLL2011DocumentReader  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CoNLLDocumentReader.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(CoNLL2011DocumentReader.class);
 
   private static final int FIELD_LAST = -1;
 
@@ -115,31 +74,23 @@ public class CoNLLDocumentReader implements DocReader  {
   private int curFileIndex;
   private final Options options;
 
-  public static final Logger logger = Logger.getLogger(CoNLLDocumentReader.class.getName());
+  public static final Logger logger = Logger.getLogger(CoNLL2011DocumentReader.class.getName());
 
-  private static final HeadFinder chineseHeadFinder = new ChineseSemanticHeadFinder();
-
-  public CoNLLDocumentReader(String filepath)
+  public CoNLL2011DocumentReader(String filepath)
   {
     this(filepath, new Options());
   }
 
-  public CoNLLDocumentReader(String filepath, Options options)
+  public CoNLL2011DocumentReader(String filepath, Options options)
   {
 //    this.filepath = filepath;
-    if (filepath != null && new File(filepath).exists()) {
-      this.fileList = getFiles(filepath, options.filePattern);
-    } else {
-      this.fileList = Collections.EMPTY_LIST;
-    }
+    this.fileList = getFiles(filepath, options.filePattern);
     this.options = options;
     if (options.sortFiles) {
       Collections.sort(this.fileList);
     }
     curFileIndex = 0;
-    if (filepath != null && new File(filepath).exists()) {
-      logger.info("Reading " + fileList.size() + " CoNLL files from " + filepath);
-    }
+    logger.info("Reading " + fileList.size() + " CoNll2011 files from " + filepath);
   }
 
   private static List<File> getFiles(String filepath, Pattern filter)
@@ -161,7 +112,7 @@ public class CoNLLDocumentReader implements DocReader  {
     }
   }
 
-  public CoNLLDocument getNextDocument()
+  public Document getNextDocument()
   {
     try {
       if (curFileIndex >= fileList.size()) return null;  // DONE!
@@ -170,7 +121,7 @@ public class CoNLLDocumentReader implements DocReader  {
         docIterator = new DocumentIterator(curFile.getAbsolutePath(), options);
       }
       while ( ! docIterator.hasNext()) {
-        Redwood.log("debug-docreader", "Processed " + docIterator.docCnt + " documents in " + curFile.getAbsolutePath());
+        logger.info("Processed " + docIterator.docCnt + " documents in " + curFile.getAbsolutePath());
         docIterator.close();
         curFileIndex++;
         if (curFileIndex >= fileList.size()) {
@@ -179,8 +130,8 @@ public class CoNLLDocumentReader implements DocReader  {
         curFile = fileList.get(curFileIndex);
         docIterator = new DocumentIterator(curFile.getAbsolutePath(), options);
       }
-      CoNLLDocument next = docIterator.next();
-      Redwood.log("debug-docreader", "Reading document: " + next.getDocumentID()+" part: "+next.getPartNo());
+      Document next = docIterator.next();
+      SieveCoreferenceSystem.logger.fine("Reading document: " + next.getDocumentID());
       return next;
     } catch (IOException ex) {
       throw new RuntimeIOException(ex);
@@ -218,8 +169,6 @@ public class CoNLLDocumentReader implements DocReader  {
     public boolean annotateTreeCoref = false;     // Annotate tree with CorefMentionAnnotation
     public boolean annotateTreeNer = false;       // Annotate tree with NamedEntityAnnotation
 
-    public Locale lang = Locale.ENGLISH;
-
     public String backgroundNerTag = "O";        // Background NER tag
 
     protected String fileFilter;
@@ -241,15 +190,11 @@ public class CoNLLDocumentReader implements DocReader  {
     }
   }
 
-  public static class CoNLLDocument implements Serializable {
-    private static final long serialVersionUID = 6287339385357914531L;
-
+  public static class Document {
     String documentIdPart;
-    public String documentID;
+    String documentID;
     String partNo;
-    public String filename;
-
-    public List<List<String[]>> sentenceWordLists = new ArrayList<>();
+    List<List<String[]>> sentenceWordLists = new ArrayList<>();
 
     Annotation annotation;
     CollectionValuedMap<String,CoreMap> corefChainMap;
@@ -315,7 +260,7 @@ public class CoNLLDocumentReader implements DocReader  {
   }
 
   /** Helper iterator **/
-  private static class DocumentIterator extends AbstractIterator<CoNLLDocument> implements Closeable {
+  private static class DocumentIterator extends AbstractIterator<Document> implements Closeable {
 
     private static final Pattern delimiterPattern = Pattern.compile("\\s+");
     private static final LabeledScoredTreeReaderFactory treeReaderFactory =
@@ -326,7 +271,7 @@ public class CoNLLDocumentReader implements DocReader  {
     // State
     String filename;
     BufferedReader br;
-    CoNLLDocument nextDoc;
+    Document nextDoc;
     int lineCnt = 0;
     int docCnt = 0;
 
@@ -343,11 +288,11 @@ public class CoNLLDocumentReader implements DocReader  {
     }
 
     @Override
-    public CoNLLDocument next() {
+    public Document next() {
       if (nextDoc == null) {
         throw new NoSuchElementException("DocumentIterator exhausted.");
       }
-      CoNLLDocument curDoc = nextDoc;
+      Document curDoc = nextDoc;
       nextDoc = readNextDocument();
       return curDoc;
     }
@@ -618,7 +563,7 @@ public class CoNLLDocumentReader implements DocReader  {
       return t;
     }
 
-    public void annotateDocument(CoNLLDocument document)
+    public void annotateDocument(Document document)
     {
       List<CoreMap> sentences = new ArrayList<>(document.sentenceWordLists.size());
       for (List<String[]> sentWords:document.sentenceWordLists) {
@@ -686,10 +631,10 @@ public class CoNLLDocumentReader implements DocReader  {
     private static final String docStart = "#begin document ";
     private static final int docStartLength = docStart.length();
 
-    public CoNLLDocument readNextDocument() {
+    public Document readNextDocument() {
       try {
         List<String[]> curSentWords = new ArrayList<>();
-        CoNLLDocument document = null;
+        Document document = null;
         for (String line; (line = br.readLine()) != null; ) {
           lineCnt++;
           line = line.trim();
@@ -699,8 +644,7 @@ public class CoNLLDocumentReader implements DocReader  {
               if (document != null) {
                 logger.warning("Unexpected begin document at line (\" + filename + \",\" + lineCnt + \")");
               }
-              document = new CoNLLDocument();
-              document.filename = this.filename;
+              document = new Document();
               document.documentIdPart = line.substring(docStartLength);
             } else if (line.startsWith("#end document")) {
               annotateDocument(document);
@@ -889,7 +833,7 @@ public class CoNLLDocumentReader implements DocReader  {
     int nestedNerMentions = 0;
     int nerMentions = 0;
 
-    public void process(CoNLLDocument doc)
+    public void process(Document doc)
     {
       List<CoreMap> sentences = doc.getAnnotation().get(CoreAnnotations.SentencesAnnotation.class);
       for (String id:doc.corefChainMap.keySet()) {
@@ -1019,7 +963,7 @@ public class CoNLLDocumentReader implements DocReader  {
   /** Reads and dumps output, mainly for debugging. */
   public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
-    boolean debug = false;
+    boolean debug = Boolean.parseBoolean(props.getProperty("debug", "false"));
     String filepath = props.getProperty("i");
     String outfile = props.getProperty("o");
     if (filepath == null || outfile == null) {
@@ -1038,11 +982,11 @@ public class CoNLLDocumentReader implements DocReader  {
     options.annotateTreeCoref = true;
     options.annotateTreeNer = true;
     CorpusStats corpusStats = new CorpusStats();
-    CoNLLDocumentReader reader = new CoNLLDocumentReader(filepath, options);
+    CoNLL2011DocumentReader reader = new CoNLL2011DocumentReader(filepath, options);
     int docCnt = 0;
     int sentCnt = 0;
     int tokenCnt = 0;
-    for (CoNLLDocument doc; (doc = reader.getNextDocument()) != null; ) {
+    for (Document doc; (doc = reader.getNextDocument()) != null; ) {
       corpusStats.process(doc);
       docCnt++;
       Annotation anno = doc.getAnnotation();
@@ -1070,95 +1014,4 @@ public class CoNLLDocumentReader implements DocReader  {
     System.out.println(corpusStats);
   }
 
-  @Override
-  public InputDoc nextDoc() {
-    CoNLLDocument conllDoc = getNextDocument();
-    if (conllDoc == null) return null;
-
-    Annotation anno = conllDoc.getAnnotation();
-
-    // conll doc has constituency tree but doesn't have dependency tree
-    setDependencyTree(anno);
-
-    List<List<Mention>> allGoldMentions = extractGoldMentions(conllDoc);
-
-    // store some useful information in docInfo for later
-    Map<String, String> docInfo = makeDocInfo(conllDoc);
-
-    // TODO: need to add some doc info from conllDoc
-    return new InputDoc(anno, docInfo, allGoldMentions, conllDoc);
-  }
-
-  // store any useful information for later (as features, debug, etc)
-  private Map<String, String> makeDocInfo(CoNLLDocument conllDoc) {
-    Map<String, String> docInfo = Generics.newHashMap();
-    docInfo.put("DOC_ID", conllDoc.documentID);
-    docInfo.put("DOC_PART", conllDoc.partNo);
-    docInfo.put("DOC_ID_PART", conllDoc.documentIdPart);
-    docInfo.put("DOC_FILE", conllDoc.filename);
-
-    return docInfo;
-  }
-
-  private void setDependencyTree(Annotation anno) {
-    List<CoreMap> sentences = anno.get(SentencesAnnotation.class);
-
-    for(CoreMap sentence : sentences) {
-      Tree tree = sentence.get(TreeAnnotation.class);
-      if (tree==null) continue;
-
-      SemanticGraph deps = null;
-      SemanticGraph basicDeps = null;
-
-      if (options.lang == Locale.CHINESE) {
-        final boolean threadSafe = true;
-
-        deps = SemanticGraphFactory.makeFromTree(
-            new ChineseGrammaticalStructure(tree, Filters.acceptFilter(), chineseHeadFinder),
-            SemanticGraphFactory.Mode.COLLAPSED,
-            GrammaticalStructure.Extras.NONE,
-            threadSafe,
-            null);
-
-        basicDeps = SemanticGraphFactory.makeFromTree(
-            new ChineseGrammaticalStructure(tree, Filters.acceptFilter(), chineseHeadFinder),
-            SemanticGraphFactory.Mode.BASIC,
-            GrammaticalStructure.Extras.NONE,
-            threadSafe,
-            null);
-      } else {
-        deps = SemanticGraphFactory.generateEnhancedDependencies(tree);
-        basicDeps = SemanticGraphFactory.generateUncollapsedDependencies(tree);
-      }
-
-      sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
-      sentence.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, deps);
-    }
-
-  }
-
-  // extract gold mentions (mention span, mention ID, cluster ID)
-  public List<List<Mention>> extractGoldMentions(CoNLLDocument conllDoc) {
-    List<CoreMap> sentences = conllDoc.getAnnotation().get(CoreAnnotations.SentencesAnnotation.class);
-    List<List<Mention>> allGoldMentions = new ArrayList<>();
-    CollectionValuedMap<String,CoreMap> corefChainMap = conllDoc.getCorefChainMap();
-    for (int i = 0; i < sentences.size(); i++) {
-      allGoldMentions.add(new ArrayList<>());
-    }
-    for (String corefIdStr : corefChainMap.keySet()) {
-      int id = Integer.parseInt(corefIdStr);
-      for (CoreMap m : corefChainMap.get(corefIdStr)) {
-        Mention mention = new Mention();
-
-        mention.goldCorefClusterID = id;
-        int sentIndex = m.get(CoreAnnotations.SentenceIndexAnnotation.class);
-        CoreMap sent = sentences.get(sentIndex);
-        mention.startIndex = m.get(CoreAnnotations.TokenBeginAnnotation.class) - sent.get(CoreAnnotations.TokenBeginAnnotation.class);
-        mention.endIndex = m.get(CoreAnnotations.TokenEndAnnotation.class) - sent.get(CoreAnnotations.TokenBeginAnnotation.class);
-        mention.originalSpan = m.get(CoreAnnotations.TokensAnnotation.class);
-        allGoldMentions.get(sentIndex).add(mention);
-      }
-    }
-    return allGoldMentions;
-  }
 }
