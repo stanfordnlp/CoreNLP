@@ -1,6 +1,7 @@
 package edu.stanford.nlp.coref.deterministic.sievepasses;
 
 import edu.stanford.nlp.coref.deterministic.*;
+import edu.stanford.nlp.dcoref.*;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 
