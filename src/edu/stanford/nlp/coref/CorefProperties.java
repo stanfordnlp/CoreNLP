@@ -101,7 +101,10 @@ public class CorefProperties {
 
   public static final String OUTPUT_PATH_PROP = "coref.conllOutputPath";
   public static String conllOutputPath(Properties props) {
-    return props.getProperty("coref.conllOutputPath", "/scr/nlp/coref/logs/");
+    String returnPath = props.getProperty("coref.conllOutputPath", "/scr/nlp/coref/logs/");
+    if (!returnPath.substring(returnPath.length()-1).equals("/"))
+      returnPath += "/";
+    return returnPath;
   }
 
   public enum Dataset {TRAIN, DEV, TEST}
