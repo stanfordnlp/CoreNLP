@@ -117,6 +117,7 @@
   </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>test/src</testSourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
