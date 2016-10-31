@@ -25,14 +25,7 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 /**
  * Does best-first coreference resolution by linking each mention to its highest scoring candidate
- * antecedent if that score is above a threshold. The model is described in
- * <p/>
- * Kevin Clark and Christopher D. Manning. 2015.
- * <a href="http://nlp.stanford.edu/pubs/clark-manning-acl15-entity.pdf">
- * Entity-Centric Coreference Resolution with Model Stacking</a>.
- * In Association for Computational Linguistics.
- * <p/>
- * See {@link StatisticalCorefTrainer} for training a new model.
+ * antecedent if that score is above a threshold.
  * @author Kevin Clark
  */
 public class StatisticalCorefAlgorithm implements CorefAlgorithm {

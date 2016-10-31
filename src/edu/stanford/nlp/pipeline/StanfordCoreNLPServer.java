@@ -25,7 +25,6 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -111,22 +110,6 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer() throws IOException {
-    // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
-    String defaultParserPath;
-    ClassLoader classLoader = getClass().getClassLoader();
-    URL srResource =
-            classLoader.getResource("edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-    log("setting default constituency parser");
-    if (srResource != null) {
-      defaultParserPath = "edu/stanford/nlp/models/srparser/englishSR.ser.gz";
-      log("using SR parser: edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-    } else {
-      defaultParserPath = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
-      log("warning: cannot find edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-      log("using: edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz instead");
-      log("to use shift reduce parser download English models jar from:");
-      log("http://stanfordnlp.github.io/CoreNLP/download.html");
-    }
     this.defaultProps = PropertiesUtils.asProperties(
         "annotators", defaultAnnotators,  // Run these annotators by default
         "mention.type", "dep",  // Use dependency trees with coref by default
@@ -135,7 +118,7 @@ public class StanfordCoreNLPServer implements Runnable {
         "inputFormat", "text",   // By default, treat the POST data like text
         "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
         "prettyPrint", "false",  // Don't bother pretty-printing
-        "parse.model", defaultParserPath,  // SR scales linearly with sentence length. Good for a server!
+        "parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz",  // SR scales linearly with sentence length. Good for a server!
         "parse.binaryTrees", "true",  // needed for the Sentiment annotator
         "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);

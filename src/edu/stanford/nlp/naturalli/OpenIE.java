@@ -585,8 +585,8 @@ public class OpenIE implements Annotator  {
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
         NaturalLogicAnnotations.PolarityAnnotation.class,
-        SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class
-        //CoreAnnotations.OriginalTextAnnotation.class
+        SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class,
+        CoreAnnotations.OriginalTextAnnotation.class
     ));
     if (resolveCoref) {
       requirements.add(edu.stanford.nlp.coref.CorefCoreAnnotations.CorefChainAnnotation.class);

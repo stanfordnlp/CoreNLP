@@ -37,12 +37,6 @@ public class CorefSystem {
     }
   }
 
-  public CorefSystem(DocumentMaker docMaker, CorefAlgorithm corefAlgorithm, boolean verbose) {
-    this.docMaker = docMaker;
-    this.corefAlgorithm = corefAlgorithm;
-    this.verbose = verbose;
-  }
-
   public void annotate(Annotation ann) {
     annotate(ann, true);
   }
@@ -118,7 +112,7 @@ public class CorefSystem {
   }
 
   public static void main(String[] args) throws Exception {
-    Properties props = StringUtils.argsToProperties(args);
+    Properties props = StringUtils.argsToProperties(new String[] {"-props", args[0]});
     CorefSystem coref = new CorefSystem(props);
     coref.runOnConll(props);
   }

@@ -106,7 +106,8 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
       removeSpuriousMentionsEn(doc, predictedMentions, dict);
     } else if (lang == Locale.CHINESE) {
       if (CorefProperties.liberalChineseMD(props)) {
-        removeSpuriousMentionsZhSimple(doc, predictedMentions, dict);
+        removeSpuriousMentionsZhSimple(doc, predictedMentions, dict,
+            CorefProperties.removeNestedMentions(props));
       } else {
         removeSpuriousMentionsZh(doc, predictedMentions, dict,
             CorefProperties.removeNestedMentions(props));
@@ -208,7 +209,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
   }
 
   private static void removeSpuriousMentionsZhSimple(Annotation doc,
-      List<List<Mention>> predictedMentions, Dictionaries dict) {
+      List<List<Mention>> predictedMentions, Dictionaries dict, boolean removeNested) {
     for(int i=0 ; i < predictedMentions.size() ; i++) {
       List<Mention> mentions = predictedMentions.get(i);
       Set<Mention> remove = Generics.newHashSet();

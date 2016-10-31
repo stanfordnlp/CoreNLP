@@ -6,13 +6,9 @@ import java.util.Properties;
 import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-/**
- * Manages the properties for training and running neural coreference systems.
- * @author Kevin Clark
- */
 public class NeuralCorefProperties {
   public static double greedyness(Properties props) {
-    return PropertiesUtils.getDouble(props, "coref.neural.greedyness", 0.5);
+    return PropertiesUtils.getDouble(props, "coref.neural.greedyness", 0);
   }
 
   public static String modelPath(Properties props) {
