@@ -62,8 +62,8 @@ public class StatisticalCorefProperties {
     return PropertiesUtils.getDouble(props, "coref.statistical.minClassImbalance", 0);
   }
 
-  public static int minTrainExamplesPerDocument(Properties props) {
-    return PropertiesUtils.getInt(props, "coref.statistical.minTrainExamplesPerDocument",
+  public static int maxTrainExamplesPerDocument(Properties props) {
+    return PropertiesUtils.getInt(props, "coref.statistical.maxTrainExamplesPerDocument",
         Integer.MAX_VALUE);
   }
 }
