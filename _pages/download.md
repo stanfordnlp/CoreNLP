@@ -6,7 +6,7 @@ permalink: '/download.html'
 
 Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. This is everything for getting going on English!  Unzip this file, open the folder that results and you're ready to use it.
 
-<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
+<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2016-10-31.zip">Download CoreNLP 3.7.0 (beta)</a> </div>
 
 **Other languages:** For working with another (human) language, you need additional model files. We have model files for several other languages. And we have more
 model files for English, including for dealing with uncased English (that is, English which is not conventionally capitalized, whether texting or telegrams).
@@ -14,11 +14,12 @@ You can find the latest models in the table below.  Versions for earlier release
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-01-19-models.jar) | 3.6.0 |
-| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar) | 3.6.0 |
-| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-01-14-models.jar) | 3.6.0 |
-| German | [download](http://nlp.stanford.edu/software/stanford-german-2016-01-19-models.jar) | 3.6.0 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2015-10-14-models.jar) | 3.6.0 |
+| Arabic | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-27-models.jar) | 3.7.0 (beta) |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-27-models.jar) | 3.7.0 (beta) |
+| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-29-models.jar) | 3.7.0 (beta) |
+| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-27-models.jar) | 3.7.0 (beta) |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-2016-10-27-models.jar) | 3.7.0 (beta) |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-27-models.jar) | 3.7.0 (beta) |
 
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
 Previous releases can be found on [the release history page](history.html).
