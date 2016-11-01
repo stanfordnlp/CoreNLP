@@ -51,7 +51,7 @@ higher-level and domain-specific text understanding applications.
 Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. Unzip this file, open the folder that results and you're ready to use it.
 
 
-<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2016-10-30.zip">Download CoreNLP 3.7.0 (beta)</a> </div>
+<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2016-10-31.zip">Download CoreNLP 3.7.0 (beta)</a> </div>
 
 To download earlier versions of Stanford CoreNLP, including the last stable release (3.6.0), go [here](history.html)
 
@@ -65,23 +65,23 @@ The jars for earlier versions can be found [here](history.html).
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-27-models.jar) | 3.7.0 (beta) |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-27-models.jar) | 3.7.0 (beta) |
-| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-29-models.jar) | 3.7.0 (beta) |
-| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-27-models.jar) | 3.7.0 (beta) |
-| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2016-10-27-models.jar) | 3.7.0 (beta) |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-27-models.jar) | 3.7.0 (beta) |
+| Arabic  | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
 
 ## Human languages supported
 
 The basic distribution provides model files for the analysis of well-edited **English**,
 but the engine is compatible with models for other languages. We provide
 packaged models for
-[Arabic](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-27-models.jar), 
-[Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-27-models.jar), [French](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-27-models.jar), 
-[German](http://nlp.stanford.edu/software/stanford-german-corenlp-2016-10-27-models.jar), and [Spanish](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-27-models.jar).
+[Arabic](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-31-models.jar), 
+[Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar), [French](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-31-models.jar), 
+[German](http://nlp.stanford.edu/software/stanford-german-corenlp-2016-10-31-models.jar), and [Spanish](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-31-models.jar).
 We also provide a jar that contains all of our
-[English](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-29-models.jar)
+[English](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-31-models.jar)
 models, which includes various variant models, and in particular has
 one optimized for working with uncased English (e.g., mostly or all
 either uppercase or lowercase).
