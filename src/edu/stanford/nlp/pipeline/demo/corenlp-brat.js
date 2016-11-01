@@ -718,8 +718,6 @@ function render(data, reverse) {
       }
       text = text.split("").reverse().join("");
     }
-    console.log(text);
-    console.log(entities);
     if ($('#' + container).length > 0) {
       Util.embed(container,
                  {entity_types: entityTypes, relation_types: relationTypes},
@@ -932,6 +930,9 @@ $(document).ready(function() {
       $('#text').attr('placeholder', 'Z. B. sprang der schnelle braune Fuchs über den faulen Hund.');
     } else if ($('#language').val() === 'es') {
       $('#text').attr('placeholder', 'por ejemplo, el rápido zorro marrón saltó sobre el perro perezoso.');
+    } else {
+      $('#text').attr('placeholder', 'Unknown language for placeholder query: ' + $('#language').val());
+
     }
   });
 
@@ -959,7 +960,22 @@ $(document).ready(function() {
     // Get the text to annotate
     currentQuery = $('#text').val();
     if (currentQuery.trim() == '') {
-      currentQuery = $('#text').attr('placeholder');
+      if ($('#language').val() === 'ar') {
+        currentQuery = 'قفز الثعلب البني السريع فوق الكلب الكسول.';
+      } else if ($('#language').val() === 'en') {
+        currentQuery = 'The quick brown fox jumped over the lazy dog.';
+        $('#text').attr('placeholder', 'e.g., The quick brown fox jumped over the lazy dog.');
+      } else if ($('#language').val() === 'zh') {
+        currentQuery = '快速的棕色狐狸跳过了懒惰的狗';
+      } else if ($('#language').val() === 'fr') {
+        currentQuery = 'Le renard brun rapide a sauté sur le chien paresseux.';
+      } else if ($('#language').val() === 'de') {
+        currentQuery = 'Sprang der schnelle braune Fuchs über den faulen Hund.';
+      } else if ($('#language').val() === 'es') {
+        currentQuery = 'El rápido zorro marrón saltó sobre el perro perezoso.';
+      } else {
+        currentQuery = 'Unknown language for default query: ' + $('#language').val();
+      }
       $('#text').val(currentQuery);
     }
     // Update the UI

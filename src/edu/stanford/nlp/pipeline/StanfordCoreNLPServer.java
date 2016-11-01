@@ -27,6 +27,8 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.*;
@@ -445,14 +447,17 @@ public class StanfordCoreNLPServer implements Runnable {
       this(fileOrClasspath, "text/html");
     }
     public FileHandler(String fileOrClasspath, String contentType) throws IOException {
-      this.content = IOUtils.slurpReader(IOUtils.readerFromString(fileOrClasspath));
-      this.contentType = contentType;
+      this.content = IOUtils.slurpReader(IOUtils.readerFromString(fileOrClasspath, "utf-8"));
+      this.contentType = contentType + "; charset=utf-8";  // always encode in utf-8
     }
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       httpExchange.getResponseHeaders().set("Content-type", this.contentType);
-      httpExchange.sendResponseHeaders(HTTP_OK, content.getBytes().length);
-      httpExchange.getResponseBody().write(content.getBytes());
+      ByteBuffer buffer = Charset.forName("UTF-8").encode(content);
+      byte[] bytes = new byte[buffer.remaining()];
+      buffer.get(bytes);
+      httpExchange.sendResponseHeaders(HTTP_OK, bytes.length);
+      httpExchange.getResponseBody().write(bytes);
       httpExchange.close();
     }
   }
