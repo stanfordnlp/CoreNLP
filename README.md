@@ -14,8 +14,8 @@ During the time between releases, one can always use the latest, under developme
 Here are some helfpul instructions to use the latest code:
 
 1. Make sure you have ant installed.
-2. Compile the code with this command: cd CoreNLP ; ant
-3. Then run this command to build a jar with the latest version of the code: cd CoreNLP/classes ; jar -cf ../stanford-corenlp.jar edu
+2. Compile the code with this command: `cd CoreNLP ; ant`
+3. Then run this command to build a jar with the latest version of the code: `cd CoreNLP/classes ; jar -cf ../stanford-corenlp.jar edu`
 4. This will create a new jar called stanford-corenlp.jar in the CoreNLP folder which contains the latest code
 5. The dependencies that work with the latest code are in CoreNLP/lib and CoreNLP/liblocal, so make sure to include those in your CLASSPATH.
 6. Also make sure to download the latest versions of the [corenlp-models](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar), 
