@@ -232,8 +232,10 @@ public class PropertiesUtils {
   }
 
   /**
-   * Load an integer property.  If the key is not present, returns defaultValue.
+   * Get the value of a property.  If the key is not present, returns defaultValue.
+   *
    */
+  // todo [cdm 2016]: This is just equivalent to props.getProperty(key, defaultValue)
   public static String getString(Properties props, String key, String defaultValue) {
     String value = props.getProperty(key);
     if (value != null) {
@@ -395,10 +397,10 @@ public class PropertiesUtils {
     String prefix = (name != null && !name.isEmpty())? name + '.' : "";
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
-    for (Property p:supportedProperties) {
+    for (Property p : supportedProperties) {
       String pname = prefix + p.name();
       String pvalue = properties.getProperty(pname, p.defaultValue());
-      sb.append(pname).append(':').append(pvalue).append(";");
+      sb.append(pname).append(':').append(pvalue).append(';');
     }
     return sb.toString();
   }
@@ -407,11 +409,10 @@ public class PropertiesUtils {
     String prefix = (name != null && !name.isEmpty())? name + '.' : "";
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
-    for (String str : properties.stringPropertyNames()) {
-      if (str.startsWith(prefix)) {
-        String pname = str;
+    for (String pname : properties.stringPropertyNames()) {
+      if (pname.startsWith(prefix)) {
         String pvalue = properties.getProperty(pname);
-        sb.append(pname).append(':').append(pvalue).append(";");
+        sb.append(pname).append(':').append(pvalue).append(';');
       }
     }
     return sb.toString();

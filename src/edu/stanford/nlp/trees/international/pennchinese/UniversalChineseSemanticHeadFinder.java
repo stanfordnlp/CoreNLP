@@ -38,9 +38,11 @@ public class UniversalChineseSemanticHeadFinder extends ChineseHeadFinder {
     nonTerminalInfo.put("DVP", new String[][]{{"leftdis", "VP" ,"ADVP"}});
     nonTerminalInfo.put("LST", new String[][]{{"right", "CD", "NP", "QP", "PU"}});
 
+    nonTerminalInfo.put("QP", new String[][]{{"right", "QP", "CD", "OD", "NP", "NT", "M", "CLP"}}); // there's some QP adjunction
+
     nonTerminalInfo.put("PP", new String[][]{{"leftexcept", "P"}});  // Preposition
     nonTerminalInfo.put("LCP", new String[][]{{"leftexcept", "LC"}});  // Localizer
-    nonTerminalInfo.put("DNP", new String[][]{{"rightexcept", "DEG"}});  // Associative
+    nonTerminalInfo.put("DNP", new String[][]{{"rightexcept", "DEG", "DEC"}});  // Associative
   }
 
   private static final long serialVersionUID = 2L;

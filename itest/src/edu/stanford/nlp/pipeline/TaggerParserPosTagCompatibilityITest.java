@@ -2,36 +2,60 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.Set;
 
-import edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.nndep.DependencyParser;
+import edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+import edu.stanford.nlp.util.Sets;
 
-/**
- * @author Christopher Manning
+/** This test checks whether our trained POS tagger and parser models are using the identical POS tag set
+ *  for the various languages that we support. It's a good idea if they are.
+ *
+ *  @author Christopher Manning
  */
 public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
-  private static void testTagSet3(String[] lexParsers, String[] maxentTaggers, String[] srParsers) {
+  private static void testTagSet4(String[] lexParsers,
+                                  String[] maxentTaggers,
+                                  String[] srParsers,
+                                  String[] nnDepParsers) {
     LexicalizedParser lp = LexicalizedParser.loadModel(lexParsers[0]);
     Set<String> tagSet = lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction());
     for (String name : maxentTaggers) {
       MaxentTagger tagger = new MaxentTagger(name);
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch", tagSet, tagger.tagSet());
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
+                   "left - right: " + Sets.diff(tagSet, tagger.tagSet()) +
+                   "; right - left: " + Sets.diff(tagger.tagSet(), tagSet) + "\n",
+                   tagSet, tagger.tagSet());
     }
     for (String name : lexParsers) {
       LexicalizedParser lp2 = LexicalizedParser.loadModel(name);
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch",
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
+                   "left - right: " + Sets.diff(tagSet, lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction())) + 
+                   "; right - left: " + Sets.diff(lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()), tagSet) + "\n",
                    tagSet, lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
     }
 
     for (String name : srParsers) {
       ShiftReduceParser srp = ShiftReduceParser.loadModel(name);
 
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch",
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
+                   "left - right: " + Sets.diff(tagSet, srp.tagSet()) +
+                   "; right - left: " + Sets.diff(srp.tagSet(), tagSet) + "\n",
                    tagSet, srp.tagSet());
     }
+
+    for (String name : nnDepParsers) {
+      DependencyParser dp = DependencyParser.loadFromModelFile(name);
+
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
+                   "left - right: " + Sets.diff(tagSet, dp.getPosSet()) +
+                   "; right - left: " + Sets.diff(dp.getPosSet(), tagSet) + "\n",
+                   tagSet, dp.getPosSet());
+    }
+
   }
 
 
@@ -53,15 +77,20 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
     "edu/stanford/nlp/models/srparser/englishSR.ser.gz",
   };
 
+  private static final String[] englishNnParsers = {
+    "edu/stanford/nlp/models/parser/nndep/english_SD.gz",
+    "edu/stanford/nlp/models/parser/nndep/english_UD.gz"
+  };
+
   public void testEnglishTagSet() {
-    testTagSet3(englishParsers, englishTaggers, englishSrParsers);
+    testTagSet4(englishParsers, englishTaggers, englishSrParsers, englishNnParsers);
   }
 
 
   private static final String[] germanTaggers = {
     "edu/stanford/nlp/models/pos-tagger/german/german-fast.tagger",
     "edu/stanford/nlp/models/pos-tagger/german/german-fast-caseless.tagger",
-    "edu/stanford/nlp/models/pos-tagger/german/german-dewac.tagger",
+    // "edu/stanford/nlp/models/pos-tagger/german/german-dewac.tagger", // No longer supported; always worse than hgc
     "edu/stanford/nlp/models/pos-tagger/german/german-hgc.tagger"
   };
 
@@ -69,12 +98,18 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
     "edu/stanford/nlp/models/lexparser/germanPCFG.ser.gz",
     "edu/stanford/nlp/models/lexparser/germanFactored.ser.gz",
   };
+
   private static final String[] germanSrParsers = {
     "edu/stanford/nlp/models/srparser/germanSR.ser.gz",
   };
 
+  private static final String[] germanNnParsers = {
+    // This one uses UD tag set not fine-grained tags!
+    // "edu/stanford/nlp/models/parser/nndep/UD_German.gz",
+  };
+
   public void testGermanTagSet() {
-    testTagSet3(germanParsers, germanTaggers, germanSrParsers);
+    testTagSet4(germanParsers, germanTaggers, germanSrParsers, germanNnParsers);
   }
 
 
@@ -91,12 +126,16 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
 //    "edu/stanford/nlp/models/lexparser/xinhuaFactored.ser.gz",
 
   };
+
   private static final String[] chineseSrParsers = {
     "edu/stanford/nlp/models/srparser/chineseSR.ser.gz",
   };
 
+  private static final String[] chineseNnParsers = {
+  };
+
   public void testChineseTagSet() {
-    testTagSet3(chineseParsers, chineseTaggers, chineseSrParsers);
+    testTagSet4(chineseParsers, chineseTaggers, chineseSrParsers, chineseNnParsers);
   }
 
 
@@ -115,12 +154,13 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
 //          "edu/stanford/nlp/models/srparser/spanishSR.beam.ser.gz",
   };
 
+  private static final String[] spanishNnParsers = {
+  };
+
   public void testSpanishTagSet() {
-    testTagSet3(spanishParsers, spanishTaggers, spanishSrParsers);
+    testTagSet4(spanishParsers, spanishTaggers, spanishSrParsers, spanishNnParsers);
   }
 
-
-  /* -- Enable this after French models jar added to Jenkins
 
   private static final String[] frenchTaggers = {
     "edu/stanford/nlp/models/pos-tagger/french/french.tagger",
@@ -136,11 +176,13 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
     // "edu/stanford/nlp/models/srparser/frenchSR.ser.gz",
   };
 
+  private static final String[] frenchNnParsers = {
+  };
+
   public void testFrenchTagSet() {
-    testTagSet3(frenchParsers, frenchTaggers, frenchSrParsers);
+    testTagSet4(frenchParsers, frenchTaggers, frenchSrParsers, frenchNnParsers);
   }
 
-  -- */
 
   // todo: Add Arabic sometime
   // todo: Add nndep parsers sometime

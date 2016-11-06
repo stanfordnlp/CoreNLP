@@ -364,7 +364,7 @@ public class AnnotatorFactories  {
           return "parse.binaryTrees=true";
         }
         return "";
-      };
+      }
     };
   }
 

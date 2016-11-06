@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -15,10 +14,11 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
- * A Dependency grammar that smooths by averaging over similar words.
+ * A Dependency grammar that smoothes by averaging over similar words.
  *
  * @author Galen Andrew
  * @author Pi-Chuan Chang
@@ -31,16 +31,16 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
 
   private static final long serialVersionUID = -1845503582705055342L;
 
-  private double simSmooth = 10.0;
+  private static final double simSmooth = 10.0;
 
   private static final String argHeadFile = "simWords/ArgHead.5";
   private static final String headArgFile = "simWords/HeadArg.5";
   private Map<Pair<Integer, String>, List<Triple<Integer, String, Double>>> simArgMap;
   private Map<Pair<Integer, String>, List<Triple<Integer, String, Double>>> simHeadMap;
 
-  private boolean debug = true;
+  private static final boolean debug = true;
 
-  private boolean verbose = false;
+  private static final boolean verbose = false;
   //private static final double MIN_PROBABILITY = Math.exp(-100.0);
 
   public ChineseSimWordAvgDepGrammar(TreebankLangParserParams tlpParams, boolean directional, boolean distance, boolean coarseDistance, boolean basicCategoryTagsInDependencyGrammar, Options op, Index<String> wordIndex, Index<String> tagIndex) {
@@ -94,17 +94,10 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
 
   private ClassicCounter<String> statsCounter = new ClassicCounter<>();
 
-  static {
-    System.runFinalizersOnExit(true);
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    super.finalize();
+  public void dumpSimWordAvgStats() {
     log.info("SimWordAvg stats:");
     log.info(statsCounter);
   }
-
 
   /*
   ** An alternative kind of smoothing.
@@ -122,10 +115,10 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
     }
 
     short distance = dependency.distance;
-    int hW = dependency.head.word;
-    int aW = dependency.arg.word;
+    // int hW = dependency.head.word;
+    // int aW = dependency.arg.word;
     IntTaggedWord aTW = dependency.arg;
-    IntTaggedWord hTW = dependency.head;
+    // IntTaggedWord hTW = dependency.head;
 
     double pb_stop_hTWds = getStopProb(dependency);
 
@@ -187,14 +180,9 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
     double score; // = (interp * pb_aTW_hTWd + (1.0 - interp) * p_aTW_aT * pb_aT_hTWd) * pb_go_hTWds;
 
 
-    /* smooth by simWords
-    **               -pichuan
-    */
-    List<Triple<Integer, String, Double>> sim2head = null;
-    List<Triple<Integer, String, Double>> sim2arg = null;
-
-    sim2arg = simArgMap.get(new Pair<>(dependency.arg.word, stringBasicCategory(dependency.arg.tag)));
-    sim2head = simHeadMap.get(new Pair<>(dependency.head.word, stringBasicCategory(dependency.head.tag)));
+    /* smooth by simWords -pichuan */
+    List<Triple<Integer, String, Double>> sim2arg = simArgMap.get(new Pair<>(dependency.arg.word, stringBasicCategory(dependency.arg.tag)));
+    List<Triple<Integer, String, Double>> sim2head = simHeadMap.get(new Pair<>(dependency.head.word, stringBasicCategory(dependency.head.tag)));
 
     List<Integer> simArg = new ArrayList<>();
     List<Integer> simHead= new ArrayList<>();
@@ -285,11 +273,8 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
     double regProb = probTB(dep);
     statsCounter.incrementCount("total");
 
-    List<Triple<Integer, String, Double>> sim2head = null;
-    List<Triple<Integer, String, Double>> sim2arg = null;
-
-    sim2arg = simArgMap.get(new Pair<>(dep.arg.word, stringBasicCategory(dep.arg.tag)));
-    sim2head = simHeadMap.get(new Pair<>(dep.head.word, stringBasicCategory(dep.head.tag)));
+    List<Triple<Integer, String, Double>> sim2arg = simArgMap.get(new Pair<>(dep.arg.word, stringBasicCategory(dep.arg.tag)));
+    List<Triple<Integer, String, Double>> sim2head = simHeadMap.get(new Pair<>(dep.head.word, stringBasicCategory(dep.head.tag)));
 
     if (sim2head == null && sim2arg == null) {
       return regProb;

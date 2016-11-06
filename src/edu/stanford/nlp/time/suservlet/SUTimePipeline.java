@@ -1,5 +1,4 @@
-package edu.stanford.nlp.time.suservlet; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.time.suservlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +13,7 @@ import edu.stanford.nlp.time.GUTimeAnnotator;
 import edu.stanford.nlp.time.HeidelTimeAnnotator;
 import edu.stanford.nlp.time.TimeAnnotator;
 import edu.stanford.nlp.time.TimeAnnotations;
+import edu.stanford.nlp.util.logging.Redwood;
 
 public class SUTimePipeline  {
 
@@ -26,7 +26,7 @@ public class SUTimePipeline  {
   }
 
   public SUTimePipeline(Properties props) {
-    // By default, we want to tokenize the text, split it into 
+    // By default, we want to tokenize the text, split it into
     // sentences, and then put it through the sutime annotator.
     // We also want to pos tag it and put it through the number and
     // qen annotators.
@@ -36,7 +36,7 @@ public class SUTimePipeline  {
     // This should be inexpensive.
 
     if (props.getProperty("annotators") == null) {
-      props.setProperty("annotators", 
+      props.setProperty("annotators",
                         "tokenize, ssplit, pos");
 //      "tokenize, ssplit, pos, number, qen");
     }
@@ -85,7 +85,7 @@ public class SUTimePipeline  {
     return anno;
   }
 
-  static public void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException {
     SUTimePipeline pipeline = new SUTimePipeline();
     Annotator timeAnnotator = pipeline.getTimeAnnotator("sutime", new Properties());
     BufferedReader is = new BufferedReader(new InputStreamReader(System.in));
@@ -96,4 +96,5 @@ public class SUTimePipeline  {
       System.out.print("> ");
     }
   }
+
 }

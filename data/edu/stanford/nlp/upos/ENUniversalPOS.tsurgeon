@@ -98,6 +98,11 @@ NN=target <... {/\\%/}
 
 relabel target SYM
 
+% fused det-noun pronouns -> PRON
+NN=target < (/^(?i:(somebody|something|someone|anybody|anything|anyone|everybody|everything|everyone|nobody|nothing))$/)
+
+relabel target PRON
+
 % NN -> NOUN (otherwise)
 NN=target <... {/.*/}
 

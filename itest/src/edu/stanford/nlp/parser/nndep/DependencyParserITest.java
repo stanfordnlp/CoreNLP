@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
+
+import junit.framework.TestCase;
+
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -17,13 +21,8 @@ import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
-import junit.framework.TestCase;
-
 import edu.stanford.nlp.util.StringUtils;
 
-import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItem;
 
 
 /**
@@ -32,7 +31,7 @@ import static org.junit.matchers.JUnitMatchers.hasItem;
  */
 public class DependencyParserITest extends TestCase {
 
-  private static final double EnglishSdLas = 89.46997859637266;
+  private static final double EnglishSdLas = 89.55236534222574; // was until Sept 2016: 89.46997859637266;
 
   /**
    * Test that the NN dependency parser performance doesn't change.
@@ -46,7 +45,7 @@ public class DependencyParserITest extends TestCase {
   }
 
   // Lower because we're evaluating on PTB + extraDevTest, not just PTB
-  private static final double EnglishUdLas = 88.72648417258083;
+  private static final double EnglishUdLas = 88.78652574464478; // was until Sept 2016: 88.72648417258083;
 
   /**
    * Test that the NN dependency parser performance doesn't change.
@@ -81,7 +80,8 @@ public class DependencyParserITest extends TestCase {
     Properties props = StringUtils.stringToProperties("language=Chinese");
     DependencyParser parser = new DependencyParser(props);
     parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2014-10-26/CTB_CoNLL_params.txt.gz");
-    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/CTB/ctb5.1/dev.gold.conll", null);
+    // [was but now no such file:] double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/CTB/ctb5.1/dev.gold.conll", null);
+    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/CTB/dev.gold.conll", null);
     assertEquals(String.format("Chinese CoNLLX gold tags LAS should be %.2f but was %.2f",
             ChineseConllxGoldTagsLas, las), ChineseConllxGoldTagsLas, las, 1e-4);
   }
@@ -98,13 +98,13 @@ public class DependencyParserITest extends TestCase {
     Annotation document = new Annotation(text);
     pipeline.annotate(document);
 
-    SemanticGraph ccProcessed = document.get(CoreAnnotations.SentencesAnnotation.class).get(0)
-                                        .get(
-                                            SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+    SemanticGraph ccProcessed =
+            document.get(CoreAnnotations.SentencesAnnotation.class).get(0)
+                                .get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
     Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
 
     GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.getConj("and");
-    assertTrue(dependencies.stream().map(TypedDependency::reln).collect(toList()).contains(expected));
+    assertTrue(dependencies.stream().map(TypedDependency::reln).collect(Collectors.toList()).contains(expected));
   }
 
   /**

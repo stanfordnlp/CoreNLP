@@ -79,7 +79,7 @@ public class OpenIE implements Annotator  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(OpenIE.class);
 
-  private enum OutputFormat { REVERB, OLLIE, DEFAULT }
+  private enum OutputFormat { REVERB, OLLIE, DEFAULT, QA_SRL }
 
   /**
    * A pattern for rewriting "NN_1 is a JJ NN_2" --> NN_1 is JJ"
@@ -493,7 +493,6 @@ public class OpenIE implements Annotator  {
       List<RelationTriple> extractions = segmenter.extract(parse, tokens);  // note: uses non-coref-canonicalized parse!
       extractions.addAll(relationsInFragments(fragments, sentence));
 
-
       // Set the annotations
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
@@ -586,8 +585,8 @@ public class OpenIE implements Annotator  {
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
         NaturalLogicAnnotations.PolarityAnnotation.class,
-        SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class,
-        CoreAnnotations.OriginalTextAnnotation.class
+        SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class
+        //CoreAnnotations.OriginalTextAnnotation.class
     ));
     if (resolveCoref) {
       requirements.add(edu.stanford.nlp.coref.CorefCoreAnnotations.CorefChainAnnotation.class);
@@ -635,6 +634,8 @@ public class OpenIE implements Annotator  {
         return extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")";
       case DEFAULT:
         return extraction.toString();
+      case QA_SRL:
+        return extraction.toQaSrlString(sentence);
       default:
         throw new IllegalStateException("Format is not implemented: " + FORMAT);
     }

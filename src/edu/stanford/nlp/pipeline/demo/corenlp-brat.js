@@ -1,7 +1,7 @@
 // Takes Stanford CoreNLP JSON output (var data = ... in data.js)
 // and uses brat to render everything.
 
-// var serverAddress = 'http://localhost:9000';
+//var serverAddress = 'http://localhost:9000';
 var serverAddress = '';
 
 // Load Brat libraries
@@ -20,9 +20,15 @@ head.js(
   // brat modules
   bratLocation + '/client/src/dispatcher.js',
   bratLocation + '/client/src/url_monitor.js',
-  bratLocation + '/client/src/visualizer.js'
+  bratLocation + '/client/src/visualizer.js',
+
+  // parse viewer
+  './corenlp-parseviewer.js'
 );
 
+// Uses Dagre (https://github.com/cpettitt/dagre) for constinuency parse
+// visualization. It works better than the brat visualization.
+var useDagre = true;
 var currentQuery = 'The quick brown fox jumped over the lazy dog.';
 var currentSentences = '';
 var currentText = '';
@@ -97,21 +103,21 @@ function posColor(posTag) {
  */
 function nerColor(nerTag) {
   if (nerTag == 'PERSON') {
-    return '#FFCCAA'
+    return '#FFCCAA';
   } else if (nerTag == 'ORGANIZATION') {
-    return '#8FB2FF'
+    return '#8FB2FF';
   } else if (nerTag == 'MISC') {
-    return '#F1F447'
+    return '#F1F447';
   } else if (nerTag == 'LOCATION') {
-    return '#95DFFF'
+    return '#95DFFF';
   } else if (nerTag == 'DATE' || nerTag == 'TIME' || nerTag == 'SET') {
-    return '#9AFFE6'
+    return '#9AFFE6';
   } else if (nerTag == 'MONEY') {
-    return '#FFFFFF'
+    return '#FFFFFF';
   } else if (nerTag == 'PERCENT') {
-    return '#FFA22B'
+    return '#FFA22B';
   } else {
-    return '#E3E3E3'
+    return '#E3E3E3';
   }
 }
 
@@ -141,7 +147,7 @@ function sentimentColor(sentiment) {
  * Get a list of annotators, from the annotator option input.
  */
 function annotators() {
-  var annotators = "tokenize,ssplit"
+  var annotators = "tokenize,ssplit";
   $('#annotators').find('option:selected').each(function () {
     annotators += "," + $(this).val();
   });
@@ -165,6 +171,106 @@ function date() {
   return "" + Y + "-" + f(M) + "-" + f(D) + "T" + f(h) + ':' + f(m) + ':' + f(s);
 }
 
+
+//-----------------------------------------------------------------------------
+// Constituency parser
+//-----------------------------------------------------------------------------
+function ConstituencyParseProcessor() {
+  var parenthesize = function (input, list) {
+    if (list === undefined) {
+      return parenthesize(input, []);
+    } else {
+      var token = input.shift();
+      if (token === undefined) {
+        return list.pop();
+      } else if (token === "(") {
+        list.push(parenthesize(input, []));
+        return parenthesize(input, list);
+      } else if (token === ")") {
+        return list;
+      } else {
+        return parenthesize(input, list.concat(token));
+      }
+    }
+  };
+
+  var toTree = function (list) {
+    if (list.length === 2 && typeof list[1] === 'string') {
+      return {label: list[0], text: list[1], isTerminal: true};
+    } else if (list.length >= 2) {
+      var label = list.shift();
+      var node = {label: label};
+      var rest = list.map(function (x) {
+        var t = toTree(x);
+        if (typeof t === 'object') {
+          t.parent = node;
+        }
+        return t;
+      });
+      node.children = rest;
+      return node;
+    } else {
+      return list;
+    }
+  };
+
+  var indexTree = function (tree, tokens, index) {
+    index = index || 0;
+    if (tree.isTerminal) {
+      tree.token = tokens[index];
+      tree.tokenIndex = index;
+      tree.tokenStart = index;
+      tree.tokenEnd = index + 1;
+      return index + 1;
+    } else if (tree.children) {
+      tree.tokenStart = index;
+      for (var i = 0; i < tree.children.length; i++) {
+        var child = tree.children[i];
+        index = indexTree(child, tokens, index);
+      }
+      tree.tokenEnd = index;
+    }
+    return index;
+  };
+
+  var tokenize = function (input) {
+    return input.split('"')
+      .map(function (x, i) {
+        if (i % 2 === 0) { // not in string
+          return x.replace(/\(/g, ' ( ')
+            .replace(/\)/g, ' ) ');
+        } else { // in string
+          return x.replace(/ /g, "!whitespace!");
+        }
+      })
+      .join('"')
+      .trim()
+      .split(/\s+/)
+      .map(function (x) {
+        return x.replace(/!whitespace!/g, " ");
+      });
+  };
+
+  var convertParseStringToTree = function (input, tokens) {
+    var p = parenthesize(tokenize(input));
+    if (Array.isArray(p)) {
+      var tree = toTree(p);
+      // Correlate tree with tokens
+      indexTree(tree, tokens);
+      return tree;
+    }
+  };
+
+  this.process = function(annotation) {
+    for (var i = 0; i < annotation.sentences.length; i++) {
+      var s = annotation.sentences[i];
+      if (s.parse) {
+        s.parseTree = convertParseStringToTree(s.parse, s.tokens);
+      }
+    }
+  }
+}
+
 // ----------------------------------------------------------------------------
 // RENDER
 // ----------------------------------------------------------------------------
@@ -172,9 +278,14 @@ function date() {
 /**
  * Render a given JSON data structure
  */
-function render(data) {
+function render(data, reverse) {
+  // Tweak arguments
+  if (typeof reverse !== 'boolean') {
+    reverse = false;
+  }
+
   // Error checks
-  if (typeof data.sentences == 'undefined') { return; }
+  if (typeof data.sentences === 'undefined') { return; }
 
   /**
    * Register an entity type (a tag) for Brat
@@ -182,7 +293,7 @@ function render(data) {
   var entityTypesSet = {};
   var entityTypes = [];
   function addEntityType(name, type, coarseType) {
-    if (typeof coarseType == "undefined") {
+    if (typeof coarseType === "undefined") {
       coarseType = type;
     }
     // Don't add duplicates
@@ -193,6 +304,8 @@ function render(data) {
     if (name == 'POS') {
       color = posColor(type);
     } else if (name == 'NER') {
+      color = nerColor(coarseType);
+    } else if (name == 'NNER') {
       color = nerColor(coarseType);
     } else if (name == 'COREF') {
       color = '#FFE000';
@@ -217,7 +330,7 @@ function render(data) {
       borderColor: 'darken'
     });
   }
-  
+
   /**
    * Register a relation type (an arc) for Brat
    */
@@ -228,7 +341,7 @@ function render(data) {
     if (relationTypesSet[type]) return;
     relationTypesSet[type] = true;
     // Default arguments
-    if (typeof symmetricEdge == 'undefined') { symmetricEdge = false; }
+    if (typeof symmetricEdge === 'undefined') { symmetricEdge = false; }
     // Add the type
     relationTypes.push({
       type: type,
@@ -237,7 +350,7 @@ function render(data) {
       arrowHead: (symmetricEdge ? 'none' : undefined),
     });
   }
-  
+
   //
   // Construct text of annotation
   //
@@ -247,7 +360,7 @@ function render(data) {
     for (var i = 0; i < sentence.tokens.length; ++i) {
       var token = sentence.tokens[i];
       var word = token.word;
-      if (!(typeof tokensMap[word] == "undefined")) {
+      if (!(typeof tokensMap[word] === "undefined")) {
         word = tokensMap[word];
       }
       if (i > 0) { currentText.push(' '); }
@@ -260,7 +373,7 @@ function render(data) {
     currentText.push('\n');
   });
   currentText = currentText.join('');
-    
+
   //
   // Shared variables
   // These are what we'll render in BRAT
@@ -271,6 +384,7 @@ function render(data) {
   var lemmaEntities = [];
   // (ner)
   var nerEntities = [];
+  var nerEntitiesNormalized = [];
   // (sentiment)
   var sentimentEntities = [];
   // (entitylinking)
@@ -289,6 +403,8 @@ function render(data) {
   var kbpRelations = [];
   var kbpRelationsSet = [];
 
+  var cparseEntities = [];
+  var cparseRelations = [];
 
   //
   // Loop over sentences.
@@ -300,7 +416,8 @@ function render(data) {
     var tokens = sentence.tokens;
     var deps = sentence['basicDependencies'];
     var deps2 = sentence['enhancedPlusPlusDependencies'];
-  
+    var parseTree = sentence['parseTree'];
+
     // POS tags
     /**
      * Generate a POS tagged token id
@@ -308,7 +425,7 @@ function render(data) {
     function posID(i) {
       return 'POS_' + sentI + '_' + i;
     }
-    if (tokens.length > 0 && typeof tokens[0].pos != 'undefined') {
+    if (tokens.length > 0 && typeof tokens[0].pos !== 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
         var pos = token.pos;
@@ -318,7 +435,39 @@ function render(data) {
         posEntities.push([posID(i), pos, [[begin, end]]]);
       }
     }
-  
+
+    // Constituency parse
+    // Carries the same assumption as NER
+    if (parseTree && !useDagre) {
+      var parseEntities = [];
+      var parseRels = [];
+      function processParseTree(tree, index) {
+        tree.visitIndex = index;
+        index++;
+        if (tree.isTerminal) {
+          parseEntities[tree.visitIndex] = posEntities[tree.tokenIndex];
+          return index;
+        } else if (tree.children) {
+          addEntityType('PARSENODE', tree.label);
+          parseEntities[tree.visitIndex] =
+            ['PARSENODE_' + sentI + '_' + tree.visitIndex, tree.label,
+              [[tokens[tree.tokenStart].characterOffsetBegin, tokens[tree.tokenEnd-1].characterOffsetEnd]]];
+          var parentEnt = parseEntities[tree.visitIndex];
+          for (var i = 0; i < tree.children.length; i++) {
+            var child = tree.children[i];
+            index = processParseTree(child, index);
+            var childEnt = parseEntities[child.visitIndex];
+            addRelationType('pc');
+            parseRels.push(['PARSEEDGE_' + sentI + '_' + parseRels.length, 'pc', [['parent', parentEnt[0]], ['child', childEnt[0]]]]);
+          }
+        }
+        return index;
+      }
+      processParseTree(parseTree, 0);
+      cparseEntities = cparseEntities.concat(cparseEntities, parseEntities);
+      cparseRelations = cparseRelations.concat(parseRels);
+    }
+
     // Dependency parsing
     /**
      * Process a dependency tree from JSON to Brat relations
@@ -337,15 +486,15 @@ function render(data) {
       return relations;
     }
     // Actually add the dependencies
-    if (typeof deps != 'undefined') {
+    if (typeof deps !== 'undefined') {
       depsRelations = depsRelations.concat(processDeps('dep', deps));
     }
-    if (typeof deps2 != 'undefined') {
+    if (typeof deps2 !== 'undefined') {
       deps2Relations = deps2Relations.concat(processDeps('dep2', deps2));
     }
-  
+
     // Lemmas
-    if (tokens.length > 0 && typeof tokens[0].lemma != 'undefined') {
+    if (tokens.length > 0 && typeof tokens[0].lemma !== 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
         var lemma = token.lemma;
@@ -355,27 +504,32 @@ function render(data) {
         lemmaEntities.push(['LEMMA_' + sentI + '_' + i, lemma, [[begin, end]]]);
       }
     }
-  
+
     // NER tags
     // Assumption: contiguous occurrence of one non-O is a single entity
-    if (tokens.length > 0 && typeof tokens[0].ner != 'undefined') {
+    if (tokens.length > 0 && typeof tokens[0].ner !== 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var ner = tokens[i].ner;
         var normalizedNER = tokens[i].normalizedNER;
-        if (typeof normalizedNER == "undefined") {
+        if (typeof normalizedNER === "undefined") {
           normalizedNER = ner;
         }
         if (ner == 'O') continue;
         var j = i;
         while (j < tokens.length - 1 && tokens[j+1].ner == ner) j++;
-        addEntityType('NER', normalizedNER, ner);
-        nerEntities.push(['NER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        addEntityType('NER', ner, ner);
+        nerEntities.push(['NER_' + sentI + '_' + i, ner, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        if (ner != normalizedNER) {
+          addEntityType('NNER', normalizedNER, ner);
+          nerEntities.push(['NNER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+
+        }
         i = j;
       }
     }
-    
+
     // Sentiment
-    if (typeof sentence.sentiment != "undefined") {
+    if (typeof sentence.sentiment !== "undefined") {
       var sentiment = sentence.sentiment.toUpperCase().replace("VERY", "VERY ");
       addEntityType('SENTIMENT', sentiment);
       sentimentEntities.push(['SENTIMENT_' + sentI, sentiment,
@@ -387,7 +541,7 @@ function render(data) {
     if (tokens.length > 0) {
       for (var i = 0; i < tokens.length; i++) {
         var link = tokens[i].entitylink;
-        if (link == 'O' || typeof link == 'undefined') continue;
+        if (link == 'O' || typeof link === 'undefined') continue;
         var j = i;
         while (j < tokens.length - 1 && tokens[j+1].entitylink == link) j++;
         addEntityType('LINK', link);
@@ -406,8 +560,8 @@ function render(data) {
       if (openieEntitiesSet[[sentI, span, role]]) return;
       openieEntitiesSet[[sentI, span, role]] = true;
       // Add the entity
-      openieEntities.push([openieID(span), role, 
-        [[tokens[span[0]].characterOffsetBegin, 
+      openieEntities.push([openieID(span), role,
+        [[tokens[span[0]].characterOffsetBegin,
           tokens[span[1] - 1].characterOffsetEnd ]] ]);
     }
     function addRelation(gov, dep, role) {
@@ -416,12 +570,12 @@ function render(data) {
       openieRelationsSet[[sentI, gov, dep, role]] = true;
       // Add the relation
       openieRelations.push(['OPENIESUBJREL_' + sentI + '_' + gov[0] + '_' + gov[1] + '_' + dep[0] + '_' + dep[1],
-                           role, 
-                           [['governor',  openieID(gov)], 
+                           role,
+                           [['governor',  openieID(gov)],
                             ['dependent', openieID(dep)]  ] ]);
     }
     // Render OpenIE
-    if (typeof sentence.openie != 'undefined') {
+    if (typeof sentence.openie !== 'undefined') {
       // Register the entities + relations we'll need
       addEntityType('ENTITY',  'Entity');
       addEntityType('RELATION', 'Relation');
@@ -473,7 +627,7 @@ function render(data) {
                            [['governor',  kbpEntity(gov)],
                             ['dependent', kbpEntity(dep)]  ] ]);
     }
-    if (typeof sentence.kbp != 'undefined') {
+    if (typeof sentence.kbp !== 'undefined') {
       // Register the entities + relations we'll need
       addRelationType('subject');
       addRelationType('object');
@@ -483,9 +637,9 @@ function render(data) {
         var subjectLink = 'Entity';
         for (var k = subjectSpan[0]; k < subjectSpan[1]; ++k) {
           if (subjectLink == 'Entity' &&
-              typeof tokens[k] != 'undefined' &&
+              typeof tokens[k] !== 'undefined' &&
               tokens[k].entitylink != 'O' &&
-              typeof tokens[k].entitylink != 'undefined') {
+              typeof tokens[k].entitylink !== 'undefined') {
             subjectLink = tokens[k].entitylink
           }
         }
@@ -494,9 +648,9 @@ function render(data) {
         var objectLink = 'Entity';
         for (var k = objectSpan[0]; k < objectSpan[1]; ++k) {
           if (objectLink == 'Entity' &&
-              typeof tokens[k] != 'undefined' &&
+              typeof tokens[k] !== 'undefined' &&
               tokens[k].entitylink != 'O' &&
-              typeof tokens[k].entitylink != 'undefined') {
+              typeof tokens[k].entitylink !== 'undefined') {
             objectLink = tokens[k].entitylink
           }
         }
@@ -512,13 +666,13 @@ function render(data) {
     }  // End KBP block
 
   }  // End sentence loop
-    
+
   //
   // Coreference
-  // 
+  //
   var corefEntities = [];
   var corefRelations = [];
-  if (typeof data.corefs != 'undefined') {
+  if (typeof data.corefs !== 'undefined') {
     addRelationType('coref', true);
     addEntityType('COREF', 'Mention');
     var clusters = Object.keys(data.corefs);
@@ -529,21 +683,21 @@ function render(data) {
           var mention = chain[i];
           var id = 'COREF' + mention.id;
           var tokens = data.sentences[mention.sentNum - 1].tokens;
-          corefEntities.push([id, 'Mention', 
-            [[tokens[mention.startIndex - 1].characterOffsetBegin, 
+          corefEntities.push([id, 'Mention',
+            [[tokens[mention.startIndex - 1].characterOffsetBegin,
               tokens[mention.endIndex - 2].characterOffsetEnd      ]] ]);
           if (i > 0) {
             var lastId = 'COREF' + chain[i - 1].id;
             corefRelations.push(['COREF' + chain[i-1].id + '_' + chain[i].id,
-                                 'coref', 
-                                 [['governor', lastId], 
+                                 'coref',
+                                 [['governor', lastId],
                                   ['dependent', id]    ] ]);
           }
         }
       }
     });
   }  // End coreference block
-    
+
   //
   // Actually render the elements
   //
@@ -552,11 +706,22 @@ function render(data) {
    * Helper function to render a given set of entities / relations
    * to a Div, if it exists.
    */
-  function embed(container, entities, relations) {
+  function embed(container, entities, relations, reverse) {
+    var text = currentText;
+    if (reverse) {
+      var length = currentText.length;
+      for (var i = 0; i < entities.length; ++i) {
+        var offsets = entities[i][2][0];
+        var tmp = length - offsets[0];
+        offsets[0] = length - offsets[1];
+        offsets[1] = tmp;
+      }
+      text = text.split("").reverse().join("");
+    }
     if ($('#' + container).length > 0) {
-      Util.embed(container, 
-                 {entity_types: entityTypes, relation_types: relationTypes}, 
-                 {text: currentText, entities: entities, relations: relations}
+      Util.embed(container,
+                 {entity_types: entityTypes, relation_types: relationTypes},
+                 {text: text, entities: entities, relations: relations}
                 );
     }
   }
@@ -567,12 +732,23 @@ function render(data) {
     embed('lemma', lemmaEntities);
     embed('ner', nerEntities);
     embed('entities', linkEntities);
+    if (!useDagre) {
+      embed('parse', cparseEntities, cparseRelations);
+    }
     embed('deps', posEntities, depsRelations);
     embed('deps2', posEntities, deps2Relations);
     embed('coref', corefEntities, corefRelations);
     embed('openie', openieEntities, openieRelations);
     embed('kbp',    kbpEntities, kbpRelations);
     embed('sentiment', sentimentEntities);
+
+    // Constituency parse
+    // Uses d3 and dagre-d3 (not brat)
+    if ($('#parse').length > 0 && useDagre) {
+      var parseViewer = new ParseViewer({ selector: '#parse' });
+      parseViewer.showAnnotation(data);
+      $('#parse').addClass('svg').css('display', 'block');
+    }
   });
 
 }  // End render function
@@ -592,7 +768,7 @@ function renderTokensregex(data) {
     if (entityTypesSet[type]) return;
     entityTypesSet[type] = true;
     // Set the color
-    if (typeof color == 'undefined') {
+    if (typeof color === 'undefined') {
       color = '#ADF6A2';
     }
     // Register the type
@@ -651,7 +827,7 @@ function renderSemgrex(data) {
     if (entityTypesSet[type]) return;
     entityTypesSet[type] = true;
     // Set the color
-    if (typeof color == 'undefined') {
+    if (typeof color === 'undefined') {
       color = '#ADF6A2';
     }
     // Register the type
@@ -672,7 +848,7 @@ function renderSemgrex(data) {
   }];
 
   var entities = [];
-  var relations = []
+  var relations = [];
 
   for (var sentI = 0; sentI < data.sentences.length; ++sentI) {
     var tokens = currentSentences[sentI].tokens;
@@ -715,6 +891,13 @@ function renderSemgrex(data) {
         );
 }  // END renderSemgrex
 
+/**
+ * Render a Tregex response
+ */
+function renderTregex(data) {
+  $('#tregex').empty();
+  $('#tregex').append('<pre>' + JSON.stringify(data, null, 4) + '</pre>');
+}  // END renderTregex
 
 // ----------------------------------------------------------------------------
 // MAIN
@@ -722,13 +905,36 @@ function renderSemgrex(data) {
 
 /**
  * MAIN()
- * 
+ *
  * The entry point of the page
  */
 $(document).ready(function() {
   // Some initial styling
   $('.chosen-select').chosen();
   $('.chosen-container').css('width', '100%');
+
+
+  // Language-specific changes
+  $('#language').on('change', function() {
+    $('#text').attr('dir', '');
+    if ($('#language').val() === 'ar') {
+      $('#text').attr('dir', 'rtl');
+      $('#text').attr('placeholder', 'على سبيل المثال، قفز الثعلب البني السريع فوق الكلب الكسول.');
+    } else if ($('#language').val() === 'en') {
+      $('#text').attr('placeholder', 'e.g., The quick brown fox jumped over the lazy dog.');
+    } else if ($('#language').val() === 'zh') {
+      $('#text').attr('placeholder', '例如，快速的棕色狐狸跳過了懶惰的狗。');
+    } else if ($('#language').val() === 'fr') {
+      $('#text').attr('placeholder', 'Par exemple, le renard brun rapide a sauté sur le chien paresseux.');
+    } else if ($('#language').val() === 'de') {
+      $('#text').attr('placeholder', 'Z. B. sprang der schnelle braune Fuchs über den faulen Hund.');
+    } else if ($('#language').val() === 'es') {
+      $('#text').attr('placeholder', 'Por ejemplo, el rápido zorro marrón saltó sobre el perro perezoso.');
+    } else {
+      $('#text').attr('placeholder', 'Unknown language for placeholder query: ' + $('#language').val());
+
+    }
+  });
 
   // Submit on shift-enter
   $('#text').keydown(function (event) {
@@ -754,7 +960,21 @@ $(document).ready(function() {
     // Get the text to annotate
     currentQuery = $('#text').val();
     if (currentQuery.trim() == '') {
-      currentQuery = 'The quick brown fox jumped over the lazy dog.';
+      if ($('#language').val() === 'ar') {
+        currentQuery = 'قفز الثعلب البني السريع فوق الكلب الكسول.';
+      } else if ($('#language').val() === 'en') {
+        currentQuery = 'The quick brown fox jumped over the lazy dog.';
+      } else if ($('#language').val() === 'zh') {
+        currentQuery = '快速的棕色狐狸跳过了懒惰的狗';
+      } else if ($('#language').val() === 'fr') {
+        currentQuery = 'Le renard brun rapide a sauté sur le chien paresseux.';
+      } else if ($('#language').val() === 'de') {
+        currentQuery = 'Sprang der schnelle braune Fuchs über den faulen Hund.';
+      } else if ($('#language').val() === 'es') {
+        currentQuery = 'El rápido zorro marrón saltó sobre el perro perezoso.';
+      } else {
+        currentQuery = 'Unknown language for default query: ' + $('#language').val();
+      }
       $('#text').val(currentQuery);
     }
     // Update the UI
@@ -767,33 +987,36 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent(
-        '{"annotators": "' + annotators() + '", "date": "' + date() + '"' +
-        ', "coref.md.type": "dep", "coref.mode": "statistical"}'),
+        '{"annotators": "' + annotators() + '", "date": "' + date() + '"}') +
+        '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
         $('#submit').prop('disabled', false);
-        if (typeof data == undefined || data.sentences == undefined) {
+        if (typeof data === 'undefined' || data.sentences == undefined) {
           alert("Failed to reach server!");
         } else {
+          // Process constituency parse
+          var constituencyParseProcessor = new ConstituencyParseProcessor();
+          constituencyParseProcessor.process(data);
           // Empty divs
           $('#annotations').empty();
           // Re-render divs
           function createAnnotationDiv(id, annotator, selector, label) {
             // (make sure we requested that element)
-            if (annotators().indexOf(annotator) < 0) { 
-              return; 
+            if (annotators().indexOf(annotator) < 0) {
+              return;
             }
             // (make sure the data contains that element)
             ok = false;
-            if (typeof data[selector] != 'undefined') {
+            if (typeof data[selector] !== 'undefined') {
               ok = true;
-            } else if (typeof data.sentences != 'undefined' && data.sentences.length > 0) {
-              if (typeof data.sentences[0][selector] != 'undefined') {
+            } else if (typeof data.sentences !== 'undefined' && data.sentences.length > 0) {
+              if (typeof data.sentences[0][selector] !== 'undefined') {
                 ok = true;
               } else if (typeof data.sentences[0].tokens != 'undefined' && data.sentences[0].tokens.length > 0) {
-                ok = (typeof data.sentences[0].tokens[0][selector] != 'undefined');
+                ok = (typeof data.sentences[0].tokens[0][selector] !== 'undefined');
               }
             }
             // (render the element)
@@ -806,6 +1029,7 @@ $(document).ready(function() {
           createAnnotationDiv('pos',      'pos',        'pos',                                 'Part-of-Speech'          );
           createAnnotationDiv('lemma',    'lemma',      'lemma',                               'Lemmas'                  );
           createAnnotationDiv('ner',      'ner',        'ner',                                 'Named Entity Recognition');
+          createAnnotationDiv('parse',    'parse',      'parseTree',                           'Constituency Parse'      );
           createAnnotationDiv('deps',     'depparse',   'basicDependencies',                   'Basic Dependencies'      );
           createAnnotationDiv('deps2',    'depparse',   'enhancedPlusPlusDependencies',        'Enhanced++ Dependencies' );
           createAnnotationDiv('openie',   'openie',     'openie',                              'Open IE'                 );
@@ -818,7 +1042,8 @@ $(document).ready(function() {
           $('.corenlp_error').remove();  // Clear error messages
           $('#annotations').show();
           // Render
-          render(data);
+          var reverse = $('#language').val() === 'ar';
+          render(data, reverse);
           // Render patterns
           $('#annotations').append('<h4 class="red" style="margin-top: 4ex;">CoreNLP Tools:</h4>');  // TODO(gabor) a strange place to add this header to
           $('#patterns_row').show();
@@ -904,4 +1129,36 @@ $(document).ready(function() {
       }
     });
   });
+
+  $('#form_tregex').submit( function (e) {
+    // Don't actually submit the form
+    e.preventDefault();
+    // Get text
+    if ($('#tregex_search').val().trim() == '') {
+      $('#tregex_search').val('NP < NN=animal');
+    }
+    var pattern = $('#tregex_search').val();
+    // Remove existing annotation
+    $('#tregex').remove();
+    // Make ajax call
+    $.ajax({
+      type: 'POST',
+      url: serverAddress + '/tregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      data: encodeURIComponent(currentQuery),
+      success: function(data) {
+        $('.tregex_error').remove();  // Clear error messages
+        $('<div id="tregex" class="pattern_brat"/>').appendTo($('#div_tregex'));
+        renderTregex(data);
+      },
+      error: function(data) {
+        var alertDiv = $('<div/>').addClass('alert').addClass('alert-danger').addClass('alert-dismissible').addClass('tregex_error').attr('role', 'alert')
+        var button = $('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
+        var message = $('<span/>').text(data.responseText);
+        button.appendTo(alertDiv);
+        message.appendTo(alertDiv);
+        alertDiv.appendTo($('#div_tregex'));
+      }
+    });
+  });
+
 });

@@ -36,8 +36,6 @@ import edu.stanford.nlp.coref.docreader.CoNLLDocumentReader;
 
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
@@ -73,7 +71,7 @@ public class Document implements Serializable {
   /** Gold Clusters for coreferent mentions */
   public Map<Integer, CorefCluster> goldCorefClusters;
 
-  /** All mentions in a document mentionID -> mention*/
+  /** All mentions in a document {@literal mentionID -> mention} */
   public Map<Integer, Mention> predictedMentionsByID;
   public Map<Integer, Mention> goldMentionsByID;
 
@@ -93,15 +91,15 @@ public class Document implements Serializable {
   /** List of gold links in a document by positions */
   private List<Pair<IntTuple,IntTuple>> goldLinks;
 
-  /** UtteranceAnnotation -> String (speaker): mention ID or speaker string
+  /** UtteranceAnnotation {@literal ->} String (speaker): mention ID or speaker string
    *   e.g., the value can be "34" (mentionID), "Larry" (speaker string), or "PER3" (autoassigned speaker string)
-   *  */
+   */
   public Map<Integer, String> speakers;
 
   /** Pair of mention id, and the mention's speaker id
    *  the second value is the "speaker mention"'s id.
    *  e.g., Larry said, "San Francisco is a city.": (id(Larry), id(San Francisco))
-   *  */
+   */
   public Set<Pair<Integer, Integer>> speakerPairs;
 
   public boolean speakerInfoGiven;
@@ -117,12 +115,13 @@ public class Document implements Serializable {
   public Map<Pair<Integer, Integer>, Boolean> acronymCache;
 
   /** Map of speaker name/id to speaker info
-   *  the key is the value of the variable 'speakers' */
+   *  the key is the value of the variable 'speakers'
+   */
   public Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
 
-  public Counter<String> properNouns = new ClassicCounter<>();
-  public Counter<String> phraseCounter = new ClassicCounter<>();
-  public Counter<String> headwordCounter = new ClassicCounter<>();
+  // public Counter<String> properNouns = new ClassicCounter<>();
+  // public Counter<String> phraseCounter = new ClassicCounter<>();
+  // public Counter<String> headwordCounter = new ClassicCounter<>();
 
   /** Additional information about the document. Can be used as features */
   public Map<String, String> docInfo;
@@ -342,4 +341,5 @@ public class Document implements Serializable {
         && this.goldMentionsByID.containsKey(m2.mentionID)
         && this.goldMentionsByID.get(m1.mentionID).goldCorefClusterID == this.goldMentionsByID.get(m2.mentionID).goldCorefClusterID;
   }
+
 }
