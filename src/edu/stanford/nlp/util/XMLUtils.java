@@ -166,6 +166,25 @@ public class XMLUtils  {
 
   /**
    * Returns the elements in the given file with the given tag associated with
+   * the text content of the previous and next siblings up to max numIncludedSiblings.
+   *
+   * @return List of Triple<String, Element, String> Targeted elements surrounded
+   * by the text content of the two previous siblings and two next siblings.
+   */
+  public static List<Triple<String, Element, String>> getTagElementTriplesFromFileNumBounded(File f,
+                                                                                             String tag,
+                                                                                             int num) {
+    List<Triple<String, Element, String>> sents = Generics.newArrayList();
+    try {
+      sents = getTagElementTriplesFromFileNumBoundedSAXException(f, tag, num);
+    } catch (SAXException e) {
+      System.err.println(e);
+    }
+    return sents;
+  }
+
+  /**
+   * Returns the elements in the given file with the given tag associated with
    * the text content of the two previous siblings and two next siblings.
    *
    * @throws SAXException if tag doesn't exist in the file.
@@ -174,6 +193,19 @@ public class XMLUtils  {
    */
   public static List<Triple<String, Element, String>> getTagElementTriplesFromFileSAXException(
       File f, String tag) throws SAXException {
+    return  getTagElementTriplesFromFileNumBoundedSAXException(f, tag, 2);
+  }
+
+  /**
+   * Returns the elements in the given file with the given tag associated with
+   * the text content of the previous and next siblings up to max numIncludedSiblings.
+   *
+   * @throws SAXException if tag doesn't exist in the file.
+   * @return List of Triple<String, Element, String> Targeted elements surrounded
+   * by the text content of the two previous siblings and two next siblings.
+   */
+  public static List<Triple<String, Element, String>> getTagElementTriplesFromFileNumBoundedSAXException(
+      File f, String tag, int numIncludedSiblings) throws SAXException {
     List<Triple<String, Element, String>> sents = Generics.newArrayList();
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -186,20 +218,20 @@ public class XMLUtils  {
         // Get element
         Node prevNode = nodeList.item(i).getPreviousSibling();
         String prev = "";
-        if (prevNode != null) {
-          if (prevNode.getPreviousSibling() != null) {
-            prev += prevNode.getPreviousSibling().getTextContent();
-          }
-          prev += prevNode.getTextContent();
+        int count = 0;
+        while (prevNode != null && count <= numIncludedSiblings) {
+          prev = prevNode.getTextContent() + prev;
+          prevNode = prevNode.getPreviousSibling();
+          count++;
         }
 
         Node nextNode = nodeList.item(i).getNextSibling();
         String next = "";
-        if (nextNode != null) {
-          next = nextNode.getTextContent();
-          if (nextNode.getNextSibling() != null) {
-            next += nextNode.getNextSibling().getTextContent();
-          }
+        count = 0;
+        while (nextNode != null && count <= numIncludedSiblings) {
+          next = next + nextNode.getTextContent();
+          nextNode = nextNode.getNextSibling();
+          count++;
         }
         Element element = (Element)nodeList.item(i);
         Triple t = new Triple(prev, element, next);
