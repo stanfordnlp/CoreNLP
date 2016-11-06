@@ -14,13 +14,6 @@ public class BenchmarkingHelper {
 
   private BenchmarkingHelper() {} // static methods
 
-  public static void setLowHighExpected(Counter<String> lowRes, Counter<String> highRes, Counter<String> expRes, String key,
-                                         double lowVal, double highVal, double expVal) {
-    lowRes.setCount(key, lowVal);
-    highRes.setCount(key, highVal);
-    expRes.setCount(key, expVal);
-  }
-
   public static void benchmarkResults(Counter<String> results,
                                Counter<String> lowResults,
                                Counter<String> highResults,
@@ -47,7 +40,7 @@ public class BenchmarkingHelper {
         } else if (val > (expected + 1e-4)) {
           System.err.printf("Value for %s = %.4f is slightly higher than expected %.4f%n", key, val, expected);
         } else {
-          System.err.printf("Value for %s  = %.4f is as expected%n", key, val);
+          System.err.printf("Value for %s  = %.4f is as expected%n");
         }
       }
     }

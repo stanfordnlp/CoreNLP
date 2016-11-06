@@ -13,8 +13,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Function;
 
-import static edu.stanford.nlp.util.logging.Redwood.Util.err;
-
 /**
  * A (subject, relation, object) triple; e.g., as used in the KBP challenges or in OpenIE systems.
  *
@@ -210,14 +208,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     } else {
       return relationGloss;
     }
-  }
-
-  /** The head of the relation of this relation triple. This is usually the main verb. */
-  public CoreLabel relationHead() {
-    return relation.stream()
-        .filter(x -> x.tag().startsWith("V"))
-        .reduce((x, y) -> y)
-        .orElse(relation.get(relation.size() - 1));
   }
 
   /** A textual representation of the confidence. */
@@ -441,18 +431,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return "" + this.confidence + "\t" + subjectGloss() + "\t" + relationGloss() + "\t" + objectGloss();
   }
 
-
-  /** Print in the format expected for https://www.cs.bgu.ac.il/~gabriels/emnlp2016.pdf, with equivalence classes. */
-  public String toQaSrlString(CoreMap sentence) {
-    String equivalenceClass = subjectHead().index() + "." + relationHead().index() + "." + objectHead().index();
-    return equivalenceClass + "\t" +
-        subjectGloss().replace('\t', ' ') + "\t" +
-        relationGloss().replace('\t', ' ') + "\t" +
-        objectGloss().replace('\t', ' ') + "\t" +
-        confidence + "\t" +
-        StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(x -> x.word().replace('\t', ' ').replace(" ", "")), " ");
-  }
-
   /** Print a description of this triple, formatted like the ReVerb outputs. */
   public String toReverbString(String docid, CoreMap sentence) {
     return (docid == null ? "no_doc_id" : docid) + "\t" +
@@ -530,7 +508,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     }
 
     /** The head of the subject of this relation triple. */
-    @Override
     public CoreLabel subjectHead() {
       if (subject.size() == 1) { return subject.get(0); }
       Span subjectSpan = Span.fromValues(subject.get(0).index(), subject.get(subject.size() - 1).index());
@@ -545,7 +522,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     }
 
     /** The head of the object of this relation triple. */
-    @Override
     public CoreLabel objectHead() {
       if (object.size() == 1) { return object.get(0); }
       Span objectSpan = Span.fromValues(object.get(0).index(), object.get(object.size() - 1).index());
@@ -557,33 +533,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
         }
       }
       return object.get(object.size() - 1);
-    }
-
-
-    /** The head of the relation of this relation triple. */
-    @Override
-    public CoreLabel relationHead() {
-      if (relation.size() == 1) { return relation.get(0); }
-      CoreLabel guess = null;
-      CoreLabel newGuess = super.relationHead();
-      int iters = 0;  // make sure we don't infinite loop...
-      while (guess != newGuess && iters < 100) {
-        guess = newGuess;
-        iters += 1;
-        for (SemanticGraphEdge edge : sourceTree.incomingEdgeIterable(new IndexedWord(guess))) {
-          // find a node in the relation list which is a governor of the candidate root
-          Optional<CoreLabel> governor = relation.stream().filter(x -> x.index() == edge.getGovernor().index()).findFirst();
-          // if we found one, this is the new root. The for loop continues
-          if (governor.isPresent()) {
-            newGuess = governor.get();
-          }
-        }
-      }
-      // Return
-      if (iters >= 100) {
-        err("Likely cycle in relation tree");
-      }
-      return guess;
     }
 
     /** {@inheritDoc} */

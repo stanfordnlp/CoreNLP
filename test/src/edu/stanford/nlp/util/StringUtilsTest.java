@@ -116,13 +116,6 @@ public class StringUtilsTest extends TestCase {
   }
   */
 
-  public void testStringIsNullOrEmpty() {
-    assertTrue(StringUtils.isNullOrEmpty(null));
-    assertTrue(StringUtils.isNullOrEmpty(""));
-    assertFalse(StringUtils.isNullOrEmpty(" "));
-    assertFalse(StringUtils.isNullOrEmpty("foo"));
-  }
-
   public void testNormalize() {
     assertEquals("can't", StringUtils.normalize("can't"));
     assertEquals("Beyonce", StringUtils.normalize("Beyoncé"));

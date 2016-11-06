@@ -93,19 +93,10 @@ public class AnnotatorImplementations  {
             PropertiesUtils.getBool(properties,
                     NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
                     NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-
-    boolean applyRegexner =
-        PropertiesUtils.getBool(properties,
-            NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
-            NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);
-
     boolean useSUTime =
             PropertiesUtils.getBool(properties,
                     NumberSequenceClassifier.USE_SUTIME_PROPERTY,
                     NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-
-    NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
-        NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
 
     boolean verbose = PropertiesUtils.getBool(properties, "ner." + "verbose", false);
 
@@ -118,8 +109,8 @@ public class AnnotatorImplementations  {
       Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".", true);
       PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
     }
-    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
-            useSUTime, applyRegexner, combinerProperties, loadPaths);
+    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
+            useSUTime, combinerProperties, loadPaths);
 
     int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
@@ -217,14 +208,7 @@ public class AnnotatorImplementations  {
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
             true);
-    Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
-            Annotator.STANFORD_MENTION + ".",
-            true);
-
-    Properties allPropsForCoref = new Properties();
-    allPropsForCoref.putAll(corefProperties);
-    allPropsForCoref.putAll(mentionProperties);
-    return new MentionAnnotator(allPropsForCoref);
+    return new MentionAnnotator(corefProperties);
   }
 
   /**
@@ -234,13 +218,7 @@ public class AnnotatorImplementations  {
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
             true);
-    Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
-            Annotator.STANFORD_MENTION + ".",
-            true);
-    Properties allPropsForCoref = new Properties();
-    allPropsForCoref.putAll(corefProperties);
-    allPropsForCoref.putAll(mentionProperties);
-    return new CorefAnnotator(allPropsForCoref);
+    return new CorefAnnotator(corefProperties);
   }
 
   /**

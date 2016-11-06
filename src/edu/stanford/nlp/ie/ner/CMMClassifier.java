@@ -81,26 +81,26 @@ import edu.stanford.nlp.util.logging.Redwood;
  * It could be used for other purposes, but the provided features
  * are aimed at doing Named Entity Recognition.
  * The code has functionality for different document encodings, but when
- * using the standard {@code ColumnDocumentReader},
+ * using the standard <code>ColumnDocumentReader</code>,
  * input files are expected to
  * be one word per line with the columns indicating things like the word,
  * POS, chunk, and class.
- * <p>
+ * <p/>
  * <b>Typical usage</b>
  * <p>For running a trained model with a provided serialized classifier: <p>
- * {@code
+ * <code>
  * java -server -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier -loadClassifier
  * conll.ner.gz -textFile samplesentences.txt
- * }<p>
+ * </code><p>
  * When specifying all parameters in a properties file (train, test, or
  * runtime):<p>
- * {@code
+ * <code>
  * java -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier -prop propFile
- * }<p>
+ * </code><p>
  * To train and test a model from the command line:<p>
- * {@code java -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier
- * -trainFile trainFile -testFile testFile -goodCoNLL &gt; output }
- * <p>
+ * <code>java -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier
+ * -trainFile trainFile -testFile testFile -goodCoNLL &gt; output </code>
+ * <p/>
  * Features are defined by a {@link FeatureFactory}; the
  * {@link FeatureFactory} which is used by default is
  * {@link NERFeatureFactory}, and you should look there for feature templates.
@@ -108,12 +108,12 @@ import edu.stanford.nlp.util.logging.Redwood;
  * recommended method) or on the command line.  The features are read into
  * a {@link SeqClassifierFlags} object, which the
  * user need not know much about, unless one wishes to add new features.
- * <p>
+ * <p/>
  * CMMClassifier may also be used programmatically.  When creating a new instance, you
  * <i>must</i> specify a properties file.  The other way to get a CMMClassifier is to
  * deserialize one via {@link CMMClassifier#getClassifier(String)}, which returns a
  * deserialized classifier.  You may then tag sentences using either the assorted
- * {@code test} or {@code testSentence} methods.
+ * <code>test</code> or <code>testSentence</code> methods.
  *
  * @author Dan Klein
  * @author Jenny Finkel
@@ -131,8 +131,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   private ProbabilisticClassifier<String, String> classifier;
 
   /** The set of empirically legal label sequences (of length (order) at most
-   *  {@code flags.maxLeft}).  Used to filter valid class sequences if
-   *  {@code useObuseObservedSequencesOnly} is set.
+   *  <code>flags.maxLeft</code>).  Used to filter valid class sequences if
+   *  <code>useObuseObservedSequencesOnly</code> is set.
    */
   Set<List<String>> answerArrays;
 
@@ -1170,9 +1170,9 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     return cmm;
   }
 
-  /** This routine builds the {@code answerArrays} which give the
+  /** This routine builds the <code>answerArrays</code> which give the
    *  empirically legal label sequences (of length (order) at most
-   *  {@code flags.maxLeft}) and the {@code classIndex},
+   *  <code>flags.maxLeft</code>) and the <code>classIndex</code>,
    *  which indexes known answer classes.
    *
    * @param docs The training data: A List of List of CoreLabel

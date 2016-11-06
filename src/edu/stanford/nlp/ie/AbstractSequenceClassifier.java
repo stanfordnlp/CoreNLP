@@ -103,27 +103,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   protected MaxSizeConcurrentHashSet<String> knownLCWords; // = null;
 
   private DocumentReaderAndWriter<IN> defaultReaderAndWriter;
-
-  /** This is the DocumentReaderAndWriter used for reading training and testing files.
-   *  It is the DocumentReaderAndWriter specified by the readerAndWriter flag and
-   *  defaults to {@code edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter} which
-   *  is suitable for reading CoNLL-style TSV files.
-   *
-   *  @return The default DocumentReaderAndWriter
-   */
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
     return defaultReaderAndWriter;
   }
 
   private DocumentReaderAndWriter<IN> plainTextReaderAndWriter;
-
-  /** This is the default DocumentReaderAndWriter used for reading text files for runtime
-   *  classification. It is the DocumentReaderAndWriter specified by the plainTextDocumentReaderAndWriter
-   *  flag and defaults to {@code edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter} which
-   *  is suitable for reading plain text files, in languages with a Tokenizer available.
-   *
-   *  @return The default plain text DocumentReaderAndWriter
-   */
   public DocumentReaderAndWriter<IN> plainTextReaderAndWriter() {
     return plainTextReaderAndWriter;
   }
@@ -274,24 +258,18 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * ObjectBankWrapper.  (Both these behaviors are different from that of the
    * classify(List) method.
    *
-   * @param tokenSequence The List of IN to be classified.
+   * @param sentence The List of IN to be classified.
    * @return The classified List of IN, where the classifier output for
    *         each token is stored in its
    *         {@link edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation}
    *         field.
    */
-  public List<IN> classifySentence(List<? extends HasWord> tokenSequence) {
-    List<IN> document = preprocessTokens(tokenSequence);
-    classify(document);
-    return document;
-  }
-
-  private List<IN> preprocessTokens(List<? extends HasWord> tokenSequence) {
+  public List<IN> classifySentence(List<? extends HasWord> sentence) {
     // log.info("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() +
     //                   ", prior to NER for " + getClass().toString());
     List<IN> document = new ArrayList<>();
     int i = 0;
-    for (HasWord word : tokenSequence) {
+    for (HasWord word : sentence) {
       IN wi; // initialized below
       if (word instanceof CoreMap) {
         // copy all annotations! some are required later in
@@ -312,7 +290,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // TODO get rid of ObjectBankWrapper
     ObjectBankWrapper<IN> wrapper = new ObjectBankWrapper<>(flags, null, knownLCWords);
     wrapper.processDocument(document);
+
+    classify(document);
     // log.info("Size of knownLCWords is " + knownLCWords.size() + ", after NER for " + getClass().toString());
+
     return document;
   }
 
@@ -325,8 +306,32 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *         each token is stored in its "answer" field.
    */
   public List<IN> classifySentenceWithGlobalInformation(List<? extends HasWord> tokenSequence, final CoreMap doc, final CoreMap sentence) {
-    List<IN> document = preprocessTokens(tokenSequence);
+    List<IN> document = new ArrayList<>();
+    int i = 0;
+    for (HasWord word : tokenSequence) {
+      IN wi; // initialized straight below
+      if (word instanceof CoreMap) {
+        // copy all annotations! some are required later in
+        // AbstractSequenceClassifier.classifyWithInlineXML
+        // wi = (IN) new ArrayCoreMap((ArrayCoreMap) word);
+        wi = tokenFactory.makeToken((IN) word);
+      } else {
+        wi = tokenFactory.makeToken();
+        wi.set(CoreAnnotations.TextAnnotation.class, word.word());
+        // wi.setWord(word.word());
+      }
+      wi.set(CoreAnnotations.PositionAnnotation.class, Integer.toString(i));
+      wi.set(CoreAnnotations.AnswerAnnotation.class, backgroundSymbol());
+      document.add(wi);
+      i++;
+    }
+
+    // TODO get rid of ObjectBankWrapper
+    ObjectBankWrapper<IN> wrapper = new ObjectBankWrapper<>(flags, null, knownLCWords);
+    wrapper.processDocument(document);
+
     classifyWithGlobalInformation(document, doc, sentence);
+
     return document;
   }
 
@@ -399,7 +404,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     return kBest;
   }
 
-  private DFSA<String, Integer> getViterbiSearchGraph(List<IN> doc, Class<? extends CoreAnnotation<String>> answerField) {
+  public DFSA<String, Integer> getViterbiSearchGraph(List<IN> doc, Class<? extends CoreAnnotation<String>> answerField) {
     if (doc.isEmpty()) {
       return new DFSA<>(null);
     }
@@ -427,7 +432,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * Classify the tokens in a String. Each sentence becomes a separate document.
    * Doesn't override default readerAndWriter.
    *
-   * @param str A String with tokens in one or more sentences of text to be classified.
+   * @param str A String with tokens in one or more sentences of text to be
+   *          classified.
    * @return {@link List} of classified sentences (each a List of something that
    *         extends {@link CoreMap}).
    */
@@ -544,7 +550,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         PrintWriter pw = new PrintWriter(sw);
         plainTextReaderAndWriter.printAnswers(docOutput, pw);
         pw.flush();
-        sb.append(sw);
+        sb.append(sw.toString());
         sb.append('\n');
       }
     }
@@ -587,7 +593,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * spans. Plain text or XML input text is expected and the
    * {@link PlainTextDocumentReaderAndWriter} is used by default.
    * Output is a (possibly
-   * empty, but not {@code null}) List of Triples. Each Triple is an entity
+   * empty, but not <code>null</code>) List of Triples. Each Triple is an entity
    * name, followed by beginning and ending character offsets in the original
    * String. Character offsets can be thought of as fenceposts between the
    * characters, or, like certain methods in the Java String class, as character
@@ -657,10 +663,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @param sentence The string to be classified
    * @return List of words
    */
-  // todo: This method is currently [2016] only called in a very small number of places:
+  // This method is currently [2016] only called in a very small number of places:
   // the parser's jsp webapp, ChineseSegmenterAnnotator, and SegDemo.
   // Maybe we could eliminate it?
-  // It also seems like it should be using the plainTextReaderAndWriter, not default?
   public List<String> segmentString(String sentence) {
     return segmentString(sentence, defaultReaderAndWriter);
   }
@@ -899,8 +904,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * represented as a list of IN. If the ObjectBank iterator() is called until
    * hasNext() returns false, then the Reader will be read till end of file, but
    * no reading is done at the time of this call. Reading is done using the
-   * reading method specified in {@code flags.documentReader}, and for some
-   * reader choices, the column mapping given in {@code flags.map}.
+   * reading method specified in <code>flags.documentReader</code>, and for some
+   * reader choices, the column mapping given in <code>flags.map</code>.
    *
    * @param in
    *          Input data addNEWLCWords do we add new lowercase words from this
@@ -978,10 +983,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
   }
 
-  private static void outputCalibrationInfo(PrintWriter pw,
-                                            Counter<Integer> calibration,
-                                            Counter<Integer> correctByBin,
-                                            TwoDimensionalCounter<Integer, String> calibratedTokens) {
+  public static void outputCalibrationInfo(PrintWriter pw,
+                                           Counter<Integer> calibration,
+                                           Counter<Integer> correctByBin,
+                                           TwoDimensionalCounter<Integer,String> calibratedTokens) {
     final int numBins = 10;
     pw.println(); // in practice may well be in middle of line when called
     pw.println("----------------------------------------");
@@ -1006,11 +1011,15 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     pw.println("----------------------------------------");
   }
 
-  public void classifyStdin() throws IOException {
+  public void classifyStdin()
+    throws IOException
+  {
     classifyStdin(plainTextReaderAndWriter);
   }
 
-  public void classifyStdin(DocumentReaderAndWriter<IN> readerWriter) throws IOException {
+  public void classifyStdin(DocumentReaderAndWriter<IN> readerWriter)
+    throws IOException
+  {
     BufferedReader is = IOUtils.readerFromStdin(flags.inputEncoding);
     for (String line; (line = is.readLine()) != null; ) {
       Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
@@ -1029,38 +1038,35 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void dumpFeatures(Collection<List<IN>> documents) {}
 
   /**
-   * Load a text file, run the classifier on it, and then print the answers to
-   * stdout (with timing to stderr). This uses the value of flags.plainTextDocumentReaderAndWriter
-   * to determine how to read the textFile format. By default this gives
-   * edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter.
-   * <i>Note:</i> This means that it works right for
-   * a plain textFile (and not a tab-separated columns test file).
+   * Load a test file, run the classifier on it, and then print the answers to
+   * stdout (with timing to stderr). This uses the value of flags.documentReader
+   * to determine testFile format.
    *
-   * @param textFile The file to test on.
+   * @param testFile The file to test on.
    */
-  public void classifyAndWriteAnswers(String textFile)
+  public void classifyAndWriteAnswers(String testFile)
           throws IOException {
-    classifyAndWriteAnswers(textFile, plainTextReaderAndWriter(), false);
+    classifyAndWriteAnswers(testFile, false);
   }
+
+  /**
+     * Load a test file, run the classifier on it, and then print the answers to
+     * stdout (with timing to stderr). This uses the value of flags.documentReader
+     * to determine testFile format.
+     *
+     * @param testFile The file to test on.
+     * @param outputScores Whether to calculate and then log performance scores (P/R/F1)
+     * @return A Triple of P/R/F1 if outputScores is true, else null
+     */
+    public Triple<Double,Double,Double> classifyAndWriteAnswers(String testFile, boolean outputScores)
+            throws IOException {
+      return classifyAndWriteAnswers(testFile, defaultReaderAndWriter(), outputScores);
+    }
 
   /**
    * Load a test file, run the classifier on it, and then print the answers to
    * stdout (with timing to stderr). This uses the value of flags.documentReader
-   * to determine testFile format. By default, this means that it is set up to
-   * read a tab-separated columns test file
-   *
-   * @param testFile The file to test on.
-   * @param outputScores Whether to calculate and then log performance scores (P/R/F1)
-   * @return A Triple of P/R/F1 if outputScores is true, else null
-   */
-  public Triple<Double,Double,Double> classifyAndWriteAnswers(String testFile, boolean outputScores)
-          throws IOException {
-    return classifyAndWriteAnswers(testFile, defaultReaderAndWriter(), outputScores);
-  }
-
-  /**
-   * Load a test file, run the classifier on it, and then print the answers to
-   * stdout (with timing to stderr).
+   * to determine testFile format.
    *
    * @param testFile The file to test on.
    * @param readerWriter A reader and writer to use for the output
@@ -1096,15 +1102,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     return classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
-  /** Run the classifier on a collection of text files.
-   *  Uses the plainTextReaderAndWriter to process them.
-   *
-   *  @param textFiles A File Collection to process.
-   *  @throws IOException For any IO error
-   */
-  public void classifyFilesAndWriteAnswers(Collection<File> textFiles)
+  public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
           throws IOException {
-    classifyFilesAndWriteAnswers(textFiles, plainTextReaderAndWriter, false);
+    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter, false);
   }
 
   public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
@@ -1275,7 +1275,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public void classifyAndWriteViterbiSearchGraph(String testFile, String searchGraphPrefix, DocumentReaderAndWriter<IN> readerAndWriter) throws IOException {
     Timing timer = new Timing();
-    ObjectBank<List<IN>> documents = makeObjectBankFromFile(testFile, readerAndWriter);
+    ObjectBank<List<IN>> documents =
+      makeObjectBankFromFile(testFile, readerAndWriter);
     int numWords = 0;
     int numSentences = 0;
 
@@ -1285,9 +1286,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       PrintWriter latticeWriter = new PrintWriter(new FileOutputStream(searchGraphPrefix + '.' + numSentences
           + ".wlattice"));
       PrintWriter vsgWriter = new PrintWriter(new FileOutputStream(searchGraphPrefix + '.' + numSentences + ".lattice"));
-      if (readerAndWriter instanceof LatticeWriter) {
+      if (readerAndWriter instanceof LatticeWriter)
         ((LatticeWriter<IN, String, Integer>) readerAndWriter).printLattice(tagLattice, doc, latticeWriter);
-      }
       tagLattice.printAttFsmFormat(vsgWriter);
       latticeWriter.close();
       vsgWriter.close();
@@ -1566,7 +1566,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @param props
    *          A Properties object which can override certain properties in the
    *          serialized file, such as the DocumentReaderAndWriter. You can pass
-   *          in {@code null} to override nothing.
+   *          in <code>null</code> to override nothing.
    */
   // todo [john bauer 2015]: This method may not be necessary.  Perhaps use the IOUtils equivalents
   public void loadJarClassifier(String modelName, Properties props) {

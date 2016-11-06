@@ -15,14 +15,6 @@ import edu.stanford.nlp.util.Pair;
 
 /**
  * Builds up coreference clusters incrementally with agglomerative clustering.
- * The model is described in
- * <p/>
- * Kevin Clark and Christopher D. Manning. 2015.
- * <a href="http://nlp.stanford.edu/pubs/clark-manning-acl15-entity.pdf">
- * Entity-Centric Coreference Resolution with Model Stacking</a>.
- * In Association for Computational Linguistics.
- * <p/>
- * See {@link StatisticalCorefTrainer} for training a new model.
  * @author Kevin Clark
  */
 public class ClusteringCorefAlgorithm implements CorefAlgorithm {

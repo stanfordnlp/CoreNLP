@@ -71,10 +71,10 @@ public class RequirementsCorrectSlowITest {
   }
 
 
-  /*@Test
+  @Test
   public void testDefaultPipeline() {
     testAnnotatorSequence(Arrays.asList("tokenize", "ssplit", "pos", "lemma", "ner", "gender", "parse", "mention", "coref"));
-  }*/
+  }
 
   @Test
   public void testDepparsePipeline() {

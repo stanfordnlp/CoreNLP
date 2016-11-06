@@ -249,9 +249,9 @@ public class UniversalChineseGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalChinese,
       "dobj", "direct object",
       OBJECT, "CP|VP", tregexCompiler,
-            "VP < ( /^V*/ $+ NP|DP=target ) !< VC ",
+            "VP < ( /^V*/ $+ NP|DP|QP=target ) !< VC ",
             // 进入/VV 了/AS 夏季/NN
-            "VP < ( /^V*/ $+ (AS $+ NP|DP=target) ) !< VC ",
+            "VP < ( /^V*/ $+ (AS $+ NP|DP|QP=target) ) !< VC ",
             " VP < ( /^V*/ $+ NP|DP=target ! $+ NP|DP) !< VC ",
             "CP < (IP $++ NP=target ) !<< VC");
 
@@ -263,6 +263,31 @@ public class UniversalChineseGrammaticalRelations {
       "iobj", "indirect object",
       OBJECT, "VP", tregexCompiler,
             " CP !> VP < ( VV $+ ( NP|DP|QP|CLP=target . NP|DP ) )");
+
+  /**
+   * The "range" grammatical relation (Chinese only).  The indirect
+   * object of a VP is the quantifier phrase which is the (dative) object
+   * of the verb.<p>
+   * <p>
+   * <code>
+   * <pre>
+   * Input:
+   *   (VP (VV 成交)
+   *       (NP (NN 药品))
+   *       (QP (CD 一亿多)
+   *           (CLP (M 元))))
+   * Output:
+   *   range(成交, 元)
+   * </pre>
+   * </code>
+   */
+  // todo [cdm 2016]: Need to get rid of this somehow....
+  public static final GrammaticalRelation RANGE =
+    new GrammaticalRelation(Language.UniversalChinese,
+      "range", "range",
+      INDIRECT_OBJECT, "VP", tregexCompiler,
+            "VP < ( NP|DP|QP $+ NP|DP|QP=target)",
+            "VP < ( VV $+ QP=target )");
 
   /**
    * The "clausal complement" (ccomp) grammatical relation.
@@ -338,12 +363,9 @@ public class UniversalChineseGrammaticalRelations {
   public static final GrammaticalRelation NUMERIC_MODIFIER =
     new GrammaticalRelation(Language.UniversalChinese, "nummod", "numeric modifier",
                             MODIFIER,
-                            "QP|NP|DP", tregexCompiler,
-            "NP|QP < ( QP  =target << M $++ NN|NP|QP)",
-            "NP|QP < ( DNP=target < (QP < CD !< OD) !< JJ|ADJP $++ NP|QP )"
-            // the following rule is merged into mark:clf
-            //"DP < ( DT $+ CLP=target )"
-            );
+                            "QP|NP", tregexCompiler,
+            "QP < CD=target",
+            "NP < ( QP=target !<< CLP )");
 
   /**
    * The "appositional modifier" (appos) grammatical relation (abstract).
@@ -351,7 +373,7 @@ public class UniversalChineseGrammaticalRelations {
   public static final GrammaticalRelation APPOSITIONAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalChinese, "appos", "appositional modifier", MODIFIER,
             "NP", tregexCompiler,
-            "NP < (/^NP(-APP)?$/=target !<<- " + LOCATION_NOUNS + " !< NT !<: NR $+ (NP <: NR !$+ __))");
+            "NP < (/^NP(-APP)?$/=target !< " + LOCATION_NOUNS + " !< NT !<: NR $+ (NP <: NR !$+ __))");
 
   public static final GrammaticalRelation PARATAXIS =
           new GrammaticalRelation(Language.UniversalChinese, "parataxis", "parataxis", DEPENDENT);
@@ -374,30 +396,6 @@ public class UniversalChineseGrammaticalRelations {
                   "NP < (NP=target $+ (NP <: NR)) [$- P|LC | $+ P|LC]",
                   "NP|QP < ( DNP =target < (NP < NT) $++ NP|QP )",
                   "NP|QP < ( DNP =target < LCP|PP $++ NP|QP )");
-
-  /**
-   * The "range" grammatical relation (Chinese only).  The indirect
-   * object of a VP is the quantifier phrase which is the (dative) object
-   * of the verb.<p>
-   * <p>
-   * <code>
-   * <pre>
-   * Input:
-   *   (VP (VV 成交)
-   *       (NP (NN 药品))
-   *       (QP (CD 一亿多)
-   *           (CLP (M 元))))
-   * Output:
-   *   range(成交, 元)
-   * </pre>
-   * </code>
-   */
-  public static final GrammaticalRelation RANGE =
-          new GrammaticalRelation(Language.UniversalChinese,
-                  "nmod:range", "range",
-                  NOUN_MODIFIER, "VP", tregexCompiler,
-                  "VP < ( NP|DP|QP $+ DP|QP=target)",
-                  "VP < ( VV $+ QP=target )");
 
   public static final GrammaticalRelation POSSESSIVE_MODIFIER =
           new GrammaticalRelation(Language.UniversalChinese, "nmod:poss", "possessive modifier", NOUN_MODIFIER,
@@ -443,10 +441,7 @@ public class UniversalChineseGrammaticalRelations {
 
   public static final GrammaticalRelation CLAUSAL_MODIFIER =
           new GrammaticalRelation(Language.UniversalChinese, "acl", "clausal modifier of noun",
-                  MODIFIER, "NP", tregexCompiler,
-                  //"NP  $++ (CP=target << VV) > NP ",
-                  "NP  < ( CP=target $++ NP << VV)",
-                  "NP < IP=target ");
+                  MODIFIER);
 
   /**
    * The "relative clause modifier" (relcl) grammatical relation.
@@ -474,26 +469,21 @@ public class UniversalChineseGrammaticalRelations {
    * </code>
    * </pre>
    */
-  /* merged into acl
   public static final GrammaticalRelation RELATIVE_CLAUSE_MODIFIER =
-    new GrammaticalRelation(Language.UniversalChinese, "acl", "adjectival clause modifier",
+    new GrammaticalRelation(Language.UniversalChinese, "acl:relcl", "relative clause modifier",
                             CLAUSAL_MODIFIER, "NP", tregexCompiler,
             "NP  $++ (CP=target << VV) > NP ",
-            "NP  < ( CP=target $++ NP << VV)",
-            "NP < IP=target ");
-            */
+            "NP  < ( CP=target $++ NP << VV)");
 
-  /*
+  /**
    * The "non-finite clause" grammatical relation.
    * This used to be verb modifier (vmod).
    */
-  /* merged into acl
   public static final GrammaticalRelation NONFINITE_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.UniversalChinese,
       "acl:nfincl", "non-finite clause modifier (examples: stores[head] based[modifier] in Boston",
       CLAUSAL_MODIFIER, "NP", tregexCompiler,
             "NP < IP=target ");
-   */
 
   /**
    * The "adjective modifier" (amod) grammatical relation.
@@ -516,7 +506,7 @@ public class UniversalChineseGrammaticalRelations {
             "NP|CLP|QP < (ADJP=target $++ NP|CLP|QP ) ",
             "NP  $++ (CP=target << VA !<< VV) > NP ",
             "NP  < ( CP=target $++ NP << VA !<< VV)",
-            "NP|QP < ( DNP=target < JJ|ADJP !< NP|QP $++ NP|QP )");
+            "NP|QP < ( DNP=target < JJ|ADJP|QP !< NP $++ NP|QP )");
 
   /**
    * The "ordinal modifier" (ordmod) grammatical relation.
@@ -525,11 +515,8 @@ public class UniversalChineseGrammaticalRelations {
           new GrammaticalRelation(Language.UniversalChinese, "amod:ordmod", "ordinal numeric modifier",
                   ADJECTIVAL_MODIFIER,
                   "NP|QP", tregexCompiler,
-                  "NP < (QP=target < OD !< CLP)",
-                  "NP|QP < ( DNP=target < (QP < OD !< CD) !< JJ|ADJP $++ NP|QP )"
-                  // the following rule is merged into mark:clf
-                  //"QP < (OD=target $+ CLP)"
-                  );
+                  "NP < QP=target < ( OD !$+ CLP )",
+                  "QP < (OD=target $+ CLP)");
 
   /**
    * The "determiner modifier" (det) grammatical relation.
@@ -787,13 +774,10 @@ public class UniversalChineseGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalChinese,
       "compound:nn", "noun compound",
       COMPOUND, "^NP", tregexCompiler,
-            "NP < (NN|NR|NT=target [$+ NN|NT $- NN|NP | $+ (NN|NT $+ NN|NP|NR)])",
-            "NP < (NN|NR|NT=target !$+ PU|CC|DNP $++ NN|NT)",
+            "NP < (NN|NT=target $+ NN|NT)",
             "NP < (NN|NR|NT $+ FW=target)",
             "NP < (NP=target !< NR !$+ PU|CC|DNP $++ (NP|PRN !< NR|QP))",
-            // the following rule captures some exceptions from nmod:assmod
-            "NP < (NP=target < NR $+ (NP [<<# NR | $+ NR|NN | $+ (__ <<# NR) | $+ /^[^N]/]))",
-            "NP < (NP=target < NN !< NR $+ (NP < NN|NT))");
+            "NP < (NP=target < NN|NT $+ (NP < NN|NT))");
 
   /**
    * The "name" grammatical relation.
@@ -982,9 +966,9 @@ public class UniversalChineseGrammaticalRelations {
                   "nmod:assmod", "associative modifier (examples: 上海市/Shanghai[modifier] 的 规定/law[head])",
                   NOUN_MODIFIER, "NP|QP|DNP", tregexCompiler,
                   "NP|QP < ( DNP =target < (NP !< NT) $++ NP|QP ) ",
-                  "NP|DNP < (/^NP(-PN)?$/=target < NR $+ (NP !<<# NR !$+ NR|NN !$+ (__ <<# NR) !$+ /^[^N]/) !$- NP|NN)",
-                  // the following rule is merged into compound:nn
-                  //"NP < (NR=target $+ NN)",
+                  "NP|DNP < (/^NP(-PN)?$/=target <: NR $+ (NP !< NR))",
+                  // fixme: This rule captures compounds sometimes, e.g. (NP (NR b292) (NN 电台))
+                  "NP < (NR=target $+ NN)",
                   "NP < (NP=target !< NR !$+ PU|CC $++ (NP|PRN < QP))");
 
   /**
@@ -1091,7 +1075,7 @@ public class UniversalChineseGrammaticalRelations {
            "VP|IP < BA=target ");
 
   /**
-   * The "classifier marker" grammatical relation.
+   * The "classifier modifier" grammatical relation.
    * <p>
    * <code>
    * <pre>
@@ -1100,16 +1084,15 @@ public class UniversalChineseGrammaticalRelations {
    *        (CLP (M 件)))
    *    (NP (NN 法规性) (NN 文件)))
    * Output:
-   *   mark:clf(七十一, 件)
+   *   clf(文件-26, 件-24)
    * </pre>
    * </code>
    */
   public static final GrammaticalRelation CLASSIFIER_MODIFIER =
     new GrammaticalRelation(Language.UniversalChinese,
-      "mark:clf", "classifier marker",
-      MARK, "QP|DP", tregexCompiler,
-            "QP < M=target",
-            "QP < CLP=target",
+      "clf", "classifier modifier",
+      MODIFIER, "^NP|DP|QP", tregexCompiler,
+            "NP|QP < ( QP  =target << M $++ NN|NP|QP)",
             "DP < ( DT $+ CLP=target )");
 
   /**
@@ -1243,6 +1226,7 @@ public class UniversalChineseGrammaticalRelations {
         OBJECT,
           DIRECT_OBJECT,
           INDIRECT_OBJECT,
+            RANGE,  // Chinese only
         CLAUSAL_COMPLEMENT,
         XCLAUSAL_COMPLEMENT,  // Exists in Chinese?
     MODIFIER,
@@ -1252,18 +1236,19 @@ public class UniversalChineseGrammaticalRelations {
       APPOSITIONAL_MODIFIER,
         PARENTHETICAL_MODIFIER, chineseOnly,
       NOUN_MODIFIER,
-        RANGE, chineseOnly,
         ASSOCIATIVE_MODIFIER, chineseOnly,
         TEMPORAL_MODIFIER, chineseOnly,
         POSSESSIVE_MODIFIER,
         NOMINAL_TOPIC_MODIFIER, chineseOnly,
       // Nominal heads, predicate dependents
+      RELATIVE_CLAUSE_MODIFIER,
+      NONFINITE_CLAUSE_MODIFIER,
       //NOMINALIZED_CLAUSE_MODIFIER,  // Exists in Chinese?
       ADJECTIVAL_MODIFIER,
       DETERMINER,
       NEGATION_MODIFIER,
-      CLAUSAL_MODIFIER,
       // Predicate heads
+      //ADVERBIAL_CLAUSE_MODIFIER,  // TODO(pliang): some of the existing advmod should be changed to this (advcl)
       ADVERBIAL_MODIFIER,
         DVPM_MODIFIER, chineseOnly,
       ADV_CLAUSAL_MODIFIER,
@@ -1278,7 +1263,6 @@ public class UniversalChineseGrammaticalRelations {
       AUX_PASSIVE_MODIFIER,
       COPULA,
       MARK,
-        CLASSIFIER_MODIFIER, chineseOnly,
       PUNCTUATION,
     // Other
       COMPOUND,
@@ -1294,6 +1278,7 @@ public class UniversalChineseGrammaticalRelations {
       LOCALIZER_COMPLEMENT, chineseOnly,
       RESULTATIVE_COMPLEMENT, chineseOnly,
       BA, chineseOnly,
+      CLASSIFIER_MODIFIER, chineseOnly,
       PREPOSITIONAL_MODIFIER, chineseOnly,
       PART_VERB, chineseOnly,
       ETC, chineseOnly,
@@ -1310,7 +1295,6 @@ public class UniversalChineseGrammaticalRelations {
   // Map from GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
   public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<>();
-
   static {
     for (int i = 0; i < rawValues.length; i++) {
       GrammaticalRelation gr = rawValues[i];

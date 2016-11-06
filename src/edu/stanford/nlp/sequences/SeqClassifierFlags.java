@@ -1,15 +1,15 @@
-package edu.stanford.nlp.sequences;
+package edu.stanford.nlp.sequences; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
 import edu.stanford.nlp.process.WordShapeClassifier;
+import java.util.function.Function;
 import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Flags for sequence classifiers. Documentation for general flags and
@@ -782,7 +782,7 @@ public class SeqClassifierFlags implements Serializable  {
   public String unknownWordDistSimClass = "null";
 
   /**
-   * Use prefixes and suffixes from the previous and current word in edge clique.
+   * Use prefixes and suffixes from the previous and next word.
    */
   public boolean useNeighborNGrams = false;
 
@@ -1040,7 +1040,7 @@ public class SeqClassifierFlags implements Serializable  {
   /** How many words it is okay to add to knownLCWords after initial training.
    *  If this number is negative, then add any number of further words during classifying/testing.
    *  If this number is non-negative (greater than or equal to 0), then add at most this many words
-   *  to the knownLCWords. By default, this is now set to 0, so there is no transductive learning on the
+   *  to the knownLCWords. By default, this is now set to 0, so their is no transductive learning on the
    *  test set, since too many people complained about results changing over runs. However, traditionally
    *  we used a non-zero value, and this usually helps performance a bit (until 2014 it was -1, then it
    *  was set to 10_000, so that memory would not grow without bound if a SequenceClassifier is run for
@@ -1062,17 +1062,12 @@ public class SeqClassifierFlags implements Serializable  {
   public String combinationMode;
   public String nerModel;
 
-  /**
-   * Use prefixes and suffixes from the previous and next word in node clique.
-   */
-  public boolean useMoreNeighborNGrams = false;
-
-
   // "ADD VARIABLES ABOVE HERE"
-
 
   public transient List<String> phraseGazettes = null;
   public transient Properties props = null;
+
+
 
   /**
    * Create a new SeqClassifierFlags object initialized with default values.
@@ -1087,17 +1082,6 @@ public class SeqClassifierFlags implements Serializable  {
    */
   public SeqClassifierFlags(Properties props) {
     setProperties(props, true);
-  }
-
-  /**
-   * Create a new SeqClassifierFlags object and initialize it using values in
-   * the Properties object. The properties are printed to stderr as it works.
-   *
-   * @param props The properties object used for initialization
-   * @param printProps Whether to print the properties on construction
-   */
-  public SeqClassifierFlags(Properties props, boolean printProps) {
-    setProperties(props, printProps);
   }
 
   /**
@@ -1304,8 +1288,6 @@ public class SeqClassifierFlags implements Serializable  {
         useNGrams = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useNeighborNGrams")) {
         useNeighborNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMoreNeighborNGrams")) {
-        useMoreNeighborNGrams = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("wordFunction")) {
         wordFunction = ReflectionLoading.loadByReflection(val);
       } else if (key.equalsIgnoreCase("conjoinShapeNGrams")) {
@@ -1424,7 +1406,7 @@ public class SeqClassifierFlags implements Serializable  {
         intern = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("mergetags")) {
         mergeTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("iobTags")) {
+      } else if (key.equalsIgnoreCase("iobtags")) {
         iobTags = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useViterbi")) {
         useViterbi = Boolean.parseBoolean(val);

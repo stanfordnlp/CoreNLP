@@ -754,12 +754,11 @@ ACRONYM = ({ACRO})\.
 
 /* --- ABBREV3 abbreviations are allowed only before numbers. ---
  * Otherwise, they aren't recognized as abbreviations (unless they also
- * appear in ABBREV1 or ABBREV2).
+ * appear in ABBREV1 or ABBREV2.
  * est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa.
- * "Art(s)." is for "article(s)" -- common in legal context, Sec(t). for section(s)
  */
 /* Maybe also "op." for "op. cit." but also get a photo op. */
-ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|bldg|prop|pp|op)\.
+ABBREV3 = (ca|figs?|prop|nos?|art|bldg|prop|pp|op)\.
 /* Case for south/north before a few places. */
 ABBREVSN = So\.|No\.
 
@@ -804,8 +803,8 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
-c[+][+]                 { return getNext(); }
-(c|f)#                  { return getNext(); }
+c[+][+]                     { return getNext(); }
+(c|f)#			    { return getNext(); }
 cannot                  { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
                           } else {
@@ -1131,7 +1130,7 @@ nno/[^A-Za-z0-9]
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
 \u0095          { return getNext("\u2022", yytext()); } /* cp1252 bullet mapped to unicode */
-\u0099          { return getNext("\u2122", yytext()); } /* cp1252 TM sign mapped to unicode */
+\u0099	        { return getNext("\u2122", yytext()); } /* cp1252 TM sign mapped to unicode */
 \0|{SPACES}|[\u200B\u200E-\u200F\uFEFF] { if (invertible) {
                      prevWordAfter.append(yytext());
                   }

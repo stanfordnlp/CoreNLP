@@ -17,10 +17,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.util.Pair;
 
-/**
- * Extracts string matching, speaker, distance, and document genre features from mentions.
- * @author Kevin Clark
- */
 public class CategoricalFeatureExtractor {
   private final Dictionaries dictionaries;
   private final Map<String, Integer> genres;
@@ -29,22 +25,17 @@ public class CategoricalFeatureExtractor {
   public CategoricalFeatureExtractor(Properties props, Dictionaries dictionaries) {
     this.dictionaries = dictionaries;
     conll = CorefProperties.conll(props);
-
-    if (conll) {
-      genres = new HashMap<>();
-      genres.put("bc", 0);
-      genres.put("bn", 1);
-      genres.put("mz", 2);
-      genres.put("nw", 3);
-      boolean english = CorefProperties.getLanguage(props) == Locale.ENGLISH;
-      if (english) {
-        genres.put("pt", 4);
-      }
-      genres.put("tc", english ? 5 : 4);
-      genres.put("wb", english ? 6 : 5);
-    } else {
-      genres = null;
+    genres = new HashMap<>();
+    boolean english = CorefProperties.getLanguage(props) == Locale.ENGLISH;
+    genres.put("bc", 0);
+    genres.put("bn", 1);
+    genres.put("mz", 2);
+    genres.put("nw", 3);
+    if (english) {
+      genres.put("pt", 4);
     }
+    genres.put("tc", english ? 5 : 4);
+    genres.put("wb", english ? 6 : 5);
   }
 
   public SimpleMatrix getPairFeatures(Pair<Integer, Integer> pair, Document document,

@@ -18,11 +18,6 @@
   margin-top: 1ex;
 }
 
-.label {
-  color: #777777;
-  font-size: small;
-}
-
 .footer {
   bottom: 0;
   width: 100%;
@@ -37,33 +32,3 @@
   margin-top: 2ex;
 }
 
-/* Styling for parse graph */
-.node rect {
-  stroke: #333;
-  fill: #fff;
-}
-
-.parse-RULE rect {
-  fill: #C0D9AF;
-}
-
-.parse-TERMINAL rect {
-  stroke: #333;
-  fill: #EEE8AA;
-}
-
-.node.highlighted {
-  stroke: #ffff00;
-}
-
-.edgePath path {
-  stroke: #333;
-  fill: #333;
-  stroke-width: 1.5px;
-}
-
-.parse-EDGE path {
-  stroke: DarkGray;
-  fill: DarkGray;
-  stroke-width: 1.5px;
-}

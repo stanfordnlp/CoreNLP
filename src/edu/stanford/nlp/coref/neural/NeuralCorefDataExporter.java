@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -25,19 +24,15 @@ import edu.stanford.nlp.coref.data.Document;
 import edu.stanford.nlp.coref.data.Document.DocType;
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * Outputs the CoNLL CoNLL data for training the neural coreference system
+ * Outputs the CoNLL CoNLL data for training a neural coreference system
  * (implented in python/theano).
- * See <a href="https://github.com/clarkkev/deep-coref">https://github.com/clarkkev/deep-coref</a>
- * for the training code.
+ * See https://github.com/clarkkev/deep-coref for the training code.
  * @author Kevin Clark
  */
 public class NeuralCorefDataExporter implements CorefDocumentProcessor {
@@ -85,14 +80,8 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
     }
 
     JsonObjectBuilder docFeatures = Json.createObjectBuilder();
-    docFeatures.add("doc_id", id);
     docFeatures.add("type", document.docType == DocType.ARTICLE ? 1 : 0);
     docFeatures.add("source", document.docInfo.get("DOC_ID").split("/")[0]);
-
-    JsonArrayBuilder sentences = Json.createArrayBuilder();
-    for (CoreMap sentence : document.annotation.get(SentencesAnnotation.class)) {
-      sentences.add(getSentenceArray(sentence.get(CoreAnnotations.TokensAnnotation.class)));
-    }
 
     JsonObjectBuilder mentions = Json.createObjectBuilder();
     for (Mention m : document.predictedMentionsByID.values()) {
@@ -102,6 +91,11 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
       String depRelation = relation == null ? "no-parent" : relation.getRelation().toString();
       String depParent = relation == null ? "<missing>" : relation.getSource().word();
 
+      JsonArrayBuilder sentenceBuilder = Json.createArrayBuilder();
+      m.sentenceWords.stream().map(CoreLabel::word)
+          .map(w -> w.equals("/.") ? "." : w)
+          .map(w -> w.equals("/?") ? "?" : w)
+          .forEach(sentenceBuilder::add);
       mentions.add(String.valueOf(m.mentionNum), Json.createObjectBuilder()
           .add("doc_id", id)
           .add("mention_id", m.mentionID)
@@ -113,7 +107,7 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
           .add("mention_type", m.mentionType.toString())
           .add("dep_relation", depRelation)
           .add("dep_parent", depParent)
-          .add("sentence", getSentenceArray(m.sentenceWords))
+          .add("sentence", sentenceBuilder.build())
           .add("contained-in-other-mention", mentionsByHeadIndex.get(m.headIndex).stream()
               .anyMatch(m2 -> m != m2 && m.insideIn(m2)) ? 1 : 0)
           .build());
@@ -144,7 +138,6 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
     }
 
     JsonObject docData = Json.createObjectBuilder()
-        .add("sentences", sentences.build())
         .add("mentions", mentions.build())
         .add("labels", labels.build())
         .add("pair_feature_names", featureNames.build())
@@ -158,15 +151,6 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
   public void finish() throws Exception {
     dataWriter.close();
     goldClusterWriter.close();
-  }
-
-  private static JsonArray getSentenceArray(List<CoreLabel> sentence) {
-    JsonArrayBuilder sentenceBuilder = Json.createArrayBuilder();
-    sentence.stream().map(CoreLabel::word)
-      .map(w -> w.equals("/.") ? "." : w)
-      .map(w -> w.equals("/?") ? "?" : w)
-      .forEach(sentenceBuilder::add);
-    return sentenceBuilder.build();
   }
 
   public static void exportData(String outputPath, Dataset dataset, Properties props,

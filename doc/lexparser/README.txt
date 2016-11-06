@@ -182,7 +182,7 @@ cross-linguistically valid representation. Note that some constructs such as pre
 phrases are now analyzed differently and that the set of relations was updated. Please 
 look at the Universal Dependencies documentation for more information:
 
-      http://www.universaldependencies.org
+      http://universaldependencies.github.io/docs/
 
 The parser also still supports the original Stanford Dependencies representation 
 as described in the StanfordDependenciesManual.pdf. Use the flag

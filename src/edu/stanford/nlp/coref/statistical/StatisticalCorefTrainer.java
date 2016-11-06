@@ -78,7 +78,7 @@ public class StatisticalCorefTrainer {
   private static void preprocess(Properties props, Dictionaries dictionaries, boolean isTrainSet)
       throws Exception {
     (isTrainSet ? new DatasetBuilder(StatisticalCorefProperties.minClassImbalance(props),
-        StatisticalCorefProperties.maxTrainExamplesPerDocument(props)) :
+        StatisticalCorefProperties.minTrainExamplesPerDocument(props)) :
           new DatasetBuilder()).runFromScratch(props, dictionaries);
     new MetadataWriter(isTrainSet).runFromScratch(props, dictionaries);
     new FeatureExtractorRunner(props, dictionaries).runFromScratch(props, dictionaries);
@@ -117,18 +117,7 @@ public class StatisticalCorefTrainer {
     new Clusterer().doTraining(CLUSTERING_MODEL_NAME);
   }
 
-  /**
-   * Run the training. Main options:
-   * <ul>
-   *   <li>-coref.data: location of training data (CoNLL format)</li>
-   *   <li>-coref.statistical.trainingPath: where to write trained models and temporary files</li>
-   *   <li>-coref.statistical.minClassImbalance: use this to downsample negative examples to
-   *   speed up and reduce the memory footprint of training</li>
-   *   <li>-coref.statistical.maxTrainExamplesPerDocument: use this to downsample examples from the
-   *   same document speed up and reduce the memory footprint training</li>
-   * </ul>
-   */
   public static void main(String[] args) throws Exception {
-    doTraining(StringUtils.argsToProperties(args));
+    doTraining(StringUtils.argsToProperties(new String[] {"-props", args[0]}));
   }
 }

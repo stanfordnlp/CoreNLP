@@ -1,24 +1,34 @@
 package edu.stanford.nlp.trees;
 
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.Serializable;
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Predicate;
+import java.util.function.Function;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.AbstractCoreLabel;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.AbstractCoreLabel;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.WhitespaceTokenizer;
+import edu.stanford.nlp.trees.international.pennchinese.CTBErrorCorrectingTreeNormalizer;
 import edu.stanford.nlp.trees.ud.EnhancementOptions;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -709,7 +719,7 @@ public abstract class GrammaticalStructure implements Serializable  {
       sortedLabels = labels;
     } else {
       sortedLabels = new ArrayList<>(labels);
-      Collections.sort(sortedLabels, new NameComparator<>());
+      Collections.sort(sortedLabels, new NameComparator<GrammaticalRelation>());
     }
     // log.info(" gov " + govH + " dep " + depH + " arc labels: " + sortedLabels);
 
@@ -1050,7 +1060,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   // Note that these field constants are 0-based whereas much documentation is 1-based
 
   public static final int CoNLLX_WordField = 1;
-  public static final int CoNLLX_POSField = 4;
+  public static final int CoNLLX_POSField = 3;
   public static final int CoNLLX_GovField = 6;
   public static final int CoNLLX_RelnField = 7;
 
@@ -1089,7 +1099,8 @@ public abstract class GrammaticalStructure implements Serializable  {
     return gsList;
   }
 
-  public static GrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields,
+  public static GrammaticalStructure
+  buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields,
                                 Map<String, GrammaticalRelation> shortNameToGRel,
                                 GrammaticalStructureFromDependenciesFactory factory) {
     List<IndexedWord> tgWords = new ArrayList<>(tokenFields.size());
@@ -1144,9 +1155,8 @@ public abstract class GrammaticalStructure implements Serializable  {
     IndexedWord dependencyRoot = new IndexedWord(rootLabel);
     for (int i = 0; i < tgWords.size(); i++) {
       String parentIdStr = tokenFields.get(i).get(CoNLLX_GovField);
-      if (StringUtils.isNullOrEmpty(parentIdStr)) {
+      if (parentIdStr == null || parentIdStr.equals(""))
         continue;
-      }
       int parentId = Integer.parseInt(parentIdStr) - 1;
       String grelString = tokenFields.get(i).get(CoNLLX_RelnField);
       if (grelString.equals("null") || grelString.equals("erased"))
@@ -1181,7 +1191,7 @@ public abstract class GrammaticalStructure implements Serializable  {
 
 
 
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     /* Language-specific default properties. The default
      * options produce English Universal dependencies.
      * This should be overwritten in every subclass.

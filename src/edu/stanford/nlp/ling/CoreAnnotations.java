@@ -1831,17 +1831,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * used in ParagraphAnnotator.
-   * to store paragraph information.
-   */
-  public static class ParagraphIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
    * used in dcoref.
    * to store premarked entity mentions.
    */

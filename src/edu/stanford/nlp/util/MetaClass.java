@@ -9,8 +9,6 @@ import edu.stanford.nlp.trees.Tree;
 
 import java.io.*;
 import java.lang.reflect.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -514,10 +512,6 @@ public class MetaClass {
       } catch (NumberFormatException e) {
         return (E) new Integer((int) Double.parseDouble(value));
       }
-    }else if(BigInteger.class.isAssignableFrom(clazz)) {
-      //(case: biginteger)
-      if(value == null){ return (E) BigInteger.ZERO; }
-      return (E) new BigInteger(value);
     }else if(Long.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz)){
       //(case: long)
       try {
@@ -533,10 +527,6 @@ public class MetaClass {
       //(case: double)
       if(value == null){ return (E) new Double(Double.NaN); }
       return (E) new Double(Double.parseDouble(value));
-    }else if(BigDecimal.class.isAssignableFrom(clazz)) {
-      //(case: bigdecimal)
-      if(value == null){ return (E) BigDecimal.ZERO; }
-      return (E) new BigDecimal(value);
     }else if(Short.class.isAssignableFrom(clazz) || short.class.isAssignableFrom(clazz)){
       //(case: short)
       try {

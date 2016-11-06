@@ -12,10 +12,6 @@ import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
-/**
- * Evaluates the accuracy of mention detection.
- * @author Kevin Clark
- */
 public class MentionDetectionEvaluator implements CorefDocumentProcessor {
   private static Redwood.RedwoodChannels log = Redwood.channels(MentionDetectionEvaluator.class);
   private int correctSystemMentions = 0;
@@ -34,13 +30,10 @@ public class MentionDetectionEvaluator implements CorefDocumentProcessor {
     }
     systemMentions += document.predictedMentionsByID.size();
 
-    double precision = correctSystemMentions / (double) systemMentions;
-    double recall = correctSystemMentions / (double) goldMentions;
     log.info("Precision: " + correctSystemMentions + " / " + systemMentions + " = " +
-        String.format("%.4f", precision));
+        String.format("%.4f", correctSystemMentions / (double) systemMentions));
     log.info("Recall: " + correctSystemMentions + " / " + goldMentions + " = " +
-        String.format("%.4f", recall));
-    log.info(String.format("F1: %.4f", 2 * precision * recall / (precision + recall)));
+        String.format("%.4f", correctSystemMentions / (double) goldMentions));
   }
 
   @Override

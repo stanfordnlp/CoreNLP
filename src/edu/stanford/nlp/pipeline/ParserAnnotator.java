@@ -195,7 +195,7 @@ public class ParserAnnotator extends SentenceAnnotator  {
     return os.toString();
   }
 
-  private static String[] convertFlagsToArray(String parserFlags) {
+  public static String[] convertFlagsToArray(String parserFlags) {
     if (parserFlags == null || parserFlags.trim().isEmpty()) {
       return StringUtils.EMPTY_STRING_ARRAY;
     } else {

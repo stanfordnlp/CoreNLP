@@ -21,32 +21,29 @@
 # Make sure that this user can authbind to port 80!
 #
 SERVER_USER="nlp"
-CORENLP_DIR="/opt/corenlp"
-
 
 do_start()
 {
-  if [ -e "$CORENLP_DIR/corenlp.shutdown" ]; then
+  if [ -e '/tmp/corenlp.shutdown' ]; then
     echo "CoreNLP server is already running!"
     echo "If you are sure this is a mistake, delete the file:"
-    echo "$CORENLP_DIR/corenlp.shutdown"
+    echo "/tmp/corenlp.shutdown"
   else
     export CLASSPATH=""
-    for JAR in `find "$CORENLP_DIR" -name "*.jar"`; do
+    for JAR in `find /opt/corenlp -name "*.jar"`; do
       CLASSPATH="$CLASSPATH:$JAR"
     done
-    nohup su "$SERVER_USER" -c "/usr/local/bin/authbind --deep java -Djava.net.preferIPv4Stack=true -Djava.io.tmpdir="$CORENLP_DIR" -cp "$CLASSPATH" -mx15g edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 80" \
-      > "$CORENLP_DIR/stdout.log" 2> "$CORENLP_DIR/stderr.log" &
+    nohup su "$SERVER_USER" -c "/usr/local/bin/authbind --deep java -Djava.net.preferIPv4Stack=true -cp "$CLASSPATH" -mx7g edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 80" &
     echo "CoreNLP server started."
   fi  
 }
 
 do_stop() 
 {
-  if [ ! -e "$CORENLP_DIR/corenlp.shutdown" ]; then
+  if [ ! -e '/tmp/corenlp.shutdown' ]; then
     echo "CoreNLP server is not running"
   else
-    KEY=`cat "$CORENLP_DIR/corenlp.shutdown"`
+    KEY=`cat /tmp/corenlp.shutdown`
     curl "localhost/shutdown?key=$KEY"
     echo "CoreNLP server stopped"
   fi
