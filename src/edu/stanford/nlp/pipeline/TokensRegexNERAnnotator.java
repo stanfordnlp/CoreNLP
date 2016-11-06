@@ -170,7 +170,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
   public static final String DEFAULT_BACKGROUND_SYMBOL = SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC";
 
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{
-          new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "Comma separated list of mapping files to use."),
+          new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "List of mapping files to use, separated by commas or semi-colons."),
           new PropertiesUtils.Property("mapping.header", defaultHeader, "Comma separated list specifying order of fields in the mapping file"),
           new PropertiesUtils.Property("mapping.field.<fieldname>", "", "Class mapping for annotation fields other than ner"),
           new PropertiesUtils.Property("commonWords", "", "Comma separated list of files for common words to not annotate (in case your mapping isn't very clean)"),
@@ -376,7 +376,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
     return TokenSequencePattern.getMultiPatternMatcher(patterns);
   }
 
-  private void annotateMatched(List<CoreLabel> tokens) {
+  public void annotateMatched(List<CoreLabel> tokens) {
     List<SequenceMatchResult<CoreMap>> matched = multiPatternMatcher.findNonOverlapping(tokens);
     for (SequenceMatchResult<CoreMap> m:matched) {
       Entry entry = patternToEntry.get(m.pattern());
@@ -784,6 +784,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
     return false;
   }
 
+  // todo [cdm 2016]: This logic seems wrong. If you have semi-colons only between files, it doesn't work!
   private static String[] processListMappingFiles(String mappingFiles) {
     if (mappingFiles.contains(";") && mappingFiles.contains(",")) {
       return SEMICOLON_DELIMITERS_PATTERN.split(mappingFiles);

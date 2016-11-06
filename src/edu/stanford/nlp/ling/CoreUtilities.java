@@ -13,7 +13,7 @@ public class CoreUtilities {
   /**
    * Pieces a List of CoreMaps back together using
    * word and setting a white space between each word
-   * TODO: remove this (listToString does the same thing)
+   * TODO: remove this (SentenceUtils.listToString does the same thing - why 2 separate classes)
    */
   public static String toSentence(List<? extends CoreMap> sentence) {
     StringBuilder text = new StringBuilder();
@@ -21,7 +21,7 @@ public class CoreUtilities {
       CoreMap iw = sentence.get(i);
       text.append(iw.get(CoreAnnotations.TextAnnotation.class));
       if (i < sz - 1) {
-        text.append(" ");
+        text.append(' ');
       }
     }
     return text.toString();
@@ -38,6 +38,16 @@ public class CoreUtilities {
 
   public static List<CoreLabel> toCoreLabelList(String... words) {
     List<CoreLabel> tokens = new ArrayList<>(words.length);
+    for (String word : words) {
+      CoreLabel cl = new CoreLabel();
+      cl.setWord(word);
+      tokens.add(cl);
+    }
+    return tokens;
+  }
+
+  public static List<CoreLabel> toCoreLabelList(List<String> words) {
+    List<CoreLabel> tokens = new ArrayList<>(words.size());
     for (String word : words) {
       CoreLabel cl = new CoreLabel();
       cl.setWord(word);
