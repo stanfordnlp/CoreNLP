@@ -11,7 +11,7 @@ Below are interfaces and packages for running Stanford CoreNLP from other langua
 
 ### Clojure
 
-* [Clojure wrapper for CoreNLP](https://github.com/gilesc/stanford-corenlp) by Cory Giles. Incomplete. Currently only a parser wrapper.
+* [Clojure wrapper for CoreNLP](https://github.com/damienstanton/stanford-corenlp) by Cory Giles, Hans Engel, and Damien Stanton. Incomplete. Currently only a tagger and parser.
 * [Clojure wrapper for CoreNLP](https://github.com/ngrunwald/stanford-nlp-tools)
 by Nils Gruenwald. Incomplete. Currently only wraps tagger and TokensRegex.
 
