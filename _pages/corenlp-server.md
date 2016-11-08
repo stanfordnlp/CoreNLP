@@ -270,4 +270,17 @@ Well, I guess they're documented now:
 
   * Hitting `Shift+Enter` on any input field in the web demo (e.g., the main text input) is equivalent to clicking the `Submit` (or `Match`) button. Furthermore, if the input is empty, it will fill itself with a default input. Useful if – to take a purely hypothetical example – you're developing the web server and don't want to re-type the same sentence everytime you re-load the website.
 
+### Using the Server in a Shell Script
 
+When booting up an instance of the server for a shell script, make sure you wait for the server to be available before interacting with it. An example using the `netcat` tool on linux:
+
+```bash
+#!/bin/bash
+java -mx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer &
+# Wait until server starts
+while ! nc -z localhost 9000; do
+    sleep 0.1 # wait for 1/10 of the second before check again
+done
+# Rest of script
+# ...
+```
