@@ -8,7 +8,7 @@ permalink: '/dependencies.html'
 | --- | --- | --- |
 | [tokenize](tokenize.html) | TokenizerAnnotator | None |
 | [cleanxml](cleanxml.html) | CleanXmlAnnotator | `tokenize` |
-| [ssplit](ssplit.html) | WordToSentenceAnnotator | `tokenize` |
+| [ssplit](ssplit.html) | WordsToSentenceAnnotator | `tokenize` |
 | [pos](pos.html) | POSTaggerAnnotator | `tokenize, ssplit` |
 | [lemma](lemma.html) | MorphaAnnotator | `tokenize, ssplit, pos` |
 | [ner](ner.html) | NERClassifierCombiner | `tokenize, ssplit, pos, lemma`  |
