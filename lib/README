@@ -339,8 +339,7 @@ VERSION: 2.6.1
 RELEASE DATE: Oct 2014
 SOURCE AVAILABLE: yes
 DESCRIPTION: Google's protocol buffer library
-URL: https://developers.google.com/protocol-bu
-ffers/
+URL: https://developers.google.com/protocol-buffers/
 USED BY: CoreMapProtos (and associated serializers)
 LAST UPDATE: 2015-09-07
 LAST UPDATE BY: Sebastian Schuster
