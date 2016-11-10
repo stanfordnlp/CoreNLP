@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
@@ -16,6 +17,7 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
+import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
@@ -300,6 +302,17 @@ public class ParserAnnotator extends SentenceAnnotator  {
       Trees.convertToCoreLabels(binarized);
       sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);
     }
+
+    // for some reason in some corner cases nodes aren't having sentenceIndex set
+    // do a pass and make sure all nodes have sentenceIndex set
+    SemanticGraph sg = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+    for (IndexedWord iw : sg.vertexSet()) {
+      if (iw.get(CoreAnnotations.SentenceIndexAnnotation.class) == null) {
+        System.out.println("found vertex with null index!");
+        iw.setSentIndex(sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
+      }
+    }
+
   }
 
   private List<Tree> doOneSentence(List<ParserConstraint> constraints,

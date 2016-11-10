@@ -74,6 +74,9 @@ public class KBPAnnotator implements Annotator {
    */
   //private final TokensRegexNERAnnotator caselessNER;
 
+  /** maximum length sentence to run on **/
+  private final int maxLength;
+
 
   /**
    * Create a new KBP annotator from the given properties.
@@ -102,6 +105,8 @@ public class KBPAnnotator implements Annotator {
           new KBPSemgrexExtractor(semgrexdir),
           statisticalExtractor
       );
+      // maximum length of sentence to operate on
+      maxLength = Integer.parseInt(props.getProperty("kbp.maxlen", "-1"));
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
@@ -354,7 +359,15 @@ public class KBPAnnotator implements Annotator {
     for (int sentenceI = 0; sentenceI < mentionsBySentence.length; ++sentenceI) {
       List<RelationTriple> triples = new ArrayList<>();  // the annotations
       List<CoreMap> candidates = mentionsBySentence[sentenceI];
+      // determine sentence length
+      int sentenceLength =
+              annotation.get(CoreAnnotations.SentencesAnnotation.class)
+                      .get(sentenceI).get(CoreAnnotations.TokensAnnotation.class).size();
       for (int subjI = 0; subjI < candidates.size(); ++subjI) {
+        // don't operate on this sentence if its too long
+        if (maxLength != -1 && sentenceLength > maxLength) {
+          break;
+        }
         CoreMap subj = candidates.get(subjI);
         int subjBegin = subj.get(CoreAnnotations.TokensAnnotation.class).get(0).index() - 1;
         int subjEnd = subj.get(CoreAnnotations.TokensAnnotation.class).get(subj.get(CoreAnnotations.TokensAnnotation.class).size() - 1).index();
