@@ -307,8 +307,9 @@ public class ParserAnnotator extends SentenceAnnotator  {
     // do a pass and make sure all nodes have sentenceIndex set
     SemanticGraph sg = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
     for (IndexedWord iw : sg.vertexSet()) {
-      if (iw.get(CoreAnnotations.SentenceIndexAnnotation.class) == null) {
-        System.out.println("found vertex with null index!");
+      if (iw.get(CoreAnnotations.SentenceIndexAnnotation.class) == null
+              && sentence.get(CoreAnnotations.SentenceIndexAnnotation.class) != null) {
+        //System.out.println("found vertex with null index!");
         iw.setSentIndex(sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
       }
     }
