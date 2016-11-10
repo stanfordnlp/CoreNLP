@@ -202,9 +202,11 @@ public class EntityMentionsAnnotator implements Annotator {
             // ... and actually are an acronym
             if (AcronymMatcher.isAcronym(token.word(), org)) {
               // ... and add them.
+              System.out.println("found ACRONYM ORG");
               token.setNER("ORGANIZATION");
               CoreMap chunk = ChunkAnnotationUtils.getAnnotatedChunk(tokens,
                   i, i + 1, totalTokensOffset, null, null, null);
+              chunk.set(CoreAnnotations.NamedEntityTagAnnotation.class,"ORGANIZATION");
               mentions.add(chunk);
 
             }
