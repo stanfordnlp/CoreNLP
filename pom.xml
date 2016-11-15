@@ -14,8 +14,8 @@
     </license>
   </licenses>
   <scm>
-    <url>http://nlp.stanford.edu/software/stanford-corenlp-2016-10-30.zip</url>
-    <connection>http://nlp.stanford.edu/software/stanford-corenlp-2016-10-30.zip</connection>
+    <url>http://nlp.stanford.edu/software/stanford-corenlp-2016-10-31.zip</url>
+    <connection>http://nlp.stanford.edu/software/stanford-corenlp-2016-10-31.zip</connection>
   </scm>
   <developers>
     <developer>
@@ -118,6 +118,35 @@
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <version>2.6.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.pholser</groupId>
+      <artifactId>junit-quickcheck-core</artifactId>
+      <version>0.5</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.pholser</groupId>
+      <artifactId>junit-quickcheck-generators</artifactId>
+      <version>0.5</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.stanford.nlp</groupId>
+      <artifactId>stanford-corenlp</artifactId>
+      <version>3.7.0</version>
+      <classifier>models-spanish</classifier>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
