@@ -11,7 +11,7 @@ Several times a year we distribute a new version of the software, which correspo
 
 During the time between releases, one can always use the latest, under development version of our code.
 
-Here are some helfpul instructions to use the latest code:
+Here are some helpful instructions to use the latest code:
 
 ## build with Ant
 
