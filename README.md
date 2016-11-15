@@ -20,8 +20,7 @@ Here are some helpful instructions to use the latest code:
 3. Then run this command to build a jar with the latest version of the code: `cd CoreNLP/classes ; jar -cf ../stanford-corenlp.jar edu`
 4. This will create a new jar called stanford-corenlp.jar in the CoreNLP folder which contains the latest code
 5. The dependencies that work with the latest code are in CoreNLP/lib and CoreNLP/liblocal, so make sure to include those in your CLASSPATH.
-6. Also make sure to download the latest versions of the [corenlp-models](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar), 
-and [english-models](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar), and include them in your CLASSPATH.  If you
+6. When using the latest version of the code make sure to download the latest versions of the [corenlp-models](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar), and [english-models](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar), and include them in your CLASSPATH.  If you
 are processing languages other than English, make sure to download the latest version of the models jar for the language you are interested in.
 
 #### build with Maven
@@ -30,6 +29,11 @@ are processing languages other than English, make sure to download the latest ve
 2. To get the tests to pass, you will need to install the latest version of the Spanish models jar.  You can download the jar from [here](http://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar).  Then run this command (replace "/location/of" with the path on your machine).
 `mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=3.7.0 -Dclassifier=models-spanish -Dpackaging=jar` 
 3. If you run this command in the CoreNLP directory: `mvn package` , it should run the tests and build this jar file: `CoreNLP/target/stanford-corenlp-3.7.0.jar`
+4. When using the latest version of the code make sure to download the latest versions of the [corenlp-models](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar), and [english-models](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar), and include them in your CLASSPATH.  If you
+are processing languages other than English, make sure to download the latest version of the models jar for the language you are interested in.  You can adapt
+the command above for installing the Spanish models to install the latest versions of the models into Maven if you want to run Stanford CoreNLP as part of a Maven project, just change the location of the file and the classifier (e.g. use "/location/of/stanford-french-corenlp-models-current.jar" and "models-french" instead).  To use the
+standard models jar, set classifier=models.
+
 
 You can find releases of Stanford CoreNLP on [Maven Central](http://search.maven.org/#browse%7C11864822).
 
