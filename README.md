@@ -35,7 +35,7 @@ the command above for installing the Spanish models to install the latest versio
 standard models jar, set classifier=models.
 
 
-You can find releases of Stanford CoreNLP on [Maven Central](http://search.maven.org/#browse%7C11864822).
+You can find releases of Stanford CoreNLP on [Maven Central](http://search.maven.org/#artifactdetails%7Cedu.stanford.nlp%7Cstanford-corenlp%7C3.6.0%7Cjar).
 
 You can find more explanation and documentation on [the Stanford CoreNLP homepage](http://nlp.stanford.edu/software/corenlp.shtml#Demo).
 
