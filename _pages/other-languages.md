@@ -20,7 +20,10 @@ by Nils Gruenwald. Incomplete. Currently only wraps tagger and TokensRegex.
 Okay, Docker isn't a language, but you know what we mean….
 
 * [corenlp-docker](https://hub.docker.com/r/motiz88/corenlp/) A Dockerfile for Stanford CoreNLP Server by motiz88.
-* [corenlp-docker](https://github.com/chilland/corenlp-docker) Another by chilland
+* [corenlp-docker](https://github.com/chilland/corenlp-docker) Another by chilland.
+* [corenlp-zmq](https://github.com/twneale/corenlp-zmq) By twneale. As the name says, this one has a ZMQ broker front end.
+* [corenlp-server](https://github.com/hotpxl/corenlp-server) Another by hotpxl.
+* [corenlp-docker](https://github.com/vzhong/corenlp-docker) And another by vzhong, a Stanford NLP graduate.
 
 ### Java
 
