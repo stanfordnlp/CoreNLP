@@ -1,12 +1,12 @@
 ---
-title: CorefAnnotator 
+title: CorefAnnotator
 keywords: coref
 permalink: '/coref.html'
 ---
 
 ## Description
 
-Implements both pronominal and nominal coreference resolution. The entire coreference graph (with head words of mentions as nodes) is saved as a CorefChainAnnotation. 
+Implements both pronominal and nominal coreference resolution. The entire coreference graph (with head words of mentions as nodes) is saved as a CorefChainAnnotation.
 
 ## Overview
 There are three different coreference systems available in CoreNLP.
@@ -24,7 +24,7 @@ The following table gives an overview of the system performances.
 * The speed measurements show the average time for processing a document in the CoNLL 2012 test set using a 2013 Macbook Pro with a 2.4 GHz Intel Core i7 processor. Preprocessing speed measures the time required for POS tagging, syntax parsing, mention detection, etc. while coref speed refers to the time spent by the coreference system.
 
 
-| System | Language | Preprocessing Speed | Coref Speed | Total Speed | F1 Score | 
+| System | Language | Preprocessing Time | Coref Time | Total Time | F1 Score |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Deterministic | English | 3.87s | 0.11s | 3.98s | 49.5 |
 | Statistical | English | 0.48s | 1.23s | 1.71s | 56.2 |
@@ -130,6 +130,24 @@ The CoNLL 2012 coreference data differs from the normal coreference use case in 
 * There are document genre annotations.
 
 Because of this, we train models with a few extra features for running on this dataset. We configure these models for accuracy over speed (e.g., by not having a maximum mention distance for the mention-ranking models). These models can be run using the -conll properties files (e.g., neural-english-conll.properties). Note that the ConLL-specific models for English are in the [English models jar](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar), not the default CoreNLP models jar.
+
+## Training New Models
+
+### Statistical System
+Training a statistical model on the CoNLL data can be done with the following command:
+
+```bash
+java -Xmx60g -cp stanford-corenlp-3.7.0.jar:stanford-english-corenlp-models-3.7.0.jar:* edu.stanford.nlp.coref.statistical.StatisticalCorefTrainer -props <properties-file>
+```
+
+See [here](https://github.com/stanfordnlp/CoreNLP/blob/master/src/edu/stanford/nlp/coref/statistical/properties/english-conll-training.properties) for an example properties file. Training over the full CoNLL 2012 training set requires a large amount of memory. To reduce the memory footprint and runtime of training, the following options can be added to the properties file:
+
+* **coref.statistical.minClassImbalance**: Use this to downsample negative examples from each document. A value less than 0.05 is recommended.
+
+* **coref.statisical.maxTrainExamplesPerDocument**:  Use this to downsample examples from larger documents. A value larger than 1000 is recommended.
+
+### Neural System
+The code for training the neural coreference system is implemented in python. It is available on github [here](https://github.com/clarkkev/deep-coref).
 
 
 ## Citing Stanford Coreference
