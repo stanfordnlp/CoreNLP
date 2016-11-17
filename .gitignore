@@ -6,3 +6,5 @@
 *.so
 .DS_Store
 .settings/**
+build
+.gradle
