@@ -89,7 +89,7 @@ public class StatisticalCorefTrainer {
     Dictionaries dictionaries = new Dictionaries(props);
 
     setDataPath("train");
-    wordCountsFile = "train/word_counts.ser";
+    wordCountsFile = trainingPath + "train/word_counts.ser";
     CorefProperties.setInput(props, Dataset.TRAIN);
     preprocess(props, dictionaries, true);
 
