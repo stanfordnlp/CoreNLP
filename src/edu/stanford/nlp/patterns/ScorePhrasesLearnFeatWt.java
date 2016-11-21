@@ -261,9 +261,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       if(simsAvgMaxAllLabels == null)
         simsAvgMaxAllLabels = new HashMap<>();
       double[] simsAvgMax = simsAvgMaxAllLabels.get(label);
-      if(simsAvgMax == null) {
+      if (simsAvgMax == null) {
         simsAvgMax = new double[Similarities.values().length];
-        Arrays.fill(simsAvgMax, 0);
+        // Arrays.fill(simsAvgMax, 0); // not needed; Java arrays zero initialized
       }
 
       if(wordVectors.containsKey(p.getPhrase()) && (! ignoreWordRegex || !PatternFactory.ignoreWordRegex.matcher(p.getPhrase()).matches())){
