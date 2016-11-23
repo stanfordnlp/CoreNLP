@@ -6,7 +6,7 @@ permalink: '/regexner.html'
 
 ## Description
 
-Implements a simple, rule-based NER over token sequences using Java regular expressions. The goal of this Annotator is to provide a simple framework to incorporate NE labels that are not annotated in traditional NL corpora. For example, the default list of regular expressions that we distribute in the models file recognizes ideologies (IDEOLOGY), nationalities (NATIONALITY), religions (RELIGION), and titles (TITLE). Here is [a simple example](http://nlp.stanford.edu/software/regexner/) of how to use RegexNER. For more complex applications, you might consider [TokensRegex](http://nlp.stanford.edu/software/tokensregex.shtml).
+RegexNER Implements a simple, rule-based NER system over token sequences using an extension of Java regular expressions. The original goal of this Annotator was to provide a simple framework to incorporate named entities and named entity labels that are not annotated in traditional NER corpora, and hence not recoginized by our statistical NER classifiers. For example, the default list of regular expressions that we distribute in the models file recognizes ideologies (IDEOLOGY), nationalities (NATIONALITY), religions (RELIGION), and job titles (TITLE). However, you can also use this annotator to simply do rule-based NER. Here is [a simple example](http://nlp.stanford.edu/software/regexner/) of how to use RegexNER. For more complex applications, you might consider using [TokensRegex](http://nlp.stanford.edu/software/tokensregex.shtml) directly.
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
@@ -14,22 +14,22 @@ Implements a simple, rule-based NER over token sequences using Java regular expr
 
 ## Options
 
-| Field | Description |
+| Option name | Type | Default | Description |
 | --- | --- |
-| `regexner.ignoreCase` | If `true`, case is ignored. Default: `false` |
-| `regexner.mapping` | Comma separated list of mapping files to use.  Each mapping file is a <b>tab</b> delimited file. Default: `edu/stanford/nlp/models/regexner/type_map_clean` |
-| `regexner.mapping.header` | Comma separated list of header fields (or `true` if header is specified in the mapping file). Default: `pattern,ner,overwrite,priority,group` |
-| `regexner.mapping.field.<fieldname>` | Class mapping for annotation fields other than ner. |
-| `regexner.commonWords` | Comma separated list of files for common words to not annotate (in case your mapping isn't very clean).  |
-| `regexner.backgroundSymbol` | Comma separated list of NER labels to always replace.  Default: `O,MISC` |
-| `regexner.posmatchtype` | How should `validpospattern` be used to match the POS of the tokens. `MATCH_ALL_TOKENS` - All tokens has to match.<br/> `MATCH_AT_LEAST_ONE_TOKEN` - At least one token has to match.<br/> `MATCH_ONE_TOKEN_PHRASE_ONLY` - Only has to match for one token phrases. Default: `MATCH_AT_LEAST_ONE_TOKEN` |
-| `regexner.validpospattern` | Regular expression pattern for matching POS tags. |
-| `regexner.noDefaultOverwriteLabels` | Comma separated list of output types for which default NER labels are not overwritten.  For these types, only if the matched expression has NER type matching the specified `overwriteableType` for the regex will the NER type be overwritten. |
-| `regexner.verbose` | If `true`, turns on extra debugging messages. Default: `false` |
+| `regexner.ignoreCase` | boolean | `false` |  If `true`, case is ignored for all patterns in all files. |
+| `regexner.mapping` | String | `edu/stanford/nlp/models/regexner/type_map_clean` | Comma separated list of mapping files to use.  Each mapping file is a <b>tab</b>-delimited file. |
+| `regexner.mapping.header` | String |`pattern,ner,overwrite,priority,group` | Comma separated list of header fields (or `true` if header is specified in the mapping file). |
+| `regexner.mapping.field.<fieldname>` | String | null | Class name for CoreLabel key for annotation fields other than NER. |
+| `regexner.commonWords` | String | null | Comma separated list of files for common words to not annotate (in case your mapping isn't very clean).  |
+| `regexner.backgroundSymbol` | String | O,MISC | Comma separated list of NER labels that can always be replaced. |
+| `regexner.posmatchtype` | enum | `MATCH_AT_LEAST_ONE_TOKEN` | How should `validpospattern` be used to match the POS of the tokens. <br/>`MATCH_ALL_TOKENS` - All tokens have to match. <br/> `MATCH_AT_LEAST_ONE_TOKEN` - At least one token has to match.<br/> `MATCH_ONE_TOKEN_PHRASE_ONLY` - Only has to match for one token phrases. |
+| `regexner.validpospattern` | regex | null | Regular expression pattern for matching POS tags. |
+| `regexner.noDefaultOverwriteLabels` | String | null | Comma-separated list of output types for which default NER labels are not overwritten. For  these types, only if the matched expression has an NER type matching the specified `overwriteableType` for the regex will the NER type be overwritten. |
+| `regexner.verbose` | boolean | `false` | If `true`, turns on extra debugging messages. |
 
 ## Mapping files
 
-The mapping file is a <b>tab</b> delimited file.
+The mapping file is a **tab**-delimited file.
 
 The format of the default mapping file used by RegexNER is described in more detail on the Stanford NLP [website](http://nlp.stanford.edu/software/regexner/).
 

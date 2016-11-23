@@ -4,14 +4,17 @@ keywords: faq
 permalink: '/faq.html'
 ---
 
-## CoreNLP stops with a FileNotFoundException or after failing to find a class.  How do I fix this?
+## CoreNLP stops with a FileNotFoundException, RuntimeIOException, or after failing to find a class or data file.  How do I fix this?
 
 The most likely cause of these errors is that one or more of the
 important jar files is missing.  If it occurs when loading the models,
-make sure the current models file is in the classpath.  If you
-encounter this exception when trying to use the xml output, make sure
-xom.jar is included.  Finally, if it seems to occur when loading
-sutime, be sure to include joda-time.jar etc.
+make sure the current models file is in the classpath. The basic
+models file has a name like `stanford-corenlp-V.V.V-models.jar`,
+depending on the version. For other language models, you may also need
+additional models jars, which will have the language name in them. If you
+encounter this exception when trying to produce XML output, make sure
+`xom.jar` is included.  Finally, if it seems to occur when loading
+SUTime, be sure to include `joda-time.jar`, etc.
 
 Basically, you want to include all of the jar files in the download
 directory unless you are sure a particular jar is not needed.

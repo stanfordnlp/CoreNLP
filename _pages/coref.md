@@ -1,118 +1,70 @@
 ---
-title: CorefAnnotator 
+title: CorefAnnotator
 keywords: coref
 permalink: '/coref.html'
 ---
 
 ## Description
 
-Implements both pronominal and nominal coreference resolution. The entire coreference graph (with head words of mentions as nodes) is saved in CorefChainAnnotation. 
-Note: there are currently two annotators that perform coreference: dcoref and coref.  Long term the plan is to merge dcoref and coref into one annotator.
-
-| Property name | Annotator class name | Generated Annotation |
-| --- | --- | --- |
-| dcoref | DeterministicCorefAnnotator | CorefChainAnnotation | 
-| coref | CorefAnnotator              | CorefChainAnnotation |
-
-## Options
-
-* coref.doClustering: if using statistical mode, use clustering algorithm for coreference ; clustering is slower but more accurate
-* coref.md.type: determine which mention detector to use: rule, dependency, or hybrid
-* coref.mode: determine which coreference system to use: statistical or hybrid
-* dcoref.sievePasses: list of sieve modules to enable in the system, specified as a comma-separated list of class names. By default, this property is set to include: "edu.stanford.nlp.dcoref.sievepasses.MarkRole, edu.stanford.nlp.dcoref.sievepasses.DiscourseMatch, edu.stanford.nlp.dcoref.sievepasses.ExactStringMatch, edu.stanford.nlp.dcoref.sievepasses.RelaxedExactStringMatch, edu.stanford.nlp.dcoref.sievepasses.PreciseConstructs, edu.stanford.nlp.dcoref.sievepasses.StrictHeadMatch1, edu.stanford.nlp.dcoref.sievepasses.StrictHeadMatch2, edu.stanford.nlp.dcoref.sievepasses.StrictHeadMatch3, edu.stanford.nlp.dcoref.sievepasses.StrictHeadMatch4, edu.stanford.nlp.dcoref.sievepasses.RelaxedHeadMatch, edu.stanford.nlp.dcoref.sievepasses.PronounMatch".  The default value can be found in Constants.SIEVEPASSES.
-* dcoref.demonym: list of demonyms from <a href="http://en.wikipedia.org/wiki/List_of_adjectival_forms_of_place_names">http://en.wikipedia.org/wiki/List_of_adjectival_forms_of_place_names</a>. The format of this file is: location TAB singular gentilic form TAB plural gentilic form, e.g., "Algeria Algerian Algerians".
-* dcoref.animate and dcoref.inanimate: lists of animate/inanimate words, from (Ji and Lin, 2009). The format is one word per line.
-* dcoref.male, dcoref.female, dcoref.neutral: lists of words of male/female/neutral gender, from (Bergsma and Lin, 2006) and (Ji and Lin, 2009). The format is one word per line.
-* dcoref.plural and dcoref.singular: lists of words that are plural or singular, from (Bergsma and Lin, 2006). The format is one word per line. All the above dictionaries are already set to the files included in the stanford-corenlp-models JAR file, but they can easily be adjusted to your needs by setting these properties.
-* dcoref.maxdist: the maximum distance at which to look for mentions.  Can help keep the runtime down in long documents.
-* oldCorefFormat: produce a CorefGraphAnnotation, the output format used in releases v1.0.3 or earlier.  Note that this uses quadratic memory rather than linear.
+Implements both pronominal and nominal coreference resolution. The entire coreference graph (with head words of mentions as nodes) is saved as a CorefChainAnnotation.
 
 ## Overview
+There are three different coreference systems available in CoreNLP.
 
-There are several settings which can affect the speed and accuracy of coreference resolution.
-Some methods require both constituency and dependency parses, while others simply need the dependency parse.
-The following tables give an overview of some of the possibilities. 
+* **Deterministic:** Fast rule-based coreference resolution for English and Chinese.
 
-* the F1 scores are on the 2012 CoNLL evaluation data
-* the speed measurements were recorded on a 2014 Macbook Pro with a 2.5 GHz Intel Core i7 processor
+* **Statistical:** Machine-learning-based coreference resolution for English. Unlike the other systems, this one only requires dependency parses, which are faster to produce that constituency parses.
 
-| Annotator | Language | Coreference/MD Modes | Parse Requirements | F1 score |
+* **Neural:** Very accurate but slow neural-network-based coreference resolution for English and Chinese.
+
+The following table gives an overview of the system performances.
+
+* The F1 scores are on the [CoNLL 2012](http://conll.cemantix.org/2012/introduction.html) evaluation data. Numbers are lower than reported in the associated [papers](#citing-stanford-coreference) because these models are designed for general-purpose use, not getting a high CoNLL score (see [Running on CoNLL 2012](#running-on-conll-2012)).
+
+* The speed measurements show the average time for processing a document in the CoNLL 2012 test set using a 2013 Macbook Pro with a 2.4 GHz Intel Core i7 processor. Preprocessing speed measures the time required for POS tagging, syntax parsing, mention detection, etc. while coref speed refers to the time spent by the coreference system.
+
+
+| System | Language | Preprocessing Time | Coref Time | Total Time | F1 Score |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| coref | en | statistical/rule | constituency and dependency | 63.61 |
-| coref | en | statistical/dependency | dependency | 56.05 |
-| dcoref | en | N/A | constituency and dependency | 55.59 |
-| coref | zh | hybrid/rule | constituency and dependency | 63.21 |
+| Deterministic | English | 3.87s | 0.11s | 3.98s | 49.5 |
+| Statistical | English | 0.48s | 1.23s | 1.71s | 56.2 |
+| Neural | English | 3.22s | 4.96s | 8.18s | 60.0 |
+| Deterministic | Chinese | 0.39s | 0.16s | 0.55s | 47.5 |
+| Neural | Chinese | 0.42s | 7.02s | 7.44s | 53.9 |
 
-| Annotator | Language | Coreference/MD Modes | Parsing Speed | Coref Speed |
-| :--- | :--- | :--- | :--- | :--- |
-| coref | en | statistical/rule | 4.45 seconds per doc | 3.50 seconds per doc | 
-| coref | en | statistical/dependency | .049 seconds per doc | 1.03 seconds per doc |
-| dcoref | en | N/A | 4.45 seconds per doc | .123 seconds per doc |
-| coref | zh | hybrid/rule | 19.1 seconds per doc | .044 seconds per doc |
-
-## Having the appropriate parses
-
-Several settings for coreference require both constituency parses and dependency parses.
-
-You can add these to your pipeline by using the parse annotator.  Make sure you don't 
-put parse.buildgraphs=false, this will set the pipeline to not create dependencies.
-As long as you leave the default or set parse.buildgraphs=true it will work.
-
-Some settings just require dependency parses.  Two ways to add dependency parses are:
-
-* as above use the parse annotator and make sure parse.buildgraphs=true
-* use the depparse annotator
-
-
-## Usage
-
-### Command Line
-
-Run statistical coref to maximize F1 on the 2012 CoNLL data set
+## Command Line Usage
+There are example properties files for using the coreference systems in [edu/stanford/nlp/coref/properties](https://github.com/stanfordnlp/CoreNLP/tree/master/src/edu/stanford/nlp/coref/properties). The properties are named [system]-[language].properties. For example, to run the deterministic system on Chinese:
 
 ```bash
-java -Xmx5g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,mention,coref -file example_file.txt
+java -Xmx5g -cp stanford-corenlp-3.7.0.jar:stanford-chinese-corenlp-models-3.7.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -props edu/stanford/nlp/coref/properties/deterministic-chinese.properties -file example_file.txt
 ```
 
-Run statistical coref for maximum speed
+Alternatively, the properties can be set manually. For example, to run the neural system on English:
 
 ```bash
-java -Xmx5g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,depparse,mention,coref -file example_file.txt 
--coref.md.type dependency -coref.doClustering false 
+java -Xmx5g -cp stanford-corenlp-3.7.0.jar:stanford-corenlp-models-3.7.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,mention,coref -coref.algorithm neural -file example_file.txt
 ```
 
-Run deterministic coref (note this version requires significantly less RAM)
+See [here](#more-details) for further options.
 
-```bash
-java -Xmx3g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file example_file.txt
-```
+## API
 
-Run Chinese coref (requires [Chinese models jar](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2015-12-08-models.jar))
-
-```bash
-java -Xmx4g -cp stanford-corenlp-3.6.0.jar:stanford-chinese-corenlp-2015-12-08-models.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -file example_file.txt -props edu/stanford/nlp/hcoref/properties/zh-coref-default.properties
-```
-
-### API
-
-Accessing coref and mention information from an Annotation
+The following example shows how to access coref and mention information from an Annotation:
 
 ```java
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.data.Mention;
+import java.util.Properties;
+
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
-import java.util.Properties;
-
 public class CorefExample {
-
   public static void main(String[] args) throws Exception {
-
-    Annotation document = new Annotation("Barack Obama was born in Hawaii.  He is the president.  Obama was elected in 2008.");
+    Annotation document = new Annotation("Barack Obama was born in Hawaii.  He is the president. Obama was elected in 2008.");
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
@@ -120,66 +72,104 @@ public class CorefExample {
     System.out.println("---");
     System.out.println("coref chains");
     for (CorefChain cc : document.get(CorefCoreAnnotations.CorefChainAnnotation.class).values()) {
-      System.out.println("\t"+cc);
+      System.out.println("\t" + cc);
     }
     for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
       System.out.println("---");
       System.out.println("mentions");
       for (Mention m : sentence.get(CorefCoreAnnotations.CorefMentionsAnnotation.class)) {
-        System.out.println("\t"+m);
+        System.out.println("\t" + m);
        }
     }
   }
 }
 ```
 
-## Running Stanford CoreNLP on CoNLL 2012
+
+
+## More Details
+
+### Deterministic System
+This is a multi-pass sieve rule-based coreference system. See [this page](http://nlp.stanford.edu/software/dcoref.shtml) for usage and more details.
+
+### Statistical System
+This is a mention-ranking model using a large set of features. It operates by iterating through each mention in the document, possibly adding a coreference link between the current one and a preceding mention at each step. Some relevant options:
+
+* **coref.maxMentionDistance:** How many mentions back to look when considering possible antecedents of the current mention. Decreasing the value will cause the system to run faster but less accurately. The default value is 50.
+
+
+* **coref.maxMentionDistanceWithStringMatch:** The system will consider linking the current mention to a preceding one further than coref.maxMentionDistance away if they share a noun or proper noun. In this case, it looks coref.maxMentionDistanceWithStringMatch away instead. The default value is 500.
+
+* **coref.statisical.pairwiseScoreThresholds**: A number between 0 and 1 determining how greedy the model is about making coreference decisions. A value of 0 causes the system to add no coreference links and a value of 1 causes the system to link every pair of mentions, combining them all into a single coreference cluster. The default value is 0.35. The value can also be a comma-separated list of 4 numbers, in which case there are separate thresholds for when both mentions are pronouns, only the first mention is a pronoun, only the last mention is a pronoun, and neither mention is a pronoun.
+
+### Neural System
+This is a neural-network-based mention-ranking model. Some relevant options:
+
+* **coref.maxMentionDistance** and **coref.maxMentionDistanceWithStringMatch**: See above.
+
+* **coref.neural.greedyness**: A number between 0 and 1 determining how greedy the model is about making coreference decisions (more greedy means more coreference links). The default value is 0.5.
+
+## Running on CoNLL 2012
 
 If you would like to run our system on the CoNLL 2012 eval data:
 
-1. First get the CoNLL scoring script from [here](http://conll.cemantix.org/2012/software.html)
-
+1. Get the CoNLL scoring script from [here](http://conll.cemantix.org/2012/software.html)
 2. Get the CoNLL 2012 eval data from [here](http://conll.cemantix.org/2012/data.html)
-
-3. Download [scoref-conll.properties](http://nlp.stanford.edu/software/scoref-conll.properties) and update it to your specific settings
-
-4. Run this command (it should show a final F1 score of 63.61):
+3. Run the CorefSystem main method. For example, for the English neural system:
 
 ```bash
-java -Xmx5g -cp "stanford-corenlp-full-2015-12-09/*" edu.stanford.nlp.scoref.StatisticalCorefSystem scoref-conll.properties
+java -Xmx6g -cp stanford-corenlp-3.7.0.jar:stanford-english-corenlp-models-3.7.0.jar:* edu.stanford.nlp.coref.CorefSystem -props edu/stanford/nlp/coref/properties/neural-english-conll.properties -coref.data <path-to-conll-data> -coref.conllOutputPath <where-to-save-system-output> -coref.scorer <path-to-scoring-script>
 ```
 
-For Chinese:
+The CoNLL 2012 coreference data differs from the normal coreference use case in a few ways:
 
-1. First get the CoNLL scoring script from [here](http://conll.cemantix.org/2012/software.html)
+* There is provided POS, NER, Parsing, etc. instead of the annotations produced by CoreNLP.
 
-2. Get the CoNLL 2012 eval data from [here](http://conll.cemantix.org/2012/data.html)
+* There are speaker annotations indicating who is saying which quote.
 
-3. Download [zh-conll.properties](http://nlp.stanford.edu/software/zh-conll.properties) and update it to your specific settings
+* There are document genre annotations.
 
-4. Run this command (it should show a final F1 score of 63.21):
+Because of this, we train models with a few extra features for running on this dataset. We configure these models for accuracy over speed (e.g., by not having a maximum mention distance for the mention-ranking models). These models can be run using the -conll properties files (e.g., neural-english-conll.properties). Note that the ConLL-specific models for English are in the [English models jar](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar), not the default CoreNLP models jar.
+
+## Training New Models
+
+### Statistical System
+Training a statistical model on the CoNLL data can be done with the following command:
 
 ```bash
-java -Xmx3g -cp "stanford-corenlp-full-2015-12-09/*:stanford-chinese-corenlp-2015-12-08-models.jar" edu.stanford.nlp.hcoref.CorefSystem -props zh-conll.properties
+java -Xmx60g -cp stanford-corenlp-3.7.0.jar:stanford-english-corenlp-models-3.7.0.jar:* edu.stanford.nlp.coref.statistical.StatisticalCorefTrainer -props <properties-file>
 ```
+
+See [here](https://github.com/stanfordnlp/CoreNLP/blob/master/src/edu/stanford/nlp/coref/statistical/properties/english-conll-training.properties) for an example properties file. Training over the full CoNLL 2012 training set requires a large amount of memory. To reduce the memory footprint and runtime of training, the following options can be added to the properties file:
+
+* **coref.statistical.minClassImbalance**: Use this to downsample negative examples from each document. A value less than 0.05 is recommended.
+
+* **coref.statisical.maxTrainExamplesPerDocument**:  Use this to downsample examples from larger documents. A value larger than 1000 is recommended.
+
+### Neural System
+The code for training the neural coreference system is implemented in python. It is available on github [here](https://github.com/clarkkev/deep-coref).
+
 
 ## Citing Stanford Coreference
 
-the latest statistical coreference system
+The deterministic coreference system for English
 
-> Kevin Clark and Christopher D. Manning.  2015. [Entity-Centric Coreference Resolution with Model Stacking](http://cs.stanford.edu/people/kevclark/resources/clark-manning-acl15-entity.pdf) In *Proceedings of the ACL* \[[pdf](http://cs.stanford.edu/people/kevclark/resources/clark-manning-acl15-entity.pdf)\] \[[bib](http://cs.stanford.edu/people/kevclark/resources/clark-manning-acl15-entity.bib)\]
+> Marta Recasens, Marie-Catherine de Marneffe, and Christopher Potts. 2013. The Life and Death of Discourse Entities: Identifying Singleton Mentions. In *Proceedings of the NAACL*. \[[pdf](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.bib)\]
 
-the deterministic coreference system
+> Heeyoung Lee, Yves Peirsman, Angel Chang, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky. 2013. Stanford's Multi-Pass Sieve Coreference Resolution System at the CoNLL-2011 Shared Task. In *Proceedings of the CoNLL-2011 Shared Task, 2011*. \[[pdf](http://nlp.stanford.edu/pubs/conllst2011-coref.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/conllst2011-coref.bib)\]
 
-> Marta Recasens, Marie-Catherine de Marneffe, and Christopher Potts. 2013. [The Life and Death of Discourse Entities: Identifying Singleton Mentions.] (http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf) In *Proceedings of the NAACL* \[[pdf](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.bib)\]
+The deterministic coreference system for Chinese
 
-> Heeyoung Lee, Yves Peirsman, Angel Chang, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky. 2013. [Stanford's Multi-Pass Sieve Coreference Resolution System at the CoNLL-2011 Shared Task.] (http://nlp.stanford.edu/pubs/conllst2011-coref.pdf) In *Proceedings of the CoNLL-2011 Shared Task, 2011.* \[[pdf](http://nlp.stanford.edu/pubs/conllst2011-coref.pdf)\] \[[bib] (http://nlp.stanford.edu/pubs/conllst2011-coref.bib)\]
+> Heeyoung Lee, Angel Chang, Yves Peirsman, Nathanael Chambers, Mihai Surdeanu and Dan Jurafsky. 2013. Deterministic coreference resolution based on entity-centric, precision-ranked rules. In *Computational Linguistics 39(4)*. \[[pdf](http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152)\]
 
-the Chinese coreference system
+The statistical coreference system
 
-> Heeyoung Lee, Angel Chang, Yves Peirsman, Nathanael Chambers, Mihai Surdeanu and Dan Jurafsky. 2013. [Deterministic coreference resolution based on entity-centric, precision-ranked rules.] (http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152) In *Computational Linguistics 39(4)* \[[pdf](http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152)\]
+> Kevin Clark and Christopher D. Manning.  2015. Entity-Centric Coreference Resolution with Model Stacking. In *Proceedings of the ACL*. \[[pdf](http://nlp.stanford.edu/pubs/clark-manning-acl15-entity.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/clark-manning-acl15-entity.bib)\]
+
+The neural coreference system
+
+> Kevin Clark and Christopher D. Manning. Deep Reinforcement Learning for Mention-Ranking Coreference Models. In *Proceedings of EMNLP*. \[[pdf](http://nlp.stanford.edu/pubs/clark2016deep.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/clark2016deep.bib)\]
+
+> Kevin Clark and Christopher D. Manning. Improving Coreference Resolution by Learning Entity-Level Distributed Representations. In *Proceedings of the ACL*. \[[pdf](http://nlp.stanford.edu/pubs/clark2016improving.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/clark2016improvingp.bib)\]
 
 
-## More information 
-
-For more details on the underlying coreference resolution algorithm, see [this page](http://nlp.stanford.edu/software/dcoref.shtml).

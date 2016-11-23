@@ -1,5 +1,5 @@
 ---
-title: WordToSentenceAnnotator
+title: WordsToSentenceAnnotator
 keywords: ssplit
 permalink: '/ssplit.html'
 ---
@@ -10,7 +10,7 @@ Splits a sequence of tokens into sentences.
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
-| ssplit | WordToSentenceAnnotator | SentencesAnnotation |
+| ssplit | WordsToSentenceAnnotator | SentencesAnnotation |
 
 ## Options
 

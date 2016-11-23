@@ -14,7 +14,7 @@ site_title: Stanford CoreNLP
 # variables
 
 sidebar_tagline: CoreNLP
-sidebar_version: version 3.6.0
+sidebar_version: version 3.7.0
 project_file_name: doc
 company_name: Stanford NLP
 
@@ -29,6 +29,8 @@ exclude:
 include:
   - _pages
 
+# avoid https mixed content?
+url: https://stanfordnlp.github.io
 # same for all
 host: 127.0.0.1
 sidebar_accordion: true
@@ -62,5 +64,4 @@ defaults:
     values:
       layout: "post"
       comments: true
-
 

@@ -50,36 +50,42 @@ higher-level and domain-specific text understanding applications.
 
 Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks), (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. Unzip this file, open the folder that results and you're ready to use it.
 
-<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
+
+<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2016-10-31.zip">Download CoreNLP 3.7.0 (beta)</a> </div>
+
+To download earlier versions of Stanford CoreNLP, including the last stable release (3.6.0), go [here](history.html)
 
 Alternatively, Stanford CoreNLP is [available on **Maven Central**](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
 Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html).
 
-You can find the jars containing the models for each language we support in the table below.
+You can find the jars for 3.7.0 (beta) containing the models for each language we support in the table below.
+
+The jars for earlier versions can be found [here](history.html).
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-01-19-models.jar) | 3.6.0 |
-| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar) | 3.6.0 |
-| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-01-14-models.jar) | 3.6.0 |
-| German | [download](http://nlp.stanford.edu/software/stanford-german-2016-01-19-models.jar) | 3.6.0 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2015-10-14-models.jar) | 3.6.0 |
+| Arabic  | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-31-models.jar) | 3.7.0 (beta) |
 
 ## Human languages supported
 
 The basic distribution provides model files for the analysis of well-edited **English**,
 but the engine is compatible with models for other languages. We provide
-packaged models for [Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-01-19-models.jar), [French](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-01-14-models.jar), 
-[German](http://nlp.stanford.edu/software/stanford-german-2016-01-19-models.jar), and [Spanish](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2015-10-14-models.jar).
+packaged models for
+[Arabic](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-31-models.jar), 
+[Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar), [French](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-31-models.jar), 
+[German](http://nlp.stanford.edu/software/stanford-german-corenlp-2016-10-31-models.jar), and [Spanish](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-31-models.jar).
 We also provide a jar that contains all of our
-[English](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar)
+[English](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-31-models.jar)
 models, which includes various variant models, and in particular has
 one optimized for working with uncased English (e.g., mostly or all
 either uppercase or lowercase).
-Stanford NLP models for  **Arabic** are
-also usable inside CoreNLP, and other people have built models for
-some other languages.  You can find out more about using CoreNLP with
+There is also some third party support for additional languages. You can find out more about using CoreNLP with
 various human languages on the
 [other human languages](human-languages.html) page.
 

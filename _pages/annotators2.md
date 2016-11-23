@@ -8,7 +8,7 @@ permalink: '/annotators2.html'
 | --- | --- | --- | --- | 
 | tokenize | TokenizerAnnotator | TokensAnnotation (list of tokens), and CharacterOffsetBeginAnnotation, CharacterOffsetEndAnnotation, TextAnnotation (for each token) | Tokenizes the text. This component started as a PTB-style tokenizer, but was extended since then to handle noisy and web text. The tokenizer saves the character offsets of each token in the input text, as CharacterOffsetBeginAnnotation and CharacterOffsetEndAnnotation. |
 | cleanxml | CleanXmlAnnotator | XmlContextAnnotation | Remove xml tokens from the document |
-| ssplit | WordToSentenceAnnotator | SentencesAnnotation | Splits a sequence of tokens into sentences. |
+| ssplit | WordsToSentenceAnnotator | SentencesAnnotation | Splits a sequence of tokens into sentences. |
 | pos | POSTaggerAnnotator | PartOfSpeechAnnotation | Labels tokens with their POS tag. For more details see [this page](http://nlp.stanford.edu/software/tagger.shtml). |
 | lemma | MorphaAnnotator | LemmaAnnotation | Generates the word lemmas for all tokens in the corpus. |
 | ner | NERClassifierCombiner | NamedEntityTagAnnotation and NormalizedNamedEntityTagAnnotation | Recognizes named (PERSON, LOCATION, ORGANIZATION, MISC), numerical (MONEY, NUMBER, ORDINAL, PERCENT), and temporal (DATE, TIME, DURATION, SET) entities. Named entities are recognized using a combination of three CRF sequence taggers trained on various corpora, such as ACE and MUC. Numerical entities are recognized using a rule-based system. Numerical entities that require normalization, e.g., dates, are normalized to NormalizedNamedEntityTagAnnotation. For more details on the CRF tagger see [this page](http://nlp.stanford.edu/software/CRF-NER.shtml). |

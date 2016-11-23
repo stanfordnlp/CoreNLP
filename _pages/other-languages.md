@@ -11,7 +11,7 @@ Below are interfaces and packages for running Stanford CoreNLP from other langua
 
 ### Clojure
 
-* [Clojure wrapper for CoreNLP](https://github.com/gilesc/stanford-corenlp) by Cory Giles. Incomplete. Currently only a parser wrapper.
+* [Clojure wrapper for CoreNLP](https://github.com/damienstanton/stanford-corenlp) by Cory Giles, Hans Engel, and Damien Stanton. Incomplete. Currently only a tagger and parser.
 * [Clojure wrapper for CoreNLP](https://github.com/ngrunwald/stanford-nlp-tools)
 by Nils Gruenwald. Incomplete. Currently only wraps tagger and TokensRegex.
 
@@ -20,7 +20,11 @@ by Nils Gruenwald. Incomplete. Currently only wraps tagger and TokensRegex.
 Okay, Docker isn't a language, but you know what we mean….
 
 * [corenlp-docker](https://hub.docker.com/r/motiz88/corenlp/) A Dockerfile for Stanford CoreNLP Server by motiz88.
-* [corenlp-docker](https://github.com/chilland/corenlp-docker) Another by chilland
+* [corenlp-docker](https://github.com/chilland/corenlp-docker) Another by chilland.
+* [corenlp-zmq](https://github.com/twneale/corenlp-zmq) By twneale. As the name says, this one has a ZMQ broker front end.
+* [stanford-corenlp-server](https://github.com/akiomik/stanford-corenlp-server) By akiomik.
+* [corenlp-server](https://github.com/hotpxl/corenlp-server) Another by hotpxl.
+* [corenlp-docker](https://github.com/vzhong/corenlp-docker) And another by vzhong, a Stanford NLP graduate.
 
 ### Java
 
