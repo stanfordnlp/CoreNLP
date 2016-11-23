@@ -11,9 +11,9 @@ Stanford CoreNLP provides a set of natural language analysis
 tools. It can give the base
 forms of words, their parts of speech, whether they are names of
 companies, people, etc., normalize dates, times, and numeric quantities,
-and mark up the structure of sentences in terms of
+mark up the structure of sentences in terms of
 phrases and word dependencies, indicate which noun phrases refer to
-the same entities, indicate sentiment, extract open-class relations between mentions, etc. 
+the same entities, indicate sentiment, extract particular or open-class relations between mentions, etc. 
 
 Choose Stanford CoreNLP if you need:
 
@@ -24,10 +24,10 @@ Choose Stanford CoreNLP if you need:
 * Interfaces available for various major modern programming languages
 * Ability to run as a simple web service
 
-Stanford CoreNLP is an integrated framework. Its goal is to
+Stanford CoreNLP’s goal is to
 make it very easy to apply a bunch of linguistic analysis tools to a piece
-of text. A CoreNLP tool pipeline can be run on a piece of plain text with
-just two lines of code. It is designed to be highly
+of text. A tool pipeline can be run on a piece of plain text with
+just two lines of code. CoreNLP is designed to be highly
 flexible and extensible.  With a single option you can change which
 tools should be enabled and which should be disabled. 
 Stanford CoreNLP integrates many of Stanford&rsquo;s NLP tools,
@@ -39,8 +39,8 @@ including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tag
 [bootstrapped pattern learning](http://nlp.stanford.edu/software/patternslearning.html),
 and the
 [open information extraction](http://nlp.stanford.edu/software/openie.html)
-tools.
-Its analyses provide the foundational building blocks for
+tools. Moreover, an annotator pipeline can include additional custom or third-party annotators.
+CoreNLP’s analyses provide the foundational building blocks for
 higher-level and domain-specific text understanding applications.
 
 ![CoreNLP screenshot]({{ site.github.url }}/images/Xi-Jinping.png)
@@ -48,7 +48,7 @@ higher-level and domain-specific text understanding applications.
 
 ## Download
 
-Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. Unzip this file, open the folder that results and you're ready to use it.
+Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks), (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. Unzip this file, open the folder that results and you're ready to use it.
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
