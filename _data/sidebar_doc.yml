@@ -134,6 +134,9 @@ entries:
         - title: FAQ 
           url: faq.html
 
+        - title: Understanding memory and time usage
+	  url: memory-time.html
+
         - title: Online demo (API)
           external_url: http://corenlp.run/
 
