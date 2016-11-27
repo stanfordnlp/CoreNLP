@@ -10,7 +10,7 @@ People not infrequently complain that Stanford CoreNLP is slow or takes a ton of
 For these examples we will work with [chapter 13 of _Ulysses_ by James Joyce]({{ site.github.url }}/assets/James-Joyce-Ulysses-ch13.txt). You can download it if you want to follow along.
 
 
-How slow and memory intensive CoreNLP is depends on the annotators _you_ choose. This is the first rule. In practice many people who have issues are just running CoreNLP out of the box with its default annotators. Not making any explicit choices about annotators or parameters is itself a choice. This page helps you make these choices wisely. Of course, sometimes the choices that are fast and memory efficient aren’t the choices that produce the highest quality annotations. Sometimes you have to make choices. 
+How slow and memory intensive CoreNLP is depends on the annotators _you_ choose. This is the first rule. In practice many people who have issues are just running CoreNLP out of the box with its default annotators. Not making any explicit choices about annotators or parameters is itself a choice. This page helps you make these choices wisely. Of course, sometimes the choices that are fast and memory efficient aren’t the choices that produce the highest quality annotations. Sometimes you have to make trade-offs.
 
 ## CoreNLP doesn’t need much time or space
 
@@ -31,7 +31,7 @@ The main other thing to know is that **CoreNLP will be slow and take a lot of me
 
 ## Avoid creating lots of pipelines
 
-If you’re using lots of annotators, CoreNLP can easily spend 10–20 seconds just loading an annotation pipeline. Pipeline loading time can easily dominate actual annotation time. So, if you load a new pipeline frequently, such as for every sentence, then CoreNLP will be painfully slow. You should load an annotation pipleline – what you get when you call `new StanfordCoreNLP(props)` in code – as infrequently as possible. Often, **you can and should just load _one_ pipeline and use it for everything**. You only need to use multiple pipelines if you simultaneously need different configurations, such as working with multiple human languages or doing processing with different options or annotators.
+If you’re using lots of annotators, CoreNLP can easily spend 10–40 seconds just loading an annotation pipeline. Pipeline loading time can easily dominate actual annotation time. So, if you load a new pipeline frequently, such as for every sentence, then CoreNLP will be painfully slow. You should load an annotation pipleline – what you get when you call `new StanfordCoreNLP(props)` in code – as infrequently as possible. Often, **you can and should just load _one_ pipeline and use it for everything**. You only need to use multiple pipelines if you simultaneously need different configurations, such as working with multiple human languages or doing processing with different options or annotators.
 
 So, even if at the command-line, if you have a thousand paragraph-long files named `para1.txt`, `para2.txt`, … then you will get much faster processing by doing this:
 
@@ -63,13 +63,13 @@ If you run the above command in CoreNLP v.3.7.0 or later, your annotation speed 
 
 Because of different default annotator choices, if you you try to process this file with the default annotation pipeline from earlier releases of CoreNLP v.3, most likely, it will just fail from lack of memory or your patience will run out before it finishes. In v.3.6, you need more than 20GB of RAM to run the default model with default options on this text. The default statistical coreference in v.3.6 was just too slow to run fully on large documents like this! 
 
-But even if we turned off coreference altogether and ran with:
+But, in v.3.6, even if we turned off coreference altogether and ran with:
 
 ```bash
 java -cp "$STANFORD_CORENLP_v360_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner,parse" -file James-Joyce-Ulysses-ch13.txt -outputFormat json
 ```
 
-then the annotation speed was only about 100 tokens per second, because the default parsing model was also very slow.
+then the annotation speed was still only about 100 tokens per second, because the default parsing model of earlier versions (`englishPCFG.ser.gz`) was also very slow.
 
 Returning to v.3.7.0 and continuing with turning annotators off, if all you need are parts of speech and named entities, you should run a pipeline like this:
 
@@ -145,7 +145,7 @@ The dependency parser (`depparse`) annotator is faster and uses less space than 
 
 ### coref
 
-If you are working using dependency parses, the fastest choice is to use the fast, dependency parse features only statistical coreference model. If you’re already committed to constituency parsing, the fastest choice for coreference is deterministic coreference (dcoref), but it’s the least accurate.  Neural-english coref is a reasonable choice for higher quality coreference. Several of the coreference models have some properties that will speed up their application to long documents:
+If you are working using dependency parses, the fastest choice is to use the fast statistical coreference model, which uses only dependency parse features. If you’re already committed to constituency parsing, the fastest choice for coreference is deterministic coreference (dcoref), but it’s the least accurate.  Neural-english coref is a reasonable choice for higher quality coreference. Several of the coreference models have some properties that will speed up their application to long documents:
 
 - `dcoref` has `dcoref.maxdist` with value the maximum number of tokens back to look for a coreferent mention.
 - Both statistical and neural `coref` have `coref.maxMentionDistance` and `coref.maxMentionDistanceWithStringMatch` which provide two variants of the same kind of limiting how far back you look for coreferent mentions. 
