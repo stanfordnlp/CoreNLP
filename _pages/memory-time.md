@@ -113,9 +113,24 @@ In the other direction, if you turn off parsing as well, then 1GB of RAM is fine
 java -mx1g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
 ```
 
-For 2., the classic problem case is parsing long sentences with dynamic programmed parsers like the traditional `englishPCFG.ser.gz` constituency parsing. This takes space proportional to the square of the longest sentence length, with a large constant factor. Parsing sentences that are hundreds of words long will take additional gigabytes of memory just for the parser tables. The easiest fix for that is just to not parse super-long sentences. You can do that with a property like: `-parse.maxlen 70`. But a better way to fix it can be to use a different parser. The shift-reduce constitutency parse is much faster, usually more accurate, and uses much less memory for parse structures (though it does have much bigger machine learning models). You can invoke it with `-parse.model edu/stanford/nlp/models/srparser/englishSR.ser.gz`, or as appropriate for the language you are parsing.
+For 2., the classic problem case is parsing long sentences with dynamic programmed parsers like the traditional `englishPCFG.ser.gz` constituency parsing. This takes space proportional to the square of the longest sentence length, with a large constant factor. Parsing sentences that are hundreds of words long will take additional gigabytes of memory just for the parser tables. The easiest fix for that is just to not parse super-long sentences. You can do that with a property like: `-parse.maxlen 70`. This can be a fine solution for something like web pages or newswire, where anything over 70 words is likely a table or list or something that isn’t a real sentence. However, it is unappealing for James Joyce: Several of the sentences in Chapter 13 are over 100 words but are well-formed, proper sentences. For example, here is one of the longer sentences in the chapter:
 
-In general, very long sentences blow out processing time and memory. One thing to be aware of is that CoreNLP currently uses simple, heuristic sentence splitting on sentence terminators like ‘.’ and ‘?’. If you are parsing “noisy” text without explicit sentence breaks – this often happens if you parse things like tables or web pages – you can end up with “sentences” more than 500 words long, which it isn’t even useful to try to parse. You should either clean these up manually or limit the sentence length that annotators try to process.
+> Her griddlecakes done to a goldenbrown hue and
+> queen Ann’s pudding of delightful creaminess had won golden opinions
+> from all because she had a lucky hand also for lighting a fire, dredge
+> in the fine selfraising flour and always stir in the same direction,
+> then cream the milk and sugar and whisk well the white of eggs though
+> she didn’t like the eating part when there were any people that made her
+> shy and often she wondered why you couldn’t eat something poetical like
+> violets or roses and they would have a beautifully appointed drawingroom
+> with pictures and engravings and the photograph of grandpapa Giltrap’s
+> lovely dog Garryowen that almost talked it was so human and chintz
+> covers for the chairs and that silver toastrack in Clery’s summer
+> jumble sales like they have in rich houses.
+
+A better way to lessen memory use is to use a different parser. The shift-reduce constitutency parse is much faster, usually more accurate, and uses much less memory for parse structures (though it does have much bigger machine learning models). You can invoke it with `-parse.model edu/stanford/nlp/models/srparser/englishSR.ser.gz`, or as appropriate for the language you are parsing.
+
+Nevertheless, in general, very long sentences blow out processing time and memory. One thing to be aware of is that CoreNLP currently uses simple, heuristic sentence splitting on sentence terminators like ‘.’ and ‘?’. If you are parsing “noisy” text without explicit sentence breaks – this often happens if you parse things like tables or web pages – you can end up with “sentences” more than 500 words long, which it isn’t even useful to try to parse. You should either clean these up manually or limit the sentence length that annotators try to process.
 
 For 3., you should avoid having documents that are two large. Don’t try to parse a whole novel as one CoreNLP document. Parse each chapter as a separate document.
 
