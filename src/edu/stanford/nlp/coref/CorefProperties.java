@@ -97,6 +97,10 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, "coref.md.liberalChineseMD", true);
   }
 
+  public static boolean useGoldMentions(Properties props) {
+    return PropertiesUtils.getBool(props, "coref.md.useGoldMentions", false);
+  }
+
   // ---------- Input and Output Data ----------
 
   public static final String OUTPUT_PATH_PROP = "coref.conllOutputPath";

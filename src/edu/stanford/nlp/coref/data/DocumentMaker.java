@@ -10,9 +10,12 @@ import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.coref.docreader.CoNLLDocumentReader;
 import edu.stanford.nlp.coref.docreader.DocReader;
+import edu.stanford.nlp.coref.md.CorefMentionFinder;
 import edu.stanford.nlp.coref.md.DependencyCorefMentionFinder;
+import edu.stanford.nlp.coref.md.RuleBasedCorefMentionFinder;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -29,8 +32,9 @@ import edu.stanford.nlp.util.CoreMap;
 public class DocumentMaker {
   private final Properties props;
   private final DocReader reader;
-  private final  HeadFinder headFinder;
+  private final HeadFinder headFinder;
   private final Dictionaries dict;
+  private final CorefMentionFinder md;
 
   public DocumentMaker(Properties props, Dictionaries dictionaries)
       throws ClassNotFoundException, IOException {
@@ -38,6 +42,8 @@ public class DocumentMaker {
     this.dict = dictionaries;
     reader = getDocumentReader(props);
     headFinder = getHeadFinder(props);
+    md = CorefProperties.useGoldMentions(props) ?
+        new RuleBasedCorefMentionFinder(headFinder, props) : null;
   }
 
   private static DocReader getDocumentReader(Properties props) {
@@ -68,8 +74,23 @@ public class DocumentMaker {
 
   public Document makeDocument(InputDoc input) throws Exception {
     List<List<Mention>> mentions = new ArrayList<>() ;
-    for (CoreMap sentence : input.annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-      mentions.add(sentence.get(CorefCoreAnnotations.CorefMentionsAnnotation.class));
+    if (CorefProperties.useGoldMentions(props)) {
+      List<CoreMap> sentences = input.annotation.get(CoreAnnotations.SentencesAnnotation.class);
+      for (int i = 0; i < sentences.size(); i++) {
+        CoreMap sentence = sentences.get(i);
+        List<CoreLabel> sentenceWords = sentence.get(CoreAnnotations.TokensAnnotation.class);
+        List<Mention> sentenceMentions = new ArrayList<>();
+        mentions.add(sentenceMentions);
+        for (Mention g : input.goldMentions.get(i)) {
+          sentenceMentions.add(new Mention(-1, g.startIndex, g.endIndex, sentenceWords,
+              null, null, new ArrayList<>(sentenceWords.subList(g.startIndex, g.endIndex))));
+        }
+        md.findHead(sentence, sentenceMentions);
+      }
+    } else {
+      for (CoreMap sentence : input.annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        mentions.add(sentence.get(CorefCoreAnnotations.CorefMentionsAnnotation.class));
+      }
     }
     Document doc = new Document(input, mentions);
 
@@ -96,11 +117,12 @@ public class DocumentMaker {
 
     Properties pipelineProps = new Properties(props);
     if (CorefProperties.conll(props)) {
-      pipelineProps.put("annotators", CorefProperties.getLanguage(props) == Locale.CHINESE ?
-          "lemma, ner, mention" : "lemma, mention");
+      pipelineProps.put("annotators", (CorefProperties.getLanguage(props) == Locale.CHINESE ?
+          "lemma, ner" : "lemma") + (CorefProperties.useGoldMentions(props) ? "" : ", mention"));
     } else {
       pipelineProps.put("annotators", "pos, lemma, ner, " +
-          (CorefProperties.useConstituencyParse(props) ? "parse" : "depparse") + ", mention");
+          (CorefProperties.useConstituencyParse(props) ? "parse" : "depparse") +
+          (CorefProperties.useGoldMentions(props) ? "" : ", mention"));
     }
     return (coreNLP = new StanfordCoreNLP(pipelineProps, false));
   }
