@@ -131,7 +131,7 @@ public class StringUtils  {
       }
     }
     String[] mapArr = new String[maxIndex + 1];
-    // Arrays.fill(mapArr, null); // not needed; Java arrays zero initialized
+    Arrays.fill(mapArr, null);
     for (int i = 0; i < m.length; i++) {
       mapArr[indices[i]] = keys[i];
     }

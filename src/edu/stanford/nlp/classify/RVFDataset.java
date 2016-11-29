@@ -131,7 +131,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
 
   public void scaleFeaturesGaussian() {
     means = new double[this.numFeatures()];
-    // Arrays.fill(means, 0); // not needed; Java arrays zero initialized
+    Arrays.fill(means, 0);
 
     for (int i = 0; i < this.size(); i++) {
       for (int j = 0; j < data[i].length; j++)
@@ -140,7 +140,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     ArrayMath.multiplyInPlace(means, 1.0 / this.size());
 
     stdevs = new double[this.numFeatures()];
-    // Arrays.fill(stdevs, 0); // not needed; Java arrays zero initialized
+    Arrays.fill(stdevs, 0);
     double[] deltaX = new double[this.numFeatures()];
 
     for (int i = 0; i < this.size(); i++) {

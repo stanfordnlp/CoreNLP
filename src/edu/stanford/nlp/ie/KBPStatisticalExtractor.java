@@ -543,10 +543,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
   public static Counter<String> features(KBPInput input) {
-    // Ensure RegexNER Tags!
-    input.sentence.regexner(DefaultPaths.DEFAULT_KBP_REGEXNER_CASED, false);
-    input.sentence.regexner(DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS, true);
-
+    
     // Get useful variables
     ClassicCounter<String> feats = new ClassicCounter<>();
     if (Span.overlaps(input.subjectSpan, input.objectSpan) || input.subjectSpan.size() == 0 || input.objectSpan.size() == 0) {

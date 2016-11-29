@@ -16,16 +16,14 @@
 <%@ page import="edu.stanford.nlp.ling.HasWord" %>
 <%@ page import="edu.stanford.nlp.ling.SentenceUtils" %>
 <%@ page import="edu.stanford.nlp.ling.Word" %>
-<%@ page import="edu.stanford.nlp.ling.CoreLabel" %>
 <%@ page import="edu.stanford.nlp.parser.lexparser.LexicalizedParser" %>
 <%@ page import="edu.stanford.nlp.process.DocumentPreprocessor" %>
 <%@ page import="edu.stanford.nlp.sequences.SeqClassifierFlags" %>
 <%@ page import="edu.stanford.nlp.trees.Tree" %>
 <%@ page import="edu.stanford.nlp.trees.TreePrint" %>
 <%@ page import="edu.stanford.nlp.trees.TreebankLanguagePack" %>
-<%@ page import="edu.stanford.nlp.util.StringUtils" %>
-<%@ page import="java.io.*" %>
 <%@ page import="java.util.function.Function" %>
+<%@ page import="java.io.*" %>
 <%@ page import="java.util.zip.GZIPInputStream" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
@@ -35,6 +33,8 @@
 <%@ page import="java.util.Collections" %>
 <%@ page import="java.util.Properties" %>
 <%@ page import="java.util.Date" %>
+<%@ page import="edu.stanford.nlp.ling.CoreLabel" %>
+<%@ page import="edu.stanford.nlp.util.StringUtils" %>
 
 <%!
 private static final int MAXWORDS = 70;
@@ -76,12 +76,11 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
      pp.typDepColPrint = new TreePrint("typedDependencies", pp.tLP);  // default is now CCprocessed
   }
 
-  // todo: Update Chinese Segmenter version (2008!)
-  // todo: Add Arabic segmenter
   // if appropriate, load segmenter
   if (parser.equals("Chinese")) {
     Properties props = new Properties();
-    String dataDir = application.getRealPath("/WEB-INF/data/chinesesegmenter");
+    String dataDir = application.
+      getRealPath("/WEB-INF/data/chinesesegmenter");
     CRFClassifier<CoreLabel> classifier = new CRFClassifier<>(props);
     BufferedInputStream bis = new BufferedInputStream(new GZIPInputStream(
       new FileInputStream(dataDir + File.separator + "05202008-ctb6.processed-chris6.lex.gz")));
@@ -115,10 +114,9 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
 
 private static final Map<String, String> nameToParserSer = new HashMap<>();
 private static final Map<String, String> nameToEscaper = new HashMap<>();
-private static final Map<String, ParserPack> parsers = new HashMap<>();
+static final Map<String, ParserPack> parsers = new HashMap<>();
 private static final Map<String, String> defaultQuery = new HashMap<>();
 
-// todo: add German
 static {
   nameToParserSer.put("English", "englishPCFG.ser.gz");
   nameToParserSer.put("Arabic",  "arabicFactored.ser.gz");

@@ -665,7 +665,7 @@ public class Document {
     try {
       AnnotationOutputter.Options options = new AnnotationOutputter.Options();
       options.pretty = false;
-      return new XMLOutputter().print(this.asAnnotation(false), options);
+      return new XMLOutputter().print(this.asAnnotation(), options);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -748,7 +748,7 @@ public class Document {
         Supplier<Annotator> mention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultMention : getOrCreate(AnnotatorFactories.mention(props, backend));
         // Run coref
         Supplier<Annotator> coref = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultCoref : getOrCreate(AnnotatorFactories.coref(props, backend));
-        Annotation ann = asAnnotation(true);
+        Annotation ann = asAnnotation();
         mention.get().annotate(ann);
         coref.get().annotate(ann);
         // Convert to proto
@@ -826,7 +826,7 @@ public class Document {
     sentences();
     // Run annotator
     Supplier<Annotator> pos = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultPOS : getOrCreate(AnnotatorFactories.posTag(props, backend));
-    Annotation ann = asAnnotation(false);
+    Annotation ann = asAnnotation();
     pos.get().annotate(ann);
     // Update data
     for (int i = 0; i < sentences.size(); ++i) {
@@ -844,7 +844,7 @@ public class Document {
     runPOS(props);
     // Run annotator
     Supplier<Annotator> lemma = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultLemma : getOrCreate(AnnotatorFactories.lemma(props, backend));
-    Annotation ann = asAnnotation(true);
+    Annotation ann = asAnnotation();
     lemma.get().annotate(ann);
     // Update data
     for (int i = 0; i < sentences.size(); ++i) {
@@ -861,7 +861,7 @@ public class Document {
     // Prerequisites
     runPOS(props);
     // Mock lemma with word
-    Annotation ann = asAnnotation(true);
+    Annotation ann = asAnnotation();
     for (int i = 0; i < sentences.size(); ++i) {
       sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setLemma(pair.second), CoreLabel::word);
     }
@@ -877,7 +877,7 @@ public class Document {
     runPOS(props);
     // Run annotator
     Supplier<Annotator> ner = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultNER : getOrCreate(AnnotatorFactories.nerTag(props, backend));
-    Annotation ann = asAnnotation(true);
+    Annotation ann = asAnnotation();
     ner.get().annotate(ann);
     // Update data
     for (int i = 0; i < sentences.size(); ++i) {
@@ -891,7 +891,7 @@ public class Document {
     runNER(props);
     // Run annotator
     Supplier<Annotator> ner = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultRegexner : getOrCreate(AnnotatorFactories.regexNER(props, backend));
-    Annotation ann = asAnnotation(true);
+    Annotation ann = asAnnotation();
     ner.get().annotate(ann);
     // Update data
     for (int i = 0; i < sentences.size(); ++i) {
@@ -905,16 +905,14 @@ public class Document {
       return this;
     }
     // Run annotator
-    boolean cacheAnnotation = false;
     Annotator parse = ((props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultParse : getOrCreate(AnnotatorFactories.parse(props, backend))).get();
     if (parse.requires().contains(CoreAnnotations.PartOfSpeechAnnotation.class) || System.getenv("CORENLP_HOST") != null) {
       // Run the POS tagger if we are (or may be) using the shift reduce parser
       runPOS(props);
-      cacheAnnotation = true;
     } else {
       sentences();
     }
-    Annotation ann = asAnnotation(cacheAnnotation);
+    Annotation ann = asAnnotation();
     parse.annotate(ann);
     // Update data
     synchronized (serializer) {
@@ -942,7 +940,7 @@ public class Document {
     runPOS(props);
     // Run annotator
     Supplier<Annotator> depparse = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultDepparse : getOrCreate(AnnotatorFactories.dependencies(props, backend));
-    Annotation ann = asAnnotation(true);
+    Annotation ann = asAnnotation();
     depparse.get().annotate(ann);
     // Update data
     synchronized (serializer) {
@@ -966,7 +964,7 @@ public class Document {
     runDepparse(props);
     // Run annotator
     Supplier<Annotator> natlog = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultNatlog : getOrCreate(AnnotatorFactories.natlog(props, backend));
-    Annotation ann = asAnnotation(true);
+    Annotation ann = asAnnotation();
     natlog.get().annotate(ann);
     // Update data
     synchronized (serializer) {
@@ -986,7 +984,7 @@ public class Document {
     runNatlog(props);
     // Run annotator
     Supplier<Annotator> openie = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultOpenie : getOrCreate(AnnotatorFactories.openie(props, backend));
-    Annotation ann = asAnnotation(true);
+    Annotation ann = asAnnotation();
     openie.get().annotate(ann);
     // Update data
     synchronized (serializer) {
@@ -1009,7 +1007,7 @@ public class Document {
     // Run prerequisites
     coref(props);
     Supplier<Annotator> entityMention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultEntityMentions : getOrCreate(AnnotatorFactories.entityMentions(props, backend));
-    Annotation ann = asAnnotation(true);
+    Annotation ann = asAnnotation();
     entityMention.get().annotate(ann);
     // Run annotator
     Supplier<Annotator> kbp = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultKBP : getOrCreate(AnnotatorFactories.kbp(props, backend));
@@ -1038,7 +1036,7 @@ public class Document {
       throw new IllegalStateException("No binarized parse tree (perhaps it's not supported in this language?)");
     }
     // Run annotator
-    Annotation ann = asAnnotation(true);
+    Annotation ann = asAnnotation();
     Supplier<Annotator> sentiment = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSentiment : getOrCreate(AnnotatorFactories.sentiment(props, backend));
     sentiment.get().annotate(ann);
     // Update data
@@ -1081,8 +1079,8 @@ public class Document {
    * @param cache If true, allow retrieving this object from the cache.
    */
   Annotation asAnnotation(boolean cache) {
-    Annotation ann = cachedAnnotation == null ? null : cachedAnnotation.get();
-    if (!cache || ann == null) {
+    Annotation ann;
+    if (!cache || cachedAnnotation == null || (ann = cachedAnnotation.get()) == null) {
       ann = serializer.fromProto(serialize());
     }
     cachedAnnotation = new SoftReference<>(ann);
