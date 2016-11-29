@@ -48,6 +48,10 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, "coref.verbose", false);
   }
 
+  public static boolean removeSingletonClusters(Properties props) {
+    return PropertiesUtils.getBool(props, "coref.removeSingletonClusters", true);
+  }
+
   // ---------- Heuristic Mention Filtering ----------
 
   public static int maxMentionDistance(Properties props) {
