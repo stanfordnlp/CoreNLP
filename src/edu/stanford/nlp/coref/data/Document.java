@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.coref.docreader.CoNLLDocumentReader;
-
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.Generics;
@@ -222,28 +221,6 @@ public class Document implements Serializable {
     int cid1 = Math.min(m1.corefClusterID, m2.corefClusterID);
     int cid2 = Math.max(m1.corefClusterID, m2.corefClusterID);
     incompatibleClusters.add(Pair.makePair(cid1,cid2));
-  }
-
-
-  /** Extract gold coref cluster information. */
-  public void extractGoldCorefClusters(){
-    goldCorefClusters = Generics.newHashMap();
-    for (int i = 0 ; i < goldMentions.size() ; i++) {
-      List<Mention> mentions = goldMentions.get(i);
-      for (Mention m : mentions) {
-        m.sentNum = i;
-        int id = m.goldCorefClusterID;
-        if (id == -1) {
-          throw new RuntimeException("No gold info");
-        }
-        CorefCluster c = goldCorefClusters.get(id);
-        if (c == null) {
-          c = new CorefCluster(id);
-          goldCorefClusters.put(id, c);
-        }
-        c.corefMentions.add(m);
-      }
-    }
   }
 
   public List<Pair<IntTuple, IntTuple>> getGoldLinks() {

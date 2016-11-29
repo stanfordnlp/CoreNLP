@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.nndep.demo; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.nndep.demo;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
@@ -7,6 +6,7 @@ import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.GrammaticalStructure;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.StringReader;
 import java.util.List;
@@ -21,6 +21,7 @@ public class DependencyParserDemo  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParserDemo.class);
+
   public static void main(String[] args) {
     String modelPath = DependencyParser.DEFAULT_MODEL;
     String taggerPath = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
@@ -54,4 +55,5 @@ public class DependencyParserDemo  {
       log.info(gs);
     }
   }
+
 }

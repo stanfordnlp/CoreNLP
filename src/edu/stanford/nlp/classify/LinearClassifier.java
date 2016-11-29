@@ -1235,15 +1235,15 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    *
    *  @param weights The parameters of the classifier. The first index is the
    *                 featureIndex value and second index is the labelIndex value.
-   * @param featureIndex An index from F to integers used to index the features in the weights array
-   * @param labelIndex An index from L to integers used to index the labels in the weights array
+   *  @param featureIndex An index from F to integers used to index the features in the weights array
+   *  @param labelIndex An index from L to integers used to index the labels in the weights array
    */
   public LinearClassifier(double[][] weights, Index<F> featureIndex, Index<L> labelIndex) {
     this.featureIndex = featureIndex;
     this.labelIndex = labelIndex;
     this.weights = weights;
     thresholds = new double[labelIndex.size()];
-    Arrays.fill(thresholds, 0.0);
+    // Arrays.fill(thresholds, 0.0); // not needed; Java arrays zero initialized
   }
 
   // todo: This is unused and seems broken (ignores passed in thresholds)

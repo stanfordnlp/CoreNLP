@@ -12,9 +12,9 @@ import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.classify.LogisticClassifierFactory;
 import edu.stanford.nlp.coref.data.CorefCluster;
-import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
+import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -82,7 +82,6 @@ public class SingletonPredictor  {
     Document document;
     while((document = docMaker.nextDoc()) != null){
       setTokenIndices(document);
-      document.extractGoldCorefClusters();
       Map<Integer, CorefCluster> entities = document.goldCorefClusters;
 
       // Generate features for coreferent mentions with class label 1

@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import edu.stanford.nlp.coref.data.CorefCluster;
+import edu.stanford.nlp.coref.data.Dictionaries;
+import edu.stanford.nlp.coref.data.Dictionaries.MentionType;
+import edu.stanford.nlp.coref.data.Document;
+import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.coref.hybrid.sieve.DiscourseMatch;
 import edu.stanford.nlp.coref.hybrid.sieve.ExactStringMatch;
 import edu.stanford.nlp.coref.hybrid.sieve.PreciseConstructs;
@@ -22,11 +27,6 @@ import edu.stanford.nlp.coref.hybrid.sieve.StrictHeadMatch1;
 import edu.stanford.nlp.coref.hybrid.sieve.StrictHeadMatch2;
 import edu.stanford.nlp.coref.hybrid.sieve.StrictHeadMatch3;
 import edu.stanford.nlp.coref.hybrid.sieve.StrictHeadMatch4;
-import edu.stanford.nlp.coref.data.CorefCluster;
-import edu.stanford.nlp.coref.data.Dictionaries;
-import edu.stanford.nlp.coref.data.Document;
-import edu.stanford.nlp.coref.data.Mention;
-import edu.stanford.nlp.coref.data.Dictionaries.MentionType;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SpeakerAnnotation;
@@ -372,7 +372,6 @@ public class HybridCorefPrinter  {
     while(true) {
       Document document = cs.docMaker.nextDoc();
       if(document==null) break;
-      document.extractGoldCorefClusters();
 
       for(int sentIdx=0 ; sentIdx < document.predictedMentions.size() ; sentIdx++) {
         List<Mention> predictedInSent = document.predictedMentions.get(sentIdx);
