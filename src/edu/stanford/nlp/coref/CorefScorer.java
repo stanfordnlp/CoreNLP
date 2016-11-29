@@ -85,7 +85,7 @@ public class CorefScorer {
   public static double getFinalConllScoreFromOutputDir(String corefOutputDir, String scorerPath) {
     File baseFolder = new File(corefOutputDir);
     File[] filesInBaseFolder = baseFolder.listFiles();
-    String baseName = "";
+    String baseName = corefOutputDir;
     for (File outputFile : filesInBaseFolder) {
       String outputFileName = outputFile.getName();
       baseName = baseName + "/" + outputFileName.split("\\.")[0];
