@@ -1,6 +1,7 @@
 package edu.stanford.nlp.coref;
 
 import java.io.IOException;
+import java.io.File;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.logging.Logger;
@@ -63,7 +64,7 @@ public class CorefScorer {
     }
   }
 
-  public static void printFinalConllScore(String summary) {
+  public static double getFinalConllScore(String summary) {
     Pattern f1 = Pattern.compile("Coreference:.*F1: (.*)%");
     Matcher f1Matcher = f1.matcher(summary);
     double[] F1s = new double[5];
@@ -72,6 +73,33 @@ public class CorefScorer {
       F1s[i++] = Double.parseDouble(f1Matcher.group(1));
     }
     double finalScore = (F1s[0]+F1s[1]+F1s[3])/3;
-    Redwood.log("Final conll score ((muc+bcub+ceafe)/3) = " + (new DecimalFormat("#.##")).format(finalScore));
+    return finalScore;
+  }
+
+  public static void printFinalConllScore(String summary) {
+    double finalScore = getFinalConllScore(summary);
+    Redwood.log(
+            "Final conll score ((muc+bcub+ceafe)/3) = " + (new DecimalFormat("#.##")).format(finalScore));
+  }
+
+  public static double getFinalConllScoreFromOutputDir(String corefOutputDir, String scorerPath) {
+    File baseFolder = new File(corefOutputDir);
+    File[] filesInBaseFolder = baseFolder.listFiles();
+    String baseName = "";
+    for (File outputFile : filesInBaseFolder) {
+      String outputFileName = outputFile.getName();
+      baseName = baseName + "/" + outputFileName.split("\\.")[0];
+      break;
+    }
+    String goldOutput = baseName + ".gold.txt";
+    String afterCorefOutput = baseName + ".coref.predicted.txt";
+    try {
+      String summary = CorefScorer.getEvalSummary(scorerPath, goldOutput, afterCorefOutput);
+      double finalScore = getFinalConllScore(summary);
+      return finalScore;
+    } catch (IOException e) {
+      Redwood.log("Error: failed to get coref score from directory");
+      return -1;
+    }
   }
 }
