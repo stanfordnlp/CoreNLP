@@ -138,6 +138,10 @@ For 3., you should avoid having documents that are two large. Don’t try to par
 
 The slowest annotators are coreference and parsing. Many coreference methods are especially sensitive to the total document length, since they are quadratic or cubic in the number of mentions in the document. The parsing annotators, particularly dynamic-programming constituency parsing, is especially sensitive to maximum sentence length. Your processing will be much faster if you either leave out these annotators or choose options that make them as fast as possible. In v.3.7.0, the fastest, most memory-efficient models are the default: neural network dependency parsing followed by statistical coreference. In earlier versions, you should choose non-default options to maximize speed and memory efficiency. The most time and memory efficient options are neural network dependency parsing followed by statistical coreference if you only need dependency parses, or shift-reduce constituency parsing followed by deterministic coreference if you do need constituency parses.
 
+The graph below is for an older version of CoreNLP (v.3.5.0) on an aging computer, but is maybe nevertheless of interest to give some idea of how the speed of the system varies by orders of magnitude depending on the annotations run.
+
+![Speed Graph]({{ site.github.url }}/images/StanfordCoreNlpSpeed.png)
+
 ## Notes for particular annotators
 
 ### pos
