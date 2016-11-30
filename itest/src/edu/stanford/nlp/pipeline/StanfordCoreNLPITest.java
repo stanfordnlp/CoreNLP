@@ -177,8 +177,8 @@ public class StanfordCoreNLPITest extends TestCase {
         {"President", "TITLE"},
         {"of", "O"},
         {"the", "O"},
-        {"United", "LOCATION"},
-        {"States", "LOCATION"},
+        {"United", "COUNTRY"},
+        {"States", "COUNTRY"},
         {".", "O"},
       },
       {
