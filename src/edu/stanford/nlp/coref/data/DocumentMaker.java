@@ -23,6 +23,7 @@ import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinder;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Class for creating {@link Document}s from raw {@link Annotation}s or from CoNLL input data.
@@ -47,16 +48,17 @@ public class DocumentMaker {
   }
 
   private static DocReader getDocumentReader(Properties props) {
-      String corpusPath = CorefProperties.getInputPath(props);
-      if (corpusPath == null) {
-        return null;
-      }
-
-      CoNLLDocumentReader.Options options = new CoNLLDocumentReader.Options();
-      options.annotateTokenCoref = false;
-      options.setFilter(".*_auto_conll$");
-      options.lang = CorefProperties.getLanguage(props);
-      return new CoNLLDocumentReader(corpusPath, options);
+    String corpusPath = CorefProperties.getInputPath(props);
+    if (corpusPath == null) {
+      return null;
+    }
+    CoNLLDocumentReader.Options options = new CoNLLDocumentReader.Options();
+    if (!PropertiesUtils.getBool(props,"coref.printConLLLoadingMessage",true))
+      options.printConLLLoadingMessage = false;
+    options.annotateTokenCoref = false;
+    options.setFilter(".*_auto_conll$");
+    options.lang = CorefProperties.getLanguage(props);
+    return new CoNLLDocumentReader(corpusPath, options);
   }
 
   private static HeadFinder getHeadFinder(Properties props) {

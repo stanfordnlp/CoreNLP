@@ -45,7 +45,10 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   public CorefAnnotator(Properties props) {
     this.props = props;
     try {
+      // suppress
+      props.setProperty("coref.printConLLLoadingMessage","false");
       corefSystem = new CorefSystem(props);
+      props.remove("coref.printConLLLoadingMessage");
     } catch (Exception e) {
       log.error("cannot create CorefAnnotator!");
       log.error(e);

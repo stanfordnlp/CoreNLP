@@ -137,7 +137,7 @@ public class CoNLLDocumentReader implements DocReader  {
       Collections.sort(this.fileList);
     }
     curFileIndex = 0;
-    if (filepath != null && new File(filepath).exists()) {
+    if (filepath != null && new File(filepath).exists() && options.printConLLLoadingMessage) {
       logger.info("Reading " + fileList.size() + " CoNLL files from " + filepath);
     }
   }
@@ -206,6 +206,8 @@ public class CoNLLDocumentReader implements DocReader  {
 
   /** Flags **/
   public static class Options {
+
+    public boolean printConLLLoadingMessage = true;
     public boolean useCorefBIOESEncoding = false; // Marks Coref mentions with prefix
                                                   // B- begin, I- inside, E- end, S- single
     public boolean annotateTokenCoref = true;    // Annotate token with CorefAnnotation
