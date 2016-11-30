@@ -1,4 +1,5 @@
 package edu.stanford.nlp.pipeline;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,7 +45,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class DeterministicCorefAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DeterministicCorefAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(DeterministicCorefAnnotator.class);
 
   private static final boolean VERBOSE = false;
 
@@ -65,7 +66,7 @@ public class DeterministicCorefAnnotator implements Annotator  {
       allowReparsing = PropertiesUtils.getBool(props, Constants.ALLOW_REPARSING_PROP, Constants.ALLOW_REPARSING);
     } catch (Exception e) {
       log.error("cannot create DeterministicCorefAnnotator!");
-      e.printStackTrace();
+      log.error(e);
       throw new RuntimeException(e);
     }
   }
@@ -189,7 +190,7 @@ public class DeterministicCorefAnnotator implements Annotator  {
     annotation.set(CorefCoreAnnotations.CorefGraphAnnotation.class, graph);
 
     for (CorefChain corefChain : result.values()) {
-      if(corefChain.getMentionsInTextualOrder().size() < 2) continue;
+      if (corefChain.getMentionsInTextualOrder().size() < 2) continue;
       Set<CoreLabel> coreferentTokens = Generics.newHashSet();
       for (CorefMention mention : corefChain.getMentionsInTextualOrder()) {
         CoreMap sentence = annotation.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1);
