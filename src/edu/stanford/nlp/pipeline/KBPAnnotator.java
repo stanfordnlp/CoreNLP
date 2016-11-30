@@ -363,11 +363,17 @@ public class KBPAnnotator implements Annotator {
       int sentenceLength =
               annotation.get(CoreAnnotations.SentencesAnnotation.class)
                       .get(sentenceI).get(CoreAnnotations.TokensAnnotation.class).size();
+      // check if sentence is too long, if it's too long don't run kbp
+      if (maxLength != -1 && sentenceLength > maxLength) {
+        // set the triples annotation to an empty list of RelationTriples
+        annotation.get(
+                CoreAnnotations.SentencesAnnotation.class).get(sentenceI).set(
+                CoreAnnotations.KBPTriplesAnnotation.class, triples);
+        // continue to next sentence
+        continue;
+      }
+      // sentence isn't too long, so continue processing this sentence
       for (int subjI = 0; subjI < candidates.size(); ++subjI) {
-        // don't operate on this sentence if its too long
-        if (maxLength != -1 && sentenceLength > maxLength) {
-          break;
-        }
         CoreMap subj = candidates.get(subjI);
         int subjBegin = subj.get(CoreAnnotations.TokensAnnotation.class).get(0).index() - 1;
         int subjEnd = subj.get(CoreAnnotations.TokensAnnotation.class).get(subj.get(CoreAnnotations.TokensAnnotation.class).size() - 1).index();
