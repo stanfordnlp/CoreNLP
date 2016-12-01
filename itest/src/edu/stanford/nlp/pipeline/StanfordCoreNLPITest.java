@@ -186,7 +186,7 @@ public class StanfordCoreNLPITest extends TestCase {
         {"is", "O"},
         {"the", "O"},
         {"first", "ORDINAL"},
-        {"African", "MISC"},
+        {"African", "NATIONALITY"},
         {"American", "NATIONALITY"},
         {"president", "TITLE"},
         {".", "O"},
