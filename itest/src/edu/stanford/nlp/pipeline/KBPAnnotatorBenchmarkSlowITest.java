@@ -20,9 +20,9 @@ public class KBPAnnotatorBenchmarkSlowITest extends TestCase {
   public String GOLD_RELATIONS_PATH = "/scr/nlp/data/kbp-benchmark/kbp-gold-relations.txt";
 
   private String convertRelationName(String relationName) {
-    if (relationName.equals("org:top_members/employees")) {
+    /*if (relationName.equals("org:top_members/employees")) {
       return "org:top_members_employees";
-    }
+    }*/
     if (relationName.equals("per:employee_of")) {
       return "per:employee_or_member_of";
     }
