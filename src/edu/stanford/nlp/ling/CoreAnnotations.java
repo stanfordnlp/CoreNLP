@@ -166,10 +166,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * The CoreMap key for getting the sentences contained in an annotation.
-   * The sentences are represented as a {@code List<CoreMap>}.
-   * Each sentence might typically have annotations such as {@code TextAnnotation},
-   * {@code TokensAnnotation}, {@code SentenceIndexAnnotation}, and {@code BasicDependenciesAnnotation}.
+   * The CoreMap key for getting the sentences contained by an annotation.
    *
    * This key is typically set only on document annotations.
    */

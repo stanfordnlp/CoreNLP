@@ -25,6 +25,7 @@
 //
 
 package edu.stanford.nlp.dcoref;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -89,7 +90,9 @@ import edu.stanford.nlp.util.logging.NewlineLogFormatter;
  */
 public class SieveCoreferenceSystem  {
 
-  /** A logger for this class. Still uses j.u.l currently. */
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SieveCoreferenceSystem.class);
+
   public static final Logger logger = Logger.getLogger(SieveCoreferenceSystem.class.getName());
 
   /**
@@ -332,8 +335,12 @@ public class SieveCoreferenceSystem  {
       logger.addHandler(fh);
       logger.setLevel(Level.FINE);
       fh.setFormatter(new NewlineLogFormatter());
-    } catch (SecurityException | IOException e) {
-      throw new RuntimeException("Cannot initialize logger!", e);
+    } catch (SecurityException e) {
+      log.error("cannot initialize logger!");
+      throw e;
+    } catch (IOException e) {
+      log.error("cannot initialize logger!");
+      throw e;
     }
 
     logger.fine(timeStamp);
@@ -1377,7 +1384,7 @@ public class SieveCoreferenceSystem  {
     logger.finer(formatPennTree(dstMention.contextParseTree));
   }
   /** For printing tree in a better format */
-  private static String formatPennTree(Tree parseTree)	{
+  public static String formatPennTree(Tree parseTree)	{
     String treeString = parseTree.pennString();
     treeString = treeString.replaceAll("\\[TextAnnotation=", "");
     treeString = treeString.replaceAll("(NamedEntityTag|Value|Index|PartOfSpeech)Annotation.+?\\)", ")");
@@ -1578,7 +1585,8 @@ public class SieveCoreferenceSystem  {
     printConllOutput(document, writer, orderedMentions, gold);
   }
 
-  private static void printConllOutput(Document document, PrintWriter writer, List<List<Mention>> orderedMentions, boolean gold) {
+  public static void printConllOutput(Document document, PrintWriter writer, List<List<Mention>> orderedMentions, boolean gold)
+  {
     Annotation anno = document.annotation;
     List<List<String[]>> conllDocSentences = document.conllDoc.sentenceWordLists;
     String docID = anno.get(CoreAnnotations.DocIDAnnotation.class);
@@ -1650,7 +1658,7 @@ public class SieveCoreferenceSystem  {
   }
 
   /** Print raw document for analysis */
-  private static void printRawDoc(Document document, boolean gold) throws FileNotFoundException {
+  public static void printRawDoc(Document document, boolean gold) throws FileNotFoundException {
     List<CoreMap> sentences = document.annotation.get(CoreAnnotations.SentencesAnnotation.class);
     List<List<Mention>> allMentions;
     if (gold) {
@@ -1721,20 +1729,19 @@ public class SieveCoreferenceSystem  {
     List<Pair<IntTuple, IntTuple>> links = new ArrayList<>();
     CorefChain.CorefMentionComparator comparator = new CorefChain.CorefMentionComparator();
 
-    for (CorefChain c : result.values()) {
+    for(CorefChain c : result.values()) {
       List<CorefMention> s = c.getMentionsInTextualOrder();
-      for (CorefMention m1 : s) {
-        for (CorefMention m2 : s) {
-          if (comparator.compare(m1, m2)==1) {
-            links.add(new Pair<>(m1.position, m2.position));
-          }
+      for(CorefMention m1 : s){
+        for(CorefMention m2 : s){
+          if(comparator.compare(m1, m2)==1) links.add(new Pair<>(m1.position, m2.position));
         }
       }
     }
     return links;
   }
 
-  public static void debugPrintMentions(PrintStream out, String tag, List<List<Mention>> mentions) {
+  public static void debugPrintMentions(PrintStream out, String tag, List<List<Mention>> mentions)
+  {
     for(int i = 0; i < mentions.size(); i ++){
      out.println(tag + " SENTENCE " + i);
      for(int j = 0; j < mentions.get(i).size(); j ++){
@@ -1747,7 +1754,8 @@ public class SieveCoreferenceSystem  {
    }
   }
 
-  public static boolean checkClusters(Logger logger, String tag, Document document) {
+  public static boolean checkClusters(Logger logger, String tag, Document document)
+  {
     List<List<Mention>> mentions = document.getOrderedMentions();
     boolean clustersOk = true;
     for (List<Mention> mentionCluster : mentions) {
