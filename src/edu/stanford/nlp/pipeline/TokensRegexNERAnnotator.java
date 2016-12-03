@@ -221,7 +221,8 @@ public class TokensRegexNERAnnotator implements Annotator  {
     String prefix = (name != null && !name.isEmpty())? name + ".":"";
     String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol", DEFAULT_BACKGROUND_SYMBOL);
     String[] backgroundSymbols = COMMA_DELIMITERS_PATTERN.split(backgroundSymbol);
-    String mappingFiles = properties.getProperty(prefix + "mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
+    String mappingFiles = properties.getProperty(prefix + "mapping",
+            DefaultPaths.DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS);
     String[] mappings = processListMappingFiles(mappingFiles);
     String validPosRegex = properties.getProperty(prefix + "validpospattern");
     this.posMatchType = PosMatchType.valueOf(properties.getProperty(prefix + "posmatchtype",
