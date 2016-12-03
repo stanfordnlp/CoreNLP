@@ -50,6 +50,9 @@ import java.util.stream.Stream;
  */
 public class StringUtils  {
 
+  // todo [cdm 2016]: Remove CoreMap/CoreLabel methods from this class
+  // todo [cdm 2016]: Write a really good join method for this class, like William's Ruby one
+
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(StringUtils.class);
 
