@@ -47,7 +47,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
                                    String newlineIsSentenceBreak, String boundaryMultiTokenRegex,
                                    Set<String> tokenRegexesToDiscard) {
     this(verbose, false,
-            new WordToSentenceProcessor<>(boundaryTokenRegex,
+            new WordToSentenceProcessor<>(boundaryTokenRegex, null,
                     boundaryToDiscard, htmlElementsToDiscard,
                     WordToSentenceProcessor.stringToNewlineIsSentenceBreak(newlineIsSentenceBreak),
                     (boundaryMultiTokenRegex != null) ? TokenSequencePattern.compile(boundaryMultiTokenRegex) : null, tokenRegexesToDiscard));
@@ -69,27 +69,25 @@ public class WordsToSentencesAnnotator implements Annotator  {
    *  are used in numbering the sentence. Only this constructor leads to
    *  empty sentences.
    *
-   *  @param verbose Whether it is verbose.
    *  @param  nlToken Zero or more new line tokens, which might be a {@literal \n} or the fake
    *                 newline tokens returned from the tokenizer.
    *  @return A WordsToSentenceAnnotator.
    */
-  public static WordsToSentencesAnnotator newlineSplitter(boolean verbose, String ... nlToken) {
+  public static WordsToSentencesAnnotator newlineSplitter(String... nlToken) {
     // this constructor will keep empty lines as empty sentences
     WordToSentenceProcessor<CoreLabel> wts =
             new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(nlToken));
-    return new WordsToSentencesAnnotator(verbose, true, wts);
+    return new WordsToSentencesAnnotator(false, true, wts);
   }
 
 
   /** Return a WordsToSentencesAnnotator that never splits the token stream. You just get one sentence.
    *
-   *  @param verbose Whether it is verbose.
    *  @return A WordsToSentenceAnnotator.
    */
-  public static WordsToSentencesAnnotator nonSplitter(boolean verbose) {
+  public static WordsToSentencesAnnotator nonSplitter() {
     WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<>(true);
-    return new WordsToSentencesAnnotator(verbose, false, wts);
+    return new WordsToSentencesAnnotator(false, false, wts);
   }
 
 

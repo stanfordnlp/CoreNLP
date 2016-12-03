@@ -161,21 +161,21 @@ public class AnnotatorFactories  {
           boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
           if (whitespaceTokenization) {
             if (System.lineSeparator().equals("\n")) {
-              return WordsToSentencesAnnotator.newlineSplitter(false, "\n");
+              return WordsToSentencesAnnotator.newlineSplitter("\n");
             } else {
               // throw "\n" in just in case files use that instead of
               // the system separator
-              return WordsToSentencesAnnotator.newlineSplitter(false, System.lineSeparator(), "\n");
+              return WordsToSentencesAnnotator.newlineSplitter(System.lineSeparator(), "\n");
             }
           } else {
-            return WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());
+            return WordsToSentencesAnnotator.newlineSplitter(PTBTokenizer.getNewlineToken());
           }
 
         } else {
           // Treat as one sentence: You get a no-op sentence splitter that always returns all tokens as one sentence.
           String isOneSentence = properties.getProperty("ssplit.isOneSentence");
           if (Boolean.parseBoolean(isOneSentence)) { // this method treats null as false
-            return WordsToSentencesAnnotator.nonSplitter(false);
+            return WordsToSentencesAnnotator.nonSplitter();
           }
 
           // multi token sentence boundaries
@@ -191,6 +191,8 @@ public class AnnotatorFactories  {
           // regular boundaries
           String boundaryTokenRegex = properties.getProperty("ssplit.boundaryTokenRegex");
           Set<String> boundariesToDiscard = null;
+
+          // todo [cdm 2016]: Add support for specifying ssplit.boundaryFollowerRegex here and send down to WordsToSentencesAnnotator
 
           // newline boundaries which are discarded.
           String bounds = properties.getProperty("ssplit.boundariesToDiscard");
