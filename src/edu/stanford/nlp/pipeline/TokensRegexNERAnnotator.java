@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  * designated overwritable (the third argument).
  *
  * It is also possible to use this annotator to annotate fields other than the
- * <code>NamedEntityTagAnnotation</code> field by
+ * {@code NamedEntityTagAnnotation} field by
  * and providing the header
  * </p>
  *
@@ -47,10 +47,10 @@ import java.util.regex.Pattern;
  * <ol>
  * <li> A TokensRegex expression (marked by starting with "( " and ending with " )".
  *      See {@link TokenSequencePattern} for TokensRegex syntax.
- *    <br/><em>Example</em>: <code>( /University/ /of/ [ {ner:LOCATION} ] )    SCHOOL</code>
+ *    <br/><em>Example</em>: {@code ( /University/ /of/ [ {ner:LOCATION} ] )    SCHOOL}
  * </li>
  * <li> a sequence of regex, each separated by whitespace (matching "\s+").
- *    <br/><em>Example</em>: <code>Stanford    SCHOOL</code>
+ *    <br/><em>Example</em>: {@code Stanford    SCHOOL}
  *    <br/>
  *    The regex will match if the successive regex match a sequence of tokens in the input.
  *    Spaces can only be used to separate regular expression tokens; within tokens \s or similar non-space
@@ -71,17 +71,17 @@ import java.util.regex.Pattern;
  * <p>
  * Main differences from {@link RegexNERAnnotator}:
  * <ul>
- *   <li>Supports annotation of fields other than the <code>NamedEntityTagAnnotation</code> field</li>
+ *   <li>Supports annotation of fields other than the {@code NamedEntityTagAnnotation} field</li>
  *   <li>Supports both TokensRegex patterns and patterns over the text of the tokens</li>
  *   <li>When NER annotation can be overwritten based on the original NER labels.  The rules for when the new NER labels are used
  *       are given below:
  *       <br/>If the found expression overlaps with a previous NER phrase, then the NER labels are not replaced.
- *       <br/>  <em>Example</em>: Old NER phrase: <code>The ABC Company</code>, Found Phrase: <code>ABC => </code> Old NER labels are not replaced.
+ *       <br/>  <em>Example</em>: Old NER phrase: {@code The ABC Company}, Found Phrase: {@code ABC => } Old NER labels are not replaced.
  *       <br/>If the found expression has inconsistent NER tags among the tokens, then the NER labels are replaced.
- *       <br/>  <em>Example</em>: Old NER phrase: <code>The/O ABC/MISC Company/ORG => The/ORG ABC/ORG Company/ORG</code>
+ *       <br/>  <em>Example</em>: Old NER phrase: {@code The/O ABC/MISC Company/ORG => The/ORG ABC/ORG Company/ORG}
  *   </li>
- *   <li>How <code>validpospattern</code> is handled for POS tags is specified by <code>PosMatchType</code></li>
- *   <li>By default, there is no <code>validPosPattern</code></li>
+ *   <li>How {@code validpospattern} is handled for POS tags is specified by {@code PosMatchType}</li>
+ *   <li>By default, there is no {@code validPosPattern}</li>
  *   <li>By default, both O and MISC is always replaced</li>
  * </ul>
  * </p>
@@ -89,38 +89,38 @@ import java.util.regex.Pattern;
  *   Configuration:
  * <table>
  *   <tr><th>Field</th><th>Description</th><th>Default</th></tr>
- *   <tr><td><code>mapping</code></td><td>Comma separated list of mapping files to use </td>
- *      <td><code>edu/stanford/nlp/models/regexner/type_map_clean</code></td>
+ *   <tr><td>{@code mapping}</td><td>Comma separated list of mapping files to use </td>
+ *      <td>{@code edu/stanford/nlp/models/regexner/type_map_clean}</td>
  *   </tr>
- *   <tr><td><code>mapping.header</code></td>
- *       <td>Comma separated list of header fields (or <code>true</code> if header is specified in the file)</td>
+ *   <tr><td>{@code mapping.header}</td>
+ *       <td>Comma separated list of header fields (or {@code true} if header is specified in the file)</td>
  *       <td>pattern,ner,overwrite,priority,group</td></tr>
- *   <tr><td><code>mapping.field.&lt;fieldname&gt;</code></td>
+ *   <tr><td>{@code mapping.field.<fieldname>}</td>
  *       <td>Class mapping for annotation fields other than ner</td></tr>
- *   <tr><td><code>commonWords</code></td>
+ *   <tr><td>{@code commonWords}</td>
  *       <td>Comma separated list of files for common words to not annotate (in case your mapping isn't very clean)</td></tr>
- *   <tr><td><code>backgroundSymbol</code></td><td>Comma separated list of NER labels to always replace</td>
- *      <td><code>O,MISC</code></td></tr>
- *   <tr><td><code>posmatchtype</code></td>
- *     <td>How should <code>validpospattern</code> be used to match the POS of the tokens.
- *         <code>MATCH_ALL_TOKENS</code> - All tokens has to match.<br/>
- *         <code>MATCH_AT_LEAST_ONE_TOKEN</code> - At least one token has to match.<br/>
- *         <code>MATCH_ONE_TOKEN_PHRASE_ONLY</code> - Only has to match for one token phrases.<br/>
+ *   <tr><td>{@code backgroundSymbol}</td><td>Comma separated list of NER labels to always replace</td>
+ *      <td>{@code O,MISC}</td></tr>
+ *   <tr><td>{@code posmatchtype}</td>
+ *     <td>How should {@code validpospattern} be used to match the POS of the tokens.
+ *         {@code MATCH_ALL_TOKENS} - All tokens has to match.<br/>
+ *         {@code MATCH_AT_LEAST_ONE_TOKEN} - At least one token has to match.<br/>
+ *         {@code MATCH_ONE_TOKEN_PHRASE_ONLY} - Only has to match for one token phrases.<br/>
  *      </td>
- *      <td><code>MATCH_AT_LEAST_ONE_TOKEN</code></td>
+ *      <td>{@code MATCH_AT_LEAST_ONE_TOKEN}</td>
  *   </tr>
- *   <tr><td><code>validpospattern</code></td><td>Regular expression pattern for matching POS tags.</td>
- *      <td><code></code></td>
+ *   <tr><td>{@code validpospattern}</td><td>Regular expression pattern for matching POS tags.</td>
+ *      <td>{@code}</td>
  *   </tr>
- *   <tr><td><code>noDefaultOverwriteLabels</code></td>
+ *   <tr><td>{@code noDefaultOverwriteLabels}</td>
  *      <td>Comma separated list of output types for which default NER labels are not overwritten.
  *          For these types, only if the matched expression has NER type matching the
  *          specified overwriteableType for the regex will the NER type be overwritten.</td>
- *      <td><code></code></td></tr>
- *   <tr><td><code>ignoreCase</code></td><td>If true, case is ignored</td></td>
- *      <td><code>false</code></td></tr>
- *   <tr><td><code>verbose</code></td><td>If true, turns on extra debugging messages.</td>
- *      <td><code>false</code></td></tr>
+ *      <td>{@code}</td></tr>
+ *   <tr><td>{@code ignoreCase}</td><td>If true, case is ignored</td></td>
+ *      <td>{@code false}</td></tr>
+ *   <tr><td>{@code verbose}</td><td>If true, turns on extra debugging messages.</td>
+ *      <td>{@code false}</td></tr>
  * </table>
  * </p>
  *
@@ -137,7 +137,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
   protected static final String WEIGHT_FIELD = "weight";
   protected static final String GROUP_FIELD = "group";
 
-  protected static final Set<String> predefinedHeaderFields = CollectionUtils.asSet(new String[]{PATTERN_FIELD, OVERWRITE_FIELD, PRIORITY_FIELD, WEIGHT_FIELD, GROUP_FIELD});
+  protected static final Set<String> predefinedHeaderFields = CollectionUtils.asSet(PATTERN_FIELD, OVERWRITE_FIELD, PRIORITY_FIELD, WEIGHT_FIELD, GROUP_FIELD);
   protected static final String defaultHeader = "pattern,ner,overwrite,priority,group";
 
   private final boolean ignoreCase;
@@ -221,8 +221,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
     String prefix = (name != null && !name.isEmpty())? name + ".":"";
     String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol", DEFAULT_BACKGROUND_SYMBOL);
     String[] backgroundSymbols = COMMA_DELIMITERS_PATTERN.split(backgroundSymbol);
-    String mappingFiles = properties.getProperty(prefix + "mapping",
-            DefaultPaths.DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS);
+    String mappingFiles = properties.getProperty(prefix + "mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
     String[] mappings = processListMappingFiles(mappingFiles);
     String validPosRegex = properties.getProperty(prefix + "validpospattern");
     this.posMatchType = PosMatchType.valueOf(properties.getProperty(prefix + "posmatchtype",
@@ -377,7 +376,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
     return TokenSequencePattern.getMultiPatternMatcher(patterns);
   }
 
-  public void annotateMatched(List<CoreLabel> tokens) {
+  private void annotateMatched(List<CoreLabel> tokens) {
     List<SequenceMatchResult<CoreMap>> matched = multiPatternMatcher.findNonOverlapping(tokens);
     for (SequenceMatchResult<CoreMap> m:matched) {
       Entry entry = patternToEntry.get(m.pattern());

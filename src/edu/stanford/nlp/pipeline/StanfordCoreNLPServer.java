@@ -678,8 +678,7 @@ public class StanfordCoreNLPServer implements Runnable {
         if (languagePropertiesFile != null) {
           Properties languageSpecificProperties = new Properties();
           try {
-            languageSpecificProperties.load(
-                    IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(languagePropertiesFile));
+            languageSpecificProperties.load(StanfordCoreNLPServer.class.getResourceAsStream(languagePropertiesFile));
             PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
           } catch (IOException e) {
             err("Failure to load language specific properties.");
