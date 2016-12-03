@@ -36,12 +36,14 @@ import edu.stanford.nlp.util.StringUtils;
 
 /**
  * A class for featurizing mention pairs and individual mentions.
+ *
  * @author Kevin Clark
  */
 public class FeatureExtractor {
-  private static int MIN_WORD_COUNT = 20;
-  private static int BIN_EXACT = 10;
-  private static double BIN_EXPONENT = 1.5;
+
+  private static final int MIN_WORD_COUNT = 20;
+  private static final int BIN_EXACT = 10;
+  private static final double BIN_EXPONENT = 1.5;
   private static final Map<Integer, String> SINGLETON_FEATURES = new HashMap<>();
   static {
     SINGLETON_FEATURES.put(2, "animacy");
@@ -106,8 +108,7 @@ public class FeatureExtractor {
       Map<Pair<Integer, Integer>, Boolean> labeledPairs, Compressor<String> compressor) {
     List<Mention> mentionsList = CorefUtils.getSortedMentions(document);
     Map<Integer, List<Mention>> mentionsByHeadIndex = new HashMap<>();
-    for (int i = 0; i < mentionsList.size(); i++) {
-      Mention m = mentionsList.get(i);
+    for (Mention m : mentionsList) {
       List<Mention> withIndex = mentionsByHeadIndex.get(m.headIndex);
       if (withIndex == null) {
         withIndex = new ArrayList<>();
