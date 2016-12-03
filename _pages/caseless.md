@@ -4,9 +4,30 @@ keywords: caseless
 permalink: '/caseless.html'
 ---
 
-It is possible to run Stanford CoreNLP with tagger, parser, and NER
-models that ignore capitalization. This requires training different
-models. We have only trained such models
+If your text is all lowercase, all uppercase, or badly and
+inconsistently capitalized (many web forums, texts, twitter, etc.)
+then this will negatively effect the performance of most of our
+annotators. Most of our annotators were trained on data that is
+standardly edited and capitalized full sentences.
+
+There are two strategies available to address this that may help. One
+is to try to first correctly capitalize the text with a
+<i>truecaser</i>, and then to process the text with the standard models.
+See the [TrueCaseAnnotator](truecase.html) for how to do this.
+
+An example command for using regular annotators following truecasing
+is:
+```
+java -Xmx3g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,truecase,pos,lemma,ner,depparse -truecase.overwriteText true -file caseless.txt -outputFormat json
+```
+
+The other strategy is to use models more suited to ill-capitalized text.
+
+The GATE folk made an English POS tagger model trained on twitter
+text. You can get it from [the extensions page](extensions.html).
+
+We have made slightly different Stanford CoreNLP models for the tagger, parser, and NER
+that ignore capitalization.  We have only trained such models
 for English, but the same method could be used for other languages. 
 
 To use these models, you need to download a jar file with caseless
@@ -32,7 +53,7 @@ ask for these models to be used like this:
   performance. Sorry! Stuff happens. If you want good caseless NER,
   you should either run with caseless models from a 3.5.x series
   release (all of which are compatible with version 3.6.0) or download
-  the new fixed model in the HEAD jar, which is available from
+  the new fixed model either from the version 3.7.0 beta or in the HEAD jar, which is available from
   [our GitHub page](https://github.com/stanfordnlp/CoreNLP). Since the
   version 3.5.x releases have a separate caseless jar, it is easy to
   also specify it as a dependency; you just have to make sure that it
