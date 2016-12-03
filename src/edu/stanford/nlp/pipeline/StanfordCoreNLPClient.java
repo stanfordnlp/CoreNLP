@@ -7,7 +7,6 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -64,6 +63,11 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     @Override
     public int hashCode() {
       throw new IllegalStateException("Hashing backends is dangerous!");
+    }
+
+    @Override
+    public String toString() {
+      return "Backend{" + "protocol=" + protocol + ", host=" + host + ", port=" + port + '}';
     }
   }
 
@@ -200,7 +204,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
         queueLock.unlock();
       }
     }
-  }
+  } // end static class BackEndScheduler
 
   /** The path on the server to connect to. */
   private final String path = "";
@@ -255,8 +259,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     // Create a list of all the properties, as JSON map elements
     List<String> jsonProperties = new ArrayList<>();
     for (String key : serverProperties.stringPropertyNames()) {
-      jsonProperties.add("\"" + JSONOutputter.cleanJSON(key) + "\": \"" +
-              JSONOutputter.cleanJSON(serverProperties.getProperty(key)) + "\"");
+      jsonProperties.add('"' + JSONOutputter.cleanJSON(key) + "\": \"" +
+              JSONOutputter.cleanJSON(serverProperties.getProperty(key)) + '"');
     }
     // Create the JSON object
     this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";
@@ -406,7 +410,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
   }
 
 
-
   /**
    * The canonical entry point of the client annotator.
    * Create an HTTP request, send this annotation to the server, and await a response.
@@ -415,43 +418,40 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    * @param callback Called when the server has returned an annotated document.
    *                 The input to this callback is the same as the passed Annotation object.
    */
-  public void annotate(final Annotation annotation, final Consumer<Annotation> callback){
-    scheduler.schedule((Backend backend, Consumer<Backend> isFinishedCallback) -> new Thread() {
-      @Override
-      public void run() {
-        try {
-          // 1. Create the input
-          // 1.1 Create a protocol buffer
-          ByteArrayOutputStream os = new ByteArrayOutputStream();
-          serializer.write(annotation, os);
-          os.close();
-          byte[] message = os.toByteArray();
-          // 1.2 Create the query params
+  public void annotate(final Annotation annotation, final Consumer<Annotation> callback) {
+    scheduler.schedule((Backend backend, Consumer<Backend> isFinishedCallback) -> new Thread(() -> {
+      try {
+        // 1. Create the input
+        // 1.1 Create a protocol buffer
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        serializer.write(annotation, os);
+        os.close();
+        byte[] message = os.toByteArray();
+        // 1.2 Create the query params
 
-          String queryParams = String.format(
-              "properties=%s",
-              URLEncoder.encode(StanfordCoreNLPClient.this.propsAsJSON, "utf-8"));
+        String queryParams = String.format(
+            "properties=%s",
+            URLEncoder.encode(StanfordCoreNLPClient.this.propsAsJSON, "utf-8"));
 
-          // 2. Create a connection
-          URL serverURL = new URL(backend.protocol, backend.host,
-              backend.port,
-              StanfordCoreNLPClient.this.path + "?" + queryParams);
+        // 2. Create a connection
+        URL serverURL = new URL(backend.protocol, backend.host,
+            backend.port,
+            StanfordCoreNLPClient.this.path + '?' + queryParams);
 
-          // 3. Do the annotation
-          //    This method has two contracts:
-          //    1. It should call the two relevant callbacks
-          //    2. It must not throw an exception
-          doAnnotation(annotation, backend, serverURL, message, 0);
-        } catch (Throwable t) {
-          log.warn("Could not annotate via server! Trying to annotate locally...", t);
-          StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
-          corenlp.annotate(annotation);
-        } finally {
-          callback.accept(annotation);
-          isFinishedCallback.accept(backend);
-        }
+        // 3. Do the annotation
+        //    This method has two contracts:
+        //    1. It should call the two relevant callbacks
+        //    2. It must not throw an exception
+        doAnnotation(annotation, backend, serverURL, message, 0);
+      } catch (Throwable t) {
+        log.warn("Could not annotate via server! Trying to annotate locally...", t);
+        StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
+        corenlp.annotate(annotation);
+      } finally {
+        callback.accept(annotation);
+        isFinishedCallback.accept(backend);
       }
-    }.start());
+    }).start());
   }
 
 
@@ -467,6 +467,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    */
   @SuppressWarnings("unchecked")
   private void doAnnotation(Annotation annotation, Backend backend, URL serverURL, byte[] message, int tries) {
+
     try {
       // 1. Set up the connection
       URLConnection connection = serverURL.openConnection();
@@ -485,8 +486,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
       // 1.3 Set some protocol-dependent properties
       switch (backend.protocol) {
         case "https":
-          ((HttpsURLConnection) connection).setRequestMethod("POST");
-          break;
         case "http":
           ((HttpURLConnection) connection).setRequestMethod("POST");
           break;
@@ -541,7 +540,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     log.info("Entering interactive shell. Type q RETURN or EOF to quit.");
     final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
     IOUtils.console("NLP> ", line -> {
-      if (line.length() > 0) {
+      if ( ! line.isEmpty()) {
         Annotation anno = pipeline.process(line);
         try {
           switch (outputFormat) {
@@ -576,7 +575,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
   /**
    * The implementation of what to run on a command-line call of CoreNLPWebClient
    *
-   * @throws IOException
+   * @throws IOException If any IO problem
    */
   public void run() throws IOException {
     StanfordRedwoodConfiguration.minimalSetup();
@@ -654,7 +653,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    * is to be processed separately as a single sentence.
    * <p>
    * Example usage:<br>
-   * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP -props properties
+   * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP -props properties -backends site1:port1,site2,port2 <br>
+   *    or just -host name -port number
    *
    * @param args List of required properties
    * @throws java.io.IOException If IO problem
@@ -666,10 +666,10 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     //
     // extract all the properties from the command line
     // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
-//    if (args.length < 2) {
-//      log.info("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
-//      System.exit(1);
-//    }
+    // if (args.length < 2) {
+    //   log.info("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
+    //   System.exit(1);
+    // }
     Properties props = StringUtils.argsToProperties(args);
     boolean hasH = props.containsKey("h");
     boolean hasHelp = props.containsKey("help");
@@ -681,7 +681,20 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
     // Create the backends
     List<Backend> backends = new ArrayList<>();
-    for (String spec : props.getProperty("backends", "corenlp.run").split(",")) {
+    String defaultBack = "corenlp.run";
+    String backStr = props.getProperty("backends");
+    if (backStr == null) {
+      String host = props.getProperty("host");
+      String port = props.getProperty("port");
+      if (host != null) {
+        if (port != null) {
+          defaultBack = host + ':' + port;
+        } else {
+          defaultBack = host;
+        }
+      }
+    }
+    for (String spec : props.getProperty("backends", defaultBack).split(",")) {
       if (spec.contains(":")) {
         String host = spec.substring(0, spec.indexOf(':'));
         int port = Integer.parseInt(spec.substring(spec.indexOf(':') + 1));

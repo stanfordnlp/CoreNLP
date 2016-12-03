@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
 
@@ -11,6 +10,7 @@ import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -26,7 +26,7 @@ import edu.stanford.nlp.util.CoreMap;
 public class WordsToSentencesAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(WordsToSentencesAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(WordsToSentencesAnnotator.class);
 
   private final WordToSentenceProcessor<CoreLabel> wts;
 

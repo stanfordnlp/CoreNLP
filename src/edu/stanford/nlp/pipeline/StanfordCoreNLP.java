@@ -620,18 +620,15 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       } catch (InterruptedException e) {
         throw new RuntimeInterruptedException(e);
       }
-      new Thread() {
-        @Override
-        public void run() {
-          try {
-            annotate(annotation);
-          } catch (Throwable t) {
-            annotation.set(CoreAnnotations.ExceptionAnnotation.class, t);
-          }
-          callback.accept(annotation);
-          availableProcessors.release();
+      new Thread(() -> {
+        try {
+          annotate(annotation);
+        } catch (Throwable t) {
+          annotation.set(CoreAnnotations.ExceptionAnnotation.class, t);
         }
-      }.start();
+        callback.accept(annotation);
+        availableProcessors.release();
+      }).start();
     }
   }
 
