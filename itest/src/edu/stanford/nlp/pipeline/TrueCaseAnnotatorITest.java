@@ -15,7 +15,9 @@ import org.junit.Assert;
  */
 public class TrueCaseAnnotatorITest extends TestCase {
 
-  private void runSentence(StanfordCoreNLP pipeline, String sentence, String[] ans) {
+  private static final boolean VERBOSE = false;
+
+  private static void runSentence(StanfordCoreNLP pipeline, String sentence, String[] ans) {
     Annotation document = new Annotation(sentence);
     pipeline.annotate(document);
 
@@ -34,14 +36,16 @@ public class TrueCaseAnnotatorITest extends TestCase {
       for(int i = 0; i < words.size(); i ++) {
         String w = words.get(i).word();
         String tcw = words.get(i).get(CoreAnnotations.TrueCaseTextAnnotation.class);
-        assertEquals("Error in truecasing", ans[i], tcw);
-        if (! w.equals(tcw)){
-          System.err.print("\"" + w + "\" true cased to \"" + tcw + "\" in context:");
-          for(int j = Math.max(0, i - 2); j < Math.min(words.size(), i + 2); j ++){
-            System.err.print(" " + words.get(j).word());
+        if (VERBOSE) {
+          if (!w.equals(tcw)) {
+            System.err.print("\"" + w + "\" true cased to \"" + tcw + "\" in context:");
+            for (int j = Math.max(0, i - 2); j < Math.min(words.size(), i + 2); j++) {
+              System.err.print(" " + words.get(j).word());
+            }
+            System.err.println();
           }
-          System.err.println();
         }
+        assertEquals("Error in truecasing", ans[i], tcw);
       }
     }
   }
@@ -50,17 +54,25 @@ public class TrueCaseAnnotatorITest extends TestCase {
   public void testTrueCaseAnnotator() {
     // run an annotation through the pipeline
     String text1 = "HEATHER BROWN WAS LEAD WOMAN AT DUKE UNIVERSITY.";
+    String text2 = "heather brown was lead woman at duke university.";
+    String text3 = "Heather Brown was lead woman at Duke University.";
     String[] ans1 = { "Heather", "Brown", "was", "lead", "woman", "at", "Duke", "University", "." };
 
-    String text2 = "heather brown was lead woman at the duke university.";
-    String[] ans2 = { "Heather", "Brown", "was", "lead", "woman", "at", "the", "Duke", "University", "." };
-    Annotation document2 = new Annotation(text2);
+    String text4 = "\"GOOD MORNING AMERICA FROM MCVEY!\"";
+    String text5 = "\"good morning america from mcvey!\"";
+    String text6 = "\"Good Morning America From McVey!\"";
+    String[] ans4 = { "``", "Good", "Morning", "America", "from", "McVey", "!", "''" };
 
-    Properties props = PropertiesUtils.asProperties("annotators", "tokenize, ssplit, pos, lemma, ner, truecase");
+    Properties props = PropertiesUtils.asProperties("annotators", "tokenize, ssplit, truecase");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     runSentence(pipeline, text1, ans1);
-    runSentence(pipeline, text2, ans2);
+    runSentence(pipeline, text2, ans1);
+    runSentence(pipeline, text3, ans1);
+
+    runSentence(pipeline, text4, ans4);
+    runSentence(pipeline, text5, ans4);
+    runSentence(pipeline, text6, ans4);
   }
 
 }

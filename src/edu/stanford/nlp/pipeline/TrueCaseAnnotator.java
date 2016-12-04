@@ -134,8 +134,9 @@ public class TrueCaseAnnotator implements Annotator  {
         break;
       case "O":
         // The model predicted mixed case, so lookup the map:
-        if (mixedCaseMap.containsKey(text)) {
-          trueCaseText = mixedCaseMap.get(text);
+        String lower = text.toLowerCase();
+        if (mixedCaseMap.containsKey(lower)) {
+          trueCaseText = mixedCaseMap.get(lower);
         }
         // else leave it as it was?
         break;
@@ -160,7 +161,7 @@ public class TrueCaseAnnotator implements Annotator  {
         if (els.length != 2) {
           throw new RuntimeException("Wrong format: " + mapFile);
         }
-        map.put(els[0],els[1]);
+        map.put(els[0], els[1]);
       }
       br.close();
     } catch (IOException e) {
