@@ -2487,7 +2487,7 @@ public class StringUtils  {
     char[] chars = encoded.trim().toCharArray();
 
     //--Parse the String
-    //(state)
+    // (state)
     char quoteCloseChar = (char) 0;
     List<StringBuilder> terms = new LinkedList<>();
     StringBuilder current = new StringBuilder();
@@ -2496,24 +2496,24 @@ public class StringUtils  {
     if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded array: " + encoded); }
     if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
     if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
-    //(finite state automata)
-    for(int i=start; i<end; i++){
+    // (finite state automaton)
+    for (int i=start; i<end; i++) {
       if (chars[i] == '\r') {
         // Ignore funny windows carriage return
         continue;
       } else if(chars[i] == '\\'){
         //(case: escaped character)
-        if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
+        if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded array is escape character: " + encoded);
         current.append(chars[i+1]);
         i += 1;
-      } else if(quoteCloseChar != 0){
+      } else if (quoteCloseChar != 0) {
         //(case: in quotes)
         if(chars[i] == quoteCloseChar){
           quoteCloseChar = (char) 0;
         }else{
           current.append(chars[i]);
         }
-      }else{
+      } else {
         //(case: normal)
         if(chars[i] == '"'){
           quoteCloseChar = '"';

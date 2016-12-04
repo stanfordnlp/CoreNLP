@@ -128,9 +128,7 @@ public class PropertiesUtils {
   @SuppressWarnings("unchecked")
   public static void checkProperties(Properties properties, Properties defaults) {
     Set<String> names = Generics.newHashSet();
-    for (String name : properties.stringPropertyNames()) {
-      names.add(name);
-    }
+    names.addAll(properties.stringPropertyNames());
     for (String defaultName : defaults.stringPropertyNames()) {
       names.remove(defaultName);
     }
