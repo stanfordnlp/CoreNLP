@@ -59,14 +59,9 @@ public class Sentence {
   }};
 
   /**
-   * <p>
    *  The protobuf representation of a Sentence.
    *  Note that this does not necessarily have up to date token information.
-   * </p>
-   * <p>
-   *
-   * </p>
-   * */
+   */
   private final CoreNLPProtos.Sentence.Builder impl;
   /** The protobuf representation of the tokens of a sentence. This has up-to-date information on the tokens */
   private final List<CoreNLPProtos.Token.Builder> tokensBuilders;
@@ -1260,7 +1255,8 @@ public class Sentence {
   }
 
   /**
-   * Apply a tokensregex pattern to the sentence
+   * Apply a TokensRegex pattern to the sentence.
+   *
    * @param pattern The TokensRegex pattern to match against.
    * @return the matcher.
    */
@@ -1269,7 +1265,8 @@ public class Sentence {
   }
 
   /**
-   * Apply a tokensregex pattern
+   * Apply a TokensRegex pattern to the sentence.
+   *
    * @param pattern The TokensRegex pattern to match against.
    * @return True if the tokensregex pattern matches.
    */
@@ -1278,7 +1275,8 @@ public class Sentence {
   }
 
   /**
-   * Apply a tokensregex pattern to the sentence
+   * Apply a TokensRegex pattern to the sentence.
+   *
    * @param pattern The TokensRegex pattern to match against.
    * @param fn The action to do on each match.
    * @return the list of matches, after run through the function.

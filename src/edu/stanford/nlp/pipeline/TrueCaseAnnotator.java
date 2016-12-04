@@ -26,11 +26,14 @@ public class TrueCaseAnnotator implements Annotator  {
   @SuppressWarnings("unchecked")
   private final CRFBiasedClassifier<CoreLabel> trueCaser;
 
-  private Map<String,String> mixedCaseMap = Generics.newHashMap();
+  private final Map<String,String> mixedCaseMap;
+
+  private final boolean overwriteText;
 
   private final boolean verbose;
 
   public static final String DEFAULT_MODEL_BIAS = "INIT_UPPER:-0.7,UPPER:-0.7,O:0";
+  private static final String DEFAULT_OVERWRITE_TEXT = "false";
   private static final String DEFAULT_VERBOSE = "false";
 
 
@@ -42,6 +45,7 @@ public class TrueCaseAnnotator implements Annotator  {
     this(System.getProperty("truecase.model", DefaultPaths.DEFAULT_TRUECASE_MODEL),
         System.getProperty("truecase.bias", DEFAULT_MODEL_BIAS),
         System.getProperty("truecase.mixedcasefile", DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST),
+        Boolean.parseBoolean(System.getProperty("truecase.overwriteText", TrueCaseAnnotator.DEFAULT_OVERWRITE_TEXT)),
         verbose);
   }
 
@@ -49,13 +53,16 @@ public class TrueCaseAnnotator implements Annotator  {
     this(properties.getProperty("truecase.model", DefaultPaths.DEFAULT_TRUECASE_MODEL),
             properties.getProperty("truecase.bias", TrueCaseAnnotator.DEFAULT_MODEL_BIAS),
             properties.getProperty("truecase.mixedcasefile", DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST),
+            Boolean.parseBoolean(properties.getProperty("truecase.overwriteText", TrueCaseAnnotator.DEFAULT_OVERWRITE_TEXT)),
             Boolean.parseBoolean(properties.getProperty("truecase.verbose", TrueCaseAnnotator.DEFAULT_VERBOSE)));
   }
 
   public TrueCaseAnnotator(String modelLoc,
                            String classBias,
                            String mixedCaseFileName,
+                           boolean overwriteText,
                            boolean verbose) {
+    this.overwriteText = overwriteText;
     this.verbose = verbose;
 
     Properties props = PropertiesUtils.asProperties(
@@ -136,6 +143,11 @@ public class TrueCaseAnnotator implements Annotator  {
     // System.err.println(text + " was classified as " + trueCase + " and so became " + trueCaseText);
 
     l.set(CoreAnnotations.TrueCaseTextAnnotation.class, trueCaseText);
+
+    if (overwriteText) {
+      l.set(CoreAnnotations.TextAnnotation.class, trueCaseText);
+      l.set(CoreAnnotations.ValueAnnotation.class, trueCaseText);
+    }
   }
 
   private static Map<String,String> loadMixedCaseMap(String mapFile) {

@@ -1,8 +1,8 @@
-package edu.stanford.nlp.international.spanish; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.spanish;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public final class SpanishVerbStripper implements Serializable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishVerbStripper.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SpanishVerbStripper.class);
 
   // The following three classes of verb forms can carry attached
   // pronouns:
