@@ -26,8 +26,8 @@ preserves that writes this information.)
 
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
-| truecase.model | String | "edu/stanford/nlp/models/truecase/truecasing.fast.caseless.qn.ser.gz" | The truecasing model to use. |
-| truecase.bias | String | "INIT\_UPPER:-0.7,UPPER:-0.7,O:0" | Biases to choose certain behaviors. You can use this to adjust the proclivities of the truecaser. The truecaser classes are: UPPER, LOWER, INIT\_UPPER, and O (for mixed case words like _McVey_). |
-| truecase.mixedcasefile | String | "edu/stanford/nlp/models/truecase/MixDisambiguation.list" | When the classifier chooses "MixedCase" classification, the form in this file (if any) is used, otherwise the input token is left unchanged. |
+| truecase.model | String | edu/stanford/nlp/models/truecase/truecasing.fast.caseless.qn.ser.gz | The truecasing model to use. |
+| truecase.bias | String | INIT\_UPPER:-0.7,UPPER:-0.7,O:0 | Biases to choose certain behaviors. You can use this to adjust the proclivities of the truecaser. The truecaser classes are: UPPER, LOWER, INIT\_UPPER, and O (for mixed case words like _McVey_). |
+| truecase.mixedcasefile | String | edu/stanford/nlp/models/truecase/MixDisambiguation.list | When the classifier chooses mixed case classification, the form in this file (if any) is used, otherwise the input token is left unchanged. |
 | truecase.overwriteText | boolean | false | Whether the truecased token form should be used to overwrite the TextAnnotation, affecting the behavior of later annotators in a pipeline. |
 | truecase.verbose | boolean | false | Whether to run more verbosely. |
