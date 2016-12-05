@@ -141,14 +141,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>edu.stanford.nlp</groupId>
-      <artifactId>stanford-corenlp</artifactId>
-      <version>3.7.0</version>
-      <classifier>models-spanish</classifier>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>
