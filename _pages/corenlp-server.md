@@ -187,6 +187,16 @@ in your current directory, then you should be able to successfully give a comman
 java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPClient -props StanfordCoreNLP-french.properties -annotators tokenize,ssplit,pos,depparse ile french.txt -outputFormat conllu -backends localhost:9000
 ```
 
+## Usage via other programming languages
+
+There are now modules for several programming languages, including
+Python and JavaScript, which work by
+talking to a Stanford CoreNLP server instance. Indeed, this is now normally the best
+way to implement an interface to CoreNLP in other languages.
+
+Check out what is available on the
+[Other programming languages and packages page](other-languages.html).
+
 ## Server Administration
 
 This section describes how to administer the server, including starting and stopping the server, as well as setting it up as a startup task 
