@@ -23,6 +23,7 @@ enum Language {
   Hebrew   = 7;
   Spanish  = 8;
   UniversalEnglish = 9;
+  UniversalChinese = 10;
 }
 
 //

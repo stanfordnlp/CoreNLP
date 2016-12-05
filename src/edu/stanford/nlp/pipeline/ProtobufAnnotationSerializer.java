@@ -873,6 +873,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return CoreNLPProtos.Language.Arabic;
       case Chinese:
         return CoreNLPProtos.Language.Chinese;
+      case UniversalChinese:
+        return CoreNLPProtos.Language.UniversalChinese;
       case English:
         return CoreNLPProtos.Language.English;
       case UniversalEnglish:
@@ -1559,6 +1561,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return Language.Hebrew;
       case Spanish:
         return Language.Spanish;
+      case UniversalChinese:
+        return Language.UniversalChinese;
       case UniversalEnglish:
         return Language.UniversalEnglish;
       case Unknown:
