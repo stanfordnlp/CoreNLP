@@ -57,6 +57,10 @@ public final class CoreNLPProtos {
      * <code>UniversalEnglish = 9;</code>
      */
     UniversalEnglish(9, 9),
+    /**
+     * <code>UniversalChinese = 10;</code>
+     */
+    UniversalChinese(10, 10),
     ;
 
     /**
@@ -99,6 +103,10 @@ public final class CoreNLPProtos {
      * <code>UniversalEnglish = 9;</code>
      */
     public static final int UniversalEnglish_VALUE = 9;
+    /**
+     * <code>UniversalChinese = 10;</code>
+     */
+    public static final int UniversalChinese_VALUE = 10;
 
 
     public final int getNumber() { return value; }
@@ -115,6 +123,7 @@ public final class CoreNLPProtos {
         case 7: return Hebrew;
         case 8: return Spanish;
         case 9: return UniversalEnglish;
+        case 10: return UniversalChinese;
         default: return null;
       }
     }
@@ -46879,18 +46888,18 @@ public final class CoreNLPProtos {
       "\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010\"-\n\017" +
       "MapStringString\022\013\n\003key\030\001 \003(\t\022\r\n\005value\030\002 " +
       "\003(\t\"*\n\014MapIntString\022\013\n\003key\030\001 \003(\r\022\r\n\005valu" +
-      "e\030\002 \003(\t*\215\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any" +
+      "e\030\002 \003(\t*\243\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any" +
       "\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004",
       "\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007" +
-      "Spanish\020\010\022\024\n\020UniversalEnglish\020\t*h\n\tSenti" +
-      "ment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATI" +
-      "VE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017" +
-      "STRONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelati" +
-      "on\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMEN" +
-      "T\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020" +
-      "\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPEN" +
-      "DENCE\020\006B*\n\031edu.stanford.nlp.pipelineB\rCo" +
-      "reNLPProtos"
+      "Spanish\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n\020Unive" +
+      "rsalChinese\020\n*h\n\tSentiment\022\023\n\017STRONG_NEG" +
+      "ATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022" +
+      "\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*" +
+      "\223\001\n\024NaturalLogicRelation\022\017\n\013EQUIVALENCE\020" +
+      "\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENT" +
+      "AILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004" +
+      "\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.sta" +
+      "nford.nlp.pipelineB\rCoreNLPProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
