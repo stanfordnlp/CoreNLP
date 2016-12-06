@@ -11,6 +11,7 @@ import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.naturalli.*;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
@@ -389,6 +390,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (sentence.containsKey(TokensAnnotation.class)) {
       for (CoreLabel tok : sentence.get(TokensAnnotation.class)) { builder.addToken(toProto(tok)); }
       keysToSerialize.remove(TokensAnnotation.class);
+    }
+    // Characters
+    if (sentence.containsKey(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
+      for (CoreLabel c : sentence.get(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
+        builder.addCharacter(toProto(c));
+      }
+      keysToSerialize.remove(SegmenterCoreAnnotations.CharactersAnnotation.class);
     }
     // Optional fields
     if (keySet.contains(SentenceIndexAnnotation.class)) { builder.setSentenceIndex(getAndRegister(sentence, keysToSerialize, SentenceIndexAnnotation.class)); }
