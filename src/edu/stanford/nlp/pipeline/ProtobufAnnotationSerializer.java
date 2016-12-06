@@ -273,8 +273,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
     keysToSerialize.remove(HeadWordLabelAnnotation.class);
     keysToSerialize.remove(HeadTagLabelAnnotation.class);
-    // Required fields
-    builder.setWord(coreLabel.word());
+    // Set the word (this may be null if the CoreLabel is storing a character (as in case of segmenter)
+    if (coreLabel.word() != null)
+      builder.setWord(coreLabel.word());
     // Optional fields
     if (keySet.contains(PartOfSpeechAnnotation.class)) { builder.setPos(coreLabel.tag()); keysToSerialize.remove(PartOfSpeechAnnotation.class); }
     if (keySet.contains(ValueAnnotation.class)) { builder.setValue(coreLabel.value()); keysToSerialize.remove(ValueAnnotation.class); }
@@ -561,6 +562,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addMentions(toProtoMention(mention));
       }
       keysToSerialize.remove(MentionsAnnotation.class);
+    }
+    // add character info from segmenter
+    if (doc.containsKey(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
+      for (CoreLabel c : doc.get(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
+        builder.addCharacter(toProto(c));
+      }
+      keysToSerialize.remove(SegmenterCoreAnnotations.CharactersAnnotation.class);
     }
     // Return
     return builder;
@@ -1288,6 +1296,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Set text
     Annotation ann = new Annotation(proto.getText());
+
+    // if there are characters, add characters
+    if (proto.getCharacterCount() > 0) {
+      List<CoreLabel> sentChars = new ArrayList<CoreLabel>();
+      for (CoreNLPProtos.Token c : proto.getCharacterList()) {
+        sentChars.add(fromProto(c));
+      }
+      ann.set(SegmenterCoreAnnotations.CharactersAnnotation.class, sentChars);
+    }
 
     // Add tokens
     List<CoreLabel> tokens = new ArrayList<>();
