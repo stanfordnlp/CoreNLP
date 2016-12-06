@@ -76,7 +76,7 @@ message Sentence {
   repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
   optional DependencyGraph  enhancedDependencies                = 17;
   optional DependencyGraph  enhancedPlusPlusDependencies        = 18;
-  optional Token            character                           = 19;
+  repeated Token            character                           = 19;
 
   optional uint32           paragraph                           = 11;
 
