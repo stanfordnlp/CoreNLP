@@ -42,6 +42,7 @@ message Document {
    * serialized without any sentences. Otherwise
    */
   repeated Token      sentencelessToken = 5;
+  repeated Token      character = 10;
 
   repeated Quote      quote = 6;
   /**
