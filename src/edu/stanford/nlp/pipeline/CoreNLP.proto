@@ -147,7 +147,7 @@ message Token {
 
   //  Chinese character info
   optional string chineseChar     = 54;
-  optional string chineseSegAnnotation = 55;
+  optional string chineseSeg = 55;
   
 
   // Fields in the CoreLabel java class that are moved elsewhere
