@@ -103,7 +103,7 @@ message Sentence {
 //
 message Token {
   // Fields set by the default annotators [new CoreNLP(new Properties())]
-  required string word              = 1;    // the word's gloss (post-tokenization)
+  optional string word              = 1;    // the word's gloss (post-tokenization)
   optional string pos               = 2;    // The word's part of speech tag
   optional string value             = 3;    // The word's 'value', (e.g., parse tree node)
   optional string category          = 4;    // The word's 'category' (e.g., parse tree node)

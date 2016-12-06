@@ -11284,7 +11284,7 @@ public final class CoreNLPProtos {
           ExtendableMessageOrBuilder<Token> {
 
     /**
-     * <code>required string word = 1;</code>
+     * <code>optional string word = 1;</code>
      *
      * <pre>
      * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -11292,7 +11292,7 @@ public final class CoreNLPProtos {
      */
     boolean hasWord();
     /**
-     * <code>required string word = 1;</code>
+     * <code>optional string word = 1;</code>
      *
      * <pre>
      * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -11300,7 +11300,7 @@ public final class CoreNLPProtos {
      */
     java.lang.String getWord();
     /**
-     * <code>required string word = 1;</code>
+     * <code>optional string word = 1;</code>
      *
      * <pre>
      * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -12540,7 +12540,7 @@ public final class CoreNLPProtos {
     public static final int WORD_FIELD_NUMBER = 1;
     private java.lang.Object word_;
     /**
-     * <code>required string word = 1;</code>
+     * <code>optional string word = 1;</code>
      *
      * <pre>
      * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -12550,7 +12550,7 @@ public final class CoreNLPProtos {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string word = 1;</code>
+     * <code>optional string word = 1;</code>
      *
      * <pre>
      * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -12571,7 +12571,7 @@ public final class CoreNLPProtos {
       }
     }
     /**
-     * <code>required string word = 1;</code>
+     * <code>optional string word = 1;</code>
      *
      * <pre>
      * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -14176,10 +14176,6 @@ public final class CoreNLPProtos {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasWord()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       if (hasOperator()) {
         if (!getOperator().isInitialized()) {
           memoizedIsInitialized = 0;
@@ -15162,10 +15158,6 @@ public final class CoreNLPProtos {
       }
 
       public final boolean isInitialized() {
-        if (!hasWord()) {
-          
-          return false;
-        }
         if (hasOperator()) {
           if (!getOperator().isInitialized()) {
             
@@ -15219,7 +15211,7 @@ public final class CoreNLPProtos {
 
       private java.lang.Object word_ = "";
       /**
-       * <code>required string word = 1;</code>
+       * <code>optional string word = 1;</code>
        *
        * <pre>
        * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -15229,7 +15221,7 @@ public final class CoreNLPProtos {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string word = 1;</code>
+       * <code>optional string word = 1;</code>
        *
        * <pre>
        * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -15250,7 +15242,7 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>required string word = 1;</code>
+       * <code>optional string word = 1;</code>
        *
        * <pre>
        * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -15270,7 +15262,7 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>required string word = 1;</code>
+       * <code>optional string word = 1;</code>
        *
        * <pre>
        * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -15287,7 +15279,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>required string word = 1;</code>
+       * <code>optional string word = 1;</code>
        *
        * <pre>
        * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -15300,7 +15292,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>required string word = 1;</code>
+       * <code>optional string word = 1;</code>
        *
        * <pre>
        * Fields set by the default annotators [new CoreNLP(new Properties())]
@@ -47857,7 +47849,7 @@ public final class CoreNLPProtos {
       "rCoref\0308 \003(\0132\".edu.stanford.nlp.pipeline" +
       ".Mention\022\"\n\032hasCorefMentionsAnnotation\0309",
       " \001(\010\022\022\n\nsentenceID\030: \001(\t*\005\010d\020\200\002\"\235\010\n\005Toke" +
-      "n\022\014\n\004word\030\001 \002(\t\022\013\n\003pos\030\002 \001(\t\022\r\n\005value\030\003 " +
+      "n\022\014\n\004word\030\001 \001(\t\022\013\n\003pos\030\002 \001(\t\022\r\n\005value\030\003 " +
       "\001(\t\022\020\n\010category\030\004 \001(\t\022\016\n\006before\030\005 \001(\t\022\r\n" +
       "\005after\030\006 \001(\t\022\024\n\014originalText\030\007 \001(\t\022\013\n\003ne" +
       "r\030\010 \001(\t\022\025\n\rnormalizedNER\030\t \001(\t\022\r\n\005lemma\030" +
