@@ -14,7 +14,8 @@ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokeni
 
 If this command is run from the distribution directory, it processes the included [sample file](files/input.txt) `input.txt`. We use a wildcard `"*"` after `-cp` to load all jar files in the current directory &ndash; it needs to be in quotes. This command writes the output to an XML [file](files/input.txt.xml.txt) named `input.txt.out` in the same directory.
 
-## Notes
+###  Notes
+
 * Processing a short text like this is very inefficient. It takes a minute to load everything before processing begins. You should batch your processing.
 * Stanford CoreNLP requires Java version 1.8 or higher.
 * Specifying memory: `-Xmx2g` specifies the amount of RAM that Java will make available for CoreNLP. On a 64-bit machine, Stanford CoreNLP typically requires 2GB to run (and it may need even more, depending on the size of the document to parse). On a 32 bit machine (in 2016, this is most commonly a 32-bit Windows machine), you cannot allocate 2GB of RAM; probably you should try with `-Xmx1800m`. You are probably okay with a minimum of `-Xmx1500m`, but this amount of memory is a bit marginal. You probably can't run some annotators, such as the statistical `coref`.
@@ -102,7 +103,7 @@ You can as usual specify details on the annotators and properties:
 java -mx1g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-french.properties -annotators tokenize,ssplit,pos,depparse -file french.txt -outputFormat conllu
 ```
 
-## Input options
+## Input
 
 To process one file, use the `-file` option.  To process a list of files, use the `-filelist` parameter:
 
@@ -116,6 +117,11 @@ If you do not specify any properties that load input files, you will be placed i
 
 If your input files have XML tags in them, you may wish to use the `cleanxml` annotator to preprocess it.
 
+### Inputting serialized files
+
+If (and only if) the input filename ends with ".ser.gz" then CoreNLP will interpret the file as the output of a previous annotation run, to which you presumably want to add on further annotations. CoreNLP will read these Annotations using the class specified in the `inputSerializer` property. The options for this are the same as for `outputSerializer [below](cmdline.html#output-serializer). Note: To successfully load a pipeline for layering on additional annotations, you need to include the property `enforceRequirements = false` to avoid complaints about required earlier annotators not being present in the pipeline.
+
+
 ## Output
 
 For each input file, Stanford CoreNLP generates one output file, with a name that adds an extra extension to the input filename. This output may contain the output of all annotations that were done, or just a subset of them. For example, for the above configuration and a file containing the text below:
@@ -126,7 +132,7 @@ Stanford CoreNLP generates [this output](files/input.txt.output).
 
 Note that this XML output can use the `CoreNLP-to-HTML.xsl` stylesheet file, which comes with the CoreNLP download or can be downloaded from [here](files/CoreNLP-to-HTML.xsl). This stylesheet enables human-readable display of the above XML content. For example, the previous example should be displayed like [this](files/input.txt.xml).
 
-## Output options
+### Output options
 
 The following properties are associated with output :
 
@@ -142,14 +148,14 @@ The following properties are associated with output :
   * "conllu": [CoNLL-U](https://universaldependencies.github.io/docs/format.html) output format, another tab-separated values (TSV) format.  Output extension is `.conllu`. This representation may give only a partial view of an `Annotation`.
   * "serialized": Produces some serialized version of each `Annotation`. May or may not be lossy. What you actually get depends on the `outputSerializer` property, which you should also set. The default is the `GenericAnnotationSerializer`, which uses the built-in Java object serialization and writes a file with extension `.ser.gz`.
 
-## Output serializer
+### Output serializer
 
 The value of the `outputSerializer` property is the name of a class which extends `edu.stanford.nlp.pipeline.AnnotationSerializer`. Valid choices include:
 `edu.stanford.nlp.pipeline.GenericAnnotationSerializer`,
 `edu.stanford.nlp.pipeline.CustomAnnotationSerializer`,
 `edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer`;
 `edu.stanford.nlp.kbp.common.KBPProtobufAnnotationSerializer`,
-`edu.stanford.nlp.kbp.slotfilling.ir.index.KryoAnnotationSerializer`.
+`edu.stanford.nlp.kbp.slotfilling.ir.index.KryoAnnotationSerializer`. If unspecified the value of the `serializer` property will be tried instead. If it is also not defined, the default is to use `edu.stanford.nlp.pipeline.GenericAnnotationSerializer`.
 
 The `ProtobufAnnotationSerializer` uses the Java methods writeDelimitedTo() and parseDelimitedFrom(), which allow sending several length-prefixed messages in one stream. Unfortunately, Google has declined to implement these methods for Python or C++. You can get information from Stack Overflow and other places on how to roll your own version for C++ or Python. Probably the best place is [here](http://stackoverflow.com/questions/2340730/are-there-c-equivalents-for-the-protocol-buffers-delimited-i-o-functions-in-ja/) but there are many other sources of information including: [here](http://stackoverflow.com/questions/8269452/google-protocol-buffers-parsedelimitedfrom-and-writedelimitedto-for-c), [here](https://github.com/google/protobuf/pull/710),  [here](http://stackoverflow.com/questions/11484700/python-example-for-reading-multiple-protobuf-messages-from-a-stream), and [here](http://eli.thegreenplace.net/2011/08/02/length-prefix-framing-for-protocol-buffers).
 [This Stack Overflow question](http://stackoverflow.com/questions/39433279/read-protobuf-serialization-of-stanfordnlp-output-in-python/40964310) explicitly addresses the issue for CoreNLP.
