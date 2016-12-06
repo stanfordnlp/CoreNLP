@@ -145,6 +145,11 @@ message Token {
   optional string trueCase        = 52;  // true case type of token
   optional string trueCaseText    = 53;  // true case gloss of token
 
+  //  Chinese character info
+  optional string chineseChar     = 54;
+  optional string chineseSegAnnotation = 55;
+  
+
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
   //       uint32 sentenceIndex  @see Sentence#sentenceIndex
