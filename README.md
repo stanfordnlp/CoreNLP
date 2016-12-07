@@ -28,10 +28,8 @@ are processing languages other than English, make sure to download the latest ve
 1. Make sure you have Maven installed, details here: [https://maven.apache.org/](https://maven.apache.org/)
 2. If you run this command in the CoreNLP directory: `mvn package` , it should run the tests and build this jar file: `CoreNLP/target/stanford-corenlp-3.7.0.jar`
 3. When using the latest version of the code make sure to download the latest versions of the [corenlp-models](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar), and [english-models](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar), and include them in your CLASSPATH.  If you
-are processing languages other than English, make sure to download the latest version of the models jar for the language you are interested in.  If you want
-to use Stanford CoreNLP as part of a Maven project, you can use this command to load models jars into your Maven repository: (replace "/location/of" with the path on your machine ; when installing stanford-corenlp-models-current.jar set `-Dclassifier=models`)
-
-`mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=3.7.0 -Dclassifier=models-spanish -Dpackaging=jar` 
+are processing languages other than English, make sure to download the latest version of the models jar for the language you are interested in.  
+4. If you want to use Stanford CoreNLP as part of a Maven project you need to install the models jars into your Maven repository.  Below is a sample command for installing the Spanish models jar.  For other languages just change the language name in the command.  To install `stanford-corenlp-models-current.jar` you will need to set `-Dclassifier=models`.  Here is the sample command for Spanish: `mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=3.7.0 -Dclassifier=models-spanish -Dpackaging=jar` 
 
 You can find releases of Stanford CoreNLP on [Maven Central](http://search.maven.org/#artifactdetails%7Cedu.stanford.nlp%7Cstanford-corenlp%7C3.6.0%7Cjar).
 
