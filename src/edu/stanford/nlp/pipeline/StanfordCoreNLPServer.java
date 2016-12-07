@@ -72,6 +72,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,regexner,kbp";
   @ArgumentParser.Option(name="preload", gloss="Cache the following annotators on startup")
   protected static String preloadedAnnotators = "";
+  @ArgumentParser.Option(name="serverProperties", gloss="Default properties file for server's StanfordCoreNLP instance")
+  protected static String serverPropertiesPath = null;
 
   protected final String shutdownKey;
 
@@ -140,6 +142,14 @@ public class StanfordCoreNLPServer implements Runnable {
         "parse.model", defaultParserPath,  // SR scales linearly with sentence length. Good for a server!
         "parse.binaryTrees", "true",  // needed for the Sentiment annotator
         "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
+
+    // overwrite all default properties with provided server properties
+    // for instance you might want to provide a default ner model
+    if (serverPropertiesPath != null) {
+      Properties serverProperties = StringUtils.argsToProperties(new String[]{"-props", serverPropertiesPath});
+      PropertiesUtils.overWriteProperties(this.defaultProps, serverProperties);
+    }
+
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
     this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
 
