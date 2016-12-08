@@ -137,6 +137,7 @@ public class KBPAnnotatorBenchmarkSlowITest extends TestCase {
       System.out.println("\tf1: "+f1);
       finalF1 = f1;
     }
-    assertTrue("f1 score: " + finalF1 +" is above threshold of 42.0", finalF1 < 45.5);
+    // check final F1 score is
+    assertTrue("f1 score: " + finalF1 +" is below threshold of 45.3", finalF1 >= 45.3);
   }
 }
