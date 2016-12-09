@@ -18,6 +18,7 @@ public class KBPAnnotatorBenchmarkSlowITest extends TestCase {
 
   public String KBP_DOCS_DIR = "/scr/nlp/data/kbp-benchmark//kbp-docs";
   public String GOLD_RELATIONS_PATH = "/scr/nlp/data/kbp-benchmark/kbp-gold-relations.txt";
+  public double KBP_MINIMUM_SCORE = 45.30;
 
   private String convertRelationName(String relationName) {
     /*if (relationName.equals("org:top_members/employees")) {
@@ -138,6 +139,6 @@ public class KBPAnnotatorBenchmarkSlowITest extends TestCase {
       finalF1 = f1;
     }
     // check final F1 score is
-    assertTrue("f1 score: " + finalF1 +" is below threshold of 45.3", finalF1 >= 45.3);
+    assertTrue("f1 score: " + finalF1 +" is below threshold of 45.3", finalF1 >= KBP_MINIMUM_SCORE);
   }
 }

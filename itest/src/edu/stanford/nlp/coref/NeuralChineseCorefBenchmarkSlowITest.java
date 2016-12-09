@@ -10,7 +10,7 @@ public class NeuralChineseCorefBenchmarkSlowITest extends CorefBenchmark {
   @Override
   public void setUp() throws Exception, IOException {
     logger = Redwood.channels(NeuralEnglishCorefCoNLLBenchmarkSlowITest.class);
-    EXPECTED_F1_SCORE = 53.90;
+    EXPECTED_F1_SCORE = 53.80;
     PROPERTIES_PATH =  "edu/stanford/nlp/coref/properties/neural-chinese.properties";
     WORK_DIR_NAME = "NeuralChineseCorefBenchmarkTest";
     testName = "Neural Chinese Coref";

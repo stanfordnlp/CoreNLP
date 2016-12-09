@@ -10,7 +10,7 @@ public class DeterministicChineseCorefCoNLLBenchmarkSlowITest extends CorefBench
   @Override
   public void setUp() throws Exception, IOException {
     logger = Redwood.channels(NeuralEnglishCorefCoNLLBenchmarkSlowITest.class);
-    EXPECTED_F1_SCORE = 55.01;
+    EXPECTED_F1_SCORE = 54.90;
     PROPERTIES_PATH =  "edu/stanford/nlp/coref/properties/deterministic-chinese-conll.properties";
     WORK_DIR_NAME = "DeterministicChineseCorefCoNLLBenchmarkTest";
     testName = "Deterministic Chinese Coref (CoNLL)";
