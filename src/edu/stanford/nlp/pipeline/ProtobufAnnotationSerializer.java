@@ -330,7 +330,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(ChineseCharAnnotation.class)) { builder.setChineseChar(getAndRegister(coreLabel, keysToSerialize, ChineseCharAnnotation.class)); }
     if (keySet.contains(ChineseSegAnnotation.class)) { builder.setChineseSeg(getAndRegister(coreLabel, keysToSerialize, ChineseSegAnnotation.class)); }
 
-
     // Return
     return builder;
   }
@@ -1116,8 +1115,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
     if (proto.hasTrueCaseText()) { word.set(TrueCaseTextAnnotation.class, proto.getTrueCaseText()); }
 
-
-
     // Return
     return word;
   }
@@ -1299,11 +1296,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // if there are characters, add characters
     if (proto.getCharacterCount() > 0) {
-      List<CoreLabel> sentChars = new ArrayList<CoreLabel>();
+      List<CoreLabel> docChars = new ArrayList<CoreLabel>();
       for (CoreNLPProtos.Token c : proto.getCharacterList()) {
-        sentChars.add(fromProto(c));
+        docChars.add(fromProto(c));
       }
-      ann.set(SegmenterCoreAnnotations.CharactersAnnotation.class, sentChars);
+      ann.set(SegmenterCoreAnnotations.CharactersAnnotation.class, docChars);
     }
 
     // Add tokens

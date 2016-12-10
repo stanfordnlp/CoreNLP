@@ -258,7 +258,7 @@ public class ProtobufAnnotationSerializerSlowITest {
   }
   */
 
-  @Test
+  /*@Test
   public void testChineseSerialization() {
     try {
       AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
@@ -278,7 +278,7 @@ public class ProtobufAnnotationSerializerSlowITest {
       // check they are the same
       sameAsRead(doc, readDoc);
     } catch (Exception e) { throw new RuntimeException(e); }
-  }
+  }*/
 
   @Test
   public void testSentiment() {

@@ -277,10 +277,8 @@ public class TokensRegexNERAnnotator implements Annotator  {
       annotationFields = fieldClasses;
     }
 
-    String noDefaultOverwriteLabelsProp = properties.getProperty(prefix + "noDefaultOverwriteLabels");
-    this.noDefaultOverwriteLabels = (noDefaultOverwriteLabelsProp != null)
-            ? Collections.unmodifiableSet(CollectionUtils.asSet(noDefaultOverwriteLabelsProp.split("\\s*,\\s*")))
-            : Collections.unmodifiableSet(new HashSet<>());
+    String noDefaultOverwriteLabelsProp = properties.getProperty(prefix + "noDefaultOverwriteLabels", "CITY");
+    this.noDefaultOverwriteLabels = Collections.unmodifiableSet(CollectionUtils.asSet(noDefaultOverwriteLabelsProp.split("\\s*,\\s*")));
     this.ignoreCase = PropertiesUtils.getBool(properties, prefix + "ignorecase", false);
     this.verbose = PropertiesUtils.getBool(properties, prefix + "verbose", false);
 
