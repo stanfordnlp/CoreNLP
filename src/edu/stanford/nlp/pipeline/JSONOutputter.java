@@ -230,7 +230,7 @@ public class JSONOutputter extends AnnotationOutputter {
               CorefChain.CorefMention representative = chain.getRepresentativeMention();
               chainWriter.set(Integer.toString(chain.getChainID()), chain.getMentionsInTextualOrder().stream().map(mention -> (Consumer<Writer>) (Writer mentionWriter) -> {
                 mentionWriter.set("id", mention.mentionID);
-                mentionWriter.set("text", SentenceUtils.listToOriginalTextString(doc.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class).subList(mention.startIndex - 1, mention.endIndex - 1)).trim());
+                mentionWriter.set("text", mention.mentionSpan);
                 mentionWriter.set("type", mention.mentionType);
                 mentionWriter.set("number", mention.number);
                 mentionWriter.set("gender", mention.gender);
