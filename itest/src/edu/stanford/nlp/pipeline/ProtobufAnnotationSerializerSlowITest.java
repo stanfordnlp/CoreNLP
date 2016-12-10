@@ -257,29 +257,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     testAnnotators("tokenize,ssplit,pos,lemma,ner,entitymentions");
   }
   */
-
-  /*@Test
-  public void testChineseSerialization() {
-    try {
-      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
-      // write Chinese doc
-      String sampleChineseDocument = "巴拉克·奥巴马是美国总统。他在2008年当选";
-      Properties chineseProperties = StringUtils.argsToProperties("-props",
-              "StanfordCoreNLP-chinese.properties");
-      Annotation doc = new StanfordCoreNLP(chineseProperties).process(sampleChineseDocument);
-      ByteArrayOutputStream ks = new ByteArrayOutputStream();
-      serializer.write(doc, ks).close();
-      // read
-      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-      Pair<Annotation, InputStream> pair = serializer.read(kis);
-      pair.second.close();
-      Annotation readDoc = pair.first;
-      kis.close();
-      // check they are the same
-      sameAsRead(doc, readDoc);
-    } catch (Exception e) { throw new RuntimeException(e); }
-  }*/
-
+  
   @Test
   public void testSentiment() {
     testAnnotators("tokenize,ssplit,pos,parse,sentiment");
