@@ -76,10 +76,6 @@ public class KBPAnnotatorBenchmarkSlowITest extends TestCase {
     Properties props = new Properties();
     props.put("annotators",
             "tokenize,ssplit,pos,lemma,ner,regexner,parse,mention,entitymentions,coref,kbp");
-    props.put("regexner.mapping",
-            "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab" +
-                    ";ignorecase=false,edu/stanford/nlp/models/kbp/regexner_cased.tab");
-    props.put("regexner.noDefaultOverwriteLabels", "CITY");
     props.put("coref.md.type", "RULE");
     pipeline = new StanfordCoreNLP(props);
   }
