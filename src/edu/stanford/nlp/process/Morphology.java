@@ -184,6 +184,26 @@ public class Morphology implements Function  {
   }
 
 
+  /** Lemmatize the word, being sensitive to the tag.
+   *  Words other than proper nouns will be changed to all lowercase.
+   *
+   *  @param word The word to lemmatize
+   *  @param tag What part of speech to assume for it.
+   *  @return The lemma for the word
+   */
+  public static synchronized String lemmaStatic(String word, String tag) {
+    return lemmaStatic(word, tag, true);
+  }
+
+
+  /** Lemmatize the word, being sensitive to the tag.
+   *
+   *  @param word The word to lemmatize
+   *  @param tag What part of speech to assume for it.
+   *  @param lowercase If this is true, words other than proper nouns will
+   *      be changed to all lowercase.
+   *  @return The lemma for the word
+   */
   public static synchronized String lemmaStatic(String word, String tag,
                                                 boolean lowercase) {
     initStaticLexer();

@@ -88,7 +88,7 @@ public class DeterministicCorefAnnotator implements Annotator  {
           Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
           trees.add(tree);
 
-          SemanticGraph dependencies = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, Extras.NONE, true, null, true); // locking here is crucial for correct threading!
+          SemanticGraph dependencies = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, Extras.NONE, null, true); // locking here is crucial for correct threading!
           sentence.set(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class, dependencies);
 
           if (!hasSpeakerAnnotations) {

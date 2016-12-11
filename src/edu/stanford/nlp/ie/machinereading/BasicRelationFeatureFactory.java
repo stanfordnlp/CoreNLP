@@ -1,4 +1,4 @@
-package edu.stanford.nlp.ie.machinereading; 
+package edu.stanford.nlp.ie.machinereading;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
@@ -603,7 +603,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
         return;
       }
       try {
-        graph = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE, true, null, true);
+        graph = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE, null, true);
 
       } catch(Exception e){
         log.info("WARNING: failed to generate dependencies from tree " + tree.toString());

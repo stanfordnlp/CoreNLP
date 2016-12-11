@@ -9,6 +9,8 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.process.Morphology;
 
 public class TreeLemmatizer implements TreeTransformer {
+
+  @Override
   public Tree transformTree(Tree t) {
     Morphology morphology = new Morphology();
 
@@ -39,4 +41,5 @@ public class TreeLemmatizer implements TreeTransformer {
     }
     return t;
   }
+
 }

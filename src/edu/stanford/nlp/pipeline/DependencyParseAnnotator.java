@@ -1,4 +1,4 @@
-package edu.stanford.nlp.pipeline; 
+package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -75,11 +75,11 @@ public class DependencyParseAnnotator extends SentenceAnnotator  {
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
     GrammaticalStructure gs = parser.predict(sentence);
 
-    SemanticGraph deps = SemanticGraphFactory.makeFromTree(gs, Mode.COLLAPSED, extraDependencies, true, null),
-                  uncollapsedDeps = SemanticGraphFactory.makeFromTree(gs, Mode.BASIC, extraDependencies, true, null),
-                  ccDeps = SemanticGraphFactory.makeFromTree(gs, Mode.CCPROCESSED, extraDependencies, true, null),
-                  enhancedDeps = SemanticGraphFactory.makeFromTree(gs, Mode.ENHANCED, extraDependencies, true, null),
-                  enhancedPlusPlusDeps = SemanticGraphFactory.makeFromTree(gs, Mode.ENHANCED_PLUS_PLUS, extraDependencies, true, null);
+    SemanticGraph deps = SemanticGraphFactory.makeFromTree(gs, Mode.COLLAPSED, extraDependencies, null),
+                  uncollapsedDeps = SemanticGraphFactory.makeFromTree(gs, Mode.BASIC, extraDependencies, null),
+                  ccDeps = SemanticGraphFactory.makeFromTree(gs, Mode.CCPROCESSED, extraDependencies, null),
+                  enhancedDeps = SemanticGraphFactory.makeFromTree(gs, Mode.ENHANCED, extraDependencies, null),
+                  enhancedPlusPlusDeps = SemanticGraphFactory.makeFromTree(gs, Mode.ENHANCED_PLUS_PLUS, extraDependencies, null);
 
 
     sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);

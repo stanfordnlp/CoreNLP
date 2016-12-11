@@ -1119,15 +1119,13 @@ public class CoNLLDocumentReader implements DocReader  {
             new ChineseGrammaticalStructure(tree, Filters.acceptFilter(), chineseHeadFinder),
             SemanticGraphFactory.Mode.COLLAPSED,
             GrammaticalStructure.Extras.NONE,
-            threadSafe,
-            null);
+                null);
 
         basicDeps = SemanticGraphFactory.makeFromTree(
             new ChineseGrammaticalStructure(tree, Filters.acceptFilter(), chineseHeadFinder),
             SemanticGraphFactory.Mode.BASIC,
             GrammaticalStructure.Extras.NONE,
-            threadSafe,
-            null);
+                null);
       } else {
         deps = SemanticGraphFactory.generateEnhancedDependencies(tree);
         basicDeps = SemanticGraphFactory.generateUncollapsedDependencies(tree);

@@ -1,20 +1,23 @@
 package edu.stanford.nlp.trees;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.trees.ud.EnhancementOptions;
-import edu.stanford.nlp.util.logging.Redwood;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.trees.ud.EnhancementOptions;
+import edu.stanford.nlp.util.Filters;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
+
 import static edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations.*;
 import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 
@@ -35,7 +38,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(UniversalEnglishGrammaticalStructure.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(UniversalEnglishGrammaticalStructure.class);
 
   private static final long serialVersionUID = 1L;
 
@@ -103,8 +106,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * tree. The new {@code GrammaticalStructure} has the same tree structure
    * and label values as the given tree (but no shared storage). As part of
    * construction, the parse tree is analyzed using definitions from
-   * {@link GrammaticalRelation <code>GrammaticalRelation</code>} to populate
-   * the new <code>GrammaticalStructure</code> with as many labeled grammatical
+   * {@link GrammaticalRelation {@code GrammaticalRelation}} to populate
+   * the new {@code GrammaticalStructure} with as many labeled grammatical
    * relations as it can.
    *
    * @param t Parse tree to make grammatical structure from
@@ -120,18 +123,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * @param tagFilter Filter to remove punctuation dependencies
    */
   public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter) {
-    this(t, tagFilter, new UniversalSemanticHeadFinder(true), true);
-  }
-
-  /**
-   * This gets used by GrammaticalStructureFactory (by reflection). DON'T DELETE.
-   *
-   * @param t Parse tree to make grammatical structure from
-   * @param tagFilter Tag filter to remove punctuation dependencies
-   * @param hf HeadFinder to use when building it
-   */
-  public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter, HeadFinder hf) {
-    this(t, tagFilter, hf, true);
+    this(t, tagFilter, new UniversalSemanticHeadFinder(true));
   }
 
   /**
@@ -139,17 +131,17 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * tree. The new {@code GrammaticalStructure} has the same tree structure
    * and label values as the given tree (but no shared storage). As part of
    * construction, the parse tree is analyzed using definitions from
-   * {@link GrammaticalRelation <code>GrammaticalRelation</code>} to populate
+   * {@link GrammaticalRelation {@code GrammaticalRelation}} to populate
    * the new {@code GrammaticalStructure} with as many labeled grammatical
    * relations as it can.
+   *
+   * This gets used by GrammaticalStructureFactory (by reflection). DON'T DELETE.
    *
    * @param t Parse tree to make grammatical structure from
    * @param tagFilter Filter for punctuation tags
    * @param hf HeadFinder to use when building it
-   * @param threadSafe Whether or not to support simultaneous instances among multiple
-   *          threads
    */
-  public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter, HeadFinder hf, boolean threadSafe) {
+  public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter, HeadFinder hf) {
 
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
     super(t, UniversalEnglishGrammaticalRelations.values(), UniversalEnglishGrammaticalRelations.valuesLock(),
@@ -239,7 +231,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     list.addAll(sg.typedDependencies());
   }
 
-  protected void postProcessDependencies(SemanticGraph sg) {
+  protected static void postProcessDependencies(SemanticGraph sg) {
     if (DEBUG) {
       printListSorted("At postProcessDependencies:", sg.typedDependencies());
     }
@@ -411,14 +403,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   /**
    * Appends case marker information to nmod/acl/advcl relations.
    * <p/>
-   * E.g. if there is a relation <code>nmod(gov, dep)</code> and <code>case(dep, prep)</code>, then
-   * the <code>nmod</nmod> relation is renamed to <code>nmod:prep</code>.
+   * E.g. if there is a relation {@code nmod(gov, dep)} and {@code case(dep, prep)}, then
+   * the {@code nmod} relation is renamed to {@code nmod:prep}.
    *
    *
    * @param sg semantic graph
    * @param gov governor of the nmod/acl/advcl relation
    * @param mod modifier of the nmod/acl/advcl relation
-   * @param caseMarkers List<IndexedWord> of all the case markers that depend on mod
+   * @param caseMarkers {@code List<IndexedWord>} of all the case markers that depend on mod
    */
   private static void addCaseMarkersToReln(SemanticGraph sg, IndexedWord gov, IndexedWord mod, List<IndexedWord> caseMarkers) {
 
@@ -430,7 +422,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       /* check for adjacency */
       if (lastCaseMarkerIndex == 0 || cm.index() == (lastCaseMarkerIndex + 1)) {
         if ( ! firstWord) {
-          sb.append("_");
+          sb.append('_');
         }
         sb.append(cm.value());
         firstWord = false;
@@ -456,12 +448,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * "Bill flies to and from Serbia." by copying the verb resulting
    * in the following relations:
    * <p/>
-   * <code>conj:and(flies, flies')</code><br/>
-   * <code>case(Serbia, to)</code><br/>
-   * <code>cc(to, and)</code><br/>
-   * <code>conj(to, from)</code><br/>
-   * <code>nmod(flies, Serbia)</code><br/>
-   * <code>nmod(flies', Serbia)</code><br/>
+   * {@code conj:and(flies, flies')}<br/>
+   * {@code case(Serbia, to)}<br/>
+   * {@code cc(to, and)}<br/>
+   * {@code conj(to, from)}<br/>
+   * {@code nmod(flies, Serbia)}<br/>
+   * {@code nmod(flies', Serbia)}<br/>
    * <p/>
    * The label of the conjunct relation includes the conjunction type
    * because if the verb has multiple cc relations then it can be impossible
@@ -573,12 +565,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * that governs the prepositinal phrase resulting in the following
    * relations:
    * <p/>
-   * <code>conj:and(flies, flies')</code><br/>
-   * <code>case(France, to)</code><br/>
-   * <code>cc(flies, and)</code><br/>
-   * <code>case(Serbia, from)</code><br/>
-   * <code>nmod(flies, France)</code><br/>
-   * <code>nmod(flies', Serbia)</code><br/>
+   * {@code conj:and(flies, flies')}<br/>
+   * {@code case(France, to)}<br/>
+   * {@code cc(flies, and)}<br/>
+   * {@code case(Serbia, from)}<br/>
+   * {@code nmod(flies, France)}<br/>
+   * {@code nmod(flies', Serbia)}<br/>
    * <p/>
    * The label of the conjunct relation includes the conjunction type
    * because if the verb has multiple cc relations then it can be impossible
@@ -694,14 +686,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   /**
    * Adds the type of conjunction to all conjunct relations.
    * <p/>
-   * <code>cc(Marie, and)</code>, <code>conj(Marie, Chris)</code> and <code>conj(Marie, John)</code>
-   * become <code>cc(Marie, and)</code>, <code>conj:and(Marie, Chris)</code> and <code>conj:and(Marie, John)</code>.
+   * {@code cc(Marie, and)}, {@code conj(Marie, Chris)} and {@code conj(Marie, John)}
+   * become {@code cc(Marie, and)}, {@code conj:and(Marie, Chris)} and {@code conj:and(Marie, John)}.
    * <p/>
    * In case multiple coordination marker depend on the same governor
    * the one that precedes the conjunct is appended to the conjunction relation or the
    * first one if no preceding marker exists.
    * <p/>
-   * Some multi-word coordination markers are collapsed to <code>conj:and</code> or <code>conj:negcc</code>.
+   * Some multi-word coordination markers are collapsed to {@code conj:and} or {@code conj:negcc}.
    * See {@link #conjValue(IndexedWord, SemanticGraph)}.
    *
    * @param sg A SemanticGraph from a sentence
@@ -755,8 +747,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   /* Used by correctWHAttachment */
   private static final SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
 
-  private static final Morphology morphology = new Morphology();
-
   /**
    * Tries to correct complicated cases of WH-movement in
    * sentences such as "What does Mary seem to have?" in
@@ -788,7 +778,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
           reattach = true;
         } else {
           /* If the control verb can't have an object, we also have to reattach. */
-          String lemma = morphology.lemma(root.value(), root.tag());
+          String lemma = Morphology.lemmaStatic(root.value(), root.tag());
           if (lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
             reattach = true;
           }
@@ -954,25 +944,25 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * <dl>
    * <dt>nominal modifier dependencies: nmod</dt>
    * <dd>
-   * If there exist the relations <code>case(hat, in)</code> and <code>nmod(in, hat)</code> then
-   * the <code>nmod</code> relation is enhanced to <code>nmod:in(cat, hat)</code>.
-   * The <code>case(hat, in)</code> relation is preserved.</dd>
+   * If there exist the relations {@code case(hat, in)} and {@code nmod(in, hat)} then
+   * the {@code nmod} relation is enhanced to {@code nmod:in(cat, hat)}.
+   * The {@code case(hat, in)} relation is preserved.</dd>
    * <dt>clausal modifier of noun/adverbial clause modifier with case markers: acs/advcl</dt>
    * <dd>
-   * If there exist the relations <code>case(attacking, of)</code> and <code>advcl(heard, attacking)</code> then
-   * the <code>nmod</code> relation is enhanced to <code>nmod:of(heard, attacking)</code>.
-   * The <code>case(attacking, of)</code> relation is preserved.</dd>
+   * If there exist the relations {@code case(attacking, of)} and {@code advcl(heard, attacking)} then
+   * the {@code nmod} relation is enhanced to {@code nmod:of(heard, attacking)}.
+   * The {@code case(attacking, of)} relation is preserved.</dd>
    * <dt>conjunct dependencies</dt>
    * <dd>
    * If there exist the relations
-   * <code>cc(investors, and)</code> and
-   * <code>conj(investors, regulators)</code>, then the <code>conj</code> relation is
+   * {@code cc(investors, and)} and
+   * {@code conj(investors, regulators)}, then the {@code conj} relation is
    * enhanced to
-   * <code>conj:and(investors, regulators)</code></dd>
+   * {@code conj:and(investors, regulators)}</dd>
    * <dt>For relative clauses, it will collapse referent</dt>
    * <dd>
-   * <code>ref(man, that)</code> and <code>dobj(love, that)</code> are collapsed
-   * to <code>dobj(love, man)</code></dd>
+   * {@code ref(man, that)} and {@code dobj(love, that)} are collapsed
+   * to {@code dobj(love, man)}</dd>
    * </dl>
    */
   @Override
@@ -1364,7 +1354,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       // There is no nsubj of asking, but the dobj, SEC, is the extra nsubj of require.
       // Similarly, "The law tells them when to do so"
       // Instead of nsubj(do, law) we want nsubj(do, them)
-      if (objects.size() > 0) {
+      if ( ! objects.isEmpty()) {
         for (IndexedWord object : objects) {
           if ( ! sg.containsEdge(modifier, object))
             sg.addEdge(modifier, object, CONTROLLING_NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
@@ -1459,7 +1449,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * Process multi-word prepositions.
    */
   private static void processMultiwordPreps(SemanticGraph sg) {
-
     /* Semgrexes require a graph with a root. */
     if (sg.getRoots().isEmpty())
       return;
@@ -1474,19 +1463,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     for (int i = 1; i < numWords; i++) {
       String bigram = vertexList.get(i-1).value().toLowerCase() + '_' + vertexList.get(i).value().toLowerCase();
 
-      if (bigrams.get(bigram) == null) {
-        bigrams.put(bigram, new HashSet<>());
-      }
+      bigrams.putIfAbsent(bigram, new HashSet<>());
 
       bigrams.get(bigram).add(vertexList.get(i-1).index());
 
       if (i > 1) {
-        String trigram = vertexList.get(i-2).value().toLowerCase() + "_" + bigram;
-
-        if (trigrams.get(trigram) == null) {
-          trigrams.put(trigram, new HashSet<>());
-        }
-
+        String trigram = vertexList.get(i-2).value().toLowerCase() + '_' + bigram;
+        trigrams.putIfAbsent(trigram, new HashSet<>());
         trigrams.get(trigram).add(vertexList.get(i-2).index());
       }
     }
@@ -1500,7 +1483,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
     /* Process three-word prepositions. */
     process3WP(sg, trigrams);
-
   }
 
 

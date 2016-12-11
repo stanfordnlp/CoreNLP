@@ -1,11 +1,11 @@
 package edu.stanford.nlp.semgraph;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.*;
 import java.util.function.Predicate;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -18,7 +18,7 @@ import java.util.*;
 public class SemanticGraphFactory  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemanticGraphFactory.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SemanticGraphFactory.class);
 
   private SemanticGraphFactory() {} // just static factory methods
 
@@ -31,8 +31,8 @@ public class SemanticGraphFactory  {
      */
     COLLAPSED,
     /** ccProcess: Whether to do processing of CC complements resulting from
-     *  collapsing.  This argument is ignored unless <code>collapse</code> is
-     * <code>true</code>.
+     *  collapsing.  This argument is ignored unless {@code collapse} is
+     * {@code true}.
      */
     CCPROCESSED,
     BASIC,
@@ -44,7 +44,7 @@ public class SemanticGraphFactory  {
    * Produces an Uncollapsed (basic) SemanticGraph.
    */
   public static SemanticGraph generateUncollapsedDependencies(Tree tree) {
-    return makeFromTree(tree, Mode.BASIC, GrammaticalStructure.Extras.NONE, true);
+    return makeFromTree(tree, Mode.BASIC, GrammaticalStructure.Extras.NONE);
   }
 
   /**
@@ -55,7 +55,7 @@ public class SemanticGraphFactory  {
    */
   @Deprecated
   public static SemanticGraph generateCollapsedDependencies(Tree tree) {
-    return makeFromTree(tree, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE, true);
+    return makeFromTree(tree, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE);
   }
 
   /**
@@ -67,7 +67,7 @@ public class SemanticGraphFactory  {
    */
   @Deprecated
   public static SemanticGraph generateCCProcessedDependencies(Tree tree) {
-    return makeFromTree(tree, Mode.CCPROCESSED, GrammaticalStructure.Extras.NONE, true);
+    return makeFromTree(tree, Mode.CCPROCESSED, GrammaticalStructure.Extras.NONE);
   }
 
   /**
@@ -75,7 +75,7 @@ public class SemanticGraphFactory  {
    * Produces an enhanced dependencies SemanticGraph.
    */
   public static SemanticGraph generateEnhancedDependencies(Tree tree){
-    return makeFromTree(tree, Mode.ENHANCED, GrammaticalStructure.Extras.NONE, true);
+    return makeFromTree(tree, Mode.ENHANCED, GrammaticalStructure.Extras.NONE);
   }
 
   /**
@@ -83,14 +83,14 @@ public class SemanticGraphFactory  {
    * Produces an enhanced++ dependencies SemanticGraph.
    */
   public static SemanticGraph generateEnhancedPlusPlusDependencies(Tree tree){
-    return makeFromTree(tree, Mode.ENHANCED_PLUS_PLUS, GrammaticalStructure.Extras.NONE, true);
+    return makeFromTree(tree, Mode.ENHANCED_PLUS_PLUS, GrammaticalStructure.Extras.NONE);
   }
 
   /**
    * Produces an Uncollapsed (basic) SemanticGraph.
    */
   public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs) {
-    return makeFromTree(gs, Mode.BASIC, GrammaticalStructure.Extras.NONE, true, null);
+    return makeFromTree(gs, Mode.BASIC, GrammaticalStructure.Extras.NONE, null);
   }
 
   /**
@@ -101,7 +101,7 @@ public class SemanticGraphFactory  {
    */
   @Deprecated
   public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs) {
-    return makeFromTree(gs, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE, true, null);
+    return makeFromTree(gs, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE, null);
   }
 
   /**
@@ -112,21 +112,21 @@ public class SemanticGraphFactory  {
    */
   @Deprecated
   public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs) {
-    return makeFromTree(gs, Mode.CCPROCESSED, GrammaticalStructure.Extras.NONE, true, null);
+    return makeFromTree(gs, Mode.CCPROCESSED, GrammaticalStructure.Extras.NONE, null);
   }
 
   /**
    * Produces an enhanced dependencies SemanticGraph.
    */
   public static SemanticGraph generateEnhancedDependencies(GrammaticalStructure gs) {
-    return makeFromTree(gs, Mode.ENHANCED, GrammaticalStructure.Extras.NONE, true, null);
+    return makeFromTree(gs, Mode.ENHANCED, GrammaticalStructure.Extras.NONE, null);
   }
 
   /**
    * Produces an enhanced++ dependencies SemanticGraph.
    */
   public static SemanticGraph generateEnhancedPlusPlusDependencies(GrammaticalStructure gs) {
-    return makeFromTree(gs, Mode.ENHANCED_PLUS_PLUS, GrammaticalStructure.Extras.NONE, true, null);
+    return makeFromTree(gs, Mode.ENHANCED_PLUS_PLUS, GrammaticalStructure.Extras.NONE, null);
   }
 
   /**
@@ -138,7 +138,7 @@ public class SemanticGraphFactory  {
    */
   @Deprecated
   public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs, GrammaticalStructure.Extras extras) {
-    return makeFromTree(gs, Mode.BASIC, extras, true, null);
+    return makeFromTree(gs, Mode.BASIC, extras, null);
   }
 
   /**
@@ -149,7 +149,7 @@ public class SemanticGraphFactory  {
    */
   @Deprecated
   public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs, GrammaticalStructure.Extras extras) {
-    return makeFromTree(gs, Mode.COLLAPSED, extras, true, null);
+    return makeFromTree(gs, Mode.COLLAPSED, extras, null);
   }
 
   /**
@@ -160,40 +160,38 @@ public class SemanticGraphFactory  {
    */
   @Deprecated
   public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs, GrammaticalStructure.Extras extras) {
-    return makeFromTree(gs, Mode.CCPROCESSED, extras, true, null);
+    return makeFromTree(gs, Mode.CCPROCESSED, extras, null);
   }
 
   /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean, boolean)
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate
    */
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            GrammaticalStructure.Extras includeExtras,
-                                           boolean threadSafe,
                                            Predicate<TypedDependency> filter,
                                            boolean originalDependencies) {
-    return makeFromTree(tree, mode, includeExtras, threadSafe, filter,
+    return makeFromTree(tree, mode, includeExtras, filter,
         originalDependencies, INCLUDE_PUNCTUATION_DEPENDENCIES);
   }
 
   /**
-   * Returns a new <code>SemanticGraph</code> constructed from a given {@link
-   * Tree} with given options. <p/>
+   * Returns a new {@code SemanticGraph} constructed from a given {@link
+   * Tree} with given options.
    *
    * This factory method is intended to replace a profusion of highly similar
    * factory methods, such as
-   * <code>typedDependencies()</code>,
-   * <code>typedDependenciesCollapsed()</code>,
-   * <code>allTypedDependencies()</code>,
-   * <code>allTypedDependenciesCollapsed()</code>, etc. <p/>
+   * {@code typedDependencies()},
+   * {@code typedDependenciesCollapsed()},
+   * {@code allTypedDependencies()},
+   * {@code allTypedDependenciesCollapsed()}, etc.
    *
    * For a fuller explanation of the meaning of the boolean arguments, see
-   * {@link GrammaticalStructure}. <p/>
+   * {@link GrammaticalStructure}.
    *
    * @param tree A tree representing a phrase structure parse
    * @param includeExtras Whether to include extra dependencies, which may
    * result in a non-tree
-   * @param threadSafe Whether to make sure processing is thread-safe
    * @param filter A filter to exclude certain dependencies; ignored if null
    * @param originalDependencies generate original Stanford dependencies instead of new
    * Universal Dependencies
@@ -202,7 +200,6 @@ public class SemanticGraphFactory  {
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            GrammaticalStructure.Extras includeExtras,
-                                           boolean threadSafe,
                                            Predicate<TypedDependency> filter,
                                            boolean originalDependencies,
                                            boolean includePunctuationDependencies) {
@@ -227,24 +224,12 @@ public class SemanticGraphFactory  {
       }
       gs = new UniversalEnglishGrammaticalStructure(tree,
           tagFilt,
-          new UniversalSemanticHeadFinder(true),
-          threadSafe);
+          new UniversalSemanticHeadFinder(true)
+      );
 
     }
     return makeFromTree(gs, mode, includeExtras,
-        threadSafe, filter);
-  }
-
-  /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean, boolean)
-   */
-  @Deprecated
-  public static SemanticGraph makeFromTree(Tree tree,
-                                           Mode mode,
-                                           boolean includeExtras,
-                                           boolean threadSafe,
-                                           Predicate<TypedDependency> filter) {
-    return makeFromTree(tree, mode, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, filter, false);
+            filter);
   }
 
 
@@ -254,7 +239,6 @@ public class SemanticGraphFactory  {
   public static SemanticGraph makeFromTree(GrammaticalStructure gs,
                                            Mode mode,
                                            GrammaticalStructure.Extras includeExtras,
-                                           boolean threadSafe,
                                            Predicate<TypedDependency> filter) {
     Collection<TypedDependency> deps;
     switch(mode) {
@@ -302,41 +286,10 @@ public class SemanticGraphFactory  {
 
 
   /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.GrammaticalStructure, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate)
+   * @see #makeFromTree(GrammaticalStructure, Mode, GrammaticalStructure.Extras, Predicate
    */
   @Deprecated
   public static SemanticGraph makeFromTree(GrammaticalStructure tree,
-                                           Mode mode,
-                                           boolean includeExtras,
-                                           boolean threadSafe,
-                                           Predicate<TypedDependency> filter) {
-    return makeFromTree(tree, mode, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, filter);
-  }
-
-
-  /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.GrammaticalStructure, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate)
-   */
-  public static SemanticGraph makeFromTree(GrammaticalStructure structure) {
-    return makeFromTree(structure, Mode.BASIC, GrammaticalStructure.Extras.NONE, false, null);
-  }
-
-
-  /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean)
-   */
-  public static SemanticGraph makeFromTree(Tree tree,
-                                           Mode mode,
-                                           GrammaticalStructure.Extras includeExtras,
-                                           Predicate<TypedDependency> filter) {
-    return makeFromTree(tree, mode, includeExtras, false, filter, false);
-  }
-
-  /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean)
-   */
-  @Deprecated
-  public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            boolean includeExtras,
                                            Predicate<TypedDependency> filter) {
@@ -345,24 +298,51 @@ public class SemanticGraphFactory  {
 
 
   /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean)
+   * @see #makeFromTree(GrammaticalStructure, Mode, GrammaticalStructure.Extras, Predicate
+   */
+  public static SemanticGraph makeFromTree(GrammaticalStructure structure) {
+    return makeFromTree(structure, Mode.BASIC, GrammaticalStructure.Extras.NONE, null);
+  }
+
+
+  /**
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate
    */
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            GrammaticalStructure.Extras includeExtras,
-                                           boolean threadSafe) {
-    return makeFromTree(tree, mode, includeExtras, threadSafe, null, false);
+                                           Predicate<TypedDependency> filter) {
+    return makeFromTree(tree, mode, includeExtras, filter, false);
   }
 
   /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean)
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate
    */
   @Deprecated
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            boolean includeExtras,
-                                           boolean threadSafe) {
-    return makeFromTree(tree, mode, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe);
+                                           Predicate<TypedDependency> filter) {
+    return makeFromTree(tree, mode, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, filter, false);
+  }
+
+  /**
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate
+   */
+  public static SemanticGraph makeFromTree(Tree tree,
+                                           Mode mode,
+                                           GrammaticalStructure.Extras includeExtras) {
+    return makeFromTree(tree, mode, includeExtras, null, false);
+  }
+
+  /**
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras)
+   */
+  @Deprecated
+  public static SemanticGraph makeFromTree(Tree tree,
+                                           Mode mode,
+                                           boolean includeExtras) {
+    return makeFromTree(tree, mode, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE);
   }
 
   /**
@@ -391,7 +371,7 @@ public class SemanticGraphFactory  {
    * Note: CDM changed the return of this from a List to a Set in 2011. This seemed more
    * sensible.  Hopefully it doesn't break anything....
    */
-  public static Set<IndexedWord> getVerticesFromEdgeSet(Iterable<SemanticGraphEdge> edges) {
+  private static Set<IndexedWord> getVerticesFromEdgeSet(Iterable<SemanticGraphEdge> edges) {
     Set<IndexedWord> retSet = Generics.newHashSet();
     for (SemanticGraphEdge edge : edges) {
       retSet.add(edge.getGovernor());
@@ -490,7 +470,7 @@ public class SemanticGraphFactory  {
    * Like makeFromGraphs, but it makes a deep copy of the graphs and
    * renumbers the index words.
    * <br>
-   * <code>lengths</code> must be a vector containing the number of
+   * {@code lengths} must be a vector containing the number of
    * tokens in each sentence.  This is used to reindex the tokens.
    */
   public static SemanticGraph deepCopyFromGraphs(List<SemanticGraph> graphs,

@@ -12,13 +12,14 @@ public class WordStemmer implements TreeVisitor {
 
   public WordStemmer() { }
 
+  @Override
   public void visitTree(Tree t) {
     // A single Morphology is not threadsafe, so to make this class
     // threadsafe, we have to create a new Morphology for each visit
     processTree(t, null, new Morphology());
   }
 
-  private void processTree(Tree t, String tag, Morphology morpha) {
+  private static void processTree(Tree t, String tag, Morphology morpha) {
     if (t.isPreTerminal()) {
       tag = t.label().value();
     }
