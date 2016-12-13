@@ -419,7 +419,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       if (!SpanishVerbStripper.isStrippable(verb))
         continue;
 
-      Pair<String, List<String>> split = verbStripper.separatePronouns(verb);
+      SpanishVerbStripper.StrippedVerb split = verbStripper.separatePronouns(verb);
       if (split == null)
         continue;
 
@@ -434,7 +434,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       // Insert clitic pronouns as leaves of pronominal phrases which are
       // siblings of `target`. Iterate in reverse order since pronouns are
       // attached to immediate right of `target`
-      List<String> pronouns = split.second();
+      List<String> pronouns = split.getPronouns();
       for (int i = pronouns.size() - 1; i >= 0; i--) {
         String pronoun = pronouns.get(i);
 
@@ -464,7 +464,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       }
 
       TsurgeonPattern relabelOperation =
-        Tsurgeon.parseOperation(String.format("[relabel vb /%s/]", split.first()));
+        Tsurgeon.parseOperation(String.format("[relabel vb /%s/]", split.getStem()));
       t = relabelOperation.matcher().evaluate(t, matcher);
     }
 

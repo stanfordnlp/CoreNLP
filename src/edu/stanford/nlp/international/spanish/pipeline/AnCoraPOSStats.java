@@ -1,4 +1,4 @@
-package edu.stanford.nlp.international.spanish.pipeline; 
+package edu.stanford.nlp.international.spanish.pipeline;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreLabel;
@@ -30,6 +30,7 @@ public class AnCoraPOSStats  {
   private static Redwood.RedwoodChannels log = Redwood.channels(AnCoraPOSStats.class);
 
   private final TwoDimensionalCounter<String, String> unigramTagger;
+  private static final String ANCORA_ENCODING = "ISO8859_1";
 
   private List<File> fileList;
   private String outputPath;
@@ -47,8 +48,7 @@ public class AnCoraPOSStats  {
     Tree t;
     for (File file : fileList) {
       Reader in =
-        new BufferedReader(new InputStreamReader(new FileInputStream(file),
-                                                 SpanishTreebankLanguagePack.STB_ENCODING));
+        new BufferedReader(new InputStreamReader(new FileInputStream(file), ANCORA_ENCODING));
       TreeReader tr = trf.newTreeReader(in);
 
       // Tree reading will implicitly perform tree normalization for us
