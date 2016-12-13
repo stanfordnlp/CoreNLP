@@ -299,13 +299,11 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * Initializer that loads the tagger.
    *
    * @param modelFile Where to initialize the tagger from.
-   *        Most commonly, this is the filename of the trained model,
-   *        for example, <code>
-   *   /u/nlp/data/pos-tagger/wsj3t0-18-left3words/left3words-wsj-0-18.tagger
-   *        </code>.  However, if it starts with "https?://" it will
-   *        be interpreted as a URL.  One can also load models
-   *        directly from the classpath, as in loading from
-   *        edu/stanford/nlp/models/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger
+   *        Most commonly, this is the filename of the trained model, for example,
+   *        {@code /u/nlp/data/pos-tagger/wsj3t0-18-left3words/left3words-wsj-0-18.tagger}.
+   *        However, if it starts with "https?://" it will be interpreted as a URL.
+   *        One can also load models directly from the classpath, as in loading from
+   *        {@code edu/stanford/nlp/models/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger}.
    * @param config TaggerConfig based on command-line arguments
    * @param printLoading Whether to print a message saying what model file is being loaded and how long it took when finished.
    * @throws RuntimeIOException if I/O errors or serialization errors
@@ -913,7 +911,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
         log.info("prob read ");
       }
       if (printLoading) {
-        t.done(log, "Reading POS tagger model from " + source);
+        t.done(log, "Loading POS tagger from " + source);
       }
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException("Error while loading a tagger model (probably missing model file)", e);
