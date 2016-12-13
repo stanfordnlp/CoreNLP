@@ -59,7 +59,7 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 ### PHP
 
-* [php-stanford-corenlp-adapter](https://github.com/DennisDeSwart/php-stanford-corenlp-adapter) by Dennis De Swart. Simple connection to Stanford CoreNLP server.
+* [php-stanford-corenlp-adapter](https://github.com/DennisDeSwart/php-stanford-corenlp-adapter) by Dennis De Swart. Simple connection to Stanford CoreNLP server. [<a href="http://www.phpclasses.org/package/10056-PHP-Natural-language-processing-using-Stanford-server.html">PHPclasses</a>]
 
 ### Python
 * [pycorenlp, A Python wrapper for Stanford CoreNLP](https://github.com/smilli/py-corenlp) by Smitha Milli that uses the new CoreNLP v3.6.0 server. Available on [PyPI](https://pypi.python.org/pypi/pycorenlp/).

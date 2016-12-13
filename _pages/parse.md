@@ -20,7 +20,7 @@ Provides full syntactic analysis, using both the constituent and the dependency 
 * parse.flags: flags to use when loading the parser model.  The English model used by default uses "-retainTmpSubcategories"
 * parse.originalDependencies: Generate original Stanford Dependencies grammatical relations instead of Universal Dependencies. Note, however, that some annotators that use dependencies such as natlog might not function properly if you use this option.  If you are using the [Neural Network dependency parser](http://nlp.stanford.edu/software/nndep.shtml) and want to get the original SD relations, see the [CoreNLP FAQ](faq.html#how-can-i-get-original-stanford-dependencies-instead-of-universal-dependencies) on how to use a model trained on Stanford Dependencies.
 * parse.kbest Store the k-best parses in `KBestTreesAnnotation`. Note that this option only has an effect if you parse sentences with a PCFG model.
-
+* parse.keepPunct A boolean option on whether to keep punctuation depenencies in the dependency parse output of the parser.
 
 ## Caseless models
 

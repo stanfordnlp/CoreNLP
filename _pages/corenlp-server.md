@@ -165,7 +165,7 @@ pipeline.annotate(document);
 You can also run the client from the command line, and get an interface similar to the command line usage for the local CoreNLP program. The following will annotate a file `input.txt` with part-of-speech, lemmas, named entities, constituency parses, and coreference:
 
 ```bash
-java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
+java -cp "*" -Xmx1g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
 ```
 
 > **NOTE**: Again, please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#dedicated-server) section.
@@ -186,6 +186,16 @@ in your current directory, then you should be able to successfully give a comman
 ```bash
 java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPClient -props StanfordCoreNLP-french.properties -annotators tokenize,ssplit,pos,depparse ile french.txt -outputFormat conllu -backends localhost:9000
 ```
+
+## Usage via other programming languages
+
+There are now modules for several programming languages, including
+Python and JavaScript, which work by
+talking to a Stanford CoreNLP server instance. Indeed, this is now normally the best
+way to implement an interface to CoreNLP in other languages.
+
+Check out what is available on the
+[Other programming languages and packages page](other-languages.html).
 
 ## Server Administration
 
