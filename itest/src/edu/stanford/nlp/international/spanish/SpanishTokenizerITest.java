@@ -119,32 +119,32 @@ public class SpanishTokenizerITest extends TestCase {
     assertEquals(27, tokens.size());
     // assertEquals("  ", tokens.get(0).get(CoreAnnotations.BeforeAnnotation.class));
     // assertEquals("\t", tokens.get(8).get(CoreAnnotations.AfterAnnotation.class));
-    assertEquals("Wrong begin char offset", 2, (int) tokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-    assertEquals("Wrong end char offset", 4, (int) tokens.get(0).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+    assertEquals("Begin char offset", 2, (int) tokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+    assertEquals("End char offset", 4, (int) tokens.get(0).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
     assertEquals("La", tokens.get(0).get(CoreAnnotations.OriginalTextAnnotation.class));
     // note: after(x) and before(x+1) are the same
     // assertEquals("   ", tokens.get(0).get(CoreAnnotations.AfterAnnotation.class));
     // assertEquals("   ", tokens.get(1).get(CoreAnnotations.BeforeAnnotation.class));
 
-    assertEquals("escribamos", tokens.get(19).get(CoreAnnotations.OriginalTextAnnotation.class));  // todo [cdm 2016]: wrong? should preserve accent
+    assertEquals("escribámo", tokens.get(19).get(CoreAnnotations.OriginalTextAnnotation.class));
     assertEquals("escribamos", tokens.get(19).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("Wrong begin char offset", 108, (int) tokens.get(19).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-    assertEquals("Wrong end char offset", 118, (int) tokens.get(19).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+    assertEquals("Begin char offset", 108, (int) tokens.get(19).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+    assertEquals("End char offset", 117, (int) tokens.get(19).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
 
     assertEquals("se", tokens.get(20).get(CoreAnnotations.OriginalTextAnnotation.class));
     assertEquals("se", tokens.get(20).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("Wrong begin char offset", 118, (int) tokens.get(20).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-    assertEquals("Wrong end char offset", 120, (int) tokens.get(20).get(CoreAnnotations.CharacterOffsetEndAnnotation.class)); // todo [cdm 2016]: Wrong! Has to be 119! Unclear what start is but end must be 119.
+    assertEquals("Begin char offset", 117, (int) tokens.get(20).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+    assertEquals("End char offset", 119, (int) tokens.get(20).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
 
     assertEquals("la", tokens.get(21).get(CoreAnnotations.OriginalTextAnnotation.class));
     assertEquals("la", tokens.get(21).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("Wrong begin char offset", 120, (int) tokens.get(21).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class)); // todo [cdm 2016]: Wrong! Has to be 119!
-    assertEquals("Wrong end char offset", 122, (int) tokens.get(21).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+    assertEquals("Begin char offset", 119, (int) tokens.get(21).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+    assertEquals("End char offset", 121, (int) tokens.get(21).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
 
     assertEquals(",", tokens.get(22).get(CoreAnnotations.OriginalTextAnnotation.class));
     assertEquals(",", tokens.get(22).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("Wrong begin char offset", 121, (int) tokens.get(22).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-    assertEquals("Wrong end char offset", 122, (int) tokens.get(22).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+    assertEquals("Begin char offset", 121, (int) tokens.get(22).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+    assertEquals("End char offset", 122, (int) tokens.get(22).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
   }
 
   private void testOffset(String input, int[] beginOffsets, int[] endOffsets) {

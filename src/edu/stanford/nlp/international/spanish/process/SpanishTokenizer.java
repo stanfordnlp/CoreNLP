@@ -196,22 +196,23 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    */
   private CoreLabel processVerb(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
-    Pair<String, List<String>> parts = verbStripper.separatePronouns(cl.word());
-    if (parts == null) {
+    SpanishVerbStripper.StrippedVerb stripped = verbStripper.separatePronouns(cl.word());
+    if (stripped == null) {
       return cl;
     }
 
     // Split the CoreLabel into separate labels, tracking changing begin + end
     // positions.
-    int stemEnd = cl.beginPosition() + parts.first().length();
+    int stemEnd = cl.beginPosition() + stripped.getOriginalStem().length();
     int lengthRemoved = 0;
-    for (String pronoun : parts.second()) {
+    for (String pronoun : stripped.getPronouns()) {
       int beginOffset = stemEnd + lengthRemoved;
       compoundBuffer.add(copyCoreLabel(cl, pronoun, beginOffset));
       lengthRemoved += pronoun.length();
     }
 
-    CoreLabel stem = copyCoreLabel(cl, parts.first(), cl.beginPosition(), stemEnd);
+    CoreLabel stem = copyCoreLabel(cl, stripped.getStem(), cl.beginPosition(), stemEnd);
+    stem.setOriginalText(stripped.getOriginalStem());
     return stem;
   }
 
