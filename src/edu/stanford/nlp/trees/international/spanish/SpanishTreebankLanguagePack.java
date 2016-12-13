@@ -19,10 +19,6 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final long serialVersionUID = -7059939700276532428L;
 
-  // The AnCora treebank is distributed in ISO 8859-1 XML, but the
-  // processed treebank (PTB-style) is UTF-8
-  public static final String STB_ENCODING = "ISO8859_1";
-
   private static final String[] punctTags = {
     "faa", "fat", "fc", "fca", "fct", "fd", "fe", "fg", "fh", "fia", "fit",
     "fla", "flt", "fp", "fpa", "fpt", "fra", "frc", "fs", "ft", "fx", "fz",
@@ -45,17 +41,6 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
   private static final String[] startSymbols = {"ROOT"};
 
   private static final char[] annotationIntroducingChars = {'^', '[', '-'};
-
-  /**
-   * Return the input Charset encoding for the Treebank. See
-   * documentation for the <code>Charset</code> class.
-   *
-   * @return Name of Charset
-   */
-  @Override
-  public String getEncoding() {
-    return STB_ENCODING;
-  }
 
   /**
    * Return a tokenizer which might be suitable for tokenizing text that will be used with this
