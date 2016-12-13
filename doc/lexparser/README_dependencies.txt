@@ -102,6 +102,14 @@ These papers can be cited as references for the original English Stanford
 Dependencies and Enlgish Universal Dependencies.
 
 --------------------------------------
+CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.7.0
+
+Implementation of enhanced and enhanced++ dependency
+representations as described in Schuster and Manning (2016).
+
+Fixed concurrency issue.
+
+--------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.5.2
 
 Switch to Universal Dependencies as the default representation.
