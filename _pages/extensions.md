@@ -13,7 +13,11 @@ permalink: '/extensions.html'
 
 We're happy to list other models and annotators that work with Stanford CoreNLP. If you have something, please get in touch!
 
+#### Models for other human languages or varieties
+
+We’ve moved this information to the page on [other human languages](human-languages.html)
+
 #### Usage in other programming languages and packages
 
-We've moved this information to the page on [other languages and packages](other-languages.html).
+We’ve moved this information to the page on [other languages and packages](other-languages.html).
 
