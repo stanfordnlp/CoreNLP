@@ -142,4 +142,12 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
 
   }
 
+  public static class KBPEntity implements CoreAnnotation<String> {
+    public Class<String> getType() { return String.class; }
+  }
+
+  public static class KBPSlotFill implements CoreAnnotation<String> {
+    public Class<String> getType() { return String.class; }
+  }
+
 }
