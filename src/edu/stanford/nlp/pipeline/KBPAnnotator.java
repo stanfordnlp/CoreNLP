@@ -31,6 +31,7 @@ import edu.stanford.nlp.coref.data.CorefChain;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class KBPAnnotator implements Annotator {
+
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(KBPAnnotator.class);
 
@@ -64,12 +65,12 @@ public class KBPAnnotator implements Annotator {
    */
   private final EntityMentionsAnnotator entityMentionAnnotator;
 
-  /**
+  /*
    * A TokensRegexNER annotator for the special KBP NER types (case-sensitive).
    */
   //private final TokensRegexNERAnnotator casedNER;
 
-  /**
+  /*
    * A TokensRegexNER annotator for the special KBP NER types (case insensitive).
    */
   //private final TokensRegexNERAnnotator caselessNER;
@@ -121,10 +122,9 @@ public class KBPAnnotator implements Annotator {
         "^(NN|JJ).*");*/
 
     // Create entity mention annotator
-    this.entityMentionAnnotator = new EntityMentionsAnnotator("kbp.entitymention", new Properties() {{
-      setProperty("kbp.entitymention.acronyms", "true");
-      setProperty("acronyms", "true");
-    }});
+    this.entityMentionAnnotator = new EntityMentionsAnnotator("kbp.entitymention",
+            PropertiesUtils.asProperties("kbp.entitymention.acronyms", "true",
+                                         "acronyms", "true"));
   }
 
 
@@ -183,7 +183,7 @@ public class KBPAnnotator implements Annotator {
   /**
    * Augment the coreferent mention map with acronym matches.
    */
-  protected void acronymMatch(List<CoreMap> mentions, Map<CoreMap, Set<CoreMap>> mentionsMap) {
+  private static void acronymMatch(List<CoreMap> mentions, Map<CoreMap, Set<CoreMap>> mentionsMap) {
     int ticks = 0;
 
     // Get all the candidate antecedents
@@ -247,6 +247,7 @@ public class KBPAnnotator implements Annotator {
    * Annotate this document for KBP relations.
    * @param annotation The document to annotate.
    */
+  @Override
   public void annotate(Annotation annotation) {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
@@ -461,7 +462,7 @@ public class KBPAnnotator implements Annotator {
 
   /**
    * A debugging method to try relation extraction from the console.
-   * @throws IOException
+   * @throws IOException If any IO problem
    */
   public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
