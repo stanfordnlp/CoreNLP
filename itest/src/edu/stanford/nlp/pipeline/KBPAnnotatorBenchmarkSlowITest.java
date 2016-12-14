@@ -18,7 +18,7 @@ public class KBPAnnotatorBenchmarkSlowITest extends TestCase {
 
   public String KBP_DOCS_DIR = "/scr/nlp/data/kbp-benchmark//kbp-docs";
   public String GOLD_RELATIONS_PATH = "/scr/nlp/data/kbp-benchmark/kbp-gold-relations.txt";
-  public double KBP_MINIMUM_SCORE = .453;
+  public double KBP_MINIMUM_SCORE = .450;
 
   private String convertRelationName(String relationName) {
     /*if (relationName.equals("org:top_members/employees")) {

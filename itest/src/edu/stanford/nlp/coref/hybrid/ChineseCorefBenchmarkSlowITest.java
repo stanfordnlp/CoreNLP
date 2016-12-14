@@ -119,7 +119,7 @@ public class ChineseCorefBenchmarkSlowITest extends TestCase {
     setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_TP, 8220, 8260, 8224); // In 2015 was: 8074
     setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_F1, 55.40, 56.00, 55.43); // In 2015 was: 55.10
 
-    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_TP, 2250.00, 2300.00, 2296.06); // In 2015 was: 2205.72
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_TP, 2250.00, 2310.00, 2296.06); // In 2015 was: 2205.72
     setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_F1, 51.30, 52.00, 51.33); // In 2015 was: 50.62
 
     setLowHighExpected(lowResults, highResults, expectedResults, BLANC_F1, 46.00, 47.25, 46.68); // In 2015 was: 46.19
