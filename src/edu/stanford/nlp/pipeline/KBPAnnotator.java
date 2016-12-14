@@ -36,13 +36,16 @@ public class KBPAnnotator implements Annotator {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(KBPAnnotator.class);
 
-  @ArgumentParser.Option(name="model", gloss="The path to the model")
+  @ArgumentParser.Option(name="kbp.language", gloss="language for kbp")
+  private String language = "english";
+
+  @ArgumentParser.Option(name="kbp.model", gloss="The path to the model")
   private String model = DefaultPaths.DEFAULT_KBP_CLASSIFIER;
 
-  @ArgumentParser.Option(name="semgrex", gloss="Semgrex patterns directory")
+  @ArgumentParser.Option(name="kbp.semgrex", gloss="Semgrex patterns directory")
   private String semgrexdir = DefaultPaths.DEFAULT_KBP_SEMGREX_DIR;
 
-  @ArgumentParser.Option(name="tokensregex", gloss="Tokensregex patterns directory")
+  @ArgumentParser.Option(name="kbp.tokensregex", gloss="Tokensregex patterns directory")
   private String tokensregexdir = DefaultPaths.DEFAULT_KBP_TOKENSREGEX_DIR;
 
   @ArgumentParser.Option(name="regexner.cased", gloss="The tokensregexner cased path")
@@ -88,25 +91,36 @@ public class KBPAnnotator implements Annotator {
   public KBPAnnotator(String name, Properties props) {
     // Parse standard properties
     ArgumentParser.fillOptions(this, name, props);
-
+    Locale kbpLanguage =
+            (language.toLowerCase().equals("zh") || language.toLowerCase().equals("chinese")) ?
+                    Locale.CHINESE : Locale.ENGLISH ;
     // Load the extractor
     try {
-      log.info("Loading KBP classifier from " + model);
-      Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(model);
-      KBPRelationExtractor statisticalExtractor;
-      if (object instanceof LinearClassifier) {
-        //noinspection unchecked
-        statisticalExtractor = new KBPStatisticalExtractor((Classifier<String, String>) object);
-      } else if (object instanceof KBPStatisticalExtractor) {
-        statisticalExtractor = (KBPStatisticalExtractor) object;
+      if (kbpLanguage == Locale.ENGLISH) {
+        log.info("kbp language: English");
+        log.info("Loading KBP classifier from " + model);
+        Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(model);
+        KBPRelationExtractor statisticalExtractor;
+        if (object instanceof LinearClassifier) {
+          //noinspection unchecked
+          statisticalExtractor = new KBPStatisticalExtractor((Classifier<String, String>) object);
+        } else if (object instanceof KBPStatisticalExtractor) {
+          statisticalExtractor = (KBPStatisticalExtractor) object;
+        } else {
+          throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPStatisticalExtractor.class);
+        }
+        this.extractor = new KBPEnsembleExtractor(
+                new KBPTokensregexExtractor(tokensregexdir),
+                new KBPSemgrexExtractor(semgrexdir),
+                statisticalExtractor
+        );
       } else {
-        throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPStatisticalExtractor.class);
+        log.info("kbp language: Chinese");
+        this.extractor = new KBPEnsembleExtractor(
+                new KBPTokensregexExtractor(tokensregexdir),
+                new KBPSemgrexExtractor(semgrexdir)
+        );
       }
-      this.extractor = new KBPEnsembleExtractor(
-          new KBPTokensregexExtractor(tokensregexdir),
-          new KBPSemgrexExtractor(semgrexdir),
-          statisticalExtractor
-      );
       // maximum length of sentence to operate on
       maxLength = Integer.parseInt(props.getProperty("kbp.maxlen", "-1"));
     } catch (IOException | ClassNotFoundException e) {
