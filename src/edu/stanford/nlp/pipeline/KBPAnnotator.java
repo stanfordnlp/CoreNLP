@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.classify.Classifier;
 import edu.stanford.nlp.classify.LinearClassifier;
+import edu.stanford.nlp.coref.data.WordLists;
 import edu.stanford.nlp.ie.*;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
@@ -138,13 +139,13 @@ public class KBPAnnotator implements Annotator {
 
   /**
    * Returns whether the given token counts as a valid pronominal mention for KBP.
+   * This method (at present) works for either Chinese or English.
+   *
    * @param word The token to classify.
-   * @return True if this token is a pronoun that KBP should recognize.
+   * @return true if this token is a pronoun that KBP should recognize.
    */
   private static boolean kbpIsPronominalMention(CoreLabel word) {
-    String str = word.word().toLowerCase();
-    return str.equals("he") || str.equals("him") || str.equals("his")
-        || str.equals("she") || str.equals("her") || str.equals("hers");
+    return WordLists.isKbpPronominalMention(word.word());
   }
 
 
