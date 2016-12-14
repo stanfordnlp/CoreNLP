@@ -129,7 +129,12 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     this.applyNumericClassifiers = applyNumericClassifiers;
     this.nerLanguage = nerLanguage;
     this.useSUTime = useSUTime;
-    this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
+    // check for which language to use for number sequence classifier
+    if (nerLanguage == Language.CHINESE) {
+      this.nsc = new ChineseNumberSequenceClassifier(new Properties(), useSUTime, nscProps);
+    } else {
+      this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
+    }
     if (augmentRegexNER) {
       this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
     } else {
@@ -265,7 +270,8 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
         combinerProperties = properties;
       }
       //Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
-      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, NERClassifierCombiner.NER_LANGUAGE_DEFAULT,
+      Language nerLanguage = Language.fromString(properties.getProperty(prefix+"language"),Language.ENGLISH);
+      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
               useSUTime, applyRegexner, combinerProperties, models);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
