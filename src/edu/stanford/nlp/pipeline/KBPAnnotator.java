@@ -48,11 +48,11 @@ public class KBPAnnotator implements Annotator {
   @ArgumentParser.Option(name="kbp.tokensregex", gloss="Tokensregex patterns directory")
   private String tokensregexdir = DefaultPaths.DEFAULT_KBP_TOKENSREGEX_DIR;
 
-  @ArgumentParser.Option(name="regexner.cased", gloss="The tokensregexner cased path")
-  private String regexnerCasedPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASED;
-
-  @ArgumentParser.Option(name="regexner.caseless", gloss="The tokensregexner caseless path")
-  private String regexnerCaselessPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS;
+  // @ArgumentParser.Option(name="regexner.cased", gloss="The tokensregexner cased path")
+  // private String regexnerCasedPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASED;
+  //
+  // @ArgumentParser.Option(name="regexner.caseless", gloss="The tokensregexner caseless path")
+  // private String regexnerCaselessPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS;
 
   /**
    * The extractor implementation.
