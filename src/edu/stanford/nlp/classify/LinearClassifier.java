@@ -67,7 +67,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RVFClassifier<L, F>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(LinearClassifier.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifier.class);
 
   /** Classifier weights. First index is the featureIndex value and second index is the labelIndex value. */
   private double[][] weights;
@@ -82,7 +82,6 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   public static final String TEXT_SERIALIZATION_DELIMITER = "\t";
 
-  static final Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifier.class);
 
   @Override
   public Collection<L> labels() {
@@ -1324,7 +1323,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    * Simple convenience wrapper for IOUtils.readFromString.
    */
   public static <L, F> LinearClassifier<L, F> readClassifier(String loadPath) {
-    log.info("Deserializing classifier from " + loadPath + "...");
+    logger.info("Deserializing classifier from " + loadPath + "...");
 
     try {
       ObjectInputStream ois = IOUtils.readStreamFromString(loadPath);
