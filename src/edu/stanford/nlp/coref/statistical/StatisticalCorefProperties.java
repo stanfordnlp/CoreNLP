@@ -46,7 +46,7 @@ public class StatisticalCorefProperties {
   }
 
   public static double[] pairwiseScoreThresholds(Properties props) {
-    String thresholdsProp = (String) props.get("coref.statistical.pairwiseScoreThresholds");
+    String thresholdsProp = props.getProperty("coref.statistical.pairwiseScoreThresholds");
     if (thresholdsProp != null) {
       String[] split = thresholdsProp.split(",");
       if (split.length == 4) {

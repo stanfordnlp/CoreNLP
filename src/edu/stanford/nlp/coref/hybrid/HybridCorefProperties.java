@@ -8,18 +8,19 @@ import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.coref.hybrid.sieve.Sieve.ClassifierType;
-
 import edu.stanford.nlp.coref.data.Dictionaries.MentionType;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
- * Properties for the hybrid coref system
+ * Properties for the hybrid coref system.
+ *
  * @author Heeyoung Lee
  * @author Kevin Clark
  */
 public class HybridCorefProperties {
-  public enum CorefInputType { RAW, CONLL, ACE, MUC }
+
+  // public enum CorefInputType { RAW, CONLL, ACE, MUC }
 
   // general
   public static final String LANG_PROP = "coref.language";
@@ -107,6 +108,9 @@ public class HybridCorefProperties {
           "ExactStringMatch", "RelaxedExactStringMatch", "PreciseConstructs", "StrictHeadMatch1",
           "StrictHeadMatch2", "StrictHeadMatch3", "StrictHeadMatch4", "RelaxedHeadMatch", "PronounMatch", "SpeakerMatch",
           "ChineseHeadMatch"));
+
+
+  private HybridCorefProperties() {} // static methods/ constants
 
 
   public static boolean doScore(Properties props) {

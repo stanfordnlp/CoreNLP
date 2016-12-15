@@ -231,16 +231,10 @@ public class PropertiesUtils {
 
   /**
    * Get the value of a property.  If the key is not present, returns defaultValue.
-   *
+   * This is just equivalent to props.getProperty(key, defaultValue).
    */
-  // todo [cdm 2016]: This is just equivalent to props.getProperty(key, defaultValue)
   public static String getString(Properties props, String key, String defaultValue) {
-    String value = props.getProperty(key);
-    if (value != null) {
-      return value;
-    } else {
-      return defaultValue;
-    }
+    return props.getProperty(key, defaultValue);
   }
 
   /**
