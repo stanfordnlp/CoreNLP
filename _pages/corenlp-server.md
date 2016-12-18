@@ -211,6 +211,12 @@ nohup java -mx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer 1337 &
 
 The classpath must include all of the CoreNLP dependencies. The memory requirements of the server are the same as that of CoreNLP, though it will grow as you load more models (e.g., memory increases if you load both the PCFG and Shift-Reduce constituency parser models). A safe minimum is 4gb; 8gb is recommended if you can spare it.
 
+### Docker
+
+If running the server under docker, the container’s port 9000 has to be published to the host. Give a command like:
+`docker run -p 9000:9000 --name coreNLP --rm -i -t motiz88/corenlp`. If, when going to `localhost:9000/`, you see the error 
+`This site can’t be reached. localhost refused to connect`, then this is what you failed to do!
+
 ### Stopping the Server
 
 The server can be stopped programmatically by making a call to the `/shutdown` endpoint with an appropriate shutdown key. This key is saved to the file `/tmp/corenlp.shutdown` when the server starts. An example command to shut down the server would be:
