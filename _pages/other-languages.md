@@ -17,7 +17,15 @@ by Nils Gruenwald. Incomplete. Currently only wraps tagger and TokensRegex.
 
 ### Docker
 
-Okay, Docker isn't a language, but you know what we mean….
+Okay, Docker isn't a language, but you know what we mean…. Note on using the CoreNLP server under docker: The container’s port 9000 has to be published to the host. You need to give a command like:
+```
+docker run -p 9000:9000 --name coreNLP --rm -i -t motiz88/corenlp
+```
+If you see the below error when going to `localhost:9000/`, then this is what you failed to do!
+```
+This site can’t be reached
+localhost refused to connect
+```
 
 * [corenlp-docker](https://hub.docker.com/r/motiz88/corenlp/) A Dockerfile for Stanford CoreNLP Server by motiz88.
 * [corenlp-docker](https://github.com/chilland/corenlp-docker) Another by chilland.
