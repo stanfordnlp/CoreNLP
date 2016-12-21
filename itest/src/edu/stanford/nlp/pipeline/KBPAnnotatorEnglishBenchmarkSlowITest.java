@@ -5,9 +5,6 @@ import edu.stanford.nlp.io.IOUtils;
 import java.io.File;
 import java.util.*;
 
-/**
- * Created by jebolton on 12/19/16.
- */
 public class KBPAnnotatorEnglishBenchmarkSlowITest extends KBPAnnotatorBenchmark {
 
   @Override

@@ -21,6 +21,9 @@ public class KBPAnnotatorBenchmark extends TestCase {
   public double KBP_MINIMUM_SCORE;
 
   public void loadGoldData() {
+    // initialize HashMaps
+    docIDToText = new HashMap<String,String>();
+    docIDToRelations = new HashMap<String,Set<String>>();
     // load the gold relations from gold relations file
     List<String> goldRelationLines = IOUtils.linesFromFile(GOLD_RELATIONS_PATH);
     for (String relationLine : goldRelationLines) {
