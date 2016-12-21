@@ -113,7 +113,7 @@ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP [ -props myprops.p
 
 where the `-filelist` parameter points to a file whose content lists all files to be processed (one per line).
 
-If you do not specify any properties that load input files, you will be placed in the interactive shell. Type `q` to exit.
+If you do not specify any properties that load input files, you will be placed in the [interactive shell](repl.html). Type `q` to exit.
 
 If your input files have XML tags in them, you may wish to use the `cleanxml` annotator to preprocess it.
 

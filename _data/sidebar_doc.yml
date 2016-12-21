@@ -37,6 +37,9 @@ entries:
         - title: Simple CoreNLP API
           url: simple.html
 
+        - title: Interactive mode (REPL)
+          url: repl.md
+
         - title: CoreNLP server
           url: corenlp-server.html
 

@@ -13,7 +13,9 @@ forms of words, their parts of speech, whether they are names of
 companies, people, etc., normalize dates, times, and numeric quantities,
 mark up the structure of sentences in terms of
 phrases and word dependencies, indicate which noun phrases refer to
-the same entities, indicate sentiment, extract particular or open-class relations between mentions, etc. 
+the same entities, indicate sentiment, 
+extract particular or open-class relations between entity mentions,
+get quotes people said, etc. 
 
 Choose Stanford CoreNLP if you need:
 
@@ -21,7 +23,7 @@ Choose Stanford CoreNLP if you need:
 * Fast, reliable analysis of arbitrary texts
 * The overall highest quality text analytics
 * Support for a number of major (human) languages
-* Interfaces available for various major modern programming languages
+* Available interfaces for most major modern programming languages
 * Ability to run as a simple web service
 
 Stanford CoreNLP’s goal is to
@@ -53,15 +55,12 @@ Stanford CoreNLP can be downloaded via the link below. This will download a larg
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2016-10-31.zip">Download CoreNLP 3.7.0 </a> </div>
 
-To download earlier versions of Stanford CoreNLP, including the last stable release (3.7.0), go [here](history.html)
-
 Alternatively, Stanford CoreNLP is [available on **Maven Central**](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
 Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
-For more information on obtaining CoreNLP, see the [download page](download.html).
+For more information on obtaining CoreNLP, see the [download page](download.html). 
+To download earlier versions of Stanford CoreNLP, including the last stable release (3.6.0), or language packs for earlier versions, go to the [history page](history.html).
 
 You can find the jars for 3.7.0 containing the models for each language we support in the table below.
-
-The jars for earlier versions can be found [here](history.html).
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
