@@ -669,7 +669,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     String best = Counters.argmax(scores);
     // While it doesn't type check, continue going down the list.
     // NO_RELATION is always an option somewhere in there, so safe to keep going...
-    while (!NO_RELATION.equals(best) &&
+    while (!NO_RELATION.equals(best) && scores.size() > 1 &&
         (!KBPRelationExtractor.RelationType.fromString(best).get().validNamedEntityLabels.contains(input.objectType) ||
          RelationType.fromString(best).get().entityType != input.subjectType) ) {
       scores.remove(best);
