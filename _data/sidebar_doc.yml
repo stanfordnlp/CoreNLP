@@ -38,7 +38,7 @@ entries:
           url: simple.html
 
         - title: Interactive mode (REPL)
-          url: repl.md
+          url: repl.html
 
         - title: CoreNLP server
           url: corenlp-server.html

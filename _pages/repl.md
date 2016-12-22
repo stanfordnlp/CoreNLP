@@ -30,6 +30,6 @@ Typing `CTRL-C` also works!
 
 ### Java 9 REPL
 
-If you are playing with the REPL for Java 9, you might want to
+If you are trying out the REPL for Java 9, you might want to
 try out using the CoreNLP [simple](simple.html) API with it.
 It works quite well.
