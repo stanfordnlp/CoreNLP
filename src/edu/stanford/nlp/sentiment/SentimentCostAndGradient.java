@@ -17,10 +17,12 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
+import edu.stanford.nlp.util.logging.Redwood;
 
 // TODO: get rid of the word Sentiment everywhere
 public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
 
+  private static Redwood.RedwoodChannels log = Redwood.channels(SentimentCostAndGradient.class);
   private final SentimentModel model;
   private final List<Tree> trainingBatch;
 
@@ -492,6 +494,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       // calculate the classification for this word/tag.  In fact, the
       // recursion should not have gotten here (unless there are
       // degenerate trees of just one leaf)
+      log.info("SentimentCostAndGradient: warning: We reached leaves in forwardPropagate: " + tree);
       throw new AssertionError("We should not have reached leaves in forwardPropagate");
     } else if (tree.isPreTerminal()) {
       classification = model.getUnaryClassification(tree.label().value());
@@ -499,6 +502,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       SimpleMatrix wordVector = model.getWordVector(word);
       nodeVector = NeuralUtils.elementwiseApplyTanh(wordVector);
     } else if (tree.children().length == 1) {
+      log.info("SentimentCostAndGradient: warning: Non-preterminal nodes of size 1: " + tree);
       throw new AssertionError("Non-preterminal nodes of size 1 should have already been collapsed");
     } else if (tree.children().length == 2) {
       forwardPropagateTree(tree.children()[0]);
@@ -521,6 +525,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
         nodeVector = NeuralUtils.elementwiseApplyTanh(W.mult(childrenVector));
       }
     } else {
+      log.info("SentimentCostAndGradient: warning: Tree not correctly binarized: " + tree);
       throw new AssertionError("Tree not correctly binarized");
     }
 
@@ -528,6 +533,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
 
     int index = getPredictedClass(predictions);
     if (!(tree.label() instanceof CoreLabel)) {
+      log.info("SentimentCostAndGradient: warning: No CoreLabels in nodes: " + tree);
       throw new AssertionError("Expected CoreLabels in the nodes");
     }
     CoreLabel label = (CoreLabel) tree.label();
