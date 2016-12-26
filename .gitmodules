@@ -1,0 +1,3 @@
+[submodule "models-install-script"]
+	path = models-install-script
+	url = https://github.com/krichter722/CoreNLP-install-models
