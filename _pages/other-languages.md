@@ -83,7 +83,7 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 ### Ruby
 
-* [Ruby bindings](https://github.com/louismullie/stanford-core-nlp) by Louis Mullie (see also: [Ruby Gems page](https://rubygems.org/gems/stanford-core-nlp)).
+* [Stanford CoreNLP Ruby bindings](https://github.com/louismullie/stanford-core-nlp) by Louis Mullie (see also: [Ruby Gems page](https://rubygems.org/gems/stanford-core-nlp)).
 * The larger [TREAT](https://github.com/louismullie/treat) NLP toolkit by Louis Mullie also makes available Stanford CoreNLP.
 
 ### Scala
