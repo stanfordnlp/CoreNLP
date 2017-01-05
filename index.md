@@ -61,12 +61,15 @@ For more information on obtaining CoreNLP, see the [download page](download.html
 To download earlier versions of Stanford CoreNLP, including the last stable release (3.6.0), or language packs for earlier versions, go to the [history page](history.html).
 
 You can find the jars for 3.7.0 containing the models for each language we support in the table below.
+Due to size issues we have divided the English resources into two jars.  The English (KBP) models jar contains extra resources needed to run relation extraction and
+entity linking.
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
 | Arabic  | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-31-models.jar) | 3.7.0 |
+| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-31-models.jar) | 3.7.0 |
