@@ -17,6 +17,7 @@ You can find the latest models in the table below.  Versions for earlier release
 | Arabic | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-31-models.jar) | 3.7.0 |
+| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2016-10-31-models.jar) | 3.7.0 |
 | Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-31-models.jar) | 3.7.0 |
