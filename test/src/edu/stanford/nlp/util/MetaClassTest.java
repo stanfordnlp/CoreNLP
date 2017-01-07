@@ -1,8 +1,10 @@
 package edu.stanford.nlp.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -395,6 +397,20 @@ public class MetaClassTest {
 
     Integer[] intsEmpty = MetaClass.cast("", Integer[].class);
     assertArrayEquals(new Integer[]{}, intsEmpty);
+  }
+
+  @Test
+  public void testCastStringArray() throws IOException {
+    String[] strings1 = MetaClass.cast("[a,b,c]", String[].class);
+    assertArrayEquals(new String[]{"a", "b", "c"}, strings1);
+
+    String string1 = Files.createTempFile("TestCastString", "tmp").toString();
+    String string2 = Files.createTempFile("TestCastString", "tmp").toString();
+    String[] strings2 = MetaClass.cast("['" + string1 + "','" + string2 + "']", String[].class);
+    assertArrayEquals(new String[]{string1, string2}, strings2);
+
+    String[] strings3 = MetaClass.cast("['a','b','c']", String[].class);
+    assertArrayEquals(new String[]{"a", "b", "c"}, strings3);
   }
 
   private static enum Fruits {
