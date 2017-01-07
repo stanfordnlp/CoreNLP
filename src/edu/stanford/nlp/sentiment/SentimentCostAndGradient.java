@@ -2,7 +2,6 @@ package edu.stanford.nlp.sentiment;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -22,7 +21,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 // TODO: get rid of the word Sentiment everywhere
 public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
 
-  private static Redwood.RedwoodChannels log = Redwood.channels(SentimentCostAndGradient.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SentimentCostAndGradient.class);
+
   private final SentimentModel model;
   private final List<Tree> trainingBatch;
 
@@ -52,7 +52,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
   }
 
   /**
-   * Returns the index with the highest value in the <code>predictions</code> matrix.
+   * Returns the index with the highest value in the {@code predictions} matrix.
    * Indexed from 0.
    */
   private static int getPredictedClass(SimpleMatrix predictions) {
@@ -287,7 +287,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     derivative = NeuralUtils.paramsToVector(theta.length, derivatives.binaryTD.valueIterator(), derivatives.binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(derivatives.binaryTensorTD.valueIterator()), derivatives.unaryCD.values().iterator(), derivatives.wordVectorD.values().iterator());
   }
 
-  static double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
+  private static double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
                                    TwoDimensionalMap<String, String, SimpleMatrix> currentMatrices,
                                    double scale, double regCost, boolean dropBiasColumn) {
     double cost = 0.0; // the regularization cost
@@ -305,9 +305,9 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return cost;
   }
 
-  static double scaleAndRegularize(Map<String, SimpleMatrix> derivatives,
+  private static double scaleAndRegularize(Map<String, SimpleMatrix> derivatives,
                                    Map<String, SimpleMatrix> currentMatrices,
-                                   double scale, double regCost, 
+                                   double scale, double regCost,
                                    boolean activeMatricesOnly, boolean dropBiasColumn) {
     double cost = 0.0; // the regularization cost
     for (Map.Entry<String, SimpleMatrix> entry : currentMatrices.entrySet()) {
@@ -330,7 +330,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return cost;
   }
 
-  static double scaleAndRegularizeTensor(TwoDimensionalMap<String, String, SimpleTensor> derivatives,
+  private static double scaleAndRegularizeTensor(TwoDimensionalMap<String, String, SimpleTensor> derivatives,
                                   TwoDimensionalMap<String, String, SimpleTensor> currentMatrices,
                                   double scale,
                                   double regCost) {
@@ -486,8 +486,8 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
    * useful annotation except when training.
    */
   public void forwardPropagateTree(Tree tree) {
-    SimpleMatrix nodeVector = null;
-    SimpleMatrix classification = null;
+    SimpleMatrix nodeVector; // initialized below or Exception thrown // = null;
+    SimpleMatrix classification; // initialized below or Exception thrown // = null;
 
     if (tree.isLeaf()) {
       // We do nothing for the leaves.  The preterminals will
