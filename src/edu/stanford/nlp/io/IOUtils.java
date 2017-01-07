@@ -385,6 +385,16 @@ public class IOUtils  {
     return oos;
   }
 
+  /**
+   * Returns an ObjectInputStream reading from any of a URL, a CLASSPATH resource, or a file.
+   * The CLASSPATH takes priority over the file system.
+   * This stream is buffered and, if necessary, gunzipped.
+   *
+   * @param filenameOrUrl The String specifying the URL/resource/file to load
+   * @return An ObjectInputStream for loading a resource
+   * @throws RuntimeIOException On any IO error
+   * @throws NullPointerException Input parameter is null
+   */
   public static ObjectInputStream readStreamFromString(String filenameOrUrl)
           throws IOException {
     InputStream is = getInputStreamFromURLOrClasspathOrFileSystem(filenameOrUrl);

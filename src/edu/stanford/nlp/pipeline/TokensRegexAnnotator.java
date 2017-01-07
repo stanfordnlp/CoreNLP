@@ -64,7 +64,7 @@ public class TokensRegexAnnotator implements Annotator {
   public TokensRegexAnnotator(String name, Properties props) {
     String prefix = (name == null)? "": name + '.';
     String[] files  = PropertiesUtils.getStringArray(props, prefix + "rules");
-    if (files == null || files.length == 0) {
+    if (files.length == 0) {
       throw new RuntimeException("No rules specified for TokensRegexAnnotator " + name + ", check " + prefix + "rules property");
     }
     env = TokenSequencePattern.getNewEnv();

@@ -33,20 +33,27 @@ import edu.stanford.nlp.coref.data.CorefChain;
 @SuppressWarnings("FieldCanBeLocal")
 public class KBPAnnotator implements Annotator {
 
+  private String NOT_PROVIDED = "none";
+
+  private Properties kbpProperties;
+
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(KBPAnnotator.class);
 
-  @ArgumentParser.Option(name="kbp.language", gloss="language for kbp")
-  private String language = "english";
+  //@ArgumentParser.Option(name="kbp.language", gloss="language for kbp")
+  //private String language = "english";
 
-  @ArgumentParser.Option(name="kbp.model", gloss="The path to the model")
+  @ArgumentParser.Option(name="kbp.model", gloss="The path to the model, set to \"none\" for no model")
   private String model = DefaultPaths.DEFAULT_KBP_CLASSIFIER;
 
-  @ArgumentParser.Option(name="kbp.semgrex", gloss="Semgrex patterns directory")
+  @ArgumentParser.Option(name="kbp.semgrex", gloss="Semgrex patterns directory, set to \"none\" to not use semgrex")
   private String semgrexdir = DefaultPaths.DEFAULT_KBP_SEMGREX_DIR;
 
-  @ArgumentParser.Option(name="kbp.tokensregex", gloss="Tokensregex patterns directory")
+  @ArgumentParser.Option(name="kbp.tokensregex", gloss="Tokensregex patterns directory, set to \"none\" to not use tokensregex")
   private String tokensregexdir = DefaultPaths.DEFAULT_KBP_TOKENSREGEX_DIR;
+
+  @ArgumentParser.Option(name="kbp.verbose", gloss="Print out KBP logging info")
+  private boolean VERBOSE = false;
 
   // @ArgumentParser.Option(name="regexner.cased", gloss="The tokensregexner cased path")
   // private String regexnerCasedPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASED;
@@ -91,14 +98,21 @@ public class KBPAnnotator implements Annotator {
   public KBPAnnotator(String name, Properties props) {
     // Parse standard properties
     ArgumentParser.fillOptions(this, name, props);
-    Locale kbpLanguage =
-            (language.toLowerCase().equals("zh") || language.toLowerCase().equals("chinese")) ?
-                    Locale.CHINESE : Locale.ENGLISH ;
-    // Load the extractor
+    //Locale kbpLanguage =
+            //(language.toLowerCase().equals("zh") || language.toLowerCase().equals("chinese")) ?
+                    //Locale.CHINESE : Locale.ENGLISH ;
+    kbpProperties = props;
     try {
-      if (kbpLanguage == Locale.ENGLISH) {
-        log.info("kbp language: English");
-        log.info("Loading KBP classifier from " + model);
+      ArrayList<KBPRelationExtractor> extractors = new ArrayList<KBPRelationExtractor>();
+      // add tokensregex rules
+      if (!tokensregexdir.equals(NOT_PROVIDED))
+        extractors.add(new KBPTokensregexExtractor(tokensregexdir, VERBOSE));
+      // add semgrex rules
+      if (!semgrexdir.equals(NOT_PROVIDED))
+        extractors.add(new KBPSemgrexExtractor(semgrexdir,VERBOSE));
+      // attempt to add statistical model
+      if (!model.equals(NOT_PROVIDED)) {
+        log.info("Loading KBP classifier from: " + model);
         Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(model);
         KBPRelationExtractor statisticalExtractor;
         if (object instanceof LinearClassifier) {
@@ -109,19 +123,13 @@ public class KBPAnnotator implements Annotator {
         } else {
           throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPStatisticalExtractor.class);
         }
-        this.extractor = new KBPEnsembleExtractor(
-                new KBPTokensregexExtractor(tokensregexdir),
-                new KBPSemgrexExtractor(semgrexdir),
-                statisticalExtractor
-        );
-      } else {
-        log.info("kbp language: Chinese");
-        this.extractor = new KBPEnsembleExtractor(
-                new KBPTokensregexExtractor(tokensregexdir),
-                new KBPSemgrexExtractor(semgrexdir)
-        );
+        extractors.add(statisticalExtractor);
       }
-      // maximum length of sentence to operate on
+      // build extractor
+      this.extractor =
+              new KBPEnsembleExtractor(extractors.toArray(
+                      new KBPRelationExtractor[extractors.size()]));
+      // set maximum length of sentence to operate on
       maxLength = Integer.parseInt(props.getProperty("kbp.maxlen", "-1"));
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
@@ -273,7 +281,7 @@ public class KBPAnnotator implements Annotator {
     entityMentionAnnotator.annotate(annotation);
 
     // Create simple document
-    Document doc = new Document(serializer.toProto(annotation));
+    Document doc = new Document(kbpProperties,serializer.toProto(annotation));
 
     // Get the mentions in the document
     List<CoreMap> mentions = new ArrayList<>();
