@@ -31,8 +31,6 @@ public class SemgrexBatchParser  {
   /** Maximum stream size in characters */
   private static final int MAX_STREAM_SIZE = 1024 * 1024;
 
-  public static boolean VERBOSE = false;
-
   private SemgrexBatchParser() { } // static methods class
 
   public static List<SemgrexPattern> compileStream(InputStream is) throws IOException {
@@ -82,7 +80,7 @@ public class SemgrexBatchParser  {
     }
     if(offset < line.length()) out.append(line.substring(offset));
     String postProcessed =  out.toString();
-    if(!postProcessed.equals(line) && VERBOSE) log.info("Line \"" + line + "\" changed to \"" + postProcessed + '"');
+    if(! postProcessed.equals(line)) log.info("Line \"" + line + "\" changed to \"" + postProcessed + '"');
     return postProcessed;
   }
 

@@ -418,7 +418,8 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    *                     the sign of the feature weight.
    * @return number of features satisfying the specified conditions
    */
-  public int getFeatureCount(Set<L> labels, double threshold, boolean useMagnitude) {
+  public int getFeatureCount(Set<L> labels, double threshold, boolean useMagnitude)
+  {
     if (labels != null) {
       Set<Integer> iLabels = getLabelIndices(labels);
       return getFeatureCountLabelIndices(iLabels, threshold, useMagnitude);
@@ -461,7 +462,8 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    * @param numFeatures  How many top features to return (-1 for unlimited)
    * @return List of triples indicating feature, label, weight
    */
-  public List<Triple<F,L,Double>> getTopFeatures(double threshold, boolean useMagnitude, int numFeatures) {
+  public List<Triple<F,L,Double>> getTopFeatures(double threshold, boolean useMagnitude, int numFeatures)
+  {
     return getTopFeatures(null, threshold, useMagnitude, numFeatures, true);
   }
 
@@ -478,7 +480,8 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    */
   public List<Triple<F,L,Double>> getTopFeatures(Set<L> labels,
                                                  double threshold, boolean useMagnitude, int numFeatures,
-                                                 boolean descending) {
+                                                 boolean descending)
+  {
     if (labels != null) {
       Set<Integer> iLabels = getLabelIndices(labels);
       return getTopFeaturesLabelIndices(iLabels, threshold, useMagnitude, numFeatures, descending);
@@ -500,7 +503,8 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    */
   protected List<Triple<F,L,Double>> getTopFeaturesLabelIndices(Set<Integer> iLabels,
                                                  double threshold, boolean useMagnitude, int numFeatures,
-                                                 boolean descending) {
+                                                 boolean descending)
+  {
     edu.stanford.nlp.util.PriorityQueue<Pair<Integer,Integer>> biggestKeys =
             new FixedPrioritiesPriorityQueue<>();
 
@@ -636,7 +640,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
     // Put in List either reversed or not
     // (Note: can't repeatedly iterate over PriorityQueue.)
     int actualSize = biggestKeys.size();
-    Pair<Integer, Integer>[] bigArray = ErasureUtils.mkTArray(Pair.class, actualSize);
+    Pair<Integer, Integer>[] bigArray = ErasureUtils.<Pair<Integer, Integer>>mkTArray(Pair.class,actualSize);
     // logger.info("biggestKeys is " + biggestKeys);
     if (printDescending) {
       for (int j = actualSize - 1; j >= 0; j--) {
@@ -947,7 +951,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
     for (F f : features.keySet()) {
       String fStr = f.toString();
       StringBuilder line = new StringBuilder(fStr);
-      line.append('[').append(nf.format(features.getCount(f))).append(']');
+      line.append("[").append(nf.format(features.getCount(f))).append("]");
       fStr = line.toString();
       for (int s = fStr.length(); s < featureLength; s++) {
         line.append(' ');
@@ -1378,7 +1382,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       out.close();
     } catch (Exception e) {
       logger.info("Error attempting to save classifier to file=" + file);
-      logger.info(e);
+      e.printStackTrace();
     }
   }
 

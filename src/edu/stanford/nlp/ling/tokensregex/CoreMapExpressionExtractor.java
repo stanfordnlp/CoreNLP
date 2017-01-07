@@ -137,9 +137,6 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     this.collapseExtractionRules = false;
     if (env != null) {
       this.collapseExtractionRules = Objects.equals((Boolean) env.get("collapseExtractionRules"), true);
-      if (env.get("verbose") != null)
-        verbose =  (env.get("verbose") != null) &&
-                Objects.equals((Boolean) env.get("verbose"), true);
     }
   }
 
@@ -160,13 +157,11 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
    */
   public void appendRules(List<SequenceMatchRules.Rule> rules)
   {
-    if (verbose)
-      log.info("Read " + rules.size() + " rules");
+    log.info("Read " + rules.size() + " rules");
     // Put rules into stages
     if (collapseExtractionRules) {
       rules = collapse(rules);
-      if (verbose)
-        log.info("Collapsing into " + rules.size() + " rules");
+      log.info("Collapsing into " + rules.size() + " rules");
     }
     for (SequenceMatchRules.Rule r:rules) {
       if (r instanceof SequenceMatchRules.AssignmentRule) {
@@ -286,8 +281,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     CoreMapExpressionExtractor<M> extractor = new CoreMapExpressionExtractor<>(env);
     for (String filename:filenames) {
       try {
-        if (verbose)
-          log.info("Reading TokensRegex rules from " + filename);
+        log.info("Reading TokensRegex rules from " + filename);
         BufferedReader br = IOUtils.readerFromString(filename);
         TokenSequenceParser parser = new TokenSequenceParser();
         parser.updateExpressionExtractor(extractor, br);
