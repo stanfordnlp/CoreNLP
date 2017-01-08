@@ -336,17 +336,10 @@ public class PropertiesUtils {
    * @return An array of Strings value for the given key in the Properties. May be empty. Never null.
    */
   public static String[] getStringArray(Properties props, String key) {
-    String val = props.getProperty(key);
-    String[] results;
-    if (val == null) {
+    String[] results = StringUtils.decodeArray(props.getProperty(key));
+    if (results == null) {
       results = StringUtils.EMPTY_STRING_ARRAY;
-    } else {
-      results = StringUtils.decodeArray(val);
-      if (results == null) {
-        results = StringUtils.EMPTY_STRING_ARRAY;
-      }
     }
-    // System.out.printf("Called with prop key and value %s %s, returned %s.%n", key, val, Arrays.toString(results));
     return results;
   }
 
