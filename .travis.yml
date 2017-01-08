@@ -1,0 +1,27 @@
+language: java
+sudo: required
+
+jdk:
+- oraclejdk8
+# `openjdk8` not available
+
+install:
+# download models (see `README.md`)
+- wget http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar
+- wget http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar
+- mvn install:install-file -Dfile=stanford-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=3.7.0 -Dclassifier=models -Dpackaging=jar
+- mvn install:install-file -Dfile=stanford-english-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=3.7.0 -Dclassifier=models-english -Dpackaging=jar
+
+- mv stanford-corenlp-models-current.jar stanford-corenlp-3.7.0-models.jar
+# necessary for `mvn install`
+
+script:
+- ant
+- ./gradlew
+- mvn install
+
+#blocklist
+branches:
+  except:
+  - gh-pages
+  
