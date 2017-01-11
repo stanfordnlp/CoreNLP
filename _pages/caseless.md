@@ -53,7 +53,7 @@ ask for these models to be used like this:
   performance. Sorry! Stuff happens. If you want good caseless NER,
   you should either run with caseless models from a 3.5.x series
   release (all of which are compatible with version 3.6.0) or download
-  the new fixed model either from the version 3.7.0 beta or in the HEAD jar, which is available from
+  the new fixed model from version 3.7.0 or in the HEAD jar, which is available from
   [our GitHub page](https://github.com/stanfordnlp/CoreNLP). Since the
   version 3.5.x releases have a separate caseless jar, it is easy to
   also specify it as a dependency; you just have to make sure that it
