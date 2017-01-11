@@ -1312,9 +1312,11 @@ public class Redwood  {
   @SuppressWarnings("deprecation")
   public static void main(String[] args){
 
-    Redwood.log(Redwood.DBG, "hello world!");
-    Redwood.hideChannelsEverywhere(Redwood.DBG);
-    Redwood.log(Redwood.DBG, "hello debug!");
+    RedwoodConfiguration.current().listenOnChannels(record -> {
+      System.out.println(">>> " + record.content.toString());
+    }, Redwood.ERR).apply();
+    Redwood.log("hello world!");
+    Redwood.log(Redwood.ERR, "an error!");
 
     System.exit(1);
 
