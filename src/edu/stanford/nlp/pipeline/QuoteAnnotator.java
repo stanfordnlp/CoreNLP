@@ -179,10 +179,10 @@ public class QuoteAnnotator implements Annotator  {
       Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> overall = getQuotes(quotesFrom);
       String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
       List<CoreMap> cmQuotesUnicode =
-          getCoreMapQuotes(overall.first(), tokens, sentences, text, docID);
+          getCoreMapQuotes(overall.first(), tokens, sentences, text, docID, false);
       List<CoreMap> cmUnclosedUnicode = null;
       if (EXTRACT_UNCLOSED) {
-        cmUnclosedUnicode = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID);
+        cmUnclosedUnicode = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID, true);
       }
       int numUnicode = countQuotes(cmQuotesUnicode);
 
@@ -192,10 +192,10 @@ public class QuoteAnnotator implements Annotator  {
       }
       overall = getQuotes(quotesFrom);
       docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
-      List<CoreMap> cmQuotesAscii = getCoreMapQuotes(overall.first(), tokens, sentences, text, docID);
+      List<CoreMap> cmQuotesAscii = getCoreMapQuotes(overall.first(), tokens, sentences, text, docID, false);
       List<CoreMap> cmUnclosedAscii = null;
       if (EXTRACT_UNCLOSED) {
-        cmUnclosedAscii = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID);
+        cmUnclosedAscii = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID, true);
       }
       int numAsciiSingle = countQuotes(cmQuotesAscii);
 
@@ -204,10 +204,10 @@ public class QuoteAnnotator implements Annotator  {
       overall = getQuotes(quotesFrom);
       docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
       List<CoreMap> cmQuotesAsciiNoSingle =
-          getCoreMapQuotes(overall.first(), tokens, sentences, text, docID);
+          getCoreMapQuotes(overall.first(), tokens, sentences, text, docID, false);
       List<CoreMap> cmUnclosedAsciiNoSingle = null;
       if (EXTRACT_UNCLOSED) {
-        cmUnclosedAsciiNoSingle = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID);
+        cmUnclosedAsciiNoSingle = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID, true);
       }
       int numAsciiNoSingle = countQuotes(cmQuotesAsciiNoSingle);
 
@@ -230,8 +230,8 @@ public class QuoteAnnotator implements Annotator  {
           getQuotes(quotesFrom);
 
       String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
-      List<CoreMap> cmQuotes = getCoreMapQuotes(overall.first(), tokens, sentences, text, docID);
-      List<CoreMap> cmQuotesUnclosed = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID);
+      List<CoreMap> cmQuotes = getCoreMapQuotes(overall.first(), tokens, sentences, text, docID, false);
+      List<CoreMap> cmQuotesUnclosed = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID, true);
 
       // add quotes to document
       setAnnotations(annotation, cmQuotes, cmQuotesUnclosed, "Setting quotes.");
@@ -290,7 +290,8 @@ public class QuoteAnnotator implements Annotator  {
   public static List<CoreMap> getCoreMapQuotes(List<Pair<Integer, Integer>> quotes,
                                                List<CoreLabel> tokens,
                                                List<CoreMap> sentences,
-                                              String text, String docID) {
+                                               String text, String docID,
+                                               boolean unclosed) {
     List<CoreMap> cmQuotes = Generics.newArrayList();
     for (Pair<Integer, Integer> p : quotes) {
       int begin = p.first();
@@ -358,7 +359,11 @@ public class QuoteAnnotator implements Annotator  {
           toRemove.add(cmQuoteComp);
         }
       }
-      cmQuote.set(CoreAnnotations.QuotationsAnnotation.class, embeddedQuotes);
+      if (!unclosed) {
+        cmQuote.set(CoreAnnotations.QuotationsAnnotation.class, embeddedQuotes);
+      } else {
+        cmQuote.set(CoreAnnotations.UnclosedQuotationsAnnotation.class, embeddedQuotes);
+      }
     }
 
     // Remove all the quotes that we want to.
@@ -368,11 +373,11 @@ public class QuoteAnnotator implements Annotator  {
     }
 
     // Set the quote index annotations properly
-    setQuoteIndices(cmQuotes);
+    setQuoteIndices(cmQuotes, unclosed);
     return cmQuotes;
   }
 
-  private static void setQuoteIndices(List<CoreMap> topLevel) {
+  private static void setQuoteIndices(List<CoreMap> topLevel, boolean unclosed) {
     List<CoreMap> level = topLevel;
     int index = 0;
     while (!level.isEmpty()) {
@@ -386,8 +391,16 @@ public class QuoteAnnotator implements Annotator  {
           }
         }
         index++;
-        if (quote.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
-          nextLevel.addAll(quote.get(CoreAnnotations.QuotationsAnnotation.class));
+        List<CoreMap> key = quote.get(CoreAnnotations.QuotationsAnnotation.class);
+        if (unclosed) {
+          key = quote.get(CoreAnnotations.UnclosedQuotationsAnnotation.class);
+        }
+        if (key != null) {
+          if (!unclosed) {
+            nextLevel.addAll(quote.get(CoreAnnotations.QuotationsAnnotation.class));
+          } else {
+            nextLevel.addAll(quote.get(CoreAnnotations.UnclosedQuotationsAnnotation.class));
+          }
         }
       }
       level = nextLevel;
