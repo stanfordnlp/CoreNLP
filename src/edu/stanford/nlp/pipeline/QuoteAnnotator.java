@@ -43,6 +43,11 @@ import java.util.regex.Pattern;
  *   <li>allowEmbeddedSame: "true" or "false" indicating whether or not to allow smart/directed
  *   (everything except " and ') quotes of the same kind to be embedded within one another
  *   (default=false).</li>
+ *   <li>extractUnclosedQuotes: "true" or "false" indicating whether or not to extract unclosed
+ *   quotes. If "true", an UnclosedQuotationsAnnotation that is structured exactly the same as
+ *   the QuotationsAnnotation will be added to the document. Any nested unclosed quotations will be
+ *   contained in nested UnclosedQuotationsAnnotation on the target unclosed quotation
+ *   (default=false).</li>
  * </ul>
  *
  * The annotator adds a QuotationsAnnotation to the Annotation
@@ -59,6 +64,8 @@ import java.util.regex.Pattern;
  *  <li>SentenceBeginAnnotation (if the sentence splitter has bee run before the quote annotator)</li>
  *  <li>SentenceEndAnnotation (if the sentence splitter has bee run before the quote annotator)</li>
  * </ul>
+ *
+ *
  *
  * @author Grace Muzny
  */
