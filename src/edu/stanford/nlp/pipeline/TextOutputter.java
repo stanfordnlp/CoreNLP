@@ -197,6 +197,19 @@ public class TextOutputter extends AnnotationOutputter {
         }
       }
     }
+
+    // display quotes if available
+    if (annotation.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
+      pw.println("Extracted quotes: ");
+      List<CoreMap> allQuotes = QuoteAnnotator.gatherQuotes(annotation);
+      for (CoreMap quote : allQuotes) {
+        pw.printf("[QuotationIndexAnnotation=%d, CharacterOffsetBegin=%d, Text=%s]%n",
+            quote.get(CoreAnnotations.QuotationIndexAnnotation.class),
+            quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
+            quote.get(CoreAnnotations.TextAnnotation.class));
+      }
+    }
+
     pw.flush();
   }
 

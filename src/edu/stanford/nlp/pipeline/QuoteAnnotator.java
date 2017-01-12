@@ -665,4 +665,20 @@ public class QuoteAnnotator implements Annotator  {
     return Collections.singleton(CoreAnnotations.QuotationsAnnotation.class);
   }
 
+
+  // helper method to recursively gather all embedded quotes
+  public static List<CoreMap> gatherQuotes(CoreMap curr) {
+    List<CoreMap> embedded = curr.get(CoreAnnotations.QuotationsAnnotation.class);
+    if (embedded != null) {
+      List<CoreMap> extended = Generics.newArrayList();
+      for (CoreMap quote : embedded) {
+        extended.addAll(gatherQuotes(quote));
+      }
+      extended.addAll(embedded);
+      return extended;
+    } else {
+      return Generics.newArrayList();
+    }
+  }
+
 }

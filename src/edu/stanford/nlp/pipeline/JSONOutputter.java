@@ -247,7 +247,7 @@ public class JSONOutputter extends AnnotationOutputter {
 
       // quotes
       if (doc.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
-        List<CoreMap> quotes = gatherQuotes(doc);
+        List<CoreMap> quotes = QuoteAnnotator.gatherQuotes(doc);
         l1.set("quotes", quotes.stream().map(quote -> (Consumer<Writer>) (Writer l2) -> {
             l2.set("id", quote.get(CoreAnnotations.QuotationIndexAnnotation.class));
             l2.set("text", quote.get(CoreAnnotations.TextAnnotation.class));
@@ -263,21 +263,6 @@ public class JSONOutputter extends AnnotationOutputter {
     });
 
     l0.writer.flush();  // flush
-  }
-
-  // helper method to recursively gather all embedded quotes
-  private List<CoreMap> gatherQuotes(CoreMap curr) {
-    List<CoreMap> embedded = curr.get(CoreAnnotations.QuotationsAnnotation.class);
-    if (embedded != null) {
-      List<CoreMap> extended = Generics.newArrayList();
-      for (CoreMap quote : embedded) {
-        extended.addAll(gatherQuotes(quote));
-      }
-      extended.addAll(embedded);
-      return extended;
-    } else {
-      return Generics.newArrayList();
-    }
   }
 
   /**
