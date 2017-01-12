@@ -12,21 +12,31 @@ The Annotators currently supported and the Annotations they generate are summari
 
 To construct a Stanford CoreNLP object from a given set of properties, use `StanfordCoreNLP(Properties props)`. This method creates the pipeline using the annotators given in the "annotators" property (see below for an example setting). The complete list of accepted annotator names is listed in the first column of the table [here](annotators.html). To parse an arbitrary text, use the `annotate(Annotation document)` method.
 
-``` java
+```java
 import edu.stanford.nlp.pipeline.*;
-// creates a StanfordCoreNLP object, with POS tagging, lemmatization, NER, parsing, and coreference resolution 
-Properties props = new Properties();
-props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
-StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+import java.util.*;
 
-// read some text in the text variable
-String text = ... // Add your text here!
+public class BasicPipelineExample {
 
-// create an empty Annotation just with the given text
-Annotation document = new Annotation(text);
+    public static void main(String[] args) {
 
-// run all Annotators on this text
-pipeline.annotate(document);
+        // creates a StanfordCoreNLP object, with POS tagging, lemmatization, NER, parsing, and coreference resolution
+        Properties props = new Properties();
+        props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+        // read some text in the text variable
+        String text = "...";
+
+        // create an empty Annotation just with the given text
+        Annotation document = new Annotation(text);
+
+        // run all Annotators on this text
+        pipeline.annotate(document);
+
+    }
+
+}
 ```
 
 You can give other properties to CoreNLP by build a Properties object
