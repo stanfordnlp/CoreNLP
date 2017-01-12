@@ -19,6 +19,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Pointer;
 
@@ -246,23 +247,17 @@ public class JSONOutputter extends AnnotationOutputter {
 
       // quotes
       if (doc.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
-        List<CoreMap> quotes = doc.get(CoreAnnotations.QuotationsAnnotation.class);
-        // gather all (including embedded) quotes into this list
-        for (CoreMap quote : quotes) {
-          gatherQuotes(quote, quotes);
-        }
-        l1.set("quotes", (Consumer<Writer>) chainWriter -> {
-          for (CoreMap quote : quotes) {
-            chainWriter.set("id", quote.get(CoreAnnotations.QuotationIndexAnnotation.class));
-            chainWriter.set("text", quote.get(CoreAnnotations.TextAnnotation.class));
-            chainWriter.set("beginIndex", quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-            chainWriter.set("endIndex", quote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-            chainWriter.set("beginToken", quote.get(CoreAnnotations.TokenBeginAnnotation.class));
-            chainWriter.set("endToken", quote.get(CoreAnnotations.TokenEndAnnotation.class));
-            chainWriter.set("beginSentence", quote.get(CoreAnnotations.SentenceBeginAnnotation.class));
-            chainWriter.set("endSentence", quote.get(CoreAnnotations.SentenceEndAnnotation.class));
-          }
-        });
+        List<CoreMap> quotes = gatherQuotes(doc);
+        l1.set("quotes", quotes.stream().map(quote -> (Consumer<Writer>) (Writer l2) -> {
+            l2.set("id", quote.get(CoreAnnotations.QuotationIndexAnnotation.class));
+            l2.set("text", quote.get(CoreAnnotations.TextAnnotation.class));
+            l2.set("beginIndex", quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+            l2.set("endIndex", quote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+            l2.set("beginToken", quote.get(CoreAnnotations.TokenBeginAnnotation.class));
+            l2.set("endToken", quote.get(CoreAnnotations.TokenEndAnnotation.class));
+            l2.set("beginSentence", quote.get(CoreAnnotations.SentenceBeginAnnotation.class));
+            l2.set("endSentence", quote.get(CoreAnnotations.SentenceEndAnnotation.class));
+        }));
       }
 
     });
@@ -271,15 +266,18 @@ public class JSONOutputter extends AnnotationOutputter {
   }
 
   // helper method to recursively gather all embedded quotes
-  private List<CoreMap> gatherQuotes(CoreMap curr, List<CoreMap> gathered) {
+  private List<CoreMap> gatherQuotes(CoreMap curr) {
     List<CoreMap> embedded = curr.get(CoreAnnotations.QuotationsAnnotation.class);
     if (embedded != null) {
-      gathered.addAll(embedded);
+      List<CoreMap> extended = Generics.newArrayList();
       for (CoreMap quote : embedded) {
-        gatherQuotes(quote, gathered);
+        extended.addAll(gatherQuotes(quote));
       }
+      extended.addAll(embedded);
+      return extended;
+    } else {
+      return Generics.newArrayList();
     }
-    return gathered;
   }
 
   /**
