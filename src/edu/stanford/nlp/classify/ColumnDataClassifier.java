@@ -73,38 +73,37 @@ import edu.stanford.nlp.util.logging.Redwood;
  * equivalent to multiclass logistic regression apart from a slightly different
  * symmetric parameterization. It also implements a Bernoulli Naive
  * Bayes model and can implement an SVM by an external call to SVMlight.
- *
+ * <p/>
  * You can also use ColumnDataClassifier programmatically, where its main
  * usefulness beyond simply building your own LinearClassifier is that it
  * provides easy conversion of data items into features, using the same
  * properties as the command-line version. You can see example of usage in
  * the class {@link edu.stanford.nlp.classify.demo.ClassifierDemo}.
- *
+ * <p/>
  * Input files are expected to
  * be one data item per line with two or more columns indicating the class
  * of the item and one or more predictive features.  Columns are
  * separated by tab characters.  Tab and newline characters cannot occur
  * inside field values (there is no escaping mechanism); any other characters
  * are legal in field values.
- *
+ * <p/>
  * Typical usage:
- *
- * {@code java edu.stanford.nlp.classify.ColumnDataClassifier -prop propFile }
- *
- * or
- *
+ * <p>{@code
+ * java edu.stanford.nlp.classify.ColumnDataClassifier -prop propFile
+ * }<p>or<p>
  * {@code java -mx300m edu.stanford.nlp.classify.ColumnDataClassifier
- * -trainFile trainFile -testFile testFile -useNGrams|... &gt; output }
- *
+ * -trainFile trainFile -testFile testFile -useNGrams|... &gt; output
+ * }
+ * <p/>
  * (Note that for large data sets, you may wish to specify
  * the amount of memory available to Java, such
  * as in the second example above.)
- *
+ * <p/>
  * In the simplest case, there are just two tab-separated columns in the
  * training input: the first for the class, and the second for the String
  * datum which has that class.   In more complex uses, each datum can
  * be multidimensional, and there are many columns of data attributes.
- *
+ * <p/>
  * To illustrate simple uses, and the behavior of Naive Bayes and Maximum
  * entropy classifiers, example files corresponding to the examples from the
  * Manning and Klein maxent classifier tutorial, slides 46-49, available at
@@ -112,7 +111,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * classify package source directory (files starting with "easy").  Other
  * examples appear in the {@code examples} directory of the distributed
  * classifier.
- *
+ * <p/>
  * In many instances, parameters can either be given on the command line
  * or provided using a Properties file
  * (specified on the command-line with {@code -prop} <i>propFile</i>).
@@ -131,9 +130,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * give a value to boolean properties (e.g., {@code 2.useString=true});
  * just giving the property name (as {@code 2.useString}) isn't
  * sufficient.
- *
+ * <p/>
  * The following properties are recognized:
- *
+ * </p>
  * <table border="1">
  *   <caption>Properties for ColumnDataClassifier</caption>
  * <tr><th><b>Property Name</b></th><th><b>Type</b></th><th><b>Default Value</b></th><th><b>Description</b></th><th><b>FeatName</b></th></tr>
@@ -237,7 +236,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td>shuffleSeed</td><td>long</td><td>0</td><td>If non-zero, and the training data is being shuffled, this is used as the seed for the Random. Otherwise, System.nanoTime() is used.</td></tr>
  * <tr><td>csvInput</td><td>boolean</td><td>false</td><td>If true, reads train and test file in csv format, with support for quoted fields.</td></tr>
  * <tr><td>inputFormat</td><td>String</td><td>null</td><td>If "header" then reads file with first line treated as header; if "comments" treats lines starting with # as comments; else treated as "plain" tsv/csv file</td></tr>
- * <tr><td>csvOutput</td><td>String</td><td>null</td><td>If non-null, used to format the output of the classifier. This is a printf-style format specification where %0 through %9 can print columns of the input, %c prints the assigned class and %n a newline character. This option can produce Kaggle-format output files!</td></tr>
+ *  <tr><td>csvOutput</td><td>String</td><td>null</td><td>If non-null, used to format the output of the classifier. This is a printf-style format specification where %0 through %9 can print columns of the input, %c prints the assigned class and %n a newline character. This option can produce Kaggle-format output files!</td></tr>
  * </table>
  *
  * @author Christopher Manning
@@ -288,13 +287,12 @@ public class ColumnDataClassifier  {
     if (globalFlags.featureFormat) {
       Collection<String> theFeatures = new ArrayList<>();
       for (int i = 0; i < strings.length; i++) {
-        if (i != globalFlags.goldAnswerColumn) {
-          if (globalFlags.significantColumnId) {
-            theFeatures.add(String.format("%d:%s", i, strings[i]));
-          } else {
-            theFeatures.add(strings[i]);
-          }
-        }
+        if (i != globalFlags.goldAnswerColumn)
+            if (globalFlags.significantColumnId) {
+              theFeatures.add(String.format("%d:%s", i, strings[i]));
+            } else {
+              theFeatures.add(strings[i]);
+            }
       }
       return new BasicDatum<>(theFeatures, strings[globalFlags.goldAnswerColumn]);
     } else {
@@ -303,16 +301,13 @@ public class ColumnDataClassifier  {
     }
   }
 
-  private static boolean isRealValued(Flags flags) {
-    return flags != null && (flags.isRealValued || flags.logTransform || flags.logitTransform || flags.sqrtTransform);
-  }
 
   private RVFDatum<String,String> makeRVFDatumFromStrings(String[] strings) {
     if (globalFlags.featureFormat) {
       ClassicCounter<String> theFeatures = new ClassicCounter<>();
       for (int i = 0; i < strings.length; i++) {
         if (i != globalFlags.goldAnswerColumn) {
-          if (isRealValued(flags[i])) {
+          if (flags[i] != null && (flags[i].isRealValued || flags[i].logTransform || flags[i].logitTransform || flags[i].sqrtTransform)) {
             addFeatureValue(strings[i], flags[i], theFeatures);
           } else {
             theFeatures.setCount(strings[i], 1.0);
@@ -342,9 +337,6 @@ public class ColumnDataClassifier  {
   /** Read a set of training examples from a file, and return the data in a
    *  featurized form and in String form. If feature selection is asked for, the returned
    *  featurized form is after feature selection has been applied.
-   *  (Note that at present we sometimes need the String form, e.g., for cross-validation, and so
-   *  we always pass to readDataset that we are inTestPhase (even though we are training), so this second
-   *  element is filled in.)
    *
    *  @param fileName File with supervised training examples.
    *  @return A Pair of a GeneralDataset, where the labels and features are Strings and a List of the input examples
@@ -482,9 +474,9 @@ public class ColumnDataClassifier  {
     return new Pair<>(dataset, lineInfos);
   }
 
-  /** Split according to whether we are using tsv file (default) or csv files. */
+  //Split according to whether we are using tsv file (default) or csv files
   private String[] splitLineToFields(String line) {
-    if (globalFlags.csvInput) {
+    if(globalFlags.csvInput) {
       String[] strings = StringUtils.splitOnCharWithQuoting(line, ',', '"', '"');
       for (int i = 0; i < strings.length; ++i) {
         if (strings[i].startsWith("\"") && strings[i].endsWith("\""))
@@ -492,9 +484,8 @@ public class ColumnDataClassifier  {
       }
       return strings;
     }
-    else {
+    else
       return tab.split(line);
-    }
   }
 
   /**
@@ -592,7 +583,7 @@ public class ColumnDataClassifier  {
         if (builder.length() > 0) {
           builder.append('\t');
         }
-        builder.append(pair.first()).append('\t').append(pair.second());
+        builder.append(pair.first().toString()).append('\t').append(pair.second());
       }
       results = builder.toString();
     } else {
@@ -699,7 +690,7 @@ public class ColumnDataClassifier  {
       } else {
         message += "Output format: ";
         if (globalFlags.displayedColumn >= 0) {
-          message += "dataColumn" + globalFlags.displayedColumn + '\t';
+          message += "dataColumn" + globalFlags.displayedColumn + "\t";
         }
         message += "goldAnswer\t";
         if (globalFlags.displayAllAnswers) {
@@ -735,11 +726,15 @@ public class ColumnDataClassifier  {
     }
     if (globalFlags.justify) {
       logger.info("### Test item " + i);
-      logger.info(StringUtils.join(example, "\t"));
+      String message = "";
+      for (String field : example) {
+        message += field + "\t";
+      }
+      logger.info(message + "\n");
       if (cl instanceof LinearClassifier) {
         ((LinearClassifier<String,String>)cl).justificationOf(d);
       }
-      logger.info();
+      logger.info("");
     }
     Counter<String> logScores;
     if (globalFlags.usesRealValues) {
@@ -753,7 +748,7 @@ public class ColumnDataClassifier  {
       // logger.info("Biased using counter: " +
       //         globalFlags.biasedHyperplane);
       List<String> biggestKeys = new ArrayList<>(logScores.keySet());
-      biggestKeys.sort(Counters.toComparatorDescending(logScores));
+      Collections.sort(biggestKeys, Counters.toComparatorDescending(logScores));
       for (String key : biggestKeys) {
         double prob = dist.probabilityOf(key);
         double threshold = globalFlags.biasedHyperplane.getCount(key);
@@ -957,8 +952,6 @@ public class ColumnDataClassifier  {
      * Extracts all the features from a certain input column.
      *
      * @param cWord The String to extract data from
-     * @param flags Flags specifying which features to extract
-     * @param featuresC Some kind of Collection or Counter to put features into
      * @param goldAns The goldAnswer for this whole datum or emptyString if none.
      *                    This is used only for filling in the binned lengths histogram counters
      */
@@ -1184,33 +1177,28 @@ public class ColumnDataClassifier  {
         for(String featureName : featureNames)
           addFeature(featuresC,featureName,DEFAULT_VALUE);
       }
-      if (isRealValued(flags)) {
+      if (flags.isRealValued || flags.logTransform || flags.logitTransform || flags.sqrtTransform) {
         addFeatureValue(cWord, flags, featuresC);
+
       }
        //logger.info("Made featuresC " + featuresC);
     }  //end makeDatum
 
-  /** Return the tokens using PTB tokenizer.
-   *
-   *  @param str String to tokenize
-   *  @return List of tokens
-   */
-  // todo [cdm 2017]: Someday should generalize this to allow use of other tokenizers
-  private String[] ptbTokenize(String str) {
-    if (ptbFactory==null) {
+  //return the tokens using PTB tokenizer
+  private String[] ptbTokenize(String cWord) {
+    if(ptbFactory==null)
       ptbFactory = PTBTokenizer.factory();
-    }
-    Tokenizer<Word> tokenizer = ptbFactory.getTokenizer(new StringReader(str));
+    Tokenizer<Word> tokenizer = ptbFactory.getTokenizer(new StringReader(cWord));
     List<Word> words = tokenizer.tokenize();
     String[] res = new String[words.size()];
-    for (int i = 0, sz = words.size(); i < sz; i++) {
+    for(int i = 0; i < words.size(); ++i) {
       res[i] = words.get(i).word();
     }
     return res;
   }
 
   /**
-   * Caches a hash of word to all substring features.  Uses a <i>lot</i> of memory!
+   * Caches a hash of word to all substring features.  A <i>lot</i> of memory!
    * If the String space is large, you shouldn't turn this on.
    */
   private static final Map<String,Collection<String>> wordToSubstrings = new ConcurrentHashMap<>();
@@ -1574,9 +1562,8 @@ public class ColumnDataClassifier  {
    * @param props Properties, with the special format of column.flag used in ColumnDataClassifier
    * @return An array of flags for each data column, with additional global flags in element [0]
    */
-  private static Pair<Flags[], Classifier<String,String>> setProperties(Properties props) {
+  private Flags[] setProperties(Properties props) {
     Flags[] myFlags;
-    Classifier<String,String> classifier = null;
     boolean myUsesRealValues = false;
 
     Pattern prefix;
@@ -1591,20 +1578,30 @@ public class ColumnDataClassifier  {
     // other command-line arguments
     String loadPath = props.getProperty("loadClassifier");
     if (loadPath != null) {
-      Pair<Flags[],Classifier<String,String>> pair = loadClassifier(loadPath);
-      myFlags = pair.first();
-      classifier = pair.second();
+      logger.info("Loading classifier from " + loadPath + "...");
+      ObjectInputStream ois = null;
+      try {
+        // load the classifier
+        ois = IOUtils.readStreamFromString(loadPath);
+        classifier = ErasureUtils.<LinearClassifier<String,String>>uncheckedCast(ois.readObject());
+        myFlags = (Flags[]) ois.readObject();
+        assert myFlags.length > 0;
+        logger.info("Done.");
+      } catch (Exception e) {
+        throw new RuntimeIOException("Error deserializing " + loadPath, e);
+      } finally {
+        IOUtils.closeIgnoringExceptions(ois);
+      }
     } else {
       myFlags = new Flags[1];
       myFlags[0] = new Flags();  // initialize zero column flags used for global flags; it can't be null
     }
 
-    logger.info("Setting ColumnDataClassifier properties");
     for (String key : props.stringPropertyNames()) {
       String val = props.getProperty(key);
-      logger.info(key + " = " + val);
 
       int col = 0;  // the default (first after class)
+       logger.info(key + " = " + val);
       Matcher matcher = prefix.matcher(key);
       if (matcher.matches()) {
         col = Integer.parseInt(matcher.group(1));
@@ -1920,7 +1917,7 @@ public class ColumnDataClassifier  {
       }
     }
     myFlags[0].usesRealValues = myUsesRealValues;
-    return new Pair<>(myFlags,classifier);
+    return myFlags;
   }
 
 
@@ -1939,76 +1936,21 @@ public class ColumnDataClassifier  {
    *               See the class documentation for details of the properties.
    */
   public ColumnDataClassifier(Properties props) {
-    this(setProperties(props));
-  }
-
-  /** Construct a ColumnDataClassifier.
-   *
-   *  @param flagsClassifierPair A Pair of a Flags object array specifies all aspects of featurization
-   *                             and other behavior and a Classifier that will be used.
-   */
-  public ColumnDataClassifier(Pair<Flags[],Classifier<String,String>> flagsClassifierPair) {
-    flags = flagsClassifierPair.first();
+    flags = setProperties(props);
     globalFlags = flags[0];
-    classifier = flagsClassifierPair.second();
-  }
-
-
-  private static Pair<Flags[],Classifier<String,String>> loadClassifier(String path) {
-    Timing t = new Timing();
-    try (ObjectInputStream ois = IOUtils.readStreamFromString(path)) {
-      Pair<Flags[],Classifier<String,String>> pair = loadClassifier(ois);
-      t.done(logger, "Loading classifier from " + path);
-      return pair;
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeIOException("Error loading classifier from " + path, e);
-    }
-  }
-
-  private static Pair<Flags[],Classifier<String,String>> loadClassifier(ObjectInputStream ois)
-          throws IOException, ClassNotFoundException {
-    // load the classifier
-    Classifier<String,String> classifier = ErasureUtils.<LinearClassifier<String,String>>uncheckedCast(ois.readObject());
-    Flags[] myFlags = (Flags[]) ois.readObject();
-    assert myFlags.length > 0;
-    return new Pair<>(myFlags, classifier);
-  }
-
-  /** Return a new ColumnDataClassifier object based on a serialized object.
-   *  The serialized object stores both a Flags[] that specifies feature extraction and
-   *  other properties of the classifier and a Classifier object.
-   *
-   *  @param path A classpath resource, URL, or file system path
-   *  @return The ColumnDataClassifier
-   */
-  public static ColumnDataClassifier getClassifier(String path) {
-    return new ColumnDataClassifier(loadClassifier(path));
-  }
-
-  /** Return a new ColumnDataClassifier object based on a serialized object.
-   *  The serialized stream stores both a Flags[] that specifies feature extraction and
-   *  other properties of the classifier and a Classifier object.
-   *
-   *  @param ois Where to read a serialized classifier from
-   *  @return The ColumnDataClassifier
-   */
-  public static ColumnDataClassifier getClassifier(ObjectInputStream ois)
-          throws IOException, ClassNotFoundException {
-    return new ColumnDataClassifier(loadClassifier(ois));
   }
 
 
   /**
-   * Runs the ColumnDataClassifier from the command-line.  Usage:
+   * Runs the ColumnDataClassifier from the command-line.  Usage: <p>{@code
+   * java edu.stanford.nlp.classify.ColumnDataClassifier -trainFile trainFile
+   * -testFile testFile [-useNGrams|-useString|-sigma sigma|...]
+   * }<p>or<p>{@code
+   * java ColumnDataClassifier -prop propFile
+   * }
    *
-   * {@code java edu.stanford.nlp.classify.ColumnDataClassifier -trainFile trainFile
-   * -testFile testFile [-useNGrams|-useString|-sigma sigma|...] }
-   *
-   * or
-   *
-   * {@code java ColumnDataClassifier -prop propFile }
-   *
-   * @param args Command line arguments, as described in the class documentation
+   * @param args Command line arguments, as described in the class
+   *             documentation
    * @throws IOException If IO problems
    */
   public static void main(String[] args) throws IOException {
@@ -2027,7 +1969,7 @@ public class ColumnDataClassifier  {
 
     if (cdc.globalFlags.loadClassifier == null) {
       // Otherwise we attempt to train one and exit if we don't succeed
-      if ( ! cdc.trainClassifier(Flags.trainFile)) {
+      if ( ! cdc.trainClassifier()) {
         return;
       }
     }
@@ -2038,9 +1980,9 @@ public class ColumnDataClassifier  {
   } // end main()
 
 
-  public boolean trainClassifier(String path) throws IOException {
+  private boolean trainClassifier() throws IOException {
     // build dataset of training data featurized
-    Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readAndReturnTrainingExamples(path);
+    Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readAndReturnTrainingExamples(Flags.trainFile);
     GeneralDataset<String,String> train = dataInfo.first();
     List<String[]> lineInfos = dataInfo.second();
 
@@ -2093,40 +2035,18 @@ public class ColumnDataClassifier  {
     // serialize the classifier
     String serializeTo = Flags.serializeTo;
     if (serializeTo != null) {
-      serializeClassifier(serializeTo);
+      logger.info("Serializing classifier to " + serializeTo + "...");
+      ObjectOutputStream oos = IOUtils.writeStreamFromString(serializeTo);
+      oos.writeObject(classifier);
+      // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
+      String testFile = globalFlags.testFile;
+      globalFlags.testFile = null;
+      oos.writeObject(flags);
+      globalFlags.testFile = testFile;
+      oos.close();
+      logger.info("Done.");
     }
     return true;
-  }
-
-  /** Serialize a classifier to a file. This writes to the file both a LinearClassifier and the
-   *  Flags[] object from a ColumnDataClassifier. The latter captures all the information about
-   *  how the ColumnDataClassifier is extracting features from data items for the classifier.
-   *
-   *  @param serializeTo Filename to serialize the classifier to
-   *  @throws IOException If any IO error
-   */
-  public void serializeClassifier(String serializeTo) throws IOException {
-    logger.info("Serializing classifier to " + serializeTo + "...");
-    ObjectOutputStream oos = IOUtils.writeStreamFromString(serializeTo);
-    serializeClassifier(oos);
-    oos.close();
-    logger.info("Done.");
-  }
-
-  /** Serialize a classifier to an ObjectOutputStream. This writes to the file both a LinearClassifier and the
-   *  Flags[] object from a ColumnDataClassifier. The latter captures all the information about
-   *  how the ColumnDataClassifier is extracting features from data items for the classifier.
-   *
-   *  @param oos ObjectOutputStream to serialize the classifier to
-   *  @throws IOException If any IO error
-   */
-  public void serializeClassifier(ObjectOutputStream oos) throws IOException {
-    oos.writeObject(classifier);
-    // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
-    String testFile = globalFlags.testFile;
-    globalFlags.testFile = null;
-    oos.writeObject(flags);
-    globalFlags.testFile = testFile;
   }
 
   private void printClassifier(Classifier classifier) {
@@ -2153,12 +2073,7 @@ public class ColumnDataClassifier  {
     }
   }
 
-  /** Test and evaluate classifier on examples available in a file (or URL, classpath resource, etc.)
-   *
-   * @param testFile The path, classpath resource or URL to load TSV data from
-   * @return A Pair consisting of the accuracy (micro-averaged F1) and macro-averaged F1 for the dataset
-   */
-  public Pair<Double, Double> testClassifier(String testFile) {
+  private void testClassifier(String testFile) {
     if (globalFlags.printFeatures != null) {
       newFeaturePrinter(globalFlags.printFeatures, "test", Flags.encoding);
     }
@@ -2167,12 +2082,11 @@ public class ColumnDataClassifier  {
     GeneralDataset<String,String> test = testInfo.first();
     List<String[]> lineInfos = testInfo.second();
 
-    Pair<Double, Double> pair = testExamples(classifier, test, lineInfos);
+    testExamples(classifier, test, lineInfos);
     // ((LinearClassifier) classifier).dumpSorted();
     if (globalFlags.printFeatures != null) {
       closeFeaturePrinter();
     }
-    return pair;
   }
 
   /** Run cross-validation on a dataset, and return accuracy and macro-F1 scores.
@@ -2219,24 +2133,9 @@ public class ColumnDataClassifier  {
   }
 
   public String classOf(Datum<String,String> example) {
-    if (classifier == null) {
+    if(classifier==null)
       throw new RuntimeException("Classifier is not initialized");
-    }
     return classifier.classOf(example);
-  }
-
-  public Counter<String> scoresOf(Datum<String,String> example) {
-    if (classifier == null) {
-      throw new RuntimeException("Classifier is not initialized");
-    }
-    return classifier.scoresOf(example);
-  }
-
-  public Classifier<String,String> getClassifier() {
-    if (classifier == null) {
-      throw new RuntimeException("Classifier is not initialized");
-    }
-    return classifier;
   }
 
 
@@ -2399,5 +2298,6 @@ public class ColumnDataClassifier  {
     }
 
   } // end class Flags
+
 
 } // end class ColumnDataClassifier
