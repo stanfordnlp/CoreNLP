@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * Lexicon-based semgenter. Uses dynamic programming to find a word
+ * Lexicon-based segmenter. Uses dynamic programming to find a word
  * segmentation that satisfies the following two preferences:
  * (1) minimize the number of out-of-vocabulary (OOV) words;
  * (2) if there are multiple segmentations with the same number
@@ -93,7 +93,8 @@ public class MaxMatchSegmenter implements WordSegmenter {
     printlnErr("raw output: "+ SentenceUtils.listToString(sent));
     ArrayList<Word> postProcessedSent = postProcessSentence(sent);
     printlnErr("processed output: "+ SentenceUtils.listToString(postProcessedSent));
-    String postSentString = ChineseStringUtils.postProcessingAnswerCTB(postProcessedSent.toString(),false,false);
+    ChineseStringUtils.CTPPostProcessor postProcessor = new ChineseStringUtils.CTPPostProcessor();
+    String postSentString = postProcessor.postProcessingAnswer(postProcessedSent.toString(), false);
     printlnErr("Sighan2005 output: "+postSentString);
     String[] postSentArray = postSentString.split("\\s+");
     ArrayList<Word> postSent = new ArrayList<>();
