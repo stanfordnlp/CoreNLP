@@ -51,7 +51,7 @@ but [the JRE](http://java.com/) will do if you are only going to be a user.
 </dependencies>
 ```
 
-If you want to get a language models jar off of Maven for Chinese, Spanish, or German, add this to your `pom.xml`:
+If you want to get a language models jar off of Maven for Arabic, Chinese, German, or Spanish, add this to your `pom.xml`:
 
 ``` xml
 <dependency>
@@ -62,4 +62,4 @@ If you want to get a language models jar off of Maven for Chinese, Spanish, or G
 </dependency>
 ```
 
-Replace "models-chinese" with one or more of "models-english", "models-english-kbp", "models-french", "models-german" or "models-spanish" for resources for other languages!
+Replace "models-chinese" with one or more of "models-english", "models-english-kbp", "models-arabic", "models-french", "models-german" or "models-spanish" for resources for other languages!
