@@ -40,12 +40,12 @@ but [the JRE](http://java.com/) will do if you are only going to be a user.
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.6.0</version>
+    <version>3.7.0</version>
 </dependency>
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.6.0</version>
+    <version>3.7.0</version>
     <classifier>models</classifier>
 </dependency>
 </dependencies>
@@ -57,9 +57,9 @@ If you want to get a language models jar off of Maven for Chinese, Spanish, or G
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.6.0</version>
+    <version>3.7.0</version>
     <classifier>models-chinese</classifier>
 </dependency>
 ```
 
-Replace "models-chinese" with one or more of "models-english", "models-french", "models-german" or "models-spanish" for resources for other languages!
+Replace "models-chinese" with one or more of "models-english", "models-english-kbp", "models-french", "models-german" or "models-spanish" for resources for other languages!
