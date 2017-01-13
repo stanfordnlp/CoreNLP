@@ -2,7 +2,10 @@ package edu.stanford.nlp.util;
 
 import junit.framework.TestCase;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class StringUtilsTest extends TestCase {
 
@@ -216,6 +219,35 @@ public class StringUtilsTest extends TestCase {
     assertEquals("xxx [out_A] xxx", StringUtils.expandEnvironmentVariables("xxx $_A xxx", env));
     assertEquals("xxx $3A xxx", StringUtils.expandEnvironmentVariables("xxx $3A xxx", env));
     assertEquals("xxx  xxx", StringUtils.expandEnvironmentVariables("xxx $UNDEFINED xxx", env));
+  }
+
+  public void testDecodeArray() throws IOException {
+    String tempFile1 = Files.createTempFile("test", "tmp").toString();
+    String tempFile2 = Files.createTempFile("test", "tmp").toString();
+    String[] decodedArray = StringUtils.decodeArray("'"+tempFile1 + "','" + tempFile2+"'");
+
+    assertEquals(2, decodedArray.length);
+    assertEquals(tempFile1, decodedArray[0]);
+    assertEquals(tempFile2, decodedArray[1]);
+
+    String[] test10 = { "\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"",
+                        "[\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"]" };
+    String[] ans10 = { "C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt" };
+    String[] test11 = { "C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt",
+                        "[C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt]" };
+    String[] ans11 = { "C:UsersBELLCH~1AppDataLocalTempbill-ie5804201486895318826regex_rules.txt" };
+
+    for (String s : test10) {
+      assertEquals(Arrays.asList(ans10), Arrays.asList(StringUtils.decodeArray(s)));
+    }
+    for (String s : test11) {
+      assertEquals(Arrays.asList(ans11), Arrays.asList(StringUtils.decodeArray(s)));
+    }
+  }
+
+  public void testRegexGroups() {
+    List<String> ans = Arrays.asList("42", "123", "1965");
+    assertEquals(ans, StringUtils.regexGroups(Pattern.compile("(\\d+)\\D*(\\d+)\\D*(\\d+)"), "abc-x42!123   -1965."));
   }
 
 }

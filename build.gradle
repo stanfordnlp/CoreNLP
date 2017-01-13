@@ -41,8 +41,10 @@ sourceSets {
   }
 }
 
-task listDeps << {
-    configurations.compile.each { File file -> println file.name }
+task listDeps {
+    doLast {
+        configurations.compile.each { File file -> println file.name }
+    }
 }
 
 dependencies {
