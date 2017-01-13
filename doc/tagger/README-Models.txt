@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.6.0 - 2015-12-08
+Stanford POS Tagger, v3.7.0 - 2016-10-31
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -115,3 +115,6 @@ Lacks distributional similarity features, but is several times faster
 than the other alternatives.
 Performance:
 96.61% overall / 86.72% unknown.
+
+german-ud.tagger
+This is a model that produces Universal Dependencies POS tags.
