@@ -1,9 +1,9 @@
-package edu.stanford.nlp.trees.international.pennchinese;
+package edu.stanford.nlp.wordseg;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.wordseg.ChineseStringUtils;
+
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -13,15 +13,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 
+/** @author KellenSunderland (public domain contribution) */
 public class ChineseStringUtilsTest extends TestCase {
 
-  public static final Integer SEGMENT_ATTEMPTS_PER_THREAD = 100;
-  public static final Integer THREADS = 8;
+  private static final Integer SEGMENT_ATTEMPTS_PER_THREAD = 100;
+  private static final Integer THREADS = 8;
 
   /**
    * A small test with stubbed data that is meant to expose multithreading initialization errors
    * in combineSegmentedSentence.
-   * <p>
+   *
    * In my testing this reliably reproduces the crash seen in the issue:
    * https://github.com/stanfordnlp/CoreNLP/issues/263
    *
@@ -53,7 +54,7 @@ public class ChineseStringUtilsTest extends TestCase {
 
   // Arbitrary test input.  We just need to segment something on multiple threads to reproduce
   // the issue
-  private List<CoreLabel> createTestTokens() {
+  private static List<CoreLabel> createTestTokens() {
     CoreLabel token = new CoreLabel();
     token.setWord("你好，世界");
     token.setValue("你好，世界");
@@ -66,7 +67,7 @@ public class ChineseStringUtilsTest extends TestCase {
 
   // Somewhat arbitrary flags.  We're just picking flags that will execute the problematic code
   // path.
-  private SeqClassifierFlags createTestFlags() {
+  private static SeqClassifierFlags createTestFlags() {
     SeqClassifierFlags flags = new SeqClassifierFlags();
     flags.sighanPostProcessing = true;
     flags.usePk = true;

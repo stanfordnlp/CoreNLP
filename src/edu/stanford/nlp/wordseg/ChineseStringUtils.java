@@ -17,6 +17,12 @@ import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHIT
 
 // TODO: ChineseStringUtils and ChineseUtils should be put somewhere common
 
+/**
+ * @author Pichuan Chang
+ * @author Michel Galley
+ * @author John Bauer
+ * @author KellenSunderland (public domain contribution)
+ */
 public class ChineseStringUtils {
 
   private static final boolean DEBUG = false;
@@ -27,6 +33,8 @@ public class ChineseStringUtils {
   private static final BaseChinesePostProcessor basicPostsProcessor = new BaseChinesePostProcessor();
   private static final CTPPostProcessor ctpPostProcessor = new CTPPostProcessor();
   private static final PKPostProcessor pkPostProcessor = new PKPostProcessor();
+
+  private ChineseStringUtils() {} // static methods
 
   public static boolean isLetterASCII(char c) {
     return c <= 127 && Character.isLetter(c);
@@ -41,7 +49,7 @@ public class ChineseStringUtils {
     //
     // Also, putting everything into 'testContent', is a bit wasteful
     // memory wise. But, it's on my near-term todo list to
-    // code something thats a bit more memory efficient.
+    // code something that's a bit more memory efficient.
     //
     // Finally, if these changes ended up breaking anything
     // just e-mail me (cerd@colorado.edu), and I'll try to fix it
@@ -328,7 +336,7 @@ public class ChineseStringUtils {
     private Pattern[] colonsWhitePat = null;
 
     public BaseChinesePostProcessor() {
-      puncs = new Character[]{'\u3001', '\u3002', '\u3003', '\u3008', '\u3009', '\u300a', '\u300b',
+      puncs = new Character[] {'\u3001', '\u3002', '\u3003', '\u3008', '\u3009', '\u300a', '\u300b',
               '\u300c', '\u300d', '\u300e', '\u300f', '\u3010', '\u3011', '\u3014', '\u3015'};
     }
 
@@ -359,7 +367,7 @@ public class ChineseStringUtils {
       return puncsPat;
     }
 
-    private String getEscapedPuncPattern(Character punc) {
+    private static String getEscapedPuncPattern(Character punc) {
       String pattern;
       if (punc == '(' || punc == ')') { // escape
         pattern = WHITE + "\\" + punc + WHITE;
@@ -441,7 +449,7 @@ public class ChineseStringUtils {
       return ans;
     }
 
-    protected String processDots(String ans, String numPat) {
+    protected static String processDots(String ans, String numPat) {
     /* all "\d\.\d" patterns */
       String dots = "[\ufe52\u2027\uff0e.]";
       Pattern p = patternMap.computeIfAbsent("(" + numPat + ")" + WHITEPLUS + "(" + dots + ")" + WHITEPLUS +
@@ -485,7 +493,7 @@ public class ChineseStringUtils {
      * @return String with spaces removed between any instance of punc and
      * surrounding chars.
      */
-    protected String gluePunc(Character punc, String ans) {
+    protected static String gluePunc(Character punc, String ans) {
       Pattern p = patternMap.computeIfAbsent(WHITE + punc, s -> Pattern.compile(s));
       Matcher m = p.matcher(ans);
       ans = m.replaceAll(String.valueOf(punc));
@@ -496,7 +504,7 @@ public class ChineseStringUtils {
       return ans;
     }
 
-    protected String processCommas(String ans) {
+    protected static String processCommas(String ans) {
       String numPat = "[0-9\uff10-\uff19]";
       String nonNumPat = "[^0-9\uff10-\uff19]";
 

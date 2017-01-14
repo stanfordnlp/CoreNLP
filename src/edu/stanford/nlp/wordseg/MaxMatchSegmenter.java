@@ -28,7 +28,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * of segments. Note that {@link edu.stanford.nlp.parser.lexparser.MaxMatchSegmenter}
  * contains a greedy version of this algorithm.
  *
- * <p>Note that the output segmentation may need to postprocessing for the segmentation
+ * Note that the output segmentation may need to postprocessing for the segmentation
  * of non-Chinese characters (e.g., punctuation, foreign names).
  *
  * @author Michel Galley
@@ -39,12 +39,12 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   private static Redwood.RedwoodChannels logger = Redwood.channels(MaxMatchSegmenter.class);
 
-  private Set<String> words = Generics.newHashSet();
-  private int len=-1;
-  private int edgesNb=0;
+  private final Set<String> words = Generics.newHashSet();
+  private int len = -1;
+  private int edgesNb = 0;
   private static final int maxLength = 10;
   private List<DFSAState<Word, Integer>> states;
-  private DFSA<Word, Integer> lattice=null;
+  private DFSA<Word, Integer> lattice = null;
   public enum MatchHeuristic { MINWORDS, MAXWORDS, MAXLEN }
 
   private static final Pattern chineseStartChars = Pattern.compile("^[\u4E00-\u9FFF]");
@@ -83,6 +83,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
   @Override
   public void finishTraining() {}
 
+  @Override
   public void loadSegmenter(String filename) {
     addLexicon(filename);
   }
@@ -107,7 +108,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
   /**
    * Add a word to the lexicon, unless it contains some non-Chinese character.
    */
-  public void addStringToLexicon(String str) {
+  private void addStringToLexicon(String str) {
     if(str.equals("")) {
       logger.warn("WARNING: blank line in lexicon");
     } else if(str.contains(" ")) {
@@ -125,7 +126,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
   /**
    * Read lexicon from a one-column text file.
    */
-  public void addLexicon(String filename) {
+  private void addLexicon(String filename) {
     try {
       BufferedReader lexiconReader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
       String lexiconLine;
@@ -146,7 +147,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
    * present in the lexicon. This function must be run prior to
    * running maxMatchSegmentation.
    */
-  public void buildSegmentationLattice(String s) {
+  private void buildSegmentationLattice(String s) {
     edgesNb = 0;
     len = s.length();
     // Initialize word lattice:
@@ -177,7 +178,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
   }
 
   /**
-   *  Returs the lexicon-based segmentation that minimizes the number of words.
+   *  Returns the lexicon-based segmentation that minimizes the number of words.
    * @return Segmented sentence.
    */
   public ArrayList<Word> maxMatchSegmentation() {
@@ -372,5 +373,6 @@ public class MaxMatchSegmenter implements WordSegmenter {
   private static boolean excludeChar(String str) { return excludeChars.matcher(str).matches(); }
 
   private static final long serialVersionUID   = 8263734344886904724L;
+
 }
 
