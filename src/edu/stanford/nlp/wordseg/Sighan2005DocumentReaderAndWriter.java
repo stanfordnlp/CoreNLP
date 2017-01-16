@@ -39,7 +39,7 @@ import edu.stanford.nlp.util.StringUtils;
 /**
  * DocumentReader for Chinese segmentation task. (Sighan bakeoff 2005)
  * Reads in characters and labels them as 1 or 0 (word START or NONSTART).
- *
+ * <p>
  * Note: maybe this can do less interning, since some is done in
  * ObjectBankWrapper, but this also calls trim() as it works....
  *
@@ -143,8 +143,8 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       for (int index = 0, len = line.length(); index < len; index++) {
         char ch = line.charAt(index);
         CoreLabel wi = new CoreLabel();
+        String wordString = Character.toString(ch);
         if ( ! Character.isWhitespace(ch) && ! Character.isISOControl(ch)) {
-          String wordString = Character.toString(ch);
           wi.set(CoreAnnotations.CharAnnotation.class, intern(wordString));
           nonspaceLineSB.append(wordString);
 

@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * Lexicon-based segmenter. Uses dynamic programming to find a word
+ * Lexicon-based semgenter. Uses dynamic programming to find a word
  * segmentation that satisfies the following two preferences:
  * (1) minimize the number of out-of-vocabulary (OOV) words;
  * (2) if there are multiple segmentations with the same number
@@ -28,7 +28,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * of segments. Note that {@link edu.stanford.nlp.parser.lexparser.MaxMatchSegmenter}
  * contains a greedy version of this algorithm.
  *
- * Note that the output segmentation may need to postprocessing for the segmentation
+ * <p>Note that the output segmentation may need to postprocessing for the segmentation
  * of non-Chinese characters (e.g., punctuation, foreign names).
  *
  * @author Michel Galley
@@ -39,12 +39,12 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   private static Redwood.RedwoodChannels logger = Redwood.channels(MaxMatchSegmenter.class);
 
-  private final Set<String> words = Generics.newHashSet();
-  private int len = -1;
-  private int edgesNb = 0;
+  private Set<String> words = Generics.newHashSet();
+  private int len=-1;
+  private int edgesNb=0;
   private static final int maxLength = 10;
   private List<DFSAState<Word, Integer>> states;
-  private DFSA<Word, Integer> lattice = null;
+  private DFSA<Word, Integer> lattice=null;
   public enum MatchHeuristic { MINWORDS, MAXWORDS, MAXLEN }
 
   private static final Pattern chineseStartChars = Pattern.compile("^[\u4E00-\u9FFF]");
@@ -83,7 +83,6 @@ public class MaxMatchSegmenter implements WordSegmenter {
   @Override
   public void finishTraining() {}
 
-  @Override
   public void loadSegmenter(String filename) {
     addLexicon(filename);
   }
@@ -94,8 +93,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
     printlnErr("raw output: "+ SentenceUtils.listToString(sent));
     ArrayList<Word> postProcessedSent = postProcessSentence(sent);
     printlnErr("processed output: "+ SentenceUtils.listToString(postProcessedSent));
-    ChineseStringUtils.CTPPostProcessor postProcessor = new ChineseStringUtils.CTPPostProcessor();
-    String postSentString = postProcessor.postProcessingAnswer(postProcessedSent.toString(), false);
+    String postSentString = ChineseStringUtils.postProcessingAnswerCTB(postProcessedSent.toString(),false,false);
     printlnErr("Sighan2005 output: "+postSentString);
     String[] postSentArray = postSentString.split("\\s+");
     ArrayList<Word> postSent = new ArrayList<>();
@@ -108,7 +106,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
   /**
    * Add a word to the lexicon, unless it contains some non-Chinese character.
    */
-  private void addStringToLexicon(String str) {
+  public void addStringToLexicon(String str) {
     if(str.equals("")) {
       logger.warn("WARNING: blank line in lexicon");
     } else if(str.contains(" ")) {
@@ -126,7 +124,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
   /**
    * Read lexicon from a one-column text file.
    */
-  private void addLexicon(String filename) {
+  public void addLexicon(String filename) {
     try {
       BufferedReader lexiconReader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
       String lexiconLine;
@@ -147,7 +145,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
    * present in the lexicon. This function must be run prior to
    * running maxMatchSegmentation.
    */
-  private void buildSegmentationLattice(String s) {
+  public void buildSegmentationLattice(String s) {
     edgesNb = 0;
     len = s.length();
     // Initialize word lattice:
@@ -178,7 +176,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
   }
 
   /**
-   *  Returns the lexicon-based segmentation that minimizes the number of words.
+   *  Returs the lexicon-based segmentation that minimizes the number of words.
    * @return Segmented sentence.
    */
   public ArrayList<Word> maxMatchSegmentation() {
@@ -373,6 +371,5 @@ public class MaxMatchSegmenter implements WordSegmenter {
   private static boolean excludeChar(String str) { return excludeChars.matcher(str).matches(); }
 
   private static final long serialVersionUID   = 8263734344886904724L;
-
 }
 
