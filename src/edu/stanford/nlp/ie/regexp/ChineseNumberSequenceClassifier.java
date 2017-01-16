@@ -6,7 +6,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+//import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.time.TimeExpressionExtractor;
 import edu.stanford.nlp.util.CoreMap;
@@ -223,7 +223,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   }
 
   public static void main(String[] args) throws IOException {
-    Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/ChineseNumberClassifierProps.properties");
+   /* Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/ChineseNumberClassifierProps.properties");
 //    Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/EnglishNumberClassifierProps.properties");
     props.setProperty("outputFormat", "text");
     props.setProperty("ssplit.boundaryTokenRegex", "\\n"); // one sentence per line
@@ -239,6 +239,6 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
       pipeline.prettyPrint(sentenceAnnotation, System.out);
     }
 
-    out.close();
+    out.close();*/
   }
 }
