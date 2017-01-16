@@ -155,7 +155,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Generate and write a shutdown key
     String tmpDir = System.getProperty("java.io.tmpdir");
-    File tmpFile = new File(tmpDir + File.separator + "corenlp.shutdown." + serverPort);
+    File tmpFile = new File(tmpDir + File.separator + "corenlp.shutdown");
     tmpFile.deleteOnExit();
     if (tmpFile.exists()) {
       if (!tmpFile.delete()) {

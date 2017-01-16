@@ -26,10 +26,10 @@ CORENLP_DIR="/opt/corenlp"
 
 do_start()
 {
-  if [ -e "$CORENLP_DIR/corenlp.shutdown.80" ]; then
+  if [ -e "$CORENLP_DIR/corenlp.shutdown" ]; then
     echo "CoreNLP server is already running!"
     echo "If you are sure this is a mistake, delete the file:"
-    echo "$CORENLP_DIR/corenlp.shutdown.80"
+    echo "$CORENLP_DIR/corenlp.shutdown"
   else
     export CLASSPATH=""
     for JAR in `find "$CORENLP_DIR" -name "*.jar"`; do
@@ -43,10 +43,10 @@ do_start()
 
 do_stop() 
 {
-  if [ ! -e "$CORENLP_DIR/corenlp.shutdown.80" ]; then
+  if [ ! -e "$CORENLP_DIR/corenlp.shutdown" ]; then
     echo "CoreNLP server is not running"
   else
-    KEY=`cat "$CORENLP_DIR/corenlp.shutdown.80"`
+    KEY=`cat "$CORENLP_DIR/corenlp.shutdown"`
     curl "localhost/shutdown?key=$KEY"
     echo "CoreNLP server stopped"
   fi
