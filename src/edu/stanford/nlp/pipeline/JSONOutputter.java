@@ -320,7 +320,7 @@ public class JSONOutputter extends AnnotationOutputter {
    * <p>For the love of all that is holy, don't try to write JSON multithreaded.
    * It should go without saying that this is not threadsafe.</p>
    */
-  protected static class JSONWriter {
+  public static class JSONWriter {
     private final PrintWriter writer;
     private final Options options;
     private JSONWriter(PrintWriter writer, Options options) {
@@ -524,7 +524,7 @@ public class JSONOutputter extends AnnotationOutputter {
    * we represent objects while creating JSON).
    */
   @FunctionalInterface
-  protected interface Writer {
+  public interface Writer {
     /**
      * Set a (key, value) pair in a JSON object.
      * Note that if either the key or the value is null, nothing will be set.
