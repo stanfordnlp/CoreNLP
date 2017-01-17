@@ -156,16 +156,16 @@ public class StanfordCoreNLPServer implements Runnable {
       log("http://stanfordnlp.github.io/CoreNLP/download.html");
     }
     this.defaultProps = PropertiesUtils.asProperties(
-            "annotators", defaultAnnotators,  // Run these annotators by default
-            "mention.type", "dep",  // Use dependency trees with coref by default
-            "coref.mode", "statistical",  // Use the new coref
-            "coref.language", "en",  // We're English by default
-            "inputFormat", "text",   // By default, treat the POST data like text
-            "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
-            "prettyPrint", "false",  // Don't bother pretty-printing
-            "parse.model", defaultParserPath,  // SR scales linearly with sentence length. Good for a server!
-            "parse.binaryTrees", "true",  // needed for the Sentiment annotator
-            "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
+        "annotators", defaultAnnotators,  // Run these annotators by default
+        "mention.type", "dep",  // Use dependency trees with coref by default
+        "coref.mode", "statistical",  // Use the new coref
+        "coref.language", "en",  // We're English by default
+        "inputFormat", "text",   // By default, treat the POST data like text
+        "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
+        "prettyPrint", "false",  // Don't bother pretty-printing
+        "parse.model", defaultParserPath,  // SR scales linearly with sentence length. Good for a server!
+        "parse.binaryTrees", "true",  // needed for the Sentiment annotator
+        "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
 
     // overwrite all default properties with provided server properties
     // for instance you might want to provide a default ner model
