@@ -24,7 +24,7 @@ If you want to process non-English languages, use this command with the appropri
 java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -serverProperties StanfordCoreNLP-chinese.properties -port 9000 -timeout 15000
 ``` 
 
-Make sure to have the Chinese models jar in your CLASSPATH.  
+Each language has a models jar which must also be on the CLASSPATH.  The most recently models jars for each language can be found [here](http://stanfordnlp.github.io/CoreNLP/download.html).  
 
 If no value for `port` is provided, port 9000 will be used by default. You can then test your server by visiting
 
