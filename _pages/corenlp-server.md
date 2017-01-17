@@ -12,8 +12,19 @@ Stanford CoreNLP ships with a built-in server, which requires only the CoreNLP d
 
 ```bash
 # Run the server using all jars in the current directory (e.g., the CoreNLP home directory)
-java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer [port] [timeout]
+java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000
 ```
+
+Note the the timeout is in milliseconds.
+
+If you want to process non-English languages, use this command with the appropriate language properties:
+
+```bash
+# Run a server using Chinese properties
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -serverProperties StanfordCoreNLP-chinese.properties -port 9000 -timeout 15000
+``` 
+
+Make sure to have the Chinese models jar in your CLASSPATH.  
 
 If no value for `port` is provided, port 9000 will be used by default. You can then test your server by visiting
 
