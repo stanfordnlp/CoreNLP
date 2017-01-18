@@ -378,6 +378,33 @@ LAST UPDATE: 2015-01-15
 LAST UPDATE BY: Melvin Johnson Premkumar
 
 -----------------------------------------------------------------
+slf4j-api.jar
+ORIGINAL JAR NAME: slf4j-api-1.7.12.jar
+
+VERSION: 1.7.12
+RELEASE DATE: 26 Mar 2015
+SOURCE AVAILABLE: yes
+DESCRIPTION: "A facade that allows users to choose various logging
+frameworks at deployment time."
+URL: https://www.slf4j.org/
+USED BY: SLF4JHandler
+
+LAST UPDATE: 2017-01-12
+LAST UPDATE BY: Jason Bolton
+-----------------------------------------------------------------
+slf4j-simple.jar
+ORIGINAL JAR NAME: slf4j-simple-1.7.12.jar
+
+VERSION: 1.7.12
+RELEASE DATE: 26 Mar 2015
+SOURCE AVAILABLE: yes
+DESCRIPTION: "A basic logger that works with slf4j"
+URL: https://www.slf4j.org/
+
+LAST UPDATE: 2017-01-17
+LAST UPDATE BY: Jason Bolton
+
+-----------------------------------------------------------------
 foo.jar
 
 ORIGINAL JAR NAME:
