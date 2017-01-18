@@ -61,9 +61,11 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 ### PHP
 
-* [php-stanford-corenlp-adapter](https://github.com/DennisDeSwart/php-stanford-corenlp-adapter) by Dennis De Swart. Simple connection to Stanford CoreNLP server. [<a href="http://www.phpclasses.org/package/10056-PHP-Natural-language-processing-using-Stanford-server.html">PHPclasses</a>]
+* [php-stanford-corenlp-adapter](https://github.com/DennisDeSwart/php-stanford-corenlp-adapter) by Dennis De Swart. Simple connection to Stanford CoreNLP server. [PHPclasses](http://www.phpclasses.org/package/10056-PHP-Natural-language-processing-using-Stanford-server.html). [Packagist](https://packagist.org/packages/dennis-de-swart/php-stanford-corenlp-adapter).
+* [php-stanford-nlp-datastore](https://github.com/DennisDeSwart/php-stanford-nlp-datastore) by Dennis De Swart. Stores data analyzed by Stanford CoreNLP in SQLite database. [Packagist](https://packagist.org/packages/dennis-de-swart/php-stanford-nlp-datastore).
 
 ### Python
+
 * [pycorenlp, A Python wrapper for Stanford CoreNLP](https://github.com/smilli/py-corenlp) by Smitha Milli that uses the new CoreNLP v3.6.0 server. Available on [PyPI](https://pypi.python.org/pypi/pycorenlp/).
 * [corenlp-pywrap](https://github.com/hhsecond/corenlp_pywrap) by Sherin Thomas also uses the new CoreNLP v3.6.0 server. Python 3.x (only). Also: [PyPI page](https://pypi.python.org/pypi/corenlp_pywrap).
 * [The "Wordseer fork" of stanford-corenlp-python, a Python wrapper for Stanford CoreNLP](https://github.com/Wordseer/stanford-corenlp-python) (see also: [PyPI page](https://pypi.python.org/pypi/stanford-corenlp-python)).  The "Wordseer fork" seems to merge the work of a number of people building on the original Dustin Smith wrapper, namely: Hiroyoshi Komatsu, Johannes Castner, Robert Elwell, Tristan Chong, Aditi Muralidharan. At Stanford CoreNLP v3.5.2, last we checked.  See also [Robert Elwell's version](https://github.com/relwell/stanford-corenlp-python) (at CoreNLP v3.2.0, last we checked).
