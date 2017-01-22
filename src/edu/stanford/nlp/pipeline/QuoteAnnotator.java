@@ -537,15 +537,8 @@ public class QuoteAnnotator implements Annotator  {
       }
     }
 
-//    // TODO: determine if we want to be more strict w/ single quotes than double
-//    // answer: we do want to.
-//    // if we reached then end and we have an open quote, close it
-//    if (closeUnclosedQuotes && start >= 0 && start < text.length() - 2) {
-//      if (!quotesMap.containsKey(quote)) {
-//        quotesMap.put(quote, new ArrayList<>());
-//      }
-//      quotesMap.get(quote).add(new Pair(start, text.length()));
-//    } else
+    // TODO: determine if we want to be more strict w/ single quotes than double
+    // answer: we do want to.
     if (start >= 0 && start < text.length() - 3) {
       String warning = text;
       if (text.length() > 150) {
@@ -560,7 +553,8 @@ public class QuoteAnnotator implements Annotator  {
     List<Pair<Integer, Integer>> unclosedQuotes = Generics.newArrayList();
     // If I didn't find any quotes, but did find a quote-beginning, try again,
     // but without the part of the text before the single quote
-    if (quotesMap.isEmpty() && start >= 0 && start < text.length() - 3) {
+    // really this test should be whether or not start is mapped to in quotesMap
+    if (!isAQuoteMapStarter(start, quotesMap) && start >= 0 && start < text.length() - 3) {
       if (EXTRACT_UNCLOSED) {
         unclosedQuotes.add(new Pair(start, text.length()));
       }
@@ -578,40 +572,53 @@ public class QuoteAnnotator implements Annotator  {
               e.second() + start + 1));
         }
       }
-    } else {
-      for (String qKind : quotesMap.keySet()) {
-        for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
-          if (q.second() - q.first() >= qKind.length() * 2) {
-            String toPass = text.substring(q.first() + qKind.length(),
-                q.second() - qKind.length());
-            String qKindToPass = null;
-            if (!(DIRECTED_QUOTES.containsKey(qKind) || qKind.equals("`"))
-                    || !ALLOW_EMBEDDED_SAME) {
-              qKindToPass = qKind;
-            }
-            Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> embedded =
-                recursiveQuotes(toPass, q.first() + qKind.length() + offset, qKindToPass);
-            // good quotes
-            for (Pair<Integer, Integer> e : embedded.first()) {
-              // don't add offset here because the
-              // recursive method already added it
-              if (e.second() - e.first() > 2) {
-                quotes.add(new Pair(e.first(), e.second()));
-              }
-            }
-            // unclosed quotes
-            if (EXTRACT_UNCLOSED) {
-              // these are the unclosed quotes
-              for (Pair<Integer, Integer> e : embedded.second()) {
-                unclosedQuotes.add(new Pair(e.first(), e.second()));
-              }
+    }
+
+    // Now take care of the good quotes that we found
+    for (String qKind : quotesMap.keySet()) {
+      for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
+        if (q.second() - q.first() >= qKind.length() * 2) {
+          String toPass = text.substring(q.first() + qKind.length(),
+              q.second() - qKind.length());
+          String qKindToPass = null;
+          if (!(DIRECTED_QUOTES.containsKey(qKind) || qKind.equals("`"))
+                  || !ALLOW_EMBEDDED_SAME) {
+            qKindToPass = qKind;
+          }
+          Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> embedded =
+              recursiveQuotes(toPass, q.first() + qKind.length() + offset, qKindToPass);
+          // good quotes
+          for (Pair<Integer, Integer> e : embedded.first()) {
+            // don't add offset here because the
+            // recursive method already added it
+            if (e.second() - e.first() > 2) {
+              quotes.add(new Pair(e.first(), e.second()));
             }
           }
-          quotes.add(new Pair(q.first() + offset, q.second() + offset));
+          // unclosed quotes
+          if (EXTRACT_UNCLOSED) {
+            // these are the unclosed quotes
+            for (Pair<Integer, Integer> e : embedded.second()) {
+              unclosedQuotes.add(new Pair(e.first(), e.second()));
+            }
+          }
+        }
+        quotes.add(new Pair(q.first() + offset, q.second() + offset));
+      }
+    }
+
+    return new Pair(quotes, unclosedQuotes);
+  }
+
+  private boolean isAQuoteMapStarter(int target, Map<String, List<Pair<Integer, Integer>>> quotesMap) {
+    for (String k : quotesMap.keySet()) {
+      for (Pair<Integer, Integer> pair : quotesMap.get(k)) {
+        if (pair.first() == target) {
+          return true;
         }
       }
     }
-    return new Pair(quotes, unclosedQuotes);
+    return false;
   }
 
   private boolean isSingleQuoteWithUse(String c) {
