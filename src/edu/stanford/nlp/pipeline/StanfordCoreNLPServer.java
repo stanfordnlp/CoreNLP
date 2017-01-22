@@ -50,8 +50,6 @@ import static java.net.HttpURLConnection.*;
 public class StanfordCoreNLPServer implements Runnable {
 
   protected HttpServer server;
-  @ArgumentParser.Option(name="server_id", gloss="a name for this server")
-  protected String serverID = null; // currently not used
   @ArgumentParser.Option(name="port", gloss="The port to run the server on")
   protected int serverPort = 9000;
   @ArgumentParser.Option(name="status_port", gloss="The port to serve the status check endpoints on. If different from the server port, this will run in a separate thread.")
@@ -96,20 +94,6 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   private final ExecutorService corenlpExecutor;
 
-  /**
-   * Create a new Stanford CoreNLP Server.
-   * @param props A list of properties for the server (server_id ...)
-   * @param port The port to host the server from.
-   * @param timeout The timeout (in milliseconds) for each command.
-   * @param strict If true, conform more strictly to the HTTP spec (e.g., for character encoding).
-   * @throws IOException Thrown from the underlying socket implementation.
-   */
-  public StanfordCoreNLPServer(Properties props, int port, int timeout, boolean strict) throws IOException {
-    this(props);
-    this.serverPort = port;
-    this.timeoutMilliseconds = timeout;
-    this.strict = strict;
-  }
 
   /**
    * Create a new Stanford CoreNLP Server.
@@ -119,7 +103,10 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown from the underlying socket implementation.
    */
   public StanfordCoreNLPServer(int port, int timeout, boolean strict) throws IOException {
-    this(null, port, timeout, strict);
+    this();
+    this.serverPort = port;
+    this.timeoutMilliseconds = timeout;
+    this.strict = strict;
   }
 
   /**
@@ -128,17 +115,6 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer() throws IOException {
-    this(null);
-  }
-
-  /**
-   * Create a new Stanford CoreNLP Server with the default parameters and some
-   *
-   * pass in properties (server_id ...)
-   *
-   * @throws IOException Thrown if we could not write the shutdown key to the a file.
-   */
-  public StanfordCoreNLPServer(Properties props) throws IOException {
     // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
     String defaultParserPath;
     ClassLoader classLoader = getClass().getClassLoader();
@@ -158,8 +134,8 @@ public class StanfordCoreNLPServer implements Runnable {
     this.defaultProps = PropertiesUtils.asProperties(
         "annotators", defaultAnnotators,  // Run these annotators by default
         "mention.type", "dep",  // Use dependency trees with coref by default
-        "coref.mode", "statistical",  // Use the new coref
-        "coref.language", "en",  // We're English by default
+        "coref.mode",  "statistical",  // Use the new coref
+        "coref.language",  "en",  // We're English by default
         "inputFormat", "text",   // By default, treat the POST data like text
         "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
         "prettyPrint", "false",  // Don't bother pretty-printing
@@ -177,15 +153,9 @@ public class StanfordCoreNLPServer implements Runnable {
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
     this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
 
-    // Generate and write a shutdown key, get optional server_id from passed in properties
-    // this way if multiple servers running can shut them all down with different ids
-    String shutdownKeyFileName;
-    if (props != null && props.getProperty("server_id") != null)
-      shutdownKeyFileName = "corenlp.shutdown."+props.getProperty("server_id");
-    else
-      shutdownKeyFileName = "corenlp.shutdown";
+    // Generate and write a shutdown key
     String tmpDir = System.getProperty("java.io.tmpdir");
-    File tmpFile = new File(tmpDir + File.separator + shutdownKeyFileName);
+    File tmpFile = new File(tmpDir + File.separator + "corenlp.shutdown");
     tmpFile.deleteOnExit();
     if (tmpFile.exists()) {
       if (!tmpFile.delete()) {
@@ -1277,9 +1247,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Fill arguments
     ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
-    // get server properties from command line, right now only property used is server_id
-    Properties serverProperties = StringUtils.argsToProperties(args);
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer(serverProperties);  // must come after filling global options
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer();  // must come after filling global options
     ArgumentParser.fillOptions(server, args);
     log("    Threads: " + ArgumentParser.threads);
 

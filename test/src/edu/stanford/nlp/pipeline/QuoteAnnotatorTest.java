@@ -19,7 +19,6 @@ public class QuoteAnnotatorTest extends TestCase {
   private static StanfordCoreNLP pipelineMaxFive;
   private static StanfordCoreNLP pipelineAsciiQuotes;
   private static StanfordCoreNLP pipelineAllowEmbeddedSame;
-  private static StanfordCoreNLP pipelineUnclosedQuotes;
 
   /**
    * Initialize the annotators at the start of the unit test.
@@ -63,13 +62,6 @@ public class QuoteAnnotatorTest extends TestCase {
         props.setProperty("customAnnotatorClass.quote5", "edu.stanford.nlp.pipeline.QuoteAnnotator");
         props.setProperty("allowEmbeddedSame", "true");
         pipelineAllowEmbeddedSame = new StanfordCoreNLP(props);
-      }
-      if(pipelineUnclosedQuotes == null){
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit, quote6");
-        props.setProperty("customAnnotatorClass.quote6", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("extractUnclosedQuotes", "true");
-        pipelineUnclosedQuotes = new StanfordCoreNLP(props);
       }
     }
   }
@@ -423,19 +415,8 @@ public class QuoteAnnotatorTest extends TestCase {
     String text = "\"I said that Jones' cow was better,\" but then he " +
         "rebutted. I was shocked--\"My cow is better than any one of Jones' bovines!\"";
     List<CoreMap> quotes = runQuotes(text, 2);
-    assertEquals("\"I said that Jones' cow was better,\"",
-        quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("\"My cow is better than any one of Jones' bovines!\"",
-        quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
-  }
-
-  public void testUnclosedLastDoubleQuotesUnclosedAnnotation() {
-    String text = "\"Hello,\" he said, \"how are you doing?";
-    List<CoreMap> quotes = runQuotes(text, 1);
-    List<CoreMap> unclosedQuotes = runUnclosedQuotes(text, 1, pipelineUnclosedQuotes);
-    assertEquals("\"Hello,\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("\"how are you doing?",
-        unclosedQuotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"I said that Jones' cow was better,\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"My cow is better than any one of Jones' bovines!\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
   }
 
   public List<CoreMap> runQuotes(String text, int numQuotes) {
@@ -504,17 +485,5 @@ public class QuoteAnnotatorTest extends TestCase {
       }
     }
     return false;
-  }
-
-  public List<CoreMap> runUnclosedQuotes(String text, int numQuotes, StanfordCoreNLP pipeline) {
-    Annotation doc = new Annotation(text);
-    pipeline.annotate(doc);
-
-    // now check what's up...
-    List<CoreMap> quotes = doc.get(CoreAnnotations.UnclosedQuotationsAnnotation.class);
-
-    Assert.assertNotNull(quotes);
-    Assert.assertEquals(numQuotes, quotes.size());
-    return quotes;
   }
 }

@@ -44,13 +44,13 @@ import edu.stanford.nlp.util.StringUtils;
  * ObjectBankWrapper, but this also calls trim() as it works....
  *
  * @author Pi-Chuan Chang
- * @author Michel Galley (Viterbi seearch graph printing)
+ * @author Michel Galley (Viterbi search graph printing)
  */
 public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer> /* Serializable */ {
 
   private static final long serialVersionUID = 3260295150250263237L;
 
-  private static Redwood.RedwoodChannels logger = Redwood.channels(Sighan2005DocumentReaderAndWriter.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(Sighan2005DocumentReaderAndWriter.class);
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MORE = false;
