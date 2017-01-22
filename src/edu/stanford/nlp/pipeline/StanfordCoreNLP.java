@@ -86,7 +86,7 @@ import java.util.regex.Pattern;
 
 public class StanfordCoreNLP extends AnnotationPipeline  {
 
-  enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED }
+  public enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED }
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -954,7 +954,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    *
    * @return A consumer that can be passed into the processFiles method.
    */
-  protected static BiConsumer<Annotation, OutputStream> createOutputter(Properties properties, AnnotationOutputter.Options outputOptions) {
+  public static BiConsumer<Annotation, OutputStream> createOutputter(Properties properties, AnnotationOutputter.Options outputOptions) {
     final OutputFormat outputFormat =
         OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
 
