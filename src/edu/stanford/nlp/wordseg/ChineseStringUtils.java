@@ -242,8 +242,8 @@ public class ChineseStringUtils {
   }
 
   static class CTPPostProcessor extends BaseChinesePostProcessor {
-
     public CTPPostProcessor() {
+
       puncs = new Character[]{'\u3001', '\u3002', '\u3003', '\u3008', '\u3009', '\u300a', '\u300b',
               '\u300c', '\u300d', '\u300e', '\u300f', '\u3010', '\u3011', '\u3014', '\u3015',
               '\u0028', '\u0029', '\u0022', '\u003c', '\u003e'};
@@ -328,10 +328,10 @@ public class ChineseStringUtils {
 
   static class BaseChinesePostProcessor {
 
-    protected static final ConcurrentHashMap<String, Pattern> patternMap = new ConcurrentHashMap<>();
+    protected static ConcurrentHashMap<String, Pattern> patternMap = new ConcurrentHashMap<>();
     protected Character[] puncs;
     private Pattern[] colonsPat = null;
-    private final Character[] colons = {'\ufe55', ':', '\uff1a'};
+    private Character[] colons = {'\ufe55', ':', '\uff1a'};
     private Pattern percentsWhitePat; // = null;
     private Pattern[] colonsWhitePat = null;
 
