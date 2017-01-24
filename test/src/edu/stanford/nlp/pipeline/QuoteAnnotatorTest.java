@@ -3,7 +3,7 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
 
 import java.util.List;
@@ -26,7 +26,8 @@ public class QuoteAnnotatorTest extends TestCase {
    * If they've already been initialized, do nothing.
    */
   @Override
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     synchronized(QuoteAnnotatorTest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
@@ -517,4 +518,5 @@ public class QuoteAnnotatorTest extends TestCase {
     Assert.assertEquals(numQuotes, quotes.size());
     return quotes;
   }
+
 }
