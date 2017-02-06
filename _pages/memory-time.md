@@ -23,17 +23,21 @@ java -mx20m -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCor
 
 CoreNLP will probably report a speed around 50,000–100,000 tokens a second for running this command. (That’s actually well under its actual speed for doing just these two operations – the text isn’t long enough for the code to be warmed up, and I/O costs, etc. dominate. Likely its real speed on your computer is well over 200,000 tokens a second in this configuration.)
 
-Of course, old timers might complain: “Wait a minute! That file is only 100K and you’re telling me it needs 20MB of heap to process. That’s a 20 times blow-out right there.” It’s true. In that sense, CoreNLP _does_ take a lot of memory. Where is the 20MB going? Well, the big tables for the finite automaton tokenizer – an annotator model – take up about half of it. The rest goes in the usual Java ways. Strings are internally memory-expensive in Java. Each token is represented as an Object, which stores various token attributes, such as token offsets, which are themselves represented as Objects. It all just uses plenty of memory.
+So, the first thing to know is that **CoreNLP will be slow and take a lot of memory if and only if you choose annotators and annotation options that are slow and use a lot of memory**.
 
-A whole document is represented in memory while processing it. Therefore, if you have a large file, like a novel, the first secret to reducing memory usage is to **process a large file a piece, say a chapter, at a time, not all at once**.
+## Limit the size of “documents” you pass to CoreNLP
 
-The main other thing to know is that **CoreNLP will be slow and take a lot of memory if and only if you choose annotators and annotation options that are slow and use a lot of memory**.
+Of course, old timers might complain about the statistics from the last subsection: “Wait a minute! That file is only 100K and you’re telling me it needs 20MB of heap to process. That’s a 20 times blow-out right there.” It’s true. In that sense, CoreNLP _does_ take a lot of memory. Where is the 20MB going? Well, the big tables for the finite automaton tokenizer – an annotator model – take up about half of it. The rest goes in the usual Java ways. Strings are internally memory-expensive in Java. Each token is represented as an Object, which stores various token attributes, such as token offsets, which are themselves represented as Objects. It all just uses plenty of memory.
+
+A whole “document” is represented in memory while processing it. Therefore, if you have a large file, like a novel, the next secret to reducing memory usage is to not treat the whole file as a “document”. **Process a large file a piece, say a chapter, at a time, not all at once**.
 
 ## Avoid creating lots of pipelines
 
-If you’re using lots of annotators, CoreNLP can easily spend 10–40 seconds just loading an annotation pipeline. Pipeline loading time can easily dominate actual annotation time. So, if you load a new pipeline frequently, such as for every sentence, then CoreNLP will be painfully slow. You should load an annotation pipleline – what you get when you call `new StanfordCoreNLP(props)` in code – as infrequently as possible. Often, **you can and should just load _one_ pipeline and use it for everything**. You only need to use multiple pipelines if you simultaneously need different configurations, such as working with multiple human languages or doing processing with different options or annotators.
+If you’re using lots of annotators, CoreNLP can easily spend 10–40 seconds just loading an annotation pipeline. Pipeline loading time can easily dominate actual annotation time. So, if you load a new pipeline frequently, such as for every sentence, then CoreNLP will be _painfully_ slow. You should load an annotation pipleline – what you get when you call `new StanfordCoreNLP(props)` in code – as infrequently as possible. Often, **you can and should just load _one_ pipeline and use it for everything**. You only need to use multiple pipelines if you simultaneously need different configurations, such as working with multiple human languages or doing processing with different options or annotators. 
 
-So, even if at the command-line, if you have a thousand paragraph-long files named `para1.txt`, `para2.txt`, … then you will get much faster processing by doing this:
+Beware that some old interfaces to CoreNLP from other programming languages fork a new CoreNLP process every time they are called. Look for a library that either talks to the CoreNLP web service API or directly calls into the Java code and so can avoid creating new annotation pipelines.
+
+Even at the command-line, if you have one thousand paragraph-long files named `para1.txt`, `para2.txt`, … then you will get _much faster_ processing by doing this:
 
 ```bash
 ls -1 para*.txt > all-files.txt
@@ -57,7 +61,7 @@ Many people run Stanford CoreNLP with its default annotators, by just using a si
 java -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -file James-Joyce-Ulysses-ch13.txt -outputFormat json
 ```
 
-However, the default runs a lot of annotators, some of them very expensive. This is a great command if you want to have your text parsed and coreference run on it. However, if really the only things that you are going to use are parts of speech and named entities, you can get your processing done orders of magnitude more quickly by turning off expensive annotators like parsing and coreference. 
+However, the default runs a lot of annotators, some of them very expensive. This is a great command if you want to have your text parsed and coreference run on it. However, if really the only things that you are going to use are parts of speech and named entities, you can get your processing done an order of magnitude more quickly by turning off expensive annotators like parsing and coreference. 
 
 If you run the above command in CoreNLP v.3.7.0 or later, your annotation speed is probably about 200 tokens per second. That’s 3 orders of magnitude slower than just tokenizing and sentence splitting, but actually this is the new good news for this version. We’ve changed the default annotator pipeline to make things _faster_.
 
@@ -95,7 +99,7 @@ There are three big places that memory goes:
 
 For 1., the only thing you can do is to either remove annotators that you do not need or to make choices for smaller annotators.  These models are what fills the large models jar. They are even larger when they are uncompressed and represented in memory. Here are some examples.
 
-Currently, the most memory-requiring models in the default pipeline are the neural network or statistical coreference. The shift-reduce constituency parser also has very large models. If you run without them, you can annotate the sample document in 2GB of RAM:
+Currently, the most memory-requiring models in the default pipeline are the neural network for statistical coreference. The shift-reduce constituency parser also has very large models. If you run without them, you can annotate the sample document in 2GB of RAM:
 
 ```bash
 java -mx2g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner,depparse" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
