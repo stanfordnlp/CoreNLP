@@ -43,6 +43,7 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 * [stanford-simple-nlp](https://npmjs.org/package/stanford-simple-nlp) is a node.js CoreNLP wrapper by xissy 
 ([github site](https://github.com/xissy/node-stanford-simple-nlp))
+* [CoreNLP-client](https://npmdaily.com/pkg/corenlp-client), a simple corenlp client to the corenlp http server using request-promise
 * [stanford-corenlp](https://www.npmjs.org/package/stanford-corenlp), a simple node.js wrapper by hiteshjoshi 
 ([github site](https://github.com/hiteshjoshi/node-stanford-corenlp)) 
 * [stanford-corenlp-node](https://github.com/mhewett/stanford-corenlp-node) is a webservice interface to CoreNLP in node.js by Mike Hewett 
