@@ -2,7 +2,7 @@
 # We actually use ant (q.v.) or a Java IDE.
 
 JAVAC = javac
-JAVAFLAGS = -O -d classes -encoding utf-8
+JAVAFLAGS = -O -d classes -encoding utf-8 -cp "*"
 
 # Builds the classes' jar file
 corenlp: source
