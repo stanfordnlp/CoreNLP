@@ -571,6 +571,10 @@ public class StanfordCoreNLPServer implements Runnable {
     public void handle(HttpExchange httpExchange) throws IOException {
       // Set common response headers
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
       // Get sentence.
       Properties props;
@@ -791,6 +795,10 @@ public class StanfordCoreNLPServer implements Runnable {
     public void handle(HttpExchange httpExchange) throws IOException {
       // Set common response headers
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
       // Some common fields
       Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner");
       if (authenticator != null && !authenticator.test(props)) {
@@ -912,6 +920,10 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Set common response headers
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
       // Some common properties
       Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
@@ -1030,6 +1042,10 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Set common response headers
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
       // Some common properties
       Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,parse");
