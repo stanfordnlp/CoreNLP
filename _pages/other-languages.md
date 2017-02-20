@@ -61,8 +61,12 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 ### PHP
 
-* [php-stanford-corenlp-adapter](https://github.com/DennisDeSwart/php-stanford-corenlp-adapter) by Dennis De Swart. Simple connection to Stanford CoreNLP server. [PHPclasses](http://www.phpclasses.org/package/10056-PHP-Natural-language-processing-using-Stanford-server.html). [Packagist](https://packagist.org/packages/dennis-de-swart/php-stanford-corenlp-adapter).
-* [php-stanford-nlp-datastore](https://github.com/DennisDeSwart/php-stanford-nlp-datastore) by Dennis De Swart. Stores data analyzed by Stanford CoreNLP in SQLite database. [Packagist](https://packagist.org/packages/dennis-de-swart/php-stanford-nlp-datastore).
+* [php-stanford-corenlp-adapter](https://github.com/DennisDeSwart/php-stanford-corenlp-adapter) by Dennis De Swart. Simple connection to Stanford CoreNLP server.
+[PHPclasses](http://www.phpclasses.org/package/10056-PHP-Natural-language-processing-using-Stanford-server.html).
+[Packagist](https://packagist.org/packages/dennis-de-swart/php-stanford-corenlp-adapter).
+* [php-stanford-nlp-datastore](https://github.com/DennisDeSwart/php-stanford-nlp-datastore) by Dennis De Swart. Stores data analyzed by Stanford CoreNLP in SQLite database.
+[PHPclasses](https://www.phpclasses.org/package/10147-PHP-Analyse-text-with-NLP-and-stores-in-a-database.html).
+[Packagist](https://packagist.org/packages/dennis-de-swart/php-stanford-nlp-datastore).
 
 ### Python
 
@@ -85,7 +89,7 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 ### Ruby
 
-* [Stanford CoreNLP Ruby bindings](https://github.com/louismullie/stanford-core-nlp) by Louis Mullie (see also: [Ruby Gems page](https://rubygems.org/gems/stanford-core-nlp)).
+* [Stanford CoreNLP Ruby bindings](https://github.com/louismullie/stanford-core-nlp) by Louis Mullie (see also: [Ruby Gems page](https://rubygems.org/gems/stanford-core-nlp)). (Updated in Feb 2017 to CoreNLP 3.5.0.)
 * The larger [TREAT](https://github.com/louismullie/treat) NLP toolkit by Louis Mullie also makes available Stanford CoreNLP.
 
 ### Scala
