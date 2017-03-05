@@ -56,7 +56,8 @@ public class DocumentMaker {
     if (!PropertiesUtils.getBool(props,"coref.printConLLLoadingMessage",true))
       options.printConLLLoadingMessage = false;
     options.annotateTokenCoref = false;
-    options.setFilter(".*_auto_conll$");
+    String conllFileFilter = props.getProperty("coref.conllFileFilter", ".*_auto_conll$");
+    options.setFilter(conllFileFilter);
     options.lang = CorefProperties.getLanguage(props);
     return new CoNLLDocumentReader(corpusPath, options);
   }
