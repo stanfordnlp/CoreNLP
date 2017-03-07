@@ -434,6 +434,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addEntailedSentence(toProto(entailedSentence));
       }
     }
+    if (keySet.contains(NaturalLogicAnnotations.EntailedClausesAnnotation.class)) {
+      for (SentenceFragment entailedClause : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.EntailedClausesAnnotation.class)) {
+        builder.addEntailedClause(toProto(entailedClause));
+      }
+    }
     if (keySet.contains(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
       for (RelationTriple triple : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
         builder.addOpenieTriple(toProto(triple));
@@ -1161,6 +1166,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       List<SentenceFragment> entailedSentences = proto.getEntailedSentenceList().stream().map(frag -> fromProto(frag, lossySentence.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toList());
       lossySentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
     }
+    // Add entailed clauses
+    if (proto.getEntailedClauseCount() > 0) {
+      List<SentenceFragment> entailedClauses = proto.getEntailedClauseList().stream().map(frag -> fromProto(frag, lossySentence.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toList());
+      lossySentence.set(NaturalLogicAnnotations.EntailedClausesAnnotation.class, entailedClauses);
+    }
     // Add relation triples
     if (proto.getOpenieTripleCount() > 0) {
       throw new IllegalStateException("Cannot deserialize OpenIE triples with this method!");
@@ -1437,6 +1447,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (sentence.getEntailedSentenceCount() > 0) {
         Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(EnhancedPlusPlusDependenciesAnnotation.class))).collect(Collectors.toSet());
         map.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
+      }
+      if (sentence.getEntailedClauseCount() > 0) {
+        Set<SentenceFragment> entailedClauses = sentence.getEntailedClauseList().stream().map(frag -> fromProto(frag, map.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toSet());
+        map.set(NaturalLogicAnnotations.EntailedClausesAnnotation.class, entailedClauses);
       }
       // Set relation triples
       if (sentence.getOpenieTripleCount() > 0) {

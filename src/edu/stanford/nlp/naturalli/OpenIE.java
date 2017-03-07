@@ -494,6 +494,7 @@ public class OpenIE implements Annotator  {
       extractions.addAll(relationsInFragments(fragments, sentence));
 
       // Set the annotations
+      sentence.set(NaturalLogicAnnotations.EntailedClausesAnnotation.class, new HashSet<>(clauses));
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
           new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions

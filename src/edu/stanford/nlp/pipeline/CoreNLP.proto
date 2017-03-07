@@ -75,6 +75,7 @@ message Sentence {
   repeated RelationTriple   openieTriple                        = 14;   // The OpenIE triples in the sentence
   repeated RelationTriple   kbpTriple                           = 16;   // The KBP triples in this sentence
   repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
+  repeated SentenceFragment entailedClause                      = 35;   // The entailed clauses, by natural logic
   optional DependencyGraph  enhancedDependencies                = 17;
   optional DependencyGraph  enhancedPlusPlusDependencies        = 18;
   repeated Token            character                           = 19;
