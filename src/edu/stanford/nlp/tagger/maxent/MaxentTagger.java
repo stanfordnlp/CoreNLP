@@ -55,6 +55,7 @@ import edu.stanford.nlp.util.XMLUtils;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.io.*;
 import java.util.*;
@@ -553,7 +554,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     if (defaultScores == null) {
       defaultScores = new double[ySize + 1];
       for (int i = 0; i < ySize + 1; ++i) {
-        defaultScores[i] = Math.log(i * defaultScore);
+        defaultScores[i] = FastMath.log(i * defaultScore);
       }
     }
   }

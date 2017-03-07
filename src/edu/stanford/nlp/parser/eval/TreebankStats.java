@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.eval; 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -343,16 +344,16 @@ public class TreebankStats  {
 
       //Compute *actual* stddev (we iterate over the whole population)
       for(int d : depths)
-        stddevDepth += Math.pow(d - meanDepth, 2);
-      stddevDepth = Math.sqrt(stddevDepth / denom);
+        stddevDepth += FastMath.pow(d - meanDepth, 2);
+      stddevDepth = FastMath.sqrt(stddevDepth / denom);
 
       for(int l : lengths)
-        stddevLength += Math.pow(l - meanLength, 2);
-      stddevLength = Math.sqrt(stddevLength / denom);
+        stddevLength += FastMath.pow(l - meanLength, 2);
+      stddevLength = FastMath.sqrt(stddevLength / denom);
 
       for(int b : breadths)
-        stddevBreadth += Math.pow(b - meanBreadth, 2);
-      stddevBreadth = Math.sqrt(stddevBreadth / denom);
+        stddevBreadth += FastMath.pow(b - meanBreadth, 2);
+      stddevBreadth = FastMath.sqrt(stddevBreadth / denom);
 
       meanBranchingByLabel = new ClassicCounter<>();
       for(String label : phrasalBranching2.keySet()) {

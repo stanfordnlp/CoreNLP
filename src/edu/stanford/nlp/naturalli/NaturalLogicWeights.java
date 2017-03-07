@@ -243,14 +243,14 @@ public class NaturalLogicWeights {
     if (edgeRel.startsWith("prep")) {
       double affinity = ppAffinity.getCount(parent, edgeRel);
       if (affinity != 0.0 && !isSecondaryEdgeOfType) {
-        return Math.sqrt(1.0 - Math.min(1.0, affinity));
+        return FastMath.sqrt(1.0 - Math.min(1.0, affinity));
       } else {
         return backoffEdgeProbability(edgeRel);
       }
     } else if (edgeRel.startsWith("dobj")) {
       double affinity = dobjAffinity.getCount(parent);
       if (affinity != 0.0 && !isSecondaryEdgeOfType) {
-        return Math.sqrt(1.0 - Math.min(1.0, affinity));
+        return FastMath.sqrt(1.0 - Math.min(1.0, affinity));
       } else {
         return backoffEdgeProbability(edgeRel);
       }

@@ -1,6 +1,6 @@
 package edu.stanford.nlp.naturalli; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -205,7 +205,7 @@ public class ForwardEntailerSearchProblem  {
     List<SearchResult> results = new ArrayList<>();
     if (!determinerRemovals.isEmpty()) {
       if (andsToAdd.isEmpty()) {
-        double score = Math.pow(weights.deletionProbability("det"), (double) determinerRemovals.size());
+        double score = FastMath.pow(weights.deletionProbability("det"), (double) determinerRemovals.size());
         assert !Double.isNaN(score);
         assert !Double.isInfinite(score);
         results.add(new SearchResult(parseTree, determinerRemovals, score));
@@ -217,7 +217,7 @@ public class ForwardEntailerSearchProblem  {
         }
         assert Util.isTree(treeWithAnds);
         results.add(new SearchResult(treeWithAnds, determinerRemovals,
-            Math.pow(weights.deletionProbability("det"), (double) determinerRemovals.size())));
+            FastMath.pow(weights.deletionProbability("det"), (double) determinerRemovals.size())));
       }
     }
 

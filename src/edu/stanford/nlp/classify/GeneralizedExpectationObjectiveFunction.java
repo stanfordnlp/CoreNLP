@@ -8,6 +8,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Triple;
+import net.jafama.FastMath;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,7 +104,7 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
         smoothDistribution(modelDist);
 
         for(int c = 0; c < numClasses; c++)
-          value += -geFeature2EmpiricalDist[n][c]*Math.log(modelDist[c]);
+          value += -geFeature2EmpiricalDist[n][c]*FastMath.log(modelDist[c]);
 
         for(int f = 0; f < labeledDataset.featureIndex().size(); f++) {
           for(int c = 0; c < numClasses; c++) {

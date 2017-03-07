@@ -7,6 +7,7 @@ import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.IntTriple;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.IntUni;
+import net.jafama.FastMath;
 
 import java.util.Arrays;
 
@@ -154,7 +155,7 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
     double[] x = normalize(x1);
     double[] xExp = new double[x.length];
     for (int i = 0; i < x.length; i++) {
-      xExp[i] = Math.exp(x[i]);
+      xExp[i] = FastMath.exp(x[i]);
     }
     value = 0.0;
     Arrays.fill(derivative, 0.0);
@@ -181,7 +182,7 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
       // }
       double total = ArrayMath.logSum(sums);
       for (int c = 0; c < numClasses; c++) {
-        probs[c] = Math.exp(sums[c] - total);
+        probs[c] = FastMath.exp(sums[c] - total);
         int priorc = indexOf(c);
         derivative[priorc] += probs[c];
         for (int f = 0; f < features.length; f++) {

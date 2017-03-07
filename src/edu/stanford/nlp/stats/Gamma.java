@@ -2,6 +2,8 @@ package edu.stanford.nlp.stats;
 
 import java.util.Random;
 
+import net.jafama.FastMath;
+
 /**
  * Represents a Gamma distribution.  The way that samples are drawn is
  * stolen from Yee Whye Teh's code.  It won't give the probability of a variable because
@@ -32,16 +34,16 @@ public class Gamma implements ProbabilityDistribution<Double> {
       return 0.0;
     } else if ( alpha == 1.0 ) {
       /* Exponential */
-      return -Math.log(Math.random());
+      return -FastMath.log(Math.random());
     } else if (alpha < 1.0) {
       /* Use Johnks generator */
       double cc = 1.0 / alpha;
       double dd = 1.0 / (1.0-alpha);
       while (true) {
-        double xx = Math.pow(Math.random(), cc);
-        double yy = xx + Math.pow(Math.random(), dd);
+        double xx = FastMath.pow(Math.random(), cc);
+        double yy = xx + FastMath.pow(Math.random(), dd);
         if (yy <= 1.0) {
-        return -Math.log(Math.random()) * xx / yy;
+        return -FastMath.log(Math.random()) * xx / yy;
         }
       }
     } else {
@@ -52,12 +54,12 @@ public class Gamma implements ProbabilityDistribution<Double> {
         double uu = Math.random();
         double vv = Math.random();
         double ww = uu * (1.0 - uu);
-        double yy = Math.sqrt(cc / ww) * (uu - 0.5);
+        double yy = FastMath.sqrt(cc / ww) * (uu - 0.5);
         double xx = bb + yy;
         if (xx >= 0) {
           double zz = 64.0 * ww * ww * ww * vv * vv;
           if ( ( zz <= (1.0 - 2.0 * yy * yy / xx) ) ||
-               ( Math.log(zz) <= 2.0 * (bb * Math.log(xx / bb) - yy) ) ) {
+               ( FastMath.log(zz) <= 2.0 * (bb * FastMath.log(xx / bb) - yy) ) ) {
             return xx;
           }
         }

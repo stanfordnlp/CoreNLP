@@ -5,6 +5,7 @@ import java.util.function.DoubleUnaryOperator;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 /**
  * Provides a medium-weight implementation of Bernoulli (or binary)
@@ -90,7 +91,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
       for (int f = 0; f < numFeatures; f++) {
         if (interpretAlwaysOnFeatureAsPrior && n_f[f] == data.length) {
           // interpret always on feature as prior!
-          weights[f][c] = Math.log(numc[c] / num);
+          weights[f][c] = FastMath.log(numc[c] / num);
         } else {
           // p_c_f = (N(f,c)+k)/(N(f)+|C|k) = Paddk(c|f)
           // set lambda = log (P()/P())
@@ -99,7 +100,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
           if (VERBOSE) {
             log.info("Prob ratio(f=" + f + ",c=" + c + ") = " + p_c_f / p_c + " (nc=" + n_c[c] + ", nf=" + n_f[f] + ", nfc=" + n_fc[f][c] + ')');
           }
-          weights[f][c] = Math.log(p_c_f / p_c);
+          weights[f][c] = FastMath.log(p_c_f / p_c);
         }
       }
     }
@@ -139,13 +140,13 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
       for (int f = 0; f < numFeatures; f++) {
         if (interpretAlwaysOnFeatureAsPrior && n_f[f] == data.length - foldSize) {
           // interpret always on feature as prior!
-          weights[f][c] = Math.log(numc[c] / num);
+          weights[f][c] = FastMath.log(numc[c] / num);
         } else {
           // p_c_f = (N(f,c)+k)/(N(f)+|C|k) = Paddk(c|f)
           // set lambda = log (P()/P())
           double p_c = (n_c[c] + epsilon) / (n + numClasses * epsilon);
           double p_c_f = (n_fc[f][c] + trialSigma) / (n_f[f] + trialSigma * numClasses);
-          weights[f][c] = Math.log(p_c_f / p_c);
+          weights[f][c] = FastMath.log(p_c_f / p_c);
         }
       }
     }

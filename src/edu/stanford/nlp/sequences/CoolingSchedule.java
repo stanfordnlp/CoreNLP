@@ -1,5 +1,7 @@
 package edu.stanford.nlp.sequences;
 
+import net.jafama.FastMath;
+
 /**
  * @author grenager
  *         Date: Dec 14, 2004
@@ -17,7 +19,7 @@ public abstract class CoolingSchedule {
       }
       @Override
       public double getTemperature(int iteration) {
-        return start * Math.pow(rate, iteration);
+        return start * FastMath.pow(rate, iteration);
       }
     };
   }

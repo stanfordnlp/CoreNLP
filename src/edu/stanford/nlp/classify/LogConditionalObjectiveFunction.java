@@ -1,5 +1,6 @@
 package edu.stanford.nlp.classify;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -179,7 +180,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       double total = ArrayMath.logSum(sums);
       int ld = labels[d];
       for (int c = 0; c < numClasses; c++) {
-        probs[c] = Math.exp(sums[c] - total);
+        probs[c] = FastMath.exp(sums[c] - total);
         for (int feature : features) {
           int i = indexOf(feature, c);
           derivative[i] += probs[ld] * probs[c];
@@ -263,7 +264,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
         // }
         double total = ArrayMath.logSum(sums);
         for (int c = 0; c < numClasses; c++) {
-          probs[c] = Math.exp(sums[c] - total);
+          probs[c] = FastMath.exp(sums[c] - total);
           if (dataWeights != null) {
             probs[c] *= dataWeights[d];
           }
@@ -364,7 +365,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
         // }
         double total = ArrayMath.logSum(sums);
         for (int c = 0; c < numClasses; c++) {
-          probs[c] = Math.exp(sums[c] - total);
+          probs[c] = FastMath.exp(sums[c] - total);
           if (dataWeights != null) {
             probs[c] *= dataWeights[d];
           }
@@ -443,7 +444,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       // }
       double total = ArrayMath.logSum(sums);
       for (int c = 0; c < numClasses; c++) {
-        probs[c] = Math.exp(sums[c] - total);
+        probs[c] = FastMath.exp(sums[c] - total);
       }
 
       for (F feature : features) {
@@ -518,8 +519,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       double totalV = ArrayMath.logSum(sumsV);
 
       for (int c = 0; c < numClasses; c++) {
-        probs[c] = Math.exp(sums[c] - total);
-        probsV[c] = Math.exp(sumsV[c] - totalV);
+        probs[c] = FastMath.exp(sums[c] - total);
+        probsV[c] = FastMath.exp(sumsV[c] - totalV);
 
         if (dataWeights != null) {
           probs[c] *= dataWeights[m];
@@ -597,8 +598,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       //double totalV = ArrayMath.logSum(sumsV);
 
       for (int c = 0; c < numClasses; c++) {
-        probs[c] = Math.exp(sums[c] - total);
-        //probsV[c] = Math.exp(sumsV[c]- totalV);
+        probs[c] = FastMath.exp(sums[c] - total);
+        //probsV[c] = FastMath.exp(sumsV[c]- totalV);
 
         if (dataWeights != null) {
           probs[c] *= dataWeights[m];
@@ -732,7 +733,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
         double total = ArrayMath.logSum(sums);
 
         for (int c = 0; c < numClasses; c++) {
-          probs[c] = Math.exp(sums[c] - total);
+          probs[c] = FastMath.exp(sums[c] - total);
 
           if (dataWeights != null) {
             probs[c] *= dataWeights[m];
@@ -785,7 +786,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       double total = ArrayMath.logSum(sums);
       int ld = labels[d];
       for (int c = 0; c < numClasses; c++) {
-        probs[c] = Math.exp(sums[c] - total);
+        probs[c] = FastMath.exp(sums[c] - total);
         for (int feature : features) {
           int i = indexOf(feature, c);
           derivative[i] += probs[ld] * probs[c];
@@ -945,7 +946,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
         // it is faster to split these two loops. More striding
         double total = ArrayMath.logSum(sums);
         for (int c = 0; c < numClasses; c++) {
-          probs[c] = Math.exp(sums[c] - total);
+          probs[c] = FastMath.exp(sums[c] - total);
           if (dataWeights != null) {
             probs[c] *= dataWeights[d];
           }
@@ -1047,7 +1048,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
         // it is faster to split these two loops. More striding
         double total = ArrayMath.logSum(sums);
         for (int c = 0; c < numClasses; c++) {
-          probs[c] = Math.exp(sums[c] - total);
+          probs[c] = FastMath.exp(sums[c] - total);
           if (dataWeights != null) {
             probs[c] *= dataWeights[d];
           }

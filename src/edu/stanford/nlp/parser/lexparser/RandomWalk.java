@@ -4,6 +4,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+import net.jafama.FastMath;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -33,7 +34,7 @@ class RandomWalk implements Serializable {
   public double score(Object hidden, Object seen, int steps) {
     double total = 0;
     for (int i = 0; i <= steps; i++) {
-      total += Math.pow(LAMBDA, steps) * step(hidden, seen, steps);
+      total += FastMath.pow(LAMBDA, steps) * step(hidden, seen, steps);
     }
     return total;
   }

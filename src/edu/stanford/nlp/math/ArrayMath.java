@@ -10,6 +10,7 @@ import java.util.Random;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
+import net.jafama.FastMath;
 
 /**
  * Methods for operating on numerical arrays as vectors and matrices.
@@ -113,7 +114,7 @@ public class ArrayMath {
   public static double[] exp(double[] a) {
     double[] result = new double[a.length];
     for (int i = 0; i < a.length; i++) {
-      result[i] = Math.exp(a[i]);
+      result[i] = FastMath.exp(a[i]);
     }
     return result;
   }
@@ -121,7 +122,7 @@ public class ArrayMath {
   public static double[] log(double[] a) {
     double[] result = new double[a.length];
     for (int i = 0; i < a.length; i++) {
-      result[i] = Math.log(a[i]);
+      result[i] = FastMath.log(a[i]);
     }
     return result;
   }
@@ -130,13 +131,13 @@ public class ArrayMath {
 
   public static void expInPlace(double[] a) {
     for (int i = 0; i < a.length; i++) {
-      a[i] = Math.exp(a[i]);
+      a[i] = FastMath.exp(a[i]);
     }
   }
 
   public static void logInPlace(double[] a) {
     for (int i = 0; i < a.length; i++) {
-      a[i] = Math.log(a[i]);
+      a[i] = FastMath.log(a[i]);
     }
   }
 
@@ -144,7 +145,7 @@ public class ArrayMath {
     double[] newScales = new double[scales.length];
     double sum = 0;
     for (int i = 0; i < scales.length; i++) {
-      sum += newScales[i] = Math.exp(scales[i]);
+      sum += newScales[i] = FastMath.exp(scales[i]);
     }
     for (int i = 0; i < scales.length; i++) {
       newScales[i] /= sum;
@@ -220,7 +221,7 @@ public class ArrayMath {
    */
   public static void powInPlace(double[] a, double c) {
     for (int i = 0; i < a.length; i++) {
-      a[i] = Math.pow(a[i], c);
+      a[i] = FastMath.pow(a[i], c);
     }
   }
 
@@ -229,7 +230,7 @@ public class ArrayMath {
    */
   public static void powInPlace(float[] a, float c) {
     for (int i = 0; i < a.length; i++) {
-      a[i] = (float) Math.pow(a[i], c);
+      a[i] = (float) FastMath.pow(a[i], c);
     }
   }
 
@@ -279,7 +280,7 @@ public class ArrayMath {
   public static double[] pow(double[] a, double c) {
     double[] result = new double[a.length];
     for (int i = 0; i < a.length; i++) {
-      result[i] = Math.pow(a[i], c);
+      result[i] = FastMath.pow(a[i], c);
     }
     return result;
   }
@@ -290,7 +291,7 @@ public class ArrayMath {
   public static float[] pow(float[] a, float c) {
     float[] result = new float[a.length];
     for (int i = 0; i < a.length; i++) {
-      result[i] = (float) Math.pow(a[i], c);
+      result[i] = (float) FastMath.pow(a[i], c);
     }
     return result;
   }
@@ -588,7 +589,7 @@ public class ArrayMath {
   public static int countCloseToZero(double[] v, double epsilon) {
     int c = 0;
     for (double aV : v)
-      if (Math.abs(aV) < epsilon)
+      if (FastMath.abs(aV) < epsilon)
         ++c;
     return c;
   }
@@ -711,8 +712,9 @@ public class ArrayMath {
   public static double norm_inf(double[] a) {
     double max = Double.NEGATIVE_INFINITY;
     for (double d : a) {
-      if (Math.abs(d) > max) {
-        max = Math.abs(d);
+      double abs = FastMath.abs(d);
+      if (abs > max) {
+        max = abs;
       }
     }
     return max;
@@ -727,8 +729,9 @@ public class ArrayMath {
   public static double norm_inf(float[] a) {
     double max = Double.NEGATIVE_INFINITY;
     for (float anA : a) {
-      if (Math.abs(anA) > max) {
-        max = Math.abs(anA);
+      float abs = FastMath.abs(anA);
+      if (abs > max) {
+        max = abs;
       }
     }
     return max;
@@ -774,7 +777,7 @@ public class ArrayMath {
     for (double anA : a) {
       squaredSum += anA * anA;
     }
-    return Math.sqrt(squaredSum);
+    return FastMath.sqrt(squaredSum);
   }
 
   /**
@@ -788,7 +791,7 @@ public class ArrayMath {
     for (float anA : a) {
       squaredSum += anA * anA;
     }
-    return Math.sqrt(squaredSum);
+    return FastMath.sqrt(squaredSum);
   }
 
   /**
@@ -979,7 +982,7 @@ public class ArrayMath {
     int min = Integer.MAX_VALUE;
     for (int[] row : matrix) {
       for (int elem : row) {
-        min = Math.min(min, elem);
+        min = FastMath.min(min, elem);
       }
     }
     return min;
@@ -990,7 +993,7 @@ public class ArrayMath {
     int max = Integer.MIN_VALUE;
     for (int[] row : matrix) {
       for (int elem : row) {
-        max = Math.max(max, elem);
+        max = FastMath.max(max, elem);
       }
     }
     return max;
@@ -1059,10 +1062,10 @@ public class ArrayMath {
     for (int i = fromIndex; i < toIndex; i++) {
       double d = logInputs[i];
       if (i != maxIdx && d > cutoff) {
-        intermediate += Math.exp(d - max);
+        intermediate += FastMath.exp(d - max);
       }
     }
-    return intermediate != 0 ? (max + Math.log(1 + intermediate)) : max;
+    return intermediate != 0 ? (max + FastMath.log1p(intermediate)) : max;
   }
 
   /**
@@ -1102,10 +1105,10 @@ public class ArrayMath {
     for (int i = fromIndex; i < afterIndex; i += stride) {
       double d = logInputs[i];
       if (i != maxIdx && d > cutoff) {
-        intermediate += Math.exp(d - max);
+        intermediate += FastMath.exp(d - max);
       }
     }
-    return intermediate != 0 ? max + Math.log(1.0 + intermediate) : max;
+    return intermediate != 0 ? max + FastMath.log1p(intermediate) : max;
   }
 
   public static double logSum(List<Double> logInputs) {
@@ -1133,10 +1136,10 @@ public class ArrayMath {
     for (int i = fromIndex; i < toIndex; i++) {
       double d = logInputs.get(i);
       if (i != maxIdx && d > cutoff) {
-        intermediate += Math.exp(d - max);
+        intermediate += FastMath.exp(d - max);
       }
     }
-    return intermediate != 0. ? max + Math.log(1.0 + intermediate) : max;
+    return intermediate != 0. ? max + FastMath.log1p(intermediate) : max;
   }
 
 
@@ -1169,17 +1172,17 @@ public class ArrayMath {
     // we avoid rearranging the array and so test indices each time!
     for (int i = 0; i < leng; i++) {
       if (i != maxIdx && logInputs[i] > cutoff) {
-        intermediate += Math.exp(logInputs[i] - max);
+        intermediate += FastMath.exp(logInputs[i] - max);
       }
     }
-    return intermediate != 0. ? max + (float) Math.log(1.0 + intermediate) : max;
+    return intermediate != 0. ? max + (float) FastMath.log1p(intermediate) : max;
   }
 
   // LINEAR ALGEBRAIC FUNCTIONS
 
   public static double innerProduct(double[] a, double[] b) {
     double result = 0.0;
-    int len = Math.min(a.length, b.length);
+    int len = FastMath.min(a.length, b.length);
     for (int i = 0; i < len; i++) {
       result += a[i] * b[i];
     }
@@ -1188,7 +1191,7 @@ public class ArrayMath {
 
   public static double innerProduct(float[] a, float[] b) {
     double result = 0.0;
-    int len = Math.min(a.length, b.length);
+    int len = FastMath.min(a.length, b.length);
     for (int i = 0; i < len; i++) {
       result += a[i] * b[i];
     }
@@ -1346,20 +1349,20 @@ public class ArrayMath {
     for(double d: a) {
       result += d * d;
     }
-    return Math.sqrt(result);
+    return FastMath.sqrt(result);
   }
   public static float L2Norm(float[] a) {
     double result = 0;
     for(float d: a) {
       result += d * d;
     }
-    return (float) Math.sqrt(result);
+    return (float) FastMath.sqrt(result);
   }
 
   public static double L1Norm(double[] a) {
     double result = 0.0;
     for (double d: a) {
-      result += Math.abs(d);
+      result += FastMath.abs(d);
     }
     return result;
   }
@@ -1375,7 +1378,7 @@ public class ArrayMath {
     double logTotal = logSum(a);
     if (logTotal == Double.NEGATIVE_INFINITY) {
       // to avoid NaN values
-      double v = -Math.log(a.length);
+      double v = -FastMath.log(a.length);
       for (int i = 0; i < a.length; i++) {
         a[i] = v;
       }
@@ -1455,7 +1458,7 @@ public class ArrayMath {
       double num = from[i] / tot;
       double num2 = to[i] / tot2;
       // System.out.println("num is " + num + " num2 is " + num2);
-      kl += num * (Math.log(num / num2) / Math.log(2.0));
+      kl += num * (FastMath.log(num / num2) / FastMath.log(2.0));
     }
     return kl;
   }
@@ -1531,7 +1534,7 @@ public class ArrayMath {
   }
 
   public static double stdev(double[] a) {
-    return Math.sqrt(variance(a));
+    return FastMath.sqrt(variance(a));
   }
 
   /**
@@ -1545,7 +1548,7 @@ public class ArrayMath {
   }
 
   public static double standardErrorOfMean(double[] a) {
-    return stdev(a) / Math.sqrt(a.length);
+    return stdev(a) / FastMath.sqrt(a.length);
   }
 
 
@@ -1630,8 +1633,8 @@ public class ArrayMath {
       mean_x += delta_x / i;
       mean_y += delta_y / i;
     }
-    double pop_sd_x = Math.sqrt(sum_sq_x/x.length);
-    double pop_sd_y = Math.sqrt(sum_sq_y/y.length);
+    double pop_sd_x = FastMath.sqrt(sum_sq_x/x.length);
+    double pop_sd_y = FastMath.sqrt(sum_sq_y/y.length);
     double cov_x_y = sum_coproduct / x.length;
     double denom = pop_sd_x*pop_sd_y;
     return denom == 0. ? 0. : cov_x_y/denom;
@@ -1740,7 +1743,7 @@ public class ArrayMath {
     }
     double aMean = aTotal / A.length;
     double bMean = bTotal / B.length;
-    return Math.abs(aMean - bMean);
+    return FastMath.abs(aMean - bMean);
   }
 
   // PRINTING FUNCTIONS
@@ -2068,7 +2071,7 @@ public class ArrayMath {
     double e = 0.0;
     for (double p : probs) {
       if (p != 0.0)
-        e -= p * Math.log(p);
+        e -= p * FastMath.log(p);
     }
     return e;
   }

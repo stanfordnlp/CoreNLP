@@ -1,6 +1,6 @@
 package edu.stanford.nlp.optimization; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Timing;
@@ -94,10 +94,10 @@ public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implem
 
 		for (K feature : gradient.keySet()) {
 		  double gradf = gradient.getCount(feature);
-		  double prevrate = eta / (Math.sqrt(sumGradSquare.getCount(feature)) + soften);
+		  double prevrate = eta / (FastMath.sqrt(sumGradSquare.getCount(feature)) + soften);
 
 		  double sgsValue = sumGradSquare.incrementCount(feature, gradf * gradf);
-		  double currentrate = eta / (Math.sqrt(sgsValue) + soften);
+		  double currentrate = eta / (FastMath.sqrt(sgsValue) + soften);
 		  double testupdate = x.getCount(feature) - (currentrate * gradient.getCount(feature));
 		  double lastUpdateTimeStep = lastUpdated.getCount(feature);
 		  double idleinterval = timeStep - lastUpdateTimeStep - 1;
@@ -106,7 +106,7 @@ public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implem
 		  // does lazy update using idleinterval
 		  double trunc = Math
 			  .max(0.0, (Math.abs(testupdate) - (currentrate + prevrate * idleinterval) * this.lambdaL1));
-		  double trunc2 = trunc * Math.pow(1 - this.lambdaL2, currentrate + prevrate * idleinterval); 
+		  double trunc2 = trunc * FastMath.pow(1 - this.lambdaL2, currentrate + prevrate * idleinterval); 
 		  double realupdate = Math.signum(testupdate) * trunc2;
 		  if (realupdate < EPS) {
 			x.remove(feature);

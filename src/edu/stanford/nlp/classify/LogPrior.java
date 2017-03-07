@@ -1,6 +1,7 @@
 package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.math.ArrayMath;
+import net.jafama.FastMath;
 
 import java.io.Serializable;
 
@@ -15,6 +16,8 @@ public class LogPrior implements Serializable {
   private static final long serialVersionUID = 7826853908892790965L;
 
   public enum LogPriorType { NULL, QUADRATIC, HUBER, QUARTIC, COSH, ADAPT, MULTIPLE_QUADRATIC }
+
+  private static final double LOG2 = Math.log(2);
 
   public static LogPriorType getType(String name) {
     if (name.equalsIgnoreCase("null")) { return LogPriorType.NULL; }
@@ -122,7 +125,7 @@ public class LogPrior implements Serializable {
     if (type == LogPriorType.ADAPT) {
       return otherPrior.getSigma();
     } else {
-      return Math.sqrt(sigmaSq);
+      return FastMath.sqrt(sigmaSq);
     }
   }
 
@@ -298,11 +301,11 @@ public class LogPrior implements Serializable {
         double norm = ArrayMath.norm_1(x) / sigmaSq;
         double d;
         if (norm > 30.0) {
-          val = norm - Math.log(2);
+          val = norm - LOG2;
           d = 1.0 / sigmaSq;
         } else {
-          val = Math.log(Math.cosh(norm));
-          d = (2 * (1 / (Math.exp(-2.0 * norm) + 1)) - 1.0) / sigmaSq;
+          val = FastMath.log(FastMath.cosh(norm));
+          d = (2 * (1 / (FastMath.exp(-2.0 * norm) + 1)) - 1.0) / sigmaSq;
         }
         for (int i=0; i < x.length; i++) {
           grad[i] += Math.signum(x[i]) * d;

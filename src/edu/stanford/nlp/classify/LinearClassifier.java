@@ -44,6 +44,7 @@ import java.util.*;
 import java.util.function.Function;
 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 
 /**
@@ -274,7 +275,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
     if(example instanceof RVFDatum<?, ?>)return probabilityOfRVFDatum((RVFDatum<L,F>)example);
     Counter<L> scores = logProbabilityOf(example);
     for (L label : scores.keySet()) {
-      scores.setCount(label, Math.exp(scores.getCount(label)));
+      scores.setCount(label, FastMath.exp(scores.getCount(label)));
     }
     return scores;
   }
@@ -289,7 +290,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
     // with a RVFDatum signature
     Counter<L> scores = logProbabilityOfRVFDatum(example);
     for (L label : scores.keySet()) {
-      scores.setCount(label, Math.exp(scores.getCount(label)));
+      scores.setCount(label, FastMath.exp(scores.getCount(label)));
     }
     return scores;
   }
@@ -305,7 +306,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
     // with a RVFDatum signature
     Counter<L> scores = logProbabilityOf(example);
     for (L label : scores.keySet()) {
-      scores.setCount(label, Math.exp(scores.getCount(label)));
+      scores.setCount(label, FastMath.exp(scores.getCount(label)));
     }
     return scores;
   }
@@ -337,7 +338,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   public Counter<L> probabilityOf(int [] features) {
     Counter<L> scores = logProbabilityOf(features);
     for (L label : scores.keySet()) {
-      scores.setCount(label, Math.exp(scores.getCount(label)));
+      scores.setCount(label, FastMath.exp(scores.getCount(label)));
     }
     return scores;
   }

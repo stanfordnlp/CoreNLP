@@ -66,6 +66,7 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
+import net.jafama.FastMath;
 
 /**
  * Static methods for operating on a {@link Counter}.
@@ -302,7 +303,7 @@ public class Counters  {
     for (Map.Entry<E, Double> en : c.entrySet()) {
       std += (en.getValue() - mean) * (en.getValue() - mean);
     }
-    return Math.sqrt(std / c.size());
+    return FastMath.sqrt(std / c.size());
   }
 
   //
@@ -546,7 +547,7 @@ public class Counters  {
 
   public static <E> void logInPlace(Counter<E> target) {
     for (E key : target.keySet()) {
-      target.setCount(key, Math.log(target.getCount(key)));
+      target.setCount(key, FastMath.log(target.getCount(key)));
     }
   }
 
@@ -1374,7 +1375,7 @@ public class Counters  {
         continue; // 0.0 doesn't add entropy but may cause -Inf
       }
       count /= total; // use normalized count
-      entropy -= count * (Math.log(count) / LOG_E_2);
+      entropy -= count * (FastMath.log(count) / LOG_E_2);
     }
     return entropy;
   }
@@ -1395,7 +1396,7 @@ public class Counters  {
         continue;
       }
       double count2 = to.getCount(key);
-      double logFract = Math.log(count2 / tot2);
+      double logFract = FastMath.log(count2 / tot2);
       if (logFract == Double.NEGATIVE_INFINITY) {
         return Double.NEGATIVE_INFINITY; // can't recover
       }
@@ -1428,7 +1429,7 @@ public class Counters  {
       double num2 = (to.getCount(key));
       num2 /= tot2;
       // System.out.println("num is " + num + " num2 is " + num2);
-      double logFract = Math.log(num / num2);
+      double logFract = FastMath.log(num / num2);
       if (logFract == Double.NEGATIVE_INFINITY) {
         return Double.NEGATIVE_INFINITY; // can't recover
       }
@@ -1477,7 +1478,7 @@ public class Counters  {
    * @return Its length
    */
   public static <E, C extends Counter<E>> double L2Norm(C c) {
-    return Math.sqrt(Counters.sumSquares(c));
+    return FastMath.sqrt(Counters.sumSquares(c));
   }
 
   /**
@@ -1554,9 +1555,9 @@ public class Counters  {
     double sqrSum = 0.0;
     for (E key : c.keySet()) {
       double count = c.getCount(key);
-      sqrSum += Math.pow(count / maxVal, 2);
+      sqrSum += FastMath.pow2(count / maxVal);
     }
-    return maxVal * Math.sqrt(sqrSum);
+    return maxVal * FastMath.sqrt(sqrSum);
   }
 
   /**
@@ -1592,7 +1593,7 @@ public class Counters  {
       }
     }
     if (lsq1 != 0.0 && lsq2 != 0.0) {
-      double denom = (Math.sqrt(lsq1) * Math.sqrt(lsq2));
+      double denom = (FastMath.sqrt(lsq1) * FastMath.sqrt(lsq2));
       return dotProd / denom;
     }
     return 0.0;
@@ -1636,7 +1637,7 @@ public class Counters  {
     double var1Prob = var1Distribution.getCount(values.first);
     double var2Prob = var2Distribution.getCount(values.second);
     double jointProb = jointDistribution.getCount(values);
-    double pmi = Math.log(jointProb) - Math.log(var1Prob) - Math.log(var2Prob);
+    double pmi = FastMath.log(jointProb) - FastMath.log(var1Prob) - FastMath.log(var2Prob);
     return pmi / LOG_E_2;
   }
 
@@ -1674,7 +1675,7 @@ public class Counters  {
     C result = (C) c.getFactory().create();
     for (E key : c.keySet()) {
       double count = c.getCount(key);
-      double noise = -Math.log(1.0 - random.nextDouble()); // inverse of CDF for
+      double noise = -FastMath.log(1.0 - random.nextDouble()); // inverse of CDF for
                                                            // exponential
                                                            // distribution
       // log.info("noise=" + noise);
@@ -2367,7 +2368,7 @@ public class Counters  {
     Counter<E> d = c.getFactory().create();
     double total = c.totalCount();
     for (E e : c.keySet()) {
-      d.setCount(e, Math.pow(c.getCount(e) / total, temp));
+      d.setCount(e, FastMath.pow(c.getCount(e) / total, temp));
     }
     return d;
   }
@@ -2375,28 +2376,28 @@ public class Counters  {
   public static <T> Counter<T> pow(Counter<T> c, double temp) {
     Counter<T> d = c.getFactory().create();
     for (T t : c.keySet()) {
-      d.setCount(t, Math.pow(c.getCount(t), temp));
+      d.setCount(t, FastMath.pow(c.getCount(t), temp));
     }
     return d;
   }
 
   public static <T> void powInPlace(Counter<T> c, double temp) {
     for (T t : c.keySet()) {
-      c.setCount(t, Math.pow(c.getCount(t), temp));
+      c.setCount(t, FastMath.pow(c.getCount(t), temp));
     }
   }
 
   public static <T> Counter<T> exp(Counter<T> c) {
     Counter<T> d = c.getFactory().create();
     for (T t : c.keySet()) {
-      d.setCount(t, Math.exp(c.getCount(t)));
+      d.setCount(t, FastMath.exp(c.getCount(t)));
     }
     return d;
   }
 
   public static <T> void expInPlace(Counter<T> c) {
     for (T t : c.keySet()) {
-      c.setCount(t, Math.exp(c.getCount(t)));
+      c.setCount(t, FastMath.exp(c.getCount(t)));
     }
   }
 

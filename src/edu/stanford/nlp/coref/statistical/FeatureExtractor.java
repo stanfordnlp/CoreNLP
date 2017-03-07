@@ -33,6 +33,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
+import net.jafama.FastMath;
 
 /**
  * A class for featurizing mention pairs and individual mentions.
@@ -517,7 +518,7 @@ public class FeatureExtractor {
 
     String bin = String.valueOf(value);
     if (value > binExact) {
-      double start = Math.pow(binExponent, (int) (Math.log(value) / Math.log(binExponent)));
+      double start = FastMath.pow(binExponent, (int) (FastMath.log(value) / FastMath.log(binExponent)));
       bin = (int) start + "-" + (int) (start * binExponent);
     }
     return bin;

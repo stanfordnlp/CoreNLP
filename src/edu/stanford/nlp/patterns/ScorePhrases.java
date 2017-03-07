@@ -35,6 +35,7 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.ArgumentParser.Option;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 public class ScorePhrases<E extends Pattern>  {
 
@@ -574,10 +575,10 @@ public class ScorePhrases<E extends Pattern>  {
         for (Entry<CandidatePhrase, Double> fq : Data.rawFreq.entrySet()) {
           Double in = fq.getValue();
           if (phraseScorer.wordFreqNorm.equals(Normalization.SQRT))
-            in = Math.sqrt(in);
+            in = FastMath.sqrt(in);
 
           else if (phraseScorer.wordFreqNorm.equals(Normalization.LOG))
-            in = 1 + Math.log(in);
+            in = 1 + FastMath.log(in);
           else
             throw new RuntimeException("can't understand the normalization");
 

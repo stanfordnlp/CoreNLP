@@ -1429,7 +1429,7 @@ public class StringUtils  {
     }
     /* ----
       // num chars needed to display longest num
-      int numChars = (int) Math.ceil(Math.log(d[n][m]) / Math.log(10));
+      int numChars = (int) Math.ceil(FastMath.log(d[n][m]) / FastMath.log(10));
       for (i = 0; i < numChars + 3; i++) {
         log.info(' ');
       }

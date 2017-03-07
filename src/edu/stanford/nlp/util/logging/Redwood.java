@@ -16,6 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import edu.stanford.nlp.util.*;
+import net.jafama.FastMath;
 
 /**
  * A hierarchical channel-based logger. Log messages are arranged hierarchically by depth
@@ -1425,11 +1426,11 @@ public class Redwood  {
     RedwoodConfiguration.standard().apply();
 //    RedwoodConfiguration.current().collapseApproximate().apply();
     forceTrack("Fuzzy Equality");
-    for(int i=0; i<100; i++){ log("iter " + i + " ended with value " + (-34587292534.0+Math.sqrt(i)*3000000000.0)); }
+    for(int i=0; i<100; i++){ log("iter " + i + " ended with value " + (-34587292534.0+FastMath.sqrt(i)*3000000000.0)); }
     endTrack("Fuzzy Equality");
     forceTrack("Fuzzy Equality (timing)");
     for(int i=0; i<100; i++){
-      log("iter " + i + " ended with value " + (-34587292534.0+Math.sqrt(i)*3000000000.0));
+      log("iter " + i + " ended with value " + (-34587292534.0+FastMath.sqrt(i)*3000000000.0));
       try {
         Thread.sleep(50);
       } catch (InterruptedException e) {

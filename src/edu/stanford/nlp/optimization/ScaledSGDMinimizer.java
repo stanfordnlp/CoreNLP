@@ -11,6 +11,8 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
+import net.jafama.FastMath;
+
 /**
  * Stochastic Gradient Descent To Quasi Newton Minimizer.
  *
@@ -247,10 +249,10 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
       high += tmp*tmp;
     }
     say("M");
-    double alpha = Math.sqrt((ArrayMath.norm(y)/ArrayMath.norm(s))) *Math.sqrt(( 50.0/ (50.0 + k) ));
-    alpha = alpha*Math.sqrt(ArrayMath.average(diag));
+    double alpha = FastMath.sqrt((ArrayMath.norm(y)/ArrayMath.norm(s))) *FastMath.sqrt(( 50.0/ (50.0 + k) ));
+    alpha = alpha*FastMath.sqrt(ArrayMath.average(diag));
     say(" alpha " + nf.format(alpha));
-    high = Math.sqrt(high)/(2*alpha);
+    high = FastMath.sqrt(high)/(2*alpha);
 
     DoubleUnaryOperator func = new lagrange(s,y,diag,alpha);
 

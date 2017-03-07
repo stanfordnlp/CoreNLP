@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.nndep;
 
+import net.jafama.FastMath;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Pair;
@@ -231,7 +232,7 @@ public class Classifier  {
         // Add bias term and apply activation function
         for (int nodeIndex : ls) {
           hidden[nodeIndex] += b1[nodeIndex];
-          hidden3[nodeIndex] = Math.pow(hidden[nodeIndex], 3);
+          hidden3[nodeIndex] = FastMath.pow(hidden[nodeIndex], 3);
         }
 
         // Feed forward to softmax layer (no activation yet)
@@ -251,13 +252,13 @@ public class Classifier  {
         double maxScore = scores[optLabel];
         for (int i = 0; i < numLabels; ++i) {
           if (label.get(i) >= 0) {
-            scores[i] = Math.exp(scores[i] - maxScore);
+            scores[i] = FastMath.exp(scores[i] - maxScore);
             if (label.get(i) == 1) sum1 += scores[i];
             sum2 += scores[i];
           }
         }
 
-        cost += (Math.log(sum2) - Math.log(sum1)) / params.getBatchSize();
+        cost += (FastMath.log(sum2) - FastMath.log(sum1)) / params.getBatchSize();
         if (label.get(optLabel) == 1)
           correct += +1.0 / params.getBatchSize();
 
@@ -577,19 +578,19 @@ public class Classifier  {
     for (int i = 0; i < W1.length; ++i) {
       for (int j = 0; j < W1[i].length; ++j) {
         eg2W1[i][j] += gradW1[i][j] * gradW1[i][j];
-        W1[i][j] -= adaAlpha * gradW1[i][j] / Math.sqrt(eg2W1[i][j] + adaEps);
+        W1[i][j] -= adaAlpha * gradW1[i][j] / FastMath.sqrt(eg2W1[i][j] + adaEps);
       }
     }
 
     for (int i = 0; i < b1.length; ++i) {
       eg2b1[i] += gradb1[i] * gradb1[i];
-      b1[i] -= adaAlpha * gradb1[i] / Math.sqrt(eg2b1[i] + adaEps);
+      b1[i] -= adaAlpha * gradb1[i] / FastMath.sqrt(eg2b1[i] + adaEps);
     }
 
     for (int i = 0; i < W2.length; ++i) {
       for (int j = 0; j < W2[i].length; ++j) {
         eg2W2[i][j] += gradW2[i][j] * gradW2[i][j];
-        W2[i][j] -= adaAlpha * gradW2[i][j] / Math.sqrt(eg2W2[i][j] + adaEps);
+        W2[i][j] -= adaAlpha * gradW2[i][j] / FastMath.sqrt(eg2W2[i][j] + adaEps);
       }
     }
 
@@ -597,7 +598,7 @@ public class Classifier  {
       for (int i = 0; i < E.length; ++i) {
         for (int j = 0; j < E[i].length; ++j) {
           eg2E[i][j] += gradE[i][j] * gradE[i][j];
-          E[i][j] -= adaAlpha * gradE[i][j] / Math.sqrt(eg2E[i][j] + adaEps);
+          E[i][j] -= adaAlpha * gradE[i][j] / FastMath.sqrt(eg2E[i][j] + adaEps);
         }
       }
     }

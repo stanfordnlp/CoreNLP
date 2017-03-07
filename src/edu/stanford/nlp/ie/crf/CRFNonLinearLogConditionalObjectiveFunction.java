@@ -1,6 +1,6 @@
 package edu.stanford.nlp.ie.crf; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.optimization.HasRegularizerParamRange;
@@ -182,7 +182,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       }
 
       if (flags.blockInitialize) {
-        double fanIn = 1/Math.sqrt(numNodeFeatures+0.0);
+        double fanIn = 1/FastMath.sqrt(numNodeFeatures);
         double twoFanIn = 2.0 * fanIn;
         int interval = numNodeFeatures / numHiddenUnits;
         for (int i = 0; i < numHiddenUnits; i++) {
@@ -204,7 +204,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
           throw new RuntimeException("after blockInitialize, param Index (" + count + ") not equal to beforeOutputWeights (" + beforeOutputWeights + ")");
         }
       } else {
-        double fanIn = 1 / Math.sqrt(numNodeFeatures+0.0);
+        double fanIn = 1 / FastMath.sqrt(numNodeFeatures);
         double twoFanIn = 2.0 * fanIn;
         for (int i = edgeParamCount; i < beforeOutputWeights; i++) {
           val = random.nextDouble() * twoFanIn - fanIn;

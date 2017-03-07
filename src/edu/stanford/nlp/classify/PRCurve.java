@@ -13,6 +13,7 @@ import edu.stanford.nlp.util.Triple;
 
 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 /** A class to create recall-precision curves given scores
  *  used to fit the best monotonic function for logistic regression and SVMs.
@@ -295,7 +296,7 @@ public class PRCurve {
   public double logLikelihood() {
     double loglik = 0;
     for (int i = 0; i < scores.length; i++) {
-      loglik += Math.log(classes[i] == 0 ? 1 - scores[i] : scores[i]);
+      loglik += FastMath.log(classes[i] == 0 ? 1 - scores[i] : scores[i]);
     }
     return loglik;
   }

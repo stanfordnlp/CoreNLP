@@ -2,6 +2,8 @@ package edu.stanford.nlp.optimization;
 
 import java.util.Arrays;
 
+import net.jafama.FastMath;
+
 /**
  * @author Dan Klein
  */
@@ -59,7 +61,7 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
     for (float aX : x) {
       sum += aX * aX;
     }
-    return (float) Math.sqrt(sum);
+    return (float) FastMath.sqrt(sum);
   }
 
   @Override

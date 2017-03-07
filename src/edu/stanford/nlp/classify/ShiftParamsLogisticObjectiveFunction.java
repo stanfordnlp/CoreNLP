@@ -7,6 +7,7 @@ import java.util.Set;
 import edu.stanford.nlp.classify.LogPrior.LogPriorType;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.optimization.HasRegularizerParamRange;
+import net.jafama.FastMath;
 
 /**
  * @author jtibs
@@ -55,7 +56,7 @@ public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFun
 
         if (c == 0) continue;
         int offset = (c - 1) * numFeatures;
-        double error = Math.exp(sum) - labels[i][c];
+        double error = FastMath.exp(sum) - labels[i][c];
         for (int f = 0; f < featureIndices.length; f++) {
           int index = featureIndices[f];
           double x = featureValues[f];

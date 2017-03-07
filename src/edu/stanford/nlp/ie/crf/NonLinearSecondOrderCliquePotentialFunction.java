@@ -2,6 +2,7 @@ package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
+import net.jafama.FastMath;
 
 /**
  * @author Mengqiu Wang
@@ -66,13 +67,13 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
       if (aFlag.useSigmoid) {
         hlCache[i] = sigmoid(layerCache[i]);
       } else {
-        hlCache[i] = Math.tanh(layerCache[i]);
+        hlCache[i] = FastMath.tanh(layerCache[i]);
       }
     }
     return hlCache;
   }
   private static double sigmoid(double x) {
-    return 1 / (1 + Math.exp(-x));
+    return 1 / (1 + FastMath.exp(-x));
   }
 
   @Override

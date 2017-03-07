@@ -2,6 +2,7 @@ package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
+import net.jafama.FastMath;
 
 /**
  * @author Mengqiu Wang
@@ -15,7 +16,7 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
   private double[] layerOneCache, hiddenLayerCache;
 
   private static double sigmoid(double x) {
-    return 1 / (1 + Math.exp(-x));
+    return 1 / (1 + FastMath.exp(-x));
   }
 
   public NonLinearCliquePotentialFunction(double[][] linearWeights, double[][] inputLayerWeights, double[][] outputLayerWeights, SeqClassifierFlags flags) {
@@ -50,7 +51,7 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
       if (aFlag.useSigmoid) {
         hiddenLayerCache[i] = sigmoid(layerOneCache[i]);
       } else {
-        hiddenLayerCache[i] = Math.tanh(layerOneCache[i]);
+        hiddenLayerCache[i] = FastMath.tanh(layerOneCache[i]);
       }
     }
     return hiddenLayerCache;

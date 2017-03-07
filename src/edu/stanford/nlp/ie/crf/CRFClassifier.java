@@ -41,6 +41,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -2649,7 +2650,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       for (int j = 0; j < matrix[i].length; j++) {
         // log conditional probability
         if (useLogProb)
-          matrix[i][j] = Math.log(matrix[i][j] / sum);
+          matrix[i][j] = FastMath.log(matrix[i][j] / sum);
         else
           matrix[i][j] = matrix[i][j] / sum;
       }

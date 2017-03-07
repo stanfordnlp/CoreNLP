@@ -86,6 +86,11 @@
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.23-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/ejml-0.23.jar!/"/>
 	</lib>
+	<lib name="jafama-2.3.0.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/jafama-2.3.0-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jafama-2.3.0-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/jafama-2.3.0.jar!/"/>
+	</lib>
 	<lib name="commons-lang3-3.1.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/commons-lang3-3.1-sources.jar!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-lang3-3.1-sources.jar!/"/>

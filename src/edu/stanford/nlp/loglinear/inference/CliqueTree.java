@@ -1,6 +1,7 @@
 package edu.stanford.nlp.loglinear.inference;
 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
 
@@ -168,7 +169,7 @@ public class CliqueTree  {
         if (Double.isInfinite(assignmentValue)) {
           impossibleObservationMade = true;
         } else {
-          partitionFunction *= Math.exp(assignmentValue);
+          partitionFunction *= FastMath.exp(assignmentValue);
         }
       }
     }

@@ -3,6 +3,7 @@ package edu.stanford.nlp.loglinear.learning;
 import edu.stanford.nlp.loglinear.inference.CliqueTree;
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
+import net.jafama.FastMath;
 
 import java.util.Iterator;
 
@@ -42,7 +43,7 @@ public class LogLikelihoodDifferentiableFunction extends AbstractDifferentiableF
 
     // Subtract log partition function
 
-    logLikelihood -= Math.log(result.partitionFunction);
+    logLikelihood -= FastMath.log(result.partitionFunction);
 
     // Quit if we have an infinite partition function
 

@@ -13,6 +13,7 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.Pair;
+import net.jafama.FastMath;
 
 public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
@@ -106,7 +107,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
       Counter<E> logpos_i = new ClassicCounter<>();
       for (Entry<E, ClassicCounter<CandidatePhrase>> en : patternsandWords4Label
           .entrySet()) {
-        logpos_i.setCount(en.getKey(), Math.log(en.getValue().size()));
+        logpos_i.setCount(en.getKey(), FastMath.log(en.getValue().size()));
       }
       Counters.multiplyInPlace(currentPatternWeights4Label, logpos_i);
     }
@@ -284,7 +285,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
           if (useFreqPhraseExtractedByPat)
             score = score * scoringFunction.applyAsDouble(new Pair<>(en.getKey(), word));
           if (constVars.sqrtPatScore)
-            patterns.incrementCount(en.getKey(), Math.sqrt(score));
+            patterns.incrementCount(en.getKey(), FastMath.sqrt(score));
           else
             patterns.incrementCount(en.getKey(), score);
         }

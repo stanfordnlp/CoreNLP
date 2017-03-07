@@ -15,6 +15,7 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 
 /**
@@ -41,7 +42,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
   private static final boolean debug = true;
 
   private static final boolean verbose = false;
-  //private static final double MIN_PROBABILITY = Math.exp(-100.0);
+  //private static final double MIN_PROBABILITY = FastMath.exp(-100.0);
 
   public ChineseSimWordAvgDepGrammar(TreebankLangParserParams tlpParams, boolean directional, boolean distance, boolean coarseDistance, boolean basicCategoryTagsInDependencyGrammar, Options op, Index<String> wordIndex, Index<String> tagIndex) {
     super(tlpParams, directional, distance, coarseDistance, basicCategoryTagsInDependencyGrammar, op, wordIndex, tagIndex);
@@ -84,8 +85,8 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
 
   @Override
   public double scoreTB(IntDependency dependency) {
-    //return op.testOptions.depWeight * Math.log(probSimilarWordAvg(dependency));
-    return op.testOptions.depWeight * Math.log(probTBwithSimWords(dependency));
+    //return op.testOptions.depWeight * FastMath.log(probSimilarWordAvg(dependency));
+    return op.testOptions.depWeight * FastMath.log(probTBwithSimWords(dependency));
   }
 
   public void setLex(Lexicon lex) {
@@ -286,14 +287,14 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
       statsCounter.incrementCount("aSim");
       for (Triple<Integer, String, Double> simArg : sim2arg) {
         //double weight = 1 - simArg.third;
-        double weight = Math.exp(-50*simArg.third);
+        double weight = FastMath.exp(-50*simArg.third);
         for (int tag = 0, numT = tagIndex.size(); tag < numT; tag++) {
           if (!stringBasicCategory(tag).equals(simArg.second)) {
             continue;
           }
           IntTaggedWord tempArg = new IntTaggedWord(simArg.first, tag);
           IntDependency tempDep = new IntDependency(dep.head, tempArg, dep.leftHeaded, dep.distance);
-          double probArg = Math.exp(lex.score(tempArg, 0, wordIndex.get(tempArg.word), null));
+          double probArg = FastMath.exp(lex.score(tempArg, 0, wordIndex.get(tempArg.word), null));
           if (probArg == 0.0) {
             continue;
           }
@@ -305,7 +306,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
       statsCounter.incrementCount("hSim");
       for (Triple<Integer, String, Double> simHead : sim2head) {
         //double weight = 1 - simHead.third;
-        double weight = Math.exp(-50*simHead.third);
+        double weight = FastMath.exp(-50*simHead.third);
         for (int tag = 0, numT = tagIndex.size(); tag < numT; tag++) {
           if (!stringBasicCategory(tag).equals(simHead.second)) {
             continue;
@@ -326,7 +327,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
             continue;
           }
           IntTaggedWord tempArg = new IntTaggedWord(simArg.first, aTag);
-          double probArg = Math.exp(lex.score(tempArg, 0, wordIndex.get(tempArg.word), null));
+          double probArg = FastMath.exp(lex.score(tempArg, 0, wordIndex.get(tempArg.word), null));
           if (probArg == 0.0) {
             continue;
           }
@@ -338,7 +339,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
               IntTaggedWord tempHead = new IntTaggedWord(simHead.first, aTag);
               IntDependency tempDep = new IntDependency(tempHead, tempArg, dep.leftHeaded, dep.distance);
               //double weight = (1-simHead.third) * (1-simArg.third);
-              double weight = Math.exp(-50*simHead.third) * Math.exp(-50*simArg.third);
+              double weight = FastMath.exp(-50*simHead.third) * FastMath.exp(-50*simArg.third);
               sumScores += probTB(tempDep) * weight / probArg;
               sumWeights += weight;
             }
@@ -354,7 +355,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
     if (sim2arg == null) {
       simProb = sumScores / sumWeights;
     } else {
-      double probArg = Math.exp(lex.score(dep.arg, 0, wordIndex.get(dep.arg.word), null));
+      double probArg = FastMath.exp(lex.score(dep.arg, 0, wordIndex.get(dep.arg.word), null));
       simProb = probArg * sumScores / sumWeights;
     }
 

@@ -1,9 +1,10 @@
 package edu.stanford.nlp.math;
-
 import java.util.Collection;
 
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.logging.Redwood;
+
+import net.jafama.FastMath;
 
 /**
  * The class {@code SloppyMath} contains methods for performing basic
@@ -185,13 +186,13 @@ public final class SloppyMath  {
       0.1208650973866179e-2,-0.5395239384953e-5};
     double xxx = x;
     double tmp = x + 5.5;
-    tmp -= ((x + 0.5) * Math.log(tmp));
+    tmp -= ((x + 0.5) * FastMath.log(tmp));
     double ser = 1.000000000190015;
     for (int j = 0; j < 6; j++) {
       xxx++;
       ser += cof[j] / xxx;
     }
-    return -tmp + Math.log(2.5066282746310005*ser / x);
+    return -tmp + FastMath.log(2.5066282746310005*ser / x);
   }
 
   /**
@@ -231,14 +232,14 @@ public final class SloppyMath  {
    *  Fairly accurate, especially for n greater than 8.
    */
   public static double gamma(double n) {
-    return Math.sqrt(2.0*Math.PI/n) * Math.pow((n/Math.E)*Math.sqrt(n*Math.sinh((1.0/n)+(1/(810*Math.pow(n,6))))),n);
+    return FastMath.sqrt(2.0*Math.PI/n) * FastMath.pow((n/Math.E)*FastMath.sqrt(n*FastMath.sinh((1.0/n)+(1/(810*FastMath.pow(n,6))))),n);
   }
 
   /**
    * Convenience method for log to a different base.
    */
   public static double log(double num, double base) {
-    return Math.log(num)/Math.log(base);
+    return FastMath.log(num)/FastMath.log(base);
   }
 
   /**
@@ -264,7 +265,7 @@ public final class SloppyMath  {
       negDiff = lx - ly;
     }
     return (max == Float.NEGATIVE_INFINITY || negDiff < -LOGTOLERANCE_F) ? max : //
-      max + (float) Math.log(1.0 + Math.exp(negDiff));
+      max + (float) FastMath.log1p(FastMath.exp(negDiff));
   }
 
   /**
@@ -290,7 +291,7 @@ public final class SloppyMath  {
       negDiff = lx - ly;
     }
     return (max == Double.NEGATIVE_INFINITY || negDiff < -LOGTOLERANCE) ? max : //
-      max + Math.log(1 + Math.exp(negDiff));
+      max + FastMath.log1p(FastMath.exp(negDiff));
   }
 
   /**
@@ -528,7 +529,7 @@ public final class SloppyMath  {
       // System.out.println(n + " choose " + m + " is " + nChooseM);
       // System.out.println("prob contribution is " +
       //	       (nChooseM * Math.pow(p, m) * Math.pow(1.0-p, n - m)));
-      total += nChooseM * Math.pow(p, m) * Math.pow(1.0 - p, n - m);
+      total += nChooseM * FastMath.pow(p, m) * FastMath.pow(1.0 - p, n - m);
     }
     return total;
   }
@@ -623,11 +624,11 @@ public final class SloppyMath  {
    */
   public static double sigmoid(double x) {
     if (x<0) {
-      double num = Math.exp(x);
+      double num = FastMath.exp(x);
       return num / (1.0 + num);
     }
     else {
-      double den = 1.0 + Math.exp(-x);
+      double den = 1.0 + FastMath.exp(-x);
       return 1.0 / den;
     }
   }
@@ -650,7 +651,7 @@ public final class SloppyMath  {
       acosCache = new float[numSamples + 1];
       for (int i = 0; i <= numSamples; ++i) {
         double x = 2.0 / ((double) numSamples) * ((double) i) - 1.0;
-        acosCache[i] = (float) Math.acos(x);
+        acosCache[i] = (float) FastMath.acos(x);
       }
     }
 
@@ -661,8 +662,8 @@ public final class SloppyMath  {
 
   public static double poisson(int x, double lambda) {
     if (x<0 || lambda<=0.0) throw new RuntimeException("Bad arguments: " + x + " and " + lambda);
-    double p = (Math.exp(-lambda) * Math.pow(lambda, x)) / factorial(x);
-    if (Double.isInfinite(p) || p<=0.0) throw new RuntimeException(Math.exp(-lambda) +" "+ Math.pow(lambda, x) + ' ' + factorial(x));
+    double p = (FastMath.exp(-lambda) * FastMath.pow(lambda, x)) / factorial(x);
+    if (Double.isInfinite(p) || p<=0.0) throw new RuntimeException(FastMath.exp(-lambda) +" "+ FastMath.pow(lambda, x) + ' ' + factorial(x));
     return p;
   }
 

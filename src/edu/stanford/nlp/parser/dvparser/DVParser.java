@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.dvparser;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.io.FileFilter;
 import java.io.FileWriter;
@@ -287,7 +288,7 @@ public class DVParser  {
         log.info("batch cost: " + currCost);
         for (int feature =0; feature<gradf.length;feature++ ) {
           sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
-          theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
+          theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(FastMath.sqrt(sumGradSquare[feature])+eps));
         }
       }
       break;

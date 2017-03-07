@@ -26,6 +26,8 @@
 
 package edu.stanford.nlp.ie.crf;
 
+import net.jafama.FastMath;
+
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Generics;
@@ -830,7 +832,7 @@ public class NERGUI  {
     if (n <= basicColors.length) {
       System.arraycopy(basicColors, 0, colors, 0, n);
     } else {
-      int s = 255 / (int)Math.ceil(Math.pow(n, (1.0 / 3.0)));
+      int s = 255 / (int)Math.ceil(FastMath.pow(n, (1.0 / 3.0)));
       int index = 0;
       OUTER: for (int i = 0; i < 256; i += s) {
         for (int j = 0; j < 256; j += s) {

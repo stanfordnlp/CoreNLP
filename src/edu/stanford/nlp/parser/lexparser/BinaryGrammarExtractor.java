@@ -7,6 +7,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
+import net.jafama.FastMath;
 
 public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGrammar,BinaryGrammar>> {
 
@@ -54,7 +55,7 @@ public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGram
     UnaryGrammar ug = new UnaryGrammar(stateIndex);
     // add unaries
     for (UnaryRule ur : unaryRules) {
-      ur.score = (float) Math.log(unaryRuleCounter.getCount(ur) / symbolCounter.getCount(stateIndex.get(ur.parent)));
+      ur.score = (float) FastMath.log(unaryRuleCounter.getCount(ur) / symbolCounter.getCount(stateIndex.get(ur.parent)));
       if (op.trainOptions.compactGrammar() >= 4) {
         ur.score = (float) unaryRuleCounter.getCount(ur);
       }
@@ -62,7 +63,7 @@ public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGram
     }
     // add binaries
     for (BinaryRule br : binaryRules) {
-      br.score = (float) Math.log((binaryRuleCounter.getCount(br) - op.trainOptions.ruleDiscount) / symbolCounter.getCount(stateIndex.get(br.parent)));
+      br.score = (float) FastMath.log((binaryRuleCounter.getCount(br) - op.trainOptions.ruleDiscount) / symbolCounter.getCount(stateIndex.get(br.parent)));
       if (op.trainOptions.compactGrammar() >= 4) {
         br.score = (float) binaryRuleCounter.getCount(br);
       }

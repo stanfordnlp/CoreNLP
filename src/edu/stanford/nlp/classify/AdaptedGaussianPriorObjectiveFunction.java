@@ -1,6 +1,8 @@
 package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.math.ArrayMath;
+import net.jafama.FastMath;
+
 import java.util.Arrays;
 
 
@@ -72,7 +74,7 @@ public class AdaptedGaussianPriorObjectiveFunction<L, F> extends LogConditionalO
       }
       double total = ArrayMath.logSum(sums);
       for (int c = 0; c < numClasses; c++) {
-        probs[c] = Math.exp(sums[c] - total);
+        probs[c] = FastMath.exp(sums[c] - total);
         if (dataWeights != null) {
           probs[c] *= dataWeights[d];
         }

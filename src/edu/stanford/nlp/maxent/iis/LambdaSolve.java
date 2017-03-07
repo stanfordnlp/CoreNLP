@@ -1,5 +1,6 @@
 package edu.stanford.nlp.maxent.iis; 
 
+import net.jafama.FastMath;
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.maxent.*;
@@ -359,7 +360,7 @@ public class LambdaSolve  {
     int i = 0;
     if (fixedFnumXY) {
       double plambda = fExpected(p.functions.get(index));
-      return (1 / (double) fnumArr[0][0]) * (Math.log(this.ftildeArr[index]) - Math.log(plambda));
+      return (1 / (double) fnumArr[0][0]) * (FastMath.log(this.ftildeArr[index]) - FastMath.log(plambda));
     }
     do {
       i++;
@@ -406,13 +407,13 @@ public class LambdaSolve  {
       int x = p.functions.get(index).getX(i);
       int y = p.functions.get(index).getY(i);
       double val = p.functions.get(index).getVal(i);
-      double zlambdaX = zlambda[x] + pcond(y, x) * zlambda[x] * (Math.exp(deltaL * val) - 1);
+      double zlambdaX = zlambda[x] + pcond(y, x) * zlambda[x] * (FastMath.exp(deltaL * val) - 1);
       for (int y1 = 0; y1 < probConds[x].length; y1++) {
         probConds[x][y1] = (probConds[x][y1] * zlambda[x]) / zlambdaX;
         s = s + probConds[x][y1];
       }
       s = s - probConds[x][y];
-      probConds[x][y] = probConds[x][y] * Math.exp(deltaL * val);
+      probConds[x][y] = probConds[x][y] * FastMath.exp(deltaL * val);
       s = s + probConds[x][y];
       zlambda[x] = zlambdaX;
       if (Math.abs(s - 1) > 0.001) {
@@ -437,7 +438,7 @@ public class LambdaSolve  {
     for (int i = 0; i < p.functions.get(index).len(); i++) {
       int y = p.functions.get(index).getY(i);
       int x = p.functions.get(index).getX(i);
-      double exponent = Math.exp(lambdaP * fnum(x, y));
+      double exponent = FastMath.exp(lambdaP * fnum(x, y));
       s = s + p.data.ptildeX(x) * pcond(y, x) * p.functions.get(index).getVal(i) * exponent;
     }
     s = s - ftildeArr[index];
@@ -452,7 +453,7 @@ public class LambdaSolve  {
     for (int i = 0; i < p.functions.get(index).len(); i++) {
       int y = ((p.functions.get(index))).getY(i);
       int x = p.functions.get(index).getX(i);
-      s = s + p.data.ptildeX(x) * pcond(y, x) * p.functions.get(index).getVal(i) * Math.exp(lambdaP * fnum(x, y)) * fnum(x, y);
+      s = s + p.data.ptildeX(x) * pcond(y, x) * p.functions.get(index).getVal(i) * FastMath.exp(lambdaP * fnum(x, y)) * fnum(x, y);
     }
     return s;
   }
@@ -521,7 +522,7 @@ public class LambdaSolve  {
   double ZAlfa(double alfa, Feature f, int x) {
     double s = 0.0;
     for (int y = 0; y < probConds[x].length; y++) {
-      s = s + pcond(y, x) * Math.exp(alfa * f.getVal(x, y));
+      s = s + pcond(y, x) * FastMath.exp(alfa * f.getVal(x, y));
     }
     return s;
   }
@@ -531,7 +532,7 @@ public class LambdaSolve  {
     double s = 0.0;
     for (int x = 0; x < p.data.xSize; x++) {
 
-      s = s - p.data.ptildeX(x) * Math.log(ZAlfa(alfa, f, x));
+      s = s - p.data.ptildeX(x) * FastMath.log(ZAlfa(alfa, f, x));
     }
     return s + alfa * ftildeArr[index];
 
@@ -542,7 +543,7 @@ public class LambdaSolve  {
     double s = 0.0;
     for (int x = 0; x < p.data.xSize; x++) {
 
-      s = s - p.data.ptildeX(x) * Math.log(ZAlfa(alfa, f, x));
+      s = s - p.data.ptildeX(x) * FastMath.log(ZAlfa(alfa, f, x));
     }
     return s + alfa * f.ftilde();
 
@@ -551,7 +552,7 @@ public class LambdaSolve  {
 
   double pcondFAlfa(double alfa, int x, int y, Feature f) {
     double s;
-    s = (1 / ZAlfa(alfa, f, x)) * pcond(y, x) * Math.exp(alfa * f.getVal(x, y));
+    s = (1 / ZAlfa(alfa, f, x)) * pcond(y, x) * FastMath.exp(alfa * f.getVal(x, y));
     return s;
   }
 
@@ -615,7 +616,7 @@ public class LambdaSolve  {
     double gsfValNew = 0.0;
     while (iterations < 30) {
       iterations++;
-      double alfanext = alfa + r * Math.log(1 - r * GSFPrime(alfa, f) / GSFSecond(alfa, f));
+      double alfanext = alfa + r * FastMath.log(1 - r * GSFPrime(alfa, f) / GSFSecond(alfa, f));
       gsfValNew = GSF(alfanext, f);
       if (Math.abs(alfanext - alfa) < errorGain) {
         return gsfValNew;
@@ -796,7 +797,7 @@ public class LambdaSolve  {
     int sz = p.data.size();
     for (int index = 0; index < sz; index++) {
       int[] example = p.data.get(index);
-      sum += Math.log(pcond(example[1], example[0]));
+      sum += FastMath.log(pcond(example[1], example[0]));
     }// index
     return sum / sz;
   }
@@ -809,7 +810,7 @@ public class LambdaSolve  {
    * @return Math.exp(first)/Math.exp(second);
    */
   public static double divide(double first, double second) {
-    return Math.exp(first - second);  // cpu samples #3,#14: 5.3%
+    return FastMath.exp(first - second);  // cpu samples #3,#14: 5.3%
   }
 
 
@@ -873,7 +874,7 @@ public class LambdaSolve  {
     for (int fNo = 0, fSize = p.fSize; fNo < fSize; fNo++) {
       // add for all occurences of the function the values to probConds
       Feature f = p.functions.get(fNo);
-      double fLambda = -Math.exp(lambda[fNo]);
+      double fLambda = -FastMath.exp(lambda[fNo]);
       double sum = ftildeArr[fNo];
 
       //if(sum==0){continue;}
@@ -1028,7 +1029,7 @@ public class LambdaSolve  {
     for (int fNo = 0; fNo < drvs.length; fNo++) {  // cpu samples #2,#10,#12: 27.3%
       Feature f = p.functions.get(fNo);
       double sum = ftildeArr[fNo] * exp.getNumber();
-      double lam = -Math.exp(lambda[fNo]);
+      double lam = -FastMath.exp(lambda[fNo]);
       drvs[fNo] = -sum * lam;
       for (int index = 0, length = f.len(); index < length; index++) {
         int x = f.getX(index);
@@ -1200,7 +1201,7 @@ public class LambdaSolve  {
           //see if u dominates v
           if (p.data.values[x][u] > p.data.values[x][v]) {
             hasgraph = true;
-            sum[x][u] += Math.exp(probConds[x][v] - probConds[x][u]);
+            sum[x][u] += FastMath.exp(probConds[x][v] - probConds[x][u]);
           }
         }
         sum[x][u] += 1;
@@ -1212,7 +1213,7 @@ public class LambdaSolve  {
         if (hasgraph) {
           zlambda[x] += weight;
         }
-        localloss += weight * Math.log(sum[x][u]);
+        localloss += weight * FastMath.log(sum[x][u]);
       }
 
       //another loop to get the sub[x][y]
@@ -1228,7 +1229,7 @@ public class LambdaSolve  {
               weight = p.data.values[x][u];
             }
 
-            sub[x][v] += weight * Math.exp(probConds[x][v] - probConds[x][u]) / sum[x][u];
+            sub[x][v] += weight * FastMath.exp(probConds[x][v] - probConds[x][u]) / sum[x][u];
           }
         }
       }

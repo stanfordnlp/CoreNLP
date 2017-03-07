@@ -5,6 +5,7 @@ import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.util.*;
+import net.jafama.FastMath;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -274,7 +275,7 @@ public class ValueFunctions {
   public static final ValueFunction POW_FUNCTION = new NumericFunction("POW", 2) {
     @Override
     public Number compute(Number... in) {
-      return Math.pow(in[0].doubleValue(), in[1].doubleValue());
+      return FastMath.pow(in[0].doubleValue(), in[1].doubleValue());
     }
   };
 

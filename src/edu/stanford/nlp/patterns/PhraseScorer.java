@@ -13,6 +13,7 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.ArgumentParser.Option;
 import edu.stanford.nlp.util.GoogleNGramsSQLBacked;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 public abstract class PhraseScorer<E extends Pattern>  {
 
@@ -98,7 +99,7 @@ public abstract class PhraseScorer<E extends Pattern>  {
         return 1;
       else
         return (1 + Data.rawFreq.getCount(g)
-          * Math.sqrt(Data.ratioGoogleNgramFreqWithDataFreq))
+          * FastMath.sqrt(Data.ratioGoogleNgramFreqWithDataFreq))
           / count;
     }
     return 0;
@@ -123,7 +124,7 @@ public abstract class PhraseScorer<E extends Pattern>  {
 
 
     return ((1 + Data.rawFreq.getCount(g)
-        * Math.sqrt(Data.ratioDomainNgramFreqWithDataFreq)) / Data.domainNGramRawFreq
+        * FastMath.sqrt(Data.ratioDomainNgramFreqWithDataFreq)) / Data.domainNGramRawFreq
           .getCount(g));
   }
 

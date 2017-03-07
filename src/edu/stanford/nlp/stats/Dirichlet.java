@@ -2,6 +2,8 @@ package edu.stanford.nlp.stats;
 
 import java.util.Random;
 
+import net.jafama.FastMath;
+
 /**
  * simple dirichlet distribution.
  *
@@ -78,7 +80,7 @@ public class Dirichlet<E> implements ConjugatePrior<Multinomial<E>, E> {
   }
   
   public double getPredictiveLogProbability(E object) {
-    return Math.log(getPredictiveProbability(object));
+    return FastMath.log(getPredictiveProbability(object));
   }
   
   public Dirichlet<E> getPosteriorDistribution(Counter<E> counts) {
@@ -94,7 +96,7 @@ public class Dirichlet<E> implements ConjugatePrior<Multinomial<E>, E> {
   }
 
   public double getPosteriorPredictiveLogProbability(Counter<E> counts, E object) {
-    return Math.log(getPosteriorPredictiveProbability(counts, object));
+    return FastMath.log(getPosteriorPredictiveProbability(counts, object));
   }
     
   public double probabilityOf(Multinomial<E> object) {
@@ -107,7 +109,7 @@ public class Dirichlet<E> implements ConjugatePrior<Multinomial<E>, E> {
     double sum = 0.0;
     for(int i =0; i < params.length; ++i)  {
       if(mult[i] > 0)
-        sum += (params[i] -1 )* Math.log(mult[i]);
+        sum += (params[i] -1 )* FastMath.log(mult[i]);
     }
     return sum;
   }

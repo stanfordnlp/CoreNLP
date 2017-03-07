@@ -5,6 +5,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
+import net.jafama.FastMath;
+
 
 /**
  * An interval tree maintains a tree so that all intervals to the left start
@@ -68,7 +70,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
     if (target == null) return false;
     TreeNode<E,T> n = node;
     int depth = 0;
-    int thresholdDepth = (node.size > 10)? ((int) (-Math.log(node.size)/Math.log(alpha)+1)):10;
+    int thresholdDepth = (node.size > 10)? ((int) (-FastMath.log(node.size)/FastMath.log(alpha)+1)):10;
     while (n != null) {
       if (n.value == null) {
         n.value = target;

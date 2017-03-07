@@ -1,6 +1,6 @@
 package edu.stanford.nlp.ie.crf; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.util.Index;
@@ -64,7 +64,7 @@ public class FactorTable  {
     for (int i = 0; i < table.length; i++) {
       sb.append(Arrays.toString(toArray(i)))
         .append(": ")
-        .append(Math.exp(getValue(i)))
+        .append(FastMath.exp(getValue(i)))
         .append('\n');
     }
     return sb.append('}').toString();
@@ -227,7 +227,7 @@ public class FactorTable  {
   }
 
   public double prob(int[] label) {
-    return Math.exp(unnormalizedLogProb(label) - totalMass());
+    return FastMath.exp(unnormalizedLogProb(label) - totalMass());
   }
 
   /**
@@ -565,9 +565,9 @@ public class FactorTable  {
         int[] b = { i, j };
         double t = 0;
         for (int k = 0; k < numClasses; k++) {
-          t += Math.exp(ft.conditionalLogProbGivenPrevious(b, k));
+          t += FastMath.exp(ft.conditionalLogProbGivenPrevious(b, k));
           System.err
-              .println(k + "|" + i + ',' + j + " : " + Math.exp(ft.conditionalLogProbGivenPrevious(b, k)));
+              .println(k + "|" + i + ',' + j + " : " + FastMath.exp(ft.conditionalLogProbGivenPrevious(b, k)));
         }
         log.info(t);
       }

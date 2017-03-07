@@ -11,6 +11,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 /**
  * A simple linear classifier trained by SGD with support for several different loss functions
@@ -137,12 +138,12 @@ public class SimpleLinearClassifier {
     return new Loss() {
       @Override
       public double predict(double product) {
-        return (1 - (1 / (1 + Math.exp(product))));
+        return (1 - (1 / (1 + FastMath.exp(product))));
       }
 
       @Override
       public double derivative(double label, double product) {
-        return -label / (1 + Math.exp(label * product));
+        return -label / (1 + FastMath.exp(label * product));
       }
 
       @Override
@@ -200,12 +201,13 @@ public class SimpleLinearClassifier {
     return new Loss() {
       @Override
       public double predict(double product) {
-        return 1 / (1 + Math.exp(product));
+        return 1 / (1 + FastMath.exp(product));
       }
 
       @Override
       public double derivative(double label, double product) {
-        return -Math.exp(product) / Math.pow(1 + Math.exp(product), 2);
+        double t = 1 + FastMath.exp(product);
+		return -FastMath.exp(product) / (t * t);
       }
 
       @Override
@@ -269,7 +271,7 @@ public class SimpleLinearClassifier {
 
       @Override
       public double getLearningRate(double count) {
-        return eta / Math.pow(1 + count, p);
+        return eta / FastMath.pow(1 + count, p);
       }
 
       @Override
@@ -288,7 +290,7 @@ public class SimpleLinearClassifier {
 
       @Override
       public double getLearningRate(double count) {
-        return eta / (tau + Math.sqrt(count));
+        return eta / (tau + FastMath.sqrt(count));
       }
 
       @Override

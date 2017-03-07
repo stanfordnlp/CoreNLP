@@ -1,6 +1,6 @@
 package edu.stanford.nlp.optimization; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Pair;
 
@@ -212,7 +212,7 @@ public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T>  {
         for (int i = 0; i < dim; i++) {
           val += x[i] * x[i] * var[i];
         }
-        return Math.pow(val * 0.5, pow);
+        return FastMath.pow(val * 0.5, pow);
       }
 
       @Override

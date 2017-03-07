@@ -1,7 +1,10 @@
 package edu.stanford.nlp.optimization;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.Redwood;
+
+import net.jafama.FastMath;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -192,7 +195,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
    */
   private double goldenMean(double a, double b) {
     if (geometric) {
-      return a * Math.pow(b / a, GOLDEN_SECTION);
+      return a * FastMath.pow(b / a, GOLDEN_SECTION);
     } else {
       return a + (b - a) * GOLDEN_SECTION;
     }
@@ -201,7 +204,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
   public static void main(String[] args) {
     GoldenSectionLineSearch min =
         new GoldenSectionLineSearch(true, 0.00001, 0.001, 121.0);
-    DoubleUnaryOperator f1 = x -> Math.log(x * x - x + 1);
+    DoubleUnaryOperator f1 = x -> FastMath.log(x * x - x + 1);
     System.out.println(min.minimize(f1));
     System.out.println();
 

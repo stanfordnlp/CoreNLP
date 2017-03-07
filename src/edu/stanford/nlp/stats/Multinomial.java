@@ -2,6 +2,8 @@ package edu.stanford.nlp.stats;
 
 import java.util.Random;
 
+import net.jafama.FastMath;
+
 /**
  * a multinomial distribution.  pretty straightforward.  specify the parameters with
  * a counter.  It is assumed that the Counter's keySet() contains all of the parameters (i.e., there are not other
@@ -50,7 +52,7 @@ public class Multinomial<E> implements ProbabilityDistribution<E> {
     if (!parameters.keySet().contains(object)) {
       throw new RuntimeException("Not a valid object for this multinomial!");
     }
-    return Math.log(parameters.getCount(object));
+    return FastMath.log(parameters.getCount(object));
   }
 
   public E drawSample(Random random) {

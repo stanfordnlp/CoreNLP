@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -409,8 +410,8 @@ public class SplittingGrammarExtractor  {
           for (int i = 0; i < parentStates; ++i) {
             for (int j = 0; j < childStates; ++j) {
               double childWeight = 0.45 + random.nextDouble() * 0.1;
-              newBetas[i][j * 2] = betas[i][j] + Math.log(childWeight);
-              newBetas[i][j * 2 + 1] = betas[i][j] + Math.log(1.0 - childWeight);
+              newBetas[i][j * 2] = betas[i][j] + FastMath.log(childWeight);
+              newBetas[i][j * 2 + 1] = betas[i][j] + FastMath.log(1.0 - childWeight);
             }
           }
           betas = newBetas;
@@ -447,8 +448,8 @@ public class SplittingGrammarExtractor  {
             for (int j = 0; j < leftStates; ++j) {
               for (int k = 0; k < rightStates; ++k) {
                 double leftWeight = 0.45 + random.nextDouble() * 0.1;
-                newBetas[i][j * 2][k] = betas[i][j][k] + Math.log(leftWeight);
-                newBetas[i][j * 2 + 1][k] = betas[i][j][k] + Math.log(1 - leftWeight);
+                newBetas[i][j * 2][k] = betas[i][j][k] + FastMath.log(leftWeight);
+                newBetas[i][j * 2 + 1][k] = betas[i][j][k] + FastMath.log(1 - leftWeight);
               }
             }
           }
@@ -461,8 +462,8 @@ public class SplittingGrammarExtractor  {
               for (int j = 0; j < leftStates; ++j) {
                 for (int k = 0; k < rightStates; ++k) {
                   double rightWeight = 0.45 + random.nextDouble() * 0.1;
-                  newBetas[i][j][k * 2] = betas[i][j][k] + Math.log(rightWeight);
-                  newBetas[i][j][k * 2 + 1] = betas[i][j][k] + Math.log(1 - rightWeight);
+                  newBetas[i][j][k * 2] = betas[i][j][k] + FastMath.log(rightWeight);
+                  newBetas[i][j][k * 2 + 1] = betas[i][j][k] + FastMath.log(1 - rightWeight);
                 }
               }
             }
@@ -627,7 +628,7 @@ public class SplittingGrammarExtractor  {
     if (DEBUG()) {
       System.out.println("Recalculating temporary betas for tree " + tree);
     }
-    double[] stateWeights = { Math.log(treeWeights.getCount(tree)) };
+    double[] stateWeights = { FastMath.log(treeWeights.getCount(tree)) };
 
     IdentityHashMap<Tree, double[][]> unaryTransitions = new IdentityHashMap<>();
     IdentityHashMap<Tree, double[][][]> binaryTransitions = new IdentityHashMap<>();
@@ -660,7 +661,7 @@ public class SplittingGrammarExtractor  {
         totalStateMass.put(tree.label().value(), stateTotal);
       }
       for (int i = 0; i < stateWeights.length; ++i) {
-        stateTotal[i] += Math.exp(stateWeights[i]);
+        stateTotal[i] += FastMath.exp(stateWeights[i]);
       }
     }
 
@@ -672,7 +673,7 @@ public class SplittingGrammarExtractor  {
       // of the weights being added to the lexicon stays the same.
       double total = 0.0;
       for (double stateWeight : stateWeights) {
-        total += Math.exp(stateWeight);
+        total += FastMath.exp(stateWeight);
       }
       if (total <= 0.0) {
         return position + 1;
@@ -682,7 +683,7 @@ public class SplittingGrammarExtractor  {
       for (int state = 0; state < stateWeights.length; ++state) {
         // TODO: maybe optimize all this TaggedWord creation
         TaggedWord tw = new TaggedWord(word, state(tag, state));
-        tempLex.train(tw, position, (Math.exp(stateWeights[state]) + smoothing) * scale);
+        tempLex.train(tw, position, (FastMath.exp(stateWeights[state]) + smoothing) * scale);
       }
       return position + 1;
     }
@@ -765,7 +766,7 @@ public class SplittingGrammarExtractor  {
           }
           if (Double.isInfinite(sum)) {
             for (int j = 0; j < childStates; ++j) {
-              betas[i][j] = -Math.log(childStates);
+              betas[i][j] = -FastMath.log(childStates);
             }
           } else {
             for (int j = 0; j < childStates; ++j) {
@@ -793,7 +794,7 @@ public class SplittingGrammarExtractor  {
             if (Double.isInfinite(sum)) {
               for (int j = 0; j < leftStates; ++j) {
                 for (int k = 0; k < rightStates; ++k) {
-                  betas[i][j][k] = -Math.log(leftStates * rightStates);
+                  betas[i][j][k] = -FastMath.log(leftStates * rightStates);
                 }
               }
             } else {
@@ -866,7 +867,7 @@ public class SplittingGrammarExtractor  {
         // of the transitions is 0, meaning the sum of the actual
         // transitions is 1.  It works if you do the math...
         if (Double.isInfinite(total)) {
-          double transition = -Math.log(childStates);
+          double transition = -FastMath.log(childStates);
           for (int j = 0; j < childStates; ++j) {
             transitions[i][j] = transition;
           }
@@ -913,7 +914,7 @@ public class SplittingGrammarExtractor  {
         // of the transitions is 0, meaning the sum of the actual
         // transitions is 1.  It works if you do the math...
         if (Double.isInfinite(total)) {
-          double transition = -Math.log(leftStates * rightStates);
+          double transition = -FastMath.log(leftStates * rightStates);
           for (int j = 0; j < leftStates; ++j) {
             for (int k = 0; k < rightStates; ++k) {
               transitions[i][j][k] = transition;
@@ -1026,8 +1027,8 @@ public class SplittingGrammarExtractor  {
           IntTaggedWord tw = new IntTaggedWord(word, state(tag, i), wordIndex, tagIndex);
           double logProb = lex.score(tw, loc, word, null);
           double wordWeight = 0.45 + random.nextDouble() * 0.1;
-          scores[i * 2] = logProb + Math.log(wordWeight);
-          scores[i * 2 + 1] = logProb + Math.log(1.0 - wordWeight);
+          scores[i * 2] = logProb + FastMath.log(wordWeight);
+          scores[i * 2 + 1] = logProb + FastMath.log(1.0 - wordWeight);
           if (DEBUG()) {
             System.out.println("Lexicon log prob " + state(tag, i) + "-" + word + ": " + logProb);
             System.out.println("  Log Split -> " + scores[i * 2] + "," + scores[i * 2 + 1]);
@@ -1066,7 +1067,7 @@ public class SplittingGrammarExtractor  {
         for (int i = 0; i < parentStates; ++i) {
           System.out.println("  " + i + ":" + scores[i]);
           for (int j = 0; j < childStates; ++j) {
-            System.out.println("    " + i + "," + j + ": " + betas[i][j] + " | " + Math.exp(betas[i][j]));
+            System.out.println("    " + i + "," + j + ": " + betas[i][j] + " | " + FastMath.exp(betas[i][j]));
           }
         }
       }
@@ -1099,7 +1100,7 @@ public class SplittingGrammarExtractor  {
           System.out.println("  " + i + ":" + scores[i]);
           for (int j = 0; j < leftStates; ++j) {
             for (int k = 0; k < rightStates; ++k) {
-              System.out.println("    " + i + "," + j + "," + k + ": " + betas[i][j][k] + " | " + Math.exp(betas[i][j][k]));
+              System.out.println("    " + i + "," + j + "," + k + ": " + betas[i][j][k] + " | " + FastMath.exp(betas[i][j][k]));
             }
           }
         }
@@ -1186,7 +1187,7 @@ public class SplittingGrammarExtractor  {
 
     for (Tree tree : trees) {
       double treeWeight = treeWeights.getCount(tree);
-      double[] stateWeights = { Math.log(treeWeight) };
+      double[] stateWeights = { FastMath.log(treeWeight) };
       tempLex.incrementTreesRead(treeWeight);
 
       IdentityHashMap<Tree, double[][]> oldUnaryTransitions = new IdentityHashMap<>();
@@ -1266,7 +1267,7 @@ public class SplittingGrammarExtractor  {
         }
         if (Double.isInfinite(total)) {
           for (int j = 0; j < childStates; ++j) {
-            newTransitions[i][j] = -Math.log(childStates);
+            newTransitions[i][j] = -FastMath.log(childStates);
           }
         } else {
           for (int j = 0; j < childStates; ++j) {
@@ -1335,7 +1336,7 @@ public class SplittingGrammarExtractor  {
         if (Double.isInfinite(total)) {
           for (int j = 0; j < leftStates; ++j) {
             for (int k = 0; k < rightStates; ++k) {
-              newTransitions[i][j][k] = -Math.log(leftStates * rightStates);
+              newTransitions[i][j][k] = -FastMath.log(leftStates * rightStates);
             }
           }
         } else {
@@ -1427,8 +1428,8 @@ public class SplittingGrammarExtractor  {
     }
 
     for (int i = 0; i < nodeProbIn.length / 2; ++i) {
-      double probInMerged = SloppyMath.logAdd(Math.log(stateMass[i * 2] / totalMass) + nodeProbIn[i * 2],
-                                              Math.log(stateMass[i * 2 + 1] / totalMass) + nodeProbIn[i * 2 + 1]);
+      double probInMerged = SloppyMath.logAdd(FastMath.log(stateMass[i * 2] / totalMass) + nodeProbIn[i * 2],
+                                              FastMath.log(stateMass[i * 2 + 1] / totalMass) + nodeProbIn[i * 2 + 1]);
       double probOutMerged = SloppyMath.logAdd(nodeProbOut[i * 2], nodeProbOut[i * 2 + 1]);
       double probMerged = probInMerged + probOutMerged;
       double probUnmerged = SloppyMath.logAdd(nodeProbIn[i * 2] + nodeProbOut[i * 2],
@@ -1491,7 +1492,7 @@ public class SplittingGrammarExtractor  {
                 int parentIndex = stateIndex.indexOf(state(parent, i));
                 int leftIndex = stateIndex.indexOf(state(left, j));
                 int rightIndex = stateIndex.indexOf(state(right, k));
-                double score = betas[i][j][k] - Math.log(stateTotal[i]);
+                double score = betas[i][j][k] - FastMath.log(stateTotal[i]);
                 BinaryRule br = new BinaryRule(parentIndex, leftIndex, rightIndex, score);
                 bg.addRule(br);
               }
@@ -1516,7 +1517,7 @@ public class SplittingGrammarExtractor  {
           for (int j = 0; j < childStates; ++j) {
             int parentIndex = stateIndex.indexOf(state(parent, i));
             int childIndex = stateIndex.indexOf(state(child, j));
-            double score = betas[i][j] - Math.log(stateTotal[i]);
+            double score = betas[i][j] - FastMath.log(stateTotal[i]);
             UnaryRule ur = new UnaryRule(parentIndex, childIndex, score);
             ug.addRule(ur);
           }

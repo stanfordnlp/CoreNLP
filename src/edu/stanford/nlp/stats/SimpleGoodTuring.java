@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.jafama.FastMath;
+
 /**
  * Simple Good-Turing smoothing, based on code from Sampson, available at:
  * ftp://ftp.informatics.susx.ac.uk/pub/users/grs2/SGT.c <br>
@@ -98,8 +100,8 @@ public class SimpleGoodTuring {
       else
         k = (double) r[j + 1];
       z[j] = 2 * n[j] / (k - i);
-      logR[j] = Math.log(r[j]);
-      logZ[j] = Math.log(z[j]);
+      logR[j] = FastMath.log(r[j]);
+      logZ[j] = FastMath.log(z[j]);
     }
     findBestFit();
     for (j = 0; j < rows; ++j) {
@@ -108,7 +110,7 @@ public class SimpleGoodTuring {
         indiffValsSeen = true;
       if (!indiffValsSeen) {
         x = (r[j] + 1) * (next_n = n[row(r[j] + 1)]) / (double) n[j];
-        if (Math.abs(x - y) <= CONFID_FACTOR * Math.sqrt(sq(r[j] + 1.0)
+        if (Math.abs(x - y) <= CONFID_FACTOR * FastMath.sqrt(sq(r[j] + 1.0)
                                                          * next_n / (sq((double) n[j]))
                                                          * (1 + next_n / (double) n[j])))
           indiffValsSeen = true;
@@ -154,7 +156,7 @@ public class SimpleGoodTuring {
   }
 
   private double smoothed(int i) {
-    return (Math.exp(intercept + slope * Math.log(i)));
+    return (FastMath.exp(intercept + slope * FastMath.log(i)));
   }
 
   private static double sq(double x) {

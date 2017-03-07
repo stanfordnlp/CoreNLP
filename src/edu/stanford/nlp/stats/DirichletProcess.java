@@ -2,6 +2,8 @@ package edu.stanford.nlp.stats;
 
 import java.util.Random;
 
+import net.jafama.FastMath;
+
 public class DirichletProcess<E> implements ProbabilityDistribution<E> {
 
   /**
@@ -49,7 +51,7 @@ public class DirichletProcess<E> implements ProbabilityDistribution<E> {
   }
 
   public double logProbabilityOf(E object) {
-    return Math.log(probabilityOf(object));
+    return FastMath.log(probabilityOf(object));
   }
 
   public double probabilityOfNewObject() {

@@ -42,6 +42,7 @@ import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
+import net.jafama.FastMath;
 
 /**
  * A classifier for binary logistic regression problems.
@@ -267,7 +268,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
 
   public double probabilityOf(Collection<F> features, L label) {
     short sign = (short)(label.equals(classes[0]) ? 1 : -1);
-    return 1.0 / (1.0 + Math.exp(sign * scoreOf(features)));
+    return 1.0 / (1.0 + FastMath.exp(sign * scoreOf(features)));
   }
 
   public double probabilityOf(RVFDatum<L, F> example) {
@@ -280,7 +281,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
 
   public double probabilityOf(Counter<F> features, L label) {
     short sign = (short)(label.equals(classes[0]) ? 1 : -1);
-    return 1.0 / (1.0 + Math.exp(sign * scoreOf(features)));
+    return 1.0 / (1.0 + FastMath.exp(sign * scoreOf(features)));
   }
 
   /**

@@ -1,6 +1,5 @@
 package edu.stanford.nlp.ie; 
 import edu.stanford.nlp.util.logging.Redwood;
-
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Index;
 

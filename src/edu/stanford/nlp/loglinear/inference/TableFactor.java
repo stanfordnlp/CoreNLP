@@ -3,6 +3,7 @@ package edu.stanford.nlp.loglinear.inference;
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
 import edu.stanford.nlp.loglinear.model.NDArrayDoubles;
+import net.jafama.FastMath;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -191,7 +192,7 @@ public class TableFactor extends NDArrayDoubles {
         if (USE_EXP_APPROX) {
           results[i][assignment[i]] += exp(v - maxValues[i][assignment[i]]);
         } else {
-          results[i][assignment[i]] += Math.exp(v - maxValues[i][assignment[i]]);
+          results[i][assignment[i]] += FastMath.exp(v - maxValues[i][assignment[i]]);
         }
       }
       // This mutates the resultAssignment[] array, rather than creating a new one
@@ -208,7 +209,7 @@ public class TableFactor extends NDArrayDoubles {
         if (USE_EXP_APPROX) {
           results[i][j] = exp(maxValues[i][j]) * results[i][j];
         } else {
-          results[i][j] = Math.exp(maxValues[i][j]) * results[i][j];
+          results[i][j] = FastMath.exp(maxValues[i][j]) * results[i][j];
         }
         sum += results[i][j];
       }
@@ -319,7 +320,7 @@ public class TableFactor extends NDArrayDoubles {
               if (USE_EXP_APPROX) {
                 marginalized.values[j] += exp(values[index] - max[j]);
               } else {
-                marginalized.values[j] += Math.exp(values[index] - max[j]);
+                marginalized.values[j] += FastMath.exp(values[index] - max[j]);
               }
             }
           }
@@ -329,7 +330,7 @@ public class TableFactor extends NDArrayDoubles {
 
         for (int j = 0; j < getDimensions()[1]; j++) {
           if (Double.isFinite(max[j])) {
-            marginalized.values[j] = max[j] + Math.log(marginalized.values[j]);
+            marginalized.values[j] = max[j] + FastMath.log(marginalized.values[j]);
           } else {
             marginalized.values[j] = max[j];
           }
@@ -369,7 +370,7 @@ public class TableFactor extends NDArrayDoubles {
               if (USE_EXP_APPROX) {
                 marginalized.values[i] += exp(values[index] - max[i]);
               } else {
-                marginalized.values[i] += Math.exp(values[index] - max[i]);
+                marginalized.values[i] += FastMath.exp(values[index] - max[i]);
               }
             }
           }
@@ -379,7 +380,7 @@ public class TableFactor extends NDArrayDoubles {
 
         for (int i = 0; i < getDimensions()[0]; i++) {
           if (Double.isFinite(max[i])) {
-            marginalized.values[i] = max[i] + Math.log(marginalized.values[i]);
+            marginalized.values[i] = max[i] + FastMath.log(marginalized.values[i]);
           } else {
             marginalized.values[i] = max[i];
           }
@@ -395,11 +396,11 @@ public class TableFactor extends NDArrayDoubles {
       TableFactor maxValues = maxOut(variable);
 
       // Then we do the sum against an offset from the pivots
-      TableFactor marginalized = marginalize(variable, 0, (marginalizedVariableValue, assignment) -> (a, b) -> a + (USE_EXP_APPROX ? exp(b - maxValues.getAssignmentLogValue(assignment)) : Math.exp(b - maxValues.getAssignmentLogValue(assignment))));
+      TableFactor marginalized = marginalize(variable, 0, (marginalizedVariableValue, assignment) -> (a, b) -> a + (USE_EXP_APPROX ? exp(b - maxValues.getAssignmentLogValue(assignment)) : FastMath.exp(b - maxValues.getAssignmentLogValue(assignment))));
 
       // Then we factor the max values back in, and
       for (int[] assignment : marginalized) {
-        marginalized.setAssignmentLogValue(assignment, maxValues.getAssignmentLogValue(assignment) + Math.log(marginalized.getAssignmentLogValue(assignment)));
+        marginalized.setAssignmentLogValue(assignment, maxValues.getAssignmentLogValue(assignment) + FastMath.log(marginalized.getAssignmentLogValue(assignment)));
       }
 
       return marginalized;
@@ -534,10 +535,10 @@ public class TableFactor extends NDArrayDoubles {
 
     double sumExp = 0.0;
     for (int[] assignment : this) {
-      sumExp += Math.exp(getAssignmentLogValue(assignment) - max);
+      sumExp += FastMath.exp(getAssignmentLogValue(assignment) - max);
     }
 
-    return sumExp * Math.exp(max);
+    return sumExp * FastMath.exp(max);
   }
 
   /**
@@ -551,7 +552,7 @@ public class TableFactor extends NDArrayDoubles {
   public double getAssignmentValue(int[] assignment) {
     double d = super.getAssignmentValue(assignment);
     // if (d == null) d = Double.NEGATIVE_INFINITY;
-    return Math.exp(d);
+    return FastMath.exp(d);
   }
 
   /**
@@ -563,7 +564,7 @@ public class TableFactor extends NDArrayDoubles {
    */
   @Override
   public void setAssignmentValue(int[] assignment, double value) {
-    super.setAssignmentValue(assignment, Math.log(value));
+    super.setAssignmentValue(assignment, FastMath.log(value));
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -677,9 +678,9 @@ public class TableFactor extends NDArrayDoubles {
     }
     double expSum = 0.0;
     for (double d : arr) {
-      expSum += Math.exp(d - max);
+      expSum += FastMath.exp(d - max);
     }
-    double logSumExp = max + Math.log(expSum);
+    double logSumExp = max + FastMath.log(expSum);
 
     if (Double.isInfinite(logSumExp)) {
       // Just put in uniform probabilities if we are normalizing all 0s
@@ -689,7 +690,7 @@ public class TableFactor extends NDArrayDoubles {
     } else {
       // Normalize in log-scale before exponentiation, to help with stability
       for (int i = 0; i < arr.length; i++) {
-        arr[i] = Math.exp(arr[i] - logSumExp);
+        arr[i] = FastMath.exp(arr[i] - logSumExp);
       }
     }
   }

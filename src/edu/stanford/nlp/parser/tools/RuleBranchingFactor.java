@@ -16,6 +16,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
+import net.jafama.FastMath;
 
 /**
  * Counts the rule branching factor (and other rule statistics) in a treebank.
@@ -119,7 +120,7 @@ public class RuleBranchingFactor {
     for (int i : branchingFactors) {
       variance += (i-mean)*(i-mean);
     }
-    return Math.sqrt(variance / (branchingFactors.size()-1));
+    return FastMath.sqrt(variance / (branchingFactors.size()-1));
   }
 
 }

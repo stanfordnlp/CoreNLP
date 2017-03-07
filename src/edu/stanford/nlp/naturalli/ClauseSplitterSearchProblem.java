@@ -1,5 +1,6 @@
 package edu.stanford.nlp.naturalli;
 
+import net.jafama.FastMath;
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.*;
@@ -508,7 +509,7 @@ public class ClauseSplitterSearchProblem  {
     List<SentenceFragment> results = new ArrayList<>();
     search(triple -> {
       assert triple.first <= 0.0;
-      double prob = Math.exp(triple.first);
+      double prob = FastMath.exp(triple.first);
       assert prob <= 1.0;
       assert prob >= 0.0;
       assert !Double.isNaN(prob);

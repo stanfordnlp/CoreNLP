@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.util.Collection;
 import java.util.Map;
@@ -97,7 +98,7 @@ public class UnknownGTTrainer  {
 
     /* set unseen word probability for each tag */
     for (String tag : tagCount.keySet()) {
-      float logprob = (float) Math.log(r1.getCount(tag) / (tagCount.getCount(tag) * r0.getCount(tag)));
+      float logprob = (float) FastMath.log(r1.getCount(tag) / (tagCount.getCount(tag) * r0.getCount(tag)));
       unknownGT.put(tag, Float.valueOf(logprob));
     }
 

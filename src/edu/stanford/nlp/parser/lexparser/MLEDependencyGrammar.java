@@ -1,6 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -241,7 +241,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar  {
             stopProb = 1.0 - stopProb;
           }
           if (stopProb > 0.0) {
-            totalScore += Math.log(stopProb);
+            totalScore += FastMath.log(stopProb);
           }
         }
       }
@@ -501,7 +501,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar  {
 
   /** Score a tag binned dependency. */
   public double scoreTB(IntDependency dependency) {
-    return op.testOptions.depWeight * Math.log(probTB(dependency));
+    return op.testOptions.depWeight * FastMath.log(probTB(dependency));
   }
 
   private static final boolean verbose = false;
@@ -646,7 +646,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar  {
       // here word generation isn't smoothed - can't get previously unseen word with tag.  Ugh.
       if (op.testOptions.useLexiconToScoreDependencyPwGt) {
         // We don't know the position.  Now -1 means average over 0 and 1.
-        p_aTW_aT = dependency.leftHeaded ? Math.exp(lex.score(dependency.arg, 1, wordIndex.get(dependency.arg.word), null)): Math.exp(lex.score(dependency.arg, -1, wordIndex.get(dependency.arg.word), null));
+        p_aTW_aT = dependency.leftHeaded ? FastMath.exp(lex.score(dependency.arg, 1, wordIndex.get(dependency.arg.word), null)): FastMath.exp(lex.score(dependency.arg, -1, wordIndex.get(dependency.arg.word), null));
         // double oldScore = c_aTW > 0.0 ? (c_aTW / c_aT) : 1.0;
         // if (oldScore == 1.0) {
         //  log.info("#### arg=" + dependency.arg + " score=" + p_aTW_aT +

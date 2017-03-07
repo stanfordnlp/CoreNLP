@@ -2,6 +2,7 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
+import net.jafama.FastMath;
 
 import java.util.Arrays;
 
@@ -87,14 +88,14 @@ public class BiasedLogConditionalObjectiveFunction extends AbstractCachingDiffFu
 
       double[] weightedSums = new double[numClasses];
       for (int trueLabel = 0; trueLabel < numClasses; trueLabel++) {
-        weightedSums[trueLabel] = Math.log(confusionMatrix[observedLabel][trueLabel]) + sums[trueLabel];
+        weightedSums[trueLabel] = FastMath.log(confusionMatrix[observedLabel][trueLabel]) + sums[trueLabel];
       }
 
       double weightedTotal = ArrayMath.logSum(weightedSums);
       
       for (int c = 0; c < numClasses; c++) {
-        probs[c] = Math.exp(sums[c] - total);
-        weightedProbs[c] = Math.exp(weightedSums[c] - weightedTotal);
+        probs[c] = FastMath.exp(sums[c] - total);
+        weightedProbs[c] = FastMath.exp(weightedSums[c] - weightedTotal);
         for (int feature : features) {
           int i = indexOf(feature, c);
           derivative[i] += probs[c] - weightedProbs[c];
@@ -103,9 +104,9 @@ public class BiasedLogConditionalObjectiveFunction extends AbstractCachingDiffFu
 
       double tmpValue = 0.0;
       for (int c = 0; c < numClasses; c++) {
-        tmpValue += confusionMatrix[observedLabel][c] * Math.exp(sums[c] - total);
+        tmpValue += confusionMatrix[observedLabel][c] * FastMath.exp(sums[c] - total);
       }
-      value -= Math.log(tmpValue);
+      value -= FastMath.log(tmpValue);
     }
     
     value += prior.compute(x, derivative);

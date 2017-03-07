@@ -3,6 +3,7 @@ package edu.stanford.nlp.stats;
 import java.util.Set;
 
 import edu.stanford.nlp.util.Generics;
+import net.jafama.FastMath;
 
 /**
  * Static methods for operating on {@link Distributions}s.
@@ -83,6 +84,7 @@ public class Distributions {
     return weightedAverage(d1, 0.5, d2);
   }
 
+  private static final double LN_TO_LOG2 = 1. / FastMath.log(2.0);
 
   /**
    * Calculates the KL divergence between the two distributions.
@@ -98,7 +100,6 @@ public class Distributions {
     double result = 0.0;
     double assignedMass1 = 0.0;
     double assignedMass2 = 0.0;
-    double log2 = Math.log(2.0);
     double p1, p2;
     double epsilon = 1e-10;
 
@@ -111,29 +112,29 @@ public class Distributions {
       if (p1 < epsilon) {
         continue;
       }
-      double logFract = Math.log(p1 / p2);
+      double logFract = FastMath.log(p1 / p2);
       if (logFract == Double.POSITIVE_INFINITY) {
         System.out.println("Didtributions.kldivergence returning +inf: p1=" + p1 + ", p2=" +p2);
         System.out.flush();
         return Double.POSITIVE_INFINITY; // can't recover
       }
-      result += p1 * (logFract / log2); // express it in log base 2
+      result += p1 * logFract;
     }
 
     if (numKeysRemaining != 0){
       p1 = (1.0 - assignedMass1) / numKeysRemaining;
       if (p1 > epsilon){
         p2 = (1.0 - assignedMass2) / numKeysRemaining;
-        double logFract = Math.log(p1 / p2);
+        double logFract = FastMath.log(p1 / p2);
         if (logFract == Double.POSITIVE_INFINITY) {
           System.out.println("Distributions.klDivergence (remaining mass) returning +inf: p1=" + p1 + ", p2=" +p2);
           System.out.flush();
           return Double.POSITIVE_INFINITY; // can't recover
         }
-        result += numKeysRemaining * p1 * (logFract / log2); // express it in log base 2
+        result += numKeysRemaining * p1 * logFract;
       }
     }
-    return result;
+    return result * LN_TO_LOG2; // express it in log base 2
   }
 
   /**

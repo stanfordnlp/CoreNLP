@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.util.Map;
 import java.util.Set;
@@ -135,7 +136,7 @@ public class BaseUnknownWordModelTrainer
 
       /* inner iteration is over words */
       for (String end : wc.keySet()) {
-        double prob = Math.log((wc.getCount(end)) / (tc.getCount(key)));  // p(sig|tag)
+        double prob = FastMath.log((wc.getCount(end)) / (tc.getCount(key)));  // p(sig|tag)
         tagHash.get(key).setCount(end, prob);
         //if (Test.verbose)
         //EncodingPrintWriter.out.println(tag + " rewrites as " + end + " endchar with probability " + prob,encoding);

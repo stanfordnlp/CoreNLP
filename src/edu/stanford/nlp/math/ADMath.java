@@ -1,5 +1,7 @@
 package edu.stanford.nlp.math;
 
+import net.jafama.FastMath;
+
 /**
  * The class {@code ADMath} was created to extend the
  * current calculations of gradient to automatically include a calculation of the
@@ -48,14 +50,14 @@ public class ADMath {
 
   public static  DoubleAD exp(DoubleAD a){
     DoubleAD c = new DoubleAD();
-    c.setval( Math.exp(a.getval()));
-    c.setdot(a.getdot() * Math.exp(a.getval()));
+    c.setval( FastMath.exp(a.getval()));
+    c.setdot(a.getdot() * FastMath.exp(a.getval()));
     return c;
   }
 
   public static  DoubleAD log(DoubleAD a){
     DoubleAD c = new DoubleAD();
-    c.setval( Math.log(a.getval()));
+    c.setval( FastMath.log(a.getval()));
     c.setdot( a.getdot()/a.getval());
     return c;
   }
@@ -123,13 +125,13 @@ public class ADMath {
     for (int i = fromIndex; i < toIndex; i++) {
       if (i != maxIdx && logInputs[i].getval() > cutoff) {
         haveTerms = true;
-        double curEXP = Math.exp(logInputs[i].getval() - max);
+        double curEXP = FastMath.exp(logInputs[i].getval() - max);
         intermediate += curEXP;
         intermediateDot += curEXP*logInputs[i].getdot();
       }
     }
     if (haveTerms) {
-      ret.setval(max + Math.log(1.0 + intermediate));
+      ret.setval(max + FastMath.log1p(intermediate));
       ret.setdot((maxdot + intermediateDot)/(1.0 + intermediate));
     } else {
       ret.setval(max);

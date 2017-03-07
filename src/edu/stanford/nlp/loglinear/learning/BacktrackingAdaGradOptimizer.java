@@ -1,6 +1,6 @@
 package edu.stanford.nlp.loglinear.learning; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 
 /**
@@ -58,7 +58,7 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer  {
       ConcatVector sqrt = s.adagradAccumulator.deepClone();
       sqrt.mapInPlace((d) -> {
         if (d == 0) return alpha;
-        else return alpha / Math.sqrt(d);
+        else return alpha / FastMath.sqrt(d);
       });
 
       gradient.elementwiseProductInPlace(sqrt);

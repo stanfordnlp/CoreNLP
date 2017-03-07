@@ -1,6 +1,6 @@
 package edu.stanford.nlp.optimization; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Timing;
 
@@ -181,7 +181,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
     for (double aW : w) {
       norm += aW * aW;
     }
-    return Math.sqrt(norm);
+    return FastMath.sqrt(norm);
   }
 
   private double doEvaluation(double[] x) {
@@ -254,7 +254,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
       //   nominator = Math.sqrt(sumDeltaXSquare[index]+eps);
       // }
       // currentRate = nominator / Math.sqrt(sumGradSquare[index]+eps);
-      currentRate = Math.sqrt(sumDeltaXSquare[index]+eps) / Math.sqrt(sumGradSquare[index]+eps);
+      currentRate = FastMath.sqrt(sumDeltaXSquare[index]+eps) / FastMath.sqrt(sumGradSquare[index]+eps);
 
       // double deltaXt = currentRate * grad;
       // sumDeltaXSquare[index] = sumDeltaXSquare[index] * rho + (1-rho) * deltaXt * deltaXt;
@@ -265,7 +265,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
         sumGradSquare[index] += grad * grad;
       }
       // apply AdaGrad
-      currentRate = initRate / Math.sqrt(sumGradSquare[index]+eps);
+      currentRate = initRate / FastMath.sqrt(sumGradSquare[index]+eps);
     }
     // prevDeltaX[index] = grad * currentRate;
     return currentRate;
@@ -457,7 +457,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
             }
           }
           if (prior == Prior.RIDGE) {
-            double testUpdateNorm = Math.sqrt(testUpdateSquaredSum);
+            double testUpdateNorm = FastMath.sqrt(testUpdateSquaredSum);
             for (int index = 0 ; index < testUpdateCache.length; index++) {
               realUpdate = testUpdateCache[index] * pospart( 1 - currentRateCache[index] * lambda / testUpdateNorm );
               updateX(x, index, realUpdate);
@@ -472,7 +472,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
             double testUpdateSquaredSum = 0;
             double testUpdateAbsSum = 0;
             double M = gFeatureIndices.length;
-            double dm = Math.log(M);
+            double dm = FastMath.log(M);
             for (int index : gFeatureIndices) {
               gValue = gradients[index];
               currentRate = computeLearningRate(index, gValue);
@@ -485,7 +485,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
               currentRateCache[index] = currentRate;
             }
             if (prior == Prior.gLASSO) {
-              double testUpdateNorm = Math.sqrt(testUpdateSquaredSum);
+              double testUpdateNorm = FastMath.sqrt(testUpdateSquaredSum);
               boolean groupHasNonZero = false;
               for (int index : gFeatureIndices) {
                 realUpdate = testUpdateCache[index] * pospart(1 - currentRateCache[index] * lambda * dm / testUpdateNorm);
@@ -521,7 +521,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
                 bCache[index] = b;
                 bSquaredSum += b * b;
               }
-              double bNorm = Math.sqrt(bSquaredSum);
+              double bNorm = FastMath.sqrt(bSquaredSum);
               int nonZeroCount = 0;
               boolean groupHasNonZero = false;
               for (int index : gFeatureIndices) {

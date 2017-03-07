@@ -1,6 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Index;
@@ -64,7 +64,7 @@ public class FrenchUnknownWordModel extends BaseUnknownWordModel  {
 
     double p_T = (c_Tseen / total);
     double p_W = 1.0 / total;
-    pb_W_T = Math.log(pb_T_S * p_W / p_T);
+    pb_W_T = FastMath.log(pb_T_S * p_W / p_T);
 
     return (float) pb_W_T;
   }

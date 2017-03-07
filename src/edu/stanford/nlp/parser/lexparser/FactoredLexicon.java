@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -119,10 +120,10 @@ public class FactoredLexicon extends BaseLexicon  {
     int morphId = morphIndex.addToIndex(reducedMorphTag);
 
     // Score the factors and create the rule score p_W_T
-    double p_W_Tf = Math.log(probWordTag(word, loc, wordId, tagId));
-//    double p_L_T = Math.log(probLemmaTag(word, loc, tagId, lemmaId));
+    double p_W_Tf = FastMath.log(probWordTag(word, loc, wordId, tagId));
+//    double p_L_T = FastMath.log(probLemmaTag(word, loc, tagId, lemmaId));
     double p_L_T = 0.0;
-    double p_M_T = Math.log(probMorphTag(tagId, morphId));
+    double p_M_T = FastMath.log(probMorphTag(tagId, morphId));
     double p_W_T = p_W_Tf + p_L_T + p_M_T;
 
     if (DEBUG) {
@@ -163,7 +164,7 @@ public class FactoredLexicon extends BaseLexicon  {
     } else { // Unseen word. Score based on the word signature (of the surface form)
       IntTaggedWord iTW = new IntTaggedWord(wordId, tagId);
       double c_T = tagCounter.getCount(tagId);
-      p_W_T = Math.exp(getUnknownWordModel().score(iTW, loc, c_T, tagCounter.totalCount(), smooth[0], word));
+      p_W_T = FastMath.exp(getUnknownWordModel().score(iTW, loc, c_T, tagCounter.totalCount(), smooth[0], word));
     }
 
     return p_W_T;
@@ -205,7 +206,7 @@ public class FactoredLexicon extends BaseLexicon  {
       //      int wordId = wordIndex.indexOf(word);
 //      IntTaggedWord iTW = new IntTaggedWord(wordId, tagId);
 //      double c_T = tagCounter.getCount(tagId);
-//      p_L_T = Math.exp(getUnknownWordModel().score(iTW, loc, c_T, tagCounter.totalCount(), smooth[0], word));
+//      p_L_T = FastMath.exp(getUnknownWordModel().score(iTW, loc, c_T, tagCounter.totalCount(), smooth[0], word));
     }
 
     return p_L_T;

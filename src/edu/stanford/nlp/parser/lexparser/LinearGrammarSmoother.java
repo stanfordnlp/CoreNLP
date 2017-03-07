@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -94,7 +95,7 @@ public class LinearGrammarSmoother implements Function<Pair<UnaryGrammar,BinaryG
       Counter<String> symCounts) {
     String label = stateIndex.get(rule.parent());
     String basicCat = basicCategory(label);
-    symWeights.incrementCount(basicCat, Math.exp(rule.score()));
+    symWeights.incrementCount(basicCat, FastMath.exp(rule.score()));
     symCounts.incrementCount(basicCat);
   }
 
@@ -106,11 +107,11 @@ public class LinearGrammarSmoother implements Function<Pair<UnaryGrammar,BinaryG
     double pSum = symWeights.getCount(basicCat);
     double n = symCounts.getCount(basicCat);
 
-    double pRule = Math.exp(rule.score());
+    double pRule = FastMath.exp(rule.score());
 
     double pSmooth = (1.0 - ALPHA)*pRule;
     pSmooth += ALPHA*(pSum / n);
-    pSmooth = Math.log(pSmooth);
+    pSmooth = FastMath.log(pSmooth);
     
     if(DEBUG)
       System.err.printf("%s\t%.4f%n", rule.toString(),pSmooth);

@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ie.crf; 
 
+import net.jafama.FastMath;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.ListeningSequenceModel;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -248,7 +249,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public double prob(int position, int label) {
-    return Math.exp(logProb(position, label));
+    return FastMath.exp(logProb(position, label));
   }
 
   public double logProb(int position, E label) {
@@ -256,7 +257,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public double prob(int position, E label) {
-    return Math.exp(logProb(position, label));
+    return FastMath.exp(logProb(position, label));
   }
 
   public double[] probsToDoubleArr(int position) {
@@ -334,7 +335,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
    * the label at position 5 is 3.
    */
   public double prob(int position, int[] labels) {
-    return Math.exp(logProb(position, labels));
+    return FastMath.exp(logProb(position, labels));
   }
 
   /**
@@ -356,7 +357,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
    * the label at position 5 is "ORG".
    */
   public double prob(int position, E[] labels) {
-    return Math.exp(logProb(position, labels));
+    return FastMath.exp(logProb(position, labels));
   }
 
   public GeneralizedCounter<E> logProbs(int position, int window) {
@@ -457,11 +458,11 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public double condProbGivenPrevious(int position, int label, int[] prevLabels) {
-    return Math.exp(condLogProbGivenPrevious(position, label, prevLabels));
+    return FastMath.exp(condLogProbGivenPrevious(position, label, prevLabels));
   }
 
   public double condProbGivenPrevious(int position, E label, E[] prevLabels) {
-    return Math.exp(condLogProbGivenPrevious(position, label, prevLabels));
+    return FastMath.exp(condLogProbGivenPrevious(position, label, prevLabels));
   }
 
   public Counter<E> condLogProbsGivenPrevious(int position, int[] prevlabels) {
@@ -508,11 +509,11 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public double condProbGivenNext(int position, int label, int[] nextLabels) {
-    return Math.exp(condLogProbGivenNext(position, label, nextLabels));
+    return FastMath.exp(condLogProbGivenNext(position, label, nextLabels));
   }
 
   public double condProbGivenNext(int position, E label, E[] nextLabels) {
-    return Math.exp(condLogProbGivenNext(position, label, nextLabels));
+    return FastMath.exp(condLogProbGivenNext(position, label, nextLabels));
   }
 
   public Counter<E> condLogProbsGivenNext(int position, int[] nextlabels) {

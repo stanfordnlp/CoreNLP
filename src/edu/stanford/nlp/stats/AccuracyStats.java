@@ -9,6 +9,7 @@ import edu.stanford.nlp.classify.ProbabilisticClassifier;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
+import net.jafama.FastMath;
 
 /**
  * Utility class for aggregating counts of true positives, false positives, and
@@ -50,7 +51,7 @@ public class AccuracyStats<L> implements Scorer<L> {
       Datum<L,F> d = data.getRVFDatum(i);
       Counter<L> scores = classifier.logProbabilityOf(d);
       int labelD = d.label().equals(posLabel) ? 1 : 0;
-      dataScores.add(new Pair<>(Math.exp(scores.getCount(posLabel)), labelD));
+      dataScores.add(new Pair<>(FastMath.exp(scores.getCount(posLabel)), labelD));
     }
 
     PRCurve prc = new PRCurve(dataScores);

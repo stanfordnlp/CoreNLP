@@ -14,6 +14,7 @@ import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Timing;
+import net.jafama.FastMath;
 
 /**
  * @author Galen Andrew
@@ -270,7 +271,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
       Symbol nextChar = (Symbol) charList.get(i);
       charList.set(i, tag);
       double charScore = getBackedOffDist(charList.subList(i, i + CONTEXT_LENGTH + 1)).probabilityOf(nextChar);
-      score += Math.log(charScore);
+      score += FastMath.log(charScore);
     }
 
     switch (penaltyType) {
@@ -325,7 +326,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
       buf.append(gen.getCh());
       switch (penaltyType) {
         case 1:
-          if (Math.random() > Math.pow(lengthPenalty, buf.length())) {
+          if (Math.random() > FastMath.pow(lengthPenalty, buf.length())) {
             break genLoop;
           }
           break;

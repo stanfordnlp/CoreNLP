@@ -45,6 +45,7 @@ import edu.stanford.nlp.parser.KBestViterbiParser;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.logging.Redwood;
 
+import net.jafama.FastMath;
 
 /**
  * An exhaustive O(n<sup>4</sup>t<sup>2</sup>) time and O(n<sup>2</sup>t)
@@ -403,15 +404,15 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser  {
               } // end for split
               // sum for iScoreHSum
               if (doiScoreHSum) {
-                double p = Math.exp(iScoreHSum[endHead][endTag][start]);
+                double p = FastMath.exp(iScoreHSum[endHead][endTag][start]);
                 for (int split = argHead + 1; split < end; split++) {
-                  p += Math.exp(iScoreH[argHead][argTag][start] +
+                  p += FastMath.exp(iScoreH[argHead][argTag][start] +
                                 iScoreH[argHead][argTag][split] +
                                 headScore[binDistance[endHead][split]][endHead][endTag][argHead][argTag] +
                                 headStop[argHead][argTag][start] +
                                 headStop[argHead][argTag][split]);
                 }
-                iScoreHSum[endHead][endTag][start] = (float)Math.log(p);
+                iScoreHSum[endHead][endTag][start] = (float)FastMath.log(p);
               }
             } // end for argTag : tags
           } // end for argHead
@@ -459,16 +460,16 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser  {
 
               // sum for iScoreHSum
               if (doiScoreHSum) {
-                double p = Math.exp(iScoreHSum[startHead][startTag][end]);
+                double p = FastMath.exp(iScoreHSum[startHead][startTag][end]);
                 for (int split = argHead + 1; split < end; split++) {
-                  p += Math.exp(iScoreH[startHead][startTag][split] +
+                  p += FastMath.exp(iScoreH[startHead][startTag][split] +
                       iScoreH[argHead][argTag][split] +
                       iScoreH[argHead][argTag][end] +
                       headScore[binDistance[startHead][split]][startHead][startTag][argHead][argTag] +
                       headStop[argHead][argTag][end] +
                       headStop[argHead][argTag][split]);
                 }
-                iScoreHSum[startHead][startTag][end] = (float)Math.log(p);
+                iScoreHSum[startHead][startTag][end] = (float)FastMath.log(p);
               }
 
             } // end for argTag: tags
@@ -637,7 +638,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser  {
             float penalty = 0.0f;
             if (bd != 0) {
               penalty = (float) dg.score(words[hWord], hTag, -2, -2, aWord > hWord, 0);
-              penalty = (float) Math.log(1.0 - Math.exp(penalty));
+              penalty = (float) FastMath.log(1.0 - FastMath.exp(penalty));
             }
             for (int aTag = 0; aTag < numTags; aTag++) {
               if (headScore[bd][hWord][hTag][aWord][aTag] + penalty > biggest) {

@@ -1,6 +1,7 @@
 package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
+import net.jafama.FastMath;
 
 import java.util.Arrays;
 
@@ -48,20 +49,20 @@ public class BiasedLogisticObjectiveFunction extends AbstractCachingDiffFunction
       }
 
       if (labels[d] == 1) {
-        expSum = Math.exp(-sum);
+        expSum = FastMath.exp(-sum);
         double g = (1 / (1 + expSum));
-        value -= Math.log(g);
+        value -= FastMath.log(g);
         derivativeIncrement = (g-1);
       } else {
-//         expSum = Math.exp(-sum);
+//         expSum = FastMath.exp(-sum);
 //         double g = (1 / (1 + expSum));
-//         value -= Math.log(1-g);
+//         value -= FastMath.log(1-g);
 //         derivativeIncrement = (g);
 //       }
-        expSum = Math.exp(-sum);
+        expSum = FastMath.exp(-sum);
         double g = (1 / (1 + expSum));
         double e = (1-probCorrect) * g + (probCorrect)*(1 - g);
-        value -= Math.log(e);
+        value -= FastMath.log(e);
         derivativeIncrement = -(g*(1-g)*(1-2*probCorrect)) / (e);
       }
 
@@ -90,17 +91,17 @@ public class BiasedLogisticObjectiveFunction extends AbstractCachingDiffFunction
       double expSum, derivativeIncrement;
 
       if (labels[d] == 0) {
-        expSum = Math.exp(sum);
+        expSum = FastMath.exp(sum);
         derivativeIncrement = 1.0 / (1.0 + (1.0 / expSum));
       } else {
-        expSum = Math.exp(-sum);
+        expSum = FastMath.exp(-sum);
         derivativeIncrement = -1.0 / (1.0 + (1.0 / expSum));
       }
 
       if (dataweights == null) {
-        value += Math.log(1.0 + expSum);
+        value += FastMath.log1p(expSum);
       } else {
-        value += Math.log(1.0 + expSum) * dataweights[d];
+        value += FastMath.log1p(expSum) * dataweights[d];
         derivativeIncrement *= dataweights[d];
       }
 

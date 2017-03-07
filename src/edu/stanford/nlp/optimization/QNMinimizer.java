@@ -14,6 +14,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.CallbackFunction;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 
 /**
@@ -1564,7 +1565,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       s = Math.max(Math.max(theta, newPt[g]), bestPt[g]);
       final double theta_s = theta / s;
       gamma = s
-          * Math.sqrt(theta_s * theta_s - (bestPt[g] / s)
+          * FastMath.sqrt(theta_s * theta_s - (bestPt[g] / s)
               * (newPt[g] / s));
       if (newPt[a] < bestPt[a]) {
         gamma = -gamma;
@@ -1602,7 +1603,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       s = Math.max(Math.max(theta, bestPt[g]), newPt[g]);
       final double theta_s = theta / s;
       gamma = s
-          * Math.sqrt(theta_s * theta_s - (bestPt[g] / s)
+          * FastMath.sqrt(theta_s * theta_s - (bestPt[g] / s)
               * (newPt[g] / s));
       if (newPt[a] > bestPt[a]) {
         gamma = -gamma;
@@ -1636,8 +1637,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       theta = 3 * (bestPt[f] - newPt[f]) / (newPt[a] - bestPt[a]) + bestPt[g]
           + newPt[g];
       s = Math.max(Math.max(theta, bestPt[g]), newPt[g]);
-      gamma = s * Math.sqrt(Math.max(0.0, (theta / s) * (theta / s) - (bestPt[g] / s)
-              * (newPt[g] / s)));
+      final double theta_s = theta / s;
+      gamma = s * FastMath.sqrt(Math.max(0.0, theta_s * theta_s
+          - (bestPt[g] / s) * (newPt[g] / s)));
       if (newPt[a] < bestPt[a]) {
         gamma = -gamma;
       }
@@ -1684,7 +1686,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         s = Math.max(Math.max(theta, bestPt[g]), newPt[g]);
         final double theta_s = theta / s;
         gamma = s
-            * Math.sqrt(theta_s * theta_s - (bestPt[g] / s)
+            * FastMath.sqrt(theta_s * theta_s - (bestPt[g] / s)
                 * (newPt[g] / s));
         if (newPt[a] > bestPt[a]) {
           gamma = -gamma;

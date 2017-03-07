@@ -2,6 +2,7 @@ package edu.stanford.nlp.ie.qe;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.tokensregex.Env;
+import net.jafama.FastMath;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -100,7 +101,7 @@ public class UnitPrefix {
       String[] fields = commaPattern.split(line);
       double base = Double.parseDouble(fields[iBase]);
       double exp = Double.parseDouble(fields[iExp]);
-      double scale = Math.pow(base, exp);
+      double scale = FastMath.pow(base, exp);
       UnitPrefix unitPrefix = new UnitPrefix(fields[iName], fields[iPrefix], scale, fields[iSystem]);
       list.add(unitPrefix);
     }

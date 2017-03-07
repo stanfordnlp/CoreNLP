@@ -30,6 +30,7 @@ import edu.stanford.nlp.util.ScoredObject;
 
 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 
 /**
@@ -51,6 +52,8 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   private static final long serialVersionUID = -3883164942879961091L;
 
   final static Redwood.RedwoodChannels logger = Redwood.channels(Dataset.class);
+
+  private static final double LN_TO_LOG2 = 1. / FastMath.log(2);
 
   public Dataset() {
     this(10);
@@ -264,7 +267,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
       }
       double l1norm = 0;
       for(F feature: tfidfFeatures.keySet()){
-        double idf = Math.log(((double)(this.size()+1))/(featureDocCounts.getCount(feature)+0.5));
+        double idf = FastMath.log(((double)(this.size()+1))/(featureDocCounts.getCount(feature)+0.5));
         double tf = tfidfFeatures.getCount(feature);
         tfidfFeatures.setCount(feature, tf*idf);
         l1norm += tf*idf;
@@ -658,7 +661,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     for (int i = 0; i < labelIndex.size(); i++) {
       double labelCount = labelCounter.getCount(labelIndex.get(i));
       double p = labelCount / size();
-      entropy -= p * (Math.log(p) / Math.log(2));
+      entropy -= p * FastMath.log(p) * LN_TO_LOG2;
     }
 
     double[] ig = new double[featureIndex.size()];
@@ -693,11 +696,11 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
         double pNot = notFeatureLabelCount / notFeatureCount;
 
         if (featureLabelCount != 0) {
-          sumFeature += p * (Math.log(p) / Math.log(2));
+          sumFeature += p * FastMath.log(p) * LN_TO_LOG2;
         }
 
         if (notFeatureLabelCount != 0) {
-          sumNotFeature += pNot * (Math.log(pNot) / Math.log(2));
+          sumNotFeature += pNot * FastMath.log(pNot) * LN_TO_LOG2;
         }
         //System.out.println(pNot+" "+(Math.log(pNot)/Math.log(2)));
 

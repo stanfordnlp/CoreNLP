@@ -1,6 +1,6 @@
 package edu.stanford.nlp.parser.lexparser;
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.EncodingPrintWriter;
@@ -587,7 +587,7 @@ public class BaseLexicon implements Lexicon  {
         log.info("Lexicon.score " + wordIndex.get(iTW.word) + "/" + tagIndex.get(iTW.tag) + " as known word.");
       }
 
-      // c_TW = Math.sqrt(c_TW); [cdm: funny math scaling? dunno who played with this]
+      // c_TW = FastMath.sqrt(c_TW); [cdm: funny math scaling? dunno who played with this]
       // c_TW += 0.5;
 
       double p_T_U;
@@ -637,7 +637,7 @@ public class BaseLexicon implements Lexicon  {
       }
       double p_T = (c_T / total);
       double p_W = (c_W / total);
-      pb_W_T = Math.log(pb_T_W * p_W / p_T);
+      pb_W_T = FastMath.log(pb_T_W * p_W / p_T);
 
       if (DEBUG_LEXICON) {
         if (iTW.word != debugLastWord) {
@@ -669,7 +669,7 @@ public class BaseLexicon implements Lexicon  {
         // For negative we now do a weighted average for the dependency grammar :-)
         double pb_W0_T = getUnknownWordModel().score(iTW, 0, c_T, total, smooth[0], word);
         double pb_W1_T = getUnknownWordModel().score(iTW, 1, c_T, total, smooth[0], word);
-        pb_W_T = Math.log((Math.exp(pb_W0_T) + 2 * Math.exp(pb_W1_T))/3);
+        pb_W_T = FastMath.log((FastMath.exp(pb_W0_T) + 2 * FastMath.exp(pb_W1_T))/3);
       }
     }
 

@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.dvparser;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.io.ObjectInputStream;
 import java.io.IOException;
@@ -197,7 +198,7 @@ public class DVModel implements Serializable  {
     SimpleMatrix matrix = new SimpleMatrix(numRows, numCols * 2);
     matrix.insertIntoThis(0, 0, identity.scale(op.trainOptions.scalingForInit * 0.1));
     matrix.insertIntoThis(0, numCols, identity.scale(op.trainOptions.scalingForInit * 0.1));
-    matrix = matrix.plus(SimpleMatrix.random_DDRM(numRows,numCols * 2,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand));
+    matrix = matrix.plus(SimpleMatrix.random_DDRM(numRows,numCols * 2,-1.0/FastMath.sqrt((double)numCols * 100.0),1.0/FastMath.sqrt((double)numCols * 100.0),rand));
     return matrix;
   }
 
@@ -210,13 +211,13 @@ public class DVModel implements Serializable  {
     SimpleMatrix matrix;
     switch (op.trainOptions.transformMatrixType) {
     case DIAGONAL:
-      matrix = SimpleMatrix.random_DDRM(numRows,numCols,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand).plus(identity);
+      matrix = SimpleMatrix.random_DDRM(numRows,numCols,-1.0/FastMath.sqrt((double)numCols * 100.0),1.0/FastMath.sqrt((double)numCols * 100.0),rand).plus(identity);
       break;
     case RANDOM:
-      matrix = SimpleMatrix.random_DDRM(numRows,numCols,-1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
+      matrix = SimpleMatrix.random_DDRM(numRows,numCols,-1.0/FastMath.sqrt((double)numCols),1.0/FastMath.sqrt((double)numCols),rand);
       break;
     case OFF_DIAGONAL:
-      matrix = SimpleMatrix.random_DDRM(numRows,numCols,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand).plus(identity);
+      matrix = SimpleMatrix.random_DDRM(numRows,numCols,-1.0/FastMath.sqrt((double)numCols * 100.0),1.0/FastMath.sqrt((double)numCols * 100.0),rand).plus(identity);
       for (int i = 0; i < numCols; ++i) {
         int x = rand.nextInt(numCols);
         int y = rand.nextInt(numCols);
@@ -225,7 +226,7 @@ public class DVModel implements Serializable  {
       }
       break;
     case RANDOM_ZEROS:
-      matrix = SimpleMatrix.random_DDRM(numRows,numCols,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand).plus(identity);
+      matrix = SimpleMatrix.random_DDRM(numRows,numCols,-1.0/FastMath.sqrt((double)numCols * 100.0),1.0/FastMath.sqrt((double)numCols * 100.0),rand).plus(identity);
       for (int i = 0; i < numCols; ++i) {
         int x = rand.nextInt(numCols);
         int y = rand.nextInt(numCols);
@@ -246,7 +247,7 @@ public class DVModel implements Serializable  {
     ++numUnaryMatrices;
 
     // scoring matrix
-    SimpleMatrix score = SimpleMatrix.random_DDRM(1, numCols, -1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
+    SimpleMatrix score = SimpleMatrix.random_DDRM(1, numCols, -1.0/FastMath.sqrt((double)numCols),1.0/FastMath.sqrt((double)numCols),rand);
     unaryScore.put(childBasic, score.scale(op.trainOptions.scalingForInit));
 
     SimpleMatrix transform;
@@ -270,7 +271,7 @@ public class DVModel implements Serializable  {
     ++numBinaryMatrices;
 
     // scoring matrix
-    SimpleMatrix score = SimpleMatrix.random_DDRM(1, numCols, -1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
+    SimpleMatrix score = SimpleMatrix.random_DDRM(1, numCols, -1.0/FastMath.sqrt((double)numCols),1.0/FastMath.sqrt((double)numCols),rand);
     binaryScore.put(leftBasic, rightBasic, score.scale(op.trainOptions.scalingForInit));
 
     SimpleMatrix binary;

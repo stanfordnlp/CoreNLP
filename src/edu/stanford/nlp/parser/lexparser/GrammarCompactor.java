@@ -1,6 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.fsm.TransducerGraph;
 import edu.stanford.nlp.fsm.TransducerGraph.Arc;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -353,7 +353,7 @@ public abstract class GrammarCompactor  {
     for (UnaryRule rule : unaryRules) {
       if (outputType == RAW_COUNTS) {
         double count = symbolCounter.getCount(newStateIndex.get(rule.parent));
-        rule.score = (float) Math.log(rule.score / count);
+        rule.score = (float) FastMath.log(rule.score / count);
       }
       ug.addRule(rule);
       numRules++;
@@ -361,7 +361,7 @@ public abstract class GrammarCompactor  {
     for (BinaryRule rule : binaryRules) {
       if (outputType == RAW_COUNTS) {
         double count = symbolCounter.getCount(newStateIndex.get(rule.parent));
-        rule.score = (float) Math.log((rule.score - op.trainOptions.ruleDiscount) / count);
+        rule.score = (float) FastMath.log((rule.score - op.trainOptions.ruleDiscount) / count);
       }
       bg.addRule(rule);
       numRules++;

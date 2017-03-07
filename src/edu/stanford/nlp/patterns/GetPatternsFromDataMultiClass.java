@@ -44,6 +44,7 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
 import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 /**
  * Given text and a seed list, this class gives more words like the seed words
@@ -1880,9 +1881,9 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       for (Entry<E, Double> en : scores.entrySet()) {
         Double score = null;
         if (oneMinusSoftMax)
-          score = (1 / (1 + Math.exp(Math.min(7, en.getValue()))));
+          score = (1 / (1 + FastMath.exp(Math.min(7, en.getValue()))));
         else
-          score = (1 / (1 + Math.exp(-1 * Math.min(7, en.getValue()))));
+          score = (1 / (1 + FastMath.exp(-1 * Math.min(7, en.getValue()))));
         if (score < minScore)
           minScore = score;
         if (score > maxScore)

@@ -18,6 +18,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 /**
  * System for building up coreference clusters incrementally, merging a pair of clusters each step.
@@ -154,7 +155,7 @@ public class Clusterer {
       }
 
       for (ClustererDoc trainDoc : trainDocs) {
-        examples.add(runPolicy(trainDoc, Math.pow(EXPERT_DECAY,
+        examples.add(runPolicy(trainDoc, FastMath.pow(EXPERT_DECAY,
                 (iteration + 1))));
       }
     }
@@ -432,7 +433,7 @@ public class Clusterer {
     public Pair<CandidateAction, CandidateAction> getActions(ClustererClassifier classifier) {
       Counter<String> mergeFeatures = getFeatures(doc, c1, c2,
           globalFeatures.get(currentIndex));
-      double mergeScore = Math.exp(classifier.weightFeatureProduct(mergeFeatures));
+      double mergeScore = FastMath.exp(classifier.weightFeatureProduct(mergeFeatures));
       hashedScores.put(new MergeKey(c1, c2, currentIndex), mergeScore > 0.5);
 
       State merge = new State(this);
@@ -654,7 +655,7 @@ public class Clusterer {
   }
 
   private static double cappedLog(double x) {
-    return Math.log(Math.max(x, 1e-8));
+    return FastMath.log(Math.max(x, 1e-8));
   }
 
   private static class ClustererClassifier extends SimpleLinearClassifier {

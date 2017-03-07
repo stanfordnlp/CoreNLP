@@ -12,6 +12,7 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.DeltaIndex;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
+import net.jafama.FastMath;
 import edu.stanford.nlp.process.WordSegmenter;
 
 
@@ -137,7 +138,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
         //        for (String tag : POSes) {  // 1.5
         for (String tag : POSes) {
           IntTaggedWord itw = new IntTaggedWord(word, tag, deltaWordIndex, tagIndex);
-          double newScore = lex.score(itw, 0, word, null) + Math.log(lex.getPOSDistribution().probabilityOf(tag));
+          double newScore = lex.score(itw, 0, word, null) + FastMath.log(lex.getPOSDistribution().probabilityOf(tag));
           if (newScore > scores[start][end]) {
             scores[start][end] = newScore;
             splitBacktrace[start][end] = end;
@@ -225,7 +226,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
           IntTaggedWord itw = new IntTaggedWord(word, tag, deltaWordIndex, tagIndex);
           double score = lex.score(itw, 0, word, null);
           if (start == 0) {
-            score += Math.log(initialPOSDist.probabilityOf(tag));
+            score += FastMath.log(initialPOSDist.probabilityOf(tag));
           }
           scores[start][end][itw.tag()] = score;
           splitBacktrace[start][end][itw.tag()] = end;
@@ -248,7 +249,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
             }
             for (String rTag : POSes) {
               int rTagNum = tagIndex.addToIndex(rTag);
-              double newScore = scores[start][split][tagNum] + scores[split][end][rTagNum] + Math.log(rTagDist.probabilityOf(rTag));
+              double newScore = scores[start][split][tagNum] + scores[split][end][rTagNum] + FastMath.log(rTagDist.probabilityOf(rTag));
               if (newScore > scores[start][end][tagNum]) {
                 scores[start][end][tagNum] = newScore;
                 splitBacktrace[start][end][tagNum] = split;

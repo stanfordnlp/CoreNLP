@@ -1,6 +1,6 @@
 package edu.stanford.nlp.ie.crf;
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFloatFunction;
 import edu.stanford.nlp.util.Index;
@@ -278,7 +278,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
             int[] label = labelIndex.get(k).getLabel();
 
             // float p = Math.pow(Math.E, factorTables[i].logProbEnd(label));
-            float p = (float) Math.exp(factorTables[i].unnormalizedLogProbEnd(label) - z);
+            float p = (float) FastMath.exp(factorTables[i].unnormalizedLogProbEnd(label) - z);
             for (int n = 0; n < data[m][i][j].length; n++) {
               E[data[m][i][j][n]][k] += p;
             }
@@ -392,7 +392,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
           // 		    int[] features = ddata[cl];
           int numClasses = labelIndices.get(cl).size();
           for (int c = 0; c < numClasses; c++) {
-            probs[cl][c] = (float) Math.exp(sums[cl][c] - total);
+            probs[cl][c] = (float) FastMath.exp(sums[cl][c] - total);
           }
           // 		    for (int f=0; f<features.length; f++) {
           // 			for (int c=0; c<numClasses; c++) {

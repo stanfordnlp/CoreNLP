@@ -57,6 +57,7 @@ import java.util.regex.PatternSyntaxException;
 
 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 
 /**
@@ -917,20 +918,20 @@ public class ColumnDataClassifier  {
   private static void addFeatureValue(String cWord, Flags flags, Object featuresC) {
     double value = Double.valueOf(cWord);
     if (flags.logTransform) {
-      double log = Math.log(value);
+      double log = FastMath.log(value);
       if(Double.isInfinite(log) || Double.isNaN(log)) {
         logger.info("WARNING: Log transform attempted on out of range value; feature ignored");
       } else
         addFeature(featuresC, "Log", log);
     } else if(flags.logitTransform) {
-      double logit = Math.log(value/(1-value));
+      double logit = FastMath.log(value/(1-value));
       if(Double.isInfinite(logit) || Double.isNaN(logit)) {
         logger.info("WARNING: Logit transform attempted on out of range value; feature ignored");
       } else {
         addFeature(featuresC, "Logit", logit);
       }
     } else if(flags.sqrtTransform) {
-      double sqrt = Math.sqrt(value);
+      double sqrt = FastMath.sqrt(value);
       addFeature(featuresC, "Sqrt", sqrt);
     } else {
       addFeature(featuresC, Flags.realValuedFeaturePrefix, value);
@@ -1053,7 +1054,7 @@ public class ColumnDataClassifier  {
         addFeature(featuresC, "SWNUM", bits.length);
       }
       if (flags.logSplitWordCount) {
-        addFeature(featuresC, "LSWNUM", Math.log(bits.length));
+        addFeature(featuresC, "LSWNUM", FastMath.log(bits.length));
       }
       if (flags.binnedSplitWordCounts != null) {
         String featureName = null;

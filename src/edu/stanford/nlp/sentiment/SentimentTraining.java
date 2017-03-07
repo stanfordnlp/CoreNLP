@@ -13,6 +13,8 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
 
+import net.jafama.FastMath;
+
 public class SentimentTraining  {
 
   /** A logger for this class */
@@ -35,7 +37,7 @@ public class SentimentTraining  {
     log.info("batch cost: " + currCost);
     for (int feature = 0; feature<gradf.length; feature++ ) {
       sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
-      theta[feature] = theta[feature] - (model.op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
+      theta[feature] = theta[feature] - (model.op.trainOptions.learningRate * gradf[feature]/(FastMath.sqrt(sumGradSquare[feature])+eps));
     }
 
     model.vectorToParams(theta);

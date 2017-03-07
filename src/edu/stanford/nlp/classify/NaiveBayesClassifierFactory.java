@@ -41,6 +41,7 @@ import edu.stanford.nlp.util.HashIndex;
 
 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.util.*;
 
@@ -172,10 +173,10 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
     for (int cl = 0; cl < numClasses; cl++) {
       for (int fno = 0; fno < numFeatures; fno++) {
         for (int val = 0; val < numValues[fno]; val++) {
-          weights[cl][fno][val] = Math.log((weights[cl][fno][val] + alphaFeature) / (priors[cl] + alphaFeature * numValues[fno]));
+          weights[cl][fno][val] = FastMath.log((weights[cl][fno][val] + alphaFeature) / (priors[cl] + alphaFeature * numValues[fno]));
         }
       }
-      priors[cl] = Math.log((priors[cl] + alphaClass) / (data.length + alphaClass * numClasses));
+      priors[cl] = FastMath.log((priors[cl] + alphaClass) / (data.length + alphaClass * numClasses));
     }
     return new NBWeights(priors, weights);
   }

@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.math.ArrayMath;
+import net.jafama.FastMath;
 
 /**
  * This class will sample an output from a sequence model.  It assumes that
@@ -26,7 +27,7 @@ public class SequenceSampler implements BestSequenceFinder {
     for (int pos = ts.leftWindow(); pos < sample.length - ts.rightWindow(); pos++) {
       double[] scores = ts.scoresOf(sample, pos);
       for (int i = 0; i < scores.length; i++) {
-        scores[i] = Math.exp(scores[i]);
+        scores[i] = FastMath.exp(scores[i]);
       }
       ArrayMath.normalize(scores);
       int l = ArrayMath.sampleFromDistribution(scores);

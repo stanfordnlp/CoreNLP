@@ -27,6 +27,7 @@ import edu.stanford.nlp.util.ArgumentParser.Option;
 import edu.stanford.nlp.util.concurrent.AtomicDouble;
 import edu.stanford.nlp.util.concurrent.ConcurrentHashCounter;
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 
 /**
@@ -208,7 +209,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
 
   static double logistic(double d) {
-    return 1 / (1 + Math.exp(-1 * d));
+    return 1 / (1 + FastMath.exp(-1 * d));
   }
 
   ConcurrentHashMap<CandidatePhrase, Counter<Integer>> wordClassClustersForPhrase = new ConcurrentHashMap<>();
@@ -303,7 +304,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               d1sq += d1[i] * d1[i];
               d2sq += d2[i] * d2[i];
             }
-            sim = sum / (Math.sqrt(d1sq) * Math.sqrt(d2sq));
+            sim = sum / (FastMath.sqrt(d1sq) * FastMath.sqrt(d2sq));
             cacheSimilarities.setCount(pair, sim);
           }
 

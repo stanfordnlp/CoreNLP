@@ -1,6 +1,6 @@
 package edu.stanford.nlp.tagger.maxent; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.maxent.Feature;
 import edu.stanford.nlp.maxent.Problem;
 import edu.stanford.nlp.maxent.iis.LambdaSolve;
@@ -186,13 +186,13 @@ public class LambdaSolveTagger extends LambdaSolve  {
       // update for this x
       double s = 0;
       int x = (p.functions.get(index)).getX(i);
-      double zlambdaX = zlambda[x] + pcond(yTag, x) * zlambda[x] * (Math.exp(deltaL) - 1);
+      double zlambdaX = zlambda[x] + pcond(yTag, x) * zlambda[x] * (FastMath.exp(deltaL) - 1);
       for (int y = 0; y < p.data.ySize; y++) {
         probConds[x][y] = (probConds[x][y] * zlambda[x]) / zlambdaX;
         s = s + probConds[x][y];
       }
       s = s - probConds[x][yTag];
-      probConds[x][yTag] = probConds[x][yTag] * Math.exp(deltaL);
+      probConds[x][yTag] = probConds[x][yTag] * FastMath.exp(deltaL);
       s = s + probConds[x][yTag];
       zlambda[x] = zlambdaX;
     }
@@ -208,13 +208,13 @@ public class LambdaSolveTagger extends LambdaSolve  {
       for (int i = 0; i < p.fSize; i++) {
         s = s + lambda[i] * p.functions.get(i).getVal(x, y1);
       }
-      zlambdaX = zlambdaX + Math.exp(s);
+      zlambdaX = zlambdaX + FastMath.exp(s);
     }
     double s = 0.0;
     for (int i = 0; i < p.fSize; i++) {
       s = s + lambda[i] * p.functions.get(i).getVal(x, y);
     }
-    return (1 / zlambdaX) * Math.exp(s);
+    return (1 / zlambdaX) * FastMath.exp(s);
   }
 
 
@@ -233,7 +233,7 @@ public class LambdaSolveTagger extends LambdaSolve  {
     for (int i = 0; i < p.functions.get(index).len(); i++) {
       int y = ((TaggerFeature) p.functions.get(index)).getYTag();
       int x = (p.functions.get(index)).getX(i);
-      s = s + p.data.ptildeX(x) * pcond(y, x) * 1 * Math.exp(lambdaP * fnum(x, y));
+      s = s + p.data.ptildeX(x) * pcond(y, x) * 1 * FastMath.exp(lambdaP * fnum(x, y));
     }
     s = s - ftildeArr[index];
 
@@ -246,7 +246,7 @@ public class LambdaSolveTagger extends LambdaSolve  {
     for (int i = 0; i < p.functions.get(index).len(); i++) {
       int y = ((TaggerFeature) (p.functions.get(index))).getYTag();
       int x = (p.functions.get(index)).getX(i);
-      s = s + p.data.ptildeX(x) * pcond(y, x) * 1 * Math.exp(lambdaP * fnum(x, y)) * fnum(x, y);
+      s = s + p.data.ptildeX(x) * pcond(y, x) * 1 * FastMath.exp(lambdaP * fnum(x, y)) * fnum(x, y);
     }
     return s;
   }
@@ -308,7 +308,7 @@ public class LambdaSolveTagger extends LambdaSolve  {
   double ZAlfa(double alfa, Feature f, int x) {
     double s = 0.0;
     for (int y = 0; y < p.data.ySize; y++) {
-      s = s + pcond(y, x) * Math.exp(alfa * f.getVal(x, y));
+      s = s + pcond(y, x) * FastMath.exp(alfa * f.getVal(x, y));
     }
     return s;
   }

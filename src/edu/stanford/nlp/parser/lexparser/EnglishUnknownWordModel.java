@@ -30,6 +30,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.logging.Redwood;
 
+import net.jafama.FastMath;
 
 /**
  * This is a basic unknown word model for English.  It supports 5 different
@@ -92,7 +93,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel  {
     double pb_T_S = scoreProbTagGivenWordSignature(iTW, loc, smooth, word);
     double p_T = (c_Tseen / total);
     double p_W = 1.0 / total;
-    double pb_W_T = Math.log(pb_T_S * p_W / p_T);
+    double pb_W_T = FastMath.log(pb_T_S * p_W / p_T);
 
     if (pb_W_T > -100.0) {
       if (DEBUG_UWM) {

@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.util.Map;
 import java.util.Set;
@@ -166,7 +167,7 @@ public class ChineseUnknownWordModelTrainer
 
       // inner iteration is over words  as strings
       for (String first : wc.keySet()) {
-        double prob = Math.log(((wc.getCount(first))) / tc.getCount(tagLab));
+        double prob = FastMath.log(((wc.getCount(first))) / tc.getCount(tagLab));
         tagHash.get(tagLab).setCount(first, prob);
         //if (Test.verbose)
         //EncodingPrintWriter.out.println(tag + " rewrites as " + first + " first char with probability " + prob,encoding);

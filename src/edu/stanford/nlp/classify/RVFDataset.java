@@ -31,6 +31,7 @@ import edu.stanford.nlp.util.HashIndex;
 
 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 /**
  * An interfacing class for {@link ClassifierFactory} that incrementally builds
@@ -154,7 +155,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     }
     for (int f = 0; f < this.numFeatures(); f++) {
       stdevs[f] /= (this.size() - 1);
-      stdevs[f] = Math.sqrt(stdevs[f]);
+      stdevs[f] = FastMath.sqrt(stdevs[f]);
     }
     for (int i = 0; i < this.size(); i++) {
       for (int j = 0; j < data[i].length; j++) {

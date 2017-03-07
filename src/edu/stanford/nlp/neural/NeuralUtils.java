@@ -15,6 +15,7 @@ import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.CollectionUtils;
+import net.jafama.FastMath;
 
 /**
  * Includes a bunch of utility methods usable by projects which use
@@ -195,7 +196,7 @@ public class NeuralUtils {
    * Returns a sigmoid applied to the input {@code x}.
    */
   public static double sigmoid(double x) {
-    return 1.0 / (1.0 + Math.exp(-x));
+    return 1.0 / (1.0 + FastMath.exp(-x));
   }
 
   /**
@@ -207,7 +208,7 @@ public class NeuralUtils {
     SimpleMatrix output = new SimpleMatrix(input);
     for (int i = 0; i < output.numRows(); ++i) {
       for (int j = 0; j < output.numCols(); ++j) {
-        output.set(i, j, Math.exp(output.get(i, j)));
+        output.set(i, j, FastMath.exp(output.get(i, j)));
       }
     }
     double sum = output.elementSum();
@@ -235,7 +236,7 @@ public class NeuralUtils {
     SimpleMatrix output = new SimpleMatrix(input);
     for (int i = 0; i < output.numRows(); ++i) {
       for (int j = 0; j < output.numCols(); ++j) {
-        output.set(i, j, Math.log(output.get(i, j)));
+        output.set(i, j, FastMath.log(output.get(i, j)));
       }
     }
     return output;
@@ -248,7 +249,7 @@ public class NeuralUtils {
     SimpleMatrix output = new SimpleMatrix(input);
     for (int i = 0; i < output.numRows(); ++i) {
       for (int j = 0; j < output.numCols(); ++j) {
-        output.set(i, j, Math.tanh(output.get(i, j)));
+        output.set(i, j, FastMath.tanh(output.get(i, j)));
       }
     }
     return output;

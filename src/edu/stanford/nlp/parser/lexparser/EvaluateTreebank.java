@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
+import net.jafama.FastMath;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -391,7 +392,7 @@ public class EvaluateTreebank  {
           double denom = ArrayMath.logSum(logScores);
           for (double logScore : logScores) {
             double logPr = logScore - denom;
-            entropy += Math.exp(logPr) * (logPr / Math.log(2));
+            entropy += FastMath.exp(logPr) * (logPr / FastMath.log(2));
           }
           entropy *= -1; //Convert to bits
           pwStats.printf("%f\t%d\t%d\n", entropy,trees.size(),sentence.size());

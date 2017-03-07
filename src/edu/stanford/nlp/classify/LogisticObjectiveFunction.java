@@ -1,6 +1,7 @@
 package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
+import net.jafama.FastMath;
 
 import java.util.Arrays;
 
@@ -50,17 +51,17 @@ public class LogisticObjectiveFunction extends AbstractCachingDiffFunction {
       double expSum, derivativeIncrement;
 
       if (labels[d] == 0) {
-        expSum = Math.exp(sum);
+        expSum = FastMath.exp(sum);
         derivativeIncrement = 1.0 / (1.0 + (1.0 / expSum));
       } else {
-        expSum = Math.exp(-sum);
+        expSum = FastMath.exp(-sum);
         derivativeIncrement = -1.0 / (1.0 + (1.0 / expSum));
       }
 
       if (dataweights == null) {
-        value += Math.log(1.0 + expSum);
+        value += FastMath.log1p(expSum);
       } else {
-        value += Math.log(1.0 + expSum) * dataweights[d];
+        value += FastMath.log1p(expSum) * dataweights[d];
         derivativeIncrement *= dataweights[d];
       }
 
@@ -89,17 +90,17 @@ public class LogisticObjectiveFunction extends AbstractCachingDiffFunction {
       double expSum, derivativeIncrement;
 
       if (labels[d] == 0) {
-        expSum = Math.exp(sum);
+        expSum = FastMath.exp(sum);
         derivativeIncrement = 1.0 / (1.0 + (1.0 / expSum));
       } else {
-        expSum = Math.exp(-sum);
+        expSum = FastMath.exp(-sum);
         derivativeIncrement = -1.0 / (1.0 + (1.0 / expSum));
       }
 
       if (dataweights == null) {
-        value += Math.log(1.0 + expSum);
+        value += FastMath.log1p(expSum);
       } else {
-        value += Math.log(1.0 + expSum) * dataweights[d];
+        value += FastMath.log1p(expSum) * dataweights[d];
         derivativeIncrement *= dataweights[d];
       }
 

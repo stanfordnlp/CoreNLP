@@ -1,6 +1,6 @@
 package edu.stanford.nlp.parser.lexparser; 
 import edu.stanford.nlp.util.logging.Redwood;
-
+import net.jafama.FastMath;
 import edu.stanford.nlp.classify.LinearClassifier;
 import edu.stanford.nlp.classify.LinearClassifierFactory;
 import edu.stanford.nlp.classify.WeightedDataset;
@@ -122,7 +122,7 @@ public class ChineseMaxentLexicon implements Lexicon  {
     if (subtractTagScore) {
       Set<String> tagSet = logProbs.keySet();
       for (String tag : tagSet) {
-        logProbs.incrementCount(tag, -Math.log(tagDist.probabilityOf(tag)));
+        logProbs.incrementCount(tag, -FastMath.log(tagDist.probabilityOf(tag)));
       }
     }
   }
