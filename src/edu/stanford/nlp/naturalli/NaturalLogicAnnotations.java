@@ -47,17 +47,6 @@ public class NaturalLogicAnnotations {
   }
 
   /**
-   * A set of clauses contained in and entailed by this sentence.
-   */
-  public static final class EntailedClausesAnnotation implements CoreAnnotation<Collection<SentenceFragment>> {
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<Collection<SentenceFragment>> getType() {
-      return (Class<Collection<SentenceFragment>>) ((Object) Collection.class);
-    }
-  }
-
-  /**
    * The set of relation triples extracted from this sentence.
    */
   public static final class RelationTriplesAnnotation implements CoreAnnotation<Collection<RelationTriple>> {
