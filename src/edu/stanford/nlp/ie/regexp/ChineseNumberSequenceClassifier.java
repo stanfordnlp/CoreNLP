@@ -200,7 +200,8 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   @Override
   public List<CoreLabel> classifyWithGlobalInformation(List<CoreLabel> tokenSequence, CoreMap document, CoreMap sentence) {
     if(useSUTime) {
-      log.fatal("ChineseNumberSequenceClassifier does not have SUTime implementation.");
+      log.error("ChineseNumberSequenceClassifier does not have SUTime implementation.");
+      throw new Error("Error: no SUTime implementation for ChineseNumberSequenceClassifier");
     }
     return classify(tokenSequence);
   }
