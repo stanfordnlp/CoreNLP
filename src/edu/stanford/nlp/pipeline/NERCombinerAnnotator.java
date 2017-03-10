@@ -110,15 +110,11 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   public void doOneSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     List<CoreLabel> output; // only used if try assignment works.
-    if (tokens.size() <= this.maxSentenceLength) {
-      try {
-        output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
-      } catch (RuntimeInterruptedException e) {
-        // If we get interrupted, set the NER labels to the background
-        // symbol if they are not already set, then exit.
-        output = null;
-      }
-    } else {
+    try {
+      output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
+    } catch (RuntimeInterruptedException e) {
+      // If we get interrupted, set the NER labels to the background
+      // symbol if they are not already set, then exit.
       output = null;
     }
     if (output == null) {
