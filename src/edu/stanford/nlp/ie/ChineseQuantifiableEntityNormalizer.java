@@ -920,7 +920,8 @@ public class ChineseQuantifiableEntityNormalizer {
     StringBuilder sb = new StringBuilder();
     for (E w : l) {
       if(!w.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals(entityType)) {
-        log.fatal("Incontinuous NER tags detected in entity: " + l);
+        log.error("differing NER tags detected in entity: " + l);
+        throw new Error("Error with entity construction, two tokens had inconsistent NER tags");
       }
       sb.append(w.get(CoreAnnotations.TextAnnotation.class));
     }
