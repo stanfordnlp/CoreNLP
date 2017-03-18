@@ -183,7 +183,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
               // If the queue is empty, and all the annotators have returned, we're done
               if (queue.isEmpty() && freeAnnotators.size() == backends.size()) {
-                log.debug("All annotations completed. Signaling for shutdown");
+                log.info("All annotations completed. Signaling for shutdown");
                 shouldShutdown.signalAll();
               }
 

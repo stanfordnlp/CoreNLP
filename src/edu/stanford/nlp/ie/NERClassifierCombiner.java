@@ -192,6 +192,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
     } else {
       this.gazetteMapping = Collections.emptyMap();
+      log.fatal("Property ner.language not recognized: " + nerLanguage);
     }
   }
 
