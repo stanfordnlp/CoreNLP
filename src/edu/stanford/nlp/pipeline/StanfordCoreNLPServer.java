@@ -91,6 +91,13 @@ public class StanfordCoreNLPServer implements Runnable {
    * few we created, until the garbage collector decides we can kill them.
    */
   private final WeakHashMap<Properties, StanfordCoreNLP> pipelineCache = new WeakHashMap<>();
+  
+  /**
+   * current CoreNLPHandler's properties.
+   * Save the current CoreNLPHandler's properties for use in 
+   * TokensRegexHandler, SemgrexHandler and TregexHandler
+   */
+  private Properties currentCoreNLPProperties;
   /**
    * An executor to time out CoreNLP execution with.
    */
@@ -659,6 +666,7 @@ public class StanfordCoreNLPServer implements Runnable {
         if (completedAnnotation != null && props.getProperty("annotators") != null && !"".equals(props.getProperty("annotators"))) {
           callback.accept(new FinishedRequest(props, completedAnnotation));
         }
+        currentCoreNLPProperties = props;
       } catch (TimeoutException e) {
         // Print the stack trace for debugging
         e.printStackTrace();
@@ -800,7 +808,9 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
       // Some common fields
-      Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner");
+      Properties props = currentCoreNLPProperties == null ? 
+    		  PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner") : 
+    			  currentCoreNLPProperties;
       if (authenticator != null && !authenticator.test(props)) {
         respondUnauthorized(httpExchange);
         return;
@@ -926,7 +936,9 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
       // Some common properties
-      Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
+      Properties props = currentCoreNLPProperties == null ?
+    		  PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner,depparse") : 
+    			  currentCoreNLPProperties;
       if (authenticator != null && !authenticator.test(props)) {
         respondUnauthorized(httpExchange);
         return;
@@ -1048,7 +1060,9 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
       // Some common properties
-      Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,parse");
+      Properties props = currentCoreNLPProperties == null ? 
+    		  PropertiesUtils.asProperties("annotators", "tokenize,ssplit,parse") : 
+    			  currentCoreNLPProperties;
       if (authenticator != null && ! authenticator.test(props)) {
         respondUnauthorized(httpExchange);
         return;
