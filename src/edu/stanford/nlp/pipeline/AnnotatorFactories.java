@@ -85,62 +85,7 @@ public class AnnotatorFactories  {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        String xmlTags =
-            properties.getProperty("clean.xmltags",
-                CleanXmlAnnotator.DEFAULT_XML_TAGS);
-        String sentenceEndingTags =
-            properties.getProperty("clean.sentenceendingtags",
-                CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS);
-        String singleSentenceTags =
-            properties.getProperty("clean.singlesentencetags",
-                CleanXmlAnnotator.DEFAULT_SINGLE_SENTENCE_TAGS);
-        String allowFlawedString = properties.getProperty("clean.allowflawedxml");
-        boolean allowFlawed = CleanXmlAnnotator.DEFAULT_ALLOW_FLAWS;
-        if (allowFlawedString != null)
-          allowFlawed = Boolean.valueOf(allowFlawedString);
-        String dateTags =
-            properties.getProperty("clean.datetags",
-                CleanXmlAnnotator.DEFAULT_DATE_TAGS);
-        String docIdTags =
-            properties.getProperty("clean.docIdtags",
-                CleanXmlAnnotator.DEFAULT_DOCID_TAGS);
-        String docTypeTags =
-            properties.getProperty("clean.docTypetags",
-                CleanXmlAnnotator.DEFAULT_DOCTYPE_TAGS);
-        String utteranceTurnTags =
-            properties.getProperty("clean.turntags",
-                CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS);
-        String speakerTags =
-            properties.getProperty("clean.speakertags",
-                CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
-        String docAnnotations =
-            properties.getProperty("clean.docAnnotations",
-                CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
-        String tokenAnnotations =
-            properties.getProperty("clean.tokenAnnotations",
-                CleanXmlAnnotator.DEFAULT_TOKEN_ANNOTATIONS_PATTERNS);
-        String sectionTags =
-            properties.getProperty("clean.sectiontags",
-                CleanXmlAnnotator.DEFAULT_SECTION_TAGS);
-        String sectionAnnotations =
-            properties.getProperty("clean.sectionAnnotations",
-                CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
-        String ssplitDiscardTokens =
-            properties.getProperty("clean.ssplitDiscardTokens");
-        CleanXmlAnnotator annotator = annotatorImplementation.cleanXML(properties, xmlTags,
-            sentenceEndingTags,
-            dateTags,
-            allowFlawed);
-        annotator.setSingleSentenceTagMatcher(singleSentenceTags);
-        annotator.setDocIdTagMatcher(docIdTags);
-        annotator.setDocTypeTagMatcher(docTypeTags);
-        annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
-        annotator.setDocAnnotationPatterns(docAnnotations);
-        annotator.setTokenAnnotationPatterns(tokenAnnotations);
-        annotator.setSectionTagMatcher(sectionTags);
-        annotator.setSectionAnnotationPatterns(sectionAnnotations);
-        annotator.setSsplitDiscardTokensMatcher(ssplitDiscardTokens);
-        return annotator;
+        return annotatorImplementation.cleanXML(properties);
       }
     };
   }

@@ -35,12 +35,8 @@ public class AnnotatorImplementations  {
   /**
    * Clean XML input
    */
-  public CleanXmlAnnotator cleanXML(Properties properties,
-                               String xmlTagsToRemove,
-                               String sentenceEndingTags,
-                               String dateTags,
-                               boolean allowFlawedXml) {
-    return new CleanXmlAnnotator(xmlTagsToRemove, sentenceEndingTags, dateTags, allowFlawedXml);
+  public CleanXmlAnnotator cleanXML(Properties properties) {
+    return new CleanXmlAnnotator(properties);
   }
 
   /**
