@@ -90,8 +90,9 @@ public class CorefSystem {
           Redwood.log(getName(), "Coref took "
               + (System.currentTimeMillis() - time) / 1000.0 + "s");
         }
-        CorefUtils.removeSingletonClusters(document);
-        writerAfterCoref.print(CorefPrinter.printConllOutput(document, false, true));
+        if(removeSingletonClusters)
+        	CorefUtils.removeSingletonClusters(document);
+        writerAfterCoref.print(CorefPrinter.printConllOutput(document, false, removeSingletonClusters));
       }
 
       @Override
