@@ -556,7 +556,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         logger.info("Registering annotator " + customName + " with class " + customClassName);
-        pool.register(customName, inputProps, Lazy.of(() -> annotatorImplementation.custom(inputProps, customName)));
+        pool.register(customName, inputProps, Lazy.of(() -> annotatorImplementation.custom(inputProps, property)));
       }
     }
   }
