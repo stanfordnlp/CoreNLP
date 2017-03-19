@@ -58,6 +58,13 @@ public interface Annotator {
    */
   void annotate(Annotation annotation);
 
+  /**
+   * A block of code called when this annotator unmounts from the
+   * {@link AnnotatorPool}.
+   * By default, nothing is done.
+   */
+  default void unmount() { }
+
 
   /**
    * Returns a set of requirements for which tasks this annotator can
