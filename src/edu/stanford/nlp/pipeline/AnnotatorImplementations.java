@@ -124,9 +124,12 @@ public class AnnotatorImplementations  {
   }
 
   public Annotator custom(Properties properties, String property) {
-    String customName = property.substring(StanfordCoreNLP
-            .CUSTOM_ANNOTATOR_PREFIX.length());
-    String customClassName = properties.getProperty(property);
+    String customName = property;
+    String customClassName = properties.getProperty(StanfordCoreNLP.CUSTOM_ANNOTATOR_PREFIX + property);
+    if (property.startsWith(StanfordCoreNLP.CUSTOM_ANNOTATOR_PREFIX)) {
+      customName = property.substring(StanfordCoreNLP.CUSTOM_ANNOTATOR_PREFIX.length());
+      customClassName = properties.getProperty(property);
+    }
 
     try {
       // name + properties
