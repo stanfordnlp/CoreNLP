@@ -133,6 +133,11 @@ public abstract class WebServiceAnnotator implements Annotator {
    */
   protected abstract Optional<String[]> startCommand();
 
+  /**
+   * An optional command provided to run to shut down the server.
+   */
+  protected abstract Optional<String[]> stopCommand();
+
 
   /**
    * Check if the server is ready to accept annotations.
@@ -271,7 +276,6 @@ public abstract class WebServiceAnnotator implements Annotator {
     // 4. Server is ensured! We can continue
   }
 
-
   /** {@inheritDoc} */
   public void unmount() {
     log.info("Unmounting server: " + this);
@@ -279,6 +283,15 @@ public abstract class WebServiceAnnotator implements Annotator {
       if (this.server.isPresent()) {
         this.server.get().kill();
         this.server = Optional.empty();
+      }
+      // run optional stop script
+      try {
+        if (stopCommand().isPresent()) {
+          ProcessBuilder proc = new ProcessBuilder(stopCommand().get());
+          proc.start();
+        }
+      } catch (Exception e) {
+        log.error("Error: problem with running stop command for WebServiceAnnotator");
       }
     }
   }
@@ -371,6 +384,11 @@ public abstract class WebServiceAnnotator implements Annotator {
       @Override
       protected Optional<String[]> startCommand() {
         return Optional.of(new String[]{"bash", "script.sh"});
+      }
+
+      @Override
+      protected Optional<String[]> stopCommand() {
+        return Optional.empty();
       }
 
       @Override
