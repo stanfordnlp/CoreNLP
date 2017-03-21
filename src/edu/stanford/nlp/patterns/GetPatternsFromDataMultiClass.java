@@ -3044,7 +3044,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     }
 
     if(props.getProperty(Flags.patternType) == null)
-      throw new RuntimeException("PattenrType not specified. Options are SURFACE and DEP");
+      throw new RuntimeException("PatternType not specified. Options are SURFACE and DEP");
 
     PatternFactory.PatternType patternType = PatternFactory.PatternType.valueOf(props.getProperty(Flags.patternType));
 
