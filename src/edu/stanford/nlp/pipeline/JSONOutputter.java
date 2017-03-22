@@ -262,7 +262,7 @@ public class JSONOutputter extends AnnotationOutputter {
 
     });
 
-    l0.writer.flush();  // flush
+    l0.flush();  // flush
   }
 
   /**
@@ -494,6 +494,10 @@ public class JSONOutputter extends AnnotationOutputter {
           writer.write(INDENT_CHAR);
         }
       }
+    }
+
+    public void flush() {
+      writer.flush();
     }
 
     private void space() {
