@@ -409,18 +409,13 @@ public class PropertiesUtils {
   }
 
   public static String getSignature(String name, Properties properties) {
-    String[] prefixes = new String[]{(name != null && !name.isEmpty())? name + '.' : ""};
-    if ("tokenize".equals(name) || "ssplit".equals(name)) {  // TODO(gabor) This is a hack, as tokenize and ssplit depend on each other so heavily
-      prefixes = new String[]{"tokenize", "ssplit"};
-    }
+    String prefix = (name != null && !name.isEmpty())? name + '.' : "";
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
     for (String pname : properties.stringPropertyNames()) {
-      for (String prefix : prefixes) {
-        if (pname.startsWith(prefix)) {
-          String pvalue = properties.getProperty(pname);
-          sb.append(pname).append(':').append(pvalue).append(';');
-        }
+      if (pname.startsWith(prefix)) {
+        String pvalue = properties.getProperty(pname);
+        sb.append(pname).append(':').append(pvalue).append(';');
       }
     }
     return sb.toString();
