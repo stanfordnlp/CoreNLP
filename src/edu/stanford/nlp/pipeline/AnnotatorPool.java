@@ -89,14 +89,6 @@ public class AnnotatorPool  {
     synchronized (this.factories) {
       CachedAnnotator oldAnnotator = this.factories.get(name);
       String newSig = PropertiesUtils.getSignature(name, props);
-      // handle special case of tokenize and ssplit
-      String otherSig = "";
-      if (name.equals("ssplit")) {
-        otherSig = PropertiesUtils.getSignature("tokenize", props);
-      } else if (name.equals("tokenize")) {
-        otherSig = PropertiesUtils.getSignature("ssplit", props);
-      }
-      newSig += otherSig;
       if (oldAnnotator == null || !Objects.equals(oldAnnotator.signature, newSig)) {
         // the new annotator uses different properties so we need to update!
         if (oldAnnotator != null) {
