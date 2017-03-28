@@ -413,6 +413,9 @@ public class PropertiesUtils {
     if ("tokenize".equals(name) || "ssplit".equals(name)) {  // TODO(gabor) This is a hack, as tokenize and ssplit depend on each other so heavily
       prefixes = new String[]{"tokenize", "ssplit"};
     }
+    if ("mention".equals(name)) {
+      prefixes = new String[]{"mention", "coref"};
+    }
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
     for (String pname : properties.stringPropertyNames()) {
