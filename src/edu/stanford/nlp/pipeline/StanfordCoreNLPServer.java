@@ -212,7 +212,7 @@ public class StanfordCoreNLPServer implements Runnable {
       String query = uri.getQuery();
       String[] queryFields = query
           .replaceAll("\\\\&", "___AMP___")
-          .replaceAll("\\\\+", "___PLUS___")
+          .replaceAll("\\\\\\+", "___PLUS___")
           .split("&");
       for (String queryField : queryFields) {
         int firstEq = queryField.indexOf('=');
