@@ -85,7 +85,7 @@ public class EntityMentionsAnnotator implements Annotator {
       if (props.containsKey(name + ".mentionsCoreAnnotation")) {
         mentionsCoreAnnotationClass =
             (Class<? extends CoreAnnotation<List<CoreMap>>>)
-                Class.forName(props.getProperty(name + ".nerNormalizedCoreAnnotation"));
+                Class.forName(props.getProperty(name + ".mentionsCoreAnnotation"));
       } else {
         mentionsCoreAnnotationClass = CoreAnnotations.MentionsAnnotation.class;
       }
