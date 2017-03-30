@@ -44,9 +44,24 @@ public class EntityMentionsAnnotator implements Annotator {
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
+  private Class<? extends CoreAnnotation<String>> nerNormalizedAnnotation;
+  private Class<? extends CoreAnnotation<String>> nerAnnotation;
+  private Class<? extends CoreAnnotation<List<CoreMap>>> mentionsAnnotation;
+
+  public EntityMentionsAnnotator(
+          Class<? extends CoreAnnotation<String>> nerNormalizedAnnotation, Class<? extends CoreAnnotation<String>> nerAnnotation,
+	  Class<? extends CoreAnnotation<List<CoreMap>>> mentionsAnnotation) {
+      this.nerNormalizedAnnotation = nerNormalizedAnnotation;
+      this.nerAnnotation = nerAnnotation;
+      this.mentionsAnnotation = mentionsAnnotation;
+      chunkIdentifier = new LabeledChunkIdentifier();
+      doAcronyms = false;
+  }
+
   public EntityMentionsAnnotator() {
-    chunkIdentifier = new LabeledChunkIdentifier();
-    doAcronyms = false;
+      this(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
+	   CoreAnnotations.NamedEntityTagAnnotation.class,
+	   CoreAnnotations.MentionsAnnotation.class);
   }
 
   // note: used in annotate.properties
@@ -72,7 +87,7 @@ public class EntityMentionsAnnotator implements Annotator {
     }
   }
 
-  private static final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = in -> {
+  private final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = in -> {
     // First argument is the current token
     CoreLabel cur = in.first;
     // Second argument the previous token
@@ -83,12 +98,12 @@ public class EntityMentionsAnnotator implements Annotator {
     }
 
     // Get NormalizedNamedEntityTag and say two entities are incompatible if they are different
-    String v1 = cur.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-    String v2 = prev.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+    String v1 = cur.get(nerNormalizedAnnotation);
+    String v2 = prev.get(nerNormalizedAnnotation);
     if ( ! checkStrings(v1,v2)) return false;
 
     // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
-    String nerTag = cur.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+    String nerTag = cur.get(nerAnnotation);
     if ("NUMBER".equals(nerTag) || "ORDINAL".equals(nerTag)) {
       // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
       Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
@@ -122,24 +137,24 @@ public class EntityMentionsAnnotator implements Annotator {
         annoTokenBegin = 0;
       }
       List<CoreMap> chunks = chunkIdentifier.getAnnotatedChunks(tokens, annoTokenBegin,
-              CoreAnnotations.TextAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class, IS_TOKENS_COMPATIBLE);
-      sentence.set(CoreAnnotations.MentionsAnnotation.class, chunks);
+              CoreAnnotations.TextAnnotation.class, nerAnnotation, IS_TOKENS_COMPATIBLE);
+      sentence.set(mentionsAnnotation, chunks);
 
       // By now entity mentions have been annotated and TextAnnotation and NamedEntityAnnotation marked
       // Some additional annotations
-      List<CoreMap> mentions = sentence.get(CoreAnnotations.MentionsAnnotation.class);
+      List<CoreMap> mentions = sentence.get(mentionsAnnotation);
       if (mentions != null) {
         for (CoreMap mention : mentions) {
           List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
           String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
-                  CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, mentionTokens);
+                  nerNormalizedAnnotation, mentionTokens);
           if (name == null) {
             name = mention.get(CoreAnnotations.TextAnnotation.class);
           } else {
-            mention.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, name);
+            mention.set(nerNormalizedAnnotation, name);
           }
           //mention.set(CoreAnnotations.EntityNameAnnotation.class, name);
-          String type = mention.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+          String type = mention.get(nerAnnotation);
           mention.set(CoreAnnotations.EntityTypeAnnotation.class, type);
 
           // set sentence index annotation for mention
@@ -175,7 +190,7 @@ public class EntityMentionsAnnotator implements Annotator {
       addAcronyms(annotation, allMentions);
     }
 
-    annotation.set(CoreAnnotations.MentionsAnnotation.class, allMentions);
+    annotation.set(mentionsAnnotation, allMentions);
   }
 
 
@@ -222,13 +237,13 @@ public class EntityMentionsAnnotator implements Annotator {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class
+	nerAnnotation
     )));
   }
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.MentionsAnnotation.class);
+    return Collections.singleton(mentionsAnnotation);
   }
 
 }
