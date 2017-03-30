@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.util.function.Function;
@@ -44,29 +45,53 @@ public class EntityMentionsAnnotator implements Annotator {
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
-  private Class<? extends CoreAnnotation<String>> nerNormalizedAnnotation;
-  private Class<? extends CoreAnnotation<String>> nerAnnotation;
-  private Class<? extends CoreAnnotation<List<CoreMap>>> mentionsAnnotation;
+  /** the CoreAnnotation keys to use for this enity mentions annotator **/
+  private Class<? extends CoreAnnotation<String>> nerCoreAnnotationClass;
+  private Class<? extends CoreAnnotation<String>> nerNormalizedCoreAnnotationClass;
+  private Class<? extends CoreAnnotation<List<CoreMap>>> mentionsCoreAnnotationClass;
 
-  public EntityMentionsAnnotator(
-          Class<? extends CoreAnnotation<String>> nerNormalizedAnnotation, Class<? extends CoreAnnotation<String>> nerAnnotation,
-	  Class<? extends CoreAnnotation<List<CoreMap>>> mentionsAnnotation) {
-      this.nerNormalizedAnnotation = nerNormalizedAnnotation;
-      this.nerAnnotation = nerAnnotation;
-      this.mentionsAnnotation = mentionsAnnotation;
-      chunkIdentifier = new LabeledChunkIdentifier();
-      doAcronyms = false;
-  }
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(EntityMentionsAnnotator.class);
 
   public EntityMentionsAnnotator() {
-      this(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
-	   CoreAnnotations.NamedEntityTagAnnotation.class,
-	   CoreAnnotations.MentionsAnnotation.class);
+    // set to default CoreAnnotations
+    nerCoreAnnotationClass = CoreAnnotations.NamedEntityTagAnnotation.class;
+    nerNormalizedCoreAnnotationClass = CoreAnnotations.NormalizedNamedEntityTagAnnotation.class;
+    mentionsCoreAnnotationClass = CoreAnnotations.MentionsAnnotation.class;
+    // defaults
+    chunkIdentifier = new LabeledChunkIdentifier();
+    doAcronyms = false;
   }
 
   // note: used in annotate.properties
-  @SuppressWarnings("UnusedDeclaration")
+  @SuppressWarnings({"UnusedDeclaration", "unchecked"})
   public EntityMentionsAnnotator(String name, Properties props) {
+    // if the user has supplied custom CoreAnnotations for the ner tags and entity mentions use them
+    try {
+      if (props.containsKey(name + ".nerCoreAnnotation")) {
+        nerCoreAnnotationClass =
+            (Class<? extends CoreAnnotation<String>>)
+                Class.forName(props.getProperty(name + ".nerCoreAnnotation"));
+      } else {
+        nerCoreAnnotationClass = CoreAnnotations.NamedEntityTagAnnotation.class;
+      }
+      if (props.containsKey(name + ".nerNormalizedCoreAnnotation")) {
+        nerNormalizedCoreAnnotationClass =
+            (Class<? extends CoreAnnotation<String>>)
+                Class.forName(props.getProperty(name + ".nerNormalizedCoreAnnotation"));
+      } else {
+        nerNormalizedCoreAnnotationClass = CoreAnnotations.NormalizedNamedEntityTagAnnotation.class;
+      }
+      if (props.containsKey(name + ".mentionsCoreAnnotation")) {
+        mentionsCoreAnnotationClass =
+            (Class<? extends CoreAnnotation<List<CoreMap>>>)
+                Class.forName(props.getProperty(name + ".nerNormalizedCoreAnnotation"));
+      } else {
+        mentionsCoreAnnotationClass = CoreAnnotations.MentionsAnnotation.class;
+      }
+    } catch (ClassNotFoundException e) {
+      log.error(e.getMessage());
+    }
     chunkIdentifier = new LabeledChunkIdentifier();
     doAcronyms = Boolean.parseBoolean(props.getProperty(name + ".acronyms", props.getProperty("acronyms", "false")));
   }
@@ -98,12 +123,12 @@ public class EntityMentionsAnnotator implements Annotator {
     }
 
     // Get NormalizedNamedEntityTag and say two entities are incompatible if they are different
-    String v1 = cur.get(nerNormalizedAnnotation);
-    String v2 = prev.get(nerNormalizedAnnotation);
+    String v1 = cur.get(nerNormalizedCoreAnnotationClass);
+    String v2 = prev.get(nerNormalizedCoreAnnotationClass);
     if ( ! checkStrings(v1,v2)) return false;
 
     // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
-    String nerTag = cur.get(nerAnnotation);
+    String nerTag = cur.get(nerCoreAnnotationClass);
     if ("NUMBER".equals(nerTag) || "ORDINAL".equals(nerTag)) {
       // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
       Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
@@ -137,24 +162,24 @@ public class EntityMentionsAnnotator implements Annotator {
         annoTokenBegin = 0;
       }
       List<CoreMap> chunks = chunkIdentifier.getAnnotatedChunks(tokens, annoTokenBegin,
-              CoreAnnotations.TextAnnotation.class, nerAnnotation, IS_TOKENS_COMPATIBLE);
-      sentence.set(mentionsAnnotation, chunks);
+              CoreAnnotations.TextAnnotation.class, nerCoreAnnotationClass, IS_TOKENS_COMPATIBLE);
+      sentence.set(mentionsCoreAnnotationClass, chunks);
 
       // By now entity mentions have been annotated and TextAnnotation and NamedEntityAnnotation marked
       // Some additional annotations
-      List<CoreMap> mentions = sentence.get(mentionsAnnotation);
+      List<CoreMap> mentions = sentence.get(mentionsCoreAnnotationClass);
       if (mentions != null) {
         for (CoreMap mention : mentions) {
           List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
           String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
-                  nerNormalizedAnnotation, mentionTokens);
+                  nerNormalizedCoreAnnotationClass, mentionTokens);
           if (name == null) {
             name = mention.get(CoreAnnotations.TextAnnotation.class);
           } else {
-            mention.set(nerNormalizedAnnotation, name);
+            mention.set(nerNormalizedCoreAnnotationClass, name);
           }
           //mention.set(CoreAnnotations.EntityNameAnnotation.class, name);
-          String type = mention.get(nerAnnotation);
+          String type = mention.get(nerCoreAnnotationClass);
           mention.set(CoreAnnotations.EntityTypeAnnotation.class, type);
 
           // set sentence index annotation for mention
@@ -190,15 +215,15 @@ public class EntityMentionsAnnotator implements Annotator {
       addAcronyms(annotation, allMentions);
     }
 
-    annotation.set(mentionsAnnotation, allMentions);
+    annotation.set(mentionsCoreAnnotationClass, allMentions);
   }
 
 
-  private static void addAcronyms(Annotation ann, List<CoreMap> mentions) {
+  private void addAcronyms(Annotation ann, List<CoreMap> mentions) {
     // Find all the organizations in a document
     List<List<CoreLabel>> organizations = new ArrayList<>();
     for (CoreMap mention : mentions) {
-      if ("ORGANIZATION".equals(mention.get(CoreAnnotations.NamedEntityTagAnnotation.class))) {
+      if ("ORGANIZATION".equals(mention.get(nerCoreAnnotationClass))) {
         organizations.add(mention.get(CoreAnnotations.TokensAnnotation.class));
       }
     }
@@ -234,16 +259,28 @@ public class EntityMentionsAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-	nerAnnotation
-    )));
+    // TODO (jb) there is an issue here that TokensRegexNERAnnotator isn't set up to
+    // indicate it uses the CoreAnnotation keys specified in the rules file
+    // fixing this would require TokensRegexNERAnnotator to specify the CoreAnnotations
+    // it uses in its requirementsSatisfied()
+    if (!nerCoreAnnotationClass.getCanonicalName().
+        equals(CoreAnnotations.NamedEntityTagAnnotation.class.getCanonicalName())) {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class
+      )));
+    } else {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.NamedEntityTagAnnotation.class
+      )));
+    }
   }
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(mentionsAnnotation);
+    return Collections.singleton(mentionsCoreAnnotationClass);
   }
 
 }
