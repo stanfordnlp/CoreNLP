@@ -882,7 +882,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     // TODO: we might want to allow for different RegexNER annotators
     // to satisfy different requirements
-    return Collections.emptySet();
+    return Collections.unmodifiableSet(new ArraySet(annotationFields));
   }
 
 }

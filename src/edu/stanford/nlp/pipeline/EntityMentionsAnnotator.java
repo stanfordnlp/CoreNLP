@@ -259,23 +259,12 @@ public class EntityMentionsAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    // TODO (jb) there is an issue here that TokensRegexNERAnnotator isn't set up to
-    // indicate it uses the CoreAnnotation keys specified in the rules file
-    // fixing this would require TokensRegexNERAnnotator to specify the CoreAnnotations
-    // it uses in its requirementsSatisfied()
-    if (!nerCoreAnnotationClass.getCanonicalName().
-        equals(CoreAnnotations.NamedEntityTagAnnotation.class.getCanonicalName())) {
-      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-          CoreAnnotations.TokensAnnotation.class,
-          CoreAnnotations.SentencesAnnotation.class
-      )));
-    } else {
       return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
           CoreAnnotations.TokensAnnotation.class,
           CoreAnnotations.SentencesAnnotation.class,
-          CoreAnnotations.NamedEntityTagAnnotation.class
+          nerCoreAnnotationClass,
+          nerNormalizedCoreAnnotationClass
       )));
-    }
   }
 
   @Override
