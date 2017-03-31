@@ -46,18 +46,17 @@ public class EntityMentionsAnnotator implements Annotator {
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
   /** the CoreAnnotation keys to use for this entity mentions annotator **/
-  private Class<? extends CoreAnnotation<String>> nerCoreAnnotationClass;
-  private Class<? extends CoreAnnotation<String>> nerNormalizedCoreAnnotationClass;
-  private Class<? extends CoreAnnotation<List<CoreMap>>> mentionsCoreAnnotationClass;
+  private Class<? extends CoreAnnotation<String>> nerCoreAnnotationClass =
+      CoreAnnotations.NamedEntityTagAnnotation.class;
+  private Class<? extends CoreAnnotation<String>> nerNormalizedCoreAnnotationClass =
+      CoreAnnotations.NormalizedNamedEntityTagAnnotation.class;
+  private Class<? extends CoreAnnotation<List<CoreMap>>> mentionsCoreAnnotationClass =
+      CoreAnnotations.MentionsAnnotation.class;
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(EntityMentionsAnnotator.class);
 
   public EntityMentionsAnnotator() {
-    // set to default CoreAnnotations
-    nerCoreAnnotationClass = CoreAnnotations.NamedEntityTagAnnotation.class;
-    nerNormalizedCoreAnnotationClass = CoreAnnotations.NormalizedNamedEntityTagAnnotation.class;
-    mentionsCoreAnnotationClass = CoreAnnotations.MentionsAnnotation.class;
     // defaults
     chunkIdentifier = new LabeledChunkIdentifier();
     doAcronyms = false;
@@ -66,28 +65,22 @@ public class EntityMentionsAnnotator implements Annotator {
   // note: used in annotate.properties
   @SuppressWarnings({"UnusedDeclaration", "unchecked"})
   public EntityMentionsAnnotator(String name, Properties props) {
-    // if the user has supplied custom CoreAnnotations for the ner tags and entity mentions use them
+    // if the user has supplied custom CoreAnnotations for the ner tags and entity mentions override the default keys
     try {
       if (props.containsKey(name + ".nerCoreAnnotation")) {
         nerCoreAnnotationClass =
             (Class<? extends CoreAnnotation<String>>)
                 Class.forName(props.getProperty(name + ".nerCoreAnnotation"));
-      } else {
-        nerCoreAnnotationClass = CoreAnnotations.NamedEntityTagAnnotation.class;
       }
       if (props.containsKey(name + ".nerNormalizedCoreAnnotation")) {
         nerNormalizedCoreAnnotationClass =
             (Class<? extends CoreAnnotation<String>>)
                 Class.forName(props.getProperty(name + ".nerNormalizedCoreAnnotation"));
-      } else {
-        nerNormalizedCoreAnnotationClass = CoreAnnotations.NormalizedNamedEntityTagAnnotation.class;
       }
       if (props.containsKey(name + ".mentionsCoreAnnotation")) {
         mentionsCoreAnnotationClass =
             (Class<? extends CoreAnnotation<List<CoreMap>>>)
                 Class.forName(props.getProperty(name + ".mentionsCoreAnnotation"));
-      } else {
-        mentionsCoreAnnotationClass = CoreAnnotations.MentionsAnnotation.class;
       }
     } catch (ClassNotFoundException e) {
       log.error(e.getMessage());
