@@ -252,12 +252,21 @@ public class EntityMentionsAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
+    //TODO(jb) for now not fully enforcing pipeline if user customizes keys
+    if (!nerCoreAnnotationClass.getCanonicalName().
+        equals(CoreAnnotations.NamedEntityTagAnnotation.class.getCanonicalName())) {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class
+      )));
+    } else {
       return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
           CoreAnnotations.TokensAnnotation.class,
           CoreAnnotations.SentencesAnnotation.class,
-          nerCoreAnnotationClass,
-          nerNormalizedCoreAnnotationClass
+          CoreAnnotations.NamedEntityTagAnnotation.class,
+          CoreAnnotations.NormalizedNamedEntityTagAnnotation.class
       )));
+    }
   }
 
   @Override
