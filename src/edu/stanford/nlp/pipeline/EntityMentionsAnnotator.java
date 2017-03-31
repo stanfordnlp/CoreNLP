@@ -263,8 +263,7 @@ public class EntityMentionsAnnotator implements Annotator {
       return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
           CoreAnnotations.TokensAnnotation.class,
           CoreAnnotations.SentencesAnnotation.class,
-          CoreAnnotations.NamedEntityTagAnnotation.class,
-          CoreAnnotations.NormalizedNamedEntityTagAnnotation.class
+          CoreAnnotations.NamedEntityTagAnnotation.class
       )));
     }
   }
