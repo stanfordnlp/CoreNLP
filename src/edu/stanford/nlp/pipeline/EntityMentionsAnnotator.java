@@ -45,7 +45,7 @@ public class EntityMentionsAnnotator implements Annotator {
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
-  /** the CoreAnnotation keys to use for this enity mentions annotator **/
+  /** the CoreAnnotation keys to use for this entity mentions annotator **/
   private Class<? extends CoreAnnotation<String>> nerCoreAnnotationClass;
   private Class<? extends CoreAnnotation<String>> nerNormalizedCoreAnnotationClass;
   private Class<? extends CoreAnnotation<List<CoreMap>>> mentionsCoreAnnotationClass;
