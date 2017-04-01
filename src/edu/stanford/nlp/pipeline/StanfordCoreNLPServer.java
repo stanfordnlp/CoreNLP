@@ -1315,7 +1315,7 @@ public class StanfordCoreNLPServer implements Runnable {
     // Start the liveness server
     AtomicBoolean live = new AtomicBoolean(false);
     server.livenessServer(live);
-    
+
     // Create the homepage
     FileHandler homepage;
     try {
