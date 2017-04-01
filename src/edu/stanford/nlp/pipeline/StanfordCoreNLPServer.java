@@ -107,6 +107,8 @@ public class StanfordCoreNLPServer implements Runnable {
   public StanfordCoreNLPServer(Properties props, int port, int timeout, boolean strict) throws IOException {
     this(props);
     this.serverPort = port;
+    if (props != null && !props.containsKey("status_port"))
+      this.statusPort = port;
     this.timeoutMilliseconds = timeout;
     this.strict = strict;
   }
@@ -194,6 +196,11 @@ public class StanfordCoreNLPServer implements Runnable {
     }
     this.shutdownKey = new BigInteger(130, new Random()).toString(32);
     IOUtils.writeStringToFile(shutdownKey, tmpFile.getPath(), "utf-8");
+    // set status port
+    if (props != null && props.containsKey("status_port"))
+      this.statusPort = Integer.parseInt(props.getProperty("status_port"));
+    else if (props != null && props.containsKey("port"))
+      this.statusPort = Integer.parseInt(props.getProperty("port"));
   }
 
   /**
@@ -1297,12 +1304,18 @@ public class StanfordCoreNLPServer implements Runnable {
     Properties serverProperties = StringUtils.argsToProperties(args);
     StanfordCoreNLPServer server = new StanfordCoreNLPServer(serverProperties);  // must come after filling global options
     ArgumentParser.fillOptions(server, args);
+    // align status port and server port in case status port hasn't been set and
+    // server port is not the default 9000
+    if (serverProperties != null && !serverProperties.containsKey("status_port") &&
+        serverProperties.containsKey("port")) {
+      server.statusPort = Integer.parseInt(serverProperties.getProperty("port"));
+    }
     log("    Threads: " + ArgumentParser.threads);
 
     // Start the liveness server
     AtomicBoolean live = new AtomicBoolean(false);
     server.livenessServer(live);
-
+    
     // Create the homepage
     FileHandler homepage;
     try {
