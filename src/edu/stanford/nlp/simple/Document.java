@@ -69,6 +69,7 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.MorphaAnnotator} implementation
    */
   private static final Annotator defaultLemma = AnnotatorFactories.lemma(EMPTY_PROPS, backend).create();
+
   /**
    * The default {@link edu.stanford.nlp.pipeline.NERCombinerAnnotator} implementation
    */
@@ -79,6 +80,21 @@ public class Document {
     public synchronized Annotator get() {
       if (impl == null) {
         impl = AnnotatorFactories.nerTag(EMPTY_PROPS, backend).create();
+      }
+      return impl;
+    }
+  };
+
+  /**
+   * The default {@link edu.stanford.nlp.pipeline.RegexNERAnnotator} implementation
+   */
+  private static Supplier<Annotator> defaultRegexner = new Supplier<Annotator>() {
+    Annotator impl = null;
+
+    @Override
+    public synchronized Annotator get() {
+      if (impl == null) {
+        impl = AnnotatorFactories.regexNER(EMPTY_PROPS, backend).create();
       }
       return impl;
     }
@@ -208,7 +224,7 @@ public class Document {
   private List<Sentence> sentences = null;
 
   /** A serializer to assist in serializing and deserializing from Protocol buffers */
-  protected final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+  protected final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(false );
 
   /**
    * THIS IS NONSTANDARD.
@@ -235,7 +251,7 @@ public class Document {
    */
   @SuppressWarnings("Convert2streamapi")
   public Document(Annotation ann) {
-    this.impl = new ProtobufAnnotationSerializer().toProto(ann).toBuilder();
+    this.impl = new ProtobufAnnotationSerializer(false).toProtoBuilder(ann);
     List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
     this.sentences = new ArrayList<>(sentences.size());
     for (CoreMap sentence : sentences) {
@@ -450,8 +466,7 @@ public class Document {
 
   protected Document runPOS(Properties props) {
     // Cached result
-    if (impl.getSentenceCount() > 0 && impl.getSentence(0).getTokenCount() > 0 &&
-        impl.getSentence(0).getToken(0).hasPos()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPos()) {
       return this;
     }
     // Prerequisites
@@ -469,8 +484,7 @@ public class Document {
 
   protected Document runLemma(Properties props) {
     // Cached result
-    if (impl.getSentenceCount() > 0 && impl.getSentence(0).getTokenCount() > 0 &&
-        impl.getSentence(0).getToken(0).hasLemma()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasLemma()) {
       return this;
     }
     // Prerequisites
@@ -487,8 +501,7 @@ public class Document {
   }
 
   protected Document runNER(Properties props) {
-    if (impl.getSentenceCount() > 0 && impl.getSentence(0).getTokenCount() > 0 &&
-        impl.getSentence(0).getToken(0).hasNer()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasNer()) {
       return this;
     }
     // Run prerequisites
@@ -504,8 +517,22 @@ public class Document {
     return this;
   }
 
+  protected Document runRegexner(Properties props) {
+    // Run prerequisites
+    runNER(props);
+    // Run annotator
+    Annotator ner = props == EMPTY_PROPS ? defaultRegexner.get() : getOrCreate(AnnotatorFactories.regexNER(props, backend));
+    Annotation ann = asAnnotation();
+    ner.annotate(ann);
+    // Update data
+    for (int i = 0; i < sentences.size(); ++i) {
+      sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setNer(pair.second), CoreLabel::ner);
+    }
+    return this;
+  }
+
   protected Document runParse(Properties props) {
-    if (impl.getSentenceCount() > 0  && impl.getSentence(0).hasParseTree()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasParseTree()) {
       return this;
     }
     // Run annotator
@@ -533,7 +560,8 @@ public class Document {
   }
 
   protected Document runDepparse(Properties props) {
-    if (impl.getSentenceCount() > 0  && impl.getSentence(0).hasBasicDependencies()) {
+    if (this.sentences != null && this.sentences.size() > 0 &&
+        this.sentences.get(0).rawSentence().hasBasicDependencies()) {
       return this;
     }
     // Run prerequisites
@@ -556,8 +584,7 @@ public class Document {
   }
 
   protected Document runNatlog(Properties props) {
-    if (impl.getSentenceCount() > 0 && impl.getSentence(0).getTokenCount() > 0 &&
-        impl.getSentence(0).getToken(0).hasPolarity()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPolarity()) {
       return this;
     }
     // Run prerequisites

@@ -108,6 +108,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   public int goldCorefClusterID = -1;
   public int corefClusterID = -1;
+  public int mentionNum;
   public int sentNum = -1;
   public int utter = -1;
   public int paragraph = -1;
@@ -128,7 +129,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   public CoreLabel headWord;
   public SemanticGraph basicDependency;
   public SemanticGraph collapsedDependency;
-  
+
   public Set<String> dependents = Generics.newHashSet();
   public List<String> preprocessedTerms;
   public Object synsets;
@@ -148,7 +149,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   transient private String spanString = null;
   transient private String lowercaseNormalizedSpanString = null;
-  
+
   public IntCounter<Integer> antecedentOrdering = new IntCounter<Integer>();
 
   @Override
@@ -266,13 +267,18 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     features.add(String.valueOf(personNum));
     features.add(number.toString());
     features.add(getPosition());
-    features.add(getRelation());
-    features.add(getQuantification(dict));
-    features.add(String.valueOf(getModifiers(dict)));
-    features.add(String.valueOf(getNegation(dict)));
-    features.add(String.valueOf(getModal(dict)));
-    features.add(String.valueOf(getReportEmbedding(dict)));
-    features.add(String.valueOf(getCoordination()));
+
+    // TODO(kevin): make these compatible with universal dependencies
+    try {
+      features.add(getRelation());
+      features.add(getQuantification(dict));
+      features.add(String.valueOf(getModifiers(dict)));
+      features.add(String.valueOf(getNegation(dict)));
+      features.add(String.valueOf(getModal(dict)));
+      features.add(String.valueOf(getReportEmbedding(dict)));
+      features.add(String.valueOf(getCoordination()));
+    } catch(IllegalArgumentException e) {}
+
     return features;
   }
 
@@ -596,7 +602,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 //      // replace this with LIST mention type
 //      if(Constants.USE_CONSTITUENT) {
 //        final String enumerationPattern = "NP < (NP=tmp $.. (/,|CC/ $.. NP))";
-//        
+//
 //        TregexPattern tgrepPattern = TregexPattern.compile(enumerationPattern);
 //        TregexMatcher m = tgrepPattern.matcher(this.mentionSubTree);
 //        while (m.find()) {
@@ -1405,7 +1411,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
     return count;
   }
-  
+
   public String getQuantification(Dictionaries dict){
 
     if(headIndexedWord == null) return null;

@@ -108,7 +108,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       LogisticClassifier logcl = ((LogisticClassifier) classifier);
 
       String l = (String) logcl.getLabelForInternalPositiveClass();
-      Counter<String> weights = logcl.weightsAsGenericCounter();
+      Counter<String> weights = logcl.weightsAsCounter();
       if (l.equals(Boolean.FALSE.toString())) {
         Counters.multiplyInPlace(weights, -1);
       }
@@ -1232,7 +1232,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return scoreslist;
   }
 */
-  
+
   public double scoreUsingClassifer(edu.stanford.nlp.classify.Classifier classifier, CandidatePhrase word, String label, boolean forLearningPatterns,
       Counter<E> patternsThatExtractedPat, Counter<E> allSelectedPatterns) {
 

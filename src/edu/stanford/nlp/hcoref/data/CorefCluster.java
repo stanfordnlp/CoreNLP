@@ -161,9 +161,9 @@ public class CorefCluster implements Serializable{
       to.firstMention = from.firstMention;
     }
     if(from.representative.moreRepresentativeThan(to.representative)) to.representative = from.representative;
-    Redwood.log("debug-cluster", "merged clusters: "+toID+" += "+from.clusterID);
-    to.printCorefCluster();
-    from.printCorefCluster();
+    //Redwood.log("debug-cluster", "merged clusters: "+toID+" += "+from.clusterID);
+    //to.printCorefCluster();
+    //from.printCorefCluster();
   }
 
   /** Print cluster information */
@@ -195,7 +195,8 @@ public class CorefCluster implements Serializable{
     }
     return false;
   }
-  
+
+  @Override
   public String toString(){
     return corefMentions.toString()+"="+clusterID;
   }

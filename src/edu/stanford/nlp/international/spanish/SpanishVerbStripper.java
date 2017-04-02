@@ -4,7 +4,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Pair;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -35,9 +34,9 @@ public final class SpanishVerbStripper implements Serializable {
   //   - Affirmative imperatives
 
   /* HashMap of singleton instances */
-  private static final Map<String, SpanishVerbStripper> instances = new HashMap<String, SpanishVerbStripper>();
+  private static final Map<String, SpanishVerbStripper> instances = new HashMap<>();
 
-  private HashMap<String, String> dict;
+  private final HashMap<String, String> dict;
 
   private static final String DEFAULT_DICT =
     "edu/stanford/nlp/international/spanish/enclitic-inflections.data";
@@ -69,31 +68,32 @@ public final class SpanishVerbStripper implements Serializable {
 
   /**
    * Sets up dictionary of valid verbs and their POS info from an input file.
-   * The input file must be a list of tab-separated verb-POS pairs, one verb
-   * per line.
+   * The input file must be a list of whitespace-separated verb-lemma-POS triples, one verb
+   * form per line.
    *
    * @param dictPath the path to the dictionary file
    */
-  private void setupDictionary(String dictPath) {
+  private HashMap<String, String> setupDictionary(String dictPath) {
+    HashMap<String, String> dictionary = new HashMap<>();
+    BufferedReader br = null;
     try {
-      dict = new HashMap<String, String>();
-      BufferedReader br = IOUtils.readerFromString(dictPath);
-      for(String line; (line = br.readLine()) != null; ) {
+      br = IOUtils.readerFromString(dictPath);
+      for (String line; (line = br.readLine()) != null; ) {
         String[] words = line.trim().split("\\s");
-        if(words.length < 3) {
-          System.err.printf("SpanishVerbStripper: addings words to dict, missing word, ignoring line%n");
+        if (words.length < 3) {
+          System.err.printf("SpanishVerbStripper: adding words to dict, missing fields, ignoring line: %s%n", line);
         } else {
           dict.put(words[0], words[2]);
         }
       }
-      IOUtils.closeIgnoringExceptions(br);
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
-    } catch (FileNotFoundException e) {
-      System.err.println("Could not load Spanish data file " + dictPath);
     } catch (IOException e) {
       System.err.println("Could not load Spanish data file " + dictPath);
+    } finally {
+      IOUtils.closeIgnoringExceptions(br);
     }
+    return dictionary;
   }
 
   @SuppressWarnings("unchecked")
@@ -112,11 +112,11 @@ public final class SpanishVerbStripper implements Serializable {
   }
 
   private SpanishVerbStripper(String dictPath) {
-    setupDictionary(dictPath);
+    dict = setupDictionary(dictPath);
   }
 
   /**
-   * Singleton pattern function for getting a default verb stripper
+   * Singleton pattern function for getting a default verb stripper.
    */
   public static SpanishVerbStripper getInstance() {
     return getInstance(DEFAULT_DICT);
@@ -259,7 +259,7 @@ public final class SpanishVerbStripper implements Serializable {
       for (int i = 0; i < m.groupCount(); i++)
         attached.add(m.group(i + 1));
 
-      return new Pair<String, List<String>>(stripped, attached);
+      return new Pair<>(stripped, attached);
     }
 
     return null;
@@ -295,12 +295,13 @@ public final class SpanishVerbStripper implements Serializable {
    * {@link #isStrippable(String)} to determine if a word is a
    * strippable verb.)
    *
-   * Converts e.g.
-   *
-   *   - decírmelo -&gt; decir
-   *   - mudarse -&gt; mudar
-   *   - contándolos -&gt; contando
-   *   - hazlo -&gt; haz
+   * Converts, e.g.,
+   * <ul>
+   *   <li> decírmelo -&gt; decir
+   *   <li> mudarse -&gt; mudar
+   *   <li> contándolos -&gt; contando
+   *   <li> hazlo -&gt; haz
+   * </ul>
    *
    * @return A verb form stripped of attached pronouns, or <tt>null</tt>
    *           if no pronouns were located / stripped.
