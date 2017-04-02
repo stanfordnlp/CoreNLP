@@ -29,11 +29,11 @@
 package edu.stanford.nlp.classify;
 
 import java.io.BufferedReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.*;
@@ -450,7 +450,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   /**
    * NOTE: nothing is actually done with this value!
    *
-   * SetUseSum sets the {@code useSum} flag: when turned on,
+   * SetUseSum sets the <code>useSum</code> flag: when turned on,
    * the Summed Conditional Objective Function is used.  Otherwise, the
    * LogConditionalObjectiveFunction is used.  The default is false.
    */
@@ -596,9 +596,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    */
   private List<F> getHighPrecisionFeatures(GeneralDataset<L,F> dataset, double minPrecision, int maxNumFeatures){
     int[][] feature2label = new int[dataset.numFeatures()][dataset.numClasses()];
-    // shouldn't be necessary as Java zero fills arrays
-    // for(int f = 0; f < dataset.numFeatures(); f++)
-    //   Arrays.fill(feature2label[f],0);
+    for(int f = 0; f < dataset.numFeatures(); f++)
+      Arrays.fill(feature2label[f],0);
 
     int[][] data = dataset.data;
     int[] labels = dataset.labels;
@@ -665,7 +664,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   /**
-   * setTuneSigmaHeldOut sets the {@code tuneSigmaHeldOut} flag: when turned on,
+   * setTuneSigmaHeldOut sets the <code>tuneSigmaHeldOut</code> flag: when turned on,
    * the sigma is tuned by means of held-out (70%-30%). Otherwise no tuning on sigma is done.
    * The default is false.
    */
@@ -675,7 +674,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   /**
-   * setTuneSigmaCV sets the {@code tuneSigmaCV} flag: when turned on,
+   * setTuneSigmaCV sets the <code>tuneSigmaCV</code> flag: when turned on,
    * the sigma is tuned by cross-validation. The number of folds is the parameter.
    * If there is less data than the number of folds, leave-one-out is used.
    * The default is false.
@@ -689,7 +688,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   /**
    * NOTE: Nothing is actually done with this value.
    *
-   * resetWeight sets the {@code restWeight} flag. This flag makes sense only if sigma is tuned:
+   * resetWeight sets the <code>restWeight</code> flag. This flag makes sense only if sigma is tuned:
    * when turned on, the weights output by the tuneSigma method will be reset to zero when training the
    * classifier.
    * The default is false.
@@ -727,8 +726,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     crossValidateSetSigma(dataset, kfold, new MultiClassAccuracyStats<>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), minimizer);
   }
   /**
-   * Sets the sigma parameter to a value that optimizes the cross-validation score given by {@code scorer}.  Search for an optimal value
-   * is carried out by {@code minimizer}.
+   * Sets the sigma parameter to a value that optimizes the cross-validation score given by <code>scorer</code>.  Search for an optimal value
+   * is carried out by <code>minimizer</code>.
    *
    * @param dataset the data set to optimize sigma on.
    */
@@ -781,8 +780,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     this.heldOutSearcher = heldOutSearcher;
   }
 
-  private LineSearcher heldOutSearcher; // = null;
-
+  private LineSearcher heldOutSearcher = null;
   public double[] heldOutSetSigma(GeneralDataset<L, F> train) {
     Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> data = train.split(0.3);
     return heldOutSetSigma(data.first(), data.second());
@@ -829,7 +827,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   class NegativeScorer implements Function<Double, Double> {
-    public double[] weights; // = null;
+    public double[] weights = null;
     GeneralDataset<L, F> trainSet;
     GeneralDataset<L, F> devSet;
     Scorer<L> scorer;
@@ -843,7 +841,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       this.timer = timer;
     }
 
-    @Override
     public Double apply(Double sigmaToTry) {
       double[][] weights2D;
       setSigma(sigmaToTry);
@@ -984,7 +981,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       LinearClassifier<String, String> classifier = new LinearClassifier<>(weights, featureIndex, labelIndex);
       return classifier;
     } catch (Exception e) {
-      throw new RuntimeIOException("Error in LinearClassifierFactory, loading from file=" + file, e);
+      logger.info("Error in LinearClassifierFactory, loading from file=" + file);
+      e.printStackTrace();
+      return null;
     }
   }
 

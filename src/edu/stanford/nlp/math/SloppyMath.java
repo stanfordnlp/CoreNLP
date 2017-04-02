@@ -1,4 +1,5 @@
-package edu.stanford.nlp.math;
+package edu.stanford.nlp.math; 
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.logging.Redwood;
 
