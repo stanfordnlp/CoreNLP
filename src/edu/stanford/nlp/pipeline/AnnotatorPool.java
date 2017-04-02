@@ -38,7 +38,7 @@ public class AnnotatorPool  {
 
   /** A timer for cleaning up old annotators */
   @SuppressWarnings("unused")  // Unused, but still runs
-  private static final Timer gc = new Timer() {{
+  private static final Timer gc = new Timer(true) {{
     scheduleAtFixedRate(new TimerTask() {
       @Override
       public void run() {

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import edu.stanford.nlp.coref.CorefDocumentProcessor;
 import edu.stanford.nlp.coref.data.CorefCluster;
 import edu.stanford.nlp.coref.data.Document;
 import edu.stanford.nlp.coref.data.Mention;
@@ -18,11 +17,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
 
-/**
- * Writes various pieces of information about coreference documents to disk.
- * @author Kevin Clark
- */
-public class MetadataWriter implements CorefDocumentProcessor {
+public class MetadataWriter implements DocumentProcessor {
   private final Map<Integer, Map<Integer, String>> mentionTypes;
   private final Map<Integer, List<List<Integer>>> goldClusters;
   private final Counter<String> wordCounts;
@@ -43,7 +38,28 @@ public class MetadataWriter implements CorefDocumentProcessor {
 
   @Override
   public void process(int id, Document document) {
-    // Mention types
+    Map<Pair<Integer, Integer>, Boolean> labeledPairs =
+        StatisticalCorefUtils.getUnlabeledMentionPairs(document);
+    for (CorefCluster c : document.goldCorefClusters.values()) {
+      List<Mention> clusterMentions = new ArrayList<>(c.getCorefMentions());
+      for (int i = 0; i < clusterMentions.size(); i++) {
+        for (Mention clusterMention : clusterMentions) {
+          Pair<Integer, Integer> mentionPair = new Pair<>(
+                  clusterMentions.get(i).mentionID, clusterMention.mentionID);
+          if (labeledPairs.containsKey(mentionPair)) {
+            labeledPairs.put(mentionPair, true);
+          }
+        }
+      }
+    }
+    Map<Pair<Integer, Integer>, Boolean> savedPairs = mentionPairs.get(id);
+    for (Map.Entry<Pair<Integer, Integer>, Boolean> e: savedPairs.entrySet()) {
+      Pair<Integer, Integer> pair = e.getKey();
+      boolean label = e.getValue();
+      assert(pair.first >= 0 && pair.second >= 0);
+      assert(label == labeledPairs.get(pair));
+    }
+
     mentionTypes.put(id, document.predictedMentionsByID.entrySet().stream().collect(
         Collectors.toMap(Map.Entry::getKey, e -> e.getValue().mentionType.toString())));
 

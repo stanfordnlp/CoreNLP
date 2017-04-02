@@ -1040,7 +1040,7 @@ public class SeqClassifierFlags implements Serializable  {
   /** How many words it is okay to add to knownLCWords after initial training.
    *  If this number is negative, then add any number of further words during classifying/testing.
    *  If this number is non-negative (greater than or equal to 0), then add at most this many words
-   *  to the knownLCWords. By default, this is now set to 0, so their is no transductive learning on the
+   *  to the knownLCWords. By default, this is now set to 0, so there is no transductive learning on the
    *  test set, since too many people complained about results changing over runs. However, traditionally
    *  we used a non-zero value, and this usually helps performance a bit (until 2014 it was -1, then it
    *  was set to 10_000, so that memory would not grow without bound if a SequenceClassifier is run for

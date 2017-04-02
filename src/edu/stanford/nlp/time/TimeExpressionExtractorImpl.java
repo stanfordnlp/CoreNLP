@@ -5,6 +5,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.SimpleDateFormat;
@@ -46,7 +47,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
   @Override
   public void init(Options options) {
     this.options = options;
-    NumberNormalizer.setVerbose(options.verbose);
+    // NumberNormalizer.setVerbose(options.verbose); // cdm 2016: Try omitting this: Don't we want to see errors?
     CoreMapExpressionExtractor.setVerbose(options.verbose);
     if (options.grammarFilename == null) {
       options.grammarFilename = Options.DEFAULT_GRAMMAR_FILES;
@@ -80,7 +81,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     } else {
       timeIndex = new SUTime.TimeIndex();
     }
-    if ("".equals(docDate)) {
+    if (StringUtils.isNullOrEmpty(docDate)) {
       docDate = null;
     }
     if (timeIndex.docDate == null && docDate != null) {
@@ -139,8 +140,8 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
           }
         } catch (Exception e) {
           if (options.verbose) {
-            e.printStackTrace();
             logger.warn("Failed to get attributes from " + text + ", timeIndex " + timeIndex);
+            logger.warn(e);
           }
           continue;
         }
@@ -149,8 +150,8 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
           timex = Timex.fromMap(text, timexAttributes);
         } catch (Exception e) {
           if (options.verbose) {
-            e.printStackTrace();
             logger.warn("Failed to process timex " + text + " with attributes " + timexAttributes);
+            logger.warn(e);
           }
           continue;
         }
@@ -276,8 +277,8 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
         }
       } catch (Exception ex) {
         if (options.verbose) {
-          ex.printStackTrace();
           logger.warn("Error resolving " + temporal, ex);
+          logger.warn(ex);
         }
       }
     }

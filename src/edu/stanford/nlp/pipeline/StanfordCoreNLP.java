@@ -51,7 +51,6 @@ import java.util.regex.Pattern;
 
 
 
-
 /**
  * This is a pipeline that takes in a string and returns various analyzed
  * linguistic forms.
@@ -390,13 +389,13 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
   /**
    * Check if we can construct an XML outputter.
+   *
+   * @return Whether we can construct an XML outputter.
    */
   private static boolean isXMLOutputPresent() {
     try {
       Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
-    } catch (ClassNotFoundException ex) {
-      return false;
-    } catch (NoClassDefFoundError ex) {
+    } catch (ClassNotFoundException | NoClassDefFoundError ex) {
       return false;
     }
     return true;
@@ -842,7 +841,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     os.println("\t             output is generated for every input file as file.outputExtension");
     os.println("\t\"outputDirectory\" - where to put output (defaults to the current directory)");
     os.println("\t\"outputExtension\" - extension to use for the output file (defaults to \".xml\" for XML, \".ser.gz\" for serialized).  Don't forget the dot!");
-    os.println("\t\"outputFormat\" - \"xml\" (default), \"text\", \"json\", \"conll\", \"conllu\", or \"serialized\"");
+    os.println("\t\"outputFormat\" - \"xml\" (usual default), \"text\" (default for REPL or if no XML), \"json\", \"conll\", \"conllu\", or \"serialized\"");
     os.println("\t\"serializer\" - Class of annotation serializer to use when outputFormat is \"serialized\".  By default, uses Java serialization.");
     os.println("\t\"replaceExtension\" - flag to chop off the last extension before adding outputExtension to file");
     os.println("\t\"noClobber\" - don't automatically override (clobber) output files that already exist");
@@ -944,7 +943,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    */
   public void processFiles(String base, final Collection<File> files, int numThreads) throws IOException {
     AnnotationOutputter.Options options = AnnotationOutputter.getOptions(this);
-    StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", "text").toUpperCase());
+    StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
     processFiles(base, files, numThreads, properties, this::annotate, createOutputter(properties, options), outputFormat);
   }
 
@@ -1060,16 +1059,14 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     final boolean continueOnAnnotateError = Boolean.parseBoolean(properties.getProperty("continueOnAnnotateError", "false"));
 
     final boolean noClobber = Boolean.parseBoolean(properties.getProperty("noClobber", "false"));
-    final boolean randomize = Boolean.parseBoolean(properties.getProperty("randomize", "false"));
+    // final boolean randomize = Boolean.parseBoolean(properties.getProperty("randomize", "false"));
 
     final MutableInteger totalProcessed = new MutableInteger(0);
     final MutableInteger totalSkipped = new MutableInteger(0);
     final MutableInteger totalErrorAnnotating = new MutableInteger(0);
-    int nFiles = 0;
 
     //for each file...
     for (final File file : files) {
-      nFiles++;
       // Determine if there is anything to be done....
       if (excludeFiles.contains(file.getName())) {
         logger.err("Skipping excluded file " + file.getName());
@@ -1312,8 +1309,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     //
     // process the arguments
     //
-    // extract all the properties from the command line
-    // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
+    // Extract all the properties from the command line.
+    // As well as command-line properties, the processor will search for the properties file in the classpath
     Properties props = new Properties();
     if (args.length > 0) {
       props = StringUtils.argsToProperties(args);

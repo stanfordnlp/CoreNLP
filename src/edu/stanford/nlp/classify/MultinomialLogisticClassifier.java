@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,16 +21,21 @@ import edu.stanford.nlp.util.Index;
 
 /**
  * A multinomial logistic regression classifier. Please see FlippingProbsLogisticClassifierFactory
- * or ShiftParamsLogisticClassifierFactory for an example use cases.
- * 
+ * or ShiftParamsLogisticClassifierFactory for example use cases.
+ *
+ * This is classic multinomial logistic regression where you have one reference class (the last one) and
+ * (numClasses - 1) times numFeatures weights, unlike the maxent/softmax regression we more normally use.
+ *
  * @author jtibs
  */
 public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassifier<L, F>, RVFClassifier<L, F> {
+
   private static final long serialVersionUID = 1L;
-  private double[][] weights;
-  private Index<F> featureIndex;
-  private Index<L> labelIndex;
-  
+
+  private final double[][] weights;
+  private final Index<F> featureIndex;
+  private final Index<L> labelIndex;
+
   /**
    * @param weights A (numClasses - 1) by numFeatures matrix that holds the weight array for each
    * class. Note that only (numClasses - 1) rows are needed, as the probability for last class is
@@ -42,12 +46,12 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
     this.labelIndex = labelIndex;
     this.weights = weights;
   }
-  
+
   @Override
   public Collection<L> labels() {
     return labelIndex.objectsList();
   }
-  
+
   @Override
   public L classOf(Datum<L, F> example) {
     return Counters.argmax(scoresOf(example));
@@ -72,7 +76,7 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
   public Counter<L> probabilityOf(Datum<L, F> example) {
     // calculate the feature indices and feature values
     int[] featureIndices = LogisticUtils.indicesOf(example.asFeatures(), featureIndex);
-   
+
     double[] featureValues;
     if (example instanceof RVFDatum<?, ?>) {
       Collection<Double> featureValuesCollection =
@@ -82,7 +86,7 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
       featureValues = new double[example.asFeatures().size()];
       Arrays.fill(featureValues, 1.0);
     }
-     
+
     // calculate probability of each class
     Counter<L> result = new ClassicCounter<>();
     int numClasses = labelIndex.size();
@@ -92,7 +96,7 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
       L label = labelIndex.get(c);
       result.incrementCount(label, sigmoids[c]);
     }
-    
+
     return result;
   }
 
@@ -102,22 +106,23 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
     Counters.logInPlace(result);
     return result;
   }
-  
-  private void load(String path) throws IOException, ClassNotFoundException {
-    System.out.print("Loading classifier from " + path + "... ");
-    
+
+  private static <LL,FF> MultinomialLogisticClassifier<LL,FF> load(String path)
+          throws IOException, ClassNotFoundException {
+    System.err.print("Loading classifier from " + path + "... ");
+
     ObjectInputStream in = new ObjectInputStream(new FileInputStream(path));
-    weights = ErasureUtils.uncheckedCast(in.readObject());
-    featureIndex = ErasureUtils.uncheckedCast(in.readObject());
-    labelIndex = ErasureUtils.uncheckedCast(in.readObject());
+    double[][] myWeights = ErasureUtils.uncheckedCast(in.readObject());
+    Index<FF> myFeatureIndex = ErasureUtils.uncheckedCast(in.readObject());
+    Index<LL> myLabelIndex = ErasureUtils.uncheckedCast(in.readObject());
     in.close();
-    
-    System.out.println("done.");
+    System.err.println("done.");
+    return new MultinomialLogisticClassifier<>(myWeights, myFeatureIndex, myLabelIndex);
   }
-  
+
   private void save(String path) throws IOException {
     System.out.print("Saving classifier to " + path + "... ");
-    
+
     // make sure the directory specified by path exists
     int lastSlash = path.lastIndexOf(File.separator);
     if (lastSlash > 0) {
@@ -125,13 +130,13 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
       if (! dir.exists())
         dir.mkdirs();
     }
-    
+
     ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path));
     out.writeObject(weights);
     out.writeObject(featureIndex);
     out.writeObject(labelIndex);
     out.close();
-    
+
     System.out.println("done.");
   }
 
@@ -152,4 +157,5 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
     }
     return allweights;
   }
+
 }

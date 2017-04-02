@@ -8,13 +8,13 @@ public class DecisionTreeNode implements Serializable {
   int idx;   // if not leaf, feature index. if leaf, idx=1 -> true, idx=0 -> false.
   float split;  // if not leaf, split point. if leaf, true probability.
   DecisionTreeNode[] children;    // go left if value is less than split
-
+  
   DecisionTreeNode() {
     idx = -1;
     split = Float.NaN;
     children = null;
   }
-
+  
   public DecisionTreeNode(int label, float prob) {
     this();
     idx = label;

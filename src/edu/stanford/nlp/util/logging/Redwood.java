@@ -1303,9 +1303,6 @@ public class Redwood  {
 
 
 
-
-
-
   /**
    * Various informal tests of Redwood functionality
    * @param args Unused
