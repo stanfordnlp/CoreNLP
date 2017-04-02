@@ -1,0 +1,9 @@
+file=/Users/golux/IdeaProjects/javanlp-unicorn/data/chekhov_steppe.xml
+BammanFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/steppe.tokens
+devChapters=6
+testChapters=4,5
+animacyFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/animate.unigrams.txt
+genderFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/genderFileFiltered.txt
+familyFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/familyWords.txt
+collapseQuotes=false
+runAll=true

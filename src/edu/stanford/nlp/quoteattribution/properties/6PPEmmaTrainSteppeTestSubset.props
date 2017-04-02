@@ -1,0 +1,15 @@
+multifile=true
+trainFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/pp.xml,/Users/golux/IdeaProjects/javanlp-unicorn/data/austen_emma.xml,/Users/golux/IdeaProjects/javanlp-unicorn/data/chekhov_steppe.xml
+trainBammanFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/pp_all.tokens,/Users/golux/IdeaProjects/javanlp-unicorn/data/emma.tokens,/Users/golux/IdeaProjects/javanlp-unicorn/data/steppe.tokens
+trainChapters=1-18,34-61;all;1-3,7-8
+test.file=/Users/golux/IdeaProjects/javanlp-unicorn/data/chekhov_steppe.xml
+test.BammanFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/steppe.tokens
+test.chapters=4,5
+#QMSieves=det,sup,conv,loose
+#MSSieves=det,loose
+animacyFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/animate.unigrams.txt
+genderFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/genderFileFiltered.txt
+familyFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/familyWords.txt
+collapseQuotes=false
+runAll=true
+

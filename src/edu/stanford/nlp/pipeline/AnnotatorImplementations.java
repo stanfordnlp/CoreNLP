@@ -180,7 +180,7 @@ public class AnnotatorImplementations  {
 
   public Annotator custom(Properties properties, String property) {
     String customName = property.substring(StanfordCoreNLP
-            .CUSTOM_ANNOTATOR_PREFIX.length());
+        .CUSTOM_ANNOTATOR_PREFIX.length());
     String customClassName = properties.getProperty(property);
 
     try {
@@ -298,6 +298,15 @@ public class AnnotatorImplementations  {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_QUOTE + '.');
     return new QuoteAnnotator(relevantProperties);
+  }
+
+  /**
+   * Attribute quotes to speakers
+   */
+  public Annotator quoteattribution(Properties properties) {
+    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+        Annotator.STANFORD_QUOTE_ATTRIBUTION + '.');
+    return new QuoteAttributionAnnotator(relevantProperties);
   }
 
   /**

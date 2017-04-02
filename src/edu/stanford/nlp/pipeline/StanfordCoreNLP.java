@@ -512,6 +512,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     pool.put(STANFORD_NATLOG, AnnotatorFactories::natlog);
     pool.put(STANFORD_OPENIE, AnnotatorFactories::openie);
     pool.put(STANFORD_QUOTE, AnnotatorFactories::quote);
+    pool.put(STANFORD_QUOTE_ATTRIBUTION, AnnotatorFactories::quoteattribution);
     pool.put(STANFORD_UD_FEATURES, AnnotatorFactories::udfeats);
     pool.put(STANFORD_LINK, AnnotatorFactories::link);
     pool.put(STANFORD_KBP, AnnotatorFactories::kbp);

@@ -1,0 +1,11 @@
+file=/Users/golux/IdeaProjects/javanlp-unicorn/data/pp.xml
+BammanFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/pp_all.tokens
+devChapters=27-33
+testChapters=19-26
+animacyFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/animate.unigrams.txt
+genderFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/genderFileFiltered.txt
+familyFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/familyWords.txt
+collapseQuotes=false
+QMSieves=sup,det,conv,loose
+MSSieves=det,loose,top
+#19-26 are test, 27-33 are dev

@@ -522,6 +522,20 @@ public class AnnotatorFactories  {
     };
   }
 
+  //
+  // Quote Attributer
+  //
+  public static AnnotatorFactory quoteattribution(Properties properties, final AnnotatorImplementations annotatorImpl) {
+    return new AnnotatorFactory(Annotator.STANFORD_QUOTE_ATTRIBUTION, QuoteAttributionAnnotator.class, properties) {
+      private static final long serialVersionUID = -2525567112379296672L;
+
+      @Override
+      public Annotator create() {
+        return annotatorImpl.quoteattribution(properties);
+      }
+    };
+  }
+
 
   //
   // UD Features Extractor

@@ -1,0 +1,12 @@
+multifile=true
+trainFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/pp.xml
+trainBammanFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/pp_all.tokens
+trainChapters=1-18,34-61
+test.file=/Users/golux/IdeaProjects/javanlp-unicorn/data/austen_emma.xml
+test.BammanFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/emma.tokens
+animacyFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/animate.unigrams.txt
+genderFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/genderFileFiltered.txt
+familyFile=/Users/golux/IdeaProjects/javanlp-unicorn/data/familyWords.txt
+collapseQuotes=false
+QMSieves=det,sup,conv,loose
+MSSieves=det,loose,top
