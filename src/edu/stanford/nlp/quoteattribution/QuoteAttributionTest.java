@@ -15,6 +15,8 @@ import java.util.*;
  */
 public class QuoteAttributionTest {
 
+  // TODO: make this into a unit test
+
   public static final String test = " THE next day opened a new scene at Longbourn. Mr. Collins made his declaration in form. Having resolved to do it without loss of time, as his leave of absence extended only to the following Saturday, and having no feelings of diffidence to make it distressing to himself even at the moment, he set about it in a very orderly manner, with all the observances which he supposed a regular part of the business.\n" +
           " On finding Mrs. Bennet, Elizabeth, and one of the younger girls together soon after breakfast, he addressed the mother in these words, \"May I hope, Madam, for your interest with your fair daughter Elizabeth, when I solicit for the honour of a private audience with her in the course of this morning?\"\n" +
           " Before Elizabeth had time for any thing but a blush of surprise, Mrs. Bennet instantly answered, \"Oh dear! -- Yes -- certainly. -- I am sure Lizzy will be very happy -- I am sure she can have no objection. -- Come, Kitty, I want you up stairs.\"\n" +

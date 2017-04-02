@@ -160,30 +160,27 @@ public class QuoteAttributionEvaluation {
             (int)sCorrect, (int)sIncorrect, (int)sSkipped, sPrecision, sRecall, sF1, sAccuracy);
   }
 
-  public static void testXML(String[] args) throws Exception {
-
-    String home = null;
+  /**
+   * Usage: java QuoteAttributionEvaluation path_to_properties_file
+   * @param args
+   * @throws Exception
+   */
+  public static void main(String[] args) throws Exception {
     // make the first argument one for a base directory
-    String specificFile = "pp_test.props";
-    if (args.length >= 1) {
-      home = args[0];
+    if (args.length != 1) {
+      System.out.println("Usage: java QuoteAttributionEvaluation path_to_properties_file");
+      System.exit(1);
     }
-    if (args.length >= 2) {
-      specificFile = args[1];
-    }
-    System.out.println("Base directory: " + home);
-    Properties props = StringUtils.propFileToProperties(home + specificFile);
+    String specificFile = args[0];
+
+    System.out.println("Using properties file: " + specificFile);
+    Properties props = StringUtils.propFileToProperties(specificFile);
 
     //convert XML file to (1) the Annotation (data.doc) (2) a list of people in the text (data.personList)
     // and (3) the gold info to be used by evaluate (data.goldList).
     XMLToAnnotation.Data data = XMLToAnnotation.readXMLFormat(props.getProperty("file"));
-    //ParagraphIndexAnnotation is required.
-//    Properties propsPara = new Properties();
-//    propsPara.setProperty("paragraphBreak", "one");
-//    ParagraphAnnotator pa = new ParagraphAnnotator(propsPara, false);
-//    pa.annotate(data.doc);
     Properties annotatorProps = new Properties();
-    XMLToAnnotation.writeCharacterList("characterListPP.txt", data.personList); //Use this to write the person list to a file
+//    XMLToAnnotation.writeCharacterList("characterListPP.txt", data.personList); //Use this to write the person list to a file
     annotatorProps.setProperty("charactersPath", props.getProperty("charactersPath"));
     annotatorProps.setProperty("booknlpCoref", props.getProperty("booknlpCoref"));
     annotatorProps.setProperty("familyWordsFile", props.getProperty("familyWordsFile"));
@@ -193,9 +190,5 @@ public class QuoteAttributionEvaluation {
     QuoteAttributionAnnotator qaa = new QuoteAttributionAnnotator(annotatorProps);
     qaa.annotate(data.doc);
     evaluate(data.doc, data.goldList);
-  }
-
-  public static void main(String[] args) throws Exception {
-    testXML(args);
   }
 }
