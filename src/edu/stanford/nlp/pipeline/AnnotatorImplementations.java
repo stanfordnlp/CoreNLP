@@ -217,7 +217,14 @@ public class AnnotatorImplementations  {
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
             true);
-    return new MentionAnnotator(corefProperties);
+    Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
+            Annotator.STANFORD_MENTION + ".",
+            true);
+
+    Properties allPropsForCoref = new Properties();
+    allPropsForCoref.putAll(corefProperties);
+    allPropsForCoref.putAll(mentionProperties);
+    return new MentionAnnotator(allPropsForCoref);
   }
 
   /**
@@ -227,7 +234,13 @@ public class AnnotatorImplementations  {
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
             true);
-    return new CorefAnnotator(corefProperties);
+    Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
+            Annotator.STANFORD_MENTION + ".",
+            true);
+    Properties allPropsForCoref = new Properties();
+    allPropsForCoref.putAll(corefProperties);
+    allPropsForCoref.putAll(mentionProperties);
+    return new CorefAnnotator(allPropsForCoref);
   }
 
   /**

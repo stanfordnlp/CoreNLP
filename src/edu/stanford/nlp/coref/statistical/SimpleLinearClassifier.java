@@ -12,9 +12,12 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
 
-/** @author Kevin Clark */
+/**
+ * A simple linear classifier trained by SGD with support for several different loss functions
+ * and learning rate schedules.
+ * @author Kevin Clark
+ */
 public class SimpleLinearClassifier {
-  /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(SimpleLinearClassifier.class);
 
   private final Loss defaultLoss;
@@ -38,7 +41,8 @@ public class SimpleLinearClassifier {
           this.weights = Counters.deserializeStringCounter(modelFile);
           Timing.endDoing("Reading " + modelFile);
         } else {
-          this.weights = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(log, "Loading coref model", modelFile);
+          this.weights = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
+              log, "Loading coref model", modelFile);
         }
       } catch (Exception e) {
         throw new RuntimeException("Error leading weights from " + modelFile, e);
@@ -293,5 +297,4 @@ public class SimpleLinearClassifier {
       }
     };
   }
-
 }

@@ -1,13 +1,10 @@
 package edu.stanford.nlp.coref.neural;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.coref.CorefAlgorithm;
 import edu.stanford.nlp.coref.CorefProperties;
@@ -19,8 +16,24 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
+import org.ejml.simple.SimpleMatrix;
 
+/**
+ * Neural mention-ranking coreference model as described in
+ * <p/>
+ * Kevin Clark and Christopher D. Manning. 2016.
+ * <a href="http://nlp.stanford.edu/pubs/clark2016deep.pdf">
+ * Deep Reinforcement Learning for Mention-Ranking Coreference Models</a>.
+ * In Empirical Methods on Natural Language Processing.
+ * <p/>
+ * Training code is implemented in python and is available at
+ * <a href="https://github.com/clarkkev/deep-coref">https://github.com/clarkkev/deep-coref</a>.
+ * @author Kevin Clark
+ */
 public class NeuralCorefAlgorithm implements CorefAlgorithm {
+  private static Redwood.RedwoodChannels log = Redwood.channels(NeuralCorefAlgorithm.class);
+
   private final double greedyness;
   private final int maxMentionDistance;
   private final int maxMentionDistanceWithStringMatch;
@@ -34,16 +47,12 @@ public class NeuralCorefAlgorithm implements CorefAlgorithm {
     maxMentionDistance = CorefProperties.maxMentionDistance(props);
     maxMentionDistanceWithStringMatch = CorefProperties.maxMentionDistanceWithStringMatch(props);
 
-    try {
-      model = IOUtils.readObjectFromURLOrClasspathOrFileSystem(
-          NeuralCorefProperties.modelPath(props));
-      embeddingExtractor = new EmbeddingExtractor(CorefProperties.conll(props),
-          IOUtils.readObjectFromURLOrClasspathOrFileSystem(
-              NeuralCorefProperties.pretrainedEmbeddingsPath(props)),
-          model.getWordEmbeddings());
-    } catch (ClassNotFoundException | IOException e) {
-      throw new RuntimeException("Error initializing NeuralCorefAlgorithm", e);
-    }
+    model = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
+        log, "Loading coref model", NeuralCorefProperties.modelPath(props));
+    embeddingExtractor = new EmbeddingExtractor(CorefProperties.conll(props),
+        IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
+            log, "Loading coref embeddings", NeuralCorefProperties.pretrainedEmbeddingsPath(props)),
+        model.getWordEmbeddings());
     featureExtractor = new CategoricalFeatureExtractor(props, dictionaries);
   }
 
@@ -76,7 +85,7 @@ public class NeuralCorefAlgorithm implements CorefAlgorithm {
     Map<Integer, List<Integer>> mentionToCandidateAntecedents = CorefUtils.heuristicFilter(sortedMentions,
         maxMentionDistance, maxMentionDistanceWithStringMatch);
     for (Map.Entry<Integer, List<Integer>> e : mentionToCandidateAntecedents.entrySet()) {
-      double bestScore = anaphoricityScores.getCount(e.getKey()) - greedyness / 10.0;
+      double bestScore = anaphoricityScores.getCount(e.getKey()) - 50 * (greedyness - 0.5);
       int m = e.getKey();
       Integer antecedent = null;
       for (int ca : e.getValue()) {

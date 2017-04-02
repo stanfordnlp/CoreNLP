@@ -8,13 +8,17 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import edu.stanford.nlp.coref.data.CorefCluster;
+import edu.stanford.nlp.coref.CorefDocumentProcessor;
+import edu.stanford.nlp.coref.CorefUtils;
 import edu.stanford.nlp.coref.data.Document;
-import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Pair;
 
-public class DatasetBuilder implements DocumentProcessor {
+/**
+ * Produces train/dev/test sets for training coreference models with (optionally) sampling.
+ * @author Kevin Clark
+ */
+public class DatasetBuilder implements CorefDocumentProcessor {
   private final int maxExamplesPerDocument;
   private final double minClassImbalancedPerDocument;
   private final Map<Integer, Map<Pair<Integer, Integer>, Boolean>> mentionPairs;
@@ -34,19 +38,7 @@ public class DatasetBuilder implements DocumentProcessor {
   @Override
   public void process(int id, Document document) {
     Map<Pair<Integer, Integer>, Boolean> labeledPairs =
-        StatisticalCorefUtils.getUnlabeledMentionPairs(document);
-    for (CorefCluster c : document.goldCorefClusters.values()) {
-      List<Mention> clusterMentions = new ArrayList<>(c.getCorefMentions());
-      for (int i = 0; i < clusterMentions.size(); i++) {
-        for (Mention clusterMention : clusterMentions) {
-          Pair<Integer, Integer> mentionPair = new Pair<>(
-                  clusterMentions.get(i).mentionID, clusterMention.mentionID);
-          if (labeledPairs.containsKey(mentionPair)) {
-            labeledPairs.put(mentionPair, true);
-          }
-        }
-      }
-    }
+        CorefUtils.getLabeledMentionPairs(document);
 
     long numP = labeledPairs.keySet().stream().filter(m -> labeledPairs.get(m)).count();
     List<Pair<Integer, Integer>> negative = labeledPairs.keySet().stream()

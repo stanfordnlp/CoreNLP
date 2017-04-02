@@ -1,7 +1,7 @@
 // Takes Stanford CoreNLP JSON output (var data = ... in data.js)
 // and uses brat to render everything.
 
-// var serverAddress = 'http://localhost:9000';
+//var serverAddress = 'http://localhost:9000';
 var serverAddress = '';
 
 // Load Brat libraries
@@ -278,7 +278,12 @@ function ConstituencyParseProcessor() {
 /**
  * Render a given JSON data structure
  */
-function render(data) {
+function render(data, reverse) {
+  // Tweak arguments
+  if (typeof reverse !== 'boolean') {
+    reverse = false;
+  }
+
   // Error checks
   if (typeof data.sentences === 'undefined') { return; }
 
@@ -299,6 +304,8 @@ function render(data) {
     if (name == 'POS') {
       color = posColor(type);
     } else if (name == 'NER') {
+      color = nerColor(coarseType);
+    } else if (name == 'NNER') {
       color = nerColor(coarseType);
     } else if (name == 'COREF') {
       color = '#FFE000';
@@ -377,6 +384,7 @@ function render(data) {
   var lemmaEntities = [];
   // (ner)
   var nerEntities = [];
+  var nerEntitiesNormalized = [];
   // (sentiment)
   var sentimentEntities = [];
   // (entitylinking)
@@ -456,8 +464,6 @@ function render(data) {
         return index;
       }
       processParseTree(parseTree, 0);
-      console.log(parseEntities);
-      console.log(parseRels);
       cparseEntities = cparseEntities.concat(cparseEntities, parseEntities);
       cparseRelations = cparseRelations.concat(parseRels);
     }
@@ -511,8 +517,13 @@ function render(data) {
         if (ner == 'O') continue;
         var j = i;
         while (j < tokens.length - 1 && tokens[j+1].ner == ner) j++;
-        addEntityType('NER', normalizedNER, ner);
-        nerEntities.push(['NER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        addEntityType('NER', ner, ner);
+        nerEntities.push(['NER_' + sentI + '_' + i, ner, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        if (ner != normalizedNER) {
+          addEntityType('NNER', normalizedNER, ner);
+          nerEntities.push(['NNER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+
+        }
         i = j;
       }
     }
@@ -695,11 +706,22 @@ function render(data) {
    * Helper function to render a given set of entities / relations
    * to a Div, if it exists.
    */
-  function embed(container, entities, relations) {
+  function embed(container, entities, relations, reverse) {
+    var text = currentText;
+    if (reverse) {
+      var length = currentText.length;
+      for (var i = 0; i < entities.length; ++i) {
+        var offsets = entities[i][2][0];
+        var tmp = length - offsets[0];
+        offsets[0] = length - offsets[1];
+        offsets[1] = tmp;
+      }
+      text = text.split("").reverse().join("");
+    }
     if ($('#' + container).length > 0) {
       Util.embed(container,
                  {entity_types: entityTypes, relation_types: relationTypes},
-                 {text: currentText, entities: entities, relations: relations}
+                 {text: text, entities: entities, relations: relations}
                 );
     }
   }
@@ -891,6 +913,29 @@ $(document).ready(function() {
   $('.chosen-select').chosen();
   $('.chosen-container').css('width', '100%');
 
+
+  // Language-specific changes
+  $('#language').on('change', function() {
+    $('#text').attr('dir', '');
+    if ($('#language').val() === 'ar') {
+      $('#text').attr('dir', 'rtl');
+      $('#text').attr('placeholder', 'على سبيل المثال، قفز الثعلب البني السريع فوق الكلب الكسول.');
+    } else if ($('#language').val() === 'en') {
+      $('#text').attr('placeholder', 'e.g., The quick brown fox jumped over the lazy dog.');
+    } else if ($('#language').val() === 'zh') {
+      $('#text').attr('placeholder', '例如，快速的棕色狐狸跳過了懶惰的狗。');
+    } else if ($('#language').val() === 'fr') {
+      $('#text').attr('placeholder', 'Par exemple, le renard brun rapide a sauté sur le chien paresseux.');
+    } else if ($('#language').val() === 'de') {
+      $('#text').attr('placeholder', 'Z. B. sprang der schnelle braune Fuchs über den faulen Hund.');
+    } else if ($('#language').val() === 'es') {
+      $('#text').attr('placeholder', 'Por ejemplo, el rápido zorro marrón saltó sobre el perro perezoso.');
+    } else {
+      $('#text').attr('placeholder', 'Unknown language for placeholder query: ' + $('#language').val());
+
+    }
+  });
+
   // Submit on shift-enter
   $('#text').keydown(function (event) {
     if (event.keyCode == 13) {
@@ -915,7 +960,21 @@ $(document).ready(function() {
     // Get the text to annotate
     currentQuery = $('#text').val();
     if (currentQuery.trim() == '') {
-      currentQuery = 'The quick brown fox jumped over the lazy dog.';
+      if ($('#language').val() === 'ar') {
+        currentQuery = 'قفز الثعلب البني السريع فوق الكلب الكسول.';
+      } else if ($('#language').val() === 'en') {
+        currentQuery = 'The quick brown fox jumped over the lazy dog.';
+      } else if ($('#language').val() === 'zh') {
+        currentQuery = '快速的棕色狐狸跳过了懒惰的狗';
+      } else if ($('#language').val() === 'fr') {
+        currentQuery = 'Le renard brun rapide a sauté sur le chien paresseux.';
+      } else if ($('#language').val() === 'de') {
+        currentQuery = 'Sprang der schnelle braune Fuchs über den faulen Hund.';
+      } else if ($('#language').val() === 'es') {
+        currentQuery = 'El rápido zorro marrón saltó sobre el perro perezoso.';
+      } else {
+        currentQuery = 'Unknown language for default query: ' + $('#language').val();
+      }
       $('#text').val(currentQuery);
     }
     // Update the UI
@@ -928,8 +987,8 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent(
-        '{"annotators": "' + annotators() + '", "date": "' + date() + '"' +
-        ', "sutime.includeRange": "true", "coref.md.type": "dep", "coref.mode": "statistical"}'),
+        '{"annotators": "' + annotators() + '", "date": "' + date() + '"}') +
+        '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
@@ -941,7 +1000,6 @@ $(document).ready(function() {
           // Process constituency parse
           var constituencyParseProcessor = new ConstituencyParseProcessor();
           constituencyParseProcessor.process(data);
-          console.log(data);
           // Empty divs
           $('#annotations').empty();
           // Re-render divs
@@ -984,7 +1042,8 @@ $(document).ready(function() {
           $('.corenlp_error').remove();  // Clear error messages
           $('#annotations').show();
           // Render
-          render(data);
+          var reverse = $('#language').val() === 'ar';
+          render(data, reverse);
           // Render patterns
           $('#annotations').append('<h4 class="red" style="margin-top: 4ex;">CoreNLP Tools:</h4>');  // TODO(gabor) a strange place to add this header to
           $('#patterns_row').show();

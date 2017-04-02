@@ -9,13 +9,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.coref.statistical.ClustererDataLoader.ClustererDoc;
+import edu.stanford.nlp.coref.statistical.EvalUtils.B3Evaluator;
+import edu.stanford.nlp.coref.statistical.EvalUtils.Evaluator;
+
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
+/**
+ * System for building up coreference clusters incrementally, merging a pair of clusters each step.
+ * Trained with a variant of the SEARN imitation learning algorithm.
+ * @author Kevin Clark
+ */
 public class Clusterer {
   private static final boolean USE_CLASSIFICATION = true;
   private static final boolean USE_RANKING = true;
@@ -83,7 +91,7 @@ public class Clusterer {
     List<ClustererDoc> trainDocs;
     try {
       PrintWriter configWriter = new PrintWriter(outputPath + "config", "UTF-8");
-      configWriter.print(StatisticalCorefUtils.fieldValues(this));
+      configWriter.print(StatisticalCorefTrainer.fieldValues(this));
       configWriter.close();
       progressWriter = new PrintWriter(outputPath + "progress", "UTF-8");
 
@@ -181,7 +189,7 @@ public class Clusterer {
 
   private double evaluatePolicy(List<ClustererDoc> docs, boolean training) {
     isTraining = 0;
-    EvalUtils.B3Evaluator evaluator = new EvalUtils.B3Evaluator();
+    B3Evaluator evaluator = new B3Evaluator();
     for (ClustererDoc doc : docs) {
       State currentState = new State(doc);
       while (!currentState.isComplete()) {
@@ -417,7 +425,7 @@ public class Clusterer {
       return cost;
     }
 
-    public void updateEvaluator(EvalUtils.Evaluator evaluator) {
+    public void updateEvaluator(Evaluator evaluator) {
       evaluator.update(doc.goldClusters, clusters, doc.mentionToGold, mentionToCluster);
     }
 

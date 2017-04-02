@@ -15,6 +15,10 @@ import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 
+/**
+ * Extracts word-embedding features from mentions.
+ * @author Kevin Clark
+ */
 public class EmbeddingExtractor {
   private final boolean conll;
   private final Embedding staticWordEmbeddings;
@@ -28,9 +32,9 @@ public class EmbeddingExtractor {
   }
 
   public SimpleMatrix getDocumentEmbedding(Document document) {
-    /*if (!conll) {
+    if (!conll) {
       return new SimpleMatrix(staticWordEmbeddings.getEmbeddingSize(), 1);
-    }*/
+    }
     List<CoreLabel> words = new ArrayList<>();
     Set<Integer> seenSentences = new HashSet<>();
     for (Mention m : document.predictedMentionsByID.values()) {
@@ -51,7 +55,7 @@ public class EmbeddingExtractor {
         getAverageEmbedding(m.sentenceWords, m.startIndex, m.endIndex),
         getAverageEmbedding(m.sentenceWords, m.startIndex - 5, m.startIndex),
         getAverageEmbedding(m.sentenceWords, m.endIndex, m.endIndex + 5),
-        getAverageEmbedding(m.sentenceWords.subList(0, m.sentenceWords.size() - 1)), // -1 is a bug in original python
+        getAverageEmbedding(m.sentenceWords.subList(0, m.sentenceWords.size() - 1)),
         docEmbedding,
         getWordEmbedding(m.sentenceWords, m.headIndex),
         getWordEmbedding(m.sentenceWords, m.startIndex),

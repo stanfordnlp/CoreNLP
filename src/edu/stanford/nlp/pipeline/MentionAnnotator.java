@@ -66,17 +66,18 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       mentionAnnotatorRequirements.addAll(Arrays.asList(
           CoreAnnotations.TokensAnnotation.class,
           CoreAnnotations.SentencesAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class,
           CoreAnnotations.PartOfSpeechAnnotation.class,
           CoreAnnotations.NamedEntityTagAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.ValueAnnotation.class,
           SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
           SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class
 
       ));
     } catch (Exception e) {
-      log.err("Error with building coref mention annotator!", e);
+      e.printStackTrace();
+      log.info("Error with building coref mention annotator!");
     }
   }
 
@@ -90,12 +91,13 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
     if (docID == null) {
       docID = "";
     }
-    if (docID.contains("nw") && corefProperties.getProperty("coref.input.type", "raw").equals("conll") &&
-            corefProperties.getProperty("coref.language", "en").equals("zh") &&
+    if (docID.contains("nw") && (CorefProperties.conll(corefProperties)
+        || corefProperties.getProperty("coref.input.type", "raw").equals("conll")) &&
+            CorefProperties.getLanguage(corefProperties) == Locale.CHINESE &&
             PropertiesUtils.getBool(corefProperties,"coref.specialCaseNewswire")) {
-      CorefProperties.setRemoveNestedMentions(corefProperties, false);
+      corefProperties.setProperty("removeNestedMentions", "false");
     } else {
-      CorefProperties.setRemoveNestedMentions(corefProperties, true);
+      corefProperties.setProperty("removeNestedMentions", "true");
     }
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
     int mentionIndex = 0;
