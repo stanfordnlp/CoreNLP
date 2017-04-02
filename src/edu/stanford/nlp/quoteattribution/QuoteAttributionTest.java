@@ -1,17 +1,17 @@
 package edu.stanford.nlp.quoteattribution;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.paragraphs.ParagraphAnnotator;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.QuoteAttributionAnnotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
+
 import java.io.*;
 import java.util.*;
 
 /**
- * Created by mjfang on 11/7/16.
+ * @author Michael Fang, Grace Muzny
  */
 public class QuoteAttributionTest {
 
@@ -36,12 +36,8 @@ public class QuoteAttributionTest {
           " \"You are uniformly charming!\" cried he, with an air of awkward gallantry; \"and I am persuaded that when sanctioned by the express authority of both your excellent parents, my proposals will not fail of being acceptable.\"\n" +
           " To such perseverance in wilful self-deception, Elizabeth would make no reply, and immediately and in silence withdrew; determined, that if he persisted in considering her repeated refusals as flattering encouragement, to apply to her father, whose negative might be uttered in such a manner as must be decisive, and whose behaviour at least could not be mistaken for the affectation and coquetry of an elegant female.";
 
-  public static final String familyFile = "/Users/golux/IdeaProjects/javanlp-unicorn/projects/core/data/edu/stanford/nlp/quoteattribution/family_words.txt";
-  public static final String animateFile = "/Users/golux/IdeaProjects/javanlp-unicorn/projects/core/data/edu/stanford/nlp/quoteattribution/animate.unigrams.txt";
-  public static final String genderFile = "/Users/golux/IdeaProjects/javanlp-unicorn/projects/core/data/edu/stanford/nlp/quoteattribution/gender_filtered.txt";
-
   //Test QuoteAttributionAnnotator on a chapter of PP.
-  public static void testPP() throws IOException, ClassNotFoundException {
+  public static void testPP(String familyFile, String animateFile, String genderFile) throws IOException, ClassNotFoundException {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, depparse, quote, quoteattribution");
     props.setProperty("quoteattribution.familyWordsFile", familyFile);
@@ -53,13 +49,7 @@ public class QuoteAttributionTest {
     
     StanfordCoreNLP coreNLP = new StanfordCoreNLP(props);
     Annotation processedAnnotation = coreNLP.process(test);
-
-//    Properties propsPara = new Properties();
-//    propsPara.setProperty("paragraphBreak", "one");
-//    ParagraphAnnotator pa = new ParagraphAnnotator(propsPara, false);
-//    pa.annotate(processedAnnotation);
-//    QuoteAttributionAnnotator qaa = new QuoteAttributionAnnotator(annotatorProps);
-//    qaa.annotate(processedAnnotation);
+    
     List<CoreMap> quotes = processedAnnotation.get(CoreAnnotations.QuotationsAnnotation.class);
     for(CoreMap quote : quotes) {
       System.out.println("Quote: " + quote.get(CoreAnnotations.TextAnnotation.class));
@@ -78,7 +68,20 @@ public class QuoteAttributionTest {
     System.out.println("Finished");
   }
 
+  /**
+   * Usage: java QuoteAttributionTest familywordsfile animatefile gendernamesfile
+   * @param args
+   * @throws IOException
+   * @throws ClassNotFoundException
+   */
   public static void main(String[] args) throws IOException, ClassNotFoundException {
-    testPP();
+    if (args.length != 3) {
+      System.out.println("Usage: java QuoteAttributionTest familywordsfile animatefile gendernamesfile");
+      System.exit(1);
+    }
+    String familyFile = args[0];
+    String animateFile = args[1];
+    String genderFile = args[2];
+    testPP(familyFile, animateFile, genderFile);
   }
 }
