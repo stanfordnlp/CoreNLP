@@ -30,12 +30,12 @@ public class MWETreeVisitor implements TreeVisitor {
   }
   
   private List<Pair<TregexPattern, TsurgeonPattern>> loadOps() {
-    List<Pair<TregexPattern,TsurgeonPattern>> ops = new ArrayList<Pair<TregexPattern,TsurgeonPattern>>();
+    List<Pair<TregexPattern,TsurgeonPattern>> ops = new ArrayList<>();
     
     String line = null;
     try {
       BufferedReader br = new BufferedReader(new StringReader(editStr));
-      List<TsurgeonPattern> tsp = new ArrayList<TsurgeonPattern>();
+      List<TsurgeonPattern> tsp = new ArrayList<>();
       while ((line = br.readLine()) != null) {
         if (DEBUG) System.err.print("Pattern is " + line);
         TregexPattern matchPattern = TregexPattern.compile(line);
@@ -48,7 +48,7 @@ public class MWETreeVisitor implements TreeVisitor {
         }
         if ( ! tsp.isEmpty()) {
           TsurgeonPattern tp = Tsurgeon.collectOperations(tsp);
-          ops.add(new Pair<TregexPattern,TsurgeonPattern>(matchPattern, tp));
+          ops.add(new Pair<>(matchPattern, tp));
         }
       } // while not at end of file
     } catch (IOException ioe) {

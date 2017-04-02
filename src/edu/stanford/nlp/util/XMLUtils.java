@@ -72,24 +72,22 @@ public class XMLUtils {
         // Get element
         Element element = (Element)nodeList.item(i);
         String raw = element.getTextContent();
-        String builtUp = "";
+        StringBuilder builtUp = new StringBuilder();
         boolean inTag = false;
-        for(int j = 0; j < raw.length(); j++) {
+        for (int j = 0; j < raw.length(); j++) {
           if (raw.charAt(j) == '<') {
             inTag = true;
           }
           if (!inTag) {
-            builtUp += raw.charAt(j);
+            builtUp.append(raw.charAt(j));
           }
           if (raw.charAt(j) == '>') {
             inTag = false;
           }
         }
-        sents.add(builtUp);
+        sents.add(builtUp.toString());
       }
-    } catch (IOException e) {
-      System.err.println(e);
-    } catch (ParserConfigurationException e) {
+    } catch (IOException | ParserConfigurationException e) {
       System.err.println(e);
     }
     return sents;
@@ -179,7 +177,7 @@ public class XMLUtils {
   /**
    * Returns a validating XML parser given an XSD (not DTD!).
    *
-   * @param schemaFile
+   * @param schemaFile File wit hXML schema
    * @return An XML parser in the form of a DocumentBuilder
    */
   public static DocumentBuilder getValidatingXmlParser(File schemaFile) {
@@ -213,7 +211,7 @@ public class XMLUtils {
   /**
    * Block-level HTML tags that are rendered with surrounding line breaks.
    */
-  public static final Set<String> breakingTags = Generics.newHashSet(Arrays.asList(new String[] {"blockquote", "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "li", "ol", "p", "pre", "ul", "tr", "td"}));
+  private static final Set<String> breakingTags = Generics.newHashSet(Arrays.asList(new String[] {"blockquote", "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "li", "ol", "p", "pre", "ul", "tr", "td"}));
 
   /**
    * @param r       the reader to read the XML/HTML from
@@ -226,12 +224,10 @@ public class XMLUtils {
       mapBack.clear(); // just in case it has something in it!
     }
     StringBuilder result = new StringBuilder();
-    String text;
-    String tag;
-    int position = 0;
     try {
+      int position = 0;
       do {
-        text = XMLUtils.readUntilTag(r); // will do nothing if the next thing is a tag
+        String text = XMLUtils.readUntilTag(r);
         if (text.length() > 0) {
           // add offsets to the map back
           for (int i = 0; i < text.length(); i++) {
@@ -243,7 +239,7 @@ public class XMLUtils {
           position += text.length();
         }
         //        System.out.println(position + " got text: " + text);
-        tag = XMLUtils.readTag(r);
+        String tag = XMLUtils.readTag(r);
         if (tag == null) {
           break;
         }
@@ -1033,7 +1029,7 @@ public class XMLUtils {
               if (end < 0) {
                 end = tag.length();
               }
-              System.out.println(begin + " " + end);
+//              System.out.println(begin + " " + end);
               value = tag.substring(begin, end);
             }
           }
@@ -1077,7 +1073,7 @@ public class XMLUtils {
   }
 
   public static XMLTag parseTag(String tagString) {
-    if (tagString == null || tagString.length() == 0) {
+    if (tagString == null || tagString.isEmpty()) {
       return null;
     }
     if (tagString.charAt(0) != '<' ||
@@ -1105,7 +1101,7 @@ public class XMLUtils {
       StringBuilder sb = new StringBuilder(msg);
       sb.append(": ");
       String str = ex.getMessage();
-      if (str.lastIndexOf(".") == str.length() - 1) {
+      if (str.lastIndexOf('.') == str.length() - 1) {
         str = str.substring(0, str.length() - 1);
       }
       sb.append(str);
@@ -1155,10 +1151,10 @@ public class XMLUtils {
       String s = IOUtils.slurpFile(args[0]);
       Reader r = new StringReader(s);
       String tag = readTag(r);
-      while (tag.length() > 0) {
+      while (tag != null && tag.length() > 0) {
         readUntilTag(r);
         tag = readTag(r);
-        if (tag.length() == 0) {
+        if (tag == null || tag.isEmpty()) {
           break;
         }
         System.out.println("got tag=" + new XMLTag(tag));

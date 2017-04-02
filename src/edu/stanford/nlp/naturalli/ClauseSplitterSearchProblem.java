@@ -49,8 +49,8 @@ public class ClauseSplitterSearchProblem {
 
   /**
    * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
-   * the preference for the type of split we should do. The most prefered is at the front of the list, and then it backs off
-   * to the less and less prefered split types.
+   * the preference for the type of split we should do. The most preferred is at the front of the list, and then it backs off
+   * to the less and less preferred split types.
    */
   protected static final Map<String, List<String>> HARD_SPLITS = Collections.unmodifiableMap(new HashMap<String, List<String>>() {{
     put("comp", new ArrayList<String>() {{
@@ -70,6 +70,18 @@ public class ClauseSplitterSearchProblem {
     }});
     put("csubj", new ArrayList<String>() {{
       add("clone_dobj");
+      add("simple");
+    }});
+    put("advcl", new ArrayList<String>() {{
+      add("clone_nsubj");
+      add("simple");
+    }});
+    put("conj:*", new ArrayList<String>() {{
+      add("clone_nsubj");
+      add("clone_dobj");
+      add("simple");
+    }});
+    put("acl:relcl", new ArrayList<String>() {{  // no doubt (-> that cats have tails <-)
       add("simple");
     }});
   }});
@@ -97,6 +109,9 @@ public class ClauseSplitterSearchProblem {
    * A mapping from a word to the extra edges that come out of it.
    */
   private final Map<IndexedWord, Collection<SemanticGraphEdge>> extraEdgesByGovernor = new HashMap<>();
+  /**
+   * A mapping from a word to the extra edges that to into it.
+   */
   private final Map<IndexedWord, Collection<SemanticGraphEdge>> extraEdgesByDependent = new HashMap<>();
   /**
    * The classifier for whether a particular dependency edge defines a clause boundary.
@@ -166,11 +181,11 @@ public class ClauseSplitterSearchProblem {
   /**
    * An action being taken; that is, the type of clause splitting going on.
    */
-  public static interface Action {
+  public interface Action {
     /**
      * The name of this action.
      */
-    public String signature();
+    String signature();
 
     /**
      * A check to make sure this is actually a valid action to take, in the context of the given tree.
@@ -179,7 +194,7 @@ public class ClauseSplitterSearchProblem {
      * @return True if this is a valid action.
      */
     @SuppressWarnings("UnusedParameters")
-    public default boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
+    default boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
       return true;
     }
 
@@ -192,10 +207,10 @@ public class ClauseSplitterSearchProblem {
      * @param ppOrNull The preposition attachment of the parent tree, if there is one.
      * @return A new state, or {@link Optional#empty()} if this action was not successful.
      */
-    public Optional<State> applyTo(SemanticGraph tree, State source,
-                                   SemanticGraphEdge outgoingEdge,
-                                   SemanticGraphEdge subjectOrNull,
-                                   SemanticGraphEdge ppOrNull);
+    Optional<State> applyTo(SemanticGraph tree, State source,
+                            SemanticGraphEdge outgoingEdge,
+                            SemanticGraphEdge subjectOrNull,
+                            SemanticGraphEdge ppOrNull);
   }
 
   /**
@@ -222,7 +237,9 @@ public class ClauseSplitterSearchProblem {
   /**
    * Mostly just an alias, but make sure our featurizer is serializable!
    */
-  public static interface Featurizer extends Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>, Serializable { }
+  public interface Featurizer extends Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>, Serializable {
+    boolean isSimpleSplit(Counter<String> feats);
+  }
 
   /**
    * Create a searcher manually, suppling a dependency tree, an optional classifier for when to split clauses,
@@ -539,6 +556,12 @@ public class ClauseSplitterSearchProblem {
       }
 
       @Override
+      public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
+        char tag = edge.getDependent().tag().charAt(0);
+        return !(tag != 'V' && tag != 'N' && tag != 'J' && tag != 'P' && tag != 'D');
+      }
+
+      @Override
       public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge objectOrNull) {
         return Optional.of(new State(
             outgoingEdge,
@@ -612,6 +635,17 @@ public class ClauseSplitterSearchProblem {
       }
 
       @Override
+      public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
+        // Don't split into anything but verbs or nouns
+        char tag = edge.getDependent().tag().charAt(0);
+        if (tag != 'V' && tag != 'N') { return false; }
+        for (SemanticGraphEdge grandchild : originalTree.outgoingEdgeIterable(edge.getDependent())) {
+          if (grandchild.getRelation().toString().contains("subj")) { return false; }
+        }
+        return true;
+      }
+
+      @Override
       public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge objectOrNull) {
         if (subjectOrNull != null && !outgoingEdge.equals(subjectOrNull)) {
           return Optional.of(new State(
@@ -640,6 +674,17 @@ public class ClauseSplitterSearchProblem {
       @Override
       public String signature() {
         return "clone_dobj";
+      }
+
+      @Override
+      public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
+        // Don't split into anything but verbs or nouns
+        char tag = edge.getDependent().tag().charAt(0);
+        if (tag != 'V' && tag != 'N') { return false; }
+        for (SemanticGraphEdge grandchild : originalTree.outgoingEdgeIterable(edge.getDependent())) {
+          if (grandchild.getRelation().toString().contains("subj")) { return false; }
+        }
+        return true;
       }
 
       @Override
@@ -732,11 +777,10 @@ public class ClauseSplitterSearchProblem {
     }, true);  // First state is implicitly "done"
     fringe.add(Pair.makePair(firstState, new ArrayList<>(0)), -0.0);
     int ticks = 0;
-    int classifierEvals = 0;
 
     while (!fringe.isEmpty()) {
       if (++ticks > maxTicks) {
-        System.err.println("WARNING! Timed out on search with " + ticks + " ticks");
+//        System.err.println("WARNING! Timed out on search with " + ticks + " ticks");
         return;
       }
       // Useful variables
@@ -794,7 +838,11 @@ public class ClauseSplitterSearchProblem {
           continue;
         }
         // Get some variables
-        List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdge.getRelation().toString());
+        String outgoingEdgeRelation = outgoingEdge.getRelation().toString();
+        List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdgeRelation);
+        if (forcedArcOrder == null && outgoingEdgeRelation.contains(":")) {
+          forcedArcOrder = hardCodedSplits.get(outgoingEdgeRelation.substring(0, outgoingEdgeRelation.indexOf(":")) + ":*");
+        }
         boolean doneForcedArc = false;
         // For each action...
         for (Action action : (forcedArcOrder == null ? actionSpace : orderActions(actionSpace, forcedArcOrder))) {
@@ -822,21 +870,26 @@ public class ClauseSplitterSearchProblem {
               bestLabel = ClauseClassifierLabel.CLAUSE_INTERM;
             } else {
               Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
-              classifierEvals += 1;
               if (scores.size() > 0) {
                 Counters.logNormalizeInPlace(scores);
               }
-              scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
+              String rel = outgoingEdge.getRelation().toString();
+              if ("nsubj".equals(rel) || "dobj".equals(rel)) {
+                scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);  // Always at least yield on nsubj and dobj
+              }
               logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);
               bestLabel = Counters.argmax(scores, (x, y) -> 0, ClauseClassifierLabel.CLAUSE_SPLIT);
             }
-            Pair<State, List<Counter<String>>> childState = Pair.makePair(candidate.get().withIsDone(bestLabel), new ArrayList<Counter<String>>(featuresSoFar) {{
-              add(features);
-            }});
-            // 2. Register the child state
-            if (!seenWords.contains(childState.first.edge.getDependent())) {
+
+            if (bestLabel != ClauseClassifierLabel.NOT_A_CLAUSE) {
+              Pair<State, List<Counter<String>>> childState = Pair.makePair(candidate.get().withIsDone(bestLabel), new ArrayList<Counter<String>>(featuresSoFar) {{
+                add(features);
+              }});
+              // 2. Register the child state
+              if (!seenWords.contains(childState.first.edge.getDependent())) {
 //            System.err.println("  pushing " + action.signature() + " with " + argmax.first.edge);
-              fringe.add(childState, logProbability);
+                fringe.add(childState, logProbability);
+              }
             }
           }
         }
@@ -852,94 +905,108 @@ public class ClauseSplitterSearchProblem {
   /**
    * The default featurizer to use during training.
    */
-  public static final Featurizer DEFAULT_FEATURIZER = triple -> {
-    // Variables
-    State from = triple.first;
-    Action action = triple.second;
-    State to = triple.third;
-    String signature = action.signature();
-    String edgeRelTaken = to.edge == null ? "root" : to.edge.getRelation().toString();
-    String edgeRelShort = to.edge == null ?  "root"  : to.edge.getRelation().getShortName();
-    if (edgeRelShort.contains("_")) {
-      edgeRelShort = edgeRelShort.substring(0, edgeRelShort.indexOf("_"));
-    }
-
-    // -- Featurize --
-    // Variables to aggregate
-    boolean parentHasSubj = false;
-    boolean parentHasObj = false;
-    boolean childHasSubj = false;
-    boolean childHasObj = false;
-    Counter<String> feats = new ClassicCounter<>();
-
-    // 1. edge taken
-    feats.incrementCount(signature + "&edge:" + edgeRelTaken);
-    feats.incrementCount(signature + "&edge_type:" + edgeRelShort);
-
-    // 2. last edge taken
-    if (from.edge == null) {
-      assert to.edge == null || to.originalTree().getRoots().contains(to.edge.getGovernor());
-      feats.incrementCount(signature + "&at_root");
-      feats.incrementCount(signature + "&at_root&root_pos:" + to.originalTree().getFirstRoot().tag());
-    } else {
-      feats.incrementCount(signature + "&not_root");
-      String lastRelShort = from.edge.getRelation().getShortName();
-      if (lastRelShort.contains("_")) {
-        lastRelShort = lastRelShort.substring(0, lastRelShort.indexOf("_"));
+  public static final Featurizer DEFAULT_FEATURIZER = new Featurizer() {
+    private static final long serialVersionUID = 4145523451314579506l;
+    @Override
+    public boolean isSimpleSplit(Counter<String> feats) {
+      for (String key : feats.keySet()) {
+        if (key.startsWith("simple&")) {
+          return true;
+        }
       }
-      feats.incrementCount(signature + "&last_edge:" + lastRelShort);
+      return false;
     }
 
-    if (to.edge != null) {
-      // 3. other edges at parent
-      for (SemanticGraphEdge parentNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getGovernor())) {
-        if (parentNeighbor != to.edge) {
-          String parentNeighborRel = parentNeighbor.getRelation().toString();
-          if (parentNeighborRel.contains("subj")) {
-            parentHasSubj = true;
+    @Override
+    public Counter<String> apply(Triple<State, Action, State> triple) {
+      // Variables
+      State from = triple.first;
+      Action action = triple.second;
+      State to = triple.third;
+      String signature = action.signature();
+      String edgeRelTaken = to.edge == null ? "root" : to.edge.getRelation().toString();
+      String edgeRelShort = to.edge == null ?  "root"  : to.edge.getRelation().getShortName();
+      if (edgeRelShort.contains("_")) {
+        edgeRelShort = edgeRelShort.substring(0, edgeRelShort.indexOf("_"));
+      }
+
+      // -- Featurize --
+      // Variables to aggregate
+      boolean parentHasSubj = false;
+      boolean parentHasObj = false;
+      boolean childHasSubj = false;
+      boolean childHasObj = false;
+      Counter<String> feats = new ClassicCounter<>();
+
+      // 1. edge taken
+      feats.incrementCount(signature + "&edge:" + edgeRelTaken);
+      feats.incrementCount(signature + "&edge_type:" + edgeRelShort);
+
+      // 2. last edge taken
+      if (from.edge == null) {
+        assert to.edge == null || to.originalTree().getRoots().contains(to.edge.getGovernor());
+        feats.incrementCount(signature + "&at_root");
+        feats.incrementCount(signature + "&at_root&root_pos:" + to.originalTree().getFirstRoot().tag());
+      } else {
+        feats.incrementCount(signature + "&not_root");
+        String lastRelShort = from.edge.getRelation().getShortName();
+        if (lastRelShort.contains("_")) {
+          lastRelShort = lastRelShort.substring(0, lastRelShort.indexOf("_"));
+        }
+        feats.incrementCount(signature + "&last_edge:" + lastRelShort);
+      }
+
+      if (to.edge != null) {
+        // 3. other edges at parent
+        for (SemanticGraphEdge parentNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getGovernor())) {
+          if (parentNeighbor != to.edge) {
+            String parentNeighborRel = parentNeighbor.getRelation().toString();
+            if (parentNeighborRel.contains("subj")) {
+              parentHasSubj = true;
+            }
+            if (parentNeighborRel.contains("obj")) {
+              parentHasObj = true;
+            }
+            // (add feature)
+            feats.incrementCount(signature + "&parent_neighbor:" + parentNeighborRel);
+            feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&parent_neighbor:" + parentNeighborRel);
           }
-          if (parentNeighborRel.contains("obj")) {
-            parentHasObj = true;
+        }
+
+        // 4. Other edges at child
+        int childNeighborCount = 0;
+        for (SemanticGraphEdge childNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getDependent())) {
+          String childNeighborRel = childNeighbor.getRelation().toString();
+          if (childNeighborRel.contains("subj")) {
+            childHasSubj = true;
           }
+          if (childNeighborRel.contains("obj")) {
+            childHasObj = true;
+          }
+          childNeighborCount += 1;
           // (add feature)
-          feats.incrementCount(signature + "&parent_neighbor:" + parentNeighborRel);
-          feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&parent_neighbor:" + parentNeighborRel);
+          feats.incrementCount(signature + "&child_neighbor:" + childNeighborRel);
+          feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor:" + childNeighborRel);
         }
+        // 4.1 Number of other edges at child
+        feats.incrementCount(signature + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
+        feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
+
+
+        // 5. Subject/Object stats
+        feats.incrementCount(signature + "&parent_neighbor_subj:" + parentHasSubj);
+        feats.incrementCount(signature + "&parent_neighbor_obj:" + parentHasObj);
+        feats.incrementCount(signature + "&child_neighbor_subj:" + childHasSubj);
+        feats.incrementCount(signature + "&child_neighbor_obj:" + childHasObj);
+
+        // 6. POS tag info
+        feats.incrementCount(signature + "&parent_pos:" + to.edge.getGovernor().tag());
+        feats.incrementCount(signature + "&child_pos:" + to.edge.getDependent().tag());
+        feats.incrementCount(signature + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
+        feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
       }
-
-      // 4. Other edges at child
-      int childNeighborCount = 0;
-      for (SemanticGraphEdge childNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getDependent())) {
-        String childNeighborRel = childNeighbor.getRelation().toString();
-        if (childNeighborRel.contains("subj")) {
-          childHasSubj = true;
-        }
-        if (childNeighborRel.contains("obj")) {
-          childHasObj = true;
-        }
-        childNeighborCount += 1;
-        // (add feature)
-        feats.incrementCount(signature + "&child_neighbor:" + childNeighborRel);
-        feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor:" + childNeighborRel);
-      }
-      // 4.1 Number of other edges at child
-      feats.incrementCount(signature + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
-      feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
-
-
-      // 5. Subject/Object stats
-      feats.incrementCount(signature + "&parent_neighbor_subj:" + parentHasSubj);
-      feats.incrementCount(signature + "&parent_neighbor_obj:" + parentHasObj);
-      feats.incrementCount(signature + "&child_neighbor_subj:" + childHasSubj);
-      feats.incrementCount(signature + "&child_neighbor_obj:" + childHasObj);
-
-      // 6. POS tag info
-      feats.incrementCount(signature + "&parent_pos:" + to.edge.getGovernor().tag());
-      feats.incrementCount(signature + "&child_pos:" + to.edge.getDependent().tag());
-      feats.incrementCount(signature + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
-      feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
+      return feats;
     }
-    return feats;
   };
 
 }

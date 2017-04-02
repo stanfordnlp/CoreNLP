@@ -5,6 +5,7 @@ import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
@@ -13,6 +14,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IterableIterator;
 import edu.stanford.nlp.util.Pair;
@@ -64,11 +66,11 @@ public class Util {
   }
 
   /**
-   * TODO(gabor) JavaDoc
+   * Returns a coherent NER span from a list of tokens.
    *
-   * @param tokens
-   * @param seed
-   * @return
+   * @param tokens The tokens of the entire sentence.
+   * @param seed The seed span of the intended NER span that should be expanded.
+   * @return A 0 indexed span corresponding to a coherent NER chunk from the given seed.
    */
   public static Span extractNER(List<CoreLabel> tokens, Span seed) {
     // Error checks
@@ -195,6 +197,7 @@ public class Util {
       }
     }
     extraEdges.forEach(tree::removeEdge);
+
     // Add apposition edges (simple coref)
     for (SemanticGraphEdge extraEdge : new ArrayList<>(extraEdges)) {  // note[gabor] prevent concurrent modification exception
       for (SemanticGraphEdge candidateAppos : tree.incomingEdgeIterable(extraEdge.getDependent())) {
@@ -255,6 +258,29 @@ public class Util {
       for (SemanticGraphEdge edge : invalidEdges) {
         tree.removeEdge(edge);
         changed = true;
+      }
+    }
+
+    // Edge case: remove duplicate dobj to "that."
+    //            This is a common parse error.
+    for (IndexedWord vertex : tree.vertexSet()) {
+      SemanticGraphEdge thatEdge = null;
+      int dobjCount = 0;
+      for (SemanticGraphEdge edge : tree.outgoingEdgeIterable(vertex)) {
+        if (edge.getDependent().word().equalsIgnoreCase("that")) {
+          thatEdge = edge;
+        }
+        if (edge.getRelation().toString().equals("dobj")) {
+          dobjCount += 1;
+        }
+      }
+      if (dobjCount > 1 && thatEdge != null) {
+        // Case: there are two dobj edges, one of which goes to the word "that"
+        // Action: rewrite the dobj edge to "that" to be a "mark" edge.
+        tree.removeEdge(thatEdge);
+        tree.addEdge(thatEdge.getGovernor(), thatEdge.getDependent(),
+            GrammaticalRelation.valueOf(thatEdge.getRelation().getLanguage(), "mark"),
+            thatEdge.getWeight(), thatEdge.isExtra());
       }
     }
 
@@ -412,7 +438,7 @@ public class Util {
    * @param dataset The dataset to evaluate the classifier on.
    */
   public static void dumpAccuracy(Classifier<ClauseSplitter.ClauseClassifierLabel, String> classifier, GeneralDataset<ClauseSplitter.ClauseClassifierLabel, String> dataset) {
-    DecimalFormat df = new DecimalFormat("0.000");
+    DecimalFormat df = new DecimalFormat("0.00%");
     log("size:         " + dataset.size());
     log("split count:  " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseSplitter.ClauseClassifierLabel.CLAUSE_SPLIT).collect(Collectors.toList()).size());
     log("interm count: " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseSplitter.ClauseClassifierLabel.CLAUSE_INTERM).collect(Collectors.toList()).size());
@@ -486,4 +512,26 @@ public class Util {
      add("past");
      add("proposed");
   }});
+
+  /**
+   * Construct the spanning span of the given list of tokens.
+   *
+   * @param tokens The tokens that should define the span.
+   * @return A span (0-indexed) that covers all of the tokens.
+   */
+  public static Span tokensToSpan(List<? extends HasIndex> tokens) {
+    int min = Integer.MAX_VALUE;
+    int max = Integer.MIN_VALUE;
+    for (HasIndex token : tokens) {
+      min = Math.min(token.index() - 1, min);
+      max = Math.max(token.index(), max);
+    }
+    if (min < 0 || max == Integer.MAX_VALUE) {
+      throw new IllegalArgumentException("Could not compute span from tokens!");
+    } else if (min >= max) {
+      throw new IllegalStateException("Either logic is broken or Gabor can't code.");
+    } else {
+      return new Span(min, max);
+    }
+  }
 }

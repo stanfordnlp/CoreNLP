@@ -5,6 +5,13 @@ import java.io.Serializable;
 import edu.stanford.nlp.stats.Counter;
 
 
+/** This class defines the runtime interface for unknown words
+ *  in lexparser. See UnknownWordModelTrainer for how unknown
+ *  word models are built from training data.
+ *
+ *  @author Anna Rafferty
+ *  @author Christopher Manning
+ */
 public interface UnknownWordModel extends Serializable {
 
   /**
@@ -29,7 +36,7 @@ public interface UnknownWordModel extends Serializable {
 
   /**
    * Get the score of this word with this tag (as an IntTaggedWord) at this
-   * loc.
+   * location loc in a sentence.
    * (Presumably an estimate of P(word | tag), usually calculated as
    * P(signature | tag).)
    * Assumes the word is unknown.
@@ -48,8 +55,8 @@ public interface UnknownWordModel extends Serializable {
   float score(IntTaggedWord iTW, int loc, double c_Tseen, double total, double smooth, String word);
 
 
-  /** Calculate P(Tag|Signature) with Bayesian smoothing via just P(Tag|Unknown) */
-  public double scoreProbTagGivenWordSignature(IntTaggedWord iTW, int loc, double smooth, String word);
+  /** Calculate P(Tag|Signature) with Bayesian smoothing via just P(Tag|Unknown). */
+  double scoreProbTagGivenWordSignature(IntTaggedWord iTW, int loc, double smooth, String word);
 
 
   /**
@@ -64,9 +71,10 @@ public interface UnknownWordModel extends Serializable {
    *          capitalized words can be treated differently)
    * @return A String that is its signature (equivalence class)
    */
-  public String getSignature(String word, int loc);
+  String getSignature(String word, int loc);
 
-  public int getSignatureIndex(int wordIndex, int sentencePosition, String word);
+  /** Returns an unknown word signature as an integer index rather than as a String. */
+  int getSignatureIndex(int wordIndex, int sentencePosition, String word);
 
 
   /**
@@ -76,8 +84,9 @@ public interface UnknownWordModel extends Serializable {
    * @param itw The tagging
    * @param count Its weight
    */
-  public void addTagging(boolean seen, IntTaggedWord itw, double count);
+  void addTagging(boolean seen, IntTaggedWord itw, double count);
 
-  public Counter<IntTaggedWord> unSeenCounter();
+  /** Returns a Counter from IntTaggedWord to how often they have been seen. */
+  Counter<IntTaggedWord> unSeenCounter();
 
 }

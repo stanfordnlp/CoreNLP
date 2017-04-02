@@ -47,6 +47,14 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   private IndexedWord original = null;
 
   /**
+   * Useful for specifying a fine-grained position when butchering parse trees.
+   * The canonical use case for this is resolving coreference in the OpenIE system, where
+   * we want to move nodes between sentences, but do not want to change their index annotation
+   * (plus, we need to have multiple nodes fit into the space of one pronoun).
+   */
+  private double pseudoPosition = Double.NaN;
+
+  /**
    * Default constructor; uses {@link CoreLabel} default constructor
    */
   public IndexedWord() {
@@ -160,6 +168,11 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   }
 
   @Override
+  public <KEY extends TypesafeMap.Key<String>> String getString(Class<KEY> key, String def) {
+    return label.getString(key, def);
+  }
+
+  @Override
   public <VALUE> VALUE remove(Class<? extends Key<VALUE>> key) {
     return label.remove(key);
   }
@@ -242,6 +255,28 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   @Override
   public void setIndex(int index) {
     label.setIndex(index);
+  }
+
+  /**
+   * In most cases, this is just the index of the word.
+   * However, this should be the value used to sort nodes in
+   * a tree.
+   *
+   * @see IndexedWord#pseudoPosition
+   */
+  public double pseudoPosition() {
+    if (!Double.isNaN(pseudoPosition)) {
+      return pseudoPosition;
+    } else {
+      return (double) index();
+    }
+  }
+
+  /**
+   * @see IndexedWord#pseudoPosition
+   */
+  public void setPseudoPosition(double position) {
+    this.pseudoPosition = position;
   }
 
   @Override
@@ -369,6 +404,11 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     if (copyCount() != otherWord.copyCount()) {
       return false;
     }
+    // Compare pseudo-positions
+    if ( (!Double.isNaN(this.pseudoPosition) || !Double.isNaN(otherWord.pseudoPosition)) &&
+         this.pseudoPosition != otherWord.pseudoPosition) {
+      return false;
+    }
     return true;
   }
 
@@ -433,6 +473,16 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
       return 1;
     }
 
+    // Override the default comparator if pseudo-positions are set.
+    // This is needed for splicing trees together awkwardly in OpenIE.
+    if (!Double.isNaN(w.pseudoPosition) || !Double.isNaN(this.pseudoPosition)) {
+      double val = this.pseudoPosition() - w.pseudoPosition();
+      if (val < 0) { return -1; }
+      if (val > 0) { return 1; }
+      else { return 0; }
+    }
+
+    // Otherwise, compare using the normal doc/sentence/token index hierarchy
     String docID = this.getString(CoreAnnotations.DocIDAnnotation.class);
     int docComp = docID.compareTo(w.getString(CoreAnnotations.DocIDAnnotation.class));
     if (docComp != 0) return docComp;

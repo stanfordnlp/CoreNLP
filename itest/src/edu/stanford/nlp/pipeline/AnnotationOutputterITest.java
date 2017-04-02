@@ -24,13 +24,13 @@ public class AnnotationOutputterITest extends TestCase {
             "2\tcat\tcat\tNN\tO\t4\tnsubj\n" +
             "3\tis\tbe\tVBZ\tO\t4\tcop\n" +
             "4\tfat\tfat\tJJ\tO\t0\tROOT\n" +
-            "5\t.\t.\t.\tO\t_\t_\n" +
+            "5\t.\t.\t.\tO\t4\tpunct\n" +
             "\n" +
             "1\tThe\tthe\tDT\tO\t2\tdet\n" +
             "2\tdog\tdog\tNN\tO\t4\tnsubj\n" +
             "3\tis\tbe\tVBZ\tO\t4\tcop\n" +
             "4\tlazy\tlazy\tJJ\tO\t0\tROOT\n" +
-            "5\t.\t.\t.\tO\t_\t_\n" +
+            "5\t.\t.\t.\tO\t4\tpunct\n" +
             "\n";
     assertEquals(expected, actual);
   }
@@ -43,74 +43,80 @@ public class AnnotationOutputterITest extends TestCase {
         "{\n" +
             "  \"sentences\": [\n" +
             "    {\n" +
-            "      \"index\": \"0\",\n" +
+            "      \"index\": 0,\n" +
             "      \"parse\": \"(ROOT (NP (JJ Bad) (NN wolf)))\",\n" +
             "      \"basic-dependencies\": [\n" +
             "        {\n" +
             "          \"dep\": \"ROOT\",\n" +
-            "          \"governor\": \"0\",\n" +
+            "          \"governor\": 0,\n" +
             "          \"governorGloss\": \"ROOT\",\n" +
-            "          \"dependent\": \"2\",\n" +
+            "          \"dependent\": 2,\n" +
             "          \"dependentGloss\": \"wolf\"\n" +
             "        },\n" +
             "        {\n" +
             "          \"dep\": \"amod\",\n" +
-            "          \"governor\": \"2\",\n" +
+            "          \"governor\": 2,\n" +
             "          \"governorGloss\": \"wolf\",\n" +
-            "          \"dependent\": \"1\",\n" +
+            "          \"dependent\": 1,\n" +
             "          \"dependentGloss\": \"Bad\"\n" +
             "        }\n" +
             "      ],\n" +
             "      \"collapsed-dependencies\": [\n" +
             "        {\n" +
             "          \"dep\": \"ROOT\",\n" +
-            "          \"governor\": \"0\",\n" +
+            "          \"governor\": 0,\n" +
             "          \"governorGloss\": \"ROOT\",\n" +
-            "          \"dependent\": \"2\",\n" +
+            "          \"dependent\": 2,\n" +
             "          \"dependentGloss\": \"wolf\"\n" +
             "        },\n" +
             "        {\n" +
             "          \"dep\": \"amod\",\n" +
-            "          \"governor\": \"2\",\n" +
+            "          \"governor\": 2,\n" +
             "          \"governorGloss\": \"wolf\",\n" +
-            "          \"dependent\": \"1\",\n" +
+            "          \"dependent\": 1,\n" +
             "          \"dependentGloss\": \"Bad\"\n" +
             "        }\n" +
             "      ],\n" +
             "      \"collapsed-ccprocessed-dependencies\": [\n" +
             "        {\n" +
             "          \"dep\": \"ROOT\",\n" +
-            "          \"governor\": \"0\",\n" +
+            "          \"governor\": 0,\n" +
             "          \"governorGloss\": \"ROOT\",\n" +
-            "          \"dependent\": \"2\",\n" +
+            "          \"dependent\": 2,\n" +
             "          \"dependentGloss\": \"wolf\"\n" +
             "        },\n" +
             "        {\n" +
             "          \"dep\": \"amod\",\n" +
-            "          \"governor\": \"2\",\n" +
+            "          \"governor\": 2,\n" +
             "          \"governorGloss\": \"wolf\",\n" +
-            "          \"dependent\": \"1\",\n" +
+            "          \"dependent\": 1,\n" +
             "          \"dependentGloss\": \"Bad\"\n" +
             "        }\n" +
             "      ],\n" +
             "      \"tokens\": [\n" +
             "        {\n" +
-            "          \"index\": \"1\",\n" +
+            "          \"index\": 1,\n" +
             "          \"word\": \"Bad\",\n" +
+            "          \"originalText\": \"Bad\",\n" +
             "          \"lemma\": \"bad\",\n" +
-            "          \"characterOffsetBegin\": \"0\",\n" +
-            "          \"characterOffsetEnd\": \"3\",\n" +
+            "          \"characterOffsetBegin\": 0,\n" +
+            "          \"characterOffsetEnd\": 3,\n" +
             "          \"pos\": \"JJ\",\n" +
-            "          \"ner\": \"O\"\n" +
+            "          \"ner\": \"O\",\n" +
+            "          \"before\": \"\",\n" +
+            "          \"after\": \" \"\n" +
             "        },\n" +
             "        {\n" +
-            "          \"index\": \"2\",\n" +
+            "          \"index\": 2,\n" +
             "          \"word\": \"wolf\",\n" +
+            "          \"originalText\": \"wolf\",\n" +
             "          \"lemma\": \"wolf\",\n" +
-            "          \"characterOffsetBegin\": \"4\",\n" +
-            "          \"characterOffsetEnd\": \"8\",\n" +
+            "          \"characterOffsetBegin\": 4,\n" +
+            "          \"characterOffsetEnd\": 8,\n" +
             "          \"pos\": \"NN\",\n" +
-            "          \"ner\": \"O\"\n" +
+            "          \"ner\": \"O\",\n" +
+            "          \"before\": \" \",\n" +
+            "          \"after\": \"\"\n" +
             "        }\n" +
             "      ]\n" +
             "    }\n" +

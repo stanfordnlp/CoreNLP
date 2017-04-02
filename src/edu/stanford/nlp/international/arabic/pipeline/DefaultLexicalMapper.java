@@ -188,8 +188,7 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
   public void setup(File path, String... options) {
     if(options == null) return;
 
-    for(int i = 0; i < options.length; i++) {
-      final String opt = options[i];
+    for (final String opt : options) {
       switch (opt) {
         case "ATBVocalizedSection":
           useATBVocalizedSectionMapping = true;

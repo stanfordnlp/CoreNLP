@@ -86,6 +86,8 @@ interface TokenSequenceParserConstants {
     "\"||\"",
     "\":case\"",
     "\":else\"",
+    "\"^\"",
+    "\"$\"",
     "\"*\"",
     "\"?\"",
     "\"+\"",

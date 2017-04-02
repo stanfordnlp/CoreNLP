@@ -16,7 +16,7 @@ public class Dirichlet<E> implements ConjugatePrior<Multinomial<E>, E> {
 
   public Dirichlet(Counter<E> parameters) {
     checkParameters(parameters);
-    this.parameters = new ClassicCounter<E>(parameters);
+    this.parameters = new ClassicCounter<>(parameters);
   }
 
   private void checkParameters(Counter<E> parameters) {
@@ -35,7 +35,7 @@ public class Dirichlet<E> implements ConjugatePrior<Multinomial<E>, E> {
   }
   
   public static <F> Multinomial<F> drawSample(Random random, Counter<F> parameters) {
-    Counter<F> multParameters = new ClassicCounter<F>();
+    Counter<F> multParameters = new ClassicCounter<>();
     double sum = 0.0;
     for (F o : parameters.keySet()) {
       double parameter = Gamma.drawSample(random, parameters.getCount(o));
@@ -45,7 +45,7 @@ public class Dirichlet<E> implements ConjugatePrior<Multinomial<E>, E> {
     for (F o : multParameters.keySet()) {
       multParameters.setCount(o, multParameters.getCount(o)/sum);
     }
-    return new Multinomial<F>(multParameters);
+    return new Multinomial<>(multParameters);
   }
 
   // Faster sampling from a Dirichlet.
@@ -66,10 +66,10 @@ public class Dirichlet<E> implements ConjugatePrior<Multinomial<E>, E> {
 
 
   public static double sampleBeta(double a, double b, Random random) {
-    Counter<Boolean> c = new ClassicCounter<Boolean>();
+    Counter<Boolean> c = new ClassicCounter<>();
     c.setCount(true, a);
     c.setCount(false, b);
-    Multinomial<Boolean> beta = (new Dirichlet<Boolean>(c)).drawSample(random);
+    Multinomial<Boolean> beta = (new Dirichlet<>(c)).drawSample(random);
     return beta.probabilityOf(true);
   }
   
@@ -82,9 +82,9 @@ public class Dirichlet<E> implements ConjugatePrior<Multinomial<E>, E> {
   }
   
   public Dirichlet<E> getPosteriorDistribution(Counter<E> counts) {
-    Counter<E> newParameters = new ClassicCounter<E>(parameters);
+    Counter<E> newParameters = new ClassicCounter<>(parameters);
     Counters.addInPlace(newParameters, counts);
-    return new Dirichlet<E>(newParameters);
+    return new Dirichlet<>(newParameters);
   }
   
   public double getPosteriorPredictiveProbability(Counter<E> counts, E object) {

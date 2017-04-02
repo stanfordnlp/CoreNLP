@@ -44,9 +44,9 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
     // CollectionValuedMap<String, Integer> tokensMatchedPattern = new
     // CollectionValuedMap<String, Integer>();
     try{
-      Set<CandidatePhrase> alreadyLabeledPhrases = new HashSet<CandidatePhrase>();
-      TwoDimensionalCounter<CandidatePhrase, E> allFreq = new TwoDimensionalCounter<CandidatePhrase, E>();
-      CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<E, Triple<String, Integer, Integer>>();
+      Set<CandidatePhrase> alreadyLabeledPhrases = new HashSet<>();
+      TwoDimensionalCounter<CandidatePhrase, E> allFreq = new TwoDimensionalCounter<>();
+      CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<>();
       for (String sentid : sentids) {
         List<CoreLabel> sent = sents.get(sentid).getTokens();
         for (Entry<TokenSequencePattern, E> pEn : patterns.entrySet()) {
@@ -94,13 +94,12 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
             boolean[] addedindices = new boolean[e-s];
             Arrays.fill(addedindices, false);
 
-
             for (int i = s; i < e; i++) {
               CoreLabel l = sent.get(i);
               l.set(PatternsAnnotations.MatchedPattern.class, true);
 
               if(!l.containsKey(PatternsAnnotations.MatchedPatterns.class) || l.get(PatternsAnnotations.MatchedPatterns.class) == null)
-                l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<Pattern>());
+                l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<>());
 
               SurfacePattern pSur = (SurfacePattern) pEn.getValue();
               assert pSur != null : "Why is " + pEn.getValue() + " not present in the index?!";
@@ -132,6 +131,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
                 }
               }
             }
+
             for(int i =0; i < addedindices.length; i++){
               if(i > 0 && i < addedindices.length -1 && addedindices[i-1] == true && addedindices[i] == false && addedindices[i+1] == true){
                 doNotUse = true;
@@ -139,8 +139,8 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
               }
             }
             if (!doNotUse) {
-              matchedTokensByPat.add(pEn.getValue(), new Triple<String, Integer, Integer>(
-                sentid, s, e -1 ));
+              matchedTokensByPat.add(pEn.getValue(), new Triple<>(
+                      sentid, s, e - 1));
 
               phrase = phrase.trim();
               if(!phrase.isEmpty()){
@@ -154,7 +154,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
           }
         }
       }
-      return new Triple<TwoDimensionalCounter<CandidatePhrase, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>, Set<CandidatePhrase>>(allFreq, matchedTokensByPat, alreadyLabeledPhrases);
+      return new Triple<>(allFreq, matchedTokensByPat, alreadyLabeledPhrases);
     }catch(Exception e){
       e.printStackTrace();
       throw e;

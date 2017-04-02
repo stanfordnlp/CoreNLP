@@ -7,8 +7,8 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 
-import edu.stanford.nlp.dcoref.CorefChain;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
@@ -52,7 +52,11 @@ public class XMLOutputter extends AnnotationOutputter {
   public void print(Annotation annotation, OutputStream os, Options options) throws IOException {
     Document xmlDoc = annotationToDoc(annotation, options);
     Serializer ser = new Serializer(os, options.encoding);
-    ser.setIndent(2);
+    if (options.pretty) {
+      ser.setIndent(2);
+    } else {
+      ser.setIndent(0);
+    }
     ser.setMaxLength(0);
     ser.write(xmlDoc);
     ser.flush();

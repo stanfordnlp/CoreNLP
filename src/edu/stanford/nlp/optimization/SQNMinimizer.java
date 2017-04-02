@@ -54,9 +54,9 @@ public class SQNMinimizer<T extends Function> extends StochasticMinimizer<T> {
   private double cPosDef = 1;
   private double epsilon = 1e-10;
 
-  private List<double[]> sList = new ArrayList<double[]>();
-  private List<double[]> yList = new ArrayList<double[]>();
-  private List<Double> roList = new ArrayList<Double>();
+  private List<double[]> sList = new ArrayList<>();
+  private List<double[]> yList = new ArrayList<>();
+  private List<Double> roList = new ArrayList<>();
 
   double[] dir, s,y;
   double ro;
@@ -97,7 +97,7 @@ public class SQNMinimizer<T extends Function> extends StochasticMinimizer<T> {
   @Override
   public Pair<Integer,Double> tune( edu.stanford.nlp.optimization.Function function,double[] initial, long msPerTest){
     System.err.println("No tuning set yet");
-    return new Pair<Integer,Double>(bSize, gain);
+    return new Pair<>(bSize, gain);
   }
 
   private void computeDir(double[] dir, double[] fg) throws SQNMinimizer.SurpriseConvergence {
@@ -139,8 +139,8 @@ public class SQNMinimizer<T extends Function> extends StochasticMinimizer<T> {
   @Override
   protected void init(AbstractStochasticCachingDiffFunction func){
 
-    sList = new ArrayList<double[]>();
-    yList = new ArrayList<double[]>();
+    sList = new ArrayList<>();
+    yList = new ArrayList<>();
    dir = new double[func.domainDimension()];
   }
 

@@ -52,8 +52,8 @@ public abstract class Sieve implements Serializable {
   public Sieve() {
     this.lang = Locale.ENGLISH;
     this.sievename = this.getClass().getSimpleName();
-    this.aType = new HashSet<MentionType>(Arrays.asList(MentionType.values()));
-    this.mType = new HashSet<MentionType>(Arrays.asList(MentionType.values()));
+    this.aType = new HashSet<>(Arrays.asList(MentionType.values()));
+    this.mType = new HashSet<>(Arrays.asList(MentionType.values()));
     this.maxSentDist = 1000;
     this.mTypeStr = Generics.newHashSet();
     this.aTypeStr = Generics.newHashSet();
@@ -111,7 +111,7 @@ public abstract class Sieve implements Serializable {
         return sieve;
         
       case RF:
-        RFSieve rfsieve = IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, sievename));
+        RFSieve rfsieve = IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getPathModel(props, sievename));
         rfsieve.thresMerge = CorefProperties.getMergeThreshold(props, sievename);
         System.err.println("Done.\nMerging threshold: "+rfsieve.thresMerge);
         return rfsieve;
@@ -128,7 +128,7 @@ public abstract class Sieve implements Serializable {
   
   
   public static List<Sieve> loadSieves(Properties props) throws Exception {
-    List<Sieve> sieves = new ArrayList<Sieve>();
+    List<Sieve> sieves = new ArrayList<>();
     String sieveProp = CorefProperties.getSieves(props);
     String currentSieveForTrain = CorefProperties.getCurrentSieveForTrain(props);
     String[] sievenames = (currentSieveForTrain==null)? 
@@ -225,7 +225,7 @@ public abstract class Sieve implements Serializable {
       int mPosition,
       List<List<Mention>> orderedMentionsBySentence,
       Dictionaries dict) {
-    List<Mention> orderedAntecedents = new ArrayList<Mention>();
+    List<Mention> orderedAntecedents = new ArrayList<>();
     // ordering antecedents
     if (antecedentSentence == m.sentNum) {   // same sentence
       orderedAntecedents.addAll(orderedMentionsBySentence.get(m.sentNum).subList(0, mPosition));
@@ -243,7 +243,7 @@ public abstract class Sieve implements Serializable {
 
   /** Divides a sentence into clauses and sort the antecedents for pronoun matching  */
   private static List<Mention> sortMentionsByClause(List<Mention> l, Mention m1) {
-    List<Mention> sorted = new ArrayList<Mention>();
+    List<Mention> sorted = new ArrayList<>();
     Tree tree = m1.contextParseTree;
     Tree current = m1.mentionSubTree;
     if(tree==null || current==null) return l;

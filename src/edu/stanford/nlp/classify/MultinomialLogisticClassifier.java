@@ -84,7 +84,7 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
     }
      
     // calculate probability of each class
-    Counter<L> result = new ClassicCounter<L>();
+    Counter<L> result = new ClassicCounter<>();
     int numClasses = labelIndex.size();
     double[] sigmoids = LogisticUtils.calculateSigmoids(weights, featureIndices, featureValues);
 
@@ -137,9 +137,9 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
 
   public Map<L, Counter<F>> weightsAsGenericCounter() {
 
-    Map<L, Counter<F>> allweights = new HashMap<L, Counter<F>>();
+    Map<L, Counter<F>> allweights = new HashMap<>();
     for(int i = 0; i < weights.length; i++){
-      Counter<F> c = new ClassicCounter<F>();
+      Counter<F> c = new ClassicCounter<>();
       L label  = labelIndex.get(i);
       double[] w =  weights[i];
       for (F f : featureIndex) {

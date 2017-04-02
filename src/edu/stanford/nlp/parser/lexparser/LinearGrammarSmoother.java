@@ -48,8 +48,8 @@ public class LinearGrammarSmoother implements Function<Pair<UnaryGrammar,BinaryG
   public Pair<UnaryGrammar,BinaryGrammar> apply(Pair<UnaryGrammar,BinaryGrammar> bgug) {
     
     ALPHA = trainOptions.ruleSmoothingAlpha;
-    Counter<String> symWeights = new ClassicCounter<String>();
-    Counter<String> symCounts = new ClassicCounter<String>();
+    Counter<String> symWeights = new ClassicCounter<>();
+    Counter<String> symCounts = new ClassicCounter<>();
 
     //Tally unary rules
     for (UnaryRule rule : bgug.first()) {

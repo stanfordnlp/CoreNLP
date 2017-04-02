@@ -8,8 +8,8 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Index;
 
 
-public abstract class AbstractUnknownWordModelTrainer 
-  implements UnknownWordModelTrainer 
+public abstract class AbstractUnknownWordModelTrainer
+  implements UnknownWordModelTrainer
 {
   double treesRead;
   double totalTrees;
@@ -20,8 +20,8 @@ public abstract class AbstractUnknownWordModelTrainer
   Lexicon lex;
 
   @Override
-  public void initializeTraining(Options op, Lexicon lex, 
-                                 Index<String> wordIndex, 
+  public void initializeTraining(Options op, Lexicon lex,
+                                 Index<String> wordIndex,
                                  Index<String> tagIndex, double totalTrees) {
     this.totalTrees = totalTrees;
     this.treesRead = 0;
@@ -34,10 +34,12 @@ public abstract class AbstractUnknownWordModelTrainer
 
 
 
+  @Override
   public final void train(Collection<Tree> trees) {
     train(trees, 1.0);
   }
 
+  @Override
   public final void train(Collection<Tree> trees, double weight) {
     for (Tree tree : trees) {
       train(tree, weight);
@@ -45,6 +47,7 @@ public abstract class AbstractUnknownWordModelTrainer
   }
 
 
+  @Override
   public final void train(Tree tree, double weight) {
     incrementTreesRead(weight);
     int loc = 0;
@@ -55,7 +58,9 @@ public abstract class AbstractUnknownWordModelTrainer
     }
   }
 
+  @Override
   public void incrementTreesRead(double weight) {
     treesRead += weight;
   }
+
 }

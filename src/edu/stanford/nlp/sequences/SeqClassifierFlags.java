@@ -408,7 +408,7 @@ public class SeqClassifierFlags implements Serializable {
   // this now controls nothing
   public boolean splitDocuments = true;
 
-  public boolean printXML = false;
+  public boolean printXML; // This is disused and can be removed when breaking serialization
 
   public boolean useSeenFeaturesOnly = false;
 
@@ -434,7 +434,7 @@ public class SeqClassifierFlags implements Serializable {
   public transient String serializeToText = null;
   public transient int interimOutputFreq = 0;
   public transient String initialWeights = null;
-  public transient List<String> gazettes = new ArrayList<String>();
+  public transient List<String> gazettes = new ArrayList<>();
   public transient String selfTrainFile = null;
 
   public String inputEncoding = "UTF-8"; // used for CTBSegDocumentReader as well
@@ -508,7 +508,7 @@ public class SeqClassifierFlags implements Serializable {
 
   public String readerAndWriter = "edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter";
 
-  public List<String> comboProps = new ArrayList<String>();
+  public List<String> comboProps = new ArrayList<>();
 
   public boolean usePrediction = false;
 
@@ -683,8 +683,9 @@ public class SeqClassifierFlags implements Serializable {
   // whether to print a line saying each ObjectBank entry (usually a filename)
   public boolean announceObjectBankEntries = false;
 
-  // This is for use with the OWLQNMinimizer. To use it, set useQN=false, and this to a positive number.
-  // A smaller number means more features are retained. Depending on the problem, a good value might be
+  // This is for use with the OWLQNMinimizer L1 regularization. To use it, set useQN=false,
+  // and this to a positive number. A smaller number means more features are retained.
+  // Depending on the problem, a good value might be
   // between 0.75 (POS tagger) down to 0.01 (Chinese word segmentation)
   public double l1reg = 0.0;
 
@@ -957,7 +958,8 @@ public class SeqClassifierFlags implements Serializable {
   public boolean separateASCIIandRange = true;
   public double dropoutRate = 0.0;
   public double dropoutScale = 1.0;
-  public int multiThreadGrad = 1;
+  // keenon: changed from = 1, nowadays it makes sense to default to parallelism
+  public int multiThreadGrad = Runtime.getRuntime().availableProcessors();
   public int maxQNItr = 0;
   public boolean dropoutApprox = false;
   public String unsupDropoutFile = null;
@@ -996,7 +998,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useHardGE = false;
   public boolean useCRFforUnsup = false;
   public boolean useGEforSup = false;
-  public boolean useKnownLCWords = true;
+  public boolean useKnownLCWords = true; // disused, can be deleted when breaking serialization
   // allow for multiple feature factories.
   public String[] featureFactories = null;
   public List<Object[]> featureFactoriesArgs = null;
@@ -1031,13 +1033,16 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean splitSlashHyphenWords;  // unused with new enum below. Remove when breaking serialization.
 
-  /** If this number is strictly positive (greater than 0; 0 means unlimited),
-   *  then add at most this many words to the knownLCwords.  (Words will only
-   *  be added if useKnownLCWords is true.) By default, this is set to 10,000,
-   *  so it will work on a few documents, but not cause unlimited memory growth
-   *  if a SequenceClassifier is run for a long time!
+  /** How many words it is okay to add to knownLCWords after initial training.
+   *  If this number is negative, then add any number of further words during classifying/testing.
+   *  If this number is non-negative (greater than or equal to 0), then add at most this many words
+   *  to the knownLCWords. By default, this is now set to 0, so their is no transductive learning on the
+   *  test set, since too many people complained about results changing over runs. However, traditionally
+   *  we used a non-zero value, and this usually helps performance a bit (until 2014 it was -1, then it
+   *  was set to 10_000, so that memory would not grow without bound if a SequenceClassifier is run for
+   *  a long time.
    */
-  public int maxAdditionalKnownLCWords = 10_000;
+  public int maxAdditionalKnownLCWords = 0; // was 10_000;
 
   public enum SlashHyphenEnum { NONE, WFRAG, WORD, BOTH };
 
@@ -1358,7 +1363,7 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("phraseGazettes")) {
         StringTokenizer st = new StringTokenizer(val, " ,;\t");
         if (phraseGazettes == null) {
-          phraseGazettes = new ArrayList<String>();
+          phraseGazettes = new ArrayList<>();
         }
         while (st.hasMoreTokens()) {
           phraseGazettes.add(st.nextToken());
@@ -1590,7 +1595,7 @@ public class SeqClassifierFlags implements Serializable {
         useGazettes = true;
         StringTokenizer st = new StringTokenizer(val, " ,;\t");
         if (gazettes == null) {
-          gazettes = new ArrayList<String>();
+          gazettes = new ArrayList<>();
         } // for after deserialization, as gazettes is transient
         while (st.hasMoreTokens()) {
           gazettes.add(st.nextToken());
@@ -1693,15 +1698,13 @@ public class SeqClassifierFlags implements Serializable {
         }
 
         featureFactories = new String[numFactories];
-        featureFactoriesArgs = new ArrayList<Object[]>(numFactories);
+        featureFactoriesArgs = new ArrayList<>(numFactories);
         for (int i = 0; i < numFactories; i++) {
           featureFactories[i] = getFeatureFactory(tokens[i]);
           featureFactoriesArgs.add(new Object[0]);
         }
       } else if (key.equalsIgnoreCase("printXML")) {
-        printXML = Boolean.parseBoolean(val); // todo: This appears unused now.
-        // Was it replaced by
-        // outputFormat?
+        System.err.println("printXML is disused; perhaps try using the -outputFormat xml option.");
 
       } else if (key.equalsIgnoreCase("useSeenFeaturesOnly")) {
         useSeenFeaturesOnly = Boolean.parseBoolean(val);
@@ -2546,9 +2549,10 @@ public class SeqClassifierFlags implements Serializable {
         useCRFforUnsup = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useGEforSup")){
         useGEforSup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKnownLCWords")){
-        useKnownLCWords = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNoisyLabel")){
+      } else if (key.equalsIgnoreCase("useKnownLCWords")) {
+        System.err.println("useKnownLCWords is deprecated; see maxAdditionalKnownLCWords (true = -1, false = 0");
+        maxAdditionalKnownLCWords = Boolean.parseBoolean(val) ? -1: 0;
+      } else if (key.equalsIgnoreCase("useNoisyLabel")) {
         useNoisyLabel = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("errorMatrix")) {
         errorMatrix = val;

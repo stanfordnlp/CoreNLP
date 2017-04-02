@@ -40,7 +40,7 @@ public abstract class RecursiveTreeTransformer implements TreeTransformer {
   }
 
   public Tree transformNonterminal(Tree tree) {
-    List<Tree> children = new ArrayList<Tree>(tree.children().length);
+    List<Tree> children = new ArrayList<>(tree.children().length);
     for (Tree child : tree.children()) {
       children.add(transformHelper(child));
     }

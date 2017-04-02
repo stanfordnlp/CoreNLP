@@ -51,7 +51,7 @@ public class ShiftParamsLogisticClassifierFactory<L, F> implements ClassifierFac
 
     labels = dataset.getLabelsArray();
 
-    return new MultinomialLogisticClassifier<L, F>(trainWeights(), dataset.featureIndex, dataset.labelIndex);
+    return new MultinomialLogisticClassifier<>(trainWeights(), dataset.featureIndex, dataset.labelIndex);
   }
   
   private double[][] trainWeights() {
@@ -97,10 +97,5 @@ public class ShiftParamsLogisticClassifierFactory<L, F> implements ClassifierFac
     }
     return result;
   }
-  
-  @Override
-  @Deprecated
-  public MultinomialLogisticClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
-    return null;
-  }
+
 }

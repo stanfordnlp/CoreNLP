@@ -73,7 +73,7 @@ public final class SpanishVerbStripper implements Serializable {
    *
    * @param dictPath the path to the dictionary file
    */
-  private HashMap<String, String> setupDictionary(String dictPath) {
+  private static HashMap<String, String> setupDictionary(String dictPath) {
     HashMap<String, String> dictionary = new HashMap<>();
     BufferedReader br = null;
     try {
@@ -83,7 +83,7 @@ public final class SpanishVerbStripper implements Serializable {
         if (words.length < 3) {
           System.err.printf("SpanishVerbStripper: adding words to dict, missing fields, ignoring line: %s%n", line);
         } else {
-          dict.put(words[0], words[2]);
+          dictionary.put(words[0], words[2]);
         }
       }
     } catch (UnsupportedEncodingException e) {
@@ -105,12 +105,9 @@ public final class SpanishVerbStripper implements Serializable {
     new Pair(Pattern.compile("ú"), "u")
   };
 
-  // CONSTRUCTORS
+  // CONSTRUCTOR
 
-  private SpanishVerbStripper() {
-    this(DEFAULT_DICT);
-  }
-
+  /** Access via the singleton-like getInstance() methods. */
   private SpanishVerbStripper(String dictPath) {
     dict = setupDictionary(dictPath);
   }
@@ -141,18 +138,18 @@ public final class SpanishVerbStripper implements Serializable {
    * The verbs in this set have accents in their infinitive forms;
    * don't remove the accents when stripping pronouns!
    */
-  private static final Set<String> accentedInfinitives = new HashSet<String>(Arrays.asList(
-    "desleír",
-    "desoír",
-    "embaír",
-    "engreír",
-    "entreoír",
-    "freír",
-    "oír",
-    "refreír",
-    "reír",
-    "sofreír",
-    "sonreír"
+  private static final Set<String> accentedInfinitives = new HashSet<>(Arrays.asList(
+          "desleír",
+          "desoír",
+          "embaír",
+          "engreír",
+          "entreoír",
+          "freír",
+          "oír",
+          "refreír",
+          "reír",
+          "sofreír",
+          "sonreír"
   ));
 
   // STATIC FUNCTIONS
@@ -189,6 +186,8 @@ public final class SpanishVerbStripper implements Serializable {
       return Character.toLowerCase(letter);
     }
   }
+
+  private static final Pattern nosse = Pattern.compile("nos|se");
 
   /**
    * Examines the given verb pair and returns <tt>true</tt> if it is a
@@ -231,7 +230,7 @@ public final class SpanishVerbStripper implements Serializable {
     // person plural imperative + object pronoun
     //
     // (vámo, nos) -> (vámos, nos)
-    if (firstPron.matches("nos|se") && dict.containsKey(stripped + 's')) {
+    if (nosse.matcher(firstPron).matches() && dict.containsKey(stripped + 's')) {
       pair.setFirst(pair.first() + getCase(pair.first(), 's'));
       return true;
     }
@@ -255,7 +254,7 @@ public final class SpanishVerbStripper implements Serializable {
       String stripped = word.substring(0, m.start());
       stripped = removeAccents(stripped);
 
-      List<String> attached = new ArrayList<String>();
+      List<String> attached = new ArrayList<>();
       for (int i = 0; i < m.groupCount(); i++)
         attached.add(m.group(i + 1));
 

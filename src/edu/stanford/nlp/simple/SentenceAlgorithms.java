@@ -3,7 +3,6 @@ package edu.stanford.nlp.simple;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -11,8 +10,6 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;

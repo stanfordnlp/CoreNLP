@@ -38,7 +38,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class ScorePhrases<E extends Pattern> {
 
-  Map<String, Boolean> writtenInJustification = new HashMap<String, Boolean>();
+  Map<String, Boolean> writtenInJustification = new HashMap<>();
 
   ConstantsAndVariables constVars = null;
 
@@ -64,7 +64,7 @@ public class ScorePhrases<E extends Pattern> {
                                                  Set<CandidatePhrase> ignoreWords, double thresholdWordExtract) {
 
     Iterator<CandidatePhrase> termIter = Counters.toPriorityQueue(newdt).iterator();
-    Counter<CandidatePhrase> finalwords = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> finalwords = new ClassicCounter<>();
 
     while (termIter.hasNext()) {
 
@@ -160,11 +160,11 @@ public class ScorePhrases<E extends Pattern> {
     boolean computeProcDataFreq = false;
     if (Data.processedDataFreq == null) {
       computeProcDataFreq = true;
-      Data.processedDataFreq = new ClassicCounter<CandidatePhrase>();
+      Data.processedDataFreq = new ClassicCounter<>();
       assert Data.rawFreq != null;
     }
 
-    Set<CandidatePhrase> alreadyIdentifiedWords = new HashSet<CandidatePhrase>(constVars.getLearnedWords().get(label).keySet());
+    Set<CandidatePhrase> alreadyIdentifiedWords = new HashSet<>(constVars.getLearnedWords(label).keySet());
     alreadyIdentifiedWords.addAll(constVars.getSeedLabelDictionary().get(label));
     Counter<CandidatePhrase> words = learnNewPhrasesPrivate(label,
         patternsForEachToken, patternsLearnedThisIter, allSelectedPatterns, alreadyIdentifiedWords,
@@ -182,7 +182,7 @@ public class ScorePhrases<E extends Pattern> {
                             CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat, Set<CandidatePhrase> alreadyLabeledWords) {
 
     Redwood.log(Redwood.DBG, "Applying pattern " + pattern + " to a total of " + sents.size() + " sentences ");
-    List<String> notAllowedClasses = new ArrayList<String>();
+    List<String> notAllowedClasses = new ArrayList<>();
     List<String> sentids = CollectionUtils.toList(sents.keySet());
     if(constVars.doNotExtractPhraseAnyWordLabeledOtherClass){
       for(String l: constVars.getAnswerClass().keySet()){
@@ -198,7 +198,7 @@ public class ScorePhrases<E extends Pattern> {
     Map<SemgrexPattern, E> depPatternsLearnedThisIterConverted = null;
 
     if(constVars.patternType.equals(PatternFactory.PatternType.SURFACE)) {
-      surfacePatternsLearnedThisIterConverted = new HashMap<TokenSequencePattern, E>();
+      surfacePatternsLearnedThisIterConverted = new HashMap<>();
       String patternStr = null;
       try{
         patternStr = pattern.toString(notAllowedClasses);
@@ -209,7 +209,7 @@ public class ScorePhrases<E extends Pattern> {
         throw e;
       }
     }else if(constVars.patternType.equals(PatternFactory.PatternType.DEP)){
-      depPatternsLearnedThisIterConverted = new HashMap<SemgrexPattern, E>();
+      depPatternsLearnedThisIterConverted = new HashMap<>();
       SemgrexPattern pat = SemgrexPattern.compile(pattern.toString(notAllowedClasses), new edu.stanford.nlp.semgraph.semgrex.Env(constVars.env.get(label).getVariables()));
       depPatternsLearnedThisIterConverted.put(pat, pattern);
     } else
@@ -332,13 +332,13 @@ public class ScorePhrases<E extends Pattern> {
   protected Map<E, Map<String, DataInstance>> getSentences(Map<E, Set<String>> sentids) {
     try{
 
-      Set<File> files = new HashSet<File>();
+      Set<File> files = new HashSet<>();
 
-      Map<E, Map<String, DataInstance>> sentsAll  = new HashMap<E, Map<String, DataInstance>>();
-      CollectionValuedMap<String, E> sentIds2Pats = new CollectionValuedMap<String, E>();
+      Map<E, Map<String, DataInstance>> sentsAll  = new HashMap<>();
+      CollectionValuedMap<String, E> sentIds2Pats = new CollectionValuedMap<>();
       for(Map.Entry<E, Set<String>> setEn: sentids.entrySet()){
         if(!sentsAll.containsKey(setEn.getKey()))
-          sentsAll.put(setEn.getKey(), new HashMap<String, DataInstance>());
+          sentsAll.put(setEn.getKey(), new HashMap<>());
         for(String s: setEn.getValue()){
           sentIds2Pats.add(s, setEn.getKey());
           if(constVars.batchProcessSents){
@@ -548,7 +548,7 @@ public class ScorePhrases<E extends Pattern> {
     TwoDimensionalCounter<E, CandidatePhrase> patternsAndWords4Label,
     String identifier, Set<CandidatePhrase> ignoreWords, boolean computeProcDataFreq) throws IOException, ClassNotFoundException {
 
-    Set<CandidatePhrase> alreadyLabeledWords = new HashSet<CandidatePhrase>();
+    Set<CandidatePhrase> alreadyLabeledWords = new HashSet<>();
     if (constVars.doNotApplyPatterns) {
       // if want to get the stats by the lossy way of just counting without
       // applying the patterns
@@ -603,10 +603,10 @@ public class ScorePhrases<E extends Pattern> {
         ignoreWordsAll = CollectionUtils.unionAsSet(ignoreWords, constVars.getOtherSemanticClassesWords());
       }
       else
-        ignoreWordsAll = new HashSet<CandidatePhrase>(constVars.getOtherSemanticClassesWords());
+        ignoreWordsAll = new HashSet<>(constVars.getOtherSemanticClassesWords());
 
       ignoreWordsAll.addAll(constVars.getSeedLabelDictionary().get(label));
-      ignoreWordsAll.addAll(constVars.getLearnedWords().get(label).keySet());
+      ignoreWordsAll.addAll(constVars.getLearnedWords(label).keySet());
       System.out.println("ignoreWordsAll contains word U.S. is " + ignoreWordsAll.contains(CandidatePhrase.createOrGet("U.S.")));
 
       Counter<CandidatePhrase> finalwords = chooseTopWords(phraseScores, terms,
@@ -639,7 +639,7 @@ public class ScorePhrases<E extends Pattern> {
       if (constVars.outDir != null && !constVars.outDir.isEmpty()) {
         String outputdir = constVars.outDir + "/" + identifier +"/"+ label;
         IOUtils.ensureDir(new File(outputdir));
-        TwoDimensionalCounter<CandidatePhrase, CandidatePhrase> reasonForWords = new TwoDimensionalCounter<CandidatePhrase, CandidatePhrase>();
+        TwoDimensionalCounter<CandidatePhrase, CandidatePhrase> reasonForWords = new TwoDimensionalCounter<>();
         for (CandidatePhrase word : finalwords.keySet()) {
           for (E l : wordsPatExtracted.getCounter(word).keySet()) {
             for (CandidatePhrase w2 : patternsAndWords4Label.getCounter(l)) {
@@ -713,10 +713,10 @@ public class ScorePhrases<E extends Pattern> {
       return finalwords;
     } else if (constVars.wordScoring.equals(WordScoring.BPB)) {
       Counters.addInPlace(terms, wordsPatExtracted);
-      Counter<CandidatePhrase> maxPatWeightTerms = new ClassicCounter<CandidatePhrase>();
-      Map<CandidatePhrase, E> wordMaxPat = new HashMap<CandidatePhrase, E>();
+      Counter<CandidatePhrase> maxPatWeightTerms = new ClassicCounter<>();
+      Map<CandidatePhrase, E> wordMaxPat = new HashMap<>();
       for (Entry<CandidatePhrase, ClassicCounter<E>> en : terms.entrySet()) {
-        Counter<E> weights = new ClassicCounter<E>();
+        Counter<E> weights = new ClassicCounter<>();
         for (E k : en.getValue().keySet())
           weights.setCount(k, patternsLearnedThisIter.getCount(k));
         maxPatWeightTerms.setCount(en.getKey(), Counters.max(weights));
@@ -738,7 +738,7 @@ public class ScorePhrases<E extends Pattern> {
       } else if (words.size() == 1)
         bestw = words.iterator().next();
       else
-        return new ClassicCounter<CandidatePhrase>();
+        return new ClassicCounter<>();
 
       Redwood.log(ConstantsAndVariables.minimaldebug, "Selected Words: " + bestw);
 

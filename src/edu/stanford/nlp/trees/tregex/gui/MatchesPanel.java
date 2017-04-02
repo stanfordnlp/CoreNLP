@@ -168,7 +168,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
 
     list.addMouseMotionListener(mouseListener);
     list.addMouseListener(mouseListener);
-    listeners = new ArrayList<MatchesPanelListener>();
+    listeners = new ArrayList<>();
     //layout
     this.setLayout(new BorderLayout());
     this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(),"Matches: "));
@@ -184,7 +184,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   }
 
   private static List<Tree> getTreebankAsList(Treebank tb) {
-    List<Tree> treeList = new ArrayList<Tree>();
+    List<Tree> treeList = new ArrayList<>();
     if (tb != null) {
       treeList.addAll(tb);
     }
@@ -284,7 +284,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   public Pair<TreeFromFile, List<Tree>> getSelectedMatch() {
     if(!isEmpty()) {
       TreeFromFile selectedTree = (TreeFromFile) list.getSelectedValue();
-      return new Pair<TreeFromFile,List<Tree>>(selectedTree, matchedParts.get(selectedTree));
+      return new Pair<>(selectedTree, matchedParts.get(selectedTree));
     }
     else
       return null;

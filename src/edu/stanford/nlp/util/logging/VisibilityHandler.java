@@ -114,7 +114,7 @@ public class VisibilityHandler extends LogRecordHandler {
     }
     //--Return
     if(isPrinting){
-      ArrayList<Record> retVal = new ArrayList<Record>();
+      ArrayList<Record> retVal = new ArrayList<>();
       retVal.add(record);
       return retVal;
     } else {

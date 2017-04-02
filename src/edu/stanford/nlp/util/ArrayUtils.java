@@ -37,7 +37,7 @@ public class ArrayUtils {
       }
     }
 
-    List<Byte> bytes = new ArrayList<Byte>();
+    List<Byte> bytes = new ArrayList<>();
 
     int index = 0;
     int prevNum = 0;
@@ -112,7 +112,7 @@ public class ArrayUtils {
 
     boolean gettingSize = true;
     int size = 0;
-    List<Integer> ints = new ArrayList<Integer>();
+    List<Integer> ints = new ArrayList<>();
     int gap = 0;
     int prevNum = 0;
 
@@ -168,7 +168,7 @@ public class ArrayUtils {
       }
     }
 
-    List<Byte> bytes = new ArrayList<Byte>();
+    List<Byte> bytes = new ArrayList<>();
 
     int index = 0;
     int prevNum = 0;
@@ -261,7 +261,7 @@ public class ArrayUtils {
     boolean gettingSize1 = true;
     boolean gettingSize2 = false;
     int size1 = 0;
-    List<Integer> ints = new ArrayList<Integer>();
+    List<Integer> ints = new ArrayList<>();
     int gap = 0;
     int size2 = 0;
     int prevNum = 0;
@@ -665,7 +665,7 @@ public class ArrayUtils {
    * singleton list back with just that array as an element.
    */
   public static List<Integer> asList(int[] array) {
-    List<Integer> l = new ArrayList<Integer>();
+    List<Integer> l = new ArrayList<>();
     for (int i : array) {
       l.add(i);
     }
@@ -899,12 +899,7 @@ public class ArrayUtils {
    */
 
   public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens){
-     return getSubListIndex(tofind, tokens, new Function<Pair, Boolean>(){
-       @Override
-       public Boolean apply(Pair objectObjectPair) {
-         return objectObjectPair.first().equals(objectObjectPair.second());
-       }
-     });
+     return getSubListIndex(tofind, tokens, (o1) -> o1.first().equals(o1.second()));
   }
 
   /**
@@ -919,7 +914,7 @@ public class ArrayUtils {
   public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens, Function<Pair, Boolean> matchingFunction){
     if(tofind.length > tokens.length)
       return null;
-    List<Integer> allIndices = new ArrayList<Integer>();
+    List<Integer> allIndices = new ArrayList<>();
     boolean matched = false;
     int index = -1;
     int lastUnmatchedIndex = 0;

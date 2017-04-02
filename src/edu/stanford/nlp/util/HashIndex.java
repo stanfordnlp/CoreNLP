@@ -180,6 +180,33 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   }
 
   /**
+   * Add the given item to the index, but without taking any locks.
+   * Use this method with care!
+   * But, this offers a noticable performance improvement if it is safe to use.
+   *
+   * @see Index#addToIndex(E)
+   */
+  public int addToIndexUnsafe(E o) {
+    if (indexes.isEmpty()) {  // a surprisingly common case in TokensRegex
+      objects.add(o);
+      indexes.put(o, 0);
+      return 0;
+    } else {
+      Integer index = indexes.get(o);
+      if (index == null) {
+        if (locked) {
+          index = -1;
+        } else {
+          index = objects.size();
+          objects.add(o);
+          indexes.put(o, index);
+        }
+      }
+      return index;
+    }
+  }
+
+  /**
    * Takes an Object and returns the integer index of the Object,
    * perhaps adding it to the index first.
    * Returns -1 if the Object is not in the Index.
@@ -258,7 +285,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    */
   public HashIndex() {
     super();
-    objects = new ArrayList<E>();
+    objects = new ArrayList<>();
     indexes = Generics.newHashMap();
   }
 
@@ -268,7 +295,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    */
   public HashIndex(int capacity) {
     super();
-    objects = new ArrayList<E>(capacity);
+    objects = new ArrayList<>(capacity);
     indexes = Generics.newHashMap(capacity);
   }
 
@@ -335,7 +362,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @return An index built out of the lines in the file
    */
   public static Index<String> loadFromFilename(String file) {
-    Index<String> index = new HashIndex<String>();
+    Index<String> index = new HashIndex<>();
     BufferedReader br = null;
     try {
       br = IOUtils.readerFromString(file);
@@ -382,7 +409,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @return An Index read from a file
    */
   public static Index<String> loadFromReader(BufferedReader br) throws IOException {
-    HashIndex<String> index = new HashIndex<String>();
+    HashIndex<String> index = new HashIndex<>();
     String line = br.readLine();
     // terminate if EOF reached, or if a blank line is encountered.
     while ((line != null) && (line.length() > 0)) {
@@ -484,7 +511,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @return An index built out of the lines in the file
    */
   public static Index<String> loadFromFileWithList(String file) {
-    Index<String> index = new HashIndex<String>();
+    Index<String> index = new HashIndex<>();
     BufferedReader br = null;
     try {
       br = new BufferedReader(new FileReader(file));

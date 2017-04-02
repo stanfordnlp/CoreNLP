@@ -1,0 +1,147 @@
+loglinear package quickstart:
+
+First, read the ConcatVector section in ARCH.txt.
+
+To jump straight into working code, go read generateSentenceModel() in edu.stanford.nlp.loglinear.CoNLLBenchmark.
+
+#####################################################
+
+Creating and featurizing a GraphicalModel
+
+#####################################################
+
+To construct a GraphicalModel, which you'll need for training and inference, do the following:
+
+-------------
+GraphicalModel model = new GraphicalModel();
+-------------
+
+Now, to add a factor to the model, you'll need to know two things: Who are the neighbor variables of this factor, and
+how many states do each of those variables possess? As an example, let's add a factor between variable 2 and variable 7,
+where variable 2 has 3 states, and variable 7 has 2 states.
+
+-------------
+int[] neighbors = new int[]{2,7};
+int[] neighborSizes = new int[]{3,2}; // This must appear in the same order as neighbors
+
+model.addFactor(neighbors, neighborSizes, (int[] assignment) -> {
+    // TODO: In the next paragraph we'll discuss featurizing each possible assignment to neighbors
+    return new ConcatVector(0);
+});
+-------------
+
+You'll also need to know how to featurize your new factors. That happens inside the closure you pass into the factor.
+The closure takes as an argument an assignment to the factor (in the same order as neighbors and neighborSizes) and
+expects in response a ConcatVector of features.
+
+Make sure your closures are idempotent! The system actually stores these closures, rather than their resulting
+ConcatVector's. This is an optimization. The GC in modern JVMs is tuned to collect large numbers of young objects, so
+creating new ConcatVectors every gradient calculation and then immediately disposing of them turns out to increase
+speed and dramatically decrease heap footprint and GC load.
+
+Here's how to create a feature closure:
+
+-------------
+int[] neighbors = new int[]{2,7};
+int[] neighborSizes = new int[]{3,2}; // This must appear in the same order as neighbors
+
+model.addFactor(neighbors, neighborSizes, (int[] assignment) -> {
+
+    // This is how assignment[] is structured
+
+    int variable2Assignment = assignment[0];
+    int variable7Assignment = assignment[1];
+
+    // Create a new ConcatVector with 2 segments:
+
+    ConcatVector features = new ConcatVector();
+
+    // Add a dense feature as feature 0, of length 2
+    // (Dense features in ConcatVector's are mostly used for embeddings)
+
+    features.setDenseComponent(0, new double[]{
+        variable2Assignment * 2 + variable7Assignment,
+        variable2Assignment + variable7Assignment * 2,
+    });
+
+    // Add a sparse (one-hot) feature as feature 1
+
+    int sparseIndex = variable2Assignment;
+    double sparseValue = 1.0;
+    features.setSparseComponent(1, sparseIndex, sparseValue);
+
+    // Return our feature set to complete the closure
+
+    return features;
+});
+-------------
+
+And that's all there is to it. Just repeat this several times to populate a GraphicalModel for whatever problem you've
+got.
+
+#####################################################
+
+Training a set of weights
+
+#####################################################
+
+Assuming you've got a bunch of GraphicalModel objects, there's not much you need to do to train a system. First, you
+need to provide labels to all your variables that the training system understands. To do this, you need to get the
+HashMap<String,String> object that represents metadata, and put in labels that the LogLikelihood system understands.
+You must label every variable that is mentioned in any factor in your model.
+
+-------------
+GraphicalModel model = new GraphicalModel();
+
+// Omitted model construction, see previous section
+
+// Tell LogLikelihood to treat variable 2 as having the assignment "1" in training labels
+
+model.getVariableMetadataByReference(2).put(LogLikelihoodFunction.VARIABLE_TRAINING_VALUE, "1");
+
+// Tell LogLikelihood to treat variable 7 as having the assignment "0" in training labels
+
+model.getVariableMetadataByReference(7).put(LogLikelihoodFunction.VARIABLE_TRAINING_VALUE, "0");
+-------------
+
+Once you've got an array of labeled models, training is pretty straightforward. We create an optimizer, pass it a
+LogLikelihoodFunction as the function to optimize, and the array of models as the data to optimize over. That returns
+us the optimal set of weights.
+
+-------------
+GraphicalModel[] trainingSet = //omitted dataset construction;
+
+// Create the optimizer we will use
+
+AbstractBatchOptimizer opt = new BacktrackingAdaGradOptimizer();
+
+// Call the optimizer, with a dataset, a function to optimize, initial weights, and l2 regularization constant
+
+ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodFunction(), new ConcatVector(0), 0.1);
+-------------
+
+We can then use these weights for inference.
+
+#####################################################
+
+Inference
+
+#####################################################
+
+Inference is easy once we have a set of weights we want to use. We simply create a CliqueTree for the model we're trying
+to optimize and the weights we want, and then ask it for inference results.
+
+-------------
+GraphicalModel model = // see previous section;
+ConcatVector weights = // see first section;
+
+CliqueTree tree = new CliqueTree(model, weights);
+
+int[] mapAssignment = tree.calculateMAP();
+double[][] marginalProbabilities = tree.calculateMarginals();
+-------------
+
+The MAP assignment comes back as an array of assignments, where the assignment for variable 0 is at index 0, variable 1
+is at index 1, and so forth. The marginalProbilities array is organized in the same way, except instead of an int for
+an assignment, there is an array of doubles, one for each possible assignment for the variable it represents, which
+represent global marginals.

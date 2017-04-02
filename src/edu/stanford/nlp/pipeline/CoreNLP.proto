@@ -49,24 +49,26 @@ message Document {
 // The serialized version of a CoreMap representing a sentence.
 //
 message Sentence {
-  repeated Token           token                               = 1;
-  required uint32          tokenOffsetBegin                    = 2;
-  required uint32          tokenOffsetEnd                      = 3;
-  optional uint32          sentenceIndex                       = 4;
-  optional uint32          characterOffsetBegin                = 5;
-  optional uint32          characterOffsetEnd                  = 6;
-  optional ParseTree       parseTree                           = 7;
-  optional ParseTree       binarizedParseTree                  = 31;
-  optional ParseTree       annotatedParseTree                  = 32;
-  optional string          sentiment                           = 33;
-  optional DependencyGraph basicDependencies                   = 8;
-  optional DependencyGraph collapsedDependencies               = 9;
-  optional DependencyGraph collapsedCCProcessedDependencies    = 10;
-  optional DependencyGraph alternativeDependencies             = 13;
-  repeated OpenIETriple    openieTriple                        = 14;   // The OpenIE triples in the sentence
-  optional uint32          paragraph                           = 11;
+  repeated Token            token                               = 1;
+  required uint32           tokenOffsetBegin                    = 2;
+  required uint32           tokenOffsetEnd                      = 3;
+  optional uint32           sentenceIndex                       = 4;
+  optional uint32           characterOffsetBegin                = 5;
+  optional uint32           characterOffsetEnd                  = 6;
+  optional ParseTree        parseTree                           = 7;
+  optional ParseTree        binarizedParseTree                  = 31;
+  optional ParseTree        annotatedParseTree                  = 32;
+  optional string           sentiment                           = 33;
+  repeated ParseTree        kBestParseTrees                     = 34;
+  optional DependencyGraph  basicDependencies                   = 8;
+  optional DependencyGraph  collapsedDependencies               = 9;
+  optional DependencyGraph  collapsedCCProcessedDependencies    = 10;
+  optional DependencyGraph  alternativeDependencies             = 13;
+  repeated OpenIETriple     openieTriple                        = 14;   // The OpenIE triples in the sentence
+  repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
+  optional uint32           paragraph                           = 11;
 
-  optional string          text                                = 12;
+  optional string           text                                = 12;   // Only needed if we're only saving the sentence.
 
 
   // Fields set by other annotators in CoreNLP
@@ -75,6 +77,10 @@ message Sentence {
   repeated Relation        relation                            = 53;
   optional bool            hasNumerizedTokensAnnotation        = 54;
   repeated NERMention      mentions                            = 55;
+  repeated Mention         mentionsForCoref                    = 56;
+  optional bool            hasCorefMentionsAnnotation          = 57;
+
+  optional string          sentenceID                          = 58;  // Useful when storing sentences (e.g. ForEach)
 
   extensions 100 to 255;
 }
@@ -114,6 +120,12 @@ message Token {
   optional Span      span           = 29;   // The span of a leaf node of a tree
   optional string    sentiment      = 30;   // The final sentiment of the sentence
   optional int32     quotationIndex = 31;   // The index of the quotation this token refers to
+  optional MapStringString conllUFeatures = 32;
+  optional string coarseTag         = 33; //  The coarse POS tag (used to store the UPOS tag)
+  optional Span conllUTokenSpan     = 34;
+  optional string conllUMisc        = 35;
+  optional MapIntString conllUSecondaryDeps = 36;
+
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)
@@ -214,6 +226,76 @@ message CorefChain {
   required int32        chainID        = 1;
   repeated CorefMention mention        = 2;
   required uint32       representative = 3;
+}
+
+//
+// a mention
+//
+
+message Mention {
+  optional int32 mentionID             = 1;
+  optional string mentionType          = 2;
+  optional string number               = 3;
+  optional string gender               = 4;
+  optional string animacy              = 5;
+  optional string person               = 6;
+  optional uint32 startIndex           = 7;
+  optional uint32 endIndex             = 9;
+  optional uint32 headIndex            = 10;
+  optional string headString           = 11;
+  optional string nerString            = 12;
+  optional uint32 originalRef          = 13;
+  optional int32 goldCorefClusterID    = 14;
+  optional int32 corefClusterID        = 15;
+  optional uint32 mentionNum           = 16;
+  optional uint32 sentNum              = 17;
+  optional uint32 utter                = 18;
+  optional uint32 paragraph            = 19;
+  optional bool isSubject              = 20;
+  optional bool isDirectObject         = 21;
+  optional bool isIndirectObject       = 22;
+  optional bool isPrepositionObject    = 23;
+  optional bool hasTwin                = 24;
+  optional bool generic                = 25;
+  optional bool isSingleton            = 26;
+  optional bool hasBasicDependency     = 27;
+  optional bool hasCollapsedDependency = 28;
+  optional bool hasContextParseTree    = 29;
+  optional IndexedWord headIndexedWord = 30;
+  optional IndexedWord   dependingVerb = 31;
+  optional IndexedWord       headWord  = 32;
+  optional SpeakerInfo    speakerInfo  = 33;
+
+  repeated IndexedWord         sentenceWords = 50;
+  repeated IndexedWord         originalSpan = 51;
+  repeated string dependents           = 52;
+  repeated string preprocessedTerms    = 53;
+  repeated int32 appositions = 54;
+  repeated int32 predicateNominatives = 55;
+  repeated int32 relativePronouns = 56;
+  repeated int32 listMembers = 57;
+  repeated int32 belongToLists = 58;
+
+}
+
+//
+// store the position (sentence, token index) of a CoreLabel
+//
+
+message IndexedWord {
+  optional uint32 sentenceNum          = 1;
+  optional uint32 tokenIndex           = 2;
+  optional uint32 docID                = 3;
+  optional uint32 copyCount            = 4;
+}
+
+//
+// speaker info, this is used for Mentions
+//
+
+message SpeakerInfo {
+  optional string speakerName          = 1;
+  repeated int32 mentions    = 2;
 }
 
 //
@@ -330,15 +412,51 @@ message NERMention {
 }
 
 //
-// An OpenIE relation triple
+// An entailed sentence fragment.
+// Created by the openie annotator.
+//
+message SentenceFragment {
+  repeated uint32 tokenIndex     = 1;
+  optional uint32 root           = 2;
+  optional bool   assumedTruth   = 3;
+  optional double score          = 4;
+}
+
+//
+// An OpenIE relation triple.
+// Created by the openie annotator.
 //
 message OpenIETriple {
-  optional string          subject      = 1;  // The surface form of the subject
-  optional string          relation     = 2;  // The surface form of the relation (required)
-  optional string          object       = 3;  // The surface form of the object
-  required double          confidence   = 4;  // The [optional] confidence of the extraction
-  required Span            subjectSpan  = 5;  // The span of the subject in the sentence
-  required Span            relationSpan = 6;  // The span of the relation in the sentence
-  required Span            objectSpan   = 7;  // The span of the object in the sentence
-  optional DependencyGraph tree         = 8;  // The dependency graph fragment for this triple
+  optional string          subject        = 1;   // The surface form of the subject
+  optional string          relation       = 2;   // The surface form of the relation (required)
+  optional string          object         = 3;   // The surface form of the object
+  optional double          confidence     = 4;   // The [optional] confidence of the extraction
+  repeated uint32          subjectTokens  = 5;   // The tokens comprising the subject of the triple
+  repeated uint32          relationTokens = 6;   // The tokens comprising the relation of the triple
+  repeated uint32          objectTokens   = 7;   // The tokens comprising the object of the triple
+  optional DependencyGraph tree           = 8;   // The dependency graph fragment for this triple
+  optional bool            istmod         = 9;   // If true, this expresses an implicit tmod relation
+  optional bool            prefixBe       = 10;  // If true, this relation string is missing a 'be' prefix
+  optional bool            suffixBe       = 11;  // If true, this relation string is missing a 'be' suffix
+  optional bool            suffixOf       = 12;  // If true, this relation string is missing a 'of' prefix
 }
+
+
+//
+// A map from strings to strings.
+// Used, minimally, in the CoNLLU featurizer
+//
+message MapStringString {
+  repeated string key   = 1;
+  repeated string value = 2;
+}
+
+//
+// A map from integers to strings.
+// Used, minimally, in the CoNLLU featurizer
+//
+message MapIntString {
+  repeated uint32 key   = 1;
+  repeated string value = 2;
+}
+

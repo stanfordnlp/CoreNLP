@@ -35,123 +35,123 @@ public class AnCoraPronounDisambiguator {
 
   public static enum PersonalPronounType {OBJECT, REFLEXIVE, UNKNOWN}
 
-  private static final Set<String> ambiguousPersonalPronouns = new HashSet<String>(Arrays.asList(
-    "me", "te", "se", "nos", "os"
+  private static final Set<String> ambiguousPersonalPronouns = new HashSet<>(Arrays.asList(
+          "me", "te", "se", "nos", "os"
   ));
 
   /**
    * The following verbs always use ambiguous pronouns in a reflexive
    * sense in the corpus.
    */
-  private static final Set<String> alwaysReflexiveVerbs = new HashSet<String>(Arrays.asList(
-    "acercar",
-    "acostumbrar",
-    "afeitar",
-    "ahincar",
-    "Anticipar",
-    "aplicar",
-    "aprovechar",
-    "Atreve",
-    "callar",
-    "casar",
-    "colocar",
-    "comportar",
-    "comprar",
-    "deber",
-    "desplazar",
-    "detectar",
-    "divirtiendo",
-    "echar",
-    "encontrar",
-    "enfrentar",
-    "entender",
-    "enterar",
-    "equivocar",
-    "esconder",
-    "esforzando",
-    "felicitar",
-    "fija",
-    "ganar",
-    "Habituar",
-    "hacer",
-    "imaginar",
-    "iniciar",
-    "ir",
-    "jugar",
-    "Levantar",
-    "Manifestar",
-    "mantener",
-    "marchar",
-    "Negar",
-    "obsesionar",
-    "Olvidar",
-    "olvidar",
-    "oponer",
-    "Para",
-    "pasar",
-    "plantear",
-    "poner",
-    "quedar",
-    "querer",
-    "reciclar",
-    "reconoce",
-    "reconstruir",
-    "recuperar",
-    "referir",
-    "rendir",
-    "reservar",
-    "reunir",
-    "sentar",
-    "sentir",
-    "someter",
-    "tirando",
-    "tomar",
-    "unir",
-    "Ve",
-    "vestir"
+  private static final Set<String> alwaysReflexiveVerbs = new HashSet<>(Arrays.asList(
+          "acercar",
+          "acostumbrar",
+          "afeitar",
+          "ahincar",
+          "Anticipar",
+          "aplicar",
+          "aprovechar",
+          "Atreve",
+          "callar",
+          "casar",
+          "colocar",
+          "comportar",
+          "comprar",
+          "deber",
+          "desplazar",
+          "detectar",
+          "divirtiendo",
+          "echar",
+          "encontrar",
+          "enfrentar",
+          "entender",
+          "enterar",
+          "equivocar",
+          "esconder",
+          "esforzando",
+          "felicitar",
+          "fija",
+          "ganar",
+          "Habituar",
+          "hacer",
+          "imaginar",
+          "iniciar",
+          "ir",
+          "jugar",
+          "Levantar",
+          "Manifestar",
+          "mantener",
+          "marchar",
+          "Negar",
+          "obsesionar",
+          "Olvidar",
+          "olvidar",
+          "oponer",
+          "Para",
+          "pasar",
+          "plantear",
+          "poner",
+          "quedar",
+          "querer",
+          "reciclar",
+          "reconoce",
+          "reconstruir",
+          "recuperar",
+          "referir",
+          "rendir",
+          "reservar",
+          "reunir",
+          "sentar",
+          "sentir",
+          "someter",
+          "tirando",
+          "tomar",
+          "unir",
+          "Ve",
+          "vestir"
   ));
 
   /**
    * The following verbs always use ambiguous clitic pronouns in an
    * object sense in the corpus.
    */
-  private static final Set<String> neverReflexiveVerbs = new HashSet<String>(Arrays.asList(
-    "aguar",
-    "anunciar",
-    "arrebatando",
-    "arruinar",
-    "clasificar",
-    "concretar",
-    "contar",
-    "crea",
-    "Cuente",
-    "Decir",
-    "devolver",
-    "devuelve",
-    "dirigiendo",
-    "distraer",
-    "exigiendo",
-    "exigir",
-    "haz",
-    "ignorar",
-    "impedir",
-    "llevar",
-    "mirar",
-    "multar",
-    "negar",
-    "ocultando",
-    "pidiendo",
-    "prevenir",
-    "quitar",
-    "resultar",
-    "saludar",
-    "servir",
-    "situar",
-    "tutear",
-    "utilizar",
-    "vender",
-    "ver",
-    "visitar"
+  private static final Set<String> neverReflexiveVerbs = new HashSet<>(Arrays.asList(
+          "aguar",
+          "anunciar",
+          "arrebatando",
+          "arruinar",
+          "clasificar",
+          "concretar",
+          "contar",
+          "crea",
+          "Cuente",
+          "Decir",
+          "devolver",
+          "devuelve",
+          "dirigiendo",
+          "distraer",
+          "exigiendo",
+          "exigir",
+          "haz",
+          "ignorar",
+          "impedir",
+          "llevar",
+          "mirar",
+          "multar",
+          "negar",
+          "ocultando",
+          "pidiendo",
+          "prevenir",
+          "quitar",
+          "resultar",
+          "saludar",
+          "servir",
+          "situar",
+          "tutear",
+          "utilizar",
+          "vender",
+          "ver",
+          "visitar"
   ));
 
   /**
@@ -162,62 +162,62 @@ public class AnCoraPronounDisambiguator {
    */
   @SuppressWarnings("unchecked")
   private static final Map<Pair<String, String>, PersonalPronounType> bruteForceDecisions =
-    new HashMap<Pair<String, String>, PersonalPronounType>();
+          new HashMap<>();
   static {
     bruteForceDecisions.put(
-      new Pair<String, String>("contar", "No contarte mi vida nunca más"), PersonalPronounType.OBJECT);
+            new Pair<>("contar", "No contarte mi vida nunca más"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("Creer", "Creerselo todo"), PersonalPronounType.REFLEXIVE);
+            new Pair<>("Creer", "Creerselo todo"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-      new Pair<String, String>("creer", "creérselo todo ..."), PersonalPronounType.REFLEXIVE);
+            new Pair<>("creer", "creérselo todo ..."), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-      new Pair<String, String>("dar", "darme la enhorabuena"), PersonalPronounType.OBJECT);
+            new Pair<>("dar", "darme la enhorabuena"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("dar", "darnos cuenta"), PersonalPronounType.REFLEXIVE);
+            new Pair<>("dar", "darnos cuenta"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-      new Pair<String, String>("dar", "podría darnos"), PersonalPronounType.OBJECT);
+            new Pair<>("dar", "podría darnos"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("dar", "puede darnos"), PersonalPronounType.OBJECT);
+            new Pair<>("dar", "puede darnos"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("decir", "suele decirnos"), PersonalPronounType.OBJECT);
+            new Pair<>("decir", "suele decirnos"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("decir", "suelo decírmelo"), PersonalPronounType.REFLEXIVE);
+            new Pair<>("decir", "suelo decírmelo"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-      new Pair<String, String>("dejar", "debería dejarnos faenar"), PersonalPronounType.OBJECT);
+            new Pair<>("dejar", "debería dejarnos faenar"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("dejar", "dejarme un intermitente encendido"), PersonalPronounType.REFLEXIVE);
+            new Pair<>("dejar", "dejarme un intermitente encendido"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-      new Pair<String, String>("dejar", ": dejarnos un país tan limpio en su gobierno como el cielo claro después de las tormentas mediterráneas , que inundan nuestras obras públicas sin encontrar nunca ni un solo responsable político de tanta mala gestión , ya sea la plaza de Cerdà socialista o los incendios forestales de la Generalitat"),
+            new Pair<>("dejar", ": dejarnos un país tan limpio en su gobierno como el cielo claro después de las tormentas mediterráneas , que inundan nuestras obras públicas sin encontrar nunca ni un solo responsable político de tanta mala gestión , ya sea la plaza de Cerdà socialista o los incendios forestales de la Generalitat"),
       PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("dejar", "podemos dejarnos adormecer"), PersonalPronounType.REFLEXIVE);
+            new Pair<>("dejar", "podemos dejarnos adormecer"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-      new Pair<String, String>("engañar", "engañarnos"), PersonalPronounType.OBJECT);
+            new Pair<>("engañar", "engañarnos"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("explicar", "deberá explicarnos"), PersonalPronounType.OBJECT);
+            new Pair<>("explicar", "deberá explicarnos"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("liar", "liarme a tiros"), PersonalPronounType.REFLEXIVE);
+            new Pair<>("liar", "liarme a tiros"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-      new Pair<String, String>("llevar", "llevarnos a una trampa en esta elección"),
+            new Pair<>("llevar", "llevarnos a una trampa en esta elección"),
       PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("manifestar", "manifestarme su solidaridad"),
+            new Pair<>("manifestar", "manifestarme su solidaridad"),
       PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("manifestar", "manifestarnos sobre las circunstancias que mantienen en vilo la vida y obra de los colombianos"),
+            new Pair<>("manifestar", "manifestarnos sobre las circunstancias que mantienen en vilo la vida y obra de los colombianos"),
       PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-      new Pair<String, String>("mirando", "estábamos mirándonos"), PersonalPronounType.REFLEXIVE);
+            new Pair<>("mirando", "estábamos mirándonos"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-      new Pair<String, String>("poner", "ponerme en ascuas"), PersonalPronounType.OBJECT);
+            new Pair<>("poner", "ponerme en ascuas"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("servir", "servirme de guía"), PersonalPronounType.OBJECT);
+            new Pair<>("servir", "servirme de guía"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("volver", "debe volvernos"), PersonalPronounType.OBJECT);
+            new Pair<>("volver", "debe volvernos"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("volver", "deja de volverme"), PersonalPronounType.OBJECT);
+            new Pair<>("volver", "deja de volverme"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-      new Pair<String, String>("volver", "volvernos"), PersonalPronounType.REFLEXIVE);
+            new Pair<>("volver", "volvernos"), PersonalPronounType.REFLEXIVE);
   }
 
   /**
@@ -263,7 +263,7 @@ public class AnCoraPronounDisambiguator {
     else if (neverReflexiveVerbs.contains(verb))
       return PersonalPronounType.OBJECT;
 
-    Pair<String, String> bruteForceKey = new Pair<String, String>(verb, clauseYield);
+    Pair<String, String> bruteForceKey = new Pair<>(verb, clauseYield);
     if (bruteForceDecisions.containsKey(bruteForceKey))
       return bruteForceDecisions.get(bruteForceKey);
 

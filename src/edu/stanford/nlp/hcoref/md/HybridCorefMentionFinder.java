@@ -32,12 +32,12 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
     this.headFinder = headFinder;
     this.lang = CorefProperties.getLanguage(props);
     mdClassifier = (CorefProperties.isMentionDetectionTraining(props))?
-        null : IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, "md"));
+        null : IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getMentionDetectionModel(props));
   }
 
   @Override
   public List<List<Mention>> findMentions(Annotation doc, Dictionaries dict, Properties props) {
-    List<List<Mention>> predictedMentions = new ArrayList<List<Mention>>();
+    List<List<Mention>> predictedMentions = new ArrayList<>();
     Set<String> neStrings = Generics.newHashSet();
     List<Set<IntPair>> mentionSpanSetList = Generics.newArrayList();
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
@@ -45,7 +45,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
 
     // extract premarked mentions, NP/PRP, named entity, enumerations
     for (CoreMap s : sentences) {
-      List<Mention> mentions = new ArrayList<Mention>();
+      List<Mention> mentions = new ArrayList<>();
       predictedMentions.add(mentions);
       Set<IntPair> mentionSpanSet = Generics.newHashSet();
       Set<IntPair> namedEntitySpanSet = Generics.newHashSet();
@@ -96,7 +96,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
           // attached to the previous NER by the earlier heuristic
           if(beginIndex < endIndex && !mentionSpanSet.contains(mSpan)) {
             int dummyMentionId = -1;
-            Mention m = new Mention(dummyMentionId, beginIndex, endIndex, sent, basicDependency, collapsedDependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
+            Mention m = new Mention(dummyMentionId, beginIndex, endIndex, sent, basicDependency, collapsedDependency, new ArrayList<>(sent.subList(beginIndex, endIndex)));
             mentions.add(m);
             mentionSpanSet.add(mSpan);
             namedEntitySpanSet.add(mSpan);
@@ -111,7 +111,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
       IntPair mSpan = new IntPair(beginIndex, sent.size());
       if(!mentionSpanSet.contains(mSpan)) {
         int dummyMentionId = -1;
-        Mention m = new Mention(dummyMentionId, beginIndex, sent.size(), sent, basicDependency, collapsedDependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, sent.size())));
+        Mention m = new Mention(dummyMentionId, beginIndex, sent.size(), sent, basicDependency, collapsedDependency, new ArrayList<>(sent.subList(beginIndex, sent.size())));
         mentions.add(m);
         mentionSpanSet.add(mSpan);
         namedEntitySpanSet.add(mSpan);
@@ -175,7 +175,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
 //      if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet)) ) {
       if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet) || t.value().startsWith("PRP")) ) {
         int dummyMentionId = -1;
-        Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basicDependency, collapsedDependency, new ArrayList<CoreLabel>(sent.subList(beginIdx, endIdx)), t);
+        Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basicDependency, collapsedDependency, new ArrayList<>(sent.subList(beginIdx, endIdx)), t);
         mentions.add(m);
         mentionSpanSet.add(mSpan);
 

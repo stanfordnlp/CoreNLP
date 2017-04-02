@@ -1,11 +1,14 @@
 package edu.stanford.nlp.patterns.surface;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.ConstantsAndVariables;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
 import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.util.StringUtils;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +22,7 @@ public class Token implements Serializable {
   //Can be semgrex.Env but does not matter
   //static public Env env = TokenSequencePattern.getNewEnv();
 
-  static Map<Class, String> class2KeyMapping = new ConcurrentHashMap<Class, String>();
+  static Map<Class, String> class2KeyMapping = new ConcurrentHashMap<>();
 
   //All the restrictions of a token: for example, word:xyz
   Map<Class, String> classORrestrictions;
@@ -46,7 +49,7 @@ public class Token implements Serializable {
   public Map<String, String> classORRestrictionsAsString(){
     if(classORrestrictions== null || classORrestrictions.isEmpty())
       return null;
-    Map<String, String> str = new HashMap<String, String>();
+    Map<String, String> str = new HashMap<>();
     for(Map.Entry<Class, String> en: classORrestrictions.entrySet()){
        str.put(class2KeyMapping.get(en.getKey()), en.getValue().toString());
     }
@@ -166,7 +169,7 @@ public class Token implements Serializable {
     if(this.envBindBooleanRestriction != null && !this.envBindBooleanRestriction.isEmpty())
       throw new RuntimeException("cannot add restriction to something that is binding to an env variable");
     if(classORrestrictions == null)
-      classORrestrictions = new TreeMap<Class, String>(new ClassComparator());
+      classORrestrictions = new TreeMap<>(new ClassComparator());
     assert value!=null;
     classORrestrictions.put(classR, value);
   }
@@ -213,6 +216,23 @@ public class Token implements Serializable {
     @Override
     public int compare(Class o1, Class o2) {
       return o1.toString().compareTo(o2.toString());
+    }
+  }
+
+  public static String toStringClass2KeyMapping(){
+    StringBuffer str = new StringBuffer();
+    for(Map.Entry<Class, String> en: class2KeyMapping.entrySet()){
+      if(str.length() > 0)
+        str.append("\n");
+      str.append(en.getKey().getName()+"###"+en.getValue());
+    }
+    return str.toString();
+  }
+
+  public static void setClass2KeyMapping(File file) throws ClassNotFoundException {
+    for(String line: IOUtils.readLines(file)){
+      String[] toks = line.split("###");
+      class2KeyMapping.put(Class.forName(toks[0]), toks[1]);
     }
   }
 

@@ -94,13 +94,13 @@ public class UNKPrinter {
       lexOptions.unknownPrefixSize = 1;
       lexOptions.unknownSuffixSize = 1;
     }
-    Index<String> wordIndex = new HashIndex<String>();
-    Index<String> tagIndex = new HashIndex<String>();
+    Index<String> wordIndex = new HashIndex<>();
+    Index<String> tagIndex = new HashIndex<>();
     Lexicon lex = tlpp.lex(op, wordIndex, tagIndex);
     
     int computeAfter = (int) (0.50 * tb.size());
-    Counter<String> vocab = new ClassicCounter<String>();
-    Counter<String> unkCounter = new ClassicCounter<String>();
+    Counter<String> vocab = new ClassicCounter<>();
+    Counter<String> unkCounter = new ClassicCounter<>();
     int treeId = 0;
     for(Tree t : tb) {
       List<Label> yield = t.yield();
@@ -115,7 +115,7 @@ public class UNKPrinter {
       treeId++;
     }
     
-    List<String> biggestKeys = new ArrayList<String>(unkCounter.keySet());
+    List<String> biggestKeys = new ArrayList<>(unkCounter.keySet());
     Collections.sort(biggestKeys, Counters.toComparatorDescending(unkCounter));
 
     for(String wordType : biggestKeys)

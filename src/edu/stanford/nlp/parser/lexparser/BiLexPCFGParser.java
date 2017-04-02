@@ -103,7 +103,7 @@ public class BiLexPCFGParser implements KBestViterbiParser {
       return tf.newTreeNode(label, childList);
     }
     // binary
-    List<Tree> children = new ArrayList<Tree>();
+    List<Tree> children = new ArrayList<>();
     if (edge.backHook.isPreHook()) {
       children.add(extractParse(edge.backEdge));
       children.add(extractParse(edge.backHook.backEdge));
@@ -130,7 +130,7 @@ public class BiLexPCFGParser implements KBestViterbiParser {
 
 
   // Added by Dan Zeman to store the list of N best trees.
-  protected List<Edge> nGoodTrees = new LinkedList<Edge>();
+  protected List<Edge> nGoodTrees = new LinkedList<>();
 
 
 
@@ -143,9 +143,9 @@ public class BiLexPCFGParser implements KBestViterbiParser {
    * @return The list of k best trees
    */
   public List<ScoredObject<Tree>> getKGoodParses(int k) {
-    List<ScoredObject<Tree>> nGoodTreesList = new ArrayList<ScoredObject<Tree>>(op.testOptions.printFactoredKGood);
+    List<ScoredObject<Tree>> nGoodTreesList = new ArrayList<>(op.testOptions.printFactoredKGood);
     for (Edge e : nGoodTrees) {
-      nGoodTreesList.add(new ScoredObject<Tree>(extractParse(e), e.iScore));
+      nGoodTreesList.add(new ScoredObject<>(extractParse(e), e.iScore));
     }
     return nGoodTreesList;
   }
@@ -302,23 +302,22 @@ public class BiLexPCFGParser implements KBestViterbiParser {
     //for (Iterator rI = bg.ruleIteratorByLeftChild(edge.state);
     //      rI.hasNext(); ) {
     List<BinaryRule> ruleList = bg.ruleListByLeftChild(edge.state);
-    for (int r = 0, rsz = ruleList.size(); r < rsz; r++) {
+    for (BinaryRule br : ruleList) {
       //BinaryRule br = rI.next();
-      BinaryRule br = ruleList.get(r);
-      if(scorer instanceof LatticeScorer) {
-      	LatticeScorer lscorer = (LatticeScorer) scorer;
-      	Edge latEdge = (Edge) lscorer.convertItemSpan(new Edge(edge));
-      	if (!fscorer.oPossibleL(project(br.parent), latEdge.start) || !fscorer.iPossibleL(project(br.rightChild), latEdge.end)) {
-      		if (!op.testOptions.exhaustiveTest) {
-      			continue;
-      		}
-      	}
+      if (scorer instanceof LatticeScorer) {
+        LatticeScorer lscorer = (LatticeScorer) scorer;
+        Edge latEdge = (Edge) lscorer.convertItemSpan(new Edge(edge));
+        if (!fscorer.oPossibleL(project(br.parent), latEdge.start) || !fscorer.iPossibleL(project(br.rightChild), latEdge.end)) {
+          if (!op.testOptions.exhaustiveTest) {
+            continue;
+          }
+        }
       } else {
-      	if (!fscorer.oPossibleL(project(br.parent), edge.start) || !fscorer.iPossibleL(project(br.rightChild), edge.end)) {
-      		if (!op.testOptions.exhaustiveTest) {
-      			continue;
-      		}
-      	}
+        if (!fscorer.oPossibleL(project(br.parent), edge.start) || !fscorer.iPossibleL(project(br.rightChild), edge.end)) {
+          if (!op.testOptions.exhaustiveTest) {
+            continue;
+          }
+        }
       }
       for (int head = edge.end; head < length; head++) {
         // cdm Apr 2006: avoid Iterator allocation
@@ -346,23 +345,22 @@ public class BiLexPCFGParser implements KBestViterbiParser {
     //for (Iterator<BinaryRule> rI = bg.ruleIteratorByRightChild(edge.state);
     //     rI.hasNext(); ) {
     ruleList = bg.ruleListByRightChild(edge.state);
-    for (int r = 0, rlSize = ruleList.size(); r < rlSize; r++) {
+    for (BinaryRule br : ruleList) {
       //BinaryRule br = rI.next();
-      BinaryRule br = ruleList.get(r);
-      if(scorer instanceof LatticeScorer) {
-      	LatticeScorer lscorer = (LatticeScorer) scorer;
-      	Edge latEdge = (Edge) lscorer.convertItemSpan(new Edge(edge));
-      	if (!fscorer.oPossibleR(project(br.parent), latEdge.end) || !fscorer.iPossibleR(project(br.leftChild), latEdge.start)) {
-      		if (!op.testOptions.exhaustiveTest) {
-      			continue;
-      		}
-      	}
+      if (scorer instanceof LatticeScorer) {
+        LatticeScorer lscorer = (LatticeScorer) scorer;
+        Edge latEdge = (Edge) lscorer.convertItemSpan(new Edge(edge));
+        if (!fscorer.oPossibleR(project(br.parent), latEdge.end) || !fscorer.iPossibleR(project(br.leftChild), latEdge.start)) {
+          if (!op.testOptions.exhaustiveTest) {
+            continue;
+          }
+        }
       } else {
-      	if (!fscorer.oPossibleR(project(br.parent), edge.end) || !fscorer.iPossibleR(project(br.leftChild), edge.start)) {
-      		if (!op.testOptions.exhaustiveTest) {
-      			continue;
-      		}
-      	}
+        if (!fscorer.oPossibleR(project(br.parent), edge.end) || !fscorer.iPossibleR(project(br.leftChild), edge.start)) {
+          if (!op.testOptions.exhaustiveTest) {
+            continue;
+          }
+        }
       }
       for (int head = 0; head < edge.start; head++) {
         // cdm Apr 2006: avoid Iterator allocation
@@ -617,7 +615,7 @@ public class BiLexPCFGParser implements KBestViterbiParser {
   }
 
   protected List<Item> makeInitialItems(List<? extends HasWord> wordList) {
-    List<Item> itemList = new ArrayList<Item>();
+    List<Item> itemList = new ArrayList<>();
     int length = wordList.size();
     int numTags = tagIndex.size();
     words = new int[length];
@@ -625,7 +623,7 @@ public class BiLexPCFGParser implements KBestViterbiParser {
     int terminalCount = 0;
     originalLabels = new CoreLabel[wordList.size()];
     for (int i = 0; i < length; i++) {
-      taggedWordList[i] = new ArrayList<IntTaggedWord>(numTags);
+      taggedWordList[i] = new ArrayList<>(numTags);
       HasWord wordObject = wordList.get(i);
       if (wordObject instanceof CoreLabel) {
         originalLabels[i] = (CoreLabel) wordObject;
@@ -720,13 +718,12 @@ public class BiLexPCFGParser implements KBestViterbiParser {
   protected void initialize(List<? extends HasWord> words) {
     length = words.size();
     interner = new Interner();
-    agenda = new ArrayHeap<Item>(ScoredComparator.DESCENDING_COMPARATOR);
+    agenda = new ArrayHeap<>(ScoredComparator.DESCENDING_COMPARATOR);
     chart = new HookChart();
     setGoal(length);
     List<Item> initialItems = makeInitialItems(words);
 //    scoreDependencies();
-    for (int i = 0, iiSize = initialItems.size(); i < iiSize; i++) {
-      Item item = initialItems.get(i);
+    for (Item item : initialItems) {
       item = (Item) interner.intern(item);
       //if (VERBOSE) System.err.println("Initial: "+item);
       discoverItem(item);

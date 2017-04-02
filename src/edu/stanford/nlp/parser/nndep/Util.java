@@ -42,11 +42,11 @@ class Util {
     int count = 0;
     double mean = 0.0;
     double std = 0.0;
-    for (int i = 0; i < A.length; ++ i)
-      for (int j = 0; j < A[i].length; ++ j) {
+    for (double[] aA : A)
+      for (int j = 0; j < aA.length; ++j) {
         count += 1;
-        mean += A[i][j];
-        std += A[i][j] * A[i][j];
+        mean += aA[j];
+        std += aA[j] * aA[j];
       }
     mean = mean / count;
     std = Math.sqrt(std / count - mean * mean);
