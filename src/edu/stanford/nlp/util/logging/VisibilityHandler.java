@@ -22,7 +22,7 @@ public class VisibilityHandler extends LogRecordHandler {
   private VisibilityHandler.State defaultState = State.SHOW_ALL;
   private final Set<Object> deltaPool = new HashSet<>();  // replacing with Generics.newHashSet() makes classloader go haywire?
 
-  public VisibilityHandler() { }
+  public VisibilityHandler() { }  // default is SHOW_ALL
 
   public VisibilityHandler(Object[] channels) {
     if (channels.length > 0) {
@@ -53,7 +53,7 @@ public class VisibilityHandler extends LogRecordHandler {
    * @param filter The channel to also show
    * @return true if this channel was already being shown.
    */
-  public boolean alsoShow(Object filter){
+  public boolean alsoShow(Object filter) {
     switch(this.defaultState){
     case HIDE_ALL:
       return this.deltaPool.add(filter);
@@ -70,7 +70,7 @@ public class VisibilityHandler extends LogRecordHandler {
    * @param filter The channel to also hide
    * @return true if this channel was already being hidden.
    */
-  public boolean alsoHide(Object filter){
+  public boolean alsoHide(Object filter) {
     switch(this.defaultState){
     case HIDE_ALL:
       return this.deltaPool.remove(filter);
@@ -82,6 +82,7 @@ public class VisibilityHandler extends LogRecordHandler {
   }
 
   /** {@inheritDoc} */
+  @Override
   public List<Record> handle(Record record) {
     boolean isPrinting = false;
     if(record.force()){

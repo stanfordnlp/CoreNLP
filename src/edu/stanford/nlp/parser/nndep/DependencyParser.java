@@ -1,4 +1,5 @@
 package edu.stanford.nlp.parser.nndep;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
@@ -35,13 +36,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -89,6 +84,22 @@ public class DependencyParser  {
    * @see #genDictionaries(java.util.List, java.util.List)
    */
   private List<String> knownWords, knownPos, knownLabels;
+
+  /** Return the set of part-of-speech tags of this parser. We normalize it a bit to help it match what
+   *  other parsers use.
+   *
+   *  @return Set of POS tags
+   */
+  public Set<String> getPosSet() {
+    Set<String> foo = Generics.newHashSet(knownPos);
+    // Don't really understand why these ones are there, but remove them. [CDM 2016]
+    foo.remove("-NULL-");
+    foo.remove("-UNKNOWN-");
+    foo.remove("-ROOT-");
+    // but our other models do include an EOS tag
+    foo.add(".$$.");
+    return Collections.unmodifiableSet(foo);
+  }
 
   /**
    * Mapping from word / POS / dependency relation label to integer ID
@@ -406,38 +417,26 @@ public class DependencyParser  {
 
       // First write word / POS / label embeddings
       for (String word : knownWords) {
-        output.write(word);
-        for (int k = 0; k < E[index].length; ++k)
-          output.write(" " + E[index][k]);
-        output.write("\n");
-        index = index + 1;
+        index = writeEmbedding(E[index], output, index, word);
       }
       for (String pos : knownPos) {
-        output.write(pos);
-        for (int k = 0; k < E[index].length; ++k)
-          output.write(" " + E[index][k]);
-        output.write("\n");
-        index = index + 1;
+        index = writeEmbedding(E[index], output, index, pos);
       }
       for (String label : knownLabels) {
-        output.write(label);
-        for (int k = 0; k < E[index].length; ++k)
-          output.write(" " + E[index][k]);
-        output.write("\n");
-        index = index + 1;
+        index = writeEmbedding(E[index], output, index, label);
       }
 
       // Now write classifier weights
       for (int j = 0; j < W1[0].length; ++j)
         for (int i = 0; i < W1.length; ++i) {
-          output.write("" + W1[i][j]);
+          output.write(String.valueOf(W1[i][j]));
           if (i == W1.length - 1)
             output.write("\n");
           else
             output.write(" ");
         }
       for (int i = 0; i < b1.length; ++i) {
-        output.write("" + b1[i]);
+        output.write(String.valueOf(b1[i]));
         if (i == b1.length - 1)
           output.write("\n");
         else
@@ -445,7 +444,7 @@ public class DependencyParser  {
       }
       for (int j = 0; j < W2[0].length; ++j)
         for (int i = 0; i < W2.length; ++i) {
-          output.write("" + W2[i][j]);
+          output.write(String.valueOf(W2[i][j]));
           if (i == W2.length - 1)
             output.write("\n");
           else
@@ -454,7 +453,7 @@ public class DependencyParser  {
 
       // Finish with pre-computation info
       for (int i = 0; i < preComputed.size(); ++i) {
-        output.write("" + preComputed.get(i));
+        output.write(String.valueOf(preComputed.get(i)));
         if ((i + 1) % 100 == 0 || i == preComputed.size() - 1)
           output.write("\n");
         else
@@ -465,6 +464,16 @@ public class DependencyParser  {
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
+  }
+
+  private static int writeEmbedding(double[] doubles, Writer output, int index, String word) throws IOException {
+    output.write(word);
+    for (double aDouble : doubles) {
+      output.write(" " + aDouble);
+    }
+    output.write("\n");
+    index = index + 1;
+    return index;
   }
 
   /**
@@ -585,6 +594,8 @@ public class DependencyParser  {
         }
       }
       input.close();
+      config.hiddenSize = hSize;
+      config.embeddingSize = eSize;
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
@@ -1180,15 +1191,15 @@ public class DependencyParser  {
    * <ul>
    *   <li>
    *     <strong>Train a parser with CoNLL treebank data:</strong>
-   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -trainFile trainPath -devFile devPath -embedFile wordEmbeddingFile -embeddingSize wordEmbeddingDimensionality -model modelOutputFile.txt.gz</code>
+   *     {@code java edu.stanford.nlp.parser.nndep.DependencyParser -trainFile trainPath -devFile devPath -embedFile wordEmbeddingFile -embeddingSize wordEmbeddingDimensionality -model modelOutputFile.txt.gz}
    *   </li>
    *   <li>
    *     <strong>Parse raw text from a file:</strong>
-   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile rawTextToParse -outFile dependenciesOutputFile.txt</code>
+   *     {@code java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile rawTextToParse -outFile dependenciesOutputFile.txt}
    *   </li>
    *   <li>
    *     <strong>Parse raw text from standard input, writing to standard output:</strong>
-   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile - -outFile -</code>
+   *     {@code java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile - -outFile -}
    *   </li>
    * </ul>
    *

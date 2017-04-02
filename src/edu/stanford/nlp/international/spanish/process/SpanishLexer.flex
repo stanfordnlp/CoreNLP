@@ -1,14 +1,15 @@
 package edu.stanford.nlp.international.spanish.process;
 
 import java.io.Reader;
-import java.util.logging.Logger;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  *  A tokenizer for Spanish. Adapted from PTBTokenizer and
@@ -174,7 +175,8 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   }
 
 
-  private static final Logger LOGGER = Logger.getLogger(SpanishLexer.class.getName());
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels LOGGER = Redwood.channels(SpanishLexer.class);
 
   private LexedTokenFactory<?> tokenFactory;
   private CoreLabel prevWord;
@@ -240,25 +242,25 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
 
   private Object normalizeFractions(final String in) {
-      // Strip non-breaking space
-      String out = NO_BREAK_SPACE.matcher(in).replaceAll("");
+    // Strip non-breaking space
+    String out = NO_BREAK_SPACE.matcher(in).replaceAll("");
 
-      if (normalizeFractions) {
-          if (escapeForwardSlashAsterisk) {
-              out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1\\\\/4");
-            out = ONE_HALF_PATTERN.matcher(out).replaceAll("1\\\\/2");
-            out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3\\\\/4");
-            out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1\\\\/3");
-            out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2\\\\/3");
-          } else {
-              out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1/4");
-            out = ONE_HALF_PATTERN.matcher(out).replaceAll("1/2");
-            out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3/4");
-            out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1/3");
-            out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2/3");
-          }
+    if (normalizeFractions) {
+      if (escapeForwardSlashAsterisk) {
+        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1\\\\/4");
+        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1\\\\/2");
+        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3\\\\/4");
+        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1\\\\/3");
+        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2\\\\/3");
+      } else {
+        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1/4");
+        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1/2");
+        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3/4");
+        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1/3");
+        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2/3");
       }
-      return getNext(out, in);
+    }
+    return getNext(out, in);
   }
 
   private static final Pattern softHyphen = Pattern.compile("\u00AD");
@@ -268,18 +270,19 @@ import edu.stanford.nlp.process.LexedTokenFactory;
    * typesetting.
    */
   private static String removeSoftHyphens(String in) {
-      String result = softHyphen.matcher(in).replaceAll("");
-      return result.length() == 0 ? "-" : result;
+    String result = softHyphen.matcher(in).replaceAll("");
+    return result.length() == 0 ? "-" : result;
   }
 
   private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
   private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
 
   private static String  Shlomi2AsciiQuotes(String in) {
-      return asciiQuotes(in);
+    return asciiQuotes(in);
   }
+
   private static String  Shlomi3AsciiQuotes(String in) {
-      return asciiQuotes(in);
+    return asciiQuotes(in);
   }
 
   private static String asciiQuotes(String in) {
@@ -290,13 +293,13 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   }
 
   private String handleQuotes(String in){
-      if (asciiQuotes) return asciiQuotes(in);
-      else return in;
+    if (asciiQuotes) return asciiQuotes(in);
+    else return in;
   }
 
   private static final Pattern dashes = Pattern.compile("[_\u058A\u2010\u2011]");
   private static String asciiDash(String in) {
-      return dashes.matcher(in).replaceAll("-");
+    return dashes.matcher(in).replaceAll("-");
   }
 
   private String handleDash(String in) {
@@ -470,7 +473,7 @@ COMPOUND = {WORD}({HYPHEN}{WORD})+
 OS = os(l[oa]s?)?
 ATTACHED_PRON = ((me|te|se|nos|les?)(l[oa]s?)?)|l[oa]s?
 VB_IRREG = d[ií]|h[aá]z|v[eé]|p[oó]n|s[aá]l|sé|t[eé]n|v[eé]n
-VB_REG = {WORD}([aeiáéí]r|[áé]ndo|[aeáé]n?|[aeáé]mos?)
+VB_REG = ir|{WORD}([aeiáéí]r|[áé]ndo|[aeáé]n?|[aeáé]mos?)
 VB_PREF = {VB_IRREG}|({VB_REG})
 
 /* Handles second person plural imperatives:

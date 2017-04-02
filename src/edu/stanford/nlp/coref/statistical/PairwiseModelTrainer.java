@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import edu.stanford.nlp.coref.statistical.MaxMarginMentionRanker.ErrorType;
-
 import edu.stanford.nlp.coref.data.Dictionaries.MentionType;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -17,10 +15,6 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
-/**
- * Class for training coreference models
- * @author Kevin Clark
- */
 public class PairwiseModelTrainer {
   public static void trainRanking(PairwiseModel model) throws Exception {
     Redwood.log("scoref-train", "Reading compression...");
@@ -79,19 +73,19 @@ public class PairwiseModelTrainer {
 
             double maxNegativeScore = -Double.MAX_VALUE;
             Example maxScoringNegative = null;
-            ErrorType maxScoringEt = null;
+            MaxMarginMentionRanker.ErrorType maxScoringEt = null;
             for (Example e : es) {
               double score = model.predict(e, doc.mentionFeatures, compressor);
               if (e.label != 1) {
                 assert(!(noAntecedent && e.isNewLink()));
-                ErrorType et = ErrorType.WL;
+                MaxMarginMentionRanker.ErrorType et = MaxMarginMentionRanker.ErrorType.WL;
                 if (noAntecedent && !e.isNewLink()) {
-                  et = ErrorType.FL;
+                  et = MaxMarginMentionRanker.ErrorType.FL;
                 } else if (!noAntecedent && e.isNewLink()) {
                   if (e.mentionType2 == MentionType.PRONOMINAL) {
-                    et = ErrorType.FN_PRON;
+                    et = MaxMarginMentionRanker.ErrorType.FN_PRON;
                   } else {
-                    et = ErrorType.FN;
+                    et = MaxMarginMentionRanker.ErrorType.FN;
                   }
                 }
 

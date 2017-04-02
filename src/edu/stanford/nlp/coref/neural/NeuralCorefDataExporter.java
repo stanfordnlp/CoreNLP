@@ -129,8 +129,7 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
       String key = m1.mentionNum + " " + m2.mentionNum;
 
       JsonArrayBuilder builder = Json.createArrayBuilder();
-      for (int val : CategoricalFeatureExtractor.pairwiseFeatures(
-          document, m1, m2, dictionaries, conll)) {
+      for (int val : CategoricalFeatureExtractor.pairwiseFeatures(document, m1, m2, dictionaries, conll)) {
         builder.add(val);
       }
       features.add(key, builder.build());
@@ -158,7 +157,6 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
     CorefProperties.setInput(props, dataset);
     String dataPath = outputPath + "/data_raw/";
     String goldClusterPath = outputPath + "/gold/";
-    IOUtils.ensureDir(new File(outputPath));
     IOUtils.ensureDir(new File(dataPath));
     IOUtils.ensureDir(new File(goldClusterPath));
     new NeuralCorefDataExporter(props, dictionaries,

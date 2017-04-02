@@ -10,13 +10,11 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 
-import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.coref.CorefRules;
-import edu.stanford.nlp.coref.CorefUtils;
 import edu.stanford.nlp.coref.data.CorefCluster;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Dictionaries.MentionType;
-import edu.stanford.nlp.coref.data.Dictionaries.Number;
+import  edu.stanford.nlp.coref.data.Dictionaries.Number;
 import edu.stanford.nlp.coref.data.Dictionaries.Person;
 import edu.stanford.nlp.coref.data.Document;
 import edu.stanford.nlp.coref.data.Document.DocType;
@@ -34,10 +32,6 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
-/**
- * A class for featurizing mention pairs and individual mentions.
- * @author Kevin Clark
- */
 public class FeatureExtractor {
   private static int MIN_WORD_COUNT = 20;
   private static int BIN_EXACT = 10;
@@ -78,8 +72,8 @@ public class FeatureExtractor {
     this.dictionaries = dictionaries;
     this.compressor = compressor;
     this.vocabulary = vocabulary;
-    this.useDocSource = CorefProperties.conll(props);
-    this.useConstituencyParse = CorefProperties.useConstituencyParse(props);
+    this.useDocSource = StatisticalCorefProperties.conll(props);
+    this.useConstituencyParse = StatisticalCorefProperties.useConstituencyParse(props);
   }
 
   private static Set<String> loadVocabulary(String wordCountsPath) {
@@ -104,10 +98,11 @@ public class FeatureExtractor {
 
   public DocumentExamples extract(int id, Document document,
       Map<Pair<Integer, Integer>, Boolean> labeledPairs, Compressor<String> compressor) {
-    List<Mention> mentionsList = CorefUtils.getSortedMentions(document);
+    List<Mention> mentionsList = StatisticalCorefUtils.getSortedMentions(document);
     Map<Integer, List<Mention>> mentionsByHeadIndex = new HashMap<>();
     for (int i = 0; i < mentionsList.size(); i++) {
       Mention m = mentionsList.get(i);
+      m.mentionNum = i;
       List<Mention> withIndex = mentionsByHeadIndex.get(m.headIndex);
       if (withIndex == null) {
         withIndex = new ArrayList<>();
@@ -313,7 +308,7 @@ public class FeatureExtractor {
       addFeature(features, "heads-agree", m2.headsAgree(m1));
       addFeature(features, "exact-match", m1.toString().trim().toLowerCase().equals(
           m2.toString().trim().toLowerCase()));
-      addFeature(features, "partial-match", relaxedStringMatch(m1, m2));
+      addFeature(features, "partial-match", partialMatch(m1, m2));
 
       double editDistance = StringUtils.editDistance(m1.spanToString(), m2.spanToString()) /
          (double) (m1.spanToString().length() + m2.spanToString().length());
@@ -414,7 +409,7 @@ public class FeatureExtractor {
     addFeature(features, "entity-attributes-agree", CorefRules.entityAttributesAgree(c2, c1));
     addFeature(features, "entity-token-distance", CorefRules.entityTokenDistance(m2, m1));
     addFeature(features, "i-within-i", CorefRules.entityIWithinI(m2, m1, dictionaries));
-    addFeature(features, "exact-string-match", CorefRules.entityExactStringMatch(c2, c1,dictionaries, doc.roleSet));
+    addFeature(features, "exact-string-match", CorefRules.entityExactStringMatch(c2, c1, dictionaries, doc.roleSet));
     addFeature(features, "entity-relaxed-heads-agree",
         CorefRules.entityRelaxedHeadsAgreeBetweenMentions(c2, c1, m2, m1));
     addFeature(features, "is-acronym", CorefRules.entityIsAcronym(doc, c2, c1));
@@ -470,7 +465,7 @@ public class FeatureExtractor {
     features.incrementCount(key, value);
   }
 
-  public static boolean relaxedStringMatch(Mention m1, Mention m2) {
+  private static boolean partialMatch(Mention m1, Mention m2) {
     Set<String> propers = getPropers(m1);
     propers.retainAll(getPropers(m2));
     return !propers.isEmpty();
@@ -541,8 +536,24 @@ public class FeatureExtractor {
 
   private static SemanticGraphEdge getDependencyParent(Mention m, IndexedWord w) {
     Iterator<SemanticGraphEdge> iterator = m.enhancedDependency.incomingEdgeIterator(w);
-    return iterator.hasNext() ? iterator.next() : null;
+    if (iterator.hasNext()) {
+      return iterator.next();
+    }
+    return null;
   }
+
+  /*private static SemanticGraphEdge getDependencyGrandparent(Mention m) {
+    SemanticGraphEdge parentEdge = getDependencyParent(m);
+    if (parentEdge == null) {
+      return null;
+    }
+    IndexedWord parentIndexedWord = parentEdge.getSource();
+    Iterator<SemanticGraphEdge> iterator = m.collapsedDependency.incomingEdgeIterator(parentIndexedWord);
+    if (iterator.hasNext()) {
+      return iterator.next();
+    }
+    return null;
+  }*/
 
   private void addDependencyFeatures(Counter<String> features, String prefix,
       SemanticGraphEdge e, boolean addWord) {
@@ -669,5 +680,11 @@ public class FeatureExtractor {
 
   private static CoreLabel prevprevWord(Mention m) {
     return m.startIndex > 1 ? m.sentenceWords.get(m.startIndex - 2) : null;
+  }
+
+  public static boolean relaxedStringMatch(Mention m1, Mention m2) {
+    Set<String> propers = getPropers(m1);
+    propers.retainAll(getPropers(m2));
+    return !propers.isEmpty();
   }
 }

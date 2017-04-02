@@ -16,6 +16,12 @@ import java.util.Properties;
 
 /**
  * A demo illustrating how to call the OpenIE system programmatically.
+ * You can call this code with:
+ *
+ * <pre>
+ *   java -mx1g -cp stanford-openie.jar:stanford-openie-models.jar edu.stanford.nlp.naturalli.OpenIEDemo
+ * </pre>
+ *
  */
 public class OpenIEDemo {
 
@@ -25,9 +31,6 @@ public class OpenIEDemo {
     // Create the Stanford CoreNLP pipeline
     Properties props = PropertiesUtils.asProperties(
             "annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie"
-            // , "depparse.model", "edu/stanford/nlp/models/parser/nndep/english_SD.gz"
-            // "annotators", "tokenize,ssplit,pos,lemma,parse,natlog,openie"
-            // , "parse.originalDependencies", "true"
     );
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 

@@ -36,13 +36,12 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
+import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.coref.data.Dictionaries.Animacy;
 import edu.stanford.nlp.coref.data.Dictionaries.Gender;
 import edu.stanford.nlp.coref.data.Dictionaries.MentionType;
 import edu.stanford.nlp.coref.data.Dictionaries.Number;
 import edu.stanford.nlp.coref.data.Dictionaries.Person;
-
-import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.ling.AbstractCoreLabel;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -1618,8 +1617,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     if (isSubject != rhs.isSubject) { return false; }
     if (isDirectObject != rhs.isDirectObject) { return false; }
-    if (isIndirectObject != rhs.isIndirectObject) { return false; }
-    if (isPrepositionObject != rhs.isPrepositionObject) { return false; }
+    if (isIndirectObject != isIndirectObject) { return false; }
+    if (isPrepositionObject != isPrepositionObject) { return false; }
 
     if (hasTwin != rhs.hasTwin) { return false; }
     if (generic != rhs.generic) { return false; }
