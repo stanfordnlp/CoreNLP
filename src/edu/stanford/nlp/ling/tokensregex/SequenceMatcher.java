@@ -2,6 +2,7 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.util.*;
 
+import java.nio.BufferOverflowException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -119,7 +120,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
    * Interface that specifies what to replace a matched pattern with
    * @param <T>
    */
-  public interface MatchReplacement<T> {
+  public static interface MatchReplacement<T> {
     /**
      * Append to replacement list
      * @param match Current matched sequence
@@ -135,7 +136,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   public static class BasicMatchReplacement<T> implements MatchReplacement<T>  {
     List<T> replacement;
 
-    @SafeVarargs
     public BasicMatchReplacement(T... replacement) {
       this.replacement = Arrays.asList(replacement);
     }
@@ -149,7 +149,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      * @param match Current matched sequence
      * @param list replacement list
      */
-    @Override
     public void append(SequenceMatchResult<T> match, List list) {
       list.addAll(replacement);
     }
@@ -470,7 +469,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     }
   }
 
-  protected boolean findMatchStart(int start, boolean matchAllTokens) {
+  protected boolean findMatchStart(int start, boolean matchAllTokens)
+  {
     switch (findType) {
       case FIND_NONOVERLAPPING:
         return findMatchStartBacktracking(start, matchAllTokens);
@@ -484,7 +484,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   }
 
   // Does not do backtracking - alternative matches are stored as we go
-  protected boolean findMatchStartNoBacktracking(int start, boolean matchAllTokens) {
+  protected boolean findMatchStartNoBacktracking(int start, boolean matchAllTokens)
+  {
     boolean matchAll = true;
     MatchedStates<T> cStates = getStartStates();
     cStates.matchLongest = matchAllTokens;
@@ -508,7 +509,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   }
 
   // Does some backtracking...
-  protected boolean findMatchStartBacktracking(int start, boolean matchAllTokens) {
+  protected boolean findMatchStartBacktracking(int start, boolean matchAllTokens)
+  {
     boolean matchAll = true;
     Stack<MatchedStates> todo = new Stack<>();
     MatchedStates cStates = getStartStates();
@@ -552,7 +554,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
    * @return true if the entire sequence is matched (false otherwise)
    * @see #find()
    */
-  public boolean matches() {
+  public boolean matches()
+  {
     matched = false;
     matchingCompleted = false;
     boolean status = findMatchStart(0, true);
@@ -565,7 +568,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     return status;
   }
 
-  private void clearMatched() {
+  private void clearMatched()
+  {
     for (int i = 0; i < matchedGroups.length; i++) {
       matchedGroups[i] = null;
     }
@@ -576,7 +580,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     }
   }
 
-  private String getStateMessage() {
+  private String getStateMessage()
+  {
     if (!matchingCompleted) {
       return "Matching not completed";
     } else if (!matched) {
@@ -591,7 +596,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
    * @param start - start index
    * @param end - end index (exclusive)
    */
-  public void region(int start, int end) {
+  public void region(int start, int end)
+  {
     if (start < 0 || start > elements.size()) {
       throw new IndexOutOfBoundsException("Invalid region start=" + start + ", need to be between 0 and " + elements.size());
     }

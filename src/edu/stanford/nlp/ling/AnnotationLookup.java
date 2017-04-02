@@ -6,16 +6,12 @@ import edu.stanford.nlp.ling.CoreLabel.GenericAnnotation;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
 
-/** Provides a mapping between CoreAnnotation keys, which are classes, and a text String that names them,
- *  which is needed for things like text serializations and the Semgrex query language.
- *
- *  @author Anna Rafferty
- */
+/** @author Anna Rafferty */
 public class AnnotationLookup {
 
   private AnnotationLookup() {}
 
-  private enum KeyLookup {
+  public enum KeyLookup {
     VALUE_KEY(CoreAnnotations.ValueAnnotation.class, "value"),
     TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "tag"),
     WORD_KEY(CoreAnnotations.TextAnnotation.class, "word"),
@@ -92,10 +88,10 @@ public class AnnotationLookup {
     POS_TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "pos");
 
 
-    private final Class<? extends CoreAnnotation<?>> coreKey; // todo [cdm 2016]: Make this private if can sort out typing
-    private final String oldKey;
+    public final Class coreKey;
+    public final String oldKey;
 
-    <T> KeyLookup(Class<? extends CoreAnnotation<T>> coreKey, String oldKey) {
+    private <T> KeyLookup(Class<? extends CoreAnnotation<T>> coreKey, String oldKey) {
       this.coreKey = coreKey;
       this.oldKey = oldKey;
     }
@@ -105,8 +101,7 @@ public class AnnotationLookup {
      * This is useful because we can then create distributions that do not have
      * all of the classes required for all the old keys (such as trees package classes).
      */
-    @SuppressWarnings("unused")
-    KeyLookup(String className, String oldKey) {
+    private KeyLookup(String className, String oldKey) {
       Class<?> keyClass;
       try {
        keyClass = Class.forName(className);
@@ -121,44 +116,24 @@ public class AnnotationLookup {
   } // end enum KeyLookup
 
 
-  /*
+  /**
    * Returns a CoreAnnotation class key for the given old-style FeatureLabel
    * key if one exists; null otherwise.
    */
-  // no longer needed, simply return the Class object directly
-//  public static KeyLookup getCoreKey(String oldKey) {
-//    for (KeyLookup lookup : KeyLookup.values()) {
-//      if (lookup.oldKey.equals(oldKey)) {
-//        return lookup;
-//      }
-//    }
-//    return null;
-//  }
-
-  /**
-   * Returns a CoreAnnotation class key for the given string
-   * key if one exists; null otherwise.
-   *
-   * @param stringKey String form of the key
-   * @return A CoreLabel/CoreAnnotation key, or {@code null} if nothing matches
-   */
-  public static Class<? extends CoreAnnotation<?>> toCoreKey(String stringKey) {
+  public static KeyLookup getCoreKey(String oldKey) {
     for (KeyLookup lookup : KeyLookup.values()) {
-      if (lookup.oldKey.equals(stringKey)) {
-        return lookup.coreKey;
+      if (lookup.oldKey.equals(oldKey)) {
+        return lookup;
       }
     }
     return null;
   }
 
-  private static final Map<Class<? extends CoreAnnotation<?>>,Class<?>> valueCache = Generics.newHashMap();
+  private static Map<Class<? extends CoreAnnotation<?>>,Class<?>> valueCache = Generics.newHashMap();
 
   /**
    * Returns the runtime value type associated with the given key.  Caches
-   * results in a private Map.
-   *
-   * @param key The annotation key (non-null)
-   * @return The type of the value of that key (non-null)
+   * results.
    */
   @SuppressWarnings("unchecked")
   public static Class<?> getValueType(Class<? extends CoreAnnotation<?>> key) {

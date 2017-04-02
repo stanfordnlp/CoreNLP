@@ -15,7 +15,7 @@ import java.io.Serializable;
  * @param <L> The type of the labels in the Datum
  * @param <F> The type of the features in the Datum
  */
-public interface Datum<L, F> extends Serializable, Featurizable<F>, Labeled<L> {
+public abstract interface Datum<L, F> extends Serializable, Featurizable<F>, Labeled<L> {
 }
 
 

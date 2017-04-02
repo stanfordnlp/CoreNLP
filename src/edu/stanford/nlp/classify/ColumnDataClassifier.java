@@ -1588,7 +1588,7 @@ public class ColumnDataClassifier  {
         ois = IOUtils.readStreamFromString(loadPath);
         classifier = ErasureUtils.<LinearClassifier<String,String>>uncheckedCast(ois.readObject());
         myFlags = (Flags[]) ois.readObject();
-        assert myFlags.length > 0;
+        assert flags.length > 0;
         logger.info("Done.");
       } catch (Exception e) {
         throw new RuntimeIOException("Error deserializing " + loadPath, e);

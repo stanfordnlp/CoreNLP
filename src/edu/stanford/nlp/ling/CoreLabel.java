@@ -1,4 +1,5 @@
 package edu.stanford.nlp.ling;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -6,6 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 
+import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -30,6 +32,9 @@ import edu.stanford.nlp.util.Generics;
  * @author rafferty
  */
 public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CoreLabel.class);
 
   private static final long serialVersionUID = 2L;
 
@@ -77,12 +82,12 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   @SuppressWarnings({"unchecked"})
   public CoreLabel(CoreMap label) {
     super(label.size());
-    Consumer<Class<? extends Key<?>>> savedListener = ArrayCoreMap.listener;  // don't listen to the clone operation
+    Consumer<Class<? extends Key<?>>> listener = ArrayCoreMap.listener;  // don't listen to the clone operation
     ArrayCoreMap.listener = null;
     for (Class key : label.keySet()) {
       set(key, label.get(key));
     }
-    ArrayCoreMap.listener = savedListener;
+    ArrayCoreMap.listener = listener;
   }
 
   /**
@@ -172,10 +177,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     for (int i = 0; i < keys.length; i++) {
       String key = keys[i];
       String value = values[i];
-      Class coreKeyClass = AnnotationLookup.toCoreKey(key);
+      KeyLookup lookup = AnnotationLookup.getCoreKey(key);
 
       //now work with the key we got above
-      if (coreKeyClass == null) {
+      if (lookup == null) {
         if (key != null) {
           throw new UnsupportedOperationException("Unknown key " + key);
         }
@@ -204,15 +209,15 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
         //}
       } else {
         try {
-          Class<?> valueClass = AnnotationLookup.getValueType(coreKeyClass);
+          Class<?> valueClass = AnnotationLookup.getValueType(lookup.coreKey);
           if(valueClass.equals(String.class)) {
-            this.set(coreKeyClass, values[i]);
+            this.set(lookup.coreKey, values[i]);
           } else if(valueClass == Integer.class) {
-            this.set(coreKeyClass, Integer.parseInt(values[i]));
+            this.set(lookup.coreKey, Integer.parseInt(values[i]));
           } else if(valueClass == Double.class) {
-            this.set(coreKeyClass, Double.parseDouble(values[i]));
+            this.set(lookup.coreKey, Double.parseDouble(values[i]));
           } else if(valueClass == Long.class) {
-            this.set(coreKeyClass, Long.parseLong(values[i]));
+            this.set(lookup.coreKey, Long.parseLong(values[i]));
           } else {
             throw new RuntimeException("Can't handle " + valueClass);
           }
@@ -221,7 +226,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
           throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: "
               + "Bad type for " + key
               + ". Value was: " + value
-              + "; expected "+AnnotationLookup.getValueType(coreKeyClass), e);
+              + "; expected "+AnnotationLookup.getValueType(lookup.coreKey), e);
         }
       }
     }
@@ -710,7 +715,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       break;
     case ALL:{
       for(Class en: this.keySet()){
-        buf.append(';').append(en).append(':').append(this.get(en));
+        buf.append(";").append(en).append(":").append(this.get(en));
       }
       break;
     }

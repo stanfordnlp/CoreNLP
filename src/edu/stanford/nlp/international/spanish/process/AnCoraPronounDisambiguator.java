@@ -83,35 +83,25 @@ public class AnCoraPronounDisambiguator  {
           "enfrentar",
           "entender",
           "enterar",
-          "entrometer",
           "equivocar",
-          "escapar",
           "esconder",
           "esforzando",
-          "establecer",
           "felicitar",
           "fija",
           "Fija",
           "ganar",
-          "guarda",
-          "guardar",
           "Habituar",
           "hacer",
-          "imagina",
           "imaginar",
           "iniciar",
-          "inscribir",
           "ir",
-          "jode",
           "jugar",
           "Levantar",
           "Manifestar",
           "mantener",
           "marchar",
-          "meter",
           "Negar",
           "obsesionar",
-          "Olvida",
           "Olvidar",
           "olvidar",
           "oponer",
@@ -119,33 +109,22 @@ public class AnCoraPronounDisambiguator  {
           "pasar",
           "plantear",
           "poner",
-          "pudra",
-          "queda",
           "quedar",
           "querer",
-          "quita",
           "reciclar",
           "reconoce",
           "reconstruir",
-          "recordar",
           "recuperar",
-          "reencontrar",
           "referir",
           "registrar",
-          "reincorporar",
           "rendir",
           "reservar",
-          "retirar",
           "reunir",
           "sentar",
           "sentir",
           "someter",
-          "subir",
           "tirando",
-          "toma",
           "tomar",
-          "tomen",
-          "Une",
           "unir",
           "Ve",
           "vestir"
@@ -153,11 +132,7 @@ public class AnCoraPronounDisambiguator  {
 
   /**
    * The following verbs always use ambiguous clitic pronouns in an
-   * object sense **in the corpora supported.**
-   *
-   * This does not imply that the below verbs are only ever non-reflexive!
-   * This list may need to be revised in order to produce correct gold trees
-   * on new datasets.
+   * object sense in the corpus.
    */
   private static final Set<String> neverReflexiveVerbs = new HashSet<>(Arrays.asList(
           "abrir",
@@ -167,7 +142,6 @@ public class AnCoraPronounDisambiguator  {
           "arruinar",
           "clasificar",
           "compensar",
-          "compra",
           "comprar",
           "concretar",
           "contar",
@@ -175,48 +149,27 @@ public class AnCoraPronounDisambiguator  {
           "crear",
           "Cuente",
           "Decir",
-          "decir",
-          "deja",
-          "digan",
           "devolver",
           "devuelve",
           "dirigiendo",
           "distraer",
-          "enfrascar",
           "exigiendo",
           "exigir",
           "haz",
           "ignorar",
           "impedir",
-          "insultar",
-          "juzgar",
-          "llamar",
-          "llevando",
           "llevar",
-          "manda",
           "mirar",
-          "Miren",
           "multar",
           "negar",
           "ocultando",
-          "pagar",
-          "patear",
-          "pedir",
-          "permitir",
           "pidiendo",
-          "preguntar",
           "prevenir",
           "quitar",
-          "razona",
           "resultar",
-          "saca",
-          "sacar",
           "saludar",
-          "seguir",
           "servir",
           "situar",
-          "suceder",
-          "tener",
           "tutear",
           "utilizar",
           "vender",
@@ -243,27 +196,9 @@ public class AnCoraPronounDisambiguator  {
     bruteForceDecisions.put(
             new Pair<>("creer", "creerte"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
-            new Pair<>("Dar", "Darte de alta ahi"), PersonalPronounType.REFLEXIVE);
-    bruteForceDecisions.put(
-            new Pair<>("da", "A mi dame billetes uno al lado del otro que es la forma mas líquida que uno pueda estar"), PersonalPronounType.OBJECT);
-    bruteForceDecisions.put(
-            new Pair<>("da", "danos UNA razon UNA"), PersonalPronounType.OBJECT);
-    bruteForceDecisions.put(
-            new Pair<>("da", "y ... dame una razon por la que hubiera matado o se hubiera comido a el compañero ?"), PersonalPronounType.OBJECT);
-    bruteForceDecisions.put(
-            new Pair<>("dar", "darme cuenta"), PersonalPronounType.REFLEXIVE);
-    bruteForceDecisions.put(
             new Pair<>("dar", "darme la enhorabuena"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
             new Pair<>("dar", "darnos cuenta"), PersonalPronounType.REFLEXIVE);
-    bruteForceDecisions.put(
-            new Pair<>("dar", "darselo a la doña"), PersonalPronounType.OBJECT);
-    bruteForceDecisions.put(
-            new Pair<>("dar", "darte cuenta"), PersonalPronounType.REFLEXIVE);
-    bruteForceDecisions.put(
-            new Pair<>("dar", "darte de alta"), PersonalPronounType.REFLEXIVE);
-    bruteForceDecisions.put(
-            new Pair<>("dar", "darte vuelta en cuestiones que no tienen nada que ver con lo que comenzaste diciendo"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
             new Pair<>("dar", "podría darnos"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
@@ -284,17 +219,9 @@ public class AnCoraPronounDisambiguator  {
     bruteForceDecisions.put(
             new Pair<>("engañar", "engañarnos"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
-            new Pair<>("estira", "=LRB= al menos estirate a los japoneses HDP !!! =RRB="),
-      PersonalPronounType.REFLEXIVE);
-    bruteForceDecisions.put(
-            new Pair<>("explica", "explicame como hago"), PersonalPronounType.OBJECT);
-    bruteForceDecisions.put(
             new Pair<>("explicar", "deberá explicarnos"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
             new Pair<>("liar", "liarme a tiros"), PersonalPronounType.REFLEXIVE);
-    bruteForceDecisions.put(
-            new Pair<>("librar", "librarme de el mismo para siempre"),
-      PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
             new Pair<>("llevar", "llevarnos a una trampa en esta elección"),
       PersonalPronounType.OBJECT);
@@ -365,9 +292,8 @@ public class AnCoraPronounDisambiguator  {
     if (bruteForceDecisions.containsKey(bruteForceKey))
       return bruteForceDecisions.get(bruteForceKey);
 
-    // Log this instance where a clitic pronoun could not be disambiguated.
-    log.info("Failed to disambiguate: " + splitVerb.first()
-             + "\nContaining clause:\t" + clauseYield + "\n");
+    // DEV
+    log.info("DISAMB " + splitVerb.first() + "\nDISAMB\t" + clauseYield);
 
     return PersonalPronounType.UNKNOWN;
   }
