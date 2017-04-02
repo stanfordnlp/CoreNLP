@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
 import edu.stanford.nlp.naturalli.OpenIE;
+import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 
@@ -165,8 +166,23 @@ public class AnnotatorImplementations {
             .CUSTOM_ANNOTATOR_PREFIX.length());
     String customClassName = properties.getProperty(property);
 
-    return ReflectionLoading.loadByReflection(customClassName, customName,
-            properties);
+    try {
+      // name + properties
+      return new MetaClass(customClassName).createInstance(customName, properties);
+    } catch (MetaClass.ConstructorNotFoundException e) {
+      try {
+        // name
+        return new MetaClass(customClassName).createInstance(customName);
+      } catch (MetaClass.ConstructorNotFoundException e2) {
+        // properties
+        try {
+          return new MetaClass(customClassName).createInstance(properties);
+        } catch (MetaClass.ConstructorNotFoundException e3) {
+          // empty arguments
+          return new MetaClass(customClassName).createInstance();
+        }
+      }
+    }
   }
 
   /**

@@ -118,12 +118,13 @@ public abstract class DeterministicCorefSieve  {
           CorefCluster mentionCluster,
           CorefCluster potentialAntecedent,
           Dictionaries dict,
-          Set<Mention> roleSet)
-  {
+          Set<Mention> roleSet) {
     return false;
   }
+
   /**
-   * Checks if two clusters are coreferent according to our sieve pass constraints
+   * Checks if two clusters are coreferent according to our sieve pass constraints.
+   *
    * @param document
    * @throws Exception
    */

@@ -3065,4 +3065,19 @@ public class Counters {
     return flat;
   }
 
+  /**
+   * Returns true if the given counter contains only finite, non-NaN values.
+   * @param counts The counter to validate.
+   * @param <E> The parameterized type of the counter.
+   * @return True if the counter is finite and not NaN on every value.
+   */
+  public static <E> boolean isFinite(Counter<E> counts) {
+    for (double value : counts.values()) {
+      if (Double.isInfinite(value) || Double.isNaN(value)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }

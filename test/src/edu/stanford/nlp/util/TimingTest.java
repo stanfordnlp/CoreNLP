@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.text.DecimalFormat;
 import java.util.Locale;
 
 import junit.framework.TestCase;
@@ -36,7 +37,7 @@ public class TimingTest extends TestCase {
       sleepTen();
     }
     long val3 = t.report();
-    assertEquals("Wrong formatted time", "0.1", Timing.toSecondsString(val3));
+    assertEquals("Wrong formatted time", new DecimalFormat("0.0").format(0.1), Timing.toSecondsString(val3));
   }
 
   private static void sleepTen() {

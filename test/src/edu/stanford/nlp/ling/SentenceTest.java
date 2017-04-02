@@ -1,9 +1,14 @@
 package edu.stanford.nlp.ling;
 
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.CoreMap;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /** 
  *  Tests the static methods that turn sentences (lists of Labels)
@@ -22,7 +27,8 @@ public class SentenceTest extends TestCase {
   public void setUp() {
     assertEquals(words.length, tags.length);
   }
-  
+
+  @Test
   public void testCoreLabelListToString() {
     List<CoreLabel> clWords = new ArrayList<CoreLabel>();
     List<CoreLabel> clValues = new ArrayList<CoreLabel>();
