@@ -80,7 +80,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 public class StanfordCoreNLP extends AnnotationPipeline {
 
-  enum OutputFormat { TEXT, XML, JSON, CONLL, SERIALIZED }
+  enum OutputFormat { TEXT, XML, JSON, CONLL, TAGGED, SERIALIZED }
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -742,6 +742,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       case CONLL: defaultExtension = ".conll"; break;
       case TEXT: defaultExtension = ".out"; break;
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
+      case TAGGED: defaultExtension = ".tag"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
     }
     final String serializerClass = properties.getProperty("serializer", GenericAnnotationSerializer.class.getName());
@@ -885,42 +886,48 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           if (annotationOkay) {
             //--Output File
             switch (outputFormat) {
-            case XML: {
-              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-              xmlPrint(annotation, fos);
-              fos.close();
-              break;
-            }
-            case JSON: {
-              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-              new JSONOutputter().print(annotation, fos);
-              fos.close();
-              break;
-            }
-            case CONLL: {
-              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-              new CoNLLOutputter().print(annotation, fos);
-              fos.close();
-              break;
-            }
-            case TEXT: {
-              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-              prettyPrint(annotation, fos);
-              fos.close();
-              break;
-            }
-            case SERIALIZED: {
-              if (outputSerializerClass != null) {
-                AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
+              case XML: {
                 OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-                outputSerializer.write(annotation, fos).close();
-              } else {
-                IOUtils.writeObjectToFile(annotation, finalOutputFilename);
+                xmlPrint(annotation, fos);
+                fos.close();
+                break;
               }
-              break;
-            }
-            default:
-              throw new IllegalArgumentException("Unknown output format " + outputFormat);
+              case JSON: {
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                new JSONOutputter().print(annotation, fos);
+                fos.close();
+                break;
+              }
+              case CONLL: {
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                new CoNLLOutputter().print(annotation, fos);
+                fos.close();
+                break;
+              }
+              case TEXT: {
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                prettyPrint(annotation, fos);
+                fos.close();
+                break;
+              }
+              case SERIALIZED: {
+                if (outputSerializerClass != null) {
+                  AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
+                  OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                  outputSerializer.write(annotation, fos).close();
+                } else {
+                  IOUtils.writeObjectToFile(annotation, finalOutputFilename);
+                }
+                break;
+              }
+              case TAGGED: {
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                TaggedTextOutputter.prettyPrint(annotation, fos, this);
+                fos.close();
+                break;
+              }
+              default:
+                throw new IllegalArgumentException("Unknown output format " + outputFormat);
             }
             synchronized (totalProcessed) {
               totalProcessed.incValue(1);
