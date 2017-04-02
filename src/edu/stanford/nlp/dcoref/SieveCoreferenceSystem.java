@@ -47,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -71,7 +70,12 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntTuple;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.logging.NewlineLogFormatter;
 
 
@@ -87,9 +91,8 @@ import edu.stanford.nlp.util.logging.NewlineLogFormatter;
  * @author Heeyoung Lee
  * @author Sudarshan Rangarajan
  */
-public class SieveCoreferenceSystem  {
+public class SieveCoreferenceSystem {
 
-  /** A logger for this class. Still uses j.u.l currently. */
   public static final Logger logger = Logger.getLogger(SieveCoreferenceSystem.class.getName());
 
   /**
@@ -161,7 +164,7 @@ public class SieveCoreferenceSystem  {
   /** Current sieve index */
   private int currentSieve;
 
-  /** counter for links in passes ({@code Pair<correct links, total links>})  */
+  /** counter for links in passes (Pair<correct links, total links>)  */
   private List<Pair<Integer, Integer>> linksCountInPass;
 
   /** Scores for each pass */
@@ -245,7 +248,7 @@ public class SieveCoreferenceSystem  {
       String keepSieveOrder = props.getProperty(Constants.OPTIMIZE_SIEVES_KEEP_ORDER_PROP);
       if (keepSieveOrder != null) {
         String[] orderings = keepSieveOrder.split("\\s*,\\s*");
-        sievesKeepOrder = new ArrayList<>();
+        sievesKeepOrder = new ArrayList<Pair<Integer, Integer>>();
         String firstSieveConstraint = null;
         String lastSieveConstraint = null;
         for (String ordering:orderings) {
@@ -285,16 +288,46 @@ public class SieveCoreferenceSystem  {
     }
   }
 
+  public static String signature(Properties props) {
+    StringBuilder os = new StringBuilder();
+    os.append(Constants.SIEVES_PROP + ":" +
+            props.getProperty(Constants.SIEVES_PROP,
+                    Constants.SIEVEPASSES));
+    os.append(Constants.SINGLETON_PROP + ":" +
+        props.getProperty(Constants.SINGLETON_PROP,
+                "false"));
+    os.append(Constants.SINGLETON_MODEL_PROP + ":" +
+        props.getProperty(Constants.SINGLETON_MODEL_PROP,
+                DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL));
+    os.append(Constants.SCORE_PROP + ":" +
+            props.getProperty(Constants.SCORE_PROP,
+                    "false"));
+    os.append(Constants.POSTPROCESSING_PROP + ":" +
+            props.getProperty(Constants.POSTPROCESSING_PROP,
+                    "false"));
+    os.append(Constants.MAXDIST_PROP + ":" +
+            props.getProperty(Constants.MAXDIST_PROP,
+                    "-1"));
+    os.append(Constants.REPLICATECONLL_PROP + ":" +
+            props.getProperty(Constants.REPLICATECONLL_PROP,
+                    "false"));
+    os.append(Constants.CONLL_SCORER + ":" +
+            props.getProperty(Constants.CONLL_SCORER,
+                    Constants.conllMentionEvalScript));
+    os.append(Dictionaries.signature(props));
+    return os.toString();
+  }
+
   public void initScorers() {
-    linksCountInPass = new ArrayList<>();
-    scorePairwise = new ArrayList<>();
-    scoreBcubed = new ArrayList<>();
-    scoreMUC = new ArrayList<>();
-    for (String sieveClassName : sieveClassNames) {
+    linksCountInPass = new ArrayList<Pair<Integer, Integer>>();
+    scorePairwise = new ArrayList<CorefScorer>();
+    scoreBcubed = new ArrayList<CorefScorer>();
+    scoreMUC = new ArrayList<CorefScorer>();
+    for(int i = 0 ; i < sieveClassNames.length ; i++){
       scorePairwise.add(new ScorerPairwise());
       scoreBcubed.add(new ScorerBCubed(BCubedType.Bconll));
       scoreMUC.add(new ScorerMUC());
-      linksCountInPass.add(new Pair<>(0, 0));
+      linksCountInPass.add(new Pair<Integer, Integer>(0, 0));
     }
   }
 
@@ -332,8 +365,12 @@ public class SieveCoreferenceSystem  {
       logger.addHandler(fh);
       logger.setLevel(Level.FINE);
       fh.setFormatter(new NewlineLogFormatter());
-    } catch (SecurityException | IOException e) {
-      throw new RuntimeException("Cannot initialize logger!", e);
+    } catch (SecurityException e) {
+      System.err.println("ERROR: cannot initialize logger!");
+      throw e;
+    } catch (IOException e) {
+      System.err.println("ERROR: cannot initialize logger!");
+      throw e;
     }
 
     logger.fine(timeStamp);
@@ -344,8 +381,8 @@ public class SieveCoreferenceSystem  {
     SieveCoreferenceSystem corefSystem = new SieveCoreferenceSystem(props);
 
     // MentionExtractor extracts MUC, ACE, or CoNLL documents
-    MentionExtractor mentionExtractor;
-    if (props.containsKey(Constants.MUC_PROP)){
+    MentionExtractor mentionExtractor = null;
+    if(props.containsKey(Constants.MUC_PROP)){
       mentionExtractor = new MUCMentionExtractor(corefSystem.dictionaries, props,
           corefSystem.semantics, corefSystem.singletonPredictor);
     } else if(props.containsKey(Constants.ACE2004_PROP) || props.containsKey(Constants.ACE2005_PROP)) {
@@ -354,10 +391,10 @@ public class SieveCoreferenceSystem  {
     } else if (props.containsKey(Constants.CONLL2011_PROP)) {
       mentionExtractor = new CoNLLMentionExtractor(corefSystem.dictionaries, props,
           corefSystem.semantics, corefSystem.singletonPredictor);
-    } else {
+    }
+    if(mentionExtractor == null){
       throw new RuntimeException("No input file specified!");
     }
-
     if (!Constants.USE_GOLD_MENTIONS) {
       // Set mention finder
       String mentionFinderClass = props.getProperty(Constants.MENTION_FINDER_PROP);
@@ -540,7 +577,7 @@ public class SieveCoreferenceSystem  {
     props.store(pw, null);
     pw.close();
     /* Run coref job in a distributed manner, score is written to file */
-    List<String> cmd = new ArrayList<>();
+    List<String> cmd = new ArrayList<String>();
     cmd.addAll(Arrays.asList(runDistCmd.split("\\s+")));
     cmd.add("-props");
     cmd.add(propsFile);
@@ -609,7 +646,7 @@ public class SieveCoreferenceSystem  {
       String second = parts[1].trim();
       int a = fromSieveNameToIndex(first, sieveNames);
       int b = fromSieveNameToIndex(second, sieveNames);
-      return new Pair<>(a, b);
+      return new Pair<Integer,Integer>(a,b);
     } else {
       throw new IllegalArgumentException("Invalid sieve ordering constraint: " + s);
     }
@@ -649,7 +686,7 @@ public class SieveCoreferenceSystem  {
     for (int i = 0; i < origSieves.length; i++) {
       remainingSieveIndices.add(i);
     }
-    List<Integer> optimizedOrdering = new ArrayList<>();
+    List<Integer> optimizedOrdering = new ArrayList<Integer>();
     while (!remainingSieveIndices.isEmpty()) {
       // initialize array of current sieves
       int curSievesNumber = optimizedOrdering.size();
@@ -661,7 +698,7 @@ public class SieveCoreferenceSystem  {
       }
       logger.info("*** Optimizing Sieve ordering for pass " + curSievesNumber + " ***");
       // Get list of sieves that we can pick from for the next sieve
-      Set<Integer> selectableSieveIndices = new TreeSet<>(remainingSieveIndices);
+      Set<Integer> selectableSieveIndices = new TreeSet<Integer>(remainingSieveIndices);
       // Based on ordering constraints remove sieves from options
       if (sievesKeepOrder != null) {
         for (Pair<Integer,Integer> ko:sievesKeepOrder) {
@@ -695,7 +732,7 @@ public class SieveCoreferenceSystem  {
       int selected = -1;
       if (selectableSieveIndices.size() > 1) {
         // Go through remaining sieves and see how well they do
-        List<Pair<Double,Integer>> scores = new ArrayList<>();
+        List<Pair<Double,Integer>> scores = new ArrayList<Pair<Double, Integer>>();
         if (runDistributedCmd != null) {
           String workDirPath = mainWorkDirPath + curSievesNumber + File.separator;
           File workDir = new File(workDirPath);
@@ -738,7 +775,7 @@ public class SieveCoreferenceSystem  {
               String text = IOUtils.slurpFile(file);
               double score = Double.parseDouble(text);
               // keeps scores so we can select best score and log them
-              scores.add(new Pair<>(score, potentialSieveIndex));
+              scores.add(new Pair<Double,Integer>(score,potentialSieveIndex));
             } else {
               throw new RuntimeException("Bad score file name: " + file);
             }
@@ -753,7 +790,7 @@ public class SieveCoreferenceSystem  {
 
             double score = runAndScoreCoref(this, mentionExtractor, props, timestamp);
             // keeps scores so we can select best score and log them
-            scores.add(new Pair<>(score, potentialSieveIndex));
+            scores.add(new Pair<Double,Integer>(score,potentialSieveIndex));
             logger.info(" Trying sieves: " + StringUtils.join(sieveClassNames,","));
             logger.info(" Trying sieves score: " + score);
           }
@@ -820,72 +857,9 @@ public class SieveCoreferenceSystem  {
     return result;
   }
 
-  public Map<Integer, edu.stanford.nlp.coref.data.CorefChain> corefReturnHybridOutput(Document document) throws Exception {
-
-    // Multi-pass sieve coreference resolution
-    for (int i = 0; i < sieves.length ; i++){
-      currentSieve = i;
-      DeterministicCorefSieve sieve = sieves[i];
-      // Do coreference resolution using this pass
-      coreference(document, sieve);
-    }
-
-    // post processing (e.g., removing singletons, appositions for conll)
-    if((!Constants.USE_GOLD_MENTIONS && doPostProcessing) || replicateCoNLL) postProcessing(document);
-
-    // coref system output: edu.stanford.nlp.hcoref.data.CorefChain
-    Map<Integer, edu.stanford.nlp.coref.data.CorefChain> result = Generics.newHashMap();
-
-    for(CorefCluster c : document.corefClusters.values()) {
-      // build mentionsMap and represents
-      Map<IntPair, Set<edu.stanford.nlp.coref.data.CorefChain.CorefMention>> mentionsMap = Generics.newHashMap();
-      IntPair keyPair = new IntPair(0,0);
-      mentionsMap.put(keyPair, new HashSet<>());
-      Mention represents = null;
-      edu.stanford.nlp.coref.data.CorefChain.CorefMention representsHybridVersion = null;
-      for (Mention mention : c.getCorefMentions()) {
-        // convert dcoref CorefMention to hcoref CorefMention
-        //IntPair mentionPosition = new IntPair(mention.sentNum, mention.headIndex);
-        IntTuple mentionPosition = document.positions.get(mention);
-        CorefMention dcorefMention = new CorefMention(mention, mentionPosition);
-        // tokens need the hcoref version of CorefClusterIdAnnotation
-        mention.headWord.set(edu.stanford.nlp.coref.CorefCoreAnnotations.CorefClusterIdAnnotation.class,
-                mention.corefClusterID);
-        // drop the dcoref version of CorefClusterIdAnnotation
-        mention.headWord.remove(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
-        // make the hcoref mention
-        edu.stanford.nlp.coref.data.CorefChain.CorefMention hcorefMention =
-                new edu.stanford.nlp.coref.data.CorefChain.CorefMention(
-                        edu.stanford.nlp.coref.data.Dictionaries.MentionType.valueOf(dcorefMention.mentionType.name()),
-                        edu.stanford.nlp.coref.data.Dictionaries.Number.valueOf(dcorefMention.number.name()),
-                        edu.stanford.nlp.coref.data.Dictionaries.Gender.valueOf(dcorefMention.gender.name()),
-                        edu.stanford.nlp.coref.data.Dictionaries.Animacy.valueOf(dcorefMention.animacy.name()),
-                        dcorefMention.startIndex,
-                        dcorefMention.endIndex,
-                        dcorefMention.headIndex,
-                        dcorefMention.corefClusterID,
-                        dcorefMention.mentionID,
-                        dcorefMention.sentNum,
-                        dcorefMention.position,
-                        dcorefMention.mentionSpan);
-        mentionsMap.get(keyPair).add(hcorefMention);
-        if (mention.moreRepresentativeThan(represents)) {
-          represents = mention;
-          representsHybridVersion = hcorefMention;
-        }
-      }
-      edu.stanford.nlp.coref.data.CorefChain hybridCorefChain =
-              new edu.stanford.nlp.coref.data.CorefChain(c.clusterID, mentionsMap, representsHybridVersion);
-      result.put(c.clusterID, hybridCorefChain);
-    }
-
-    return result;
-  }
-
   /**
-   * Do coreference resolution using one sieve pass.
-   *
-   * @param document An extracted document
+   * Do coreference resolution using one sieve pass
+   * @param document - an extracted document
    * @throws Exception
    */
   private void coreference(
@@ -988,7 +962,7 @@ public class SieveCoreferenceSystem  {
       scoreBcubed.get(currentSieve).calculateScore(document);
       scorePairwise.get(currentSieve).calculateScore(document);
       if(currentSieve==0) {
-        scoreSingleDoc = new ArrayList<>();
+        scoreSingleDoc = new ArrayList<CorefScorer>();
         scoreSingleDoc.add(new ScorerPairwise());
         scoreSingleDoc.get(currentSieve).calculateScore(document);
         additionalCorrectLinksCount = (int) scoreSingleDoc.get(currentSieve).precisionNumSum;
@@ -1056,9 +1030,9 @@ public class SieveCoreferenceSystem  {
   public static List<List<Mention>> filterMentionsWithSingletonClusters(Document document, List<List<Mention>> mentions)
   {
 
-    List<List<Mention>> res = new ArrayList<>(mentions.size());
+    List<List<Mention>> res = new ArrayList<List<Mention>>(mentions.size());
     for (List<Mention> ml:mentions) {
-      List<Mention> filtered = new ArrayList<>();
+      List<Mention> filtered = new ArrayList<Mention>();
       for (Mention m:ml) {
         CorefCluster cluster = document.corefClusters.get(m.corefClusterID);
         if (cluster != null && cluster.getCorefMentions().size() > 1) {
@@ -1296,8 +1270,8 @@ public class SieveCoreferenceSystem  {
 
     StringBuilder golds = new StringBuilder();
     golds.append("Gold mentions in the sentence:\n");
-    Counter<Integer> mBegin = new ClassicCounter<>();
-    Counter<Integer> mEnd = new ClassicCounter<>();
+    Counter<Integer> mBegin = new ClassicCounter<Integer>();
+    Counter<Integer> mEnd = new ClassicCounter<Integer>();
 
     for(Mention m : goldOrderedMentionsBySentence.get(src.get(0))){
       mBegin.incrementCount(m.startIndex);
@@ -1343,8 +1317,8 @@ public class SieveCoreferenceSystem  {
 
     golds = new StringBuilder();
     golds.append("Gold mentions in the sentence:\n");
-    mBegin = new ClassicCounter<>();
-    mEnd = new ClassicCounter<>();
+    mBegin = new ClassicCounter<Integer>();
+    mEnd = new ClassicCounter<Integer>();
 
     for(Mention m : goldOrderedMentionsBySentence.get(dst.get(0))){
       mBegin.incrementCount(m.startIndex);
@@ -1377,7 +1351,7 @@ public class SieveCoreferenceSystem  {
     logger.finer(formatPennTree(dstMention.contextParseTree));
   }
   /** For printing tree in a better format */
-  private static String formatPennTree(Tree parseTree)	{
+  public static String formatPennTree(Tree parseTree)	{
     String treeString = parseTree.pennString();
     treeString = treeString.replaceAll("\\[TextAnnotation=", "");
     treeString = treeString.replaceAll("(NamedEntityTag|Value|Index|PartOfSpeech)Annotation.+?\\)", ")");
@@ -1413,10 +1387,10 @@ public class SieveCoreferenceSystem  {
       }
       if(p2.get(0)<i && i < p1.get(0)) menDist += orderedMentionsBySentence.get(i).size();
     }
-    String correct = (goldLinks.contains(new Pair<>(p1, p2)))? "\tCorrect" : "\tIncorrect";
+    String correct = (goldLinks.contains(new Pair<IntTuple, IntTuple>(p1,p2)))? "\tCorrect" : "\tIncorrect";
     logger.finest("\nsentence distance: "+(p1.get(0)-p2.get(0))+"\tmention distance: "+menDist + correct);
 
-    if(!goldLinks.contains(new Pair<>(p1, p2))){
+    if(!goldLinks.contains(new Pair<IntTuple,IntTuple>(p1,p2))){
       logger.finer("-------Incorrect merge in pass"+sieveIndex+"::--------------------");
       c1.printCorefCluster(logger);
       logger.finer("--------------------------------------------");
@@ -1578,7 +1552,8 @@ public class SieveCoreferenceSystem  {
     printConllOutput(document, writer, orderedMentions, gold);
   }
 
-  private static void printConllOutput(Document document, PrintWriter writer, List<List<Mention>> orderedMentions, boolean gold) {
+  public static void printConllOutput(Document document, PrintWriter writer, List<List<Mention>> orderedMentions, boolean gold)
+  {
     Annotation anno = document.annotation;
     List<List<String[]>> conllDocSentences = document.conllDoc.sentenceWordLists;
     String docID = anno.get(CoreAnnotations.DocIDAnnotation.class);
@@ -1593,9 +1568,9 @@ public class SieveCoreferenceSystem  {
       Map<Integer,Set<Mention>> mentionBeginEnd = Generics.newHashMap();
 
       for(int i=0 ; i<sentence.size(); i++){
-        mentionBeginOnly.put(i, new LinkedHashSet<>());
-        mentionEndOnly.put(i, new LinkedHashSet<>());
-        mentionBeginEnd.put(i, new LinkedHashSet<>());
+        mentionBeginOnly.put(i, new LinkedHashSet<Mention>());
+        mentionEndOnly.put(i, new LinkedHashSet<Mention>());
+        mentionBeginEnd.put(i, new LinkedHashSet<Mention>());
       }
 
       for(Mention m : orderedMentions.get(sentNum)) {
@@ -1650,7 +1625,7 @@ public class SieveCoreferenceSystem  {
   }
 
   /** Print raw document for analysis */
-  private static void printRawDoc(Document document, boolean gold) throws FileNotFoundException {
+  public static void printRawDoc(Document document, boolean gold) throws FileNotFoundException {
     List<CoreMap> sentences = document.annotation.get(CoreAnnotations.SentencesAnnotation.class);
     List<List<Mention>> allMentions;
     if (gold) {
@@ -1676,8 +1651,8 @@ public class SieveCoreferenceSystem  {
         doc.append("\n");
       }
       previousOffset = t.get(t.size()-1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-      Counter<Integer> startCounts = new ClassicCounter<>();
-      Counter<Integer> endCounts = new ClassicCounter<>();
+      Counter<Integer> startCounts = new ClassicCounter<Integer>();
+      Counter<Integer> endCounts = new ClassicCounter<Integer>();
       Map<Integer, Set<Mention>> endMentions = Generics.newHashMap();
       for (Mention m : mentions) {
         startCounts.incrementCount(m.startIndex);
@@ -1718,23 +1693,22 @@ public class SieveCoreferenceSystem  {
   }
   public static List<Pair<IntTuple, IntTuple>> getLinks(
       Map<Integer, CorefChain> result) {
-    List<Pair<IntTuple, IntTuple>> links = new ArrayList<>();
+    List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple, IntTuple>>();
     CorefChain.CorefMentionComparator comparator = new CorefChain.CorefMentionComparator();
 
-    for (CorefChain c : result.values()) {
+    for(CorefChain c : result.values()) {
       List<CorefMention> s = c.getMentionsInTextualOrder();
-      for (CorefMention m1 : s) {
-        for (CorefMention m2 : s) {
-          if (comparator.compare(m1, m2)==1) {
-            links.add(new Pair<>(m1.position, m2.position));
-          }
+      for(CorefMention m1 : s){
+        for(CorefMention m2 : s){
+          if(comparator.compare(m1, m2)==1) links.add(new Pair<IntTuple, IntTuple>(m1.position, m2.position));
         }
       }
     }
     return links;
   }
 
-  public static void debugPrintMentions(PrintStream out, String tag, List<List<Mention>> mentions) {
+  public static void debugPrintMentions(PrintStream out, String tag, List<List<Mention>> mentions)
+  {
     for(int i = 0; i < mentions.size(); i ++){
      out.println(tag + " SENTENCE " + i);
      for(int j = 0; j < mentions.get(i).size(); j ++){
@@ -1747,7 +1721,8 @@ public class SieveCoreferenceSystem  {
    }
   }
 
-  public static boolean checkClusters(Logger logger, String tag, Document document) {
+  public static boolean checkClusters(Logger logger, String tag, Document document)
+  {
     List<List<Mention>> mentions = document.getOrderedMentions();
     boolean clustersOk = true;
     for (List<Mention> mentionCluster : mentions) {

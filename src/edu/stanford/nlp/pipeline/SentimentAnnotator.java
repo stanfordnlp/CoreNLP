@@ -1,8 +1,11 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
@@ -13,7 +16,6 @@ import edu.stanford.nlp.sentiment.SentimentModel;
 import edu.stanford.nlp.sentiment.SentimentUtils;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
@@ -53,18 +55,13 @@ public class SentimentAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+  public Set<Requirement> requirementsSatisfied() {
     return Collections.emptySet();
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.PartOfSpeechAnnotation.class,
-        TreeCoreAnnotations.TreeAnnotation.class,
-        TreeCoreAnnotations.BinarizedTreeAnnotation.class,
-        CoreAnnotations.CategoryAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return PARSE_TAG_BINARIZED_TREES;
   }
 
   @Override

@@ -18,12 +18,11 @@ import org.ejml.simple.SimpleMatrix;
  * @author Richard Socher
  */
 public class SimpleTensor implements Serializable {
-
   private final SimpleMatrix[] slices;
 
-  private final int numRows;
-  private final int numCols;
-  private final int numSlices;
+  final int numRows;
+  final int numCols;
+  final int numSlices;
 
   /**
    * Creates a zero initialized tensor
@@ -55,7 +54,7 @@ public class SimpleTensor implements Serializable {
       }
       this.slices[i] = new SimpleMatrix(slices[i]);
     }
-
+    
   }
 
   /**
@@ -106,7 +105,7 @@ public class SimpleTensor implements Serializable {
 
   /**
    * Returns a new tensor which has the values of the original tensor
-   * scaled by {@code scaling}.  The original object is
+   * scaled by <code>scaling</code>.  The original object is
    * unaffected.
    */
   public SimpleTensor scale(double scaling) {
@@ -118,7 +117,7 @@ public class SimpleTensor implements Serializable {
   }
 
   /**
-   * Returns {@code other} added to the current object, which is unaffected.
+   * Returns <code>other</code> added to the current object, which is unaffected.
    */
   public SimpleTensor plus(SimpleTensor other) {
     if (other.numRows != numRows || other.numCols != numCols || other.numSlices != numSlices) {
@@ -158,8 +157,8 @@ public class SimpleTensor implements Serializable {
   }
 
   /**
-   * Use the given {@code matrix} in place of {@code slice}.
-   * Does not copy the {@code matrix}, but rather uses the actual object.
+   * Use the given <code>matrix</code> in place of <code>slice</code>.
+   * Does not copy the <code>matrix</code>, but rather uses the actual object.
    */
   public void setSlice(int slice, SimpleMatrix matrix) {
     if (slice < 0 || slice >= numSlices) {
@@ -175,7 +174,7 @@ public class SimpleTensor implements Serializable {
   }
 
   /**
-   * Returns the SimpleMatrix at {@code slice}.
+   * Returns the SimpleMatrix at <code>slice</code>.
    * <br>
    * The actual slice is returned - do not alter this unless you know what you are doing.
    */
@@ -214,7 +213,7 @@ public class SimpleTensor implements Serializable {
    */
   public boolean isZero() {
     for (int i = 0; i < numSlices; ++i) {
-      if ( ! NeuralUtils.isZero(slices[i])) {
+      if (!NeuralUtils.isZero(slices[i])) {
         return false;
       }
     }
@@ -222,7 +221,7 @@ public class SimpleTensor implements Serializable {
   }
 
   /**
-   * Returns an iterator over the {@code SimpleMatrix} objects contained in the tensor.
+   * Returns an iterator over the <code>SimpleMatrix</code> objects contained in the tensor.
    */
   public Iterator<SimpleMatrix> iteratorSimpleMatrix() {
     return Arrays.asList(slices).iterator();
@@ -247,7 +246,6 @@ public class SimpleTensor implements Serializable {
       advanceIterator();
     }
 
-    @Override
     public boolean hasNext() {
       if (currentIterator == null) {
         return false;
@@ -259,7 +257,6 @@ public class SimpleTensor implements Serializable {
       return (currentIterator != null);
     }
 
-    @Override
     public SimpleMatrix next() {
       if (currentIterator != null && currentIterator.hasNext()) {
         return currentIterator.next();
@@ -284,7 +281,6 @@ public class SimpleTensor implements Serializable {
       currentIterator = null;
     }
 
-    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -294,7 +290,7 @@ public class SimpleTensor implements Serializable {
   public String toString() {
     StringBuilder result = new StringBuilder();
     for (int slice = 0; slice < numSlices; ++slice) {
-      result.append("Slice ").append(slice).append("\n");
+      result.append("Slice " + slice + "\n");
       result.append(slices[slice]);
     }
     return result.toString();
@@ -307,12 +303,11 @@ public class SimpleTensor implements Serializable {
   public String toString(String format) {
     StringBuilder result = new StringBuilder();
     for (int slice = 0; slice < numSlices; ++slice) {
-      result.append("Slice ").append(slice).append("\n");
+      result.append("Slice " + slice + "\n");
       result.append(NeuralUtils.toString(slices[slice], format));
     }
     return result.toString();
   }
 
   private static final long serialVersionUID = 1;
-
 }

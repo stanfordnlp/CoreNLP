@@ -1,5 +1,7 @@
 package edu.stanford.nlp.tagger.maxent;
 
+import edu.stanford.nlp.util.StringUtils;
+
 import java.io.*;
 import java.util.Map;
 import java.util.Properties;
@@ -7,9 +9,6 @@ import java.util.Properties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
-
 
 /**
  * Reads and stores configuration information for a POS tagger.
@@ -23,10 +22,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  @author Anna Rafferty
  *  @author Michel Galley
  */
-public class TaggerConfig extends Properties /* Inherits implementation of Serializable! */  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TaggerConfig.class);
+public class TaggerConfig extends Properties /* Inherits implementation of Serializable! */ {
 
   private static final long serialVersionUID = -4136407850147157497L;
 
@@ -146,7 +142,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
       }
       if (name != null) {
         try {
-          log.info("Loading default properties from tagger " + name);
+          System.err.println("Loading default properties from tagger " + name);
           DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name));
           this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
           in.close();
@@ -196,7 +192,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     //on command line/in props file
     //Get the path to the model (or the path where you'd like to save the model); this is necessary for training, testing, and tagging
     this.setProperty("model", props.getProperty("model", this.getProperty("model", "")).trim());
-    if ( ! (this.getMode() == Mode.DUMP) && this.getProperty("model").isEmpty()) {
+    if ( ! (this.getMode() == Mode.DUMP) && this.getProperty("model").equals("")) {
       throw new RuntimeException("'model' parameter must be specified");
     }
 
@@ -229,7 +225,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     this.setProperty("closedClassTagThreshold", props.getProperty("closedClassTagThreshold", this.getProperty("closedClassTagThreshold")));
 
     this.setProperty("arch", props.getProperty("arch", this.getProperty("arch")));
-    if (this.getMode() == Mode.TRAIN && this.getProperty("arch").isEmpty()) {
+    if (this.getMode() == Mode.TRAIN && this.getProperty("arch").equals("")) {
       throw new IllegalArgumentException("No architecture specified; " +
                                          "set the -arch flag with " +
                                          "the features to be used");
@@ -290,7 +286,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
   }
 
   public boolean keepEmptySentences() {
-    return getOutputOptionsContains("keepEmptySentences");
+    return getOutputOptionsContains("keepEmptySentences");    
   }
 
   public boolean getOutputOptionsContains(String sought) {
@@ -334,7 +330,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
   }
 
   private static String[] wsvStringToStringArray(String str) {
-    if (StringUtils.isNullOrEmpty(str)) {
+    if (str == null || str.equals("")) {
       return StringUtils.EMPTY_STRING_ARRAY;
     } else {
       return str.split("\\s+");

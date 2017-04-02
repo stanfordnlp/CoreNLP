@@ -142,7 +142,7 @@ public class RNNOptions implements Serializable {
       wordVectors = args[argIndex + 1];
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-unkWord")) {
-      unkWord = args[argIndex + 1];
+      unkWord = args[argIndex] + 1;
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-numHid")) {
       numHid = Integer.parseInt(args[argIndex + 1]);

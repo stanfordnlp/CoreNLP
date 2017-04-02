@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
@@ -13,10 +12,7 @@ import java.util.*;
  * @author Dan Klein
  * @author Christopher Manning (generified and optimized storage)
  */
-public class BinaryGrammar implements Serializable, Iterable<BinaryRule>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BinaryGrammar.class);
+public class BinaryGrammar implements Serializable, Iterable<BinaryRule> {
 
   // private static final BinaryRule[] EMPTY_BINARY_RULE_ARRAY = new BinaryRule[0];
 
@@ -87,7 +83,7 @@ public class BinaryGrammar implements Serializable, Iterable<BinaryRule>  {
       } else {
         // if state is not synthetic, we add rule to splitRules only if both children are not synthetic
         // do left
-        List<BinaryRule> ruleList = new ArrayList<>();
+        List<BinaryRule> ruleList = new ArrayList<BinaryRule>();
         for (BinaryRule br : rulesWithLC[state]) {
           if ( ! isSynthetic(br.rightChild)) {
             ruleList.add(br);
@@ -232,9 +228,9 @@ public class BinaryGrammar implements Serializable, Iterable<BinaryRule>  {
     ruleSetWithLC = new Set[numStates];
     ruleSetWithRC = new Set[numStates];
     for (int s = 0; s < numStates; s++) {
-      rulesWithParent[s] = new ArrayList<>();
-      rulesWithLC[s] = new ArrayList<>();
-      rulesWithRC[s] = new ArrayList<>();
+      rulesWithParent[s] = new ArrayList<BinaryRule>();
+      rulesWithLC[s] = new ArrayList<BinaryRule>();
+      rulesWithRC[s] = new ArrayList<BinaryRule>();
       ruleSetWithLC[s] = Generics.newHashSet();
       ruleSetWithRC[s] = Generics.newHashSet();
     }
@@ -242,7 +238,7 @@ public class BinaryGrammar implements Serializable, Iterable<BinaryRule>  {
 
   public BinaryGrammar(Index<String> stateIndex) {
     this.index = stateIndex;
-    allRules = new ArrayList<>();
+    allRules = new ArrayList<BinaryRule>();
     init();
   }
 
@@ -254,7 +250,7 @@ public class BinaryGrammar implements Serializable, Iterable<BinaryRule>  {
    * @throws IOException If format is bung
    */
   public void readData(BufferedReader in) throws IOException {
-    //if (Test.verbose) log.info(">> readData");
+    //if (Test.verbose) System.err.println(">> readData");
     String line;
     int lineNum = 1;
     line = in.readLine();

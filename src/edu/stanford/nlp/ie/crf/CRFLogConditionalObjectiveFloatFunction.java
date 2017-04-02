@@ -1,5 +1,4 @@
 package edu.stanford.nlp.ie.crf;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFloatFunction;
@@ -13,10 +12,7 @@ import java.util.List;
  * @author Jenny Finkel
  */
 
-public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiffFloatFunction implements HasCliquePotentialFunction  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFLogConditionalObjectiveFloatFunction.class);
+public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiffFloatFunction implements HasCliquePotentialFunction {
 
   public static final int NO_PRIOR = 0;
   public static final int QUADRATIC_PRIOR = 1;
@@ -74,15 +70,15 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
   public int domainDimension() {
     if (domainDimension < 0) {
       domainDimension = 0;
-      for (int aMap : map) {
-        domainDimension += labelIndices.get(aMap).size();
+      for (int i = 0; i < map.length; i++) {
+        domainDimension += labelIndices.get(map[i]).size();
       }
     }
     return domainDimension;
   }
 
   public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
-    throw new UnsupportedOperationException("CRFLogConditionalObjectiveFloatFunction is not clique potential compatible yet");
+    throw new UnsupportedOperationException("CRFLogConditionalObjectiveFloatFunction is not clique potential compatible yet"); 
   }
 
   public float[][] to2D(float[] weights) {
@@ -99,9 +95,9 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
   public float[] to1D(float[][] weights) {
     float[] newWeights = new float[domainDimension()];
     int index = 0;
-    for (float[] weight : weights) {
-      System.arraycopy(weight, 0, newWeights, index, weight.length);
-      index += weight.length;
+    for (int i = 0; i < weights.length; i++) {
+      System.arraycopy(weights[i], 0, newWeights, index, weights[i].length);
+      index += weights[i].length;
     }
     return newWeights;
   }
@@ -111,7 +107,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
     int index = 0;
     for (int i = 0; i < map.length; i++) {
       d[i] = new float[labelIndices.get(map[i]).size()];
-      // Arrays.fill(d[i], 0);  // not needed; Java arrays zero initialized
+      Arrays.fill(d[i], 0);
       index += labelIndices.get(map[i]).size();
     }
     return d;
@@ -134,7 +130,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
           System.arraycopy(label, window - 1 - j, cliqueLabel, 0, j + 1);
           CRFLabel crfLabel = new CRFLabel(cliqueLabel);
           int labelIndex = labelIndices.get(j).indexOf(crfLabel);
-          //log.info(crfLabel + " " + labelIndex);
+          //System.err.println(crfLabel + " " + labelIndex);
           for (int k = 0; k < dataDoc[i][j].length; k++) {
             Ehat[dataDoc[i][j][k]][labelIndex]++;
           }
@@ -150,23 +146,23 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
     for (int j = 0; j < labelIndices.size(); j++) {
       Index labelIndex = labelIndices.get(j);
       FloatFactorTable ft = new FloatFactorTable(numClasses, j + 1);
-
+	    
       // ...and each possible labeling for that clique
       for (int k = 0; k < labelIndex.size(); k++) {
         int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
         float weight = 0.0f;
         for (int m = 0; m < data[j].length; m++) {
-          //log.info("**"+weights[data[j][m]][k]);
+          //System.err.println("**"+weights[data[j][m]][k]);	    
           weight += weights[data[j][m]][k];
         }
         ft.setValue(label, weight);
-        //log.info(">>"+ft);
+        //System.err.println(">>"+ft);	    
       }
-      //log.info("::"+ft);
+      //System.err.println("::"+ft);	    
       if (j > 0) {
         ft.multiplyInEnd(factorTable);
       }
-      //log.info("::"+ft);
+      //System.err.println("::"+ft);
       factorTable = ft;
 
     }
@@ -181,11 +177,11 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
 
     //       for (int i = 0; i < weights.length; i++) {
     //         for (int j = 0; j < weights[i].length; j++) {
-    //           log.info(i+" "+j+": "+weights[i][j]);
+    //           System.err.println(i+" "+j+": "+weights[i][j]);
     //         }
     //       }
 
-    //log.info("calibrating clique tree");
+    //System.err.println("calibrating clique tree");
 
     FloatFactorTable[] factorTables = new FloatFactorTable[data.length];
     FloatFactorTable[] messages = new FloatFactorTable[data.length - 1];
@@ -194,19 +190,19 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
 
       factorTables[i] = getFloatFactorTable(weights, data[i], labelIndices, numClasses);
       if (VERBOSE) {
-        log.info(i + ": " + factorTables[i]);
+        System.err.println(i + ": " + factorTables[i]);
       }
 
       if (i > 0) {
         messages[i - 1] = factorTables[i - 1].sumOutFront();
         if (VERBOSE) {
-          log.info(messages[i - 1]);
+          System.err.println(messages[i - 1]);
         }
         factorTables[i].multiplyInFront(messages[i - 1]);
         if (VERBOSE) {
-          log.info(factorTables[i]);
+          System.err.println(factorTables[i]);
           if (i == data.length - 1) {
-            log.info(i + ": " + factorTables[i].toProbString());
+            System.err.println(i + ": " + factorTables[i].toProbString());
           }
         }
       }
@@ -216,16 +212,16 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
 
       FloatFactorTable summedOut = factorTables[i + 1].sumOutEnd();
       if (VERBOSE) {
-        log.info((i + 1) + "-->" + i + ": " + summedOut);
+        System.err.println((i + 1) + "-->" + i + ": " + summedOut);
       }
       summedOut.divideBy(messages[i]);
       if (VERBOSE) {
-        log.info((i + 1) + "-->" + i + ": " + summedOut);
+        System.err.println((i + 1) + "-->" + i + ": " + summedOut);
       }
       factorTables[i].multiplyInEnd(summedOut);
       if (VERBOSE) {
-        log.info(i + ": " + factorTables[i]);
-        log.info(i + ": " + factorTables[i].toProbString());
+        System.err.println(i + ": " + factorTables[i]);
+        System.err.println(i + ": " + factorTables[i].toProbString());
       }
 
 
@@ -250,7 +246,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
     for (int m = 0; m < data.length; m++) {
 
       FloatFactorTable[] factorTables = getCalibratedCliqueTree(weights, data[m], labelIndices, numClasses);
-      //             log.info("calibrated:");
+      //             System.err.println("calibrated:");
       //             for (int i = 0; i < factorTables.length; i++) {
       //               System.out.println(factorTables[i]);
       //               System.out.println("+++++++++++++++++++++++++++++");
@@ -264,7 +260,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
       for (int i = 0; i < data[m].length; i++) {
         float p = factorTables[i].conditionalLogProb(given, labels[m][i]);
         if (VERBOSE) {
-          log.info("P(" + labels[m][i] + "|" + Arrays.toString(given) + ")=" + p);
+          System.err.println("P(" + labels[m][i] + "|" + Arrays.toString(given) + ")=" + p);
         }
         prob += p;
         System.arraycopy(given, 1, given, 0, given.length - 1);
@@ -301,12 +297,12 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
       for (int j = 0; j < E[i].length; j++) {
         derivative[index++] = (E[i][j] - Ehat[i][j]);
         if (VERBOSE) {
-          log.info("deriv(" + i + "," + j + ") = " + E[i][j] + " - " + Ehat[i][j] + " = " + derivative[index - 1]);
+          System.err.println("deriv(" + i + "," + j + ") = " + E[i][j] + " - " + Ehat[i][j] + " = " + derivative[index - 1]);
         }
       }
     }
 
-
+        
     // priors
     if (prior == QUADRATIC_PRIOR) {
       float sigmaSq = sigma * sigma;
@@ -358,7 +354,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
       sums[i] = new float[size];
       probs[i] = new float[size];
       counts[i] = new float[size];
-      // Arrays.fill(counts[i], 0.0f); // not needed; Java arrays zero initialized
+      Arrays.fill(counts[i], 0.0f);
     }
 
     for (int d = 0; d < data.length; d++) {
@@ -372,8 +368,8 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
           Arrays.fill(sums[cl], 0.0f);
           int numClasses = labelIndices.get(cl).size();
           for (int c = 0; c < numClasses; c++) {
-            for (int feature : features) {
-              sums[cl][c] += weights[feature][c];
+            for (int f = 0; f < features.length; f++) {
+              sums[cl][c] += weights[features[f]][c];
             }
           }
         }
@@ -386,7 +382,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
           Arrays.fill(label, classIndex.indexOf(backgroundSymbol));
           int index1 = label.length - 1;
           for (int pos = e; pos >= 0 && index1 >= 0; pos--) {
-            //log.info(index1+" "+pos);
+            //System.err.println(index1+" "+pos);
             label[index1--] = llabels[pos];
           }
           CRFLabel crfLabel = new CRFLabel(label);
@@ -406,9 +402,9 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
           // 				derivative[index]--;
           // 			    }
           // 			    index++;
-          // 			}
+          // 			}			
           // 		    }
-
+		    
 
           value -= sums[cl][labelIndex] - total;
 
@@ -419,15 +415,15 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
           // 		    }
 
         }
-
+		
         // go through each clique...
         for (int j = 0; j < data[d][e].length; j++) {
           Index labelIndex = labelIndices.get(j);
-
+		    
           // ...and each possible labeling for that clique
           for (int k = 0; k < labelIndex.size(); k++) {
             int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
-
+			
             // float p = Math.pow(Math.E, factorTables[i].logProbEnd(label));
             float p = probs[j][k];
             for (int n = 0; n < data[d][e][j].length; n++) {
@@ -438,7 +434,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
       }
 
     }
-
+   
 
     // compute the partial derivative for each feature
     int index = 0;
@@ -568,7 +564,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
         }
       }
     }
-
+  
 
     // compute the partial derivative for each feature
     int index = 0;

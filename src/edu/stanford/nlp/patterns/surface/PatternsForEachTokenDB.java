@@ -2,7 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.patterns.SQLConnection;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -15,27 +15,27 @@ import java.util.*;
 public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachToken<E>{
 
 
-  @ArgumentParser.Option(name = "createTable")
+  @Execution.Option(name = "createTable")
   boolean createTable = false;
 
-  @ArgumentParser.Option(name = "deleteExisting")
+  @Execution.Option(name = "deleteExisting")
   boolean deleteExisting = false;
 
-  @ArgumentParser.Option(name = "tableName")
+  @Execution.Option(name = "tableName")
   String tableName = null;
 
-  @ArgumentParser.Option(name = "patternindicesTable")
+  @Execution.Option(name = "patternindicesTable")
   String patternindicesTable = "patternindices";
 
-  @ArgumentParser.Option(name="deleteDBResourcesOnExit")
+  @Execution.Option(name="deleteDBResourcesOnExit")
   boolean deleteDBResourcesOnExit = true;
 
   public PatternsForEachTokenDB(Properties props, Map<String, Map<Integer, Set<E>>> pats){
 
-    ArgumentParser.fillOptions(this, props);
+    Execution.fillOptions(this, props);
 
 
-      ArgumentParser.fillOptions(SQLConnection.class, props);
+      Execution.fillOptions(SQLConnection.class, props);
 
       assert tableName != null : "tableName property is null!";
       tableName = tableName.toLowerCase();
@@ -311,7 +311,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
       String query = "Select patterns from " + tableName + " where sentid=\'" + sentId + "\'";
       Statement stmt = conn.createStatement();
       ResultSet rs = stmt.executeQuery(query);
-      Map<Integer, Set<E>> patsToken = new HashMap<>();
+      Map<Integer, Set<E>> patsToken = new HashMap<Integer, Set<E>>();
       if(rs.next()){
         byte[] st = (byte[]) rs.getObject(1);
         ByteArrayInputStream baip = new ByteArrayInputStream(st);
@@ -484,7 +484,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
   @Override
   public Map<String, Map<Integer, Set<E>>> getPatternsForAllTokens(Collection<String> sampledSentIds) {
     try{
-      Map<String, Map<Integer, Set<E>>> pats = new HashMap<>();
+      Map<String, Map<Integer, Set<E>>> pats = new HashMap<String, Map<Integer, Set<E>>>();
       Connection conn = SQLConnection.getConnection();
       Iterator<String> iter = sampledSentIds.iterator();
       int totalNumberOfValuesLeftToBatch = sampledSentIds.size();

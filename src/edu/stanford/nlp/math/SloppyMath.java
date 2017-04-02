@@ -1,6 +1,4 @@
 package edu.stanford.nlp.math;
-import edu.stanford.nlp.util.Triple;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Collection;
 
@@ -16,10 +14,7 @@ import java.util.Collection;
  * @author Christopher Manning
  * @version 2003/01/02
  */
-public final class SloppyMath  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SloppyMath.class);
+public final class SloppyMath {
 
   private SloppyMath() {}  // this class is just static methods.
 
@@ -693,83 +688,6 @@ public final class SloppyMath  {
     return result;
   }
 
-
-  /**
-   * Taken from http://nerds-central.blogspot.com/2011/05/high-speed-parse-double-for-jvm.html
-   */
-  private final static double exps[] = new double[617];
-  static {
-    for(int i=-308;i<308;++i) {
-      String toParse = "1.0e" + i;
-      exps[(i + 308)]=Double.parseDouble("1.0e" + i);
-    }
-  }
-
-
-  /**
-   * Taken from http://nerds-central.blogspot.com/2011/05/high-speed-parse-double-for-jvm.html
-   */
-  public static double parseDouble(boolean negative, long mantissa, int  exponent) {
-     // Do this with no locals other than the arguments to make it stupid easy
-     // for the JIT compiler to inline the code.
-    int e = -16;
-    return (negative ? -1. : 1.) * (((double)mantissa) * exps[(e + 308)]) * exps[(exponent + 308)];
-  }
-
-
-  /**
-   * Segment a double into a mantissa and exponent.
-   */
-  public static Triple<Boolean, Long, Integer> segmentDouble(double d) {
-    if (Double.isInfinite(d) || Double.isNaN(d)) {
-      throw new IllegalArgumentException("Cannot handle weird double: " + d);
-    }
-    boolean negative = d < 0;
-    d = Math.abs(d);
-    int exponent = 0;
-    while (d >= 10.0) {
-      exponent += 1;
-      d = d / 10.;
-    }
-    while (d < 1.0) {
-      exponent -= 1;
-      d = d * 10.;
-    }
-    return Triple.makeTriple(negative, (long) (d * 10000000000000000.), exponent);
-  }
-
-
-  /**
-   * From http://nadeausoftware.com/articles/2009/08/java_tip_how_parse_integers_quickly
-   *
-   * Parse an integer very quickly, without sanity checks.
-   */
-  public static long parseInt( final String s ) {
-    // Check for a sign.
-    long num  = 0;
-    long sign = -1;
-    final int len  = s.length( );
-    final char ch  = s.charAt( 0 );
-    if ( ch == '-' ) {
-      sign = 1;
-    }
-    else {
-      final long d = ch - '0';
-      num = -d;
-    }
-    // Build the number.
-    final long max = (sign == -1) ?
-        -Long.MAX_VALUE : Long.MIN_VALUE;
-    final long multmax = max / 10;
-    int i = 1;
-    while ( i < len ) {
-      long d = s.charAt(i++) - '0';
-      num *= 10;
-      num -= d;
-    }
-    return sign * num;
-  }
-
   /**
    * Tests the hypergeometric distribution code, or other functions
    * provided in this module.
@@ -779,7 +697,7 @@ public final class SloppyMath  {
    */
   public static void main(String[] args) {
     if (args.length == 0) {
-      log.info("Usage: java edu.stanford.nlp.math.SloppyMath " + "[-logAdd|-fishers k n r m|-binomial r n p");
+      System.err.println("Usage: java edu.stanford.nlp.math.SloppyMath " + "[-logAdd|-fishers k n r m|-binomial r n p");
     } else if (args[0].equals("-logAdd")) {
       System.out.println("Log adds of neg infinity numbers, etc.");
       System.out.println("(logs) -Inf + -Inf = " + logAdd(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY));
@@ -822,7 +740,7 @@ public final class SloppyMath  {
       double ans = SloppyMath.exactBinomial(k, n, p);
       System.out.println("Binomial p(X >= " + k + "; " + n + ", " + p + ") = " + ans);
     } else {
-      log.info("Unknown option: " + args[0]);
+      System.err.println("Unknown option: " + args[0]);
     }
   }
 

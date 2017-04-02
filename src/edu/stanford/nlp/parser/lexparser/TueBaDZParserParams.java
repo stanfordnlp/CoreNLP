@@ -1,11 +1,13 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.CategoryWordTag;
+import edu.stanford.nlp.ling.HasTag;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.tuebadz.TueBaDZHeadFinder;
 import edu.stanford.nlp.trees.international.tuebadz.TueBaDZLanguagePack;
@@ -21,10 +23,7 @@ import edu.stanford.nlp.util.Index;
  *  @author Roger Levy (rog@stanford.edu)
  *  @author Wolfgang Maier (wmaier@sfs.uni-tuebingen.de)
  */
-public class TueBaDZParserParams extends AbstractTreebankParserParams  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TueBaDZParserParams.class);
+public class TueBaDZParserParams extends AbstractTreebankParserParams {
 
   private HeadFinder hf = new TueBaDZHeadFinder();
 
@@ -48,7 +47,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams  {
   /** Returns the first sentence of TueBaDZ. */
   @Override
   public List<? extends HasWord> defaultTestSentence() {
-    return SentenceUtils.toWordList("Veruntreute", "die", "AWO", "Spendengeld", "?");
+    return Sentence.toWordList("Veruntreute", "die", "AWO", "Spendengeld", "?");
   }
 
   @Override
@@ -152,7 +151,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams  {
 
   @Override
   public void display() {
-    log.info("TueBaDZParserParams nodeCleanup=" + nodeCleanup +
+    System.err.println("TueBaDZParserParams nodeCleanup=" + nodeCleanup +
                        " mKonjParent=" + markKonjParent + " mContainsV=" + markContainsV +
                        " mZu=" + markZu + " mColons=" + markColons);
   }
@@ -176,7 +175,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams  {
       return t;
     }
 
-    List<String> annotations = new ArrayList<>();
+    List<String> annotations = new ArrayList<String>();
     Label lab = t.label();
     String word = null;
     if (lab instanceof HasWord) {
@@ -272,7 +271,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams  {
 
   private List<String> childBasicCats(Tree t) {
     Tree[] kids = t.children();
-    List<String> l = new ArrayList<>();
+    List<String> l = new ArrayList<String>();
     for (Tree kid : kids) {
       l.add(basicCat(kid.label().value()));
     }

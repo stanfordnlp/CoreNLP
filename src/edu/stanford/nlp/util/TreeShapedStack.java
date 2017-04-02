@@ -45,7 +45,7 @@ public class TreeShapedStack<T> {
    * Returns a new node with the new data attached.
    */
   public TreeShapedStack<T> push(T data) {
-    return new TreeShapedStack<>(this, data, size + 1);
+    return new TreeShapedStack<T>(this, data, size + 1);
   }
 
   /**

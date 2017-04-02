@@ -1,7 +1,5 @@
 package edu.stanford.nlp.util.concurrent;
 
-import edu.stanford.nlp.util.RuntimeInterruptedException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,10 +67,10 @@ public class MulticoreWrapper<I,O> {
   public MulticoreWrapper(int numThreads, ThreadsafeProcessor<I,O> processor, boolean orderResults) {
     nThreads = numThreads <= 0 ? Runtime.getRuntime().availableProcessors() : numThreads;
     this.orderResults = orderResults;
-    outputQueue = new ConcurrentHashMap<>(2 * nThreads);
+    outputQueue = new ConcurrentHashMap<Integer,O>(2*nThreads);
     threadPool = buildThreadPool(nThreads);
     //    queue = new ExecutorCompletionService<Integer>(threadPool);
-    idleProcessors = new ArrayBlockingQueue<>(nThreads, false);
+    idleProcessors = new ArrayBlockingQueue<Integer>(nThreads, false);
     callback = (result, processorId) -> {
       outputQueue.put(result.id, result.item);
       idleProcessors.add(processorId);
@@ -84,7 +82,7 @@ public class MulticoreWrapper<I,O> {
     threadPool.prestartAllCoreThreads();
 
     // Setup the processors, one per thread
-    List<ThreadsafeProcessor<I,O>> procList = new ArrayList<>(nThreads);
+    List<ThreadsafeProcessor<I,O>> procList = new ArrayList<ThreadsafeProcessor<I,O>>(nThreads);
     procList.add(processor);
     idleProcessors.add(0);
     for (int i = 1; i < nThreads; ++i) {
@@ -96,10 +94,6 @@ public class MulticoreWrapper<I,O> {
 
   protected ThreadPoolExecutor buildThreadPool(int nThreads) {
     return (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
-  }
-
-  public int nThreads() {
-    return nThreads;
   }
 
   /**
@@ -133,7 +127,7 @@ public class MulticoreWrapper<I,O> {
       throw new RejectedExecutionException("Couldn't submit item to threadpool: " + item.toString());
     }
     final int itemId = submittedItemCounter++;
-    CallableJob<I,O> job = new CallableJob<>(item, itemId, processorList.get(procId), procId, callback);
+    CallableJob<I,O> job = new CallableJob<I,O>(item, itemId, processorList.get(procId), procId, callback);
     threadPool.submit(job);
   }
 
@@ -145,7 +139,7 @@ public class MulticoreWrapper<I,O> {
     try {
       return idleProcessors.take();
     } catch (InterruptedException e) {
-      throw new RuntimeInterruptedException(e);
+      return null;
     }
   }
   
@@ -253,14 +247,14 @@ public class MulticoreWrapper<I,O> {
     public Integer call() {
       try {
         O result = processor.process(item);
-        QueueItem<O> output = new QueueItem<>(result, itemId);
+        QueueItem<O> output = new QueueItem<O>(result, itemId);
         callback.call(output, processorId);
         return itemId;
       
       } catch (Exception e) {
         e.printStackTrace();
         // Hope that the consumer knows how to handle null!
-        QueueItem<O> output = new QueueItem<>(null, itemId);
+        QueueItem<O> output = new QueueItem<O>(null, itemId);
         callback.call(output, processorId);
         return itemId;
       }

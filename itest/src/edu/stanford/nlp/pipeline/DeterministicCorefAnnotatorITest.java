@@ -4,20 +4,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Assert;
-
+import junit.framework.Assert;
 import junit.framework.TestCase;
-
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-import edu.stanford.nlp.coref.data.CorefChain;
-import edu.stanford.nlp.coref.data.CorefChain.CorefMention;
 import edu.stanford.nlp.dcoref.Constants;
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
 public class DeterministicCorefAnnotatorITest extends TestCase {
-
   private static AnnotationPipeline pipeline;
 
   @Override
@@ -53,9 +50,9 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     Assert.assertNotNull(corefChains);
 
     // test chainID = m.corefClusterID
-    for (int chainID : corefChains.keySet()) {
+    for(int chainID : corefChains.keySet()) {
       CorefChain c = corefChains.get(chainID);
-      for (CorefMention m : c.getMentionsInTextualOrder()) {
+      for(CorefMention m : c.getMentionsInTextualOrder()) {
         Assert.assertEquals(m.corefClusterID, chainID);
       }
     }
@@ -94,9 +91,9 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     //    }
 
     // test chainID = m.corefClusterID
-    for (int chainID : chains.keySet()) {
+    for(int chainID : chains.keySet()) {
       CorefChain c = chains.get(chainID);
-      for (CorefMention m : c.getMentionsInTextualOrder()) {
+      for(CorefMention m : c.getMentionsInTextualOrder()) {
         Assert.assertEquals(m.corefClusterID, chainID);
       }
     }

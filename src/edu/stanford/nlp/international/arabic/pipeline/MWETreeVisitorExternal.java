@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.pipeline;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
@@ -25,10 +24,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public class MWETreeVisitorExternal implements TreeVisitor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MWETreeVisitorExternal.class);
+public class MWETreeVisitorExternal implements TreeVisitor {
 
   private static final String mweFile = "/home/rayder441/sandbox/javanlp/projects/core/data/edu/stanford/nlp/pipeline/attia-mwe-list.txt.out.tok.fixed.proc.uniq";
   
@@ -66,7 +62,7 @@ public class MWETreeVisitorExternal implements TreeVisitor  {
    */
   public void visitTree(Tree tree) {
     if (tree == null) return;
-    String yield = SentenceUtils.listToString(tree.yield());
+    String yield = Sentence.listToString(tree.yield());
     if (mweDictionary.contains(yield)) {
       List<Tree> children = getPreterminalSubtrees(tree);
       String newLabel = "MW" + tree.value();
@@ -86,7 +82,7 @@ public class MWETreeVisitorExternal implements TreeVisitor  {
   }
   
   private List<Tree> getPreterminalSubtrees(Tree tree) {
-    List<Tree> preterminals = new ArrayList<>();
+    List<Tree> preterminals = new ArrayList<Tree>();
     for (Tree subTree : tree) {
       if (subTree.isPreTerminal()) {
         preterminals.add(subTree);

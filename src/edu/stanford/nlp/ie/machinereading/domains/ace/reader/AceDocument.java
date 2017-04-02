@@ -1,6 +1,5 @@
 
-package edu.stanford.nlp.ie.machinereading.domains.ace.reader; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,10 +19,7 @@ import edu.stanford.nlp.util.Generics;
 /**
  * Stores the ACE elements annotated in this document
  */
-public class AceDocument extends AceElement  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AceDocument.class);
+public class AceDocument extends AceElement {
   /** Prefix of the files from where this doc was created */
   private String mPrefix;
 
@@ -67,17 +63,17 @@ public class AceDocument extends AceElement  {
 
     mEntities = Generics.newHashMap();
     mEntityMentions = Generics.newHashMap();
-    mSentenceEntityMentions = new ArrayList<>();
+    mSentenceEntityMentions = new ArrayList<ArrayList<AceEntityMention>>();
 
     mRelations = Generics.newHashMap();
     mRelationMentions = Generics.newHashMap();
-    mSentenceRelationMentions = new ArrayList<>();
+    mSentenceRelationMentions = new ArrayList<ArrayList<AceRelationMention>>();
 
     mEvents = Generics.newHashMap();
     mEventMentions = Generics.newHashMap();
-    mSentenceEventMentions = new ArrayList<>();
+    mSentenceEventMentions = new ArrayList<ArrayList<AceEventMention>>();
     
-    mTokens = new Vector<>();
+    mTokens = new Vector<AceToken>();
   }
 
   public void setPrefix(String p) {
@@ -103,7 +99,7 @@ public class AceDocument extends AceElement  {
     else if (p.indexOf("wl/") >= 0)
       mSource = "weblog";
     else {
-      log.info("WARNING: Unknown source for doc: " + p);
+      System.err.println("WARNING: Unknown source for doc: " + p);
       mSource = "none";
     }
   }
@@ -271,20 +267,20 @@ public class AceDocument extends AceElement  {
     StringBuffer buf = new StringBuffer();
     boolean doPrint = false;
     buf.append("...");
-    for (AceToken mToken : mTokens) {
+    for (int i = 0; i < mTokens.size(); i++) {
       // start printing
-      if (doPrint == false && mToken.getByteOffset().start() > start - 20
-              && mToken.getByteOffset().end() < end) {
+      if (doPrint == false && mTokens.get(i).getByteOffset().start() > start - 20
+          && mTokens.get(i).getByteOffset().end() < end) {
         doPrint = true;
       }
 
       // end printing
-      else if (doPrint == true && mToken.getByteOffset().start() > end + 20) {
+      else if (doPrint == true && mTokens.get(i).getByteOffset().start() > end + 20) {
         doPrint = false;
       }
 
       if (doPrint) {
-        buf.append(" " + mToken.display());
+        buf.append(" " + mTokens.get(i).display());
       }
     }
     buf.append("...");
@@ -372,7 +368,7 @@ public class AceDocument extends AceElement  {
     //
     if (usePredictedBoundaries == false) {
       doc = AceDomReader.parseDocument(new File(prefix + XML_EXT));
-      // log.info("Parsed " + doc.getEntityMentions().size() +
+      // System.err.println("Parsed " + doc.getEntityMentions().size() +
       // " entities in document " + prefix);
     }
 
@@ -383,7 +379,7 @@ public class AceDocument extends AceElement  {
       int lastSlash = prefix.lastIndexOf(File.separator);
       assert (lastSlash > 0 && lastSlash < prefix.length() - 1);
       String id = prefix.substring(lastSlash + 1);
-      // log.info(id + ": " + prefix);
+      // System.err.println(id + ": " + prefix);
       doc = new AceDocument(id);
     }
     doc.setPrefix(prefix);
@@ -428,9 +424,9 @@ public class AceDocument extends AceElement  {
 
       // adjust the number of rows if necessary
       while (sentence >= doc.mSentenceEntityMentions.size()) {
-        doc.mSentenceEntityMentions.add(new ArrayList<>());
-        doc.mSentenceRelationMentions.add(new ArrayList<>());
-        doc.mSentenceEventMentions.add(new ArrayList<>());
+        doc.mSentenceEntityMentions.add(new ArrayList<AceEntityMention>());
+        doc.mSentenceRelationMentions.add(new ArrayList<AceRelationMention>());
+        doc.mSentenceEventMentions.add(new ArrayList<AceEventMention>());
       }
 
       // store the entity mentions in increasing order:
@@ -499,9 +495,9 @@ public class AceDocument extends AceElement  {
        * won't have created rows in mSentence*Mentions
        */
       while (sentence >= doc.mSentenceEntityMentions.size()) {
-        doc.mSentenceEntityMentions.add(new ArrayList<>());
-        doc.mSentenceRelationMentions.add(new ArrayList<>());
-        doc.mSentenceEventMentions.add(new ArrayList<>());
+        doc.mSentenceEntityMentions.add(new ArrayList<AceEntityMention>());
+        doc.mSentenceRelationMentions.add(new ArrayList<AceRelationMention>());
+        doc.mSentenceEventMentions.add(new ArrayList<AceEventMention>());
       }
 
       // store the event mentions in increasing order
@@ -540,7 +536,7 @@ public class AceDocument extends AceElement  {
     //
     if (usePredictedBoundaries == false) {
       doc = AceDomReader.parseDocument(new File(prefix + XML_EXT));
-      // log.info("Parsed " + doc.getEntityMentions().size() +
+      // System.err.println("Parsed " + doc.getEntityMentions().size() +
       // " entities in document " + prefix);
     }
 
@@ -551,7 +547,7 @@ public class AceDocument extends AceElement  {
       int lastSlash = prefix.lastIndexOf(File.separator);
       assert (lastSlash > 0 && lastSlash < prefix.length() - 1);
       String id = prefix.substring(lastSlash + 1);
-      // log.info(id + ": " + prefix);
+      // System.err.println(id + ": " + prefix);
       doc = new AceDocument(id);
     }
     doc.setPrefix(prefix);
@@ -596,9 +592,9 @@ public class AceDocument extends AceElement  {
 
       // adjust the number of rows if necessary
       while (sentence >= doc.mSentenceEntityMentions.size()) {
-        doc.mSentenceEntityMentions.add(new ArrayList<>());
-        doc.mSentenceRelationMentions.add(new ArrayList<>());
-        doc.mSentenceEventMentions.add(new ArrayList<>());
+        doc.mSentenceEntityMentions.add(new ArrayList<AceEntityMention>());
+        doc.mSentenceRelationMentions.add(new ArrayList<AceRelationMention>());
+        doc.mSentenceEventMentions.add(new ArrayList<AceEventMention>());
       }
 
       // store the entity mentions in increasing order:
@@ -767,7 +763,7 @@ public class AceDocument extends AceElement  {
     //
     // read Massi's B-ENT, I-ENT, or O labels
     //
-    ArrayList<String> labels = new ArrayList<>();
+    ArrayList<String> labels = new ArrayList<String>();
     String line;
     while ((line = is.readLine()) != null) {
       ArrayList<String> tokens = SimpleTokenize.tokenize(line);

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.ListeningSequenceModel;
@@ -19,10 +18,7 @@ import java.util.List;
  * @param <E> The type of the label (usually String in our uses)
  * @author Jenny Finkel
  */
-public class CRFCliqueTree<E> implements ListeningSequenceModel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFCliqueTree.class);
+public class CRFCliqueTree<E> implements ListeningSequenceModel {
 
   private final FactorTable[] factorTables;
   private final double z; // norm constant
@@ -276,7 +272,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public Counter<E> probs(int position) {
-    Counter<E> c = new ClassicCounter<>();
+    Counter<E> c = new ClassicCounter<E>();
     for (int i = 0, sz = classIndex.size(); i < sz; i++) {
       E label = classIndex.get(i);
       c.incrementCount(label, prob(position, i));
@@ -285,7 +281,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public Counter<E> logProbs(int position) {
-    Counter<E> c = new ClassicCounter<>();
+    Counter<E> c = new ClassicCounter<E>();
     for (int i = 0, sz = classIndex.size(); i < sz; i++) {
       E label = classIndex.get(i);
       c.incrementCount(label, logProb(position, i));
@@ -360,7 +356,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public GeneralizedCounter logProbs(int position, int window) {
-    GeneralizedCounter<E> gc = new GeneralizedCounter<>(window);
+    GeneralizedCounter<E> gc = new GeneralizedCounter<E>(window);
     int[] labels = new int[window];
     // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.)
     // 4.12.5
@@ -384,7 +380,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public GeneralizedCounter probs(int position, int window) {
-    GeneralizedCounter<E> gc = new GeneralizedCounter<>(window);
+    GeneralizedCounter<E> gc = new GeneralizedCounter<E>(window);
     int[] labels = new int[window];
     // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.)
     // 4.12.5
@@ -420,7 +416,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   private List<E> intArrayToListE(int[] is) {
-    List<E> os = new ArrayList<>(is.length);
+    List<E> os = new ArrayList<E>(is.length);
     for (int i : is) {
       os.add(classIndex.get(i));
     }
@@ -465,7 +461,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public Counter<E> condLogProbsGivenPrevious(int position, int[] prevlabels) {
-    Counter<E> c = new ClassicCounter<>();
+    Counter<E> c = new ClassicCounter<E>();
     for (int i = 0, sz = classIndex.size(); i < sz; i++) {
       E label = classIndex.get(i);
       c.incrementCount(label, condLogProbGivenPrevious(position, i, prevlabels));
@@ -474,7 +470,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public Counter<E> condLogProbsGivenPrevious(int position, E[] prevlabels) {
-    Counter<E> c = new ClassicCounter<>();
+    Counter<E> c = new ClassicCounter<E>();
     for (int i = 0, sz = classIndex.size(); i < sz; i++) {
       E label = classIndex.get(i);
       c.incrementCount(label, condLogProbGivenPrevious(position, label, prevlabels));
@@ -516,7 +512,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public Counter<E> condLogProbsGivenNext(int position, int[] nextlabels) {
-    Counter<E> c = new ClassicCounter<>();
+    Counter<E> c = new ClassicCounter<E>();
     for (int i = 0, sz = classIndex.size(); i < sz; i++) {
       E label = classIndex.get(i);
       c.incrementCount(label, condLogProbGivenNext(position, i, nextlabels));
@@ -525,7 +521,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   }
 
   public Counter<E> condLogProbsGivenNext(int position, E[] nextlabels) {
-    Counter<E> c = new ClassicCounter<>();
+    Counter<E> c = new ClassicCounter<E>();
     for (int i = 0, sz = classIndex.size(); i < sz; i++) {
       E label = classIndex.get(i);
       c.incrementCount(label, condLogProbGivenNext(position, label, nextlabels));
@@ -563,25 +559,25 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
         featureValByCliqueSize = featureVals[i];
       factorTables[i] = getFactorTable(data[i], labelIndices, numClasses, cliquePotentialFunc, featureValByCliqueSize, i);
 
-      // log.info("before calibration,FT["+i+"] = " + factorTables[i].toProbString());
+      // System.err.println("before calibration,FT["+i+"] = " + factorTables[i].toProbString());
 
       if (i > 0) {
         messages[i - 1] = factorTables[i - 1].sumOutFront();
-        // log.info("forward message, message["+(i-1)+"] = " + messages[i-1].toProbString());
+        // System.err.println("forward message, message["+(i-1)+"] = " + messages[i-1].toProbString());
         factorTables[i].multiplyInFront(messages[i - 1]);
-        // log.info("after forward calibration, FT["+i+"] = " + factorTables[i].toProbString());
+        // System.err.println("after forward calibration, FT["+i+"] = " + factorTables[i].toProbString());
       }
     }
 
     for (int i = factorTables.length - 2; i >= 0; i--) {
       FactorTable summedOut = factorTables[i + 1].sumOutEnd();
       summedOut.divideBy(messages[i]);
-      // log.info("backward summedOut, summedOut= " + summedOut.toProbString());
+      // System.err.println("backward summedOut, summedOut= " + summedOut.toProbString());
       factorTables[i].multiplyInEnd(summedOut);
-      // log.info("after backward calibration, FT["+i+"] = " + factorTables[i].toProbString());
+      // System.err.println("after backward calibration, FT["+i+"] = " + factorTables[i].toProbString());
     }
 
-    return new CRFCliqueTree<>(factorTables, classIndex, backgroundSymbol);
+    return new CRFCliqueTree<E>(factorTables, classIndex, backgroundSymbol);
   }
 
   /**
@@ -611,7 +607,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
       factorTables[i].multiplyInEnd(summedOut);
     }
 
-    return new CRFCliqueTree<>(factorTables, classIndex, backgroundSymbol);
+    return new CRFCliqueTree<E>(factorTables, classIndex, backgroundSymbol);
   }
 
   private static FactorTable getFactorTable(double[] weights, double wScale, int[][] weightIndices, int[][] data,

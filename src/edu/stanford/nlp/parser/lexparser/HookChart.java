@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.*;
 
@@ -12,10 +11,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Dan Klein
  */
-public class HookChart  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(HookChart.class);
+class HookChart {
 
   private Map<ChartIndex,List<Hook>> registeredPreHooks = Generics.newHashMap();
   private Map<ChartIndex,List<Hook>> registeredPostHooks = Generics.newHashMap();
@@ -209,11 +205,11 @@ public class HookChart  {
     List<V> list = map.get(index);
     if (list == null) {
       // make default size small: many only ever contain 1 or 2 items
-      list = new ArrayList<>(3);
+      list = new ArrayList<V>(3);
       map.put(index, list);
     }
     list.add(item);
-    // log.info("#### HookChart list length is " + list.size());
+    // System.err.println("#### HookChart list length is " + list.size());
   }
 
 

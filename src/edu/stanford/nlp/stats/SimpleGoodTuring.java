@@ -193,8 +193,8 @@ public class SimpleGoodTuring {
    * values read.
    */
   private static int[][] readInput() throws Exception {
-    List<Integer> rVals = new ArrayList<>();
-    List<Integer> nVals = new ArrayList<>();
+    List<Integer> rVals = new ArrayList<Integer>();
+    List<Integer> nVals = new ArrayList<Integer>();
     BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
     String line;
     while ((line = in.readLine()) != null) {

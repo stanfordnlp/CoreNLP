@@ -1,7 +1,5 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.concurrent.*;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.ling.HasWord;
@@ -24,10 +22,7 @@ import java.io.PrintStream;
  * this sampling procedure to find the best sequence.
  * @author grenager
  */
-public class SequenceGibbsSampler implements BestSequenceFinder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SequenceGibbsSampler.class);
+public class SequenceGibbsSampler implements BestSequenceFinder {
 
   // a random number generator
   private static Random random = new Random(2147483647L);
@@ -86,14 +81,14 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
     List samples = collectSamples(model, numSamples, sampleInterval, initialSequence);
     int[] best = null;
     double bestScore = Double.NEGATIVE_INFINITY;
-    for (Object sample : samples) {
-      int[] sequence = (int[]) sample;
+    for (int i = 0; i < samples.size(); i++) {
+      int[] sequence = (int[]) samples.get(i);
       double score = model.scoreOf(sequence);
-      if (score > bestScore) {
+      if (score>bestScore) {
         best = sequence;
         bestScore = score;
-        log.info("found new best (" + bestScore + ")");
-        log.info(ArrayMath.toString(best));
+        System.err.println("found new best ("+bestScore+")");
+        System.err.println(ArrayMath.toString(best));
       }
     }
     return best;
@@ -105,7 +100,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
   }
 
   public int[] findBestUsingAnnealing(SequenceModel model, CoolingSchedule schedule, int[] initialSequence) {
-    if (verbose>0) log.info("Doing annealing");
+    if (verbose>0) System.err.println("Doing annealing");
     listener.setInitialSequence(initialSequence);
     List result = new ArrayList();
     // so we don't change the initial, or the one we just stored
@@ -122,9 +117,6 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
       positionsChanged = Generics.newHashSet();
 
     for (int i=0; i<schedule.numIterations(); i++) {
-      if (Thread.interrupted()) {  // Allow interrupting the parser
-        throw new RuntimeInterruptedException();
-      }
       double temperature = schedule.getTemperature(i);
       if (speedUpThreshold <= 0) {
         score = sampleSequenceForward(model, sequence, temperature, null); // modifies tagSequence
@@ -144,22 +136,22 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
         best = sequence;
       } else {
         // score = model.scoreOf(sequence);
-        //log.info(i+" "+score+" "+Arrays.toString(sequence));
+        //System.err.println(i+" "+score+" "+Arrays.toString(sequence));
         if (score>bestScore) {
           best = sequence;
           bestScore = score;
         }      
       }
       if (i % 50 == 0) {
-        if (verbose > 1) log.info("itr " + i + ": " + bestScore + "\t");
+        if (verbose > 1) System.err.println("itr " + i + ": " + bestScore + "\t");
       }
-      if (verbose>0) log.info(".");
+      if (verbose>0) System.err.print(".");
     }
     if (verbose>1) {
-      log.info();
+      System.err.println();
       printSamples(result, System.err);
     }
-    if (verbose>0) log.info("done.");
+    if (verbose>0) System.err.println("done.");
     //return sequence;
     return best;
   }
@@ -184,22 +176,22 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
    * @return a Counter containing the sequence samples, as arrays of type int, and their scores
    */
   public List<int[]> collectSamples(SequenceModel model, int numSamples, int sampleInterval, int[] initialSequence) {
-    if (verbose>0) log.info("Collecting samples");
+    if (verbose>0) System.err.print("Collecting samples");
     listener.setInitialSequence(initialSequence);
-    List<int[]> result = new ArrayList<>();
+    List<int[]> result = new ArrayList<int[]>();
     int[] sequence = initialSequence;
     for (int i=0; i<numSamples; i++) {
       sequence = copy(sequence); // so we don't change the initial, or the one we just stored
       sampleSequenceRepeatedly(model, sequence, sampleInterval); // modifies tagSequence
       result.add(sequence); // save it to return later
-      if (verbose>0) log.info(".");
+      if (verbose>0) System.err.print(".");
       System.err.flush();
     }
     if (verbose>1) {
-      log.info();
+      System.err.println();
       printSamples(result, System.err);
     }
-    if (verbose>0) log.info("done.");
+    if (verbose>0) System.err.println("done.");
     return result;
   }
 
@@ -240,7 +232,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
    */
   public double sampleSequenceForward(final SequenceModel model, final int[] sequence, final double temperature, Set<Integer> onlySampleThesePositions) {
     double returnScore = Double.NEGATIVE_INFINITY;
-    // log.info("Sampling forward");
+    // System.err.println("Sampling forward");
     if (onlySampleThesePositions != null) {
       for (int pos: onlySampleThesePositions) {
         returnScore = samplePosition(model, sequence, pos, temperature);
@@ -251,13 +243,13 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
           returnScore = samplePosition(model, sequence, pos, temperature);
         }
       } else if (samplingStyle == RANDOM_SAMPLING) {
-        for (int aSequence : sequence) {
+        for (int itr=0; itr<sequence.length; itr++) {
           int pos = random.nextInt(sequence.length);
           returnScore = samplePosition(model, sequence, pos, temperature);
         }
       } else if (samplingStyle == CHROMATIC_SAMPLING) {
         // make copies of the sequences and merge at the end
-        List<Pair<Integer, Integer>> results = new ArrayList<>();
+        List<Pair<Integer, Integer>> results = new ArrayList<Pair<Integer, Integer>>();
         for (List<Integer> indieList: partition) {
           if (indieList.size() <= chromaticSize) {
             for (int pos: indieList) {
@@ -265,25 +257,24 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
               sequence[pos] = newPosProb.first();
             }
           } else {
-            MulticoreWrapper<List<Integer>, List<Pair<Integer, Integer>>> wrapper = new MulticoreWrapper<>(chromaticSize,
-                    new ThreadsafeProcessor<List<Integer>, List<Pair<Integer, Integer>>>() {
-                      @Override
-                      public List<Pair<Integer, Integer>> process(List<Integer> posList) {
-                        List<Pair<Integer, Integer>> allPos = new ArrayList<>(posList.size());
-                        Pair<Integer, Double> newPosProb = null;
-                        for (int pos : posList) {
-                          newPosProb = samplePositionHelper(model, sequence, pos, temperature);
-                          // returns the position to sample in first place and new label in second place
-                          allPos.add(new Pair<>(pos, newPosProb.first()));
-                        }
-                        return allPos;
-                      }
-
-                      @Override
-                      public ThreadsafeProcessor<List<Integer>, List<Pair<Integer, Integer>>> newInstance() {
-                        return this;
-                      }
-                    });
+            MulticoreWrapper<List<Integer>, List<Pair<Integer, Integer>>> wrapper = new MulticoreWrapper<List<Integer>, List<Pair<Integer, Integer>>>(chromaticSize, 
+                new ThreadsafeProcessor<List<Integer>, List<Pair<Integer, Integer>>>() {
+              @Override
+              public List<Pair<Integer, Integer>> process(List<Integer> posList) {
+                List<Pair<Integer, Integer>> allPos = new ArrayList<Pair<Integer, Integer>>(posList.size());
+                Pair<Integer, Double> newPosProb = null;
+                for (int pos: posList) {
+                  newPosProb = samplePositionHelper(model, sequence, pos, temperature); 
+                  // returns the position to sample in first place and new label in second place
+                  allPos.add(new Pair<Integer, Integer>(pos, newPosProb.first()));
+                }
+                return allPos;
+              }
+              @Override
+              public ThreadsafeProcessor<List<Integer>, List<Pair<Integer, Integer>>> newInstance() {
+                return this;
+              }
+            });
             results.clear();
             int interval = Math.max(1, indieList.size() / chromaticSize);
             for (int begin = 0, end = 0, indieListSize = indieList.size(); end < indieListSize; begin += interval) {
@@ -366,7 +357,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
     ArrayMath.expInPlace(distribution);
     int newTag = ArrayMath.sampleFromDistribution(distribution, random);
     double newProb = distribution[newTag];
-    return new Pair<>(newTag, newProb);
+    return new Pair<Integer, Double>(newTag, newProb);
   }
 
   /**
@@ -395,8 +386,8 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
         s = word.word();
       }
       out.print(StringUtils.padOrTrim(s, 10));
-      for (Object sample : samples) {
-        int[] sequence = (int[]) sample;
+      for (int j = 0; j < samples.size(); j++) {
+        int[] sequence = (int[]) samples.get(j);
         out.print(" " + StringUtils.padLeft(sequence[i], 2));
       }
       out.println();
@@ -416,11 +407,11 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
     this.samplingStyle = samplingStyle;
     if (verbose > 0) {
       if (samplingStyle == RANDOM_SAMPLING) {
-        log.info("Using random sampling");
+        System.err.println("Using random sampling");
       } else if (samplingStyle == CHROMATIC_SAMPLING) {
-        log.info("Using chromatic sampling with " + chromaticSize + " threads");
+        System.err.println("Using chromatic sampling with " + chromaticSize + " threads");
       } else if (samplingStyle == SEQUENTIAL_SAMPLING) {
-        log.info("Using sequential sampling");
+        System.err.println("Using sequential sampling");
       }
     }
     this.chromaticSize = chromaticSize;

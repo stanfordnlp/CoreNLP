@@ -83,7 +83,7 @@ public class NumberNormalizerITest extends TestCase {
 
     // Check answers
     for (CoreMap num: document.get(CoreAnnotations.NumerizedTokensAnnotation.class)) {
-      if (num.containsKey(CoreAnnotations.NumericCompositeTypeAnnotation.class)) {
+      if (num.has(CoreAnnotations.NumericCompositeTypeAnnotation.class)) {
         Number expectedNumber = expectedNumbers.next();
         String expectedType = "NUMBER";
         String expectedText = expectedTexts.next();
@@ -128,7 +128,7 @@ public class NumberNormalizerITest extends TestCase {
 
     // Check answers
     for (CoreMap num: document.get(CoreAnnotations.NumerizedTokensAnnotation.class)) {
-      if (num.containsKey(CoreAnnotations.NumericCompositeTypeAnnotation.class)) {
+      if (num.has(CoreAnnotations.NumericCompositeTypeAnnotation.class)) {
         Number expectedNumber = expectedNumbers.next();
         String expectedType = "ORDINAL";
         String expectedText = expectedTexts.next();

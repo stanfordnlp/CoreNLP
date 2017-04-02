@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.*;
 
@@ -14,10 +13,7 @@ import edu.stanford.nlp.ling.Label;
 /** Gets rid of extra NP under NP nodes.
  *  @author Dan Klein
  */
-public class NodePruner  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NodePruner.class);
+class NodePruner {
 
   private final ExhaustivePCFGParser parser;
   private final TreeTransformer debinarizer;
@@ -33,7 +29,7 @@ public class NodePruner  {
     Tree pcfgTree = debinarizer.transformTree(tempTree);
     Set<Constituent> pcfgConstituents = pcfgTree.constituents(new LabeledScoredConstituentFactory());
     // delete child labels that are not in reference but do not cross reference
-    List<Tree> prunedChildren = new ArrayList<>();
+    List<Tree> prunedChildren = new ArrayList<Tree>();
     int childStart = 0;
     for (int c = 0, numCh = testTree.numChildren(); c < numCh; c++) {
       Tree child = testTree.getChild(c);
@@ -56,8 +52,8 @@ public class NodePruner  {
         isExtra = false;
       }
       if (isExtra) {
-        log.info("Pruning: " + child.label() + " from " + (childStart + start) + " to " + (childEnd + start));
-        log.info("Was: " + testTree + " vs " + pcfgTree);
+        System.err.println("Pruning: " + child.label() + " from " + (childStart + start) + " to " + (childEnd + start));
+        System.err.println("Was: " + testTree + " vs " + pcfgTree);
         prunedChildren.addAll(child.getChildrenAsList());
       } else {
         prunedChildren.add(child);
@@ -68,7 +64,7 @@ public class NodePruner  {
   }
 
   private List<Tree> helper(List<Tree> treeList, int start) {
-    List<Tree> newTreeList = new ArrayList<>(treeList.size());
+    List<Tree> newTreeList = new ArrayList<Tree>(treeList.size());
     for (Tree tree : treeList) {
       int end = start + tree.yield().size();
       newTreeList.add(prune(tree, start));

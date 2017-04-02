@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
  *
  * @author Jenny Finkel
  */
+
 public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> {
 
   private static final long serialVersionUID = -3838331732026362075L;
@@ -30,13 +31,19 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   private final SeqClassifierFlags flags;
   private final ObjectBank<List<IN>> wrapped;
   private final Set<String> knownLCWords;
+  private final int knownLCWordsSizeLimit;
 
 
   public ObjectBankWrapper(SeqClassifierFlags flags, ObjectBank<List<IN>> wrapped, Set<String> knownLCWords) {
-    super(null, null);
+    super(null,null);
     this.flags = flags;
     this.wrapped = wrapped;
     this.knownLCWords = knownLCWords;
+    if (flags.maxAdditionalKnownLCWords > 0 && ((long) flags.maxAdditionalKnownLCWords) + knownLCWords.size() < Integer.MAX_VALUE) {
+      knownLCWordsSizeLimit = knownLCWords.size() + flags.maxAdditionalKnownLCWords;
+    } else {
+      knownLCWordsSizeLimit = Integer.MAX_VALUE;
+    }
   }
 
 
@@ -59,7 +66,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
       while ((spilloverIter == null || !spilloverIter.hasNext()) &&
              wrappedIter.hasNext()) {
         List<IN> doc = wrappedIter.next();
-        List<List<IN>> docs = new ArrayList<>();
+        List<List<IN>> docs = new ArrayList<List<IN>>();
         docs.add(doc);
         fixDocLengths(docs);
         spilloverIter = docs.iterator();
@@ -76,7 +83,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
       // -pichuan
       while (spilloverIter == null || !spilloverIter.hasNext()) {
         List<IN> doc = wrappedIter.next();
-        List<List<IN>> docs = new ArrayList<>();
+        List<List<IN>> docs = new ArrayList<List<IN>>();
         docs.add(doc);
         fixDocLengths(docs);
         spilloverIter = docs.iterator();
@@ -134,8 +141,11 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         if (flags.wordFunction != null) {
           word = flags.wordFunction.apply(word);
         }
-        if ( ! word.isEmpty() && Character.isLowerCase(word.codePointAt(0))) {
-          knownLCWords.add(word);
+        if (flags.useKnownLCWords && ! word.isEmpty() && knownLCWords.size() < knownLCWordsSizeLimit) {
+          int ch = word.codePointAt(0);
+          if (Character.isLowerCase(ch)) {
+            knownLCWords.add(word);
+          }
         }
 
         String s = intern(WordShapeClassifier.wordShape(word, flags.wordShape, knownLCWords));
@@ -173,8 +183,8 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   private void fixDocLengths(List<List<IN>> docs) {
     final int maxDocSize = flags.maxDocSize;
 
-    WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<>();
-    List<List<IN>> newDocuments = new ArrayList<>();
+    WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<IN>();
+    List<List<IN>> newDocuments = new ArrayList<List<IN>>();
     for (List<IN> document : docs) {
       if (maxDocSize <= 0 || document.size() <= maxDocSize) {
         if (flags.keepEmptySentences || !document.isEmpty()) {
@@ -183,13 +193,13 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         continue;
       }
       List<List<IN>> sentences = wts.process(document);
-      List<IN> newDocument = new ArrayList<>();
+      List<IN> newDocument = new ArrayList<IN>();
       for (List<IN> sentence : sentences) {
         if (newDocument.size() + sentence.size() > maxDocSize) {
           if (!newDocument.isEmpty()) {
             newDocuments.add(newDocument);
           }
-          newDocument = new ArrayList<>();
+          newDocument = new ArrayList<IN>();
         }
         newDocument.addAll(sentence);
       }

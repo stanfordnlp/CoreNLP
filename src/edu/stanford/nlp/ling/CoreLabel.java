@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 
+import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.Generics;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext  {
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext {
 
   private static final long serialVersionUID = 2L;
 
@@ -77,12 +77,9 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   @SuppressWarnings({"unchecked"})
   public CoreLabel(CoreMap label) {
     super(label.size());
-    Consumer<Class<? extends Key<?>>> savedListener = ArrayCoreMap.listener;  // don't listen to the clone operation
-    ArrayCoreMap.listener = null;
     for (Class key : label.keySet()) {
       set(key, label.get(key));
     }
-    ArrayCoreMap.listener = savedListener;
   }
 
   /**
@@ -136,26 +133,12 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     initFromStrings(keys, values);
   }
 
-  /** This is provided as a simple way to make a CoreLabel for a word from a String.
-   *  It's often useful in fixup or test code. It sets all three of the Text, OriginalText,
-   *  and Value annotations to the given value.
-   *
-   *  @param word The word string to make a CoreLabel for
-   *  @return A CoreLabel for this word string
-   */
-  public static CoreLabel wordFromString(String word) {
-    CoreLabel cl = new CoreLabel();
-    cl.setWord(word);
-    cl.setOriginalText(word);
-    cl.setValue(word);
-    return cl;
-  }
 
   /**
    * Class that all "generic" annotations extend.
    * This allows you to read in arbitrary values from a file as features, for example.
    */
-  public interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
+  public static interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
   //Unchecked is below because eclipse can't handle the level of type inference if we correctly parametrize GenericAnnotation with String
   @SuppressWarnings("unchecked")
   public static final Map<String, Class<? extends GenericAnnotation>> genericKeys = Generics.newHashMap();
@@ -172,10 +155,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     for (int i = 0; i < keys.length; i++) {
       String key = keys[i];
       String value = values[i];
-      Class coreKeyClass = AnnotationLookup.toCoreKey(key);
+      KeyLookup lookup = AnnotationLookup.getCoreKey(key);
 
       //now work with the key we got above
-      if (coreKeyClass == null) {
+      if (lookup == null) {
         if (key != null) {
           throw new UnsupportedOperationException("Unknown key " + key);
         }
@@ -199,20 +182,20 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
         //}
         // unknown key; ignore
         //if (VERBOSE) {
-        //  log.info("CORE: CoreLabel.fromAbstractMapLabel: " +
+        //  System.err.println("CORE: CoreLabel.fromAbstractMapLabel: " +
         //      "Unknown key "+key);
         //}
       } else {
         try {
-          Class<?> valueClass = AnnotationLookup.getValueType(coreKeyClass);
+          Class<?> valueClass = AnnotationLookup.getValueType(lookup.coreKey);
           if(valueClass.equals(String.class)) {
-            this.set(coreKeyClass, values[i]);
+            this.set(lookup.coreKey, values[i]);
           } else if(valueClass == Integer.class) {
-            this.set(coreKeyClass, Integer.parseInt(values[i]));
+            this.set(lookup.coreKey, Integer.parseInt(values[i]));
           } else if(valueClass == Double.class) {
-            this.set(coreKeyClass, Double.parseDouble(values[i]));
+            this.set(lookup.coreKey, Double.parseDouble(values[i]));
           } else if(valueClass == Long.class) {
-            this.set(coreKeyClass, Long.parseLong(values[i]));
+            this.set(lookup.coreKey, Long.parseLong(values[i]));
           } else {
             throw new RuntimeException("Can't handle " + valueClass);
           }
@@ -221,7 +204,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
           throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: "
               + "Bad type for " + key
               + ". Value was: " + value
-              + "; expected "+AnnotationLookup.getValueType(coreKeyClass), e);
+              + "; expected "+AnnotationLookup.getValueType(lookup.coreKey), e);
         }
       }
     }
@@ -301,17 +284,13 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    */
   @Override
   public <KEY extends Key<String>> String getString(Class<KEY> key) {
-    return this.getString(key, "");
-  }
-
-  @Override
-  public <KEY extends Key<String>> String getString(Class<KEY> key, String def) {
     String value = get(key);
     if (value == null) {
-      return def;
+      return "";
     }
     return value;
   }
+
 
   /**
    * {@inheritDoc}
@@ -347,7 +326,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     set(CoreAnnotations.TextAnnotation.class, word);
     // Pado feb 09: if you change the word, delete the lemma.
     // Gabor dec 2012: check if there was a real change -- this remove is actually rather expensive if it gets called a lot
-    // todo [cdm 2015]: probably no one now knows why this was even needed, but maybe it should just be removed. It's kind of weird.
     if (word != null && !word.equals(originalWord) && containsKey(CoreAnnotations.LemmaAnnotation.class)) {
       remove(CoreAnnotations.LemmaAnnotation.class);
     }
@@ -571,8 +549,8 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   public static final String TAG_SEPARATOR = "/";
 
   public enum OutputFormat {
-    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX, VALUE_TAG_NER, LEMMA_INDEX, ALL
-  }
+    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX, ALL
+  };
 
   public static final OutputFormat DEFAULT_FORMAT = OutputFormat.VALUE_INDEX;
 
@@ -583,15 +561,15 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
 
   /**
    * Returns a formatted string representing this label.  The
-   * desired format is passed in as a {@code String}.
+   * desired format is passed in as a <code>String</code>.
    * Currently supported formats include:
    * <ul>
    * <li>"value": just prints the value</li>
    * <li>"{map}": prints the complete map</li>
    * <li>"value{map}": prints the value followed by the contained
-   * map (less the map entry containing key {@code CATEGORY_KEY})</li>
+   * map (less the map entry containing key <code>CATEGORY_KEY</code>)</li>
    * <li>"value-index": extracts a value and an integer index from
-   * the contained map using keys  {@code INDEX_KEY},
+   * the contained map using keys  <code>INDEX_KEY</code>,
    * respectively, and prints them with a hyphen in between</li>
    * <li>"value-tag"
    * <li>"value-tag-index"
@@ -679,7 +657,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       break;
     }
     case WORD:
-      // TODO: maybe we should unify word() and value(). [cdm 2015] I think not, rather maybe remove value and redefine category.
+      // TODO: we should unify word() and value()
       buf.append(word());
       break;
     case WORD_INDEX: {
@@ -690,27 +668,9 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       }
       break;
     }
-    case VALUE_TAG_NER:{
-      buf.append(value());
-      String tag = tag();
-      if (tag != null) {
-        buf.append(TAG_SEPARATOR).append(tag);
-      }
-      if(ner() != null){
-        buf.append(TAG_SEPARATOR).append(ner());
-      }
-      break;
-    }
-    case LEMMA_INDEX:
-      buf.append(lemma());
-      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
-      if (index != null) {
-        buf.append('-').append((index).intValue());
-      }
-      break;
     case ALL:{
       for(Class en: this.keySet()){
-        buf.append(';').append(en).append(':').append(this.get(en));
+        buf.append(";").append(en).append(":").append(this.get(en));
       }
       break;
     }

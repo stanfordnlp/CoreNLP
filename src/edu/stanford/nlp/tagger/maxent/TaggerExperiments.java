@@ -27,11 +27,9 @@
 
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.maxent.Experiments;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,10 +46,7 @@ import java.util.Arrays;
  * @author Kristina Toutanova
  * @version 1.0
  */
-public class TaggerExperiments extends Experiments  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(TaggerExperiments.class);
+public class TaggerExperiments extends Experiments {
 
   private static final boolean DEBUG = true;
   private static final String zeroSt = "0";
@@ -86,13 +81,13 @@ public class TaggerExperiments extends Experiments  {
   protected TaggerExperiments(TaggerConfig config, MaxentTagger maxentTagger) throws IOException {
     this(maxentTagger);
 
-    log.info("TaggerExperiments: adding word/tags");
+    System.err.println("TaggerExperiments: adding word/tags");
     PairsHolder pairs = new PairsHolder();
     ReadDataTagged c = new ReadDataTagged(config, maxentTagger, pairs);
     vArray = new int[c.getSize()][2];
 
     initTemplatesNew();
-    log.info("Featurizing tagged data tokens...");
+    System.err.println("Featurizing tagged data tokens...");
     for (int i = 0, size = c.getSize(); i < size; i++) {
 
       DataWordTag d = c.get(i);
@@ -105,19 +100,18 @@ public class TaggerExperiments extends Experiments  {
       vArray[i][0] = indX;
       vArray[i][1] = indY;
 
-      // It's the 2010s now and it doesn't take so long to featurize....
-      // if (i > 0 && (i % 10000) == 0) {
-      //   System.err.printf("%d ", i);
-      //   if (i % 100000 == 0) { System.err.println(); }
-      // }
+      if (i > 0 && (i % 10000) == 0) {
+        System.err.printf("%d ", i);
+        if (i % 100000 == 0) { System.err.println(); }
+      }
     }
-    // log.info();
-    log.info("Featurized " + c.getSize() + " data tokens [done].");
+    System.err.println();
+    System.err.println("Featurized " + c.getSize() + " data tokens [done].");
     c.release();
     ptilde();
     maxentTagger.xSize = xSize;
     maxentTagger.ySize = ySize;
-    log.info("xSize [num Phi templates] = " + xSize + "; ySize [num classes] = " + ySize);
+    System.err.println("xSize [num Phi templates] = " + xSize + "; ySize [num classes] = " + ySize);
 
     hashHistories();
 
@@ -158,22 +152,22 @@ public class TaggerExperiments extends Experiments  {
     // todo: Change to rethrow a RuntimeIOException.
     // todo: can fnumArr overflow?
     try {
-      log.info("TaggerExperiments.getFeaturesNew: initializing fnumArr.");
+      System.err.println("TaggerExperiments.getFeaturesNew: initializing fnumArr.");
       fnumArr = new byte[xSize][ySize]; // what is the maximum number of active features
       File hFile = File.createTempFile("temp",".x", new File("./"));
       RandomAccessFile hF = new RandomAccessFile(hFile, "rw");
-      log.info("  length of sTemplates keys: " + sTemplates.size());
-      log.info("getFeaturesNew adding features ...");
+      System.err.println("  length of sTemplates keys: " + sTemplates.size());
+      System.err.println("getFeaturesNew adding features ...");
       int current = 0;
       int numFeats = 0;
       final boolean VERBOSE = false;
       for (FeatureKey fK : sTemplates) {
         int numF = fK.num;
         int[] xValues;
-        Pair<Integer, String> wT = new Pair<>(numF, fK.val);
+        Pair<Integer, String> wT = new Pair<Integer, String>(numF, fK.val);
         xValues = tFeature.getXValues(wT);
         if (xValues == null) {
-          log.info("  xValues is null: " + fK); //  + " " + i
+          System.err.println("  xValues is null: " + fK.toString()); //  + " " + i
           continue;
         }
         int numEvidence = 0;
@@ -236,7 +230,7 @@ public class TaggerExperiments extends Experiments  {
             current = current + numElements;
             feats.add(tF);
             if (VERBOSE) {
-              log.info("  added feature with key " + fK + " has support " + numElements);
+              System.err.println("  added feature with key " + fK.toString() + " has support " + numElements);
             }
           } else {
 
@@ -248,7 +242,7 @@ public class TaggerExperiments extends Experiments  {
                                                  maxentTagger.getTagIndex(fK.tag), this);
             feats.add(tF);
             if (VERBOSE) {
-              log.info("  added feature with key " + fK + " has support " + xValues.length);
+              System.err.println("  added feature with key " + fK.toString() + " has support " + xValues.length);
             }
           }
 
@@ -283,7 +277,7 @@ public class TaggerExperiments extends Experiments  {
         feats.xIndexed[current1] = hF.readInt();
         current1++;
       }
-      log.info("  total feats: " + sTemplates.size() + ", populated: " + numFeats);
+      System.err.println("  total feats: " + sTemplates.size() + ", populated: " + numFeats);
       hF.close();
       hFile.delete();
 
@@ -309,14 +303,14 @@ public class TaggerExperiments extends Experiments  {
         }
       } // for x
 
-      log.info("  Max features per x,y pair: " + max);
-      log.info("  Max non-zero y values for an x: " + maxGt);
-      log.info("  Number of non-zero feature x,y pairs: " +
+      System.err.println("  Max features per x,y pair: " + max);
+      System.err.println("  Max non-zero y values for an x: " + maxGt);
+      System.err.println("  Number of non-zero feature x,y pairs: " +
           (xSize * ySize - numZeros));
-      log.info("  Number of zero feature x,y pairs: " + numZeros);
-      log.info("end getFeaturesNew.");
+      System.err.println("  Number of zero feature x,y pairs: " + numZeros);
+      System.err.println("end getFeaturesNew.");
     } catch (Exception e) {
-      throw new RuntimeIOException(e);
+      e.printStackTrace();
     }
   }
 
@@ -324,37 +318,35 @@ public class TaggerExperiments extends Experiments  {
   private void hashHistories() {
     int fAll = maxentTagger.extractors.size() + maxentTagger.extractorsRare.size();
     int fGeneral = maxentTagger.extractors.size();
-    log.info("Hashing histories ...");
+    System.err.println("Hashing histories ...");
     for (int x = 0; x < xSize; x++) {
       History h = tHistories.getHistory(x);
-      // It's the 2010s now and it doesn't take so long to featurize....
-      // if (x > 0 && x % 10000 == 0) {
-      //   System.err.printf("%d ",x);
-      //   if (x % 100000 == 0) { log.info(); }
-      // }
+      if (x > 0 && x % 10000 == 0) {
+        System.err.printf("%d ",x);
+        if (x % 100000 == 0) { System.err.println(); }
+      }
       int fSize = (maxentTagger.isRare(ExtractorFrames.cWord.extract(h)) ? fAll : fGeneral);
       for (int i = 0; i < fSize; i++) {
         tFeature.addPrev(i, h);
       }
     } // for x
     // now for the populated ones
-    // log.info();
-    log.info("Hashed " + xSize + " histories.");
-    log.info("Hashing populated histories ...");
+    System.err.println();
+    System.err.println("Hashed " + xSize + " histories.");
+    System.err.println("Hashing populated histories ...");
     for (int x = 0; x < xSize; x++) {
       History h = tHistories.getHistory(x);
-      // It's the 2010s now and it doesn't take so long to featurize....
-      // if (x > 0 && x % 10000 == 0) {
-      //   log.info(x + " ");
-      //   if (x % 100000 == 0) { log.info(); }
-      // }
+      if (x > 0 && x % 10000 == 0) {
+        System.err.print(x + " ");
+        if (x % 100000 == 0) { System.err.println(); }
+      }
       int fSize = (maxentTagger.isRare(ExtractorFrames.cWord.extract(h)) ? fAll : fGeneral);
       for (int i = 0; i < fSize; i++) {
         tFeature.add(i, h, x); // write this to check whether to add
       }
     } // for x
-    // log.info();
-    log.info("Hashed populated histories.");
+    System.err.println();
+    System.err.println("Hashed populated histories.");
   }
 
 

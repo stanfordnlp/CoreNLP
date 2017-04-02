@@ -25,7 +25,7 @@ public class HistoryTable {
   private final Index<History> idx;
 
   public HistoryTable() {
-    idx = new HashIndex<>(capacity);
+    idx = new HashIndex<History>(capacity);
   }
 
   void release() {

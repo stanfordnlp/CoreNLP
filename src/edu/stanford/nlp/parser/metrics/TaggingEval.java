@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.metrics; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.metrics;
 
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
@@ -36,10 +35,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public class TaggingEval extends AbstractEval  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TaggingEval.class);
+public class TaggingEval extends AbstractEval {
 
   private final Lexicon lex;
 
@@ -65,17 +61,17 @@ public class TaggingEval extends AbstractEval  {
     this.lex = lex;
 
     if(doCatLevelEval) {
-      precisions = new ClassicCounter<>();
-      recalls = new ClassicCounter<>();
-      f1s = new ClassicCounter<>();
+      precisions = new ClassicCounter<String>();
+      recalls = new ClassicCounter<String>();
+      f1s = new ClassicCounter<String>();
 
-      precisions2 = new ClassicCounter<>();
-      recalls2 = new ClassicCounter<>();
-      pnums2 = new ClassicCounter<>();
-      rnums2 = new ClassicCounter<>();
+      precisions2 = new ClassicCounter<String>();
+      recalls2 = new ClassicCounter<String>();
+      pnums2 = new ClassicCounter<String>();
+      rnums2 = new ClassicCounter<String>();
 
-      percentOOV = new ClassicCounter<>();
-      percentOOV2 = new ClassicCounter<>();
+      percentOOV = new ClassicCounter<String>();
+      percentOOV2 = new ClassicCounter<String>();
     }
   }
 
@@ -189,7 +185,7 @@ public class TaggingEval extends AbstractEval  {
       cats.addAll(precisions.keySet());
       cats.addAll(recalls.keySet());
 
-      Map<Double,String> f1Map = new TreeMap<>();
+      Map<Double,String> f1Map = new TreeMap<Double,String>();
       for (String cat : cats) {
         double pnum2 = pnums2.getCount(cat);
         double rnum2 = rnums2.getCount(cat);
@@ -292,14 +288,14 @@ public class TaggingEval extends AbstractEval  {
         encoding = opt.getValue()[0];
 
       } else {
-        log.info(usage.toString());
+        System.err.println(usage.toString());
         System.exit(-1);
       }
 
       //Non-option arguments located at key null
       String[] rest = argsMap.get(null);
       if(rest == null || rest.length < minArgs) {
-        log.info(usage.toString());
+        System.err.println(usage.toString());
         System.exit(-1);
       }
       goldFile = rest[0];

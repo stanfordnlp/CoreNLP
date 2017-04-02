@@ -79,16 +79,16 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
   public final int maxFiles;
 
   /** The implementation of the mapping */
-  private final Map<KEY, SoftReference<T>> mapping = new ConcurrentHashMap<>();
+  private final Map<KEY, SoftReference<T>> mapping = new ConcurrentHashMap<KEY, SoftReference<T>>();
 
   /** A reaper for soft references, to save memory on storing the keys */
-  private final ReferenceQueue<T> reaper = new ReferenceQueue<>();
+  private final ReferenceQueue<T> reaper = new ReferenceQueue<T>();
 
   /**
    * A file canonicalizer, so that we can synchronize on blocks -- static, as it should work between instances.
    * In particular, an exception is thrown if the JVM attempts to take out two locks on a file.
    */
-  private static final Interner<File> canonicalFile = new Interner<>();
+  private static final Interner<File> canonicalFile = new Interner<File>();
   /** A map indicating whether the JVM holds a file lock on the given file */
   private static final IdentityHashMap<File, FileSemaphore> fileLocks = Generics.newIdentityHashMap();
 
@@ -165,7 +165,6 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
             // Sleep a bit
             Thread.sleep(100);
           } catch (InterruptedException e) {
-            throw new RuntimeInterruptedException(e);
           }
         }
       }
@@ -357,7 +356,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
       return existing;
     } else {
       // In-memory
-      SoftReference<T> ref = new SoftReference<>(value, this.reaper);
+      SoftReference<T> ref = new SoftReference<T>(value, this.reaper);
       mapping.put(key, ref);
       // On Disk
       if (existing == null) {
@@ -501,9 +500,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
             warn("FileBackedCache", "Caught out of memory error (clearing cache): " + e.getMessage());
             FileBackedCache.this.clear();
             //noinspection EmptyCatchBlock
-            try { Thread.sleep(1000); } catch (InterruptedException e2) {
-              throw new RuntimeInterruptedException(e2);
-            }
+            try { Thread.sleep(1000); } catch (InterruptedException e2) { }
             elements = readBlock(files[index]).iterator();
           } catch (RuntimeException e) {
             err(e);
@@ -713,7 +710,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
         haveClosed = true;
         // Add elements
         for (Pair<KEY, T> elem : read) {
-          SoftReference<T> ref = new SoftReference<>(elem.second, this.reaper);
+          SoftReference<T> ref = new SoftReference<T>(elem.second, this.reaper);
           mapping.put(elem.first, ref);
         }
         return read;
@@ -796,10 +793,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
       if (tries > 30) { throw new IOException("Could not create file: " + candidate); }
       if (candidate.createNewFile()) { break; }
       tries++;
-      try { Thread.sleep(1000); } catch (InterruptedException e) {
-        log(e);
-        throw new RuntimeInterruptedException(e);
-      }
+      try { Thread.sleep(1000); } catch (InterruptedException e) { log(e); }
     }
   }
 
@@ -858,10 +852,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
       for (int i = 0; i < 1000; ++i) {
         lockOrNull = channel.tryLock();
         if (lockOrNull == null || !lockOrNull.isValid()) {
-          try { Thread.sleep(1000); } catch (InterruptedException e) {
-            log(e);
-            throw new RuntimeInterruptedException(e);
-          }
+          try { Thread.sleep(1000); } catch (InterruptedException e) { log(e); }
           if (i % 60 == 59) { warn("FileBackedCache", "Lock still busy after " + ((i+1)/60) + " minutes"); }
           //noinspection UnnecessaryContinue
           continue;
@@ -896,11 +887,8 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
   protected Pair<? extends InputStream, CloseAction> newInputStream(File f) throws IOException {
     final FileSemaphore lock = acquireFileLock(f);
     final ObjectInputStream rtn = new ObjectInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(f))));
-    return new Pair<>(rtn,
-            () -> {
-              lock.release();
-              rtn.close();
-            });
+    return new Pair<ObjectInputStream, CloseAction>(rtn,
+        () -> { lock.release(); rtn.close();  });
   }
 
   /**
@@ -920,12 +908,8 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
     final ObjectOutputStream rtn = isAppend
         ? new AppendingObjectOutputStream(new GZIPOutputStream(new BufferedOutputStream(stream)))
         : new ObjectOutputStream(new GZIPOutputStream(new BufferedOutputStream(stream)));
-    return new Pair<>(rtn,
-            () -> {
-              rtn.flush();
-              lock.release();
-              rtn.close();
-            });
+    return new Pair<ObjectOutputStream, CloseAction>(rtn,
+        () -> { rtn.flush(); lock.release(); rtn.close(); });
   }
 
   /**

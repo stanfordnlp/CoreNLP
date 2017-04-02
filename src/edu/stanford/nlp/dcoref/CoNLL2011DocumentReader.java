@@ -1,5 +1,4 @@
-package edu.stanford.nlp.dcoref; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.dcoref;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -45,10 +44,7 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class CoNLL2011DocumentReader  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CoNLL2011DocumentReader.class);
+public class CoNLL2011DocumentReader {
 
   private static final int FIELD_LAST = -1;
 
@@ -96,7 +92,7 @@ public class CoNLL2011DocumentReader  {
   private static List<File> getFiles(String filepath, Pattern filter)
   {
     Iterable<File> iter = IOUtils.iterFilesRecursive(new File(filepath), filter);
-    List<File> fileList = new ArrayList<>();
+    List<File> fileList = new ArrayList<File>();
     for (File f:iter) {
       fileList.add(f);
     }
@@ -194,7 +190,7 @@ public class CoNLL2011DocumentReader  {
     String documentIdPart;
     String documentID;
     String partNo;
-    List<List<String[]>> sentenceWordLists = new ArrayList<>();
+    List<List<String[]>> sentenceWordLists = new ArrayList<List<String[]>>();
 
     Annotation annotation;
     CollectionValuedMap<String,CoreMap> corefChainMap;
@@ -341,8 +337,8 @@ public class CoNLL2011DocumentReader  {
     private static List<Triple<Integer,Integer,String>> getLabelledSpans(List<String[]> sentWords, int fieldIndex,
                                                                          String defaultMarker, boolean checkEndLabel)
     {
-      List<Triple<Integer,Integer,String>> spans = new ArrayList<>();
-      Stack<Triple<Integer,Integer, String>> openSpans = new Stack<>();
+      List<Triple<Integer,Integer,String>> spans = new ArrayList<Triple<Integer,Integer,String>>();
+      Stack<Triple<Integer,Integer, String>> openSpans = new Stack<Triple<Integer,Integer,String>>();
       boolean removeStar = (ASTERISK.equals(defaultMarker));
       for (int wordPos = 0; wordPos < sentWords.size(); wordPos++) {
         String[] fields = sentWords.get(wordPos);
@@ -359,7 +355,7 @@ public class CoNLL2011DocumentReader  {
                 if (removeStar) {
                   s = starPattern.matcher(s).replaceAll("");
                 }
-                openSpans.push(new Triple<>(wordPos, -1, s));
+                openSpans.push(new Triple<Integer,Integer,String>(wordPos,-1,s));
                 openParenIndex = -1;
               }
               isDelimiter = true;
@@ -373,7 +369,7 @@ public class CoNLL2011DocumentReader  {
                 // and it is just an artifact of the ordering
                 String s = val.substring(lastDelimiterIndex+1, j);
                 if (!s.equals(t.third())) {
-                  Stack<Triple<Integer,Integer, String>> saved = new Stack<>();
+                  Stack<Triple<Integer,Integer, String>> saved = new Stack<Triple<Integer,Integer,String>>();
                   while (!s.equals(t.third())) {
                     // find correct match
                     saved.push(t);
@@ -400,7 +396,7 @@ public class CoNLL2011DocumentReader  {
             if (removeStar) {
               s = starPattern.matcher(s).replaceAll("");
             }
-            openSpans.push(new Triple<>(wordPos, -1, s));
+            openSpans.push(new Triple<Integer,Integer,String>(wordPos,-1,s));
           }
         }
       }
@@ -420,7 +416,7 @@ public class CoNLL2011DocumentReader  {
       List<Tree> leaves = tree.getLeaves();
       // Check leaves == number of words
       assert(leaves.size() == sentWords.size());
-      List<CoreLabel> tokens = new ArrayList<>(leaves.size());
+      List<CoreLabel> tokens = new ArrayList<CoreLabel>(leaves.size());
       sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
       for (int i = 0; i < sentWords.size(); i++) {
         String[] fields = sentWords.get(i);
@@ -507,7 +503,7 @@ public class CoNLL2011DocumentReader  {
 
 
       // Accumulate docTokens and label sentence with overall token begin/end, and sentence index annotations
-      List<CoreLabel> docTokens = new ArrayList<>();
+      List<CoreLabel> docTokens = new ArrayList<CoreLabel>();
       int sentenceIndex = 0;
       int tokenBegin = 0;
       for (CoreMap sentenceAnnotation:sentences) {
@@ -565,7 +561,7 @@ public class CoNLL2011DocumentReader  {
 
     public void annotateDocument(Document document)
     {
-      List<CoreMap> sentences = new ArrayList<>(document.sentenceWordLists.size());
+      List<CoreMap> sentences = new ArrayList<CoreMap>(document.sentenceWordLists.size());
       for (List<String[]> sentWords:document.sentenceWordLists) {
         sentences.add(wordsToSentence(sentWords));
       }
@@ -574,8 +570,8 @@ public class CoNLL2011DocumentReader  {
       document.setAnnotation(docAnnotation);
 
       // Do this here so we have updated character offsets and all
-      CollectionValuedMap<String, CoreMap> corefChainMap = new CollectionValuedMap<>(CollectionFactory.<CoreMap>arrayListFactory());
-      List<CoreMap> nerChunks = new ArrayList<>();
+      CollectionValuedMap<String, CoreMap> corefChainMap = new CollectionValuedMap<String, CoreMap>(CollectionFactory.<CoreMap>arrayListFactory());
+      List<CoreMap> nerChunks = new ArrayList<CoreMap>();
       for (int i = 0; i < sentences.size(); i++) {
         CoreMap sentence = sentences.get(i);
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
@@ -633,7 +629,7 @@ public class CoNLL2011DocumentReader  {
 
     public Document readNextDocument() {
       try {
-        List<String[]> curSentWords = new ArrayList<>();
+        List<String[]> curSentWords = new ArrayList<String[]>();
         Document document = null;
         for (String line; (line = br.readLine()) != null; ) {
           lineCnt++;
@@ -675,7 +671,7 @@ public class CoNLL2011DocumentReader  {
             if (curSentWords.size() > 0) {
               assert document != null;
               document.addSentence(curSentWords);
-              curSentWords = new ArrayList<>();
+              curSentWords = new ArrayList<String[]>();
             }
           }
         }
@@ -693,7 +689,7 @@ public class CoNLL2011DocumentReader  {
 
   public static void usage()
   {
-    log.info("java edu.stanford.nlp.dcoref.CoNLL2011DocumentReader [-ext <extension to match>] -i <inputpath> -o <outputfile>");
+    System.err.println("java edu.stanford.nlp.dcoref.CoNLL2011DocumentReader [-ext <extension to match>] -i <inputpath> -o <outputfile>");
   }
 
   public static Pair<Integer,Integer> getMention(Integer index, String corefG, List<CoreLabel> sentenceAnno) {
@@ -821,12 +817,12 @@ public class CoNLL2011DocumentReader  {
 
   public static class CorpusStats
   {
-    IntCounter<String> mentionTreeLabelCounter = new IntCounter<>();
-    IntCounter<String> mentionTreeNonPretermLabelCounter = new IntCounter<>();
-    IntCounter<String> mentionTreePretermNonPretermNoMatchLabelCounter = new IntCounter<>();
-    IntCounter<String> mentionTreeMixedLabelCounter = new IntCounter<>();
-    IntCounter<Integer> mentionTokenLengthCounter = new IntCounter<>();
-    IntCounter<Integer> nerMentionTokenLengthCounter = new IntCounter<>();
+    IntCounter<String> mentionTreeLabelCounter = new IntCounter<String>();
+    IntCounter<String> mentionTreeNonPretermLabelCounter = new IntCounter<String>();
+    IntCounter<String> mentionTreePretermNonPretermNoMatchLabelCounter = new IntCounter<String>();
+    IntCounter<String> mentionTreeMixedLabelCounter = new IntCounter<String>();
+    IntCounter<Integer> mentionTokenLengthCounter = new IntCounter<Integer>();
+    IntCounter<Integer> nerMentionTokenLengthCounter = new IntCounter<Integer>();
     int mentionExactTreeSpan = 0;
     int nonPretermSpanMatches = 0;
     int totalMentions = 0;

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -16,10 +15,7 @@ import java.util.Random;
  * 
  * @author Sida Wang
  */
-public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implements SparseMinimizer<K, F>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SparseAdaGradMinimizer.class);
+public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implements SparseMinimizer<K, F> {
   public boolean quiet = false;
 
   protected int numPasses;
@@ -53,7 +49,7 @@ public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implem
 	this.lambdaL1 = lambdaL1;
 	this.lambdaL2 = lambdaL2;
 	// can use another counter to make this thread-safe
-	this.sumGradSquare = new ClassicCounter<>();
+	this.sumGradSquare = new ClassicCounter<K>();
   }
 
   @Override
@@ -77,7 +73,7 @@ public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implem
 	sayln("       Number of passes is = " + numPasses);
 	sayln("       Max iterations is = " + maxIterations);
 
-	Counter<K> lastUpdated = new ClassicCounter<>();
+	Counter<K> lastUpdated = new ClassicCounter<K>();
 	int timeStep = 0;
 
 	Timing total = new Timing();
@@ -149,7 +145,7 @@ public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implem
 
   protected void sayln(String s) {
 	if (!quiet) {
-	  log.info(s);
+	  System.err.println(s);
 	}
   }
 }

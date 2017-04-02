@@ -1,27 +1,28 @@
+
 package edu.stanford.nlp.util.logging;
 
 import java.io.File;
 import java.io.OutputStream;
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.MetaClass;
 
 /**
  * A class which encapsulates configuration settings for Redwood.
  * The class operates on the builder model; that is, you can chain method
  * calls.
- *
  * @author Gabor Angeli (angeli at cs.stanford)
  */
-public class RedwoodConfiguration  {
+public class RedwoodConfiguration {
 
   /**
    * A list of tasks to run when the configuration is applied
    */
-  private LinkedList<Runnable> tasks = new LinkedList<>();
+  private LinkedList<Runnable> tasks = new LinkedList<Runnable>();
 
   private OutputHandler outputHandler = Redwood.ConsoleHandler.out();
   private File defaultFile = new File("/dev/null");
@@ -40,13 +41,11 @@ public class RedwoodConfiguration  {
   }
 
   /**
-   * Capture a system stream.
-   *
+   * Capture a system stream
    * @param stream The stream to capture; one of System.out or System.err
    * @return this
    */
   public RedwoodConfiguration capture(final OutputStream stream) {
-    // Capture the stream
     if (stream == System.out) {
       tasks.add(() -> Redwood.captureSystemStreams(true, Redwood.realSysErr == System.err));
     } else if (stream == System.err) {
@@ -67,34 +66,6 @@ public class RedwoodConfiguration  {
     }
     return this;
   }
-
-
-
-  public RedwoodConfiguration listenOnChannels(Consumer<Redwood.Record> listener, Object... channels) {
-    return this.handlers(
-        Handlers.chain(new FilterHandler(Collections.singletonList(new LogFilter() {
-              Set<Object> matchAgainst = new HashSet<>(Arrays.asList(channels));
-              @Override
-              public boolean matches(Redwood.Record message) {
-                for (Object channel : message.channels()) {
-                  if (matchAgainst.contains(channel)) {
-                    return true;
-                  }
-                }
-                return false;
-              }
-            }), true),
-            (config, root) -> {
-              root.addChild(new LogRecordHandler() {
-                @Override
-                public List<Redwood.Record> handle(Redwood.Record record) {
-                  listener.accept(record);
-                  return Collections.singletonList(record);
-                }
-              });
-            }));
-  }
-
 
   /**
    * Determine where, in the end, console output should go.
@@ -119,12 +90,12 @@ public class RedwoodConfiguration  {
   }
 
   /**
-   * Set the width of the channels (or 0 to not show channels).
+   * Set the width of the channels (or 0 to not show channels)
    * @param width The left margin in which to show channels
    * @return this
    */
   public RedwoodConfiguration channelWidth(final int width) {
-    tasks.addFirst(() -> RedwoodConfiguration.this.channelWidth = width);
+    tasks.add(() -> RedwoodConfiguration.this.channelWidth = width);
     return this;
   }
 
@@ -133,7 +104,7 @@ public class RedwoodConfiguration  {
    * @return this
    */
   public RedwoodConfiguration clear(){
-    this.tasks = new LinkedList<>();
+    this.tasks = new LinkedList<Runnable>();
     this.tasks.add(() -> {
       Redwood.clearHandlers();
       Redwood.restoreSystemStreams();
@@ -144,8 +115,8 @@ public class RedwoodConfiguration  {
 
 
 
-  public interface Thunk {
-    void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root);
+  public static interface Thunk {
+    public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root);
   }
 
   @SuppressWarnings("UnusedDeclaration")
@@ -192,7 +163,6 @@ public class RedwoodConfiguration  {
       handler.leftMargin = config.channelWidth;
       root.addChild(handler);
     };
-
     /**
      * Output to a standard error. This is a leaf node.
      * Consider using "output" instead, unless you really
@@ -203,33 +173,6 @@ public class RedwoodConfiguration  {
       handler.leftMargin = config.channelWidth;
       root.addChild(handler);
     };
-
-    /**
-     * Output to slf4j. This is a leaf node.
-     */
-    public static final Thunk slf4j = (config, root) -> {
-      try {
-        OutputHandler handler = MetaClass.create("edu.stanford.nlp.util.logging.SLF4JHandler").createInstance();
-        handler.leftMargin = config.channelWidth;
-        root.addChild(handler);
-      } catch (Exception e) {
-        throw new IllegalStateException("Could not find SLF4J in your classpath", e);
-      }
-    };
-
-    /**
-     * Output to java.util.Logging. This is a leaf node.
-     */
-    public static final Thunk javaUtil = (config, root) -> {
-      try {
-        OutputHandler handler = new JavaUtilLoggingHandler();
-        handler.leftMargin = config.channelWidth;
-        root.addChild(handler);
-      } catch (Exception e) {
-        throw new IllegalStateException("Could not find java.util.logging in your classpath", e);
-      }
-    };
-
     /**
      * Output to the default location specified by the output() method.
      * Consider using this rather than stderr or stdout.
@@ -248,7 +191,18 @@ public class RedwoodConfiguration  {
     public static final LogRecordHandler hideDebug = new VisibilityHandler() {{
       alsoHide(Redwood.DBG);
     }};
-
+    /**
+     * Hide the error channel only.
+     */
+    public static final LogRecordHandler hideError = new VisibilityHandler() {{
+      alsoHide(Redwood.ERR);
+    }};
+    /**
+     * Hide the warning channel only.
+     */
+    public static final LogRecordHandler hideWarn = new VisibilityHandler() {{
+      alsoHide(Redwood.WARN);
+    }};
     /**
      * Show only errors (e.g., to send them to an error file)
      */
@@ -256,7 +210,6 @@ public class RedwoodConfiguration  {
       hideAll();
       alsoShow(Redwood.ERR);
     }};
-
     /**
      * Hide these channels, in addition to anything already hidden by upstream handlers.
      */
@@ -267,14 +220,6 @@ public class RedwoodConfiguration  {
         }
       }};
     }
-
-    /**
-     * Show all channels (with this handler, there may be upstream handlers).
-     */
-    public static LogRecordHandler showAllChannels() {
-      return new VisibilityHandler();
-    }
-
     /**
      * Show only these channels, as far as downstream handlers are concerned.
      */
@@ -313,9 +258,12 @@ public class RedwoodConfiguration  {
      * @param destinations The destinations for log messages coming into this node.
      */
     public static Thunk branch(final Thunk... destinations) {
-      return (config, root) -> {
-        for (Thunk destination : destinations) {
-          destination.apply(config, root);
+      return new Thunk() {
+        @Override
+        public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
+          for (Thunk destination : destinations) {
+            destination.apply(config, root);
+          }
         }
       };
     }
@@ -367,11 +315,11 @@ public class RedwoodConfiguration  {
   }
 
   /**
-   * Add handlers to Redwood. This is the main way to tell Redwood to do stuff.
+   * <p><Add handlers to Redwood. This is the main way to tell Redwood to do stuff.
    * Use this by calling a combination of methods in Handlers. It may be useful
-   * to "import static RedwoodConfiguration.Handlers.*"
+   * to "import static RedwoodConfiguration.Handlers.*"</p>
    *
-   * For example:
+   * <p>For example:</p>
    * <pre>
    *   handlers(branch(
    *     chain( hideDebug, collapseApproximate, branch( output, file("stderr.log") ),
@@ -412,94 +360,13 @@ public class RedwoodConfiguration  {
   }
 
   /**
-   * A standard  Redwood configuration, which prints to the console with channels.
-   * It does not show debug level messages (but shows warning and error messages).
+   * The default Redwood configuration, which prints to the console.
    * This is the usual starting point for new configurations.
    * @return  A basic Redwood Configuration.
    */
-  public static RedwoodConfiguration standard() {
+  public static RedwoodConfiguration standard(){
     return new RedwoodConfiguration().clear().handlers(
-        Handlers.chain(Handlers.hideDebug, Handlers.stderr));
-  }
-
-  /**
-   * The default Redwood configuration, which prints to the console without channels.
-   * It does not show debug level messages (but shows warning and error messages).
-   * This is the usual starting point for new configurations.
-   * @return  A basic Redwood Configuration.
-   */
-  public static RedwoodConfiguration minimal() {
-    return new RedwoodConfiguration().clear().handlers(
-        Handlers.chain(Handlers.hideChannels(), Handlers.hideDebug, Handlers.stderr)
-    );
-  }
-
-  /**
-   * Run Redwood with SLF4J as the console backend
-   * @return A redwood configuration. Remember to call {@link RedwoodConfiguration#apply()}.
-   */
-  public static RedwoodConfiguration slf4j() {
-    return new RedwoodConfiguration().clear().handlers(
-        Handlers.chain(Handlers.hideChannels(), Handlers.slf4j)
-    );
-  }
-
-  /** Run Redwood with SLF4J if available, otherwise with stderr logging at the debug (everything) level.
-   *  @return A redwood configuration. Remember to call {@link RedwoodConfiguration#apply()}.
-   */
-  public static RedwoodConfiguration debugLevel() {
-    RedwoodConfiguration config;
-    try {
-      MetaClass.create("org.slf4j.LoggerFactory").createInstance();
-      config = new RedwoodConfiguration().clear().handlers(
-              Handlers.chain(Handlers.showAllChannels(), Handlers.slf4j));
-    } catch (Exception ignored) {
-      config = new RedwoodConfiguration().clear().handlers(
-              Handlers.chain(Handlers.showAllChannels(), Handlers.stderr));
-    }
-    return config;
-  }
-
-  /** Run Redwood with SLF4J if available, otherwise with stderr logging at the warning (and error) level.
-   *  @return A redwood configuration. Remember to call {@link RedwoodConfiguration#apply()}.
-   */
-  public static RedwoodConfiguration infoLevel() {
-    RedwoodConfiguration config;
-    try {
-      MetaClass.create("org.slf4j.LoggerFactory").createInstance();
-      config = new RedwoodConfiguration().clear().handlers(
-              Handlers.chain(Handlers.hideChannels(Redwood.DBG), Handlers.slf4j));
-    } catch (Exception ignored) {
-      config = new RedwoodConfiguration().clear().handlers(
-              Handlers.chain(Handlers.hideChannels(Redwood.DBG), Handlers.stderr));
-    }
-    return config;
-  }
-
-  /** Run Redwood with SLF4J if available, otherwise with stderr logging at the error only level.
-   *  @return A redwood configuration. Remember to call {@link RedwoodConfiguration#apply()}.
-   */
-  public static RedwoodConfiguration errorLevel() {
-    RedwoodConfiguration config;
-    try {
-      MetaClass.create("org.slf4j.LoggerFactory").createInstance();
-      config = new RedwoodConfiguration().clear().handlers(
-              Handlers.chain(Handlers.showOnlyError, Handlers.slf4j));
-    } catch (Exception ignored) {
-      config = new RedwoodConfiguration().clear().handlers(
-              Handlers.chain(Handlers.showOnlyError, Handlers.stderr));
-    }
-    return config;
-  }
-
-  /**
-   * Run Redwood with java.util.logging
-   * @return A redwood configuration. Remember to call {@link RedwoodConfiguration#apply()}.
-   */
-  @SuppressWarnings("unused")
-  public static RedwoodConfiguration javaUtilLogging() {
-    return new RedwoodConfiguration().clear().handlers(
-        Handlers.chain(Handlers.hideChannels(), Handlers.javaUtil)
+        Handlers.chain(Handlers.hideChannels(), Handlers.stderr)
     );
   }
 
@@ -514,16 +381,21 @@ public class RedwoodConfiguration  {
 
 
   /**
-   * Helper for parsing properties.
-   *
-   * @param p The Properties object
+   * Helper for parsing properties
+   * @param p The properties object
    * @param key The key to retrieve
    * @param defaultValue The default value if the key does not exist
    * @param used The set of keys we have seen
    * @return The value of the property at the key
    */
   private static String get(Properties p, String key, String defaultValue, Set<String> used){
-    String rtn = p.getProperty(key, defaultValue);
+    Object cand = p.get(key);
+    String rtn;
+    if (cand == null) {
+      rtn = p.getProperty(key, defaultValue);
+    } else {
+      rtn = cand.toString();
+    }
     used.add(key);
     return rtn;
   }
@@ -561,7 +433,7 @@ public class RedwoodConfiguration  {
 
     //--Collapse
     String collapse = get(props, "log.collapse", "none", used);
-    List<LogRecordHandler> chain = new LinkedList<>();
+    List<LogRecordHandler> chain = new LinkedList<LogRecordHandler>();
     if (collapse.equalsIgnoreCase("exact")) {
       chain.add(new RepeatedRecordHandler(RepeatedRecordHandler.EXACT));
     } else if (collapse.equalsIgnoreCase("approximate")) {
@@ -628,7 +500,7 @@ public class RedwoodConfiguration  {
     Redwood.log("foo");
     Redwood.log(Redwood.DBG, "debug");
     System.out.println("Bar");
-    log.info("Baz");
+    System.err.println("Baz");
   }
   */
 }

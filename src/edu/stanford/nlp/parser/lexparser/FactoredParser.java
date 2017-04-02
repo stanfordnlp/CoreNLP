@@ -55,7 +55,6 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -66,10 +65,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Galen Andrew (lattice parsing)
  * @author Philip Resnik and Dan Zeman (n good parses)
  */
-public class FactoredParser  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(FactoredParser.class);
+public class FactoredParser {
 
 /* some documentation for Roger's convenience
  * {pcfg,dep,combo}{PE,DE,TE} are precision/dep/tagging evals for the models
@@ -94,7 +90,7 @@ public class FactoredParser  {
     // op.tlpParams may be changed to something else later, so don't use it till
     // after options are parsed.
 
-    StringUtils.logInvocationString(log, args);
+    System.out.println(StringUtils.toInvocationString("FactoredParser", args));
 
     String path = "/u/nlp/stuff/corpora/Treebank3/parsed/mrg/wsj";
     int trainLow = 200, trainHigh = 2199, testLow = 2200, testHigh = 2219;
@@ -120,13 +116,13 @@ public class FactoredParser  {
         try {
           op.tlpParams = (TreebankLangParserParams) Class.forName(args[i + 1]).newInstance();
         } catch (ClassNotFoundException e) {
-          log.info("Class not found: " + args[i + 1]);
+          System.err.println("Class not found: " + args[i + 1]);
           throw new RuntimeException(e);
         } catch (InstantiationException e) {
-          log.info("Couldn't instantiate: " + args[i + 1] + ": " + e.toString());
+          System.err.println("Couldn't instantiate: " + args[i + 1] + ": " + e.toString());
           throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
-          log.info("illegal access" + e);
+          System.err.println("illegal access" + e);
           throw new RuntimeException(e);
         }
         i += 2;
@@ -159,7 +155,7 @@ public class FactoredParser  {
     // blippTreebank.loadPath(blippPath, "", true);
 
     Timing.startTime();
-    log.info("Reading trees...");
+    System.err.print("Reading trees...");
     testTreebank.loadPath(path, new NumberRangeFileFilter(testLow, testHigh, true));
     if (op.testOptions.increasingLength) {
       Collections.sort(testTreebank, new TreeLengthComparator());
@@ -168,7 +164,7 @@ public class FactoredParser  {
     trainTreebank.loadPath(path, new NumberRangeFileFilter(trainLow, trainHigh, true));
     Timing.tick("done.");
 
-    log.info("Binarizing trees...");
+    System.err.print("Binarizing trees...");
     TreeAnnotatorAndBinarizer binarizer;
     if (!op.trainOptions.leftToRight) {
       binarizer = new TreeAnnotatorAndBinarizer(op.tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), true, op);
@@ -181,12 +177,12 @@ public class FactoredParser  {
       collinsPuncTransformer = new CollinsPuncTransformer(tlp);
     }
     TreeTransformer debinarizer = new Debinarizer(op.forceCNF);
-    List<Tree> binaryTrainTrees = new ArrayList<>();
+    List<Tree> binaryTrainTrees = new ArrayList<Tree>();
 
     if (op.trainOptions.selectiveSplit) {
       op.trainOptions.splitters = ParentAnnotationStats.getSplitCategories(trainTreebank, op.trainOptions.tagSelectiveSplit, 0, op.trainOptions.selectiveSplitCutOff, op.trainOptions.tagSelectiveSplitCutOff, op.tlpParams.treebankLanguagePack());
       if (op.trainOptions.deleteSplitters != null) {
-        List<String> deleted = new ArrayList<>();
+        List<String> deleted = new ArrayList<String>();
         for (String del : op.trainOptions.deleteSplitters) {
           String baseDel = tlp.basicCategory(del);
           boolean checkBasic = del.equals(baseDel);
@@ -201,7 +197,7 @@ public class FactoredParser  {
             }
           }
         }
-        log.info("Removed from vertical splitters: " + deleted);
+        System.err.println("Removed from vertical splitters: " + deleted);
       }
     }
     if (op.trainOptions.selectivePostSplit) {
@@ -233,7 +229,7 @@ public class FactoredParser  {
       binarizer.dumpStats();
     }
 
-    List<Tree> binaryTestTrees = new ArrayList<>();
+    List<Tree> binaryTestTrees = new ArrayList<Tree>();
     for (Tree tree : testTreebank) {
       if (op.trainOptions.collinsPunc) {
         tree = collinsPuncTransformer.transformTree(tree);
@@ -247,7 +243,7 @@ public class FactoredParser  {
     DependencyGrammar dg = null;
     // DependencyGrammar dgBLIPP = null;
     Lexicon lex = null;
-    Index<String> stateIndex = new HashIndex<>();
+    Index<String> stateIndex = new HashIndex<String>();
 
     // extract grammars
     Extractor<Pair<UnaryGrammar,BinaryGrammar>> bgExtractor = new BinaryGrammarExtractor(op, stateIndex);
@@ -257,10 +253,10 @@ public class FactoredParser  {
     //Extractor dgExtractor = new DependencyMemGrammarExtractor();
 
     if (op.doPCFG) {
-      log.info("Extracting PCFG...");
+      System.err.print("Extracting PCFG...");
       Pair<UnaryGrammar, BinaryGrammar> bgug = null;
       if (op.trainOptions.cheatPCFG) {
-        List<Tree> allTrees = new ArrayList<>(binaryTrainTrees);
+        List<Tree> allTrees = new ArrayList<Tree>(binaryTrainTrees);
         allTrees.addAll(binaryTestTrees);
         bgug = bgExtractor.extract(allTrees);
       } else {
@@ -272,9 +268,9 @@ public class FactoredParser  {
       ug.purgeRules();
       Timing.tick("done.");
     }
-    log.info("Extracting Lexicon...");
-    Index<String> wordIndex = new HashIndex<>();
-    Index<String> tagIndex = new HashIndex<>();
+    System.err.print("Extracting Lexicon...");
+    Index<String> wordIndex = new HashIndex<String>();
+    Index<String> tagIndex = new HashIndex<String>();
     lex = op.tlpParams.lex(op, wordIndex, tagIndex);
     lex.initializeTraining(binaryTrainTrees.size());
     lex.train(binaryTrainTrees);
@@ -282,7 +278,7 @@ public class FactoredParser  {
     Timing.tick("done.");
 
     if (op.doDep) {
-      log.info("Extracting Dependencies...");
+      System.err.print("Extracting Dependencies...");
       binaryTrainTrees.clear();
       Extractor<DependencyGrammar> dgExtractor = new MLEDependencyGrammarExtractor(op, wordIndex, tagIndex);
       // dgBLIPP = (DependencyGrammar) dgExtractor.extract(new ConcatenationIterator(trainTreebank.iterator(),blippTreebank.iterator()),new TransformTreeDependency(tlpParams,true));
@@ -310,7 +306,7 @@ public class FactoredParser  {
 
     // serialization
     if (serializeFile != null) {
-      log.info("Serializing parser...");
+      System.err.print("Serializing parser...");
       LexicalizedParser parser = new LexicalizedParser(lex, bg, ug, dg, stateIndex, wordIndex, tagIndex, op);
       parser.saveParserToSerialized(serializeFile);
       Timing.tick("done.");
@@ -363,8 +359,8 @@ public class FactoredParser  {
         Object[] arguments = new Object[]{op.testOptions.taggerSerializedFile};
         tagger = (Function<List<? extends HasWord>,ArrayList<TaggedWord>>) Class.forName("edu.stanford.nlp.tagger.maxent.MaxentTagger").getConstructor(argsClass).newInstance(arguments);
       } catch (Exception e) {
-        log.info(e);
-        log.info("Warning: No pretagging of sentences will be done.");
+        System.err.println(e);
+        System.err.println("Warning: No pretagging of sentences will be done.");
       }
     }
 
@@ -391,7 +387,7 @@ public class FactoredParser  {
       long timeMil1 = System.currentTimeMillis();
       Timing.tick("Starting parse.");
       if (op.doPCFG) {
-        //log.info(op.testOptions.forceTags);
+        //System.err.println(op.testOptions.forceTags);
         if (op.testOptions.forceTags) {
           if (tagger != null) {
             //System.out.println("Using a tagger to set tags");
@@ -418,7 +414,7 @@ public class FactoredParser  {
       }
       long timeMil2 = System.currentTimeMillis();
       long elapsed = timeMil2 - timeMil1;
-      log.info("Time: " + ((int) (elapsed / 100)) / 10.00 + " sec.");
+      System.err.println("Time: " + ((int) (elapsed / 100)) / 10.00 + " sec.");
       //System.out.println("PCFG Best Parse:");
       Tree tree2b = null;
       Tree tree2 = null;
@@ -449,7 +445,7 @@ public class FactoredParser  {
             tree4 = tree2b;
           }
         } catch (NullPointerException e) {
-          log.info("Blocked, using PCFG parse!");
+          System.err.println("Blocked, using PCFG parse!");
           tree4 = tree2b;
         }
       }
@@ -556,8 +552,9 @@ public class FactoredParser  {
 
   private static List<TaggedWord> cleanTags(List<TaggedWord> twList, TreebankLanguagePack tlp) {
     int sz = twList.size();
-    List<TaggedWord> l = new ArrayList<>(sz);
-    for (TaggedWord tw : twList) {
+    List<TaggedWord> l = new ArrayList<TaggedWord>(sz);
+    for (int i = 0; i < sz; i++) {
+      TaggedWord tw = twList.get(i);
       TaggedWord tw2 = new TaggedWord(tw.word(), tlp.basicCategory(tw.tag()));
       l.add(tw2);
     }
@@ -565,7 +562,7 @@ public class FactoredParser  {
   }
 
   private static ArrayList<Word> wordify(List wList) {
-    ArrayList<Word> s = new ArrayList<>();
+    ArrayList<Word> s = new ArrayList<Word>();
     for (Object obj : wList) {
       s.add(new Word(obj.toString()));
     }
@@ -573,11 +570,11 @@ public class FactoredParser  {
   }
 
   private static ArrayList<Word> cutLast(ArrayList<Word> s) {
-    return new ArrayList<>(s.subList(0, s.size() - 1));
+    return new ArrayList<Word>(s.subList(0, s.size() - 1));
   }
 
   private static ArrayList<Word> addLast(ArrayList<? extends Word> s) {
-    ArrayList<Word> s2 = new ArrayList<>(s);
+    ArrayList<Word> s2 = new ArrayList<Word>(s);
     //s2.add(new StringLabel(Lexicon.BOUNDARY));
     s2.add(new Word(Lexicon.BOUNDARY));
     return s2;

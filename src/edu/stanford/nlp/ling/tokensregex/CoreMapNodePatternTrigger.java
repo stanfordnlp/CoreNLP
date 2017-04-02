@@ -3,7 +3,10 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -14,11 +17,11 @@ import java.util.function.Function;
 */
 public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatternTrigger<CoreMap> {
   Collection<? extends SequencePattern<CoreMap>> patterns;
-  Collection<SequencePattern<CoreMap>> alwaysTriggered = new LinkedHashSet<>();
+  Collection<SequencePattern<CoreMap>> alwaysTriggered = new LinkedHashSet<SequencePattern<CoreMap>>();
   TwoDimensionalCollectionValuedMap<Class, Object, SequencePattern<CoreMap>> annotationTriggers =
-          new TwoDimensionalCollectionValuedMap<>();
+          new TwoDimensionalCollectionValuedMap<Class, Object, SequencePattern<CoreMap>>();
   TwoDimensionalCollectionValuedMap<Class, String, SequencePattern<CoreMap>> lowercaseStringTriggers =
-          new TwoDimensionalCollectionValuedMap<>();
+          new TwoDimensionalCollectionValuedMap<Class, String, SequencePattern<CoreMap>>();
 
   public CoreMapNodePatternTrigger(SequencePattern<CoreMap>... patterns) {
     this(Arrays.asList(patterns));
@@ -26,13 +29,13 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
   public CoreMapNodePatternTrigger(Collection<? extends SequencePattern<CoreMap>> patterns) {
     this.patterns = patterns;
 
-    Function<NodePattern<CoreMap>, StringTriggerCandidate> stringTriggerFilter =
+    Function<NodePattern<CoreMap>, Triple<Class,String,Boolean>> textTriggerFilter =
         in -> {
           if (in instanceof CoreMapNodePattern) {
             CoreMapNodePattern p = (CoreMapNodePattern) in;
             for (Pair<Class,NodePattern> v:p.getAnnotationPatterns()) {
-              if (v.second instanceof CoreMapNodePattern.StringAnnotationPattern) {
-                return new StringTriggerCandidate(v.first, ((CoreMapNodePattern.StringAnnotationPattern) v.second).target,
+              if (v.first == CoreAnnotations.TextAnnotation.class && v.second instanceof CoreMapNodePattern.StringAnnotationPattern) {
+                return Triple.makeTriple(v.first, ((CoreMapNodePattern.StringAnnotationPattern) v.second).target,
                         ((CoreMapNodePattern.StringAnnotationPattern) v.second).ignoreCase());
               }
             }
@@ -42,16 +45,12 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
 
     for (SequencePattern<CoreMap> pattern:patterns) {
       // Look for first string...
-      Collection<StringTriggerCandidate> triggerCandidates = pattern.findNodePatterns(stringTriggerFilter, false, true);
-      // TODO: Select most unlikely to trigger trigger from the triggerCandidates
-      //  (if we had some statistics on most frequent annotation values...., then pick least frequent)
-      // For now, just pick the longest: going from (text or lemma) to rest
-      StringTriggerCandidate trigger = triggerCandidates.stream().max(STRING_TRIGGER_CANDIDATE_COMPARATOR).orElse(null);
-      if (!triggerCandidates.isEmpty()) {
-        if (trigger.ignoreCase) {
-          lowercaseStringTriggers.add(trigger.key, trigger.value.toLowerCase(), pattern);
+      Triple<Class,String,Boolean> firstTextTrigger = pattern.findNodePattern(textTriggerFilter);
+      if (firstTextTrigger != null) {
+        if (firstTextTrigger.third) {
+          lowercaseStringTriggers.add(firstTextTrigger.first, firstTextTrigger.second.toLowerCase(), pattern);
         } else {
-          annotationTriggers.add(trigger.key, trigger.value, pattern);
+          annotationTriggers.add(firstTextTrigger.first, firstTextTrigger.second, pattern);
         }
       } else {
         alwaysTriggered.add(pattern);
@@ -59,41 +58,9 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
     }
   }
 
-  private static class StringTriggerCandidate {
-    Class key;
-    String value;
-    boolean ignoreCase;
-    int keyLevel;
-    int effectiveValueLength;
-
-    public StringTriggerCandidate(Class key, String value, boolean ignoreCase) {
-      this.key = key;
-      this.value = value;
-      this.ignoreCase = ignoreCase;
-      // Favor text and lemma (more likely to be unique)
-      this.keyLevel = (CoreAnnotations.TextAnnotation.class.equals(key) || CoreAnnotations.LemmaAnnotation.class.equals(key))? 1:0;
-      // Special case for -LRB- ( and -RRB- )
-      this.effectiveValueLength = ("-LRB-".equals(value) || "-RRB-".equals(value))? 1: value.length();
-    }
-  }
-  private static final Comparator<StringTriggerCandidate> STRING_TRIGGER_CANDIDATE_COMPARATOR =
-    new Comparator<StringTriggerCandidate>() {
-      @Override
-      public int compare(StringTriggerCandidate o1, StringTriggerCandidate o2) {
-        if (o1.keyLevel != o2.keyLevel) {
-          return (o1.keyLevel < o2.keyLevel)? -1:1;
-        } else {
-          int v1 = o1.effectiveValueLength;
-          int v2 = o2.effectiveValueLength;
-          if (v1 != v2) return (v1 < v2)? -1:1;
-          else return 0;
-        }
-      }
-    };
-
   @Override
   public Collection<SequencePattern<CoreMap>> apply(CoreMap in) {
-    Set<SequencePattern<CoreMap>> triggeredPatterns = new LinkedHashSet<>();
+    Set<SequencePattern<CoreMap>> triggeredPatterns = new LinkedHashSet<SequencePattern<CoreMap>>();
     triggeredPatterns.addAll(alwaysTriggered);
     for (Class key:annotationTriggers.firstKeySet()) {
       Object value = in.get(key);

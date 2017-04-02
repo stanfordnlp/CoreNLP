@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
@@ -18,10 +17,7 @@ import java.util.List;
  * @author Jenny Finkel
  */
 @SuppressWarnings("UnusedDeclaration")
-public class FactorTable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FactorTable.class);
+public class FactorTable {
 
   private final int numClasses;
   private final int windowSize;
@@ -98,7 +94,7 @@ public class FactorTable  {
   }
 
   private static <L> String toString(int[] array, Index<L> classIndex) {
-    List<L> l = new ArrayList<>(array.length);
+    List<L> l = new ArrayList<L>(array.length);
     for (int item : array) {
       l.add(classIndex.get(item));
     }
@@ -167,7 +163,7 @@ public class FactorTable  {
       indices[i] = index;
       index += offset;
     }
-    // log.info("indicesEnd returning: " + Arrays.toString(indices));
+    // System.err.println("indicesEnd returning: " + Arrays.toString(indices));
     return indices;
   }
 
@@ -248,7 +244,7 @@ public class FactorTable  {
 
 //  public double conditionalLogProbGivenPreviousForPartial(int[] given, int of) {
 //    if (given.length != windowSize - 1) {
-//      log.info("error computing conditional log prob");
+//      System.err.println("error computing conditional log prob");
 //      System.exit(0);
 //    }
 //    // int[] label = indicesFront(given);
@@ -260,8 +256,8 @@ public class FactorTable  {
 //
 //    int i = indexOf(given, of);
 //    // if (SloppyMath.isDangerous(z) || SloppyMath.isDangerous(table[i])) {
-//    // log.info("z="+z);
-//    // log.info("t="+table[i]);
+//    // System.err.println("z="+z);
+//    // System.err.println("t="+table[i]);
 //    // }
 //
 //    return table[i];
@@ -427,7 +423,7 @@ public class FactorTable  {
     table[indexOf(label)] = value;
     // } catch (Exception e) {
     // e.printStackTrace();
-    // log.info("Table length: " + table.length + " indexOf(label): "
+    // System.err.println("Table length: " + table.length + " indexOf(label): "
     // + indexOf(label));
     // throw new ArrayIndexOutOfBoundsException(e.toString());
     // // System.exit(1);
@@ -529,7 +525,7 @@ public class FactorTable  {
       }
     }
 
-    log.info(ft);
+    System.err.println(ft);
     double normalization = 0.0;
     for (int i = 0; i < numClasses; i++) {
       for (int j = 0; j < numClasses; j++) {
@@ -538,9 +534,9 @@ public class FactorTable  {
         }
       }
     }
-    log.info("Normalization Z = " + normalization);
+    System.err.println("Normalization Z = " + normalization);
 
-    log.info(ft.sumOutFront());
+    System.err.println(ft.sumOutFront());
 
     FactorTable ft2 = new FactorTable(numClasses, 2);
     for (int i = 0; i < numClasses; i++) {
@@ -550,9 +546,9 @@ public class FactorTable  {
       }
     }
 
-    log.info(ft2);
+    System.err.println(ft2);
     // FactorTable ft3 = ft2.sumOutFront();
-    // log.info(ft3);
+    // System.err.println(ft3);
 
     for (int i = 0; i < numClasses; i++) {
       for (int j = 0; j < numClasses; j++) {
@@ -563,11 +559,11 @@ public class FactorTable  {
           System.err
               .println(k + "|" + i + ',' + j + " : " + Math.exp(ft.conditionalLogProbGivenPrevious(b, k)));
         }
-        log.info(t);
+        System.err.println(t);
       }
     }
 
-    log.info("conditionalLogProbGivenFirst");
+    System.err.println("conditionalLogProbGivenFirst");
     for (int j = 0; j < numClasses; j++) {
       for (int k = 0; k < numClasses; k++) {
         int[] b = { j, k };
@@ -577,11 +573,11 @@ public class FactorTable  {
           System.err
               .println(i + "|" + j + ',' + k + " : " + ft.unnormalizedConditionalLogProbGivenFirst(i, b));
         }
-        log.info(t);
+        System.err.println(t);
       }
     }
 
-    log.info("conditionalLogProbGivenFirst");
+    System.err.println("conditionalLogProbGivenFirst");
     for (int i = 0; i < numClasses; i++) {
       for (int j = 0; j < numClasses; j++) {
         int[] b = { i, j };
@@ -591,7 +587,7 @@ public class FactorTable  {
           System.err
               .println(i + "," + j + '|' + k + " : " + ft.conditionalLogProbGivenNext(b, k));
         }
-        log.info(t);
+        System.err.println(t);
       }
     }
 
@@ -607,9 +603,9 @@ public class FactorTable  {
     ft3.setValue(new int[] {1, 1, 1}, Math.log(1e-50));
 
     FactorTable ft4 = ft3.sumOutFront();
-    log.info(ft4.toNonLogString());
+    System.err.println(ft4.toNonLogString());
     FactorTable ft5 = ft3.sumOutEnd();
-    log.info(ft5.toNonLogString());
+    System.err.println(ft5.toNonLogString());
   } // end main
 
 }

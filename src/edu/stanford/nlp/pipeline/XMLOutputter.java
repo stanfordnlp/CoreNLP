@@ -1,25 +1,21 @@
-package edu.stanford.nlp.pipeline; 
+package edu.stanford.nlp.pipeline;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-
-import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
-import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.stats.Counters;
@@ -44,8 +40,7 @@ import nu.xom.*;
  * see {@link edu.stanford.nlp.pipeline.AnnotationSerializer}; e.g.,
  * {@link edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer}.
  */
-public class XMLOutputter extends AnnotationOutputter  {
-
+public class XMLOutputter extends AnnotationOutputter {
   // the namespace is set in the XSLT file
   private static final String NAMESPACE_URI = null;
   private static final String STYLESHEET_NAME = "CoreNLP-to-HTML.xsl";
@@ -57,11 +52,7 @@ public class XMLOutputter extends AnnotationOutputter  {
   public void print(Annotation annotation, OutputStream os, Options options) throws IOException {
     Document xmlDoc = annotationToDoc(annotation, options);
     Serializer ser = new Serializer(os, options.encoding);
-    if (options.pretty) {
-      ser.setIndent(2);
-    } else {
-      ser.setIndent(0);
-    }
+    ser.setIndent(2);
     ser.setMaxLength(0);
     ser.write(xmlDoc);
     ser.flush();
@@ -168,32 +159,6 @@ public class XMLOutputter extends AnnotationOutputter  {
           if (depInfo != null) {
             sentElem.appendChild(depInfo);
           }
-
-          depInfo = buildDependencyTreeInfo("enhanced-dependencies", sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          if (depInfo != null) {
-            sentElem.appendChild(depInfo);
-          }
-
-          depInfo = buildDependencyTreeInfo("enhanced-plus-plus-dependencies", sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          if (depInfo != null) {
-            sentElem.appendChild(depInfo);
-          }
-        }
-
-        // add Open IE triples
-        Collection<RelationTriple> openieTriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-        if (openieTriples != null) {
-          Element openieElem = new Element("openie", NAMESPACE_URI);
-          addTriples(openieTriples, openieElem, NAMESPACE_URI);
-          sentElem.appendChild(openieElem);
-        }
-
-        // add KBP triples
-        Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
-        if (kbpTriples != null) {
-          Element kbpElem = new Element("kbp", NAMESPACE_URI);
-          addTriples(kbpTriples, kbpElem, NAMESPACE_URI);
-          sentElem.appendChild(kbpElem);
         }
 
         // add the MR entities and relations
@@ -238,8 +203,8 @@ public class XMLOutputter extends AnnotationOutputter  {
     if (corefChains != null) {
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       Element corefInfo = new Element("coreference", NAMESPACE_URI);
-      addCorefGraphInfo(options, corefInfo, sentences, corefChains, NAMESPACE_URI);
-      docElem.appendChild(corefInfo);
+      if (addCorefGraphInfo(options, corefInfo, sentences, corefChains, NAMESPACE_URI))
+        docElem.appendChild(corefInfo);
     }
 
     //
@@ -250,22 +215,13 @@ public class XMLOutputter extends AnnotationOutputter  {
   }
 
   /**
-   * Generates the XML content for a list of OpenIE triples.
-   */
-  private static void addTriples(Collection<RelationTriple> openieTriples, Element top, String namespaceUri) {
-    for (RelationTriple triple : openieTriples) {
-      top.appendChild(toXML(triple, namespaceUri));
-    }
-  }
-
-  /**
    * Generates the XML content for a constituent tree
    */
   private static void addConstituentTreeInfo(Element treeInfo, Tree tree, TreePrint constituentTreePrinter) {
     StringWriter treeStrWriter = new StringWriter();
     constituentTreePrinter.printTree(tree, new PrintWriter(treeStrWriter, true));
     String temp = treeStrWriter.toString();
-    //log.info(temp);
+    //System.err.println(temp);
     treeInfo.appendChild(temp);
   }
 
@@ -467,12 +423,6 @@ public class XMLOutputter extends AnnotationOutputter  {
       wordInfo.appendChild(cur);
     }
 
-    if (token.containsKey(CoreAnnotations.WikipediaEntityAnnotation.class)) {
-      Element cur = new Element("entitylink", curNS);
-      cur.appendChild(token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
-      wordInfo.appendChild(cur);
-    }
-
 //    IntTuple corefDest;
 //    if((corefDest = label.get(CorefDestAnnotation.class)) != null){
 //      Element cur = new Element("coref", curNS);
@@ -498,49 +448,6 @@ public class XMLOutputter extends AnnotationOutputter  {
       cur.appendChild(value);
       tokenElement.appendChild(cur);
     }
-  }
-
-  private static Element toXML(RelationTriple triple, String curNS) {
-    Element top = new Element("triple", curNS);
-    top.addAttribute(new Attribute("confidence", triple.confidenceGloss()));
-
-    // Create the subject
-    Element subject = new Element("subject", curNS);
-    subject.addAttribute(new Attribute("begin", Integer.toString(triple.subjectTokenSpan().first)));
-    subject.addAttribute(new Attribute("end", Integer.toString(triple.subjectTokenSpan().second)));
-    Element text = new Element("text", curNS);
-    text.appendChild(triple.subjectGloss());
-    Element lemma = new Element("lemma", curNS);
-    lemma.appendChild(triple.subjectLemmaGloss());
-    subject.appendChild(text);
-    subject.appendChild(lemma);
-    top.appendChild(subject);
-
-    // Create the relation
-    Element relation = new Element("relation", curNS);
-    relation.addAttribute(new Attribute("begin", Integer.toString(triple.relationTokenSpan().first)));
-    relation.addAttribute(new Attribute("end", Integer.toString(triple.relationTokenSpan().second)));
-    text = new Element("text", curNS);
-    text.appendChild(triple.relationGloss());
-    lemma = new Element("lemma", curNS);
-    lemma.appendChild(triple.relationLemmaGloss());
-    relation.appendChild(text);
-    relation.appendChild(lemma);
-    top.appendChild(relation);
-
-    // Create the object
-    Element object = new Element("object", curNS);
-    object.addAttribute(new Attribute("begin", Integer.toString(triple.objectTokenSpan().first)));
-    object.addAttribute(new Attribute("end", Integer.toString(triple.objectTokenSpan().second)));
-    text = new Element("text", curNS);
-    text.appendChild(triple.objectGloss());
-    lemma = new Element("lemma", curNS);
-    lemma.appendChild(triple.objectLemmaGloss());
-    object.appendChild(text);
-    object.appendChild(lemma);
-    top.appendChild(object);
-
-    return top;
   }
 
   private static Element toXML(EntityMention entity, String curNS) {

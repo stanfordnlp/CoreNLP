@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.parsesegment; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.parsesegment;
 
 import java.io.*;
 import java.util.*;
@@ -18,10 +17,7 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 
-public class JointParsingModel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(JointParsingModel.class);
+public class JointParsingModel {
 
   private boolean VERBOSE = false;
 
@@ -57,7 +53,7 @@ public class JointParsingModel  {
 
   private void removeDeleteSplittersFromSplitters(TreebankLanguagePack tlp) {
     if (op.trainOptions.deleteSplitters != null) {
-      List<String> deleted = new ArrayList<>();
+      List<String> deleted = new ArrayList<String>();
       for (String del : op.trainOptions.deleteSplitters) {
         String baseDel = tlp.basicCategory(del);
         boolean checkBasic = del.equals(baseDel);
@@ -72,7 +68,7 @@ public class JointParsingModel  {
         }
       }
       if (op.testOptions.verbose) {
-        log.info("Removed from vertical splitters: " + deleted);
+        System.err.println("Removed from vertical splitters: " + deleted);
       }
     }
   }
@@ -81,9 +77,9 @@ public class JointParsingModel  {
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = tlpParams.treebankLanguagePack();
 
-    if (VERBOSE) log.info("\n\n" + trainTreebank.textualSummary(tlp));
+    if (VERBOSE) System.err.println("\n\n" + trainTreebank.textualSummary(tlp));
 
-    log.info("Binarizing trees...");
+    System.err.print("Binarizing trees...");
     TreeAnnotatorAndBinarizer binarizer = new TreeAnnotatorAndBinarizer(tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), true, op);
     Timing.tick("done.");
 
@@ -91,9 +87,9 @@ public class JointParsingModel  {
       op.trainOptions.splitters = ParentAnnotationStats.getSplitCategories(trainTreebank, op.trainOptions.tagSelectiveSplit, 0, op.trainOptions.selectiveSplitCutOff, op.trainOptions.tagSelectiveSplitCutOff, tlp);
       removeDeleteSplittersFromSplitters(tlp);
       if (op.testOptions.verbose) {
-        List<String> list = new ArrayList<>(op.trainOptions.splitters);
+        List<String> list = new ArrayList<String>(op.trainOptions.splitters);
         Collections.sort(list);
-        log.info("Parent split categories: " + list);
+        System.err.println("Parent split categories: " + list);
       }
     }
     //		if (op.trainOptions.selectivePostSplit) {
@@ -102,7 +98,7 @@ public class JointParsingModel  {
     //			Treebank annotatedTB = trainTreebank.transform(myTransformer);
     //			op.trainOptions.postSplitters = ParentAnnotationStats.getSplitCategories(annotatedTB, true, 0, op.trainOptions.selectivePostSplitCutOff, op.trainOptions.tagSelectivePostSplitCutOff, tlp);
     //			if (op.testOptions.verbose) {
-    //				log.info("Parent post annotation split categories: " + op.trainOptions.postSplitters);
+    //				System.err.println("Parent post annotation split categories: " + op.trainOptions.postSplitters);
     //			}
     //		}
     if (op.trainOptions.hSelSplit) {
@@ -119,7 +115,7 @@ public class JointParsingModel  {
 
     //Tree transformation
     //
-    List<Tree> binaryTrainTrees = new ArrayList<>();
+    List<Tree> binaryTrainTrees = new ArrayList<Tree>();
     for (Tree tree : trainTreebank) {
       tree = binarizer.transformTree(tree);
       if (tree.yield().size() - 1 <= trainLengthLimit) {
@@ -140,13 +136,13 @@ public class JointParsingModel  {
 
   public LexicalizedParser getParserDataFromTreebank(Treebank trainTreebank) {
 
-    log.info("Binarizing training trees...");
+    System.err.print("Binarizing training trees...");
     List<Tree> binaryTrainTrees = getAnnotatedBinaryTreebankFromTreebank(trainTreebank);
     Timing.tick("done.");
 
-    Index<String> stateIndex = new HashIndex<>();
+    Index<String> stateIndex = new HashIndex<String>();
 
-    log.info("Extracting PCFG...");
+    System.err.print("Extracting PCFG...");
     Extractor<Pair<UnaryGrammar,BinaryGrammar>> bgExtractor = new BinaryGrammarExtractor(op, stateIndex);
     Pair<UnaryGrammar,BinaryGrammar> bgug = bgExtractor.extract(binaryTrainTrees);
 
@@ -157,9 +153,9 @@ public class JointParsingModel  {
     ug.purgeRules();
     Timing.tick("done.");
 
-    log.info("Extracting Lexicon...");
-    Index<String> wordIndex = new HashIndex<>();
-    Index<String> tagIndex = new HashIndex<>();
+    System.err.print("Extracting Lexicon...");
+    Index<String> wordIndex = new HashIndex<String>();
+    Index<String> tagIndex = new HashIndex<String>();
     Lexicon lex = op.tlpParams.lex(op, wordIndex, tagIndex);
     lex.initializeTraining(binaryTrainTrees.size());
     lex.train(binaryTrainTrees);
@@ -169,13 +165,13 @@ public class JointParsingModel  {
     Extractor<DependencyGrammar> dgExtractor = op.tlpParams.dependencyGrammarExtractor(op, wordIndex, tagIndex);
     DependencyGrammar dg = null;
     if (op.doDep) {
-      log.info("Extracting Dependencies...");
+      System.err.print("Extracting Dependencies...");
       dg = dgExtractor.extract(binaryTrainTrees);
       dg.setLexicon(lex);
       Timing.tick("done.");
     }
 
-    log.info("Done extracting grammars and lexicon.");
+    System.err.println("Done extracting grammars and lexicon.");
 
     return new LexicalizedParser(lex, bg, ug, dg, stateIndex, wordIndex, tagIndex, op);
   }
@@ -194,11 +190,11 @@ public class JointParsingModel  {
     final LatticeXMLReader reader = new LatticeXMLReader();
 
     if(!reader.load(inputStream,serInput)) {
-      System.err.printf("%s: Error loading input lattice xml from stdin%n", this.getClass().getName());
+      System.err.printf("%s: Error loading input lattice xml from stdin\n", this.getClass().getName());
       return false;
     }
 
-    System.err.printf("%s: Entering main parsing loop...%n", this.getClass().getName());
+    System.err.printf("%s: Entering main parsing loop...\n", this.getClass().getName());
 
     int latticeNum = 0;
     int parseable = 0;
@@ -207,7 +203,7 @@ public class JointParsingModel  {
     for(final Lattice lattice : reader) {
 
       if (lattice.getNumNodes() > op.testOptions.maxLength + 1) {  // + 1 for boundary symbol
-        System.err.printf("%s: Lattice %d too big! (%d nodes)%n",this.getClass().getName(),latticeNum,lattice.getNumNodes());
+        System.err.printf("%s: Lattice %d too big! (%d nodes)\n",this.getClass().getName(),latticeNum,lattice.getNumNodes());
         latticeNum++;
         continue;
       }
@@ -221,28 +217,27 @@ public class JointParsingModel  {
         Tree rawTree = null;
         if(op.doPCFG && pparser.parse(lattice)) {
           rawTree = pparser.getBestParse(); //1best segmentation
-          //bestSegmentationB still has boundary symbol in it
-          bestSegmentationB = rawTree.yield(new ArrayList<CoreLabel>()); // NOTE! Type is need here for JDK8 compilation (maybe bad typing somewhere)
+          bestSegmentationB = rawTree.yield(new ArrayList<CoreLabel>()); //has boundary symbol
 
           if(op.doDep && dparser.parse(bestSegmentationB)) {
-            System.err.printf("%s: Dependency parse succeeded!%n", this.getClass().getName());
+            System.err.printf("%s: Dependency parse succeeded!\n", this.getClass().getName());
             if(bparser.parse(bestSegmentationB)) {
-              System.err.printf("%s: Factored parse succeeded!%n", this.getClass().getName());
+              System.err.printf("%s: Factored parse succeeded!\n", this.getClass().getName());
               rawTree = bparser.getBestParse();
               fParseSucceeded++;
             }
 
           } else {
-            System.out.printf("%s: Dependency parse failed. Backing off to PCFG...%n", this.getClass().getName());
+            System.out.printf("%s: Dependency parse failed. Backing off to PCFG...\n", this.getClass().getName());
           }
 
         } else {
-          System.out.printf("%s: WARNING: parsing failed for lattice %d%n", this.getClass().getName(), latticeNum);
+          System.out.printf("%s: WARNING: parsing failed for lattice %d\n", this.getClass().getName(), latticeNum);
         }
 
         //Post-process the tree
         if (rawTree == null) {
-          System.out.printf("%s: WARNING: Could not extract best parse for lattice %d%n", this.getClass().getName(), latticeNum);
+          System.out.printf("%s: WARNING: Could not extract best parse for lattice %d\n", this.getClass().getName(), latticeNum);
 
         } else {
           Tree t = debinarizer.transformTree(rawTree);
@@ -254,21 +249,21 @@ public class JointParsingModel  {
 
         //When a best parse can't be extracted
       } catch (Exception e) {
-        System.out.printf("%s: WARNING: Could not extract best parse for lattice %d%n", this.getClass().getName(), latticeNum);
+        System.out.printf("%s: WARNING: Could not extract best parse for lattice %d\n", this.getClass().getName(), latticeNum);
         e.printStackTrace();
       }
 
       latticeNum++;
     }
 
-    log.info("===================================================================");
-    log.info("===================================================================");
-    log.info("Post mortem:");
-    log.info("  Input:     " + latticeNum);
-    log.info("  Parseable: " + parseable);
-    log.info("  Parsed:    " + successes);
-    log.info("  f_Parsed:  " + fParseSucceeded);
-    log.info("  String %:  " + (int)((double) successes * 10000.0 / (double) parseable) / 100.0);
+    System.err.println("===================================================================");
+    System.err.println("===================================================================");
+    System.err.println("Post mortem:");
+    System.err.println("  Input:     " + latticeNum);
+    System.err.println("  Parseable: " + parseable);
+    System.err.println("  Parsed:    " + successes);
+    System.err.println("  f_Parsed:  " + fParseSucceeded);
+    System.err.println("  String %:  " + (int)((double) successes * 10000.0 / (double) parseable) / 100.0);
 
     return true;
   }
@@ -303,16 +298,16 @@ public class JointParsingModel  {
     if (VERBOSE) {
       op.display();
       String lexNumRules = (pparser != null) ? Integer.toString(lp.lex.numRules()): "";
-      log.info("Grammar\tStates\tTags\tWords\tUnaryR\tBinaryR\tTaggings");
-      log.info("Grammar\t" +
+      System.err.println("Grammar\tStates\tTags\tWords\tUnaryR\tBinaryR\tTaggings");
+      System.err.println("Grammar\t" +
                          lp.stateIndex.size() + '\t' +
                          lp.tagIndex.size() + '\t' +
                          lp.wordIndex.size() + '\t' +
                          (pparser != null ? lp.ug.numRules(): "") + '\t' +
                          (pparser != null ? lp.bg.numRules(): "") + '\t' +
                          lexNumRules);
-      log.info("ParserPack is " + op.tlpParams.getClass().getName());
-      log.info("Lexicon is " + lp.lex.getClass().getName());
+      System.err.println("ParserPack is " + op.tlpParams.getClass().getName());
+      System.err.println("Lexicon is " + lp.lex.getClass().getName());
     }
 
     return parse(inputStream);
@@ -325,9 +320,8 @@ public class JointParsingModel  {
    */
   private static class GenericLatticeScorer implements LatticeScorer {
 
-    @Override
     public Item convertItemSpan(Item item) {
-      if(bestSegmentationB == null || bestSegmentationB.isEmpty())
+      if(bestSegmentationB == null || bestSegmentationB.size() == 0)
         throw new RuntimeException(this.getClass().getName() + ": No 1best segmentation available");
 
       item.start = bestSegmentationB.get(item.start).beginPosition();
@@ -335,7 +329,6 @@ public class JointParsingModel  {
       return item;
     }
 
-    @Override
     public double oScore(Edge edge) {
       final Edge latticeEdge = (Edge) convertItemSpan(new Edge(edge));
 
@@ -345,7 +338,6 @@ public class JointParsingModel  {
       return pOscore + dOscore;
     }
 
-    @Override
     public double iScore(Edge edge) {
       final Edge latticeEdge = (Edge) convertItemSpan(new Edge(edge));
 
@@ -355,21 +347,18 @@ public class JointParsingModel  {
       return pIscore + dIscore;
     }
 
-    @Override
     public boolean oPossible(Hook hook) {
       final Hook latticeHook = (Hook) convertItemSpan(new Hook(hook));
 
       return pparser.oPossible(latticeHook) && dparser.oPossible(hook);
     }
 
-    @Override
     public boolean iPossible(Hook hook) {
       final Hook latticeHook = (Hook) convertItemSpan(new Hook(hook));
 
       return pparser.iPossible(latticeHook) && dparser.iPossible(hook);
     }
 
-    @Override
     public boolean parse(List<? extends HasWord> words) {
       throw new UnsupportedOperationException(this.getClass().getName() + ": Does not support parse operation.");
     }

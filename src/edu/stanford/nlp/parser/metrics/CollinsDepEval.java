@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.metrics; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.metrics;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -32,10 +31,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public class CollinsDepEval extends AbstractEval  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CollinsDepEval.class);
+public class CollinsDepEval extends AbstractEval {
 
   private static final boolean DEBUG = false;
 
@@ -57,19 +53,19 @@ public class CollinsDepEval extends AbstractEval  {
     this.hf = hf;
     this.startSymbol = startSymbol;
 
-    precisions = new ClassicCounter<>();
-    recalls = new ClassicCounter<>();
-    f1s = new ClassicCounter<>();
+    precisions = new ClassicCounter<CollinsRelation>();
+    recalls = new ClassicCounter<CollinsRelation>();
+    f1s = new ClassicCounter<CollinsRelation>();
 
-    precisions2 = new ClassicCounter<>();
-    recalls2 = new ClassicCounter<>();
-    pnums2 = new ClassicCounter<>();
-    rnums2 = new ClassicCounter<>();
+    precisions2 = new ClassicCounter<CollinsRelation>();
+    recalls2 = new ClassicCounter<CollinsRelation>();
+    pnums2 = new ClassicCounter<CollinsRelation>();
+    rnums2 = new ClassicCounter<CollinsRelation>();
   }
 
   @Override
   protected Set<?> makeObjects(Tree tree) {
-    log.info(this.getClass().getName() + ": Function makeObjects() not implemented");
+    System.err.println(this.getClass().getName() + ": Function makeObjects() not implemented");
     return null;
   }
 
@@ -151,7 +147,7 @@ public class CollinsDepEval extends AbstractEval  {
     cats.addAll(precisions.keySet());
     cats.addAll(recalls.keySet());
 
-    Map<Double,CollinsRelation> f1Map = new TreeMap<>();
+    Map<Double,CollinsRelation> f1Map = new TreeMap<Double,CollinsRelation>();
     for (CollinsRelation cat : cats) {
       double pnum2 = pnums2.getCount(cat);
       double rnum2 = rnums2.getCount(cat);
@@ -211,7 +207,7 @@ public class CollinsDepEval extends AbstractEval  {
    */
   public static void main(String[] args) {
     if(args.length < MIN_ARGS) {
-      log.info(usage());
+      System.err.println(usage());
       System.exit(-1);
     }
     Properties options = StringUtils.argsToProperties(args, optionArgDefs());
@@ -223,7 +219,7 @@ public class CollinsDepEval extends AbstractEval  {
     
     String[] parsedArgs = options.getProperty("","").split("\\s+");
     if (parsedArgs.length != MIN_ARGS) {
-      log.info(usage());
+      System.err.println(usage());
       System.exit(-1);
     }
     File goldFile = new File(parsedArgs[0]);

@@ -15,9 +15,8 @@ import java.util.function.Function;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.process.TokenizerFactory;
@@ -119,7 +118,7 @@ public class ParseFiles {
     }
 
     final Timing timer = new Timing();
-    // timer.start(); // constructor already starts it.
+    timer.start();
 
     //Loop over the files
     for (int i = argIndex; i < args.length; i++) {
@@ -161,7 +160,7 @@ public class ParseFiles {
 
         String ext = (op.testOptions.outputFilesExtension == null) ? "stp" : op.testOptions.outputFilesExtension;
         String fname = normalizedName + '.' + ext;
-        if (op.testOptions.outputFilesDirectory != null && ! op.testOptions.outputFilesDirectory.isEmpty()) {
+        if (op.testOptions.outputFilesDirectory != null && !op.testOptions.outputFilesDirectory.equals("")) {
           String fseparator = System.getProperty("file.separator");
           if (fseparator == null || fseparator.isEmpty()) {
             fseparator = "/";
@@ -173,7 +172,7 @@ public class ParseFiles {
         try {
           pwo = op.tlpParams.pw(new FileOutputStream(fname));
         } catch (IOException ioe) {
-          throw new RuntimeIOException(ioe);
+          ioe.printStackTrace();
         }
       }
       treePrint.printHeader(pwo, op.tlpParams.getOutputEncoding());
@@ -183,14 +182,14 @@ public class ParseFiles {
       int num = 0;
       int numProcessed = 0;
       if (op.testOptions.testingThreads != 1) {
-        MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
+        MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<List<? extends HasWord>, ParserQuery>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
 
         for (List<HasWord> sentence : documentPreprocessor) {
           num++;
           numSents++;
           int len = sentence.size();
           numWords += len;
-          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + SentenceUtils.listToString(sentence, true));
+          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
 
           wrapper.put(sentence);
           while (wrapper.peek()) {
@@ -211,7 +210,7 @@ public class ParseFiles {
           numSents++;
           int len = sentence.size();
           numWords += len;
-          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + SentenceUtils.listToString(sentence, true));
+          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
           pq.parseAndReport(sentence, pwErr);
           processResults(pq, numProcessed++, pwo);
         }
@@ -287,14 +286,14 @@ public class ParseFiles {
       treePrint.printTree(ansTree, Integer.toString(num), pwo);
     } catch (RuntimeException re) {
       pwErr.println("TreePrint.printTree skipped: out of memory (or other error)");
-      re.printStackTrace(pwErr);
+      re.printStackTrace();
       numNoMemory++;
       try {
         treePrint.printTree(null, Integer.toString(num), pwo);
       } catch (Exception e) {
         pwErr.println("Sentence skipped: out of memory or error calling TreePrint.");
         pwo.println("(())");
-        e.printStackTrace(pwErr);
+        e.printStackTrace();
       }
     }
     // crude addition of k-best tree printing

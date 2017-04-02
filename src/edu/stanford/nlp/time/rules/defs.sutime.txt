@@ -55,12 +55,6 @@
   SATURDAY = DayOfWeek(6);
   SUNDAY = DayOfWeek(7);
 
-  WEEKDAY = {
-    type: DAYS_OF_WEEK,
-    label: "WD",
-    value: TimeWithRange(TimeRange(MONDAY, FRIDAY, Duration(DAY, 5)))
-  }
-
   WEEKEND = {
     type: DAYS_OF_WEEK,
     label: "WE",

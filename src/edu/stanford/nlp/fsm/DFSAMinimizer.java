@@ -1,5 +1,4 @@
-package edu.stanford.nlp.fsm; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.fsm;
 
 import edu.stanford.nlp.util.DisjointSet;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -16,10 +15,7 @@ import java.util.*;
  * @author Dan Klein
  * @version 12/14/2000
  */
-public final class DFSAMinimizer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DFSAMinimizer.class);
+public final class DFSAMinimizer {
 
   static boolean debug = false;
 
@@ -42,8 +38,8 @@ public final class DFSAMinimizer  {
     long time = System.currentTimeMillis();
     if (debug) {
       time = System.currentTimeMillis();
-      log.info("\nStarting on " + dfsa.dfsaID);
-      log.info(" -- " + states.size() + " states.");
+      System.err.println("\nStarting on " + dfsa.dfsaID);
+      System.err.println(" -- " + states.size() + " states.");
     }
     int numStates = states.size();
     // assign ids
@@ -64,7 +60,7 @@ public final class DFSAMinimizer  {
       }
     }
     if (debug) {
-      log.info("Initialized: " + (System.currentTimeMillis() - time));
+      System.err.println("Initialized: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // visit all non-distinct
@@ -105,7 +101,7 @@ public final class DFSAMinimizer  {
           }
           if (distinguishable) {
             // if the pair is distinguishable, record that
-            List<IntPair> markStack = new ArrayList<>();
+            List<IntPair> markStack = new ArrayList<IntPair>();
             markStack.add(ip);
             while (!markStack.isEmpty()) {
               IntPair ipToMark = markStack.get(markStack.size() - 1);
@@ -121,7 +117,7 @@ public final class DFSAMinimizer  {
             for (IntPair pendingIPair : pendingIPairs) {
               List<IntPair> dependentList1 = dependentList[pendingIPair.i][pendingIPair.j];
               if (dependentList1 == null) {
-                dependentList1 = new ArrayList<>();
+                dependentList1 = new ArrayList<IntPair>();
                 dependentList[pendingIPair.i][pendingIPair.j] = dependentList1;
               }
               dependentList1.add(ip);
@@ -131,11 +127,11 @@ public final class DFSAMinimizer  {
       }
     }
     if (debug) {
-      log.info("All pairs marked: " + (System.currentTimeMillis() - time));
+      System.err.println("All pairs marked: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // decide what canonical state each state will map to...
-    DisjointSet<DFSAState<T, S>> stateClasses = new FastDisjointSet<>(states);
+    DisjointSet<DFSAState<T, S>> stateClasses = new FastDisjointSet<DFSAState<T, S>>(states);
     for (int i = 0; i < numStates; i++) {
       for (int j = i + 1; j < numStates; j++) {
         if (!distinct[i][j]) {
@@ -151,7 +147,7 @@ public final class DFSAMinimizer  {
       stateToRep.put(state1, rep);
     }
     if (debug) {
-      log.info("Canonical states chosen: " + (System.currentTimeMillis() - time));
+      System.err.println("Canonical states chosen: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // reduce the DFSA by replacing transition targets with their reps
@@ -167,7 +163,7 @@ public final class DFSAMinimizer  {
     }
     dfsa.initialState = stateToRep.get(dfsa.initialState);
     if (debug) {
-      log.info("Done: " + (System.currentTimeMillis() - time));
+      System.err.println("Done: " + (System.currentTimeMillis() - time));
     }
     // done!
   }
@@ -184,14 +180,14 @@ public final class DFSAMinimizer  {
     long time = System.currentTimeMillis();
     if (debug) {
       time = System.currentTimeMillis();
-      log.info("Starting on " + dfsa.dfsaID);
-      log.info(" -- " + states.size() + " states.");
+      System.err.println("Starting on " + dfsa.dfsaID);
+      System.err.println(" -- " + states.size() + " states.");
     }
     // initialize grid
     int numDone = 0;
     for (DFSAState<T, S> state1 : states) {
       for (DFSAState<T, S> state2 : states) {
-        UnorderedPair<DFSAState<T, S>, DFSAState<T, S>> up = new UnorderedPair<>(state1, state2);
+        UnorderedPair<DFSAState<T, S>, DFSAState<T, S>> up = new UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>(state1, state2);
         if (state1.equals(state2)) {
           continue;
         }
@@ -208,7 +204,7 @@ public final class DFSAMinimizer  {
           streak++;
         }
         if (state1.isAccepting() != state2.isAccepting()) {
-          //log.info(Utils.pad((String)state1.stateID, 20)+" "+state2.stateID);
+          //System.err.println(Utils.pad((String)state1.stateID, 20)+" "+state2.stateID);
           stateUPairToDistinguished.put(up, Boolean.TRUE);
         } else {
           stateUPairToDistinguished.put(up, Boolean.FALSE);
@@ -217,11 +213,11 @@ public final class DFSAMinimizer  {
       }
       numDone++;
       if (numDone % 20 == 0) {
-        log.info("\r" + numDone + "  " + ((double) collisions / (double) entries));
+        System.err.print("\r" + numDone + "  " + ((double) collisions / (double) entries));
       }
     }
     if (debug) {
-      log.info("\nInitialized: " + (System.currentTimeMillis() - time));
+      System.err.println("\nInitialized: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // visit each undistinguished pair
@@ -248,7 +244,7 @@ public final class DFSAMinimizer  {
         if (transition1 != null && transition2 != null) {
           DFSAState<T, S> target1 = transition1.getTarget();
           DFSAState<T, S> target2 = transition2.getTarget();
-          UnorderedPair<DFSAState<T, S>, DFSAState<T, S>> targetUPair = new UnorderedPair<>(target1, target2);
+          UnorderedPair<DFSAState<T, S>, DFSAState<T, S>> targetUPair = new UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>(target1, target2);
           if (!target1.equals(target2)) {
             if (stateUPairToDistinguished.get(targetUPair).equals(Boolean.TRUE)) {
               distinguishable = true;
@@ -260,7 +256,7 @@ public final class DFSAMinimizer  {
       }
       // if the pair is distinguishable, record that
       if (distinguishable) {
-        List<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>> markStack = new ArrayList<>();
+        List<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>> markStack = new ArrayList<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>>();
         markStack.add(up);
         while (!markStack.isEmpty()) {
           UnorderedPair<DFSAState<T, S>, DFSAState<T, S>> upToMark = markStack.get(markStack.size() - 1);
@@ -277,7 +273,7 @@ public final class DFSAMinimizer  {
         for (UnorderedPair<DFSAState<T, S>, DFSAState<T, S>> pendingUPair : pendingUPairs) {
           List<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>> dependentList = stateUPairToDependentUPairList.get(pendingUPair);
           if (dependentList == null) {
-            dependentList = new ArrayList<>();
+            dependentList = new ArrayList<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>>();
             stateUPairToDependentUPairList.put(pendingUPair, dependentList);
           }
           dependentList.add(up);
@@ -285,11 +281,11 @@ public final class DFSAMinimizer  {
       }
     }
     if (debug) {
-      log.info("All pairs marked: " + (System.currentTimeMillis() - time));
+      System.err.println("All pairs marked: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // decide what canonical state each state will map to...
-    DisjointSet<DFSAState<T, S>> stateClasses = new FastDisjointSet<>(states);
+    DisjointSet<DFSAState<T, S>> stateClasses = new FastDisjointSet<DFSAState<T, S>>(states);
     for (UnorderedPair<DFSAState<T, S>, DFSAState<T, S>> up : stateUPairToDistinguished.keySet()) {
       if (stateUPairToDistinguished.get(up).equals(Boolean.FALSE)) {
         DFSAState<T, S> state1 = up.first;
@@ -303,7 +299,7 @@ public final class DFSAMinimizer  {
       stateToRep.put(state, rep);
     }
     if (debug) {
-      log.info("Canonical states chosen: " + (System.currentTimeMillis() - time));
+      System.err.println("Canonical states chosen: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // reduce the DFSA by replacing transition targets with their reps
@@ -317,7 +313,7 @@ public final class DFSAMinimizer  {
     }
     dfsa.initialState = stateClasses.find(dfsa.initialState);
     if (debug) {
-      log.info("Done: " + (System.currentTimeMillis() - time));
+      System.err.println("Done: " + (System.currentTimeMillis() - time));
     }
     // done!
   }

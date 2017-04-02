@@ -1,12 +1,11 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.*;
 
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.MemoryTreebank;
@@ -27,10 +26,7 @@ import edu.stanford.nlp.util.Index;
  * @author Roger Levy
  */
 
-public class NegraPennTreebankParserParams extends AbstractTreebankParserParams  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NegraPennTreebankParserParams.class);
+public class NegraPennTreebankParserParams extends AbstractTreebankParserParams {
 
   private static final long serialVersionUID = 757812264219400466L;
 
@@ -200,8 +196,8 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
       try {
         headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
       } catch (Exception e) {
-        log.info(e);
-        log.info(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
+        System.err.println(e);
+        System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
       }
       i+=2;
     }
@@ -210,10 +206,10 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
 
   @Override
   public void display() {
-    log.info("NegraPennTreebankParserParams");
-    log.info("  markZuVP=" + markZuVP);
-    log.info("  insertNPinPP=" + treeNormalizerInsertNPinPP);
-    log.info("  leaveGF=" + treeNormalizerLeaveGF);
+    System.err.println("NegraPennTreebankParserParams");
+    System.err.println("  markZuVP=" + markZuVP);
+    System.err.println("  insertNPinPP=" + treeNormalizerInsertNPinPP);
+    System.err.println("  leaveGF=" + treeNormalizerLeaveGF);
     System.out.println("markLP=" + markLP);
     System.out.println("markColon=" + markColon);
   }
@@ -234,7 +230,7 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
       return t;
     }
 
-    List<String> annotations = new ArrayList<>();
+    List<String> annotations = new ArrayList<String>();
 
     CoreLabel lab = (CoreLabel) t.label();
     String word = lab.word();
@@ -369,9 +365,9 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
 
   private List<String> childBasicCats(Tree t) {
     Tree[] kids = t.children();
-    List<String> l = new ArrayList<>();
-    for (Tree kid : kids) {
-      l.add(basicCat(kid.label().value()));
+    List<String> l = new ArrayList<String>();
+    for (int i = 0, n = kids.length; i < n; i++) {
+      l.add(basicCat(kids[i].label().value()));
     }
     return l;
   }
@@ -382,7 +378,7 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
    */
   public List<? extends HasWord> defaultTestSentence() {
     String[] sent = {"Solch", "einen", "Zuspruch", "hat", "Angela", "Merkel", "lange", "nicht", "mehr", "erlebt", "."};
-    return SentenceUtils.toWordList(sent);
+    return Sentence.toWordList(sent);
   }
 
 }

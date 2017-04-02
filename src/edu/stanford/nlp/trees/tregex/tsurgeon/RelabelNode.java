@@ -71,7 +71,7 @@ class RelabelNode extends TsurgeonPattern {
       mode = RelabelMode.REGEX;
       this.labelRegex = Pattern.compile(m1.group(1));
       this.replacementString = m1.group(2);
-      replacementPieces = new ArrayList<>();
+      replacementPieces = new ArrayList<String>();
       Matcher generalMatcher = 
         oneGeneralReplacementPattern.matcher(m1.group(2));
       int lastPosition = 0;

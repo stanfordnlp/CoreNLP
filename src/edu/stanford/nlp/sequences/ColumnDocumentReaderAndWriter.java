@@ -1,5 +1,4 @@
 package edu.stanford.nlp.sequences;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -22,10 +21,7 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Jenny Finkel
  */
-public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(ColumnDocumentReaderAndWriter.class);
+public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
 
   private static final long serialVersionUID = 3806263423697973704L;
 
@@ -58,7 +54,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
     return factory.getIterator(r);
   }
 
-  // private int num; // = 0;
+  private int num; // = 0;
 
 
   private class ColumnDocParser implements Serializable, Function<String,List<CoreLabel>> {
@@ -66,19 +62,20 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
     private static final long serialVersionUID = -6266332661459630572L;
     private final Pattern whitePattern = Pattern.compile("\\s+"); // should this really only do a tab?
 
-    private int lineCount = 0;
+    int lineCount = 0;
 
     @Override
     public List<CoreLabel> apply(String doc) {
-      // if (num > 0 && num % 1000 == 0) { log.info("["+num+"]"); } // cdm: Not so useful to do in new logging world
-      // num++;
+      if (num > 0 && num % 1000 == 0) { System.err.print("["+num+"]"); }
+      num++;
 
-      List<CoreLabel> words = new ArrayList<>();
+      List<CoreLabel> words = new ArrayList<CoreLabel>();
+
       String[] lines = doc.split("\n");
 
       for (String line : lines) {
         ++lineCount;
-        if (line.trim().isEmpty()) {
+        if (line.trim().length() == 0) {
           continue;
         }
         String[] info = whitePattern.split(line);
@@ -91,7 +88,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
             wi.set(CoreAnnotations.GoldAnswerAnnotation.class, wi.get(CoreAnnotations.AnswerAnnotation.class));
           }
         } catch (RuntimeException e) {
-          log.info("Error on line " + lineCount + ": " + line);
+          System.err.println("Error on line " + lineCount + ": " + line);
           throw e;
         }
         words.add(wi);

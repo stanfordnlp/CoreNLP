@@ -1,7 +1,6 @@
 package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
@@ -21,7 +20,7 @@ import java.util.Set;
  * The expressions recognized by SUTime are loosely based on GUTIME.
  *
  * After annotation, the {@link TimeAnnotations.TimexAnnotations} annotation
- * will be populated with a {@code List&lt;CoreMap&gt;}, each of which
+ * will be populated with a <code>List&lt;CoreMap&gt;</code>, each of which
  * will represent one temporal expression.
  *
  * If a reference time is set (via {@link edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation}),
@@ -40,7 +39,7 @@ import java.util.Set;
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation}</td>
- *     <td>{@code String}</td>
+ *     <td><code>String</code></td>
  *     <td>If present, then the string is interpreted as a date/time and
  *         used as the reference document date with respect to which other
  *         temporal expressions are resolved</td>
@@ -48,53 +47,53 @@ import java.util.Set;
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation}</td>
- *     <td>{@code List&lt;CoreMap&gt;}</td>
+ *     <td><code>List&lt;CoreMap&gt;</code></td>
  *     <td>If present, time expressions will be extracted from each sentence
  *         and each sentence will be annotated individually.</td>
  *     <td>Optional (good to have)</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation}</td>
- *     <td>{@code List&lt;CoreLabel&gt;}</td>
+ *     <td><code>List&lt;CoreLabel&gt;</code></td>
  *     <td>Tokens (for each sentence or for entire annotation if no sentences)</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation}</td>
- *     <td>{@code String}</td>
+ *     <td><code>String</code></td>
  *     <td>Text (for each sentence or for entire annotation if no sentences)</td>
  *     <td>Optional</td>
  *   </tr>
  *   <tr><td colspan="4"><center><b>Per token annotations</b></center></td></tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation}</td>
- *     <td>{@code String}</td>
+ *     <td><code>String</code></td>
  *     <td>Token text (normalized)</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation}</td>
- *     <td>{@code String}</td>
+ *     <td><code>String</code></td>
  *     <td>Token text (original)</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation}</td>
- *     <td>{@code Integer}</td>
+ *     <td><code>Integer</code></td>
  *     <td>The index of the first character of this token
  *        (0-based wrt to TextAnnotation of the annotation containing the TokensAnnotation).</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation}</td>
- *     <td>{@code Integer}</td>
+ *     <td><code>Integer</code></td>
  *     <td>The index of the first character after this token
  *        (0-based wrt to TextAnnotation of the annotation containing the TokensAnnotation).</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation}</td>
- *     <td>{@code String}</td>
+ *     <td><code>String</code></td>
  *     <td>Token part of speech</td>
  *     <td>Optional</td>
  *   </tr>
@@ -111,7 +110,7 @@ import java.util.Set;
  *   </tr>
  *   <tr>
  *     <td>{@link TimeAnnotations.TimexAnnotations}</td>
- *     <td>{@code List&lt;CoreMap&gt;}</td>
+ *     <td><code>List&lt;CoreMap&gt;</code></td>
  *     <td>List of temporal expressions (on the entire annotation and also for each sentence)</td>
  *   </tr>
  *   <tr><td colspan="3"><center><b>Per each temporal expression</b></center></td></tr>
@@ -123,51 +122,48 @@ import java.util.Set;
  *   <tr>
  *     <td>{@link TimeExpression.Annotation}</td>
  *     <td>{@link TimeExpression}</td>
- *     <td>TimeExpression object.  Use {@code getTemporal()} to get internal temporal representation.</td>
+ *     <td>TimeExpression object.  Use <code>getTemporal()</code> to get internal temporal representation.</td>
  *   </tr>
  *   <tr>
  *     <td>{@link TimeExpression.ChildrenAnnotation}</td>
- *     <td>{@code List&lt;CoreMap&gt;}</td>
+ *     <td><code>List&lt;CoreMap&gt;</code></td>
  *     <td>List of chunks forming this time expression (inner chunks can be tokens, nested time expressions,
  *         numeric expressions, etc)</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation}</td>
- *     <td>{@code String}</td>
+ *     <td><code>String</code></td>
  *     <td>Text of this time expression</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation}</td>
- *     <td>{@code List&lt;CoreLabel&gt;}</td>
+ *     <td><code>List&lt;CoreLabel&gt;</code></td>
  *     <td>Tokens that make up this time expression</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation}</td>
- *     <td>{@code Integer}</td>
+ *     <td><code>Integer</code></td>
  *     <td>The index of the first character of this token (0-based).</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation}</td>
- *     <td>{@code Integer}</td>
+ *     <td><code>Integer</code></td>
  *     <td>The index of the first character after this token (0-based).</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokenBeginAnnotation}</td>
- *     <td>{@code Integer}</td>
+ *     <td><code>Integer</code></td>
  *     <td>The index of the first token of this time expression (0-based).</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokenEndAnnotation}</td>
- *     <td>{@code Integer}</td>
+ *     <td><code>Integer</code></td>
  *     <td>The index of the first token after this time expression (0-based).</td>
  *   </tr>
  * </table>
  */
 
-public class TimeAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(TimeAnnotator.class);
+public class TimeAnnotator implements Annotator {
 
   private final TimeExpressionExtractorImpl timexExtractor;
   private final boolean quiet;
@@ -182,22 +178,18 @@ public class TimeAnnotator implements Annotator  {
   }
 
   public TimeAnnotator(String name, Properties props) {
-    this(name, props, false);
-  }
-
-  public TimeAnnotator(String name, Properties props, boolean quiet) {
     timexExtractor = new TimeExpressionExtractorImpl(name, props);
-    this.quiet = quiet;
+    this.quiet = false;
   }
 
   @Override
   public void annotate(Annotation annotation) {
     SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
     String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
-    if (docDate == null) {
+    if(docDate == null) {
       Calendar cal = annotation.get(CoreAnnotations.CalendarAnnotation.class);
-      if (cal == null) {
-        if ( ! quiet) { log.warn("No document date specified"); }
+      if(cal == null) {
+        if (!quiet) { Redwood.log(Redwood.WARN, "No document date specified"); }
       } else {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
         docDate = dateFormat.format(cal.getTime());
@@ -206,14 +198,14 @@ public class TimeAnnotator implements Annotator  {
     List<CoreMap> allTimeExpressions; // initialized below = null;
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {
-      allTimeExpressions = new ArrayList<>();
-      List<CoreMap> allNumerics = new ArrayList<>();
+      allTimeExpressions = new ArrayList<CoreMap>();
+      List<CoreMap> allNumerics = new ArrayList<CoreMap>();
       for (CoreMap sentence: sentences) {
         // make sure that token character offsets align with the actual sentence text
         // They may not align due to token normalizations, such as "(" to "-LRB-".
         CoreMap alignedSentence =  NumberSequenceClassifier.alignSentence(sentence);
         // uncomment the next line for verbose dumping of tokens....
-        // log.info("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
+        // System.err.println("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
         List<CoreMap> timeExpressions =
           timexExtractor.extractTimeExpressionCoreMaps(alignedSentence, docDate, timeIndex);
         if (timeExpressions != null) {
@@ -238,25 +230,24 @@ public class TimeAnnotator implements Annotator  {
 
   /**
    * Helper method for people not working from a complete Annotation.
-   *
-   * @return A list of CoreMap.  Each CoreMap represents a detected temporal expression.
+   * @return a list of CoreMap.  Each CoreMap represents a detected temporal expression.
    */
   public List<CoreMap> annotateSingleSentence(CoreMap sentence, String docDate, SUTime.TimeIndex timeIndex) {
     CoreMap annotationCopy = NumberSequenceClassifier.alignSentence(sentence);
-    if (docDate != null && docDate.isEmpty()) {
+    if (docDate.equals("")) {
       docDate = null;
     }
     return timexExtractor.extractTimeExpressionCoreMaps(annotationCopy, docDate, timeIndex);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(TimeAnnotations.TimexAnnotations.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(SUTIME_REQUIREMENT);
   }
 
 }

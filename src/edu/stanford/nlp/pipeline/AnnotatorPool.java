@@ -1,12 +1,8 @@
 package edu.stanford.nlp.pipeline;
-import java.lang.ref.SoftReference;
-import java.util.*;
+
+import java.util.Map;
 
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Lazy;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * An object for keeping track of Annotators. Typical use is to allow multiple
@@ -19,56 +15,16 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * @author bethard
  */
-public class AnnotatorPool  {
+public class AnnotatorPool {
 
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorPool.class);
-
-
-  /**
-   * A cached annotator, including the signature it should cache on.
-   */
-  private static class CachedAnnotator {
-    /** The signature of the annotator. */
-    public final String signature;
-    /** The cached annotator. */
-    public final Lazy<Annotator> annotator;
-
-    /**
-     * The straightforward constructor.
-     */
-    private CachedAnnotator(String signature, Lazy<Annotator> annotator) {
-      this.signature = signature;
-      this.annotator = annotator;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      CachedAnnotator that = (CachedAnnotator) o;
-      return signature != null ? signature.equals(that.signature) : that.signature == null && (annotator != null ? annotator.equals(that.annotator) : that.annotator == null);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-      int result = signature != null ? signature.hashCode() : 0;
-      result = 31 * result + (annotator != null ? annotator.hashCode() : 0);
-      return result;
-    }
-  }
-
-
-  /** The set of factories we know about defining how we should create new annotators of each name */
-  private final Map<String, CachedAnnotator> factories;
-
+  private final Map<String, Annotator> annotators;
+  private final Map<String, AnnotatorFactory> factories;
 
   /**
    * Create an empty AnnotatorPool.
    */
   public AnnotatorPool() {
+    this.annotators = Generics.newHashMap();
     this.factories = Generics.newHashMap();
   }
 
@@ -79,47 +35,36 @@ public class AnnotatorPool  {
    * be defined within the AnnotatorPool, but an Annotator is only created
    * when one is actually needed.
    *
-   * @param name       The name to be associated with the Annotator.
-   * @param props The properties we are using to create the annotator
-   * @param annotator    A factory that creates an instance of the desired Annotator.
+   * @param name    The name to be associated with the Annotator.
+   * @param factory A factory that creates an instance of the desired Annotator.
    * @return true if a new annotator was created; false if we reuse an existing one
    */
-  public boolean register(String name, Properties props, Lazy<Annotator> annotator) {
+  public boolean register(String name, AnnotatorFactory factory) {
     boolean newAnnotator = false;
-    synchronized (this.factories) {
-      CachedAnnotator oldAnnotator = this.factories.get(name);
-      String newSig = PropertiesUtils.getSignature(name, props);
-      if (oldAnnotator == null || !Objects.equals(oldAnnotator.signature, newSig)) {
+    if (this.factories.containsKey(name)) {
+      AnnotatorFactory oldFactory = this.factories.get(name);
+      String oldSig = oldFactory.signature();
+      String newSig = factory.signature();
+      if(! oldSig.equals(newSig)) {
         // the new annotator uses different properties so we need to update!
-        if (oldAnnotator != null) {
-          log.info("Replacing old annotator \"" + name + "\" with signature ["
-              + oldAnnotator.signature + "] with new annotator with signature [" + newSig + "]");
-        }
-        // Add the new annotator
-        this.factories.put(name, new CachedAnnotator(newSig, annotator));
-        // Unmount the old annotator
-        Optional.ofNullable(oldAnnotator).flatMap(ann -> Optional.ofNullable(ann.annotator.getIfDefined())).ifPresent(Annotator::unmount);
-        // Register that we added an annotator
+        // TODO: this printout should be logged instead of going to stderr. we need to standardize logging
+        // System.err.println("Replacing old annotator \"" + name + "\" with signature ["
+        //         + oldSig + "] with new annotator with signature [" + newSig + "]");
+        this.factories.put(name, factory);
         newAnnotator = true;
+
+        // delete the existing annotator; we'll create one with the new props on demand
+        // removing the annotator like this will not affect any
+        // existing pipelines which use the old annotator, but if
+        // those are all gone, then the old annotator will be garbage
+        // collected and memory will be freed up
+        annotators.remove(name);
       }
       // nothing to do if an annotator with same name and signature already exists
+    } else {
+      this.factories.put(name, factory);
     }
     return newAnnotator;
-  }
-
-
-  /**
-   * Clear this pool, and unmount all the annotators mounted on it.
-   */
-  public synchronized void clear() {
-    synchronized (this.factories) {
-      for (Map.Entry<String, CachedAnnotator> entry : new HashSet<>(this.factories.entrySet())) {
-        // Unmount the annotator
-        Optional.ofNullable(entry.getValue()).flatMap(ann -> Optional.ofNullable(ann.annotator.getIfDefined())).ifPresent(Annotator::unmount);
-        // Remove the annotator
-        this.factories.remove(entry.getKey());
-      }
-    }
   }
 
   /**
@@ -132,12 +77,14 @@ public class AnnotatorPool  {
    * @throws IllegalArgumentException If the annotator cannot be created
    */
   public synchronized Annotator get(String name) {
-    CachedAnnotator factory =  this.factories.get(name);
-    if (factory != null) {
-      return factory.annotator.get();
-    } else {
-      throw new IllegalArgumentException("No annotator named " + name);
+    if (!this.annotators.containsKey(name)) {
+      AnnotatorFactory factory = this.factories.get(name);
+      if (factory == null) {
+        throw new IllegalArgumentException("No annotator named " + name);
+      }
+      this.annotators.put(name, factory.create());
     }
+    return this.annotators.get(name);
   }
 
 }

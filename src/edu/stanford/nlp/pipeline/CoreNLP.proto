@@ -4,12 +4,6 @@ option java_package = "edu.stanford.nlp.pipeline";
 option java_outer_classname = "CoreNLPProtos";
 
 //
-// From JAVANLP_HOME, you can build me with the command:
-//
-//  protoc -I=projects/core/src/edu/stanford/nlp/pipeline/ --java_out=projects/core/src projects/core/src/edu/stanford/nlp/pipeline/CoreNLP.proto
-//
-
-//
 // An enumeration for the valid languages allowed in CoreNLP
 //
 enum Language {
@@ -23,7 +17,6 @@ enum Language {
   Hebrew   = 7;
   Spanish  = 8;
   UniversalEnglish = 9;
-  UniversalChinese = 10;
 }
 
 //
@@ -34,21 +27,14 @@ message Document {
   repeated Sentence   sentence    = 2;
   repeated CorefChain corefChain  = 3;
   optional string     docID       = 4;
-  optional string     docDate     = 7;
-  optional uint64     calendar    = 8;
 
   /**
    * A peculiar field, for the corner case when a Document is
    * serialized without any sentences. Otherwise
    */
   repeated Token      sentencelessToken = 5;
-  repeated Token      character = 10;
 
   repeated Quote      quote = 6;
-  /**
-   * This field is for entity mentions across the document.
-   */
-  repeated NERMention mentions = 9;
 
   extensions 100 to 255;
 }
@@ -57,33 +43,23 @@ message Document {
 // The serialized version of a CoreMap representing a sentence.
 //
 message Sentence {
-  repeated Token            token                               = 1;
-  required uint32           tokenOffsetBegin                    = 2;
-  required uint32           tokenOffsetEnd                      = 3;
-  optional uint32           sentenceIndex                       = 4;
-  optional uint32           characterOffsetBegin                = 5;
-  optional uint32           characterOffsetEnd                  = 6;
-  optional ParseTree        parseTree                           = 7;
-  optional ParseTree        binarizedParseTree                  = 31;
-  optional ParseTree        annotatedParseTree                  = 32;
-  optional string           sentiment                           = 33;
-  repeated ParseTree        kBestParseTrees                     = 34;
-  optional DependencyGraph  basicDependencies                   = 8;
-  optional DependencyGraph  collapsedDependencies               = 9;
-  optional DependencyGraph  collapsedCCProcessedDependencies    = 10;
-  optional DependencyGraph  alternativeDependencies             = 13;
-  repeated RelationTriple   openieTriple                        = 14;   // The OpenIE triples in the sentence
-  repeated RelationTriple   kbpTriple                           = 16;   // The KBP triples in this sentence
-  repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
-  repeated SentenceFragment entailedClause                      = 35;   // The entailed clauses, by natural logic
-  optional DependencyGraph  enhancedDependencies                = 17;
-  optional DependencyGraph  enhancedPlusPlusDependencies        = 18;
-  repeated Token            character                           = 19;
+  repeated Token           token                               = 1;
+  required uint32          tokenOffsetBegin                    = 2;
+  required uint32          tokenOffsetEnd                      = 3;
+  optional uint32          sentenceIndex                       = 4;
+  optional uint32          characterOffsetBegin                = 5;
+  optional uint32          characterOffsetEnd                  = 6;
+  optional ParseTree       parseTree                           = 7;
+  optional ParseTree       binarizedParseTree                  = 31;
+  optional ParseTree       annotatedParseTree                  = 32;
+  optional string          sentiment                           = 33;
+  optional DependencyGraph basicDependencies                   = 8;
+  optional DependencyGraph collapsedDependencies               = 9;
+  optional DependencyGraph collapsedCCProcessedDependencies    = 10;
+  optional DependencyGraph alternativeDependencies             = 13;
+  optional uint32          paragraph                           = 11;
 
-  optional uint32           paragraph                           = 11;
-
-  optional string           text                                = 12;   // Only needed if we're only saving the sentence.
-
+  optional string          text                                = 12;
 
   // Fields set by other annotators in CoreNLP
   optional bool            hasRelationAnnotations              = 51;
@@ -91,10 +67,6 @@ message Sentence {
   repeated Relation        relation                            = 53;
   optional bool            hasNumerizedTokensAnnotation        = 54;
   repeated NERMention      mentions                            = 55;
-  repeated Mention         mentionsForCoref                    = 56;
-  optional bool            hasCorefMentionsAnnotation          = 57;
-
-  optional string          sentenceID                          = 58;  // Useful when storing sentences (e.g. ForEach)
 
   extensions 100 to 255;
 }
@@ -104,7 +76,7 @@ message Sentence {
 //
 message Token {
   // Fields set by the default annotators [new CoreNLP(new Properties())]
-  optional string word              = 1;    // the word's gloss (post-tokenization)
+  required string word              = 1;    // the word's gloss (post-tokenization)
   optional string pos               = 2;    // The word's part of speech tag
   optional string value             = 3;    // The word's 'value', (e.g., parse tree node)
   optional string category          = 4;    // The word's 'category' (e.g., parse tree node)
@@ -134,23 +106,11 @@ message Token {
   optional Span      span           = 29;   // The span of a leaf node of a tree
   optional string    sentiment      = 30;   // The final sentiment of the sentence
   optional int32     quotationIndex = 31;   // The index of the quotation this token refers to
-  optional MapStringString conllUFeatures = 32;
-  optional string coarseTag         = 33; //  The coarse POS tag (used to store the UPOS tag)
-  optional Span conllUTokenSpan     = 34;
-  optional string conllUMisc        = 35;
-  optional MapIntString conllUSecondaryDeps = 36;
-  optional string   wikipediaEntity = 37;
-
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)
   optional string trueCase        = 52;  // true case type of token
   optional string trueCaseText    = 53;  // true case gloss of token
-
-  //  Chinese character info
-  optional string chineseChar     = 54;
-  optional string chineseSeg      = 55;
-  
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
@@ -246,76 +206,6 @@ message CorefChain {
   required int32        chainID        = 1;
   repeated CorefMention mention        = 2;
   required uint32       representative = 3;
-}
-
-//
-// a mention
-//
-
-message Mention {
-  optional int32 mentionID             = 1;
-  optional string mentionType          = 2;
-  optional string number               = 3;
-  optional string gender               = 4;
-  optional string animacy              = 5;
-  optional string person               = 6;
-  optional uint32 startIndex           = 7;
-  optional uint32 endIndex             = 9;
-  optional uint32 headIndex            = 10;
-  optional string headString           = 11;
-  optional string nerString            = 12;
-  optional uint32 originalRef          = 13;
-  optional int32 goldCorefClusterID    = 14;
-  optional int32 corefClusterID        = 15;
-  optional uint32 mentionNum           = 16;
-  optional uint32 sentNum              = 17;
-  optional uint32 utter                = 18;
-  optional uint32 paragraph            = 19;
-  optional bool isSubject              = 20;
-  optional bool isDirectObject         = 21;
-  optional bool isIndirectObject       = 22;
-  optional bool isPrepositionObject    = 23;
-  optional bool hasTwin                = 24;
-  optional bool generic                = 25;
-  optional bool isSingleton            = 26;
-  optional bool hasBasicDependency     = 27;
-  optional bool hasEnhancedDepenedncy  = 28;
-  optional bool hasContextParseTree    = 29;
-  optional IndexedWord headIndexedWord = 30;
-  optional IndexedWord   dependingVerb = 31;
-  optional IndexedWord       headWord  = 32;
-  optional SpeakerInfo    speakerInfo  = 33;
-
-  repeated IndexedWord         sentenceWords = 50;
-  repeated IndexedWord         originalSpan = 51;
-  repeated string dependents           = 52;
-  repeated string preprocessedTerms    = 53;
-  repeated int32 appositions = 54;
-  repeated int32 predicateNominatives = 55;
-  repeated int32 relativePronouns = 56;
-  repeated int32 listMembers = 57;
-  repeated int32 belongToLists = 58;
-
-}
-
-//
-// store the position (sentence, token index) of a CoreLabel
-//
-
-message IndexedWord {
-  optional uint32 sentenceNum          = 1;
-  optional uint32 tokenIndex           = 2;
-  optional uint32 docID                = 3;
-  optional uint32 copyCount            = 4;
-}
-
-//
-// speaker info, this is used for Mentions
-//
-
-message SpeakerInfo {
-  optional string speakerName          = 1;
-  repeated int32 mentions    = 2;
 }
 
 //
@@ -429,67 +319,4 @@ message NERMention {
   optional string normalizedNER                 = 5;
   optional string entityType                    = 6;
   optional Timex  timex                         = 7;
-  optional string wikipediaEntity               = 8;
 }
-
-//
-// An entailed sentence fragment.
-// Created by the openie annotator.
-//
-message SentenceFragment {
-  repeated uint32 tokenIndex     = 1;
-  optional uint32 root           = 2;
-  optional bool   assumedTruth   = 3;
-  optional double score          = 4;
-}
-
-
-//
-// The index of a token in a document, including the sentence
-// index and the offset.
-//
-message TokenLocation {
- optional uint32 sentenceIndex = 1;
- optional uint32 tokenIndex    = 2;
-
-}
-
-
-//
-// An OpenIE relation triple.
-// Created by the openie annotator.
-//
-message RelationTriple {
-  optional string          subject        = 1;   // The surface form of the subject
-  optional string          relation       = 2;   // The surface form of the relation (required)
-  optional string          object         = 3;   // The surface form of the object
-  optional double          confidence     = 4;   // The [optional] confidence of the extraction
-  repeated TokenLocation   subjectTokens  = 13; // The tokens comprising the subject of the triple
-  repeated TokenLocation   relationTokens = 14; // The tokens comprising the relation of the triple
-  repeated TokenLocation   objectTokens   = 15; // The tokens comprising the object of the triple
-  optional DependencyGraph tree           = 8;   // The dependency graph fragment for this triple
-  optional bool            istmod         = 9;   // If true, this expresses an implicit tmod relation
-  optional bool            prefixBe       = 10;  // If true, this relation string is missing a 'be' prefix
-  optional bool            suffixBe       = 11;  // If true, this relation string is missing a 'be' suffix
-  optional bool            suffixOf       = 12;  // If true, this relation string is missing a 'of' prefix
-}
-
-
-//
-// A map from strings to strings.
-// Used, minimally, in the CoNLLU featurizer
-//
-message MapStringString {
-  repeated string key   = 1;
-  repeated string value = 2;
-}
-
-//
-// A map from integers to strings.
-// Used, minimally, in the CoNLLU featurizer
-//
-message MapIntString {
-  repeated uint32 key   = 1;
-  repeated string value = 2;
-}
-

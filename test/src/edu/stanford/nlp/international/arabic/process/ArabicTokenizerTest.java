@@ -3,11 +3,11 @@ package edu.stanford.nlp.international.arabic.process;
 import java.io.StringReader;
 import java.util.List;
 
-import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.TokenizerFactory;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.process.Tokenizer;
 
 /**
@@ -137,28 +137,9 @@ public class ArabicTokenizerTest extends TestCase {
       String line = untokInputs[i];
       Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new StringReader(line));
       List<CoreLabel> tokens = tokenizer.tokenize();
-      String tokenizedLine = SentenceUtils.listToString(tokens);
+      String tokenizedLine = Sentence.listToString(tokens);
       String reference = tokReferences[i];
       assertEquals("Tokenization deviates from reference", reference, tokenizedLine);
-    }
-  }
-
-  public void testCharOffsets() {
-    String untokInput = "إِنَّ- -نا هادِئ+ُونَ .";
-    int[] beginOffsets = {0, 7, 11, 22};
-    int[] endOffsets = {6, 10, 21, 23};
-    
-    TokenizerFactory<CoreLabel> tf = ArabicTokenizer.atbFactory();
-    tf.setOptions("removeProMarker");
-    tf.setOptions("removeSegMarker");
-    tf.setOptions("removeMorphMarker");
-    
-    Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new StringReader(untokInput));
-    List<CoreLabel> tokens = tokenizer.tokenize();
-    assertEquals("Number of tokens doesn't match reference", tokens.size(), beginOffsets.length);
-    for (int i = 0; i < beginOffsets.length; i++) {
-      assertEquals("Char begin offset deviates from reference", beginOffsets[i], tokens.get(i).beginPosition());
-      assertEquals("Char end offset deviates from reference", endOffsets[i], tokens.get(i).endPosition());
     }
   }
 }

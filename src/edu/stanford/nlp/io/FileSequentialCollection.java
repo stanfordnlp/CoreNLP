@@ -1,5 +1,4 @@
-package edu.stanford.nlp.io; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.io;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -52,10 +51,7 @@ import java.util.*;
  * @version 1.0, August 2002
  * @see FileArrayList
  */
-public class FileSequentialCollection extends AbstractCollection<File>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FileSequentialCollection.class);
+public class FileSequentialCollection extends AbstractCollection<File> {
 
   /**
    * Stores the input collection over which we work.  This is
@@ -209,7 +205,7 @@ public class FileSequentialCollection extends AbstractCollection<File>  {
     super();
     // store the arguments.  They are expanded by the iterator
     if (c == null) {
-      coll = new ArrayList<>();
+      coll = new ArrayList<Object>();
     } else {
       coll = c;
     }
@@ -262,11 +258,11 @@ public class FileSequentialCollection extends AbstractCollection<File>  {
     private File next;
 
     public FileSequentialCollectionIterator() {
-      // log.info("Coll is " + coll);
+      // System.err.println("Coll is " + coll);
       roots = coll.toArray();
       rootsIndex = 0;
-      fileArrayStack = new Stack<>();
-      fileArrayStackIndices = new Stack<>();
+      fileArrayStack = new Stack<Object>();
+      fileArrayStackIndices = new Stack<Integer>();
       if (roots.length > 0) {
         fileArrayStack.add(roots[rootsIndex]);
         fileArrayStackIndices.push(Integer.valueOf(0));
@@ -307,10 +303,10 @@ public class FileSequentialCollection extends AbstractCollection<File>  {
     private File primeNextFile() {
       while (rootsIndex < roots.length) {
         while (!fileArrayStack.empty()) {
-          // log.info("fileArrayStack: " + fileArrayStack);
+          // System.err.println("fileArrayStack: " + fileArrayStack);
           Object obj = fileArrayStack.peek();
           if (obj instanceof File[]) {
-            // log.info("Got a File[]");
+            // System.err.println("Got a File[]");
             File[] files = (File[]) obj;
             Integer index = fileArrayStackIndices.pop();
             int ind = index.intValue();
@@ -334,16 +330,16 @@ public class FileSequentialCollection extends AbstractCollection<File>  {
             }
             File path = (File) obj;
             if (path.isDirectory()) {
-              // log.info("Got directory " + path);
+              // System.err.println("Got directory " + path);
               // if path is a directory, look into it
               File[] directoryListing = path.listFiles(filt);
               if (directoryListing == null) {
                 throw new IllegalArgumentException("Directory access problem for: " + path);
               }
-              // log.info("  with " +
+              // System.err.println("  with " +
               //	    directoryListing.length + " files in it.");
               if (includeDirs) {
-                // log.info("Include dir as answer");
+                // System.err.println("Include dir as answer");
                 if (directoryListing.length > 0) {
                   fileArrayStack.push(directoryListing);
                   fileArrayStackIndices.push(Integer.valueOf(0));
@@ -361,7 +357,7 @@ public class FileSequentialCollection extends AbstractCollection<File>  {
               }
             } else {
               // it's just a fixed file
-              // log.info("Got a plain file " + path);
+              // System.err.println("Got a plain file " + path);
               if (!path.exists()) {
                 throw new IllegalArgumentException("File doesn't exist: " + path);
               }

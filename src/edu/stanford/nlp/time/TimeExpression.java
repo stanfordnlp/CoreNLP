@@ -5,14 +5,15 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
-import edu.stanford.nlp.pipeline.CoreMapAggregator;
+import edu.stanford.nlp.ling.tokensregex.types.Value;
+import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Interval;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * Time Expression.
@@ -25,13 +26,11 @@ public class TimeExpression extends MatchedExpression {
    * The CoreMap key for storing a SUTime.TimeIndex (for looking up Timex Id).
    */
   public static class TimeIndexAnnotation implements CoreAnnotation<SUTime.TimeIndex> {
-    @Override
     public Class<SUTime.TimeIndex> getType() {
       return SUTime.TimeIndex.class;
     }
   }
 
-  // todo [cdm 2016]: Rename this class!
   /**
    * The CoreMap key for storing a TimeExpression annotation.
    */
@@ -80,15 +79,17 @@ public class TimeExpression extends MatchedExpression {
   private static SingleAnnotationExtractor getSingleAnnotationExtractor(final Function<CoreMap, SUTime.Temporal> temporalFunc)
   {
     SingleAnnotationExtractor extractFunc = new SingleAnnotationExtractor();
-    extractFunc.valueExtractor = in -> {
-      SUTime.Temporal t = temporalFunc.apply(in);
-      return new Expressions.PrimitiveValue<>("Temporal", t);
+    extractFunc.valueExtractor = new Function<CoreMap, Value>() {
+      public Value apply(CoreMap in) {
+        SUTime.Temporal t = temporalFunc.apply(in);
+        return new Expressions.PrimitiveValue<SUTime.Temporal>("Temporal", t);
+      }
     };
     extractFunc.tokensAnnotationField = CoreAnnotations.NumerizedTokensAnnotation.class;
     extractFunc.resultAnnotationField = Collections.singletonList((Class) TimeExpression.Annotation.class);
     extractFunc.resultNestedAnnotationField = TimeExpression.ChildrenAnnotation.class;
     extractFunc.resultAnnotationExtractor = TimeExpressionConverter;
-    extractFunc.tokensAggregator = CoreMapAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATOR;
+    extractFunc.tokensAggregators = CoreMapAttributeAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATORS;
     return extractFunc;
   }
 
@@ -146,7 +147,7 @@ public class TimeExpression extends MatchedExpression {
   }
 
   public void setTemporal(SUTime.Temporal temporal) {
-    this.value = new Expressions.PrimitiveValue<>("Temporal", temporal);
+    this.value = new Expressions.PrimitiveValue<SUTime.Temporal>("Temporal", temporal);
   }
 
 /*  public String toString()

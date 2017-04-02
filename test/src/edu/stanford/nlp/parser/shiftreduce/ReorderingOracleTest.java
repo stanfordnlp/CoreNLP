@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -43,7 +43,7 @@ public class ReorderingOracleTest extends TestCase {
 
   String[] WORDS = { "My", "dog", "also", "likes", "eating", "sausage" };
   String[] TAGS = { "PRP$", "NN", "RB", "VBZ", "VBZ", "NN" };
-  List<TaggedWord> sentence = SentenceUtils.toTaggedList(Arrays.asList(WORDS), Arrays.asList(TAGS));
+  List<TaggedWord> sentence = Sentence.toTaggedList(Arrays.asList(WORDS), Arrays.asList(TAGS));
 
   Tree[] correctTrees = { 
     Tree.valueOf("(ROOT (S (NP (PRP$ My) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))"),

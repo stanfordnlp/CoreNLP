@@ -1,5 +1,4 @@
 package edu.stanford.nlp.stats;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.classify.Classifier;
 import edu.stanford.nlp.classify.GeneralDataset;
@@ -17,19 +16,15 @@ import java.util.Properties;
  * Calculates phrase based precision and recall (similar to conlleval)
  * Handles various encodings such as IO, IOB, IOE, BILOU, SBEIO, []
  *
- * Usage: java edu.stanford.nlp.stats.MultiClassChunkEvalStats [options] < filename <br>
- *        -r - Do raw token based evaluation <br>
- *        -d delimiter - Specifies delimiter to use (instead of tab) <br>
- *        -b boundary - Boundary token (default is -X- ) <br>
- *        -t defaultTag - Default tag to use if tag is not prefixed (i.e. is not X-xxx ) <br>
+ * Usage: java edu.stanford.nlp.stats.MultiClassChunkEvalStats [options] < filename
+ *        -r - Do raw token based evaluation
+ *        -d <delimiter> - Specifies delimiter to use (instead of tab)
+ *        -b <boundary> - Boundary token (default is -X- )
+ *        -t <defaultTag> - Default tag to use if tag is not prefixed (i.e. is not X-xxx )
  *        -ignoreProvidedTag - Discards the provided tag (i.e. if label is X-xxx, just use xxx for evaluation)
- *
  * @author Angel Chang
  */
-public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedStats.MultiClassStringLabelStats  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(MultiClassChunkEvalStats.class);
+public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedStats.MultiClassStringLabelStats {
   private boolean inCorrect = false;
   private LabeledChunkIdentifier.LabelTagType prevCorrect = null;
   private LabeledChunkIdentifier.LabelTagType prevGuess = null;
@@ -62,7 +57,6 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
     return chunker;
   }
 
-  @Override
   public void clearCounts()
   {
     super.clearCounts();
@@ -71,19 +65,19 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
     prevGuess = null;
   }
 
-  @Override
-  protected void finalizeCounts() {
+  protected void finalizeCounts()
+  {
     markBoundary();
     super.finalizeCounts();
   }
 
-  private String getTypeLabel(LabeledChunkIdentifier.LabelTagType tagType) {
+  private String getTypeLabel(LabeledChunkIdentifier.LabelTagType tagType)
+  {
     if (useLabel) return tagType.label;
     else return tagType.type;
   }
-
-  @Override
-  protected void markBoundary() {
+  protected void markBoundary()
+  {
     if (inCorrect) {
       inCorrect=false;
       correctGuesses.incrementCount(getTypeLabel(prevCorrect));
@@ -92,18 +86,19 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
     prevCorrect = null;
   }
 
-  @Override
-  protected void addGuess(String guess, String trueLabel, boolean addUnknownLabels) {
+  protected void addGuess(String guess, String trueLabel, boolean addUnknownLabels)
+  {
     LabeledChunkIdentifier.LabelTagType guessTagType = chunker.getTagType(guess);
     LabeledChunkIdentifier.LabelTagType correctTagType = chunker.getTagType(trueLabel);
     addGuess(guessTagType, correctTagType, addUnknownLabels);
   }
 
   protected void addGuess(LabeledChunkIdentifier.LabelTagType guess,
-                          LabeledChunkIdentifier.LabelTagType correct, boolean addUnknownLabels) {
+                          LabeledChunkIdentifier.LabelTagType correct, boolean addUnknownLabels)
+  {
     if (addUnknownLabels) {
       if (labelIndex == null) {
-        labelIndex = new HashIndex<>();
+        labelIndex = new HashIndex<String>();
       }
       labelIndex.add(getTypeLabel(guess));
       labelIndex.add(getTypeLabel(correct));
@@ -119,8 +114,8 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
        }
     }
 
-    boolean correctStarted = LabeledChunkIdentifier.isStartOfChunk(prevCorrect, correct);
-    boolean guessStarted = LabeledChunkIdentifier.isStartOfChunk(prevGuess, guess);
+    boolean correctStarted = chunker.isStartOfChunk(prevCorrect, correct);
+    boolean guessStarted = chunker.isStartOfChunk(prevGuess, guess);
     if ( correctStarted && guessStarted && guess.typeMatches(correct)) {
       inCorrect = true;
     }
@@ -141,21 +136,21 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
         tokensCorrect++;
       }
     }
-
+    
     tokensCount++;
     prevGuess = guess;
     prevCorrect = correct;
   }
 
   // Returns string precision recall in ConllEval format
-  @Override
   public String getConllEvalString()
   {
     return getConllEvalString(true);
   }
 
-  public static void main(String[] args) {
-    StringUtils.logInvocationString(log, args);
+  public static void main(String[] args) throws Exception
+  {
+    StringUtils.printErrInvocationString("MultiClassChunkEvalStats", args);
     Properties props = StringUtils.argsToProperties(args);
     String boundary = props.getProperty("b","-X-");
     String delimiter = props.getProperty("d","\t");
@@ -183,12 +178,11 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
       if ("conll".equalsIgnoreCase(format)) {
         System.out.println(stats.getConllEvalString());
       } else {
-        System.out.println(stats.getDescription(6));
+        System.out.println(stats.getDescription(6));        
       }
     } catch (IOException ex) {
-      log.info("Error processing file: " + ex.toString());
+      System.err.println("Error processing file: " + ex.toString());
       ex.printStackTrace(System.err);
     }
   }
-
 }

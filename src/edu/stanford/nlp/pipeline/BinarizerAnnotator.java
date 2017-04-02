@@ -1,18 +1,15 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ReflectionLoading;
 
@@ -29,11 +26,10 @@ import edu.stanford.nlp.util.ReflectionLoading;
  * @author John Bauer
  */
 public class BinarizerAnnotator implements Annotator {
-
   private static final String DEFAULT_TLPP_CLASS = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
-
-  private final TreeBinarizer binarizer;
-  private final String tlppClass;
+  
+  final TreeBinarizer binarizer;
+  final String tlppClass;
 
   public BinarizerAnnotator(String annotatorName, Properties props) {
     this.tlppClass = props.getProperty(annotatorName + ".tlppClass", DEFAULT_TLPP_CLASS);
@@ -41,8 +37,8 @@ public class BinarizerAnnotator implements Annotator {
     this.binarizer = TreeBinarizer.simpleTreeBinarizer(tlpp.headFinder(), tlpp.treebankLanguagePack());
   }
 
-  public String signature(String annotatorName, Properties props) {
-    // String tlppClass = props.getProperty(annotatorName + ".tlppClass", DEFAULT_TLPP_CLASS);
+  public static String signature(String annotatorName, Properties props) {
+    String tlppClass = props.getProperty(annotatorName + ".tlppClass", DEFAULT_TLPP_CLASS);
     return tlppClass;
   }
 
@@ -67,12 +63,12 @@ public class BinarizerAnnotator implements Annotator {
     }
     Trees.convertToCoreLabels(binarized);
     sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);
-  }
+  }  
 
   /**
    * Recursively check that a tree is not already binarized.
    */
-  private static boolean isBinarized(Tree tree) {
+  private boolean isBinarized(Tree tree) {
     if (tree.isLeaf()) {
       return true;
     }
@@ -91,17 +87,12 @@ public class BinarizerAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        TreeCoreAnnotations.TreeAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return Collections.singleton(PARSE_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(BINARIZED_TREES_REQUIREMENT);
   }
-
 }

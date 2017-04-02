@@ -181,10 +181,8 @@ public class Dictionaries {
       "if", "false", "fallacy", "unsuccessfully", "unlikely", "impossible", "improbable", "uncertain", "unsure", "impossibility", "improbability", "cancellation", "breakup", "lack",
       "long-stalled", "end", "rejection", "failure", "avoid", "bar", "block", "break", "cancel", "cease", "cut", "decline", "deny", "deprive", "destroy", "excuse",
       "fail", "forbid", "forestall", "forget", "halt", "lose", "nullify", "prevent", "refrain", "reject", "rebut", "remain", "refuse", "stop", "suspend", "ward"));
-  public final Set<String> neg_relations = Generics.newHashSet(Arrays.asList("nmod:without", "acl:without", "advcl:without",
-      "nmod:except", "acl:except", "advcl:except", "nmod:excluding", "acl:excluding", "advcl:excluding", "nmod:if", "acl:if",
-      "advcl:if", "nmod:whether", "acl:whether", "advcl:whether",  "nmod:away_from", "acl:away_from", "advcl:away_fom",
-      "nmod:instead_of", "acl:instead_of", "advcl:instead_of"));
+  public final Set<String> neg_relations = Generics.newHashSet(Arrays.asList("prep_without", "prepc_without", "prep_except", "prepc_except", "prep_excluding", "prepx_excluding",
+      "prep_if", "prepc_if", "prep_whether", "prepc_whether", "prep_away_from", "prepc_away_from", "prep_instead_of", "prepc_instead_of"));
   public final Set<String> modals = Generics.newHashSet(Arrays.asList("can", "could", "may", "might", "must", "should", "would", "seem",
       "able", "apparently", "necessarily", "presumably", "probably", "possibly", "reportedly", "supposedly",
       "inconceivable", "chance", "impossibility", "improbability", "encouragement", "improbable", "impossible",
@@ -214,8 +212,8 @@ public class Dictionaries {
 
   public final Map<List<String>, Gender> genderNumber = Generics.newHashMap();
 
-  public final ArrayList<Counter<Pair<String, String>>> corefDict = new ArrayList<>(4);
-  public final Counter<Pair<String, String>> corefDictPMI = new ClassicCounter<>();
+  public final ArrayList<Counter<Pair<String, String>>> corefDict = new ArrayList<Counter<Pair<String, String>>>(4);
+  public final Counter<Pair<String, String>> corefDictPMI = new ClassicCounter<Pair<String, String>>();
   public final Map<String,Counter<String>> NE_signatures = Generics.newHashMap();
 
   private void setPronouns() {
@@ -403,7 +401,7 @@ public class Dictionaries {
       ArrayList<Counter<Pair<String, String>>> dict) {
 
     for(int i = 0; i < 4; i++){
-      dict.add(new ClassicCounter<>());
+      dict.add(new ClassicCounter<Pair<String, String>>());
 
       BufferedReader reader = null;
       try {
@@ -413,7 +411,7 @@ public class Dictionaries {
 
         while(reader.ready()) {
           String[] split = reader.readLine().split("\t");
-          dict.get(i).setCount(new Pair<>(split[0], split[1]), Double.parseDouble(split[2]));
+          dict.get(i).setCount(new Pair<String, String>(split[0], split[1]), Double.parseDouble(split[2]));
         }
 
       } catch (IOException e) {
@@ -434,7 +432,7 @@ public class Dictionaries {
 
         while(reader.ready()) {
           String[] split = reader.readLine().split("\t");
-          dict.setCount(new Pair<>(split[0], split[1]), Double.parseDouble(split[3]));
+          dict.setCount(new Pair<String, String>(split[0], split[1]), Double.parseDouble(split[3]));
         }
 
       } catch (IOException e) {
@@ -451,7 +449,7 @@ public class Dictionaries {
 
       while(reader.ready()) {
         String[] split = reader.readLine().split("\t");
-        Counter<String> cntr = new ClassicCounter<>();
+        Counter<String> cntr = new ClassicCounter<String>();
         sigs.put(split[0], cntr);
         for (int i = 1; i < split.length; i=i+2) {
           cntr.setCount(split[i], Double.parseDouble(split[i+1]));

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,10 +22,7 @@ import edu.stanford.nlp.util.Generics;
  *
  *  @author Christopher Manning
  */
-public class Dependencies  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Dependencies.class);
+public class Dependencies {
 
   private Dependencies() {} // only static methods
 
@@ -42,7 +38,7 @@ public class Dependencies  {
     @Override
     public boolean test(Dependency<G, D, N> d) {
       /*
-      log.info("DRF: Checking " + d + ": hasTag?: " +
+      System.err.println("DRF: Checking " + d + ": hasTag?: " +
                          (d.dependent() instanceof HasTag) + "; value: " +
                          ((d.dependent() instanceof HasTag)? ((HasTag) d.dependent()).tag(): null));
       */
@@ -72,14 +68,14 @@ public class Dependencies  {
     /** @param wrf A filter that rejects punctuation words.
      */
     public DependentPuncWordRejectFilter(Predicate<String> wrf) {
-      // log.info("wrf is " + wrf);
+      // System.err.println("wrf is " + wrf);
       wordRejectFilter = wrf;
     }
 
     @Override
     public boolean test(Dependency<G, D, N> d) {
       /*
-      log.info("DRF: Checking " + d + ": hasWord?: " +
+      System.err.println("DRF: Checking " + d + ": hasWord?: " +
                          (d.dependent() instanceof HasWord) + "; value: " +
                          ((d.dependent() instanceof HasWord)? ((HasWord) d.dependent()).word(): d.dependent().value()));
       */
@@ -93,7 +89,7 @@ public class Dependencies  {
       if (word == null) {
         word = d.dependent().value();
       }
-      // log.info("Dep: kid is " + ((MapLabel) d.dependent()).toString("value{map}"));
+      // System.err.println("Dep: kid is " + ((MapLabel) d.dependent()).toString("value{map}"));
       return wordRejectFilter.test(word);
     }
 
@@ -129,7 +125,7 @@ public class Dependencies  {
 
       List<TypedDependency> depList = govToDepMap.get(gov);
       if (depList == null) {
-        depList = new ArrayList<>();
+        depList = new ArrayList<TypedDependency>();
         govToDepMap.put(gov, depList);
       }
       depList.add(dep);
@@ -148,7 +144,7 @@ public class Dependencies  {
         Set<List<TypedDependency>> childDepLists = getGovMaxChains(govToDepMap, childNode, depth-1);
         if (childDepLists.size() != 0) {
           for (List<TypedDependency> childDepList : childDepLists) {
-            List<TypedDependency> depList = new ArrayList<>(childDepList.size() + 1);
+            List<TypedDependency> depList = new ArrayList<TypedDependency>(childDepList.size() + 1);
             depList.add(child);
             depList.addAll(childDepList);
             depLists.add(depList);
@@ -163,7 +159,7 @@ public class Dependencies  {
 
   public static Counter<List<TypedDependency>> getTypedDependencyChains(List<TypedDependency> deps, int maxLength) {
     Map<IndexedWord,List<TypedDependency>> govToDepMap = govToDepMap(deps);
-    Counter<List<TypedDependency>> tdc = new ClassicCounter<>();
+    Counter<List<TypedDependency>> tdc = new ClassicCounter<List<TypedDependency>>();
     for (IndexedWord gov : govToDepMap.keySet()) {
       Set<List<TypedDependency>> maxChains = getGovMaxChains(govToDepMap, gov, maxLength);
       for (List<TypedDependency> maxChain : maxChains) {

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.international.negra; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.negra;
 
 import java.util.*;
 
@@ -16,10 +15,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Roger Levy
  */
-public class NegraPennTreeNormalizer extends TreeNormalizer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NegraPennTreeNormalizer.class);
+public class NegraPennTreeNormalizer extends TreeNormalizer {
   /** How to clean up node labels: 0 = do nothing, 1 = keep category and
    *  function, 2 = just category
    */
@@ -160,7 +156,7 @@ public class NegraPennTreeNormalizer extends TreeNormalizer  {
       String cat = t.value();
       if(cat == null || cat.equals("")) {
         if (t.numChildren() == 3 && t.firstChild().label().value().equals("NN") && t.getChild(1).label().value().equals("$.")) {
-          log.info("Correcting treebank error: giving phrase label DL to " + t);
+          System.err.println("Correcting treebank error: giving phrase label DL to " + t);
           t.label().setValue("DL");
         }
       }
@@ -176,8 +172,8 @@ public class NegraPennTreeNormalizer extends TreeNormalizer  {
 
   private void insertNPinPPall(Tree t) {
     Tree[] kids = t.children();
-    for (Tree kid : kids) {
-      insertNPinPPall(kid);
+    for (int i = 0, n = kids.length; i < n; i++) {
+      insertNPinPPall(kids[i]);
     }
     insertNPinPP(t);
   }
@@ -196,7 +192,7 @@ public class NegraPennTreeNormalizer extends TreeNormalizer  {
       } // j now indexes last dtr of new NP
 
       if (i > j) {
-        log.info("##### Warning -- no NP material here!");
+        System.err.println("##### Warning -- no NP material here!");
         return; // there is no NP material!
       }
 

@@ -85,7 +85,7 @@ public class UnitPrefix {
     BufferedReader br = IOUtils.getBufferedFileReader(filename);
     String headerString = br.readLine();
     String[] header = commaPattern.split(headerString);
-    Map<String,Integer> headerIndex = new HashMap<>();
+    Map<String,Integer> headerIndex = new HashMap<String,Integer>();
     for (int i = 0; i < header.length; i++) {
       headerIndex.put(header[i], i);
     }
@@ -95,7 +95,7 @@ public class UnitPrefix {
     int iExp = headerIndex.get("exp");
     int iSystem = headerIndex.get("system");
     String line;
-    List<UnitPrefix> list = new ArrayList<>();
+    List<UnitPrefix> list = new ArrayList<UnitPrefix>();
     while ((line = br.readLine()) != null) {
       String[] fields = commaPattern.split(line);
       double base = Double.parseDouble(fields[iBase]);

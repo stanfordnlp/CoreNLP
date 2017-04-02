@@ -13,7 +13,7 @@ public class CoreUtilities {
   /**
    * Pieces a List of CoreMaps back together using
    * word and setting a white space between each word
-   * TODO: remove this (SentenceUtils.listToString does the same thing - why 2 separate classes)
+   * TODO: remove this (listToString does the same thing)
    */
   public static String toSentence(List<? extends CoreMap> sentence) {
     StringBuilder text = new StringBuilder();
@@ -21,14 +21,14 @@ public class CoreUtilities {
       CoreMap iw = sentence.get(i);
       text.append(iw.get(CoreAnnotations.TextAnnotation.class));
       if (i < sz - 1) {
-        text.append(' ');
+        text.append(" ");
       }
     }
     return text.toString();
   }
 
   public static List<CoreLabel> deepCopy(List<CoreLabel> tokens) {
-    List<CoreLabel> copy = new ArrayList<>();
+    List<CoreLabel> copy = new ArrayList<CoreLabel>();
     for (CoreLabel ml : tokens) {
       CoreLabel ml1 = new CoreLabel(ml);  // copy the labels
       copy.add(ml1);
@@ -37,17 +37,7 @@ public class CoreUtilities {
   }
 
   public static List<CoreLabel> toCoreLabelList(String... words) {
-    List<CoreLabel> tokens = new ArrayList<>(words.length);
-    for (String word : words) {
-      CoreLabel cl = new CoreLabel();
-      cl.setWord(word);
-      tokens.add(cl);
-    }
-    return tokens;
-  }
-
-  public static List<CoreLabel> toCoreLabelList(List<String> words) {
-    List<CoreLabel> tokens = new ArrayList<>(words.size());
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(words.length);
     for (String word : words) {
       CoreLabel cl = new CoreLabel();
       cl.setWord(word);
@@ -58,7 +48,7 @@ public class CoreUtilities {
 
   public static List<CoreLabel> toCoreLabelList(String[] words, String[] tags) {
     assert tags.length == words.length;
-    List<CoreLabel> tokens = new ArrayList<>(words.length);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(words.length);
     for (int i = 0, sz = words.length; i < sz; i++) {
       CoreLabel cl = new CoreLabel();
       cl.setWord(words[i]);
@@ -70,7 +60,7 @@ public class CoreUtilities {
 
   public static List<CoreLabel> toCoreLabelListWithCharacterOffsets(String[] words, String[] tags) {
     assert tags.length == words.length;
-    List<CoreLabel> tokens = new ArrayList<>(words.length);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(words.length);
     int offset = 0;
     for (int i = 0, sz = words.length; i < sz; i++) {
       CoreLabel cl = new CoreLabel();
@@ -90,7 +80,7 @@ public class CoreUtilities {
                                                 String[] answers) {
     assert tags.length == words.length;
     assert answers.length == words.length;
-    List<CoreLabel> tokens = new ArrayList<>(words.length);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(words.length);
     for (int i = 0, sz = words.length; i < sz; i++) {
       CoreLabel cl = new CoreLabel();
       cl.setWord(words[i]);

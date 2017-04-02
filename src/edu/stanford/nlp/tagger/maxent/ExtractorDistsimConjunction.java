@@ -12,7 +12,7 @@ public class ExtractorDistsimConjunction extends Extractor {
   private final Distsim lexicon;
   private final int left;
   private final int right;
-  private final String name;
+  private String name;
 
   @Override
   String extract(History h, PairsHolder pH) {
@@ -28,13 +28,6 @@ public class ExtractorDistsimConjunction extends Extractor {
     return sb.toString();
   }
 
-  /** Create an Extractor for conjunctions of Distsim classes
-   *
-   *  @param distSimPath File path. If it contains a semi-colon, the material after it is interpreted
-   *                     as options to the Distsim class (q.v.)
-   *  @param left Which position to start from (normally a non-positive number)
-   *  @param right Which position to end with (normally a non-negative number)
-   */
   ExtractorDistsimConjunction(String distSimPath, int left, int right) {
     super();
     lexicon = Distsim.initLexicon(distSimPath);
@@ -50,6 +43,6 @@ public class ExtractorDistsimConjunction extends Extractor {
 
   @Override public boolean isLocal() { return false; }
   @Override public boolean isDynamic() { return false; }
-
+  
 } // end static class ExtractorDistsimConjunction
 

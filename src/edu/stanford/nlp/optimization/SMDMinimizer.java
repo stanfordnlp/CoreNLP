@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Pair;
@@ -36,10 +35,7 @@ import edu.stanford.nlp.util.Pair;
  * @version 1.0
  * @since 1.0
  */
-public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SMDMinimizer.class);
+public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T> {
 
 
 
@@ -130,9 +126,9 @@ public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T>  {
     gain = tuneGain(function, initial, msPerTest, 1e-8,1.0);
     bSize = tuneBatch(function,initial,msPerTest,1);
 
-    log.info("Results:  gain: " + nf.format(gain) + "  batch " + bSize  + "   mu" + nf.format(this.mu) + "  lam" + nf.format(this.lam));
+    System.err.println("Results:  gain: " + nf.format(gain) + "  batch " + bSize  + "   mu" + nf.format(this.mu) + "  lam" + nf.format(this.lam));
 
-    return new Pair<>(bSize, gain);
+    return new Pair<Integer,Double>(bSize, gain);
   }
 
 
@@ -221,7 +217,7 @@ public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T>  {
       }
     };
 
-    SMDMinimizer<DiffFunction> min = new SMDMinimizer<>();
+    SMDMinimizer<DiffFunction> min = new SMDMinimizer<DiffFunction>();
 
     min.minimize(f, 1.0E-4, init);
   }

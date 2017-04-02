@@ -17,10 +17,6 @@ public interface ParserQuery {
 
   Tree getBestParse();
 
-  List<ScoredObject<Tree>> getKBestParses(int k);
-
-  double getBestScore();
-
   Tree getBestPCFGParse();
 
   Tree getBestDependencyParse(boolean debinarize);

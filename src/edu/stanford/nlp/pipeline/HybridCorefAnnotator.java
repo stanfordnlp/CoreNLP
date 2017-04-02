@@ -1,52 +1,42 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-import edu.stanford.nlp.coref.CorefCoreAnnotations.CorefChainAnnotation;
-import edu.stanford.nlp.coref.data.CorefChain;
-import edu.stanford.nlp.coref.data.Document;
-import edu.stanford.nlp.coref.data.CorefChain.CorefMention;
-import edu.stanford.nlp.coref.hybrid.HybridCorefSystem;
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation;
+import edu.stanford.nlp.hcoref.CorefSystem;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.CorefChain.CorefMention;
+import edu.stanford.nlp.hcoref.data.Document;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArraySet;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntTuple;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 
-public class HybridCorefAnnotator extends TextAnnotationCreator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(HybridCorefAnnotator.class);
+public class HybridCorefAnnotator extends TextAnnotationCreator implements Annotator {
 
   private static final boolean VERBOSE = false;
 
-  private final HybridCorefSystem corefSystem;
+  private final CorefSystem corefSystem;
 
   // for backward compatibility
   private final boolean OLD_FORMAT;
 
   public HybridCorefAnnotator(Properties props) {
     try {
-      // Load the default properties
-      Properties corefProps = new Properties();
-      try {
-        corefProps.load(IOUtils.readerFromString("edu/stanford/nlp/hcoref/properties/coref-default-dep.properties"));
-      } catch (IOException ignored) { }
-      // Add passed properties
-      Enumeration<Object> keys = props.keys();
-      while (keys.hasMoreElements()) {
-        String key = keys.nextElement().toString();
-        corefProps.setProperty(key, props.getProperty(key));
-      }
-      // Create coref system
-      corefSystem = new HybridCorefSystem(corefProps);
+      corefSystem = new CorefSystem(props);
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
     } catch (Exception e) {
-      log.error("cannot create HybridCorefAnnotator!");
+      System.err.println("ERROR: cannot create HybridCorefAnnotator!");
       e.printStackTrace();
       throw new RuntimeException(e);
     }
@@ -56,7 +46,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
   public void annotate(Annotation annotation){
     try {
       if (!annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-        log.error("this coreference resolution system requires SentencesAnnotation!");
+        System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
         return;
       }
 
@@ -70,7 +60,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 
       // for backward compatibility
       if(OLD_FORMAT) annotateOldFormat(result, corefDoc);
-
+      
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -79,29 +69,29 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
   }
 
   public static List<Pair<IntTuple, IntTuple>> getLinks(Map<Integer, CorefChain> result) {
-    List<Pair<IntTuple, IntTuple>> links = new ArrayList<>();
+    List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple, IntTuple>>();
     CorefChain.CorefMentionComparator comparator = new CorefChain.CorefMentionComparator();
 
     for(CorefChain c : result.values()) {
       List<CorefMention> s = c.getMentionsInTextualOrder();
       for(CorefMention m1 : s){
         for(CorefMention m2 : s){
-          if(comparator.compare(m1, m2)==1) links.add(new Pair<>(m1.position, m2.position));
-        }
-      }
-    }
+          if(comparator.compare(m1, m2)==1) links.add(new Pair<IntTuple, IntTuple>(m1.position, m2.position));
+        }    
+      }    
+    }    
     return links;
   }
 
-  private static void annotateOldFormat(Map<Integer, CorefChain> result, Document corefDoc) {
-
+  private void annotateOldFormat(Map<Integer, CorefChain> result, Document corefDoc) {
+    
     List<Pair<IntTuple, IntTuple>> links = getLinks(result);
     Annotation annotation = corefDoc.annotation;
 
     if(VERBOSE){
-      System.err.printf("Found %d coreference links:%n", links.size());
+      System.err.printf("Found %d coreference links:\n", links.size());
       for(Pair<IntTuple, IntTuple> link: links){
-        System.err.printf("LINK (%d, %d) -> (%d, %d)%n", link.first.get(0), link.first.get(1), link.second.get(0), link.second.get(1));
+        System.err.printf("LINK (%d, %d) -> (%d, %d)\n", link.first.get(0), link.first.get(1), link.second.get(0), link.second.get(1));
       }
     }
 
@@ -110,7 +100,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
     //
 
     // this graph is stored in CorefGraphAnnotation -- the raw links found by the coref system
-    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<>();
+    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<Pair<IntTuple,IntTuple>>();
 
     for(Pair<IntTuple, IntTuple> link: links){
       //
@@ -127,7 +117,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
       IntTuple src = new IntTuple(2);
       src.set(0, srcSent);
       src.set(1, srcTok);
-      graph.add(new Pair<>(src, dst));
+      graph.add(new Pair<IntTuple, IntTuple>(src, dst));
     }
     annotation.set(CorefCoreAnnotations.CorefGraphAnnotation.class, graph);
 
@@ -145,7 +135,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
     }
   }
 
-  private static boolean hasSpeakerAnnotations(Annotation annotation) {
+  private boolean hasSpeakerAnnotations(Annotation annotation) {
     for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreLabel t : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
         if (t.get(CoreAnnotations.SpeakerAnnotation.class) != null) {
@@ -157,29 +147,22 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
-        CorefCoreAnnotations.CorefMentionsAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, DEPENDENCY_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CorefChainAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(COREF_REQUIREMENT);
   }
-
-  private static Annotation testEnglish() {
+  
+  private static Annotation testEnglish(){
     String text = "Barack Obama is the president of United States. He visited California last week.";
-    return testAnnoation(text,new String[] {
+    return testAnnoation(text,new String[]{
         "-props", "edu/stanford/nlp/hcoref/properties/coref-default-dep.properties"
     });
   }
-
+  
   private static Annotation testChinese(){
 //    String text = "中国武道太学和中国书道太学成立。新华社北京９月１日电。旨在振兴中华文化于"
 //        + "国际的中国武道太学和中国书道太学今天在北京成立。上述两所太学是在国家体委、"
@@ -192,7 +175,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
         "-props", "edu/stanford/nlp/hcoref/properties/zh-dcoref-default.properties"
     });
   }
-
+  
   private static Annotation testAnnoation(String text,String[] args){
     Annotation document = new Annotation(text);
     Properties props = StringUtils.argsToProperties(args);
@@ -202,9 +185,9 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
     hcoref.annotate(document);
     return document;
   }
-
+  
   public static void main(String[] args) {
-
+    
 //    String text = "Since the implementation of the Individual Visit Scheme between Hong Kong and the mainland , more and more mainland tourists are coming to visit Hong Kong. "
 //                  +"From the beginning up till now , more than seven million individual tourists , have come to Hong Kong. "
 //                  +"Well , we now , er , believe more will be coming . "
@@ -216,11 +199,11 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 //                  +"You can go to burn incense and make a vow at the Repulse Bay , where all deities gather . "
 //                  +"You can enjoy the most charming sun - filled sandy beaches in Hong Kong. "
 //                  +"You can ascend Victoria Peak to get a panoramic view of Victoria Harbor 's beautiful scenery . "
-//                  +"Or hop onto a trolley with over a century of history , and feel the city 's blend of the old and the modern in slow motion .";
-//
+//                  +"Or hop onto a trolley with over a century of history , and feel the city 's blend of the old and the modern in slow motion ."; 
+//    
 
     Annotation document = testChinese();
     System.out.println(document.get(CorefChainAnnotation.class));
-    log.info();
+    System.err.println();
   }
 }

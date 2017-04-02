@@ -20,13 +20,13 @@ public class CreatePatterns<E> {
   public CreatePatterns(Properties props, ConstantsAndVariables constVars)
       throws IOException {
     this.constVars = constVars;
-    ArgumentParser.fillOptions(ConstantsAndVariables.class, props);
+    Execution.fillOptions(ConstantsAndVariables.class, props);
     constVars.setUp(props);
     setUp(props);
   }
 
   void setUp(Properties props) {
-    ArgumentParser.fillOptions(this, props);
+    Execution.fillOptions(this, props);
   }
 
 
@@ -42,7 +42,7 @@ public class CreatePatterns<E> {
    // this.patternsForEachToken = new HashMap<String, Map<Integer, Set<Integer>>>();
 
     Date startDate = new Date();
-    List<String> keyset = new ArrayList<>(sents.keySet());
+    List<String> keyset = new ArrayList<String>(sents.keySet());
 
     int num;
     if (constVars.numThreads == 1)
@@ -53,7 +53,7 @@ public class CreatePatterns<E> {
         .newFixedThreadPool(constVars.numThreads);
 
     Redwood.log(ConstantsAndVariables.extremedebug, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
-    List<Future<Boolean>> list = new ArrayList<>();
+    List<Future<Boolean>> list = new ArrayList<Future<Boolean>>();
     for (int i = 0; i < constVars.numThreads; i++) {
 
       int from = i * num;
@@ -123,14 +123,14 @@ public class CreatePatterns<E> {
 
     @Override
     public Boolean call() throws Exception {
-      Map<String, Map<Integer, Set<E>>> tempPatternsForTokens = new HashMap<>();
+      Map<String, Map<Integer, Set<E>>> tempPatternsForTokens = new HashMap<String, Map<Integer, Set<E>>>();
       int numSentencesInOneCommit = 0;
 
       for (String id : sentIds) {
         DataInstance sent = sents.get(id);
 
         if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY))
-          tempPatternsForTokens.put(id, new HashMap<>());
+          tempPatternsForTokens.put(id, new HashMap<Integer, Set<E>>());
 
         Map<Integer, Set<E>> p  = (Map) PatternFactory.getPatternsAroundTokens(constVars.patternType, sent, constVars.getStopWords());
         //to save number of commits to the database

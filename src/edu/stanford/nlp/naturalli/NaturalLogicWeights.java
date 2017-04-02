@@ -43,7 +43,7 @@ public class NaturalLogicWeights {
 
     String line;
     // Simple PP attachments
-    BufferedReader ppReader = IOUtils.readerFromString(affinityModels + "/pp.tab.gz", "utf8");
+    BufferedReader ppReader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(affinityModels + "/pp.tab.gz", "utf8");
     while ( (line = ppReader.readLine()) != null) {
       String[] fields = line.split("\t");
       Pair<String, String> key = Pair.makePair(fields[0].intern(), fields[1].intern());
@@ -52,7 +52,7 @@ public class NaturalLogicWeights {
     ppReader.close();
 
     // Subj PP attachments
-    BufferedReader subjPPReader = IOUtils.readerFromString(affinityModels + "/subj_pp.tab.gz", "utf8");
+    BufferedReader subjPPReader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(affinityModels + "/subj_pp.tab.gz", "utf8");
     while ( (line = subjPPReader.readLine()) != null) {
       String[] fields = line.split("\t");
       Triple<String, String, String> key = Triple.makeTriple(fields[0].intern(), fields[1].intern(), fields[2].intern());
@@ -61,7 +61,7 @@ public class NaturalLogicWeights {
     subjPPReader.close();
 
     // Subj Obj PP attachments
-    BufferedReader subjObjPPReader = IOUtils.readerFromString(affinityModels + "/subj_obj_pp.tab.gz", "utf8");
+    BufferedReader subjObjPPReader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(affinityModels + "/subj_obj_pp.tab.gz", "utf8");
     while ( (line = subjObjPPReader.readLine()) != null) {
       String[] fields = line.split("\t");
       Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
@@ -70,7 +70,7 @@ public class NaturalLogicWeights {
     subjObjPPReader.close();
 
     // Subj PP PP attachments
-    BufferedReader subjPPPPReader = IOUtils.readerFromString(affinityModels + "/subj_pp_pp.tab.gz", "utf8");
+    BufferedReader subjPPPPReader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(affinityModels + "/subj_pp_pp.tab.gz", "utf8");
     while ( (line = subjPPPPReader.readLine()) != null) {
       String[] fields = line.split("\t");
       Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
@@ -79,7 +79,7 @@ public class NaturalLogicWeights {
     subjPPPPReader.close();
 
     // Subj PP PP attachments
-    BufferedReader subjPPObjReader = IOUtils.readerFromString(affinityModels + "/subj_pp_obj.tab.gz", "utf8");
+    BufferedReader subjPPObjReader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(affinityModels + "/subj_pp_obj.tab.gz", "utf8");
     while ( (line = subjPPObjReader.readLine()) != null) {
       String[] fields = line.split("\t");
       Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
@@ -88,7 +88,7 @@ public class NaturalLogicWeights {
     subjPPObjReader.close();
 
     // Subj PP PP attachments
-    BufferedReader objReader = IOUtils.readerFromString(affinityModels + "/obj.tab.gz", "utf8");
+    BufferedReader objReader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(affinityModels + "/obj.tab.gz", "utf8");
     while ( (line = objReader.readLine()) != null) {
       String[] fields = line.split("\t");
       verbObjAffinity.put(fields[0], Double.parseDouble(fields[1]));
@@ -106,19 +106,6 @@ public class NaturalLogicWeights {
       return 1.0;
     }
   }
-  public double subjDeletionProbability(SemanticGraphEdge edge, Iterable<SemanticGraphEdge> neighbors) {
-    // Get information about the neighbors
-    // (in a totally not-creepy-stalker sort of way)
-    for (SemanticGraphEdge neighbor : neighbors) {
-      if (neighbor != edge) {
-        String neighborRel = neighbor.getRelation().toString();
-        if (neighborRel.contains("subj")) {
-          return 1.0;
-        }
-      }
-    }
-    return 0.0;
-  }
 
   public double objDeletionProbability(SemanticGraphEdge edge, Iterable<SemanticGraphEdge> neighbors) {
     // Get information about the neighbors
@@ -133,9 +120,6 @@ public class NaturalLogicWeights {
         }
         if (neighborRel.contains("prep")) {
           pp = Optional.of(neighborRel);
-        }
-        if (neighborRel.contains("obj")) {
-          return 1.0;  // allow deleting second object
         }
       }
     }
@@ -216,8 +200,6 @@ public class NaturalLogicWeights {
       return ppDeletionProbability(edge, neighbors);
     } else if (edgeRel.contains("obj")) {
       return objDeletionProbability(edge, neighbors);
-    } else if (edgeRel.contains("subj")) {
-      return subjDeletionProbability(edge, neighbors);
     } else if (edgeRel.equals("amod")) {
       String word = (edge.getDependent().lemma() != null ? edge.getDependent().lemma() : edge.getDependent().word()).toLowerCase();
       if (Util.PRIVATIVE_ADJECTIVES.contains(word)) {

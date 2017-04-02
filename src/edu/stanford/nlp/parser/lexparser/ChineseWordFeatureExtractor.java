@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ie.ChineseMorphFeatureSets;
 import edu.stanford.nlp.ling.TaggedWord;
@@ -13,10 +12,7 @@ import java.util.*;
 /**
  * @author Galen Andrew
  */
-public class ChineseWordFeatureExtractor implements WordFeatureExtractor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseWordFeatureExtractor.class);
+public class ChineseWordFeatureExtractor implements WordFeatureExtractor {
   /**
    * 
    */
@@ -67,8 +63,8 @@ public class ChineseWordFeatureExtractor implements WordFeatureExtractor  {
         break;
 
       default:
-        log.info("Feature level " + level + " is not supported in ChineseWordFeatureExtractor.");
-        log.info("Using level 0");
+        System.err.println("Feature level " + level + " is not supported in ChineseWordFeatureExtractor.");
+        System.err.println("Using level 0");
         setFeatureLevel(0);
     }
   }
@@ -108,7 +104,7 @@ public class ChineseWordFeatureExtractor implements WordFeatureExtractor  {
   private void loadFeatures() {
     if (cmfs != null) return;
     cmfs = new ChineseMorphFeatureSets(featureDir);
-    log.info("Total affix features: " + cmfs.getAffixFeatures().size());
+    System.err.println("Total affix features: " + cmfs.getAffixFeatures().size());
   }
 
   private Collection<String> threshedFeatures;
@@ -121,11 +117,11 @@ public class ChineseWordFeatureExtractor implements WordFeatureExtractor  {
       }
     }
     threshedFeatures = c.keysAbove(thresh);
-    log.info((c.size() - threshedFeatures.size()) + " word features removed due to thresholding.");
+    System.err.println((c.size() - threshedFeatures.size()) + " word features removed due to thresholding.");
   }
 
   public Collection<String> makeFeatures(String word) {
-    List<String> features = new ArrayList<>();
+    List<String> features = new ArrayList<String>();
     if (morpho) {
       for (Map.Entry<String, Set<Character>> e : cmfs.getSingletonFeatures().entrySet()) {
         if (e.getValue().contains(word.charAt(0))) {

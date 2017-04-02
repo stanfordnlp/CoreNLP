@@ -1,5 +1,4 @@
-package edu.stanford.nlp.io; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.io;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,10 +15,7 @@ import java.util.zip.GZIPOutputStream;
  * @author Spence Green
  *
  */
-public final class FileSystem  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FileSystem.class);
+public final class FileSystem {
 
   private FileSystem() {}
   
@@ -82,8 +78,8 @@ public final class FileSystem  {
   public static boolean deleteDir(File dir) {
     if (dir.isDirectory()) {
       String[] children = dir.list();
-      for (String aChildren : children) {
-        boolean success = deleteDir(new File(dir, aChildren));
+      for (int i = 0; i < children.length; i++) {
+        boolean success = deleteDir(new File(dir, children[i]));
         if (!success)
           return false;
       }
@@ -126,7 +122,7 @@ public final class FileSystem  {
   public static void mkdirOrFail(File dir) {
     if (!dir.mkdirs()) {
       String error = "Could not create " + dir;
-      log.info(error);
+      System.err.println(error);
       throw new RuntimeException(error);
     }
   }
@@ -134,7 +130,7 @@ public final class FileSystem  {
   public static void checkExistsOrFail(File file) {
     if (!file.exists()) {
       String error = "Output path " + file + " does not exist";
-      log.info(error);
+      System.err.println(error);
       throw new RuntimeException(error);
     }
   }
@@ -142,7 +138,7 @@ public final class FileSystem  {
   public static void checkNotExistsOrFail(File file) {
     if (file.exists()) {
       String error = "Output path " + file + " already exists";
-      log.info(error);
+      System.err.println(error);
       throw new RuntimeException(error);
     }
   }
@@ -160,7 +156,7 @@ public final class FileSystem  {
     try {
       copyFile(new File(testFileName),new File(testDirName + "/" + testFileName));
     } catch (IOException e) {
-      log.info("Copy failed");
+      System.err.println("Copy failed");
       System.exit(-1);
     }
     
@@ -175,10 +171,10 @@ public final class FileSystem  {
       }
       
     } catch (IOException e) {
-      log.info("Tar command failed");
+      System.err.println("Tar command failed");
       System.exit(-1);
     } catch(InterruptedException e) {
-      log.info("Tar command interrupted");
+      System.err.println("Tar command interrupted");
       e.printStackTrace();
       System.exit(-1);
     }
@@ -186,13 +182,13 @@ public final class FileSystem  {
     try {
       gzipFile(new File(String.format(testDirName + ".tar")), new File(testDirName + ".tar.gz"));
     } catch (IOException e) {
-      log.info("gzip command failed");
+      System.err.println("gzip command failed");
       System.exit(-1);
     }
     
     boolean deleteSuccess = deleteDir(new File(testDirName));
     if(!deleteSuccess) {
-      log.info("Could not delete directory");
+      System.err.println("Could not delete directory");
       System.exit(-1);
     }
     

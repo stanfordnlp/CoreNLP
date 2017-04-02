@@ -301,20 +301,10 @@ public class CorefChain implements Serializable {
     }
   }
 
-  /**
-   * Delete a mention from this coreference chain.
-   * @param m The mention to delete.
-   */
-  public void deleteMention(CorefMention m) {
-    this.mentions.remove(m);
-    IntPair position = new IntPair(m.sentNum, m.headIndex);
-    this.mentionMap.remove(position);
-  }
-
   public CorefChain(CorefCluster c, Map<Mention, IntTuple> positions){
     chainID = c.clusterID;
     // Collect mentions
-    mentions = new ArrayList<>();
+    mentions = new ArrayList<CorefMention>();
     mentionMap = Generics.newHashMap();
     CorefMention represents = null;
     for (Mention m : c.getCorefMentions()) {
@@ -341,7 +331,7 @@ public class CorefChain implements Serializable {
     this.chainID = cid;
     this.representative = representative;
     this.mentionMap = mentionMap;
-    this.mentions = new ArrayList<>();
+    this.mentions = new ArrayList<CorefMention>();
     for (Set<CorefMention> ms: mentionMap.values()) {
       for (CorefMention m: ms) {
         this.mentions.add(m);

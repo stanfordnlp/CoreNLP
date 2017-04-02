@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,13 +12,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.stanford.nlp.io.NullOutputStream;
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasTag;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.parser.metrics.BestOfTopKEval;
@@ -44,10 +46,7 @@ import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 
-public class EvaluateTreebank  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EvaluateTreebank.class);
+public class EvaluateTreebank {
 
   private final Options op;
   private final TreeTransformer debinarizer;
@@ -90,7 +89,7 @@ public class EvaluateTreebank  {
   AbstractEval.ScoreEval factLL = null;
   AbstractEval kGoodLB = null;
 
-  private final List<BestOfTopKEval> topKEvals = new ArrayList<>();
+  private final List<BestOfTopKEval> topKEvals = new ArrayList<BestOfTopKEval>();
 
   private int kbestPCFG = 0;
 
@@ -268,10 +267,10 @@ public class EvaluateTreebank  {
       if (op.testOptions.preTag) {
         List<TaggedWord> s = tagger.apply(t.yieldWords());
         if(op.testOptions.verbose) {
-          log.info("Guess tags: "+Arrays.toString(s.toArray()));
-          log.info("Gold tags: "+t.labeledYield().toString());
+          System.err.println("Guess tags: "+Arrays.toString(s.toArray()));
+          System.err.println("Gold tags: "+t.labeledYield().toString());
         }
-        return SentenceUtils.toCoreLabelList(s);
+        return Sentence.toCoreLabelList(s);
       } else if(op.testOptions.noFunctionalForcing) {
         ArrayList<? extends HasWord> s = t.taggedYield();
         for (HasWord word : s) {
@@ -279,12 +278,12 @@ public class EvaluateTreebank  {
           tag = tag.split("-")[0];
           ((HasTag) word).setTag(tag);
         }
-        return SentenceUtils.toCoreLabelList(s);
+        return Sentence.toCoreLabelList(s);
       } else {
-        return SentenceUtils.toCoreLabelList(t.taggedYield());
+        return Sentence.toCoreLabelList(t.taggedYield());
       }
     } else {
-      return SentenceUtils.toCoreLabelList(t.yieldWords());
+      return Sentence.toCoreLabelList(t.yieldWords());
     }
   }
 
@@ -434,14 +433,14 @@ public class EvaluateTreebank  {
           pwErr.println("WARNING: Evaluation could not be performed due to gold/parsed yield mismatch.");
           pwErr.printf("  sizes: gold: %d (transf) %d (orig); parsed: %d (transf) %d (orig).%n", gYield.size(), goldTree.yield().size(),
                        fYield.size(), tree.yield().size());
-          pwErr.println("  gold: " + SentenceUtils.listToString(gYield, true));
-          pwErr.println("  pars: " + SentenceUtils.listToString(fYield, true));
+          pwErr.println("  gold: " + Sentence.listToString(gYield, true));
+          pwErr.println("  pars: " + Sentence.listToString(fYield, true));
           numSkippedEvals++;
           return;
         }
 
         if (topKEvals.size() > 0) {
-          List<Tree> transGuesses = new ArrayList<>();
+          List<Tree> transGuesses = new ArrayList<Tree>();
           int kbest = Math.min(op.testOptions.evalPCFGkBest, kbestPCFGTrees.size());
           for (ScoredObject<Tree> guess : kbestPCFGTrees.subList(0, kbest)) {
             transGuesses.add(collinizer.transformTree(guess.object()));
@@ -572,7 +571,7 @@ public class EvaluateTreebank  {
    *          of the parser on the treebank.
    */
   public double testOnTreebank(Treebank testTreebank) {
-    log.info("Testing on treebank");
+    System.err.println("Testing on treebank");
     Timing treebankTotalTimer = new Timing();
     TreePrint treePrint = op.testOptions.treePrint(op.tlpParams);
     TreebankLangParserParams tlpParams = op.tlpParams;
@@ -614,14 +613,14 @@ public class EvaluateTreebank  {
     }
 
     if (op.testOptions.testingThreads != 1) {
-      MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
+      MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<List<? extends HasWord>, ParserQuery>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
 
-      LinkedList<Tree> goldTrees = new LinkedList<>();
+      LinkedList<Tree> goldTrees = new LinkedList<Tree>();
       for (Tree goldTree : testTreebank) {
         List<? extends HasWord> sentence = getInputSentence(goldTree);
         goldTrees.add(goldTree);
 
-        pwErr.println("Parsing [len. " + sentence.size() + "]: " + SentenceUtils.listToString(sentence));
+        pwErr.println("Parsing [len. " + sentence.size() + "]: " + Sentence.listToString(sentence));
         wrapper.put(sentence);
         while (wrapper.peek()) {
           ParserQuery pq = wrapper.poll();
@@ -641,7 +640,7 @@ public class EvaluateTreebank  {
       for (Tree goldTree : testTreebank) {
         final List<CoreLabel> sentence = getInputSentence(goldTree);
 
-        pwErr.println("Parsing [len. " + sentence.size() + "]: " + SentenceUtils.listToString(sentence));
+        pwErr.println("Parsing [len. " + sentence.size() + "]: " + Sentence.listToString(sentence));
 
         pq.parseAndReport(sentence, pwErr);
 

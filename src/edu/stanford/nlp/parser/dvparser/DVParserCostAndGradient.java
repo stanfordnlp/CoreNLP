@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.dvparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.dvparser;
 
 import java.util.ArrayList;
 import java.util.Formatter;
@@ -27,10 +26,7 @@ import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
-public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DVParserCostAndGradient.class);
+public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
   List<Tree> trainingBatch;
   IdentityHashMap<Tree, List<Tree>> topParses;
   DVModel dvModel;
@@ -69,7 +65,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
   }
 
   public static void outputSpans(Tree tree) {
-    log.info(tree.getSpan() + " ");
+    System.err.print(tree.getSpan() + " ");
     for (Tree child : tree.children()) {
       outputSpans(child);
     }
@@ -81,18 +77,18 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     // score of the entire tree is the sum of the scores of all of
     // its nodes
     // TODO: make the node vectors part of the tree itself?
-    IdentityHashMap<Tree, Double> scores = new IdentityHashMap<>();
+    IdentityHashMap<Tree, Double> scores = new IdentityHashMap<Tree, Double>();
     try {
       forwardPropagateTree(tree, words, nodeVectors, scores);
     } catch (AssertionError e) {
-      log.info("Failed to correctly process tree " + tree);
+      System.err.println("Failed to correctly process tree " + tree);
       throw e;
     }
 
     double score = 0.0;
     for (Tree node : scores.keySet()) {
       score += scores.get(node);
-      //log.info(Double.toString(score));
+      //System.err.println(Double.toString(score));
     }
     return score;
   }
@@ -134,7 +130,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     if (W == null) {
       String error = "Could not find W for tree " + tree;
       if (op.testOptions.verbose) {
-        log.info(error);
+        System.err.println(error);
       }
       throw new NoSuchParseException(error);
     }
@@ -146,14 +142,14 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     if (scoreW == null) {
       String error = "Could not find scoreW for tree " + tree;
       if (op.testOptions.verbose) {
-        log.info(error);
+        System.err.println(error);
       }
       throw new NoSuchParseException(error);
     }
     double score = scoreW.dot(currentVector);
     //score = NeuralUtils.sigmoid(score);
     scores.put(tree, score);
-    //log.info(Double.toString(score)+" ");
+    //System.err.print(Double.toString(score)+" ");
   }
 
   public int domainDimension() {
@@ -164,7 +160,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
   static final double TRAIN_LAMBDA = 1.0;
 
   public List<DeepTree> getAllHighestScoringTreesTest(List<Tree> trees){
-	  List<DeepTree> allBestTrees = new ArrayList<>();
+	  List<DeepTree> allBestTrees = new ArrayList<DeepTree>();
 	  for (Tree tree : trees) {
 		  allBestTrees.add(getHighestScoringTree(tree, 0));
 	  }
@@ -180,7 +176,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     Tree bestTree = null;
     IdentityHashMap<Tree, SimpleMatrix> bestVectors = null;
     for (Tree hypothesis : hypotheses) {
-      IdentityHashMap<Tree, SimpleMatrix> nodeVectors = new IdentityHashMap<>();
+      IdentityHashMap<Tree, SimpleMatrix> nodeVectors = new IdentityHashMap<Tree, SimpleMatrix>();
       double scoreHyp = score(hypothesis, nodeVectors);
       double deltaMargin =0;
       if (lambda != 0){
@@ -206,7 +202,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
       // For each tree, move in the direction of the gold tree, and
       // move away from the direction of the best scoring hypothesis
 
-      IdentityHashMap<Tree, SimpleMatrix> goldVectors = new IdentityHashMap<>();
+      IdentityHashMap<Tree, SimpleMatrix> goldVectors = new IdentityHashMap<Tree, SimpleMatrix>();
       double scoreGold = score(tree, goldVectors);
       DeepTree bestTree = getHighestScoringTree(tree, TRAIN_LAMBDA);
       DeepTree goldTree = new DeepTree(tree, goldVectors, scoreGold);
@@ -235,14 +231,14 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     binaryScoreDerivativesG = TwoDimensionalMap.treeMap();
     binaryScoreDerivativesB = TwoDimensionalMap.treeMap();
     Map<String, SimpleMatrix> unaryW_dfsG,unaryW_dfsB ;
-    unaryW_dfsG = new TreeMap<>();
-    unaryW_dfsB = new TreeMap<>();
+    unaryW_dfsG = new TreeMap<String, SimpleMatrix>();
+    unaryW_dfsB = new TreeMap<String, SimpleMatrix>();
     Map<String, SimpleMatrix> unaryScoreDerivativesG,unaryScoreDerivativesB ;
-    unaryScoreDerivativesG = new TreeMap<>();
-    unaryScoreDerivativesB= new TreeMap<>();
+    unaryScoreDerivativesG = new TreeMap<String, SimpleMatrix>();
+    unaryScoreDerivativesB= new TreeMap<String, SimpleMatrix>();
 
-    Map<String, SimpleMatrix> wordVectorDerivativesG = new TreeMap<>();
-    Map<String, SimpleMatrix> wordVectorDerivativesB = new TreeMap<>();
+    Map<String, SimpleMatrix> wordVectorDerivativesG = new TreeMap<String, SimpleMatrix>();
+    Map<String, SimpleMatrix> wordVectorDerivativesB = new TreeMap<String, SimpleMatrix>();
 
     for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : dvModel.binaryTransform) {
       int numRows = entry.getValue().numRows();
@@ -274,7 +270,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     Timing scoreTiming = new Timing();
     scoreTiming.doing("Scoring trees");
     int treeNum = 0;
-    MulticoreWrapper<Tree, Pair<DeepTree, DeepTree>> wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new ScoringProcessor());
+    MulticoreWrapper<Tree, Pair<DeepTree, DeepTree>> wrapper = new MulticoreWrapper<Tree, Pair<DeepTree, DeepTree>>(op.trainOptions.trainingThreads, new ScoringProcessor());
     for (Tree tree : trainingBatch) {
       wrapper.put(tree);
     }
@@ -290,7 +286,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
       boolean isDone = (Math.abs(bestTree.getScore() - goldTree.getScore()) <= 0.00001 || goldTree.getScore() > bestTree.getScore());
       String done = isDone ? "done" : "";
       formatter.format("Tree %6d Highest tree: %12.4f Correct tree: %12.4f %s", treeNum, bestTree.getScore(), goldTree.getScore(), done);
-      log.info(treeDebugLine.toString());
+      System.err.println(treeDebugLine.toString());
       if (!isDone){
         // if the gold tree is better than the best hypothesis tree by
         // a large enough margin, then the score difference will be 0
@@ -363,8 +359,8 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     // add regularization to cost:
     double[] currentParams = dvModel.paramsToVector();
     double regCost = 0;
-    for (double currentParam : currentParams) {
-      regCost += currentParam * currentParam;
+    for (int i = 0 ; i<currentParams.length;i++){
+      regCost += currentParams[i] * currentParams[i];
     }
     regCost = op.trainOptions.regCost * 0.5 * regCost;
     value  += regCost;

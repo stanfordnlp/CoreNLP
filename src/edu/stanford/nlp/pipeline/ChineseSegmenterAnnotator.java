@@ -1,13 +1,15 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
+import edu.stanford.nlp.ling.ChineseCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -23,10 +25,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  *
  * @author Pi-Chuan Chang
  */
-public class ChineseSegmenterAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseSegmenterAnnotator.class);
+public class ChineseSegmenterAnnotator implements Annotator {
 
   private AbstractSequenceClassifier<?> segmenter;
   private final boolean VERBOSE;
@@ -76,7 +75,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         }
       }
     }
-    this.VERBOSE = PropertiesUtils.getBool(props, name + ".verbose", false);
+    this.VERBOSE = PropertiesUtils.getBool(props, name + ".verbose", true);
     if (model == null) {
       throw new RuntimeException("Expected a property " + name + ".model");
     }
@@ -87,7 +86,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   private void loadModel(String segLoc) {
     // don't write very much, because the CRFClassifier already reports loading
     if (VERBOSE) {
-      log.info("Loading segmentation model ... ");
+      System.err.print("Loading segmentation model ... ");
     }
     segmenter = CRFClassifier.getClassifierNoExceptions(segLoc);
   }
@@ -95,7 +94,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   private void loadModel(String segLoc, Properties props) {
     // don't write very much, because the CRFClassifier already reports loading
     if (VERBOSE) {
-      log.info("Loading Segmentation Model ... ");
+      System.err.print("Loading Segmentation Model ... ");
     }
     try {
       segmenter = CRFClassifier.getClassifier(segLoc, props);
@@ -109,7 +108,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Adding Segmentation annotation ... ");
+      System.err.print("Adding Segmentation annotation ... ");
     }
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {
@@ -138,12 +137,8 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       String wordString = new String(ca);
 
       // if this word is a whitespace or a control character, set 'seg' to true for next word, and break
-      if ((Character.isSpaceChar(origText.charAt(i)) || Character.isISOControl(origText.charAt(i))) &&
-          ! (origText.charAt(i) == '\n' || origText.charAt(i) == '\r')) {
+      if (Character.isWhitespace(origText.charAt(i)) || Character.isISOControl(origText.charAt(i))) {
         seg = true;
-      } else if (Character.isISOControl(origText.charAt(i))) {
-        // skip it but don't set seg
-        seg = false;
       } else {
         // if this word is a word, put it as a feature label and set seg to false for next word
         wi.set(CoreAnnotations.ChineseCharAnnotation.class, wordString);
@@ -159,7 +154,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       }
     }
 
-    annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, words);
+    annotation.set(ChineseCoreAnnotations.CharactersAnnotation.class, words);
   }
 
   private void runSegmentation(CoreMap annotation) {
@@ -170,16 +165,15 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     // 0, 0+1 ,
 
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
-    List<CoreLabel> sentChars = annotation.get(SegmenterCoreAnnotations.CharactersAnnotation.class);
+    List<CoreLabel> sentChars = annotation.get(ChineseCoreAnnotations.CharactersAnnotation.class);
     List<CoreLabel> tokens = new ArrayList<>();
     annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
-    text = text.replaceAll("[\n\r]", "");
     List<String> words = segmenter.segmentString(text);
     if (VERBOSE) {
-      log.info(text);
-      log.info("--->");
-      log.info(words);
+      System.err.println(text);
+      System.err.println("--->");
+      System.err.println(words);
     }
 
     int pos = 0;
@@ -191,40 +185,23 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       }
       CoreLabel token = new CoreLabel();
       token.setWord(w);
-      token.setValue(w);
       token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
       pos += w.length();
       fl = sentChars.get(pos - 1);
       token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-      if (VERBOSE) {
-        log.info("Adding token " + token.toShorterString());
-      }
       tokens.add(token);
     }
   }
 
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
+  public Set<Requirement> requires() {
     return Collections.emptySet();
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return new HashSet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.BeforeAnnotation.class,
-        CoreAnnotations.AfterAnnotation.class,
-        CoreAnnotations.TokenBeginAnnotation.class,
-        CoreAnnotations.TokenEndAnnotation.class,
-        CoreAnnotations.PositionAnnotation.class,
-        CoreAnnotations.IndexAnnotation.class,
-        CoreAnnotations.OriginalTextAnnotation.class,
-        CoreAnnotations.ValueAnnotation.class
-    ));
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 
 }

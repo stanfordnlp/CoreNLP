@@ -1,9 +1,6 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
-
 import java.util.Arrays;
 
 
@@ -14,10 +11,7 @@ import java.util.Arrays;
  * @author Dan Klein
  * @author Teg Grenager (grenager@stanford.edu)
  */
-public class ExactBestSequenceFinder implements BestSequenceFinder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ExactBestSequenceFinder.class);
+public class ExactBestSequenceFinder implements BestSequenceFinder {
 
   private static final boolean DEBUG = false;
 
@@ -47,14 +41,11 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
       throw new RuntimeException("linearConstraints.length (" +  linearConstraints.length + ") does not match padLength (" + padLength + ") of SequenceModel" + ", length=="+length+", leftW="+leftWindow+", rightW="+rightWindow);
     int[][] tags = new int[padLength][];
     int[] tagNum = new int[padLength];
-    if (DEBUG) { log.info("Doing bestSequence length " + length + "; leftWin " + leftWindow + "; rightWin " + rightWindow + "; padLength " + padLength); }
+    if (DEBUG) { System.err.println("Doing bestSequence length " + length + "; leftWin " + leftWindow + "; rightWin " + rightWindow + "; padLength " + padLength); }
     for (int pos = 0; pos < padLength; pos++) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       tags[pos] = ts.getPossibleValues(pos);
       tagNum[pos] = tags[pos].length;
-      if (DEBUG) { log.info("There are " + tagNum[pos] + " values at position " + pos + ": " + Arrays.toString(tags[pos])); }
+      if (DEBUG) { System.err.println("There are " + tagNum[pos] + " values at position " + pos + ": " + Arrays.toString(tags[pos])); }
     }
 
     int[] tempTags = new int[padLength];
@@ -67,9 +58,6 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
       curProduct *= tagNum[i];
     }
     for (int pos = leftWindow + rightWindow; pos < padLength; pos++) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       if (pos > leftWindow + rightWindow) {
         curProduct /= tagNum[pos - leftWindow - rightWindow - 1]; // shift off
       }
@@ -80,18 +68,12 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
     // Score all of each window's options
     double[][] windowScore = new double[padLength][];
     for (int pos = leftWindow; pos < leftWindow + length; pos++) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
-      if (DEBUG) { log.info("scoring word " + pos + " / " + (leftWindow + length) + ", productSizes =  " + productSizes[pos] + ", tagNum = " + tagNum[pos] + "..."); }
+      if (DEBUG) { System.err.println("scoring word " + pos + " / " + (leftWindow + length) + ", productSizes =  " + productSizes[pos] + ", tagNum = " + tagNum[pos] + "..."); }
       windowScore[pos] = new double[productSizes[pos]];
       Arrays.fill(tempTags, tags[0][0]);
-      if (DEBUG) { log.info("windowScore[" + pos + "] has size (productSizes[pos]) " + windowScore[pos].length); }
+      if (DEBUG) { System.err.println("windowScore[" + pos + "] has size (productSizes[pos]) " + windowScore[pos].length); }
 
       for (int product = 0; product < productSizes[pos]; product++) {
-        if (Thread.interrupted()) {  // Allow interrupting
-          throw new RuntimeInterruptedException();
-        }
         int p = product;
         int shift = 1;
         for (int curPos = pos + rightWindow; curPos >= pos - leftWindow; curPos--) {
@@ -107,12 +89,12 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
         if (tempTags[pos] == tags[pos][0]) {
           // get all tags at once
           double[] scores = ts.scoresOf(tempTags, pos);
-          if (DEBUG) { log.info("Matched at array index [product] " + product + "; tempTags[pos] == tags[pos][0] == " + tempTags[pos]); }
-          if (DEBUG) { log.info("For pos " + pos + " scores.length is " + scores.length + "; tagNum[pos] = " + tagNum[pos] + "; windowScore[pos].length = " + windowScore[pos].length); }
-          if (DEBUG) { log.info("scores: " + Arrays.toString(scores)); }
+          if (DEBUG) { System.err.println("Matched at array index [product] " + product + "; tempTags[pos] == tags[pos][0] == " + tempTags[pos]); }
+          if (DEBUG) { System.err.println("For pos " + pos + " scores.length is " + scores.length + "; tagNum[pos] = " + tagNum[pos] + "; windowScore[pos].length = " + windowScore[pos].length); }
+          if (DEBUG) { System.err.println("scores: " + Arrays.toString(scores)); }
           // fill in the relevant windowScores
           for (int t = 0; t < tagNum[pos]; t++) {
-            if (DEBUG) { log.info("Setting value of windowScore[" + pos + "][" + product + "+" + t + "*" + shift + "] = " + scores[t]); }
+            if (DEBUG) { System.err.println("Setting value of windowScore[" + pos + "][" + product + "+" + t + "*" + shift + "] = " + scores[t]); }
             windowScore[pos][product + t * shift] = scores[t];
           }
         }
@@ -123,9 +105,6 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
     double[][] score = new double[padLength][];
     int[][] trace = new int[padLength][];
     for (int pos = 0; pos < padLength; pos++) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       score[pos] = new double[productSizes[pos]];
       trace[pos] = new int[productSizes[pos]];
     }
@@ -133,14 +112,11 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
     // Do forward Viterbi algorithm
 
     // loop over the classification spot
-    //log.info();
+    //System.err.println();
     for (int pos = leftWindow; pos < length + leftWindow; pos++) {
-      //log.info(".");
+      //System.err.print(".");
       // loop over window product types
       for (int product = 0; product < productSizes[pos]; product++) {
-        if (Thread.interrupted()) {  // Allow interrupting
-          throw new RuntimeInterruptedException();
-        }
         // check for initial spot
         if (pos == leftWindow) {
           // no predecessor type
@@ -148,7 +124,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
           if (linearConstraints != null) {
             if (DEBUG) {
               if (linearConstraints[pos][product % tagNum[pos]] != 0) {
-                log.info("Applying linear constraints=" + linearConstraints[pos][product % tagNum[pos]] + " to preScore="+ windowScore[pos][product] + " at pos="+pos+" for tag="+(product % tagNum[pos]));
+                System.err.println("Applying linear constraints=" + linearConstraints[pos][product % tagNum[pos]] + " to preScore="+ windowScore[pos][product] + " at pos="+pos+" for tag="+(product % tagNum[pos]));
               }
             }
             score[pos][product] += linearConstraints[pos][product % tagNum[pos]];
@@ -167,8 +143,8 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
             if (linearConstraints != null) {
               if (DEBUG) {
                 if (pos == 2 && linearConstraints[pos][product % tagNum[pos]] != 0) {
-                  log.info("Applying linear constraints=" + linearConstraints[pos][product % tagNum[pos]] + " to preScore="+ predScore + " at pos="+pos+" for tag="+(product % tagNum[pos]));
-                  log.info("predScore:" + predScore + " = score["+(pos - 1)+"]["+predProduct+"]:" + score[pos - 1][predProduct] + " + windowScore["+pos+"]["+product+"]:" + windowScore[pos][product]);
+                  System.err.println("Applying linear constraints=" + linearConstraints[pos][product % tagNum[pos]] + " to preScore="+ predScore + " at pos="+pos+" for tag="+(product % tagNum[pos]));
+                  System.err.println("predScore:" + predScore + " = score["+(pos - 1)+"]["+predProduct+"]:" + score[pos - 1][predProduct] + " + windowScore["+pos+"]["+product+"]:" + windowScore[pos][product]);
                 }
               }
               predScore += linearConstraints[pos][product % tagNum[pos]];
@@ -202,6 +178,6 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
       bestCurrentProduct = trace[pos + 1][bestNextProduct];
       tempTags[pos - leftWindow] = tags[pos - leftWindow][bestCurrentProduct / (productSizes[pos] / tagNum[pos - leftWindow])];
     }
-    return new Pair<>(tempTags, bestFinalScore);
+    return new Pair<int[], Double>(tempTags, bestFinalScore);
   }
 }

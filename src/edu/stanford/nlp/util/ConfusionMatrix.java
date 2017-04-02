@@ -1,16 +1,17 @@
 package edu.stanford.nlp.util;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * This implements a confusion table over arbitrary types of class labels. Main
@@ -132,7 +133,7 @@ public class ConfusionMatrix<U> {
   }
 
 
-  private ConcurrentHashMap<Pair<U, U>, Integer> confTable = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Pair<U, U>, Integer> confTable = new ConcurrentHashMap<Pair<U, U>, Integer>();
 
   /**
    * Increments the entry for this guess and gold by 1.
@@ -145,7 +146,7 @@ public class ConfusionMatrix<U> {
    * Increments the entry for this guess and gold by the given increment amount.
    */
   public synchronized void add(U guess, U gold, int increment) {
-      Pair<U, U> pair = new Pair<>(guess, gold);
+      Pair<U, U> pair = new Pair<U, U>(guess, gold);
       if (confTable.containsKey(pair)) {
         confTable.put(pair, confTable.get(pair) + increment);
       } else {
@@ -157,7 +158,7 @@ public class ConfusionMatrix<U> {
    * Retrieves the number of entries with this guess and gold.
    */
   public Integer get(U guess, U gold) {
-    Pair<U, U> pair = new Pair<>(guess, gold);
+    Pair<U, U> pair = new Pair<U, U>(guess, gold);
     if (confTable.containsKey(pair)) {
       return confTable.get(pair);
     } else {
@@ -170,7 +171,7 @@ public class ConfusionMatrix<U> {
    * entered into this confusion table.
    */
   public Set<U> uniqueLabels() {
-    HashSet<U> ret = new HashSet<>();
+    HashSet<U> ret = new HashSet<U>();
     for (Pair<U, U> pair : confTable.keySet()) {
       ret.add(pair.first());
       ret.add(pair.second());
@@ -234,15 +235,15 @@ public class ConfusionMatrix<U> {
       }
       return ret;
     } else {
-      ArrayList<String> names = new ArrayList<>();
-      HashMap<String, U> lookup = new HashMap<>();
+      ArrayList<String> names = new ArrayList<String>();
+      HashMap<String, U> lookup = new HashMap<String, U>();
       for (U label : labels) {
         names.add(label.toString());
         lookup.put(label.toString(), label);
       }
       Collections.sort(names);
 
-      ArrayList<U> ret = new ArrayList<>();
+      ArrayList<U> ret = new ArrayList<U>();
       for (String name : names) {
         ret.add(lookup.get(name));
       }
@@ -274,7 +275,7 @@ public class ConfusionMatrix<U> {
     return sum;
   }
 
-  private String getPlaceHolder(int index, U label) {
+  public String getPlaceHolder(int index, U label) {
     if (useRealLabels) {
       return label.toString();
     } else {
@@ -339,204 +340,4 @@ public class ConfusionMatrix<U> {
 
     return ret.toString();
   }
-
-
-  private class ConfusionGrid extends Canvas {
-
-    public class Grid extends JPanel {
-      private int columnCount = uniqueLabels().size() + 1;
-      private int rowCount = uniqueLabels().size() + 1;
-      private List<Rectangle> cells;
-      private Point selectedCell;
-
-      public Grid() {
-        cells = new ArrayList<>(columnCount * rowCount);
-        MouseAdapter mouseHandler;
-        mouseHandler = new MouseAdapter() {
-          @Override
-          public void mouseMoved(MouseEvent e) {
-            int width = getWidth();
-            int height = getHeight();
-            int cellWidth = width / columnCount;
-            int cellHeight = height / rowCount;
-            int column = e.getX() / cellWidth;
-            int row = e.getY() / cellHeight;
-            selectedCell = new Point(column, row);
-            repaint();
-          }
-        };
-        addMouseMotionListener(mouseHandler);
-      }
-
-      public void onMouseOver(Graphics2D g2d, Rectangle cell, U guess, U gold) {
-        // Compute values
-        int x = (int) (cell.getLocation().x + cell.getWidth() / 5.0);
-        int y = (int) ( cell.getLocation().y + cell.getHeight() / 5.0);
-        // Compute the text
-        Integer value = confTable.get(Pair.makePair(guess, gold));
-        if (value == null) { value = 0; }
-        String text = "Guess: " + guess.toString() + "\n" +
-            "Gold: " + gold.toString() + "\n" +
-            "Value: " + value;
-        // Set the font
-        Font bak = g2d.getFont();
-        g2d.setFont(bak.deriveFont(bak.getSize() * 2.0f));
-        // Render
-        g2d.setColor(Color.WHITE);
-        g2d.fill(cell);
-        g2d.setColor(Color.BLACK);
-        for (String line : text.split("\n")) {
-          g2d.drawString(line, x, y += g2d.getFontMetrics().getHeight());
-        }
-
-        // Reset
-        g2d.setFont(bak);
-      }
-
-      @Override
-      public Dimension getPreferredSize() {
-        return new Dimension(800, 800);
-      }
-
-      @Override
-      public void invalidate() {
-        cells.clear();
-        super.invalidate();
-      }
-
-      @Override
-      protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        // Dimensions
-        Graphics2D g2d = (Graphics2D) g.create();
-        g.setFont(new Font("Arial", Font.PLAIN, 10));
-        int width = getWidth();
-        int height = getHeight();
-        int cellWidth = width / columnCount;
-        int cellHeight = height / rowCount;
-        int xOffset = (width - (columnCount * cellWidth)) / 2;
-        int yOffset = (height - (rowCount * cellHeight)) / 2;
-
-        // Get label index
-        List<U> labels = uniqueLabels().stream().collect(Collectors.toList());
-
-        // Get color gradient
-        int maxDiag = 0;
-        int maxOffdiag = 0;
-        for (Map.Entry<Pair<U, U>, Integer> entry : confTable.entrySet()) {
-          if (entry.getKey().first == entry.getKey().second) {
-            maxDiag = Math.max(maxDiag, entry.getValue());
-          } else {
-            maxOffdiag = Math.max(maxOffdiag, entry.getValue());
-          }
-        }
-
-        // Render the grid
-        float[] hsb = new float[3];
-        for (int row = 0; row < rowCount; row++) {
-          for (int col = 0; col < columnCount; col++) {
-            // Position
-            int x = xOffset + (col * cellWidth);
-            int y = yOffset + (row * cellHeight);
-            float xCenter = xOffset + (col * cellWidth) + cellWidth / 3.0f;
-            float yCenter = yOffset + (row * cellHeight) + cellHeight / 2.0f;
-            // Get text + Color
-            String text;
-            Color bg = Color.WHITE;
-            if (row == 0 && col == 0) {
-              text = "V guess | gold >";
-            } else if (row == 0) {
-              text = labels.get(col - 1).toString();
-            } else if (col == 0) {
-              text = labels.get(row - 1).toString();
-            } else {
-              // Set value
-              Integer count = confTable.get(Pair.makePair(labels.get(row - 1), labels.get(col - 1)));
-              if (count == null) {
-                count = 0;
-              }
-              text = "" + count;
-              // Get color
-              if (row == col) {
-                double percentGood = ((double) count) / ((double) maxDiag);
-                hsb = Color.RGBtoHSB(
-                    (int) (255 - (255.0 * percentGood)),
-                    (int) (255 - (255.0 * percentGood / 2.0)),
-                    (int) (255 - (255.0 * percentGood)),
-                    hsb
-                );
-                bg = Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
-              } else {
-                double percentBad = ((double) count) / ((double) maxOffdiag);
-                hsb = Color.RGBtoHSB(
-                    (int) (255 - (255.0 * percentBad / 2.0)),
-                    (int) (255 - (255.0 * percentBad)),
-                    (int) (255 - (255.0 * percentBad)),
-                    hsb
-                );
-                bg = Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
-
-              }
-            }
-            // Draw
-            Rectangle cell = new Rectangle(x, y, cellWidth, cellHeight);
-            g2d.setColor(bg);
-            g2d.fill(cell);
-            g2d.setColor(Color.BLACK);
-            g2d.drawString(text, xCenter, yCenter);
-            cells.add(cell);
-          }
-        }
-
-        // Mouse over
-        if (selectedCell != null && selectedCell.x > 0 && selectedCell.y > 0) {
-          int index = selectedCell.x + (selectedCell.y * columnCount);
-          Rectangle cell = cells.get(index);
-          onMouseOver(g2d, cell, labels.get(selectedCell.y - 1), labels.get(selectedCell.x - 1));
-        }
-
-        // Clean up
-        g2d.dispose();
-      }
-    }
-
-    public ConfusionGrid() {
-      EventQueue.invokeLater(() -> {
-        try {
-          UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignored) {
-        }
-
-        JFrame frame = new JFrame("Confusion Matrix");
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
-        frame.add(new Grid());
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-      });
-    }
-  }
-
-  /**
-   * Show the confusion matrix in a GUI.
-   */
-  public void gui() {
-    ConfusionGrid gui = new ConfusionGrid();
-    gui.setVisible(true);
-  }
-
-  public static void main(String[] args) {
-    ConfusionMatrix<String> confusion = new ConfusionMatrix<>();
-    confusion.add("a", "a");
-    confusion.add("a", "b");
-    confusion.add("b", "a");
-    confusion.add("a", "a");
-    confusion.add("b", "b");
-    confusion.add("b", "b");
-    confusion.add("a", "b");
-    confusion.gui();
-  }
-
 }

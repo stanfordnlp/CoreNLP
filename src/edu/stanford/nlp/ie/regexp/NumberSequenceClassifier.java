@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.regexp; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.regexp;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -51,10 +50,7 @@ import java.util.regex.Pattern;
  * @author Christopher Manning
  * @author Mihai (integrated with NumberNormalizer, SUTime)
  */
-public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLabel>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NumberSequenceClassifier.class);
+public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLabel> {
 
   private static final boolean DEBUG = false;
 
@@ -63,14 +59,13 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   public static final boolean USE_SUTIME_DEFAULT = TimeExpressionExtractorFactory.DEFAULT_EXTRACTOR_PRESENT;
   public static final String USE_SUTIME_PROPERTY = "ner.useSUTime";
   public static final String USE_SUTIME_PROPERTY_BASE = "useSUTime";
-  public static final String SUTIME_PROPERTY = "sutime";
 
   private final TimeExpressionExtractor timexExtractor;
 
   public NumberSequenceClassifier() {
     this(new Properties(), USE_SUTIME_DEFAULT, new Properties());
     if (! CURRENCY_WORD_PATTERN.matcher("pounds").matches()) {
-      log.info("NumberSequence: Currency pattern broken");
+      System.err.println("NumberSequence: Currency pattern broken");
     }
   }
 
@@ -83,7 +78,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     super(props);
     this.useSUTime = useSUTime;
     if(this.useSUTime) {
-      this.timexExtractor = TimeExpressionExtractorFactory.createExtractor(SUTIME_PROPERTY, sutimeProps);
+      this.timexExtractor = TimeExpressionExtractorFactory.createExtractor("sutime", sutimeProps);
     } else {
       this.timexExtractor = null;
     }
@@ -158,11 +153,11 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
         Timex timex = timeExpression.get(TimeAnnotations.TimexAnnotation.class);
         if(timex != null){
           if(DEBUG){
-            log.info("FOUND DATE/TIME \"" + timeExpression +
+            System.err.println("FOUND DATE/TIME \"" + timeExpression +
                 "\" with offsets " + start + " " + end +
                 " and value " + timex);
-            log.info("The above CoreMap has the following fields:");
-            // for(Class key: timeExpression.keySet()) log.info("\t" + key + ": " + timeExpression.get(key));
+            System.err.println("The above CoreMap has the following fields:");
+            // for(Class key: timeExpression.keySet()) System.err.println("\t" + key + ": " + timeExpression.get(key));
           }
           String label = timex.timexType();
           for(int i = start; i < end; i ++){
@@ -191,7 +186,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
           String type = number.get(CoreAnnotations.NumericCompositeTypeAnnotation.class);
           Number value = number.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
           if(type != null){
-            if(DEBUG) log.info("FOUND NUMBER \"" + number + "\" with offsets " + start + " " + end + " and value " + value + " and type " + type);
+            if(DEBUG) System.err.println("FOUND NUMBER \"" + number + "\" with offsets " + start + " " + end + " and value " + value + " and type " + type);
             for(int i = start; i < end; i ++){
               CoreLabel token = tokenSequence.get(i - offset);
               if(token.get(CoreAnnotations.AnswerAnnotation.class).equals(flags.backgroundSymbol)){
@@ -336,9 +331,9 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
    */
   private List<CoreMap> runSUTime(CoreMap sentence, final CoreMap document) {
     /*
-    log.info("PARSING SENTENCE: " + sentence.get(CoreAnnotations.TextAnnotation.class));
+    System.err.println("PARSING SENTENCE: " + sentence.get(CoreAnnotations.TextAnnotation.class));
     for(CoreLabel t: sentence.get(CoreAnnotations.TokensAnnotation.class)){
-      log.info("TOKEN: \"" + t.word() + "\" \"" + t.get(CoreAnnotations.OriginalTextAnnotation.class) + "\" " + t.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) + " " + t.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+      System.err.println("TOKEN: \"" + t.word() + "\" \"" + t.get(CoreAnnotations.OriginalTextAnnotation.class) + "\" " + t.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) + " " + t.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
     }
     */
 
@@ -470,7 +465,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     // no need to adjust anything; use the original list
     if(! adjustCharacterOffsets && ! forceCopy) return srcList;
 
-    List<CoreLabel> dstList = new ArrayList<>();
+    List<CoreLabel> dstList = new ArrayList<CoreLabel>();
     int adjustment = 0;
     int offset = 0; // for when offsets are not available
     for(CoreLabel src: srcList) {
@@ -609,14 +604,14 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   public static final Pattern PERCENT_SYMBOL_PATTERN = Pattern.compile("%");
 
   private List<CoreLabel> classifyOld(List<CoreLabel> document) {
-    // if (DEBUG) { log.info("NumberSequenceClassifier tagging"); }
-    PaddedList<CoreLabel> pl = new PaddedList<>(document, pad);
+    // if (DEBUG) { System.err.println("NumberSequenceClassifier tagging"); }
+    PaddedList<CoreLabel> pl = new PaddedList<CoreLabel>(document, pad);
     for (int i = 0, sz = pl.size(); i < sz; i++) {
       CoreLabel me = pl.get(i);
       CoreLabel prev = pl.get(i - 1);
       CoreLabel next = pl.get(i + 1);
       CoreLabel next2 = pl.get(i + 2);
-      //if (DEBUG) { log.info("Tagging:" + me.word()); }
+      //if (DEBUG) { System.err.println("Tagging:" + me.word()); }
       me.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
       if (CURRENCY_SYMBOL_PATTERN.matcher(me.word()).matches() &&
               (prev.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD") ||
@@ -624,12 +619,12 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
         // dollar, pound, pound, yen,
         // Penn Treebank ancient # as pound, euro,
         if (DEBUG) {
-          log.info("Found currency sign:" + me.word());
+          System.err.println("Found currency sign:" + me.word());
         }
         me.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
       } else if (me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
         if (DEBUG) {
-          log.info("Tagging CD:" + me.word());
+          System.err.println("Tagging CD:" + me.word());
         }
 
         if (TIME_PATTERN.matcher(me.word()).matches()) {
@@ -666,7 +661,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
           me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
         } else {
           if (DEBUG) {
-            log.info("Found number:" + me.word());
+            System.err.println("Found number:" + me.word());
           }
           if (prev.getString(CoreAnnotations.AnswerAnnotation.class).equals("MONEY")) {
             me.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
@@ -695,7 +690,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
             me.get(CoreAnnotations.TextAnnotation.class) != null &&
             me.get(CoreAnnotations.TextAnnotation.class).equalsIgnoreCase("and")) {
           if (DEBUG) {
-            log.info("Found number and:" + me.word());
+            System.err.println("Found number and:" + me.word());
           }
           String wd = prev.word();
           if (wd.equalsIgnoreCase("hundred") ||
@@ -765,13 +760,13 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
    */
   private static boolean leftScanFindsWeightWord(List<CoreLabel> pl, int i) {
     if (DEBUG) {
-      log.info("leftScan from: " + pl.get(i).word());
+      System.err.println("leftScan from: " + pl.get(i).word());
     }
     for (int j = i - 1; j >= 0 && j >= i - 3; j--) {
       CoreLabel fl = pl.get(j);
       if (fl.word().startsWith("weigh")) {
         if (DEBUG) {
-          log.info("leftScan found weight: " + fl.word());
+          System.err.println("leftScan found weight: " + fl.word());
         }
         return true;
       }
@@ -791,7 +786,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   private static boolean rightScanFindsMoneyWord(List<CoreLabel> pl, int i) {
     int j = i;
     if (DEBUG) {
-      log.info("rightScan from: " + pl.get(j).word());
+      System.err.println("rightScan from: " + pl.get(j).word());
     }
     int sz = pl.size();
     while (j < sz && pl.get(j).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
@@ -803,7 +798,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     String tag = pl.get(j).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
     String word = pl.get(j).word();
     if (DEBUG) {
-      log.info("rightScan testing: " + word + '/' + tag + "; answer is: " + Boolean.toString((tag.equals("NN") || tag.equals("NNS")) && CURRENCY_WORD_PATTERN.matcher(word).matches()));
+      System.err.println("rightScan testing: " + word + '/' + tag + "; answer is: " + Boolean.toString((tag.equals("NN") || tag.equals("NNS")) && CURRENCY_WORD_PATTERN.matcher(word).matches()));
     }
     return (tag.equals("NN") || tag.equals("NNS")) && CURRENCY_WORD_PATTERN.matcher(word).matches();
   }
@@ -817,8 +812,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
   @Override
   public void serializeClassifier(String serializePath) {
-    log.info("Serializing classifier to " + serializePath + "...");
-    log.info("done.");
+    System.err.print("Serializing classifier to " + serializePath + "...");
+    System.err.println("done.");
   }
 
   public void serializeClassifier(ObjectOutputStream oos) {}
@@ -854,7 +849,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
     if (textFile != null) {
       DocumentReaderAndWriter<CoreLabel> readerAndWriter =
-              new PlainTextDocumentReaderAndWriter<>();
+        new PlainTextDocumentReaderAndWriter<CoreLabel>();
       nsc.classifyAndWriteAnswers(textFile, readerAndWriter, false);
     }
   } // end main

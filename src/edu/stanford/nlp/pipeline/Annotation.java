@@ -31,7 +31,7 @@ import java.util.List;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 
@@ -92,7 +92,7 @@ public class Annotation extends ArrayCoreMap {
   public Annotation(List<CoreMap> sentences) {
     super();
     this.set(CoreAnnotations.SentencesAnnotation.class, sentences);
-    List<CoreLabel> tokens = new ArrayList<>();
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>();
     StringBuilder text = new StringBuilder();
     for (CoreMap sentence : sentences) {
       List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
@@ -104,7 +104,7 @@ public class Annotation extends ArrayCoreMap {
         if (text.length() > 0) {
           text.append('\n');
         }
-        text.append(SentenceUtils.listToString(sentenceTokens));
+        text.append(Sentence.listToString(sentenceTokens));
       }
     }
     this.set(CoreAnnotations.TokensAnnotation.class, tokens);

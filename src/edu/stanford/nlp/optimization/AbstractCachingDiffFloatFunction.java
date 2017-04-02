@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunction, HasFloatInitial {
 
-  private float[] lastX = null;
+  float[] lastX = null;
 
   protected float[] derivative = null;
   protected float value = 0.0f;
@@ -26,7 +26,7 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
   @Override
   public float[] initial() {
     float[] initial = new float[domainDimension()];
-    // Arrays.fill(initial, 0.0f);  // not needed; Java arrays zero initialized
+    Arrays.fill(initial, 0.0f);
     return initial;
   }
 
@@ -67,5 +67,4 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
     ensure(x);
     return derivative;
   }
-
 }

@@ -1,11 +1,18 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
-import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
@@ -14,10 +21,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  *
  * @author Anna Rafferty
  */
-public class POSTaggerAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(POSTaggerAnnotator.class);
+public class POSTaggerAnnotator implements Annotator {
 
   private final MaxentTagger pos;
 
@@ -76,6 +80,14 @@ public class POSTaggerAnnotator implements Annotator  {
     this.reuseTags = PropertiesUtils.getBool(props, annotatorName + ".reuseTags", false);
   }
 
+  public static String signature(Properties props) {
+    return ("pos.maxlen:" + props.getProperty("pos.maxlen", "") +
+            "pos.verbose:" + PropertiesUtils.getBool(props, "pos.verbose") + 
+            "pos.reuseTags:" + PropertiesUtils.getBool(props, "pos.reuseTags") + 
+            "pos.model:" + props.getProperty("pos.model", DefaultPaths.DEFAULT_POS_MODEL) +
+            "pos.nthreads:" + props.getProperty("pos.nthreads", props.getProperty("nthreads", "")));
+  }
+
   private static MaxentTagger loadModel(String loc, boolean verbose) {
     Timing timer = null;
     if (verbose) {
@@ -92,13 +104,13 @@ public class POSTaggerAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     // turn the annotation into a sentence
-    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+    if (annotation.has(CoreAnnotations.SentencesAnnotation.class)) {
       if (nThreads == 1) {
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           doOneSentence(sentence);
         }
       } else {
-        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<>(nThreads, new POSTaggerProcessor());
+        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads, new POSTaggerProcessor());
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           wrapper.put(sentence);
           while (wrapper.peek()) {
@@ -134,10 +146,9 @@ public class POSTaggerAnnotator implements Annotator  {
       try {
         tagged = pos.tagSentence(tokens, this.reuseTags);
       } catch (OutOfMemoryError e) {
-        log.error(e); // Beware that we can now get an OOM in logging, too.
-        log.warn("Tagging of sentence ran out of memory. " +
+        System.err.println("WARNING: Tagging of sentence ran out of memory. " +
                            "Will ignore and continue: " +
-                           SentenceUtils.listToString(tokens));
+                           Sentence.listToString(tokens));
       }
     }
 
@@ -146,27 +157,21 @@ public class POSTaggerAnnotator implements Annotator  {
         tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
       }
     } else {
-      for (CoreLabel token : tokens) {
-        token.set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
+      for (int i = 0, sz = tokens.size(); i < sz; i++) {
+        tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
       }
     }
     return sentence;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.PartOfSpeechAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(POS_REQUIREMENT);
   }
 
 }

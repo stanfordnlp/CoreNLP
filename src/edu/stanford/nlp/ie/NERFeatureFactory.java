@@ -56,7 +56,6 @@ import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -79,11 +78,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li>Add code to NERFeatureFactory for this feature. First decide which
  *     classes (hidden states) are involved in the feature.  If only the
  *     current class, you add the feature extractor to the
- *     {@code featuresC} code, if both the current and previous class,
- *     then {@code featuresCpC}, etc.</li>
+ *     <code>featuresC</code> code, if both the current and previous class,
+ *     then <code>featuresCpC</code>, etc.</li>
  * </ol>
  * <p> Parameters can be defined using a Properties file
- * (specified on the command-line with {@code -prop} <i>propFile</i>),
+ * (specified on the command-line with <code>-prop</code> <i>propFile</i>),
  * or directly on the command line. The following properties are recognized:
  * </p>
  * <table border="1">
@@ -101,7 +100,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td> dehyphenateNGrams</td><td>boolean</td><td>false</td><td>Remove hyphens before making features from letter n-grams</td></tr>
  * <tr><td> conjoinShapeNGrams</td><td>boolean</td><td>false</td><td>Conjoin word shape and n-gram features</td></tr>
  * <tr><td> useNeighborNGrams</td><td>boolean</td><td>false</td><td>Use letter n-grams for the previous and current words in the CpC clique.  This feature helps languages such as Chinese, but not so much for English</td></tr>
- * <tr><td> useMoreNeighborNGrams</td><td>boolean</td><td>false</td><td>Use letter n-grams for the previous and next words in the C clique.  This feature helps languages such as Chinese, but not so much for English</td></tr>
  * <tr><td> usePrev</td><td>boolean</td><td>false</td><td>Gives you feature for (pw,c), and together with other options enables other previous features, such as (pt,c) [with useTags)</td></tr>
  * <tr><td> useNext</td><td>boolean</td><td>false</td><td>Gives you feature for (nw,c), and together with other options enables other next features, such as (nt,c) [with useTags)</td></tr>
  * <tr><td> useTags</td><td>boolean</td><td>false</td><td>Gives you features for (t,c), (pt,c) [if usePrev], (nt,c) [if useNext]</td></tr>
@@ -181,14 +179,14 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td> usePosition</td><td>boolean</td><td>false</td><td>Use combination of position in sentence and class as a feature</td></tr>
  * <tr><td> useBeginSent</td><td>boolean</td><td>false</td><td>Use combination of initial position in sentence and class (and word shape) as a feature.  (Doesn't seem to help.)</td></tr>
  * <tr><td> useDisjShape</td><td>boolean</td><td>false</td><td>Include features giving disjunctions of word shapes anywhere in the left or right disjunctionWidth words (preserving direction but not position)</td></tr>
- * <tr><td> useClassFeature</td><td>boolean</td><td>false</td><td>Include a feature for the class (as a class marginal).  Puts a prior on the classes which is equivalent to how often the feature appeared in the training data. This is the same thing as having a bias vector or having an always-on feature in a model.</td></tr>
+ * <tr><td> useClassFeature</td><td>boolean</td><td>false</td><td>Include a feature for the class (as a class marginal).  Puts a prior on the classes which is equivalent to how often the feature appeared in the training data.</td></tr>
  * <tr><td> useShapeConjunctions</td><td>boolean</td><td>false</td><td>Conjoin shape with tag or position</td></tr>
  * <tr><td> useWordTag</td><td>boolean</td><td>false</td><td>Include word and tag pair features</td></tr>
  * <tr><td> useLastRealWord</td><td>boolean</td><td>false</td><td>Iff the prev word is of length 3 or less, add an extra feature that combines the word two back and the current word's shape. <i>Weird!</i></td></tr>
  * <tr><td> useNextRealWord</td><td>boolean</td><td>false</td><td>Iff the next word is of length 3 or less, add an extra feature that combines the word after next and the current word's shape. <i>Weird!</i></td></tr>
  * <tr><td> useTitle</td><td>boolean</td><td>false</td><td>Match a word against a list of name titles (Mr, Mrs, etc.). Doesn't really seem to help.</td></tr>
  * <tr><td> useTitle2</td><td>boolean</td><td>false</td><td>Match a word against a better list of English name titles (Mr, Mrs, etc.). Still doesn't really seem to help.</td></tr>
- * <tr><td> useDistSim</td><td>boolean</td><td>false</td><td>Load a file of distributional similarity classes (specified by {@code distSimLexicon}) and use it for features</td></tr>
+ * <tr><td> useDistSim</td><td>boolean</td><td>false</td><td>Load a file of distributional similarity classes (specified by <code>distSimLexicon</code>) and use it for features</td></tr>
  * <tr><td> distSimLexicon</td><td>String</td><td></td><td>The file to be loaded for distsim classes.</td></tr>
  * <tr><td> distSimFileFormat</td><td>String</td><td>alexclark</td><td>Files should be formatted as tab separated rows where each row is a word/class pair.  alexclark=word first, terrykoo=class first</td></tr>
  * <tr><td> useOccurrencePatterns</td><td>boolean</td><td>false</td><td>This is a very engineered feature designed to capture multiple references to names.  If the current word isn't capitalized, followed by a non-capitalized word, and preceded by a word with alphabetic characters, it returns NO-OCCURRENCE-PATTERN.  Otherwise, if the previous word is a capitalized NNP, then if in the next 150 words you find this PW-W sequence, you get XY-NEXT-OCCURRENCE-XY, else if you find W you get XY-NEXT-OCCURRENCE-Y.  Similarly for backwards and XY-PREV-OCCURRENCE-XY and XY-PREV-OCCURRENCE-Y.  Else (if the previous word isn't a capitalized NNP), under analogous rules you get one or more of X-NEXT-OCCURRENCE-YX, X-NEXT-OCCURRENCE-XY, X-NEXT-OCCURRENCE-X, X-PREV-OCCURRENCE-YX, X-PREV-OCCURRENCE-XY, X-PREV-OCCURRENCE-X.</td></tr>
@@ -196,7 +194,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td> useGenericFeatures</td><td>boolean</td><td>false</td><td>If true, any features you include in the map will be incorporated into the model with values equal to those given in the file; values are treated as strings unless you use the "realValued" option (described below)</td></tr>
  * <tr><td> justify</td><td>boolean</td><td>false</td><td>Print out all
  * feature/class pairs and their weight, and then for each input data
- * point, print justification (weights) for active features. Only implemented for CMMClassifier.</td></tr>
+ * point, print justification (weights) for active features</td></tr>
  * <tr><td> normalize</td><td>boolean</td><td>false</td><td>For the CMMClassifier (only) if this is true then the Scorer normalizes scores as probabilities.</td></tr>
  * <tr><td> useHuber</td><td>boolean</td><td>false</td><td>Use a Huber loss prior rather than the default quadratic loss.</td></tr>
  * <tr><td> useQuartic</td><td>boolean</td><td>false</td><td>Use a Quartic prior rather than the default quadratic loss.</td></tr>
@@ -369,10 +367,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Huy Nguyen
  * @author Mengqiu Wang
  */
-public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN>  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(NERFeatureFactory.class);
+public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> {
 
   private static final long serialVersionUID = -2329726064739185544L;
 
@@ -401,7 +396,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String domain = cInfo.get(0).get(CoreAnnotations.DomainAnnotation.class);
     final boolean doFE = domain != null;
 
-//    log.info(doFE+"\t"+domain);
+//    System.err.println(doFE+"\t"+domain);
 
     // there are two special cases below, because 2 cliques have 2 names
     Collection<String> c;
@@ -455,7 +450,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       addAllInterningAndSuffixing(features, c, domain + '-' + suffix);
     }
 
-    // log.info(StringUtils.join(features,"\n")+"\n");
+    // System.err.println(StringUtils.join(features,"\n")+"\n");
     return features;
   }
 
@@ -474,7 +469,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     if (lexicon != null) {
       return;
     }
-    Timing timing = new Timing();
+    Timing.startDoing("Loading distsim lexicon from " + flags.distSimLexicon);
     lexicon = Generics.newHashMap();
     boolean terryKoo = "terryKoo".equals(flags.distSimFileFormat);
     for (String line : ObjectBank.getLineIterator(flags.distSimLexicon,
@@ -502,20 +497,13 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
       lexicon.put(word, wordClass);
     }
-    timing.done(log, "Loading distsim lexicon from " + flags.distSimLexicon);
+    Timing.endDoing();
   }
 
-  public String describeDistsimLexicon() {
-    if (lexicon == null) {
-      return "No distsim lexicon";
-    } else {
-      return "Distsim lexicon of size " + lexicon.size();
-    }
-  }
 
   private void distSimAnnotate(PaddedList<IN> info) {
     for (CoreLabel fl : info) {
-      if (fl.containsKey(CoreAnnotations.DistSimAnnotation.class)) { return; }
+      if (fl.has(CoreAnnotations.DistSimAnnotation.class)) { return; }
       String word = getWord(fl);
       if ( ! flags.casedDistSim) {
         word = word.toLowerCase();
@@ -787,7 +775,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String pShape = p.getString(CoreAnnotations.ShapeAnnotation.class);
     String nShape = n.getString(CoreAnnotations.ShapeAnnotation.class);
 
-    Collection<String> featuresC = new ArrayList<>();
+    Collection<String> featuresC = new ArrayList<String>();
 
     if (flags.useDistSim) {
       distSimAnnotate(cInfo);
@@ -1009,10 +997,10 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (isOrdinal(cInfo, loc)) {
           featuresC.add("C_ORDINAL");
           if (isOrdinal(cInfo, loc-1)) {
-            //log.info(getWord(p) + " ");
+            //System.err.print(getWord(p) + " ");
             featuresC.add("PC_ORDINAL");
           }
-          //log.info(cWord);
+          //System.err.println(cWord);
         }
         if (isOrdinal(cInfo, loc-1)) {
           featuresC.add("P_ORDINAL");
@@ -1253,7 +1241,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
           subs = wordToSubstrings.get(cWord);
         }
         if (subs == null) {
-          subs = new ArrayList<>();
+          subs = new ArrayList<String>();
           String word = '<' + cWord + '>';
           if (flags.lowercaseNGrams) {
             word = word.toLowerCase();
@@ -1429,7 +1417,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       if (flags.useNGrams) {
         Collection<String> subs = wordToSubstrings.get(cWord);
         if (subs == null) {
-          subs = new ArrayList<>();
+          subs = new ArrayList<String>();
           String word = '<' + cWord + '>';
           if (flags.lowercaseNGrams) {
             word = word.toLowerCase();
@@ -1565,7 +1553,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         int val = Integer.parseInt(cWord);
         if(val > 0) featuresC.add("POSITIVE_INTEGER");
         else if(val < 0) featuresC.add("NEGATIVE_INTEGER");
-        // log.info("FOUND INTEGER");
+        // System.err.println("FOUND INTEGER");
       } catch(NumberFormatException e){
         // not an integer value, nothing to do
       }
@@ -1579,7 +1567,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
       //now look through the cached keys
       for (Class key : genericAnnotationKeys) {
-        //log.info("Adding feature: " + CoreLabel.genericValues.get(key) + " with value " + c.get(key));
+        //System.err.println("Adding feature: " + CoreLabel.genericValues.get(key) + " with value " + c.get(key));
         if (c.get(key) != null && c.get(key) instanceof Collection) {
           for (Object ob: (Collection)c.get(key)) {
             featuresC.add(ob + "-" + CoreLabel.genericValues.get(key));
@@ -1637,7 +1625,6 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       featuresC.add(c.get(CoreAnnotations.CommonWordsAnnotation.class));
 
     if (flags.useRadical && cWord.length() > 0) {
-      // todo [cdm 2016]: Really all stuff in this file should be fixed to work with codepoints outside BMP
       if (cWord.length() == 1) {
         featuresC.add(RadicalMap.getRadical(cWord.charAt(0)) +
                       "-SINGLE-CHAR-RADICAL");
@@ -1659,36 +1646,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
        featuresC.add(s+"-SPLITWORD");
       }
     }
-
-    if (flags.useMoreNeighborNGrams) {
-      int maxLen = pWord.length();
-      if (flags.maxNGramLeng >= 0 && flags.maxNGramLeng < maxLen) {
-        maxLen = flags.maxNGramLeng;
-      }
-      for (int len = 1; len <= maxLen; ++len) {
-        featuresC.add(pWord.substring(0, len) + "-PREV-PREFIX");
-      }
-      for (int pos = pWord.length() - maxLen; pos < pWord.length(); ++pos) {
-        featuresC.add(pWord.substring(pos, pWord.length()) +
-                        "-PREV-SUFFIX");
-      }
-
-      maxLen = nWord.length();
-      if (flags.maxNGramLeng >= 0 && flags.maxNGramLeng < maxLen) {
-        maxLen = flags.maxNGramLeng;
-      }
-      for (int len = 1; len <= maxLen; ++len) {
-        featuresC.add(nWord.substring(0, len) + "-NEXT-PREFIX");
-      }
-      for (int pos = nWord.length() - maxLen; pos < nWord.length(); ++pos) {
-        featuresC.add(nWord.substring(pos, nWord.length()) +
-                        "-NEXT-SUFFIX");
-      }
-    }
-
     return featuresC;
   } // end featuresC()
-
 
   /**
    * Binary feature annotations
@@ -1724,7 +1683,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String pDS = p.getString(CoreAnnotations.DistSimAnnotation.class);
     String cShape = c.getString(CoreAnnotations.ShapeAnnotation.class);
     String pShape = p.getString(CoreAnnotations.ShapeAnnotation.class);
-    Collection<String> featuresCpC = new ArrayList<>();
+    Collection<String> featuresCpC = new ArrayList<String>();
 
     if (flags.noEdgeFeature)
       return featuresCpC;
@@ -1910,7 +1869,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String cWord = getWord(c);
     String pWord = getWord(p);
     String p2Word = getWord(p2);
-    Collection<String> featuresCp2C = new ArrayList<>();
+    Collection<String> featuresCp2C = new ArrayList<String>();
 
     if (flags.useMoreAbbr) {
       featuresCp2C.add(p2.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-P2ABBRANS");
@@ -1955,7 +1914,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String pWord = getWord(p);
     String p2Word = getWord(p2);
     String p3Word = getWord(p3);
-    Collection<String> featuresCp3C = new ArrayList<>();
+    Collection<String> featuresCp3C = new ArrayList<String>();
 
     if (flags.useParenMatching) {
       if (flags.useReverse) {
@@ -1989,7 +1948,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String p3Word = getWord(p3);
     String p4Word = getWord(p4);
 
-    Collection<String> featuresCp4C = new ArrayList<>();
+    Collection<String> featuresCp4C = new ArrayList<String>();
 
     if (flags.useParenMatching) {
       if (flags.useReverse) {
@@ -2024,7 +1983,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String p3Word = getWord(p3);
     String p4Word = getWord(p4);
     String p5Word = getWord(p5);
-    Collection<String> featuresCp5C = new ArrayList<>();
+    Collection<String> featuresCp5C = new ArrayList<String>();
 
     if (flags.useParenMatching) {
       if (flags.useReverse) {
@@ -2053,7 +2012,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String pWord = getWord(p);
     // String p2Word = getWord(p2);
 
-    Collection<String> featuresCpCp2C = new ArrayList<>();
+    Collection<String> featuresCpCp2C = new ArrayList<String>();
 
     if (flags.useInternal && flags.useExternal) {
 
@@ -2139,7 +2098,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
 
-    Collection<String> featuresCpCp2Cp3C = new ArrayList<>();
+    Collection<String> featuresCpCp2Cp3C = new ArrayList<String>();
 
     if (flags.useTaggySequences) {
       if (flags.useTags) {
@@ -2173,7 +2132,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   }
 
   protected Collection<String> featuresCpCp2Cp3Cp4C(PaddedList<IN> cInfo, int loc) {
-    Collection<String> featuresCpCp2Cp3Cp4C = new ArrayList<>();
+    Collection<String> featuresCpCp2Cp3Cp4C = new ArrayList<String>();
 
     CoreLabel p = cInfo.get(loc - 1);
 
@@ -2193,7 +2152,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   protected Collection<String> featuresCnC(PaddedList<IN> cInfo, int loc) {
     CoreLabel c = cInfo.get(loc);
 
-    Collection<String> featuresCnC = new ArrayList<>();
+    Collection<String> featuresCnC = new ArrayList<String>();
 
     if (flags.useNext) {
       if (flags.useSequences && flags.useNextSequences) {
@@ -2209,7 +2168,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   protected Collection<String> featuresCpCnC(PaddedList<IN> cInfo, int loc) {
     CoreLabel c = cInfo.get(loc);
 
-    Collection<String> featuresCpCnC = new ArrayList<>();
+    Collection<String> featuresCpCnC = new ArrayList<String>();
 
     if (flags.useNext && flags.usePrev) {
       if (flags.useSequences && flags.usePrevSequences && flags.useNextSequences) {
@@ -2222,7 +2181,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   }
 
 
-  private int reverse(int i) {
+  int reverse(int i) {
     return (flags.useReverse ? -1 * i : i);
   }
 
@@ -2232,11 +2191,11 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String nWord = getWord(cInfo.get(loc + reverse(1)));
     CoreLabel p = cInfo.get(loc - reverse(1));
     String pWord = getWord(p);
-    // log.info(word+" "+nWord);
+    // System.err.println(word+" "+nWord);
     if (!(isNameCase(word) && noUpperCase(nWord) && hasLetter(nWord) && hasLetter(pWord) && p != cInfo.getPad())) {
       return Collections.singletonList("NO-OCCURRENCE-PATTERN");
     }
-    // log.info("LOOKING");
+    // System.err.println("LOOKING");
     Set<String> l = Generics.newHashSet();
     if (cInfo.get(loc - reverse(1)).getString(CoreAnnotations.PartOfSpeechAnnotation.class) != null && isNameCase(pWord) && cInfo.get(loc - reverse(1)).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
       for (int jump = 3; jump < 150; jump++) {
@@ -2262,9 +2221,9 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (getWord(cInfo.get(loc + reverse(jump))).equals(word)) {
           if (isNameCase(getWord(cInfo.get(loc + reverse(jump - 1)))) && (cInfo.get(loc + reverse(jump - 1))).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
             l.add("X-NEXT-OCCURRENCE-YX");
-            // log.info(getWord(cInfo.get(loc+reverse(jump-1))));
+            // System.err.println(getWord(cInfo.get(loc+reverse(jump-1))));
           } else if (isNameCase(getWord(cInfo.get(loc + reverse(jump + 1)))) && (cInfo.get(loc + reverse(jump + 1))).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
-            // log.info(getWord(cInfo.get(loc+reverse(jump+1))));
+            // System.err.println(getWord(cInfo.get(loc+reverse(jump+1))));
             l.add("X-NEXT-OCCURRENCE-XY");
           } else {
             l.add("X-NEXT-OCCURRENCE-X");
@@ -2275,10 +2234,10 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (getWord(cInfo.get(loc + jump)) != null && getWord(cInfo.get(loc + jump)).equals(word)) {
           if (isNameCase(getWord(cInfo.get(loc + reverse(jump + 1)))) && (cInfo.get(loc + reverse(jump + 1))).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
             l.add("X-PREV-OCCURRENCE-YX");
-            // log.info(getWord(cInfo.get(loc+reverse(jump+1))));
+            // System.err.println(getWord(cInfo.get(loc+reverse(jump+1))));
           } else if (isNameCase(getWord(cInfo.get(loc + reverse(jump - 1)))) && cInfo.get(loc + reverse(jump - 1)).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
             l.add("X-PREV-OCCURRENCE-XY");
-            // log.info(getWord(cInfo.get(loc+reverse(jump-1))));
+            // System.err.println(getWord(cInfo.get(loc+reverse(jump-1))));
           } else {
             l.add("X-PREV-OCCURRENCE-X");
           }
@@ -2287,7 +2246,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     }
     /*
     if (!l.isEmpty()) {
-      log.info(pWord+" "+word+" "+nWord+" "+l);
+      System.err.println(pWord+" "+word+" "+nWord+" "+l);
     }
     */
     return l;
@@ -2304,7 +2263,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   public void initGazette() {
     try {
       // read in gazettes
-      if (flags.gazettes == null) { flags.gazettes = new ArrayList<>(); }
+      if (flags.gazettes == null) { flags.gazettes = new ArrayList<String>(); }
       List<String> gazettes = flags.gazettes;
       for (String gazetteFile : gazettes) {
         BufferedReader r = IOUtils.readerFromString(gazetteFile, flags.inputEncoding);

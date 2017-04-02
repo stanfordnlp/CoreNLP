@@ -29,9 +29,6 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
-
 /**
  * An interfacing class for {@link ClassifierFactory} that incrementally builds
  * a more memory-efficient representation of a {@link List} of {@link RVFDatum}
@@ -46,7 +43,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @param <L> The type of the labels in the Dataset
  * @param <F> The type of the features in the Dataset
  */
-public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Iterable<RVFDatum<L, F>>, Serializable
+public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Iterable<RVFDatum<L, F>>, Serializable
 
   private static final long serialVersionUID = -3841757837680266182L;
 
@@ -57,9 +54,6 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
                               // for normalization.
   double[] means;
   double[] stdevs; // means and stdevs of features, used for
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels logger = Redwood.channels(RVFDataset.class);
 
   /*
    * Store source and id of each datum; optional, and not fully supported.
@@ -112,26 +106,24 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     double[][] trainValues = new double[trainSize][];
     int[] trainLabels = new int[trainSize];
 
-    synchronized (System.class) {
-      System.arraycopy(data, 0, devData, 0, devSize);
-      System.arraycopy(values, 0, devValues, 0, devSize);
-      System.arraycopy(labels, 0, devLabels, 0, devSize);
+    System.arraycopy(data, 0, devData, 0, devSize);
+    System.arraycopy(values, 0, devValues, 0, devSize);
+    System.arraycopy(labels, 0, devLabels, 0, devSize);
 
-      System.arraycopy(data, devSize, trainData, 0, trainSize);
-      System.arraycopy(values, devSize, trainValues, 0, trainSize);
-      System.arraycopy(labels, devSize, trainLabels, 0, trainSize);
-    }
+    System.arraycopy(data, devSize, trainData, 0, trainSize);
+    System.arraycopy(values, devSize, trainValues, 0, trainSize);
+    System.arraycopy(labels, devSize, trainLabels, 0, trainSize);
 
-    RVFDataset<L, F> dev = new RVFDataset<>(labelIndex, devLabels, featureIndex, devData, devValues);
-    RVFDataset<L, F> train = new RVFDataset<>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
+    RVFDataset<L, F> dev = new RVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues);
+    RVFDataset<L, F> train = new RVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
 
-    return new Pair<>(train, dev);
+    return new Pair<GeneralDataset<L, F>, GeneralDataset<L, F>>(train, dev);
 
   }
 
   public void scaleFeaturesGaussian() {
     means = new double[this.numFeatures()];
-    // Arrays.fill(means, 0); // not needed; Java arrays zero initialized
+    Arrays.fill(means, 0);
 
     for (int i = 0; i < this.size(); i++) {
       for (int j = 0; j < data[i].length; j++)
@@ -140,7 +132,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     ArrayMath.multiplyInPlace(means, 1.0 / this.size());
 
     stdevs = new double[this.numFeatures()];
-    // Arrays.fill(stdevs, 0); // not needed; Java arrays zero initialized
+    Arrays.fill(stdevs, 0);
     double[] deltaX = new double[this.numFeatures()];
 
     for (int i = 0; i < this.size(); i++) {
@@ -253,7 +245,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
    * @return a new dataset
    */
   public RVFDataset<L, F> scaleDataset(RVFDataset<L, F> dataset) {
-    RVFDataset<L, F> newDataset = new RVFDataset<>(this.featureIndex, this.labelIndex);
+    RVFDataset<L, F> newDataset = new RVFDataset<L, F>(this.featureIndex, this.labelIndex);
     for (int i = 0; i < dataset.size(); i++) {
       RVFDatum<L, F> datum = dataset.getDatum(i);
       newDataset.add(scaleDatum(datum));
@@ -274,7 +266,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     // scale this dataset before scaling the datum
     if (minValues == null || maxValues == null)
       scaleFeatures();
-    Counter<F> scaledFeatures = new ClassicCounter<>();
+    Counter<F> scaledFeatures = new ClassicCounter<F>();
     for (F feature : datum.asFeatures()) {
       int fID = this.featureIndex.indexOf(feature);
       if (fID >= 0) {
@@ -287,11 +279,11 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
         scaledFeatures.incrementCount(feature, newVal);
       }
     }
-    return new RVFDatum<>(scaledFeatures, datum.label());
+    return new RVFDatum<L, F>(scaledFeatures, datum.label());
   }
 
   public RVFDataset<L, F> scaleDatasetGaussian(RVFDataset<L, F> dataset) {
-    RVFDataset<L, F> newDataset = new RVFDataset<>(this.featureIndex, this.labelIndex);
+    RVFDataset<L, F> newDataset = new RVFDataset<L, F>(this.featureIndex, this.labelIndex);
     for (int i = 0; i < dataset.size(); i++) {
       RVFDatum<L, F> datum = dataset.getDatum(i);
       newDataset.add(scaleDatumGaussian(datum));
@@ -303,7 +295,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     // scale this dataset before scaling the datum
     if (means == null || stdevs == null)
       scaleFeaturesGaussian();
-    Counter<F> scaledFeatures = new ClassicCounter<>();
+    Counter<F> scaledFeatures = new ClassicCounter<F>();
     for (F feature : datum.asFeatures()) {
       int fID = this.featureIndex.indexOf(feature);
       if (fID >= 0) {
@@ -316,7 +308,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
         scaledFeatures.incrementCount(feature, newVal);
       }
     }
-    return new RVFDatum<>(scaledFeatures, datum.label());
+    return new RVFDatum<L, F>(scaledFeatures, datum.label());
   }
 
   @Override
@@ -332,48 +324,26 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     double[][] trainValues = new double[trainSize][];
     int[] trainLabels = new int[trainSize];
 
-    synchronized (System.class) {
-      System.arraycopy(data, start, devData, 0, devSize);
-      System.arraycopy(values, start, devValues, 0, devSize);
-      System.arraycopy(labels, start, devLabels, 0, devSize);
+    System.arraycopy(data, start, devData, 0, devSize);
+    System.arraycopy(values, start, devValues, 0, devSize);
+    System.arraycopy(labels, start, devLabels, 0, devSize);
 
-      System.arraycopy(data, 0, trainData, 0, start);
-      System.arraycopy(data, end, trainData, start, size() - end);
-      System.arraycopy(values, 0, trainValues, 0, start);
-      System.arraycopy(values, end, trainValues, start, size() - end);
-      System.arraycopy(labels, 0, trainLabels, 0, start);
-      System.arraycopy(labels, end, trainLabels, start, size() - end);
-    }
+    System.arraycopy(data, 0, trainData, 0, start);
+    System.arraycopy(data, end, trainData, start, size() - end);
+    System.arraycopy(values, 0, trainValues, 0, start);
+    System.arraycopy(values, end, trainValues, start, size() - end);
+    System.arraycopy(labels, 0, trainLabels, 0, start);
+    System.arraycopy(labels, end, trainLabels, start, size() - end);
 
-    if (this instanceof WeightedRVFDataset<?,?>) {
-      float[] trainWeights = new float[trainSize];
-      float[] devWeights = new float[devSize];
+    GeneralDataset<L, F> dev = new RVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues);
+    GeneralDataset<L, F> train = new RVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
 
-      WeightedRVFDataset<L, F> w = (WeightedRVFDataset<L, F>)this;
-
-      synchronized (System.class) {
-        System.arraycopy(w.weights, start, devWeights, 0, devSize);
-        System.arraycopy(w.weights, 0, trainWeights, 0, start);
-        System.arraycopy(w.weights, end, trainWeights, start, size() - end);
-      }
-
-      WeightedRVFDataset<L, F> dev = new WeightedRVFDataset<>(labelIndex, devLabels, featureIndex, devData, devValues, devWeights);
-      WeightedRVFDataset<L, F> train = new WeightedRVFDataset<>(labelIndex, trainLabels, featureIndex, trainData, trainValues, trainWeights);
-
-      return new Pair<>(train, dev);
-    } else {
-
-      GeneralDataset<L, F> dev = new RVFDataset<>(labelIndex, devLabels, featureIndex, devData, devValues);
-      GeneralDataset<L, F> train = new RVFDataset<>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
-
-      return new Pair<>(train, dev);
-    }
+    return new Pair<GeneralDataset<L, F>, GeneralDataset<L, F>>(train, dev);
 
   }
 
   // TODO: Check that this does what we want for Datum other than RVFDatum
   @Override
-  // If you edit me, also take care of WeightedRVFDataset
   public void add(Datum<L, F> d) {
     if (d instanceof RVFDatum<?, ?>) {
       addLabel(d.label());
@@ -386,7 +356,6 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     }
   }
 
-  // If you edit me, also take care of WeightedRVFDataset
   public void add(Datum<L, F> d, String src, String id) {
     if (d instanceof RVFDatum<?, ?>) {
       addLabel(d.label());
@@ -415,11 +384,11 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
    */
   @Override
   public RVFDatum<L, F> getRVFDatum(int index) {
-    ClassicCounter<F> c = new ClassicCounter<>();
+    ClassicCounter<F> c = new ClassicCounter<F>();
     for (int i = 0; i < data[index].length; i++) {
       c.incrementCount(featureIndex.get(data[index][i]), values[index][i]);
     }
-    return new RVFDatum<>(c, labelIndex.get(labels[index]));
+    return new RVFDatum<L, F>(c, labelIndex.get(labels[index]));
   }
 
   public RVFDatum<L, F> getRVFDatumWithId(int index) {
@@ -438,25 +407,22 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
 
   public void addAllWithSourcesAndIds(RVFDataset<L, F> data) {
     for(int index=0 ; index<data.size ; index++) {
-      this.add(data.getRVFDatumWithId(index), data.getRVFDatumSource(index), data.getRVFDatumId(index));
+      add(data.getRVFDatumWithId(index), data.getRVFDatumSource(index), data.getRVFDatumId(index));
     }
   }
-
   public void addAll(Iterable<? extends Datum<L,F>> data) {
     for (Datum<L, F> d : data) {
-      this.add(d);
+      add(d);
     }
   }
   private void addSourceAndId(String src, String id) {
-    sourcesAndIds.add(new Pair<>(src, id));
+    sourcesAndIds.add(new Pair<String, String>(src, id));
   }
 
   private void addLabel(L label) {
     if (labels.length == size) {
       int[] newLabels = new int[size * 2];
-      synchronized (System.class) {
-        System.arraycopy(labels, 0, newLabels, 0, size);
-      }
+      System.arraycopy(labels, 0, newLabels, 0, size);
       labels = newLabels;
     }
     labels[size] = labelIndex.addToIndex(label);
@@ -466,15 +432,13 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     if (data.length == size) {
       int[][] newData = new int[size * 2][];
       double[][] newValues = new double[size * 2][];
-      synchronized (System.class) {
-        System.arraycopy(data, 0, newData, 0, size);
-        System.arraycopy(values, 0, newValues, 0, size);
-      }
+      System.arraycopy(data, 0, newData, 0, size);
+      System.arraycopy(values, 0, newValues, 0, size);
       data = newData;
       values = newValues;
     }
 
-    final List<F> featureNames = new ArrayList<>(features.keySet());
+    final List<F> featureNames = new ArrayList<F>(features.keySet());
     final int nFeatures = featureNames.size();
     data[size] = new int[nFeatures];
     values[size] = new double[nFeatures];
@@ -509,33 +473,31 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
 
   @Override
   protected void initialize(int numDatums) {
-    labelIndex = new HashIndex<>();
-    featureIndex = new HashIndex<>();
+    labelIndex = new HashIndex<L>();
+    featureIndex = new HashIndex<F>();
     labels = new int[numDatums];
     data = new int[numDatums][];
     values = new double[numDatums][];
-    sourcesAndIds = new ArrayList<>(numDatums);
+    sourcesAndIds = new ArrayList<Pair<String, String>>(numDatums);
     size = 0;
   }
 
   /**
-   * Prints some summary statistics to the logger for the Dataset.
+   * Prints some summary statistics to stderr for the Dataset.
    */
   @Override
   public void summaryStatistics() {
-    logger.info("numDatums: " + size);
-    StringBuilder sb = new StringBuilder("numLabels: ");
-    sb.append(labelIndex.size()).append(" [");
+    System.err.println("numDatums: " + size);
+    System.err.print("numLabels: " + labelIndex.size() + " [");
     Iterator<L> iter = labelIndex.iterator();
     while (iter.hasNext()) {
-      sb.append(iter.next());
+      System.err.print(iter.next());
       if (iter.hasNext()) {
-        sb.append(", ");
+        System.err.print(", ");
       }
     }
-    sb.append(']');
-    logger.info(sb.toString());
-    logger.info("numFeatures (Phi(X) types): " + featureIndex.size());
+    System.err.println("]");
+    System.err.println("numFeatures (Phi(X) types): " + featureIndex.size());
     /*for(int i = 0; i < data.length; i++) {
       for(int j = 0; j < data[i].length; j++) {
       System.out.println(data[i][j]);
@@ -608,7 +570,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
    *
    */
   public static RVFDataset<String, String> readSVMLightFormat(String filename) {
-    return readSVMLightFormat(filename, new HashIndex<>(), new HashIndex<>());
+    return readSVMLightFormat(filename, new HashIndex<String>(), new HashIndex<String>());
   }
 
   /**
@@ -617,7 +579,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
    * lines is null, it is assumed no line information is desired)
    */
   public static RVFDataset<String, String> readSVMLightFormat(String filename, List<String> lines) {
-    return readSVMLightFormat(filename, new HashIndex<>(), new HashIndex<>(), lines);
+    return readSVMLightFormat(filename, new HashIndex<String>(), new HashIndex<String>(), lines);
   }
 
   /**
@@ -634,7 +596,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
    * @param featureSet
    */
   public void selectFeaturesFromSet(Set<F> featureSet) {
-    HashIndex<F> newFeatureIndex = new HashIndex<>();
+    HashIndex<F> newFeatureIndex = new HashIndex<F>();
     int[] featMap = new int[featureIndex.size()];
     Arrays.fill(featMap, -1);
     for (F feature : featureSet) {
@@ -646,8 +608,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     }
     featureIndex = newFeatureIndex;
     for (int i = 0; i < size; i++) {
-      List<Integer> featList = new ArrayList<>(data[i].length);
-      List<Double> valueList = new ArrayList<>(values[i].length);
+      List<Integer> featList = new ArrayList<Integer>(data[i].length);
+      List<Double> valueList = new ArrayList<Double>(values[i].length);
       for (int j = 0; j < data[i].length; j++) {
         if (featMap[data[i][j]] >= 0) {
           featList.add(featMap[data[i][j]]);
@@ -669,7 +631,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
    */
   public void applyFeatureCountThreshold(int k) {
     float[] counts = getFeatureCounts();
-    HashIndex<F> newFeatureIndex = new HashIndex<>();
+    HashIndex<F> newFeatureIndex = new HashIndex<F>();
 
     int[] featMap = new int[featureIndex.size()];
     for (int i = 0; i < featMap.length; i++) {
@@ -688,8 +650,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     // counts = null; // This is unnecessary; JVM can clean it up
 
     for (int i = 0; i < size; i++) {
-      List<Integer> featList = new ArrayList<>(data[i].length);
-      List<Double> valueList = new ArrayList<>(values[i].length);
+      List<Integer> featList = new ArrayList<Integer>(data[i].length);
+      List<Double> valueList = new ArrayList<Double>(values[i].length);
       for (int j = 0; j < data[i].length; j++) {
         if (featMap[data[i][j]] >= 0) {
           featList.add(featMap[data[i][j]]);
@@ -712,7 +674,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
   @Override
   public void applyFeatureMaxCountThreshold(int k) {
     float[] counts = getFeatureCounts();
-    HashIndex<F> newFeatureIndex = new HashIndex<>();
+    HashIndex<F> newFeatureIndex = new HashIndex<F>();
 
     int[] featMap = new int[featureIndex.size()];
     for (int i = 0; i < featMap.length; i++) {
@@ -731,8 +693,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     // counts = null; // This is unnecessary; JVM can clean it up
 
     for (int i = 0; i < size; i++) {
-      List<Integer> featList = new ArrayList<>(data[i].length);
-      List<Double> valueList = new ArrayList<>(values[i].length);
+      List<Integer> featList = new ArrayList<Integer>(data[i].length);
+      List<Double> valueList = new ArrayList<Double>(values[i].length);
       for (int j = 0; j < data[i].length; j++) {
         if (featMap[data[i][j]] >= 0) {
           featList.add(featMap[data[i][j]]);
@@ -752,7 +714,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     BufferedReader in = null;
     RVFDataset<String, String> dataset;
     try {
-      dataset = new RVFDataset<>(10, featureIndex, labelIndex);
+      dataset = new RVFDataset<String, String>(10, featureIndex, labelIndex);
       in = IOUtils.readerFromString(filename);
 
       while (in.ready()) {
@@ -772,7 +734,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
   public static RVFDatum<String, String> svmLightLineToRVFDatum(String l) {
     l = l.replaceFirst("#.*$", ""); // remove any trailing comments
     String[] line = l.split("\\s+");
-    ClassicCounter<String> features = new ClassicCounter<>();
+    ClassicCounter<String> features = new ClassicCounter<String>();
     for (int i = 1; i < line.length; i++) {
       String[] f = line[i].split(":");
       if (f.length != 2) {
@@ -781,7 +743,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
       double val = Double.parseDouble(f[1]);
       features.incrementCount(f[0], val);
     }
-    return new RVFDatum<>(features, line[0]);
+    return new RVFDatum<String, String>(features, line[0]);
   }
 
   // todo [cdm 2012]: This duplicates the functionality of the methods above. Should be refactored.
@@ -799,14 +761,14 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
       line = line.replaceAll("#.*", ""); // remove any trailing comments
       String[] items = line.split("\\s+");
       Integer label = Integer.parseInt(items[0]);
-      Counter<F> features = new ClassicCounter<>();
+      Counter<F> features = new ClassicCounter<F>();
       for (int i = 1; i < items.length; i++) {
         String[] featureItems = items[i].split(":");
         int feature = Integer.parseInt(featureItems[0]);
         double value = Double.parseDouble(featureItems[1]);
         features.incrementCount(this.featureIndex.get(feature), value);
       }
-      this.add(new RVFDatum<>(features, this.labelIndex.get(label)));
+      this.add(new RVFDatum<L, F>(features, this.labelIndex.get(label)));
     }
   }
 
@@ -900,36 +862,36 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
   }
 
   public static void main(String[] args) {
-    RVFDataset<String, String> data = new RVFDataset<>();
-    ClassicCounter<String> c1 = new ClassicCounter<>();
+    RVFDataset<String, String> data = new RVFDataset<String, String>();
+    ClassicCounter<String> c1 = new ClassicCounter<String>();
     c1.incrementCount("fever", 3.5);
     c1.incrementCount("cough", 1.1);
     c1.incrementCount("congestion", 4.2);
 
-    ClassicCounter<String> c2 = new ClassicCounter<>();
+    ClassicCounter<String> c2 = new ClassicCounter<String>();
     c2.incrementCount("fever", 1.5);
     c2.incrementCount("cough", 2.1);
     c2.incrementCount("nausea", 3.2);
 
-    ClassicCounter<String> c3 = new ClassicCounter<>();
+    ClassicCounter<String> c3 = new ClassicCounter<String>();
     c3.incrementCount("cough", 2.5);
     c3.incrementCount("congestion", 3.2);
 
-    data.add(new RVFDatum<>(c1, "cold"));
-    data.add(new RVFDatum<>(c2, "flu"));
-    data.add(new RVFDatum<>(c3, "cold"));
+    data.add(new RVFDatum<String, String>(c1, "cold"));
+    data.add(new RVFDatum<String, String>(c2, "flu"));
+    data.add(new RVFDatum<String, String>(c3, "cold"));
     data.summaryStatistics();
 
-    LinearClassifierFactory<String, String> factory = new LinearClassifierFactory<>();
+    LinearClassifierFactory<String, String> factory = new LinearClassifierFactory<String, String>();
     factory.useQuasiNewton();
 
     LinearClassifier<String, String> c = factory.trainClassifier(data);
 
-    ClassicCounter<String> c4 = new ClassicCounter<>();
+    ClassicCounter<String> c4 = new ClassicCounter<String>();
     c4.incrementCount("cough", 2.3);
     c4.incrementCount("fever", 1.3);
 
-    RVFDatum<String, String> datum = new RVFDatum<>(c4);
+    RVFDatum<String, String> datum = new RVFDatum<String, String>(c4);
 
     c.justificationOf((Datum<String, String>) datum);
   }
@@ -941,8 +903,6 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     }
     values = trimToSize(values);
     data = trimToSize(data);
-    assert values.length == size;
-    assert values.length == size();
     return values;
   }
 

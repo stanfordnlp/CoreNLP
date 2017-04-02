@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -15,10 +14,7 @@ import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Pair;
 
 
-public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EnglishPTBTreebankCorrector.class);
+public class EnglishPTBTreebankCorrector implements TreebankTransformer {
 
   private static final boolean DEBUG = false;
 
@@ -70,25 +66,25 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
 
   public EnglishPTBTreebankCorrector() {
     // initialize the transformations to be done
-    ops = new ArrayList<>();
+    ops = new ArrayList<Pair<TregexPattern,TsurgeonPattern>>();
     TreebankLanguagePack tlp = new PennTreebankLanguagePack();
     TregexPatternCompiler tpc = new TregexPatternCompiler(tlp.headFinder(), tlp.getBasicCategoryFunction());
     Macros.addAllMacros(tpc, getBufferedReader(macroStr));
     try {
       BufferedReader br = getBufferedReader(editStr);
-      List<TsurgeonPattern> tsp = new ArrayList<>();
+      List<TsurgeonPattern> tsp = new ArrayList<TsurgeonPattern>();
       for (String line; (line = br.readLine()) != null; ) {
         TregexPattern matchPattern = tpc.compile(line);
         tsp.clear();
-        if (DEBUG) log.info("Pattern is " + line + " [" + matchPattern + ']');
+        if (DEBUG) System.err.println("Pattern is " + line + " [" + matchPattern + ']');
         while (continuing(line = br.readLine())) {
           TsurgeonPattern p = Tsurgeon.parseOperation(line);
-          if (DEBUG) log.info("Operation is " + line + " [" + p + ']');
+          if (DEBUG) System.err.println("Operation is " + line + " [" + p + ']');
           tsp.add(p);
         }
         if ( ! tsp.isEmpty()) {
           TsurgeonPattern tp = Tsurgeon.collectOperations(tsp);
-          ops.add(new Pair<>(matchPattern, tp));
+          ops.add(new Pair<TregexPattern,TsurgeonPattern>(matchPattern, tp));
         }
       } // while not at end of file
     } catch (IOException ioe) {
@@ -1673,7 +1669,6 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
      "relabel bad NNP\n" +
             '\n') +
 
-    // spelling of "deterrant" is how it appears in wrong tree!
     ("@NP <1 (DT < a|an) <2 (JJ=bad < /^(?:official|deterrant|bible|academic|fine|buy-out|perk|installment)$/) !<3 __\n" +
      "relabel bad NN\n" +
             '\n') +

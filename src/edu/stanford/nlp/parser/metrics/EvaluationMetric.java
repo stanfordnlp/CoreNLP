@@ -64,7 +64,7 @@ public class EvaluationMetric {
    * and the denominator of the precision in the second element.
    */
   public Pair<Double,Double> getPFractionals() {
-    return new Pair<>(precisions2, pnums2);
+    return new Pair<Double,Double>(precisions2,pnums2);
   }
 
   /**
@@ -74,7 +74,7 @@ public class EvaluationMetric {
    * and the denominator of the recall in the second element.
    */
   public Pair<Double,Double> getRFractionals() {
-    return new Pair<>(recalls2, rnums2);
+    return new Pair<Double,Double>(recalls2,rnums2);
   }
 
   /**

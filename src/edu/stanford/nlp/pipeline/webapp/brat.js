@@ -23,7 +23,8 @@ head.js(
 );
 head.ready(function() {
     // Short-hands for our visualisation types.
-    vis_types = ['pos', 'ner', 'coref', 'basic_dep', 'collapsed_ccproc_dep'];
+    vis_types = ['pos', 'ner', 'coref', 'basic_dep', 'collapsed_dep',
+        'collapsed_ccproc_dep'];
     // Data storage and state variables.
     var data = {};
     var conf = false;
@@ -45,7 +46,7 @@ head.ready(function() {
             if (data[type] && !done[type]) {
                 // Note: Util.embed doesn't have any error handling, once this
                 // exists it should be injected here.
-                Util.embed(type, conf, data[type], webFontURLs);
+                Util.embed(type, conf, data[type]);
                 $('#' + type + '_loading').hide();
                 done[type] = true;
             };

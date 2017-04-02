@@ -1,5 +1,4 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import java.util.*;
 import java.util.function.Function;
@@ -15,7 +14,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   private static final double defaultAlpha = 0.65; // How balanced we want this tree (between 0.5 and 1.0)
   private static final boolean debug = false;
 
-  private TreeNode<E,T> root = new TreeNode<>();
+  private TreeNode<E,T> root = new TreeNode<E,T>();
 
   // Tree node
   public static class TreeNode<E extends Comparable<E>, T extends HasInterval<E>> {
@@ -93,14 +92,14 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
         if (target.getInterval().compareTo(n.value.getInterval()) <= 0) {
           // Should go on left
           if (n.left == null) {
-            n.left = new TreeNode<>();
+            n.left = new TreeNode<E,T>();
             n.left.parent = n;
           }
           n = n.left;
         } else {
           // Should go on right
           if (n.right == null) {
-            n.right = new TreeNode<>();
+            n.right = new TreeNode<E,T>();
             n.right.parent = n;
           }
           n = n.right;
@@ -118,7 +117,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
 
   @Override
   public Iterator<T> iterator() {
-    return new TreeNodeIterator<>(root);
+    return new TreeNodeIterator<E,T>(root);
   }
 
   private static class TreeNodeIterator<E extends Comparable<E>, T extends HasInterval<E>> extends AbstractIterator<T> {
@@ -158,13 +157,13 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
         stage++;
         switch (stage) {
           case 0:
-            curIter = (node.left != null)? new TreeNodeIterator<>(node.left):null;
+            curIter = (node.left != null)? new TreeNodeIterator<E,T>(node.left):null;
             break;
           case 1:
             curIter = null;
             return node.value;
           case 2:
-            curIter = (node.right != null)? new TreeNodeIterator<>(node.right):null;
+            curIter = (node.right != null)? new TreeNodeIterator<E,T>(node.right):null;
             break;
           default:
             return null;
@@ -321,7 +320,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   }
 
   public void check(TreeNode<E,T> treeNode) {
-    Stack<TreeNode<E,T>> todo = new Stack<>();
+    Stack<TreeNode<E,T>> todo = new Stack<TreeNode<E, T>>();
     todo.add(treeNode);
     while (!todo.isEmpty()) {
       TreeNode<E,T> node = todo.pop();
@@ -403,7 +402,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   // Balances this tree
   public TreeNode<E,T> balance(TreeNode<E,T> node) {
     if (debug) check(node);
-    Stack<TreeNode<E,T>> todo = new Stack<>();
+    Stack<TreeNode<E,T>> todo = new Stack<TreeNode<E, T>>();
     todo.add(node);
     TreeNode<E,T> newRoot = null;
     while (!todo.isEmpty()) {
@@ -576,14 +575,14 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
 
   public static <E extends Comparable<E>, T extends HasInterval<E>> List<T> getOverlapping(TreeNode<E,T> n, E p)
   {
-    List<T> overlapping = new ArrayList<>();
+    List<T> overlapping = new ArrayList<T>();
     getOverlapping(n, p, overlapping);
     return overlapping;
   }
 
   public static <E extends Comparable<E>, T extends HasInterval<E>> List<T> getOverlapping(TreeNode<E,T> n, Interval<E> target)
   {
-    List<T> overlapping = new ArrayList<>();
+    List<T> overlapping = new ArrayList<T>();
     getOverlapping(n, target, overlapping);
     return overlapping;
   }
@@ -595,7 +594,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   }
 
   public static <E extends Comparable<E>, T extends HasInterval<E>> void getOverlapping(TreeNode<E,T> node, Interval<E> target, List<T> result) {
-    Queue<TreeNode<E,T>> todo = new LinkedList<>();
+    Queue<TreeNode<E,T>> todo = new LinkedList<TreeNode<E, T>>();
     todo.add(node);
     while (!todo.isEmpty()) {
       TreeNode<E,T> n = todo.poll();
@@ -635,7 +634,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
     return overlaps(n, Interval.toInterval(p,p));
   }
   public static <E extends Comparable<E>, T extends HasInterval<E>> boolean overlaps(TreeNode<E,T> node, Interval<E> target) {
-    Stack<TreeNode<E,T>> todo = new Stack<>();
+    Stack<TreeNode<E,T>> todo = new Stack<TreeNode<E, T>>();
     todo.push(node);
 
     while (!todo.isEmpty()) {
@@ -734,7 +733,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
 
   private static <E extends Comparable<E>, T extends HasInterval<E>>
     boolean contains(TreeNode<E,T> node, Interval<E> target, Function<T,Boolean> containsTargetFunction) {
-    Stack<TreeNode<E,T>> todo = new Stack<>();
+    Stack<TreeNode<E,T>> todo = new Stack<TreeNode<E,T>>();
     todo.push(node);
 
     // Don't search nodes that don't exist
@@ -772,8 +771,8 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   public static <T, E extends Comparable<E>> List<T> getNonOverlapping(
           List<? extends T> items, Function<? super T,Interval<E>> toIntervalFunc)
   {
-    List<T> nonOverlapping = new ArrayList<>();
-    IntervalTree<E,Interval<E>> intervals = new IntervalTree<>();
+    List<T> nonOverlapping = new ArrayList<T>();
+    IntervalTree<E,Interval<E>> intervals = new IntervalTree<E, Interval<E>>();
     for (T item:items) {
       Interval<E> i = toIntervalFunc.apply(item);
       boolean addOk = intervals.addNonOverlapping(i);
@@ -787,7 +786,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   public static <T, E extends Comparable<E>> List<T> getNonOverlapping(
           List<? extends T> items, Function<? super T,Interval<E>> toIntervalFunc, Comparator<? super T> compareFunc)
   {
-    List<T> sorted = new ArrayList<>(items);
+    List<T> sorted = new ArrayList<T>(items);
     Collections.sort(sorted, compareFunc);
     return getNonOverlapping(sorted, toIntervalFunc);
   }
@@ -816,7 +815,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
       List<? extends T> items, Function<? super T,Interval<E>> toIntervalFunc, Function<? super T, Double> scoreFunc)
   {
     if (items.size() > 1) {
-      Map<E,PartialScoredList<T,E>> bestNonOverlapping = new TreeMap<>();
+      Map<E,PartialScoredList<T,E>> bestNonOverlapping = new TreeMap<E,PartialScoredList<T,E>>();
       for (T item:items) {
         Interval<E> itemInterval = toIntervalFunc.apply(item);
         E mBegin = itemInterval.getBegin();
@@ -824,7 +823,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
         PartialScoredList<T,E> bestk = bestNonOverlapping.get(mEnd);
         double itemScore = scoreFunc.apply(item);
         if (bestk == null) {
-          bestk = new PartialScoredList<>();
+          bestk = new PartialScoredList<T,E>();
           bestk.size = 1;
           bestk.score = itemScore;
           bestk.object = item;
@@ -859,7 +858,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
           best = v;
         }
       }
-      List<T> nonOverlapping = new ArrayList<>(best.size);
+      List<T> nonOverlapping = new ArrayList<T>(best.size);
       PartialScoredList<T,E> prev = best;
       while (prev != null) {
         if (prev.object != null) {
@@ -874,7 +873,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
       Collections.reverse(nonOverlapping);
       return nonOverlapping;
     } else {
-      List<T> nonOverlapping = new ArrayList<>(items);
+      List<T> nonOverlapping = new ArrayList<T>(items);
       return nonOverlapping;
     }
   }
@@ -888,17 +887,17 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   public static <T, E extends Comparable<E>> List<T> getNonNested(
           List<? extends T> items, Function<? super T,Interval<E>> toIntervalFunc, Comparator<? super T> compareFunc)
   {
-    List<T> sorted = new ArrayList<>(items);
+    List<T> sorted = new ArrayList<T>(items);
     Collections.sort(sorted, compareFunc);
-    List<T> res = new ArrayList<>();
-    IntervalTree<E,Interval<E>> intervals = new IntervalTree<>();
+    List<T> res = new ArrayList<T>();
+    IntervalTree<E,Interval<E>> intervals = new IntervalTree<E, Interval<E>>();
     for (T item:sorted) {
       Interval<E> i = toIntervalFunc.apply(item);
       boolean addOk = intervals.addNonNested(i);
       if (addOk) {
         res.add(item);
       } else {
-        //        log.info("Discarding " + item);
+        //        System.err.println("Discarding " + item);
       }
     }
     return res;

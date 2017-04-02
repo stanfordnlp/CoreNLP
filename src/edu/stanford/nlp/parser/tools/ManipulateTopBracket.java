@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.tools; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.tools;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -22,10 +21,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public class ManipulateTopBracket  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ManipulateTopBracket.class);
+public class ManipulateTopBracket {
 
   private static final int minArgs = 1;
   private static String usage() {
@@ -71,7 +67,7 @@ public class ManipulateTopBracket  {
         tb.loadPath(filename);
       }
     } else {
-      log.info(usage());
+      System.err.println(usage());
       System.exit(-1);
     }
 

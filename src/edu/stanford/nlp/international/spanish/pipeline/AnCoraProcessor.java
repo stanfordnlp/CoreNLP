@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.spanish.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.spanish.pipeline;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.stats.Counters;
@@ -49,10 +48,7 @@ import java.util.function.Predicate;
  *
  * @author Jon Gauthier
  */
-public class AnCoraProcessor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnCoraProcessor.class);
+public class AnCoraProcessor {
 
   private final List<File> inputFiles;
   private final Properties options;
@@ -71,7 +67,7 @@ public class AnCoraProcessor  {
         ("unigramTagger")));
       unigramTagger = (TwoDimensionalCounter<String, String>) ois.readObject();
     } else {
-      unigramTagger = new TwoDimensionalCounter<>();
+      unigramTagger = new TwoDimensionalCounter<String, String>();
     }
   }
 
@@ -100,7 +96,7 @@ public class AnCoraProcessor  {
 
     final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, false);
 
-    List<Tree> trees = new ArrayList<>();
+    List<Tree> trees = new ArrayList<Tree>();
     for (File file : inputFiles) {
       Pair<TwoDimensionalCounter<String, String>, List<Tree>> ret = processTreeFile(file, trf,
                                                                                     encoding);
@@ -119,14 +115,14 @@ public class AnCoraProcessor  {
   private static Pair<TwoDimensionalCounter<String, String>, List<Tree>> processTreeFile(
     File file, SpanishXMLTreeReaderFactory trf, String encoding) {
 
-    TwoDimensionalCounter<String, String> tagger = new TwoDimensionalCounter<>();
+    TwoDimensionalCounter<String, String> tagger = new TwoDimensionalCounter<String, String>();
 
     try {
       Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(file),
                                                            encoding));
       TreeReader tr = trf.newTreeReader(file.getPath(), in);
 
-      List<Tree> trees = new ArrayList<>();
+      List<Tree> trees = new ArrayList<Tree>();
       Tree t, splitPoint;
 
       while ((t = tr.readTree()) != null) {
@@ -147,7 +143,7 @@ public class AnCoraProcessor  {
 
       tr.close();
 
-      return new Pair<>(tagger, trees);
+      return new Pair<TwoDimensionalCounter<String, String>, List<Tree>>(tagger, trees);
     } catch (IOException e) {
       e.printStackTrace();
       return null;
@@ -189,7 +185,7 @@ public class AnCoraProcessor  {
    */
   static Pair<Tree, Tree> split(Tree t, Tree splitPoint) {
     if (splitPoint == null)
-      return new Pair<>(t, null);
+      return new Pair<Tree, Tree>(t, null);
 
     Tree left = t.prune(new LeftOfFilter(splitPoint, t));
     Tree right = t.prune(new RightOfExclusiveFilter(splitPoint, t));
@@ -197,7 +193,7 @@ public class AnCoraProcessor  {
     left = splittingNormalizer.normalizeWholeTree(left, splittingTreeFactory);
     right = splittingNormalizer.normalizeWholeTree(right, splittingTreeFactory);
 
-    return new Pair<>(left, right);
+    return new Pair<Tree, Tree>(left, right);
   }
 
   /**
@@ -350,7 +346,7 @@ public class AnCoraProcessor  {
 
     @Override
     public Collection<Tree> process(Collection<Tree> coll) {
-      List<Tree> ret = new ArrayList<>();
+      List<Tree> ret = new ArrayList<Tree>();
 
       // Apparently TsurgeonPatterns are not thread safe
       MultiWordTreeExpander expander = new MultiWordTreeExpander();
@@ -398,13 +394,13 @@ public class AnCoraProcessor  {
 
     int availableProcessors = Runtime.getRuntime().availableProcessors();
     MulticoreWrapper<Collection<Tree>, Collection<Tree>> wrapper =
-            new MulticoreWrapper<>(availableProcessors, processor,
-                    false);
+      new MulticoreWrapper<Collection<Tree>, Collection<Tree>>(availableProcessors, processor,
+                                                               false);
 
     // Chunk our work so that parallelization is actually worth it
     int numChunks = availableProcessors * 20;
-    List<List<Tree>> chunked = CollectionUtils.partitionIntoFolds(trees, numChunks);
-    List<Tree> ret = new ArrayList<>();
+    List<Collection<Tree>> chunked = CollectionUtils.partitionIntoFolds(trees, numChunks);
+    List<Tree> ret = new ArrayList<Tree>();
 
     for (final Collection<Tree> coll : chunked) {
       wrapper.put(coll);
@@ -431,7 +427,7 @@ public class AnCoraProcessor  {
       "        want each step to benefit from a complete tagger.)\n" +
       "    -ner: Add NER-specific information to trees\n";
 
-  private static final Map<String, Integer> argOptionDefs = new HashMap<>();
+  private static final Map<String, Integer> argOptionDefs = new HashMap<String, Integer>();
   static {
     argOptionDefs.put("unigramTagger", 1);
     argOptionDefs.put("ner", 0);
@@ -440,11 +436,11 @@ public class AnCoraProcessor  {
   public static void main(String[] args)
     throws InterruptedException, IOException, ExecutionException, ClassNotFoundException {
     if (args.length < 1)
-      log.info(usage);
+      System.err.println(usage);
 
     Properties options = StringUtils.argsToProperties(args, argOptionDefs);
     String[] remainingArgs = options.getProperty("").split(" ");
-    List<File> fileList = new ArrayList<>();
+    List<File> fileList = new ArrayList<File>();
     for (String arg : remainingArgs)
       fileList.add(new File(arg));
 

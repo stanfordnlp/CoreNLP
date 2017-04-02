@@ -1,5 +1,4 @@
 package edu.stanford.nlp.international.spanish.pipeline;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
@@ -24,13 +23,9 @@ import java.util.*;
  *
  * @author Jon Gauthier
  */
-public class AnCoraPOSStats  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnCoraPOSStats.class);
+public class AnCoraPOSStats {
 
   private final TwoDimensionalCounter<String, String> unigramTagger;
-  private static final String ANCORA_ENCODING = "ISO8859_1";
 
   private List<File> fileList;
   private String outputPath;
@@ -39,7 +34,7 @@ public class AnCoraPOSStats  {
     this.fileList = fileList;
     this.outputPath = outputPath;
 
-    unigramTagger = new TwoDimensionalCounter<>();
+    unigramTagger = new TwoDimensionalCounter<String, String>();
   }
 
   public void process() throws IOException {
@@ -48,7 +43,8 @@ public class AnCoraPOSStats  {
     Tree t;
     for (File file : fileList) {
       Reader in =
-        new BufferedReader(new InputStreamReader(new FileInputStream(file), ANCORA_ENCODING));
+        new BufferedReader(new InputStreamReader(new FileInputStream(file),
+                                                 SpanishTreebankLanguagePack.STB_ENCODING));
       TreeReader tr = trf.newTreeReader(in);
 
       // Tree reading will implicitly perform tree normalization for us
@@ -72,14 +68,14 @@ public class AnCoraPOSStats  {
   private static final String usage =
     String.format("Usage: java %s -o <output_path> file(s)%n%n", AnCoraPOSStats.class.getName());
 
-  private static final Map<String, Integer> argOptionDefs = new HashMap<>();
+  private static final Map<String, Integer> argOptionDefs = new HashMap<String, Integer>();
   static {
     argOptionDefs.put("o", 1);
   }
 
   public static void main(String[] args) throws IOException {
     if (args.length < 1) {
-      log.info(usage);
+      System.err.println(usage);
       System.exit(1);
     }
 
@@ -90,7 +86,7 @@ public class AnCoraPOSStats  {
       throw new IllegalArgumentException("-o argument (output path for built tagger) is required");
 
     String[] remainingArgs = options.getProperty("").split(" ");
-    List<File> fileList = new ArrayList<>();
+    List<File> fileList = new ArrayList<File>();
     for (String arg : remainingArgs)
       fileList.add(new File(arg));
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.pipeline;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,10 +19,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class MWETreeVisitor implements TreeVisitor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MWETreeVisitor.class);
+public class MWETreeVisitor implements TreeVisitor {
 
  private static final boolean DEBUG = false;
   
@@ -34,25 +30,25 @@ public class MWETreeVisitor implements TreeVisitor  {
   }
   
   private List<Pair<TregexPattern, TsurgeonPattern>> loadOps() {
-    List<Pair<TregexPattern,TsurgeonPattern>> ops = new ArrayList<>();
+    List<Pair<TregexPattern,TsurgeonPattern>> ops = new ArrayList<Pair<TregexPattern,TsurgeonPattern>>();
     
     String line = null;
     try {
       BufferedReader br = new BufferedReader(new StringReader(editStr));
-      List<TsurgeonPattern> tsp = new ArrayList<>();
+      List<TsurgeonPattern> tsp = new ArrayList<TsurgeonPattern>();
       while ((line = br.readLine()) != null) {
-        if (DEBUG) log.info("Pattern is " + line);
+        if (DEBUG) System.err.print("Pattern is " + line);
         TregexPattern matchPattern = TregexPattern.compile(line);
-        if (DEBUG) log.info(" [" + matchPattern + "]");
+        if (DEBUG) System.err.println(" [" + matchPattern + "]");
         tsp.clear();
         while (continuing(line = br.readLine())) {
           TsurgeonPattern p = Tsurgeon.parseOperation(line);
-          if (DEBUG) log.info("Operation is " + line + " [" + p + "]");
+          if (DEBUG) System.err.println("Operation is " + line + " [" + p + "]");
           tsp.add(p);
         }
         if ( ! tsp.isEmpty()) {
           TsurgeonPattern tp = Tsurgeon.collectOperations(tsp);
-          ops.add(new Pair<>(matchPattern, tp));
+          ops.add(new Pair<TregexPattern,TsurgeonPattern>(matchPattern, tp));
         }
       } // while not at end of file
     } catch (IOException ioe) {

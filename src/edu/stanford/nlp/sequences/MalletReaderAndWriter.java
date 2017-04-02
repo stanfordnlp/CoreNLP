@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -23,10 +22,7 @@ import edu.stanford.nlp.util.StringUtils;
  * 
  * @author Michel Galley
  */
-public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MalletReaderAndWriter.class);
+public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
 
   private static final long serialVersionUID = 3806263423691913704L;
 
@@ -49,23 +45,24 @@ public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
     private static final long serialVersionUID = -6211332661459630572L;
     public List<CoreLabel> apply(String doc) {
 
-      if (num % 1000 == 0) { log.info("["+num+"]"); }
+      if (num % 1000 == 0) { System.err.print("["+num+"]"); }
       num++;
       
-      List<CoreLabel> words = new ArrayList<>();
+      List<CoreLabel> words = new ArrayList<CoreLabel>();
       
       String[] lines = doc.split("\n");
-
-      for (String line : lines) {
+      
+      for (int i = 0; i < lines.length; i++) {
+        String line = lines[i];
         if (line.trim().length() < 1)
           continue;
         int idx = line.lastIndexOf(" ");
-        if (idx < 0)
-          throw new RuntimeException("Bad line: " + line);
+        if(idx < 0)
+          throw new RuntimeException("Bad line: "+line);
         CoreLabel wi = new CoreLabel();
-        wi.setWord(line.substring(0, idx));
-        wi.set(CoreAnnotations.AnswerAnnotation.class, line.substring(idx + 1));
-        wi.set(CoreAnnotations.GoldAnswerAnnotation.class, line.substring(idx + 1));
+        wi.setWord(line.substring(0,idx));
+        wi.set(CoreAnnotations.AnswerAnnotation.class, line.substring(idx+1));
+        wi.set(CoreAnnotations.GoldAnswerAnnotation.class, line.substring(idx+1));
         words.add(wi);
       }
       return words;

@@ -3,13 +3,12 @@ package edu.stanford.nlp.sequences;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
 import edu.stanford.nlp.process.WordShapeClassifier;
+import java.util.function.Function;
 import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Flags for sequence classifiers. Documentation for general flags and
@@ -129,10 +128,7 @@ import java.util.function.Function;
  *
  * @author Jenny Finkel
  */
-public class SeqClassifierFlags implements Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SeqClassifierFlags.class);
+public class SeqClassifierFlags implements Serializable {
 
   private static final long serialVersionUID = -7076671761070232567L;
 
@@ -412,7 +408,7 @@ public class SeqClassifierFlags implements Serializable  {
   // this now controls nothing
   public boolean splitDocuments = true;
 
-  public boolean printXML; // This is disused and can be removed when breaking serialization
+  public boolean printXML = false;
 
   public boolean useSeenFeaturesOnly = false;
 
@@ -438,7 +434,7 @@ public class SeqClassifierFlags implements Serializable  {
   public transient String serializeToText = null;
   public transient int interimOutputFreq = 0;
   public transient String initialWeights = null;
-  public transient List<String> gazettes = new ArrayList<>();
+  public transient List<String> gazettes = new ArrayList<String>();
   public transient String selfTrainFile = null;
 
   public String inputEncoding = "UTF-8"; // used for CTBSegDocumentReader as well
@@ -512,7 +508,7 @@ public class SeqClassifierFlags implements Serializable  {
 
   public String readerAndWriter = "edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter";
 
-  public List<String> comboProps = new ArrayList<>();
+  public List<String> comboProps = new ArrayList<String>();
 
   public boolean usePrediction = false;
 
@@ -687,9 +683,8 @@ public class SeqClassifierFlags implements Serializable  {
   // whether to print a line saying each ObjectBank entry (usually a filename)
   public boolean announceObjectBankEntries = false;
 
-  // This is for use with the OWLQNMinimizer L1 regularization. To use it, set useQN=false,
-  // and this to a positive number. A smaller number means more features are retained.
-  // Depending on the problem, a good value might be
+  // This is for use with the OWLQNMinimizer. To use it, set useQN=false, and this to a positive number.
+  // A smaller number means more features are retained. Depending on the problem, a good value might be
   // between 0.75 (POS tagger) down to 0.01 (Chinese word segmentation)
   public double l1reg = 0.0;
 
@@ -782,7 +777,7 @@ public class SeqClassifierFlags implements Serializable  {
   public String unknownWordDistSimClass = "null";
 
   /**
-   * Use prefixes and suffixes from the previous and current word in edge clique.
+   * Use prefixes and suffixes from the previous and next word.
    */
   public boolean useNeighborNGrams = false;
 
@@ -962,8 +957,7 @@ public class SeqClassifierFlags implements Serializable  {
   public boolean separateASCIIandRange = true;
   public double dropoutRate = 0.0;
   public double dropoutScale = 1.0;
-  // keenon: changed from = 1, nowadays it makes sense to default to parallelism
-  public int multiThreadGrad = Runtime.getRuntime().availableProcessors();
+  public int multiThreadGrad = 1;
   public int maxQNItr = 0;
   public boolean dropoutApprox = false;
   public String unsupDropoutFile = null;
@@ -1002,7 +996,7 @@ public class SeqClassifierFlags implements Serializable  {
   public boolean useHardGE = false;
   public boolean useCRFforUnsup = false;
   public boolean useGEforSup = false;
-  public boolean useKnownLCWords = true; // disused, can be deleted when breaking serialization
+  public boolean useKnownLCWords = true;
   // allow for multiple feature factories.
   public String[] featureFactories = null;
   public List<Object[]> featureFactoriesArgs = null;
@@ -1037,16 +1031,13 @@ public class SeqClassifierFlags implements Serializable  {
 
   public boolean splitSlashHyphenWords;  // unused with new enum below. Remove when breaking serialization.
 
-  /** How many words it is okay to add to knownLCWords after initial training.
-   *  If this number is negative, then add any number of further words during classifying/testing.
-   *  If this number is non-negative (greater than or equal to 0), then add at most this many words
-   *  to the knownLCWords. By default, this is now set to 0, so there is no transductive learning on the
-   *  test set, since too many people complained about results changing over runs. However, traditionally
-   *  we used a non-zero value, and this usually helps performance a bit (until 2014 it was -1, then it
-   *  was set to 10_000, so that memory would not grow without bound if a SequenceClassifier is run for
-   *  a long time.
+  /** If this number is strictly positive (greater than 0; 0 means unlimited),
+   *  then add at most this many words to the knownLCwords.  (Words will only
+   *  be added if useKnownLCWords is true.) By default, this is set to 10,000,
+   *  so it will work on a few documents, but not cause unlimited memory growth
+   *  if a SequenceClassifier is run for a long time!
    */
-  public int maxAdditionalKnownLCWords = 0; // was 10_000;
+  public int maxAdditionalKnownLCWords = 10_000;
 
   public enum SlashHyphenEnum { NONE, WFRAG, WORD, BOTH };
 
@@ -1062,17 +1053,12 @@ public class SeqClassifierFlags implements Serializable  {
   public String combinationMode;
   public String nerModel;
 
-  /**
-   * Use prefixes and suffixes from the previous and next word in node clique.
-   */
-  public boolean useMoreNeighborNGrams = false;
-
-
   // "ADD VARIABLES ABOVE HERE"
-
 
   public transient List<String> phraseGazettes = null;
   public transient Properties props = null;
+
+
 
   /**
    * Create a new SeqClassifierFlags object initialized with default values.
@@ -1087,17 +1073,6 @@ public class SeqClassifierFlags implements Serializable  {
    */
   public SeqClassifierFlags(Properties props) {
     setProperties(props, true);
-  }
-
-  /**
-   * Create a new SeqClassifierFlags object and initialize it using values in
-   * the Properties object. The properties are printed to stderr as it works.
-   *
-   * @param props The properties object used for initialization
-   * @param printProps Whether to print the properties on construction
-   */
-  public SeqClassifierFlags(Properties props, boolean printProps) {
-    setProperties(props, printProps);
   }
 
   /**
@@ -1123,7 +1098,7 @@ public class SeqClassifierFlags implements Serializable  {
       String val = props.getProperty(key);
       if (!(key.isEmpty() && val.isEmpty())) {
         if (printProps) {
-          log.info(key + '=' + val);
+          System.err.println(key + '=' + val);
         }
         sb.append(key).append('=').append(val).append('\n');
       }
@@ -1304,8 +1279,6 @@ public class SeqClassifierFlags implements Serializable  {
         useNGrams = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useNeighborNGrams")) {
         useNeighborNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMoreNeighborNGrams")) {
-        useMoreNeighborNGrams = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("wordFunction")) {
         wordFunction = ReflectionLoading.loadByReflection(val);
       } else if (key.equalsIgnoreCase("conjoinShapeNGrams")) {
@@ -1385,7 +1358,7 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("phraseGazettes")) {
         StringTokenizer st = new StringTokenizer(val, " ,;\t");
         if (phraseGazettes == null) {
-          phraseGazettes = new ArrayList<>();
+          phraseGazettes = new ArrayList<String>();
         }
         while (st.hasMoreTokens()) {
           phraseGazettes.add(st.nextToken());
@@ -1424,7 +1397,7 @@ public class SeqClassifierFlags implements Serializable  {
         intern = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("mergetags")) {
         mergeTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("iobTags")) {
+      } else if (key.equalsIgnoreCase("iobtags")) {
         iobTags = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useViterbi")) {
         useViterbi = Boolean.parseBoolean(val);
@@ -1547,8 +1520,8 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("useMinimalAbbr1")) {
         useMinimalAbbr1 = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("documentReader")) {
-        log.info("You are using an outdated flag: -documentReader " + val);
-        log.info("Please use -readerAndWriter instead.");
+        System.err.println("You are using an outdated flag: -documentReader " + val);
+        System.err.println("Please use -readerAndWriter instead.");
       } else if (key.equalsIgnoreCase("deleteBlankLines")) {
         deleteBlankLines = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("answerFile")) {
@@ -1617,7 +1590,7 @@ public class SeqClassifierFlags implements Serializable  {
         useGazettes = true;
         StringTokenizer st = new StringTokenizer(val, " ,;\t");
         if (gazettes == null) {
-          gazettes = new ArrayList<>();
+          gazettes = new ArrayList<String>();
         } // for after deserialization, as gazettes is transient
         while (st.hasMoreTokens()) {
           gazettes.add(st.nextToken());
@@ -1634,10 +1607,10 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("useFloat")) {
         useFloat = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("trainMap")) {
-        log.info("trainMap and testMap are no longer valid options - please use map instead.");
+        System.err.println("trainMap and testMap are no longer valid options - please use map instead.");
         throw new RuntimeException();
       } else if (key.equalsIgnoreCase("testMap")) {
-        log.info("trainMap and testMap are no longer valid options - please use map instead.");
+        System.err.println("trainMap and testMap are no longer valid options - please use map instead.");
         throw new RuntimeException();
       } else if (key.equalsIgnoreCase("map")) {
         map = val;
@@ -1704,8 +1677,8 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("timitDatum")) {
         timitDatum = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("splitDocuments")) {
-        log.info("You are using an outdated flag: -splitDocuments");
-        log.info("Please use -maxDocSize -1 instead.");
+        System.err.println("You are using an outdated flag: -splitDocuments");
+        System.err.println("Please use -maxDocSize -1 instead.");
         splitDocuments = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("featureWeightThreshold")) {
         featureWeightThreshold = Double.parseDouble(val);
@@ -1720,13 +1693,15 @@ public class SeqClassifierFlags implements Serializable  {
         }
 
         featureFactories = new String[numFactories];
-        featureFactoriesArgs = new ArrayList<>(numFactories);
+        featureFactoriesArgs = new ArrayList<Object[]>(numFactories);
         for (int i = 0; i < numFactories; i++) {
           featureFactories[i] = getFeatureFactory(tokens[i]);
           featureFactoriesArgs.add(new Object[0]);
         }
       } else if (key.equalsIgnoreCase("printXML")) {
-        log.info("printXML is disused; perhaps try using the -outputFormat xml option.");
+        printXML = Boolean.parseBoolean(val); // todo: This appears unused now.
+        // Was it replaced by
+        // outputFormat?
 
       } else if (key.equalsIgnoreCase("useSeenFeaturesOnly")) {
         useSeenFeaturesOnly = Boolean.parseBoolean(val);
@@ -1961,7 +1936,7 @@ public class SeqClassifierFlags implements Serializable  {
         if (val.equalsIgnoreCase("linear") || val.equalsIgnoreCase("exp") || val.equalsIgnoreCase("exponential")) {
           annealingType = val;
         } else {
-          log.info("unknown annealingType: " + val + ".  Please use linear|exp|exponential");
+          System.err.println("unknown annealingType: " + val + ".  Please use linear|exp|exponential");
         }
       } else if (key.equalsIgnoreCase("numSamples")) {
         numSamples = Integer.parseInt(val);
@@ -2571,10 +2546,9 @@ public class SeqClassifierFlags implements Serializable  {
         useCRFforUnsup = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useGEforSup")){
         useGEforSup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKnownLCWords")) {
-        log.info("useKnownLCWords is deprecated; see maxAdditionalKnownLCWords (true = -1, false = 0");
-        maxAdditionalKnownLCWords = Boolean.parseBoolean(val) ? -1: 0;
-      } else if (key.equalsIgnoreCase("useNoisyLabel")) {
+      } else if (key.equalsIgnoreCase("useKnownLCWords")){
+        useKnownLCWords = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useNoisyLabel")){
         useNoisyLabel = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("errorMatrix")) {
         errorMatrix = val;
@@ -2618,15 +2592,15 @@ public class SeqClassifierFlags implements Serializable  {
         nerModel = val;
         // ADD VALUE ABOVE HERE
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
-        log.info("Unknown property: |" + key + '|');
+        System.err.println("Unknown property: |" + key + '|');
       }
     }
     if (startFold > numFolds) {
-      log.info("startFold > numFolds -> setting startFold to 1");
+      System.err.println("startFold > numFolds -> setting startFold to 1");
       startFold = 1;
     }
     if (endFold > numFolds) {
-      log.info("endFold > numFolds -> setting to numFolds");
+      System.err.println("endFold > numFolds -> setting to numFolds");
       endFold = numFolds;
     }
 

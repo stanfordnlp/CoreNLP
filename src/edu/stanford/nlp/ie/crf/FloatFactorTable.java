@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
@@ -15,10 +14,7 @@ import java.util.List;
  *  @author Jenny Finkel
  */
 
-public class FloatFactorTable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FloatFactorTable.class);
+public class FloatFactorTable {
 
   private final int numClasses;
   private final int windowSize;
@@ -76,8 +72,8 @@ public class FloatFactorTable  {
 
   private String toString(int[] array, Index classIndex) {
     List l = new ArrayList();
-    for (int anArray : array) {
-      l.add(classIndex.get(anArray));
+    for (int i = 0; i < array.length; i++) {
+      l.add(classIndex.get(array[i]));
     }
     return l.toString();
   }
@@ -93,18 +89,18 @@ public class FloatFactorTable  {
 
   private int indexOf(int[] entry) {
     int index = 0;
-    for (int anEntry : entry) {
+    for (int i = 0; i < entry.length; i++) {
       index *= numClasses;
-      index += anEntry;
+      index += entry[i];
     }
     return index;
   }
 
   private int indexOf(int[] front, int end) {
     int index = 0;
-    for (int aFront : front) {
+    for (int i = 0; i < front.length; i++) {
       index *= numClasses;
-      index += aFront;
+      index += front[i];
     }
     index *= numClasses;
     index += end;
@@ -115,9 +111,9 @@ public class FloatFactorTable  {
     int[] indices = new int[SloppyMath.intPow(numClasses, windowSize - entries.length)];
     int offset = SloppyMath.intPow(numClasses, entries.length);
     int index = 0;
-    for (int entry : entries) {
+    for (int i = 0; i < entries.length; i++) {
       index *= numClasses;
-      index += entry;
+      index += entries[i];
     }
     for (int i = 0; i < indices.length; i++) {
       indices[i] = index;
@@ -130,9 +126,9 @@ public class FloatFactorTable  {
     int[] indices = new int[SloppyMath.intPow(numClasses, windowSize - entries.length)];
     int offset = SloppyMath.intPow(numClasses, windowSize - entries.length);
     int start = 0;
-    for (int entry : entries) {
+    for (int i = 0; i < entries.length; i++) {
       start *= numClasses;
-      start += entry;
+      start += entries[i];
     }
     start *= offset;
     int end = 0;
@@ -182,7 +178,7 @@ public class FloatFactorTable  {
   // given is at the begining, of is at the end
   public float conditionalLogProb(int[] given, int of) {
     if (given.length != windowSize - 1) {
-      log.info("error computing conditional log prob");
+      System.err.println("error computing conditional log prob");
       System.exit(0);
     }
     int[] label = indicesFront(given);
@@ -375,7 +371,7 @@ public class FloatFactorTable  {
         float t = 0;
         for (int k = 0; k < 6; k++) {
           t += Math.exp(ft.conditionalLogProb(b, k));
-          log.info(k + "|" + i + "," + j + " : " + Math.exp(ft.conditionalLogProb(b, k)));
+          System.err.println(k + "|" + i + "," + j + " : " + Math.exp(ft.conditionalLogProb(b, k)));
         }
         System.out.println(t);
       }

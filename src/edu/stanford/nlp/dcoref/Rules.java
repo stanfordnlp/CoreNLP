@@ -11,8 +11,8 @@ import edu.stanford.nlp.dcoref.Dictionaries.Gender;
 import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.Dictionaries.Number;
 import edu.stanford.nlp.dcoref.Dictionaries.Person;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.math.NumberMatchingRegex;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.Sets;
  * Rules for coref system (mention detection, entity coref, event coref)
  * The name of the method for mention detection starts with detection,
  * for entity coref starts with entity, and for event coref starts with event.
- *
+ * 
  * @author heeyoung, recasens
  */
 public class Rules {
@@ -36,7 +36,7 @@ public class Rules {
       CorefCluster potentialAntecedent) {
     boolean mentionClusterHaveProper = false;
     boolean potentialAntecedentHaveProper = false;
-
+    
     for (Mention m : mentionCluster.corefMentions) {
       if (m.mentionType==MentionType.PROPER) {
         mentionClusterHaveProper = true;
@@ -60,15 +60,15 @@ public class Rules {
     }
     return false;
   }
-
+  
   public static boolean entityAlias(CorefCluster mentionCluster, CorefCluster potentialAntecedent,
       Semantics semantics, Dictionaries dict) throws Exception {
-
+    
     Mention mention = mentionCluster.getRepresentativeMention();
     Mention antecedent = potentialAntecedent.getRepresentativeMention();
     if(mention.mentionType!=MentionType.PROPER
         || antecedent.mentionType!=MentionType.PROPER) return false;
-
+    
     Method meth = semantics.wordnet.getClass().getMethod("alias", new Class[]{Mention.class, Mention.class});
     if((Boolean) meth.invoke(semantics.wordnet, new Object[]{mention, antecedent})) {
       return true;
@@ -149,7 +149,7 @@ public class Rules {
     if (first.size() == 0 && second.size() == 0) { return false; }
     List<CoreLabel> longer;
     List<CoreLabel> shorter;
-
+    
     if (first.size() == second.size()) {
       String firstWord = first.get(0).get(CoreAnnotations.TextAnnotation.class);
       String secondWord = second.get(0).get(CoreAnnotations.TextAnnotation.class);
@@ -169,8 +169,8 @@ public class Rules {
       }
     }
     int acronymPos = 0;
-    for (CoreLabel aLonger1 : longer) {
-      String word = aLonger1.get(CoreAnnotations.TextAnnotation.class);
+    for (int wordNum = 0; wordNum < longer.size(); ++wordNum) {
+      String word = longer.get(wordNum).get(CoreAnnotations.TextAnnotation.class);
       for (int charNum = 0; charNum < word.length(); ++charNum) {
         if (word.charAt(charNum) >= 'A' && word.charAt(charNum) <= 'Z') {
           // This triggers if there were more "acronym" characters in
@@ -188,12 +188,12 @@ public class Rules {
     if (acronymPos != acronym.length()) {
       return false;
     }
-    for (CoreLabel aLonger : longer) {
-      if (aLonger.get(CoreAnnotations.TextAnnotation.class).contains(acronym)) {
+    for (int i = 0; i < longer.size(); ++i) {
+      if (longer.get(i).get(CoreAnnotations.TextAnnotation.class).contains(acronym)) {
         return false;
       }
     }
-
+    
     return true;
   }
 
@@ -218,7 +218,7 @@ public class Rules {
   }
 
   public static boolean entityAttributesAgree(CorefCluster mentionCluster, CorefCluster potentialAntecedent, boolean ignoreGender){
-
+    
     boolean hasExtraAnt = false;
     boolean hasExtraThis = false;
 
@@ -354,7 +354,7 @@ public class Rules {
 
   /**
    * Exact string match except phrase after head (only for proper noun):
-   * For dealing with a error like {@literal "[Mr. Bickford] <- [Mr. Bickford , an 18-year mediation veteran] }"
+   * For dealing with a error like "[Mr. Bickford] <- [Mr. Bickford , an 18-year mediation veteran]"
    */
   public static boolean entityRelaxedExactStringMatch(
       CorefCluster mentionCluster,
@@ -391,7 +391,7 @@ public class Rules {
     }
     return false;
   }
-
+  
 
   /** Check whether later mention has incompatible modifier */
   public static boolean entityHaveIncompatibleModifier(Mention m, Mention ant) {
@@ -593,7 +593,7 @@ public class Rules {
   /** Is the speaker for mention the same entity as the ant entity? */
   public static boolean antecedentIsMentionSpeaker(Document document,
                                                    Mention mention, Mention ant, Dictionaries dict) {
-    if(document.speakerPairs.contains(new Pair<>(mention.mentionID, ant.mentionID))) {
+    if(document.speakerPairs.contains(new Pair<Integer, Integer>(mention.mentionID, ant.mentionID))) {
       return true;
     }
 
@@ -755,7 +755,7 @@ public class Rules {
    * Given the name of a speaker, returns the coref cluster id it belongs to (-1 if no cluster)
    * @param document The document to search in
    * @param speakerString The name to search for
-   * @return cluster id
+   * @return cluster id 
    */
   public static int getSpeakerClusterId(Document document, String speakerString) {
     int speakerClusterId = -1;
@@ -800,12 +800,12 @@ public class Rules {
   }
 
   // COREF_DICT strict: all the mention pairs between the two clusters must match in the dict
-  public static boolean entityClusterAllCorefDictionary(CorefCluster menCluster, CorefCluster antCluster,
+  public static boolean entityClusterAllCorefDictionary(CorefCluster menCluster, CorefCluster antCluster, 
       Dictionaries dict, int dictColumn, int freq){
     boolean ret = false;
     for(Mention men : menCluster.getCorefMentions()){
       if(men.isPronominal()) continue;
-      for(Mention ant : antCluster.getCorefMentions()){
+      for(Mention ant : antCluster.getCorefMentions()){   
         if(ant.isPronominal() || men.headWord.lemma().equals(ant.headWord.lemma())) continue;
         if(entityCorefDictionary(men, ant, dict, dictColumn, freq)){
           ret = true;
@@ -814,18 +814,18 @@ public class Rules {
         }
       }
     }
-    return ret;
+    return ret; 
   }
-
+   
    // COREF_DICT pairwise: the two mentions match in the dict
-   public static boolean entityCorefDictionary(Mention men, Mention ant, Dictionaries dict, int dictVersion, int freq){
-
-     Pair<String, String> mention_pair = new Pair<>(
-             men.getSplitPattern()[dictVersion - 1].toLowerCase(),
-             ant.getSplitPattern()[dictVersion - 1].toLowerCase());
-
+   public static boolean entityCorefDictionary(Mention men, Mention ant, Dictionaries dict, int dictVersion, int freq){  
+          
+     Pair<String, String> mention_pair = new Pair<String, String>(
+         men.getSplitPattern()[dictVersion-1].toLowerCase(), 
+         ant.getSplitPattern()[dictVersion-1].toLowerCase());     
+     
      int high_freq = -1;
-     if(dictVersion == 1){
+     if(dictVersion == 1){ 
        high_freq = 75;
      } else if(dictVersion == 2){
        high_freq = 16;
@@ -834,21 +834,21 @@ public class Rules {
      } else if(dictVersion == 4){
        high_freq = 16;
      }
-
+     
      if(dict.corefDict.get(dictVersion-1).getCount(mention_pair) > high_freq) return true;
 
      if(dict.corefDict.get(dictVersion-1).getCount(mention_pair) > freq){
          if(dict.corefDictPMI.getCount(mention_pair) > 0.18) return true;
          if(!dict.corefDictPMI.containsKey(mention_pair)) return true;
-     }
-     return false;
+     }     
+     return false; 
    }
-
+   
    public static boolean contextIncompatible(Mention men, Mention ant, Dictionaries dict) {
      String antHead = ant.headWord.word();
-     if ( (ant.mentionType == MentionType.PROPER)
-           && ant.sentNum != men.sentNum
-           && !isContextOverlapping(ant,men)
+     if ( (ant.mentionType == MentionType.PROPER) 
+           && ant.sentNum != men.sentNum 
+           && !isContextOverlapping(ant,men) 
            && dict.NE_signatures.containsKey(antHead)) {
        IntCounter<String> ranks = Counters.toRankCounter(dict.NE_signatures.get(antHead));
        List<String> context;
@@ -880,7 +880,7 @@ public class Rules {
    public static boolean sentenceContextIncompatible(Mention men, Mention ant, Dictionaries dict) {
      if ( (ant.mentionType != MentionType.PROPER)
           && (ant.sentNum != men.sentNum)
-          && (men.mentionType != MentionType.PROPER)
+          && (men.mentionType != MentionType.PROPER) 
           && !isContextOverlapping(ant,men)) {
        List<String> context1 = !ant.getPremodifierContext().isEmpty() ? ant.getPremodifierContext() : ant.getContext();
        List<String> context2 = !men.getPremodifierContext().isEmpty() ? men.getPremodifierContext() : men.getContext();
@@ -909,7 +909,7 @@ public class Rules {
      }
      return false;
    }
-
+   
    private static boolean isContextOverlapping(Mention m1, Mention m2) {
      Set<String> context1 = Generics.newHashSet();
      Set<String> context2 = Generics.newHashSet();

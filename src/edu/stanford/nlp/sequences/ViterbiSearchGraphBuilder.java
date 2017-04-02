@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.fsm.*;
@@ -10,14 +9,11 @@ import java.util.Arrays;
  * @author Michel Galley
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in types
  */
-public class ViterbiSearchGraphBuilder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ViterbiSearchGraphBuilder.class);
+public class ViterbiSearchGraphBuilder {
 
   public static DFSA<String, Integer> getGraph(SequenceModel ts, Index<String> classIndex) {
 
-    DFSA<String, Integer> viterbiSearchGraph = new DFSA<>(null);
+    DFSA<String, Integer> viterbiSearchGraph = new DFSA<String, Integer>(null);
 
     // Set up tag options
     int length = ts.length();
@@ -41,18 +37,18 @@ public class ViterbiSearchGraphBuilder  {
     DFSAState<String, Integer> startState = null, endState = null;
     if(viterbiSearchGraph != null) {
       int stateId = -1;
-      startState = new DFSAState<>(++stateId, viterbiSearchGraph, 0.0);
+      startState = new DFSAState<String, Integer>(++stateId, viterbiSearchGraph, 0.0);
       viterbiSearchGraph.setInitialState(startState);
       graphStates = new DFSAState[length][];
       for(int pos = 0; pos<length; ++pos) {
         //System.err.printf("%d states at pos %d\n",tags[pos].length,pos);
         graphStates[pos] = new DFSAState[tags[pos].length];
         for(int product = 0; product < tags[pos].length; ++product) {
-          graphStates[pos][product] = new DFSAState<>(++stateId, viterbiSearchGraph);
+          graphStates[pos][product] = new DFSAState<String, Integer>(++stateId, viterbiSearchGraph);
         }
       }
       // Accepting state:
-      endState = new DFSAState<>(++stateId, viterbiSearchGraph, 0.0);
+      endState = new DFSAState<String, Integer>(++stateId, viterbiSearchGraph, 0.0);
       endState.setAccepting(true);
     }
 
@@ -109,8 +105,8 @@ public class ViterbiSearchGraphBuilder  {
           // all nodes in the first spot link to startState:
           int curTag = tags[pos][product % tagNum[pos]];
           //System.err.printf("pos=%d, product=%d, tag=%d score=%.3f\n",pos,product,curTag,windowScore[pos][product]);
-          DFSATransition<String, Integer> tr =
-                  new DFSATransition<>("", startState, graphStates[pos][product], classIndex.get(curTag), "", -windowScore[pos][product]);
+          DFSATransition<String, Integer> tr = 
+            new DFSATransition<String, Integer>("",startState,graphStates[pos][product],classIndex.get(curTag),"",-windowScore[pos][product]);
           startState.addTransition(tr);
         } else {
           int sharedProduct = product / tagNum[pos + rightWindow];
@@ -120,14 +116,14 @@ public class ViterbiSearchGraphBuilder  {
             int predProduct = newTagNum * factor + sharedProduct;
             int predTag = tags[pos-1][predProduct % tagNum[pos-1]];
             int curTag = tags[pos][product % tagNum[pos]];
-            //log.info("pos: "+pos);
-            //log.info("product: "+product);
+            //System.err.println("pos: "+pos);
+            //System.err.println("product: "+product);
             //System.err.printf("pos=%d-%d, product=%d-%d, tag=%d-%d score=%.3f\n",pos-1,pos,predProduct,product,predTag,curTag,
             //  windowScore[pos][product]);
             DFSAState<String, Integer> sourceState = graphStates[pos-leftWindow][predTag];
             DFSAState<String, Integer> destState = (pos-leftWindow+1==graphStates.length) ? endState : graphStates[pos-leftWindow+1][curTag];
-            DFSATransition<String, Integer> tr =
-                    new DFSATransition<>("", sourceState, destState, classIndex.get(curTag), "", -windowScore[pos][product]);
+            DFSATransition<String, Integer> tr = 
+              new DFSATransition<String, Integer>("",sourceState,destState,classIndex.get(curTag),"",-windowScore[pos][product]);
             graphStates[pos-leftWindow][predTag].addTransition(tr);
           }
         }

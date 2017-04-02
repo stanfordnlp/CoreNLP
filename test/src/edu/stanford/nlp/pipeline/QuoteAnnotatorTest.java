@@ -3,7 +3,7 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
-import org.junit.Assert;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import java.util.List;
@@ -18,16 +18,13 @@ public class QuoteAnnotatorTest extends TestCase {
   private static StanfordCoreNLP pipelineNoSingleQuotes;
   private static StanfordCoreNLP pipelineMaxFive;
   private static StanfordCoreNLP pipelineAsciiQuotes;
-  private static StanfordCoreNLP pipelineAllowEmbeddedSame;
-  private static StanfordCoreNLP pipelineUnclosedQuotes;
 
   /**
    * Initialize the annotators at the start of the unit test.
    * If they've already been initialized, do nothing.
    */
   @Override
-  public void setUp() throws Exception {
-    super.setUp();
+  public void setUp() {
     synchronized(QuoteAnnotatorTest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
@@ -58,38 +55,7 @@ public class QuoteAnnotatorTest extends TestCase {
         props.setProperty("asciiQuotes", "true");
         pipelineAsciiQuotes = new StanfordCoreNLP(props);
       }
-      if (pipelineAllowEmbeddedSame == null) {
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit, quote5");
-        props.setProperty("customAnnotatorClass.quote5", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("allowEmbeddedSame", "true");
-        pipelineAllowEmbeddedSame = new StanfordCoreNLP(props);
-      }
-      if(pipelineUnclosedQuotes == null){
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit, quote6");
-        props.setProperty("customAnnotatorClass.quote6", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("extractUnclosedQuotes", "true");
-        pipelineUnclosedQuotes = new StanfordCoreNLP(props);
-      }
     }
-  }
-
-  public void testBasicEmbeddedSameUnicode() {
-    String text = "“Hello,” he said, “how “are” you doing?”";
-    List<CoreMap> quotes = runQuotes(text, 2, pipeline);
-    assertEquals("“Hello,”", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("“how “are” you doing?”", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
-    List<CoreMap> embedded = quotes.get(1).get(CoreAnnotations.QuotationsAnnotation.class);
-    assertEquals(embedded.size(), 0);
-  }
-
-  public void testBasicAllowEmbeddedSameUnicode() {
-    String text = "“Hello,” he said, “how “are” you doing?”";
-    List<CoreMap> quotes = runQuotes(text, 2, pipelineAllowEmbeddedSame);
-    assertEquals("“Hello,”", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("“how “are” you doing?”", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
-    assertEmbedded("“are”", "“how “are” you doing?”", quotes);
   }
 
   public void testBasicAsciiQuotes() {
@@ -113,18 +79,6 @@ public class QuoteAnnotatorTest extends TestCase {
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("“Mr. Bennet”", "“Mr. 'tis “Mr. Bennet” Bennet”", quotes);
     assertEmbedded("“Mr. 'tis “Mr. Bennet” Bennet”", text, quotes);
-  }
-
-  public void testDashes() {
-    String text = "\"Hello\"--said Mr. Cornwallaby";
-    List<CoreMap> quotes = runQuotes(text, 1);
-    assertEquals("\"Hello\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    text = "“-Wish- you success!”—In what";
-    quotes = runQuotes(text, 1);
-    assertEquals("“-Wish- you success!”", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    text = "\"-Wish- you success!\"—In what";
-    quotes = runQuotes(text, 1);
-    assertEquals("\"-Wish- you success!\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
   }
 
   public void testBasicInternalPunc() {
@@ -152,64 +106,39 @@ public class QuoteAnnotatorTest extends TestCase {
 
   public void testEmbeddedLatexQuotes() {
     String text = "``Hello ``how are you doing?''''";
-    List<CoreMap> quotes = runQuotes(text, 1, pipelineAllowEmbeddedSame);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("``how are you doing?''", text, quotes);
     assertInnerAnnotationValues(quotes.get(0), 0, 0, 0, 0, 9);
   }
 
-  public void testEmbeddedLatexQuotesNoEmbedded() {
-    String text = "``Hello ``how are you doing?''''";
-    List<CoreMap> quotes = runQuotes(text, 1, pipeline);
-    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    List<CoreMap> embedded = quotes.get(0).get(CoreAnnotations.QuotationsAnnotation.class);
-    assertEquals(0, embedded.size());
-  }
-
   public void testEmbeddedSingleLatexQuotes() {
     String text = "`Hello `how are you doing?''";
-    List<CoreMap> quotes = runQuotes(text, 1, pipelineAllowEmbeddedSame);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("`how are you doing?'", text, quotes);
   }
 
   public void testEmbeddedLatexQuotesAllEndSamePlace() {
     String text = "``Hello ``how `are ``you doing?'''''''";
-    List<CoreMap> quotes = runQuotes(text, 1, pipelineAllowEmbeddedSame);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("``how `are ``you doing?'''''", text, quotes);
     assertEmbedded("`are ``you doing?'''", "``how `are ``you doing?'''''", quotes);
     assertEmbedded("``you doing?''", "`are ``you doing?'''", quotes);
   }
 
-  public void testEmbeddedLatexQuotesAllEndSamePlaceNoEmbedded() {
-    String text = "``Hello ``how ``are ``you doing?''''''''";
-    List<CoreMap> quotes = runQuotes(text, 1, pipeline);
-    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    List<CoreMap> embedded = quotes.get(0).get(CoreAnnotations.QuotationsAnnotation.class);
-    assertEquals(0, embedded.size());
-  }
-
   public void testTripleEmbeddedLatexQuotes() {
     String text = "``Hel ``lo ``how'' are you'' doing?''";
-    List<CoreMap> quotes = runQuotes(text, 1, pipelineAllowEmbeddedSame);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("``lo ``how'' are you''", text, quotes);
     assertEmbedded("``how''", "``lo ``how'' are you''", quotes);
   }
 
-  public void testTripleEmbeddedLatexQuotesNoEmbedded() {
-    String text = "``Hel ``lo ``how'' are you'' doing?''";
-    // This case fails unless you also don't consider single quotes
-    List<CoreMap> quotes = runQuotes(text, 1, pipelineNoSingleQuotes);
-    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    List<CoreMap> embedded = quotes.get(0).get(CoreAnnotations.QuotationsAnnotation.class);
-    assertEquals(0, embedded.size());
-  }
-
   public void testTripleEmbeddedUnicodeQuotes() {
     String text = "“Hel «lo “how” are you» doing?”";
-    List<CoreMap> quotes = runQuotes(text, 1, pipelineAllowEmbeddedSame);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("«lo “how” are you»", text, quotes);
     assertEmbedded("“how”", "«lo “how” are you»", quotes);
@@ -217,13 +146,13 @@ public class QuoteAnnotatorTest extends TestCase {
 
   public void testBasicIgnoreSingleQuotes() {
     String text = "“Hello,” he 'said', “how are you doing?”";
-    List<CoreMap> quotes = runQuotes(text, 2, pipelineAllowEmbeddedSame);
+    List<CoreMap> quotes = runQuotes(text, 2, pipelineNoSingleQuotes);
     assertEquals("“Hello,”", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("“how are you doing?”", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
 
     text = "\"'Tis Impossible, “Mr. 'tis “Mr. Bennet” Bennet”, impossible, when 'tis I am not acquainted with him\n" +
         " myself; how can you be so teasing?\"";
-    quotes = runQuotes(text, 1, pipelineAllowEmbeddedSame);
+    quotes = runQuotes(text, 1, pipelineNoSingleQuotes);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("“Mr. Bennet”", "“Mr. 'tis “Mr. Bennet” Bennet”", quotes);
     assertEmbedded("“Mr. 'tis “Mr. Bennet” Bennet”", text, quotes);
@@ -424,19 +353,8 @@ public class QuoteAnnotatorTest extends TestCase {
     String text = "\"I said that Jones' cow was better,\" but then he " +
         "rebutted. I was shocked--\"My cow is better than any one of Jones' bovines!\"";
     List<CoreMap> quotes = runQuotes(text, 2);
-    assertEquals("\"I said that Jones' cow was better,\"",
-        quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("\"My cow is better than any one of Jones' bovines!\"",
-        quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
-  }
-
-  public void testUnclosedLastDoubleQuotesUnclosedAnnotation() {
-    String text = "\"Hello,\" he said, \"how are you doing?";
-    List<CoreMap> quotes = runQuotes(text, 1);
-    List<CoreMap> unclosedQuotes = runUnclosedQuotes(text, 1, pipelineUnclosedQuotes);
-    assertEquals("\"Hello,\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("\"how are you doing?",
-        unclosedQuotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"I said that Jones' cow was better,\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"My cow is better than any one of Jones' bovines!\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
   }
 
   public List<CoreMap> runQuotes(String text, int numQuotes) {
@@ -506,17 +424,4 @@ public class QuoteAnnotatorTest extends TestCase {
     }
     return false;
   }
-
-  public List<CoreMap> runUnclosedQuotes(String text, int numQuotes, StanfordCoreNLP pipeline) {
-    Annotation doc = new Annotation(text);
-    pipeline.annotate(doc);
-
-    // now check what's up...
-    List<CoreMap> quotes = doc.get(CoreAnnotations.UnclosedQuotationsAnnotation.class);
-
-    Assert.assertNotNull(quotes);
-    Assert.assertEquals(numQuotes, quotes.size());
-    return quotes;
-  }
-
 }

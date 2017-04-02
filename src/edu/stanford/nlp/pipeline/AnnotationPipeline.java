@@ -1,7 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.*;
@@ -9,7 +7,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 
 /**
@@ -24,10 +22,7 @@ import java.util.function.Consumer;
  * @author Jenny Finkel
  */
 
-public class AnnotationPipeline implements Annotator  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotationPipeline.class);
+public class AnnotationPipeline implements Annotator {
 
   protected static final boolean TIME = true;
 
@@ -38,7 +33,7 @@ public class AnnotationPipeline implements Annotator  {
     this.annotators = annotators;
     if (TIME) {
       int num = annotators.size();
-      accumulatedTime = new ArrayList<>(num);
+      accumulatedTime = new ArrayList<MutableLong>(num);
       for (int i = 0; i < num; i++) {
         accumulatedTime.add(new MutableLong());
       }
@@ -46,7 +41,7 @@ public class AnnotationPipeline implements Annotator  {
   }
 
   public AnnotationPipeline() {
-    this(new ArrayList<>()); // It can't be a singletonList() since it isn't copied but is mutated.
+    this(new ArrayList<Annotator>());
   }
 
   public void addAnnotator(Annotator annotator) {
@@ -67,9 +62,6 @@ public class AnnotationPipeline implements Annotator  {
     Iterator<MutableLong> it = accumulatedTime.iterator();
     Timing t = new Timing();
     for (Annotator annotator : annotators) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       if (TIME) {
         t.start();
       }
@@ -100,7 +92,7 @@ public class AnnotationPipeline implements Annotator  {
    * @param callback A function to be called when an annotation finishes.
    *                 The return value of the callback is ignored.
    */
-  public void annotate(final Iterable<Annotation> annotations, final Consumer<Annotation> callback) {
+  public void annotate(final Iterable<Annotation> annotations, final Function<Annotation,Object> callback) {
     annotate(annotations, Runtime.getRuntime().availableProcessors(), callback);
   }
 
@@ -112,7 +104,7 @@ public class AnnotationPipeline implements Annotator  {
    * @param numThreads The number of threads to run on
    */
   public void annotate(final Iterable<Annotation> annotations, int numThreads) {
-    annotate(annotations, numThreads, in -> {});
+    annotate(annotations, numThreads, in -> null);
   }
 
   /**
@@ -123,45 +115,48 @@ public class AnnotationPipeline implements Annotator  {
    * @param callback A function to be called when an annotation finishes.
    *                 The return value of the callback is ignored.
    */
-  public void annotate(final Iterable<Annotation> annotations, int numThreads, final Consumer<Annotation> callback){
+  public void annotate(final Iterable<Annotation> annotations, int numThreads, final Function<Annotation,Object> callback){
     // case: single thread (no point in spawning threads)
     if(numThreads == 1) {
       for(Annotation ann : annotations) {
         annotate(ann);
-        callback.accept(ann);
+        callback.apply(ann);
       }
     }
     // Java's equivalent to ".map{ lambda(annotation) => annotate(annotation) }
-    Iterable<Runnable> threads = () -> {
-      final Iterator<Annotation> iter = annotations.iterator();
-      return new Iterator<Runnable>() {
-        @Override
-        public boolean hasNext() {
-          return iter.hasNext();
-        }
-        @Override
-        public Runnable next() {
-          if ( ! iter.hasNext()) {
-            throw new NoSuchElementException();
+    Iterable<Runnable> threads = new Iterable<Runnable>() {
+      @Override
+      public Iterator<Runnable> iterator() {
+        final Iterator<Annotation> iter = annotations.iterator();
+        return new Iterator<Runnable>() {
+          @Override
+          public boolean hasNext() {
+            return iter.hasNext();
           }
-          final Annotation input = iter.next();
-          return () -> {
-            //(logging)
-            String beginningOfDocument = input.toString().substring(0,Math.min(50,input.toString().length()));
-            Redwood.startTrack("Annotating \"" + beginningOfDocument + "...\"");
-            //(annotate)
-            annotate(input);
-            //(callback)
-            callback.accept(input);
-            //(logging again)
-            Redwood.endTrack("Annotating \"" + beginningOfDocument + "...\"");
-          };
-        }
-        @Override
-        public void remove() {
-          iter.remove();
-        }
-      };
+          @Override
+          public Runnable next() {
+            if ( ! iter.hasNext()) {
+              throw new NoSuchElementException();
+            }
+            final Annotation input = iter.next();
+            return () -> {
+              //(logging)
+              String beginningOfDocument = input.toString().substring(0,Math.min(50,input.toString().length()));
+              Redwood.startTrack("Annotating \"" + beginningOfDocument + "...\"");
+              //(annotate)
+              annotate(input);
+              //(callback)
+              callback.apply(input);
+              //(logging again)
+              Redwood.endTrack("Annotating \"" + beginningOfDocument + "...\"");
+            };
+          }
+          @Override
+          public void remove() {
+            iter.remove();
+          }
+        };
+      }
     };
     // Thread
     Redwood.Util.threadAndRun(this.getClass().getSimpleName(), threads, numThreads );
@@ -190,15 +185,13 @@ public class AnnotationPipeline implements Annotator  {
   public String timingInformation() {
     StringBuilder sb = new StringBuilder();
     if (TIME) {
-      sb.append("Annotation pipeline timing information:");
-      sb.append(IOUtils.eolChar);
+      sb.append("Annotation pipeline timing information:\n");
       Iterator<MutableLong> it = accumulatedTime.iterator();
       long total = 0;
       for (Annotator annotator : annotators) {
         MutableLong m = it.next();
         sb.append(StringUtils.getShortClassName(annotator)).append(": ");
-        sb.append(Timing.toSecondsString(m.longValue())).append(" sec.");
-        sb.append(IOUtils.eolChar);
+        sb.append(Timing.toSecondsString(m.longValue())).append(" sec.\n");
         total += m.longValue();
       }
       sb.append("TOTAL: ").append(Timing.toSecondsString(total)).append(" sec.");
@@ -207,8 +200,8 @@ public class AnnotationPipeline implements Annotator  {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    Set<Class<? extends CoreAnnotation>> satisfied = Generics.newHashSet();
+  public Set<Requirement> requirementsSatisfied() {
+    Set<Requirement> satisfied = Generics.newHashSet();
     for (Annotator annotator : annotators) {
       satisfied.addAll(annotator.requirementsSatisfied());
     }
@@ -216,7 +209,7 @@ public class AnnotationPipeline implements Annotator  {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
+  public Set<Requirement> requires() {
     if (annotators.isEmpty()) {
       return Collections.emptySet();
     }
@@ -227,14 +220,14 @@ public class AnnotationPipeline implements Annotator  {
   public static void main(String[] args) throws IOException, ClassNotFoundException {
     Timing tim = new Timing();
     AnnotationPipeline ap = new AnnotationPipeline();
-    final boolean verbose = false;
+    boolean verbose = false;
     ap.addAnnotator(new TokenizerAnnotator(verbose, "en"));
     ap.addAnnotator(new WordsToSentencesAnnotator(verbose));
     // ap.addAnnotator(new NERCombinerAnnotator(verbose));
     // ap.addAnnotator(new OldNERAnnotator(verbose));
     // ap.addAnnotator(new NERMergingAnnotator(verbose));
     ap.addAnnotator(new ParserAnnotator(verbose, -1));
-/*
+/**
     ap.addAnnotator(new UpdateSentenceFromParseAnnotator(verbose));
     ap.addAnnotator(new NumberAnnotator(verbose));
     ap.addAnnotator(new QuantifiableEntityNormalizingAnnotator(verbose));
@@ -253,7 +246,7 @@ public class AnnotationPipeline implements Annotator  {
 
     if (TIME) {
       System.out.println(ap.timingInformation());
-      log.info("Total time for AnnotationPipeline: " +
+      System.err.println("Total time for AnnotationPipeline: " +
                          tim.toSecondsString() + " sec.");
     }
   }

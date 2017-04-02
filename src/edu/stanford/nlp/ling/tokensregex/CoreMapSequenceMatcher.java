@@ -1,31 +1,29 @@
 package edu.stanford.nlp.ling.tokensregex;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
+import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.CoreMap;
+import java.util.function.Function;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
-import edu.stanford.nlp.pipeline.CoreMapAggregator;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.CoreMap;
-
 
 /**
- * CoreMap Sequence Matcher for regular expressions for sequences over CoreMaps.
+ * CoreMap Sequence Matcher for regular expressions for sequences over coremaps
  *
  * @author Angel Chang
  */
 public class CoreMapSequenceMatcher<T extends CoreMap> extends SequenceMatcher<T> {
-
   protected static final Function<List<? extends CoreMap>, String> COREMAP_LIST_TO_STRING_CONVERTER =
-          in -> (in != null)? ChunkAnnotationUtils.getTokenText(in, CoreAnnotations.TextAnnotation.class): null;
+      in -> (in != null)? ChunkAnnotationUtils.getTokenText(in, CoreAnnotations.TextAnnotation.class): null;
 
-  public CoreMapSequenceMatcher(SequencePattern<T> pattern, List<? extends T> tokens) {
+ public CoreMapSequenceMatcher(SequencePattern<T> pattern, List<? extends T> tokens) {
     super(pattern, tokens);
-    // this.nodesToStringConverter = COREMAP_LIST_TO_STRING_CONVERTER;
+//    this.nodesToStringConverter = COREMAP_LIST_TO_STRING_CONVERTER;
   }
 
   public static class BasicCoreMapSequenceMatcher extends CoreMapSequenceMatcher<CoreMap> {
@@ -42,7 +40,8 @@ public class CoreMapSequenceMatcher<T extends CoreMap> extends SequenceMatcher<T
     annotateGroup(0, attributes);
   }
 
-  public void annotateGroup(int group, Map<String,String> attributes) {
+  public void annotateGroup(int group, Map<String,String> attributes)
+  {
     int groupStart = start(group);
     if (groupStart >=0) {
       int groupEnd = end(group);
@@ -55,8 +54,9 @@ public class CoreMapSequenceMatcher<T extends CoreMap> extends SequenceMatcher<T
     return getMergedList(0);
   }
 
-  public List<CoreMap> getMergedList(int... groups) {
-    List<CoreMap> res = new ArrayList<>();
+  public List<CoreMap> getMergedList(int... groups)
+  {
+    List<CoreMap> res = new ArrayList<CoreMap>();
     int last = 0;
     List<Integer> orderedGroups = CollectionUtils.asList(groups);
     Collections.sort(orderedGroups);
@@ -81,7 +81,8 @@ public class CoreMapSequenceMatcher<T extends CoreMap> extends SequenceMatcher<T
     return mergeGroup(0);
   }
 
-  private CoreMap createMergedChunk(int groupStart, int groupEnd) {
+  private CoreMap createMergedChunk(int groupStart, int groupEnd)
+  {
     CoreMap merged = null;
   /*  if (annotation != null) {
       // Take start and end
@@ -89,12 +90,13 @@ public class CoreMapSequenceMatcher<T extends CoreMap> extends SequenceMatcher<T
     }  */
     if (merged == null) {
       // Okay, have to go through these one by one and merge them
-      merged = CoreMapAggregator.getDefaultAggregator().merge(elements, groupStart, groupEnd);
+      merged = ChunkAnnotationUtils.getMergedChunk(elements, groupStart, groupEnd, CoreMapAttributeAggregator.getDefaultAggregators());
     }
     return merged;
   }
 
-  public CoreMap mergeGroup(int group) {
+  public CoreMap mergeGroup(int group)
+  {
     int groupStart = start(group);
     if (groupStart >=0) {
       int groupEnd = end(group);

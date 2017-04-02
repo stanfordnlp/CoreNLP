@@ -1,7 +1,9 @@
 package edu.stanford.nlp.simple;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.naturalli.*;
+import edu.stanford.nlp.naturalli.Operator;
+import edu.stanford.nlp.naturalli.OperatorSpec;
+import edu.stanford.nlp.naturalli.Polarity;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import org.junit.Test;
@@ -38,27 +40,7 @@ public class SentenceITest {
   public void testNER() {
     assertEquals(
         new ArrayList <String>(){{ add("PERSON"); add("PERSON"); add("O"); add("O"); add("O"); add("LOCATION"); add("LOCATION"); add("O"); }},
-        new Sentence("George Bush lives in the United States.").nerTags());
-  }
-
-  @Test
-  public void testMentions() {
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); }},
-        new Sentence("George Bush lives in the United States.").mentions("PERSON"));
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); add("Bill Clinton"); }},
-        new Sentence("George Bush and Bill Clinton").mentions("PERSON"));
-
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); add("United States"); }},
-        new Sentence("George Bush lives in the United States.").mentions());
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); add("Bill Clinton"); }},
-        new Sentence("George Bush and Bill Clinton").mentions());
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); add("27"); }},
-        new Sentence("George Bush 27").mentions());
+        new Sentence("George Bush lives in the United States.").ners());
   }
 
   @Test
@@ -135,13 +117,13 @@ public class SentenceITest {
     assertEquals(new Integer(3), sentence.governor(1).orElse(-42));
     assertEquals(new Integer(3), sentence.governor(2).orElse(-42));
     assertEquals(new Integer(-1), sentence.governor(3).orElse(-42));
-//    assertEquals(new Integer(3), sentence.governor(4).orElse(-42));
+    assertEquals(new Integer(3), sentence.governor(4).orElse(-42));
 
     assertEquals("det", sentence.incomingDependencyLabel(0).orElse("???"));
     assertEquals("nsubj", sentence.incomingDependencyLabel(1).orElse("???"));
     assertEquals("cop", sentence.incomingDependencyLabel(2).orElse("???"));
     assertEquals("root", sentence.incomingDependencyLabel(3).orElse("???"));
-//    assertEquals("punct", sentence.incomingDependencyLabel(4).orElse("???"));
+    assertEquals("punct", sentence.incomingDependencyLabel(4).orElse("???"));
 
     // Make sure we called the right annotator
     assertNotNull(sentence.asCoreMap().get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
@@ -159,7 +141,7 @@ public class SentenceITest {
   @Test
   public void testToCoreLabels() {
     Sentence sent = new Sentence("the quick brown fox jumped over the lazy dog");
-    List<CoreLabel> tokens = sent.asCoreLabels(Sentence::posTags);
+    List<CoreLabel> tokens = sent.asCoreLabels(sent::posTags);
     assertEquals(9, tokens.size());
     assertEquals("the", tokens.get(0).word());
     assertEquals("dog", tokens.get(8).word());
@@ -182,23 +164,4 @@ public class SentenceITest {
     assertEquals(orig, loaded);
     in.close();
   }
-
-  /*
-  @Test
-  public void testFragmentConstructor() {
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
-      setProperty("annotators", "tokenize,ssplit,pos,depparse,natlog,openie");
-    }});
-    Annotation ann = new Annotation("The blue cat eats mice.");
-    pipeline.annotate(ann);
-    CoreMap map = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-
-    for (SentenceFragment fragment : map.get(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
-      Sentence s = new Sentence(fragment);
-      assertEquals(
-          StringUtils.join(fragment.words.stream().map(CoreLabel::word), " "),
-          StringUtils.join(s.words(), " "));
-    }
-  }
-  */
 }

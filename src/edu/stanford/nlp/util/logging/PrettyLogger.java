@@ -2,6 +2,7 @@
 package edu.stanford.nlp.util.logging;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -170,7 +171,7 @@ public class PrettyLogger {
       channels.log("(empty)");
     } else {
       // convert keys to sorted list, if possible
-      List<K> keys = new LinkedList<>();
+      List<K> keys = new LinkedList<K>();
       for (K key : mapping.keySet()) {
         keys.add(key);
       }
@@ -277,5 +278,4 @@ public class PrettyLogger {
     }
     Redwood.endTrack(description);
   }
-
 }

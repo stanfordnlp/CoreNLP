@@ -1,7 +1,5 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
@@ -10,69 +8,22 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * An annotator which picks quotations out of the given text. Allows
- * for embedded quotations so long as they are either directed unicode quotes or are
- * of a different type of quote than the outer quotations
- * (e.g. "'Gadzooks' is what he said to me" is legal whereas
- * "They called me "Danger" when I was..." is illegal).
- * Uses regular-expression-like rules to find quotes and does not
+ * for embedded quotations so long as they are of a different type of
+ * quote than the outer quotations (e.g. "'Gadzooks' is what he said to me"
+ * is legal whereas "They called me "Danger" when I was..." is
+ * illegal.) Uses regular-expression-like rules to find quotes and does not
  * depend on the tokenizer, which allows quotes like ''Tis true!' to be
  * correctly identified.
  *
- * Considers regular ascii ("", '', ``'', and `') as well as "smart" and
- * international quotation marks as follows:
- * “”,‘’, «», ‹›, 「」, 『』, „”, and ‚’.
- *
- * Note: extracts everything within these pairs as a whole quote segment, which may or may
- * not be the desired behaviour for texts that use different formatting styles than
- * standard english ones.
- *
- * There are a number of options that can be passed to the quote annotator to
- * customize its' behaviour:
- * <ul>
- *   <li>singleQuotes: "true" or "false", indicating whether or not to consider ' tokens
- *    to be quotation marks (default=false).</li>
- *   <li>maxLength: maximum character length of quotes to consider (default=-1).</li>
- *   <li>asciiQuotes: "true" or "false", indicating whether or not to convert all quotes
- *   to ascii quotes before processing (can help when there are errors in quote directionality)
- *   (default=false).</li>
- *   <li>allowEmbeddedSame: "true" or "false" indicating whether or not to allow smart/directed
- *   (everything except " and ') quotes of the same kind to be embedded within one another
- *   (default=false).</li>
- *   <li>extractUnclosedQuotes: "true" or "false" indicating whether or not to extract unclosed
- *   quotes. If "true", an UnclosedQuotationsAnnotation that is structured exactly the same as
- *   the QuotationsAnnotation will be added to the document. Any nested unclosed quotations will be
- *   contained in nested UnclosedQuotationsAnnotation on the target unclosed quotation
- *   (default=false).</li>
- * </ul>
- *
- * The annotator adds a QuotationsAnnotation to the Annotation
- * which returns a List<CoreMap> that
- * contain the following information:
- * <ul>
- *  <li>CharacterOffsetBeginAnnotation</li>
- *  <li>CharacterOffsetEndAnnotation</li>
- *  <li>QuotationIndexAnnotation</li>
- *  <li>QuotationsAnnotation (if there are embedded quotes)</li>
- *  <li>TokensAnnotation (if the tokenizer is run before the quote annotator)</li>
- *  <li>TokenBeginAnnotation (if the tokenizer is run before the quote annotator)</li>
- *  <li>TokenEndAnnotation (if the tokenizer is run before the quote annotator)</li>
- *  <li>SentenceBeginAnnotation (if the sentence splitter has bee run before the quote annotator)</li>
- *  <li>SentenceEndAnnotation (if the sentence splitter has bee run before the quote annotator)</li>
- * </ul>
- *
- *
+ * Only considers " and ' characters presently (1/23/2015).
  *
  * @author Grace Muzny
  */
-public class QuoteAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(QuoteAnnotator.class);
+public class QuoteAnnotator implements Annotator {
 
   private final boolean VERBOSE;
   private final boolean DEBUG = false;
@@ -84,15 +35,9 @@ public class QuoteAnnotator implements Annotator  {
   // whether to convert unicode quotes to non-unicode " and '
   // before processing
   public boolean ASCII_QUOTES = false;
-  // Whether or not to allow quotes of the same type embedded inside of each other
-  public boolean ALLOW_EMBEDDED_SAME = false;
 
-  // Whether or not to allow quotes of the same type embedded inside of each other
-  public boolean SMART_QUOTES = false;
-
-  // Whether or not to extract unclosed quotes
-  public boolean EXTRACT_UNCLOSED = false;
-
+  // TODO: implement this
+//  public boolean closeUnclosedQuotes = false;
   //TODO: add directed quote/unicode quote understanding capabilities.
   // will need substantial logic, probably, as quotation mark conventions
   // vary widely.
@@ -127,8 +72,8 @@ public class QuoteAnnotator implements Annotator  {
   }
 
   /** Return a QuoteAnnotator that isolates quotes denoted by the
-   * ASCII characters " and ' as well as a variety of smart and international quotes.
-   * If an unclosed quote appears, by default, this quote will not be counted as a quote.
+   * ASCII characters " and '. If an unclosed quote appears, by default,
+   * this quote will not be counted as a quote.
    *
    *  @param  props Properties object that contains the customizable properties
    *                 attributes.
@@ -151,15 +96,12 @@ public class QuoteAnnotator implements Annotator  {
     USE_SINGLE = Boolean.parseBoolean(props.getProperty("singleQuotes", "false"));
     MAX_LENGTH = Integer.parseInt(props.getProperty("maxLength", "-1"));
     ASCII_QUOTES = Boolean.parseBoolean(props.getProperty("asciiQuotes", "false"));
-    ALLOW_EMBEDDED_SAME = Boolean.parseBoolean(props.getProperty("allowEmbeddedSame", "false"));
-    SMART_QUOTES = Boolean.parseBoolean(props.getProperty("smartQuotes", "false"));
-    EXTRACT_UNCLOSED = Boolean.parseBoolean(props.getProperty("extractUnclosedQuotes", "false"));
 
     VERBOSE = verbose;
     Timing timer = null;
     if (VERBOSE) {
       timer = new Timing();
-      log.info("Preparing quote annotator...");
+      System.err.print("Preparing quote annotator...");
     }
 
     if (VERBOSE) {
@@ -176,96 +118,20 @@ public class QuoteAnnotator implements Annotator  {
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
+
     String quotesFrom = text;
-
-    if (SMART_QUOTES) {
-      // we're just going to try a bunch of different things and pick
-      // whichever results in the most total quotes
-
-      // try unicode
-      Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> overall = getQuotes(quotesFrom);
-      String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
-      List<CoreMap> cmQuotesUnicode =
-          getCoreMapQuotes(overall.first(), tokens, sentences, text, docID, false);
-      List<CoreMap> cmUnclosedUnicode = null;
-      if (EXTRACT_UNCLOSED) {
-        cmUnclosedUnicode = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID, true);
-      }
-      int numUnicode = countQuotes(cmQuotesUnicode);
-
-      // try ascii
-      if (ASCII_QUOTES) {
-        quotesFrom = replaceUnicode(text);
-      }
-      overall = getQuotes(quotesFrom);
-      docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
-      List<CoreMap> cmQuotesAscii = getCoreMapQuotes(overall.first(), tokens, sentences, text, docID, false);
-      List<CoreMap> cmUnclosedAscii = null;
-      if (EXTRACT_UNCLOSED) {
-        cmUnclosedAscii = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID, true);
-      }
-      int numAsciiSingle = countQuotes(cmQuotesAscii);
-
-      // don't allow single quotes
-      USE_SINGLE = false;
-      overall = getQuotes(quotesFrom);
-      docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
-      List<CoreMap> cmQuotesAsciiNoSingle =
-          getCoreMapQuotes(overall.first(), tokens, sentences, text, docID, false);
-      List<CoreMap> cmUnclosedAsciiNoSingle = null;
-      if (EXTRACT_UNCLOSED) {
-        cmUnclosedAsciiNoSingle = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID, true);
-      }
-      int numAsciiNoSingle = countQuotes(cmQuotesAsciiNoSingle);
-
-      log.info("Number of quotes + unicode - single : " + numUnicode);
-      log.info("Number of quotes + ascii - single : " + numAsciiNoSingle);
-      log.info("Number of quotes + ascii + single : " + numAsciiSingle);
-      if (numUnicode >= numAsciiNoSingle && numUnicode > (numAsciiSingle / 2)) {
-        setAnnotations(annotation, cmQuotesUnicode, cmUnclosedUnicode, "Using unicode quotes.");
-      } else if (numAsciiSingle > (numAsciiNoSingle / 2)) {
-        setAnnotations(annotation, cmQuotesAscii, cmUnclosedAscii, "Using ascii quotes.");
-      } else {
-        setAnnotations(annotation, cmQuotesAsciiNoSingle,
-            cmUnclosedAsciiNoSingle, "Using ascii quotes with no single quotes.");
-      }
-    } else {
-      if (ASCII_QUOTES) {
-        quotesFrom = replaceUnicode(text);
-      }
-      Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> overall =
-          getQuotes(quotesFrom);
-
-      String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
-      List<CoreMap> cmQuotes = getCoreMapQuotes(overall.first(), tokens, sentences, text, docID, false);
-      List<CoreMap> cmQuotesUnclosed = getCoreMapQuotes(overall.second(), tokens, sentences, text, docID, true);
-
-      // add quotes to document
-      setAnnotations(annotation, cmQuotes, cmQuotesUnclosed, "Setting quotes.");
+    if (ASCII_QUOTES) {
+      quotesFrom = replaceUnicode(text);
     }
-  }
+    List<Pair<Integer, Integer>> overall = getQuotes(quotesFrom);
 
-  private void setAnnotations(Annotation annotation,
-                              List<CoreMap> quotes,
-                              List<CoreMap> unclosed,
-                              String message) {
-    annotation.set(CoreAnnotations.QuotationsAnnotation.class, quotes);
-    log.info(message);
-    if (EXTRACT_UNCLOSED) {
-      annotation.set(CoreAnnotations.UnclosedQuotationsAnnotation.class, unclosed);
-    }
-  }
+    String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
 
-  //TODO: update this so that it goes more than 1 layer deep
-  private int countQuotes(List<CoreMap> quotes) {
-    int total = quotes.size();
-    for (CoreMap quote : quotes) {
-      List<CoreMap> innerQuotes = quote.get(CoreAnnotations.QuotationsAnnotation.class);
-      if (innerQuotes != null) {
-        total += innerQuotes.size();
-      }
-    }
-    return total;
+    List<CoreMap> cmQuotes = getCoreMapQuotes(overall, tokens, sentences, text, docID);
+
+    // add quotes to document
+    annotation.set(CoreAnnotations.QuotationsAnnotation.class, cmQuotes);
+
   }
 
   // Stolen from PTBLexer
@@ -297,8 +163,7 @@ public class QuoteAnnotator implements Annotator  {
   public static List<CoreMap> getCoreMapQuotes(List<Pair<Integer, Integer>> quotes,
                                                List<CoreLabel> tokens,
                                                List<CoreMap> sentences,
-                                               String text, String docID,
-                                               boolean unclosed) {
+                                              String text, String docID) {
     List<CoreMap> cmQuotes = Generics.newArrayList();
     for (Pair<Integer, Integer> p : quotes) {
       int begin = p.first();
@@ -366,11 +231,7 @@ public class QuoteAnnotator implements Annotator  {
           toRemove.add(cmQuoteComp);
         }
       }
-      if (!unclosed) {
-        cmQuote.set(CoreAnnotations.QuotationsAnnotation.class, embeddedQuotes);
-      } else {
-        cmQuote.set(CoreAnnotations.UnclosedQuotationsAnnotation.class, embeddedQuotes);
-      }
+      cmQuote.set(CoreAnnotations.QuotationsAnnotation.class, embeddedQuotes);
     }
 
     // Remove all the quotes that we want to.
@@ -380,11 +241,11 @@ public class QuoteAnnotator implements Annotator  {
     }
 
     // Set the quote index annotations properly
-    setQuoteIndices(cmQuotes, unclosed);
+    setQuoteIndices(cmQuotes);
     return cmQuotes;
   }
 
-  private static void setQuoteIndices(List<CoreMap> topLevel, boolean unclosed) {
+  private static void setQuoteIndices(List<CoreMap> topLevel) {
     List<CoreMap> level = topLevel;
     int index = 0;
     while (!level.isEmpty()) {
@@ -398,16 +259,8 @@ public class QuoteAnnotator implements Annotator  {
           }
         }
         index++;
-        List<CoreMap> key = quote.get(CoreAnnotations.QuotationsAnnotation.class);
-        if (unclosed) {
-          key = quote.get(CoreAnnotations.UnclosedQuotationsAnnotation.class);
-        }
-        if (key != null) {
-          if (!unclosed) {
-            nextLevel.addAll(quote.get(CoreAnnotations.QuotationsAnnotation.class));
-          } else {
-            nextLevel.addAll(quote.get(CoreAnnotations.UnclosedQuotationsAnnotation.class));
-          }
+        if (quote.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
+          nextLevel.addAll(quote.get(CoreAnnotations.QuotationsAnnotation.class));
         }
       }
       level = nextLevel;
@@ -439,11 +292,11 @@ public class QuoteAnnotator implements Annotator  {
     return quote;
   }
 
-  public Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> getQuotes(String text) {
+  public List<Pair<Integer, Integer>> getQuotes(String text) {
     return recursiveQuotes(text, 0, null);
   }
 
-  public Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>>  recursiveQuotes(String text, int offset, String prevQuote) {
+  public List<Pair<Integer, Integer>> recursiveQuotes(String text, int offset, String prevQuote) {
     Map<String, List<Pair<Integer, Integer>>> quotesMap = new HashMap<>();
     int start = -1;
     int end = -1;
@@ -476,15 +329,8 @@ public class QuoteAnnotator implements Annotator  {
 
       if (DIRECTED_QUOTES.containsKey(quote) &&
           DIRECTED_QUOTES.get(quote).equals(c)) {
-        if (c.equals("’")) {
-          if ((i == text.length() - 1 || isSingleQuoteEnd(text, i))) {
-            // check to make sure that this isn't an apostrophe..
-            directed--;
-          }
-        } else {
           // closing
           directed--;
-        }
       }
 
       // opening
@@ -521,6 +367,7 @@ public class QuoteAnnotator implements Annotator  {
         quote = null;
       }
 
+
       if (c.length() > 1) {
         i += c.length() - 1;
       }
@@ -537,88 +384,56 @@ public class QuoteAnnotator implements Annotator  {
       }
     }
 
-    // TODO: determine if we want to be more strict w/ single quotes than double
-    // answer: we do want to.
+//    // TODO: determine if we want to be more strict w/ single quotes than double
+//    // answer: we do want to.
+//    // if we reached then end and we have an open quote, close it
+//    if (closeUnclosedQuotes && start >= 0 && start < text.length() - 2) {
+//      if (!quotesMap.containsKey(quote)) {
+//        quotesMap.put(quote, new ArrayList<>());
+//      }
+//      quotesMap.get(quote).add(new Pair(start, text.length()));
+//    } else
     if (start >= 0 && start < text.length() - 3) {
       String warning = text;
       if (text.length() > 150) {
         warning = text.substring(0, 150) + "...";
       }
-      log.info("WARNING: unmatched quote of type " +
+      System.err.println("WARNING: unmatched quote of type " +
           quote + " found at index " + start + " in text segment: " + warning);
     }
 
     // recursively look for embedded quotes in these ones
     List<Pair<Integer, Integer>> quotes = Generics.newArrayList();
-    List<Pair<Integer, Integer>> unclosedQuotes = Generics.newArrayList();
     // If I didn't find any quotes, but did find a quote-beginning, try again,
     // but without the part of the text before the single quote
-    // really this test should be whether or not start is mapped to in quotesMap
-    if (!isAQuoteMapStarter(start, quotesMap) && start >= 0 && start < text.length() - 3) {
-      if (EXTRACT_UNCLOSED) {
-        unclosedQuotes.add(new Pair(start, text.length()));
-      }
+    if (quotesMap.isEmpty() && start >= 0 && start < text.length() - 3) {
       String toPass = text.substring(start + quote.length(), text.length());
-      Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> embedded = recursiveQuotes(toPass, offset, null);
-      // these are the good quotes
-      for (Pair<Integer, Integer> e : embedded.first()) {
+      List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass, offset, null);
+      for (Pair<Integer, Integer> e : embedded) {
         quotes.add(new Pair(e.first() + start + quote.length(),
             e.second() + start + 1));
       }
-      if (EXTRACT_UNCLOSED) {
-        // these are the unclosed quotes
-        for (Pair<Integer, Integer> e : embedded.second()) {
-          unclosedQuotes.add(new Pair(e.first() + start + quote.length(),
-              e.second() + start + 1));
-        }
-      }
-    }
-
-    // Now take care of the good quotes that we found
-    for (String qKind : quotesMap.keySet()) {
-      for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
-        if (q.second() - q.first() >= qKind.length() * 2) {
-          String toPass = text.substring(q.first() + qKind.length(),
-              q.second() - qKind.length());
-          String qKindToPass = null;
-          if (!(DIRECTED_QUOTES.containsKey(qKind) || qKind.equals("`"))
-                  || !ALLOW_EMBEDDED_SAME) {
-            qKindToPass = qKind;
-          }
-          Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> embedded =
-              recursiveQuotes(toPass, q.first() + qKind.length() + offset, qKindToPass);
-          // good quotes
-          for (Pair<Integer, Integer> e : embedded.first()) {
-            // don't add offset here because the
-            // recursive method already added it
-            if (e.second() - e.first() > 2) {
+    } else {
+      for (String qKind : quotesMap.keySet()) {
+        for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
+          if (q.first() < q.second() - qKind.length() * 2) {
+            String toPass = text.substring(q.first() + qKind.length(),
+                q.second() - qKind.length());
+            String qKindToPass = DIRECTED_QUOTES.containsKey(qKind) || qKind.equals("`") ? null : qKind;
+            List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass,
+                q.first() + qKind.length() + offset, qKindToPass);
+            for (Pair<Integer, Integer> e : embedded) {
+              // don't add offset here because the
+              // recursive method already added it
               quotes.add(new Pair(e.first(), e.second()));
             }
           }
-          // unclosed quotes
-          if (EXTRACT_UNCLOSED) {
-            // these are the unclosed quotes
-            for (Pair<Integer, Integer> e : embedded.second()) {
-              unclosedQuotes.add(new Pair(e.first(), e.second()));
-            }
-          }
-        }
-        quotes.add(new Pair(q.first() + offset, q.second() + offset));
-      }
-    }
-
-    return new Pair(quotes, unclosedQuotes);
-  }
-
-  private boolean isAQuoteMapStarter(int target, Map<String, List<Pair<Integer, Integer>>> quotesMap) {
-    for (String k : quotesMap.keySet()) {
-      for (Pair<Integer, Integer> pair : quotesMap.get(k)) {
-        if (pair.first() == target) {
-          return true;
+          quotes.add(new Pair(q.first() + offset, q.second() + offset));
         }
       }
     }
-    return false;
+
+    return quotes;
   }
 
   private boolean isSingleQuoteWithUse(String c) {
@@ -653,9 +468,7 @@ public class QuoteAnnotator implements Annotator  {
   }
 
   public static boolean isWhitespaceOrPunct(String c) {
-    Pattern punctOrWhite = Pattern.compile("[\\s\\p{Punct}]", Pattern.UNICODE_CHARACTER_CLASS);
-    Matcher m = punctOrWhite.matcher(c);
-    return m.matches();
+    return c.matches("[\\s\\p{Punct}]");
   }
 
   public static boolean isSingleQuote(String c) {
@@ -663,29 +476,13 @@ public class QuoteAnnotator implements Annotator  {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.EMPTY_SET;
+  public Set<Requirement> requires() {
+    return Collections.emptySet();
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.QuotationsAnnotation.class);
-  }
-
-
-  // helper method to recursively gather all embedded quotes
-  public static List<CoreMap> gatherQuotes(CoreMap curr) {
-    List<CoreMap> embedded = curr.get(CoreAnnotations.QuotationsAnnotation.class);
-    if (embedded != null) {
-      List<CoreMap> extended = Generics.newArrayList();
-      for (CoreMap quote : embedded) {
-        extended.addAll(gatherQuotes(quote));
-      }
-      extended.addAll(embedded);
-      return extended;
-    } else {
-      return Generics.newArrayList();
-    }
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(QUOTE_REQUIREMENT);
   }
 
 }

@@ -3,22 +3,20 @@ package edu.stanford.nlp.pipeline;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
-
-import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.util.Lazy;
 import junit.framework.TestCase;
-import org.junit.Assert;
+import junit.framework.Assert;
 
 /**
  * Makes sure that the pool creates new Annotators when the signature properties change
  */
 public class AnnotatorPoolTest extends TestCase {
-
-  static class SampleAnnotatorFactory extends Lazy<Annotator> {
+  static class SampleAnnotatorFactory extends AnnotatorFactory {
     private static final long serialVersionUID = 1L;
-    public SampleAnnotatorFactory(Properties props) {}
+    public SampleAnnotatorFactory(Properties props) {
+      super(props, new AnnotatorImplementations());
+    }
     @Override
-    protected Annotator compute() {
+    public Annotator create() {
       return new Annotator() {
         @Override
         public void annotate(Annotation annotation) {
@@ -26,54 +24,48 @@ public class AnnotatorPoolTest extends TestCase {
         }
 
         @Override
-        public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+        public Set<Requirement> requirementsSatisfied() {
           // empty body; we don't actually use it here
           return Collections.emptySet();
         }
 
         @Override
-        public Set<Class<? extends CoreAnnotation>> requires() {
+        public Set<Requirement> requires() {
           // empty body; we don't actually use it here
           return Collections.emptySet();
         }
       };
     }
+    @Override
+    public String signature() {
+      // keep track of all relevant properties for this annotator here!
+      StringBuilder os = new StringBuilder();
+      os.append("sample.prop = " + properties.getProperty("sample.prop", ""));
+      return os.toString();
+    }
+
+    @Override
+    protected String additionalSignature() {
+      return "";
+    }
   }
-
-
 
   public void testSignature() throws Exception {
     Properties props = new Properties();
     props.setProperty("sample.prop", "v1");
     AnnotatorPool pool = new AnnotatorPool();
-    pool.register("sample", props, new SampleAnnotatorFactory(props));
+    pool.register("sample", new SampleAnnotatorFactory(props));
     Annotator a1 = pool.get("sample");
     System.out.println("First annotator: " + a1);
-    pool.register("sample", props, new SampleAnnotatorFactory(props));
+    pool.register("sample", new SampleAnnotatorFactory(props));
     Annotator a2 = pool.get("sample");
     System.out.println("Second annotator: " + a2);
     Assert.assertTrue(a1 == a2);
 
     props.setProperty("sample.prop", "v2");
-    pool.register("sample", props, new SampleAnnotatorFactory(props));
+    pool.register("sample", new SampleAnnotatorFactory(props));
     Annotator a3 = pool.get("sample");
     System.out.println("Third annotator: " + a3);
     Assert.assertTrue(a1 != a3);
   }
-
-
-  /*public void testGlobalCache() throws Exception {
-    Properties props = new Properties();
-    props.setProperty("sample.prop", "v1");
-    AnnotatorPool pool1 = new AnnotatorPool();
-    pool1.register("sample", props, new SampleAnnotatorFactory(props));
-    Annotator a1 = pool1.get("sample");
-
-    AnnotatorPool pool2 = new AnnotatorPool();
-    pool2.register("sample", props, new SampleAnnotatorFactory(props));
-    Annotator a2 = pool2.get("sample");
-
-    assertTrue(a1 == a2);
-  }*/
-
 }

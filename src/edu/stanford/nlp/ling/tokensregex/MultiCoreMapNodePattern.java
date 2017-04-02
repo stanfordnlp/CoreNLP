@@ -36,14 +36,14 @@ public class MultiCoreMapNodePattern extends MultiNodePattern<CoreMap> {
 
   protected Collection<Interval<Integer>> match(List<? extends CoreMap> nodes, int start)
   {
-    List<Interval<Integer>> matched = new ArrayList<>();
+    List<Interval<Integer>> matched = new ArrayList<Interval<Integer>>();
     int minEnd = start + minNodes;
     int maxEnd = nodes.size();
     if (maxNodes >= 0 && maxNodes + start < nodes.size()) {
       maxEnd = maxNodes + start;
     }
     for (int end = minEnd; end <= maxEnd; end++) {
-      CoreMap chunk = ChunkAnnotationUtils.getMergedChunk(nodes, start, end, aggregators, null);
+      CoreMap chunk = ChunkAnnotationUtils.getMergedChunk(nodes, start, end, aggregators);
       if (nodePattern.match(chunk)) {
         matched.add(Interval.toInterval(start, end));
       }
@@ -84,7 +84,7 @@ public class MultiCoreMapNodePattern extends MultiNodePattern<CoreMap> {
     protected Collection<Interval<Integer>> match(List<? extends CoreMap> nodes, int start) {
       PhraseTable.WordList words = new PhraseTable.TokenList(nodes, textKey);
       List<PhraseTable.PhraseMatch> matches = phraseTable.findMatches(words, start, nodes.size(), false);
-      Collection<Interval<Integer>> intervals = new ArrayList<>(matches.size());
+      Collection<Interval<Integer>> intervals = new ArrayList<Interval<Integer>>(matches.size());
       for (PhraseTable.PhraseMatch match:matches) {
         intervals.add(match.getInterval());
       }

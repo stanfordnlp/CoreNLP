@@ -1,16 +1,17 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * This calls NumberSequenceClassifier, which is a rule based classifier, which
@@ -23,10 +24,7 @@ import java.util.*;
  * @author Jenny Finkel
  */
 
-public class NumberAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NumberAnnotator.class);
+public class NumberAnnotator implements Annotator {
 
   private final AbstractSequenceClassifier<CoreLabel> nsc;
 
@@ -67,7 +65,7 @@ public class NumberAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Adding number annotation ... ");
+      System.err.print("Adding number annotation ... ");
     }
 
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
@@ -77,7 +75,7 @@ public class NumberAnnotator implements Annotator  {
         doOneSentenceNew(tokens, annotation, sentence);
       }
       if (VERBOSE) {
-        log.info("done. Output: " + annotation.get(CoreAnnotations.SentencesAnnotation.class));
+        System.err.println("done. Output: " + annotation.get(CoreAnnotations.SentencesAnnotation.class));
       }
     } else if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
@@ -97,11 +95,11 @@ public class NumberAnnotator implements Annotator  {
       CoreLabel newWord = newFLIter.next();
       String before = origWord.ner();
       String newGuess = newWord.get(CoreAnnotations.AnswerAnnotation.class);
-      // log.info(origWord.word());
-      // log.info(origWord.ner());
+      // System.err.println(origWord.word());
+      // System.err.println(origWord.ner());
       if (VERBOSE)
-        log.info(newWord);
-      // log.info("-------------------------------------");
+        System.err.println(newWord);
+      // System.err.println("-------------------------------------");
       if ((before == null || before.equals(BACKGROUND_SYMBOL) || before.equals("MISC"))
           && !newGuess.equals(BACKGROUND_SYMBOL)) {
         origWord.setNER(newGuess);
@@ -114,17 +112,14 @@ public class NumberAnnotator implements Annotator  {
 
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class
-        )));
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+  public Set<Requirement> requirementsSatisfied() {
     // technically it adds some NER, but someone who wants full NER
     // labels will be very disappointed, so we do not claim to produce NER
-    return Collections.singleton(CoreAnnotations.NumerizedTokensAnnotation.class);
+    return Collections.singleton(NUMBER_REQUIREMENT);
   }
 }

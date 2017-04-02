@@ -1,5 +1,4 @@
 package edu.stanford.nlp.ie;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.sequences.ListeningSequenceModel;
 import edu.stanford.nlp.util.CoreMap;
@@ -20,10 +19,7 @@ import java.util.Arrays;
  *
  * @author Mengqiu Wang
  **/
-public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap> implements ListeningSequenceModel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EntityCachingAbstractSequencePriorBIO.class);
+public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap> implements ListeningSequenceModel {
 
   protected int[] sequence;
   protected final int backgroundSymbol;
@@ -42,7 +38,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     for (int i=0; i<numClasses; i++) {
       possibleValues[i] = i;
     }
-    this.wordDoc = new ArrayList<>(doc.size());
+    this.wordDoc = new ArrayList<String>(doc.size());
     for (IN w: doc) {
       wordDoc.add(w.get(CoreAnnotations.TextAnnotation.class));
     }
@@ -123,7 +119,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
   public void setInitialSequence(int[] initialSequence) {
     this.sequence = initialSequence;
     entities = new EntityBIO[initialSequence.length];
-    // Arrays.fill(entities, null);  // not needed; Java arrays zero initialized
+    Arrays.fill(entities, null);
     for (int i = 0; i < initialSequence.length; i++) {
       if (initialSequence[i] != backgroundSymbol) {
         String rawTag = classIndex.get(sequence[i]);
@@ -153,7 +149,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     EntityBIO entity = new EntityBIO();
     entity.type = tagIndex.indexOf(tag);
     entity.startPosition = position;
-    entity.words = new ArrayList<>();
+    entity.words = new ArrayList<String>();
     entity.words.add(wordDoc.get(position));
     int pos = position + 1;
     for ( ; pos < sequence.length; pos++) {
@@ -175,7 +171,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
    * words in this entity occurs.
    */
   public int[] otherOccurrences(EntityBIO entity){
-    List<Integer> other = new ArrayList<>();
+    List<Integer> other = new ArrayList<Integer>();
     for (int i = 0; i < wordDoc.size(); i++) {
       if (i == entity.startPosition) { continue; }
       if (matches(entity, i)) {
@@ -217,7 +213,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     if (sequence[position] == oldVal)
       return;
 
-    if (VERBOSE) log.info("changing position "+position+" from " +classIndex.get(oldVal)+" to "+classIndex.get(sequence[position]));
+    if (VERBOSE) System.err.println("changing position "+position+" from " +classIndex.get(oldVal)+" to "+classIndex.get(sequence[position]));
 
     if (sequence[position] == backgroundSymbol) { // new tag is O
       String oldRawTag = classIndex.get(oldVal);
@@ -232,11 +228,11 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
         }
       } else { // old tag was a I, check previous one
         if (entities[position] != null) { // this was part of an entity, shortened
-          if (VERBOSE) log.info("splitting off prev entity");
+          if (VERBOSE) System.err.println("splitting off prev entity");
           EntityBIO oldEntity = entities[position];
           int oldLen = oldEntity.words.size();
           int offset = position - oldEntity.startPosition;
-          List<String> newWords = new ArrayList<>();
+          List<String> newWords = new ArrayList<String>();
           for (int i=0; i<offset; i++) {
             newWords.add(oldEntity.words.get(i));
           }
@@ -247,7 +243,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
             entities[position+i] = null;
           }
           if (VERBOSE && position > 0)
-            log.info("position:" + position +", entities[position-1] = " + entities[position-1].toString(tagIndex));
+            System.err.println("position:" + position +", entities[position-1] = " + entities[position-1].toString(tagIndex));
         } // otherwise, non-entity part I-xxx -> O, no enitty affected
       }
     } else {
@@ -276,7 +272,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
             if (oldEntity != null) {// break old entity
               int oldLen = oldEntity.words.size();
               int offset = position - oldEntity.startPosition;
-              List<String> newWords = new ArrayList<>();
+              List<String> newWords = new ArrayList<String>();
               for (int i=0; i<offset; i++) {
                 newWords.add(oldEntity.words.get(i));
               }
@@ -312,7 +308,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
               if (entities[position-1] != null) {
                 String oldTag = tagIndex.get(entities[position-1].type);
                 if (VERBOSE)
-                  log.info("position:" + position +", entities[position-1] = " + entities[position-1].toString(tagIndex));
+                  System.err.println("position:" + position +", entities[position-1] = " + entities[position-1].toString(tagIndex));
                 EntityBIO entity = extractEntity(sequence, position-1-entities[position-1].words.size()+1, oldTag);
                 addEntityToEntitiesArray(entity);
               }
@@ -322,7 +318,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
               EntityBIO oldEntity = entities[position];
               int oldLen = oldEntity.words.size();
               int offset = position - oldEntity.startPosition;
-              List<String> newWords = new ArrayList<>();
+              List<String> newWords = new ArrayList<String>();
               for (int i=0; i<offset; i++) {
                 newWords.add(oldEntity.words.get(i));
               }

@@ -6,20 +6,17 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import org.junit.Assert;
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.patterns.PatternsAnnotations;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
+import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
-import edu.stanford.nlp.trees.*;
 
-/**
- * @author Chloe Kiddon
- * @author Sonal Gupta
- */
+
 public class SemgrexPatternTest extends TestCase {
 
   /*
@@ -43,13 +40,13 @@ public class SemgrexPatternTest extends TestCase {
   }
 
   public void testFind() throws Exception {
-    SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass>Hughes/NNP auxpass>was/VBD prep_to>Gracia/NNP]");
+    SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass:Hughes/NNP auxpass:was/VBD prep_to:Gracia/NNP]");
     SemanticGraph t = SemanticGraph
-        .valueOf("[loved/VBD\nnsubj>Hughes/NNP\ndobj>[wife/NN poss>his/PRP$ appos>Gracia/NNP]\nconj_and>[obsessed/JJ\ncop>was/VBD\nadvmod>absolutely/RB\nprep_with>[Elicia/NN poss>his/PRP$ amod>little/JJ compound>daughter/NN]]]");
+        .valueOf("[loved/VBD\nnsubj:Hughes/NNP\ndobj:[wife/NN poss:his/PRP$ appos:Gracia/NNP]\nconj_and:[obsessed/JJ\ncop:was/VBD\nadvmod:absolutely/RB\nprep_with:[Elicia/NN poss:his/PRP$ amod:little/JJ nn:daughter/NN]]]");
     String s =
         "(ROOT\n(S\n(NP (DT The) (NN chimney) (NNS sweeps))\n(VP (VBP do) (RB not)\n(VP (VB like)\n(S\n(VP (VBG working)\n(PP (IN on)\n(NP (DT an) (JJ empty) (NN stomach)))))))\n(. .)))";
     Tree tree = Tree.valueOf(s);
-    SemanticGraph sg = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.COLLAPSED, GrammaticalStructure.Extras.MAXIMAL, null);
+    SemanticGraph sg = SemanticGraphFactory.allTypedDependencies(tree, true);
     SemgrexPattern pat = SemgrexPattern.compile("{}=gov ![>det {}] & > {word:/^(?!not).*$/}=dep");
     sg.prettyPrint();
     // SemgrexPattern pat =
@@ -123,8 +120,9 @@ public class SemgrexPatternTest extends TestCase {
   public void testMacro() throws IOException {
     SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass>Hughes/NNP auxpass>was/VBD nmod:to>Gracia/NNP]");
     String macro = "macro WORD = married";
+    SemgrexBatchParser parser = new SemgrexBatchParser();
     String pattern = "({word:${WORD}}=parent >>nsubjpass {}=node)";
-    List<SemgrexPattern> pats = SemgrexBatchParser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)));
+    List<SemgrexPattern> pats = parser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)));
     SemgrexPattern pat3 = pats.get(0);
     boolean ignoreCase = true;
     SemgrexMatcher mat3 = pat3.matcher(h, ignoreCase);
@@ -144,10 +142,11 @@ public class SemgrexPatternTest extends TestCase {
     //SemanticGraph t = SemanticGraph
     //  .valueOf("[loved/VBD\nnsubj:Hughes/NNP\ndobj:[wife/NN poss:his/PRP$ appos:Gracia/NNP]\nconj_and:[obsessed/JJ\ncop:was/VBD\nadvmod:absolutely/RB\nprep_with:[Elicia/NN poss:his/PRP$ amod:little/JJ nn:daughter/NN]]]");
     String macro = "macro WORD = married";
+    SemgrexBatchParser parser = new SemgrexBatchParser();
     Env env = new Env();
     env.bind("pattern1",PatternsAnnotations.PatternLabel1.class);
     String pattern = "({pattern1:YES}=parent >>nsubjpass {}=node)";
-    List<SemgrexPattern> pats = SemgrexBatchParser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)), env);
+    List<SemgrexPattern> pats = parser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)), env);
     SemgrexPattern pat3 = pats.get(0);
     boolean ignoreCase = true;
     SemgrexMatcher mat3 = pat3.matcher(h, ignoreCase);
@@ -169,98 +168,6 @@ public class SemgrexPatternTest extends TestCase {
     IOUtils.writeObjectToFile(pat3, tempfile);
     SemgrexPattern pat4 = IOUtils.readObjectFromFile(tempfile);
     Assert.assertEquals(pat3, pat4);
-  }
-
-  public void testSiblingPatterns() {
-    SemanticGraph sg = SemanticGraph.valueOf("[loved/VBD-2\nnsubj>Hughes/NNP-1\ndobj>[wife/NN-4 nmod:poss>his/PRP$-3 appos>Gracia/NNP-5]\nconj:and>[obsessed/JJ-9\ncop>was/VBD-7\nadvmod>absolutely/RB-8\nnmod:with>[Elicia/NN-14 nmod:poss>his/PRP$-11 amod>little/JJ-12 compound>daughter/NN-13]]]");
-
-    /* Test "." */
-
-    SemgrexPattern pat1 = SemgrexPattern.compile("{tag:NNP}=w1 . {tag:VBD}=w2");
-    SemgrexMatcher matcher = pat1.matcher(sg);
-    if (matcher.find()) {
-      String w1 = matcher.getNode("w1").word();
-      String w2 = matcher.getNode("w2").word();
-      Assert.assertEquals("Hughes", w1);
-      Assert.assertEquals("loved", w2);
-    } else {
-      throw new RuntimeException("failed!");
-    }
-
-    /* Test "$+" */
-
-    SemgrexPattern pat2 = SemgrexPattern.compile("{word:was}=w1 $+ {}=w2");
-    matcher = pat2.matcher(sg);
-    if (matcher.find()) {
-      String w1 = matcher.getNode("w1").word();
-      String w2 = matcher.getNode("w2").word();
-      Assert.assertEquals("was", w1);
-      Assert.assertEquals("absolutely", w2);
-    } else {
-      throw new RuntimeException("failed!");
-    }
-
-    /* Test "$-" */
-    SemgrexPattern pat3 = SemgrexPattern.compile("{word:absolutely}=w1 $- {}=w2");
-    matcher = pat3.matcher(sg);
-    if (matcher.find()) {
-      String w1 = matcher.getNode("w1").word();
-      String w2 = matcher.getNode("w2").word();
-      Assert.assertEquals("absolutely", w1);
-      Assert.assertEquals("was", w2);
-    } else {
-      throw new RuntimeException("failed!");
-    }
-
-    /* Test "$++" */
-    SemgrexPattern pat4 = SemgrexPattern.compile("{word:his}=w1 $++ {tag:NN}=w2");
-    matcher = pat4.matcher(sg);
-    if (matcher.find()) {
-      String w1 = matcher.getNode("w1").word();
-      String w2 = matcher.getNode("w2").word();
-      Assert.assertEquals("his", w1);
-      Assert.assertEquals("daughter", w2);
-    } else {
-      throw new RuntimeException("failed!");
-    }
-
-
-
-    /* Test "$--" */
-    SemgrexPattern pat6 = SemgrexPattern.compile("{word:daughter}=w1 $-- {tag:/PRP./}=w2");
-    matcher = pat6.matcher(sg);
-    if (matcher.find()) {
-      String w1 = matcher.getNode("w1").word();
-      String w2 = matcher.getNode("w2").word();
-      Assert.assertEquals("daughter", w1);
-      Assert.assertEquals("his", w2);
-    } else {
-      throw new RuntimeException("failed!");
-    }
-
-    /* Test for not matching. */
-    SemgrexPattern pat5 = SemgrexPattern.compile("{word:his}=w1 $-- {}=w2");
-    matcher = pat5.matcher(sg);
-    if (matcher.find()) {
-      throw new RuntimeException("failed!");
-    }
-
-    /* Test for negation. */
-    SemgrexPattern pat7 = SemgrexPattern.compile("{word:his}=w1 !$-- {}");
-    matcher = pat7.matcher(sg);
-    if (matcher.find()) {
-      String w1 = matcher.getNode("w1").word();
-      Assert.assertEquals("his", w1);
-    } else {
-      throw new RuntimeException("failed!");
-    }
-
-    SemgrexPattern pat8 = SemgrexPattern.compile("{word:his}=w1 !$++ {}");
-    matcher = pat8.matcher(sg);
-    if (matcher.find()) {
-      throw new RuntimeException("failed!");
-    }
-
   }
 
 }

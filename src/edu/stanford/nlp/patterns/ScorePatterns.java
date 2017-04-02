@@ -16,12 +16,12 @@ public abstract class ScorePatterns<E> {
   protected Properties props;
 
   public abstract Counter<E> score() throws IOException, ClassNotFoundException;
-  protected TwoDimensionalCounter<E, CandidatePhrase> patternsandWords4Label = new TwoDimensionalCounter<>();
-  protected TwoDimensionalCounter<E, CandidatePhrase> negPatternsandWords4Label = new TwoDimensionalCounter<>();
+  protected TwoDimensionalCounter<E, CandidatePhrase> patternsandWords4Label = new TwoDimensionalCounter<E, CandidatePhrase>();
+  protected TwoDimensionalCounter<E, CandidatePhrase> negPatternsandWords4Label = new TwoDimensionalCounter<E, CandidatePhrase>();
   // protected TwoDimensionalCounter<SurfacePattern, String>
   // posnegPatternsandWords4Label = new TwoDimensionalCounter<SurfacePattern,
   // String>();
-  protected TwoDimensionalCounter<E, CandidatePhrase> unLabeledPatternsandWords4Label = new TwoDimensionalCounter<>();
+  protected TwoDimensionalCounter<E, CandidatePhrase> unLabeledPatternsandWords4Label = new TwoDimensionalCounter<E, CandidatePhrase>();
   //protected TwoDimensionalCounter<E, String> negandUnLabeledPatternsandWords4Label = new TwoDimensionalCounter<E, String>();
   //protected TwoDimensionalCounter<E, String> allPatternsandWords4Label = new TwoDimensionalCounter<E, String>();
   protected String label;

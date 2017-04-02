@@ -14,7 +14,7 @@ public interface HasInterval<E extends Comparable<E>> {
    */
   public Interval<E> getInterval();
 
-  public final static Comparator<HasInterval<Integer>> LENGTH_GT_COMPARATOR =
+  public final static Comparator<HasInterval<Integer>> LENGTH_COMPARATOR =
       (e1, e2) -> {
         int len1 = e1.getInterval().getEnd() - e1.getInterval().getBegin();
         int len2 = e2.getInterval().getEnd() - e2.getInterval().getBegin();
@@ -24,17 +24,6 @@ public interface HasInterval<E extends Comparable<E>> {
           return (len1 > len2)? -1:1;
         }
       };
-
-  public final static Comparator<HasInterval<Integer>> LENGTH_LT_COMPARATOR =
-    (e1, e2) -> {
-      int len1 = e1.getInterval().getEnd() - e1.getInterval().getBegin();
-      int len2 = e2.getInterval().getEnd() - e2.getInterval().getBegin();
-      if (len1 == len2) {
-        return 0;
-      } else {
-        return (len1 < len2)? -1:1;
-      }
-    };
 
   public final static Comparator<HasInterval> ENDPOINTS_COMPARATOR =
       (e1, e2) -> (e1.getInterval().compareTo(e2.getInterval()));
@@ -64,6 +53,6 @@ public interface HasInterval<E extends Comparable<E>> {
       };
 
   public final static Comparator<HasInterval<Integer>> LENGTH_ENDPOINTS_COMPARATOR =
-          Comparators.chain(HasInterval.LENGTH_GT_COMPARATOR, HasInterval.ENDPOINTS_COMPARATOR);
+          Comparators.chain(HasInterval.LENGTH_COMPARATOR, HasInterval.ENDPOINTS_COMPARATOR);
 
 }

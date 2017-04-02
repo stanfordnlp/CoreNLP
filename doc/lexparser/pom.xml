@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.stanford.nlp</groupId>
   <artifactId>stanford-parser</artifactId>
-  <version>3.7.0</version>
+  <version>3.5.2</version>
   <packaging>jar</packaging>
   <name>Stanford Parser</name>
   <description>Stanford Parser processes raw text in English, Chinese, German, Arabic, and French, and extracts constituency parse trees.</description>
@@ -14,8 +14,8 @@
     </license>
   </licenses>
   <scm>
-    <url>http://nlp.stanford.edu/software/stanford-parser-2016-10-31.zip</url>
-    <connection>http://nlp.stanford.edu/software/stanford-parser-2016-10-31.zip</connection>
+    <url>http://nlp.stanford.edu/software/stanford-parser-2015-04-20.zip</url>
+    <connection>http://nlp.stanford.edu/software/stanford-parser-2015-04-20.zip</connection>
   </scm>
   <developers>
     <developer>
@@ -24,9 +24,9 @@
       <email>manning@stanford.edu</email>
     </developer>
     <developer>
-      <id>jason.bolton</id>
-      <name>Jason Bolton</name>
-      <email>jebolton@stanford.edu</email>
+      <id>john.bauer</id>
+      <name>John Bauer</name>
+      <email>horatio@gmail.com</email>
     </developer>
     <developer>
       <id>spence.green</id>
@@ -44,11 +44,6 @@
       <groupId>com.googlecode.efficient-java-matrix-library</groupId>
       <artifactId>ejml</artifactId>
       <version>0.23</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.12</version>
     </dependency>
   </dependencies>
   <build>
@@ -68,7 +63,7 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>${project.basedir}/stanford-parser-3.7.0-models.jar</file>
+                  <file>${project.basedir}/stanford-parser-3.5.2-models.jar</file>
                   <type>jar</type>
                   <classifier>models</classifier>
                 </artifact>

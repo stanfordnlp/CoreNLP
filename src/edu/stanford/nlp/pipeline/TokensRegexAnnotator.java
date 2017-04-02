@@ -1,11 +1,9 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.CoreMapExpressionExtractor;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
-import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -17,31 +15,31 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Uses TokensRegex patterns to annotate tokens.
+ * <p>Uses TokensRegex patterns to annotate tokens.</p>
  *
  * <p>
  *   Configuration:
  *   <ul>
- *     <li>{@code rules} - Name of file containing extraction rules
+ *     <li><code>rules</code> - Name of file containing extraction rules
  *        (see {@link CoreMapExpressionExtractor} and {@link edu.stanford.nlp.ling.tokensregex.SequenceMatchRules}</li>
  *   </ul>
- *   Other options (can be set in rules file using {@code options.xxx = ...})
+ *   Other options (can be set in rules file using <code>options.xxx = ...</code>)
  *   <ul>
- *     <li>{@code setTokenOffsets} - whether to explicit set the token offsets of individual tokens (needed to token sequence matches to work)</li>
- *     <li>{@code extractWithTokens} - whether to return unmatched tokens as well</li>
- *     <li>{@code flatten} - whether to flatten matched expressions into individual tokens</li>
- *     <li>{@code matchedExpressionsAnnotationKey} - Annotation key where matched expressions are stored as a list</li>
+ *     <li><code>setTokenOffsets</code> - whether to explicit set the token offsets of individual tokens (needed to token sequence matches to work)</li>
+ *     <li><code>extractWithTokens</code> - whether to return unmatched tokens as well</li>
+ *     <li><code>flatten</code> - whether to flatten matched expressions into individual tokens</li>
+ *     <li><code>matchedExpressionsAnnotationKey</code> - Annotation key where matched expressions are stored as a list</li>
  *   </ul>
  * </p>
- * <p>Multiple {@code TokensRegexAnnotator} can be configured using the same properties file by specifying
- * difference prefix for the {@code TokensRegexAnnotator}</p>
+ * <p>Multiple <code>TokensRegexAnnotator</code> can be configured using the same properties file by specifying
+ * difference prefix for the <code>TokensRegexAnnotator</code></p>
  *
  * @author Angel Chang
  */
 public class TokensRegexAnnotator implements Annotator {
 
   private final Env env;
-  private final CoreMapExpressionExtractor<MatchedExpression> extractor;
+  private final CoreMapExpressionExtractor extractor;
   private final Options options = new Options();
   private final boolean verbose;
 
@@ -62,9 +60,9 @@ public class TokensRegexAnnotator implements Annotator {
   }
 
   public TokensRegexAnnotator(String name, Properties props) {
-    String prefix = (name == null)? "": name + '.';
+    String prefix = (name == null)? "":name + ".";
     String[] files  = PropertiesUtils.getStringArray(props, prefix + "rules");
-    if (files.length == 0) {
+    if (files == null || files.length == 0) {
       throw new RuntimeException("No rules specified for TokensRegexAnnotator " + name + ", check " + prefix + "rules property");
     }
     env = TokenSequencePattern.getNewEnv();
@@ -79,7 +77,7 @@ public class TokensRegexAnnotator implements Annotator {
       options.matchedExpressionsAnnotationKey = EnvLookup.lookupAnnotationKeyWithClassname(env, matchedExpressionsAnnotationKeyName);
       if (options.matchedExpressionsAnnotationKey == null) {
         String propName = prefix + "matchedExpressionsAnnotationKey";
-        throw new RuntimeException("Cannot determine annotation key for " + propName + '=' + matchedExpressionsAnnotationKeyName);
+        throw new RuntimeException("Cannot determine annotation key for " + propName + "=" + matchedExpressionsAnnotationKeyName);
       }
     }
   }
@@ -131,7 +129,7 @@ public class TokensRegexAnnotator implements Annotator {
     }
     List<CoreMap> allMatched;
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-      allMatched = new ArrayList<>();
+      allMatched = new ArrayList<CoreMap>();
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       for (CoreMap sentence : sentences) {
         List<CoreMap> matched = extract(sentence);
@@ -156,12 +154,12 @@ public class TokensRegexAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+  public Set<Requirement> requirementsSatisfied() {
     // TODO: not sure what goes here
     return Collections.emptySet();
   }

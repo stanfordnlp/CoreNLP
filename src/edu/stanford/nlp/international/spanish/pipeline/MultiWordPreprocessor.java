@@ -1,5 +1,4 @@
 package edu.stanford.nlp.international.spanish.pipeline;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -8,6 +7,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
@@ -18,6 +18,9 @@ import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
+import edu.stanford.nlp.trees.tregex.ParseException;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -32,10 +35,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Jon Gauthier
  * @author Spence Green (original French version)
  */
-public final class MultiWordPreprocessor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MultiWordPreprocessor.class);
+public final class MultiWordPreprocessor {
 
   private static int nMissingPOS;
   private static int nMissingPhrasal;
@@ -57,27 +57,21 @@ public final class MultiWordPreprocessor  {
    *
    *     (grup.adv (rg cerca) (sp000 de))
    */
-  private static Map<String, String> phrasalCategoryMap = new HashMap<>();
+  private static Map<String, String> phrasalCategoryMap = new HashMap<String, String>();
   static {
     phrasalCategoryMap.put("ao0000", "grup.a");
     phrasalCategoryMap.put("aq0000", "grup.a");
-    phrasalCategoryMap.put("aqo000", "grup.a");
-    phrasalCategoryMap.put("da0000", "spec");
-    phrasalCategoryMap.put("di0000", "sn");
     phrasalCategoryMap.put("dn0000", "spec");
     phrasalCategoryMap.put("dt0000", "spec");
     phrasalCategoryMap.put("i", "interjeccio");
-    phrasalCategoryMap.put("i00", "interjeccio");
     phrasalCategoryMap.put("rg", "grup.adv");
     phrasalCategoryMap.put("rn", "grup.adv"); // no sólo
-    phrasalCategoryMap.put("vaip000", "grup.verb");
     phrasalCategoryMap.put("vmg0000", "grup.verb");
     phrasalCategoryMap.put("vmic000", "grup.verb");
     phrasalCategoryMap.put("vmii000", "grup.verb");
     phrasalCategoryMap.put("vmif000", "grup.verb");
     phrasalCategoryMap.put("vmip000", "grup.verb");
     phrasalCategoryMap.put("vmis000", "grup.verb");
-    phrasalCategoryMap.put("vmm0000", "grup.verb");
     phrasalCategoryMap.put("vmn0000", "grup.verb");
     phrasalCategoryMap.put("vmp0000", "grup.verb");
     phrasalCategoryMap.put("vmsi000", "grup.verb");
@@ -87,8 +81,6 @@ public final class MultiWordPreprocessor  {
     // New groups (not from AnCora specification)
     phrasalCategoryMap.put("cc", "grup.cc");
     phrasalCategoryMap.put("cs", "grup.cs");
-    phrasalCategoryMap.put("pn000000", "grup.nom");
-    phrasalCategoryMap.put("pi000000", "grup.pron");
     phrasalCategoryMap.put("pr000000", "grup.pron");
     phrasalCategoryMap.put("pt000000", "grup.pron");
     phrasalCategoryMap.put("px000000", "grup.pron");
@@ -102,7 +94,7 @@ public final class MultiWordPreprocessor  {
 
   private static class ManualUWModel {
 
-    private static Map<String, String> posMap = new HashMap<>();
+    private static Map<String, String> posMap = new HashMap<String, String>();
     static {
       // i.e., "metros cúbicos"
       posMap.put("cúbico", "aq0000");
@@ -232,15 +224,15 @@ public final class MultiWordPreprocessor  {
      * unigram tagger (and which never appear as function words in
      * multi-word tokens)
      */
-    private static final Set<String> actuallyNames = new HashSet<>(Arrays.asList(
-            "Avenida",
-            "Contra",
-            "Gracias", // interjection
-            "in", // preposition; only appears in corpus as "in extremis" (preposition)
-            "Mercado",
-            "Jesús", // interjection
-            "Salvo",
-            "Van" // verb
+    private static final Set<String> actuallyNames = new HashSet<String>(Arrays.asList(
+      "Avenida",
+      "Contra",
+      "Gracias", // interjection
+      "in", // preposition; only appears in corpus as "in extremis" (preposition)
+      "Mercado",
+      "Jesús", // interjection
+      "Salvo",
+      "Van" // verb
     ));
 
     // Name-looking word that isn't "Al"
@@ -375,7 +367,7 @@ public final class MultiWordPreprocessor  {
         return "ncms000";
 
       // Now make an educated guess.
-      //log.info("No POS tag for " + word);
+      //System.err.println("No POS tag for " + word);
       return "np00000";
     }
   }
@@ -463,9 +455,9 @@ public final class MultiWordPreprocessor  {
     // Try treating this word as a verb and stripping any clitic
     // pronouns. If the stripped version exists in the unigram
     // tagger, then stick with the verb hypothesis
-    SpanishVerbStripper.StrippedVerb strippedVerb = verbStripper.separatePronouns(word);
-    if (strippedVerb != null && unigramTaggerKeys.contains(strippedVerb.getStem())) {
-      String pos = Counters.argmax(unigramTagger.getCounter(strippedVerb.getStem()));
+    Pair<String, List<String>> strippedVerb = verbStripper.separatePronouns(word);
+    if (strippedVerb != null && unigramTaggerKeys.contains(strippedVerb.first())) {
+      String pos = Counters.argmax(unigramTagger.getCounter(strippedVerb.first()));
       if (pos.startsWith("v"))
         return pos;
     }
@@ -537,7 +529,7 @@ public final class MultiWordPreprocessor  {
     for(Tree kid : t.children())
       sb.append(kid.value()).append(" ");
     String posSequence = sb.toString().trim();
-    log.info("No phrasal cat for: " + posSequence + " (original POS of MWE: " + originalPos + ")");
+    System.err.println("No phrasal cat for: " + posSequence);
 
     // Give up.
     return null;
@@ -611,7 +603,7 @@ public final class MultiWordPreprocessor  {
   public static void main(String[] args) {
     Properties options = StringUtils.argsToProperties(args, argOptionDefs);
     if(!options.containsKey("") || options.containsKey("help")) {
-      log.info(usage());
+      System.err.println(usage());
       return;
     }
 
@@ -620,16 +612,16 @@ public final class MultiWordPreprocessor  {
 
     final File treeFile = new File(options.getProperty(""));
     TwoDimensionalCounter<String,String> labelTerm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> termLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> labelPreterm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> pretermLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     TwoDimensionalCounter<String,String> unigramTagger =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));

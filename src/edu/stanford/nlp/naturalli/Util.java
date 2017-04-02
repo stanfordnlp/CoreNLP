@@ -5,7 +5,6 @@ import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
@@ -14,8 +13,10 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.IterableIterator;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -63,11 +64,11 @@ public class Util {
   }
 
   /**
-   * Returns a coherent NER span from a list of tokens.
+   * TODO(gabor) JavaDoc
    *
-   * @param tokens The tokens of the entire sentence.
-   * @param seed The seed span of the intended NER span that should be expanded.
-   * @return A 0 indexed span corresponding to a coherent NER chunk from the given seed.
+   * @param tokens
+   * @param seed
+   * @return
    */
   public static Span extractNER(List<CoreLabel> tokens, Span seed) {
     // Error checks
@@ -153,7 +154,7 @@ public class Util {
    * @return A list of extra edges, which are valid but were removed.
    */
   public static List<SemanticGraphEdge> cleanTree(SemanticGraph tree) {
-//    assert !isCyclic(tree);
+    assert !isCyclic(tree);
 
     // Clean nodes
     List<IndexedWord> toDelete = new ArrayList<>();
@@ -171,24 +172,9 @@ public class Util {
 
     // Clean edges
     Iterator<SemanticGraphEdge> iter = tree.edgeIterable().iterator();
-    List<Triple<IndexedWord, IndexedWord, SemanticGraphEdge>> toAdd = new ArrayList<>();
-    toDelete.clear();
     while (iter.hasNext()) {
       SemanticGraphEdge edge = iter.next();
       if (edge.getDependent().index() == edge.getGovernor().index()) {
-        // Clean up copy-edges
-        if (edge.getDependent().isCopy(edge.getGovernor())) {
-          for (SemanticGraphEdge toCopy : tree.outgoingEdgeIterable(edge.getDependent())) {
-            toAdd.add(Triple.makeTriple(edge.getGovernor(), toCopy.getDependent(), toCopy));
-          }
-          toDelete.add(edge.getDependent());
-        }
-        if (edge.getGovernor().isCopy(edge.getDependent())) {
-          for (SemanticGraphEdge toCopy : tree.outgoingEdgeIterable(edge.getGovernor())) {
-            toAdd.add(Triple.makeTriple(edge.getDependent(), toCopy.getDependent(), toCopy));
-          }
-          toDelete.add(edge.getGovernor());
-        }
         // Clean self-edges
         iter.remove();
       } else if (edge.getRelation().toString().equals("punct")) {
@@ -198,42 +184,17 @@ public class Util {
         }
       }
     }
-    // (add edges we wanted to add)
-    toDelete.forEach(tree::removeVertex);
-    for (Triple<IndexedWord, IndexedWord, SemanticGraphEdge> edge : toAdd) {
-      tree.addEdge(edge.first, edge.second,
-          edge.third.getRelation(), edge.third.getWeight(), edge.third.isExtra());
-    }
 
-    // Handle extra edges.
-    // Two cases:
-    // (1) the extra edge is a subj/obj edge and the main edge is a conj:.*
-    //     in this case, keep the extra
-    // (2) otherwise, delete the extra
+    // Remove extra edges
     List<SemanticGraphEdge> extraEdges = new ArrayList<>();
     for (SemanticGraphEdge edge : tree.edgeIterable()) {
       if (edge.isExtra()) {
-        List<SemanticGraphEdge> incomingEdges = tree.incomingEdgeList(edge.getDependent());
-        SemanticGraphEdge toKeep = null;
-        for (SemanticGraphEdge candidate : incomingEdges) {
-          if (toKeep == null) {
-            toKeep = candidate;
-          } else if (toKeep.getRelation().toString().startsWith("conj") && candidate.getRelation().toString().matches(".subj.*|.obj.*")) {
-            toKeep = candidate;
-          } else if (!candidate.isExtra() &&
-                     !(candidate.getRelation().toString().startsWith("conj") && toKeep.getRelation().toString().matches(".subj.*|.obj.*"))) {
-            toKeep = candidate;
-          }
-        }
-        for (SemanticGraphEdge candidate : incomingEdges) {
-          if (candidate != toKeep) {
-            extraEdges.add(candidate);
-          }
+        if (tree.incomingEdgeList(edge.getDependent()).size() > 1) {
+          extraEdges.add(edge);
         }
       }
     }
     extraEdges.forEach(tree::removeEdge);
-
     // Add apposition edges (simple coref)
     for (SemanticGraphEdge extraEdge : new ArrayList<>(extraEdges)) {  // note[gabor] prevent concurrent modification exception
       for (SemanticGraphEdge candidateAppos : tree.incomingEdgeIterable(extraEdge.getDependent())) {
@@ -294,29 +255,6 @@ public class Util {
       for (SemanticGraphEdge edge : invalidEdges) {
         tree.removeEdge(edge);
         changed = true;
-      }
-    }
-
-    // Edge case: remove duplicate dobj to "that."
-    //            This is a common parse error.
-    for (IndexedWord vertex : tree.vertexSet()) {
-      SemanticGraphEdge thatEdge = null;
-      int dobjCount = 0;
-      for (SemanticGraphEdge edge : tree.outgoingEdgeIterable(vertex)) {
-        if ("that".equalsIgnoreCase(edge.getDependent().word())) {
-          thatEdge = edge;
-        }
-        if ("dobj".equals(edge.getRelation().toString())) {
-          dobjCount += 1;
-        }
-      }
-      if (dobjCount > 1 && thatEdge != null) {
-        // Case: there are two dobj edges, one of which goes to the word "that"
-        // Action: rewrite the dobj edge to "that" to be a "mark" edge.
-        tree.removeEdge(thatEdge);
-        tree.addEdge(thatEdge.getGovernor(), thatEdge.getDependent(),
-            GrammaticalRelation.valueOf(thatEdge.getRelation().getLanguage(), "mark"),
-            thatEdge.getWeight(), thatEdge.isExtra());
       }
     }
 
@@ -474,7 +412,7 @@ public class Util {
    * @param dataset The dataset to evaluate the classifier on.
    */
   public static void dumpAccuracy(Classifier<ClauseSplitter.ClauseClassifierLabel, String> classifier, GeneralDataset<ClauseSplitter.ClauseClassifierLabel, String> dataset) {
-    DecimalFormat df = new DecimalFormat("0.00%");
+    DecimalFormat df = new DecimalFormat("0.000");
     log("size:         " + dataset.size());
     log("split count:  " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseSplitter.ClauseClassifierLabel.CLAUSE_SPLIT).collect(Collectors.toList()).size());
     log("interm count: " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseSplitter.ClauseClassifierLabel.CLAUSE_INTERM).collect(Collectors.toList()).size());
@@ -548,26 +486,4 @@ public class Util {
      add("past");
      add("proposed");
   }});
-
-  /**
-   * Construct the spanning span of the given list of tokens.
-   *
-   * @param tokens The tokens that should define the span.
-   * @return A span (0-indexed) that covers all of the tokens.
-   */
-  public static Span tokensToSpan(List<? extends HasIndex> tokens) {
-    int min = Integer.MAX_VALUE;
-    int max = Integer.MIN_VALUE;
-    for (HasIndex token : tokens) {
-      min = Math.min(token.index() - 1, min);
-      max = Math.max(token.index(), max);
-    }
-    if (min < 0 || max == Integer.MAX_VALUE) {
-      throw new IllegalArgumentException("Could not compute span from tokens!");
-    } else if (min >= max) {
-      throw new IllegalStateException("Either logic is broken or Gabor can't code.");
-    } else {
-      return new Span(min, max);
-    }
-  }
 }

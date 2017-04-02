@@ -5,7 +5,10 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.Map.Entry;
 
 /** Utilities methods for standard (but woeful) Java Properties objects.
@@ -35,24 +38,8 @@ public class PropertiesUtils {
     return ! (value.equals("false") || value.equals("no") || value.equals("off"));
   }
 
-  /** Create a Properties object from the passed in String arguments.
-   *  The odd numbered arguments are the names of keys, and the even
-   *  numbered arguments are the value of the preceding key
-   *
-   *  @param args An even-length list of alternately key and value
-   */
-  public static Properties asProperties(String... args) {
-    if (args.length % 2 != 0) {
-      throw new IllegalArgumentException("Need an even number of arguments but there were " + args.length);
-    }
-    Properties properties = new Properties();
-    for (int i = 0; i < args.length; i += 2) {
-      properties.setProperty(args[i], args[i + 1]);
-    }
-    return properties;
-  }
-
   /** Convert from Properties to String. */
+
   public static String asString(Properties props) {
     try {
       StringWriter sw = new StringWriter();
@@ -125,7 +112,9 @@ public class PropertiesUtils {
   @SuppressWarnings("unchecked")
   public static void checkProperties(Properties properties, Properties defaults) {
     Set<String> names = Generics.newHashSet();
-    names.addAll(properties.stringPropertyNames());
+    for (String name : properties.stringPropertyNames()) {
+      names.add(name);
+    }
     for (String defaultName : defaults.stringPropertyNames()) {
       names.remove(defaultName);
     }
@@ -152,36 +141,13 @@ public class PropertiesUtils {
    *         {@code prefix}. This prefix is removed from all keys in
    *         the returned structure.
    */
-    public static Properties extractPrefixedProperties(Properties properties, String prefix) {
-      return extractPrefixedProperties(properties, prefix, false);
-    }
-
-  /**
-   * Build a {@code Properties} object containing key-value pairs from
-   * the given data where the keys are prefixed with the given
-   * {@code prefix}. The keys in the returned object will be stripped
-   * of their common prefix.
-   *
-   * @param properties Key-value data from which to extract pairs
-   * @param prefix Key-value pairs where the key has this prefix will
-   *               be retained in the returned {@code Properties} object
-   * @param keepPrefix whether the prefix should be kept in the key
-   * @return A Properties object containing those key-value pairs from
-   *         {@code properties} where the key was prefixed by
-   *         {@code prefix}. If keepPrefix is false, the prefix is removed from all keys in
-   *         the returned structure.
-   */
-    public static Properties extractPrefixedProperties(Properties properties, String prefix, boolean keepPrefix) {
+  public static Properties extractPrefixedProperties(Properties properties, String prefix) {
     Properties ret = new Properties();
 
     for (String keyStr : properties.stringPropertyNames()) {
       if (keyStr.startsWith(prefix)) {
-        if (keepPrefix) {
-          ret.setProperty(keyStr, properties.getProperty(keyStr));
-        } else {
-          String newStr = keyStr.substring(prefix.length());
-          ret.setProperty(newStr, properties.getProperty(keyStr));
-        }
+        String newStr = keyStr.substring(prefix.length());
+        ret.setProperty(newStr, properties.getProperty(keyStr));
       }
     }
 
@@ -227,11 +193,15 @@ public class PropertiesUtils {
   }
 
   /**
-   * Get the value of a property.  If the key is not present, returns defaultValue.
-   * This is just equivalent to props.getProperty(key, defaultValue).
+   * Load an integer property.  If the key is not present, returns defaultValue.
    */
   public static String getString(Properties props, String key, String defaultValue) {
-    return props.getProperty(key, defaultValue);
+    String value = props.getProperty(key);
+    if (value != null) {
+      return value;
+    } else {
+      return defaultValue;
+    }
   }
 
   /**
@@ -323,27 +293,16 @@ public class PropertiesUtils {
 
   /**
    * Loads a comma-separated list of strings from Properties.  Commas may be quoted if needed, e.g.:
-   *
    *    property1 = value1,value2,"a quoted value",'another quoted value'
    *
    * getStringArray(props, "property1") should return the same thing as
-   *
    *    new String[] { "value1", "value2", "a quoted value", "another quoted value" };
-   *
-   * @return An array of Strings value for the given key in the Properties. May be empty. Never null.
    */
   public static String[] getStringArray(Properties props, String key) {
-    String val = props.getProperty(key);
-    String[] results;
-    if (val == null) {
+    String[] results = MetaClass.cast(props.getProperty(key), String [].class);
+    if (results == null) {
       results = StringUtils.EMPTY_STRING_ARRAY;
-    } else {
-      results = StringUtils.decodeArray(val);
-      if (results == null) {
-        results = StringUtils.EMPTY_STRING_ARRAY;
-      }
     }
-    // System.out.printf("Called with prop key and value %s %s, returned %s.%n", key, val, Arrays.toString(results));
     return results;
   }
 
@@ -358,16 +317,6 @@ public class PropertiesUtils {
   // add ovp's key values to bp, overwrite if necessary , this is a helper
   public static Properties overWriteProperties(Properties bp, Properties ovp) {
     for (String propertyName : ovp.stringPropertyNames()) {
-      bp.setProperty(propertyName,ovp.getProperty(propertyName));
-    }
-    return bp;
-  }
-
-  //  add ovp's key values to bp, don't overwrite if there is already a value
-  public static Properties noClobberWriteProperties(Properties bp, Properties ovp) {
-    for (String propertyName : ovp.stringPropertyNames()) {
-      if (bp.containsKey(propertyName))
-        continue;
       bp.setProperty(propertyName,ovp.getProperty(propertyName));
     }
     return bp;
@@ -397,43 +346,10 @@ public class PropertiesUtils {
     String prefix = (name != null && !name.isEmpty())? name + '.' : "";
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
-    for (Property p : supportedProperties) {
+    for (Property p:supportedProperties) {
       String pname = prefix + p.name();
       String pvalue = properties.getProperty(pname, p.defaultValue());
-      sb.append(pname).append(':').append(pvalue).append(';');
-    }
-    return sb.toString();
-  }
-
-  public static String getSignature(String name, Properties properties) {
-    String[] prefixes = new String[]{(name != null && !name.isEmpty())? name + '.' : ""};
-    if ("tokenize".equals(name) || "ssplit".equals(name)) {  // TODO(gabor) This is a hack, as tokenize and ssplit depend on each other so heavily
-      prefixes = new String[]{"tokenize", "ssplit"};
-    }
-    if ("mention".equals(name)) {
-      prefixes = new String[]{"mention", "coref"};
-    }
-    if ("ner".equals(name)) {
-      prefixes = new String[]{"ner", "sutime"};
-    }
-    // handle special case of implied properties (e.g. sentiment implies parse should set parse.binaryTrees = true
-    Properties propertiesCopy = new Properties();
-    propertiesCopy.putAll(properties);
-    // TODO(jb) This is a hack: handle implied need for binary trees if sentiment annotator is present
-    Set<String> annoNames =
-        Generics.newHashSet(Arrays.asList(properties.getProperty("annotators", "").split("[, \t]+")));
-    if ("parse".equals(name) && annoNames.contains("sentiment") && !properties.containsKey("parse.binaryTrees")) {
-      propertiesCopy.setProperty("parse.binaryTrees", "true");
-    }
-    // keep track of all relevant properties for this annotator here!
-    StringBuilder sb = new StringBuilder();
-    for (String pname : propertiesCopy.stringPropertyNames()) {
-      for (String prefix : prefixes) {
-        if (pname.startsWith(prefix)) {
-          String pvalue = propertiesCopy.getProperty(pname);
-          sb.append(pname).append(':').append(pvalue).append(';');
-        }
-      }
+      sb.append(pname).append(':').append(pvalue);
     }
     return sb.toString();
   }

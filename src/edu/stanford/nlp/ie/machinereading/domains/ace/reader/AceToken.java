@@ -1,6 +1,5 @@
 
-package edu.stanford.nlp.ie.machinereading.domains.ace.reader; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,10 +14,7 @@ import edu.stanford.nlp.ie.machinereading.common.StringDictionary;
 import edu.stanford.nlp.trees.Span;
 import edu.stanford.nlp.util.Generics;
 
-public class AceToken  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AceToken.class);
+public class AceToken {
   /**
    * The actual token bytes
    * Normally we work with mWord (see below), but mLiteral is needed when
@@ -99,25 +95,25 @@ public class AceToken  {
 
   public static void loadGazetteers(String dataPath) throws java.io.FileNotFoundException, java.io.IOException {
 
-    log.info("Loading location gazetteer... ");
+    System.err.print("Loading location gazetteer... ");
     LOC_GAZ = Generics.newHashMap();
     loadDictionary(LOC_GAZ, dataPath + File.separator + "world_small.gaz.nonambiguous");
-    log.info("done.");
+    System.err.println("done.");
 
-    log.info("Loading first-name gazetteer... ");
+    System.err.print("Loading first-name gazetteer... ");
     FIRST_GAZ = Generics.newHashMap();
     loadDictionary(FIRST_GAZ, dataPath + File.separator + "per_first.gaz");
-    log.info("done.");
+    System.err.println("done.");
 
-    log.info("Loading last-name gazetteer... ");
+    System.err.print("Loading last-name gazetteer... ");
     LAST_GAZ = Generics.newHashMap();
     loadDictionary(LAST_GAZ, dataPath + File.separator + "per_last.gaz");
-    log.info("done.");
+    System.err.println("done.");
 
-    log.info("Loading trigger-word gazetteer... ");
+    System.err.print("Loading trigger-word gazetteer... ");
     TRIGGER_GAZ = Generics.newHashMap();
     loadDictionary(TRIGGER_GAZ, dataPath + File.separator + "triggers.gaz");
-    log.info("done.");
+    System.err.println("done.");
   }
 
   /** Loads one dictionary from disk */
@@ -170,13 +166,13 @@ public class AceToken  {
    */
   public static void loadProximityClasses(String proxFileName) throws java.io.IOException {
 
-    log.info("Loading proximity classes...");
+    System.err.println("Loading proximity classes...");
 
     BufferedReader in = null;
     try {
       in = new BufferedReader(new FileReader(proxFileName));
     } catch (java.io.IOException e) {
-      log.info("Warning: no proximity database found.");
+      System.err.println("Warning: no proximity database found.");
       return;
     }
 
@@ -185,7 +181,7 @@ public class AceToken  {
       ArrayList<String> tokens = SimpleTokenize.tokenize(line);
       if (tokens.size() > 0) {
         Integer key = WORDS.get(tokens.get(0));
-        ArrayList<Integer> value = new ArrayList<>();
+        ArrayList<Integer> value = new ArrayList<Integer>();
 
         for (int i = 0; i < tokens.size() && i < PROXIMITY_CLASS_SIZE; i++) {
           Integer word = WORDS.get(tokens.get(i));
@@ -197,7 +193,7 @@ public class AceToken  {
     }
 
     in.close();
-    log.info("Finished loading proximity classes.");
+    System.err.println("Finished loading proximity classes.");
   }
 
   public String getLiteral() {
@@ -392,7 +388,7 @@ public class AceToken  {
 
   private static int[] extractSuffixes(String word) {
     String lower = word.toLowerCase();
-    ArrayList<Integer> suffixes = new ArrayList<>();
+    ArrayList<Integer> suffixes = new ArrayList<Integer>();
     for (int i = 2; i <= 4; i++) {
       if (lower.length() >= i) {
         try {

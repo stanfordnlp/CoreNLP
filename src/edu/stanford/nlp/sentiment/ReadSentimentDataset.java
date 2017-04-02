@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sentiment; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sentiment;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -27,10 +26,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author John Bauer
  */
-public class ReadSentimentDataset  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ReadSentimentDataset.class);
+public class ReadSentimentDataset {
   static final Function<Tree, String> TRANSFORM_TREE_TO_WORD = tree -> tree.label().value();
 
   static final Function<String, String> TRANSFORM_PARENS = word -> {
@@ -109,7 +105,7 @@ public class ReadSentimentDataset  {
 
   private ReadSentimentDataset() {} // static class
 
-  public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper, int numClasses) {
+  public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper) {
     int maxNode = 0;
     for (Integer parent : parentPointers) {
       maxNode = Math.max(maxNode, parent);
@@ -171,9 +167,9 @@ public class ReadSentimentDataset  {
         throw new RuntimeException("Could not find sentiment score for phrase id " + phraseId);
       }
       // TODO: make this a numClasses option
-      int classLabel = Math.round((float) Math.floor(score * (float) numClasses));
-      if (classLabel > numClasses - 1) {
-        classLabel = numClasses - 1;
+      int classLabel = Math.round((float) Math.floor(score * 5.0));
+      if (classLabel > 4) {
+        classLabel = 4;
       }
       subtrees[i].label().setValue(Integer.toString(classLabel));
     }
@@ -249,8 +245,6 @@ public class ReadSentimentDataset  {
     String devFilename = null;
     String testFilename = null;
 
-    int numClasses = 5;
-
     int argIndex = 0;
     while (argIndex < args.length) {
       if (args[argIndex].equalsIgnoreCase("-dictionary")) {
@@ -291,11 +285,8 @@ public class ReadSentimentDataset  {
         devFilename = args[argIndex + 1] + "/dev.txt";
         testFilename = args[argIndex + 1] + "/test.txt";
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-numClasses")) {
-        numClasses = Integer.parseInt(args[argIndex + 1]);
-        argIndex += 2;
       } else {
-        log.info("Unknown argument " + args[argIndex]);
+        System.err.println("Unknown argument " + args[argIndex]);
         System.exit(2);
       }
     }
@@ -339,7 +330,7 @@ public class ReadSentimentDataset  {
     for (String line : IOUtils.readLines(parseFilename, "utf-8")) {
       String[] pieces = line.split("\\|");
       List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), arg -> Integer.valueOf(arg) - 1);
-      Tree tree = convertTree(parentPointers, sentences.get(index), phraseIds, sentimentScores, escaper, numClasses);
+      Tree tree = convertTree(parentPointers, sentences.get(index), phraseIds, sentimentScores, escaper);
       ++index;
       trees.add(tree);
     }

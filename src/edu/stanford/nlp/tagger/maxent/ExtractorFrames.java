@@ -27,7 +27,6 @@
 
 
 package edu.stanford.nlp.tagger.maxent;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.util.StringUtils;
@@ -113,14 +112,11 @@ import java.util.*;
  * @author Michel Galley
  * @version 1.0
  */
-public class ExtractorFrames  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ExtractorFrames.class);
+public class ExtractorFrames {
 
   // all features are implicitly conjoined with the current tag
   static final Extractor cWord = new Extractor(0, false);
-  private static final Extractor prevWord = new Extractor(-1, false);
+  static final Extractor prevWord = new Extractor(-1, false);
   private static final Extractor prevTag = new Extractor(-1, true);
   // prev tag and current word!
   private static final Extractor prevTagWord = new ExtractorWordTag(0, -1);
@@ -158,7 +154,7 @@ public class ExtractorFrames  {
     arch = arch.replaceAll("bidirectional5words", "words(-2,2),order(-2,2),twoTags(-1,1),wordTag(0,-1),wordTag(0,1),biwords(-1,1)");
     arch = arch.replaceAll("bidirectional", "words(-1,1),order(-2,2),twoTags(-1,1),wordTag(0,-1),wordTag(0,1),biwords(-1,1)");
 
-    ArrayList<Extractor> extrs = new ArrayList<>();
+    ArrayList<Extractor> extrs = new ArrayList<Extractor>();
     List<String> args = StringUtils.valueSplit(arch, "[a-zA-Z0-9]*(?:\\([^)]*\\))?", "\\s*,\\s*");
     for (String arg : args) {
       if (arg.equals("sighan2005")) {
@@ -299,7 +295,7 @@ public class ExtractorFrames  {
                  arg.startsWith("unicodeshapeconjunction(")) {
         // okay; known unknown keyword
       } else {
-        log.info("Unrecognized ExtractorFrames identifier (ignored): " + arg);
+        System.err.println("Unrecognized ExtractorFrames identifier (ignored): " + arg);
       }
     } // end for
     return extrs.toArray(new Extractor[extrs.size()]);
@@ -787,8 +783,6 @@ class ExtractorWordShapeConjunction extends Extractor {
  */
 class ExtractorSpanishAuxiliaryTag extends Extractor {
 
-  private static final long serialVersionUID = -3352770856914897103L;
-
   public ExtractorSpanishAuxiliaryTag() {
     super(-1, true);
   }
@@ -811,11 +805,9 @@ class ExtractorSpanishAuxiliaryTag extends Extractor {
 
 /**
  * Extracts a boolean indicating whether the given word is preceded by
- * a semi-auxiliary verb.
+ * a semiauxiliary verb.
  */
 class ExtractorSpanishSemiauxiliaryTag extends Extractor {
-
-  private static final long serialVersionUID = -164942945521643734L;
 
   public ExtractorSpanishSemiauxiliaryTag() {
     super(-1, true);

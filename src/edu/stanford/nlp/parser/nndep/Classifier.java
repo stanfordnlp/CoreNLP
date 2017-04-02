@@ -1,5 +1,4 @@
 package edu.stanford.nlp.parser.nndep;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Pair;
@@ -34,10 +33,7 @@ import java.util.stream.IntStream;
  * @author Danqi Chen
  * @author Jon Gauthier
  */
-public class Classifier  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Classifier.class);
+public class Classifier {
   // E: numFeatures x embeddingSize
   // W1: hiddenSize x (embeddingSize x numFeatures)
   // b1: hiddenSize
@@ -526,7 +522,7 @@ public class Classifier  {
     gradSaved = new double[preMap.size()][config.hiddenSize];
 
     int numChunks = config.trainingThreads;
-    List<List<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
+    List<Collection<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
 
     // Submit chunks for processing on separate threads
     for (Collection<Example> chunk : chunks)
@@ -592,12 +588,10 @@ public class Classifier  {
       }
     }
 
-    if (config.doWordEmbeddingGradUpdate) {
-      for (int i = 0; i < E.length; ++i) {
-        for (int j = 0; j < E[i].length; ++j) {
-          eg2E[i][j] += gradE[i][j] * gradE[i][j];
-          E[i][j] -= adaAlpha * gradE[i][j] / Math.sqrt(eg2E[i][j] + adaEps);
-        }
+    for (int i = 0; i < E.length; ++i) {
+      for (int j = 0; j < E[i].length; ++j) {
+        eg2E[i][j] += gradE[i][j] * gradE[i][j];
+        E[i][j] -= adaAlpha * gradE[i][j] / Math.sqrt(eg2E[i][j] + adaEps);
       }
     }
   }
@@ -668,7 +662,7 @@ public class Classifier  {
         for (int k = 0; k < config.embeddingSize; ++k)
           saved[mapX][j] += W1[j][pos * config.embeddingSize + k] * E[tok][k];
     }
-    log.info("PreComputed " + toPreCompute.size() + ", Elapsed Time: " + (System
+    System.err.println("PreComputed " + toPreCompute.size() + ", Elapsed Time: " + (System
         .currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
 

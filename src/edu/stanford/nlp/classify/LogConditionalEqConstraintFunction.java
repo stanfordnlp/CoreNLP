@@ -76,7 +76,7 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
    *
    */
   protected Index<IntTuple> createIndex() {
-    Index<IntTuple> index = new HashIndex<>();
+    Index<IntTuple> index = new HashIndex<IntTuple>();
     for (int c = 0; c < numClasses; c++) {
       index.add(new IntUni(c));
       for (int f = 0; f < numFeatures; f++) {
@@ -160,8 +160,8 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
     Arrays.fill(derivative, 0.0);
     double[] sums = new double[numClasses];
     double[] probs = new double[numClasses];
-    // double[] counts = new double[numClasses];
-    // Arrays.fill(counts, 0.0); // not needed; Java arrays zero initialized
+    double[] counts = new double[numClasses];
+    Arrays.fill(counts, 0.0);
     for (int d = 0; d < data.length; d++) {
       int[] features = data[d];
       // activation

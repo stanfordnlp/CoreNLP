@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.international.tuebadz; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.tuebadz;
 
 import java.util.regex.Pattern;
 
@@ -13,10 +12,7 @@ import edu.stanford.nlp.util.Generics;
  *
  *  @author Roger Levy (rog@csli.stanford.edu)
  */
-public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TueBaDZHeadFinder.class);
+public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder {
 
   private static final long serialVersionUID = 1L;
 
@@ -100,10 +96,10 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder  {
   /* Many TueBaDZ local trees have an explicitly marked head, as :HD or -HD.  (Almost!) all the time, there is only one :HD per local tree.  Use it if possible. */
    protected Tree findMarkedHead(Tree t) {
      Tree[] kids = t.children();
-     for (Tree kid : kids) {
-       if (headMarkedPattern.matcher(kid.label().value()).find() || headMarkedPattern2.matcher(kid.label().value()).find()) {
-         //log.info("found manually-labeled head " + kids[i] + " for tree " + t);
-         return kid;
+     for (int i = 0, n = kids.length; i < n; i++) {
+       if (headMarkedPattern.matcher(kids[i].label().value()).find() || headMarkedPattern2.matcher(kids[i].label().value()).find()) {
+         //System.err.println("found manually-labeled head " + kids[i] + " for tree " + t);
+         return kids[i];
        }
      }
      return null;
@@ -164,7 +160,7 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder  {
      Tree theHead = null;
      String motherCat = basicCategory(t.label().value());
      if (DEBUG) {
-       log.info("Looking for head of " + t.label() +
+       System.err.println("Looking for head of " + t.label() +
                           "; value is |" + t.label().value() + "|, " +
                           " baseCat is |" + motherCat + "|");
      }
@@ -175,13 +171,13 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder  {
      String[][] how = nonTerminalInfo.get(motherCat);
      if (how == null) {
        if (DEBUG) {
-         log.info("Warning: No rule found for " + motherCat +
+         System.err.println("Warning: No rule found for " + motherCat +
                             " (first char: " + motherCat.charAt(0) + ")");
-         log.info("Known nonterms are: " + nonTerminalInfo.keySet());
+         System.err.println("Known nonterms are: " + nonTerminalInfo.keySet());
        }
        if (defaultRule != null) {
          if (DEBUG) {
-           log.info("  Using defaultRule");
+           System.err.println("  Using defaultRule");
          }
          return traverseLocate(t.children(), defaultRule, true);
        } else {
@@ -196,7 +192,7 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder  {
        }
      }
      if (DEBUG) {
-       log.info("  Chose " + theHead.label());
+       System.err.println("  Chose " + theHead.label());
      }
      return theHead;
    }

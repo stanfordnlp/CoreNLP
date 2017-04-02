@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.metrics; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.metrics;
 
 import java.io.PrintWriter;
 import java.util.Map;
@@ -21,10 +20,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Roger Levy
  * @author Spence Green
  */
-public class EvalbByCat extends AbstractEval  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EvalbByCat.class);
+public class EvalbByCat extends AbstractEval {
 
   private final Evalb evalb;
   
@@ -45,14 +41,14 @@ public class EvalbByCat extends AbstractEval  {
     super(str, runningAverages);
 
     evalb = new Evalb(str, false);
-    precisions = new ClassicCounter<>();
-    recalls = new ClassicCounter<>();
-    f1s = new ClassicCounter<>();
+    precisions = new ClassicCounter<Label>();
+    recalls = new ClassicCounter<Label>();
+    f1s = new ClassicCounter<Label>();
 
-    precisions2 = new ClassicCounter<>();
-    recalls2 = new ClassicCounter<>();
-    pnums2 = new ClassicCounter<>();
-    rnums2 = new ClassicCounter<>();
+    precisions2 = new ClassicCounter<Label>();
+    recalls2 = new ClassicCounter<Label>();
+    pnums2 = new ClassicCounter<Label>();
+    rnums2 = new ClassicCounter<Label>();
   }
   
   public EvalbByCat(String str, boolean runningAverages, String labelRegex) {
@@ -148,13 +144,13 @@ public class EvalbByCat extends AbstractEval  {
   @Override
   public void display(boolean verbose, PrintWriter pw) {
     if (precisions.keySet().size() != recalls.keySet().size()) {
-      log.error("Different counts for precisions and recalls!");
+      System.err.println("ERROR: Different counts for precisions and recalls!");
       return;
     }
     final Set<Label> cats = getEvalLabelSet(precisions.keySet());
     final Random rand = new Random();
 
-    Map<Double,Label> f1Map = new TreeMap<>();
+    Map<Double,Label> f1Map = new TreeMap<Double,Label>();
     for (Label cat : cats) {
       double pnum2 = pnums2.getCount(cat);
       double rnum2 = rnums2.getCount(cat);

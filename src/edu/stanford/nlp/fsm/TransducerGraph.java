@@ -1,5 +1,4 @@
-package edu.stanford.nlp.fsm; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.fsm;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -28,10 +27,7 @@ import edu.stanford.nlp.util.StringUtils;
 // TODO: needs some work to make type-safe.
 // (In several places, it takes an Object and does instanceof to see what
 // it is, or assumes one of the alphabets is a Double, etc....)
-public class TransducerGraph implements Cloneable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TransducerGraph.class);
+public class TransducerGraph implements Cloneable {
 
   public static final String EPSILON_INPUT = "EPSILON";
 
@@ -664,7 +660,7 @@ public class TransducerGraph implements Cloneable  {
     double result = 0.0;
     Set<Arc> arcs = getArcsBySource(node);
     if (arcs.isEmpty()) {
-      log.info("No outbound arcs from node.");
+      System.err.println("No outbound arcs from node.");
       return result;
     }
     for (Arc arc : arcs) {
@@ -699,7 +695,7 @@ public class TransducerGraph implements Cloneable  {
     Object node = this.getStartNode();
     Set endNodes = this.getEndNodes();
     while (!endNodes.contains(node)) {
-      List<Arc> arcs = new ArrayList<>(this.getArcsBySource(node));
+      List<Arc> arcs = new ArrayList<Arc>(this.getArcsBySource(node));
       TransducerGraph.Arc arc = arcs.get(r.nextInt(arcs.size()));
       list.add(arc.getInput());
       node = arc.getTargetNode();
@@ -738,7 +734,7 @@ public class TransducerGraph implements Cloneable  {
    * For testing only.
    */
   public List<Double> getPathOutputs(List<List> pathList) {
-    List<Double> outputList = new ArrayList<>();
+    List<Double> outputList = new ArrayList<Double>();
     for (List path : pathList) {
       outputList.add(new Double(getOutputOfPathInGraph(path)));
     }
@@ -865,7 +861,7 @@ public class TransducerGraph implements Cloneable  {
     int pathLength = (int) (r.nextGaussian() * pathLengthVariance + pathLengthMean);
     for (int i = 0; i < numPaths; i++) {
       // make a path
-      List<String> path = new ArrayList<>();
+      List<String> path = new ArrayList<String>();
       String input;
       for (int j = 0; j < pathLength; j++) {
         input = Integer.toString(r.nextInt(numInputs));

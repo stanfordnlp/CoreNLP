@@ -80,7 +80,7 @@ public class InefficientSGDMinimizer<T extends Function> extends StochasticMinim
     gain = tuneGain(function, initial, msPerTest, gainLow,gainHigh);
     bSize = tuneBatch(function,initial,msPerTest,1);
 
-    return new Pair<>(bSize, gain);
+    return new Pair<Integer,Double>(bSize, gain);
   }
 
   @Override
@@ -147,7 +147,7 @@ public class InefficientSGDMinimizer<T extends Function> extends StochasticMinim
       }
     };
 
-    InefficientSGDMinimizer<DiffFunction> min = new InefficientSGDMinimizer<>();
+    InefficientSGDMinimizer<DiffFunction> min = new InefficientSGDMinimizer<DiffFunction>();
     min.minimize(f, 1.0E-4, init);
   }
 

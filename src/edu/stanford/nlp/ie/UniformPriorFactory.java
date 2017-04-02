@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.sequences.ListeningSequenceModel;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
@@ -12,10 +11,7 @@ import java.util.List;
 /**
  * @author Christopher Manning
  */
-public class UniformPriorFactory<IN extends CoreMap> implements PriorModelFactory<IN>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(UniformPriorFactory.class);
+public class UniformPriorFactory<IN extends CoreMap> implements PriorModelFactory<IN> {
 
   @Override
   public ListeningSequenceModel getInstance(String backgroundSymbol,
@@ -24,8 +20,8 @@ public class UniformPriorFactory<IN extends CoreMap> implements PriorModelFactor
                                             List<IN> document,
                                             Pair<double[][], double[][]> entityMatrices,
                                             SeqClassifierFlags flags) {
-    // log.info("Using uniform prior!");
-    UniformPrior<IN> uniPrior = new UniformPrior<>(flags.backgroundSymbol, classIndex, document);
+    // System.err.println("Using uniform prior!");
+    UniformPrior<IN> uniPrior = new UniformPrior<IN>(flags.backgroundSymbol, classIndex, document);
     return uniPrior;
   }
 

@@ -7,21 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author sonalg
- * @version 11/3/14.
+ * Created by sonalg on 11/3/14.
  */
 public class Env implements Serializable {
-
-  private static final long serialVersionUID = -4168610545399833956L;
-
   /**
-   * Mapping of variable names to their values.
+   * Mapping of variable names to their values
    */
-  private final Map<String, Object> variables;
+  Map<String, Object> variables = new HashMap<String, Object>();
 
-  public Env() {
-    variables = new HashMap<>();
-  }
+  public Env() {}
 
   public Env(Map<String, Object> variables) {
     this.variables = variables;
@@ -58,17 +52,18 @@ public class Env implements Serializable {
 //        }
       }
     }
-    Class coreKeyClass = AnnotationLookup.toCoreKey(name);
-    if (coreKeyClass != null) {
-      return coreKeyClass;
+    AnnotationLookup.KeyLookup lookup = AnnotationLookup.getCoreKey(name);
+    if (lookup != null) {
+      return lookup.coreKey;
     } else {
       try {
         Class clazz = Class.forName(name);
         return clazz;
-      } catch (ClassNotFoundException ex) {
-        return null;
-      }
+      } catch (ClassNotFoundException ex) {}
+      return null;
     }
   }
+
+
 
 }

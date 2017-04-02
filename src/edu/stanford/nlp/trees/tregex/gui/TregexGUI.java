@@ -28,8 +28,7 @@
 //    Licensing: parser-support@lists.stanford.edu
 //    http://www-nlp.stanford.edu/software/tregex.shtml
 
-package edu.stanford.nlp.trees.tregex.gui; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.tregex.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -75,10 +74,7 @@ import edu.stanford.nlp.util.ReflectionLoading;
  * @author Anna Rafferty
  */
 @SuppressWarnings("serial")
-public class TregexGUI extends JFrame implements ActionListener, MatchesPanelListener  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TregexGUI.class);
+public class TregexGUI extends JFrame implements ActionListener, MatchesPanelListener {
 
   private static TregexGUI instance; // = null;
 
@@ -359,7 +355,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       for (int i = 0; i < initialFiles.size(); ++i) {
         files[i] = new File(initialFiles.get(i));
       }
-      startFileLoadingThread(new EnumMap<>(FilterType.class), files);
+      startFileLoadingThread(new EnumMap<FilterType,String>(FilterType.class), files);
     }
 
     setVisible(true);
@@ -388,13 +384,13 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       } catch (NoClassDefFoundError e) {
         // This will be thrown first if the OSXAdapter is loaded on a system without the EAWT
         // because OSXAdapter extends ApplicationAdapter in its def
-        log.info("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
+        System.err.println("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
       } catch (ClassNotFoundException e) {
         // This shouldn't be reached; if there's a problem with the OSXAdapter we should get the
         // above NoClassDefFoundError first.
-        log.info("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
+        System.err.println("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
       } catch (Exception e) {
-        log.info("Exception while loading the OSXAdapter:");
+        System.err.println("Exception while loading the OSXAdapter:");
         e.printStackTrace();
       }
     }
@@ -533,7 +529,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       if (haveDirectory) {
         doFileFilters(selectedFiles);
       } else {
-        startFileLoadingThread(new EnumMap<>(FilterType.class), selectedFiles);
+        startFileLoadingThread(new EnumMap<FilterType,String>(FilterType.class), selectedFiles);
       }
     }
   }
@@ -645,7 +641,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   }
 
   private static EnumMap<FilterType,String> getFilters(JPanel panel) {
-    EnumMap<FilterType,String> filters = new EnumMap<>(FilterType.class);
+    EnumMap<FilterType,String> filters = new EnumMap<FilterType, String>(FilterType.class);
     Component[] components = panel.getComponents();
     for(Component c : components) {
       if (c.getClass() != Box.class) {
@@ -712,7 +708,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
             out.flush();
             out.close();
           } catch(Exception e) {
-            log.info("Exception in save");
+            System.err.println("Exception in save");
             e.printStackTrace();
           }
         }
@@ -739,7 +735,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
             out.flush();
             out.close();
           } catch(Exception e) {
-            log.info("Exception in save");
+            System.err.println("Exception in save");
             e.printStackTrace();
           }
         }
@@ -767,7 +763,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
             out.flush();
             out.close();
           } catch(Exception e) {
-            log.info("Exception in save");
+            System.err.println("Exception in save");
             e.printStackTrace();
           }
         }

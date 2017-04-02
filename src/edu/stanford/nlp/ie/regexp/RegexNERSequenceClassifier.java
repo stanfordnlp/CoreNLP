@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.regexp; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.regexp;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -63,10 +62,7 @@ import edu.stanford.nlp.util.Generics;
  * @author jtibs
  * @author Mihai
  */
-public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreLabel>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(RegexNERSequenceClassifier.class);
+public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreLabel> {
 
   private final List<Entry> entries;
 
@@ -127,7 +123,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     if (overwriteMyLabels) {
       for (Entry entry: entries) myLabels.add(entry.type);
     }
-    // log.info("RegexNER using labels: " +  myLabels);
+    // System.err.println("RegexNER using labels: " +  myLabels);
   }
 
   /**
@@ -169,12 +165,12 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     if (overwriteMyLabels) {
       for (Entry entry: entries) myLabels.add(entry.type);
     }
-    // log.info("RegexNER using labels: " + myLabels);
+    // System.err.println("RegexNER using labels: " + myLabels);
   }
 
   private static class Entry implements Comparable<Entry> {
     public List<Pattern> regex; // the regex, tokenized by splitting on white space
-    public List<String> exact = new ArrayList<>();
+    public List<String> exact = new ArrayList<String>();
     public String type; // the associated type
     public Set<String> overwritableTypes;
     public double priority;
@@ -215,9 +211,9 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     if (validPosPattern == null) {
       return true;
     }
-    // log.info("CHECKING " + start + " " + end);
+    // System.err.println("CHECKING " + start + " " + end);
     for (int i = start; i < end; i ++) {
-      // log.info("TAG = " + tokens.get(i).tag());
+      // System.err.println("TAG = " + tokens.get(i).tag());
       if (tokens.get(i).tag() == null) {
         throw new IllegalArgumentException("RegexNER was asked to check for valid tags on an untagged sequence. Either tag the sequence, perhaps with the pos annotator, or create RegexNER with an empty validPosPattern, perhaps with the property regexner.validpospattern");
       }
@@ -235,7 +231,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
       int start = 0; // the index of the token from which we begin our search each iteration
       while (true) {
         // only search the part of the document that we haven't yet considered
-        // log.info("REGEX FIND MATCH FOR " + entry.regex.toString());
+        // System.err.println("REGEX FIND MATCH FOR " + entry.regex.toString());
         start = findStartIndex(entry, document, start, myLabels, this.ignoreCase);
         if (start < 0) break; // no match found
 
@@ -261,7 +257,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
    *  @return a sorted list of Entries
    */
   private static List<Entry> readEntries(BufferedReader mapping, boolean ignoreCase) throws IOException {
-    List<Entry> entries = new ArrayList<>();
+    List<Entry> entries = new ArrayList<Entry>();
 
     int lineCount = 0;
     for (String line; (line = mapping.readLine()) != null; ) {
@@ -274,7 +270,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
       String type = split[1].trim();
       Set<String> overwritableTypes = Generics.newHashSet();
       double priority = 0.0;
-      List<Pattern> tokens = new ArrayList<>();
+      List<Pattern> tokens = new ArrayList<Pattern>();
 
       if (split.length >= 3) {
         overwritableTypes.addAll(Arrays.asList(split[2].trim().split(",")));
@@ -301,8 +297,8 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     }
 
     Collections.sort(entries);
-    // log.info("Read these entries:");
-    // log.info(entries);
+    // System.err.println("Read these entries:");
+    // System.err.println(entries);
     return entries;
   }
 
@@ -318,7 +314,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
   private static int findStartIndex(Entry entry, List<CoreLabel> document, int searchStart, Set<String> myLabels, boolean ignoreCase) {
     List<Pattern> regex = entry.regex;
     int rSize = regex.size();
-    // log.info("REGEX FIND MATCH FOR " + regex.toString() + " length: " + rSize);
+    // System.err.println("REGEX FIND MATCH FOR " + regex.toString() + " length: " + rSize);
 
     for (int start = searchStart, end = document.size() - regex.size(); start <= end; start++) {
       boolean failed = false;
@@ -340,9 +336,9 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
         }
       }
       if (! failed) {
-        // log.info("MATCHED REGEX:");
-        // for(int i = start; i < start + regex.size(); i ++) log.info(" " + document.get(i).word());
-        // log.info();
+        // System.err.print("MATCHED REGEX:");
+        // for(int i = start; i < start + regex.size(); i ++) System.err.print(" " + document.get(i).word());
+        // System.err.println();
         return start;
       }
     }

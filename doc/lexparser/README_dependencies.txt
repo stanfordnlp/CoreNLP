@@ -1,15 +1,15 @@
-UNIVERSAL/STANFORD DEPENDENCIES.  Stanford Parser v3.7.0
+UNIVERSAL/STANFORD DEPENDENCIES.  Stanford Parser v3.5.2
 -----------------------------------------------------------
 
 IMPORTANT: Starting with version 3.5.2 the default dependencies
 representation output by the Stanford Parser is the new Universal
 Dependencies Representation. Universal Dependencies were developed
 with the goal of being a cross-linguistically valid representation.
-Note that some constructions such as prepositional phrases are now 
+Note that some constructs such as prepositional phrases are now 
 analyzed differently and that the set of relations was updated. The
 online documentation of English Universal Dependencies at
 
-    http://www.universaldependencies.org
+    http://universaldependencies.github.io/docs/#language-en
 
 should be consulted for the current set of dependency relations.
 
@@ -20,10 +20,7 @@ manual. Use the flag
 
     -originalDependencies
 
-to obtain the original Stanford Dependencies. Note, however, that we
-are no longer maintaining the SD converter or representation and we
-therefore recommend to use the Universal Dependencies representation
-for any new projects.
+to obtain the original Stanford Dependencies.
 
 
 The manual for the English version of the Stanford Dependencies
@@ -52,35 +49,17 @@ For an overview of the original English Universal Dependencies schemes, please l
 at:
 
   Marie-Catherine de Marneffe, Timothy Dozat, Natalia Silveira, Katri Haverinen,
-  Filip Ginter, Joakim Nivre, and Christopher D. Manning. 2014. Universal Stanford
+  Filip Ginter, Joakim Nivre and Christopher D. Manning. 2014. Universal Stanford
   dependencies: A cross-linguistic typology. 9th International Conference on
   Language Resources and Evaluation (LREC 2014).
-  http://nlp.stanford.edu/~manning/papers/USD_LREC14_UD_revision.pdf
-  
-  and
-  
-  Joakim Nivre, Marie-Catherine de Marneffe, Filip Ginter, Yoav Goldberg, Jan Hajič,
-  Christopher D. Manning, Ryan McDonald, Slav Petrov, Sampo Pyysalo, Natalia Silveira,
-  Reut Tsarfaty, and Daniel Zeman. 2016. Universal Dependencies v1: A Multilingual 
-  Treebank Collection. In Proceedings of the Tenth International Conference on Language 
-  Resources and Evaluation (LREC 2016).
-  http://nlp.stanford.edu/pubs/nivre2016ud.pdf
-  
-Please note, though, that some of the relations discussed in the first paper
+  http://nlp.stanford.edu/pubs/USD_LREC14_paper_camera_ready.pdf
+
+Please note, though, that some of the relations discussed in this paper
 were subsequently updated and please refer to the online documentation at
     
-    http://www.universaldependencies.org
+    http://universaldependencies.github.com/docs/
 
 for an up to date documention of the set of relations.
-
-For an overview of the enhanced and enhanced++ dependency representations, please look 
-at:
-
-  Sebastian Schuster and Christopher D. Manning. 2016. Enhanced English Universal 
-  Dependencies: An Improved Representation for Natural Language Understanding Tasks. 
-  In Proceedings of the Tenth International Conference on Language Resources and 
-  Evaluation (LREC 2016).
-  http://nlp.stanford.edu/~sebschu/pubs/schuster-manning-lrec2016.pdf
 
 For an overview of the original typed dependencies scheme, please look
 at:
@@ -102,20 +81,12 @@ These papers can be cited as references for the original English Stanford
 Dependencies and Enlgish Universal Dependencies.
 
 --------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.7.0
-
-Implementation of enhanced and enhanced++ dependency
-representations as described in Schuster and Manning (2016).
-
-Fixed concurrency issue.
-
---------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.5.2
 
 Switch to Universal Dependencies as the default representation.
 Please see the Universal Dependencies documentation at
 
-      http://www.universaldependencies.org
+      http://universaldependencies.github.io/docs/
 
 for more information on the new relations.
 

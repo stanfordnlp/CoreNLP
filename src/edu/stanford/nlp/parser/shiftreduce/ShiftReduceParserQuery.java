@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.shiftreduce; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.shiftreduce;
 
 
 import java.io.PrintWriter;
@@ -11,7 +10,7 @@ import java.util.PriorityQueue;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.KBestViterbiParser;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserQuery;
@@ -21,14 +20,10 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
-public class ShiftReduceParserQuery implements ParserQuery  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ShiftReduceParserQuery.class);
+public class ShiftReduceParserQuery implements ParserQuery {
   Debinarizer debinarizer = new Debinarizer(false);
 
   List<? extends HasWord> originalSentence;
@@ -74,29 +69,23 @@ public class ShiftReduceParserQuery implements ParserQuery  {
 
     success = true;
     unparsable = false;
-    PriorityQueue<State> beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    PriorityQueue<State> beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
     beam.add(initialState);
     // TODO: don't construct as many PriorityQueues
     while (beam.size() > 0) {
-      if (Thread.interrupted()) { // Allow interrupting the parser
-        throw new RuntimeInterruptedException();
-      }
-      // log.info("================================================");
-      // log.info("Current beam:");
-      // log.info(beam);
+      // System.err.println("================================================");
+      // System.err.println("Current beam:");
+      // System.err.println(beam);
       PriorityQueue<State> oldBeam = beam;
-      beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
-        if (Thread.interrupted()) {  // Allow interrupting the parser
-          throw new RuntimeInterruptedException();
-        }
         Collection<ScoredObject<Integer>> predictedTransitions = parser.model.findHighestScoringTransitions(state, true, maxBeamSize, constraints);
-        // log.info("Examining state: " + state);
+        // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
           Transition transition = parser.model.transitionIndex.get(predictedTransition.object());
           State newState = transition.apply(state, predictedTransition.score());
-          // log.info("  Transition: " + transition + " (" + predictedTransition.score() + ")");
+          // System.err.println("  Transition: " + transition + " (" + predictedTransition.score() + ")");
           if (bestState == null || bestState.score() < newState.score()) {
             bestState = newState;
           }
@@ -156,8 +145,8 @@ public class ShiftReduceParserQuery implements ParserQuery  {
   @Override
   public boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr) {
     boolean success = parse(sentence);
-    //log.info(getBestTransitionSequence());
-    //log.info(getBestBinarizedParse());
+    //System.err.println(getBestTransitionSequence());
+    //System.err.println(getBestBinarizedParse());
     return success;
   }
 
@@ -179,12 +168,6 @@ public class ShiftReduceParserQuery implements ParserQuery  {
     return debinarized;
   }
 
-  @Override
-  public List<ScoredObject<Tree>> getKBestParses(int k) { return this.getKBestPCFGParses(k); }
-
-  @Override
-  public double getBestScore() { return this.getPCFGScore(); }
-
   /** TODO: can we get away with not calling this PCFG? */
   @Override
   public Tree getBestPCFGParse() {
@@ -204,7 +187,7 @@ public class ShiftReduceParserQuery implements ParserQuery  {
   /** TODO: if this is a beam, return all equal parses */
   @Override
   public List<ScoredObject<Tree>> getBestPCFGParses() {
-    ScoredObject<Tree> parse = new ScoredObject<>(debinarized, finalState.score);
+    ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
     return Collections.singletonList(parse);
   }
 
@@ -216,7 +199,7 @@ public class ShiftReduceParserQuery implements ParserQuery  {
   /** TODO: return more if this used a beam */
   @Override
   public List<ScoredObject<Tree>> getKBestPCFGParses(int kbestPCFG) {
-    ScoredObject<Tree> parse = new ScoredObject<>(debinarized, finalState.score);
+    ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
     return Collections.singletonList(parse);
   }
 
@@ -294,8 +277,8 @@ public class ShiftReduceParserQuery implements ParserQuery  {
     List<Tree> leaves = tree.getLeaves();
     if (leaves.size() != originalSentence.size()) {
       throw new IllegalStateException("originalWords and sentence of different sizes: " + originalSentence.size() + " vs. " + leaves.size() +
-                                      "\n Orig: " + SentenceUtils.listToString(originalSentence) +
-                                      "\n Pars: " + SentenceUtils.listToString(leaves));
+                                      "\n Orig: " + Sentence.listToString(originalSentence) +
+                                      "\n Pars: " + Sentence.listToString(leaves));
     }
     // TODO: get rid of this cast
     Iterator<? extends Label> wordsIterator = (Iterator<? extends Label>) originalSentence.iterator();

@@ -1,5 +1,4 @@
 package edu.stanford.nlp.naturalli;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.international.Language;
@@ -30,7 +29,7 @@ import java.util.stream.Stream;
  * <p>
  *   For usage at test time, load a model from
  *   {@link ClauseSplitter#load(String)}, and then take the top clauses of a given tree
- *   with {@link ClauseSplitterSearchProblem#topClauses(double, int)}, yielding a list of
+ *   with {@link ClauseSplitterSearchProblem#topClauses(double)}, yielding a list of
  *   {@link edu.stanford.nlp.naturalli.SentenceFragment}s.
  * </p>
  * <pre>
@@ -46,15 +45,12 @@ import java.util.stream.Stream;
  *
  * @author Gabor Angeli
  */
-public class ClauseSplitterSearchProblem  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ClauseSplitterSearchProblem.class);
+public class ClauseSplitterSearchProblem {
 
   /**
    * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
-   * the preference for the type of split we should do. The most preferred is at the front of the list, and then it backs off
-   * to the less and less preferred split types.
+   * the preference for the type of split we should do. The most prefered is at the front of the list, and then it backs off
+   * to the less and less prefered split types.
    */
   protected static final Map<String, List<String>> HARD_SPLITS = Collections.unmodifiableMap(new HashMap<String, List<String>>() {{
     put("comp", new ArrayList<String>() {{
@@ -68,50 +64,16 @@ public class ClauseSplitterSearchProblem  {
       add("clone_nsubj");
       add("simple");
     }});
-    put("vmod", new ArrayList<String>() {{
-      add("clone_nsubj");
-      add("simple");
-    }});
     put("csubj", new ArrayList<String>() {{
       add("clone_dobj");
       add("simple");
     }});
-    put("advcl", new ArrayList<String>() {{
-      add("clone_nsubj");
-      add("simple");
-    }});
-    put("advcl:*", new ArrayList<String>() {{
-      add("clone_nsubj");
-      add("simple");
-    }});
-    put("conj:*", new ArrayList<String>() {{
-      add("clone_nsubj");
-      add("clone_dobj");
-      add("simple");
-    }});
-    put("acl:relcl", new ArrayList<String>() {{  // no doubt (-> that cats have tails <-)
-      add("simple");
-    }});
-    put("parataxis", new ArrayList<String>() {{  // no doubt (-> that cats have tails <-)
-      add("simple");
-    }});
-  }});
-
-  /**
-   * A set of words which indicate that the complement clause is not factual, or at least not necessarily factual.
-   */
-  protected static final Set<String> INDIRECT_SPEECH_LEMMAS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("report"); add("say"); add("told"); add("claim"); add("assert"); add("think"); add("believe"); add("suppose");
   }});
 
   /**
    * The tree to search over.
    */
   public final SemanticGraph tree;
-  /**
-   * The assumed truth of the original clause.
-   */
-  public final boolean assumedTruth;
   /**
    * The length of the sentence, as determined from the tree.
    */
@@ -120,9 +82,6 @@ public class ClauseSplitterSearchProblem  {
    * A mapping from a word to the extra edges that come out of it.
    */
   private final Map<IndexedWord, Collection<SemanticGraphEdge>> extraEdgesByGovernor = new HashMap<>();
-  /**
-   * A mapping from a word to the extra edges that to into it.
-   */
   private final Map<IndexedWord, Collection<SemanticGraphEdge>> extraEdgesByDependent = new HashMap<>();
   /**
    * The classifier for whether a particular dependency edge defines a clause boundary.
@@ -192,11 +151,11 @@ public class ClauseSplitterSearchProblem  {
   /**
    * An action being taken; that is, the type of clause splitting going on.
    */
-  public interface Action {
+  public static interface Action {
     /**
      * The name of this action.
      */
-    String signature();
+    public String signature();
 
     /**
      * A check to make sure this is actually a valid action to take, in the context of the given tree.
@@ -205,7 +164,7 @@ public class ClauseSplitterSearchProblem  {
      * @return True if this is a valid action.
      */
     @SuppressWarnings("UnusedParameters")
-    default boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
+    public default boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
       return true;
     }
 
@@ -218,39 +177,37 @@ public class ClauseSplitterSearchProblem  {
      * @param ppOrNull The preposition attachment of the parent tree, if there is one.
      * @return A new state, or {@link Optional#empty()} if this action was not successful.
      */
-    Optional<State> applyTo(SemanticGraph tree, State source,
-                            SemanticGraphEdge outgoingEdge,
-                            SemanticGraphEdge subjectOrNull,
-                            SemanticGraphEdge ppOrNull);
+    public Optional<State> applyTo(SemanticGraph tree, State source,
+                                   SemanticGraphEdge outgoingEdge,
+                                   SemanticGraphEdge subjectOrNull,
+                                   SemanticGraphEdge ppOrNull);
   }
 
   /**
    * The options used for training the clause searcher.
    */
   public static class TrainingOptions {
-    @ArgumentParser.Option(name = "negativeSubsampleRatio", gloss = "The percent of negative datums to take")
+    @Execution.Option(name = "negativeSubsampleRatio", gloss = "The percent of negative datums to take")
     public double negativeSubsampleRatio = 1.00;
-    @ArgumentParser.Option(name = "positiveDatumWeight", gloss = "The weight to assign every positive datum.")
+    @Execution.Option(name = "positiveDatumWeight", gloss = "The weight to assign every positive datum.")
     public float positiveDatumWeight = 100.0f;
-    @ArgumentParser.Option(name = "unknownDatumWeight", gloss = "The weight to assign every unknown datum (everything extracted with an unconfirmed relation).")
+    @Execution.Option(name = "unknownDatumWeight", gloss = "The weight to assign every unknown datum (everything extracted with an unconfirmed relation).")
     public float unknownDatumWeight = 1.0f;
-    @ArgumentParser.Option(name = "clauseSplitWeight", gloss = "The weight to assign for clause splitting datums. Higher values push towards higher recall.")
+    @Execution.Option(name = "clauseSplitWeight", gloss = "The weight to assign for clause splitting datums. Higher values push towards higher recall.")
     public float clauseSplitWeight = 1.0f;
-    @ArgumentParser.Option(name = "clauseIntermWeight", gloss = "The weight to assign for intermediate splits. Higher values push towards higher recall.")
+    @Execution.Option(name = "clauseIntermWeight", gloss = "The weight to assign for intermediate splits. Higher values push towards higher recall.")
     public float clauseIntermWeight = 2.0f;
-    @ArgumentParser.Option(name = "seed", gloss = "The random seed to use")
+    @Execution.Option(name = "seed", gloss = "The random seed to use")
     public int seed = 42;
     @SuppressWarnings("unchecked")
-    @ArgumentParser.Option(name = "classifierFactory", gloss = "The class of the classifier factory to use for training the various classifiers")
+    @Execution.Option(name = "classifierFactory", gloss = "The class of the classifier factory to use for training the various classifiers")
     public Class<? extends ClassifierFactory<ClauseSplitter.ClauseClassifierLabel, String, Classifier<ClauseSplitter.ClauseClassifierLabel, String>>> classifierFactory = (Class<? extends ClassifierFactory<ClauseSplitter.ClauseClassifierLabel, String, Classifier<ClauseSplitter.ClauseClassifierLabel, String>>>) ((Object) LinearClassifierFactory.class);
   }
 
   /**
    * Mostly just an alias, but make sure our featurizer is serializable!
    */
-  public interface Featurizer extends Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>, Serializable {
-    boolean isSimpleSplit(Counter<String> feats);
-  }
+  public static interface Featurizer extends Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>, Serializable { }
 
   /**
    * Create a searcher manually, suppling a dependency tree, an optional classifier for when to split clauses,
@@ -259,17 +216,15 @@ public class ClauseSplitterSearchProblem  {
    * constructor.
    *
    * @param tree               The dependency tree to search over.
-   * @param assumedTruth       The assumed truth of the tree (relevant for natural logic inference). If in doubt, pass in true.
    * @param isClauseClassifier The classifier for whether a given dependency arc should be a new clause. If this is not given, all arcs are treated as clause separators.
    * @param featurizer         The featurizer for the classifier. If no featurizer is given, one should be given in {@link ClauseSplitterSearchProblem#search(java.util.function.Predicate, Classifier, Map, java.util.function.Function, int)}, or else the classifier will be useless.
    * @see ClauseSplitter#load(String)
    */
-  protected ClauseSplitterSearchProblem(SemanticGraph tree, boolean assumedTruth,
+  protected ClauseSplitterSearchProblem(SemanticGraph tree,
                                         Optional<Classifier<ClauseSplitter.ClauseClassifierLabel, String>> isClauseClassifier,
                                         Optional<Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>> featurizer
   ) {
     this.tree = new SemanticGraph(tree);
-    this.assumedTruth = assumedTruth;
     this.isClauseClassifier = isClauseClassifier;
     this.featurizer = featurizer;
     // Index edges
@@ -296,10 +251,9 @@ public class ClauseSplitterSearchProblem  {
    * However, it is very useful for training time.
    *
    * @param tree The dependency tree to search over.
-   * @param assumedTruth The truth of the premise. Almost always True.
    */
-  public ClauseSplitterSearchProblem(SemanticGraph tree, boolean assumedTruth) {
-    this(tree, assumedTruth, Optional.empty(), Optional.empty());
+  public ClauseSplitterSearchProblem(SemanticGraph tree) {
+    this(tree, Optional.empty(), Optional.empty());
   }
 
   /**
@@ -309,7 +263,8 @@ public class ClauseSplitterSearchProblem  {
    * @param tree The tree to split a clause from.
    * @param toKeep The edge representing the clause to keep.
    */
-  static void splitToChildOfEdge(SemanticGraph tree, SemanticGraphEdge toKeep) {
+  @SuppressWarnings("unchecked")
+  private void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
     Queue<IndexedWord> fringe = new LinkedList<>();
     List<IndexedWord> nodesToRemove = new ArrayList<>();
     // Find nodes to remove
@@ -336,20 +291,6 @@ public class ClauseSplitterSearchProblem  {
     nodesToRemove.forEach(tree::removeVertex);
     // Set new root
     tree.setRoot(toKeep.getDependent());
-
-  }
-
-  /**
-   * The basic method for splitting off a clause of a tree.
-   * This modifies the tree in place.
-   * This method addtionally follows ref edges.
-   *
-   * @param tree The tree to split a clause from.
-   * @param toKeep The edge representing the clause to keep.
-   */
-  @SuppressWarnings("unchecked")
-  private void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
-    splitToChildOfEdge(tree, toKeep);
 
     // Follow 'ref' edges
     Map<IndexedWord, IndexedWord> refReplaceMap = new HashMap<>();
@@ -446,11 +387,10 @@ public class ClauseSplitterSearchProblem  {
   }
 
   /**
-   * Strips aux and mark edges when we are splitting into a clause.
-   *
+   * Stips aux and mark edges when we are splitting into a clause.
    * @param toModify The tree we are stripping the edges from.
    */
-  private static void stripAuxMark(SemanticGraph toModify) {
+  private void stripAuxMark(SemanticGraph toModify) {
     List<SemanticGraphEdge> toClean = new ArrayList<>();
     for (SemanticGraphEdge edge : toModify.outgoingEdgeIterable(toModify.getFirstRoot())) {
       String rel = edge.getRelation().toString();
@@ -489,13 +429,10 @@ public class ClauseSplitterSearchProblem  {
   /**
    * Get the top few clauses from this searcher, cutting off at the given minimum
    * probability.
-   *
    * @param thresholdProbability The threshold under which to stop returning clauses. This should be between 0 and 1.
-   * @param maxClauses A hard limit on the number of clauses to return.
-   *
    * @return The resulting {@link edu.stanford.nlp.naturalli.SentenceFragment} objects, representing the top clauses of the sentence.
    */
-  public List<SentenceFragment> topClauses(double thresholdProbability, int maxClauses) {
+  public List<SentenceFragment> topClauses(double thresholdProbability) {
     List<SentenceFragment> results = new ArrayList<>();
     search(triple -> {
       assert triple.first <= 0.0;
@@ -517,7 +454,7 @@ public class ClauseSplitterSearchProblem  {
 
   /**
    * Search, using the default weights / featurizer. This is the most common entry method for the raw search,
-   * though {@link ClauseSplitterSearchProblem#topClauses(double, int)} may be a more convenient method for
+   * though {@link ClauseSplitterSearchProblem#topClauses(double)} may be a more convenient method for
    * an end user.
    *
    * @param candidateFragments The callback function for results. The return value defines whether to continue searching.
@@ -528,7 +465,7 @@ public class ClauseSplitterSearchProblem  {
           new LinearClassifier<>(new ClassicCounter<>()),
           HARD_SPLITS,
           this.featurizer.isPresent() ? this.featurizer.get() : DEFAULT_FEATURIZER,
-          1000);
+          10000);
     } else {
       if (!(isClauseClassifier.get() instanceof LinearClassifier)) {
         throw new IllegalArgumentException("For now, only linear classifiers are supported");
@@ -537,7 +474,7 @@ public class ClauseSplitterSearchProblem  {
           isClauseClassifier.get(),
           HARD_SPLITS,
           this.featurizer.get(),
-          1000);
+          10000);
     }
   }
 
@@ -568,12 +505,6 @@ public class ClauseSplitterSearchProblem  {
       @Override
       public String signature() {
         return "simple";
-      }
-
-      @Override
-      public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
-        char tag = edge.getDependent().tag().charAt(0);
-        return !(tag != 'V' && tag != 'N' && tag != 'J' && tag != 'P' && tag != 'D');
       }
 
       @Override
@@ -650,17 +581,6 @@ public class ClauseSplitterSearchProblem  {
       }
 
       @Override
-      public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
-        // Don't split into anything but verbs or nouns
-        char tag = edge.getDependent().tag().charAt(0);
-        if (tag != 'V' && tag != 'N') { return false; }
-        for (SemanticGraphEdge grandchild : originalTree.outgoingEdgeIterable(edge.getDependent())) {
-          if (grandchild.getRelation().toString().contains("subj")) { return false; }
-        }
-        return true;
-      }
-
-      @Override
       public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge objectOrNull) {
         if (subjectOrNull != null && !outgoingEdge.equals(subjectOrNull)) {
           return Optional.of(new State(
@@ -689,17 +609,6 @@ public class ClauseSplitterSearchProblem  {
       @Override
       public String signature() {
         return "clone_dobj";
-      }
-
-      @Override
-      public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
-        // Don't split into anything but verbs or nouns
-        char tag = edge.getDependent().tag().charAt(0);
-        if (tag != 'V' && tag != 'N') { return false; }
-        for (SemanticGraphEdge grandchild : originalTree.outgoingEdgeIterable(edge.getDependent())) {
-          if (grandchild.getRelation().toString().contains("subj")) { return false; }
-        }
-        return true;
       }
 
       @Override
@@ -737,7 +646,7 @@ public class ClauseSplitterSearchProblem  {
   /**
    * Re-order the action space based on the specified order of names.
    */
-  private static Collection<Action> orderActions(Collection<Action> actionSpace, List<String> order) {
+  private Collection<Action> orderActions(Collection<Action> actionSpace, List<String> order) {
     List<Action> tmp = new ArrayList<>(actionSpace);
     List<Action> out = new ArrayList<>();
     for (String key : order) {
@@ -795,7 +704,7 @@ public class ClauseSplitterSearchProblem  {
 
     while (!fringe.isEmpty()) {
       if (++ticks > maxTicks) {
-//        log.info("WARNING! Timed out on search with " + ticks + " ticks");
+        System.err.println("WARNING! Timed out on search with " + ticks + " ticks");
         return;
       }
       // Useful variables
@@ -823,7 +732,7 @@ public class ClauseSplitterSearchProblem  {
               }
             }
           }).accept(copy);
-          return new SentenceFragment(copy, assumedTruth, false);
+          return new SentenceFragment(copy, false);
         }))) {
           break;
         }
@@ -844,20 +753,7 @@ public class ClauseSplitterSearchProblem  {
       // Iterate over children
       // For each outgoing edge...
       for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(rootWord)) {
-        // Prohibit indirect speech verbs from splitting off clauses
-        // (e.g., 'said', 'think')
-        // This fires if the governor is an indirect speech verb, and the outgoing edge is a ccomp
-        if ( outgoingEdge.getRelation().toString().equals("ccomp") &&
-             ( (outgoingEdge.getGovernor().lemma() != null && INDIRECT_SPEECH_LEMMAS.contains(outgoingEdge.getGovernor().lemma())) ||
-                INDIRECT_SPEECH_LEMMAS.contains(outgoingEdge.getGovernor().word())) ) {
-          continue;
-        }
-        // Get some variables
-        String outgoingEdgeRelation = outgoingEdge.getRelation().toString();
-        List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdgeRelation);
-        if (forcedArcOrder == null && outgoingEdgeRelation.contains(":")) {
-          forcedArcOrder = hardCodedSplits.get(outgoingEdgeRelation.substring(0, outgoingEdgeRelation.indexOf(":")) + ":*");
-        }
+        List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdge.getRelation().toString());
         boolean doneForcedArc = false;
         // For each action...
         for (Action action : (forcedArcOrder == null ? actionSpace : orderActions(actionSpace, forcedArcOrder))) {
@@ -888,23 +784,17 @@ public class ClauseSplitterSearchProblem  {
               if (scores.size() > 0) {
                 Counters.logNormalizeInPlace(scores);
               }
-              String rel = outgoingEdge.getRelation().toString();
-              if ("nsubj".equals(rel) || "dobj".equals(rel)) {
-                scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);  // Always at least yield on nsubj and dobj
-              }
+              scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
               logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);
               bestLabel = Counters.argmax(scores, (x, y) -> 0, ClauseClassifierLabel.CLAUSE_SPLIT);
             }
-
-            if (bestLabel != ClauseClassifierLabel.NOT_A_CLAUSE) {
-              Pair<State, List<Counter<String>>> childState = Pair.makePair(candidate.get().withIsDone(bestLabel), new ArrayList<Counter<String>>(featuresSoFar) {{
-                add(features);
-              }});
-              // 2. Register the child state
-              if (!seenWords.contains(childState.first.edge.getDependent())) {
-//            log.info("  pushing " + action.signature() + " with " + argmax.first.edge);
-                fringe.add(childState, logProbability);
-              }
+            Pair<State, List<Counter<String>>> childState = Pair.makePair(candidate.get().withIsDone(bestLabel), new ArrayList<Counter<String>>(featuresSoFar) {{
+              add(features);
+            }});
+            // 2. Register the child state
+            if (!seenWords.contains(childState.first.edge.getDependent())) {
+//            System.err.println("  pushing " + action.signature() + " with " + argmax.first.edge);
+              fringe.add(childState, logProbability);
             }
           }
         }
@@ -912,7 +802,6 @@ public class ClauseSplitterSearchProblem  {
 
       seenWords.add(rootWord);
     }
-//    log.info("Search finished in " + ticks + " ticks and " + classifierEvals + " classifier evaluations.");
   }
 
 
@@ -920,108 +809,94 @@ public class ClauseSplitterSearchProblem  {
   /**
    * The default featurizer to use during training.
    */
-  public static final Featurizer DEFAULT_FEATURIZER = new Featurizer() {
-    private static final long serialVersionUID = 4145523451314579506l;
-    @Override
-    public boolean isSimpleSplit(Counter<String> feats) {
-      for (String key : feats.keySet()) {
-        if (key.startsWith("simple&")) {
-          return true;
-        }
-      }
-      return false;
+  public static final Featurizer DEFAULT_FEATURIZER = triple -> {
+    // Variables
+    State from = triple.first;
+    Action action = triple.second;
+    State to = triple.third;
+    String signature = action.signature();
+    String edgeRelTaken = to.edge == null ? "root" : to.edge.getRelation().toString();
+    String edgeRelShort = to.edge == null ?  "root"  : to.edge.getRelation().getShortName();
+    if (edgeRelShort.contains("_")) {
+      edgeRelShort = edgeRelShort.substring(0, edgeRelShort.indexOf("_"));
     }
 
-    @Override
-    public Counter<String> apply(Triple<State, Action, State> triple) {
-      // Variables
-      State from = triple.first;
-      Action action = triple.second;
-      State to = triple.third;
-      String signature = action.signature();
-      String edgeRelTaken = to.edge == null ? "root" : to.edge.getRelation().toString();
-      String edgeRelShort = to.edge == null ?  "root"  : to.edge.getRelation().getShortName();
-      if (edgeRelShort.contains("_")) {
-        edgeRelShort = edgeRelShort.substring(0, edgeRelShort.indexOf("_"));
+    // -- Featurize --
+    // Variables to aggregate
+    boolean parentHasSubj = false;
+    boolean parentHasObj = false;
+    boolean childHasSubj = false;
+    boolean childHasObj = false;
+    Counter<String> feats = new ClassicCounter<>();
+
+    // 1. edge taken
+    feats.incrementCount(signature + "&edge:" + edgeRelTaken);
+    feats.incrementCount(signature + "&edge_type:" + edgeRelShort);
+
+    // 2. last edge taken
+    if (from.edge == null) {
+      assert to.edge == null || to.originalTree().getRoots().contains(to.edge.getGovernor());
+      feats.incrementCount(signature + "&at_root");
+      feats.incrementCount(signature + "&at_root&root_pos:" + to.originalTree().getFirstRoot().tag());
+    } else {
+      feats.incrementCount(signature + "&not_root");
+      String lastRelShort = from.edge.getRelation().getShortName();
+      if (lastRelShort.contains("_")) {
+        lastRelShort = lastRelShort.substring(0, lastRelShort.indexOf("_"));
       }
+      feats.incrementCount(signature + "&last_edge:" + lastRelShort);
+    }
 
-      // -- Featurize --
-      // Variables to aggregate
-      boolean parentHasSubj = false;
-      boolean parentHasObj = false;
-      boolean childHasSubj = false;
-      boolean childHasObj = false;
-      Counter<String> feats = new ClassicCounter<>();
-
-      // 1. edge taken
-      feats.incrementCount(signature + "&edge:" + edgeRelTaken);
-      feats.incrementCount(signature + "&edge_type:" + edgeRelShort);
-
-      // 2. last edge taken
-      if (from.edge == null) {
-        assert to.edge == null || to.originalTree().getRoots().contains(to.edge.getGovernor());
-        feats.incrementCount(signature + "&at_root");
-        feats.incrementCount(signature + "&at_root&root_pos:" + to.originalTree().getFirstRoot().tag());
-      } else {
-        feats.incrementCount(signature + "&not_root");
-        String lastRelShort = from.edge.getRelation().getShortName();
-        if (lastRelShort.contains("_")) {
-          lastRelShort = lastRelShort.substring(0, lastRelShort.indexOf("_"));
-        }
-        feats.incrementCount(signature + "&last_edge:" + lastRelShort);
-      }
-
-      if (to.edge != null) {
-        // 3. other edges at parent
-        for (SemanticGraphEdge parentNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getGovernor())) {
-          if (parentNeighbor != to.edge) {
-            String parentNeighborRel = parentNeighbor.getRelation().toString();
-            if (parentNeighborRel.contains("subj")) {
-              parentHasSubj = true;
-            }
-            if (parentNeighborRel.contains("obj")) {
-              parentHasObj = true;
-            }
-            // (add feature)
-            feats.incrementCount(signature + "&parent_neighbor:" + parentNeighborRel);
-            feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&parent_neighbor:" + parentNeighborRel);
+    if (to.edge != null) {
+      // 3. other edges at parent
+      for (SemanticGraphEdge parentNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getGovernor())) {
+        if (parentNeighbor != to.edge) {
+          String parentNeighborRel = parentNeighbor.getRelation().toString();
+          if (parentNeighborRel.contains("subj")) {
+            parentHasSubj = true;
           }
-        }
-
-        // 4. Other edges at child
-        int childNeighborCount = 0;
-        for (SemanticGraphEdge childNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getDependent())) {
-          String childNeighborRel = childNeighbor.getRelation().toString();
-          if (childNeighborRel.contains("subj")) {
-            childHasSubj = true;
+          if (parentNeighborRel.contains("obj")) {
+            parentHasObj = true;
           }
-          if (childNeighborRel.contains("obj")) {
-            childHasObj = true;
-          }
-          childNeighborCount += 1;
           // (add feature)
-          feats.incrementCount(signature + "&child_neighbor:" + childNeighborRel);
-          feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor:" + childNeighborRel);
+          feats.incrementCount(signature + "&parent_neighbor:" + parentNeighborRel);
+          feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&parent_neighbor:" + parentNeighborRel);
         }
-        // 4.1 Number of other edges at child
-        feats.incrementCount(signature + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
-        feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
-
-
-        // 5. Subject/Object stats
-        feats.incrementCount(signature + "&parent_neighbor_subj:" + parentHasSubj);
-        feats.incrementCount(signature + "&parent_neighbor_obj:" + parentHasObj);
-        feats.incrementCount(signature + "&child_neighbor_subj:" + childHasSubj);
-        feats.incrementCount(signature + "&child_neighbor_obj:" + childHasObj);
-
-        // 6. POS tag info
-        feats.incrementCount(signature + "&parent_pos:" + to.edge.getGovernor().tag());
-        feats.incrementCount(signature + "&child_pos:" + to.edge.getDependent().tag());
-        feats.incrementCount(signature + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
-        feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
       }
-      return feats;
+
+      // 4. Other edges at child
+      int childNeighborCount = 0;
+      for (SemanticGraphEdge childNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getDependent())) {
+        String childNeighborRel = childNeighbor.getRelation().toString();
+        if (childNeighborRel.contains("subj")) {
+          childHasSubj = true;
+        }
+        if (childNeighborRel.contains("obj")) {
+          childHasObj = true;
+        }
+        childNeighborCount += 1;
+        // (add feature)
+        feats.incrementCount(signature + "&child_neighbor:" + childNeighborRel);
+        feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor:" + childNeighborRel);
+      }
+      // 4.1 Number of other edges at child
+      feats.incrementCount(signature + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
+      feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
+
+
+      // 5. Subject/Object stats
+      feats.incrementCount(signature + "&parent_neighbor_subj:" + parentHasSubj);
+      feats.incrementCount(signature + "&parent_neighbor_obj:" + parentHasObj);
+      feats.incrementCount(signature + "&child_neighbor_subj:" + childHasSubj);
+      feats.incrementCount(signature + "&child_neighbor_obj:" + childHasObj);
+
+      // 6. POS tag info
+      feats.incrementCount(signature + "&parent_pos:" + to.edge.getGovernor().tag());
+      feats.incrementCount(signature + "&child_pos:" + to.edge.getDependent().tag());
+      feats.incrementCount(signature + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
+      feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
     }
+    return feats;
   };
 
 }

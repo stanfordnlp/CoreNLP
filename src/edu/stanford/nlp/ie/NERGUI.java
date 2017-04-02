@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
@@ -24,18 +23,15 @@ import java.util.regex.Pattern;
  * @author Jenny Finkel
  */
 
-public class NERGUI  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NERGUI.class);
+public class NERGUI {
 
   private AbstractSequenceClassifier<?> classifier;
 
   private JFrame frame;
   private JEditorPane editorPane;
   private JToolBar tagPanel;
-  private static final int HEIGHT = 600;
-  private static final int WIDTH = 650;
+  private static int HEIGHT = 600;
+  private static int WIDTH = 650;
   private Map<String, Color> tagToColorMap;
   private JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
   private MutableAttributeSet defaultAttrSet = new SimpleAttributeSet();
@@ -54,7 +50,7 @@ public class NERGUI  {
 
     //Create and set up the window.
     frame = new JFrame("Stanford Named Entity Recognizer");
-    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.getContentPane().setLayout(new BorderLayout());
     frame.getContentPane().setSize(WIDTH, HEIGHT);
 
@@ -85,21 +81,19 @@ public class NERGUI  {
     JMenu classifierMenu = new JMenu("Classifier");
     menubar.add(classifierMenu);
 
-    final int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-
-    /*
+    /**
      * FILE MENU
      */
 
     JMenuItem openFile = new JMenuItem("Open File");
     openFile.setMnemonic('O');
-    openFile.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, menuMask));
+    openFile.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.Event.CTRL_MASK));
     openFile.addActionListener(actor);
     fileMenu.add(openFile);
 
     JMenuItem loadURL = new JMenuItem("Load URL");
     loadURL.setMnemonic('L');
-    loadURL.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, menuMask));
+    loadURL.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, java.awt.Event.CTRL_MASK));
     loadURL.addActionListener(actor);
     fileMenu.add(loadURL);
 
@@ -107,20 +101,20 @@ public class NERGUI  {
 
     saveUntagged = new JMenuItem("Save Untagged File");
     saveUntagged.setMnemonic('S');
-    saveUntagged.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, menuMask));
+    saveUntagged.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Event.CTRL_MASK));
     saveUntagged.addActionListener(actor);
     saveUntagged.setEnabled(false);
     fileMenu.add(saveUntagged);
 
     JMenuItem saveUntaggedAs = new JMenuItem("Save Untagged File As ...");
     saveUntaggedAs.setMnemonic('U');
-    saveUntaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, menuMask));
+    saveUntaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, java.awt.Event.CTRL_MASK));
     saveUntaggedAs.addActionListener(actor);
     fileMenu.add(saveUntaggedAs);
 
     saveTaggedAs = new JMenuItem("Save Tagged File As ...");
     saveTaggedAs.setMnemonic('T');
-    saveTaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, menuMask));
+    saveTaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.Event.CTRL_MASK));
     saveTaggedAs.addActionListener(actor);
     saveTaggedAs.setEnabled(false);
     fileMenu.add(saveTaggedAs);
@@ -129,47 +123,47 @@ public class NERGUI  {
 
     JMenuItem exit = new JMenuItem("Exit");
     exit.setMnemonic('x');
-    exit.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, menuMask));
+    exit.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.Event.CTRL_MASK));
     exit.addActionListener(actor);
     fileMenu.add(exit);
 
 
-    /*
+    /**
      * EDIT MENU
      */
 
     JMenuItem clear = new JMenuItem("Clear");
     clear.setMnemonic('C');
-    clear.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, menuMask));
+    clear.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Event.CTRL_MASK));
     clear.addActionListener(actor);
     editMenu.add(clear);
 
 
-    /*
+    /**
      * CLASSIFIER MENU
      */
 
     JMenuItem loadCRF = new JMenuItem("Load CRF From File");
     loadCRF.setMnemonic('R');
-    loadCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, menuMask));
+    loadCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.Event.CTRL_MASK));
     loadCRF.addActionListener(actor);
     classifierMenu.add(loadCRF);
 
     JMenuItem loadDefaultCRF = new JMenuItem("Load Default CRF");
     loadDefaultCRF.setMnemonic('L');
-    loadDefaultCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, menuMask));
+    loadDefaultCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Event.CTRL_MASK));
     loadDefaultCRF.addActionListener(actor);
     classifierMenu.add(loadDefaultCRF);
 
     JMenuItem loadCMM = new JMenuItem("Load CMM From File");
     loadCMM.setMnemonic('M');
-    loadCMM.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, menuMask));
+    loadCMM.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.Event.CTRL_MASK));
     loadCMM.addActionListener(actor);
     classifierMenu.add(loadCMM);
 
     JMenuItem loadDefaultCMM = new JMenuItem("Load Default CMM");
     loadDefaultCMM.setMnemonic('D');
-    loadDefaultCMM.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, menuMask));
+    loadDefaultCMM.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Event.CTRL_MASK));
     loadDefaultCMM.addActionListener(actor);
     classifierMenu.add(loadDefaultCMM);
 
@@ -179,7 +173,6 @@ public class NERGUI  {
 
 
   private class InputListener implements KeyListener {
-
     public void keyPressed(KeyEvent e) {
 
     }
@@ -253,7 +246,7 @@ public class NERGUI  {
           saveFile(getFile(false), taggedContents);
           break;
         default:
-          log.info("Unknown Action: " + e);
+          System.err.println("Unknown Action: " + e);
           break;
       }
     }
@@ -419,7 +412,7 @@ public class NERGUI  {
 
   private void extract() {
 
-    log.info("content type: "+editorPane.getContentType());
+    System.err.println("content type: "+editorPane.getContentType());
     if (!editorPane.getContentType().equals("text/html")) {
 
       DefaultStyledDocument doc = (DefaultStyledDocument)editorPane.getDocument();
@@ -463,7 +456,7 @@ public class NERGUI  {
           } catch (Exception ex) {
             throw new RuntimeException(ex);
           }
-          log.info(tag+": "+ finalText.substring(start, end));
+          System.err.println(tag+": "+ finalText.substring(start, end));
         } else {
           // print error message
         }
@@ -499,7 +492,7 @@ public class NERGUI  {
         Matcher m1 = endPattern.matcher(finalText);
         m1.find(m.end());
         String entity = finalText.substring(start, m1.start());
-        log.info(tag+": "+ entity);
+        System.err.println(tag+": "+ entity);
         finalText = m1.replaceFirst("</span>");
         m = startPattern.matcher(finalText);
       }
@@ -508,7 +501,7 @@ public class NERGUI  {
       editorPane.revalidate();
       editorPane.repaint();
 
-      log.info(finalText);
+      System.err.println(finalText);
     }
     saveTaggedAs.setEnabled(true);
   }
@@ -527,7 +520,7 @@ public class NERGUI  {
     editorPane.setDocument(doc);
     //    defaultAttrSet = ((StyledEditorKit)editorPane.getEditorKit()).getInputAttributes();
     //    StyleConstants.setFontFamily(defaultAttrSet, "Lucinda Sans Unicode");
-    log.info("attr: "+defaultAttrSet);
+    System.err.println("attr: "+defaultAttrSet);
 
     try {
       doc.insertString(0, " ", defaultAttrSet);
@@ -554,7 +547,7 @@ public class NERGUI  {
     System.exit(-1);
   }
 
-  private final static String initText = "In bringing his distinct vision to the Western genre, writer-director Jim Jarmusch has created a quasi-mystical avant-garde drama that remains a deeply spiritual viewing experience. After losing his parents and fianc\u00E9e, a Cleveland accountant named William Blake (a remarkable Johnny Depp) spends all his money and takes a train to the frontier town of Machine in order to work at a factory. Upon arriving in Machine, he is denied his expected job and finds himself a fugitive after murdering a man in self-defense. Wounded and helpless, Blake is befriended by Nobody (Gary Farmer), a wandering Native American who considers him to be a ghostly manifestation of the famous poet. Nobody aids Blake in his flight from three bumbling bounty hunters, preparing him for his final journey--a return to the world of the spirits.";
+  private String initText = "In bringing his distinct vision to the Western genre, writer-director Jim Jarmusch has created a quasi-mystical avant-garde drama that remains a deeply spiritual viewing experience. After losing his parents and fianc\u00E9e, a Cleveland accountant named William Blake (a remarkable Johnny Depp) spends all his money and takes a train to the frontier town of Machine in order to work at a factory. Upon arriving in Machine, he is denied his expected job and finds himself a fugitive after murdering a man in self-defense. Wounded and helpless, Blake is befriended by Nobody (Gary Farmer), a wandering Native American who considers him to be a ghostly manifestation of the famous poet. Nobody aids Blake in his flight from three bumbling bounty hunters, preparing him for his final journey--a return to the world of the spirits.";
   //  private String initText = "In";
 
   private void buildContentPanel() {
@@ -667,7 +660,7 @@ public class NERGUI  {
     tagToColorMap = makeTagToColorMap(tags, backgroundSymbol);
   }
 
-  public static Map<String, Color> makeTagToColorMap(Set<String> tags,
+  public static Map<String, Color> makeTagToColorMap(Set<String> tags, 
                                                      String backgroundSymbol) {
     int numColors = tags.size() - 1;
     Color[] colors = getNColors(numColors);
@@ -753,5 +746,4 @@ public class NERGUI  {
       gui.createAndShowGUI();
     });
   }
-
 }

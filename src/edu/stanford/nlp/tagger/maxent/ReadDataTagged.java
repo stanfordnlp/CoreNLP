@@ -3,8 +3,7 @@
  * Description:  A Maximum Entropy Toolkit<p>
  * Copyright:    Copyright (c) Trustees of Leland Stanford Junior University<p>
  */
-package edu.stanford.nlp.tagger.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.maxent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,12 +28,9 @@ import edu.stanford.nlp.util.Generics;
  * @author Kristina Toutanova
  * @version 1.0
  */
-public class ReadDataTagged  {
+public class ReadDataTagged {
 
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ReadDataTagged.class);
-
-  private final ArrayList<DataWordTag> v = new ArrayList<>();
+  private final ArrayList<DataWordTag> v = new ArrayList<DataWordTag>();
   private int numElements = 0;
   private int totalSentences = 0;
   private int totalWords = 0;
@@ -74,10 +70,10 @@ public class ReadDataTagged  {
   }
 
   private void loadFile(TaggedFileReader reader, Map<String, IntCounter<String>> wordTagCounts) {
-    log.info("Loading tagged words from " + reader.filename());
+    System.err.println("Loading tagged words from " + reader.filename());
 
-    ArrayList<String> words = new ArrayList<>();
-    ArrayList<String> tags = new ArrayList<>();
+    ArrayList<String> words = new ArrayList<String>();
+    ArrayList<String> tags = new ArrayList<String>();
     int numSentences = 0;
     int numWords = 0;
     int maxLen = Integer.MIN_VALUE;
@@ -86,7 +82,7 @@ public class ReadDataTagged  {
     for (List<TaggedWord> sentence : reader) {
       if (maxentTagger.wordFunction != null) {
         List<TaggedWord> newSentence =
-                new ArrayList<>(sentence.size());
+          new ArrayList<TaggedWord>(sentence.size());
         for (TaggedWord word : sentence) {
           TaggedWord newWord =
             new TaggedWord(maxentTagger.wordFunction.apply(word.word()),
@@ -125,7 +121,7 @@ public class ReadDataTagged  {
 
         IntCounter<String> tagCounts = wordTagCounts.get(word);
         if (tagCounts == null) {
-          tagCounts = new IntCounter<>();
+          tagCounts = new IntCounter<String>();
           wordTagCounts.put(word, tagCounts);
         }
         tagCounts.incrementCount(tag, 1);
@@ -136,11 +132,11 @@ public class ReadDataTagged  {
       numWords += sentence.size();
       words.clear();
       tags.clear();
-      if ((numSentences % 100000) == 0) log.info("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words ... [still reading]");
+      if ((numSentences % 100000) == 0) System.err.println("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words ... [still reading]");
     }
 
-    log.info("Read " + numWords + " words from " + reader.filename() + " [done].");
-    log.info("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words.");
+    System.err.println("Read " + numWords + " words from " + reader.filename() + " [done].");
+    System.err.println("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words.");
   }
 
 

@@ -16,13 +16,8 @@ import edu.stanford.nlp.util.Generics;
  * etc <br>
  * <br>
  * into a serialized data structure which should take much less time to load.
- *
- * @author John Bauer
  */
 public class ConvertGenderFile {
-
-  private ConvertGenderFile() {} // static class
-
   public static void main(String[] args) throws IOException {
     String input = null;
     String output = null;
@@ -52,7 +47,7 @@ public class ConvertGenderFile {
     for (String line; (line = reader.readLine()) != null; ) {
       String[] split = line.split("\t");
       String[] countStr = split[1].split(" ");
-
+        
       int male = Integer.parseInt(countStr[0]);
       int female = Integer.parseInt(countStr[1]);
       int neutral = Integer.parseInt(countStr[2]);

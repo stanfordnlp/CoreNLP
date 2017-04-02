@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
@@ -30,10 +29,7 @@ import java.net.URLConnection;
  * @author Galen Andrew
  * @author Pi-Chuan Chang
  */
-public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseLexiconAndWordSegmenter.class);
+public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 
   private final ChineseLexicon chineseLexicon;
   private final WordSegmenter wordSegmenter;
@@ -204,13 +200,13 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
     if (op.trainOptions.collinsPunc) {
       collinsPuncTransformer = new CollinsPuncTransformer(tlpParams.treebankLanguagePack());
     }
-    List<Tree> binaryTrainTrees = new ArrayList<>();
+    List<Tree> binaryTrainTrees = new ArrayList<Tree>();
     // List<Tree> binaryTuneTrees = new ArrayList<Tree>();
 
     if (op.trainOptions.selectiveSplit) {
       op.trainOptions.splitters = ParentAnnotationStats.getSplitCategories(trainTreebank, true, 0, op.trainOptions.selectiveSplitCutOff, op.trainOptions.tagSelectiveSplitCutOff, tlpParams.treebankLanguagePack());
       if (op.testOptions.verbose) {
-        log.info("Parent split categories: " + op.trainOptions.splitters);
+        System.err.println("Parent split categories: " + op.trainOptions.splitters);
       }
     }
     if (op.trainOptions.selectivePostSplit) {
@@ -218,7 +214,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
       Treebank annotatedTB = trainTreebank.transform(myTransformer);
       op.trainOptions.postSplitters = ParentAnnotationStats.getSplitCategories(annotatedTB, true, 0, op.trainOptions.selectivePostSplitCutOff, op.trainOptions.tagSelectivePostSplitCutOff, tlpParams.treebankLanguagePack());
       if (op.testOptions.verbose) {
-        log.info("Parent post annotation split categories: " + op.trainOptions.postSplitters);
+        System.err.println("Parent post annotation split categories: " + op.trainOptions.postSplitters);
       }
     }
     if (op.trainOptions.hSelSplit) {
@@ -254,20 +250,20 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
 
   private static void printArgs(String[] args, PrintStream ps) {
     ps.print("ChineseLexiconAndWordSegmenter invoked with arguments:");
-    for (String arg : args) {
-      ps.print(" " + arg);
+    for (int i = 0; i < args.length; i++) {
+      ps.print(" " + args[i]);
     }
     ps.println();
   }
 
   static void saveSegmenterDataToSerialized(ChineseLexiconAndWordSegmenter cs, String filename) {
     try {
-      log.info("Writing segmenter in serialized format to file " + filename + " ");
+      System.err.print("Writing segmenter in serialized format to file " + filename + " ");
       ObjectOutputStream out = IOUtils.writeStreamFromString(filename);
 
       out.writeObject(cs);
       out.close();
-      log.info("done.");
+      System.err.println("done.");
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
@@ -276,7 +272,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
 
   static void saveSegmenterDataToText(ChineseLexiconAndWordSegmenter cs, String filename) {
     try {
-      log.info("Writing parser in text grammar format to file " + filename);
+      System.err.print("Writing parser in text grammar format to file " + filename);
       OutputStream os;
       if (filename.endsWith(".gz")) {
         // it's faster to do the buffering _outside_ the gzipping as here
@@ -291,26 +287,26 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
       //        pd.pt.writeData(out);
       //      }
       //      out.println();
-      //      log.info(".");
+      //      System.err.print(".");
       out.println(prefix + "LEXICON");
       if (cs != null) {
         cs.writeData(out);
       }
       out.println();
-      log.info(".");
+      System.err.print(".");
       out.flush();
       out.close();
-      log.info("done.");
+      System.err.println("done.");
     } catch (IOException e) {
-      log.info("Trouble saving segmenter data to ASCII format.");
+      System.err.println("Trouble saving segmenter data to ASCII format.");
       e.printStackTrace();
     }
   }
 
   private static Treebank makeTreebank(String treebankPath, Options op, FileFilter filt) {
-    log.info("Training a segmenter from treebank dir: " + treebankPath);
+    System.err.println("Training a segmenter from treebank dir: " + treebankPath);
     Treebank trainTreebank = op.tlpParams.memoryTreebank();
-    log.info("Reading trees...");
+    System.err.print("Reading trees...");
     if (filt == null) {
       trainTreebank.loadPath(treebankPath);
     } else {
@@ -345,7 +341,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
   protected static ChineseLexiconAndWordSegmenter getSegmenterDataFromSerializedFile(String serializedFileOrUrl) {
     ChineseLexiconAndWordSegmenter cs = null;
     try {
-      log.info("Loading segmenter from serialized file " + serializedFileOrUrl + " ...");
+      System.err.print("Loading segmenter from serialized file " + serializedFileOrUrl + " ...");
       ObjectInputStream in;
       InputStream is;
       if (serializedFileOrUrl.startsWith("http://")) {
@@ -363,21 +359,21 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
       }
       cs = (ChineseLexiconAndWordSegmenter) in.readObject();
       in.close();
-      log.info(" done.");
+      System.err.println(" done.");
       return cs;
     } catch (InvalidClassException ice) {
       // For this, it's not a good idea to continue and try it as a text file!
-      log.info();   // as in middle of line from above message
+      System.err.println();   // as in middle of line from above message
       throw new RuntimeException(ice);
     } catch (FileNotFoundException fnfe) {
       // For this, it's not a good idea to continue and try it as a text file!
-      log.info();   // as in middle of line from above message
+      System.err.println();   // as in middle of line from above message
       throw new RuntimeException(fnfe);
     } catch (StreamCorruptedException sce) {
       // suppress error message, on the assumption that we've really got
       // a text grammar, and that'll be tried next
     } catch (Exception e) {
-      log.info();   // as in middle of line from above message
+      System.err.println();   // as in middle of line from above message
       e.printStackTrace();
     }
     return null;
@@ -416,7 +412,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
     // boolean fromXML = false;
     int argIndex = 0;
     if (args.length < 1) {
-      log.info("usage: java edu.stanford.nlp.parser.lexparser." +
+      System.err.println("usage: java edu.stanford.nlp.parser.lexparser." +
                          "LexicalizedParser parserFileOrUrl filename*");
       return;
     }
@@ -501,7 +497,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
       } else {
         int j = op.tlpParams.setOptionFlag(args, argIndex);
         if (j == argIndex) {
-          log.info("Unknown option ignored: " + args[argIndex]);
+          System.err.println("Unknown option ignored: " + args[argIndex]);
           j++;
         }
         argIndex = j;
@@ -540,8 +536,8 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
         }
       }
       Treebank trainTreebank = makeTreebank(treebankPath, op, trainFilter);
-      Index<String> wordIndex = new HashIndex<>();
-      Index<String> tagIndex = new HashIndex<>();
+      Index<String> wordIndex = new HashIndex<String>();
+      Index<String> tagIndex = new HashIndex<String>();
       cs = new ChineseLexiconAndWordSegmenter(trainTreebank, op, wordIndex, tagIndex);
     } else if (textInputFileOrUrl != null) {
       // so we load the segmenter from a text grammar file
@@ -557,7 +553,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
       try {
         cs = new ChineseLexiconAndWordSegmenter(serializedInputFileOrUrl, op);
       } catch (IllegalArgumentException e) {
-        log.info("Error loading segmenter, exiting...");
+        System.err.println("Error loading segmenter, exiting...");
         System.exit(0);
       }
     }
@@ -571,7 +567,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
         if (treebankPath == null) {
           throw new RuntimeException("No test treebank path specified...");
         } else {
-          log.info("No test treebank path specified.  Using train path: \"" + treebankPath + "\"");
+          System.err.println("No test treebank path specified.  Using train path: \"" + treebankPath + "\"");
           testPath = treebankPath;
         }
       }
@@ -589,7 +585,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
     //
     // -- Roger
     if (op.testOptions.verbose) {
-      log.info("Lexicon is " + cs.getClass().getName());
+      System.err.println("Lexicon is " + cs.getClass().getName());
     }
 
     PrintWriter pwOut = tlpParams.pw();
@@ -602,7 +598,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
       if (textOutputFileOrUrl != null) {
         saveSegmenterDataToText(cs, textOutputFileOrUrl);
       } else {
-        log.info("Usage: must specify a text segmenter data output path");
+        System.err.println("Usage: must specify a text segmenter data output path");
       }
     }
     if (saveToSerializedFile) {
@@ -615,7 +611,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
         saveSegmenterDataToSerialized(cs, serializedOutputFileOrUrl);
       } else if (textOutputFileOrUrl == null && testTreebank == null) {
         // no saving/parsing request has been specified
-        log.info("usage: " + "java edu.stanford.nlp.parser.lexparser.ChineseLexiconAndWordSegmenter" + "-train trainFilesPath [start stop] serializedParserFilename");
+        System.err.println("usage: " + "java edu.stanford.nlp.parser.lexparser.ChineseLexiconAndWordSegmenter" + "-train trainFilesPath [start stop] serializedParserFilename");
       }
     }
     /* --------------------- Testing part!!!! ----------------------- */
@@ -675,7 +671,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
 //          } else {
 //            document = documentPreprocessor.getSentencesFromText(filename, escaper, sentenceDelimiter, tagDelimiter);
 //          }
-//          log.info("Segmenting file: " + filename + " with " + document.size() + " sentences.");
+//          System.err.println("Segmenting file: " + filename + " with " + document.size() + " sentences.");
 //          PrintWriter pwo = pwOut;
 //          if (op.testOptions.writeOutputFiles) {
 //            try {

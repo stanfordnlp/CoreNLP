@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,10 +13,6 @@ import edu.stanford.nlp.util.Index;
 public class BaseUnknownWordModelTrainer
   extends AbstractUnknownWordModelTrainer
 {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BaseUnknownWordModelTrainer.class);
-
   // Records the number of times word/tag pair was seen in training data.
   ClassicCounter<IntTaggedWord> seenCounter;
   // Counts of each tag (stored as a Label) on unknown words.
@@ -46,10 +41,10 @@ public class BaseUnknownWordModelTrainer
                                  Index<String> tagIndex, double totalTrees) {
     super.initializeTraining(op, lex, wordIndex, tagIndex, totalTrees);
 
-    seenCounter = new ClassicCounter<>();
-    unSeenCounter = new ClassicCounter<>();
+    seenCounter = new ClassicCounter<IntTaggedWord>();
+    unSeenCounter = new ClassicCounter<IntTaggedWord>();
     tagHash = Generics.newHashMap();
-    tc = new ClassicCounter<>();
+    tc = new ClassicCounter<Label>();
     c = Generics.newHashMap();
     seenEnd = Generics.newHashSet();
 
@@ -60,16 +55,16 @@ public class BaseUnknownWordModelTrainer
     useFirst = false;
 
     if (useFirst) {
-      log.info("Including first letter for unknown words.");
+      System.err.println("Including first letter for unknown words.");
     }
     if (useFirstCap) {
-      log.info("Including whether first letter is capitalized for unknown words");
+      System.err.println("Including whether first letter is capitalized for unknown words");
     }
     if (useEnd) {
-      log.info("Classing unknown word as the average of their equivalents by identity of last " + op.lexOptions.unknownSuffixSize + " letters.");
+      System.err.println("Classing unknown word as the average of their equivalents by identity of last " + op.lexOptions.unknownSuffixSize + " letters.");
     }
     if (useGT) {
-      log.info("Using Good-Turing smoothing for unknown words.");
+      System.err.println("Using Good-Turing smoothing for unknown words.");
     }
 
     this.indexToStartUnkCounting = (totalTrees * op.trainOptions.fractionBeforeUnseenCounting);
@@ -91,7 +86,7 @@ public class BaseUnknownWordModelTrainer
 
     Label tag = new Tag(tw.tag());
     if ( ! c.containsKey(tag)) {
-      c.put(tag, new ClassicCounter<>());
+      c.put(tag, new ClassicCounter<String>());
     }
     c.get(tag).incrementCount(subString, weight);
 
@@ -113,30 +108,28 @@ public class BaseUnknownWordModelTrainer
     }
   }
 
-  @Override
   public UnknownWordModel finishTraining() {
     if (useGT) {
       unknownGTTrainer.finishTraining();
     }
 
-    for (Map.Entry<Label, ClassicCounter<String>> entry : c.entrySet()) {
+    for (Label tag : c.keySet()) {
       /* outer iteration is over tags */
-      Label key = entry.getKey();
-      ClassicCounter<String> wc = entry.getValue(); // counts for words given a tag
+      ClassicCounter<String> wc = c.get(tag); // counts for words given a tag
 
-      if (!tagHash.containsKey(key)) {
-        tagHash.put(key, new ClassicCounter<>());
+      if (!tagHash.containsKey(tag)) {
+        tagHash.put(tag, new ClassicCounter<String>());
       }
 
       /* the UNKNOWN sequence is assumed to be seen once in each tag */
       // This is sort of broken, but you can regard it as a Dirichlet prior.
-      tc.incrementCount(key);
+      tc.incrementCount(tag);
       wc.setCount(unknown, 1.0);
 
       /* inner iteration is over words */
       for (String end : wc.keySet()) {
-        double prob = Math.log((wc.getCount(end)) / (tc.getCount(key)));  // p(sig|tag)
-        tagHash.get(key).setCount(end, prob);
+        double prob = Math.log((wc.getCount(end)) / (tc.getCount(tag)));  // p(sig|tag)
+        tagHash.get(tag).setCount(end, prob);
         //if (Test.verbose)
         //EncodingPrintWriter.out.println(tag + " rewrites as " + end + " endchar with probability " + prob,encoding);
       }

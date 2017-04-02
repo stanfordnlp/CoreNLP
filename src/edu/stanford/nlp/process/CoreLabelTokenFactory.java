@@ -21,7 +21,7 @@ import edu.stanford.nlp.ling.CoreLabel;
  */
 public class CoreLabelTokenFactory implements CoreTokenFactory<CoreLabel>, LexedTokenFactory<CoreLabel>, Serializable {
 
-  private final boolean addIndices;
+  final boolean addIndices;
 
   /**
    * Constructor for a new token factory which will add in the word, the
@@ -46,13 +46,12 @@ public class CoreLabelTokenFactory implements CoreTokenFactory<CoreLabel>, Lexed
    * Constructs a CoreLabel as a String with a corresponding BEGIN and END position.
    * (Does not take substring).
    */
-  @Override
   public CoreLabel makeToken(String tokenText, int begin, int length) {
     return makeToken(tokenText, tokenText, begin, length);
   }
 
   /**
-   * Constructs a CoreLabel as a String with a corresponding BEGIN and END position,
+   * Constructs a CoreLabel as a String with a corresponding BEGIN and END position, 
    * when the original OriginalTextAnnotation is different from TextAnnotation
    * (Does not take substring).
    */
@@ -68,19 +67,16 @@ public class CoreLabelTokenFactory implements CoreTokenFactory<CoreLabel>, Lexed
     return cl;
   }
 
-  @Override
   public CoreLabel makeToken() {
     CoreLabel l = new CoreLabel();
     return l;
   }
 
-  @Override
   public CoreLabel makeToken(String[] keys, String[] values) {
     CoreLabel l = new CoreLabel(keys, values);
     return l;
   }
 
-  @Override
   public CoreLabel makeToken(CoreLabel labelToBeCopied) {
     CoreLabel l = new CoreLabel(labelToBeCopied);
     return l;

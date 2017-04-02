@@ -23,7 +23,7 @@ import java.io.OutputStream;
  * @author Gabor Angeli
  */
 public abstract class AnnotationOutputter {
-  static final TreePrint DEFAULT_CONSTITUENT_TREE_PRINTER = new TreePrint("penn");
+  private static final TreePrint DEFAULT_CONSTITUENT_TREE_PRINTER = new TreePrint("penn");
   private static final Options DEFAULT_OPTIONS = new Options(); // IMPORTANT: must come after DEFAULT_CONSTITUENCY_TREE_PRINTER
 
   public static class Options {
@@ -31,16 +31,13 @@ public abstract class AnnotationOutputter {
     public boolean includeText = false;
     /** Should a small window of context be provided with each coreference mention */
     public int coreferenceContextSize = 0;
-    /** The output encoding to use */
+    public double relationsBeam = 0.0;
     public String encoding = "UTF-8";
     /** How to print a constituent tree */
     public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
     /** If false, will print only non-singleton entities*/
     public boolean printSingletons = false;
-    /** If false, try to compress whitespace as much as possible. This is particularly useful for sending over the wire. */
-    public boolean pretty = true;
 
-    public double relationsBeam = 0.0;
     public double beamPrintingOption = 0.0;
   }
 
@@ -81,7 +78,6 @@ public abstract class AnnotationOutputter {
     options.encoding = pipeline.getEncoding();
     options.printSingletons = pipeline.getPrintSingletons();
     options.beamPrintingOption = pipeline.getBeamPrintingOption();
-    options.pretty = pipeline.getPrettyPrint();
     return options;
   }
 

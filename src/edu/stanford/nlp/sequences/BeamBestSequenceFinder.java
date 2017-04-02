@@ -1,8 +1,6 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.util.Beam;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.Scored;
 import edu.stanford.nlp.util.ScoredComparator;
 
@@ -16,10 +14,7 @@ import java.util.NoSuchElementException;
  * @author Dan Klein
  * @author Teg Grenager (grenager@stanford.edu)
  */
-public class BeamBestSequenceFinder implements BestSequenceFinder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BeamBestSequenceFinder.class);
+public class BeamBestSequenceFinder implements BestSequenceFinder {
 
   // todo [CDM 2013]: AFAICS, this class doesn't actually work correctly AND gives nondeterministic answers. See the commented out test in BestSequenceFinderTest
 
@@ -127,9 +122,6 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
     TagSeq initSeq = new TagSeq();
     newBeam.add(initSeq);
     for (int pos = 0; pos < padLength; pos++) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       //System.out.println("scoring word " + pos + " / " + (leftWindow + length) + ", tagNum = " + tagNum[pos] + "...");
       //System.out.flush();
 
@@ -140,12 +132,9 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
         newBeam = new Beam(beamSize, ScoredComparator.ASCENDING_COMPARATOR);
       }
       // each hypothesis gets extended and beamed
-      for (Object anOldBeam : oldBeam) {
-        if (Thread.interrupted()) {  // Allow interrupting
-          throw new RuntimeInterruptedException();
-        }
+      for (Iterator beamI = oldBeam.iterator(); beamI.hasNext();) {
         // System.out.print("#"); System.out.flush();
-        TagSeq tagSeq = (TagSeq) anOldBeam;
+        TagSeq tagSeq = (TagSeq) beamI.next();
         for (int nextTagNum = 0; nextTagNum < tagNum[pos]; nextTagNum++) {
           TagSeq nextSeq = tagSeq.tclone();
 
@@ -164,14 +153,14 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
       // System.out.println(" done");
       if (recenter) {
         double max = Double.NEGATIVE_INFINITY;
-        for (Object aNewBeam1 : newBeam) {
-          TagSeq tagSeq = (TagSeq) aNewBeam1;
+        for (Iterator beamI = newBeam.iterator(); beamI.hasNext();) {
+          TagSeq tagSeq = (TagSeq) beamI.next();
           if (tagSeq.score > max) {
             max = tagSeq.score;
           }
         }
-        for (Object aNewBeam : newBeam) {
-          TagSeq tagSeq = (TagSeq) aNewBeam;
+        for (Iterator beamI = newBeam.iterator(); beamI.hasNext();) {
+          TagSeq tagSeq = (TagSeq) beamI.next();
           tagSeq.score -= max;
         }
       }
@@ -181,7 +170,7 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
       int[] seq = bestSeq.tags();
       return seq;
     } catch (NoSuchElementException e) {
-      log.info("Beam empty -- no best sequence.");
+      System.err.println("Beam empty -- no best sequence.");
       return null;
     }
 
@@ -238,9 +227,9 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
     // Do forward Viterbi algorithm
 
     // loop over the classification spot
-    //log.info();
+    //System.err.println();
     for (int pos=leftWindow; pos<length+leftWindow; pos++) {
-      //log.info(".");
+      //System.err.print(".");
       // loop over window product types
       for (int product=0; product<productSizes[pos]; product++) {
 	// check for initial spot
@@ -346,9 +335,9 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
     // Do forward Viterbi algorithm
 
     // loop over the classification spot
-    //log.info();
+    //System.err.println();
     for (int pos=leftWindow; pos<length+leftWindow; pos++) {
-      //log.info(".");
+      //System.err.print(".");
       // loop over window product types
       for (int product=0; product<productSizes[pos]; product++) {
 	// check for initial spot

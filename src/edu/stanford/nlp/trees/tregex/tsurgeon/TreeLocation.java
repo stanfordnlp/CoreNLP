@@ -70,7 +70,7 @@ class TreeLocation {
           throw new RuntimeException("Error: Haven't dealt with relation " + relation + " yet.");
         }
       }
-      return new Pair<>(parent, newIndex);
+      return new Pair<Tree,Integer>(parent,newIndex);
     }
   }
 

@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import edu.stanford.nlp.ie.regexp.ChineseNumberSequenceClassifier;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -17,8 +20,11 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Subclass of ClassifierCombiner that behaves like a NER, by copying
@@ -28,144 +34,73 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * @author Mihai Surdeanu
  */
-public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(NERClassifierCombiner.class);
+public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
 
   private final boolean applyNumericClassifiers;
   public static final boolean APPLY_NUMERIC_CLASSIFIERS_DEFAULT = true;
   public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY = "ner.applyNumericClassifiers";
-  private static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
-  public static final String APPLY_GAZETTE_PROPERTY = "ner.regex";
-  public static final boolean APPLY_GAZETTE_DEFAULT = false;
-
-  private final Language nerLanguage;
-  public static final Language NER_LANGUAGE_DEFAULT = Language.ENGLISH;
-  public static final String NER_LANGUAGE_PROPERTY = "ner.language";
-  public static final String NER_LANGUAGE_PROPERTY_BASE = "language";
+  public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
 
   private final boolean useSUTime;
 
-  public enum Language {
-    ENGLISH("English"),
-    CHINESE("Chinese");
-
-    public String languageName;
-
-    Language(String name) {
-      this.languageName = name;
-    }
-
-    public static Language fromString(String name, Language defaultValue) {
-      if(name != null) {
-        for(Language l : Language.values()) {
-          if(name.equalsIgnoreCase(l.languageName)) {
-            return l;
-          }
-        }
-      }
-      return defaultValue;
-    }
-  }
-
   // todo [cdm 2015]: Could avoid constructing this if applyNumericClassifiers is false
   private final AbstractSequenceClassifier<CoreLabel> nsc;
-
-  /**
-   * A mapping from single words to the NER tag that they should be.
-   */
-  private final Map<String, String> gazetteMapping;
 
   public NERClassifierCombiner(Properties props)
     throws IOException
   {
     super(props);
     applyNumericClassifiers = PropertiesUtils.getBool(props, APPLY_NUMERIC_CLASSIFIERS_PROPERTY, APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-    nerLanguage = Language.fromString(PropertiesUtils.getString(props, NER_LANGUAGE_PROPERTY, null), NER_LANGUAGE_DEFAULT);
     useSUTime = PropertiesUtils.getBool(props, NumberSequenceClassifier.USE_SUTIME_PROPERTY, NumberSequenceClassifier.USE_SUTIME_DEFAULT);
     nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
-    if (PropertiesUtils.getBool(props, NERClassifierCombiner.APPLY_GAZETTE_PROPERTY, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT) ) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }
   }
 
   public NERClassifierCombiner(String... loadPaths)
     throws IOException
   {
-    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, loadPaths);
+    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, loadPaths);
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
-                               boolean augmentRegexNER,
                                boolean useSUTime,
                                String... loadPaths)
     throws IOException
   {
     super(loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
-    this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
     this.nsc = new NumberSequenceClassifier(useSUTime);
-    if (augmentRegexNER) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
-                               Language nerLanguage,
                                boolean useSUTime,
-                               boolean augmentRegexNER,
                                Properties nscProps,
                                String... loadPaths)
     throws IOException
   {
-    // NOTE: nscProps may contains sutime props which will not be recognized by the SeqClassifierFlags
     super(nscProps, ClassifierCombiner.extractCombinationModeSafe(nscProps), loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
-    this.nerLanguage = nerLanguage;
     this.useSUTime = useSUTime;
-    // check for which language to use for number sequence classifier
-    if (nerLanguage == Language.CHINESE) {
-      this.nsc = new ChineseNumberSequenceClassifier(new Properties(), useSUTime, nscProps);
-    } else {
-      this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
-    }
-    if (augmentRegexNER) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }
+    this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
   }
 
   @SafeVarargs
   public NERClassifierCombiner(AbstractSequenceClassifier<CoreLabel>... classifiers)
     throws IOException
   {
-    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT, classifiers);
+    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, classifiers);
   }
 
   @SafeVarargs
   public NERClassifierCombiner(boolean applyNumericClassifiers,
                                boolean useSUTime,
-                               boolean augmentRegexNER,
                                AbstractSequenceClassifier<CoreLabel>... classifiers)
     throws IOException
   {
     super(classifiers);
     this.applyNumericClassifiers = applyNumericClassifiers;
-    this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
     this.nsc = new NumberSequenceClassifier(useSUTime);
-    if (augmentRegexNER) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }
   }
 
   // constructor which builds an NERClassifierCombiner from an ObjectInputStream
@@ -185,14 +120,8 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     } else {
       this.applyNumericClassifiers = diskApplyNumericClassifiers;
     }
-    this.nerLanguage = NER_LANGUAGE_DEFAULT;
     // build the nsc, note that initProps should be set by ClassifierCombiner
     this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
-    if (PropertiesUtils.getBool(props, NERClassifierCombiner.APPLY_GAZETTE_PROPERTY, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT) ) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }
   }
 
   public static final Set<String> DEFAULT_PASS_DOWN_PROPERTIES =
@@ -239,7 +168,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       models  = modelNames.split(",");
     } else {
       // Allow for no real NER model - can just use numeric classifiers or SUTime
-      log.info("WARNING: no NER models specified");
+      System.err.println("WARNING: no NER models specified");
       models = StringUtils.EMPTY_STRING_ARRAY;
     }
     NERClassifierCombiner nerCombiner;
@@ -252,26 +181,16 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
               PropertiesUtils.getBool(properties,
                       prefix + NumberSequenceClassifier.USE_SUTIME_PROPERTY_BASE,
                       NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-      boolean applyRegexner =
-          PropertiesUtils.getBool(properties,
-              NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
-              NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);
       Properties combinerProperties;
       if (passDownProperties != null) {
         combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
-        if (useSUTime) {
-          // Make sure SUTime parameters are included
-          Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY + ".", true);
-          PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
-        }
       } else {
         // if passDownProperties is null, just pass everything through
         combinerProperties = properties;
       }
       //Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
-      Language nerLanguage = Language.fromString(properties.getProperty(prefix+"language"),Language.ENGLISH);
-      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
-              useSUTime, applyRegexner, combinerProperties, models);
+      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
+              useSUTime, combinerProperties, models);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -313,8 +232,8 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       } catch (RuntimeInterruptedException e) {
         throw e;
       } catch (Exception e) {
-        log.info("Ignored an exception in NumberSequenceClassifier: (result is that some numbers were not classified)");
-        log.info("Tokens: " + StringUtils.joinWords(tokens, " "));
+        System.err.println("Ignored an exception in NumberSequenceClassifier: (result is that some numbers were not classified)");
+        System.err.println("Tokens: " + StringUtils.joinWords(tokens, " "));
         e.printStackTrace(System.err);
       }
 
@@ -324,41 +243,20 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       try {
         // normalizes numeric entities such as MONEY, TIME, DATE, or PERCENT
         // note: this uses and sets NamedEntityTagAnnotation!
-        if(nerLanguage == Language.CHINESE) {
-          // For chinese there is no support for SUTime by default
-          // We need to hand in document and sentence for Chinese to handle DocDate; however, since English normalization
-          // is handled by SUTime, and the information is passed in recognizeNumberSequences(), English only need output.
-          ChineseQuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, document, sentence);
-        } else {
-          QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
-        }
+        QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
       } catch (Exception e) {
-        log.info("Ignored an exception in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
-        log.info("Tokens: " + StringUtils.joinWords(tokens, " "));
+        System.err.println("Ignored an exception in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
+        System.err.println("Tokens: " + StringUtils.joinWords(tokens, " "));
         e.printStackTrace(System.err);
       } catch(AssertionError e) {
-        log.info("Ignored an assertion in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
-        log.info("Tokens: " + StringUtils.joinWords(tokens, " "));
+        System.err.println("Ignored an assertion in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
+        System.err.println("Tokens: " + StringUtils.joinWords(tokens, " "));
         e.printStackTrace(System.err);
       }
     } else {
       // AnswerAnnotation -> NERAnnotation
       copyAnswerFieldsToNERField(output);
     }
-
-    // Apply RegexNER annotations
-    // cdm 2016: Used to say and do "// skip first token" but I couldn't understand why, so I removed that.
-    for (CoreLabel token : tokens) {
-      // System.out.println(token.toShorterString());
-      if ((token.tag() == null || token.tag().charAt(0) == 'N') && "O".equals(token.ner()) || "MISC".equals(token.ner())) {
-        String target = gazetteMapping.get(token.originalText());
-        if (target != null) {
-          token.setNER(target);
-        }
-      }
-    }
-
-    // Return
     return output;
   }
 
@@ -374,7 +272,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       CoreLabel origWord = words.get(i);
       CoreLabel newWord = newWords.get(i);
 
-      // log.info(newWord.word() + " => " + newWord.get(CoreAnnotations.AnswerAnnotation.class) + " " + origWord.ner());
+      // System.err.println(newWord.word() + " => " + newWord.get(CoreAnnotations.AnswerAnnotation.class) + " " + origWord.ner());
 
       String before = origWord.get(CoreAnnotations.AnswerAnnotation.class);
       String newGuess = newWord.get(CoreAnnotations.AnswerAnnotation.class);
@@ -406,7 +304,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     }
   }
 
-  /** Static method for getting an NERClassifierCombiner from a string path. */
+  // static method for getting an NERClassifierCombiner from a string path
   public static NERClassifierCombiner getClassifier(String loadPath, Properties props) throws IOException,
           ClassNotFoundException, ClassCastException {
     ObjectInputStream ois = IOUtils.readStreamFromString(loadPath);
@@ -421,47 +319,21 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     return new NERClassifierCombiner(ois, props);
   }
 
-  /** Method for displaying info about an NERClassifierCombiner. */
+  // method for displaying info about an NERClassifierCombiner
   public static void showNCCInfo(NERClassifierCombiner ncc) {
-    log.info("");
-    log.info("info for this NERClassifierCombiner: ");
+    System.err.println("");
+    System.err.println("info for this NERClassifierCombiner: ");
     ClassifierCombiner.showCCInfo(ncc);
-    log.info("useSUTime: "+ncc.useSUTime);
-    log.info("applyNumericClassifier: "+ncc.applyNumericClassifiers);
-    log.info("");
+    System.err.println("useSUTime: "+ncc.useSUTime);
+    System.err.println("applyNumericClassifier: "+ncc.applyNumericClassifiers);
+    System.err.println("");
   }
 
-
-  /**
-   * Read a gazette mapping in TokensRegex format from the given path
-   * The format is: 'case_sensitive_word \t target_ner_class' (additional info is ignored).
-   *
-   * @param mappingFile The mapping file to read from, as a path either on the filesystem or in your classpath.
-   *
-   * @return The mapping from word to NER tag.
-   */
-  private static Map<String, String> readRegexnerGazette(String mappingFile) {
-    Map<String, String> mapping = new HashMap<>();
-    try {
-      for (String line : IOUtils.slurpReader(IOUtils.readerFromString(mappingFile.trim())).split("\n")) {
-        String[] fields = line.split("\t");
-        String key = fields[0];
-        String target = fields[1];
-        mapping.put(key, target);
-      }
-    } catch (IOException e) {
-      log.warn("Could not read Regex mapping: " + mappingFile);
-    }
-    return Collections.unmodifiableMap(mapping);
-  }
-
-
-
-  /** The main method. */
+  /** the main method **/
   public static void main(String[] args) throws Exception {
-    StringUtils.logInvocationString(log, args);
+    StringUtils.printErrInvocationString("NERClassifierCombiner", args);
     Properties props = StringUtils.argsToProperties(args);
-    SeqClassifierFlags flags = new SeqClassifierFlags(props, false); // false for print probs as printed in next code block
+    SeqClassifierFlags flags = new SeqClassifierFlags(props);
 
     String loadPath = props.getProperty("loadClassifier");
     NERClassifierCombiner ncc;
@@ -490,7 +362,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     // run on multiple textFiles , based off CRFClassifier code
     String textFiles = props.getProperty("textFiles");
     if (textFiles != null) {
-      List<File> files = new ArrayList<>();
+      List<File> files = new ArrayList<File>();
       for (String filename : textFiles.split(",")) {
         files.add(new File(filename));
       }
@@ -507,13 +379,13 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       if (crfToExamine == null) {
         // in this case there is no crfToExamine
         if (testFile != null) {
-          ncc.classifyAndWriteAnswers(testFile, readerAndWriter, true);
+          ncc.classifyAndWriteAnswers(testFile,readerAndWriter,true);
         } else {
           List<File> files = Arrays.asList(testFiles.split(",")).stream().map(File::new).collect(Collectors.toList());
           ncc.classifyFilesAndWriteAnswers(files, ncc.defaultReaderAndWriter(), true);
         }
       } else {
-        ClassifierCombiner.examineCRF(ncc, crfToExamine, flags, testFile, testFiles, readerAndWriter);
+        ClassifierCombiner.examineCRF(ncc,crfToExamine,flags,testFile,testFiles,readerAndWriter);
       }
     }
 

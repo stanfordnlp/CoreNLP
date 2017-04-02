@@ -3,12 +3,16 @@ package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.time.TimeAnnotations;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.DataFilePaths;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.SystemUtils;
 import org.w3c.dom.*;
 
 import java.io.File;
@@ -76,10 +80,10 @@ public class GUTimeAnnotator implements Annotator {
    // new XMLOutputter().output(inputXML, inputWriter);
     inputWriter.close();
 
-    boolean useFirstDate =
-      (!document.containsKey(CoreAnnotations.CalendarAnnotation.class) && !document.containsKey(CoreAnnotations.DocDateAnnotation.class));
+    boolean useFirstDate = 
+      (!document.has(CoreAnnotations.CalendarAnnotation.class) && !document.has(CoreAnnotations.DocDateAnnotation.class));
     
-    ArrayList<String> args = new ArrayList<>();
+    ArrayList<String> args = new ArrayList<String>();
     args.add("perl");
     args.add("-I" + this.gutimePath.getPath());
     args.add(new File(this.gutimePath, "TimeTag.pl").getPath());
@@ -254,7 +258,7 @@ public class GUTimeAnnotator implements Annotator {
       }
     }
     //--Set Timexes
-    List<CoreMap> timexMaps = new ArrayList<>();
+    List<CoreMap> timexMaps = new ArrayList<CoreMap>();
     int offset = 0;
     NodeList docNodes = docElem.getChildNodes();
     Element textElem = null;
@@ -328,18 +332,12 @@ public class GUTimeAnnotator implements Annotator {
 
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(TimeAnnotations.TimexAnnotations.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(GUTIME_REQUIREMENT);
   }
 }

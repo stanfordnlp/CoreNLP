@@ -11,7 +11,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 
-version = '3.7.0'
+version = '3.4.1'
 
 // Gradle application plugin
 mainClassName = "edu.stanford.nlp.pipeline.StanfordCoreNLP"
@@ -41,15 +41,12 @@ sourceSets {
   }
 }
 
-task listDeps {
-    doLast {
-        configurations.compile.each { File file -> println file.name }
-    }
+task listDeps << {
+    configurations.compile.each { File file -> println file.name }
 }
 
 dependencies {
   compile fileTree(dir: 'lib', include: '*.jar')
-  testCompile fileTree(dir: 'liblocal', include: '*.jar')
 }
 
 // Eclipse plugin setup
@@ -62,8 +59,4 @@ eclipse {
       }
     }
   }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.2'
 }

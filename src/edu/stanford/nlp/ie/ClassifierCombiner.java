@@ -1,5 +1,4 @@
 package edu.stanford.nlp.ie;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,10 +52,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * @author Chris Cox
  * @author Mihai Surdeanu
  */
-public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSequenceClassifier<IN>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ClassifierCombiner.class);
+public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSequenceClassifier<IN> {
 
   private static final boolean DEBUG = false;
 
@@ -102,7 +98,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           paths.add(path);
         }
       }
-      loadClassifiers(p, paths);
+      loadClassifiers(paths);
     }
 
     //
@@ -111,7 +107,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     else if((loadPath1 = p.getProperty("loadClassifier")) != null && (loadPath2 = p.getProperty("loadAuxClassifier")) != null){
       paths.add(loadPath1);
       paths.add(loadPath2);
-      loadClassifiers(p, paths);
+      loadClassifiers(paths);
     }
 
     //
@@ -120,7 +116,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     else {
       paths.add(DefaultPaths.DEFAULT_NER_THREECLASS_MODEL);
       paths.add(DefaultPaths.DEFAULT_NER_MUC_MODEL);
-      loadClassifiers(p, paths);
+      loadClassifiers(paths);
     }
     this.initLoadPaths = new ArrayList<>(paths);
     this.initProps = p;
@@ -138,7 +134,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     super(props);
     this.combinationMode = combinationMode;
     List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
-    loadClassifiers(props, paths);
+    loadClassifiers(paths);
     this.initLoadPaths = new ArrayList<>(paths);
     this.initProps = props;
   }
@@ -208,18 +204,18 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     // read in the base classifiers
     Integer numClassifiers = ois.readInt();
     // set up the list of base classifiers
-    this.baseClassifiers = new ArrayList<>();
+    this.baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     int i = 0;
     while (i < numClassifiers) {
       try {
-        log.info("loading CRF...");
-        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois, props));
+        System.err.println("loading CRF...");
+        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois));
         baseClassifiers.add(newCRF);
         i++;
       } catch (Exception e) {
         try {
-          log.info("loading CMM...");
-          CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois, props));
+          System.err.println("loading CMM...");
+          CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois));
           baseClassifiers.add(newCMM);
           i++;
         } catch (Exception ex) {
@@ -250,20 +246,20 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     try {
       return extractCombinationMode(p);
     } catch (IllegalArgumentException e) {
-      log.info("Illegal value of " + COMBINATION_MODE_PROPERTY + ": " + p.getProperty(COMBINATION_MODE_PROPERTY));
-      log.info("  Legal values:");
+      System.err.print("Illegal value of " + COMBINATION_MODE_PROPERTY + ": " + p.getProperty(COMBINATION_MODE_PROPERTY));
+      System.err.print("  Legal values:");
       for (CombinationMode mode : CombinationMode.values()) {
-        log.info("  " + mode);
+        System.err.print("  " + mode);
       }
-      log.info();
+      System.err.println();
       return CombinationMode.NORMAL;
     }
   }
 
-  private void loadClassifiers(Properties props, List<String> paths) throws IOException {
-    baseClassifiers = new ArrayList<>();
+  private void loadClassifiers(List<String> paths) throws IOException {
+    baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     for(String path: paths){
-      AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(props, path);
+      AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(path);
       baseClassifiers.add(cls);
       if(DEBUG){
         System.err.printf("Successfully loaded classifier #%d from %s.%n", baseClassifiers.size(), path);
@@ -275,11 +271,11 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
 
-  public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(Properties props, String path)
+  public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(String path)
       throws IOException {
     //try loading as a CRFClassifier
     try {
-      return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path, props));
+       return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -288,7 +284,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       return ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(path));
     } catch (Exception e) {
       //fail
-      //log.info("Couldn't load classifier from path :"+path);
+      //System.err.println("Couldn't load classifier from path :"+path);
       throw new IOException("Couldn't load classifier from " + path, e);
     }
   }
@@ -323,7 +319,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     String background = baseClassifiers.get(0).flags.backgroundSymbol;
 
     // baseLabels.get(i) points to the labels assigned by baseClassifiers.get(i)
-    List<Set<String>> baseLabels = new ArrayList<>();
+    List<Set<String>> baseLabels = new ArrayList<Set<String>>();
     Set<String> seenLabels = Generics.newHashSet();
     for (AbstractSequenceClassifier<? extends CoreMap> baseClassifier : baseClassifiers) {
       Set<String> labs = baseClassifier.labels();
@@ -339,17 +335,17 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
     if (DEBUG) {
       for(int i = 0; i < baseLabels.size(); i ++)
-        log.info("mergeDocuments: Using classifier #" + i + " for " + baseLabels.get(i));
-      log.info("mergeDocuments: Background symbol is " + background);
+        System.err.println("mergeDocuments: Using classifier #" + i + " for " + baseLabels.get(i));
+      System.err.println("mergeDocuments: Background symbol is " + background);
 
-      log.info("Base model outputs:");
+      System.err.println("Base model outputs:");
       for( int i = 0; i < baseDocuments.size(); i ++){
         System.err.printf("Output of model #%d:", i);
         for (IN l : baseDocuments.get(i)) {
-          log.info(' ');
-          log.info(l.get(CoreAnnotations.AnswerAnnotation.class));
+          System.err.print(' ');
+          System.err.print(l.get(CoreAnnotations.AnswerAnnotation.class));
         }
-        log.info();
+        System.err.println();
       }
     }
 
@@ -362,13 +358,13 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
 
     if (DEBUG) {
-      log.info("Output of combined model:");
+      System.err.print("Output of combined model:");
       for (IN l: mainDocument) {
-        log.info(' ');
-        log.info(l.get(CoreAnnotations.AnswerAnnotation.class));
+        System.err.print(' ');
+        System.err.print(l.get(CoreAnnotations.AnswerAnnotation.class));
       }
-      log.info();
-      log.info();
+      System.err.println();
+      System.err.println();
     }
 
     return mainDocument;
@@ -384,7 +380,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     boolean insideAuxTag = false;
     boolean auxTagValid = true;
     String prevAnswer = background;
-    Collection<INN> constituents = new ArrayList<>();
+    Collection<INN> constituents = new ArrayList<INN>();
 
     Iterator<INN> auxIterator = auxDocument.listIterator();
 
@@ -404,7 +400,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
             }
           }
           auxTagValid = true;
-          constituents = new ArrayList<>();
+          constituents = new ArrayList<INN>();
         }
         insideAuxTag = true;
         if (insideMainTag) { auxTagValid = false; }
@@ -417,7 +413,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
               wi.set(CoreAnnotations.AnswerAnnotation.class, prevAnswer);
             }
           }
-          constituents = new ArrayList<>();
+          constituents = new ArrayList<INN>();
         }
         insideAuxTag=false;
         auxTagValid = true;
@@ -444,7 +440,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     if (baseClassifiers.isEmpty()) {
       return tokens;
     }
-    List<List<IN>> baseOutputs = new ArrayList<>();
+    List<List<IN>> baseOutputs = new ArrayList<List<IN>>();
 
     // the first base model works in place, modifying the original tokens
     List<IN> output = baseClassifiers.get(0).classifySentence(tokens);
@@ -478,13 +474,13 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   // write a ClassifierCombiner to disk, this is based on CRFClassifier code
   @Override
   public void serializeClassifier(String serializePath) {
-    log.info("Serializing classifier to " + serializePath + "...");
+    System.err.print("Serializing classifier to " + serializePath + "...");
 
     ObjectOutputStream oos = null;
     try {
       oos = IOUtils.writeStreamFromString(serializePath);
       serializeClassifier(oos);
-      log.info("done.");
+      System.err.println("done.");
 
     } catch (Exception e) {
       throw new RuntimeIOException("Failed to save classifier", e);
@@ -513,10 +509,11 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       Integer numClassifiers = baseClassifiers.size();
       oos.writeInt(numClassifiers);
       // go through baseClassifiers and write each one to disk with CRFClassifier's serialize method
-      log.info("");
+      System.err.println("");
       for (AbstractSequenceClassifier<IN> asc : baseClassifiers) {
+        // TODO: fix situation so that this doesn't have to just be for crf's
         //CRFClassifier crfc = (CRFClassifier) asc;
-        //log.info("Serializing a base classifier...");
+        //System.err.println("Serializing a base classifier...");
         asc.serializeClassifier(oos);
       }
     } catch (IOException e) {
@@ -554,7 +551,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   // this does not currently support drill down on CMM's
   public static void examineCRF(ClassifierCombiner cc, String crfNameOrIndex, SeqClassifierFlags flags,
                                 String testFile, String testFiles,
-                                DocumentReaderAndWriter<CoreLabel> readerAndWriter) throws Exception {
+                                DocumentReaderAndWriter readerAndWriter) throws Exception {
     CRFClassifier<CoreLabel> crf;
     // potential index into baseClassifiers
     int ci;
@@ -598,7 +595,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           crf.printLabelInformation(testFile, readerAndWriter);
         } else {
           // no crf test flag provided
-          log.info("Warning: no crf test flag was provided, running classify and write answers");
+          System.err.println("Warning: no crf test flag was provided, running classify and write answers");
           crf.classifyAndWriteAnswers(testFile,readerAndWriter,true);
         }
       } else if (testFiles != null) {
@@ -609,7 +606,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           // there is a crf and printProbs
           crf.printProbs(files, crf.defaultReaderAndWriter());
         } else {
-          log.info("Warning: no crf test flag was provided, running classify files and write answers");
+          System.err.println("Warning: no crf test flag was provided, running classify files and write answers");
           crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
         }
       }
@@ -618,21 +615,21 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
   // show some info about a ClassifierCombiner
   public static void showCCInfo(ClassifierCombiner cc) {
-    log.info("");
-    log.info("classifiers used:");
-    log.info("");
+    System.err.println("");
+    System.err.println("classifiers used:");
+    System.err.println("");
     if (cc.initLoadPaths.size() == cc.baseClassifiers.size()) {
       for (int i = 0 ; i < cc.initLoadPaths.size() ; i++) {
-        log.info("baseClassifiers index "+i+" : "+cc.initLoadPaths.get(i));
+        System.err.println("baseClassifiers index "+i+" : "+cc.initLoadPaths.get(i));
       }
     } else {
       for (int i = 0 ; i < cc.initLoadPaths.size() ; i++) {
-        log.info("baseClassifiers index "+i);
+        System.err.println("baseClassifiers index "+i);
       }
     }
-    log.info("");
-    log.info("combinationMode: "+cc.combinationMode);
-    log.info("");
+    System.err.println("");
+    System.err.println("combinationMode: "+cc.combinationMode);
+    System.err.println("");
   }
 
   /**
@@ -645,7 +642,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     Properties props = StringUtils.argsToProperties(args);
     ClassifierCombiner ec = new ClassifierCombiner(props);
 
-    log.info(ec.classifyToString("Marketing : Sony Hopes to Win Much Bigger Market For Wide Range of Small-Video Products --- By Andrew B. Cohen Staff Reporter of The Wall Street Journal"));
+    System.err.println(ec.classifyToString("Marketing : Sony Hopes to Win Much Bigger Market For Wide Range of Small-Video Products --- By Andrew B. Cohen Staff Reporter of The Wall Street Journal"));
   }
 
 }

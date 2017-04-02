@@ -111,10 +111,10 @@ public class ACEMentionExtractor extends MentionExtractor {
   }
 
   public Document nextDoc() throws Exception {
-    List<List<CoreLabel>> allWords = new ArrayList<>();
-    List<List<Mention>> allGoldMentions = new ArrayList<>();
+    List<List<CoreLabel>> allWords = new ArrayList<List<CoreLabel>>();
+    List<List<Mention>> allGoldMentions = new ArrayList<List<Mention>>();
     List<List<Mention>> allPredictedMentions;
-    List<Tree> allTrees = new ArrayList<>();
+    List<Tree> allTrees = new ArrayList<Tree>();
 
     Annotation anno;
 
@@ -166,20 +166,17 @@ public class ACEMentionExtractor extends MentionExtractor {
   }
 
   private void extractGoldMentions(CoreMap s, List<List<Mention>> allGoldMentions, EntityComparator comparator) {
-    List<Mention> goldMentions = new ArrayList<>();
+    List<Mention> goldMentions = new ArrayList<Mention>();
     allGoldMentions.add(goldMentions);
     List<EntityMention> goldMentionList = s.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
     List<CoreLabel> words = s.get(CoreAnnotations.TokensAnnotation.class);
 
-    TreeSet<EntityMention> treeForSortGoldMentions = new TreeSet<>(comparator);
+    TreeSet<EntityMention> treeForSortGoldMentions = new TreeSet<EntityMention>(comparator);
     if(goldMentionList!=null) treeForSortGoldMentions.addAll(goldMentionList);
     if(!treeForSortGoldMentions.isEmpty()){
       for(EntityMention e : treeForSortGoldMentions){
         Mention men = new Mention();
         men.dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-        if (men.dependency == null) {
-          men.dependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-        }
         men.startIndex = e.getExtentTokenStart();
         men.endIndex = e.getExtentTokenEnd();
 
@@ -217,7 +214,7 @@ public class ACEMentionExtractor extends MentionExtractor {
   private static void printRawDoc(List<CoreMap> sentences, List<List<Mention>> allMentions, String filename, boolean gold) throws FileNotFoundException {
     StringBuilder doc = new StringBuilder();
     int previousOffset = 0;
-    Counter<Integer> mentionCount = new ClassicCounter<>();
+    Counter<Integer> mentionCount = new ClassicCounter<Integer>();
     for(List<Mention> l : allMentions) {
       for(Mention m : l) {
         mentionCount.incrementCount(m.goldCorefClusterID);
@@ -233,8 +230,8 @@ public class ACEMentionExtractor extends MentionExtractor {
       List<CoreLabel> t = sentence.get(CoreAnnotations.TokensAnnotation.class);
       if(previousOffset+2 < t.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class)) sent += "\n";
       previousOffset = t.get(t.size()-1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-      Counter<Integer> startCounts = new ClassicCounter<>();
-      Counter<Integer> endCounts = new ClassicCounter<>();
+      Counter<Integer> startCounts = new ClassicCounter<Integer>();
+      Counter<Integer> endCounts = new ClassicCounter<Integer>();
       Map<Integer, Set<Integer>> endID = Generics.newHashMap();
       for (Mention m : mentions) {
         startCounts.incrementCount(m.startIndex);

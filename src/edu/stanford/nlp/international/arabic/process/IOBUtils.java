@@ -1,7 +1,5 @@
-package edu.stanford.nlp.international.arabic.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.process;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,14 +13,10 @@ import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFea
 import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SentenceUtils;
-import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -32,10 +26,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  * @author Will Monroe
  */
-public class IOBUtils  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IOBUtils.class);
+public class IOBUtils {
 
   // Training token types.
   private enum TokenType { BeginMarker, EndMarker, BothMarker, NoMarker }
@@ -85,25 +76,7 @@ public class IOBUtils  {
   public static List<CoreLabel> StringToIOB(List<CoreLabel> tokenList,
                                             Character segMarker,
                                             boolean applyRewriteRules) {
-    return StringToIOB(tokenList, segMarker, applyRewriteRules, false, null, null);
-  }
-
-  /**
-   * Convert a String to a list of characters suitable for labeling in an IOB
-   * segmentation model.
-   *
-   * @param tokenList
-   * @param segMarker
-   * @param applyRewriteRules add rewrite labels (for training data)
-   * @param tf a TokenizerFactory returning ArabicTokenizers (for determining original segment boundaries)
-   * @param origText the original string before tokenization (for determining original segment boundaries)
-   */
-  public static List<CoreLabel> StringToIOB(List<CoreLabel> tokenList,
-                                            Character segMarker,
-                                            boolean applyRewriteRules,
-                                            TokenizerFactory<CoreLabel> tf,
-                                            String origText) {
-    return StringToIOB(tokenList, segMarker, applyRewriteRules, false, tf, origText);
+    return StringToIOB(tokenList, segMarker, applyRewriteRules, false);
   }
   
   /**
@@ -120,28 +93,7 @@ public class IOBUtils  {
                                             Character segMarker,
                                             boolean applyRewriteRules,
                                             boolean stripRewrites) {
-    return StringToIOB(tokenList, segMarker, applyRewriteRules, stripRewrites, null, null);
-  }
-
-  /**
-   * Convert a String to a list of characters suitable for labeling in an IOB
-   * segmentation model.
-   *
-   * @param tokenList
-   * @param segMarker
-   * @param applyRewriteRules add rewrite labels (for training data)
-   * @param stripRewrites revert training data to old Green & DeNero model (remove
-   *    rewrite labels but still rewrite to try to preserve raw text)
-   * @param tf a TokenizerFactory returning ArabicTokenizers (for determining original segment boundaries)
-   * @param origText the original string before tokenization (for determining original segment boundaries)
-   */
-  public static List<CoreLabel> StringToIOB(List<CoreLabel> tokenList,
-                                            Character segMarker,
-                                            boolean applyRewriteRules,
-                                            boolean stripRewrites,
-                                            TokenizerFactory<CoreLabel> tf,
-                                            String origText) {
-    List<CoreLabel> iobList = new ArrayList<>(tokenList.size() * 7 + tokenList.size());
+    List<CoreLabel> iobList = new ArrayList<CoreLabel>(tokenList.size()*7 + tokenList.size());
     final String strSegMarker = String.valueOf(segMarker);
 
     boolean addWhitespace = false;
@@ -149,13 +101,15 @@ public class IOBUtils  {
     String lastToken = "";
     String currentWord = "";
     int wordStartIndex = 0;
-    for (CoreLabel cl : tokenList) {
+    for (int i = 0; i < numTokens; ++i) {
       // What type of token is this
+      CoreLabel cl = tokenList.get(i);
+
       if (addWhitespace) {
         fillInWordStatistics(iobList, currentWord, wordStartIndex);
         currentWord = "";
         wordStartIndex = iobList.size() + 1;
-
+        
         iobList.add(createDatum(cl, BoundaryChar, BoundarySymbol));
         final CoreLabel boundaryDatum = iobList.get(iobList.size() - 1);
         boundaryDatum.setIndex(0);
@@ -174,7 +128,7 @@ public class IOBUtils  {
 
       } else {
         // Iterate over the characters in the token
-        tokenToDatums(iobList, cl, token, tokType, cl, lastToken, applyRewriteRules, stripRewrites, tf, origText);
+        tokenToDatums(iobList, cl, token, tokType, tokenList.get(i), lastToken, applyRewriteRules, stripRewrites);
         addWhitespace = (tokType == TokenType.BeginMarker || tokType == TokenType.NoMarker);
       }
       currentWord += token;
@@ -214,8 +168,6 @@ public class IOBUtils  {
    * @param tokenLabel
    * @param lastToken
    * @param applyRewriteRules
-   * @param tf a TokenizerFactory returning ArabicTokenizers (for determining original segment boundaries)
-   * @param origText the original string before tokenization (for determining original segment boundaries)
    */
   private static void tokenToDatums(List<CoreLabel> iobList,
                                 CoreLabel cl,
@@ -224,9 +176,7 @@ public class IOBUtils  {
                                 CoreLabel tokenLabel,
                                 String lastToken,
                                 boolean applyRewriteRules,
-                                boolean stripRewrites,
-                                TokenizerFactory<CoreLabel> tf,
-                                String origText) {
+                                boolean stripRewrites) {
 
     if (token.isEmpty()) return;
     String lastLabel = ContinuationSymbol;
@@ -268,18 +218,18 @@ public class IOBUtils  {
           features.getValue(MorphoFeatureType.DEF).equals("D")) {
         if (rawToken.startsWith("-ال")) {
           if (!token.startsWith("ا"))
-            log.info("Bad REWAL: " + rawToken + " / " + token);
+            System.err.println("Bad REWAL: " + rawToken + " / " + token);
           token = token.substring(1);
           rewritten = rewritten.substring(1);
           if (!stripRewrites)
             firstLabel = RewriteSymbol;
         } else if (rawToken.startsWith("-ل")) {
           if (!token.startsWith("ل"))
-            log.info("Bad REWAL: " + rawToken + " / " + token);
+            System.err.println("Bad REWAL: " + rawToken + " / " + token);
           if (!stripRewrites)
             firstLabel = RewriteSymbol;
         } else {
-          log.info("Ignoring REWAL: " + rawToken + " / " + token);
+          System.err.println("Ignoring REWAL: " + rawToken + " / " + token);
         }
       }
       
@@ -301,56 +251,26 @@ public class IOBUtils  {
       }
     }
 
-    String origWord;
-    if (origText == null) {
-      origWord = tokenLabel.word();
-    } else {
-      origWord = origText.substring(cl.beginPosition(), cl.endPosition());
-    }
-    int origIndex = 0;
-    while (origIndex < origWord.length() && isDeletedCharacter(origWord.charAt(origIndex), tf)) {
-      ++origIndex;
-    }
-
     // Create datums and add to iobList
     if (token.isEmpty())
-      log.info("Rewriting resulted in empty token: " + tokenLabel.word());
+      System.err.println("Rewriting resulted in empty token: " + tokenLabel.word());
     String firstChar = String.valueOf(token.charAt(0));
-    // Start at 0 to make sure we include the whole token according to the tokenizer
-    iobList.add(createDatum(cl, firstChar, firstLabel, 0, origIndex + 1));
+    iobList.add(createDatum(cl, firstChar, firstLabel));
     final int numChars = token.length();
     if (crossRefRewrites && rewritten.length() != numChars) {
       System.err.printf("Rewritten annotation doesn't have correct length: %s>>>%s%n", token, rewritten);
       crossRefRewrites = false;
     }
 
-    ++origIndex;
-    for (int j = 1; j < numChars; ++j, ++origIndex) {
-      while (origIndex < origWord.length() && isDeletedCharacter(origWord.charAt(origIndex), tf)) {
-        ++origIndex;
-      }
-      if (origIndex >= origWord.length()) {
-        origIndex = origWord.length() - 1;
-      }
-
+    for (int j = 1; j < numChars; ++j) {
       String charLabel = (j == numChars-1) ? lastLabel : ContinuationSymbol;
       String thisChar = String.valueOf(token.charAt(j));
       if (crossRefRewrites && !String.valueOf(rewritten.charAt(j)).equals(thisChar))
         charLabel = RewriteSymbol;
       if (charLabel == ContinuationSymbol && thisChar.equals("ى") && j != numChars - 1)
         charLabel = RewriteSymbol; // Assume all mid-word alef maqsura are supposed to be yah
-      iobList.add(createDatum(cl, thisChar, charLabel, origIndex, origIndex + 1));
+      iobList.add(createDatum(cl, thisChar, charLabel));
     }
-
-    // End at endPosition to make sure we include the whole token according to the tokenizer
-    if (!iobList.isEmpty()) {
-      iobList.get(iobList.size() - 1).setEndPosition(cl.endPosition());
-    }
-  }
-
-  private static boolean isDeletedCharacter(char ch, TokenizerFactory<CoreLabel> tf) {
-    List<CoreLabel> tokens = tf.getTokenizer(new StringReader(Character.toString(ch))).tokenize();
-    return tokens.isEmpty();
   }
 
   /**
@@ -371,30 +291,18 @@ public class IOBUtils  {
     return tokType == TokenType.NoMarker ? tok : tok.substring(beginOffset, endOffset);
   }
 
-  private static CoreLabel createDatum(CoreLabel cl, String token, String label) {
-    int endOffset = cl.get(CharacterOffsetEndAnnotation.class) - cl.get(CharacterOffsetBeginAnnotation.class);
-    return createDatum(cl, token, label, 0, endOffset);
-  }
-
   /**
    * Create a datum from a string. The CoreAnnotations must correspond to those used by
    * SequenceClassifier. The following annotations are copied from the provided
    * CoreLabel cl, if present:
    *    DomainAnnotation
-   * startOffset and endOffset will be added to the {@link CharacterOffsetBeginAnnotation} of
-   * the {@link CoreLabel} cl to give the {@link CharacterOffsetBeginAnnotation} and
-   * {@link CharacterOffsetEndAnnotation} of the resulting datum.
    */
-  private static CoreLabel createDatum(CoreLabel cl, String token, String label, int startOffset, int endOffset) {
+  private static CoreLabel createDatum(CoreLabel cl, String token, String label) {
     CoreLabel newTok = new CoreLabel();
     newTok.set(CoreAnnotations.TextAnnotation.class, token);
     newTok.set(CoreAnnotations.CharAnnotation.class, token);
     newTok.set(CoreAnnotations.AnswerAnnotation.class, label);
     newTok.set(CoreAnnotations.GoldAnswerAnnotation.class, label);
-    newTok.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        cl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) + startOffset);
-    newTok.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        cl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) + endOffset);
     if (cl != null && cl.containsKey(CoreAnnotations.DomainAnnotation.class))
       newTok.set(CoreAnnotations.DomainAnnotation.class,
                  cl.get(CoreAnnotations.DomainAnnotation.class));
@@ -435,7 +343,7 @@ public class IOBUtils  {
 
   public static List<CoreLabel> StringToIOB(String str, Character segMarker) {
     // Whitespace tokenization
-    List<CoreLabel> toks = SentenceUtils.toCoreLabelList(str.trim().split("\\s+"));
+    List<CoreLabel> toks = Sentence.toCoreLabelList(str.trim().split("\\s+"));
     return StringToIOB(toks, segMarker, false);
   }
 
@@ -444,16 +352,7 @@ public class IOBUtils  {
    * for prefixes and suffixes in the string, and add a space at segmentations.
    */
   public static String IOBToString(List<CoreLabel> labeledSequence, String prefixMarker, String suffixMarker) {
-    return IOBToString(labeledSequence, prefixMarker, suffixMarker, true, true, 0, labeledSequence.size());
-  }
-
-  /**
-   * Convert a list of labeled characters to a String. Include segmentation markers
-   * for prefixes and suffixes in the string, and add a space at segmentations.
-   */
-  public static String IOBToString(List<CoreLabel> labeledSequence, String prefixMarker, String suffixMarker,
-      int startIndex, int endIndex) {
-    return IOBToString(labeledSequence, prefixMarker, suffixMarker, true, true, startIndex, endIndex);
+    return IOBToString(labeledSequence, prefixMarker, suffixMarker, true, true);
   }
 
   /**
@@ -461,26 +360,26 @@ public class IOBUtils  {
    * (but no spaces) at segmentation boundaries.
    */
   public static String IOBToString(List<CoreLabel> labeledSequence, String segmentationMarker) {
-    return IOBToString(labeledSequence, segmentationMarker, null, false, true, 0, labeledSequence.size());
+    return IOBToString(labeledSequence, segmentationMarker, null, false, true);
   }
 
   /**
    * Convert a list of labeled characters to a String. Preserve the original (unsegmented) text.
    */
   public static String IOBToString(List<CoreLabel> labeledSequence) {
-    return IOBToString(labeledSequence, null, null, false, false, 0, labeledSequence.size());
+    return IOBToString(labeledSequence, null, null, false, false);
   }
 
   private static String IOBToString(List<CoreLabel> labeledSequence,
-      String prefixMarker, String suffixMarker, boolean addSpace, boolean applyRewrites,
-      int startIndex, int endIndex) {
+      String prefixMarker, String suffixMarker, boolean addSpace, boolean applyRewrites) {
     StringBuilder sb = new StringBuilder();
     String lastLabel = "";
     final boolean addPrefixMarker = prefixMarker != null && prefixMarker.length() > 0;
     final boolean addSuffixMarker = suffixMarker != null && suffixMarker.length() > 0;
     if (addPrefixMarker || addSuffixMarker)
       annotateMarkers(labeledSequence);
-    for (int i = startIndex; i < endIndex; ++i) {
+    final int sequenceLength = labeledSequence.size();
+    for (int i = 0; i < sequenceLength; ++i) {
       CoreLabel labeledChar = labeledSequence.get(i);
       String token = labeledChar.get(CoreAnnotations.CharAnnotation.class);
       if (addPrefixMarker && token.equals(prefixMarker))
@@ -681,79 +580,5 @@ public class IOBUtils  {
     for (CoreLabel cl : tokenList) {
       cl.set(CoreAnnotations.DomainAnnotation.class, domain);
     }
-  }
-
-  public static List<IntPair> TokenSpansForIOB(List<CoreLabel> labeledSequence) {
-    List<IntPair> spans = CollectionUtils.makeList();
-
-    String lastLabel = "";
-    boolean inToken = false;
-    int tokenStart = 0;
-    final int sequenceLength = labeledSequence.size();
-    for (int i = 0; i < sequenceLength; ++i) {
-      CoreLabel labeledChar = labeledSequence.get(i);
-      String token = labeledChar.get(CoreAnnotations.CharAnnotation.class);
-      String label = labeledChar.get(CoreAnnotations.AnswerAnnotation.class);
-      if (token.equals(BoundaryChar)) {
-        if (inToken) {
-          spans.add(new IntPair(tokenStart, i));
-        }
-        inToken = false;
-      } else {
-        switch(label) {
-          case BeginSymbol:
-            if (lastLabel.equals(ContinuationSymbol) || lastLabel.equals(BeginSymbol) ||
-                lastLabel.equals(RewriteSymbol)) {
-              if (inToken) {
-                spans.add(new IntPair(tokenStart, i));
-              }
-              inToken = true;
-              tokenStart = i;
-            } else if (!inToken) {
-              inToken = true;
-              tokenStart = i;
-            }
-            break;
-
-          case ContinuationSymbol:
-            if (!inToken) {
-              inToken = true;
-              tokenStart = i;
-            }
-            break;
-
-          case BoundarySymbol:
-          case NosegSymbol:
-            if (inToken) {
-              spans.add(new IntPair(tokenStart, i));
-            }
-            inToken = true;
-            tokenStart = i;
-            break;
-
-          case RewriteSymbol:
-          case "REWAL":
-          case "REWTA":
-            if (token.equals("ل")) {
-              if (inToken) {
-                spans.add(new IntPair(tokenStart, i));
-              }
-              inToken = true;
-              tokenStart = i;
-            } else if (!inToken) {
-              inToken = true;
-              tokenStart = i;
-            }
-            break;
-        }
-      }
-      lastLabel = label;
-    }
-
-    if (inToken) {
-      spans.add(new IntPair(tokenStart, sequenceLength));
-    }
-
-    return spans;
   }
 }

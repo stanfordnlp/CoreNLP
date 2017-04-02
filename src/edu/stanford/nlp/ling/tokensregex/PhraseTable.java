@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ling.tokensregex; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -42,10 +41,6 @@ import java.util.regex.Pattern;
  */
 public class PhraseTable implements Serializable
 {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PhraseTable.class);
-
   private static final String PHRASE_END = "";
   private static final long serialVersionUID = 1L;
   Map<String,Object> rootTree;
@@ -59,11 +54,11 @@ public class PhraseTable implements Serializable
   int nPhrases = 0;
   int nStrings = 0;
 
-  transient CacheMap<String,String> normalizedCache = new CacheMap<>(5000);
+  transient CacheMap<String,String> normalizedCache = new CacheMap<String,String>(5000);
 
   public PhraseTable() {}
 
-  public PhraseTable(int initSize) { rootTree = new HashMap<>(initSize); }
+  public PhraseTable(int initSize) { rootTree = new HashMap<String,Object>(initSize); }
 
   public PhraseTable(boolean normalize, boolean caseInsensitive, boolean ignorePunctuation) {
     this.normalize = normalize;
@@ -101,7 +96,7 @@ public class PhraseTable implements Serializable
 
   public void setNormalizationCacheSize(int cacheSize)
   {
-    CacheMap<String,String> newNormalizedCache = new CacheMap<>(cacheSize);
+    CacheMap<String,String> newNormalizedCache = new CacheMap<String,String>(cacheSize);
     newNormalizedCache.putAll(normalizedCache);
     normalizedCache = newNormalizedCache;
   }
@@ -191,7 +186,7 @@ public class PhraseTable implements Serializable
       // Pick map factory to use depending on number of tags we have
       MapFactory<String,MutableDouble> mapFactory = (columns.length < 20)?
               MapFactory.<String,MutableDouble>arrayMapFactory(): MapFactory.<String,MutableDouble>linkedHashMapFactory();
-      Counter<String> counts = new ClassicCounter<>(mapFactory);
+      Counter<String> counts = new ClassicCounter<String>(mapFactory);
       for (int i = 1; i < columns.length; i++) {
         String[] tagCount = countDelimiterPattern.split(columns[i], 2);
         if (tagCount.length == 2) {
@@ -270,7 +265,7 @@ public class PhraseTable implements Serializable
   public WordList toNormalizedWordList(String phraseText)
   {
     String[] words = splitText(phraseText);
-    List<String> list = new ArrayList<>(words.length);
+    List<String> list = new ArrayList<String>(words.length);
     for (String word:words) {
       word = getNormalizedForm(word);
       if (word.length() > 0) {
@@ -330,7 +325,7 @@ public class PhraseTable implements Serializable
   private synchronized boolean addPhrase(String phraseText, String tag, WordList wordList, Object phraseData)
   {
     if (rootTree == null) {
-      rootTree = new HashMap<>();
+      rootTree = new HashMap<String,Object>();
     }
     return addPhrase(rootTree, phraseText, tag, wordList, phraseData, 0);
   }
@@ -449,7 +444,7 @@ public class PhraseTable implements Serializable
     }
     if (!phraseAdded) {
       if (wordList.size() == 0) {
-        log.warn(phraseText + " not added");
+        System.err.println("WARNING: " + phraseText + " not added");
       } else {
         Phrase oldphrase = (Phrase) tree.get(PHRASE_END);
         if (oldphrase != null) {
@@ -732,7 +727,7 @@ public class PhraseTable implements Serializable
       assert(tokenStart >= 0);
       assert(tokenEnd > tokenStart);
       int n = tokenEnd - tokenStart;
-      List<String> normalized = new ArrayList<>(n);
+      List<String> normalized = new ArrayList<String>(n);
       int[] tokenIndexMap = new int[n+1];
       int j = 0, last = 0;
       for (int i = tokenStart; i < tokenEnd; i++) {
@@ -771,8 +766,8 @@ public class PhraseTable implements Serializable
                                                     WordList tokens, int tokenStart, int tokenEnd,
                                                     boolean findAll, boolean matchEnd)
   {
-    List<PhraseMatch> matched = new ArrayList<>();
-    Stack<StackEntry> todoStack = new Stack<>();
+    List<PhraseMatch> matched = new ArrayList<PhraseMatch>();
+    Stack<StackEntry> todoStack = new Stack<StackEntry>();
     todoStack.push(new StackEntry(rootTree, tokenStart, tokenStart, tokenEnd, findAll? tokenStart+1:-1));
     while (!todoStack.isEmpty()) {
       StackEntry cur = todoStack.pop();
@@ -847,7 +842,7 @@ public class PhraseTable implements Serializable
 
   private static class PhraseTableIterator extends AbstractIterator<Phrase> {
     private PhraseTable phraseTable;
-    private Stack<Iterator<Object>> iteratorStack = new Stack<>();
+    private Stack<Iterator<Object>> iteratorStack = new Stack<Iterator<Object>>();
     private Phrase next = null;
 
     public PhraseTableIterator(PhraseTable phraseTable) {
@@ -939,7 +934,7 @@ public class PhraseTable implements Serializable
 
     public boolean addForm(String form) {
       if (alternateForms == null) {
-        alternateForms = new HashSet<>(4);
+        alternateForms = new HashSet<String>(4);
         alternateForms.add(text);
       }
       return alternateForms.add(form);
@@ -977,7 +972,7 @@ public class PhraseTable implements Serializable
   }
 
   public final static Comparator<PhraseMatch> PHRASEMATCH_LENGTH_ENDPOINTS_COMPARATOR =
-          Comparators.chain(HasInterval.LENGTH_GT_COMPARATOR, HasInterval.ENDPOINTS_COMPARATOR);
+          Comparators.chain(HasInterval.LENGTH_COMPARATOR, HasInterval.ENDPOINTS_COMPARATOR);
 
   /**
    * Represents a matched phrase

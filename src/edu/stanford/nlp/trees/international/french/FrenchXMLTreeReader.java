@@ -1,12 +1,10 @@
-package edu.stanford.nlp.trees.international.french; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.french;
 
 import java.io.*;
 import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import edu.stanford.nlp.ling.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -14,7 +12,14 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.stanford.nlp.io.ReaderInputStream;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasCategory;
+import edu.stanford.nlp.ling.HasContext;
+import edu.stanford.nlp.ling.HasTag;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
@@ -39,10 +44,7 @@ import edu.stanford.nlp.util.XMLUtils;
  * @author Spence Green
  *
  */
-public class FrenchXMLTreeReader implements TreeReader  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FrenchXMLTreeReader.class);
+public class FrenchXMLTreeReader implements TreeReader {
 
   private InputStream stream;
   private final TreeNormalizer treeNormalizer;
@@ -190,7 +192,7 @@ public class FrenchXMLTreeReader implements TreeReader  {
    * @param text
    */
   private List<String> getWordString(String text) {
-    List<String> toks = new ArrayList<>();
+    List<String> toks = new ArrayList<String>();
     if(text == null || text.equals(""))
       toks.add(EMPTY_LEAF);
     else {
@@ -228,7 +230,7 @@ public class FrenchXMLTreeReader implements TreeReader  {
       if (lemmas != null && lemmas.size() != leafToks.size()) {
         // If this happens (and it does for a few poorly editted trees)
         // we assume something has gone wrong and ignore the lemmas.
-        log.info("Lemmas don't match tokens, ignoring lemmas: " +
+        System.err.println("Lemmas don't match tokens, ignoring lemmas: " +
                            "lemmas " + lemmas + ", tokens " + leafToks);
         lemmas = null;
       }
@@ -236,12 +238,12 @@ public class FrenchXMLTreeReader implements TreeReader  {
       //Terminals can have multiple tokens (MWEs). Make these into a
       //flat structure for now.
       Tree t = null;
-      List<Tree> kids = new ArrayList<>();
+      List<Tree> kids = new ArrayList<Tree>();
       if(leafToks.size() > 1) {
         for (int i = 0; i < leafToks.size(); ++i) {
           String tok = leafToks.get(i);
           String s = treeNormalizer.normalizeTerminal(tok);
-          List<Tree> leafList = new ArrayList<>();
+          List<Tree> leafList = new ArrayList<Tree>();
           Tree leafNode = treeFactory.newLeaf(s);
           if(leafNode.label() instanceof HasWord)
             ((HasWord) leafNode.label()).setWord(s);
@@ -287,7 +289,7 @@ public class FrenchXMLTreeReader implements TreeReader  {
       return t;
     }
 
-    List<Tree> kids = new ArrayList<>();
+    List<Tree> kids = new ArrayList<Tree>();
     for(Node childNode = eRoot.getFirstChild(); childNode != null; childNode = childNode.getNextSibling()) {
       if(childNode.getNodeType() != Node.ELEMENT_NODE) continue;
       Tree t = getTreeFromXML(childNode);
@@ -314,9 +316,9 @@ public class FrenchXMLTreeReader implements TreeReader  {
 
 
   private Tree postProcessMWE(Tree t) {
-    String tYield = SentenceUtils.listToString(t.yield()).replaceAll("\\s+", "");
+    String tYield = Sentence.listToString(t.yield()).replaceAll("\\s+", "");
     if(tYield.matches("[\\d\\p{Punct}]*")) {
-      List<Tree> kids = new ArrayList<>();
+      List<Tree> kids = new ArrayList<Tree>();
       kids.add(treeFactory.newLeaf(tYield));
       t = treeFactory.newTreeNode(t.value(), kids);
     } else {
@@ -337,8 +339,9 @@ public class FrenchXMLTreeReader implements TreeReader  {
       System.exit(-1);
     }
 
-    List<File> fileList = new ArrayList<>();
-    for (String arg : args) fileList.add(new File(arg));
+    List<File> fileList = new ArrayList<File>();
+    for(int i = 0; i < args.length; i++)
+      fileList.add(new File(args[i]));
 
     TreeReaderFactory trf = new FrenchXMLTreeReaderFactory(false);
     int totalTrees = 0;
@@ -368,7 +371,7 @@ public class FrenchXMLTreeReader implements TreeReader  {
 
 //wsg2011: Print out the observed morphological analyses
 //      for(String analysis : morphAnalyses)
-//        log.info(analysis);
+//        System.err.println(analysis);
 
       System.err.printf("%nRead %d trees%n",totalTrees);
 

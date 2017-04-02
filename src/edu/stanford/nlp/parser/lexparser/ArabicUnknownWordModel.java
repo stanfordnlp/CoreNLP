@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Index;
@@ -15,10 +14,7 @@ import edu.stanford.nlp.util.Index;
  * @author Christopher Manning
  * @author Anna Rafferty
  */
-public class ArabicUnknownWordModel extends BaseUnknownWordModel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicUnknownWordModel.class);
+public class ArabicUnknownWordModel extends BaseUnknownWordModel {
 
   private static final long serialVersionUID = 4825624957364628771L;
 
@@ -52,7 +48,7 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel  {
   public ArabicUnknownWordModel(Options op, Lexicon lex,
                                 Index<String> wordIndex,
                                 Index<String> tagIndex) {
-    this(op, lex, wordIndex, tagIndex, new ClassicCounter<>());
+    this(op, lex, wordIndex, tagIndex, new ClassicCounter<IntTaggedWord>());
   }
 
   @Override
@@ -240,7 +236,7 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel  {
     default:
       // 0 = do nothing so it just stays as "UNK"
     } // end switch (unknownLevel)
-    // log.info("Summarized " + word + " to " + sb.toString());
+    // System.err.println("Summarized " + word + " to " + sb.toString());
     return sb.toString();
   } // end getSignature()
 

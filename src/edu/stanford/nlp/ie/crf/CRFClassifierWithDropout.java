@@ -24,8 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.ObjectBank;
@@ -39,10 +38,7 @@ import java.util.*;
  *
  * @author Mengqiu Wang
  */
-public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<IN>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierWithDropout.class);
+public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<IN> {
 
   private List<List<IN>> unsupDocs;
 
@@ -54,10 +50,10 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
   @Override
   protected Collection<List<IN>> loadAuxiliaryData(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter) {
     if (flags.unsupDropoutFile != null) {
-      log.info("Reading unsupervised dropout data from file: " + flags.unsupDropoutFile);
+      System.err.println("Reading unsupervised dropout data from file: " + flags.unsupDropoutFile);
       Timing timer = new Timing();
       timer.start();
-      unsupDocs = new ArrayList<>();
+      unsupDocs = new ArrayList<List<IN>>();
       ObjectBank<List<IN>> unsupObjBank = makeObjectBankFromFile(flags.unsupDropoutFile, readerAndWriter);
       for (List<IN> doc : unsupObjBank) {
         for (IN tok: doc) {
@@ -67,10 +63,10 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
         unsupDocs.add(doc);
       }
       long elapsedMs = timer.stop();
-      log.info("Time to read: : " + Timing.toSecondsString(elapsedMs) + " seconds");
+      System.err.println("Time to read: : " + Timing.toSecondsString(elapsedMs) + " seconds");
     }
     if (unsupDocs != null && flags.doFeatureDiscovery) {
-      List<List<IN>> totalDocs = new ArrayList<>();
+      List<List<IN>> totalDocs = new ArrayList<List<IN>>();
       totalDocs.addAll(docs);
       totalDocs.addAll(unsupDocs);
       return totalDocs;
@@ -89,7 +85,7 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
       for (int q=0; q<unsupDropoutData.length; q++)
         unsupDropoutData[q] = unsupDataAndLabels.get(q).first();
       long elapsedMs = timer.stop();
-      log.info("Time to read unsupervised dropout data: " + Timing.toSecondsString(elapsedMs) + " seconds, read " + unsupDropoutData.length + " files");
+      System.err.println("Time to read unsupervised dropout data: " + Timing.toSecondsString(elapsedMs) + " seconds, read " + unsupDropoutData.length + " files");
     }
 
     return new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,

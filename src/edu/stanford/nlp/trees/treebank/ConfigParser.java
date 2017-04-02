@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.treebank; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.treebank;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -22,10 +21,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class ConfigParser implements Iterable<Properties>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ConfigParser.class);
+public class ConfigParser implements Iterable<Properties> {
 
   //The parameter names and delimiter
   private static final String DELIM = "=";
@@ -97,34 +93,34 @@ public class ConfigParser implements Iterable<Properties>  {
 
   public ConfigParser(String filename) {
     configFile = filename;
-    datasetList = new ArrayList<>();
+    datasetList = new ArrayList<Properties>();
 
     //For Pair<Pattern,Pattern>, the first pattern matches the parameter name
     //while the second (optionally) accepts the parameter values
     patternsMap = Generics.newHashMap();
-    patternsMap.put(paramName, new Pair<>(matchName, null));
-    patternsMap.put(paramType, new Pair<>(matchType, null));
-    patternsMap.put(paramPath, new Pair<>(matchPath, null));
-    patternsMap.put(paramOutputPath, new Pair<>(matchOutputPath, null));
-    patternsMap.put(paramSplit, new Pair<>(matchSplit, null));
-    patternsMap.put(paramTagDelim, new Pair<>(matchTagDelim, null));
-    patternsMap.put(paramFileExt, new Pair<>(matchFileExt, null));
-    patternsMap.put(paramEncode, new Pair<>(matchEncode, matchEncodeArgs));
-    patternsMap.put(paramMapping, new Pair<>(matchMapping, null));
-    patternsMap.put(paramDistrib, new Pair<>(matchDistrib, booleanArgs));
-    patternsMap.put(paramFlat, new Pair<>(matchFlat, booleanArgs));
-    patternsMap.put(paramDT, new Pair<>(matchDT, booleanArgs));
-    patternsMap.put(paramLexMapper, new Pair<>(matchLexMapper, null));
-    patternsMap.put(paramNoDashTags, new Pair<>(matchNoDashTags, booleanArgs));
-    patternsMap.put(paramAddRoot, new Pair<>(matchAddRoot, booleanArgs));
-    patternsMap.put(paramUnEscape, new Pair<>(matchUnEscape, booleanArgs));
-    patternsMap.put(paramLexMapOptions, new Pair<>(matchLexMapOptions, null));
-    patternsMap.put(paramPosMapper, new Pair<>(matchPosMapper, null));
-    patternsMap.put(paramPosMapOptions, new Pair<>(matchPosMapOptions, null));
-    patternsMap.put(paramMaxLen, new Pair<>(matchMaxLen, null));
-    patternsMap.put(paramMorph, new Pair<>(matchMorph, null));
-    patternsMap.put(paramTransform, new Pair<>(matchTransform, null));
-    patternsMap.put(paramCCTagset, new Pair<>(matchCCTagset, null));
+    patternsMap.put(paramName, new Pair<Pattern,Pattern>(matchName,null));
+    patternsMap.put(paramType, new Pair<Pattern,Pattern>(matchType,null));
+    patternsMap.put(paramPath, new Pair<Pattern,Pattern>(matchPath,null));
+    patternsMap.put(paramOutputPath, new Pair<Pattern,Pattern>(matchOutputPath,null));
+    patternsMap.put(paramSplit, new Pair<Pattern,Pattern>(matchSplit,null));
+    patternsMap.put(paramTagDelim, new Pair<Pattern,Pattern>(matchTagDelim,null));
+    patternsMap.put(paramFileExt, new Pair<Pattern,Pattern>(matchFileExt,null));
+    patternsMap.put(paramEncode, new Pair<Pattern,Pattern>(matchEncode,matchEncodeArgs));
+    patternsMap.put(paramMapping, new Pair<Pattern,Pattern>(matchMapping,null));
+    patternsMap.put(paramDistrib, new Pair<Pattern,Pattern>(matchDistrib,booleanArgs));
+    patternsMap.put(paramFlat, new Pair<Pattern,Pattern>(matchFlat,booleanArgs));
+    patternsMap.put(paramDT, new Pair<Pattern,Pattern>(matchDT,booleanArgs));
+    patternsMap.put(paramLexMapper, new Pair<Pattern,Pattern>(matchLexMapper,null));
+    patternsMap.put(paramNoDashTags, new Pair<Pattern,Pattern>(matchNoDashTags,booleanArgs));
+    patternsMap.put(paramAddRoot, new Pair<Pattern,Pattern>(matchAddRoot,booleanArgs));
+    patternsMap.put(paramUnEscape, new Pair<Pattern,Pattern>(matchUnEscape,booleanArgs));
+    patternsMap.put(paramLexMapOptions, new Pair<Pattern,Pattern>(matchLexMapOptions,null));
+    patternsMap.put(paramPosMapper, new Pair<Pattern,Pattern>(matchPosMapper,null));
+    patternsMap.put(paramPosMapOptions, new Pair<Pattern,Pattern>(matchPosMapOptions,null));
+    patternsMap.put(paramMaxLen, new Pair<Pattern,Pattern>(matchMaxLen,null));
+    patternsMap.put(paramMorph, new Pair<Pattern,Pattern>(matchMorph,null));
+    patternsMap.put(paramTransform, new Pair<Pattern,Pattern>(matchTransform,null));
+    patternsMap.put(paramCCTagset, new Pair<Pattern,Pattern>(matchCCTagset,null));
   }
 
   public Iterator<Properties> iterator() {

@@ -1,7 +1,7 @@
 package edu.stanford.nlp.process;
 
 // Stanford English Tokenizer -- a deterministic, fast high-quality tokenizer
-// Copyright (c) 2002-2016 The Board of Trustees of
+// Copyright (c) 2002-2009 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -42,7 +42,6 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -70,6 +69,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     token and the whitespace around it that a list of tokens can be
  *     faithfully converted back to the original String.  Valid only if the
  *     LexedTokenFactory is an instance of CoreLabelTokenFactory.  The
+ *
+ *
+ *
  *     keys used in it are: TextAnnotation for the tokenized form,
  *     OriginalTextAnnotation for the original string, BeforeAnnotation and
  *     AfterAnnotation for the whitespace before and after a token, and
@@ -79,13 +81,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     are done so end - begin gives the token length.) Default is false.
  * <li>tokenizeNLs: Whether end-of-lines should become tokens (or just
  *     be treated as part of whitespace). Default is false.
- * <li>tokenizePerLine: Run the tokenizer separately on each line of a file.
- *     This has the following consequences: (i) A token (currently only SGML tokens)
- *     cannot span multiple lines of the original input, and (ii) The tokenizer will not
- *     examine/wait for input from the next line before deciding tokenization decisions on
- *     this line. The latter property affects treating periods by acronyms as end-of-sentence
- *     markers. Having this true is necessary to stop the tokenizer blocking and waiting
- *     for input after a newline is seen when the previous line ends with an abbreviation. </li>
  * <li>ptb3Escaping: Enable all traditional PTB3 token transforms
  *     (like parentheses becoming -LRB-, -RRB-).  This is a macro flag that
  *     sets or clears all the options below. (Default setting of the various
@@ -113,7 +108,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li>normalizeOtherBrackets: Whether to map other common bracket characters
  *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank.
  *     Default is true.
- * <li>asciiQuotes: Whether to map all quote characters to the traditional ' and ".
+ * <li>asciiQuotes Whether to map all quote characters to the traditional ' and ".
  *     Default is false.
  * <li>latexQuotes: Whether to map quotes to ``, `, ', '', as in Latex
  *     and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
@@ -153,10 +148,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  *      (Exception: for only "U.S." the treebank does have the two tokens
  *      "U.S." and "." like our default; strictTreebank3 now does that too.)
  *      The default is false.
- *  <li>splitHyphenated: whether or not to tokenize segments of hyphenated words
- *      separately ("school" "-" "aged", "frog" "-" "lipped"), keeping the exceptions
- *      in Supplementary Guidelines for ETTB 2.0 by Justin Mott, Colin Warner, Ann Bies,
- *      Ann Taylor. Default is false, which maintains old treebank tokenizer behavior.
  * </ol>
  * <p>
  * A single instance of a PTBTokenizer is not thread safe, as it uses
@@ -172,10 +163,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Jenny Finkel (integrating in invertible PTB tokenizer)
  * @author Christopher Manning (redid API, added many options, maintenance)
  */
-public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(PTBTokenizer.class);
+public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // the underlying lexer
   private final PTBLexer lexer;
@@ -190,7 +178,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    *          {@link Word}
    */
   public static PTBTokenizer<Word> newPTBTokenizer(Reader r) {
-    return new PTBTokenizer<>(r, new WordTokenFactory(), "");
+    return new PTBTokenizer<Word>(r, new WordTokenFactory(), "");
   }
 
 
@@ -209,7 +197,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * @return A PTBTokenizer which returns CoreLabel objects
    */
   public static PTBTokenizer<CoreLabel> newPTBTokenizer(Reader r, boolean tokenizeNLs, boolean invertible) {
-    return new PTBTokenizer<>(r, tokenizeNLs, invertible, false, new CoreLabelTokenFactory());
+    return new PTBTokenizer<CoreLabel>(r, tokenizeNLs, invertible, false, new CoreLabelTokenFactory());
   }
 
 
@@ -317,11 +305,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * that makes simply joining the tokens with spaces look bad. So join
    * the tokens with space and run it through this method to produce nice
    * looking text. It's not perfect, but it works pretty well.
-   * <p>
-   * <b>Note:</b> If your tokens have maintained the OriginalTextAnnotation and
-   * the BeforeAnnotation and the AfterAnnotation, then rather than doing
-   * this you can actually precisely reconstruct the text they were made
-   * from!
    *
    * @param ptbText A String in PTB3-escaped form
    * @return An approximation to the original String
@@ -334,7 +317,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         sb.append(token);
       }
     } catch (IOException e) {
-      throw new RuntimeIOException(e);
+      e.printStackTrace();
     }
     return sb.toString();
   }
@@ -417,7 +400,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * @return A presentable version of the given PTB-tokenized words
    */
   public static String labelList2Text(List<? extends HasWord> ptbWords) {
-    List<String> words = new ArrayList<>();
+    List<String> words = new ArrayList<String>();
     for (HasWord hw : ptbWords) {
       words.add(hw.word());
     }
@@ -460,9 +443,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     Matcher m = null;
     if (parseInsidePattern != null) {
       m = parseInsidePattern.matcher(""); // create once as performance hack
-      // System.err.printf("parseInsidePattern is: |%s|%n", parseInsidePattern);
     }
-    for (PTBTokenizer<CoreLabel> tokenizer = new PTBTokenizer<>(r, new CoreLabelTokenFactory(), options); tokenizer.hasNext(); ) {
+    for (PTBTokenizer<CoreLabel> tokenizer = new PTBTokenizer<CoreLabel>(r, new CoreLabelTokenFactory(), options); tokenizer.hasNext(); ) {
       CoreLabel obj = tokenizer.next();
       // String origStr = obj.get(CoreAnnotations.TextAnnotation.class).replaceFirst("\n+$", ""); // DanC added this to fix a lexer bug, hopefully now corrected
       String origStr = obj.get(CoreAnnotations.TextAnnotation.class);
@@ -475,11 +457,10 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       }
       if (m != null && m.reset(origStr).matches()) {
         printing = m.group(1).isEmpty(); // turn on printing if no end element slash, turn it off it there is
-        // System.err.printf("parseInsidePattern matched against: |%s|, printing is %b.%n", origStr, printing);
       } else if (printing) {
         if (dump) {
           // after having checked for tags, change str to be exhaustive
-          str = obj.toShorterString();
+          str = obj.toString();
         }
         if (preserveLines) {
           if (PTBLexer.NEWLINE_TOKEN.equals(origStr)) {
@@ -518,12 +499,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
   /** @return A PTBTokenizerFactory that vends CoreLabel tokens with default tokenization. */
   public static TokenizerFactory<CoreLabel> coreLabelFactory() {
-    return coreLabelFactory("");
-  }
-
-  /** @return A PTBTokenizerFactory that vends CoreLabel tokens with default tokenization. */
-  public static TokenizerFactory<CoreLabel> coreLabelFactory(String options) {
-    return PTBTokenizerFactory.newPTBTokenizerFactory(new CoreLabelTokenFactory(), options);
+    return PTBTokenizerFactory.newPTBTokenizerFactory(new CoreLabelTokenFactory(), "");
   }
 
   /** Get a TokenizerFactory that does Penn Treebank tokenization.
@@ -535,7 +511,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * @return A TokenizerFactory that does Penn Treebank tokenization
    */
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory, String options) {
-    return new PTBTokenizerFactory<>(factory, options);
+    return new PTBTokenizerFactory<T>(factory, options);
 
   }
 
@@ -548,8 +524,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    *  @param <T> The class of the returned tokens
    */
   public static class PTBTokenizerFactory<T extends HasWord> implements TokenizerFactory<T> {
-
-    private static final long serialVersionUID = -8859638719818931606L;
 
     protected final LexedTokenFactory<T> factory;
     protected String options;
@@ -579,7 +553,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
      * @return A TokenizerFactory that returns Word objects
      */
     public static PTBTokenizerFactory<Word> newWordTokenizerFactory(String options) {
-      return new PTBTokenizerFactory<>(new WordTokenFactory(), options);
+      return new PTBTokenizerFactory<Word>(new WordTokenFactory(), options);
     }
 
     /**
@@ -592,7 +566,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
      * @return A TokenizerFactory that returns CoreLabel objects o
      */
     public static PTBTokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory(String options) {
-      return new PTBTokenizerFactory<>(new CoreLabelTokenFactory(), options);
+      return new PTBTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(), options);
     }
 
     /**
@@ -605,11 +579,11 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
      *         LexedTokenFactory
      */
     public static <T extends HasWord> PTBTokenizerFactory<T> newPTBTokenizerFactory(LexedTokenFactory<T> tokenFactory, String options) {
-      return new PTBTokenizerFactory<>(tokenFactory, options);
+      return new PTBTokenizerFactory<T>(tokenFactory, options);
     }
 
     public static PTBTokenizerFactory<CoreLabel> newPTBTokenizerFactory(boolean tokenizeNLs, boolean invertible) {
-      return new PTBTokenizerFactory<>(tokenizeNLs, invertible, false, new CoreLabelTokenFactory());
+      return new PTBTokenizerFactory<CoreLabel>(tokenizeNLs, invertible, false, new CoreLabelTokenFactory());
     }
 
 
@@ -653,15 +627,15 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     /** Returns a tokenizer wrapping the given Reader. */
     @Override
     public Tokenizer<T> getTokenizer(Reader r) {
-      return new PTBTokenizer<>(r, factory, options);
+      return new PTBTokenizer<T>(r, factory, options);
     }
 
     @Override
     public Tokenizer<T> getTokenizer(Reader r, String extraOptions) {
       if (options == null || options.isEmpty()) {
-        return new PTBTokenizer<>(r, factory, extraOptions);
+        return new PTBTokenizer<T>(r, factory, extraOptions);
       } else {
-        return new PTBTokenizer<>(r, factory, options + ',' + extraOptions);
+        return new PTBTokenizer<T>(r, factory, options + ',' + extraOptions);
       }
     }
 
@@ -694,7 +668,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * This main method assumes that the input file is in utf-8 encoding,
    * unless an encoding is specified.
    * <p/>
-   * Usage: {@code java edu.stanford.nlp.process.PTBTokenizer [options] filename+ }
+   * Usage: <code>
+   * java edu.stanford.nlp.process.PTBTokenizer [options] filename+
+   * </code>
    * <p/>
    * Options:
    * <ul>
@@ -728,10 +704,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     boolean showHelp = PropertiesUtils.getBool(options, "help", false);
     showHelp = PropertiesUtils.getBool(options, "h", showHelp);
     if (showHelp) {
-      log.info("Usage: java edu.stanford.nlp.process.PTBTokenizer [options]* filename*");
-      log.info("  options: -h|-help|-options tokenizerOptions|-preserveLines|-lowerCase|-dump|-ioFileList");
-      log.info("           -encoding encoding|-parseInside regex|-untok");
-      return;
+      System.err.println("Usage: java edu.stanford.nlp.process.PTBTokenizer [options]* filename*");
+      System.err.println("  options: -h|-preserveLines|-lowerCase|-dump|-ioFileList|-encoding|-parseInside|-options");
+      System.exit(0);
     }
 
     StringBuilder optionsSB = new StringBuilder();
@@ -752,8 +727,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     Pattern parseInsidePattern = null;
     if (parseInsideKey != null) {
       try {
-        // We still allow space, but PTBTokenizer will change space to &nbsp; so need to also match it
-        parseInsidePattern = Pattern.compile("<(/?)(?:" + parseInsideKey + ")(?:(?:\\s|\u00A0)[^>]*?)?>");
+        parseInsidePattern = Pattern.compile("<(/?)(?:" + parseInsideKey + ")(?:\\s[^>]*?)?>");
       } catch (PatternSyntaxException e) {
         // just go with null parseInsidePattern
       }
@@ -763,10 +737,10 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     String parsedArgStr = options.getProperty("",null);
     String[] parsedArgs = (parsedArgStr == null) ? null : parsedArgStr.split("\\s+");
 
-    ArrayList<String> inputFileList = new ArrayList<>();
+    ArrayList<String> inputFileList = new ArrayList<String>();
     ArrayList<String> outputFileList = null;
     if (inputOutputFileList && parsedArgs != null) {
-      outputFileList = new ArrayList<>();
+      outputFileList = new ArrayList<String>();
       for (String fileName : parsedArgs) {
         BufferedReader r = IOUtils.readerFromString(fileName, charset);
         for (String inLine; (inLine = r.readLine()) != null; ) {

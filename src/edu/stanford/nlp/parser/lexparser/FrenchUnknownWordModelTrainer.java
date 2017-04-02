@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -27,8 +26,8 @@ public class FrenchUnknownWordModelTrainer
     super.initializeTraining(op, lex, wordIndex, tagIndex, totalTrees);
     indexToStartUnkCounting = (totalTrees * op.trainOptions.fractionBeforeUnseenCounting);
 
-    seenCounter = new ClassicCounter<>();
-    unSeenCounter = new ClassicCounter<>();
+    seenCounter = new ClassicCounter<IntTaggedWord>();
+    unSeenCounter = new ClassicCounter<IntTaggedWord>();
 
     model = new FrenchUnknownWordModel(op, lex, wordIndex, tagIndex,
                                        unSeenCounter);

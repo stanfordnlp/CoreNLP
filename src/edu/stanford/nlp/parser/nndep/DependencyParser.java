@@ -1,6 +1,4 @@
 package edu.stanford.nlp.parser.nndep;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
@@ -28,7 +26,6 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
@@ -36,7 +33,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Random;
 
 import static java.util.stream.Collectors.toList;
 
@@ -71,10 +74,7 @@ import static java.util.stream.Collectors.toList;
  * @author Danqi Chen (danqi@cs.stanford.edu)
  * @author Jon Gauthier
  */
-public class DependencyParser  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParser.class);
+public class DependencyParser {
   public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_UD.gz";
 
   /**
@@ -84,22 +84,6 @@ public class DependencyParser  {
    * @see #genDictionaries(java.util.List, java.util.List)
    */
   private List<String> knownWords, knownPos, knownLabels;
-
-  /** Return the set of part-of-speech tags of this parser. We normalize it a bit to help it match what
-   *  other parsers use.
-   *
-   *  @return Set of POS tags
-   */
-  public Set<String> getPosSet() {
-    Set<String> foo = Generics.newHashSet(knownPos);
-    // Don't really understand why these ones are there, but remove them. [CDM 2016]
-    foo.remove("-NULL-");
-    foo.remove("-UNKNOWN-");
-    foo.remove("-ROOT-");
-    // but our other models do include an EOS tag
-    foo.add(".$$.");
-    return Collections.unmodifiableSet(foo);
-  }
 
   /**
    * Mapping from word / POS / dependency relation label to integer ID
@@ -140,7 +124,7 @@ public class DependencyParser  {
 
   /**
    * Get an integer ID for the given word. This ID can be used to index
-   * into the embeddings {@link Classifier#E}.
+   * into the embeddings {@link #embeddings}.
    *
    * @return An ID for the given word, or an ID referring to a generic
    *         "unknown" word if the word is unknown
@@ -159,9 +143,9 @@ public class DependencyParser  {
 
   public List<Integer> getFeatures(Configuration c) {
     // Presize the arrays for very slight speed gain. Hardcoded, but so is the current feature list.
-    List<Integer> fWord = new ArrayList<>(18);
-    List<Integer> fPos = new ArrayList<>(18);
-    List<Integer> fLabel = new ArrayList<>(12);
+    List<Integer> fWord = new ArrayList<Integer>(18);
+    List<Integer> fPos = new ArrayList<Integer>(18);
+    List<Integer> fLabel = new ArrayList<Integer>(12);
     for (int j = 2; j >= 0; --j) {
       int index = c.getStack(j);
       fWord.add(getWordID(c.getWord(index)));
@@ -274,16 +258,16 @@ public class DependencyParser  {
     Dataset ret = new Dataset(config.numTokens, numTrans);
 
     Counter<Integer> tokPosCount = new IntCounter<>();
-    log.info(Config.SEPARATOR);
-    log.info("Generate training examples...");
+    System.err.println(Config.SEPARATOR);
+    System.err.println("Generate training examples...");
 
     for (int i = 0; i < sents.size(); ++i) {
 
       if (i > 0) {
         if (i % 1000 == 0)
-          log.info(i + " ");
+          System.err.print(i + " ");
         if (i % 10000 == 0 || i == sents.size() - 1)
-          log.info();
+          System.err.println();
       }
 
       if (trees.get(i).isProjective()) {
@@ -307,7 +291,7 @@ public class DependencyParser  {
         }
       }
     }
-    log.info("#Train Examples: " + ret.n);
+    System.err.println("#Train Examples: " + ret.n);
 
     List<Integer> sortedTokens = Counters.toSortedList(tokPosCount, false);
     preComputed = new ArrayList<>(sortedTokens.subList(0, Math.min(config.numPreComputed, sortedTokens.size())));
@@ -390,10 +374,10 @@ public class DependencyParser  {
     knownLabels.add(0, Config.NULL);
     generateIDs();
 
-    log.info(Config.SEPARATOR);
-    log.info("#Word: " + knownWords.size());
-    log.info("#POS:" + knownPos.size());
-    log.info("#Label: " + knownLabels.size());
+    System.err.println(Config.SEPARATOR);
+    System.err.println("#Word: " + knownWords.size());
+    System.err.println("#POS:" + knownPos.size());
+    System.err.println("#Label: " + knownLabels.size());
   }
 
   public void writeModelFile(String modelFile) {
@@ -417,26 +401,38 @@ public class DependencyParser  {
 
       // First write word / POS / label embeddings
       for (String word : knownWords) {
-        index = writeEmbedding(E[index], output, index, word);
+        output.write(word);
+        for (int k = 0; k < E[index].length; ++k)
+          output.write(" " + E[index][k]);
+        output.write("\n");
+        index = index + 1;
       }
       for (String pos : knownPos) {
-        index = writeEmbedding(E[index], output, index, pos);
+        output.write(pos);
+        for (int k = 0; k < E[index].length; ++k)
+          output.write(" " + E[index][k]);
+        output.write("\n");
+        index = index + 1;
       }
       for (String label : knownLabels) {
-        index = writeEmbedding(E[index], output, index, label);
+        output.write(label);
+        for (int k = 0; k < E[index].length; ++k)
+          output.write(" " + E[index][k]);
+        output.write("\n");
+        index = index + 1;
       }
 
       // Now write classifier weights
       for (int j = 0; j < W1[0].length; ++j)
         for (int i = 0; i < W1.length; ++i) {
-          output.write(String.valueOf(W1[i][j]));
+          output.write("" + W1[i][j]);
           if (i == W1.length - 1)
             output.write("\n");
           else
             output.write(" ");
         }
       for (int i = 0; i < b1.length; ++i) {
-        output.write(String.valueOf(b1[i]));
+        output.write("" + b1[i]);
         if (i == b1.length - 1)
           output.write("\n");
         else
@@ -444,7 +440,7 @@ public class DependencyParser  {
       }
       for (int j = 0; j < W2[0].length; ++j)
         for (int i = 0; i < W2.length; ++i) {
-          output.write(String.valueOf(W2[i][j]));
+          output.write("" + W2[i][j]);
           if (i == W2.length - 1)
             output.write("\n");
           else
@@ -453,7 +449,7 @@ public class DependencyParser  {
 
       // Finish with pre-computation info
       for (int i = 0; i < preComputed.size(); ++i) {
-        output.write(String.valueOf(preComputed.get(i)));
+        output.write("" + preComputed.get(i));
         if ((i + 1) % 100 == 0 || i == preComputed.size() - 1)
           output.write("\n");
         else
@@ -464,16 +460,6 @@ public class DependencyParser  {
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
-  }
-
-  private static int writeEmbedding(double[] doubles, Writer output, int index, String word) throws IOException {
-    output.write(word);
-    for (double aDouble : doubles) {
-      output.write(" " + aDouble);
-    }
-    output.write("\n");
-    index = index + 1;
-    return index;
   }
 
   /**
@@ -511,7 +497,7 @@ public class DependencyParser  {
     Timing t = new Timing();
     try {
 
-      log.info("Loading depparse model file: " + modelFile + " ... ");
+      System.err.println("Loading depparse model file: " + modelFile + " ... ");
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
 
@@ -530,9 +516,9 @@ public class DependencyParser  {
       s = input.readLine();
       int nPreComputed = Integer.parseInt(s.substring(s.indexOf('=') + 1));
 
-      knownWords = new ArrayList<>();
-      knownPos = new ArrayList<>();
-      knownLabels = new ArrayList<>();
+      knownWords = new ArrayList<String>();
+      knownPos = new ArrayList<String>();
+      knownLabels = new ArrayList<String>();
       double[][] E = new double[nDict + nPOS + nLabel][eSize];
       String[] splits;
       int index = 0;
@@ -585,7 +571,7 @@ public class DependencyParser  {
           W2[i][j] = Double.parseDouble(splits[i]);
       }
 
-      preComputed = new ArrayList<>();
+      preComputed = new ArrayList<Integer>();
       while (preComputed.size() < nPreComputed) {
         s = input.readLine();
         splits = s.split(" ");
@@ -594,8 +580,6 @@ public class DependencyParser  {
         }
       }
       input.close();
-      config.hiddenSize = hSize;
-      config.embeddingSize = eSize;
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
@@ -603,7 +587,7 @@ public class DependencyParser  {
 
     // initialize the loaded parser
     initialize(verbose);
-    t.done(log, "Initializing dependency parser");
+    t.done("Initializing dependency parser");
   }
 
   // TODO this should be a function which returns the embeddings array + embedID
@@ -616,7 +600,7 @@ public class DependencyParser  {
       BufferedReader input = null;
       try {
         input = IOUtils.readerFromString(embedFile);
-        List<String> lines = new ArrayList<>();
+        List<String> lines = new ArrayList<String>();
         for (String s; (s = input.readLine()) != null; ) {
           lines.add(s);
         }
@@ -626,7 +610,7 @@ public class DependencyParser  {
 
         int dim = splits.length - 1;
         embeddings = new double[nWords][dim];
-        log.info("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
+        System.err.println("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
 
         if (dim != config.embeddingSize)
             throw new IllegalArgumentException("The dimension of embedding file does not match config.embeddingSize");
@@ -642,8 +626,9 @@ public class DependencyParser  {
       } finally {
         IOUtils.closeIgnoringExceptions(input);
       }
-      embeddings = Util.scaling(embeddings, 0, 1.0);
     }
+
+    embeddings = Util.scaling(embeddings, 0, 1.0);
     return embeddings;
   }
 
@@ -658,19 +643,19 @@ public class DependencyParser  {
    *                  training corpus
    */
   public void train(String trainFile, String devFile, String modelFile, String embedFile, String preModel) {
-    log.info("Train File: " + trainFile);
-    log.info("Dev File: " + devFile);
-    log.info("Model File: " + modelFile);
-    log.info("Embedding File: " + embedFile);
-    log.info("Pre-trained Model File: " + preModel);
+    System.err.println("Train File: " + trainFile);
+    System.err.println("Dev File: " + devFile);
+    System.err.println("Model File: " + modelFile);
+    System.err.println("Embedding File: " + embedFile);
+    System.err.println("Pre-trained Model File: " + preModel);
 
     List<CoreMap> trainSents = new ArrayList<>();
-    List<DependencyTree> trainTrees = new ArrayList<>();
+    List<DependencyTree> trainTrees = new ArrayList<DependencyTree>();
     Util.loadConllFile(trainFile, trainSents, trainTrees, config.unlabeled, config.cPOS);
     Util.printTreeStats("Train", trainTrees);
 
-    List<CoreMap> devSents = new ArrayList<>();
-    List<DependencyTree> devTrees = new ArrayList<>();
+    List<CoreMap> devSents = new ArrayList<CoreMap>();
+    List<DependencyTree> devTrees = new ArrayList<DependencyTree>();
     if (devFile != null) {
       Util.loadConllFile(devFile, devSents, devTrees, config.unlabeled, config.cPOS);
       Util.printTreeStats("Dev", devTrees);
@@ -678,14 +663,14 @@ public class DependencyParser  {
     genDictionaries(trainSents, trainTrees);
 
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
-    List<String> lDict = new ArrayList<>(knownLabels);
+    List<String> lDict = new ArrayList<String>(knownLabels);
     lDict.remove(0);
     system = new ArcStandard(config.tlp, lDict, true);
 
     // Initialize a classifier; prepare for training
     setupClassifierForTraining(trainSents, trainTrees, embedFile, preModel);
 
-    log.info(Config.SEPARATOR);
+    System.err.println(Config.SEPARATOR);
     config.printParameters();
 
     long startTime = System.currentTimeMillis();
@@ -695,13 +680,13 @@ public class DependencyParser  {
     double bestUAS = 0;
 
     for (int iter = 0; iter < config.maxIter; ++iter) {
-      log.info("##### Iteration " + iter);
+      System.err.println("##### Iteration " + iter);
 
       Classifier.Cost cost = classifier.computeCostFunction(config.batchSize, config.regParameter, config.dropProb);
-      log.info("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
+      System.err.println("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
       classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
 
-      log.info("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+      System.err.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
 
       // UAS evaluation
       if (devFile != null && iter % config.evalPerIter == 0) {
@@ -713,7 +698,7 @@ public class DependencyParser  {
         List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(toList());
 
         double uas = config.noPunc ? system.getUASnoPunc(devSents, predicted, devTrees) : system.getUAS(devSents, predicted, devTrees);
-        log.info("UAS: " + uas);
+        System.err.println("UAS: " + uas);
 
         if (config.saveIntermediate && uas > bestUAS) {
           System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
@@ -725,7 +710,7 @@ public class DependencyParser  {
 
       // Clear gradients
       if (config.clearGradientsPerIter > 0 && iter % config.clearGradientsPerIter == 0) {
-        log.info("Clearing gradient histories..");
+        System.err.println("Clearing gradient histories..");
         classifier.clearGradientHistories();
       }
     }
@@ -793,7 +778,7 @@ public class DependencyParser  {
         W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
 
     // Read embeddings into `embedID`, `embeddings`
-     Map<String, Integer> embedID = new HashMap<>();
+     Map<String, Integer> embedID = new HashMap<String, Integer>();
      double[][] embeddings = readEmbedFile(embedFile, embedID);
 
     // Try to match loaded embeddings with words in dictionary
@@ -808,7 +793,8 @@ public class DependencyParser  {
       }
       if (index >= 0) {
         ++foundEmbed;
-        System.arraycopy(embeddings[index], 0, E[i], 0, E[i].length);
+        for (int j = 0; j < E[i].length; ++j)
+          E[i][j] = embeddings[index][j];
       } else {
         for (int j = 0; j < E[i].length; ++j)
           //E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
@@ -817,11 +803,11 @@ public class DependencyParser  {
           E[i][j] = random.nextDouble() * 0.02 - 0.01;
       }
     }
-    log.info("Found embeddings: " + foundEmbed + " / " + knownWords.size());
+    System.err.println("Found embeddings: " + foundEmbed + " / " + knownWords.size());
 
     if (preModel != null) {
         try {
-          log.info("Loading pre-trained model file: " + preModel + " ... ");
+          System.err.println("Loading pre-trained model file: " + preModel + " ... ");
           String s;
           BufferedReader input = IOUtils.readerFromString(preModel);
 
@@ -872,7 +858,7 @@ public class DependencyParser  {
 
           boolean copyLayer1 = hSize == config.hiddenSize && config.embeddingSize == eSize && config.numTokens == nTokens;
           if (copyLayer1) {
-            log.info("Copying parameters W1 && b1...");
+            System.err.println("Copying parameters W1 && b1...");
           }
           for (int j = 0; j < eSize * nTokens; ++j) {
             s = input.readLine();
@@ -892,7 +878,7 @@ public class DependencyParser  {
 
           boolean copyLayer2 = (nLabel * 2 - 1 == system.numTransitions()) && hSize == config.hiddenSize;
           if (copyLayer2)
-            log.info("Copying parameters W2...");
+            System.err.println("Copying parameters W2...");
           for (int j = 0; j < hSize; ++j) {
               s = input.readLine();
               if (copyLayer2) {
@@ -921,9 +907,6 @@ public class DependencyParser  {
 
     Configuration c = system.initialConfiguration(sentence);
     while (!system.isTerminal(c)) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       double[] scores = classifier.computeScores(getFeatureArray(c));
 
       double optScore = Double.NEGATIVE_INFINITY;
@@ -1070,10 +1053,10 @@ public class DependencyParser  {
    *  @return The LAS score on the dataset
    */
   public double testCoNLL(String testFile, String outFile) {
-    log.info("Test File: " + testFile);
+    System.err.println("Test File: " + testFile);
     Timing timer = new Timing();
     List<CoreMap> testSents = new ArrayList<>();
-    List<DependencyTree> testTrees = new ArrayList<>();
+    List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
     Util.loadConllFile(testFile, testSents, testTrees, config.unlabeled, config.cPOS);
 
     // count how much to parse
@@ -1083,8 +1066,8 @@ public class DependencyParser  {
     for (CoreMap testSent : testSents) {
       numSentences += 1;
       List<CoreLabel> tokens = testSent.get(CoreAnnotations.TokensAnnotation.class);
-      for (CoreLabel token : tokens) {
-        String word = token.word();
+      for (int k = 0; k < tokens.size(); ++ k) {  
+        String word = tokens.get(k).word();
         numWords += 1;
         if (!wordIDs.containsKey(word))
           numOOVWords += 1;
@@ -1094,7 +1077,7 @@ public class DependencyParser  {
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
-
+    
     double uas = config.noPunc ? result.get("UASnoPunc") : result.get("UAS");
     double las = config.noPunc ? result.get("LASnoPunc") : result.get("LAS");
     System.err.printf("UAS = %.4f%n", uas);
@@ -1191,15 +1174,15 @@ public class DependencyParser  {
    * <ul>
    *   <li>
    *     <strong>Train a parser with CoNLL treebank data:</strong>
-   *     {@code java edu.stanford.nlp.parser.nndep.DependencyParser -trainFile trainPath -devFile devPath -embedFile wordEmbeddingFile -embeddingSize wordEmbeddingDimensionality -model modelOutputFile.txt.gz}
+   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -trainFile trainPath -devFile devPath -embedFile wordEmbeddingFile -embeddingSize wordEmbeddingDimensionality -model modelOutputFile.txt.gz</code>
    *   </li>
    *   <li>
    *     <strong>Parse raw text from a file:</strong>
-   *     {@code java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile rawTextToParse -outFile dependenciesOutputFile.txt}
+   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile rawTextToParse -outFile dependenciesOutputFile.txt</code>
    *   </li>
    *   <li>
    *     <strong>Parse raw text from standard input, writing to standard output:</strong>
-   *     {@code java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile - -outFile -}
+   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile - -outFile -</code>
    *   </li>
    * </ul>
    *
@@ -1295,5 +1278,4 @@ public class DependencyParser  {
       parser.parseTextFile(input, output);
     }
   }
-
 }

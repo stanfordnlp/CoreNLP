@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.*;
 
@@ -22,10 +21,7 @@ import edu.stanford.nlp.util.*;
  *
  *  @author Christopher Manning
  */
-public class FastFactoredParser implements KBestViterbiParser  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FastFactoredParser.class);
+public class FastFactoredParser implements KBestViterbiParser {
 
   // TODO Regression tests
   // TODO Set dependency tuning and test whether useful
@@ -69,7 +65,7 @@ public class FastFactoredParser implements KBestViterbiParser  {
   }
 
 
-  private List<ScoredObject<Tree>> nGoodTrees = new ArrayList<>();
+  private List<ScoredObject<Tree>> nGoodTrees = new ArrayList<ScoredObject<Tree>>();
 
 
 
@@ -96,15 +92,15 @@ public class FastFactoredParser implements KBestViterbiParser  {
    * @return The score for the tree according to the grammar
    */
   private double depScoreTree(Tree tr) {
-    // log.info("Here's our tree:");
+    // System.err.println("Here's our tree:");
     // tr.pennPrint();
-    // log.info(Trees.toDebugStructureString(tr));
+    // System.err.println(Trees.toDebugStructureString(tr));
     Tree cwtTree = tr.deepCopy(new LabeledScoredTreeFactory(), new CategoryWordTagFactory());
     cwtTree.percolateHeads(binHeadFinder);
-    // log.info("Here's what it went to:");
+    // System.err.println("Here's what it went to:");
     // cwtTree.pennPrint();
     List<IntDependency> deps = MLEDependencyGrammar.treeToDependencyList(cwtTree, wordIndex, tagIndex);
-    // log.info("Here's the deps:\n" + deps);
+    // System.err.println("Here's the deps:\n" + deps);
     return dg.scoreAll(deps);
   }
 
@@ -123,14 +119,14 @@ public class FastFactoredParser implements KBestViterbiParser  {
     int numParsesToConsider = numToFind * op.testOptions.fastFactoredCandidateMultiplier + op.testOptions.fastFactoredCandidateAddend;
     if (pparser.hasParse()) {
       List<ScoredObject<Tree>> pcfgBest = pparser.getKBestParses(numParsesToConsider);
-      Beam<ScoredObject<Tree>> goodParses = new Beam<>(numToFind);
+      Beam<ScoredObject<Tree>> goodParses = new Beam<ScoredObject<Tree>>(numToFind);
 
       for (ScoredObject<Tree> candidate : pcfgBest) {
         if (Thread.interrupted()) {
           throw new RuntimeInterruptedException();
         }
         double depScore = depScoreTree(candidate.object());
-        ScoredObject<Tree> x = new ScoredObject<>(candidate.object(), candidate.score() + depScore);
+        ScoredObject<Tree> x = new ScoredObject<Tree>(candidate.object(), candidate.score() + depScore);
         goodParses.add(x);
       }
       nGoodTrees = goodParses.asSortedList();

@@ -1,7 +1,5 @@
 package edu.stanford.nlp.ling;
-import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.Objects;
 import java.util.Set;
 
 import edu.stanford.nlp.util.StringUtils;
@@ -31,10 +29,7 @@ import edu.stanford.nlp.util.TypesafeMap;
  * @author John Bauer
  * @author Sonal Gupta
  */
-public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IndexedWord.class);
+public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
 
   private static final long serialVersionUID = 3739633991145239829L;
 
@@ -46,18 +41,10 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   private final CoreLabel label;
 
   private int copyCount; // = 0;
-
+  
   private int numCopies = 0;
-
+  
   private IndexedWord original = null;
-
-  /**
-   * Useful for specifying a fine-grained position when butchering parse trees.
-   * The canonical use case for this is resolving coreference in the OpenIE system, where
-   * we want to move nodes between sentences, but do not want to change their index annotation
-   * (plus, we need to have multiple nodes fit into the space of one pronoun).
-   */
-  private double pseudoPosition = Double.NaN;
 
   /**
    * Default constructor; uses {@link CoreLabel} default constructor
@@ -118,7 +105,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     copy.setCopyCount(count);
     return copy;
   }
-
+  
   public IndexedWord makeCopy() {
     return makeCopy(++numCopies);
   }
@@ -129,7 +116,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     copy.original = this;
     return copy;
   }
-
+  
   public IndexedWord makeSoftCopy() {
     if (original != null) {
       return original.makeSoftCopy();
@@ -137,7 +124,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
       return makeSoftCopy(++numCopies);
     }
   }
-
+  
   public IndexedWord getOriginal() {
     return original;
   }
@@ -153,6 +140,11 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   }
 
   @Override
+  public <VALUE> boolean has(Class<? extends TypesafeMap.Key<VALUE>> key) {
+    return label.has(key);
+  }
+
+  @Override
   public <VALUE> boolean containsKey(Class<? extends TypesafeMap.Key<VALUE>> key) {
     return label.containsKey(key);
   }
@@ -165,11 +157,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   @Override
   public <KEY extends TypesafeMap.Key<String>> String getString(Class<KEY> key) {
     return label.getString(key);
-  }
-
-  @Override
-  public <KEY extends TypesafeMap.Key<String>> String getString(Class<KEY> key, String def) {
-    return label.getString(key, def);
   }
 
   @Override
@@ -257,28 +244,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     label.setIndex(index);
   }
 
-  /**
-   * In most cases, this is just the index of the word.
-   * However, this should be the value used to sort nodes in
-   * a tree.
-   *
-   * @see IndexedWord#pseudoPosition
-   */
-  public double pseudoPosition() {
-    if (!Double.isNaN(pseudoPosition)) {
-      return pseudoPosition;
-    } else {
-      return (double) index();
-    }
-  }
-
-  /**
-   * @see IndexedWord#pseudoPosition
-   */
-  public void setPseudoPosition(double position) {
-    this.pseudoPosition = position;
-  }
-
   @Override
   public int sentIndex() {
     return label.sentIndex();
@@ -330,26 +295,33 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   public String toPrimes() {
     return StringUtils.repeat('\'', copyCount);
   }
-
+  
   public boolean isCopy(IndexedWord otherWord) {
     Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
     Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
-    if ( ! Objects.equals(myInd, otherInd)) {
+    if (myInd == null) {
+      if (otherInd != null)
+      return false;
+    } else if ( ! myInd.equals(otherInd)) {
       return false;
     }
-
     Integer mySentInd = get(CoreAnnotations.SentenceIndexAnnotation.class);
     Integer otherSentInd = otherWord.get(CoreAnnotations.SentenceIndexAnnotation.class);
-    if ( ! Objects.equals(mySentInd, otherSentInd)) {
+    if (mySentInd == null) {
+      if (otherSentInd != null)
+      return false;
+    } else if ( ! mySentInd.equals(otherSentInd)) {
       return false;
     }
-
     String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
     String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
-    if ( ! Objects.equals(myDocID, otherDocID)) {
+    if (myDocID == null) {
+      if (otherDocID != null)
+      return false;
+    } else if ( ! myDocID.equals(otherDocID)) {
       return false;
     }
-
+    
     if (copyCount() == 0 || otherWord.copyCount() != 0) {
       return false;
     }
@@ -372,28 +344,29 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     final IndexedWord otherWord = (IndexedWord) o;
     Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
     Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
-    if ( ! Objects.equals(myInd, otherInd)) {
+    if (myInd == null) {
+      if (otherInd != null)
+      return false;
+    } else if ( ! myInd.equals(otherInd)) {
       return false;
     }
-
     Integer mySentInd = get(CoreAnnotations.SentenceIndexAnnotation.class);
     Integer otherSentInd = otherWord.get(CoreAnnotations.SentenceIndexAnnotation.class);
-    if ( ! Objects.equals(mySentInd, otherSentInd)) {
+    if (mySentInd == null) {
+      if (otherSentInd != null)
+      return false;
+    } else if ( ! mySentInd.equals(otherSentInd)) {
       return false;
     }
-
     String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
     String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
-    if ( ! Objects.equals(myDocID, otherDocID)) {
+    if (myDocID == null) {
+      if (otherDocID != null)
+      return false;
+    } else if ( ! myDocID.equals(otherDocID)) {
       return false;
     }
-
     if (copyCount() != otherWord.copyCount()) {
-      return false;
-    }
-    // Compare pseudo-positions
-    if ( (!Double.isNaN(this.pseudoPosition) || !Double.isNaN(otherWord.pseudoPosition)) &&
-         this.pseudoPosition != otherWord.pseudoPosition) {
       return false;
     }
     return true;
@@ -416,16 +389,16 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
       result = get(CoreAnnotations.DocIDAnnotation.class).hashCode();
       sensible = true;
     }
-    if (containsKey(CoreAnnotations.SentenceIndexAnnotation.class)) {
+    if (has(CoreAnnotations.SentenceIndexAnnotation.class)) {
       result = 29 * result + get(CoreAnnotations.SentenceIndexAnnotation.class).hashCode();
       sensible = true;
     }
-    if (containsKey(CoreAnnotations.IndexAnnotation.class)) {
+    if (has(CoreAnnotations.IndexAnnotation.class)) {
       result = 29 * result + get(CoreAnnotations.IndexAnnotation.class).hashCode();
       sensible = true;
     }
     if ( ! sensible) {
-      log.info("WARNING!!!  You have hashed an IndexedWord with no docID, sentIndex or wordIndex. You will almost certainly lose");
+      System.err.println("WARNING!!!  You have hashed an IndexedWord with no docID, sentIndex or wordIndex. You will almost certainly lose");
     }
     cachedHashCode = result;
     return result;
@@ -460,16 +433,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
       return 1;
     }
 
-    // Override the default comparator if pseudo-positions are set.
-    // This is needed for splicing trees together awkwardly in OpenIE.
-    if (!Double.isNaN(w.pseudoPosition) || !Double.isNaN(this.pseudoPosition)) {
-      double val = this.pseudoPosition() - w.pseudoPosition();
-      if (val < 0) { return -1; }
-      if (val > 0) { return 1; }
-      else { return 0; }
-    }
-
-    // Otherwise, compare using the normal doc/sentence/token index hierarchy
     String docID = this.getString(CoreAnnotations.DocIDAnnotation.class);
     int docComp = docID.compareTo(w.getString(CoreAnnotations.DocIDAnnotation.class));
     if (docComp != 0) return docComp;

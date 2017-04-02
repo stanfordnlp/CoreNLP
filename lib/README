@@ -4,38 +4,27 @@ Written by Bill MacCartney <wcmac@cs.stanford.edu> 23 January 2006
 Updated by Daniel Ramage 16 October 2006
 
 This directory is intended to contain only *current and necessary*
-.jar files used with JavaNLP-core.  
-
-Our original model was that each jar file in lib should be without
+.jar files used with JavaNLP-core.  Each jar file in lib should be without
 its version number but include a corresponding source .zip/.jar file
 with a full version number in the libsrc folder.  For example, if
 there is a file  lib/ra.jar there should be a corresponding and
-up-to-date libsrc/ra-0.1.8-src.zip. That had some good properties
-but could also be a nuisance in the modern world, so it is also
-fine and more common recently for people to have in lib a
-lib/ra-0.1.8.jar corresponding to a libsrc/ra-0.1.8-src.{zip,jar}.
+up-to-date libsrc/ra-0.1.8-src.zip.
 
 Outdated or redundant .jar files should NOT be kept here, but can
 be stored instead in /u/nlp/java/liball.  Files in that directory
 can have version numbers in the name.  Example: colt1.0.3.jar.
 
 If you're adding a new .jar to the repository, please:
- - make sure the jar isn't already somewhere in the repository.
-   If it is, try to converge on one version and promote placement to
-   more if it is used in multiple projects
- - add the jar itself to the lib directory (with or without version number)
- - add its source zip with version number to the libsrc directory
+ - add the jar itself (without version number)
+ - add its source zip (with version number)
  - check to make sure that the jar file doesn't have other libraries
    embedded within it (use jar -tf). if the .jar file has other libraries
-   embedded which overlap with other javanlp libraries, please remove them.
-   Normally we then give the jar a name ending in "x" to show we modified it.
+   embedded which overlap with other javanlp libraries, please remove that
  - update the Eclipse .classpath file to include the jar and a path
-   to its source -- this is essential to keep things working for 
-   Eclipse/IntelliJ users!
+   to its source,
  - also update this file with information about the jar
  - If it will be needed by releases of CoreNLP, also add it to the *2* pom files.
- - If it will be needed by releases of CoreNLP, also document the
-   licensing in LIBRARY-LICENSES.
+ - If it will be needed by releases of CoreNLP, also document the licensing in LIBRARY-LICENSES.
 
 Any .jar files which appear in this directory should be listed in
 this file, with the following information:
@@ -150,11 +139,11 @@ LAST UPDATE BY: Jeff Michels
 -----------------------------------------------------------------------
 junit.jar
 
-ORIGINAL JAR NAME: junit-4.12.jar
+ORIGINAL JAR NAME: junit-4.5.jar
 
-VERSION: 4.12
+VERSION: 4.5
 
-RELEASE DATE: 2015/02/19
+RELEASE DATE: 2008/08/08
 
 SOURCE AVAILABLE: yes
 
@@ -165,7 +154,7 @@ URL: http://www.junit.org/
 USED BY: Our junit tests.
 Not needed by CoreNLP distributions.
 
-LAST UPDATE: 2015/08/28
+LAST UPDATE: 2008/08/24
 
 LAST UPDATE BY: Ilya Sherman
 
@@ -257,9 +246,9 @@ LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 joda-time.jar
-ORIGINAL JAR NAME: joda-time-2.9.4.jar
-VERSION: 2.9.4
-RELEASE DATE: 2016-05-27
+ORIGINAL JAR NAME: joda-time-2.1.jar
+VERSION: 2.1
+RELEASE DATE: 2012-02-22
 SOURCE AVAILABLE: yes
 DESCRIPTION: Extended date/time API that handles partial dates/times
 URL: http://joda-time.sourceforge.net/index.html
@@ -267,14 +256,14 @@ URL: http://joda-time.sourceforge.net/index.html
 USED BY: edu.stanford.nlp.time
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2016-07-08
-LAST UPDATE BY: Angel Chang
+LAST UPDATE: 2012-11-08
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-jollyday-0.4.9.jar
-ORIGINAL JAR NAME: jollyday-0.4.9.jar
-VERSION: 0.4.9
-RELEASE DATE: 2015-05-06
+jollyday-0.4.7.jar
+ORIGINAL JAR NAME: jollyday-0.4.7.jar
+VERSION: 0.4.7
+RELEASE DATE: 2012-11-05
 SOURCE AVAILABLE: yes
 DESCRIPTION: API for holidays (using jodatime)
 URL: http://jollyday.sourceforge.net
@@ -282,8 +271,8 @@ URL: http://jollyday.sourceforge.net
 USED BY: edu.stanford.nlp.time
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2016-07-24
-LAST UPDATE BY: Christopher Manning
+LAST UPDATE: 2012-11-05
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 ejml-0.23.jar
@@ -334,14 +323,14 @@ LAST UPDATE BY: Spence Green
 -----------------------------------------------------------------
 protobuf.jar
 ORIGINAL JAR NAME: <compiled from source>
-VERSION: 2.6.1
-RELEASE DATE: Oct 2014
+VERSION: 2.4.1
+RELEASE DATE: April 2011
 SOURCE AVAILABLE: yes
 DESCRIPTION: Google's protocol buffer library
-URL: https://developers.google.com/protocol-buffers/
+URL: https://code.google.com/p/protobuf/
 USED BY: CoreMapProtos (and associated serializers)
-LAST UPDATE: 2015-09-07
-LAST UPDATE BY: Sebastian Schuster
+LAST UPDATE: 2013-09-24
+LAST UPDATE BY: Gabor Angeli
 
 ----------------------------------------------------------------
 javax.json.jar
@@ -376,33 +365,6 @@ USED BY: patterns.surface
 
 LAST UPDATE: 2015-01-15
 LAST UPDATE BY: Melvin Johnson Premkumar
-
------------------------------------------------------------------
-slf4j-api.jar
-ORIGINAL JAR NAME: slf4j-api-1.7.12.jar
-
-VERSION: 1.7.12
-RELEASE DATE: 26 Mar 2015
-SOURCE AVAILABLE: yes
-DESCRIPTION: "A facade that allows users to choose various logging
-frameworks at deployment time."
-URL: https://www.slf4j.org/
-USED BY: SLF4JHandler
-
-LAST UPDATE: 2017-01-12
-LAST UPDATE BY: Jason Bolton
------------------------------------------------------------------
-slf4j-simple.jar
-ORIGINAL JAR NAME: slf4j-simple-1.7.12.jar
-
-VERSION: 1.7.12
-RELEASE DATE: 26 Mar 2015
-SOURCE AVAILABLE: yes
-DESCRIPTION: "A basic logger that works with slf4j"
-URL: https://www.slf4j.org/
-
-LAST UPDATE: 2017-01-17
-LAST UPDATE BY: Jason Bolton
 
 -----------------------------------------------------------------
 foo.jar

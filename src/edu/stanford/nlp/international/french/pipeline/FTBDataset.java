@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.french.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.french.pipeline;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,10 +39,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * @author Spence Green
  *
  */
-public class FTBDataset extends AbstractDataset  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FTBDataset.class);
+public class FTBDataset extends AbstractDataset {
 
   private boolean CC_TAGSET = false;
 
@@ -100,7 +96,7 @@ public class FTBDataset extends AbstractDataset  {
 
       preprocessMWEs();
 
-      List<TregexPattern> badTrees = new ArrayList<>();
+      List<TregexPattern> badTrees = new ArrayList<TregexPattern>();
       //These trees appear in the Candito training set
       //They are mangled by the TreeCorrector, so discard them ahead of time.
       badTrees.add(TregexPattern.compile("@SENT <: @PUNC"));
@@ -119,7 +115,7 @@ public class FTBDataset extends AbstractDataset  {
           if(skipTree) break;
         }
         if(skipTree) {
-          log.info("Discarding tree: " + t.toString());
+          System.err.println("Discarding tree: " + t.toString());
           continue;
         }
 
@@ -169,16 +165,16 @@ public class FTBDataset extends AbstractDataset  {
   private void preprocessMWEs() {
 
     TwoDimensionalCounter<String,String> labelTerm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> termLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> labelPreterm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> pretermLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     TwoDimensionalCounter<String,String> unigramTagger =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     for (Tree t : treebank) {
       MWEPreprocessor.countMWEStatistics(t, unigramTagger,

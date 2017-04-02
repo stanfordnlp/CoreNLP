@@ -1,5 +1,4 @@
 package edu.stanford.nlp.sequences;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -32,13 +31,13 @@ import java.util.regex.Pattern;
  * Accepts the following properties
  * <table>
  *   <tr><th>Field</th><th>Type</th><th>Default</th><th>Description</th></tr>
- *   <tr><td>{@code columns}</td><td>String</td><td>{@code}</td><td>Comma separated list of mapping between annotation (see {@link edu.stanford.nlp.ling.AnnotationLookup}) and column index (starting from 0).  Example: {@code word=0,tag=1}</td></tr>
- *   <tr><td>{@code delimiter}</td><td>String</td><td>{@code \t}</td><td>Regular expression for delimiter</td></tr>
- *   <tr><td>{@code replaceWhitespace}</td><td>Boolean</td><td>{@code true}</td><td>Replace whitespaces with "_"</td></tr>
- *   <tr><td>{@code tokens}</td><td>Class</td>
+ *   <tr><td><code>columns</code></td><td>String</td><td><code></code></td><td>Comma separated list of mapping between annotation (see {@link edu.stanford.nlp.ling.AnnotationLookup.KeyLookup}) and column index (starting from 0).  Example: <code>word=0,tag=1</code></td></tr>
+ *   <tr><td><code>delimiter</code></td><td>String</td><td><code>\t</code></td><td>Regular expression for delimiter</td></tr>
+ *   <tr><td><code>replaceWhitespace</code></td><td>Boolean</td><td><code>true</code></td><td>Replace whitespaces with "_"</td></tr>
+ *   <tr><td><code>tokens</code></td><td>Class</td>
  *       <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation}</td>
  *       <td>Annotation field for tokens</td></tr>
- *   <tr><td>{@code tokenFactory}</td><td>Class</td>
+ *   <tr><td><code>tokenFactory</code></td><td>Class</td>
  *       <td>{@link CoreLabelTokenFactory edu.stanford.nlp.process.CoreLabelTokenFactory}</td>
  *       <td>Factory for creating tokens</td></tr>
  * </table>
@@ -46,10 +45,7 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  * @author Sonal Gupta (made the class generic)
  */
-public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements DocumentReaderAndWriter<IN>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ColumnTabDocumentReaderWriter.class);
+public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements DocumentReaderAndWriter<IN> {
 
   private static final long serialVersionUID = 1;
 
@@ -64,7 +60,6 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
    * reads the tokenFactory and tokensAnnotationClassName from
    * {@link SeqClassifierFlags}
    */
-  @Override
   public void init(SeqClassifierFlags flags) {
     if (flags.tokensAnnotationClassName != null) {
       this.tokensAnnotationClassName = flags.tokensAnnotationClassName;
@@ -136,7 +131,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
     } else {
       br = new BufferedReader(r);
     }
-    return new BufferedReaderIterator<>(new ColumnDocBufferedGetNextTokens(br));
+    return new BufferedReaderIterator<List<IN>>(new ColumnDocBufferedGetNextTokens(br));
   }
 
   public Iterator<Annotation> getDocIterator(Reader r) {
@@ -146,7 +141,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
     } else {
       br = new BufferedReader(r);
     }
-    return new BufferedReaderIterator<>(new ColumnDocBufferedGetNext(br, false));
+    return new BufferedReaderIterator<Annotation>(new ColumnDocBufferedGetNext(br, false));
   }
 
   public Iterator<Annotation> getDocIterator(Reader r, boolean includeText) {
@@ -156,11 +151,11 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
     } else {
       br = new BufferedReader(r);
     }
-    return new BufferedReaderIterator<>(new ColumnDocBufferedGetNext(br, false, includeText));
+    return new BufferedReaderIterator<Annotation>(new ColumnDocBufferedGetNext(br, false, includeText));
   }
 
-  private interface GetNextFunction<E> {
-    E getNext();
+  private static interface GetNextFunction<E> {
+    public E getNext();
   }
 
   private static class BufferedReaderIterator<E> extends AbstractIterator<E> {
@@ -193,7 +188,6 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
       docGetNext = new ColumnDocBufferedGetNext(br, true);
     }
 
-    @Override
     public List<IN> getNext() {
       try {
         CoreMap m = docGetNext.getNext();
@@ -268,20 +262,20 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
             i += tokenText.length();
             token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, i);
             /*
-             * if (i > docText.length()) { log.info("index " + i +
+             * if (i > docText.length()) { System.err.println("index " + i +
              * " larger than docText length " + docText.length());
-             * log.info("Token: " + tokenText);
-             * log.info("DocText: " + docText); }
+             * System.err.println("Token: " + tokenText);
+             * System.err.println("DocText: " + docText); }
              */
             assert (i <= docText.length());
             i++; // Skip space
           }
         }
         if (sentenceBoundaries != null) {
-          List<CoreMap> sentences = new ArrayList<>(sentenceBoundaries.size());
+          List<CoreMap> sentences = new ArrayList<CoreMap>(sentenceBoundaries.size());
           for (IntPair p : sentenceBoundaries) {
             // get the sentence text from the first and last character offsets
-            List<IN> sentenceTokens = new ArrayList<>(tokens.subList(p.getSource(), p.getTarget() + 1));
+            List<IN> sentenceTokens = new ArrayList<IN>(tokens.subList(p.getSource(), p.getTarget() + 1));
             Integer begin = sentenceTokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
             int last = sentenceTokens.size() - 1;
             Integer end = sentenceTokens.get(last).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
@@ -324,12 +318,11 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
       }
     }
 
-    @Override
     public Annotation getNext() {
       if (itemCnt > 0 && itemCnt % 1000 == 0) {
-        log.info("[" + itemCnt + "," + lineCnt + "]");
+        System.err.print("[" + itemCnt + "," + lineCnt + "]");
         if (itemCnt % 10000 == 9000) {
-          log.info();
+          System.err.println();
         }
       }
       try {
@@ -337,7 +330,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
         List<IN> words = null;
         List<IntPair> boundaries = null;
         if (keepBoundaries) {
-          boundaries = new ArrayList<>();
+          boundaries = new ArrayList<IntPair>();
         }
         while ((line = br.readLine()) != null) {
           lineCnt++;
@@ -364,7 +357,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
               }
             } else {
               if (words == null) {
-                words = new ArrayList<>();
+                words = new ArrayList<IN>();
                 docId = newDocId;
                 itemCnt++;
               }
@@ -388,21 +381,20 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
           }
         }
         if (words == null) {
-          log.info("[" + itemCnt + "," + lineCnt + "]");
+          System.err.println("[" + itemCnt + "," + lineCnt + "]");
         }
         if (keepBoundaries) {
           markBoundary(words, boundaries);
         }
         return (words == null) ? null : createDoc(docId, words, boundaries, includeText);
       } catch (IOException ex) {
-        log.info("IOException: " + ex);
+        System.err.println("IOException: " + ex);
         throw new RuntimeException(ex);
       }
     }
 
   } // end class ColumnDocParser
 
-  @Override
   public void printAnswers(List<IN> doc, PrintWriter out) {
     for (IN wi : doc) {
       String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);

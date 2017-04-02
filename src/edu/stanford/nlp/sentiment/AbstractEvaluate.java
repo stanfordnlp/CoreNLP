@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sentiment; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sentiment;
 
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.neural.rnn.TopNGramRecord;
@@ -20,10 +19,7 @@ import java.util.Set;
  * @author John Bauer
  * @author Michael Haas <haas@cl.uni-heidelberg.de> (extracted this abstract class from Evaluate)
  */
-public abstract class AbstractEvaluate  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractEvaluate.class);
+public abstract class AbstractEvaluate {
 
     String[] equivalenceClassNames;
     int labelsCorrect;
@@ -51,15 +47,15 @@ public abstract class AbstractEvaluate  {
     }
 
     protected static void printConfusionMatrix(String name, int[][] confusion) {
-        log.info(name + " confusion matrix");
-        ConfusionMatrix<Integer> confusionMatrix = new ConfusionMatrix<>();
+        System.err.println(name + " confusion matrix");
+        ConfusionMatrix<Integer> confusionMatrix = new ConfusionMatrix<Integer>();
         confusionMatrix.setUseRealLabels(true);
         for (int i = 0; i < confusion.length; ++i) {
             for (int j = 0; j < confusion[i].length; ++j) {
                 confusionMatrix.add(j, i, confusion[i][j]);
             }
         }
-        log.info(confusionMatrix);
+        System.err.println(confusionMatrix);
     }
 
     protected static double[] approxAccuracy(int[][] confusion, int[][] classes) {
@@ -83,13 +79,13 @@ public abstract class AbstractEvaluate  {
     protected static double approxCombinedAccuracy(int[][] confusion, int[][] classes) {
         int correct = 0;
         int total = 0;
-        for (int[] aClass : classes) {
-            for (int j = 0; j < aClass.length; ++j) {
-                for (int k = 0; k < aClass.length; ++k) {
-                    correct += confusion[aClass[j]][aClass[k]];
+        for (int i = 0; i < classes.length; ++i) {
+            for (int j = 0; j < classes[i].length; ++j) {
+                for (int k = 0; k < classes[i].length; ++k) {
+                    correct += confusion[classes[i][j]][classes[i][k]];
                 }
-                for (int k = 0; k < confusion[aClass[j]].length; ++k) {
-                    total += confusion[aClass[j]][k];
+                for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
+                    total += confusion[classes[i][j]][k];
                 }
             }
         }
@@ -103,8 +99,8 @@ public abstract class AbstractEvaluate  {
         rootLabelsCorrect = 0;
         rootLabelsIncorrect = 0;
         rootLabelConfusion = new int[op.numClasses][op.numClasses];
-        lengthLabelsCorrect = new IntCounter<>();
-        lengthLabelsIncorrect = new IntCounter<>();
+        lengthLabelsCorrect = new IntCounter<Integer>();
+        lengthLabelsIncorrect = new IntCounter<Integer>();
         equivalenceClasses = op.equivalenceClasses;
         equivalenceClassNames = op.equivalenceClassNames;
         if (op.testOptions.ngramRecordSize > 0) {
@@ -201,7 +197,7 @@ public abstract class AbstractEvaluate  {
         Set<Integer> keys = Generics.newHashSet();
         keys.addAll(lengthLabelsCorrect.keySet());
         keys.addAll(lengthLabelsIncorrect.keySet());
-        Counter<Integer> results = new ClassicCounter<>();
+        Counter<Integer> results = new ClassicCounter<Integer>();
         for (Integer key : keys) {
             results.setCount(key, lengthLabelsCorrect.getCount(key) / (lengthLabelsCorrect.getCount(key) + lengthLabelsIncorrect.getCount(key)));
         }
@@ -212,39 +208,39 @@ public abstract class AbstractEvaluate  {
         Counter<Integer> accuracies = lengthAccuracies();
         Set<Integer> keys = Generics.newTreeSet();
         keys.addAll(accuracies.keySet());
-        log.info("Label accuracy at various lengths:");
+        System.err.println("Label accuracy at various lengths:");
         for (Integer key : keys) {
-            log.info(StringUtils.padLeft(Integer.toString(key), 4) + ": " + NF.format(accuracies.getCount(key)));
+            System.err.println(StringUtils.padLeft(Integer.toString(key), 4) + ": " + NF.format(accuracies.getCount(key)));
         }
     }
 
     public void printSummary() {
-        log.info("EVALUATION SUMMARY");
-        log.info("Tested " + (labelsCorrect + labelsIncorrect) + " labels");
-        log.info("  " + labelsCorrect + " correct");
-        log.info("  " + labelsIncorrect + " incorrect");
-        log.info("  " + NF.format(exactNodeAccuracy()) + " accuracy");
-        log.info("Tested " + (rootLabelsCorrect + rootLabelsIncorrect) + " roots");
-        log.info("  " + rootLabelsCorrect + " correct");
-        log.info("  " + rootLabelsIncorrect + " incorrect");
-        log.info("  " + NF.format(exactRootAccuracy()) + " accuracy");
+        System.err.println("EVALUATION SUMMARY");
+        System.err.println("Tested " + (labelsCorrect + labelsIncorrect) + " labels");
+        System.err.println("  " + labelsCorrect + " correct");
+        System.err.println("  " + labelsIncorrect + " incorrect");
+        System.err.println("  " + NF.format(exactNodeAccuracy()) + " accuracy");
+        System.err.println("Tested " + (rootLabelsCorrect + rootLabelsIncorrect) + " roots");
+        System.err.println("  " + rootLabelsCorrect + " correct");
+        System.err.println("  " + rootLabelsIncorrect + " incorrect");
+        System.err.println("  " + NF.format(exactRootAccuracy()) + " accuracy");
         printConfusionMatrix("Label", labelConfusion);
         printConfusionMatrix("Root label", rootLabelConfusion);
         if (equivalenceClasses != null && equivalenceClassNames != null) {
             double[] approxLabelAccuracy = approxAccuracy(labelConfusion, equivalenceClasses);
             for (int i = 0; i < equivalenceClassNames.length; ++i) {
-                log.info("Approximate " + equivalenceClassNames[i] + " label accuracy: " + NF.format(approxLabelAccuracy[i]));
+                System.err.println("Approximate " + equivalenceClassNames[i] + " label accuracy: " + NF.format(approxLabelAccuracy[i]));
             }
-            log.info("Combined approximate label accuracy: " + NF.format(approxCombinedAccuracy(labelConfusion, equivalenceClasses)));
+            System.err.println("Combined approximate label accuracy: " + NF.format(approxCombinedAccuracy(labelConfusion, equivalenceClasses)));
             double[] approxRootLabelAccuracy = approxAccuracy(rootLabelConfusion, equivalenceClasses);
             for (int i = 0; i < equivalenceClassNames.length; ++i) {
-                log.info("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
+                System.err.println("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
             }
-            log.info("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
-            log.info();
+            System.err.println("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
+            System.err.println();
         }
         if (op.testOptions.ngramRecordSize > 0) {
-            log.info(ngrams);
+            System.err.println(ngrams);
         }
         if (op.testOptions.printLengthAccuracies) {
             printLengthAccuracies();

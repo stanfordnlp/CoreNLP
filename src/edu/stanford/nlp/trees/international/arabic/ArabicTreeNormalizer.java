@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.international.arabic; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.arabic;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,10 +39,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Anna Rafferty
  * @author Spence Green
  */
-public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicTreeNormalizer.class);
+public class ArabicTreeNormalizer extends BobChrisTreeNormalizer {
 
   private final boolean retainNPTmp;
   private final boolean retainNPSbj;
@@ -167,7 +163,7 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
 
         // there are some nodes "/" missing preterminals.  We'll splice in a tag for these.
         int nk = t.numChildren();
-        List<Tree> newKids = new ArrayList<>(nk);
+        List<Tree> newKids = new ArrayList<Tree>(nk);
         for (int j = 0; j < nk; j++) {
           Tree child = t.getChild(j);
           if (child.isLeaf()) {

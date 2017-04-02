@@ -26,14 +26,11 @@ import java.util.regex.Pattern;
  */
 public class TimeFormatter {
 
-  private TimeFormatter() {} // static methods/classes
-
-
   public static class JavaDateFormatExtractor implements
-          Function<CoreMap, Value> {
-
-    private static final Class<CoreAnnotations.TextAnnotation> textAnnotationField = CoreAnnotations.TextAnnotation.class;
-    private final SimpleDateFormat format;
+          Function<CoreMap, Value>
+  {
+    static final Class<CoreAnnotations.TextAnnotation> textAnnotationField = CoreAnnotations.TextAnnotation.class;
+    SimpleDateFormat format;
 
     public JavaDateFormatExtractor(String pattern) {
       this.format = new SimpleDateFormat(pattern);
@@ -50,15 +47,13 @@ public class TimeFormatter {
         return null;
       }
     }
-
   }
 
-
   public static class JodaDateTimeFormatExtractor implements
-          Function<CoreMap, Value> {
-
-    private static final Class<CoreAnnotations.TextAnnotation> textAnnotationField = CoreAnnotations.TextAnnotation.class;
-    private final DateTimeFormatter formatter;
+          Function<CoreMap, Value>
+  {
+    static final Class<CoreAnnotations.TextAnnotation> textAnnotationField = CoreAnnotations.TextAnnotation.class;
+    DateTimeFormatter formatter;
 
     public JodaDateTimeFormatExtractor(DateTimeFormatter formatter) {
       this.formatter = formatter;
@@ -81,12 +76,10 @@ public class TimeFormatter {
     }
   }
 
-
   static class ApplyActionWrapper<I,O> implements Function<I,O> {
-
-    private final Env env;
-    private final Function<I,O> base;
-    private final Expression action;
+    Env env;
+    Function<I,O> base;
+    Expression action;
 
     ApplyActionWrapper(Env env, Function<I,O> base, Expression action) {
       this.env = env;
@@ -102,70 +95,67 @@ public class TimeFormatter {
       }
       return v;
     }
-
   }
 
-
   static class TimePatternExtractRuleCreator extends SequenceMatchRules.AnnotationExtractRuleCreator {
-
-    private static void updateExtractRule(SequenceMatchRules.AnnotationExtractRule r,
+    protected void updateExtractRule(SequenceMatchRules.AnnotationExtractRule r,
                                      Env env,
                                      Pattern pattern,
-                                     Function<String, Value> extractor) {
-      MatchedExpression.SingleAnnotationExtractor annotationExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
-      annotationExtractor.valueExtractor =
-              new SequenceMatchRules.CoreMapFunctionApplier<>(
+                                     Function<String, Value> extractor)
+    {
+      MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
+      valueExtractor.valueExtractor =
+              new SequenceMatchRules.CoreMapFunctionApplier< String, Value>(
                       env, r.annotationField,
                       extractor);
-      r.extractRule = new SequenceMatchRules.CoreMapExtractRule<>(
+      r.extractRule = new SequenceMatchRules.CoreMapExtractRule< String, MatchedExpression >(
               env, r.annotationField,
-              new SequenceMatchRules.StringPatternExtractRule<>(pattern,
-                      new SequenceMatchRules.StringMatchedExpressionExtractor(annotationExtractor, r.matchedExpressionGroup)));
-      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(annotationExtractor);
-      r.pattern = pattern;
+              new SequenceMatchRules.StringPatternExtractRule<MatchedExpression>(pattern,
+                      new SequenceMatchRules.StringMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup)));
+      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
     }
 
-    private static void updateExtractRule(SequenceMatchRules.AnnotationExtractRule r,
+    protected void updateExtractRule(SequenceMatchRules.AnnotationExtractRule r,
                                      Env env,
-                                     Function<CoreMap, Value> extractor) {
-      MatchedExpression.SingleAnnotationExtractor annotationExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
-      annotationExtractor.valueExtractor = extractor;
-      r.extractRule = new SequenceMatchRules.CoreMapExtractRule<>(
+                                     Function<CoreMap, Value> extractor)
+    {
+      MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
+      valueExtractor.valueExtractor = extractor;
+      r.extractRule = new SequenceMatchRules.CoreMapExtractRule<List<? extends CoreMap>, MatchedExpression >(
               env, r.annotationField,
-              new SequenceMatchRules.BasicSequenceExtractRule(annotationExtractor));
-      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(annotationExtractor);
+              new SequenceMatchRules.BasicSequenceExtractRule(valueExtractor));
+      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
     }
 
     @Override
     public SequenceMatchRules.AnnotationExtractRule create(Env env, Map<String,Object> attributes) {
       SequenceMatchRules.AnnotationExtractRule r = super.create(env, attributes);
       if (r.ruleType == null) { r.ruleType = "time"; }
-      String expr = Expressions.asObject(env, attributes.get("pattern"));
-      String formatter = Expressions.asObject(env, attributes.get("formatter"));
+      String expr = (String) Expressions.asObject(env, attributes.get("pattern"));
+      String formatter = (String) Expressions.asObject(env, attributes.get("formatter"));
       Expression action = Expressions.asExpression(env, attributes.get("action"));
-      String localeString = Expressions.asObject(env, attributes.get("locale"));
-      r.pattern = expr;
+      String localeString = (String) Expressions.asObject(env, attributes.get("locale"));
       if (formatter == null) {
         if (r.annotationField == null) { r.annotationField = EnvLookup.getDefaultTextAnnotationKey(env);  }
         /* Parse pattern and figure out what the result should be.... */
         CustomDateFormatExtractor formatExtractor = new CustomDateFormatExtractor(expr, localeString);
         //SequenceMatchRules.Expression result = (SequenceMatchRules.Expression) attributes.get("result");
-        updateExtractRule(r, env, formatExtractor.getTextPattern(), new ApplyActionWrapper<>(env, formatExtractor, action));
+        updateExtractRule(r, env, formatExtractor.getTextPattern(), new ApplyActionWrapper(env, formatExtractor, action));
       } else if ("org.joda.time.format.DateTimeFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
-        updateExtractRule(r, env, new ApplyActionWrapper<>(env, new JodaDateTimeFormatExtractor(expr), action));
+        updateExtractRule(r, env, new ApplyActionWrapper(env, new JodaDateTimeFormatExtractor(expr), action));
       } else if ("org.joda.time.format.ISODateTimeFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
         try {
           Method m = ISODateTimeFormat.class.getMethod(expr);
           DateTimeFormatter dtf = (DateTimeFormatter) m.invoke(null);
-          updateExtractRule(r, env, new ApplyActionWrapper<>(env, new JodaDateTimeFormatExtractor(expr), action));
+          updateExtractRule(r, env, new ApplyActionWrapper(env, new JodaDateTimeFormatExtractor(expr), action));
         } catch (Exception ex) {
           throw new RuntimeException("Error creating DateTimeFormatter", ex);
         }
       } else if ("java.text.SimpleDateFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
-        updateExtractRule(r, env, new ApplyActionWrapper<>(env, new JavaDateFormatExtractor(expr), action));
+        updateExtractRule(r, env, new ApplyActionWrapper(env, new JavaDateFormatExtractor(expr), action));
       } else {
         throw new IllegalArgumentException("Unsupported formatter: " + formatter);
       }
@@ -173,8 +163,8 @@ public class TimeFormatter {
     }
   }
 
-  /*
-   * Rules for parsing time specific patterns.
+  /**
+   * Rules for parsing time specific patterns
    * Patterns are similar to time patterns used by JodaTime combined with a simplified regex expression
    *
    # y       year                         year          1996                         y
@@ -187,15 +177,14 @@ public class TimeFormatter {
    # S       fraction of second           number        978                          S (Millisecond)
    # a       half day of day marker       am/pm
    */
-
   /**
-   * Converts time string pattern to text pattern.
+   * 1. Convert time string pattern to text pattern
    */
-  public static class CustomDateFormatExtractor implements Function<String, Value> {
-
-    private final FormatterBuilder builder;
-    private final String timePattern;
-    private final Pattern textPattern;
+  public static class CustomDateFormatExtractor implements Function<String, Value>
+  {
+    FormatterBuilder builder;
+    String timePattern;
+    Pattern textPattern;
 
     public CustomDateFormatExtractor(String timePattern, String localeString) {
       Locale locale = (localeString != null)? new Locale(localeString): Locale.getDefault();
@@ -237,12 +226,11 @@ public class TimeFormatter {
       }
       return new Expressions.PrimitiveValue("Temporal", t);
     }
-
   }
 
 
-  private abstract static class FormatComponent {
-
+  private abstract static class FormatComponent
+  {
     int group = -1;
     String quantifier = null;
 
@@ -256,14 +244,14 @@ public class TimeFormatter {
 
     public StringBuilder appendRegex(StringBuilder sb) {
       if (group > 0) {
-        sb.append('(');
+        sb.append("(");
       }
       appendRegex0(sb);
       if (quantifier != null) {
         sb.append(quantifier);
       }
       if (group > 0) {
-        sb.append(')');
+        sb.append(")");
       }
       return sb;
     }
@@ -271,11 +259,10 @@ public class TimeFormatter {
 
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) { return t; }
     public int getGroup() { return group; }
-
   }
 
-  private abstract static class DateTimeFieldComponent extends FormatComponent {
-
+  private abstract static class DateTimeFieldComponent extends FormatComponent
+  {
     DateTimeFieldType fieldType;
 
     public Integer parseValue(String str) { return null; }
@@ -295,18 +282,17 @@ public class TimeFormatter {
       }
       return t;
     }
-
   }
 
+  private static class NumericDateComponent extends DateTimeFieldComponent
+  {
+    int minValue;
+    int maxValue;
+    int minDigits;
+    int maxDigits;
 
-  private static class NumericDateComponent extends DateTimeFieldComponent {
-
-    private final int minValue;
-    private final int maxValue;
-    private final int minDigits;
-    private final int maxDigits;
-
-    public NumericDateComponent(DateTimeFieldType fieldType, int minDigits, int maxDigits) {
+    public NumericDateComponent(DateTimeFieldType fieldType, int minDigits, int maxDigits)
+    {
       this.fieldType = fieldType;
       this.minDigits = minDigits;
       this.maxDigits = maxDigits;
@@ -318,7 +304,7 @@ public class TimeFormatter {
 
     protected StringBuilder appendRegex0(StringBuilder sb) {
       if (maxDigits > 5 || minDigits != maxDigits) {
-        sb.append("\\d{").append(minDigits).append(',').append(maxDigits).append('}');
+        sb.append("\\d{").append(minDigits).append(",").append(maxDigits).append("}");
       } else {
         for (int i = 0; i < minDigits; i++) {
           sb.append("\\d");
@@ -335,9 +321,7 @@ public class TimeFormatter {
         return null;
       }
     }
-
   }
-
 
   private static class RelaxedNumericDateComponent extends FormatComponent
   {
@@ -389,9 +373,8 @@ public class TimeFormatter {
     }
   };
 
-
-  private static class TextDateComponent extends DateTimeFieldComponent {
-
+  private static class TextDateComponent extends DateTimeFieldComponent
+  {
     Map<String, Integer> valueMapping;
     List<String> validValues;
     Locale locale;
@@ -401,7 +384,8 @@ public class TimeFormatter {
 
     public TextDateComponent() {}
 
-    public TextDateComponent(DateTimeFieldType fieldType, Locale locale, Boolean isShort) {
+    public TextDateComponent(DateTimeFieldType fieldType, Locale locale, Boolean isShort)
+    {
       this.fieldType = fieldType;
       this.locale = locale;
       this.isShort = isShort;
@@ -410,7 +394,7 @@ public class TimeFormatter {
       MutableDateTime.Property property = dt.property(fieldType);
       minValue = property.getMinimumValueOverall();
       maxValue = property.getMaximumValueOverall();
-      this.validValues = new ArrayList<>(maxValue - minValue + 1);
+      this.validValues = new ArrayList<String>(maxValue-minValue+1);
       this.valueMapping = Generics.newHashMap();
       for (int i = minValue; i <= maxValue; i++) {
         property.set(i);
@@ -440,7 +424,6 @@ public class TimeFormatter {
       return v;
     }
 
-    @Override
     protected StringBuilder appendRegex0(StringBuilder sb) {
       boolean first = true;
       for (String v:validValues) {
@@ -480,7 +463,7 @@ public class TimeFormatter {
       return sb;
     }
 
-    private static int parseInteger(String str, int pos, int length) {
+    private int parseInteger(String str, int pos, int length) {
       return Integer.parseInt(str.substring(pos, pos+length));
     }
 
@@ -566,7 +549,7 @@ public class TimeFormatter {
     static final List<String> timeZoneIds;
     static final String timeZoneIdsRegex;
     static {
-      timeZoneIds = new ArrayList<>(DateTimeZone.getAvailableIDs());
+      timeZoneIds = new ArrayList<String>(DateTimeZone.getAvailableIDs());
       timeZonesById = Generics.newHashMap();
       for (String str:timeZoneIds) {
         DateTimeZone dtz = DateTimeZone.forID(str);
@@ -626,10 +609,10 @@ public class TimeFormatter {
       }
     }
 
-    private static void updateTimeZoneNames(Locale locale) {
+    private void updateTimeZoneNames(Locale locale) {
       long time1 = new SUTime.IsoDate(2013,1,1).getJodaTimeInstant().getMillis();
       long time2 = new SUTime.IsoDate(2013,6,1).getJodaTimeInstant().getMillis();
-      CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<>();
+      CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<String, DateTimeZone>();
       for (DateTimeZone dtz:TimeZoneIdComponent.timeZonesById.values()) {
         // standard timezones
         tzMap.add(dtz.getShortName(time1, locale).toLowerCase(), dtz);
@@ -641,7 +624,7 @@ public class TimeFormatter {
 //      tzMap.add(dtz.getID().toLowerCase(), dtz);
       }
       // Order by length for regex
-      List<String> tzNames = new ArrayList<>(tzMap.keySet());
+      List<String> tzNames = new ArrayList<String>(tzMap.keySet());
       Collections.sort(tzNames, STRING_LENGTH_REV_COMPARATOR);
       String tzRegex = makeRegex(tzNames);
       synchronized (TimeZoneComponent.class) {
@@ -676,47 +659,40 @@ public class TimeFormatter {
     }
   }
 
-
-  private static class LiteralComponent extends FormatComponent {
-
-    private final String text;
+  private static class LiteralComponent extends FormatComponent
+  {
+    String text;
 
     public LiteralComponent(String str) {
       this.text = str;
     }
 
-    @Override
     protected StringBuilder appendRegex0(StringBuilder sb) {
       sb.append(Pattern.quote(text));
       return sb;
     }
-
   }
 
-
-  private static class RegexComponent extends FormatComponent {
-
-    private final String regex;
+  private static class RegexComponent extends FormatComponent
+  {
+    String regex;
 
     public RegexComponent(String regex) {
       this.regex = regex;
     }
 
-    @Override
     protected StringBuilder appendRegex0(StringBuilder sb) {
       sb.append(regex);
       return sb;
     }
-
   }
 
-
-  private static class FormatterBuilder {
-
+  private static class FormatterBuilder
+  {
     boolean useRelaxedHour = true;
     Locale locale;
     DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
-    List<FormatComponent> pieces = new ArrayList<>();
+    List<FormatComponent> pieces = new ArrayList<FormatComponent>();
     int curGroup = 0;
 
     public DateTimeFormatter toFormatter() {
@@ -909,7 +885,7 @@ public class TimeFormatter {
     protected void appendGroupEnd() { appendRegexPart(")"); }
     protected void appendLiteral(char c) {
       builder.appendLiteral(c);
-      appendLiteralField(String.valueOf(c));}
+      appendLiteralField("" + c);}
     protected void appendLiteral(String s) {
       builder.appendLiteral(s);
       appendLiteralField(s); }

@@ -1,5 +1,4 @@
 package edu.stanford.nlp.parser.nndep;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -21,10 +20,7 @@ import java.util.Set;
  *
  * @author Danqi Chen
  */
-public abstract class ParsingSystem  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ParsingSystem.class);
+public abstract class ParsingSystem {
 
   /**
    * Defines language-specific settings for this parsing instance.
@@ -113,10 +109,10 @@ public abstract class ParsingSystem  {
     makeTransitions();
 
     if (verbose) {
-      log.info(Config.SEPARATOR);
-      log.info("#Transitions: " + numTransitions());
-      log.info("#Labels: " + labels.size());
-      log.info("ROOTLABEL: " + rootLabel);
+      System.err.println(Config.SEPARATOR);
+      System.err.println("#Transitions: " + numTransitions());
+      System.err.println("#Labels: " + labels.size());
+      System.err.println("ROOTLABEL: " + rootLabel);
     }
   }
 
@@ -131,7 +127,7 @@ public abstract class ParsingSystem  {
   private Set<String> getPunctuationTags() {
     if (tlp instanceof PennTreebankLanguagePack) {
       // Hack for English: match punctuation tags used in Danqi's paper
-      return new HashSet<>(Arrays.asList("''", ",", ".", ":", "``", "-LRB-", "-RRB-"));
+      return new HashSet<>(Arrays.asList("``", "''", ".", ",", ":"));
     } else {
       return CollectionUtils.asSet(tlp.punctuationTags());
     }
@@ -145,14 +141,14 @@ public abstract class ParsingSystem  {
    */
   public Map<String, Double> evaluate(List<CoreMap> sentences, List<DependencyTree> trees,
                                       List<DependencyTree> goldTrees) {
-    Map<String, Double> result = new HashMap<>();
+    Map<String, Double> result = new HashMap<String, Double>();
 
     // We'll skip words which are punctuation. Retrieve tags indicating
     // punctuation in this treebank.
     Set<String> punctuationTags = getPunctuationTags();
 
     if (trees.size() != goldTrees.size()) {
-      log.error("Incorrect number of trees.");
+      System.err.println("ERROR: Incorrect number of trees.");
       return null;
     }
 
@@ -172,11 +168,11 @@ public abstract class ParsingSystem  {
       List<CoreLabel> tokens = sentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
 
       if (trees.get(i).n != goldTrees.get(i).n) {
-        log.error("Tree " + (i + 1) + ": incorrect number of nodes.");
+        System.err.println("ERROR: Tree " + (i + 1) + ": incorrect number of nodes.");
         return null;
       }
       if (!trees.get(i).isTree()) {
-        log.error("Tree " + (i + 1) + ": illegal.");
+        System.err.println("ERROR: Tree " + (i + 1) + ": illegal.");
         return null;
       }
 

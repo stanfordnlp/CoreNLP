@@ -49,7 +49,7 @@ public class SVMLightClassifier<L, F> extends LinearClassifier<L, F> {
     }
     Counter<L> scores = scoresOf(example);
     scores.incrementCount(null);
-    Counter<L> probs = platt.logProbabilityOf(new RVFDatum<>(scores));
+    Counter<L> probs = platt.logProbabilityOf(new RVFDatum<L, L>(scores));
     //System.out.println(scores+" "+probs);
     return probs;
   }
@@ -67,7 +67,7 @@ public class SVMLightClassifier<L, F> extends LinearClassifier<L, F> {
     }
     Counter<L> scores = scoresOf(example);
     scores.incrementCount(null);
-    Counter<L> probs = platt.logProbabilityOf(new RVFDatum<>(scores));
+    Counter<L> probs = platt.logProbabilityOf(new RVFDatum<L, L>(scores));
     //System.out.println(scores+" "+probs);
     return probs;
   }

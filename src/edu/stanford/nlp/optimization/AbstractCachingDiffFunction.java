@@ -1,7 +1,5 @@
 package edu.stanford.nlp.optimization;
 
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +12,14 @@ import java.util.Set;
  *
  *  @author Dan Klein
  */
-public abstract class AbstractCachingDiffFunction implements DiffFunction, HasInitial  {
 
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(AbstractCachingDiffFunction.class);
+public abstract class AbstractCachingDiffFunction implements DiffFunction, HasInitial {
 
-  private double[] lastX; // = null;
-  private int fEvaluations; // = 0;
+  double[] lastX; // = null;
+  int fEvaluations; // = 0;
   protected double[] derivative; // = null;
   protected double value; // = 0.0;
-  private final Random generator = new Random(2147483647L);
+  protected Random generator = new Random(2147483647L);
 
   public boolean gradientCheck() {
     return gradientCheck(100, 50, initial());
@@ -35,12 +31,12 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     double diffPctThreshold = 0.1;
     double twoEpsilon = epsilon * 2;
     int xLen = x.length;
-    // log.info("\n\n\ncalling derivativeAt");
+    // System.err.println("\n\n\ncalling derivativeAt");
     derivativeAt(x);
     double[] savedDeriv = new double[xLen];
     System.arraycopy(derivative, 0, savedDeriv, 0, derivative.length);
     int interval = Math.max(1, x.length / numOfChecks);
-    Set<Integer> indicesToCheck = new TreeSet<>();
+    Set<Integer> indicesToCheck = new TreeSet<Integer>();
     for (int paramIndex = 0; paramIndex < xLen; paramIndex+=interval) {
       indicesToCheck.add(paramIndex);
     }
@@ -54,14 +50,14 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
       indicesToCheck.add(generator.nextInt(xLen));
     }
     boolean returnVal = true;
-    List<Integer> badIndices = new ArrayList<>();
+    List<Integer> badIndices = new ArrayList<Integer>();
     for (int paramIndex: indicesToCheck) {
       double oldX = x[paramIndex];
       x[paramIndex] = oldX + epsilon;
-      // log.info("\n\n\ncalling valueAt1");
+      // System.err.println("\n\n\ncalling valueAt1");
       double plusVal = valueAt(x);
       x[paramIndex] = oldX - epsilon;
-      // log.info("\n\n\ncalling valueAt2");
+      // System.err.println("\n\n\ncalling valueAt2");
       double minusVal = valueAt(x);
       double appDeriv = (plusVal - minusVal) / twoEpsilon;
       double calcDeriv = savedDeriv[paramIndex];
@@ -79,14 +75,14 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     if (returnVal){
       System.err.printf("ALL gradients passed. Yay!\n");
     } else {
-      log.info("Bad indices: ");
+      System.err.print("Bad indices: ");
       for (int i = 0; i < badIndices.size() && i < 10; ++i) {
-        log.info(" " + badIndices.get(i));
+        System.err.print(" " + badIndices.get(i));
       }
       if (badIndices.size() >= 10) {
-        log.info(" (...)");
+        System.err.print(" (...)");
       }
-      log.info();
+      System.err.println();
     }
     return returnVal;
   }

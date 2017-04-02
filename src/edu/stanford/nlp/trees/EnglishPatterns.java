@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  *  patterns. They originated in other classes like
  *  EnglishGrammaticalRelations, but were collected here so that they
  *  could be used without having to load large classes (which we might want
- *  to have parallel versions of).
+ *  to have parallel versions of.
  *  Some are just stored here as String objects, since they are often used as
  *  sub-patterns inside larger patterns.
  *
@@ -57,7 +57,7 @@ public class EnglishPatterns {
   // which don't require a NP before the xcomp.
   public static final String xcompNoObjVerbRegex =
       "/^(?i:advis|afford|allow|am$|appear|are$|ask|attempt|avoid|be$|bec[oa]m|beg[ia]n|believ|call|caus[ei]|ceas[ei]|choos[ei]|chose|claim|consider|continu|convinc|decid|decline|end|enjoy|expect|feel|felt|find|forb[ia]d|forc[ei]|forg[eo]t|found|going|gon|g[eo]t|happen|hat[ei]|ha[vds]|help|hesitat|hop[ei]|intend|instruct|invit|['i]s$|keep|kept|learn|leav[ei]|left|let|lik[ei]|look|lov[ei]|made|mak[ei]|manag|nam[ei]|need|offer|order|plan|pretend|proceed|promis|prov[ei]|rate|recommend|refus|regret|remember|requir|sa[iy]|seem|sound|start|stop|suggest|suppos|tell|tend|threaten|told|tr[yi]|turn|used|wan|was$|willing|wish)/";
-
+  
   // A list of verbs where the answer to a question involving that
   // verb would be a ccomp.  For example, "I know when the train is
   // arriving."  What does the person know?
@@ -76,10 +76,10 @@ public class EnglishPatterns {
 
   public static final Pattern RELATIVIZING_WORD_PATTERN = Pattern.compile(RELATIVIZING_WORD_REGEX);
 
-  // Lemmata of verbs with the argument structure NP V S-INF.
+  // Lemmata of verbs witht the argument structure NP V S-INF.
   // Extracted from VerbNet 3.2.
   public static final String NP_V_S_INF_VERBS_REGEX = "(?i:acquiesce|submit|bow|defer|accede|succumb|yield|capitulate|despise|disdain|dislike|regret|like|love|enjoy|fear|hate|pledge|proceed|begin|start|commence|recommence|resume|undertake|ally|collaborate|collude|conspire|discriminate|legislate|partner|protest|rebel|retaliate|scheme|sin|befriend|continue|broadcast|cable|e-mail|fax|modem|netmail|phone|radio|relay|satellite|semaphore|sign|signal|telecast|telegraph|telephone|telex|wire|wireless|ache|crave|fall|hanker|hope|hunger|itch|long|lust|pine|pray|thirst|wish|yearn|dangle|hanker|lust|thirst|yearn|babble|bark|bawl|bellow|bleat|blubber|boom|bray|burble|bluster|cackle|call|carol|chant|chatter|chirp|chortle|chuckle|cluck|coo|croak|croon|crow|cry|drawl|drone|gabble|gasp|gibber|groan|growl|grumble|grunt|hiss|holler|hoot|howl|jabber|keen|lilt|lisp|mewl|moan|mumble|murmur|mutter|nasal|natter|pant|prattle|purr|quaver|rage|rant|rasp|roar|rumble|scream|screech|shout|shriek|sibilate|simper|sigh|sing|smatter|smile|snap|snarl|snivel|snuffle|splutter|squall|squawk|squeak|squeal|stammer|stemmer|stutter|thunder|tisk|trill|trumpet|twang|twitter|vociferate|wail|warble|wheeze|whimper|whine|whisper|whistle|witter|whoop|yammer|yap|yell|yelp|yodel|blare|gurgle|hum|neglect|fail|forego|forgo|flub|overleap|manage|omit|seem|appear|prove|manage|fail|flub|try|attempt|intend|enjoy|expect|wish|hope|intend|mean|plan|propose|think|aim|dream|imagine|yen)";
-
+  
   private EnglishPatterns() {} // static constants
 
 }

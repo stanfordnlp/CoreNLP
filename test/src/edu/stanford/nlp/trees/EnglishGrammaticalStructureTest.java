@@ -250,7 +250,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "dobj(knows-2, industry-6)\n",
 
         "det(weapon-2, What-1)\n" +
-                "pobj(with-10, weapon-2)\n" +
+                "pobj(proficient-9, weapon-2)\n" +
                 "cop(proficient-9, is-3)\n" +
                 "det(Apollo-7, the-4)\n" +
                 "amod(Apollo-7, mythological-5)\n" +
@@ -530,7 +530,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false, false));
+          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
     }
 
   }
@@ -688,7 +688,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false, false));
+          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
     }
   }
 
@@ -744,7 +744,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       // TODO: add an example for "it is raining" once that is correct... needs expl(raining, It)
       // TODO: add an example for "It is clear that Sue is smart" once that is correct... needs expl(clear, It)
       "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (NP (DT the) (NN fear)) (PP (IN of) (NP (NNS cockroaches)))) (VP (VBN called))) (. ?)))",
-      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBP am) (NP (PRP I)) (ADJP (JJ good) (PP (IN at)))) (. ?)))",
     };
 
     // the expected dependency answers (basic)
@@ -963,11 +962,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "pobj(of-5, cockroaches-6)\n" +
                 "root(ROOT-0, called-7)\n",
 
-        "pobj(at-5, What-1)\n" +
-                "cop(good-4, am-2)\n" +
-                "nsubj(good-4, I-3)\n" +
-                "root(ROOT-0, good-4)\n" +
-                "prep(good-4, at-5)\n"
     };
 
     // the expected dependency answers (noncollapsed)
@@ -1185,11 +1179,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "prep(fear-4, of-5)\n" +
                 "pobj(of-5, cockroaches-6)\n" +
                 "root(ROOT-0, called-7)\n",
-        "pobj(at-5, What-1)\n" +
-                "cop(good-4, am-2)\n" +
-                "nsubj(good-4, I-3)\n" +
-                "root(ROOT-0, good-4)\n" +
-                "prep(good-4, at-5)\n"
     };
 
     assertEquals("Test array and basic answer array lengths mismatch!", testTrees.length, basicAnswers.length);
@@ -1207,9 +1196,9 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          basicAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false, false));
+          basicAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
       assertEquals("Unexpected noncollapsed dependencies for tree " + testTree,
-          noncollapsedAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.MAXIMAL), tree, false, false, false));
+          noncollapsedAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
     }
   }
 
@@ -1238,7 +1227,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "(ROOT (S (NP (DT The) (NN man)) (VP (VBZ is) (ADVP (RB here))) (. .)))",
          "(ROOT (S (NP (NNP Xml) (NN field)) (VP (MD should) (VP (VB include) (NP (PDT both) (NP (DT the) (NN entity) (NN id)) (CC and) (NP (DT the) (NN entity) (NN name))) (SBAR (IN since) (S (NP (DT the) (NN entity) (NNS names)) (VP (VBP are) (RB not) (ADJP (JJ unique))))))) (. .)))",
          "(ROOT (S (S (NP (DT The) (NN government)) (VP (VBZ counts) (NP (NN money)) (SBAR (IN as) (S (NP (PRP it)) (VP (VBZ is) (VP (VBN spent))))))) (: ;) (S (NP (NNP Dodge)) (VP (VBZ counts) (NP (NNS contracts)) (SBAR (WHADVP (WRB when)) (S (NP (PRP they)) (VP (VBP are) (VP (VBN awarded))))))) (. .)))",
-         "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBP am) (NP (PRP I)) (ADJP (JJ good) (PP (IN at)))) (. ?)))",
 
     };
 
@@ -1290,11 +1278,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "nsubjpass(awarded-16, they-14)\n" +
                 "auxpass(awarded-16, are-15)\n" +
                 "advcl(counts-11, awarded-16)\n",
-        "pobj(at-5, What-1)\n" +
-                "root(ROOT-0, am-2)\n" +
-                "nsubj(am-2, I-3)\n" +
-                "acomp(am-2, good-4)\n" +
-                "prep(good-4, at-5)\n"
+
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
@@ -1312,7 +1296,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
               new SemanticHeadFinder(false));
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false, false));
+          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
     }
   }
 
@@ -1368,7 +1352,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false, false));
+          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false));
     }
   }
 
@@ -1402,7 +1386,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-        testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true, false));
+        testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true));
     }
 
   }
@@ -1515,7 +1499,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       Tree tree = Tree.valueOf(testTree, trf);
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
-      String depString = GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false, false);
+      String depString = EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false);
       assertEquals("Unexpected collapsed dependencies for tree "+testTree,
           testAnswer, depString);
     }
@@ -1772,7 +1756,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected CC processed dependencies for tree "+testTree,
-          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false, false));
+          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
     }
   }
 
@@ -1805,7 +1789,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false, false));
+          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
     }
   }
 

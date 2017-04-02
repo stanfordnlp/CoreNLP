@@ -4,8 +4,7 @@
  * Copyright:   Copyright (c) 2002. Kristina Toutanova, Stanford University
  * Company:     Stanford University, All Rights Reserved.
  */
-package edu.stanford.nlp.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.maxent;
 
 import java.util.Arrays;
 
@@ -22,10 +21,7 @@ import edu.stanford.nlp.util.ReflectionLoading;
  * @author Kristina Toutanova
  * @author Christopher Manning
  */
-public class CGRunner  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CGRunner.class);
+public class CGRunner {
 
   private static final boolean SAVE_LAMBDAS_REGULARLY = false;
 
@@ -243,7 +239,7 @@ public class CGRunner  {
           lik += (lambda[i] * lambda[i]) / (sigmaSquareds[i] + sigmaSquareds[i]);
         }
       }
-      // log.info(valueAtCalls + " calls to valueAt;" +
+      // System.err.println(valueAtCalls + " calls to valueAt;" +
       //		       " penalized log likelihood is " + lik);
 
       likelihood = lik;
@@ -261,7 +257,7 @@ public class CGRunner  {
         }
       }
       if (!eq) {
-        log.info("derivativeAt: call with different value");
+        System.err.println("derivativeAt: call with different value");
         valueAt(lambda);
       }
 
@@ -307,8 +303,8 @@ public class CGRunner  {
     public double valueAt(double[] lambda) {
       double likelihood = lf.likelihood();
       // this line is printed in the middle of the normal line of QN minimization, so put println at beginning
-      log.info();
-      log.info(reportMonitoring(likelihood));
+      System.err.println();
+      System.err.print(reportMonitoring(likelihood));
 
       if (SAVE_LAMBDAS_REGULARLY  && iterations > 0 && iterations % 5 == 0) {
         model.save_lambdas(filename + '.' + iterations + ".lam");

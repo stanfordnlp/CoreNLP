@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.Tree;
@@ -11,10 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class HTKLatticeReader  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(HTKLatticeReader.class);
+public class HTKLatticeReader {
 
   public final boolean DEBUG;
   public final boolean PRETTYPRINT;
@@ -39,7 +35,7 @@ public class HTKLatticeReader  {
     }
 
     // READ LATTICE
-    latticeWords = new ArrayList<>();
+    latticeWords = new ArrayList<HTKLatticeReader.LatticeWord>();
 
     Pattern wordLinePattern = Pattern.compile("(\\d+)\\s+(\\d+)\\s+lm=(-?\\d+\\.\\d+),am=(-?\\d+\\.\\d+)\\s+([^( ]+)(?:\\((\\d+)\\))?.*");
     Matcher wordLineMatcher = wordLinePattern.matcher(line);
@@ -70,7 +66,7 @@ public class HTKLatticeReader  {
 
       LatticeWord lw = new LatticeWord(word, startNode, endNode, lm, am, pronunciation, mergeType);
       if (DEBUG) {
-        log.info(lw);
+        System.err.println(lw);
       }
       latticeWords.add(lw);
 
@@ -81,7 +77,7 @@ public class HTKLatticeReader  {
     // GET NUMBER OF NODES
     numStates = Integer.parseInt(line.trim());
     if (DEBUG) {
-      log.info(numStates);
+      System.err.println(numStates);
     }
 
     // READ NODE TIMES
@@ -94,7 +90,7 @@ public class HTKLatticeReader  {
       nodeTimeMatcher = nodeTimePattern.matcher(in.readLine());
 
       if (!nodeTimeMatcher.matches()) {
-        log.info("Input File Error");
+        System.err.println("Input File Error");
         System.exit(1);
       }
 
@@ -103,7 +99,7 @@ public class HTKLatticeReader  {
       nodeTimes[i] = Integer.parseInt(nodeTimeMatcher.group(2));
 
       if (DEBUG) {
-        log.info(i + "\tt=" + nodeTimes[i]);
+        System.err.println(i + "\tt=" + nodeTimes[i]);
       }
     }
   }
@@ -116,19 +112,19 @@ public class HTKLatticeReader  {
     int prevNode = 0;
     int prevTime = nodeTimes[0];
     if (DEBUG) {
-      log.info(0 + " (" + nodeTimes[0] + ")" + "-->" + 0 + " (" + nodeTimes[0] + ") ++");
+      System.err.println(0 + " (" + nodeTimes[0] + ")" + "-->" + 0 + " (" + nodeTimes[0] + ") ++");
     }
     for (int i = 1; i < nodeTimes.length; i++) {
       if (prevTime == nodeTimes[i]) {
         indexMap[i] = prevNode;
         if (DEBUG) {
-          log.info(i + " (" + nodeTimes[i] + ")" + "-->" + prevNode + " (" + nodeTimes[prevNode] + ") **");
+          System.err.println(i + " (" + nodeTimes[i] + ")" + "-->" + prevNode + " (" + nodeTimes[prevNode] + ") **");
         }
       } else {
         indexMap[i] = prevNode = i;
         prevTime = nodeTimes[i];
         if (DEBUG) {
-          log.info(i + " (" + nodeTimes[i] + ")" + "-->" + prevNode + " (" + nodeTimes[prevNode] + ") ++");
+          System.err.println(i + " (" + nodeTimes[i] + ")" + "-->" + prevNode + " (" + nodeTimes[prevNode] + ") ++");
         }
       }
     }
@@ -137,7 +133,7 @@ public class HTKLatticeReader  {
       lw.startNode = indexMap[lw.startNode];
       lw.endNode = indexMap[lw.endNode];
       if (DEBUG) {
-        log.info(lw);
+        System.err.println(lw);
       }
     }
   }
@@ -192,7 +188,7 @@ public class HTKLatticeReader  {
   private void buildWordsAtTime() {
     wordsAtTime = new ArrayList[numStates];
     for (int i = 0; i < wordsAtTime.length; i++) {
-      wordsAtTime[i] = new ArrayList<>();
+      wordsAtTime[i] = new ArrayList<LatticeWord>();
     }
 
     for (LatticeWord lw : latticeWords) {
@@ -205,7 +201,7 @@ public class HTKLatticeReader  {
   private void buildWordsStartAt() {
     wordsStartAt = new ArrayList[numStates];
     for (int i = 0; i < wordsStartAt.length; i++) {
-      wordsStartAt[i] = new ArrayList<>();
+      wordsStartAt[i] = new ArrayList<LatticeWord>();
     }
 
     for (LatticeWord lw : latticeWords) {
@@ -216,7 +212,7 @@ public class HTKLatticeReader  {
   private void buildWordsEndAt() {
     wordsEndAt = new ArrayList[numStates];
     for (int i = 0; i < wordsEndAt.length; i++) {
-      wordsEndAt[i] = new ArrayList<>();
+      wordsEndAt[i] = new ArrayList<LatticeWord>();
     }
 
     for (LatticeWord lw : latticeWords) {
@@ -230,19 +226,18 @@ public class HTKLatticeReader  {
 
     while (changed) {
       changed = false;
-      for (ArrayList<LatticeWord> aWordsAtTime : wordsAtTime) {
-        if (aWordsAtTime.size() < 2) {
+      for (int i = 0; i < wordsAtTime.length; i++) {
+        if (wordsAtTime[i].size() < 2) {
           continue;
         }
-        INNER:
-        for (int j = 0; j < aWordsAtTime.size() - 1; j++) {
-          LatticeWord w1 = aWordsAtTime.get(j);
-          for (int k = j + 1; k < aWordsAtTime.size(); k++) {
-            LatticeWord w2 = aWordsAtTime.get(k);
+        INNER: for (int j = 0; j < wordsAtTime[i].size() - 1; j++) {
+          LatticeWord w1 = wordsAtTime[i].get(j);
+          for (int k = j + 1; k < wordsAtTime[i].size(); k++) {
+            LatticeWord w2 = wordsAtTime[i].get(k);
             if (w1.word.equalsIgnoreCase(w2.word)) {
               if (removeRedundentPair(w1, w2)) {
                 //int numMerged = mergeDuplicates();
-                //if (DEBUG) { log.info("merged " + numMerged + " identical entries."); }
+                //if (DEBUG) { System.err.println("merged " + numMerged + " identical entries."); }
                 changed = true;
                 //printWords();
                 //j--;
@@ -259,9 +254,9 @@ public class HTKLatticeReader  {
   private boolean removeRedundentPair(LatticeWord w1, LatticeWord w2) {
 
     if (DEBUG) {
-      log.info("trying to remove:");
-      log.info(w1);
-      log.info(w2);
+      System.err.println("trying to remove:");
+      System.err.println(w1);
+      System.err.println(w2);
     }
 
     int w1Start = w1.startNode;
@@ -292,7 +287,7 @@ public class HTKLatticeReader  {
     for (LatticeWord lw : wordsStartAt[oldStart]) {
       if (lw.endNode < newStart || ((lw.endNode == newStart) && (lw.endNode != lw.startNode))) {
         if (DEBUG) {
-          log.info("failed");
+          System.err.println("failed");
         }
         return false;
       }
@@ -300,7 +295,7 @@ public class HTKLatticeReader  {
     for (LatticeWord lw : wordsEndAt[oldEnd]) {
       if (lw.startNode > newEnd || ((lw.startNode == newEnd) && (lw.endNode != lw.startNode))) {
         if (DEBUG) {
-          log.info("failed");
+          System.err.println("failed");
         }
         return false;
       }
@@ -315,14 +310,14 @@ public class HTKLatticeReader  {
     changeEndTimes(wordsEndAt[oldEnd], newEnd);
 
     if (DEBUG) {
-      log.info("succeeded");
+      System.err.println("succeeded");
     }
     return true;
   }
 
 
   private void changeStartTimes(List<LatticeWord> words, int newStartTime) {
-    ArrayList<LatticeWord> toRemove = new ArrayList<>();
+    ArrayList<LatticeWord> toRemove = new ArrayList<LatticeWord>();
     for (LatticeWord lw : words) {
       latticeWords.remove(lw);
       int oldStartTime = lw.startNode;
@@ -330,7 +325,7 @@ public class HTKLatticeReader  {
 
       if (latticeWords.contains(lw)) {
         if (DEBUG) {
-          log.info("duplicate found");
+          System.err.println("duplicate found");
         }
         LatticeWord twin = latticeWords.get(latticeWords.indexOf(lw));
         // assert (twin != lw) ;
@@ -364,7 +359,7 @@ public class HTKLatticeReader  {
   }
 
   private void changeEndTimes(List<LatticeWord> words, int newEndTime) {
-    ArrayList<LatticeWord> toRemove = new ArrayList<>();
+    ArrayList<LatticeWord> toRemove = new ArrayList<LatticeWord>();
     for (LatticeWord lw : words) {
       latticeWords.remove(lw);
       int oldEndTime = lw.endNode;
@@ -372,7 +367,7 @@ public class HTKLatticeReader  {
 
       if (latticeWords.contains(lw)) {
         if (DEBUG) {
-          log.info("duplicate found");
+          System.err.println("duplicate found");
         }
         LatticeWord twin = latticeWords.get(latticeWords.indexOf(lw));
         // assert (twin != lw) ;
@@ -406,7 +401,7 @@ public class HTKLatticeReader  {
   }
 
   private void removeSilence() {
-    ArrayList<HTKLatticeReader.LatticeWord> silences = new ArrayList<>();
+    ArrayList<HTKLatticeReader.LatticeWord> silences = new ArrayList<HTKLatticeReader.LatticeWord>();
     for (LatticeWord lw : latticeWords) {
       if (lw.word.equalsIgnoreCase(SILENCE)) {
         silences.add(lw);
@@ -445,7 +440,7 @@ public class HTKLatticeReader  {
         LatticeWord second = latticeWords.get(j);
         if (first.equals(second)) {
           if (DEBUG) {
-            log.info("removed duplicate");
+            System.err.println("removed duplicate");
           }
           first.merge(second);
           latticeWords.remove(j);
@@ -479,17 +474,17 @@ public class HTKLatticeReader  {
   //     }
 
   public void processLattice() {
-    // log.info(1);
+    // System.err.println(1);
     buildWordTimeArrays();
-    //log.info(2);
+    //System.err.println(2);
     removeSilence();
-    //log.info(3);
+    //System.err.println(3);
     mergeDuplicates();
-    //log.info(4);
+    //System.err.println(4);
     removeRedundency();
-    //log.info(5);
+    //System.err.println(5);
     removeEmptyNodes();
-    //log.info(6);
+    //System.err.println(6);
     if (PRETTYPRINT) {
       printWords();
     }
@@ -511,9 +506,9 @@ public class HTKLatticeReader  {
     this.mergeType = mergeType;
 
     BufferedReader in = IOUtils.readerFromString(filename);
-    //log.info(-1);
+    //System.err.println(-1);
     readInput(in);
-    //log.info(0);
+    //System.err.println(0);
     if (PRETTYPRINT) {
       printWords();
     }
@@ -531,7 +526,7 @@ public class HTKLatticeReader  {
   }
 
   public List<HTKLatticeReader.LatticeWord> getWordsOverSpan(int a, int b) {
-    ArrayList<HTKLatticeReader.LatticeWord> words = new ArrayList<>();
+    ArrayList<HTKLatticeReader.LatticeWord> words = new ArrayList<HTKLatticeReader.LatticeWord>();
     for (LatticeWord lw : wordsStartAt[a]) {
       if (lw.endNode == b) {
         words.add(lw);
@@ -560,8 +555,8 @@ public class HTKLatticeReader  {
       } else if (args[i].equalsIgnoreCase("-parser")) {
         parseGram = args[++i];
       } else {
-        log.info("unrecognized flag: " + args[i]);
-        log.info("usage: java LatticeReader <file> [ -debug ] [ -useMax ] [ -useSum ] [ -noPrettyPrint ] [ -parser parserFile ]");
+        System.err.println("unrecognized flag: " + args[i]);
+        System.err.println("usage: java LatticeReader <file> [ -debug ] [ -useMax ] [ -useSum ] [ -noPrettyPrint ] [ -parser parserFile ]");
         System.exit(0);
       }
     }

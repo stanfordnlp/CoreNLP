@@ -1,5 +1,4 @@
-package edu.stanford.nlp.naturalli.demo; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.naturalli.demo;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
@@ -27,10 +26,7 @@ import java.util.*;
  *
  * @author Gabor Angeli
  */
-public class OpenIEServlet extends HttpServlet  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(OpenIEServlet.class);
+public class OpenIEServlet extends HttpServlet {
   StanfordCoreNLP pipeline = null;
   StanfordCoreNLP backoff = null;
 
@@ -42,7 +38,6 @@ public class OpenIEServlet extends HttpServlet  {
   public void init()  throws ServletException {
     Properties commonProps = new Properties() {{
       setProperty("depparse.extradependencies", "ref_only_uncollapsed");
-      setProperty("parse.extradependencies", "ref_only_uncollapsed");
       setProperty("openie.splitter.threshold", "0.10");
       setProperty("openie.optimze_for", "GENERAL");
       setProperty("openie.ignoreaffinity", "false");
@@ -61,7 +56,7 @@ public class OpenIEServlet extends HttpServlet  {
       commonProps.setProperty("openie.splitter.model", dataDir + "/clauseSplitterModel.ser.gz");
       commonProps.setProperty("openie.affinity_models", dataDir);
     } catch (NullPointerException e) {
-      log.info("Could not load servlet context. Are you on the command line?");
+      System.err.println("Could not load servlet context. Are you on the command line?");
     }
     if (this.pipeline == null) {
       Properties fullProps = new Properties(commonProps);
@@ -80,22 +75,23 @@ public class OpenIEServlet extends HttpServlet  {
   /**
    * Annotate a document (which is usually just a sentence).
    */
-  public void annotate(StanfordCoreNLP pipeline, Annotation ann) {
-    if (ann.get(CoreAnnotations.SentencesAnnotation.class) == null) {
-      pipeline.annotate(ann);
-    } else {
-      if (ann.get(CoreAnnotations.SentencesAnnotation.class).size() == 1) {
-        CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-        for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-          token.remove(NaturalLogicAnnotations.OperatorAnnotation.class);
-          token.remove(NaturalLogicAnnotations.PolarityAnnotation.class);
+  public void annotate(Annotation ann) {
+    pipeline.annotate(ann);
+    if (ann.get(CoreAnnotations.SentencesAnnotation.class).size() == 1) {
+      CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+      if (sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class) != null) {
+        if (sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class).isEmpty()) {
+          for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+            token.remove(NaturalLogicAnnotations.OperatorAnnotation.class);
+            token.remove(NaturalLogicAnnotations.PolarityAnnotation.class);
+          }
+          sentence.remove(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
+          sentence.remove(NaturalLogicAnnotations.EntailedSentencesAnnotation.class);
+          sentence.remove(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+          sentence.remove(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+          sentence.remove(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+          backoff.annotate(ann);
         }
-        sentence.remove(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-        sentence.remove(NaturalLogicAnnotations.EntailedSentencesAnnotation.class);
-        sentence.remove(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-        sentence.remove(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-        sentence.remove(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
-        pipeline.annotate(ann);
       }
     }
   }
@@ -159,22 +155,6 @@ public class OpenIEServlet extends HttpServlet  {
     return sb.toString();
   }
 
-  private void runWithPipeline(StanfordCoreNLP pipeline, Annotation ann, Set<String> triples, Set<String> entailments) {
-    // Annotate
-    annotate(pipeline, ann);
-    // Extract info
-    for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
-      for (SentenceFragment fragment : sentence.get(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
-        entailments.add(quote(fragment.toString()));
-      }
-      for (RelationTriple fragment : sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
-        triples.add("[ " + quote(fragment.subjectGloss()) + ", " + quote(fragment.relationGloss()) + ", " + quote(fragment.objectGloss()) + " ]");
-      }
-    }
-
-  }
-
-
   /**
    * Actually perform the GET request, given all the relevant information (already sanity checked).
    * This is the meat of the servlet code.
@@ -194,12 +174,18 @@ public class OpenIEServlet extends HttpServlet  {
     // Annotate
     Annotation ann = new Annotation(q);
     try {
+      // Annotate
+      annotate(ann);
       // Collect results
-      Set<String> entailments = new HashSet<>();
+      List<String> entailments = new ArrayList<>();
       Set<String> triples = new LinkedHashSet<>();
-      runWithPipeline(pipeline, ann, triples, entailments);  // pipeline must come before backoff
-      if (triples.size() == 0) {
-        runWithPipeline(backoff, ann, triples, entailments);   // backoff must come after pipeline
+      for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+        for (SentenceFragment fragment : sentence.get(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
+          entailments.add(quote(fragment.toString()));
+        }
+        for (RelationTriple fragment : sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
+          triples.add("[ " + quote(fragment.subjectLemmaGloss()) + ", " + quote(fragment.relationLemmaGloss()) + ", " + quote(fragment.objectLemmaGloss()) + " ]");
+        }
       }
       // Write results
       out.println("{ " +

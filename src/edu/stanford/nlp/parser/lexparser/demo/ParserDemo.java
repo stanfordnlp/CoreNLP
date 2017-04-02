@@ -11,7 +11,7 @@ import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 
@@ -87,7 +87,7 @@ class ParserDemo {
   public static void demoAPI(LexicalizedParser lp) {
     // This option shows parsing a list of correctly tokenized words
     String[] sent = { "This", "is", "an", "easy", "sentence", "." };
-    List<CoreLabel> rawWords = SentenceUtils.toCoreLabelList(sent);
+    List<CoreLabel> rawWords = Sentence.toCoreLabelList(sent);
     Tree parse = lp.apply(rawWords);
     parse.pennPrint();
     System.out.println();

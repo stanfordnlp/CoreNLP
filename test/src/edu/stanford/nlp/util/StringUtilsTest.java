@@ -2,10 +2,7 @@ package edu.stanford.nlp.util;
 
 import junit.framework.TestCase;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class StringUtilsTest extends TestCase {
 
@@ -27,7 +24,7 @@ public class StringUtilsTest extends TestCase {
     Properties p2 = new Properties();
     p2.setProperty("fred", "true");
     p2.setProperty("2", "joe");
-    Map<String,Integer> argNums = new HashMap<>();
+    Map<String,Integer> argNums = new HashMap<String,Integer>();
     argNums.put("fred", 1);
     assertEquals(StringUtils.argsToProperties(new String[]{"-fred", "-2", "joe"}), p2);
     assertEquals(StringUtils.argsToProperties(new String[]{"-fred", "-2", "joe"}, argNums), p1);
@@ -95,35 +92,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[0]);
     assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[1]);
     assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[4]);
-  }
 
-  /*
-  public void testSplitOnCharSpeed() {
-    String line = "1;2;3;4;5;678;901;234567;1";
-    int runs = 1000000;
-
-    for (int gcIter = 0; gcIter < 10; ++gcIter) {
-      long start = System.currentTimeMillis();
-      for (int i = 0; i < runs; ++i) {
-        StringUtils.split(line, ";");
-      }
-      System.err.println("Old: " + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + " for " + runs + " splits");
-
-      start = System.currentTimeMillis();
-      for (int i = 0; i < runs; ++i) {
-        StringUtils.splitOnChar(line, ';');
-      }
-      System.err.println("New: " + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + " for " + runs + " splits");
-      System.err.println();
-    }
-  }
-  */
-
-  public void testStringIsNullOrEmpty() {
-    assertTrue(StringUtils.isNullOrEmpty(null));
-    assertTrue(StringUtils.isNullOrEmpty(""));
-    assertFalse(StringUtils.isNullOrEmpty(" "));
-    assertFalse(StringUtils.isNullOrEmpty("foo"));
   }
 
   public void testNormalize() {
@@ -192,62 +161,11 @@ public class StringUtilsTest extends TestCase {
     System.out.println(makeSet(expected));
     System.out.println(StringUtils.getCharacterNgrams(string, min, max));
     assertEquals(makeSet(expected),
-                 new HashSet<>(StringUtils.getCharacterNgrams(string, min, max)));
+                 new HashSet<String>(StringUtils.getCharacterNgrams(string, min, max)));
   }
 
-  @SafeVarargs
-  private final <T> Set<T> makeSet(T... elems) {
-    return new HashSet<>(Arrays.asList(elems));
-  }
-
-
-  public void testExpandEnvironmentVariables() {
-    Map<String, String> env = new HashMap<String, String>() {{
-      put("A", "[outA]");
-      put("A_B", "[outA_B]");
-      put("a_B", "[outa_B]");
-      put("a_B45", "[outa_B45]");
-      put("_A", "[out_A]");
-      put("3A", "[out_3A]");
-    }};
-    assertEquals("xxx [outA] xxx", StringUtils.expandEnvironmentVariables("xxx $A xxx", env));
-    assertEquals("xxx[outA] xxx", StringUtils.expandEnvironmentVariables("xxx$A xxx", env));
-    assertEquals("xxx[outA]xxx", StringUtils.expandEnvironmentVariables("xxx${A}xxx", env));
-    assertEquals("xxx [outA_B] xxx", StringUtils.expandEnvironmentVariables("xxx $A_B xxx", env));
-    assertEquals("xxx [outa_B] xxx", StringUtils.expandEnvironmentVariables("xxx $a_B xxx", env));
-    assertEquals("xxx [outa_B45] xxx", StringUtils.expandEnvironmentVariables("xxx $a_B45 xxx", env));
-    assertEquals("xxx [out_A] xxx", StringUtils.expandEnvironmentVariables("xxx $_A xxx", env));
-    assertEquals("xxx $3A xxx", StringUtils.expandEnvironmentVariables("xxx $3A xxx", env));
-    assertEquals("xxx  xxx", StringUtils.expandEnvironmentVariables("xxx $UNDEFINED xxx", env));
-  }
-
-  public void testDecodeArray() throws IOException {
-    String tempFile1 = Files.createTempFile("test", "tmp").toString();
-    String tempFile2 = Files.createTempFile("test", "tmp").toString();
-    String[] decodedArray = StringUtils.decodeArray("'"+tempFile1 + "','" + tempFile2+"'");
-
-    assertEquals(2, decodedArray.length);
-    assertEquals(tempFile1, decodedArray[0]);
-    assertEquals(tempFile2, decodedArray[1]);
-
-    String[] test10 = { "\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"",
-                        "[\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"]" };
-    String[] ans10 = { "C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt" };
-    String[] test11 = { "C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt",
-                        "[C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt]" };
-    String[] ans11 = { "C:UsersBELLCH~1AppDataLocalTempbill-ie5804201486895318826regex_rules.txt" };
-
-    for (String s : test10) {
-      assertEquals(Arrays.asList(ans10), Arrays.asList(StringUtils.decodeArray(s)));
-    }
-    for (String s : test11) {
-      assertEquals(Arrays.asList(ans11), Arrays.asList(StringUtils.decodeArray(s)));
-    }
-  }
-
-  public void testRegexGroups() {
-    List<String> ans = Arrays.asList("42", "123", "1965");
-    assertEquals(ans, StringUtils.regexGroups(Pattern.compile("(\\d+)\\D*(\\d+)\\D*(\\d+)"), "abc-x42!123   -1965."));
+  private <T> Set<T> makeSet(T... elems) {
+    return new HashSet<T>(Arrays.asList(elems));
   }
 
 }

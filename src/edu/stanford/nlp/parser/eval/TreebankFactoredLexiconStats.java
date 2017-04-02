@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.eval; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.eval;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,10 +28,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class TreebankFactoredLexiconStats  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TreebankFactoredLexiconStats.class);
+public class TreebankFactoredLexiconStats {
 
 
 //  private static String stripTag(String tag) {
@@ -73,27 +69,27 @@ public class TreebankFactoredLexiconStats  {
     }
 
     // Counters
-    Counter<String> wordTagCounter = new ClassicCounter<>(30000);
-    Counter<String> morphTagCounter = new ClassicCounter<>(500);
+    Counter<String> wordTagCounter = new ClassicCounter<String>(30000);
+    Counter<String> morphTagCounter = new ClassicCounter<String>(500);
 //    Counter<String> signatureTagCounter = new ClassicCounter<String>();
-    Counter<String> morphCounter = new ClassicCounter<>(500);
-    Counter<String> wordCounter = new ClassicCounter<>(30000);
-    Counter<String> tagCounter = new ClassicCounter<>(300);
+    Counter<String> morphCounter = new ClassicCounter<String>(500);
+    Counter<String> wordCounter = new ClassicCounter<String>(30000);
+    Counter<String> tagCounter = new ClassicCounter<String>(300);
 
-    Counter<String> lemmaCounter = new ClassicCounter<>(25000);
-    Counter<String> lemmaTagCounter = new ClassicCounter<>(25000);
+    Counter<String> lemmaCounter = new ClassicCounter<String>(25000);
+    Counter<String> lemmaTagCounter = new ClassicCounter<String>(25000);
 
-    Counter<String> richTagCounter = new ClassicCounter<>(1000);
+    Counter<String> richTagCounter = new ClassicCounter<String>(1000);
 
-    Counter<String> reducedTagCounter = new ClassicCounter<>(500);
+    Counter<String> reducedTagCounter = new ClassicCounter<String>(500);
 
-    Counter<String> reducedTagLemmaCounter = new ClassicCounter<>(500);
+    Counter<String> reducedTagLemmaCounter = new ClassicCounter<String>(500);
 
     Map<String,Set<String>> wordLemmaMap = Generics.newHashMap();
 
-    TwoDimensionalIntCounter<String,String> lemmaReducedTagCounter = new TwoDimensionalIntCounter<>(30000);
-    TwoDimensionalIntCounter<String,String> reducedTagTagCounter = new TwoDimensionalIntCounter<>(500);
-    TwoDimensionalIntCounter<String,String> tagReducedTagCounter = new TwoDimensionalIntCounter<>(300);
+    TwoDimensionalIntCounter<String,String> lemmaReducedTagCounter = new TwoDimensionalIntCounter<String,String>(30000);
+    TwoDimensionalIntCounter<String,String> reducedTagTagCounter = new TwoDimensionalIntCounter<String,String>(500);
+    TwoDimensionalIntCounter<String,String> tagReducedTagCounter = new TwoDimensionalIntCounter<String,String>(300);
 
     int numTrees = 0;
     for (Tree tree : tb) {
@@ -197,7 +193,7 @@ public class TreebankFactoredLexiconStats  {
     System.out.println(sbNoLemma.toString());
     System.out.println(sbMultLemmas.toString());
     System.out.println("==================");
-    List<String> tags = new ArrayList<>(tagReducedTagCounter.firstKeySet());
+    List<String> tags = new ArrayList<String>(tagReducedTagCounter.firstKeySet());
     Collections.sort(tags);
     for (String tag : tags) {
       System.out.println(tag);

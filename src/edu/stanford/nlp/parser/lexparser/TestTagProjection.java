@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 // Looks like the intended behavior of TestTagProjection is:
 // 1) Include the basic category (everything before a '-' or '^' annotation)
@@ -14,10 +13,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 
 /** @author Dan Klein */
-public class TestTagProjection implements TagProjection  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TestTagProjection.class);
+class TestTagProjection implements TagProjection {
 
   private static final long serialVersionUID = 9161675508802284114L;
 
@@ -36,7 +32,7 @@ public class TestTagProjection implements TagProjection  {
       }
     }
     String ret = sb.toString();
-    // log.info("TTP mapped " + tagStr + " to " + ret);
+    // System.err.println("TTP mapped " + tagStr + " to " + ret);
     return ret;
   }
 

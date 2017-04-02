@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.process;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,10 +28,7 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
  *
  * @author Spence Green
  */
-public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicDocumentReaderAndWriter.class);
+public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
 
   private static final long serialVersionUID = 3667837672769424178L;
 
@@ -136,8 +132,8 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
         if (inputHasDomainLabels) {
           String[] domainAndData = in.split("\\s+", 2);
           if (domainAndData.length < 2) {
-            log.info("Missing domain label or text: ");
-            log.info(in);
+            System.err.println("Missing domain label or text: ");
+            System.err.println(in);
           } else {
             lineDomain = domainAndData[0];
             in = domainAndData[1];
@@ -148,7 +144,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
         if (inputHasTags) {
           String[] toks = in.split("\\s+");
-          List<CoreLabel> input = new ArrayList<>(toks.length);
+          List<CoreLabel> input = new ArrayList<CoreLabel>(toks.length);
           final String tagDelim = Pattern.quote(tagDelimiter);
           final String rewDelim = Pattern.quote(rewriteDelimiter);
           for (String wordTag : toks) {
