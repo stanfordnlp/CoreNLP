@@ -63,7 +63,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     return ann;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "ConstantConditions"})
   public static void sameAsRead(Annotation doc, Annotation readDoc) {
     // Run the original document through the number normalizer
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
@@ -257,7 +257,6 @@ public class ProtobufAnnotationSerializerSlowITest {
     testAnnotators("tokenize,ssplit,pos,lemma,ner,entitymentions");
   }
   */
-
 
   @Test
   public void testSentiment() {

@@ -50,6 +50,8 @@ import static java.net.HttpURLConnection.*;
 public class StanfordCoreNLPServer implements Runnable {
 
   protected HttpServer server;
+  @ArgumentParser.Option(name="server_id", gloss="a name for this server")
+  protected String serverID = null; // currently not used
   @ArgumentParser.Option(name="port", gloss="The port to run the server on")
   protected int serverPort = 9000;
   @ArgumentParser.Option(name="status_port", gloss="The port to serve the status check endpoints on. If different from the server port, this will run in a separate thread.")
@@ -72,6 +74,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,regexner,kbp";
   @ArgumentParser.Option(name="preload", gloss="Cache the following annotators on startup")
   protected static String preloadedAnnotators = "";
+  @ArgumentParser.Option(name="serverProperties", gloss="Default properties file for server's StanfordCoreNLP instance")
+  protected static String serverPropertiesPath = null;
 
   protected final String shutdownKey;
 
@@ -92,6 +96,22 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   private final ExecutorService corenlpExecutor;
 
+  /**
+   * Create a new Stanford CoreNLP Server.
+   * @param props A list of properties for the server (server_id ...)
+   * @param port The port to host the server from.
+   * @param timeout The timeout (in milliseconds) for each command.
+   * @param strict If true, conform more strictly to the HTTP spec (e.g., for character encoding).
+   * @throws IOException Thrown from the underlying socket implementation.
+   */
+  public StanfordCoreNLPServer(Properties props, int port, int timeout, boolean strict) throws IOException {
+    this(props);
+    this.serverPort = port;
+    if (props != null && !props.containsKey("status_port"))
+      this.statusPort = port;
+    this.timeoutMilliseconds = timeout;
+    this.strict = strict;
+  }
 
   /**
    * Create a new Stanford CoreNLP Server.
@@ -101,10 +121,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown from the underlying socket implementation.
    */
   public StanfordCoreNLPServer(int port, int timeout, boolean strict) throws IOException {
-    this();
-    this.serverPort = port;
-    this.timeoutMilliseconds = timeout;
-    this.strict = strict;
+    this(null, port, timeout, strict);
   }
 
   /**
@@ -113,6 +130,17 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer() throws IOException {
+    this(null);
+  }
+
+  /**
+   * Create a new Stanford CoreNLP Server with the default parameters and some
+   *
+   * pass in properties (server_id ...)
+   *
+   * @throws IOException Thrown if we could not write the shutdown key to the a file.
+   */
+  public StanfordCoreNLPServer(Properties props) throws IOException {
     // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
     String defaultParserPath;
     ClassLoader classLoader = getClass().getClassLoader();
@@ -132,20 +160,34 @@ public class StanfordCoreNLPServer implements Runnable {
     this.defaultProps = PropertiesUtils.asProperties(
         "annotators", defaultAnnotators,  // Run these annotators by default
         "mention.type", "dep",  // Use dependency trees with coref by default
-        "coref.mode",  "statistical",  // Use the new coref
-        "coref.language",  "en",  // We're English by default
+        "coref.mode", "statistical",  // Use the new coref
+        "coref.language", "en",  // We're English by default
         "inputFormat", "text",   // By default, treat the POST data like text
         "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
         "prettyPrint", "false",  // Don't bother pretty-printing
         "parse.model", defaultParserPath,  // SR scales linearly with sentence length. Good for a server!
         "parse.binaryTrees", "true",  // needed for the Sentiment annotator
         "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
+
+    // overwrite all default properties with provided server properties
+    // for instance you might want to provide a default ner model
+    if (serverPropertiesPath != null) {
+      Properties serverProperties = StringUtils.argsToProperties(new String[]{"-props", serverPropertiesPath});
+      PropertiesUtils.overWriteProperties(this.defaultProps, serverProperties);
+    }
+
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
     this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
 
-    // Generate and write a shutdown key
+    // Generate and write a shutdown key, get optional server_id from passed in properties
+    // this way if multiple servers running can shut them all down with different ids
+    String shutdownKeyFileName;
+    if (props != null && props.getProperty("server_id") != null)
+      shutdownKeyFileName = "corenlp.shutdown."+props.getProperty("server_id");
+    else
+      shutdownKeyFileName = "corenlp.shutdown";
     String tmpDir = System.getProperty("java.io.tmpdir");
-    File tmpFile = new File(tmpDir + File.separator + "corenlp.shutdown");
+    File tmpFile = new File(tmpDir + File.separator + shutdownKeyFileName);
     tmpFile.deleteOnExit();
     if (tmpFile.exists()) {
       if (!tmpFile.delete()) {
@@ -154,6 +196,11 @@ public class StanfordCoreNLPServer implements Runnable {
     }
     this.shutdownKey = new BigInteger(130, new Random()).toString(32);
     IOUtils.writeStringToFile(shutdownKey, tmpFile.getPath(), "utf-8");
+    // set status port
+    if (props != null && props.containsKey("status_port"))
+      this.statusPort = Integer.parseInt(props.getProperty("status_port"));
+    else if (props != null && props.containsKey("port"))
+      this.statusPort = Integer.parseInt(props.getProperty("port"));
   }
 
   /**
@@ -172,7 +219,7 @@ public class StanfordCoreNLPServer implements Runnable {
       String query = uri.getQuery();
       String[] queryFields = query
           .replaceAll("\\\\&", "___AMP___")
-          .replaceAll("\\\\+", "___PLUS___")
+          .replaceAll("\\\\\\+", "___PLUS___")
           .split("&");
       for (String queryField : queryFields) {
         int firstEq = queryField.indexOf('=');
@@ -531,6 +578,10 @@ public class StanfordCoreNLPServer implements Runnable {
     public void handle(HttpExchange httpExchange) throws IOException {
       // Set common response headers
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
       // Get sentence.
       Properties props;
@@ -678,7 +729,8 @@ public class StanfordCoreNLPServer implements Runnable {
         if (languagePropertiesFile != null) {
           Properties languageSpecificProperties = new Properties();
           try {
-            languageSpecificProperties.load(StanfordCoreNLPServer.class.getResourceAsStream(languagePropertiesFile));
+            languageSpecificProperties.load(
+                    IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(languagePropertiesFile));
             PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
           } catch (IOException e) {
             err("Failure to load language specific properties.");
@@ -750,6 +802,10 @@ public class StanfordCoreNLPServer implements Runnable {
     public void handle(HttpExchange httpExchange) throws IOException {
       // Set common response headers
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
       // Some common fields
       Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner");
       if (authenticator != null && !authenticator.test(props)) {
@@ -871,6 +927,10 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Set common response headers
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
       // Some common properties
       Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
@@ -912,7 +972,7 @@ public class StanfordCoreNLPServer implements Runnable {
             } else {
               // Case: find matches
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
-                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
+                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class));
                 int i = 0;
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
@@ -989,6 +1049,10 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Set common response headers
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
       // Some common properties
       Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,parse");
@@ -1236,8 +1300,16 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Fill arguments
     ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer();  // must come after filling global options
+    // get server properties from command line, right now only property used is server_id
+    Properties serverProperties = StringUtils.argsToProperties(args);
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer(serverProperties);  // must come after filling global options
     ArgumentParser.fillOptions(server, args);
+    // align status port and server port in case status port hasn't been set and
+    // server port is not the default 9000
+    if (serverProperties != null && !serverProperties.containsKey("status_port") &&
+        serverProperties.containsKey("port")) {
+      server.statusPort = Integer.parseInt(serverProperties.getProperty("port"));
+    }
     log("    Threads: " + ArgumentParser.threads);
 
     // Start the liveness server

@@ -7,15 +7,18 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -30,6 +33,9 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLPClient.class);
+
+  /** A simple URL spec, for parsing backend URLs */
+  private static final Pattern URL_PATTERN = Pattern.compile("(?:(https?)://)?([^:]+):([0-9]+)?");
 
   /**
    * Information on how to connect to a backend.
@@ -65,6 +71,11 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     public int hashCode() {
       throw new IllegalStateException("Hashing backends is dangerous!");
     }
+
+    @Override
+    public String toString() {
+      return protocol + "://" + host + ":" + port;
+    }
   }
 
   /**
@@ -79,44 +90,40 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     public final List<Backend> backends;
 
     /**
-     * The queue of annotators (backends) that are free to be run on.
-     * Remember to lock access to this object with {@link BackendScheduler#freeAnnotatorsLock}.
-     */
-    private final Queue<Backend> freeAnnotators;
-    /**
-     * The lock on access to {@link BackendScheduler#freeAnnotators}.
-     */
-    private final Lock freeAnnotatorsLock = new ReentrantLock();
-    /**
-     * Represents the event that an annotator has freed up and is available for
-     * work on the {@link BackendScheduler#freeAnnotators} queue.
-     * Linked to {@link BackendScheduler#freeAnnotatorsLock}.
-     */
-    private final Condition newlyFree = freeAnnotatorsLock.newCondition();
-
-    /**
      * The queue on requests for the scheduler to handle.
      * Each element of this queue is a function: calling the function signals
      * that this backend is available to perform a task on the passed backend.
      * It is then obligated to call the passed Consumer to signal that it has
      * released control of the backend, and it can be used for other things.
-     * Remember to lock access to this object with {@link BackendScheduler#queueLock}.
+     * Remember to lock access to this object with {@link BackendScheduler#stateLock}.
      */
     private final Queue<BiConsumer<Backend, Consumer<Backend>>> queue;
     /**
      * The lock on access to {@link BackendScheduler#queue}.
      */
-    private final Lock queueLock = new ReentrantLock();
+    private final Lock stateLock = new ReentrantLock();
     /**
      * Represents the event that an item has been added to the work queue.
-     * Linked to {@link BackendScheduler#queueLock}.
+     * Linked to {@link BackendScheduler#stateLock}.
      */
-    private final Condition enqueued = queueLock.newCondition();
+    private final Condition enqueued = stateLock.newCondition();
     /**
      * Represents the event that the queue has become empty, and this schedule is no
      * longer needed.
      */
-    public final Condition queueEmpty = queueLock.newCondition();
+    public final Condition shouldShutdown = stateLock.newCondition();
+
+    /**
+     * The queue of annotators (backends) that are free to be run on.
+     * Remember to lock access to this object with {@link BackendScheduler#stateLock}.
+     */
+    private final Queue<Backend> freeAnnotators;
+    /**
+     * Represents the event that an annotator has freed up and is available for
+     * work on the {@link BackendScheduler#freeAnnotators} queue.
+     * Linked to {@link BackendScheduler#stateLock}.
+     */
+    private final Condition newlyFree = stateLock.newCondition();
 
     /**
      * While this is true, continue running the scheduler.
@@ -142,39 +149,47 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
       try {
         while (doRun) {
           // Wait for a request
-          queueLock.lock();
-          while (queue.isEmpty()) {
-            enqueued.await();
-            if (!doRun) { return; }
-          }
-          // Signal if the queue is empty
-          if (queue.isEmpty()) {
-            queueEmpty.signalAll();
-          }
-          // Get the actual request
-          BiConsumer<Backend, Consumer<Backend>> request = queue.poll();
-          // We have a request
-          queueLock.unlock();
+          BiConsumer<Backend, Consumer<Backend>> request;
+          Backend annotator;
+          stateLock.lock();
+          try {
+            while (queue.isEmpty()) {
+              enqueued.await();
+              if (!doRun) {
+                return;
+              }
+            }
+            // Get the actual request
+            request = queue.poll();
+            // We have a request
 
-          // Find a free annotator
-          freeAnnotatorsLock.lock();
-          while (freeAnnotators.isEmpty()) {
-            newlyFree.await();
+            // Find a free annotator
+            while (freeAnnotators.isEmpty()) {
+              newlyFree.await();
+            }
+            annotator = freeAnnotators.poll();
+          } finally {
+            stateLock.unlock();
           }
-          Backend annotator = freeAnnotators.poll();
-          freeAnnotatorsLock.unlock();
           // We have an annotator
 
           // Run the annotation
           request.accept(annotator, freedAnnotator -> {
             // ASYNC: we've freed this annotator
             // add it back to the queue and register it as available
-            freeAnnotatorsLock.lock();
+            stateLock.lock();
             try {
               freeAnnotators.add(freedAnnotator);
+
+              // If the queue is empty, and all the annotators have returned, we're done
+              if (queue.isEmpty() && freeAnnotators.size() == backends.size()) {
+                log.debug("All annotations completed. Signaling for shutdown");
+                shouldShutdown.signalAll();
+              }
+
               newlyFree.signal();
             } finally {
-              freeAnnotatorsLock.unlock();
+              stateLock.unlock();
             }
           });
           // Annotator is running (in parallel, most likely)
@@ -192,15 +207,15 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
      *                 to register the backend as free for further work.
      */
     public void schedule(BiConsumer<Backend, Consumer<Backend>> annotate) {
-      queueLock.lock();
+      stateLock.lock();
       try {
         queue.add(annotate);
         enqueued.signal();
       } finally {
-        queueLock.unlock();
+        stateLock.unlock();
       }
     }
-  }
+  } // end static class BackEndScheduler
 
   /** The path on the server to connect to. */
   private final String path = "";
@@ -253,11 +268,10 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     serverProperties.setProperty("outputSerializer", ProtobufAnnotationSerializer.class.getName());
 
     // Create a list of all the properties, as JSON map elements
-    List<String> jsonProperties = new ArrayList<>();
-    for (String key : serverProperties.stringPropertyNames()) {
-      jsonProperties.add("\"" + JSONOutputter.cleanJSON(key) + "\": \"" +
-              JSONOutputter.cleanJSON(serverProperties.getProperty(key)) + "\"");
-    }
+    List<String> jsonProperties = serverProperties.stringPropertyNames().stream().map(key -> '"' + JSONOutputter.cleanJSON(key) + "\": \"" +
+        JSONOutputter
+            .cleanJSON(serverProperties.getProperty(key)) + '"')
+        .collect(Collectors.toList());
     // Create the JSON object
     this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";
 
@@ -406,7 +420,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
   }
 
 
-
   /**
    * The canonical entry point of the client annotator.
    * Create an HTTP request, send this annotation to the server, and await a response.
@@ -415,43 +428,40 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    * @param callback Called when the server has returned an annotated document.
    *                 The input to this callback is the same as the passed Annotation object.
    */
-  public void annotate(final Annotation annotation, final Consumer<Annotation> callback){
-    scheduler.schedule((Backend backend, Consumer<Backend> isFinishedCallback) -> new Thread() {
-      @Override
-      public void run() {
-        try {
-          // 1. Create the input
-          // 1.1 Create a protocol buffer
-          ByteArrayOutputStream os = new ByteArrayOutputStream();
-          serializer.write(annotation, os);
-          os.close();
-          byte[] message = os.toByteArray();
-          // 1.2 Create the query params
+  public void annotate(final Annotation annotation, final Consumer<Annotation> callback) {
+    scheduler.schedule((Backend backend, Consumer<Backend> isFinishedCallback) -> new Thread(() -> {
+      try {
+        // 1. Create the input
+        // 1.1 Create a protocol buffer
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        serializer.write(annotation, os);
+        os.close();
+        byte[] message = os.toByteArray();
+        // 1.2 Create the query params
 
-          String queryParams = String.format(
-              "properties=%s",
-              URLEncoder.encode(StanfordCoreNLPClient.this.propsAsJSON, "utf-8"));
+        String queryParams = String.format(
+            "properties=%s",
+            URLEncoder.encode(StanfordCoreNLPClient.this.propsAsJSON, "utf-8"));
 
-          // 2. Create a connection
-          URL serverURL = new URL(backend.protocol, backend.host,
-              backend.port,
-              StanfordCoreNLPClient.this.path + "?" + queryParams);
+        // 2. Create a connection
+        URL serverURL = new URL(backend.protocol, backend.host,
+            backend.port,
+            StanfordCoreNLPClient.this.path + '?' + queryParams);
 
-          // 3. Do the annotation
-          //    This method has two contracts:
-          //    1. It should call the two relevant callbacks
-          //    2. It must not throw an exception
-          doAnnotation(annotation, backend, serverURL, message, 0);
-        } catch (Throwable t) {
-          log.warn("Could not annotate via server! Trying to annotate locally...", t);
-          StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
-          corenlp.annotate(annotation);
-        } finally {
-          callback.accept(annotation);
-          isFinishedCallback.accept(backend);
-        }
+        // 3. Do the annotation
+        //    This method has two contracts:
+        //    1. It should call the two relevant callbacks
+        //    2. It must not throw an exception
+        doAnnotation(annotation, backend, serverURL, message, 0);
+      } catch (Throwable t) {
+        log.warn("Could not annotate via server! Trying to annotate locally...", t);
+        StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
+        corenlp.annotate(annotation);
+      } finally {
+        callback.accept(annotation);
+        isFinishedCallback.accept(backend);
       }
-    }.start());
+    }).start());
   }
 
 
@@ -467,6 +477,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    */
   @SuppressWarnings("unchecked")
   private void doAnnotation(Annotation annotation, Backend backend, URL serverURL, byte[] message, int tries) {
+
     try {
       // 1. Set up the connection
       URLConnection connection = serverURL.openConnection();
@@ -485,8 +496,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
       // 1.3 Set some protocol-dependent properties
       switch (backend.protocol) {
         case "https":
-          ((HttpsURLConnection) connection).setRequestMethod("POST");
-          break;
         case "http":
           ((HttpURLConnection) connection).setRequestMethod("POST");
           break;
@@ -541,7 +550,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     log.info("Entering interactive shell. Type q RETURN or EOF to quit.");
     final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
     IOUtils.console("NLP> ", line -> {
-      if (line.length() > 0) {
+      if ( ! line.isEmpty()) {
         Annotation anno = pipeline.process(line);
         try {
           switch (outputFormat) {
@@ -576,7 +585,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
   /**
    * The implementation of what to run on a command-line call of CoreNLPWebClient
    *
-   * @throws IOException
+   * @throws IOException If any IO problem
    */
   public void run() throws IOException {
     StanfordRedwoodConfiguration.minimalSetup();
@@ -633,15 +642,15 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    * </p>
    */
   public void shutdown() throws InterruptedException {
-    scheduler.queueLock.lock();
+    scheduler.stateLock.lock();
     try {
-      while (!scheduler.queue.isEmpty()) {
-        scheduler.queueEmpty.await();
+      while (!scheduler.queue.isEmpty() || scheduler.freeAnnotators.size() != scheduler.backends.size()) {
+        scheduler.shouldShutdown.await(5, TimeUnit.SECONDS);
       }
       scheduler.doRun = false;
       scheduler.enqueued.signalAll();  // In case the thread's waiting on this condition
     } finally {
-      scheduler.queueLock.unlock();
+      scheduler.stateLock.unlock();
     }
   }
 
@@ -654,7 +663,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    * is to be processed separately as a single sentence.
    * <p>
    * Example usage:<br>
-   * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP -props properties
+   * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP -props properties -backends site1:port1,site2,port2 <br>
+   *    or just -host name -port number
    *
    * @param args List of required properties
    * @throws java.io.IOException If IO problem
@@ -666,10 +676,10 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     //
     // extract all the properties from the command line
     // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
-//    if (args.length < 2) {
-//      log.info("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
-//      System.exit(1);
-//    }
+    // if (args.length < 2) {
+    //   log.info("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
+    //   System.exit(1);
+    // }
     Properties props = StringUtils.argsToProperties(args);
     boolean hasH = props.containsKey("h");
     boolean hasHelp = props.containsKey("help");
@@ -681,17 +691,37 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
     // Create the backends
     List<Backend> backends = new ArrayList<>();
-    for (String spec : props.getProperty("backends", "corenlp.run").split(",")) {
-      if (spec.contains(":")) {
-        String host = spec.substring(0, spec.indexOf(':'));
-        int port = Integer.parseInt(spec.substring(spec.indexOf(':') + 1));
-        backends.add(new Backend(host.startsWith("http://") ? "http" : "https",
-            host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
-            port));
-      } else {
-        backends.add(new Backend("http", spec, 80));
+    String defaultBack = "http://localhost:9000";
+    String backStr = props.getProperty("backends");
+    if (backStr == null) {
+      String host = props.getProperty("host");
+      String port = props.getProperty("port");
+      if (host != null) {
+        if (port != null) {
+          defaultBack = host + ':' + port;
+        } else {
+          defaultBack = host;
+        }
       }
     }
+
+    for (String spec : props.getProperty("backends", defaultBack).split(",")) {
+      Matcher matcher = URL_PATTERN.matcher(spec.trim());
+      if (matcher.matches()) {
+        String protocol = matcher.group(1);
+        if (protocol == null) {
+          protocol = "http";
+        }
+        String host = matcher.group(2);
+        int port = 80;
+        String portStr = matcher.group(3);
+        if (portStr != null) {
+          port = Integer.parseInt(portStr);
+        }
+        backends.add(new Backend(protocol, host, port));
+      }
+    }
+    log.info("Using backends: " + backends);
 
     // Run the pipeline
     StanfordCoreNLPClient client = new StanfordCoreNLPClient(props, backends);

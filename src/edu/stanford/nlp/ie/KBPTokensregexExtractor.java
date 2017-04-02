@@ -56,7 +56,12 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
   }
 
   public KBPTokensregexExtractor(String tokensregexDir) {
-    logger.log("Creating TokensRegexExtractor");
+    this(tokensregexDir, false);
+  }
+
+  public KBPTokensregexExtractor(String tokensregexDir, boolean verbose) {
+    if (verbose)
+      logger.log("Creating TokensRegexExtractor");
     // Create extractors
     for (RelationType rel : RelationType.values()) {
       String path = tokensregexDir + File.separator + rel.canonicalName.replaceAll("/", "SLASH") + ".rules";
@@ -64,9 +69,11 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
         List<String> listFiles = new ArrayList<>();
         listFiles.add(tokensregexDir + File.separator + "defs.rules");
         listFiles.add(path);
-        logger.log("Rule files for relation " + rel + " is " + path);
+        if (verbose)
+          logger.log("Rule files for relation " + rel + " is " + path);
         Env env = TokenSequencePattern.getNewEnv();
         env.bind("collapseExtractionRules", true);
+        env.bind("verbose", verbose);
         CoreMapExpressionExtractor extr = CoreMapExpressionExtractor.createExtractorFromFiles(env, listFiles).keepTemporaryTags();
         rules.put(rel, extr);
       }

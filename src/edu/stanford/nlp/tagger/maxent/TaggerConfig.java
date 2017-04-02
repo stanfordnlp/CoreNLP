@@ -1,7 +1,4 @@
-package edu.stanford.nlp.tagger.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
-
-import edu.stanford.nlp.util.StringUtils;
+package edu.stanford.nlp.tagger.maxent;
 
 import java.io.*;
 import java.util.Map;
@@ -10,6 +7,9 @@ import java.util.Properties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
+
 
 /**
  * Reads and stores configuration information for a POS tagger.
@@ -196,7 +196,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     //on command line/in props file
     //Get the path to the model (or the path where you'd like to save the model); this is necessary for training, testing, and tagging
     this.setProperty("model", props.getProperty("model", this.getProperty("model", "")).trim());
-    if ( ! (this.getMode() == Mode.DUMP) && this.getProperty("model").equals("")) {
+    if ( ! (this.getMode() == Mode.DUMP) && this.getProperty("model").isEmpty()) {
       throw new RuntimeException("'model' parameter must be specified");
     }
 
@@ -229,7 +229,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     this.setProperty("closedClassTagThreshold", props.getProperty("closedClassTagThreshold", this.getProperty("closedClassTagThreshold")));
 
     this.setProperty("arch", props.getProperty("arch", this.getProperty("arch")));
-    if (this.getMode() == Mode.TRAIN && this.getProperty("arch").equals("")) {
+    if (this.getMode() == Mode.TRAIN && this.getProperty("arch").isEmpty()) {
       throw new IllegalArgumentException("No architecture specified; " +
                                          "set the -arch flag with " +
                                          "the features to be used");
@@ -290,7 +290,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
   }
 
   public boolean keepEmptySentences() {
-    return getOutputOptionsContains("keepEmptySentences");    
+    return getOutputOptionsContains("keepEmptySentences");
   }
 
   public boolean getOutputOptionsContains(String sought) {
@@ -334,7 +334,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
   }
 
   private static String[] wsvStringToStringArray(String str) {
-    if (str == null || str.equals("")) {
+    if (StringUtils.isNullOrEmpty(str)) {
       return StringUtils.EMPTY_STRING_ARRAY;
     } else {
       return str.split("\\s+");

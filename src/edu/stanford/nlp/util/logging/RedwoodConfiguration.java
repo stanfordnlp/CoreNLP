@@ -2,10 +2,8 @@ package edu.stanford.nlp.util.logging;
 
 import java.io.File;
 import java.io.OutputStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import edu.stanford.nlp.util.Generics;
@@ -69,6 +67,34 @@ public class RedwoodConfiguration  {
     }
     return this;
   }
+
+
+
+  public RedwoodConfiguration listenOnChannels(Consumer<Redwood.Record> listener, Object... channels) {
+    return this.handlers(
+        Handlers.chain(new FilterHandler(Collections.singletonList(new LogFilter() {
+              Set<Object> matchAgainst = new HashSet<>(Arrays.asList(channels));
+              @Override
+              public boolean matches(Redwood.Record message) {
+                for (Object channel : message.channels()) {
+                  if (matchAgainst.contains(channel)) {
+                    return true;
+                  }
+                }
+                return false;
+              }
+            }), true),
+            (config, root) -> {
+              root.addChild(new LogRecordHandler() {
+                @Override
+                public List<Redwood.Record> handle(Redwood.Record record) {
+                  listener.accept(record);
+                  return Collections.singletonList(record);
+                }
+              });
+            }));
+  }
+
 
   /**
    * Determine where, in the end, console output should go.

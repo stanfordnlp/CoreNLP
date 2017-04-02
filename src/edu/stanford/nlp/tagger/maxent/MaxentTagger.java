@@ -1,7 +1,6 @@
 // MaxentTagger -- StanfordMaxEnt, A Maximum Entropy Toolkit
 // Copyright (c) 2002-2016 Leland Stanford Junior University
 
-
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -23,7 +22,7 @@
 // USA
 // Support/Questions: stanford-nlp on SO or java-nlp-user@lists.stanford.edu
 // Licensing: java-nlp-support@lists.stanford.edu
-// http://www-nlp.stanford.edu/software/tagger.shtml
+// http://nlp.stanford.edu/software/tagger.html
 
 package edu.stanford.nlp.tagger.maxent;
 
@@ -86,33 +85,33 @@ import java.text.DecimalFormat;
  * <dl>
  * <dt>
  * A MaxentTagger can be made with a constructor taking as argument the location of parameter files for a trained tagger: </dt>
- * <dd> <code>MaxentTagger tagger = new MaxentTagger("models/left3words-wsj-0-18.tagger");</code></dd>
+ * <dd> {@code MaxentTagger tagger = new MaxentTagger("models/left3words-wsj-0-18.tagger"); }</dd>
  * <p>
  * <dt>A default path is provided for the location of the tagger on the Stanford NLP machines:</dt>
- * <dd><code>MaxentTagger tagger = new MaxentTagger(DEFAULT_NLP_GROUP_MODEL_PATH); </code></dd>
+ * <dd>{@code MaxentTagger tagger = new MaxentTagger(DEFAULT_NLP_GROUP_MODEL_PATH); }</dd>
  * <p>
  * <dt>If you set the NLP_DATA_HOME environment variable,
  * DEFAULT_NLP_GROUP_MODEL_PATH will instead point to the directory
  * given in NLP_DATA_HOME.</dt>
  * <p>
  * <dt>To tag a List of HasWord and get a List of TaggedWord, you can use one of: </dt>
- * <dd><code>List&lt;TaggedWord&gt; taggedSentence = tagger.tagSentence(List&lt;? extends HasWord&gt; sentence)</code></dd>
- * <dd><code>List&lt;TaggedWord&gt; taggedSentence = tagger.apply(List&lt;? extends HasWord&gt; sentence)</code></dd>
+ * <dd>{@code List&lt;TaggedWord&gt; taggedSentence = tagger.tagSentence(List&lt;? extends HasWord&gt; sentence)}</dd>
+ * <dd>{@code List&lt;TaggedWord&gt; taggedSentence = tagger.apply(List&lt;? extends HasWord&gt; sentence)}</dd>
  * <p>
  * <dt>To tag a list of sentences and get back a list of tagged sentences:
- * <dd><code> List taggedList = tagger.process(List sentences)</code></dd>
+ * <dd>{@code List taggedList = tagger.process(List sentences)}</dd>
  * <p>
  * <dt>To tag a String of text and to get back a String with tagged words:</dt>
- * <dd> <code>String taggedString = tagger.tagString("Here's a tagged string.")</code></dd>
+ * <dd> {@code String taggedString = tagger.tagString("Here's a tagged string.")}</dd>
  * <p>
  * <dt>To tag a string of <i>correctly tokenized</i>, whitespace-separated words and get a string of tagged words back:</dt>
- * <dd> <code>String taggedString = tagger.tagTokenizedString("Here 's a tagged string .")</code></dd>
+ * <dd> {@code String taggedString = tagger.tagTokenizedString("Here 's a tagged string .")}</dd>
  * </dl>
  * <p>
- * The <code>tagString</code> method uses the default tokenizer (PTBTokenizer).
+ * The {@code tagString} method uses the default tokenizer (PTBTokenizer).
  * If you wish to control tokenization, you may wish to call
  * {@link #tokenizeText(Reader, TokenizerFactory)} and then to call
- * <code>process()</code> on the result.
+ * {@code process()} on the result.
  * </p>
  *
  * <h3>Using the command line</h3>
@@ -151,7 +150,7 @@ import java.text.DecimalFormat;
  * input has already been tokenized, use the flag "-tokenize false".
  *
  * <p> Parameters can be defined using a Properties file
- * (specified on the command-line with <code>-prop</code> <i>propFile</i>),
+ * (specified on the command-line with {@code -prop} <i>propFile</i>),
  * or directly on the command line (by preceding their name with a minus sign
  * ("-") to turn them into a flag. The following properties are recognized:
  * </p>
@@ -182,8 +181,8 @@ import java.text.DecimalFormat;
  * <tr><td>encoding</td><td>String</td><td>UTF-8</td><td>All</td><td>Encoding of the read files (training, testing) and the output text files.</td></tr>
  * <tr><td>tokenize</td><td>boolean</td><td>true</td><td>Tag,Test</td><td>Whether or not the file needs to be tokenized.  If this is false, the tagger assumes that white space separates words if and only if they should be tagged as separate tokens, and that the input is strictly one sentence per line.</td></tr>
  * <tr><td>tokenizerFactory</td><td>String</td><td>edu.stanford.nlp.<br>process.PTBTokenizer</td><td>Tag,Test</td><td>Fully qualified class name of the tokenizer to use.  edu.stanford.nlp.process.PTBTokenizer does basic English tokenization.</td></tr>
- * <tr><td>tokenizerOptions</td><td>String</td><td></td><td>Tag,Test</td><td>Known options for the particular tokenizer used. A comma-separated list. For PTBTokenizer, options of interest include <code>americanize=false</code> and <code>asciiQuotes</code> (for German). Note that any choice of tokenizer options that conflicts with the tokenization used in the tagger training data will likely degrade tagger performance.</td></tr>
- * <tr><td>sentenceDelimiter</td><td>String</td><td>null</td><td>Tag,Test</td><td>A marker used to separate a text into sentences. If not set (equal to <code>null</code>), sentence breaking is done by content (looking for periods, etc.) Otherwise, it will break on this String, except that if the String is "newline", it breaks on the String "\\n".</td></tr>
+ * <tr><td>tokenizerOptions</td><td>String</td><td></td><td>Tag,Test</td><td>Known options for the particular tokenizer used. A comma-separated list. For PTBTokenizer, options of interest include {@code americanize=false} and {@code asciiQuotes} (for German). Note that any choice of tokenizer options that conflicts with the tokenization used in the tagger training data will likely degrade tagger performance.</td></tr>
+ * <tr><td>sentenceDelimiter</td><td>String</td><td>null</td><td>Tag,Test</td><td>A marker used to separate a text into sentences. If not set (equal to {@code null}), sentence breaking is done by content (looking for periods, etc.) Otherwise, it will break on this String, except that if the String is "newline", it breaks on the String "\\n".</td></tr>
  * <tr><td>arch</td><td>String</td><td>generic</td><td>Train</td><td>Architecture of the model, as a comma-separated list of options, some with a parenthesized integer argument written k here: this determines what features are used to build your model.  See {@link ExtractorFrames} and {@link ExtractorFramesRare} for more information.</td></tr>
  * <tr><td>wordFunction</td><td>String</td><td>(none)</td><td>Train</td><td>A function to apply to the text before training or testing.  Must inherit from edu.stanford.nlp.util.Function&lt;String, String&gt;.  Can be blank.</td></tr>
  * <tr><td>lang</td><td>String</td><td>english</td><td>Train</td><td>Language from which the part of speech tags are drawn. This option determines which tags are considered closed-class (only fixed set of words can be tagged with a closed-class tag, such as prepositions). Defined languages are 'english' (Penn tag set), 'polish' (very rudimentary), 'french', 'chinese', 'arabic', 'german', and 'medline'.  </td></tr>
@@ -194,8 +193,8 @@ import java.text.DecimalFormat;
  * <tr><td>sgml</td><td>boolean</td><td>false</td><td>Tag, Test</td><td>Very basic tagging of the contents of all sgml fields; for more complex mark-up, consider using the xmlInput option.</td></tr>
  * <tr><td>xmlInput</td><td>String</td><td></td><td>Tag, Test</td><td>Give a space separated list of tags in an XML file whose content you would like tagged.  Any internal tags that appear in the content of fields you would like tagged will be discarded; the rest of the XML will be preserved and the original text of specified fields will be replaced with the tagged text.</td></tr>
  * <tr><td>outputFile</td><td>String</td><td>""</td><td>Tag</td><td>Path to write output to.  If blank, stdout is used.</td></tr>
- * <tr><td>outputFormat</td><td>String</td><td>""</td><td>Tag</td><td>Output format. One of: slashTags (default), xml, or tsv</td></tr>
- * <tr><td>outputFormatOptions</td><td>String</td><td>""</td><td>Tag</td><td>Output format options.</td></tr>
+ * <tr><td>outputFormat</td><td>String</td><td>""</td><td>Tag</td><td>Output format. One of: slashTags (default), xml (or inlineXML as a synonym), or tsv</td></tr>
+ * <tr><td>outputFormatOptions</td><td>String</td><td>""</td><td>Tag</td><td>Output format options. Currently used: lemmatize, verbose, keepEmptySentences</td></tr>
  * <tr><td>tagInside</td><td>String</td><td>""</td><td>Tag</td><td>Tags inside elements that match the regular expression given in the String.</td></tr>
  * <tr><td>search</td><td>String</td><td>cg</td><td>Train</td><td>Specify the search method to be used in the optimization method for training.  Options are 'cg' (conjugate gradient), 'iis' (improved iterative scaling), or 'qn' (quasi-newton).</td></tr>
  * <tr><td>sigmaSquared</td><td>double</td><td>0.5</td><td>Train</td><td>Sigma-squared smoothing/regularization parameter to be used for conjugate gradient search.  Default usually works reasonably well.</td></tr>
@@ -300,13 +299,11 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * Initializer that loads the tagger.
    *
    * @param modelFile Where to initialize the tagger from.
-   *        Most commonly, this is the filename of the trained model,
-   *        for example, <code>
-   *   /u/nlp/data/pos-tagger/wsj3t0-18-left3words/left3words-wsj-0-18.tagger
-   *        </code>.  However, if it starts with "https?://" it will
-   *        be interpreted as a URL.  One can also load models
-   *        directly from the classpath, as in loading from
-   *        edu/stanford/nlp/models/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger
+   *        Most commonly, this is the filename of the trained model, for example,
+   *        {@code /u/nlp/data/pos-tagger/wsj3t0-18-left3words/left3words-wsj-0-18.tagger}.
+   *        However, if it starts with "https?://" it will be interpreted as a URL.
+   *        One can also load models directly from the classpath, as in loading from
+   *        {@code edu/stanford/nlp/models/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger}.
    * @param config TaggerConfig based on command-line arguments
    * @param printLoading Whether to print a message saying what model file is being loaded and how long it took when finished.
    * @throws RuntimeIOException if I/O errors or serialization errors
@@ -366,14 +363,14 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   final boolean alltags = false;
   final Map<String, Set<String>> tagTokens = Generics.newHashMap();
 
-  static final int RARE_WORD_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_THRESH);
-  static final int MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.MIN_FEATURE_THRESH);
-  static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
-  static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
-  static final int VERY_COMMON_WORD_THRESH = Integer.parseInt(TaggerConfig.VERY_COMMON_WORD_THRESH);
+  private static final int RARE_WORD_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_THRESH);
+  private static final int MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.MIN_FEATURE_THRESH);
+  private static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
+  private static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
+  private static final int VERY_COMMON_WORD_THRESH = Integer.parseInt(TaggerConfig.VERY_COMMON_WORD_THRESH);
 
-  static final boolean OCCURRING_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.OCCURRING_TAGS_ONLY);
-  static final boolean POSSIBLE_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.POSSIBLE_TAGS_ONLY);
+  private static final boolean OCCURRING_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.OCCURRING_TAGS_ONLY);
+  private static final boolean POSSIBLE_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.POSSIBLE_TAGS_ONLY);
 
   private double defaultScore;
   private double[] defaultScores; // = null;
@@ -794,7 +791,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       throw new RuntimeIOException("Error while loading a tagger model (probably missing model file)", e);
     }
   }
- 
+
   /** This reads the complete tagger from a single model provided as an InputStream,
    *  and initializes the tagger using a
    *  combination of the properties passed in and parameters from the file.
@@ -914,7 +911,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
         log.info("prob read ");
       }
       if (printLoading) {
-        t.done(log, "Reading POS tagger model from " + source);
+        t.done(log, "Loading POS tagger from " + source);
       }
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException("Error while loading a tagger model (probably missing model file)", e);

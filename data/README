@@ -6,7 +6,7 @@ Small data files (test files, properties files, etc) can go here.
 Don't put large models here.  That would cause git to bloat too much.
 
 Open source: Don't put here any file that is copyright or that we
-don't have the rights to rights to redistribute. The contents of this
+don't have the rights to redistribute. The contents of this
 directory appear in our public github repository.
 
 Contact: John Bauer (horatio@gmail.com)

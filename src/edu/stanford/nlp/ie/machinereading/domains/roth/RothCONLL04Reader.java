@@ -26,12 +26,15 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
+ * A Reader designed for the relation extraction data studied in Dan Roth and Wen-tau Yih,
+ * A Linear Programming Formulation for Global Inference in Natural Language Tasks. CoNLL 2004.
+ * The format is a somewhat ad-hoc tab-separated value file format.
  *
  * @author Mihai, David McClosky, and agusev
  * @author Sonal Gupta (sonalg@stanford.edu)
- *
  */
 public class RothCONLL04Reader extends GenericDataSetReader {
+
   public RothCONLL04Reader() {
     super(null, true, true, true);
 
@@ -46,34 +49,39 @@ public class RothCONLL04Reader extends GenericDataSetReader {
     Annotation doc = new Annotation("");
 
     logger.info("Reading file: " + path);
-    Iterator<String> lineIterator = IOUtils.readLines(path).iterator();
 
-    // Each iteration through this loop processes a single sentence
-    // along with any relations in it
-    while (lineIterator.hasNext()) {
-      Annotation sentence = readSentence(doc, path, lineIterator);
+    // Each iteration through this loop processes a single sentence along with any relations in it
+    for (Iterator<String> lineIterator = IOUtils.readLines(path).iterator(); lineIterator.hasNext(); ) {
+      Annotation sentence = readSentence(path, lineIterator);
       AnnotationUtils.addSentence(doc, sentence);
     }
 
     return doc;
   }
 
+  private boolean warnedNER; // = false;
 
-  private static String getNormalizedNERTag(String ner){
-    if(ner.equalsIgnoreCase("O"))
+  private String getNormalizedNERTag(String ner) {
+    if (ner.equalsIgnoreCase("O")) {
       return "O";
-    else if(ner.equalsIgnoreCase("Peop"))
+    } else if (ner.equalsIgnoreCase("Peop")) {
       return "PERSON";
-    else if(ner.equalsIgnoreCase("Loc"))
+    } else if (ner.equalsIgnoreCase("Loc")) {
       return "LOCATION";
-    else if(ner.equalsIgnoreCase("Org"))
+    } else if(ner.equalsIgnoreCase("Org")) {
       return "ORGANIZATION";
-    else if(ner.equalsIgnoreCase("Other"))
+    } else if(ner.equalsIgnoreCase("Other")) {
       return "OTHER";
+    } else {
+      if ( ! warnedNER) {
+        warnedNER = true;
+        logger.warning("This file contains NER tags not in the original Roth/Yih dataset, e.g.: " + ner);
+      }
+    }
     throw new RuntimeException("Cannot normalize ner tag " + ner);
   }
 
-  private static Annotation readSentence(Annotation doc, String docId, Iterator<String> lineIterator) {
+  private Annotation readSentence(String docId, Iterator<String> lineIterator) {
     Annotation sentence = new Annotation("");
     sentence.set(CoreAnnotations.DocIDAnnotation.class, docId);
     sentence.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, new ArrayList<>());
@@ -132,7 +140,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
         //List<String> postags = StringUtils.split(pieces.get(4),"/");
 
         String text = StringUtils.join(words, " ");
-        identifier = "entity" + pieces.get(0) + "-" + pieces.get(2);
+        identifier = "entity" + pieces.get(0) + '-' + pieces.get(2);
         String nerTag = getNormalizedNERTag(pieces.get(1)); // entity type of the word/expression
 
         if (sentenceID == null)
@@ -167,7 +175,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
         }
 
         textContent.append(text);
-        textContent.append(" ");
+        textContent.append(' ');
         tokenCount += words.size();
         break;
       }
@@ -260,4 +268,5 @@ public class RothCONLL04Reader extends GenericDataSetReader {
     Annotation doc = reader.parse("/u/nlp/data/RothCONLL04/conll04.corp");
     System.out.println(AnnotationUtils.datasetToString(doc));
   }
+
 }

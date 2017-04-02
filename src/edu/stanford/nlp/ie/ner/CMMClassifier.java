@@ -1331,7 +1331,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     double[][] confusionMatrix = new double[classIndex.size()][classIndex.size()];
 
     for (int i = 0; i < confusionMatrix.length; i++) {
-      Arrays.fill(confusionMatrix[i], 0.0);
+      // Arrays.fill(confusionMatrix[i], 0.0);  // not needed; Java arrays zero initialized
       confusionMatrix[i][i] = 1.0;
     }
 

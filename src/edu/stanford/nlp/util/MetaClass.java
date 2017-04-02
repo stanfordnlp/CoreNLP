@@ -250,12 +250,12 @@ public class MetaClass {
     @Override
     public String toString() {
       StringBuilder b = new StringBuilder();
-      b.append(cl.getName()).append("(");
+      b.append(cl.getName()).append('(');
       for (Class<?> cl : classParams) {
-        b.append(" ").append(cl.getName()).append(",");
+        b.append(' ').append(cl.getName()).append(',');
       }
       b.replace(b.length() - 1, b.length(), " ");
-      b.append(")");
+      b.append(')');
       return b.toString();
     }
 
@@ -491,84 +491,84 @@ public class MetaClass {
   public static <E> E cast(String value, Type type){
     //--Get Type
     Class <?> clazz;
-    if(type instanceof Class){
+    if (type instanceof Class) {
       clazz = (Class <?>) type;
-    }else if(type instanceof ParameterizedType){
+    } else if (type instanceof ParameterizedType) {
       ParameterizedType pt = (ParameterizedType) type;
       clazz = (Class <?>) pt.getRawType();
-    }else{
+    } else {
       throw new IllegalArgumentException("Cannot cast to type (unhandled type): " + type);
     }
     //--Cast
-    if(String.class.isAssignableFrom(clazz)){
+    if (String.class.isAssignableFrom(clazz)) {
       // (case: String)
       return (E) value;
-    }else if(Boolean.class.isAssignableFrom(clazz) || boolean.class.isAssignableFrom(clazz)){
+    } else if (Boolean.class.isAssignableFrom(clazz) || boolean.class.isAssignableFrom(clazz)) {
       //(case: boolean)
       if("1".equals(value)){ return (E) Boolean.TRUE; }
       return (E) Boolean.valueOf(Boolean.parseBoolean(value));
-    }else if(Integer.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz)){
+    } else if (Integer.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz)) {
       //(case: integer)
       try {
         return (E) new Integer(Integer.parseInt(value));
       } catch (NumberFormatException e) {
         return (E) new Integer((int) Double.parseDouble(value));
       }
-    }else if(BigInteger.class.isAssignableFrom(clazz)) {
+    } else if (BigInteger.class.isAssignableFrom(clazz)) {
       //(case: biginteger)
       if(value == null){ return (E) BigInteger.ZERO; }
       return (E) new BigInteger(value);
-    }else if(Long.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz)){
+    } else if (Long.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz)) {
       //(case: long)
       try {
         return (E) new Long(Long.parseLong(value));
       } catch (NumberFormatException e) {
         return (E) new Long((long) Double.parseDouble(value));
       }
-    }else if(Float.class.isAssignableFrom(clazz) || float.class.isAssignableFrom(clazz)){
+    } else if (Float.class.isAssignableFrom(clazz) || float.class.isAssignableFrom(clazz)) {
       //(case: float)
       if(value == null){ return (E) new Float(Float.NaN); }
       return (E) new Float(Float.parseFloat(value));
-    }else if(Double.class.isAssignableFrom(clazz) || double.class.isAssignableFrom(clazz)){
+    } else if (Double.class.isAssignableFrom(clazz) || double.class.isAssignableFrom(clazz)) {
       //(case: double)
       if(value == null){ return (E) new Double(Double.NaN); }
       return (E) new Double(Double.parseDouble(value));
-    }else if(BigDecimal.class.isAssignableFrom(clazz)) {
+    } else if (BigDecimal.class.isAssignableFrom(clazz)) {
       //(case: bigdecimal)
       if(value == null){ return (E) BigDecimal.ZERO; }
       return (E) new BigDecimal(value);
-    }else if(Short.class.isAssignableFrom(clazz) || short.class.isAssignableFrom(clazz)){
+    } else if (Short.class.isAssignableFrom(clazz) || short.class.isAssignableFrom(clazz)) {
       //(case: short)
       try {
         return (E) new Short(Short.parseShort(value));
       } catch (NumberFormatException e) {
         return (E) new Short((short) Double.parseDouble(value));
       }
-    }else if(Byte.class.isAssignableFrom(clazz) || byte.class.isAssignableFrom(clazz)){
+    } else if (Byte.class.isAssignableFrom(clazz) || byte.class.isAssignableFrom(clazz)) {
       //(case: byte)
       try {
         return (E) new Byte(Byte.parseByte(value));
       } catch (NumberFormatException e) {
         return (E) new Byte((byte) Double.parseDouble(value));
       }
-    }else if(Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)){
+    } else if(Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)) {
       //(case: char)
       return (E) new Character((char) Integer.parseInt(value));
-    }else if(Lazy.class.isAssignableFrom(clazz)) {
+    } else if(Lazy.class.isAssignableFrom(clazz)) {
       //(case: Lazy)
       final String v = value;
       return (E) Lazy.of(() -> MetaClass.castWithoutKnowingType(v) );
-    }else if(Optional.class.isAssignableFrom(clazz)) {
+    } else if (Optional.class.isAssignableFrom(clazz)) {
       //(case: Optional)
       return (E) ((value == null || "null".equals(value.toLowerCase()) || "empty".equals(value.toLowerCase()) || "none".equals(value.toLowerCase())) ? Optional.empty() : Optional.of(value));
-    }else if(java.util.Date.class.isAssignableFrom(clazz)){
+    } else if (java.util.Date.class.isAssignableFrom(clazz)) {
       //(case: date)
       try {
         return (E) new Date(Long.parseLong(value));
       } catch (NumberFormatException e) {
         return null;
       }
-    } else if(java.util.Calendar.class.isAssignableFrom(clazz)){
+    } else if (java.util.Calendar.class.isAssignableFrom(clazz)) {
       //(case: date)
       try {
         Date d = new Date(Long.parseLong(value));
@@ -578,34 +578,34 @@ public class MetaClass {
       } catch (NumberFormatException e) {
         return null;
       }
-    } else if(FileWriter.class.isAssignableFrom(clazz)){
+    } else if (FileWriter.class.isAssignableFrom(clazz)) {
       try {
         return (E) new FileWriter(new File(value));
       } catch (IOException e) {
         throw new RuntimeIOException(e);
       }
-    } else if(BufferedReader.class.isAssignableFrom(clazz)){
+    } else if (BufferedReader.class.isAssignableFrom(clazz)) {
       try {
         return (E) IOUtils.getBufferedReaderFromClasspathOrFileSystem(value);
       } catch (IOException e) {
         throw new RuntimeIOException(e);
       }
-    } else if(FileReader.class.isAssignableFrom(clazz)){
+    } else if (FileReader.class.isAssignableFrom(clazz)) {
       try {
         return (E) new FileReader(new File(value));
       } catch (IOException e) {
         throw new RuntimeIOException(e);
       }
-    } else if(File.class.isAssignableFrom(clazz)){
+    } else if (File.class.isAssignableFrom(clazz)) {
       return (E) new File(value);
-    } else if(Class.class.isAssignableFrom(clazz)){
+    } else if (Class.class.isAssignableFrom(clazz)) {
       try {
         return (E) Class.forName(value);
       } catch (ClassNotFoundException e) {
         return null;
       }
-    } else if(clazz.isArray()){
-      if(value == null){ return null; }
+    } else if (clazz.isArray()) {
+      if (value == null) { return null; }
       Class <?> subType = clazz.getComponentType();
       // (case: array)
       String[] strings = StringUtils.decodeArray(value);
@@ -616,7 +616,7 @@ public class MetaClass {
       return (E) array;
     } else if (Map.class.isAssignableFrom(clazz)) {
       return (E) StringUtils.decodeMap(value);
-    } else if(clazz.isEnum()){
+    } else if (clazz.isEnum()) {
       // (case: enumeration)
       Class c = (Class) clazz;
       if(value == null){ return null; }
@@ -675,7 +675,7 @@ public class MetaClass {
       if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
       File toWriteTo = cast(value, File.class);
       try {
-        if (!toWriteTo.exists() && !toWriteTo.createNewFile()) {
+        if (toWriteTo == null || (!toWriteTo.exists() && !toWriteTo.createNewFile())) {
           throw new IllegalStateException("Could not create output stream (cannot write file): " + value);
         }
         return (E) IOUtils.getFileOutputStream(value);
@@ -695,10 +695,8 @@ public class MetaClass {
         // (case: can parse from string)
         Method decode = clazz.getMethod("fromString", String.class);
         return (E) decode.invoke(MetaClass.create(clazz), value);
-      } catch (NoSuchMethodException e) {  // Silent errors for misc failures
-      } catch (InvocationTargetException e) {
-      } catch (IllegalAccessException e) {
-      } catch (ClassCastException e) {
+      } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | ClassCastException e) {
+        // Silent errors for misc failures
       }
 
       // Pass 2: Guess what the object could be

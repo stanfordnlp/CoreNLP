@@ -48,6 +48,10 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, "coref.verbose", false);
   }
 
+  public static boolean removeSingletonClusters(Properties props) {
+    return PropertiesUtils.getBool(props, "coref.removeSingletonClusters", true);
+  }
+
   // ---------- Heuristic Mention Filtering ----------
 
   public static int maxMentionDistance(Properties props) {
@@ -97,6 +101,10 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, "coref.md.liberalChineseMD", true);
   }
 
+  public static boolean useGoldMentions(Properties props) {
+    return PropertiesUtils.getBool(props, "coref.md.useGoldMentions", false);
+  }
+
   // ---------- Input and Output Data ----------
 
   public static final String OUTPUT_PATH_PROP = "coref.conllOutputPath";
@@ -115,7 +123,10 @@ public class CorefProperties {
   }
 
   public static String getDataPath(Properties props) {
-    return props.getProperty("coref.data", "/scr/nlp/data/conll-2012/");
+    String returnPath = props.getProperty("coref.data", "/scr/nlp/data/conll-2012/");
+    if (!returnPath.substring(returnPath.length()-1).equals("/"))
+      returnPath += "/";
+    return returnPath;
   }
 
   public static String getTrainDataPath(Properties props) {

@@ -11,6 +11,7 @@ import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.naturalli.*;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
@@ -272,8 +273,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
     keysToSerialize.remove(HeadWordLabelAnnotation.class);
     keysToSerialize.remove(HeadTagLabelAnnotation.class);
-    // Required fields
-    builder.setWord(coreLabel.word());
+    // Set the word (this may be null if the CoreLabel is storing a character (as in case of segmenter)
+    if (coreLabel.word() != null)
+      builder.setWord(coreLabel.word());
     // Optional fields
     if (keySet.contains(PartOfSpeechAnnotation.class)) { builder.setPos(coreLabel.tag()); keysToSerialize.remove(PartOfSpeechAnnotation.class); }
     if (keySet.contains(ValueAnnotation.class)) { builder.setValue(coreLabel.value()); keysToSerialize.remove(ValueAnnotation.class); }
@@ -323,6 +325,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(GenderAnnotation.class)) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (keySet.contains(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
     if (keySet.contains(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
+
+    // Chinese character related stuff
+    if (keySet.contains(ChineseCharAnnotation.class)) { builder.setChineseChar(getAndRegister(coreLabel, keysToSerialize, ChineseCharAnnotation.class)); }
+    if (keySet.contains(ChineseSegAnnotation.class)) { builder.setChineseSeg(getAndRegister(coreLabel, keysToSerialize, ChineseSegAnnotation.class)); }
+
     // Return
     return builder;
   }
@@ -390,6 +397,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       for (CoreLabel tok : sentence.get(TokensAnnotation.class)) { builder.addToken(toProto(tok)); }
       keysToSerialize.remove(TokensAnnotation.class);
     }
+    // Characters
+    if (sentence.containsKey(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
+      for (CoreLabel c : sentence.get(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
+        builder.addCharacter(toProto(c));
+      }
+      keysToSerialize.remove(SegmenterCoreAnnotations.CharactersAnnotation.class);
+    }
     // Optional fields
     if (keySet.contains(SentenceIndexAnnotation.class)) { builder.setSentenceIndex(getAndRegister(sentence, keysToSerialize, SentenceIndexAnnotation.class)); }
     if (keySet.contains(CharacterOffsetBeginAnnotation.class)) { builder.setCharacterOffsetBegin(getAndRegister(sentence, keysToSerialize, CharacterOffsetBeginAnnotation.class)); }
@@ -418,6 +432,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
       for (SentenceFragment entailedSentence : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
         builder.addEntailedSentence(toProto(entailedSentence));
+      }
+    }
+    if (keySet.contains(NaturalLogicAnnotations.EntailedClausesAnnotation.class)) {
+      for (SentenceFragment entailedClause : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.EntailedClausesAnnotation.class)) {
+        builder.addEntailedClause(toProto(entailedClause));
       }
     }
     if (keySet.contains(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
@@ -547,6 +566,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addMentions(toProtoMention(mention));
       }
       keysToSerialize.remove(MentionsAnnotation.class);
+    }
+    // add character info from segmenter
+    if (doc.containsKey(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
+      for (CoreLabel c : doc.get(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
+        builder.addCharacter(toProto(c));
+      }
+      keysToSerialize.remove(SegmenterCoreAnnotations.CharactersAnnotation.class);
     }
     // Return
     return builder;
@@ -873,6 +899,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return CoreNLPProtos.Language.Arabic;
       case Chinese:
         return CoreNLPProtos.Language.Chinese;
+      case UniversalChinese:
+        return CoreNLPProtos.Language.UniversalChinese;
       case English:
         return CoreNLPProtos.Language.English;
       case UniversalEnglish:
@@ -957,11 +985,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
                     .build())
                 .collect(Collectors.toList()))
         .addAllObjectTokens(triple.object.stream().map(token ->
-            CoreNLPProtos.TokenLocation.newBuilder()
-                .setSentenceIndex(token.sentIndex())
-                .setTokenIndex(token.index() - 1)
-                .build())
-            .collect(Collectors.toList()));
+                CoreNLPProtos.TokenLocation.newBuilder()
+                        .setSentenceIndex(token.sentIndex())
+                        .setTokenIndex(token.index() - 1)
+                        .build())
+                .collect(Collectors.toList()));
     Optional<SemanticGraph> treeOptional = triple.asDependencyTree();
     if (treeOptional.isPresent()) {
       builder.setTree(toProto(treeOptional.get()));
@@ -1083,12 +1111,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasConllUTokenSpan()) { word.set(CoNLLUTokenSpanAnnotation.class, new IntPair(proto.getConllUTokenSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasConllUSecondaryDeps()) { word.set(CoNLLUSecondaryDepsAnnotation.class, fromProto(proto.getConllUSecondaryDeps())); }
     if (proto.hasWikipediaEntity()) { word.set(WikipediaEntityAnnotation.class, proto.getWikipediaEntity()); }
+    // Chinese char info
+    if (proto.hasChineseChar()) { word.set(ChineseCharAnnotation.class, proto.getChineseChar()) ; }
+    if (proto.hasChineseSeg()) { word.set(ChineseSegAnnotation.class, proto.getChineseSeg()) ; }
 
-
-            // Non-default annotators
+    // Non-default annotators
     if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
     if (proto.hasTrueCaseText()) { word.set(TrueCaseTextAnnotation.class, proto.getTrueCaseText()); }
+
     // Return
     return word;
   }
@@ -1135,12 +1166,23 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       List<SentenceFragment> entailedSentences = proto.getEntailedSentenceList().stream().map(frag -> fromProto(frag, lossySentence.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toList());
       lossySentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
     }
+    // Add entailed clauses
+    if (proto.getEntailedClauseCount() > 0) {
+      List<SentenceFragment> entailedClauses = proto.getEntailedClauseList().stream().map(frag -> fromProto(frag, lossySentence.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toList());
+      lossySentence.set(NaturalLogicAnnotations.EntailedClausesAnnotation.class, entailedClauses);
+    }
     // Add relation triples
     if (proto.getOpenieTripleCount() > 0) {
       throw new IllegalStateException("Cannot deserialize OpenIE triples with this method!");
     }
     if (proto.getKbpTripleCount() > 0) {
       throw new IllegalStateException("Cannot deserialize KBP triples with this method!");
+    }
+    // Add chinese characters
+    if (proto.getCharacterCount() > 0) {
+      List<CoreLabel> sentenceCharacters =
+              proto.getCharacterList().stream().map(c -> fromProto(c)).collect(Collectors.toList());
+      lossySentence.set(SegmenterCoreAnnotations.CharactersAnnotation.class, sentenceCharacters);
     }
     // Add text -- missing by default as it's populated from the Document
     lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
@@ -1261,6 +1303,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Set text
     Annotation ann = new Annotation(proto.getText());
+
+    // if there are characters, add characters
+    if (proto.getCharacterCount() > 0) {
+      List<CoreLabel> docChars = new ArrayList<CoreLabel>();
+      for (CoreNLPProtos.Token c : proto.getCharacterList()) {
+        docChars.add(fromProto(c));
+      }
+      ann.set(SegmenterCoreAnnotations.CharactersAnnotation.class, docChars);
+    }
 
     // Add tokens
     List<CoreLabel> tokens = new ArrayList<>();
@@ -1396,6 +1447,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (sentence.getEntailedSentenceCount() > 0) {
         Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(EnhancedPlusPlusDependenciesAnnotation.class))).collect(Collectors.toSet());
         map.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
+      }
+      if (sentence.getEntailedClauseCount() > 0) {
+        Set<SentenceFragment> entailedClauses = sentence.getEntailedClauseList().stream().map(frag -> fromProto(frag, map.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toSet());
+        map.set(NaturalLogicAnnotations.EntailedClausesAnnotation.class, entailedClauses);
       }
       // Set relation triples
       if (sentence.getOpenieTripleCount() > 0) {
@@ -1559,6 +1614,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return Language.Hebrew;
       case Spanish:
         return Language.Spanish;
+      case UniversalChinese:
+        return Language.UniversalChinese;
       case UniversalEnglish:
         return Language.UniversalEnglish;
       case Unknown:

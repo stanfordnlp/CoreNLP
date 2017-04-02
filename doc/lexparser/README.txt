@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v3.6.0 - 2015-12-09
+Stanford Lexicalized Parser v3.7.0 - 2016-10-31
 -----------------------------------------------
 
 Copyright (c) 2002-2015 The Board of Trustees of The Leland Stanford Junior
@@ -52,6 +52,30 @@ This uses the PCFG parser, which is quick to load and run, and quite accurate.
 begins; continued parsing is quicker. To use the lexicalized parser, replace
 englishPCFG.ser.gz with englishFactored.ser.gz in the lexparser.sh script
 and use the flag -mx600m to give more memory to java.]
+
+NEURAL NETWORK DEPENDENCY PARSER USAGE
+
+To use the neural net dependency parser, issue the following command:
+
+    java -Xmx2g -cp "*" edu.stanford.nlp.parser.nndep.DependencyParser \
+    -model edu/stanford/nlp/models/parser/nndep/english_UD.gz \
+    -textFile data/english-onesent.txt -outFile data/english-onesent.txt.out
+
+The output will be written to data/english-onesent.txt.out
+
+If you want to run on a language other than English, you will need to use
+a language specific POS tagger.  Here is an example for Chinese:
+
+    java -Xmx2g -cp "*" edu.stanford.nlp.parser.nndep.DependencyParser \
+    -model edu/stanford/nlp/models/parser/nndep/UD_Chinese.gz \
+    -tagger.model edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger \
+    -textFile data/chinese-onesent-utf8.txt -outFile data/chinese-onesent-utf8.txt.out
+
+The other POS tagger models are included in the models jar.  It should be noted that
+currently the French and Spanish POS taggers are trained with different tag sets than
+the UD tag sets used for the French and Spanish UD parsers.  In future releases this
+issue should be resolved.  The Chinese, English, and German UD parsers are consistent
+with their POS taggers.
 
 WINDOWS GUI USAGE
 
@@ -223,6 +247,8 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
+
+2016-10-31    3.7.0     new UD models 
 
 2015-12-09    3.6.0     Updated for compatibility 
 

@@ -132,6 +132,8 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
   };
 
   private static final String[] chineseNnParsers = {
+    // this one doesn't quite work because Factored has URL tag but UD_Chinese doesn't (not quite sure why...).
+    //    "edu/stanford/nlp/models/parser/nndep/UD_Chinese.gz"
   };
 
   public void testChineseTagSet() {

@@ -252,4 +252,23 @@ public class WordLists {
           "多少" // "How many" [cdm added used to be t ested separately]
   ));
 
+  /** KBP pronominal mentions are at present only 3rd person, non-neuter, non-reflexive pronouns.
+   *  At present we just mix English and Chinese ones, since it does no harm.
+   */
+  private static final Set<String> kbpPronominalMentions = Generics.newHashSet(Arrays.asList(
+          "he", "him", "his", "she", "her", "hers",
+          "他", "她", "他们", "她们", "她的", "他的"
+  ));
+
+  /**
+   * Returns whether the given token counts as a valid pronominal mention for KBP.
+   * This method (at present) works for either Chinese or English.
+   *
+   * @param word The token to classify.
+   * @return true if this token is a pronoun that KBP should recognize (3rd person, non-neuter, non reflexive).
+   */
+  public static boolean isKbpPronominalMention(String word) {
+    return kbpPronominalMentions.contains(word.toLowerCase());
+  }
+
 }

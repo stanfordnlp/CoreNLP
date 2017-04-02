@@ -82,7 +82,7 @@ public class QuoteAttributionUtils {
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
 
     WordToSentenceProcessor wsp =
-            new WordToSentenceProcessor(null, null, null, WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, null, null); //create SentenceSplitter that never splits on newline
+            new WordToSentenceProcessor(WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER); //create SentenceSplitter that never splits on newline
 
 
     int prevParagraph = 0;
@@ -221,7 +221,8 @@ public class QuoteAttributionUtils {
 
 //        SemanticGraph deps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.ENHANCED, maximal, true, null),
 //                uncollapsedDeps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.BASIC, maximal, true, null),
-    SemanticGraph ccDeps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.ENHANCED_PLUS_PLUS, maximal, true, null);
+//    SemanticGraph ccDeps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.ENHANCED_PLUS_PLUS, maximal, true, null);
+    SemanticGraph ccDeps = SemanticGraphFactory.generateEnhancedPlusPlusDependencies(gs);
     return ccDeps;
   }
 

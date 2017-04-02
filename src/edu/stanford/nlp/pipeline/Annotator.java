@@ -22,15 +22,32 @@ import java.util.*;
  * wrapping instead because I believe that it will help to keep the
  * pipeline code more manageable.
  * <br>
- * An Annotator can also provide a description of what it produces and
- * a description of what it requires to have been produced by using
- * the Requirement objects.  Predefined Requirement objects are
- * provided for most of the core annotators, such as tokenize, ssplit,
- * etc.  The StanfordCoreNLP version of the AnnotationPipeline can
+ * An Annotator should also provide a description of what it produces and
+ * a description of what it requires to have been produced by using Sets
+ * of requirements.
+ * The StanfordCoreNLP version of the AnnotationPipeline can
  * enforce requirements, throwing an exception if an annotator does
- * not have all of its prerequisite met.  An Annotator which does not
+ * not have all of its prerequisites met.  An Annotator which does not
  * participate in this system can simply return Collections.emptySet()
  * for both requires() and requirementsSatisfied().
+ *
+ * <h2>Properties</h2>
+ *
+ * We extensively use Properties objects to configure each Annotator.
+ * In particular, CoreNLP has most of its properties in an informal
+ * namespace with properties names like "parse.maxlen" to specify that
+ * a property only applies to a parser annotator. There can also be
+ * global properties; they should not have any periods in their names.
+ * Each Annotator knows its own name; we assume these don't collide badly,
+ * though possibly two parsers could share the "parse.*" namespace.
+ * An Annotator should have a constructor that simply takes a Properties
+ * object. At this point, the Annotator should expect to be getting
+ * properties in namespaces. The classes that annotators call (like
+ * a concrete parser, tagger, or whatever) mainly expect properties
+ * not in namespaces. In general the annotator should subset the
+ * passed in properties to keep only global properties and ones in
+ * its own namespace, and then strip the namespace prefix from the
+ * latter properties.
  *
  * @author Jenny Finkel
  */
@@ -40,6 +57,13 @@ public interface Annotator {
    * Given an Annotation, perform a task on this Annotation.
    */
   void annotate(Annotation annotation);
+
+  /**
+   * A block of code called when this annotator unmounts from the
+   * {@link AnnotatorPool}.
+   * By default, nothing is done.
+   */
+  default void unmount() { }
 
 
   /**
@@ -103,7 +127,7 @@ public interface Annotator {
     put(STANFORD_REGEXNER,                 new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
     put(STANFORD_ENTITY_MENTIONS,          new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER)));
     put(STANFORD_GENDER,                   new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER)));
-    put(STANFORD_TRUECASE,                 new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA)));
+    put(STANFORD_TRUECASE,                 new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
     put(STANFORD_PARSE,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
     put(STANFORD_DETERMINISTIC_COREF,      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_MENTION, STANFORD_PARSE)));
     put(STANFORD_COREF,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_MENTION)));
@@ -120,7 +144,5 @@ public interface Annotator {
     put(STANFORD_LINK,                     new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_DEPENDENCIES, STANFORD_LEMMA, STANFORD_NER, STANFORD_ENTITY_MENTIONS)));
     put(STANFORD_KBP,                      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_DEPENDENCIES, STANFORD_LEMMA, STANFORD_NER, STANFORD_MENTION, STANFORD_COREF, STANFORD_REGEXNER)));
   }};
-
-
 
 }

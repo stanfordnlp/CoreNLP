@@ -1,4 +1,4 @@
-Stanford NER - v3.6.0 - 2015-12-09
+Stanford NER - v3.7.0 - 2016-10-31
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -12,7 +12,7 @@ Original CRF code by Jenny Finkel.
 Additional modules, features, internationalization, compaction, and
 support code by Christopher Manning, Dan Klein, Christopher Cox, Huy Nguyen
 Shipra Dingare, Anna Rafferty, and John Bauer.
-This release prepared by Jon Gauthier.
+This release prepared by Jason Bolton.
 
 LICENSE
 
@@ -232,6 +232,8 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
+
+2016-10-31    3.7.0     Improved Chinese NER 
 
 2015-12-09    3.6.0     Updated for compatibility 
 

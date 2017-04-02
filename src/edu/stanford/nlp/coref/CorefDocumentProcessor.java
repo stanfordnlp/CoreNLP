@@ -40,7 +40,6 @@ public interface CorefDocumentProcessor {
     Document document = docMaker.nextDoc();
     long time = System.currentTimeMillis();
     while (document != null) {
-      document.extractGoldCorefClusters();
       process(docId, document);
       Redwood.log(getName(), "Processed document " + docId + " in "
           + (System.currentTimeMillis() - time) / 1000.0 + "s");

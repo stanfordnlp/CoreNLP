@@ -15,9 +15,6 @@ import edu.stanford.nlp.coref.CorefUtils;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Dictionaries.MentionType;
 import edu.stanford.nlp.coref.data.Document;
-import edu.stanford.nlp.coref.data.Mention;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
@@ -128,17 +125,5 @@ public class StatisticalCorefAlgorithm implements CorefAlgorithm {
         CorefUtils.mergeCoreferenceClusters(pair, document);
       }
     }
-  }
-
-  private static List<String> getContentWords(Mention m) {
-    List<String> words = new ArrayList<>();
-    for (int i = m.startIndex; i < m.endIndex; i++) {
-      CoreLabel cl = m.sentenceWords.get(i);
-      String POS = cl.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-      if (POS.equals("NN") || POS.equals("NNS") || POS.equals("NNP") || POS.equals("NNPS")) {
-        words.add(cl.word().toLowerCase());
-      }
-    }
-    return words;
   }
 }

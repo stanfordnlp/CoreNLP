@@ -42,6 +42,67 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final int nThreads;
   private final int maxSentenceLength;
 
+
+  public NERCombinerAnnotator(Properties properties) throws IOException {
+
+    List<String> models = new ArrayList<>();
+    String modelNames = properties.getProperty("ner.model");
+    if (modelNames == null) {
+      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+    }
+    if ( ! modelNames.isEmpty()) {
+      models.addAll(Arrays.asList(modelNames.split(",")));
+    }
+    if (models.isEmpty()) {
+      // Allow for no real NER model - can just use numeric classifiers or SUTime.
+      // Have to unset ner.model, so unlikely that people got here by accident.
+      log.info("WARNING: no NER models specified");
+    }
+
+    boolean applyNumericClassifiers =
+        PropertiesUtils.getBool(properties,
+            NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
+            NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
+
+    boolean applyRegexner =
+        PropertiesUtils.getBool(properties,
+            NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
+            NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);
+
+    boolean useSUTime =
+        PropertiesUtils.getBool(properties,
+            NumberSequenceClassifier.USE_SUTIME_PROPERTY,
+            NumberSequenceClassifier.USE_SUTIME_DEFAULT);
+
+    NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
+        NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
+
+    boolean verbose = PropertiesUtils.getBool(properties, "ner." + "verbose", false);
+
+    String[] loadPaths = models.toArray(new String[models.size()]);
+
+    Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties,
+        NERClassifierCombiner.DEFAULT_PASS_DOWN_PROPERTIES);
+    if (useSUTime) {
+      // Make sure SUTime parameters are included
+      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".", true);
+      PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
+    }
+    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
+        useSUTime, applyRegexner, combinerProperties, loadPaths);
+
+    int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
+    long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
+    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
+
+    VERBOSE = verbose;
+    this.ner = nerCombiner;
+    this.maxTime = maxTime;
+    this.nThreads = nThreads;
+    this.maxSentenceLength = maxSentenceLength;
+  }
+
+
   public NERCombinerAnnotator() throws IOException, ClassNotFoundException {
     this(true);
   }
@@ -74,13 +135,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this.maxSentenceLength = maxSentenceLength;
   }
 
-  public NERCombinerAnnotator(String name, Properties properties) {
-    this(NERClassifierCombiner.createNERClassifierCombiner(name, properties),
-            PropertiesUtils.getBool(properties, name + ".verbose", false),
-            PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
-            PropertiesUtils.getLong(properties, name + ".maxtime", -1),
-            PropertiesUtils.getInt(properties, name + ".maxlen", Integer.MAX_VALUE));
-  }
 
   @Override
   protected int nThreads() {
@@ -110,11 +164,15 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   public void doOneSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     List<CoreLabel> output; // only used if try assignment works.
-    try {
-      output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
-    } catch (RuntimeInterruptedException e) {
-      // If we get interrupted, set the NER labels to the background
-      // symbol if they are not already set, then exit.
+    if (tokens.size() <= this.maxSentenceLength) {
+      try {
+        output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
+      } catch (RuntimeInterruptedException e) {
+        // If we get interrupted, set the NER labels to the background
+        // symbol if they are not already set, then exit.
+        output = null;
+      }
+    } else {
       output = null;
     }
     if (output == null) {
@@ -157,6 +215,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       }
     }
   }
+
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {

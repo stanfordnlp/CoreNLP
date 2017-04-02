@@ -89,7 +89,7 @@ public class StatisticalCorefTrainer {
     Dictionaries dictionaries = new Dictionaries(props);
 
     setDataPath("train");
-    wordCountsFile = "train/word_counts.ser";
+    wordCountsFile = trainingPath + "train/word_counts.ser";
     CorefProperties.setInput(props, Dataset.TRAIN);
     preprocess(props, dictionaries, true);
 
@@ -124,8 +124,8 @@ public class StatisticalCorefTrainer {
    *   <li>-coref.statistical.trainingPath: where to write trained models and temporary files</li>
    *   <li>-coref.statistical.minClassImbalance: use this to downsample negative examples to
    *   speed up and reduce the memory footprint of training</li>
-   *   <li>-coref.statistical.maxTrainExamplesPerDocument: use this to downsample examples from the
-   *   same document speed up and reduce the memory footprint training</li>
+   *   <li>-coref.statistical.maxTrainExamplesPerDocument: use this to downsample examples from
+   *   each document to speed up and reduce the memory footprint training</li>
    * </ul>
    */
   public static void main(String[] args) throws Exception {

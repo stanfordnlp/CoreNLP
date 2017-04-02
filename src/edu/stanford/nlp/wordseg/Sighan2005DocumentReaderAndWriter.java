@@ -39,18 +39,18 @@ import edu.stanford.nlp.util.StringUtils;
 /**
  * DocumentReader for Chinese segmentation task. (Sighan bakeoff 2005)
  * Reads in characters and labels them as 1 or 0 (word START or NONSTART).
- * <p>
+ *
  * Note: maybe this can do less interning, since some is done in
  * ObjectBankWrapper, but this also calls trim() as it works....
  *
  * @author Pi-Chuan Chang
- * @author Michel Galley (Viterbi seearch graph printing)
+ * @author Michel Galley (Viterbi search graph printing)
  */
 public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer> /* Serializable */ {
 
   private static final long serialVersionUID = 3260295150250263237L;
 
-  private static Redwood.RedwoodChannels logger = Redwood.channels(Sighan2005DocumentReaderAndWriter.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(Sighan2005DocumentReaderAndWriter.class);
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MORE = false;
@@ -143,8 +143,8 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       for (int index = 0, len = line.length(); index < len; index++) {
         char ch = line.charAt(index);
         CoreLabel wi = new CoreLabel();
-        String wordString = Character.toString(ch);
         if ( ! Character.isWhitespace(ch) && ! Character.isISOControl(ch)) {
+          String wordString = Character.toString(ch);
           wi.set(CoreAnnotations.CharAnnotation.class, intern(wordString));
           nonspaceLineSB.append(wordString);
 

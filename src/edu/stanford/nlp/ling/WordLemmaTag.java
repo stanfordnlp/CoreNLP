@@ -6,7 +6,7 @@ import edu.stanford.nlp.process.Morphology;
  * A WordLemmaTag corresponds to a pair of a tagged (e.g., for part of speech)
  * word and its lemma. WordLemmaTag is implemented with String-valued word,
  * lemma and tag.
- * It implements the Label interface; the <code>value()</code> method for that
+ * It implements the Label interface; the {@code value()} method for that
  * interface corresponds to the word of the WordLemmaTag.
  * <p/>
  * The equality relation for WordLemmaTag is defined as identity of
@@ -35,10 +35,10 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
   }
 
   /**
-   * Create a new <code>WordLemmaTag</code>.
+   * Create a new {@code WordLemmaTag}.
    *
    * @param word This word is set as the word of this Label
-   * @param tag  The <code>value()</code> of this Label is set as the
+   * @param tag  The {@code value()} of this Label is set as the
    *             tag of this Label
    */
   public WordLemmaTag(String word, String tag) {
@@ -49,11 +49,11 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
   }
 
   /**
-   * Create a new <code>WordLemmaTag</code>.
+   * Create a new {@code WordLemmaTag}.
    *
    * @param word  This word is passed to the supertype constructor
    * @param lemma The lemma is set as the lemma of this Label
-   * @param tag   The <code>value()</code> of this Label is set as the
+   * @param tag   The {@code value()} of this Label is set as the
    *              tag of this Label
    */
   public WordLemmaTag(String word, String lemma, String tag) {
@@ -63,11 +63,11 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
   }
 
   /**
-   * Create a new <code>WordLemmaTag</code> from a Label.  The value of
+   * Create a new {@code WordLemmaTag} from a Label.  The value of
    * the Label corresponds to the word of the WordLemmaTag.
    *
    * @param word This word is passed to the supertype constructor
-   * @param tag  The <code>value()</code> of this Label is set as the
+   * @param tag  The {@code value()} of this Label is set as the
    *             tag of this Label
    */
   public WordLemmaTag(Label word, Label tag) {
@@ -83,10 +83,12 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
    *
    * @return the "value" of the Label
    */
+  @Override
   public String value() {
     return word;
   }
 
+  @Override
   public String word() {
     return value();
   }
@@ -96,10 +98,12 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
    *
    * @param value the value for the Label
    */
+  @Override
   public void setValue(String value) {
     word = value;
   }
 
+  @Override
   public void setWord(String word) {
     setValue(word);
   }
@@ -113,10 +117,12 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
    *
    * @param tag the value for the Label
    */
+  @Override
   public final void setTag(String tag) {
     this.tag = tag;
   }
 
+  @Override
   public String tag() {
     return tag;
   }
@@ -146,12 +152,13 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
    * We assume that we can always just divide on the rightmost divider character,
    * rather than trying to parse up escape sequences.  If the divider character isn't found
    * in the word, then the whole string becomes the word, and lemma and tag
-   * are <code>null</code>.
+   * are {@code null}.
    * We assume that if only one divider character is found, word and tag are present in
    * the String, and lemma will be computed.
    *
-   * @param labelStr The word that will go into the <code>WordLemmaTag</code>
+   * @param labelStr The word that will go into the {@code WordLemmaTag}
    */
+  @Override
   public void setFromString(String labelStr) {
     setFromString(labelStr, DIVIDER);
   }
@@ -162,7 +169,7 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
     if (first == second) {
       setWord(labelStr.substring(0, first));
       setTag(labelStr.substring(first + 1));
-      setLemma(Morphology.stemStatic(labelStr.substring(0, first), labelStr.substring(first + 1)).word());
+      setLemma(Morphology.lemmaStatic(labelStr.substring(0, first), labelStr.substring(first + 1)));
     } else if (first >= 0) {
       setWord(labelStr.substring(0, first));
       setLemma(labelStr.substring(first + 1, second));
@@ -203,9 +210,10 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
    * Orders first by word, then by lemma, then by tag.
    *
    * @param wordLemmaTag object to compare to
-   * @return result (positive if <code>this</code> is greater than
-   *         <code>obj</code>, 0 if equal, negative otherwise)
+   * @return result (positive if {@code this} is greater than
+   *         {@code obj}, 0 if equal, negative otherwise)
    */
+  @Override
   public int compareTo(WordLemmaTag wordLemmaTag) {
     int first = word().compareTo(wordLemmaTag.word());
     if (first != 0)
@@ -220,11 +228,12 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
 
   /**
    * Return a factory for this kind of label
-   * (i.e., <code>TaggedWord</code>).
+   * (i.e., {@code TaggedWord}).
    * The factory returned is always the same one (a singleton).
    *
    * @return The label factory
    */
+  @Override
   public LabelFactory labelFactory() {
     return new WordLemmaTagFactory();
   }

@@ -18,19 +18,17 @@ import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreePrint;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Pointer;
 
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.ArrayList;
-import java.util.Map;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 
@@ -230,7 +228,7 @@ public class JSONOutputter extends AnnotationOutputter {
               CorefChain.CorefMention representative = chain.getRepresentativeMention();
               chainWriter.set(Integer.toString(chain.getChainID()), chain.getMentionsInTextualOrder().stream().map(mention -> (Consumer<Writer>) (Writer mentionWriter) -> {
                 mentionWriter.set("id", mention.mentionID);
-                mentionWriter.set("text", SentenceUtils.listToOriginalTextString(doc.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class).subList(mention.startIndex - 1, mention.endIndex - 1)).trim());
+                mentionWriter.set("text", mention.mentionSpan);
                 mentionWriter.set("type", mention.mentionType);
                 mentionWriter.set("number", mention.number);
                 mentionWriter.set("gender", mention.gender);
@@ -246,6 +244,22 @@ public class JSONOutputter extends AnnotationOutputter {
           });
         }
       }
+
+      // quotes
+      if (doc.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
+        List<CoreMap> quotes = QuoteAnnotator.gatherQuotes(doc);
+        l1.set("quotes", quotes.stream().map(quote -> (Consumer<Writer>) (Writer l2) -> {
+            l2.set("id", quote.get(CoreAnnotations.QuotationIndexAnnotation.class));
+            l2.set("text", quote.get(CoreAnnotations.TextAnnotation.class));
+            l2.set("beginIndex", quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+            l2.set("endIndex", quote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+            l2.set("beginToken", quote.get(CoreAnnotations.TokenBeginAnnotation.class));
+            l2.set("endToken", quote.get(CoreAnnotations.TokenEndAnnotation.class));
+            l2.set("beginSentence", quote.get(CoreAnnotations.SentenceBeginAnnotation.class));
+            l2.set("endSentence", quote.get(CoreAnnotations.SentenceEndAnnotation.class));
+        }));
+      }
+
     });
 
     l0.writer.flush();  // flush
@@ -306,7 +320,7 @@ public class JSONOutputter extends AnnotationOutputter {
    * <p>For the love of all that is holy, don't try to write JSON multithreaded.
    * It should go without saying that this is not threadsafe.</p>
    */
-  protected static class JSONWriter {
+  public static class JSONWriter {
     private final PrintWriter writer;
     private final Options options;
     private JSONWriter(PrintWriter writer, Options options) {
@@ -510,7 +524,7 @@ public class JSONOutputter extends AnnotationOutputter {
    * we represent objects while creating JSON).
    */
   @FunctionalInterface
-  protected interface Writer {
+  public interface Writer {
     /**
      * Set a (key, value) pair in a JSON object.
      * Note that if either the key or the value is null, nothing will be set.

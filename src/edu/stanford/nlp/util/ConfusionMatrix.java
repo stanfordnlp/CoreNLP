@@ -10,9 +10,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -277,7 +274,7 @@ public class ConfusionMatrix<U> {
     return sum;
   }
 
-  public String getPlaceHolder(int index, U label) {
+  private String getPlaceHolder(int index, U label) {
     if (useRealLabels) {
       return label.toString();
     } else {
@@ -541,4 +538,5 @@ public class ConfusionMatrix<U> {
     confusion.add("a", "b");
     confusion.gui();
   }
+
 }

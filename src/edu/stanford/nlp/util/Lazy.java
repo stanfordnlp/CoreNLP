@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.lang.ref.SoftReference;
 import java.util.function.Supplier;
 
 /**
@@ -8,19 +9,21 @@ import java.util.function.Supplier;
  * @author Gabor Angeli
  */
 public abstract class Lazy<E> {
-  private E implOrNull = null;
+  private SoftReference<E> implOrNull = null;
 
   public synchronized E get() {
-    if (implOrNull == null) {
-      implOrNull = compute();
+    E elem = implOrNull == null ? null : implOrNull.get();
+    if (elem == null) {
+      elem = compute();
+      implOrNull = new SoftReference<E>(elem);
     }
-    return implOrNull;
+    return elem;
   }
 
   protected abstract E compute();
 
   public E getIfDefined() {
-    return implOrNull;
+    return implOrNull == null ? null : implOrNull.get();
   }
 
   public static <E> Lazy<E> from(final E definedElement) {

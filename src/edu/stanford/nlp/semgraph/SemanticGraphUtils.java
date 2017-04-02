@@ -1,4 +1,4 @@
-package edu.stanford.nlp.semgraph; 
+package edu.stanford.nlp.semgraph;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
@@ -351,7 +351,7 @@ public class SemanticGraphUtils  {
     }
     return vertices.first();
   }
-  
+
   /**
    * Returns the vertices that are "leftmost, rightmost"  Note this requires that the IndexedFeatureLabels present actually have
    * ordering information.
@@ -364,7 +364,7 @@ public class SemanticGraphUtils  {
     }
     return Pair.makePair(vertices.first(), vertices.last());
   }
-  
+
   /**
    * Given a SemanticGraph, and a set of nodes, finds the "blanket" of nodes that are one
    * edge away from the set of nodes passed in.  This is similar to the idea of a Markov
@@ -783,7 +783,7 @@ public class SemanticGraphUtils  {
 
   /**
    * nodeValuesTranformation is a function that converts a vertex (IndexedWord) to the value.
-   * For an example, see <code>semgrexFromGraph</code>
+   * For an example, see {@code semgrexFromGraph}
    * function implementations (if useWord and useTag is true, the value is "{word: vertex.word; tag: vertex.tag}").
    * @throws Exception
    */
@@ -815,7 +815,7 @@ public class SemanticGraphUtils  {
 
   /**
    * Recursive call to generate the Semgrex pattern based off of this SemanticGraph.
-   * nodeValuesTranformation is a function that converts a vertex (IndexedWord) to the value. For an example, see <code>semgrexFromGraph</code>
+   * nodeValuesTranformation is a function that converts a vertex (IndexedWord) to the value. For an example, see {@code semgrexFromGraph}
    * function implementations.
    */
   protected static String semgrexFromGraphHelper(IndexedWord vertice, SemanticGraph sg,
@@ -869,13 +869,13 @@ public class SemanticGraphUtils  {
 
     Iterable<SemanticGraphEdge> edgeIter = null;
     if(!orderedNodes){
-     edgeIter = sg.outgoingEdgeIterable(vertice); 
+     edgeIter = sg.outgoingEdgeIterable(vertice);
     } else{
-      edgeIter = CollectionUtils.sorted(sg.outgoingEdgeList(vertice), (arg0, arg1) -> 
+      edgeIter = CollectionUtils.sorted(sg.outgoingEdgeList(vertice), (arg0, arg1) ->
         (arg0.getRelation().toString().compareTo(arg1.getRelation().toString())));
     }
-      
-    
+
+
     // For each edge, record the edge, but do not traverse to the vertice if it is already in the
     // tabu list.  If it already is, we emit the edge and the target vertice, as
     // we will not be continuing in that vertex, but we wish to record the relation.
@@ -927,7 +927,7 @@ public class SemanticGraphUtils  {
     return patternString;
   }
 
-  
+
 
   /**
    * Sanitizes the given string into a Semgrex friendly name
@@ -954,13 +954,12 @@ public class SemanticGraphUtils  {
 
 
   /**
-   * Given a <code>SemanticGraph</code>, sets the lemmas on its label
+   * Given a {@code SemanticGraph}, sets the lemmas on its label
    * objects based on their word and tag.
    */
   public static void lemmatize(SemanticGraph sg) {
     for (IndexedWord node : sg.vertexSet()) {
-      String lemma = Morphology.stemStatic(node.word(), node.tag()).word();
-      node.setLemma(lemma);
+      node.setLemma(Morphology.lemmaStatic(node.word(), node.tag()));
     }
   }
 
@@ -1107,7 +1106,7 @@ public class SemanticGraphUtils  {
   }
 
   /**
-   * Private helper class for <code>mapTreeToSg</code>.   Acts to
+   * Private helper class for {@code mapTreeToSg}.   Acts to
    * map between a Tree node and a lexical value.
    * @author Eric Yeh
    *
@@ -1182,7 +1181,7 @@ public class SemanticGraphUtils  {
   }
 
   /**
-   * Private helper class for <code>mapTreeToSg</code>.  Acts to
+   * Private helper class for {@code mapTreeToSg}.  Acts to
    * map between an IndexedWord (in a SemanticGraph) and a lexical value.
    * @author lumberjack
    *

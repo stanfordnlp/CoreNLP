@@ -23,6 +23,7 @@ enum Language {
   Hebrew   = 7;
   Spanish  = 8;
   UniversalEnglish = 9;
+  UniversalChinese = 10;
 }
 
 //
@@ -41,6 +42,7 @@ message Document {
    * serialized without any sentences. Otherwise
    */
   repeated Token      sentencelessToken = 5;
+  repeated Token      character = 10;
 
   repeated Quote      quote = 6;
   /**
@@ -73,8 +75,10 @@ message Sentence {
   repeated RelationTriple   openieTriple                        = 14;   // The OpenIE triples in the sentence
   repeated RelationTriple   kbpTriple                           = 16;   // The KBP triples in this sentence
   repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
+  repeated SentenceFragment entailedClause                      = 35;   // The entailed clauses, by natural logic
   optional DependencyGraph  enhancedDependencies                = 17;
   optional DependencyGraph  enhancedPlusPlusDependencies        = 18;
+  repeated Token            character                           = 19;
 
   optional uint32           paragraph                           = 11;
 
@@ -100,7 +104,7 @@ message Sentence {
 //
 message Token {
   // Fields set by the default annotators [new CoreNLP(new Properties())]
-  required string word              = 1;    // the word's gloss (post-tokenization)
+  optional string word              = 1;    // the word's gloss (post-tokenization)
   optional string pos               = 2;    // The word's part of speech tag
   optional string value             = 3;    // The word's 'value', (e.g., parse tree node)
   optional string category          = 4;    // The word's 'category' (e.g., parse tree node)
@@ -142,6 +146,11 @@ message Token {
   optional string gender          = 51;  // gender annotation (machine reading)
   optional string trueCase        = 52;  // true case type of token
   optional string trueCaseText    = 53;  // true case gloss of token
+
+  //  Chinese character info
+  optional string chineseChar     = 54;
+  optional string chineseSeg      = 55;
+  
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets

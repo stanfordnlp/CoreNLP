@@ -524,7 +524,7 @@
  * Currently, we support the following options for the "annotators" property:
  * <ul>
  * <li> tokenize - Tokenizes the text using TokenizingAnnotator. This annotator is required by all following annotators!</li>
- * <li> ssplit - Splits the sequence of tokens into sentences using WordToSentenceAnnotator. This annotator is required if the input text contains multiple sentences, e.g., it is an entire document.</li>
+ * <li> ssplit - Splits the sequence of tokens into sentences using WordsToSentencesAnnotator. This annotator is required if the input text contains multiple sentences, e.g., it is an entire document.</li>
  * <li> pos - Runs the POS tagger using POSTaggerAnnotator</li>
  * <li> lemma - Generates the lemmas for all tokens using MorphaAnnotator</li>
  * <li> ner - Runs a combination of NER models using OldNERCombinerAnnotator</li>
