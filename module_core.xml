@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_core" default="compile.module.core">
+  <dirname property="module.core.basedir" file="${ant.file.module_core}"/>
+  
+  <property name="module.jdk.home.core" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.core" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.core" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.core" value="-encoding UTF-8 -source 8 ${compiler.args}"/>
+  
+  <property name="core.output.dir" value="${module.core.basedir}/../action_parsing/out/production/core"/>
+  <property name="core.testoutput.dir" value="${module.core.basedir}/../action_parsing/out/test/core"/>
+  
+  <path id="core.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="core.module.production.classpath">
+    <path refid="${module.jdk.classpath.core}"/>
+    <path refid="library.lib_core.classpath"/>
+  </path>
+  
+  <path id="core.runtime.production.module.classpath">
+    <pathelement location="${core.output.dir}"/>
+    <path refid="library.lib_core.classpath"/>
+    <path refid="library.javanlp_modules.classpath"/>
+  </path>
+  
+  <path id="core.module.classpath">
+    <path refid="${module.jdk.classpath.core}"/>
+    <pathelement location="${core.output.dir}"/>
+    <path refid="library.lib_core.classpath"/>
+  </path>
+  
+  <path id="core.runtime.module.classpath">
+    <pathelement location="${core.testoutput.dir}"/>
+    <pathelement location="${core.output.dir}"/>
+    <path refid="library.lib_core.classpath"/>
+    <path refid="library.javanlp_modules.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.core">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.core">
+    <patternset refid="excluded.from.module.core"/>
+  </patternset>
+  
+  <path id="core.module.sourcepath">
+    <dirset dir="${module.core.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.core" depends="compile.module.core.production,compile.module.core.tests" description="Compile module core"/>
+  
+  <target name="compile.module.core.production" depends="register.custom.compilers" description="Compile module core; production classes">
+    <mkdir dir="${core.output.dir}"/>
+    <javac2 destdir="${core.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.core}/javac">
+      <compilerarg line="${compiler.args.core}"/>
+      <bootclasspath refid="core.module.bootclasspath"/>
+      <classpath refid="core.module.production.classpath"/>
+      <src refid="core.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.core"/>
+    </javac2>
+    
+    <copy todir="${core.output.dir}">
+      <fileset dir="${module.core.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.core.tests" depends="register.custom.compilers,compile.module.core.production" description="compile module core; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.core" description="cleanup module">
+    <delete dir="${core.output.dir}"/>
+    <delete dir="${core.testoutput.dir}"/>
+  </target>
+</project>
