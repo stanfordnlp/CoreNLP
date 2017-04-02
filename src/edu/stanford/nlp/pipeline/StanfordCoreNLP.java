@@ -1047,7 +1047,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         //(read file)
         if (annotation == null) {
           String encoding = properties.getProperty("encoding", "UTF-8");
-          
+          String text = IOUtils.slurpFile(file.getAbsoluteFile(), encoding);
           annotation = new Annotation(text);
         }
 
@@ -1056,6 +1056,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           log("done.");
           Throwable ex = finishedAnnotation.get(CoreAnnotations.ExceptionAnnotation.class);
           if (ex == null) {
+            try{
             //--Output File
 	      OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
               print.accept(finishedAnnotation, fos);
