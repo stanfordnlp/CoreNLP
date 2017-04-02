@@ -1057,6 +1057,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           Throwable ex = finishedAnnotation.get(CoreAnnotations.ExceptionAnnotation.class);
           if (ex == null) {
             //--Output File
+	      OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+              print.accept(finishedAnnotation, fos);
+              fos.close();
+            } catch(IOException e) {
+              throw new RuntimeIOException(e);
             }
 
             synchronized (totalProcessed) {
