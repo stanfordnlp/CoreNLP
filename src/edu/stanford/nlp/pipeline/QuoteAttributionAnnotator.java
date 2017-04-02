@@ -15,7 +15,6 @@ import edu.stanford.nlp.quoteattribution.Sieves.QMSieves.*;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.io.IOException;
 import java.util.*;
 
 
@@ -126,7 +125,7 @@ public class QuoteAttributionAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     // 0. pre-preprocess the text with paragraph annotations
-    // TODO: maybe move this out
+    // TODO: maybe move this out, definitely make it so that you can set paragraph breaks
     Properties propsPara = new Properties();
     propsPara.setProperty("paragraphBreak", "one");
     ParagraphAnnotator pa = new ParagraphAnnotator(propsPara, false);

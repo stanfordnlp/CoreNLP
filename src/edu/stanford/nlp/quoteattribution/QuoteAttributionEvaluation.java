@@ -11,7 +11,7 @@ import edu.stanford.nlp.util.StringUtils;
 import java.util.*;
 
 /**
- * Created by mjfang on 11/28/16.
+ * @author Michael Fang, Grace Muzny
  */
 public class QuoteAttributionEvaluation {
 
@@ -162,7 +162,7 @@ public class QuoteAttributionEvaluation {
 
   public static void testXML(String[] args) throws Exception {
 
-    String home = "/Users/golux/Research/stanford/quote_attribution";
+    String home = null;
     // make the first argument one for a base directory
     String specificFile = "pp_test.props";
     if (args.length >= 1) {
@@ -172,20 +172,24 @@ public class QuoteAttributionEvaluation {
       specificFile = args[1];
     }
     System.out.println("Base directory: " + home);
-    Properties props = StringUtils.propFileToProperties(home + "ExtractQuotesXMLScripts/" + specificFile);
+    Properties props = StringUtils.propFileToProperties(home + specificFile);
 
     //convert XML file to (1) the Annotation (data.doc) (2) a list of people in the text (data.personList)
     // and (3) the gold info to be used by evaluate (data.goldList).
     XMLToAnnotation.Data data = XMLToAnnotation.readXMLFormat(props.getProperty("file"));
     //ParagraphIndexAnnotation is required.
-    Properties propsPara = new Properties();
-    propsPara.setProperty("paragraphBreak", "one");
-    ParagraphAnnotator pa = new ParagraphAnnotator(propsPara, false);
-    pa.annotate(data.doc);
+//    Properties propsPara = new Properties();
+//    propsPara.setProperty("paragraphBreak", "one");
+//    ParagraphAnnotator pa = new ParagraphAnnotator(propsPara, false);
+//    pa.annotate(data.doc);
     Properties annotatorProps = new Properties();
     XMLToAnnotation.writeCharacterList("characterListPP.txt", data.personList); //Use this to write the person list to a file
     annotatorProps.setProperty("charactersPath", props.getProperty("charactersPath"));
     annotatorProps.setProperty("booknlpCoref", props.getProperty("booknlpCoref"));
+    annotatorProps.setProperty("familyWordsFile", props.getProperty("familyWordsFile"));
+    annotatorProps.setProperty("animacyWordsFile", props.getProperty("animacyWordsFile"));
+    annotatorProps.setProperty("genderNamesFile", props.getProperty("genderNamesFile"));
+    annotatorProps.setProperty("modelPath", props.getProperty("modelPath"));
     QuoteAttributionAnnotator qaa = new QuoteAttributionAnnotator(annotatorProps);
     qaa.annotate(data.doc);
     evaluate(data.doc, data.goldList);

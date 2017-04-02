@@ -37,19 +37,20 @@ public class QuoteAttributionTest {
           " To such perseverance in wilful self-deception, Elizabeth would make no reply, and immediately and in silence withdrew; determined, that if he persisted in considering her repeated refusals as flattering encouragement, to apply to her father, whose negative might be uttered in such a manner as must be decisive, and whose behaviour at least could not be mistaken for the affectation and coquetry of an elegant female.";
 
   //Test QuoteAttributionAnnotator on a chapter of PP.
-  public static void testPP(String familyFile, String animateFile, String genderFile) throws IOException, ClassNotFoundException {
+  public static void testPP(String familyFile, String animateFile, String genderFile,
+                            String charactersFile, String modelFile) throws IOException, ClassNotFoundException {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, depparse, quote, quoteattribution");
     props.setProperty("quoteattribution.familyWordsFile", familyFile);
     props.setProperty("quoteattribution.animacyWordsFile", animateFile);
     props.setProperty("quoteattribution.genderNamesFile", genderFile);
 
-    props.setProperty("quoteattribution.charactersPath", "/Users/golux/Research/stanford/quote_attribution/characterListPP.txt");
-    props.setProperty("quoteattribution.modelPath", "/Users/golux/Research/stanford/quote_attribution/model.ser");
+    props.setProperty("quoteattribution.charactersPath", charactersFile);
+    props.setProperty("quoteattribution.modelPath", modelFile);
     
     StanfordCoreNLP coreNLP = new StanfordCoreNLP(props);
     Annotation processedAnnotation = coreNLP.process(test);
-    
+
     List<CoreMap> quotes = processedAnnotation.get(CoreAnnotations.QuotationsAnnotation.class);
     for(CoreMap quote : quotes) {
       System.out.println("Quote: " + quote.get(CoreAnnotations.TextAnnotation.class));
@@ -69,19 +70,21 @@ public class QuoteAttributionTest {
   }
 
   /**
-   * Usage: java QuoteAttributionTest familywordsfile animatefile gendernamesfile
+   * Usage: java QuoteAttributionTest familywordsfile animatefile gendernamesfile charactersfile modelfile
    * @param args
    * @throws IOException
    * @throws ClassNotFoundException
    */
   public static void main(String[] args) throws IOException, ClassNotFoundException {
-    if (args.length != 3) {
-      System.out.println("Usage: java QuoteAttributionTest familywordsfile animatefile gendernamesfile");
+    if (args.length != 5) {
+      System.out.println("Usage: java QuoteAttributionTest familywordsfile animatefile gendernamesfile charactersfile modelfile");
       System.exit(1);
     }
     String familyFile = args[0];
     String animateFile = args[1];
     String genderFile = args[2];
-    testPP(familyFile, animateFile, genderFile);
+    String charactersFile = args[3];
+    String modelFile = args[4];
+    testPP(familyFile, animateFile, genderFile, charactersFile, modelFile);
   }
 }
