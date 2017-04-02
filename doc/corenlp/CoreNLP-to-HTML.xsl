@@ -92,16 +92,7 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
   </p>
 
   <p>
-  <i>Collapsed dependencies</i>
-  <ul>
-  <xsl:for-each select="dependencies[@type='collapsed-dependencies']">
-    <xsl:apply-templates select="dep"/>
-  </xsl:for-each>
-  </ul>
-  </p>
-
-  <p>
-  <i>Collapsed dependencies with CC processed</i>
+  <i>Enhanced dependencies</i>
   <ul>
   <xsl:for-each select="dependencies[@type='collapsed-ccprocessed-dependencies']">
     <xsl:apply-templates select="dep"/>

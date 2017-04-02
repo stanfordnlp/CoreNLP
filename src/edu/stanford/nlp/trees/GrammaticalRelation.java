@@ -169,6 +169,21 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return null;
   }
 
+  /**
+   * Returns the GrammaticalRelation having the given string
+   * representation (e.g. "nsubj"), or null if no such is found.
+   *
+   * @param s The short name of the GrammaticalRelation
+   * @param map The map from string to GrammaticalRelation
+   * @return The GrammaticalRelation with that name
+   */
+  public static GrammaticalRelation valueOf(String s, Map<String, GrammaticalRelation> map) {
+    if (map.containsKey(s)) {
+      return map.get(s);
+    }
+    return null;
+  }
+
   /** Convert from a String representation of a GrammaticalRelation to a
    *  GrammaticalRelation.  Where possible, you should avoid using this
    *  method and simply work with true GrammaticalRelations rather than
@@ -185,7 +200,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   public static GrammaticalRelation valueOf(Language language, String s) {
     GrammaticalRelation reln;
     synchronized (stringsToRelations) {
-      reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language).values()) : null);
+      reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language)) : null);
     }
     if (reln == null) {
       // TODO this breaks the hierarchical structure of the classes,

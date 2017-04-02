@@ -1,6 +1,7 @@
 package edu.stanford.nlp.semgraph;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
+import edu.stanford.nlp.ie.machinereading.structure.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -1966,6 +1967,32 @@ public class SemanticGraph implements Serializable {
       dependencies.add(dependency);
     }
     return dependencies;
+  }
+
+  /**
+   * Returns the span of the subtree yield of this node. That is, the span of all the nodes under it.
+   * In the case of projective graphs, the words in this span are also the yield of the constituent rooted
+   * at this node.
+   *
+   * @param word The word acting as the root of the constituent we are finding.
+   * @return A span, represented as a pair of integers. The span is zero indexed. The begin is inclusive and the end is exclusive.
+   */
+  public Pair<Integer, Integer> yieldSpan(IndexedWord word) {
+    int min = Integer.MAX_VALUE;
+    int max = Integer.MIN_VALUE;
+    Stack<IndexedWord> fringe = new Stack<>();
+    fringe.push(word);
+    while (!fringe.isEmpty()) {
+      IndexedWord parent = fringe.pop();
+      min = Math.min(min, parent.index() - 1);
+      max = Math.max(max, parent.index());
+      for (SemanticGraphEdge edge : outgoingEdgeIterable(parent)) {
+        if (!edge.isExtra()) {
+          fringe.push(edge.getDependent());
+        }
+      }
+    }
+    return Pair.makePair(min, max);
   }
 
   private static final long serialVersionUID = 1L;

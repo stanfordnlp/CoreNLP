@@ -3,6 +3,7 @@ package edu.stanford.nlp.simple;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.dcoref.Dictionaries;
+import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
@@ -36,6 +37,7 @@ public class Document {
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
   }};
+
   /**
    * The backend to use for constructing {@link edu.stanford.nlp.pipeline.AnnotatorFactory}s.
    */
@@ -128,6 +130,21 @@ public class Document {
   };
 
   /**
+   * The default {@link edu.stanford.nlp.naturalli.OpenIE} implementation
+   */
+  private static Supplier<Annotator> defaultOpenie = new Supplier<Annotator>() {
+    Annotator impl = null;
+
+    @Override
+    public synchronized Annotator get() {
+      if (impl == null) {
+        impl = AnnotatorFactories.openie(EMPTY_PROPS, backend).create();
+      }
+      return impl;
+    }
+  };
+
+  /**
    * The default {@link edu.stanford.nlp.pipeline.DeterministicCorefAnnotator} implementation
    */
   private static Supplier<Annotator> defaultCoref = new Supplier<Annotator>() {
@@ -186,11 +203,23 @@ public class Document {
 
   /** The protocol buffer representing this document */
   private final CoreNLPProtos.Document.Builder impl;
+
   /** The list of sentences associated with this document */
   private List<Sentence> sentences = null;
 
   /** A serializer to assist in serializing and deserializing from Protocol buffers */
   protected final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+
+  /**
+   * THIS IS NONSTANDARD.
+   * An indicator of whether we have run the OpenIE annotator.
+   * Unlike most other annotators, it's quite common for a sentence to not have any extracted triples,
+   * and therefore it's hard to determine whether we should rerun the annotator based solely on the saved
+   * annotation.
+   * At the same time, the proto file should not have this flag in it.
+   * So, here it is.
+   */
+  private boolean haveRunOpenie = false;
 
   /**
    * Create a new document from the passed in text.
@@ -204,6 +233,7 @@ public class Document {
    * Convert a CoreNLP Annotation object to a Document.
    * @param ann The CoreNLP Annotation object.
    */
+  @SuppressWarnings("Convert2streamapi")
   public Document(Annotation ann) {
     this.impl = new ProtobufAnnotationSerializer().toProto(ann).toBuilder();
     List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
@@ -218,6 +248,7 @@ public class Document {
    * @see edu.stanford.nlp.simple.Document#serialize()
    * @param proto The protocol buffer representing this document.
    */
+  @SuppressWarnings("Convert2streamapi")
   public Document(CoreNLPProtos.Document proto) {
     this.impl = proto.toBuilder();
     if (proto.getSentenceCount() > 0) {
@@ -493,9 +524,9 @@ public class Document {
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
         sentences.get(i).updateParse(serializer.toProto(tree));
         sentences.get(i).updateDependencies(
-            serializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
-            serializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)),
-            serializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)));
+            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
+            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)),
+            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)));
       }
     }
     return this;
@@ -516,9 +547,9 @@ public class Document {
       for (int i = 0; i < sentences.size(); ++i) {
         CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
         sentences.get(i).updateDependencies(
-            serializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
-            serializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)),
-            serializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)));
+            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
+            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)),
+            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)));
       }
     }
     return this;
@@ -537,10 +568,35 @@ public class Document {
     Annotation ann = asAnnotation();
     natlog.annotate(ann);
     // Update data
-    for (int i = 0; i < sentences.size(); ++i) {
-      sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setPolarity(ProtobufAnnotationSerializer.toProto(pair.second)), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
-      sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setOperator(ProtobufAnnotationSerializer.toProto(pair.second)), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
+    synchronized (serializer) {
+      for (int i = 0; i < sentences.size(); ++i) {
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setPolarity(ProtobufAnnotationSerializer.toProto(pair.second)), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setOperator(ProtobufAnnotationSerializer.toProto(pair.second)), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
+      }
     }
+    return this;
+  }
+
+  protected Document runOpenie(Properties props) {
+    if (haveRunOpenie) {
+      return this;
+    }
+    // Run prerequisites
+    runNatlog(props);
+    // Run annotator
+    Annotator openie = props == EMPTY_PROPS ? defaultOpenie.get() : getOrCreate(AnnotatorFactories.openie(props, backend));
+    Annotation ann = asAnnotation();
+    openie.annotate(ann);
+    // Update data
+    synchronized (serializer) {
+      for (int i = 0; i < sentences.size(); ++i) {
+        CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
+        Collection<RelationTriple> triples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
+        sentences.get(i).updateTriples(triples.stream().map(ProtobufAnnotationSerializer::toProto));
+      }
+    }
+    // Return
+    haveRunOpenie = true;
     return this;
   }
 
