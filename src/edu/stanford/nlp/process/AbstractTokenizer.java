@@ -1,13 +1,15 @@
 package edu.stanford.nlp.process;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+// import edu.stanford.nlp.util.logging.Redwood;
+
+
 /**
  * An abstract tokenizer.  Tokenizers extending AbstractTokenizer need only
- * implement the <code>getNext()</code> method. This implementation does not
+ * implement the {@code getNext()} method. This implementation does not
  * allow null tokens, since
  * null is used in the protected nextToken field to signify that no more
  * tokens are available.
@@ -15,7 +17,10 @@ import java.util.NoSuchElementException;
  * @author Teg Grenager (grenager@stanford.edu)
  */
 
-public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
+public abstract class AbstractTokenizer<T> implements Tokenizer<T>  {
+
+  // /** A logger for this class */
+  // private static final Redwood.RedwoodChannels log = Redwood.channels(AbstractTokenizer.class);
 
   protected T nextToken; // = null;
 
@@ -47,7 +52,7 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
   }
 
   /**
-   * Returns <code>true</code> if this Tokenizer has more elements.
+   * Returns {@code true} if this Tokenizer has more elements.
    */
   @Override
   public boolean hasNext() {
@@ -90,11 +95,11 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
    */
   @Override
   public List<T> tokenize() {
-    // System.out.println("tokenize called");
     List<T> result = new ArrayList<>();
     while (hasNext()) {
       result.add(next());
     }
+    // log.info("tokenize() produced " + result);
     return result;
   }
 

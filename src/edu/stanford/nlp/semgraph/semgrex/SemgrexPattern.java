@@ -1,4 +1,5 @@
 package edu.stanford.nlp.semgraph.semgrex;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -16,32 +17,30 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * A SemgrexPattern is a <code>tgrep</code>-type pattern for matching node
- * configurations in one of the SemanticGraph structures.  Unlike
- * <code>tgrep</code> but like Unix <code>grep</code>, there is no pre-indexing
+ * A SemgrexPattern is a pattern for matching node and edge configurations a dependency graph.
+ * Patterns are written in a similar style to {@code tgrep} or {@code Tregex} and operate over
+ * {@code SemanticGraph} objects, which contain {@code IndexedWord nodes}.  Unlike
+ * {@code tgrep} but like Unix {@code grep}, there is no pre-indexing
  * of the data to be searched.  Rather there is a linear scan through the graph
  * where matches are sought. <p/>
- *
- * SemgrexPattern instances can be matched against instances of the {@link
- * IndexedWord} class. <p/>
  *
  * A node is represented by a set of attributes and their values contained by
  * curly braces: {attr1:value1;attr2:value2;...}.  Therefore, {} represents any
  * node in the graph.  Attributes must be plain strings; values can be strings
- * or regular expressions blocked off by "/".  (I think regular expressions must
- * match the whole attribute value; so that /NN/ matches "NN" only, while /NN.* /
- * matches "NN", "NNS", "NNP", etc. --wcmac) <p/>
+ * or regular expressions blocked off by "/".  Regular expressions must
+ * match the whole attribute value, so that /NN/ matches "NN" only, while /NN.* /
+ * matches "NN", "NNS", "NNP", etc. <p/>
  *
- * For example, <code>{lemma:slice;tag:/VB.* /}</code> represents any verb nodes
+ * For example, {@code {lemma:slice;tag:/VB.* /}} represents any verb nodes
  * with "slice" as their lemma.  Attributes are extracted using
- * <code>edu.stanford.nlp.ling.AnnotationLookup</code>. <p/>
+ * {@code edu.stanford.nlp.ling.AnnotationLookup}. <p/>
  *
- * The root of the graph can be marked by the $ sign, that is <code>{$}</code>
+ * The root of the graph can be marked by the $ sign, that is {@code {$}}
  * represents the root node. <p/>
  *
  * Relations are defined by a symbol representing the type of relationship and a
  * string or regular expression representing the value of the relationship. A
- * relationship string of <code>%</code> means any relationship.  It is
+ * relationship string of {@code %} means any relationship.  It is
  * also OK simply to omit the relationship symbol altogether.
  * <p/>
  *
@@ -56,33 +55,33 @@ import edu.stanford.nlp.util.StringUtils;
  * <tr><td>A x,y&lt;&lt;reln B <td>A is the dependent of a relation reln in a chain to B following dep-&gt;gov paths between distances of x and y
  * <tr><td>A x,y&gt;&gt;reln B <td>A is the governor of a relation reln in a chain to B following gov-&gt;dep paths between distances of x and y
  * <tr><td>A == B <td>A and B are the same nodes in the same graph
- * <tr><td>A . B <td>A is immediately precedes B, i.e. A.index() == B.index() - 1
+ * <tr><td>A . B <td>A immediately precedes B, i.e. A.index() == B.index() - 1
  * <tr><td>A $+ B <td>B is a right immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() - 1
- * <tr><td>A $- B <td>B is a right immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() + 1
+ * <tr><td>A $- B <td>B is a left immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() + 1
  * <tr><td>A $++ B <td>B is a right sibling of A, i.e. A and B have the same parent and A.index() < B.index()
  * <tr><td>A $-- B <td>B is a left sibling of A, i.e. A and B have the same parent and A.index() > B.index()
- * <tr><td>A @ B <td>A is aligned to B
+ * <tr><td>A @ B <td>A is aligned to B (this is only used when you have two dependency graphs which are aligned)
  * </table>
  * <p/>
  *
  * In a chain of relations, all relations are relative to the first
- * node in the chain. For example, "<code>{} &gt;nsubj {} &gt;dobj
- * {}</code>" means "any node that is the governor of both a nsubj and
+ * node in the chain. For example, "{@code {} &gt;nsubj {} &gt;dobj
+ * {}}" means "any node that is the governor of both a nsubj and
  * a dobj relation".  If instead what you want is a node that is the
  * governor of a nsubj relation with a node that is itself the
- * governor of dobj relation, you should write: "<code>{} &gt;nsubj
- * ({} &gt;dobj {})</code>". <p/>
+ * governor of dobj relation, you should use parentheses and write: "{@code {} &gt;nsubj
+ * ({} &gt;dobj {})}". <p/>
  *
  * If a relation type is specified for the &lt;&lt; relation, the
  * relation type is only used for the first relation in the sequence.
  * Therefore, if B depends on A with the relation type foo, the
- * pattern <code>{} &lt;&lt;foo {}</code> will then match B and
+ * pattern {@code {} &lt;&lt;foo {}} will then match B and
  * everything that depends on B. <p/>
  *
  * Similarly, if a relation type is specified for the &gt;&gt;
  * relation, the relation type is only used for the last relation in
  * the sequence.  Therefore, if A governs B with the relation type
- * foo, the pattern <code>{} &gt;&gt;foo {}</code> will then match A
+ * foo, the pattern {@code {} &gt;&gt;foo {}} will then match A
  * and all of the nodes which have a sequence leading to A. <p/>
  *
  * <h3>Boolean relational operators</h3>
@@ -94,7 +93,7 @@ import edu.stanford.nlp.util.StringUtils;
  * expression
  *
  * <blockquote>
- * <code> {} [&lt;subj {} | &lt;agent {}] &amp; @ {} </code>
+ *{@code {} [&lt;subj {} | &lt;agent {}] &amp; @ {} }
  * </blockquote>
  *
  * matches a node that is either the dep of a subj or agent relationship and
@@ -112,13 +111,13 @@ import edu.stanford.nlp.util.StringUtils;
  * descendants:
  *
  * <blockquote>
- * <code> {}=a &gt;&gt; {word:foo} : {}=a &gt;&gt; {word:bar} </code>
+ * {@code {}=a &gt;&gt; {word:foo} : {}=a &gt;&gt; {word:bar} }
  * </blockquote>
  *
  * This pattern could have been written
  *
  * <blockquote>
- * <code> {}=a &gt;&gt; {word:foo} &gt;&gt; {word:bar} </code>
+ * {@code {}=a &gt;&gt; {word:foo} &gt;&gt; {word:bar} }
  * </blockquote>
  *
  * However, for more complex examples, partitioning a pattern may make
@@ -129,7 +128,7 @@ import edu.stanford.nlp.util.StringUtils;
  * Nodes can be given names (a.k.a. handles) using '='.  A named node will
  * be stored in a map that maps names to nodes so that if a match is found, the
  * node corresponding to the named node can be extracted from the map.  For
- * example <code> ({tag:NN}=noun) </code> will match a singular noun node and
+ * example {@code ({tag:NN}=noun) } will match a singular noun node and
  * after a match is found, the map can be queried with the name to retrieved the
  * matched node using {@link SemgrexMatcher#getNode(String o)} with (String)
  * argument "noun" (<it>not</it> "=noun").  Note that you are not allowed to
@@ -142,18 +141,18 @@ import edu.stanford.nlp.util.StringUtils;
  * description -- this is known as "backreferencing".  In this case, the
  * expression will match only when all instances of the same name get matched to
  * the same node.  For example: the pattern
- * <code>{} &gt;dobj ({} &gt; {}=foo) &gt;mod ({} &gt; {}=foo) </code>
- * will match a graph in which there are two nodes, <code>X</code> and
- * <code>Y</code>, for which <code>X</code> is the grandparent of
- * <code>Y</code> and there are two paths to <code>Y</code>, one of
- * which goes through a <code>dobj</code> and one of which goes
- * through a <code>mod</code>. <p/>
+ * {@code {} &gt;dobj ({} &gt; {}=foo) &gt;mod ({} &gt; {}=foo) }
+ * will match a graph in which there are two nodes, {@code X} and
+ * {@code Y}, for which {@code X} is the grandparent of
+ * {@code Y} and there are two paths to {@code Y}, one of
+ * which goes through a {@code dobj} and one of which goes
+ * through a {@code mod}. <p/>
  *
  * <p><h3>Naming relations</h3>
  *
  * It is also possible to name relations.  For example, you can write the pattern
- * <code>{idx:1} &gt;=reln {idx:2}</code>  The name of the relation will then
- * be stored in the matcher and can be extracted with <code>getRelnName("reln")</code>
+ * {@code {idx:1} &gt;=reln {idx:2}}  The name of the relation will then
+ * be stored in the matcher and can be extracted with {@code getRelnName("reln")}
  * At present, though, there is no backreferencing capability such as with the
  * named nodes; this is only useful when using the API to extract the name of the
  * relation used when making the match.
@@ -164,14 +163,17 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Chloe Kiddon
  */
-public abstract class SemgrexPattern implements Serializable {
+public abstract class SemgrexPattern implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SemgrexPattern.class);
 
   private static final long serialVersionUID = 1722052832350596732L;
   private boolean neg = false;
   private boolean opt = false;
   private String patternString; // conceptually final, but can't do because of parsing
 
-  Env env;
+  protected Env env; //always set with setEnv to make sure that it is also availble to child patterns
 
   // package private constructor
   SemgrexPattern() {
@@ -277,7 +279,7 @@ public abstract class SemgrexPattern implements Serializable {
     try {
       SemgrexParser parser = new SemgrexParser(new StringReader(semgrex + "\n"));
       SemgrexPattern newPattern = parser.Root();
-      newPattern.env = env;
+      newPattern.setEnv(env);
       newPattern.patternString = semgrex;
       return newPattern;
     } catch (ParseException ex) {
@@ -294,6 +296,18 @@ public abstract class SemgrexPattern implements Serializable {
   public String pattern() {
     return patternString;
   }
+
+  /**
+   * Recursively sets the env variable to this pattern and all its children
+   *
+   * @param env
+   */
+  public void setEnv(Env env) {
+    this.env = env;
+    this.getChildren().stream().forEach(p -> p.setEnv(env));
+  }
+
+
 
   // printing methods
   // -----------------------------------------------------------
@@ -373,16 +387,16 @@ public abstract class SemgrexPattern implements Serializable {
 
 
   public static void help() {
-    System.err.println("Possible arguments for SemgrexPattern:");
-    System.err.println(PATTERN + ": what pattern to use for matching");
-    System.err.println(TREE_FILE + ": a file of trees to process");
-    System.err.println(CONLLU_FILE + ": a CoNLL-U file of dependency trees to process");
-    System.err.println(MODE + ": what mode for dependencies.  basic, collapsed, or ccprocessed.  To get 'noncollapsed', use basic with extras");
-    System.err.println(EXTRAS + ": whether or not to use extras");
-    System.err.println(OUTPUT_FORMAT_OPTION + ": output format of matches. list or offset. 'list' prints the graph as a list of dependencies, "
+    log.info("Possible arguments for SemgrexPattern:");
+    log.info(PATTERN + ": what pattern to use for matching");
+    log.info(TREE_FILE + ": a file of trees to process");
+    log.info(CONLLU_FILE + ": a CoNLL-U file of dependency trees to process");
+    log.info(MODE + ": what mode for dependencies.  basic, collapsed, or ccprocessed.  To get 'noncollapsed', use basic with extras");
+    log.info(EXTRAS + ": whether or not to use extras");
+    log.info(OUTPUT_FORMAT_OPTION + ": output format of matches. list or offset. 'list' prints the graph as a list of dependencies, "
                          + "'offset' prints the filename and the line offset in the ConLL-U file.");
-    System.err.println();
-    System.err.println(PATTERN + " is required");
+    log.info();
+    log.info(PATTERN + " is required");
   }
 
   /**
@@ -435,7 +449,7 @@ public abstract class SemgrexPattern implements Serializable {
     // TODO: allow other sources of graphs, such as dependency files
     if (argsMap.containsKey(TREE_FILE) && argsMap.get(TREE_FILE).length > 0) {
       for (String treeFile : argsMap.get(TREE_FILE)) {
-        System.err.println("Loading file " + treeFile);
+        log.info("Loading file " + treeFile);
         MemoryTreebank treebank = new MemoryTreebank(new TreeNormalizer());
         treebank.loadPath(treeFile);
         for (Tree tree : treebank) {
@@ -449,7 +463,7 @@ public abstract class SemgrexPattern implements Serializable {
     if (argsMap.containsKey(CONLLU_FILE) && argsMap.get(CONLLU_FILE).length > 0) {
       CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
       for (String conlluFile : argsMap.get(CONLLU_FILE)) {
-        System.err.println("Loading file " + conlluFile);
+        log.info("Loading file " + conlluFile);
         Iterator<SemanticGraph> it = reader.getIterator(IOUtils.readerFromString(conlluFile));
 
         while (it.hasNext()) {
@@ -466,18 +480,18 @@ public abstract class SemgrexPattern implements Serializable {
       }
 
       if (outputFormat == OutputFormat.LIST) {
-        System.err.println("Matched graph:");
-        System.err.println(graph.toString(SemanticGraph.OutputFormat.LIST));
+        log.info("Matched graph:");
+        log.info(graph.toString(SemanticGraph.OutputFormat.LIST));
         boolean found = true;
         while (found) {
-          System.err.println("Matches at: " + matcher.getMatch().value() + "-" + matcher.getMatch().index());
+          log.info("Matches at: " + matcher.getMatch().value() + "-" + matcher.getMatch().index());
           List<String> nodeNames = Generics.newArrayList();
           nodeNames.addAll(matcher.getNodeNames());
           Collections.sort(nodeNames);
           for (String name : nodeNames) {
-            System.err.println("  " + name + ": " + matcher.getNode(name).value() + "-" + matcher.getNode(name).index());
+            log.info("  " + name + ": " + matcher.getNode(name).value() + "-" + matcher.getNode(name).index());
           }
-          System.err.println();
+          log.info();
           found = matcher.find();
         }
       } else if (outputFormat == OutputFormat.OFFSET) {

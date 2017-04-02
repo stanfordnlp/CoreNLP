@@ -1,9 +1,10 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.List;
 
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.LeftHeadFinder;
@@ -25,7 +26,10 @@ import edu.stanford.nlp.trees.international.hebrew.HebrewTreebankLanguagePack;
  * @author Spence Green
  *
  */
-public class HebrewTreebankParserParams extends AbstractTreebankParserParams {
+public class HebrewTreebankParserParams extends AbstractTreebankParserParams  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(HebrewTreebankParserParams.class);
 
   private static final long serialVersionUID = -3466519995341208619L;
 
@@ -67,7 +71,7 @@ public class HebrewTreebankParserParams extends AbstractTreebankParserParams {
 
   @Override
   public void display() {
-    System.err.println(optionsString.toString());
+    log.info(optionsString.toString());
   }
 
   //TODO Add Reut's rules (from her thesis).
@@ -94,7 +98,7 @@ public class HebrewTreebankParserParams extends AbstractTreebankParserParams {
 
   public List<? extends HasWord> defaultTestSentence() {
     String[] sent = {"H", "MWX", "MTPLC", "LA", "RQ", "M", "H", "TWPEH", "H", "MBIFH", "ALA", "GM", "M", "DRKI", "H", "HERMH", "yyDOT"};
-    return Sentence.toWordList(sent);
+    return SentenceUtils.toWordList(sent);
   }
 
   public TreeReaderFactory treeReaderFactory() {

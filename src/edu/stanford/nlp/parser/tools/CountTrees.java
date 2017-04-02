@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.tools;
+package edu.stanford.nlp.parser.tools; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.Properties;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.Tree;
@@ -23,7 +24,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public class CountTrees {
+public class CountTrees  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CountTrees.class);
 
   private static final int minArgs = 1;
   private static final String usage;
@@ -90,10 +94,10 @@ public class CountTrees {
         pw.println(tree.toString());
         
       } else if (flattenTrees) {
-        pw.println(Sentence.listToString(tree.yield()));
+        pw.println(SentenceUtils.listToString(tree.yield()));
         
       } else if (printPOS) {
-        pw.println(Sentence.listToString(tree.preTerminalYield()));
+        pw.println(SentenceUtils.listToString(tree.preTerminalYield()));
       
       } else if (printTnT) {
         List<CoreLabel> yield = tree.taggedLabeledYield();

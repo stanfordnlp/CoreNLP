@@ -1,8 +1,9 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -18,7 +19,8 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
+
 
 /**
  * Make sure serializing to Protocol Buffers works, and is lossless.
@@ -67,7 +69,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
         if (sentence.containsKey(CoreAnnotations.TokensAnnotation.class)) {
-          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).has(CoreAnnotations.TokenBeginAnnotation.class);
+          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).containsKey(CoreAnnotations.TokenBeginAnnotation.class);
           if (hasTokenBeginAnnotation) {
             sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
           }
@@ -93,6 +95,8 @@ public class ProtobufAnnotationSerializerSlowITest {
         CoreMap sentence = doc.get(CoreAnnotations.SentencesAnnotation.class).get(i);
         for (int k = 0; k < sentence.get(CoreAnnotations.TokensAnnotation.class).size(); ++k) {
           CoreLabel token = sentence.get(CoreAnnotations.TokensAnnotation.class).get(k);
+          token.remove(TreeCoreAnnotations.HeadWordLabelAnnotation.class);
+          token.remove(TreeCoreAnnotations.HeadTagLabelAnnotation.class);
           // Set docID
           if (doc.containsKey(CoreAnnotations.DocIDAnnotation.class)) { token.setDocID(doc.get(CoreAnnotations.DocIDAnnotation.class)); }
           // Set sentence index if not already there
@@ -193,7 +197,6 @@ public class ProtobufAnnotationSerializerSlowITest {
             }
           }
         }
-      } else {
         assertTrue("Annotations don't match (don't know why?)", false);
       }
     }
@@ -220,12 +223,14 @@ public class ProtobufAnnotationSerializerSlowITest {
     return annotators.toArray(new String[annotators.size()]);
   }
 
-  private void testAnnotators(String annotators) {
+
+  private void testAnnotators(String annotators, Pair<String,String> additionalProperty) {
     try {
       AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
       // Write
       Annotation doc = new StanfordCoreNLP(new Properties(){{
         setProperty("annotators", annotators);
+        setProperty(additionalProperty.first, additionalProperty.second);
       }}).process(THOROUGH_TEST ? prideAndPrejudiceChapters1 : prideAndPrejudiceFirstBit);
       ByteArrayOutputStream ks = new ByteArrayOutputStream();
       serializer.write(doc, ks).close();
@@ -239,6 +244,10 @@ public class ProtobufAnnotationSerializerSlowITest {
 
       sameAsRead(doc, readDoc);
     } catch (Exception e) { throw new RuntimeException(e); }
+  }
+
+  private void testAnnotators(String annotators) {
+    testAnnotators(annotators, Pair.makePair("__none__", "__none__"));
   }
 
   /*
@@ -304,8 +313,8 @@ public class ProtobufAnnotationSerializerSlowITest {
     assertNotNull(compressedProto);
 
     // Check size
-    assertTrue("" + compressedProto.length, compressedProto.length < 340000);
-    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1700000);
+    assertTrue("" + compressedProto.length, compressedProto.length < 390000);
+    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 2100000);
   }
 
   @Test
@@ -423,7 +432,34 @@ public class ProtobufAnnotationSerializerSlowITest {
 
   @Test
   public void testGender() {
-    testAnnotators("tokenize,ssplit,pos,gender");
+    testAnnotators("tokenize,ssplit,pos,lemma,ner,gender");
+  }
+
+
+  @Test
+  public void testDocDate() {
+    Annotation ann = new Annotation("hello world");
+    ann.set(CoreAnnotations.DocDateAnnotation.class, "2016-05-05");
+    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+    Annotation reread = serializer.fromProto(serializer.toProto(ann));
+    sameAsRead(ann, reread);
+  }
+
+
+  @Test
+  public void testCalendar() {
+    Annotation ann = new Annotation("hello world");
+    ann.set(CoreAnnotations.CalendarAnnotation.class, new GregorianCalendar());
+    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+    Annotation reread = serializer.fromProto(serializer.toProto(ann));
+    sameAsRead(ann, reread);
+  }
+
+
+  @Test
+  public void testShiftReduce() {
+    testAnnotators("tokenize,ssplit,pos,parse",
+        Pair.makePair("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz"));
   }
 
   /**
@@ -453,7 +489,7 @@ public class ProtobufAnnotationSerializerSlowITest {
           String annotator = iter.next();
           boolean valid = true;
           try {
-            for (Annotator.Requirement requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
+            for (Class<? extends CoreAnnotation> requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
               if (!annotatorsAdded.contains(requirement.toString())) { valid = false; }
             }
           } catch (NullPointerException ignored) { }

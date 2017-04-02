@@ -1,9 +1,7 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.ie.machinereading.BasicRelationExtractor;
 import edu.stanford.nlp.ie.machinereading.Extractor;
@@ -14,8 +12,11 @@ import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.RelationMentionsAnnotation;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
@@ -26,7 +27,10 @@ import edu.stanford.nlp.util.StringUtils;
  *
  */
 
-public class RelationExtractorAnnotator implements Annotator {
+public class RelationExtractorAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(RelationExtractorAnnotator.class);
   MachineReading mr;
   private static boolean verbose = false;
 
@@ -37,7 +41,7 @@ public class RelationExtractorAnnotator implements Annotator {
       Extractor entityExtractor = new RothEntityExtractor();
       BasicRelationExtractor relationExtractor = BasicRelationExtractor.load(relationModel);
       
-      System.err.println("Loading relation model from " + relationModel);
+      log.info("Loading relation model from " + relationModel);
       mr = MachineReading.makeMachineReadingForAnnotation(new RothCONLL04Reader(), entityExtractor, relationExtractor, null, null,
           null, true, verbose);
     } catch(Exception e){
@@ -60,9 +64,9 @@ public class RelationExtractorAnnotator implements Annotator {
       List<EntityMention> entities = outSent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
       origSent.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, entities);
       if(verbose && entities != null){
-        System.err.println("Extracted the following entities:");
+        log.info("Extracted the following entities:");
         for(EntityMention e: entities){
-          System.err.println("\t" + e);
+          log.info("\t" + e);
         }
       }
       
@@ -70,10 +74,10 @@ public class RelationExtractorAnnotator implements Annotator {
       List<RelationMention> relations = outSent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
       origSent.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, relations);
       if(verbose && relations != null){
-        System.err.println("Extracted the following relations:");
+        log.info("Extracted the following relations:");
         for(RelationMention r: relations){
           if(! r.getType().equals(RelationMention.UNRELATED)){
-            System.err.println(r);
+            log.info(r);
           }
         }
       }
@@ -82,13 +86,25 @@ public class RelationExtractorAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requires() {
-    return new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, PARSE_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.PartOfSpeechAnnotation.class,
+        CoreAnnotations.NamedEntityTagAnnotation.class,
+        TreeCoreAnnotations.TreeAnnotation.class,
+        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
+    )));
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(RELATION_EXTRACTOR_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        MachineReadingAnnotations.EntityMentionsAnnotation.class,
+        RelationMentionsAnnotation.class
+    )));
   }
 
   public static void main(String[] args){

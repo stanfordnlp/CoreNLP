@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.french.scripts;
+package edu.stanford.nlp.international.french.scripts; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -23,7 +24,10 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class TreeToMorfette {
+public class TreeToMorfette  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TreeToMorfette.class);
 
   /**
    * @param args

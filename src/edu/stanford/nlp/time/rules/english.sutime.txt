@@ -15,7 +15,7 @@
   $INT_TIMES = ( $INT /times/ | once | twice | thrice );
   $REL_MOD = ( /the/? /next|following|last|previous/ | /this/ /coming|past/? | /the/ /coming|past/ );
   $FREQ_MOD = ( /each/ | /every/ $NUM_ORD | /every/ /other|alternate|alternating/? | /alternate|alternating/ );
-  $EARLY_LATE_MOD = ( /late|early|mid-?/ | /the/? /beginning|start|dawn|middle|end/ /of/ );
+  $EARLY_LATE_MOD = ( /late|early|mid-?/ | /the/? /beginning|start|dawn|middle|end/ /of/ | /late|early/ /in|on/ );
   $APPROX_MOD = ( /about|around|some|exactly|precisely/ );
   $YEAR = ( /[012]\d\d\d/ | /'\d\d/ | /'/ /\d\d/ | /\w+teen|twenty/ [ { numcompvalue<100 } & { numcompvalue>0 } & $INT ] );
   $POSSIBLE_YEAR = ( $YEAR /a\.?d\.?|b\.?c\.?/? | $INT /a\.?d\.?|b\.?c\.?/ | $INT1000TO3000 );
@@ -308,9 +308,12 @@
   { (/dec\.?/) => DECEMBER }
 
   { ruleType: "filter",
-	over: NIL,
-    pattern: ( [ { temporal::IS_TIMEX_DATE } & {{ tokens[0].tag =~ /NN.*S/ }} ] ),
-    result: MakePeriodicTemporalSet($0[0].temporal.value)
+    over: NIL,
+    // We added the end in "s" condition to avoid tagging mistakes (as with 1879) leading to non-plurals being SET
+    pattern: ( [ { temporal::IS_TIMEX_DATE } & {{ tokens[0].tag =~ /NN.*S/ }} & {{ tokens[0].word =~ /.+s/ }} ] ),
+    result: MakePeriodicTemporalSet($0[0].temporal.value),
+    // Set to TRUE to turn anything that is labeled a date but marked as plural to be a set
+    active: TRUE
   }
 
   ########################################################################################################################

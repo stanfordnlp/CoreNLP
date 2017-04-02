@@ -1,4 +1,5 @@
-package edu.stanford.nlp.time;
+package edu.stanford.nlp.time; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,7 +30,10 @@ import edu.stanford.nlp.util.Iterables;
 /**
  * @author Karthik Raghunathan
  */
-public class ParsedGigawordReader implements Iterable<Annotation> {
+public class ParsedGigawordReader implements Iterable<Annotation>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ParsedGigawordReader.class);
 
   private Iterable<File> files;
 
@@ -81,7 +85,7 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
             doc.append(line);
             doc.append('\n');
 //            if(line.contains("<DOC id")){
-//              System.err.println(line);
+//              log.info(line);
 //            }
             if (line.equals("</DOC>")) {
               break;
@@ -103,7 +107,7 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
           xml = xml.replaceAll("sid=(.*)>", "sid=\"$1\">");
           xml = xml.replaceAll("</SENT>\n</DOC>", "</SENT>\n</TEXT>\n</DOC>");
           xml = new String(xml.getBytes(), "UTF8");
-          //System.err.println("This is what goes in:\n" + xml);
+          //log.info("This is what goes in:\n" + xml);
           return toAnnotation(xml);
         } catch (IOException e) {
           throw new RuntimeIOException(e);

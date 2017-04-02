@@ -29,15 +29,13 @@ package edu.stanford.nlp.trees;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
-import junit.framework.Assert;
-import junit.framework.TestCase;
 
 
 /** Test cases for Universal Dependencies English typed dependencies (Stanford dependencies).
@@ -57,14 +55,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
   private TestType type;
 
 
-  enum TestType {
+  private enum TestType {
     BASIC, //Basic conversion, no extra dependencies or collapsing
     COPULA_HEAD, //Basic conversion with copula being the head
     NON_COLLAPSED, //Basic conversion + extra dependencies
     NON_COLLAPSED_SEPARATOR, //Basic conversion + extra dependencies appended at the end
     COLLAPSED, //Collapsed relations
     CC_PROCESSED, //CCprocessed relations
-  };
+  }
 
 
   /**
@@ -1230,7 +1228,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP Who) ) (SQ (VBZ is) (VP (VBG going) (S (VP (TO to) (VP (VB carry) (NP (DT the) (NN water) )))))) (. ?)))",
               "nsubj(going-3, Who-1)\n" +
-               "nsubj(carry-5, Who-1)\n" +
+               "nsubj:xsubj(carry-5, Who-1)\n" +
                "aux(going-3, is-2)\n" +
                "root(ROOT-0, going-3)\n" +
                "mark(carry-5, to-4)\n" +
@@ -1738,7 +1736,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               {TestType.NON_COLLAPSED,
                "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
                "nsubj(like-2, I-1)\n" +
-                "nsubj(swim-4, I-1)\n" +
+                "nsubj:xsubj(swim-4, I-1)\n" +
                 "root(ROOT-0, like-2)\n" +
                 "mark(swim-4, to-3)\n" +
                 "xcomp(like-2, swim-4)\n"},
@@ -1748,7 +1746,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                 "root(ROOT-0, says-2)\n" +
                 "mark(like-5, that-3)\n" +
                 "nsubj(like-5, you-4)\n" +
-                "nsubj(swim-7, you-4)\n" +
+                "nsubj:xsubj(swim-7, you-4)\n" +
                 "ccomp(says-2, like-5)\n" +
                 "mark(swim-7, to-6)\n" +
                 "xcomp(like-5, swim-7)\n"},
@@ -1813,7 +1811,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                 "mark(swim-4, to-3)\n" +
                 "xcomp(like-2, swim-4)\n" +
                 "======\n" +
-                "nsubj(swim-4, I-1)\n"
+                "nsubj:xsubj(swim-4, I-1)\n"
              },
 
              /* Test preposition collapsing */
@@ -1891,7 +1889,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
              {TestType.COLLAPSED,
               "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
               "nsubj(like-2, I-1)\n" +
-               "nsubj(swim-4, I-1)\n" +
+               "nsubj:xsubj(swim-4, I-1)\n" +
                "root(ROOT-0, like-2)\n" +
                "mark(swim-4, to-3)\n" +
                "xcomp(like-2, swim-4)\n"},
@@ -1914,7 +1912,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nsubj(risk-11, users-8)\n" +
                "cop(risk-11, are-9)\n" +
                "case(risk-11, at-10)\n" +
-               "acl:at(information-5, risk-11)\n"},
+               "acl(information-5, risk-11)\n"},
              {TestType.COLLAPSED,
               "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (JJ questionable) (NNS properties))))) (. .)))",
               "nsubj(heard-2, They-1)\n" +
@@ -1930,7 +1928,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, says-2)\n" +
                "mark(like-5, that-3)\n" +
                "nsubj(like-5, you-4)\n" +
-               "nsubj(swim-7, you-4)\n" +
+               "nsubj:xsubj(swim-7, you-4)\n" +
                "ccomp(says-2, like-5)\n" +
                "mark(swim-7, to-6)\n" +
                "xcomp(like-5, swim-7)\n"},
@@ -2256,29 +2254,29 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "case(Dependencies-14, about-12)\n" +
                "compound(Dependencies-14, Stanford-13)\n" +
                "nmod:about(talked-11, Dependencies-14)\n"},
-             {TestType.CC_PROCESSED,
-              "(ROOT (S (NP-TMP (DT These) (NNS days)) (NP (PRP he)) (VP (VBZ hustles) (PP (TO to) (NP (JJ house-painting) (NNS jobs))) (PP (IN in) (NP (PRP$ his) (NNP Chevy) (NN pickup))) (PP (IN before) (CC and) (IN after) (S (VP (NN training) (PP (IN with) (NP (DT the) (NNPS Tropics))))))) (. .)))",
-              "det(days-2, These-1)\n" +
-               "nmod:tmod(hustles-4, days-2)\n" +
-               "nsubj(hustles-4, he-3)\n" +
-               "nsubj(hustles-4', he-3)\n" +
-               "root(ROOT-0, hustles-4)\n" +
-               "conj:and(hustles-4, hustles-4')\n" +
-               "case(jobs-7, to-5)\n" +
-               "amod(jobs-7, house-painting-6)\n" +
-               "nmod:to(hustles-4, jobs-7)\n" +
-               "case(pickup-11, in-8)\n" +
-               "nmod:poss(pickup-11, his-9)\n" +
-               "compound(pickup-11, Chevy-10)\n" +
-               "nmod:in(hustles-4, pickup-11)\n" +
-               "case(training-15, before-12)\n" +
-               "cc(before-12, and-13)\n" +
-               "conj:and(before-12, after-14)\n" +
-               "advcl:after(hustles-4', training-15)\n" +
-               "advcl:before(hustles-4, training-15)\n" +
-               "case(Tropics-18, with-16)\n" +
-               "det(Tropics-18, the-17)\n" +
-               "nmod:with(training-15, Tropics-18)\n"},
+//             {TestType.CC_PROCESSED,
+//              "(ROOT (S (NP-TMP (DT These) (NNS days)) (NP (PRP he)) (VP (VBZ hustles) (PP (TO to) (NP (JJ house-painting) (NNS jobs))) (PP (IN in) (NP (PRP$ his) (NNP Chevy) (NN pickup))) (PP (IN before) (CC and) (IN after) (S (VP (NN training) (PP (IN with) (NP (DT the) (NNPS Tropics))))))) (. .)))",
+//              "det(days-2, These-1)\n" +
+//               "nmod:tmod(hustles-4, days-2)\n" +
+//               "nsubj(hustles-4, he-3)\n" +
+//               "nsubj(hustles-4', he-3)\n" +
+//               "root(ROOT-0, hustles-4)\n" +
+//               "conj:and(hustles-4, hustles-4')\n" +
+//               "case(jobs-7, to-5)\n" +
+//               "amod(jobs-7, house-painting-6)\n" +
+//               "nmod:to(hustles-4, jobs-7)\n" +
+//               "case(pickup-11, in-8)\n" +
+//               "nmod:poss(pickup-11, his-9)\n" +
+//               "compound(pickup-11, Chevy-10)\n" +
+//               "nmod:in(hustles-4, pickup-11)\n" +
+//               "case(training-15, before-12)\n" +
+//               "cc(before-12, and-13)\n" +
+//               "conj:and(before-12, after-14)\n" +
+//               "advcl:after(hustles-4', training-15)\n" +
+//               "advcl:before(hustles-4, training-15)\n" +
+//               "case(Tropics-18, with-16)\n" +
+//               "det(Tropics-18, the-17)\n" +
+//               "nmod:with(training-15, Tropics-18)\n"},
              {TestType.CC_PROCESSED,
               "(ROOT (S (NP (NNP Jill)) (VP (VBD walked) (PP (PP (IN out) (NP (DT the) (NN door))) (, ,) (PP (IN over) (NP (DT the) (NN road))) (, ,) (PP (IN across) (NP (DT the) (JJ deserted) (NN block))) (, ,) (PP (IN around) (NP (DT the) (NN corner))) (, ,) (CC and) (PP (IN through) (NP (DT the) (NN park))))) (. .)))",
               "nsubj(walked-2, Jill-1)\n" +
@@ -2636,7 +2634,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
     assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(), tree, false, false, false));
 
   }
 
@@ -2659,7 +2657,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
 
 
       assertEquals("Unexpected basic dependencies with copula as head for tree "+ testTree,
-          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(), tree, false, false, false));
   }
 
    /**
@@ -2675,7 +2673,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
     assertEquals("Unexpected non-collapsed dependencies for tree "+ testTree,
-        testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false));
+        testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false, false));
   }
 
 
@@ -2692,7 +2690,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
     assertEquals("Unexpected basic dependencies for tree "+testTree,
-      testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true));
+      testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true, false));
 
   }
 
@@ -2710,7 +2708,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     Tree tree = Tree.valueOf(testTree, trf);
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
-    String depString = UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(Extras.MAXIMAL), tree, false, false);
+    String depString = GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCollapsed(Extras.MAXIMAL), tree, false, false, false);
     assertEquals("Unexpected collapsed dependencies for tree " + testTree,
           testAnswer, depString);
   }
@@ -2730,7 +2728,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
     assertEquals("Unexpected CC processed dependencies for tree "+testTree,
-          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, false, false, false));
   }
 
 }

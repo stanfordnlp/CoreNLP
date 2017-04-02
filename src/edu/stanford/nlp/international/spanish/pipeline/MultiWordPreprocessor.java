@@ -1,4 +1,5 @@
 package edu.stanford.nlp.international.spanish.pipeline;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -7,7 +8,6 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
@@ -18,9 +18,6 @@ import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
-import edu.stanford.nlp.trees.tregex.ParseException;
-import edu.stanford.nlp.trees.tregex.TregexMatcher;
-import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -35,7 +32,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Jon Gauthier
  * @author Spence Green (original French version)
  */
-public final class MultiWordPreprocessor {
+public final class MultiWordPreprocessor  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MultiWordPreprocessor.class);
 
   private static int nMissingPOS;
   private static int nMissingPhrasal;
@@ -61,17 +61,23 @@ public final class MultiWordPreprocessor {
   static {
     phrasalCategoryMap.put("ao0000", "grup.a");
     phrasalCategoryMap.put("aq0000", "grup.a");
+    phrasalCategoryMap.put("aqo000", "grup.a");
+    phrasalCategoryMap.put("da0000", "spec");
+    phrasalCategoryMap.put("di0000", "sn");
     phrasalCategoryMap.put("dn0000", "spec");
     phrasalCategoryMap.put("dt0000", "spec");
     phrasalCategoryMap.put("i", "interjeccio");
+    phrasalCategoryMap.put("i00", "interjeccio");
     phrasalCategoryMap.put("rg", "grup.adv");
     phrasalCategoryMap.put("rn", "grup.adv"); // no sólo
+    phrasalCategoryMap.put("vaip000", "grup.verb");
     phrasalCategoryMap.put("vmg0000", "grup.verb");
     phrasalCategoryMap.put("vmic000", "grup.verb");
     phrasalCategoryMap.put("vmii000", "grup.verb");
     phrasalCategoryMap.put("vmif000", "grup.verb");
     phrasalCategoryMap.put("vmip000", "grup.verb");
     phrasalCategoryMap.put("vmis000", "grup.verb");
+    phrasalCategoryMap.put("vmm0000", "grup.verb");
     phrasalCategoryMap.put("vmn0000", "grup.verb");
     phrasalCategoryMap.put("vmp0000", "grup.verb");
     phrasalCategoryMap.put("vmsi000", "grup.verb");
@@ -81,6 +87,8 @@ public final class MultiWordPreprocessor {
     // New groups (not from AnCora specification)
     phrasalCategoryMap.put("cc", "grup.cc");
     phrasalCategoryMap.put("cs", "grup.cs");
+    phrasalCategoryMap.put("pn000000", "grup.nom");
+    phrasalCategoryMap.put("pi000000", "grup.pron");
     phrasalCategoryMap.put("pr000000", "grup.pron");
     phrasalCategoryMap.put("pt000000", "grup.pron");
     phrasalCategoryMap.put("px000000", "grup.pron");
@@ -367,7 +375,7 @@ public final class MultiWordPreprocessor {
         return "ncms000";
 
       // Now make an educated guess.
-      //System.err.println("No POS tag for " + word);
+      //log.info("No POS tag for " + word);
       return "np00000";
     }
   }
@@ -529,7 +537,7 @@ public final class MultiWordPreprocessor {
     for(Tree kid : t.children())
       sb.append(kid.value()).append(" ");
     String posSequence = sb.toString().trim();
-    System.err.println("No phrasal cat for: " + posSequence);
+    log.info("No phrasal cat for: " + posSequence + " (original POS of MWE: " + originalPos + ")");
 
     // Give up.
     return null;
@@ -603,7 +611,7 @@ public final class MultiWordPreprocessor {
   public static void main(String[] args) {
     Properties options = StringUtils.argsToProperties(args, argOptionDefs);
     if(!options.containsKey("") || options.containsKey("help")) {
-      System.err.println(usage());
+      log.info(usage());
       return;
     }
 

@@ -1,21 +1,29 @@
 package edu.stanford.nlp.wordseg;
 
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
+import edu.stanford.nlp.util.logging.Redwood;
 
+/** @author Huihsin Tseng */
 class TagAffixDetector {
 
-  private CorpusChar cc;
-  private affDict aD;
-  //String sighanCorporaDict = "/u/nlp/data/chinese-segmenter/";
-  private String corporaDict = "/u/nlp/data/gale/segtool/stanford-seg/data";
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(TagAffixDetector.class);
+  private static final boolean VERBOSE = false;
+
+  private final CorpusChar cc;
+  private final AffixDictionary aD;
+  // String sighanCorporaDict = "/u/nlp/data/chinese-segmenter/";
+  private static final String DEFAULT_CORPORA_DICT = "/u/nlp/data/gale/segtool/stanford-seg/data";
 
   public TagAffixDetector(SeqClassifierFlags flags) {
+    String corporaDict;
     if (flags.sighanCorporaDict != null) {
       corporaDict = flags.sighanCorporaDict;
+    } else {
+      corporaDict = DEFAULT_CORPORA_DICT;
     }
 
-    if (!corporaDict.equals("") && !corporaDict.endsWith("/")) {
-      corporaDict = corporaDict + "/";
+    if ( ! corporaDict.isEmpty() && ! corporaDict.endsWith("/")) {
+      corporaDict = corporaDict + '/';
     }
 
     String ccPath;
@@ -38,14 +46,16 @@ class TagAffixDetector {
       ccPath = corporaDict+"dict/pos_close/char.ctb.list";
       adPath = corporaDict+"dict/in.ctb";
     }
-    System.err.println("INFO: TagAffixDetector: useChPos=" + flags.useChPos +
-            " | useCTBChar2=" + flags.useCTBChar2 + " | usePKChar2=" + flags.usePKChar2);
-    System.err.println("INFO: TagAffixDetector: building TagAffixDetector from "+ccPath+" and "+adPath);
+    if (VERBOSE) {
+      logger.info("TagAffixDetector: useChPos=" + flags.useChPos +
+              " | useCTBChar2=" + flags.useCTBChar2 + " | usePKChar2=" + flags.usePKChar2);
+      logger.info("TagAffixDetector: building TagAffixDetector from " + ccPath + " and " + adPath);
+    }
     cc = new CorpusChar(ccPath);
-    aD = new affDict(adPath);
+    aD = new AffixDictionary(adPath);
   }
 
-  String checkDic(String t2, String c2 ){
+  String checkDic(String t2, String c2 ) {
     if(cc.getTag(t2, c2).equals("1"))
       return "1";
     return "0";

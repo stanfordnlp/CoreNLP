@@ -1,5 +1,6 @@
 package edu.stanford.nlp.loglinear.inference;
 
+import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
 
@@ -13,9 +14,12 @@ import java.util.*;
  * local factors during many game playing sample steps. It assumes that the model that is passed in is by-reference,
  * and that it can change between inference calls in small ways, so that cacheing of some results is worthwhile.
  */
-public class CliqueTree {
-  GraphicalModel model;
-  ConcatVector weights;
+public class CliqueTree  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CliqueTree.class);
+  private GraphicalModel model;
+  private ConcatVector weights;
 
   // This is the metadata key for the model to store an observed value for a variable, as an int
   public static final String VARIABLE_OBSERVED_VALUE = "inference.CliqueTree.VARIABLE_OBSERVED_VALUE";
@@ -319,12 +323,13 @@ public class CliqueTree {
 
     int forceRootForCachedMessagePassing = -1;
     int[] cachedCliquesBackPointers = null;
-    // Sometimes we'll have cached versions of the factors, but they're from inference steps a long time ago, so we
-    // don't get consistent backpointers to our cache of factors. This is a flag to indicate if this happens.
-    boolean backPointersConsistent = true;
 
     if (CACHE_MESSAGES && (numFactorsCached == cliques.length - 1) && (numFactorsCached > 0)) {
       cachedCliquesBackPointers = new int[cliques.length];
+
+      // Sometimes we'll have cached versions of the factors, but they're from inference steps a long time ago, so we
+      // don't get consistent backpointers to our cache of factors. This is a flag to indicate if this happens.
+      boolean backPointersConsistent = true;
 
       // Calculate the correspondence between the old cliques list and the new cliques list
 
@@ -397,9 +402,9 @@ public class CliqueTree {
         // toVisitArray[cursor] = false;
         trees[cursor] = treeIndex;
         if (visited[cursor]) {
-          System.err.println("Visited contains: " + cursor);
-          System.err.println("Visited: " + Arrays.toString(visited));
-          System.err.println("To visit: " + toVisit);
+          log.info("Visited contains: " + cursor);
+          log.info("Visited: " + Arrays.toString(visited));
+          log.info("To visit: " + toVisit);
         }
         assert (!visited[cursor]);
         visited[cursor] = true;
@@ -574,9 +579,9 @@ public class CliqueTree {
             double valueSum = convergedClique.valueSum();
             if (Double.isFinite(valueSum) && Double.isFinite(treePartitionFunctions[trees[i]])) {
               if (Math.abs(treePartitionFunctions[trees[i]] - valueSum) >= 1.0e-3 * treePartitionFunctions[trees[i]]) {
-                System.err.println("Different partition functions for tree " + trees[i] + ": ");
-                System.err.println("Pre-existing for tree: " + treePartitionFunctions[trees[i]]);
-                System.err.println("This clique for tree: " + valueSum);
+                log.info("Different partition functions for tree " + trees[i] + ": ");
+                log.info("Pre-existing for tree: " + treePartitionFunctions[trees[i]]);
+                log.info("This clique for tree: " + valueSum);
               }
               assert (Math.abs(treePartitionFunctions[trees[i]] - valueSum) < 1.0e-3 * treePartitionFunctions[trees[i]]);
             }
@@ -771,7 +776,7 @@ public class CliqueTree {
    * @param marginalize whether to use sum of max marginalization, for marginal or MAP inference
    * @return the marginalized message
    */
-  private TableFactor marginalizeMessage(TableFactor message, int[] relevant, MarginalizationMethod marginalize) {
+  private static TableFactor marginalizeMessage(TableFactor message, int[] relevant, MarginalizationMethod marginalize) {
     TableFactor result = message;
 
     for (int i : message.neighborIndices) {
@@ -805,7 +810,7 @@ public class CliqueTree {
    * @param f2 second factor to compare
    * @return whether their domains overlap
    */
-  private boolean domainsOverlap(TableFactor f1, TableFactor f2) {
+  private static boolean domainsOverlap(TableFactor f1, TableFactor f2) {
     for (int n1 : f1.neighborIndices) {
       for (int n2 : f2.neighborIndices) {
         if (n1 == n2) return true;
@@ -814,8 +819,8 @@ public class CliqueTree {
     return false;
   }
 
-  @SuppressWarnings("*")
-  private boolean assertsEnabled() {
+  @SuppressWarnings({"*", "AssertWithSideEffects", "ConstantConditions", "UnusedAssignment"})
+  private static boolean assertsEnabled() {
     boolean assertsEnabled = false;
     assert (assertsEnabled = true); // intentional side effect
     return assertsEnabled;

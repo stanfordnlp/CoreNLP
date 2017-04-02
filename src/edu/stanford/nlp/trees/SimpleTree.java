@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.Label;
 
@@ -13,7 +14,10 @@ import java.util.List;
  *
  * @author Christopher Manning
  */
-public class SimpleTree extends Tree {
+public class SimpleTree extends Tree  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SimpleTree.class);
 
   private static final long serialVersionUID = -8075763706877132926L;
 
@@ -70,7 +74,7 @@ public class SimpleTree extends Tree {
   @Override
   public void setChildren(Tree[] children) {
     if (children == null) {
-      System.err.println("Warning -- you tried to set the children of a SimpleTree to null.\nYou should be really using a zero-length array instead.");
+      log.info("Warning -- you tried to set the children of a SimpleTree to null.\nYou should be really using a zero-length array instead.");
       daughterTrees = EMPTY_TREE_ARRAY;
     } else {
       daughterTrees = children;

@@ -11,25 +11,25 @@ import java.io.Serializable;
 
 /**
  * This interface specifies language/treebank specific information for a
- * Treebank, which a parser or other treebank user might need to know. <p>
- * <p/>
+ * Treebank, which a parser or other treebank user might need to know.
+ *
  * Some of this is fixed for a (treebank,language) pair, but some of it
  * reflects feature extraction decisions, so it can be sensible to have
  * multiple implementations of this interface for the same
- * (treebank,language) pair. <p>
- * <p/>
+ * (treebank,language) pair.
+ *
  * So far this covers punctuation, character encodings, and characters
  * reserved for label annotations.  It should probably be expanded to
- * cover other stuff (unknown words?). <p>
- * <p/>
+ * cover other stuff (unknown words?).
+ *
  * Various methods in this class return arrays.  You should treat them
- * as read-only, even though one cannot enforce that in Java. <p>
- * <p/>
+ * as read-only, even though one cannot enforce that in Java.
+ *
  * Implementations in this class do not call basicCategory() on arguments
  * before testing them, so if needed, you should explicitly call
  * basicCategory() yourself before passing arguments to these routines for
  * testing.
- * <p/>
+ *
  * This class should be able to be an immutable singleton.  It contains
  * data on various things, but no state.  At some point we should make it
  * a real immutable singleton.
@@ -43,7 +43,7 @@ public interface TreebankLanguagePack extends Serializable {
    * Use this as the default encoding for Readers and Writers of
    * Treebank data.
    */
-  public static final String DEFAULT_ENCODING = "UTF-8";
+  String DEFAULT_ENCODING = "UTF-8";
 
 
   /**
@@ -53,7 +53,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param str The string to check
    * @return Whether this is a punctuation tag
    */
-  public boolean isPunctuationTag(String str);
+  boolean isPunctuationTag(String str);
 
 
   /**
@@ -65,7 +65,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param str The string to check
    * @return Whether this is a punctuation word
    */
-  public boolean isPunctuationWord(String str);
+  boolean isPunctuationWord(String str);
 
 
   /**
@@ -75,7 +75,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param str The string to check
    * @return Whether this is a sentence final punctuation tag
    */
-  public boolean isSentenceFinalPunctuationTag(String str);
+  boolean isSentenceFinalPunctuationTag(String str);
 
 
   /**
@@ -89,7 +89,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param str The string to check
    * @return Whether this is a EVALB-ignored punctuation tag
    */
-  public boolean isEvalBIgnoredPunctuationTag(String str);
+  boolean isEvalBIgnoredPunctuationTag(String str);
 
 
   /**
@@ -98,7 +98,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The filter
    */
-  public Predicate<String> punctuationTagAcceptFilter();
+  Predicate<String> punctuationTagAcceptFilter();
 
 
   /**
@@ -107,7 +107,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The filter
    */
-  public Predicate<String> punctuationTagRejectFilter();
+  Predicate<String> punctuationTagRejectFilter();
 
   /**
    * Returns a filter that accepts a String that is a punctuation
@@ -117,7 +117,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> punctuationWordAcceptFilter();
+  Predicate<String> punctuationWordAcceptFilter();
 
 
   /**
@@ -128,7 +128,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> punctuationWordRejectFilter();
+  Predicate<String> punctuationWordRejectFilter();
 
 
   /**
@@ -137,7 +137,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> sentenceFinalPunctuationTagAcceptFilter();
+  Predicate<String> sentenceFinalPunctuationTagAcceptFilter();
 
 
   /**
@@ -150,7 +150,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> evalBIgnoredPunctuationTagAcceptFilter();
+  Predicate<String> evalBIgnoredPunctuationTagAcceptFilter();
 
 
   /**
@@ -162,7 +162,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> evalBIgnoredPunctuationTagRejectFilter();
+  Predicate<String> evalBIgnoredPunctuationTagRejectFilter();
 
 
   /**
@@ -170,7 +170,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The punctuation tags
    */
-  public String[] punctuationTags();
+  String[] punctuationTags();
 
 
   /**
@@ -178,7 +178,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The punctuation words
    */
-  public String[] punctuationWords();
+  String[] punctuationWords();
 
 
   /**
@@ -188,7 +188,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The sentence final punctuation tags
    */
-  public String[] sentenceFinalPunctuationTags();
+  String[] sentenceFinalPunctuationTags();
 
 
   /**
@@ -197,7 +197,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The punctuation words
    */
-  public String[] sentenceFinalPunctuationWords();
+  String[] sentenceFinalPunctuationWords();
 
   /**
    * Returns a String array of punctuation tags that EVALB-style evaluation
@@ -208,7 +208,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return Whether this is a EVALB-ignored punctuation tag
    */
-  public String[] evalBIgnoredPunctuationTags();
+  String[] evalBIgnoredPunctuationTags();
 
 
   /**
@@ -216,7 +216,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
-  public GrammaticalStructureFactory grammaticalStructureFactory();
+  GrammaticalStructureFactory grammaticalStructureFactory();
 
 
   /**
@@ -225,7 +225,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param puncFilter A filter which should reject punctuation words (as Strings)
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter);
+  GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter);
 
 
   /**
@@ -235,14 +235,14 @@ public interface TreebankLanguagePack extends Serializable {
    * @param typedDependencyHF A HeadFinder which finds heads for typed dependencies
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder typedDependencyHF);
+  GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder typedDependencyHF);
 
   /**
    * Whether or not we have typed dependencies for this language.  If
    * this method returns false, a call to grammaticalStructureFactory
    * will cause an exception.
    */
-  public boolean supportsGrammaticalStructures();
+  boolean supportsGrammaticalStructures();
 
   /**
    * Return the charset encoding of the Treebank.  See
@@ -250,7 +250,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return Name of Charset
    */
-  public String getEncoding();
+  String getEncoding();
 
 
   /**
@@ -261,7 +261,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return A tokenizer
    */
-  public TokenizerFactory<? extends HasWord> getTokenizerFactory();
+  TokenizerFactory<? extends HasWord> getTokenizerFactory();
 
   /**
    * Return an array of characters at which a String should be
@@ -276,7 +276,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return An array of characters that set off label name suffixes
    */
-  public char[] labelAnnotationIntroducingCharacters();
+  char[] labelAnnotationIntroducingCharacters();
 
 
   /**
@@ -286,7 +286,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param ch A char
    * @return Whether this char introduces functional annotations
    */
-  public boolean isLabelAnnotationIntroducingCharacter(char ch);
+  boolean isLabelAnnotationIntroducingCharacter(char ch);
 
 
   /**
@@ -300,7 +300,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param category The whole String name of the label
    * @return The basic category of the String
    */
-  public String basicCategory(String category);
+  String basicCategory(String category);
 
   /**
    * Returns the category for a String with everything following
@@ -309,7 +309,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param category The String name of the label (may previously have had basic category called on it)
    * @return The String stripped of grammatical functions
    */
-  public String stripGF(String category);
+  String stripGF(String category);
 
 
   /**
@@ -318,7 +318,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return the String-&gt;String Function object
    */
-  public Function<String,String> getBasicCategoryFunction();
+  Function<String,String> getBasicCategoryFunction();
 
   /**
    * Returns the syntactic category and 'function' of a String.
@@ -330,7 +330,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param category The whole String name of the label
    * @return A String giving the category and function
    */
-  public String categoryAndFunction(String category);
+  String categoryAndFunction(String category);
 
   /**
    * Returns a {@link Function Function} object that maps Strings to Strings according
@@ -338,7 +338,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return the String-&gt;String Function object
    */
-  public Function<String,String> getCategoryAndFunctionFunction();
+  Function<String,String> getCategoryAndFunctionFunction();
 
   /**
    * Accepts a String that is a start symbol of the treebank.
@@ -346,7 +346,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param str The str to test
    * @return Whether this is a start symbol
    */
-  public boolean isStartSymbol(String str);
+  boolean isStartSymbol(String str);
 
 
   /**
@@ -355,7 +355,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The filter
    */
-  public Predicate<String> startSymbolAcceptFilter();
+  Predicate<String> startSymbolAcceptFilter();
 
 
   /**
@@ -363,7 +363,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The start symbols
    */
-  public String[] startSymbols();
+  String[] startSymbols();
 
   /**
    * Returns a String which is the first (perhaps unique) start symbol
@@ -371,7 +371,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The start symbol
    */
-  public String startSymbol();
+  String startSymbol();
 
 
   /**
@@ -381,7 +381,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return the extension on files for this treebank
    */
-  public String treebankFileExtension();
+  String treebankFileExtension();
 
   /**
    * Sets the grammatical function indicating character to gfCharacter.
@@ -389,7 +389,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param gfCharacter Sets the character in label names that sets of
    *         grammatical function marking (from the phrase label).
    */
-  public void setGfCharacter(char gfCharacter);
+  void setGfCharacter(char gfCharacter);
 
   /** Returns a TreeReaderFactory suitable for general purpose use
    *  with this language/treebank.
@@ -397,20 +397,20 @@ public interface TreebankLanguagePack extends Serializable {
    *  @return A TreeReaderFactory suitable for general purpose use
    *  with this language/treebank.
    */
-  public TreeReaderFactory treeReaderFactory();
+  TreeReaderFactory treeReaderFactory();
 
   /** Return a TokenizerFactory for Trees of this language/treebank.
    *
    * @return A TokenizerFactory for Trees of this language/treebank.
    */
-  public TokenizerFactory<Tree> treeTokenizerFactory();
+  TokenizerFactory<Tree> treeTokenizerFactory();
 
   /**
    * The HeadFinder to use for your treebank.
    *
    * @return A suitable HeadFinder
    */
-  public abstract HeadFinder headFinder();
+  HeadFinder headFinder();
 
 
   /**
@@ -418,7 +418,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return A suitable HeadFinder
    */
-  public abstract HeadFinder typedDependencyHeadFinder();
+  HeadFinder typedDependencyHeadFinder();
 
 
   /**
@@ -426,17 +426,18 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return A language-specific MorphoFeatureSpecification
    */
-  public abstract MorphoFeatureSpecification morphFeatureSpec();
-  
-  /**
-   * Used for languages where an original Stanford Dependency
-   * converter and a Universal Dependency converter exists.
-   */
-  public abstract void setGenerateOriginalDependencies(boolean generateOriginalDependencies);
+  MorphoFeatureSpecification morphFeatureSpec();
 
   /**
    * Used for languages where an original Stanford Dependency
    * converter and a Universal Dependency converter exists.
    */
-  public abstract boolean generateOriginalDependencies();
+  void setGenerateOriginalDependencies(boolean generateOriginalDependencies);
+
+  /**
+   * Used for languages where an original Stanford Dependency
+   * converter and a Universal Dependency converter exists.
+   */
+  boolean generateOriginalDependencies();
+
 }

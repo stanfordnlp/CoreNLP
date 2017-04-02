@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.process.SerializableFunction;
@@ -41,7 +42,10 @@ import java.util.Map;
  * @author Jon Gauthier
  * @author Spence Green
  */
-public abstract class TregexPoweredTreebankParserParams extends AbstractTreebankParserParams {
+public abstract class TregexPoweredTreebankParserParams extends AbstractTreebankParserParams  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TregexPoweredTreebankParserParams.class);
 
   private static final long serialVersionUID = -1985603901694682420L;
 
@@ -112,7 +116,7 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
         compiled = compiler.compile(annotation.getValue().first());
       } catch (TregexParseException e) {
         int nth = annotationPatterns.size() + 1;
-        System.err.println("Parse exception on annotation pattern #" + nth + " initialization: " + e);
+        log.info("Parse exception on annotation pattern #" + nth + " initialization: " + e);
         continue;
       }
 
@@ -205,7 +209,7 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
   public void display() {
     for (String feature : features)
       System.err.printf("%s ", feature);
-    System.err.println();
+    log.info();
   }
 
   /**

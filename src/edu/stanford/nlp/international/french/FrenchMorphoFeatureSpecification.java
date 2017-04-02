@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.french;
+package edu.stanford.nlp.international.french; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -20,7 +21,10 @@ import edu.stanford.nlp.international.morph.MorphoFeatures;
  * @author Spence Green
  *
  */
-public class FrenchMorphoFeatureSpecification extends MorphoFeatureSpecification {
+public class FrenchMorphoFeatureSpecification extends MorphoFeatureSpecification  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FrenchMorphoFeatureSpecification.class);
 
   private static final long serialVersionUID = -58379347760106784L;
 
@@ -191,7 +195,7 @@ public class FrenchMorphoFeatureSpecification extends MorphoFeatureSpecification
       
     } 
 //    else {
-//      System.err.println("Could not map spec: " + spec);
+//      log.info("Could not map spec: " + spec);
 //    }
 
     return feats;

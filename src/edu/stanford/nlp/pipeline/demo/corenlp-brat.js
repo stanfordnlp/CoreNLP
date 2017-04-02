@@ -1,11 +1,11 @@
 // Takes Stanford CoreNLP JSON output (var data = ... in data.js)
 // and uses brat to render everything.
 
-//var serverAddress = 'http://localhost:9000/'
-var serverAddress = ''
+// var serverAddress = 'http://localhost:9000';
+var serverAddress = '';
 
 // Load Brat libraries
-var bratLocation = 'http://nlp.stanford.edu/js/brat';
+var bratLocation = 'https://storage.googleapis.com/corenlp/js/brat';
 head.js(
   // External libraries
   bratLocation + '/client/lib/jquery.svg.min.js',
@@ -115,15 +115,54 @@ function nerColor(nerTag) {
   }
 }
 
+
+/**
+ * A mapping from sentiment value to the associated
+ * visualization color
+ */
+function sentimentColor(sentiment) {
+  if (sentiment == "VERY POSITIVE") {
+    return '#00FF00';
+  } else if (sentiment == "POSITIVE") {
+    return '#7FFF00';
+  } else if (sentiment == "NEUTRAL") {
+    return '#FFFF00';
+  } else if (sentiment == "NEGATIVE") {
+    return '#FF7F00';
+  } else if (sentiment == "VERY NEGATIVE") {
+    return '#FF0000';
+  } else {
+    return '#E3E3E3';
+  }
+}
+
+
 /**
  * Get a list of annotators, from the annotator option input.
  */
 function annotators() {
   var annotators = "tokenize,ssplit"
-  $('#annotators option:selected').each(function () {
+  $('#annotators').find('option:selected').each(function () {
     annotators += "," + $(this).val();
   });
   return annotators;
+}
+
+/**
+ * Get the input date
+ */
+function date() {
+  function f(n) {
+    return n < 10 ? '0' + n : n;
+  }
+  var date = new Date();
+  var M = date.getMonth() + 1;
+  var D = date.getDate();
+  var Y = date.getFullYear();
+  var h = date.getHours();
+  var m = date.getMinutes();
+  var s = date.getSeconds();
+  return "" + Y + "-" + f(M) + "-" + f(D) + "T" + f(h) + ':' + f(m) + ':' + f(s);
 }
 
 // ----------------------------------------------------------------------------
@@ -142,7 +181,10 @@ function render(data) {
    */
   var entityTypesSet = {};
   var entityTypes = [];
-  function addEntityType(name, type) {
+  function addEntityType(name, type, coarseType) {
+    if (typeof coarseType == "undefined") {
+      coarseType = type;
+    }
     // Don't add duplicates
     if (entityTypesSet[type]) return;
     entityTypesSet[type] = true;
@@ -151,7 +193,7 @@ function render(data) {
     if (name == 'POS') {
       color = posColor(type);
     } else if (name == 'NER') {
-      color = nerColor(type);
+      color = nerColor(coarseType);
     } else if (name == 'COREF') {
       color = '#FFE000';
     } else if (name == 'ENTITY') {
@@ -159,6 +201,12 @@ function render(data) {
     } else if (name == 'RELATION') {
       color = posColor('VB');
     } else if (name == 'LEMMA') {
+      color = '#FFFFFF';
+    } else if (name == 'SENTIMENT') {
+      color = sentimentColor(type);
+    } else if (name == 'LINK') {
+      color = '#FFFFFF';
+    } else if (name == 'KBP_ENTITY') {
       color = '#FFFFFF';
     }
     // Register the type
@@ -199,6 +247,9 @@ function render(data) {
     for (var i = 0; i < sentence.tokens.length; ++i) {
       var token = sentence.tokens[i];
       var word = token.word;
+      if (!(typeof tokensMap[word] == "undefined")) {
+        word = tokensMap[word];
+      }
       if (i > 0) { currentText.push(' '); }
       token.characterOffsetBegin = currentText.length;
       for (var j = 0; j < word.length; ++j) {
@@ -220,6 +271,10 @@ function render(data) {
   var lemmaEntities = [];
   // (ner)
   var nerEntities = [];
+  // (sentiment)
+  var sentimentEntities = [];
+  // (entitylinking)
+  var linkEntities = [];
   // (dependencies)
   var depsRelations = [];
   var deps2Relations = [];
@@ -228,6 +283,11 @@ function render(data) {
   var openieEntitiesSet = {};
   var openieRelations = [];
   var openieRelationsSet = {};
+  // (kbp)
+  var kbpEntities = [];
+  var kbpEntitiesSet = [];
+  var kbpRelations = [];
+  var kbpRelationsSet = [];
 
 
   //
@@ -238,8 +298,8 @@ function render(data) {
     var sentence = data.sentences[sentI];
     var index = sentence.index;
     var tokens = sentence.tokens;
-    var deps = sentence['basic-dependencies'];
-    var deps2 = sentence['collapsed-ccprocessed-dependencies'];
+    var deps = sentence['basicDependencies'];
+    var deps2 = sentence['enhancedPlusPlusDependencies'];
   
     // POS tags
     /**
@@ -301,11 +361,37 @@ function render(data) {
     if (tokens.length > 0 && typeof tokens[0].ner != 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var ner = tokens[i].ner;
+        var normalizedNER = tokens[i].normalizedNER;
+        if (typeof normalizedNER == "undefined") {
+          normalizedNER = ner;
+        }
         if (ner == 'O') continue;
         var j = i;
         while (j < tokens.length - 1 && tokens[j+1].ner == ner) j++;
-        addEntityType('NER', ner);
-        nerEntities.push(['NER_' + sentI + '_' + i, ner, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        addEntityType('NER', normalizedNER, ner);
+        nerEntities.push(['NER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        i = j;
+      }
+    }
+    
+    // Sentiment
+    if (typeof sentence.sentiment != "undefined") {
+      var sentiment = sentence.sentiment.toUpperCase().replace("VERY", "VERY ");
+      addEntityType('SENTIMENT', sentiment);
+      sentimentEntities.push(['SENTIMENT_' + sentI, sentiment,
+        [[tokens[0].characterOffsetBegin, tokens[tokens.length - 1].characterOffsetEnd]]]);
+    }
+
+    // Entity Links
+    // Carries the same assumption as NER
+    if (tokens.length > 0) {
+      for (var i = 0; i < tokens.length; i++) {
+        var link = tokens[i].entitylink;
+        if (link == 'O' || typeof link == 'undefined') continue;
+        var j = i;
+        while (j < tokens.length - 1 && tokens[j+1].entitylink == link) j++;
+        addEntityType('LINK', link);
+        linkEntities.push(['LINK_' + sentI + '_' + i, link, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
         i = j;
       }
     }
@@ -359,7 +445,72 @@ function render(data) {
         addRelation(relationSpan, objectSpan, 'object');
       }
     }  // End OpenIE block
-  
+
+
+    //
+    // KBP
+    //
+    // Helper Functions
+    function kbpEntity(span) {
+      return 'KBPENTITY' + '_' + sentI + '_' + span[0] + '_' + span[1];
+    }
+    function addKBPEntity(span, role) {
+      // Don't add duplicate entities
+      if (kbpEntitiesSet[[sentI, span, role]]) return;
+      kbpEntitiesSet[[sentI, span, role]] = true;
+      // Add the entity
+      kbpEntities.push([kbpEntity(span), role,
+        [[tokens[span[0]].characterOffsetBegin,
+          tokens[span[1] - 1].characterOffsetEnd ]] ]);
+    }
+    function addKBPRelation(gov, dep, role) {
+      // Don't add duplicate relations
+      if (kbpRelationsSet[[sentI, gov, dep, role]]) return;
+      kbpRelationsSet[[sentI, gov, dep, role]] = true;
+      // Add the relation
+      kbpRelations.push(['KBPRELATION_' + sentI + '_' + gov[0] + '_' + gov[1] + '_' + dep[0] + '_' + dep[1],
+                           role,
+                           [['governor',  kbpEntity(gov)],
+                            ['dependent', kbpEntity(dep)]  ] ]);
+    }
+    if (typeof sentence.kbp != 'undefined') {
+      // Register the entities + relations we'll need
+      addRelationType('subject');
+      addRelationType('object');
+      // Loop over triples
+      for (var i = 0; i < sentence.kbp.length; ++i) {
+        var subjectSpan = sentence.kbp[i].subjectSpan;
+        var subjectLink = 'Entity';
+        for (var k = subjectSpan[0]; k < subjectSpan[1]; ++k) {
+          if (subjectLink == 'Entity' &&
+              typeof tokens[k] != 'undefined' &&
+              tokens[k].entitylink != 'O' &&
+              typeof tokens[k].entitylink != 'undefined') {
+            subjectLink = tokens[k].entitylink
+          }
+        }
+        addEntityType('KBP_ENTITY',  subjectLink);
+        var objectSpan = sentence.kbp[i].objectSpan;
+        var objectLink = 'Entity';
+        for (var k = objectSpan[0]; k < objectSpan[1]; ++k) {
+          if (objectLink == 'Entity' &&
+              typeof tokens[k] != 'undefined' &&
+              tokens[k].entitylink != 'O' &&
+              typeof tokens[k].entitylink != 'undefined') {
+            objectLink = tokens[k].entitylink
+          }
+        }
+        addEntityType('KBP_ENTITY',  objectLink);
+        var relation = sentence.kbp[i].relation;
+        var begin = parseInt(token.characterOffsetBegin);
+        // Add the entities
+        addKBPEntity(subjectSpan, subjectLink);
+        addKBPEntity(objectSpan, objectLink);
+        // Add the relations
+        addKBPRelation(subjectSpan, objectSpan, relation);
+      }
+    }  // End KBP block
+
   }  // End sentence loop
     
   //
@@ -415,10 +566,13 @@ function render(data) {
     embed('pos', posEntities);
     embed('lemma', lemmaEntities);
     embed('ner', nerEntities);
+    embed('entities', linkEntities);
     embed('deps', posEntities, depsRelations);
     embed('deps2', posEntities, deps2Relations);
     embed('coref', corefEntities, corefRelations);
     embed('openie', openieEntities, openieRelations);
+    embed('kbp',    kbpEntities, kbpRelations);
+    embed('sentiment', sentimentEntities);
   });
 
 }  // End render function
@@ -573,15 +727,22 @@ function renderSemgrex(data) {
  */
 $(document).ready(function() {
   // Some initial styling
-  $(".chosen-select").chosen();
+  $('.chosen-select').chosen();
   $('.chosen-container').css('width', '100%');
 
   // Submit on shift-enter
+  $('#text').keydown(function (event) {
+    if (event.keyCode == 13) {
+      if(event.shiftKey){
+        event.preventDefault();  // don't register the enter key when pressed
+        return false;
+      }
+    }
+  });
   $('#text').keyup(function (event) {
     if (event.keyCode == 13) {
       if(event.shiftKey){
-        event.preventDefault();
-        $('#submit').click();
+        $('#submit').click();  // submit the form when the enter key is released
         event.stopPropagation();
         return false;
       }
@@ -605,8 +766,11 @@ $(document).ready(function() {
     // Run query
     $.ajax({
       type: 'POST',
-      url: serverAddress + '?properties=' + encodeURIComponent('{"annotators": "' + annotators() + '"}'),
-      data: currentQuery,
+      url: serverAddress + '?properties=' + encodeURIComponent(
+        '{"annotators": "' + annotators() + '", "date": "' + date() + '"' +
+        ', "coref.md.type": "dep", "coref.mode": "statistical"}'),
+      data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
+      dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
         $('#submit').prop('disabled', false);
@@ -622,7 +786,7 @@ $(document).ready(function() {
               return; 
             }
             // (make sure the data contains that element)
-            ok = false
+            ok = false;
             if (typeof data[selector] != 'undefined') {
               ok = true;
             } else if (typeof data.sentences != 'undefined' && data.sentences.length > 0) {
@@ -638,14 +802,17 @@ $(document).ready(function() {
             }
           }
           // (create the divs)
-          //                  div id    annotator   field_in_data                          label
-          createAnnotationDiv('pos',    'pos',      'pos',                                 'Part-of-Speech'          );
-          createAnnotationDiv('lemma',  'lemma',    'lemma',                               'Lemmas'                  );
-          createAnnotationDiv('ner',    'ner',      'ner',                                 'Named Entity Recognition');
-          createAnnotationDiv('deps',   'depparse', 'basic-dependencies',                  'Basic Dependencies'      );
-          createAnnotationDiv('deps2',  'depparse', 'collapsed-ccprocessed-dependencies',  'Enhanced Dependencies'   );
-          createAnnotationDiv('openie', 'openie',   'openie',                              'Open IE'                 );
-          createAnnotationDiv('coref',  'dcoref',   'corefs',                              'Coreference'             );
+          //                  div id      annotator     field_in_data                          label
+          createAnnotationDiv('pos',      'pos',        'pos',                                 'Part-of-Speech'          );
+          createAnnotationDiv('lemma',    'lemma',      'lemma',                               'Lemmas'                  );
+          createAnnotationDiv('ner',      'ner',        'ner',                                 'Named Entity Recognition');
+          createAnnotationDiv('deps',     'depparse',   'basicDependencies',                   'Basic Dependencies'      );
+          createAnnotationDiv('deps2',    'depparse',   'enhancedPlusPlusDependencies',        'Enhanced++ Dependencies' );
+          createAnnotationDiv('openie',   'openie',     'openie',                              'Open IE'                 );
+          createAnnotationDiv('coref',    'coref',      'corefs',                              'Coreference'             );
+          createAnnotationDiv('entities', 'entitylink', 'entitylink',                          'Wikidict Entities'       );
+          createAnnotationDiv('kbp',      'kbp',        'kbp',                                 'KBP Relations'           );
+          createAnnotationDiv('sentiment','sentiment',  'sentiment',                           'Sentiment'               );
           // Update UI
           $('#loading').hide();
           $('.corenlp_error').remove();  // Clear error messages
@@ -658,6 +825,7 @@ $(document).ready(function() {
         }
       },
       error: function(data) {
+        DATA = data;
         var alertDiv = $('<div/>').addClass('alert').addClass('alert-danger').addClass('alert-dismissible').addClass('corenlp_error').attr('role', 'alert')
         var button = $('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
         var message = $('<span/>').text(data.responseText);
@@ -687,8 +855,8 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + 'tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
-      data: currentQuery,
+      url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.tokensregex_error').remove();  // Clear error messages
         $('<div id="tokensregex" class="pattern_brat"/>').appendTo($('#div_tokensregex'));
@@ -719,8 +887,8 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + 'semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
-      data: currentQuery,
+      url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.semgrex_error').remove();  // Clear error messages
         $('<div id="semgrex" class="pattern_brat"/>').appendTo($('#div_semgrex'));

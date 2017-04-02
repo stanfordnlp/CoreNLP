@@ -26,7 +26,8 @@
 //http://www-nlp.stanford.edu/software/tagger.shtml
 
 
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.util.StringUtils;
@@ -112,7 +113,10 @@ import java.util.*;
  * @author Michel Galley
  * @version 1.0
  */
-public class ExtractorFrames {
+public class ExtractorFrames  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ExtractorFrames.class);
 
   // all features are implicitly conjoined with the current tag
   static final Extractor cWord = new Extractor(0, false);
@@ -295,7 +299,7 @@ public class ExtractorFrames {
                  arg.startsWith("unicodeshapeconjunction(")) {
         // okay; known unknown keyword
       } else {
-        System.err.println("Unrecognized ExtractorFrames identifier (ignored): " + arg);
+        log.info("Unrecognized ExtractorFrames identifier (ignored): " + arg);
       }
     } // end for
     return extrs.toArray(new Extractor[extrs.size()]);
@@ -783,6 +787,8 @@ class ExtractorWordShapeConjunction extends Extractor {
  */
 class ExtractorSpanishAuxiliaryTag extends Extractor {
 
+  private static final long serialVersionUID = -3352770856914897103L;
+
   public ExtractorSpanishAuxiliaryTag() {
     super(-1, true);
   }
@@ -805,9 +811,11 @@ class ExtractorSpanishAuxiliaryTag extends Extractor {
 
 /**
  * Extracts a boolean indicating whether the given word is preceded by
- * a semiauxiliary verb.
+ * a semi-auxiliary verb.
  */
 class ExtractorSpanishSemiauxiliaryTag extends Extractor {
+
+  private static final long serialVersionUID = -164942945521643734L;
 
   public ExtractorSpanishSemiauxiliaryTag() {
     super(-1, true);

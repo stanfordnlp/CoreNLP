@@ -5,7 +5,7 @@ import edu.stanford.nlp.util.CoreMap;
 import java.util.List;
 
 /**
- * Token Sequence Matcher for regular expressions for sequences over tokens
+ * Token Sequence Matcher for regular expressions over sequences of tokens.
  *
  * @author Angel Chang
  */
@@ -18,10 +18,10 @@ public class TokenSequenceMatcher extends CoreMapSequenceMatcher<CoreMap> {
             }
           };     */
 
-  public TokenSequenceMatcher(SequencePattern pattern, List<? extends CoreMap> tokens) {
+  public TokenSequenceMatcher(SequencePattern<CoreMap> pattern, List<? extends CoreMap> tokens) {
     super(pattern, tokens);
- //   this.nodesToStringConverter = CORELABEL_LIST_TO_STRING_CONVERTER;
-      this.nodesToStringConverter = COREMAP_LIST_TO_STRING_CONVERTER;
+    //   this.nodesToStringConverter = CORELABEL_LIST_TO_STRING_CONVERTER;
+    this.nodesToStringConverter = COREMAP_LIST_TO_STRING_CONVERTER;
   }
-  
+
 }

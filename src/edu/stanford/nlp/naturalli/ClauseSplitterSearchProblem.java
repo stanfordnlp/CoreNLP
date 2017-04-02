@@ -1,4 +1,5 @@
 package edu.stanford.nlp.naturalli;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.international.Language;
@@ -29,7 +30,7 @@ import java.util.stream.Stream;
  * <p>
  *   For usage at test time, load a model from
  *   {@link ClauseSplitter#load(String)}, and then take the top clauses of a given tree
- *   with {@link ClauseSplitterSearchProblem#topClauses(double)}, yielding a list of
+ *   with {@link ClauseSplitterSearchProblem#topClauses(double, int)}, yielding a list of
  *   {@link edu.stanford.nlp.naturalli.SentenceFragment}s.
  * </p>
  * <pre>
@@ -45,7 +46,10 @@ import java.util.stream.Stream;
  *
  * @author Gabor Angeli
  */
-public class ClauseSplitterSearchProblem {
+public class ClauseSplitterSearchProblem  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ClauseSplitterSearchProblem.class);
 
   /**
    * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
@@ -76,12 +80,19 @@ public class ClauseSplitterSearchProblem {
       add("clone_nsubj");
       add("simple");
     }});
+    put("advcl:*", new ArrayList<String>() {{
+      add("clone_nsubj");
+      add("simple");
+    }});
     put("conj:*", new ArrayList<String>() {{
       add("clone_nsubj");
       add("clone_dobj");
       add("simple");
     }});
     put("acl:relcl", new ArrayList<String>() {{  // no doubt (-> that cats have tails <-)
+      add("simple");
+    }});
+    put("parataxis", new ArrayList<String>() {{  // no doubt (-> that cats have tails <-)
       add("simple");
     }});
   }});
@@ -217,20 +228,20 @@ public class ClauseSplitterSearchProblem {
    * The options used for training the clause searcher.
    */
   public static class TrainingOptions {
-    @Execution.Option(name = "negativeSubsampleRatio", gloss = "The percent of negative datums to take")
+    @ArgumentParser.Option(name = "negativeSubsampleRatio", gloss = "The percent of negative datums to take")
     public double negativeSubsampleRatio = 1.00;
-    @Execution.Option(name = "positiveDatumWeight", gloss = "The weight to assign every positive datum.")
+    @ArgumentParser.Option(name = "positiveDatumWeight", gloss = "The weight to assign every positive datum.")
     public float positiveDatumWeight = 100.0f;
-    @Execution.Option(name = "unknownDatumWeight", gloss = "The weight to assign every unknown datum (everything extracted with an unconfirmed relation).")
+    @ArgumentParser.Option(name = "unknownDatumWeight", gloss = "The weight to assign every unknown datum (everything extracted with an unconfirmed relation).")
     public float unknownDatumWeight = 1.0f;
-    @Execution.Option(name = "clauseSplitWeight", gloss = "The weight to assign for clause splitting datums. Higher values push towards higher recall.")
+    @ArgumentParser.Option(name = "clauseSplitWeight", gloss = "The weight to assign for clause splitting datums. Higher values push towards higher recall.")
     public float clauseSplitWeight = 1.0f;
-    @Execution.Option(name = "clauseIntermWeight", gloss = "The weight to assign for intermediate splits. Higher values push towards higher recall.")
+    @ArgumentParser.Option(name = "clauseIntermWeight", gloss = "The weight to assign for intermediate splits. Higher values push towards higher recall.")
     public float clauseIntermWeight = 2.0f;
-    @Execution.Option(name = "seed", gloss = "The random seed to use")
+    @ArgumentParser.Option(name = "seed", gloss = "The random seed to use")
     public int seed = 42;
     @SuppressWarnings("unchecked")
-    @Execution.Option(name = "classifierFactory", gloss = "The class of the classifier factory to use for training the various classifiers")
+    @ArgumentParser.Option(name = "classifierFactory", gloss = "The class of the classifier factory to use for training the various classifiers")
     public Class<? extends ClassifierFactory<ClauseSplitter.ClauseClassifierLabel, String, Classifier<ClauseSplitter.ClauseClassifierLabel, String>>> classifierFactory = (Class<? extends ClassifierFactory<ClauseSplitter.ClauseClassifierLabel, String, Classifier<ClauseSplitter.ClauseClassifierLabel, String>>>) ((Object) LinearClassifierFactory.class);
   }
 
@@ -435,10 +446,11 @@ public class ClauseSplitterSearchProblem {
   }
 
   /**
-   * Stips aux and mark edges when we are splitting into a clause.
+   * Strips aux and mark edges when we are splitting into a clause.
+   *
    * @param toModify The tree we are stripping the edges from.
    */
-  private void stripAuxMark(SemanticGraph toModify) {
+  private static void stripAuxMark(SemanticGraph toModify) {
     List<SemanticGraphEdge> toClean = new ArrayList<>();
     for (SemanticGraphEdge edge : toModify.outgoingEdgeIterable(toModify.getFirstRoot())) {
       String rel = edge.getRelation().toString();
@@ -477,10 +489,13 @@ public class ClauseSplitterSearchProblem {
   /**
    * Get the top few clauses from this searcher, cutting off at the given minimum
    * probability.
+   *
    * @param thresholdProbability The threshold under which to stop returning clauses. This should be between 0 and 1.
+   * @param maxClauses A hard limit on the number of clauses to return.
+   *
    * @return The resulting {@link edu.stanford.nlp.naturalli.SentenceFragment} objects, representing the top clauses of the sentence.
    */
-  public List<SentenceFragment> topClauses(double thresholdProbability) {
+  public List<SentenceFragment> topClauses(double thresholdProbability, int maxClauses) {
     List<SentenceFragment> results = new ArrayList<>();
     search(triple -> {
       assert triple.first <= 0.0;
@@ -502,7 +517,7 @@ public class ClauseSplitterSearchProblem {
 
   /**
    * Search, using the default weights / featurizer. This is the most common entry method for the raw search,
-   * though {@link ClauseSplitterSearchProblem#topClauses(double)} may be a more convenient method for
+   * though {@link ClauseSplitterSearchProblem#topClauses(double, int)} may be a more convenient method for
    * an end user.
    *
    * @param candidateFragments The callback function for results. The return value defines whether to continue searching.
@@ -722,7 +737,7 @@ public class ClauseSplitterSearchProblem {
   /**
    * Re-order the action space based on the specified order of names.
    */
-  private Collection<Action> orderActions(Collection<Action> actionSpace, List<String> order) {
+  private static Collection<Action> orderActions(Collection<Action> actionSpace, List<String> order) {
     List<Action> tmp = new ArrayList<>(actionSpace);
     List<Action> out = new ArrayList<>();
     for (String key : order) {
@@ -780,7 +795,7 @@ public class ClauseSplitterSearchProblem {
 
     while (!fringe.isEmpty()) {
       if (++ticks > maxTicks) {
-//        System.err.println("WARNING! Timed out on search with " + ticks + " ticks");
+//        log.info("WARNING! Timed out on search with " + ticks + " ticks");
         return;
       }
       // Useful variables
@@ -887,7 +902,7 @@ public class ClauseSplitterSearchProblem {
               }});
               // 2. Register the child state
               if (!seenWords.contains(childState.first.edge.getDependent())) {
-//            System.err.println("  pushing " + action.signature() + " with " + argmax.first.edge);
+//            log.info("  pushing " + action.signature() + " with " + argmax.first.edge);
                 fringe.add(childState, logProbability);
               }
             }
@@ -897,7 +912,7 @@ public class ClauseSplitterSearchProblem {
 
       seenWords.add(rootWord);
     }
-//    System.err.println("Search finished in " + ticks + " ticks and " + classifierEvals + " classifier evaluations.");
+//    log.info("Search finished in " + ticks + " ticks and " + classifierEvals + " classifier evaluations.");
   }
 
 

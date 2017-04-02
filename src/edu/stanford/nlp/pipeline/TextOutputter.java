@@ -3,18 +3,23 @@ package edu.stanford.nlp.pipeline;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
+import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
+import edu.stanford.nlp.naturalli.OpenIE;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
@@ -96,7 +101,7 @@ public class TextOutputter extends AnnotationOutputter {
         String[] tokenAnnotations = {
                 "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag",
                 "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag",
-                "Timex", "TrueCase", "TrueCaseText", "SentimentClass" };
+                "Timex", "TrueCase", "TrueCaseText", "SentimentClass", "WikipediaEntity" };
         for (CoreLabel token: tokens) {
           pw.print(token.toShorterString(tokenAnnotations));
           pw.println();
@@ -112,8 +117,8 @@ public class TextOutputter extends AnnotationOutputter {
         // case we don't want to recreate them using the dependency
         // printer.  This might be relevant if using CoreNLP for a
         // language which doesn't have dependencies, for example.
-        if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
-          pw.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
+        if (sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class) != null) {
+          pw.print(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class).toList());
           pw.println();
         }
 
@@ -135,6 +140,25 @@ public class TextOutputter extends AnnotationOutputter {
             }
           }
         }
+
+        // display OpenIE triples
+        Collection<RelationTriple> openieTriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
+        if (openieTriples != null && openieTriples.size() > 0) {
+          pw.println("Extracted the following Open IE triples:");
+          for (RelationTriple triple : openieTriples) {
+            pw.println(OpenIE.tripleToString(triple, docId, sentence));
+          }
+        }
+
+        // display KBP triples
+        Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
+        if (kbpTriples != null && kbpTriples.size() > 0) {
+          pw.println("Extracted the following KBP triples:");
+          for (RelationTriple triple : kbpTriples) {
+            pw.println(triple.toString());
+          }
+        }
+
       }
     }
 

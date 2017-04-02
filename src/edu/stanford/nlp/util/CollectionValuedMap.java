@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -18,28 +17,28 @@ import java.util.Set;
  * used to create the Collections. Thus this class can be configured to act like
  * a "HashSetValuedMap" or a "ListValuedMap", or even a
  * "HashSetValuedIdentityHashMap". The possibilities are endless!
- * 
- * @param <K>
- *          Key type of map
- * @param <V>
- *          Type of the Collection that is the Map's value
+ *
+ * @param <K> Key type of map
+ * @param <V> Type of the Collection that is the Map's value
  * @author Teg Grenager (grenager@cs.stanford.edu)
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in
  *         types
  */
 public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Serializable {
 
-  private static final long serialVersionUID = -9064664153962599076l;
-  private Map<K, Collection<V>> map;
-  protected CollectionFactory<V> cf;
-  private boolean treatCollectionsAsImmutable;
-  protected MapFactory<K, Collection<V>> mf;
+  private static final long serialVersionUID = -9064664153962599076L;
+
+  @SuppressWarnings("serial")
+  private final Map<K, Collection<V>> map;
+  protected final CollectionFactory<V> cf;
+  protected final boolean treatCollectionsAsImmutable;
+  protected final MapFactory<K, Collection<V>> mf;
 
   /**
    * Replaces current Collection mapped to key with the specified Collection.
    * Use carefully!
-   * 
    */
+  @Override
   public Collection<V> put(K key, Collection<V> collection) {
     return map.put(key, collection);
   }
@@ -47,20 +46,23 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * Unsupported. Use {@link #addAll(Map)} instead.
    */
+  @Override
   public void putAll(Map<? extends K, ? extends Collection<V>> m) {
     throw new UnsupportedOperationException();
   }
 
   /**
-   * The empty collection to be returned when a <code>get</code> doesn't find
+   * The empty collection to be returned when a {@code get} doesn't find
    * the key. The collection returned should be empty, such as
    * Collections.emptySet, for example.
    */
+  @SuppressWarnings("serial")
   private final Collection<V> emptyValue;
 
   /**
    * @return the Collection mapped to by key, never null, but may be empty.
    */
+  @Override
   public Collection<V> get(Object key) {
     Collection<V> c = map.get(key);
     if (c == null) {
@@ -71,7 +73,6 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   /**
    * Adds the value to the Collection mapped to by the key.
-   * 
    */
   public void add(K key, V value) {
     if (treatCollectionsAsImmutable) {
@@ -91,11 +92,10 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
       c.add(value); // modifying the old collection
     }
   }
-  
+
   /**
    * Adds the values to the Collection mapped to by the key.
    */
-  
   public void addAll(K key, Collection<V> values) {
     if (treatCollectionsAsImmutable) {
       Collection<V> newC = cf.newCollection();
@@ -115,7 +115,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
     }
   }
 
-  // Just add the key (empty collection, but key is in the keySet
+  /** Just add the key (empty collection, but key is in the keySet). */
   public void addKey(K key) {
     Collection<V> c = map.get(key);
     if (c == null) {
@@ -127,7 +127,6 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * Adds all of the mappings in m to this CollectionValuedMap. If m is a
    * CollectionValuedMap, it will behave strangely. Use the constructor instead.
-   * 
    */
   public void addAll(Map<K, V> m) {
     if (m instanceof CollectionValuedMap<?, ?>) {
@@ -166,17 +165,20 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   /**
    * Removes the mapping associated with this key from this Map.
-   * 
+   *
    * @return the Collection mapped to by this key.
    */
+  @Override
   public Collection<V> remove(Object key) {
     return map.remove(key);
   }
 
   /**
-   * removes the mappings associated with the keys from this map
-   * @param keys
+   * Removes the mappings associated with the keys from this map.
+   *
+   * @param keys They keys to remove
    */
+  @SuppressWarnings("Convert2streamapi")
   public void removeAll(Collection<K> keys) {
     for (K k : keys) {
       remove(k);
@@ -186,11 +188,9 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * Removes the value from the Collection mapped to by this key, leaving the
    * rest of the collection intact.
-   * 
-   * @param key
-   *          the key to the Collection to remove the value from
-   * @param value
-   *          the value to remove
+   *
+   * @param key The key to the Collection to remove the value from
+   * @param value The value to remove
    */
   public void removeMapping(K key, V value) {
     if (treatCollectionsAsImmutable) {
@@ -211,6 +211,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * Clears this Map.
    */
+  @Override
   public void clear() {
     map.clear();
   }
@@ -218,6 +219,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * @return true iff this key is in this map
    */
+  @Override
   public boolean containsKey(Object key) {
     return map.containsKey(key);
   }
@@ -225,6 +227,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * Unsupported.
    */
+  @Override
   public boolean containsValue(Object value) {
     throw new UnsupportedOperationException();
   }
@@ -232,6 +235,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * @return true iff this Map has no mappings in it.
    */
+  @Override
   public boolean isEmpty() {
     return map.isEmpty();
   }
@@ -240,9 +244,10 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    * Each element of the Set is a Map.Entry object, where getKey() returns the
    * key of the mapping, and getValue() returns the Collection mapped to by the
    * key.
-   * 
+   *
    * @return a Set view of the mappings contained in this map.
    */
+  @Override
   public Set<Entry<K, Collection<V>>> entrySet() {
     return map.entrySet();
   }
@@ -250,6 +255,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * @return a Set view of the keys in this Map.
    */
+  @Override
   public Set<K> keySet() {
     return map.keySet();
   }
@@ -257,6 +263,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * The number of keys in this map.
    */
+  @Override
   public int size() {
     return map.size();
   }
@@ -265,10 +272,12 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    * @return a collection of the values (really, a collection of values) in this
    *         Map
    */
+  @Override
   public Collection<Collection<V>> values() {
     return map.values();
   }
 
+  @SuppressWarnings("Convert2streamapi")
   public Collection<V> allValues() {
     Collection<V> c = cf.newCollection();
     for (Collection<V> c1 : map.values()) {
@@ -329,22 +338,13 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   }
 
   /**
-   * Creates a "delta clone" of this Map, where only the differences are
-   * represented.
+   * Creates a "delta copy" of this Map, where only the differences
+   * from the original Map are represented. (This typically assumes
+   * that this map will no longer be changed.)
    */
-  public CollectionValuedMap<K, V> deltaClone() {
-    CollectionValuedMap<K, V> result = new CollectionValuedMap<>(null, cf, true);
-    result.map = new DeltaMap<>(this.map);
-    return result;
-  }
-
-  /**
-   * @return a clone of this Map
-   */
-  @Override
-  public CollectionValuedMap<K, V> clone() {
-    CollectionValuedMap<K, V> result = new CollectionValuedMap<>(this);
-    return result;
+  public CollectionValuedMap<K, V> deltaCopy() {
+    Map<K,Collection<V>> deltaMap = new DeltaMap<>(this.map);
+    return new CollectionValuedMap<>(null, cf, true, deltaMap);
   }
 
   /**
@@ -372,32 +372,56 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
     return buf.toString();
   }
 
+
   /**
    * Creates a new empty CollectionValuedMap.
-   * 
-   * @param mf
-   *          a MapFactory which will be used to generate the underlying Map
-   * @param cf
-   *          a CollectionFactory which will be used to generate the Collections
+   *
+   * @param mf A MapFactory which will be used to generate the underlying Map
+   * @param cf A CollectionFactory which will be used to generate the Collections
    *          in each mapping
-   * @param treatCollectionsAsImmutable
-   *          if true, forces this Map to create new a Collection everytime a
+   * @param treatCollectionsAsImmutable If true, forces this Map to create new a Collection every time a
    *          new value is added to or deleted from the Collection a mapping.
    */
   public CollectionValuedMap(MapFactory<K, Collection<V>> mf, CollectionFactory<V> cf,
-      boolean treatCollectionsAsImmutable) {
+                             boolean treatCollectionsAsImmutable) {
+    this(mf, cf, treatCollectionsAsImmutable, null);
+  }
+
+  /**
+   * Creates a new CollectionValuedMap.
+   *
+   * @param mf A MapFactory which will be used to generate the underlying Map
+   * @param cf A CollectionFactory which will be used to generate the Collections
+   *          in each mapping
+   * @param treatCollectionsAsImmutable If true, forces this Map to create new a Collection every time a
+   *          new value is added to or deleted from the Collection a mapping.
+   * @param map An existing map to use rather than initializing one with mf. If this is non-null it is
+   *            used to initialize the map rather than mf.
+   */
+  private CollectionValuedMap(MapFactory<K, Collection<V>> mf, CollectionFactory<V> cf,
+                             boolean treatCollectionsAsImmutable,
+                             Map<K, Collection<V>> map) {
+    if (cf == null) {
+      throw new IllegalArgumentException();
+    }
+    if (mf == null && map == null) {
+      throw new IllegalArgumentException();
+    }
     this.mf = mf;
     this.cf = cf;
     this.treatCollectionsAsImmutable = treatCollectionsAsImmutable;
     this.emptyValue = cf.newEmptyCollection();
-    if (mf != null) {
-      map = Collections.synchronizedMap(mf.newMap());
+    if (map != null) {
+      this.map = map;
+    } else {
+      this.map = Collections.synchronizedMap(mf.newMap());
     }
   }
 
   /**
-   * Creates a new CollectionValuedMap with all of the mappings from cvm. Same
-   * as {@link #clone()}.
+   * Creates a new CollectionValuedMap with all of the mappings from cvm.
+   *
+   * @param cvm The CollectionValueMap to copy as this object.
    */
   public CollectionValuedMap(CollectionValuedMap<K, V> cvm) {
     this.mf = cvm.mf;
@@ -420,72 +444,18 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    * treat Collections as immutable.
    */
   public CollectionValuedMap() {
-    this(MapFactory.<K, Collection<V>> hashMapFactory(), CollectionFactory.<V> hashSetFactory(), false);
+    this(MapFactory.hashMapFactory(), CollectionFactory.hashSetFactory(), false);
   }
 
   /**
    * Creates a new empty CollectionValuedMap which uses a HashMap as the
    * underlying Map. Does not treat Collections as immutable.
-   * 
-   * @param cf
-   *          a CollectionFactory which will be used to generate the Collections
+   *
+   * @param cf A CollectionFactory which will be used to generate the Collections
    *          in each mapping
    */
   public CollectionValuedMap(CollectionFactory<V> cf) {
-    this(MapFactory.<K, Collection<V>> hashMapFactory(), cf, false);
+    this(MapFactory.hashMapFactory(), cf, false);
   }
 
-  /**
-   * For testing only.
-   * 
-   * @param args
-   *          from command line
-   */
-  public static void main(String[] args) {
-    CollectionValuedMap<Integer, Integer> originalMap = new CollectionValuedMap<>();
-    /*
-        for (int i=0; i<4; i++) {
-          for (int j=0; j<4; j++) {
-            originalMap.add(new Integer(i), new Integer(j));
-          }
-        }
-        originalMap.remove(new Integer(2));
-        System.out.println("Map: ");
-        System.out.println(originalMap);
-        System.exit(0);
-    */
-    Random r = new Random();
-    for (int i = 0; i < 800; i++) {
-      Integer rInt1 = Integer.valueOf(r.nextInt(400));
-      Integer rInt2 = Integer.valueOf(r.nextInt(400));
-      originalMap.add(rInt1, rInt2);
-      System.out.println("Adding " + rInt1 + ' ' + rInt2);
-    }
-    CollectionValuedMap<Integer, Integer> originalCopyMap = new CollectionValuedMap<>(originalMap);
-    CollectionValuedMap<Integer, Integer> deltaCopyMap = new CollectionValuedMap<>(originalMap);
-    CollectionValuedMap<Integer, Integer> deltaMap = new DeltaCollectionValuedMap<>(originalMap);
-    // now make a lot of changes to deltaMap;
-    // add and change some stuff
-    for (int i = 0; i < 400; i++) {
-      Integer rInt1 = Integer.valueOf(r.nextInt(400));
-      Integer rInt2 = Integer.valueOf(r.nextInt(400) + 1000);
-      deltaMap.add(rInt1, rInt2);
-      deltaCopyMap.add(rInt1, rInt2);
-      System.out.println("Adding " + rInt1 + ' ' + rInt2);
-    }
-    // remove some stuff
-    for (int i = 0; i < 400; i++) {
-      Integer rInt1 = Integer.valueOf(r.nextInt(1400));
-      Integer rInt2 = Integer.valueOf(r.nextInt(1400));
-      deltaMap.removeMapping(rInt1, rInt2);
-      deltaCopyMap.removeMapping(rInt1, rInt2);
-      System.out.println("Removing " + rInt1 + ' ' + rInt2);
-    }
-    System.out.println("original: " + originalMap);
-    System.out.println("copy: " + deltaCopyMap);
-    System.out.println("delta: " + deltaMap);
-
-    System.out.println("Original preserved? " + originalCopyMap.equals(originalMap));
-    System.out.println("Delta accurate? " + deltaMap.equals(deltaCopyMap));
-  }
 }

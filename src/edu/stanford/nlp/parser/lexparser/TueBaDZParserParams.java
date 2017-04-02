@@ -1,13 +1,11 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.stanford.nlp.ling.CategoryWordTag;
-import edu.stanford.nlp.ling.HasTag;
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.tuebadz.TueBaDZHeadFinder;
 import edu.stanford.nlp.trees.international.tuebadz.TueBaDZLanguagePack;
@@ -23,7 +21,10 @@ import edu.stanford.nlp.util.Index;
  *  @author Roger Levy (rog@stanford.edu)
  *  @author Wolfgang Maier (wmaier@sfs.uni-tuebingen.de)
  */
-public class TueBaDZParserParams extends AbstractTreebankParserParams {
+public class TueBaDZParserParams extends AbstractTreebankParserParams  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TueBaDZParserParams.class);
 
   private HeadFinder hf = new TueBaDZHeadFinder();
 
@@ -47,7 +48,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
   /** Returns the first sentence of TueBaDZ. */
   @Override
   public List<? extends HasWord> defaultTestSentence() {
-    return Sentence.toWordList("Veruntreute", "die", "AWO", "Spendengeld", "?");
+    return SentenceUtils.toWordList("Veruntreute", "die", "AWO", "Spendengeld", "?");
   }
 
   @Override
@@ -151,7 +152,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
 
   @Override
   public void display() {
-    System.err.println("TueBaDZParserParams nodeCleanup=" + nodeCleanup +
+    log.info("TueBaDZParserParams nodeCleanup=" + nodeCleanup +
                        " mKonjParent=" + markKonjParent + " mContainsV=" + markContainsV +
                        " mZu=" + markZu + " mColons=" + markColons);
   }

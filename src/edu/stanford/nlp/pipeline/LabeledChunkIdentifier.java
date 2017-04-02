@@ -11,48 +11,52 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Identifies chunks based on labels that uses IOB like encoding
- * Assumes labels have the form <tag>-<type>
- *  where the tag is a prefix indicating where in the chunk it is.
+ * Identifies chunks based on labels that uses IOB-like encoding
+ * (Erik F. Tjong Kim Sang and Jorn Veenstra, Representing Text Chunks, EACL 1999).
+ * Assumes labels have the form {@code <tag>-<type>},
+ * where the tag is a prefix indicating where in the chunk it is.
  * Supports various encodings: IO, IOB, IOE, BILOU, SBEIO, []
  * The type is
- * Example:  Bill   works for  Bank   of     America
- * IO:       I-PER  O     O    I-ORG  I-ORG  I-ORG
- * IOB1:     B-PER  O     O    B-ORG  I-ORG  I-ORG
- * IOB2:     I-PER  O     O    B-ORG  I-ORG  I-ORG
- * IOE1:     E-PER  O     O    I-ORG  I-ORG  E-ORG
- * IOE2:     I-PER  O     O    I-ORG  I-ORG  E-ORG
- * BILOU:    U-PER  O     O    B-ORG  I-ORG  L-ORG
- * SBEIO:    S-PER  O     O    B-ORG  I-ORG  E-ORG
+ * Example:  Bill   gave  Xerox Bank   of     America shares
+ * IO:       I-PER  O     I-ORG I-ORG  I-ORG  I-ORG   O
+ * IOB1:     I-PER  O     I-ORG B-ORG  I-ORG  I-ORG   O
+ * IOB2:     B-PER  O     B-ORG B-ORG  I-ORG  I-ORG   O
+ * IOE1:     I-PER  O     E-ORG I-ORG  I-ORG  I-ORG   O
+ * IOE2:     E-PER  O     E-ORG I-ORG  I-ORG  E-ORG   O
+ * BILOU:    U-PER  O     U-ORG B-ORG  I-ORG  L-ORG   O
+ * SBEIO:    S-PER  O     S-ORG B-ORG  I-ORG  E-ORG   O
+ *
  * @author Angel Chang
  */
 public class LabeledChunkIdentifier {
+
   /**
-   * Whether to use or ignore provided tag (the label prefix)
+   * Whether to use or ignore provided tag (the label prefix).
    */
   private boolean ignoreProvidedTag = false;
 
   /**
-   * Label/Type indicating the token is not a part of a chunk
+   * Label/Type indicating the token is not a part of a chunk.
    */
   private String negLabel = "O";
 
   /**
    * What tag to default to if label/type indicate it is part of a chunk
    *  (used if type does not match negLabel and
-   *    the tag is not provided or ignoreProvidedTag is set)
+   *    the tag is not provided or ignoreProvidedTag is set).
    */
   private String defaultPosTag = "I";
 
   /**
    * What tag to default to if label/type indicate it is not part of a chunk
    *  (used if type matches negLabel and
-   *    the tag is not provided or ignoreProvidedTag is set)
+   *    the tag is not provided or ignoreProvidedTag is set).
    */
   private String defaultNegTag = "O";
 
   /**
    * Find and annotate chunks.  Returns list of CoreMap (Annotation) objects.
+   *
    * @param tokens - List of tokens to look for chunks
    * @param totalTokensOffset - Index of tokens to offset by
    * @param textKey - Key to use to find the token text
@@ -60,23 +64,20 @@ public class LabeledChunkIdentifier {
    * @return List of annotations (each as a CoreMap) representing the chunks of tokens
    */
   @SuppressWarnings("unchecked")
-  public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset, Class textKey, Class labelKey)
-  {
+  public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset, Class textKey, Class labelKey) {
     return getAnnotatedChunks(tokens, totalTokensOffset, textKey, labelKey, null, null);
   }
 
   @SuppressWarnings("unchecked")
   public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset, Class textKey, Class labelKey,
-                                          Function<Pair<CoreLabel, CoreLabel>, Boolean> checkTokensCompatible)
-  {
+                                          Function<Pair<CoreLabel, CoreLabel>, Boolean> checkTokensCompatible) {
     return getAnnotatedChunks(tokens, totalTokensOffset, textKey, labelKey, null, null, checkTokensCompatible);
   }
 
   @SuppressWarnings("unchecked")
   public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset,
                                           Class textKey, Class labelKey,
-                                          Class tokenChunkKey, Class tokenLabelKey)
-  {
+                                          Class tokenChunkKey, Class tokenLabelKey) {
     return getAnnotatedChunks(tokens, totalTokensOffset, textKey, labelKey, tokenChunkKey, tokenLabelKey, null);
   }
 
@@ -89,6 +90,7 @@ public class LabeledChunkIdentifier {
    *   TokenBeginAnnotation - Index of first token in chunk (index in original list of tokens)
    *   TokenEndAnnotation - Index of last token in chunk (index in original list of tokens)
    *   TextAnnotation - String representing tokens in this chunks (token text separated by space)
+   *
    * @param tokens - List of tokens to look for chunks
    * @param totalTokensOffset - Index of tokens to offset by
    * @param labelKey - Key to use to find the token label (to determine if inside chunk or not)
@@ -102,8 +104,7 @@ public class LabeledChunkIdentifier {
   public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset,
                                           Class textKey, Class labelKey,
                                           Class tokenChunkKey, Class tokenLabelKey,
-                                          Function<Pair<CoreLabel, CoreLabel>, Boolean> checkTokensCompatible)
-  {
+                                          Function<Pair<CoreLabel, CoreLabel>, Boolean> checkTokensCompatible) {
     List<CoreMap> chunks = new ArrayList();
     LabelTagType prevTagType = null;
     int tokenBegin = -1;
@@ -149,15 +150,15 @@ public class LabeledChunkIdentifier {
   }
 
   /**
-   * Returns whether a chunk ended between the previous and current token
+   * Returns whether a chunk ended between the previous and current token.
+   *
    * @param prevTag - the tag of the previous token
    * @param prevType - the type of the previous token
    * @param curTag - the tag of the current token
    * @param curType - the type of the current token
    * @return true if the previous token was the last token of a chunk
    */
-  public static boolean isEndOfChunk(String prevTag, String prevType, String curTag, String curType)
-  {
+  private static boolean isEndOfChunk(String prevTag, String prevType, String curTag, String curType) {
     boolean chunkEnd = false;
 
     if ( "B".equals(prevTag) && "B".equals(curTag) ) { chunkEnd = true; }
@@ -177,13 +178,13 @@ public class LabeledChunkIdentifier {
   }
 
   /**
-   * Returns whether a chunk ended between the previous and current token
+   * Returns whether a chunk ended between the previous and current token.
+   *
    * @param prev - the label/tag/type of the previous token
    * @param cur - the label/tag/type of the current token
    * @return true if the previous token was the last token of a chunk
    */
-  public static boolean isEndOfChunk(LabelTagType prev, LabelTagType cur)
-  {
+  public static boolean isEndOfChunk(LabelTagType prev, LabelTagType cur) {
     if (prev == null) return false;
     return isEndOfChunk(prev.tag, prev.type, cur.tag, cur.type);
   }
@@ -196,8 +197,7 @@ public class LabeledChunkIdentifier {
    * @param curType - the type of the current token
    * @return true if the current token was the first token of a chunk
    */
-  public static boolean isStartOfChunk(String prevTag, String prevType, String curTag, String curType)
-  {
+  private static boolean isStartOfChunk(String prevTag, String prevType, String curTag, String curType) {
     boolean chunkStart = false;
 
     boolean prevTagE = "E".equals(prevTag) || "L".equals(prevTag) || "S".equals(prevTag) || "U".equals(prevTag);
@@ -223,8 +223,7 @@ public class LabeledChunkIdentifier {
    * @param cur - the label/tag/type of the current token
    * @return true if the current token was the first token of a chunk
    */
-  public static boolean isStartOfChunk(LabelTagType prev, LabelTagType cur)
-  {
+  public static boolean isStartOfChunk(LabelTagType prev, LabelTagType cur) {
     if (prev == null) {
       return isStartOfChunk("O", "O", cur.tag, cur.type);
     } else {
@@ -232,17 +231,18 @@ public class LabeledChunkIdentifier {
     }
   }
 
-  public static boolean isChunk(LabelTagType cur) {
+  private static boolean isChunk(LabelTagType cur) {
     return (!"O".equals(cur.tag) && !".".equals(cur.tag));
   }
 
-  private static Pattern labelPattern = Pattern.compile("^([^-]*)-(.*)$");
+  private static final Pattern labelPattern = Pattern.compile("^([^-]*)-(.*)$");
+
 
   /**
-   * Class representing a label, tag and type
+   * Class representing a label, tag and type.
    */
-  public static class LabelTagType
-  {
+  public static class LabelTagType {
+
     public String label;
     public String tag;
     public String type;
@@ -259,19 +259,14 @@ public class LabeledChunkIdentifier {
       return this.type.equals(other.type);
     }
 
-    public String toString()
-    {
-      StringBuilder sb = new StringBuilder();
-      sb.append("(");
-      sb.append(label).append(",");
-      sb.append(tag).append(",");
-      sb.append(type).append(")");
-      return sb.toString();
+    public String toString() {
+      return '(' + label + ',' + tag + ',' + type + ')';
     }
-  }
 
-  public LabelTagType getTagType(String label)
-  {
+  } // end static class LabelTagType
+
+
+  public LabelTagType getTagType(String label) {
     if (label == null) {
       return new LabelTagType(negLabel, defaultNegTag, negLabel);
     }

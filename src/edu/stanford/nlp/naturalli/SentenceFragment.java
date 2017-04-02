@@ -18,22 +18,27 @@ import java.util.stream.Collectors;
  * @author Gabor Angeli
  */
 public class SentenceFragment {
+
   /**
    * The words in this sentence fragment (e.g., for use as the gloss of the fragment).
    */
   public final List<CoreLabel> words = new ArrayList<>();
+
   /**
    * The parse tree for this sentence fragment.
    */
   public final SemanticGraph parseTree;
+
   /**
    * The assumed truth of this fragment; this is relevant for what entailments are supported
    */
   public final boolean assumedTruth;
+
   /**
    * A score for this fragment. This is 1.0 by default.
    */
   public double score = 1.0;
+
 
   public SentenceFragment(SemanticGraph tree, boolean assumedTruth, boolean copy) {
     if (copy) {
@@ -102,7 +107,7 @@ public class SentenceFragment {
       for (SemanticGraphEdge edge : parseTree.incomingEdgeIterable(new IndexedWord(word))) {
         String rel = edge.getRelation().toString();
         if (rel.contains("_")) {  // for Stanford dependencies only
-          addedConnective = rel.substring(rel.indexOf("_") + 1);
+          addedConnective = rel.substring(rel.indexOf('_') + 1);
         }
       }
       if (addedConnective != null) {
@@ -116,4 +121,5 @@ public class SentenceFragment {
     // Return the sentence
     return StringUtils.join(glosses.stream().map(Pair::first), " ");
   }
+
 }

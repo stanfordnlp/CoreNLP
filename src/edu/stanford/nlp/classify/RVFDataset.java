@@ -29,8 +29,8 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * An interfacing class for {@link ClassifierFactory} that incrementally builds
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @param <L> The type of the labels in the Dataset
  * @param <F> The type of the features in the Dataset
  */
-public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Iterable<RVFDatum<L, F>>, Serializable
+public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Iterable<RVFDatum<L, F>>, Serializable
 
   private static final long serialVersionUID = -3841757837680266182L;
 
@@ -58,7 +58,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
   double[] means;
   double[] stdevs; // means and stdevs of features, used for
 
-  final static Logger logger = LoggerFactory.getLogger(RVFDataset.class);
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(RVFDataset.class);
 
   /*
    * Store source and id of each datum; optional, and not fully supported.
@@ -518,20 +519,22 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
   }
 
   /**
-   * Prints some summary statistics to stderr for the Dataset.
+   * Prints some summary statistics to the logger for the Dataset.
    */
   @Override
   public void summaryStatistics() {
     logger.info("numDatums: " + size);
-    System.err.print("numLabels: " + labelIndex.size() + " [");
+    StringBuilder sb = new StringBuilder("numLabels: ");
+    sb.append(labelIndex.size()).append(" [");
     Iterator<L> iter = labelIndex.iterator();
     while (iter.hasNext()) {
-      System.err.print(iter.next());
+      sb.append(iter.next());
       if (iter.hasNext()) {
-        System.err.print(", ");
+        sb.append(", ");
       }
     }
-    logger.info("]");
+    sb.append(']');
+    logger.info(sb.toString());
     logger.info("numFeatures (Phi(X) types): " + featureIndex.size());
     /*for(int i = 0; i < data.length; i++) {
       for(int j = 0; j < data[i].length; j++) {

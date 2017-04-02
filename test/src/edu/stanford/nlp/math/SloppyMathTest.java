@@ -1,5 +1,6 @@
 package edu.stanford.nlp.math;
 
+import edu.stanford.nlp.util.Triple;
 import junit.framework.TestCase;
 
 public class SloppyMathTest extends TestCase {
@@ -90,6 +91,24 @@ public class SloppyMathTest extends TestCase {
     assertEquals(1, SloppyMath.pythonMod(-8, 3));
     assertEquals(-1, SloppyMath.pythonMod(8, -3));
     assertEquals(-2, SloppyMath.pythonMod(-8, -3));
+  }
+
+  public void testParseDouble() {
+    for (int base = -10; base < 10; ++base) {
+      if (base == 0) { continue; }
+      for (int exponent = -100; exponent < 100; ++exponent) {
+        double number = Math.pow(Math.PI * base, exponent);
+        Triple<Boolean, Long, Integer> parts = SloppyMath.segmentDouble(number);
+        double parsed = SloppyMath.parseDouble(parts.first, parts.second, parts.third);
+        assertEquals(number, parsed, Math.abs(parsed) / 1.0e5);
+      }
+    }
+  }
+
+  public void testParseInt() {
+    assertEquals(42, SloppyMath.parseInt("42"));
+    assertEquals(-42, SloppyMath.parseInt("-42"));
+    assertEquals(42000000000000l, SloppyMath.parseInt("42000000000000"));
   }
 }
 

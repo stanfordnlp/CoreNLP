@@ -1,4 +1,5 @@
 package edu.stanford.nlp.ling.tokensregex.types;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
@@ -100,7 +101,10 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class Expressions {
+public class Expressions  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Expressions.class);
 
   /** VAR - Variable */
   public static final String TYPE_VAR = "VAR";
@@ -574,7 +578,7 @@ public class Expressions {
       }
       Value v = exp != null? exp.evaluate(env, args): null;
       if (v == null) {
-        System.err.println("Unknown variable: " + varName);
+        log.info("Unknown variable: " + varName);
       }
       return v;
     }
@@ -1034,7 +1038,7 @@ public class Expressions {
   public static class MethodCallExpression extends Expressions.TypedExpression {
 
     String function;
-    Expression object;
+    private final Expression object;
     List<Expression> params;
 
     public MethodCallExpression(String function, Expression object, List<Expression> params, String... tags) {

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.swing;
+package edu.stanford.nlp.swing; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -10,7 +11,10 @@ import java.util.List;
  * @author Huy Nguyen (htnguyen@cs.stanford.edu)
  * @author Christopher Manning
  */
-public class FontDetector {
+public class FontDetector  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FontDetector.class);
 
   public static final int NUM_LANGUAGES = 2;
   public static final int CHINESE = 0;
@@ -70,7 +74,7 @@ public class FontDetector {
 
   public static void main(String[] args) {
     List<Font> fonts = supportedFonts(ARABIC);
-    System.err.println("Has MS Mincho? " + hasFont("MS Mincho"));
+    log.info("Has MS Mincho? " + hasFont("MS Mincho"));
     for (Font font : fonts) {
       System.out.println(font.getName());
     }

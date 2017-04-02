@@ -106,6 +106,18 @@ public class QuoteAnnotatorTest extends TestCase {
     assertEmbedded("“Mr. 'tis “Mr. Bennet” Bennet”", text, quotes);
   }
 
+  public void testDashes() {
+    String text = "\"Hello\"--said Mr. Cornwallaby";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals("\"Hello\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    text = "“-Wish- you success!”—In what";
+    quotes = runQuotes(text, 1);
+    assertEquals("“-Wish- you success!”", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    text = "\"-Wish- you success!\"—In what";
+    quotes = runQuotes(text, 1);
+    assertEquals("\"-Wish- you success!\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+  }
+
   public void testBasicInternalPunc() {
     String text = "\"Impossible, Mr. Bennet, impossible, when I am not acquainted with him\n" +
         " myself; how can you be so teasing?\"";

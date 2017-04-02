@@ -1,7 +1,9 @@
-package edu.stanford.nlp.loglinear.learning;
+package edu.stanford.nlp.loglinear.learning; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +21,10 @@ import java.util.Random;
  * and to share certain basic bits of functionality useful for batch optimizers, like intelligent multi-thread management
  * and user interrupt handling.
  */
-public abstract class AbstractBatchOptimizer {
+public abstract class AbstractBatchOptimizer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractBatchOptimizer.class);
   public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {
     return optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-5, false);
   }
@@ -30,8 +35,8 @@ public abstract class AbstractBatchOptimizer {
                                    double l2regularization,
                                    double convergenceDerivativeNorm,
                                    boolean quiet) {
-    if (!quiet) System.err.println("\n**************\nBeginning training\n");
-    else System.err.println("[Beginning quiet training]");
+    if (!quiet) log.info("\n**************\nBeginning training\n");
+    else log.info("[Beginning quiet training]");
 
     TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization, convergenceDerivativeNorm, quiet);
     new Thread(mainWorker).start();
@@ -39,19 +44,19 @@ public abstract class AbstractBatchOptimizer {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
     if (!quiet) {
-      System.err.println("NOTE: you can press any key (and maybe ENTER afterwards to jog stdin) to terminate learning early.");
-      System.err.println("The convergence criteria are quite aggressive if left uninterrupted, and will run for a while");
-      System.err.println("if left to their own devices.\n");
+      log.info("NOTE: you can press any key (and maybe ENTER afterwards to jog stdin) to terminate learning early.");
+      log.info("The convergence criteria are quite aggressive if left uninterrupted, and will run for a while");
+      log.info("if left to their own devices.\n");
 
       while (true) {
         if (mainWorker.isFinished) {
-          System.err.println("training completed without interruption");
+          log.info("training completed without interruption");
           return mainWorker.weights;
         }
         try {
           if (br.ready()) {
-            System.err.println("received quit command: quitting");
-            System.err.println("training completed by interruption");
+            log.info("received quit command: quitting");
+            log.info("training completed by interruption");
             mainWorker.isFinished = true;
             return mainWorker.weights;
           }
@@ -65,11 +70,11 @@ public abstract class AbstractBatchOptimizer {
           try {
             mainWorker.naturalTerminationBarrier.wait();
           } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeInterruptedException(e);
           }
         }
       }
-      System.err.println("[Quiet training complete]");
+      log.info("[Quiet training complete]");
       return mainWorker.weights;
     }
   }
@@ -321,7 +326,7 @@ public abstract class AbstractBatchOptimizer {
             try {
               threads[i].join();
             } catch (InterruptedException e) {
-              e.printStackTrace();
+              throw new RuntimeInterruptedException(e);
             }
             logLikelihood += workers[i].localLogLikelihood;
             derivative.addVectorInPlace(workers[i].localDerivative, 1.0);
@@ -388,14 +393,14 @@ public abstract class AbstractBatchOptimizer {
         double derivativeNorm = derivative.dotProduct(derivative);
         if (derivativeNorm < convergenceDerivativeNorm) {
           if (!quiet)
-            System.err.println("Derivative norm " + derivativeNorm + " < " + convergenceDerivativeNorm + ": quitting");
+            log.info("Derivative norm " + derivativeNorm + " < " + convergenceDerivativeNorm + ": quitting");
           break;
         }
 
         // Do the actual computation
 
         if (!quiet) {
-          System.err.println("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
+          log.info("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
         }
         boolean converged = updateWeights(weights, derivative, logLikelihood, optimizationState, quiet);
 

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.sentiment;
+package edu.stanford.nlp.sentiment; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -12,10 +13,15 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
-public class SentimentTraining {
+public class SentimentTraining  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SentimentTraining.class);
 
   private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
+
+  private SentimentTraining() {} // static methods
 
   public static void executeOneTrainingBatch(SentimentModel model, List<Tree> trainingBatch, double[] sumGradSquare) {
     SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(model, trainingBatch);
@@ -23,13 +29,11 @@ public class SentimentTraining {
 
     // AdaGrad
     double eps = 1e-3;
-    double currCost = 0;
-
     // TODO: do we want to iterate multiple times per batch?
     double[] gradf = gcFunc.derivativeAt(theta);
-    currCost = gcFunc.valueAt(theta);
-    System.err.println("batch cost: " + currCost);
-    for (int feature = 0; feature<gradf.length;feature++ ) {
+    double currCost = gcFunc.valueAt(theta);
+    log.info("batch cost: " + currCost);
+    for (int feature = 0; feature<gradf.length; feature++ ) {
       sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
       theta[feature] = theta[feature] - (model.op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
     }
@@ -41,21 +45,21 @@ public class SentimentTraining {
     Timing timing = new Timing();
     long maxTrainTimeMillis = model.op.trainOptions.maxTrainTimeSeconds * 1000;
     int debugCycle = 0;
-    double bestAccuracy = 0.0;
+    // double bestAccuracy = 0.0;
 
     // train using AdaGrad (seemed to work best during the dvparser project)
     double[] sumGradSquare = new double[model.totalParamSize()];
     Arrays.fill(sumGradSquare, model.op.trainOptions.initialAdagradWeight);
 
     int numBatches = trainingTrees.size() / model.op.trainOptions.batchSize + 1;
-    System.err.println("Training on " + trainingTrees.size() + " trees in " + numBatches + " batches");
-    System.err.println("Times through each training batch: " + model.op.trainOptions.epochs);
+    log.info("Training on " + trainingTrees.size() + " trees in " + numBatches + " batches");
+    log.info("Times through each training batch: " + model.op.trainOptions.epochs);
     for (int epoch = 0; epoch < model.op.trainOptions.epochs; ++epoch) {
-      System.err.println("======================================");
-      System.err.println("Starting epoch " + epoch);
+      log.info("======================================");
+      log.info("Starting epoch " + epoch);
       if (epoch > 0 && model.op.trainOptions.adagradResetFrequency > 0 &&
           (epoch % model.op.trainOptions.adagradResetFrequency == 0)) {
-        System.err.println("Resetting adagrad weights to " + model.op.trainOptions.initialAdagradWeight);
+        log.info("Resetting adagrad weights to " + model.op.trainOptions.initialAdagradWeight);
         Arrays.fill(sumGradSquare, model.op.trainOptions.initialAdagradWeight);
       }
 
@@ -64,22 +68,22 @@ public class SentimentTraining {
         Collections.shuffle(shuffledSentences, model.rand);
       }
       for (int batch = 0; batch < numBatches; ++batch) {
-        System.err.println("======================================");
-        System.err.println("Epoch " + epoch + " batch " + batch);
+        log.info("======================================");
+        log.info("Epoch " + epoch + " batch " + batch);
 
         // Each batch will be of the specified batch size, except the
         // last batch will include any leftover trees at the end of
         // the list
         int startTree = batch * model.op.trainOptions.batchSize;
         int endTree = (batch + 1) * model.op.trainOptions.batchSize;
-        if (endTree + model.op.trainOptions.batchSize > shuffledSentences.size()) {
+        if (endTree > shuffledSentences.size()) {
           endTree = shuffledSentences.size();
         }
 
         executeOneTrainingBatch(model, shuffledSentences.subList(startTree, endTree), sumGradSquare);
 
         long totalElapsed = timing.report();
-        System.err.println("Finished epoch " + epoch + " batch " + batch + "; total training time " + totalElapsed + " ms");
+        log.info("Finished epoch " + epoch + " batch " + batch + "; total training time " + totalElapsed + " ms");
 
         if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
           // no need to debug output, we're done now
@@ -97,7 +101,7 @@ public class SentimentTraining {
 
           // output an intermediate model
           if (modelPath != null) {
-            String tempPath = modelPath;
+            String tempPath;
             if (modelPath.endsWith(".ser.gz")) {
               tempPath = modelPath.substring(0, modelPath.length() - 7) + "-" + FILENAME.format(debugCycle) + "-" + NF.format(score) + ".ser.gz";
             } else if (modelPath.endsWith(".gz")) {
@@ -114,7 +118,7 @@ public class SentimentTraining {
       long totalElapsed = timing.report();
 
       if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
-        System.err.println("Max training time exceeded, exiting");
+        log.info("Max training time exceeded, exiting");
         break;
       }
     }
@@ -125,6 +129,16 @@ public class SentimentTraining {
     return gcFunc.gradientCheck(model.totalParamSize(), 50, model.paramsToVector());
   }
 
+  /** Trains a sentiment model.
+   *  The -trainPath argument points to a labeled sentiment treebank.
+   *  The trees in this data will be used to train the model parameters (also to seed the model vocabulary).
+   *  The -devPath argument points to a second labeled sentiment treebank.
+   *  The trees in this data will be used to periodically evaluate the performance of the model.
+   *  We won't train on this data; it will only be used to test how well the model generalizes to unseen data.
+   *  The -model argument specifies where to save the learned sentiment model.
+   *
+   *  @param args Command line arguments
+   */
   public static void main(String[] args) {
     RNNOptions op = new RNNOptions();
 
@@ -168,19 +182,19 @@ public class SentimentTraining {
 
     // read in the trees
     List<Tree> trainingTrees = SentimentUtils.readTreesWithGoldLabels(trainPath);
-    System.err.println("Read in " + trainingTrees.size() + " training trees");
+    log.info("Read in " + trainingTrees.size() + " training trees");
     if (filterUnknown) {
       trainingTrees = SentimentUtils.filterUnknownRoots(trainingTrees);
-      System.err.println("Filtered training trees: " + trainingTrees.size());
+      log.info("Filtered training trees: " + trainingTrees.size());
     }
 
     List<Tree> devTrees = null;
     if (devPath != null) {
       devTrees = SentimentUtils.readTreesWithGoldLabels(devPath);
-      System.err.println("Read in " + devTrees.size() + " dev trees");
+      log.info("Read in " + devTrees.size() + " dev trees");
       if (filterUnknown) {
         devTrees = SentimentUtils.filterUnknownRoots(devTrees);
-        System.err.println("Filtered dev trees: " + devTrees.size());
+        log.info("Filtered dev trees: " + devTrees.size());
       }
     }
 
@@ -191,8 +205,8 @@ public class SentimentTraining {
     // However, when we handle trees given to us from the Stanford Parser,
     // we will have to perform this step
 
-    // build an unitialized SentimentModel from the binary productions
-    System.err.println("Sentiment model options:\n" + op);
+    // build an uninitialized SentimentModel from the binary productions
+    log.info("Sentiment model options:\n" + op);
     SentimentModel model = new SentimentModel(op, trainingTrees);
 
     if (op.trainOptions.initialMatrixLogPath != null) {
@@ -217,4 +231,5 @@ public class SentimentTraining {
       model.saveSerialized(modelPath);
     }
   }
+
 }

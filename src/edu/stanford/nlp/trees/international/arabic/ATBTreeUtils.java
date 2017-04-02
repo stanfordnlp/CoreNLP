@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
@@ -86,7 +86,7 @@ public class ATBTreeUtils {
   public static String flattenTree(Tree t) {
     t = t.prune(emptyFilter, tf);
 
-    String flatString = Sentence.listToString(t.yield());
+    String flatString = SentenceUtils.listToString(t.yield());
 
     return flatString;
   }
@@ -108,7 +108,7 @@ public class ATBTreeUtils {
       token.setWord(word);
       token.setValue(word);
     }
-    return Sentence.listToString(taggedSentence, false, separator);
+    return SentenceUtils.listToString(taggedSentence, false, separator);
   }
 
   public static void main(String[] args) {

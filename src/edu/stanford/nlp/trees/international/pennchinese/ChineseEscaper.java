@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.pennchinese;
+package edu.stanford.nlp.trees.international.pennchinese; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -20,7 +21,10 @@ import edu.stanford.nlp.util.UTF8EquivalenceFunction;
  *
  * @author Christopher Manning
  */
-public class ChineseEscaper implements Function<List<HasWord>, List<HasWord>> {
+public class ChineseEscaper implements Function<List<HasWord>, List<HasWord>>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseEscaper.class);
 
   /** IBM entity normalization patterns */
   private static final Pattern p2 = Pattern.compile("\\$[a-z]+_\\((.*?)\\|\\|.*?\\)");
@@ -33,11 +37,11 @@ public class ChineseEscaper implements Function<List<HasWord>, List<HasWord>> {
     for (HasWord wd : ans) {
       String w = wd.word();
       Matcher m2 = p2.matcher(w);
-      // System.err.println("Escaper: w is " + w);
+      // log.info("Escaper: w is " + w);
       if (m2.find()) {
-        // System.err.println("  Found pattern.");
+        // log.info("  Found pattern.");
         w = m2.replaceAll("$1");
-        // System.err.println("  Changed it to: " + w);
+        // log.info("  Changed it to: " + w);
       }
       String newW = UTF8EquivalenceFunction.replaceAscii(w);
       wd.setWord(newW);

@@ -1,10 +1,14 @@
-package edu.stanford.nlp.dcoref;
+package edu.stanford.nlp.dcoref; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
 import edu.stanford.nlp.util.Generics;
 
-public class ScorerMUC extends CorefScorer {
+public class ScorerMUC extends CorefScorer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ScorerMUC.class);
 
   public ScorerMUC() {
     super(ScoreType.MUC);
@@ -35,9 +39,9 @@ public class ScorerMUC extends CorefScorer {
       rNum -= partitions.size();
     }
     if (rDen != doc.allGoldMentions.size()-doc.goldCorefClusters.values().size()) {
-      System.err.println("rDen is " + rDen);
-      System.err.println("doc.allGoldMentions.size() is " + doc.allGoldMentions.size());
-      System.err.println("doc.goldCorefClusters.values().size() is " + doc.goldCorefClusters.values().size());
+      log.info("rDen is " + rDen);
+      log.info("doc.allGoldMentions.size() is " + doc.allGoldMentions.size());
+      log.info("doc.goldCorefClusters.values().size() is " + doc.goldCorefClusters.values().size());
     }
     assert(rDen == (doc.allGoldMentions.size()-doc.goldCorefClusters.values().size()));
 

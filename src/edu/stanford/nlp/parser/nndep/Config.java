@@ -20,11 +20,11 @@ import java.util.function.Function;
  * @author Danqi Chen
  * @author Jon Gauthier
  */
-public class Config
-{
+public class Config {
+
   /**
-  *   Out-of-vocabulary token string.
-  */
+   *   Out-of-vocabulary token string.
+   */
   public static final String UNKNOWN = "-UNKNOWN-";
 
    /**
@@ -169,7 +169,13 @@ public class Config
   */
   public boolean noPunc = true;
 
-  /** 
+  /**
+  *  Update word embeddings when performing gradient descent.
+  *  Set to false if you provide embeddings and do not want to finetune.
+  */
+  public boolean doWordEmbeddingGradUpdate = true;
+
+  /**
    * Describes language-specific properties necessary for training and
    * testing. By default,
    * {@link edu.stanford.nlp.trees.PennTreebankLanguagePack} will be
@@ -225,6 +231,7 @@ public class Config
     unlabeled = PropertiesUtils.getBool(props, "unlabeled", unlabeled);
     cPOS = PropertiesUtils.getBool(props, "cPOS", cPOS);
     noPunc = PropertiesUtils.getBool(props, "noPunc", noPunc);
+    doWordEmbeddingGradUpdate = PropertiesUtils.getBool(props, "doWordEmbeddingGradUpdate", doWordEmbeddingGradUpdate);
 
     // Runtime parsing options
     sentenceDelimiter = PropertiesUtils.getString(props, "sentenceDelimiter", sentenceDelimiter);
@@ -247,7 +254,7 @@ public class Config
    * @return A {@link edu.stanford.nlp.international.Language}
    *         or {@code null} if no instance matches the given string.
    */
-  private Language getLanguage(String languageStr) {
+  private static Language getLanguage(String languageStr) {
     for (Language l : Language.values()) {
       if (l.name().equalsIgnoreCase(languageStr))
         return l;
@@ -275,5 +282,7 @@ public class Config
     System.err.printf("unlabeled = %b%n", unlabeled);
     System.err.printf("cPOS = %b%n", cPOS);
     System.err.printf("noPunc = %b%n", noPunc);
+    System.err.printf("doWordEmbeddingGradUpdate = %b%n", doWordEmbeddingGradUpdate);
   }
+
 }

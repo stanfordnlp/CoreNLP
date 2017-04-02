@@ -2,7 +2,8 @@
  *
  */
 package edu.stanford.nlp.neural;
-
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -14,13 +15,18 @@ import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * @author Minh-Thang Luong <lmthang@stanford.edu>
  * @author John Bauer
  * @author Richard Socher
+ * @author Kevin Clark
  */
-public class Embedding {
+public class Embedding implements Serializable  {
+  private static final long serialVersionUID = 4925779982530239054L;
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Embedding.class);
   private Map<String, SimpleMatrix> wordVectors;
   private int embeddingSize;
 
@@ -82,7 +88,7 @@ public class Embedding {
    * truncated and a warning is printed.
    */
   private void loadWordVectors(String wordVectorFile) {
-    System.err.println("# Loading embedding ...\n  word vector file = " + wordVectorFile);
+    log.info("# Loading embedding ...\n  word vector file = " + wordVectorFile);
     boolean warned = false;
 
     int numWords = 0;
@@ -106,14 +112,14 @@ public class Embedding {
       int dimOfWords = lineSplit.length - 1;
       if (embeddingSize <= 0) {
         embeddingSize = dimOfWords;
-        System.err.println("  detected embedding size = " + dimOfWords);
+        log.info("  detected embedding size = " + dimOfWords);
       }
       // the first entry is the word itself
       // the other entries will all be entries in the word vector
       if (dimOfWords > embeddingSize) {
         if (!warned) {
           warned = true;
-          System.err.println("WARNING: Dimensionality of numHid parameter and word vectors do not match, deleting word vector dimensions to fit!");
+          log.info("WARNING: Dimensionality of numHid parameter and word vectors do not match, deleting word vector dimensions to fit!");
         }
         dimOfWords = embeddingSize;
       } else if (dimOfWords < embeddingSize) {
@@ -128,7 +134,7 @@ public class Embedding {
 
       numWords++;
     }
-    System.err.println("  num words = " + numWords);
+    log.info("  num words = " + numWords);
   }
 
   /**
@@ -142,7 +148,7 @@ public class Embedding {
    * truncated and a warning is printed.
    */
   private void loadWordVectors(String wordFile, String vectorFile) {
-    System.err.println("# Loading embedding ...\n  word file = " + wordFile + "\n  vector file = " + vectorFile);
+    log.info("# Loading embedding ...\n  word file = " + wordFile + "\n  vector file = " + vectorFile);
     boolean warned = false;
 
     int numWords = 0;
@@ -169,14 +175,14 @@ public class Embedding {
 
       if (embeddingSize <= 0) {
         embeddingSize = dimOfWords;
-        System.err.println("  detected embedding size = " + dimOfWords);
+        log.info("  detected embedding size = " + dimOfWords);
       }
       // the first entry is the word itself
       // the other entries will all be entries in the word vector
       if (dimOfWords > embeddingSize) {
         if (!warned) {
           warned = true;
-          System.err.println("WARNING: Dimensionality of numHid parameter and word vectors do not match, deleting word vector dimensions to fit!");
+          log.info("WARNING: Dimensionality of numHid parameter and word vectors do not match, deleting word vector dimensions to fit!");
         }
         dimOfWords = embeddingSize;
       } else if (dimOfWords < embeddingSize) {
@@ -192,9 +198,12 @@ public class Embedding {
       numWords++;
     }
 
-    System.err.println("  num words = " + numWords);
+    log.info("  num words = " + numWords);
   }
 
+  public void writeToFile(String filename) throws IOException {
+    IOUtils.writeObjectToFile(wordVectors, filename);
+  }
 
   /*** Getters & Setters ***/
   public int size(){
@@ -221,6 +230,10 @@ public class Embedding {
     }
   }
 
+  public boolean containsWord(String word) {
+    return wordVectors.containsKey(word);
+  }
+
   public SimpleMatrix getStartWordVector() {
     return wordVectors.get(START_WORD);
   }
@@ -240,7 +253,6 @@ public class Embedding {
   public int getEmbeddingSize() {
     return embeddingSize;
   }
-
 
   public void setWordVectors(Map<String, SimpleMatrix> wordVectors) {
     this.wordVectors = wordVectors;
@@ -267,5 +279,4 @@ public class Embedding {
 
     return wordVectors.get(UNKNOWN_WORD).getNumElements();
   }
-
 }

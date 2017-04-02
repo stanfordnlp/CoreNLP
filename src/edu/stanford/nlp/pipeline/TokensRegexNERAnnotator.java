@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.*;
@@ -125,7 +126,10 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class TokensRegexNERAnnotator implements Annotator {
+public class TokensRegexNERAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TokensRegexNERAnnotator.class);
   protected static final Redwood.RedwoodChannels logger = Redwood.channels("TokenRegexNER");
   protected static final String PATTERN_FIELD = "pattern";
   protected static final String OVERWRITE_FIELD = "overwrite";
@@ -137,6 +141,7 @@ public class TokensRegexNERAnnotator implements Annotator {
   protected static final String defaultHeader = "pattern,ner,overwrite,priority,group";
 
   private final boolean ignoreCase;
+  private final List<Boolean> ignoreCaseList;
   private final Set<String> commonWords;
   private final List<Entry> entries;
   private final Map<SequencePattern<CoreMap>,Entry> patternToEntry;
@@ -145,7 +150,10 @@ public class TokensRegexNERAnnotator implements Annotator {
 
   private final Set<String> myLabels;  // set of labels to always overwrite
   private final Pattern validPosPattern;
+  private final List<Pattern> validPosPatternList;
   private final boolean verbose;
+
+  private final Map<Entry, Integer> entryToMappingFileNumber;
 
   // Labels for which we don't use the default overwrite types (mylabels)
   private final Set<String> noDefaultOverwriteLabels;
@@ -162,7 +170,7 @@ public class TokensRegexNERAnnotator implements Annotator {
   public static final String DEFAULT_BACKGROUND_SYMBOL = SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC";
 
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{
-          new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "Comma separated list of mapping files to use."),
+          new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "List of mapping files to use, separated by commas or semi-colons."),
           new PropertiesUtils.Property("mapping.header", defaultHeader, "Comma separated list specifying order of fields in the mapping file"),
           new PropertiesUtils.Property("mapping.field.<fieldname>", "", "Class mapping for annotation fields other than ner"),
           new PropertiesUtils.Property("commonWords", "", "Comma separated list of files for common words to not annotate (in case your mapping isn't very clean)"),
@@ -200,17 +208,21 @@ public class TokensRegexNERAnnotator implements Annotator {
     if (validPosRegex != null) {
       props.setProperty(prefix + "validpospattern", validPosRegex);
     }
+
     return props;
   }
 
-  private static Pattern FILE_DELIMITERS_PATTERN = Pattern.compile("\\s*[,;]\\s*");
-  private static Pattern COMMA_DELIMITERS_PATTERN = Pattern.compile("\\s*,\\s*");
+  private static final Pattern FILE_DELIMITERS_PATTERN = Pattern.compile("\\s*[,;]\\s*");
+  private static final Pattern COMMA_DELIMITERS_PATTERN = Pattern.compile("\\s*,\\s*");
+  private static final Pattern SEMICOLON_DELIMITERS_PATTERN = Pattern.compile("\\s*;\\s*");
+  private static final Pattern EQUALS_DELIMITERS_PATTERN = Pattern.compile("\\s*=\\s*");
+
   public TokensRegexNERAnnotator(String name, Properties properties) {
     String prefix = (name != null && !name.isEmpty())? name + ".":"";
     String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol", DEFAULT_BACKGROUND_SYMBOL);
     String[] backgroundSymbols = COMMA_DELIMITERS_PATTERN.split(backgroundSymbol);
     String mappingFiles = properties.getProperty(prefix + "mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
-    String[] mappings = FILE_DELIMITERS_PATTERN.split(mappingFiles);
+    String[] mappings = processListMappingFiles(mappingFiles);
     String validPosRegex = properties.getProperty(prefix + "validpospattern");
     this.posMatchType = PosMatchType.valueOf(properties.getProperty(prefix + "posmatchtype",
             DEFAULT_POS_MATCH_TYPE.name()));
@@ -276,7 +288,11 @@ public class TokensRegexNERAnnotator implements Annotator {
     } else {
       validPosPattern = null;
     }
-    entries = Collections.unmodifiableList(readEntries(name, noDefaultOverwriteLabels, ignoreCase, verbose, headerFields, annotationFieldnames, mappings));
+    validPosPatternList = new ArrayList<>();
+    ignoreCaseList = new ArrayList<>();
+    entryToMappingFileNumber = new HashMap<>();
+    processPerFileOptions(name, mappings, ignoreCaseList, validPosPatternList, ignoreCase, validPosPattern);
+    entries = Collections.unmodifiableList(readEntries(name, noDefaultOverwriteLabels, ignoreCaseList, entryToMappingFileNumber, verbose, headerFields, annotationFieldnames, mappings));
     IdentityHashMap<SequencePattern<CoreMap>, Entry> patternToEntry = new IdentityHashMap<>();
     multiPatternMatcher = createPatternMatcher(patternToEntry);
     this.patternToEntry = Collections.unmodifiableMap(patternToEntry);
@@ -296,7 +312,7 @@ public class TokensRegexNERAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     if (verbose) {
-      System.err.print("Adding TokensRegexNER annotations ... ");
+      log.info("Adding TokensRegexNER annotations ... ");
     }
 
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -315,21 +331,25 @@ public class TokensRegexNERAnnotator implements Annotator {
     }
 
     if (verbose)
-      System.err.println("done.");
+      log.info("done.");
   }
 
   private MultiPatternMatcher<CoreMap> createPatternMatcher(Map<SequencePattern<CoreMap>, Entry> patternToEntry) {
     // Convert to tokensregex pattern
-    int patternFlags = ignoreCase? Pattern.CASE_INSENSITIVE:0;
-    int stringMatchFlags = ignoreCase? NodePattern.CASE_INSENSITIVE:0;
-    Env env = TokenSequencePattern.getNewEnv();
-    env.setDefaultStringPatternFlags(patternFlags);
-    env.setDefaultStringMatchFlags(stringMatchFlags);
-    NodePattern<String> posTagPattern = (validPosPattern != null && PosMatchType.MATCH_ALL_TOKENS.equals(posMatchType))?
-            new CoreMapNodePattern.StringAnnotationRegexPattern(validPosPattern):null;
+
     List<TokenSequencePattern> patterns = new ArrayList<>(entries.size());
     for (Entry entry:entries) {
       TokenSequencePattern pattern;
+
+      Boolean ignoreCaseEntry = ignoreCaseList.get(entryToMappingFileNumber.get(entry));
+      int patternFlags = ignoreCaseEntry? Pattern.CASE_INSENSITIVE:0;
+      int stringMatchFlags = ignoreCaseEntry? NodePattern.CASE_INSENSITIVE:0;
+      Env env = TokenSequencePattern.getNewEnv();
+      env.setDefaultStringPatternFlags(patternFlags);
+      env.setDefaultStringMatchFlags(stringMatchFlags);
+
+      NodePattern<String> posTagPattern = (validPosPatternList.get(entryToMappingFileNumber.get(entry)) != null && PosMatchType.MATCH_ALL_TOKENS.equals(posMatchType))?
+              new CoreMapNodePattern.StringAnnotationRegexPattern(validPosPatternList.get(entryToMappingFileNumber.get(entry))):null;
       if (entry.tokensRegex != null) {
         // TODO: posTagPatterns...
         pattern = TokenSequencePattern.compile(env, entry.tokensRegex);
@@ -356,7 +376,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     return TokenSequencePattern.getMultiPatternMatcher(patterns);
   }
 
-  private void annotateMatched(List<CoreLabel> tokens) {
+  public void annotateMatched(List<CoreLabel> tokens) {
     List<SequenceMatchResult<CoreMap>> matched = multiPatternMatcher.findNonOverlapping(tokens);
     for (SequenceMatchResult<CoreMap> m:matched) {
       Entry entry = patternToEntry.get(m.pattern());
@@ -369,7 +389,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       String str = m.group(g);
       if (commonWords.contains(str)) {
         if (verbose) {
-          System.err.println("Not annotating (common word) '" + str + "': " +
+          log.info("Not annotating (common word) '" + str + "': " +
               StringUtils.joinFields(m.groupNodes(g), CoreAnnotations.NamedEntityTagAnnotation.class)
               + " with " + entry.getTypeDescription() + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
         }
@@ -390,7 +410,7 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
       } else {
         if (verbose) {
-          System.err.println("Not annotating  '" + m.group(g) + "': " +
+          log.info("Not annotating  '" + m.group(g) + "': " +
                   StringUtils.joinFields(m.groupNodes(g), CoreAnnotations.NamedEntityTagAnnotation.class)
                   + " with " + entry.getTypeDescription() + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
         }
@@ -401,7 +421,7 @@ public class TokensRegexNERAnnotator implements Annotator {
   // TODO: roll check into tokens regex pattern?
   // That allows for better matching because unmatched sequences will be eliminated at match time
   private boolean checkPosTags(List<CoreLabel> tokens, int start, int end) {
-    if (validPosPattern != null) {
+    if (validPosPattern != null || atLeastOneValidPosPattern(validPosPatternList)) {
       // Need to check POS tag too...
       switch (posMatchType) {
         case MATCH_ONE_TOKEN_PHRASE_ONLY:
@@ -411,8 +431,14 @@ public class TokensRegexNERAnnotator implements Annotator {
           for (int i = start; i < end; i++) {
             CoreLabel token = tokens.get(i);
             String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-            if (pos != null && validPosPattern.matcher(pos).matches()) {
+            if (pos != null && validPosPattern != null && validPosPattern.matcher(pos).matches()) {
               return true;
+            } else if (pos != null) {
+              for (Pattern pattern : validPosPatternList) {
+                if (pattern != null && pattern.matcher(pos).matches()) {
+                  return true;
+                }
+              }
             }
           }
           return false;
@@ -532,7 +558,7 @@ public class TokensRegexNERAnnotator implements Annotator {
    */
   private static List<Entry> readEntries(String annotatorName,
                                          Set<String> noDefaultOverwriteLabels,
-                                         boolean ignoreCase, boolean verbose,
+                                         List<Boolean> ignoreCaseList, Map<Entry, Integer> entryToMappingFileNumber, boolean verbose,
                                          String[] headerFields,
                                          String[] annotationFieldnames,
                                          String... mappings) {
@@ -542,12 +568,13 @@ public class TokensRegexNERAnnotator implements Annotator {
     //       we don't know how many tokens are matched until after the matching is done)
     List<Entry> entries = new ArrayList<>();
     TrieMap<String,Entry> seenRegexes = new TrieMap<>();
-    Arrays.sort(mappings);
-    for (String mapping:mappings) {
+    //Arrays.sort(mappings);
+    for (int mappingFileIndex = 0; mappingFileIndex < mappings.length; mappingFileIndex++) {
+      String mapping = mappings[mappingFileIndex];
       BufferedReader rd = null;
       try {
         rd = IOUtils.readerFromString(mapping);
-        readEntries(annotatorName, headerFields, annotationFieldnames, entries, seenRegexes, mapping, rd, noDefaultOverwriteLabels, ignoreCase, verbose);
+        readEntries(annotatorName, headerFields, annotationFieldnames, entries, seenRegexes, mapping, rd, noDefaultOverwriteLabels, ignoreCaseList.get(mappingFileIndex), mappingFileIndex, entryToMappingFileNumber, verbose);
       } catch (IOException e) {
         throw new RuntimeIOException("Couldn't read TokensRegexNER from " + mapping, e);
       } finally {
@@ -594,7 +621,8 @@ public class TokensRegexNERAnnotator implements Annotator {
                                          String mappingFilename,
                                          BufferedReader mapping,
                                          Set<String> noDefaultOverwriteLabels,
-                                         boolean ignoreCase, boolean verbose) throws IOException {
+                                         boolean ignoreCase, Integer mappingFileIndex,
+                                         Map<Entry, Integer> entryToMappingFileNumber, boolean verbose) throws IOException {
     int origEntriesSize = entries.size();
     int isTokensRegex = 0;
     int lineCount = 0;
@@ -738,6 +766,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       }
 
       entries.add(entry);
+      entryToMappingFileNumber.put(entry, mappingFileIndex);
       seenRegexes.put(key, entry);
       if (entry.tokensRegex != null) isTokensRegex++;
     }
@@ -755,13 +784,86 @@ public class TokensRegexNERAnnotator implements Annotator {
     return false;
   }
 
-  @Override
-  public Set<Requirement> requires() {
-    return StanfordCoreNLP.TOKENIZE_AND_SSPLIT;
+  // todo [cdm 2016]: This logic seems wrong. If you have semi-colons only between files, it doesn't work!
+  private static String[] processListMappingFiles(String mappingFiles) {
+    if (mappingFiles.contains(";") && mappingFiles.contains(",")) {
+      return SEMICOLON_DELIMITERS_PATTERN.split(mappingFiles);
+      //Semicolons separate the files and for each file, commas separate the options - options handled later
+    } else if (mappingFiles.contains(",")) {
+      return COMMA_DELIMITERS_PATTERN.split(mappingFiles);
+      //No per-file options, commas separate the files
+    } else {
+      //Semicolons separate the files
+      return SEMICOLON_DELIMITERS_PATTERN.split(mappingFiles);
+    }
+  }
+
+  private static void processPerFileOptions(String annotatorName, String[] mappings, List<Boolean> ignoreCaseList, List<Pattern> validPosPatternList, boolean ignoreCase, Pattern validPosPattern) {
+    Integer numMappingFiles = mappings.length;
+    for (int index = 0; index < numMappingFiles; index++) {
+      boolean ignoreCaseSet = false;
+      boolean validPosPatternSet = false;
+      String[] allOptions = COMMA_DELIMITERS_PATTERN.split(mappings[index].trim());
+      Integer numOptions = allOptions.length;
+      if (numOptions > 1) { // there are some per file options here
+        for (int i = 0; i < numOptions-1; i++) {
+          String[] optionAndValue = EQUALS_DELIMITERS_PATTERN.split(allOptions[i].trim());
+          if (optionAndValue.length != 2) {
+            throw new IllegalArgumentException("TokensRegexNERAnnotator " + annotatorName
+                    + " ERROR: Incorrectly specified options for mapping file " + mappings[index].trim());
+          } else {
+            switch (optionAndValue[0].trim().toLowerCase()) {
+              case "ignorecase":
+                ignoreCaseList.add(Boolean.parseBoolean(optionAndValue[1].trim()));
+                ignoreCaseSet = true;
+                break;
+              case "validpospattern":
+                String validPosRegex = optionAndValue[1].trim();
+                if (validPosRegex != null && !validPosRegex.equals("")) {
+                  validPosPatternList.add(Pattern.compile(validPosRegex));
+                } else {
+                  validPosPatternList.add(validPosPattern);
+                }
+                validPosPatternSet = true;
+                break;
+              default:
+                break;
+            }
+          }
+        }
+        mappings[index] = allOptions[numOptions-1];
+      }
+
+      if (!ignoreCaseSet) {
+        ignoreCaseList.add(ignoreCase);
+      }
+
+      if (!validPosPatternSet) {
+        validPosPatternList.add(validPosPattern);
+      }
+    }
+  }
+
+  private static boolean atLeastOneValidPosPattern(List<Pattern> validPosPatternList) {
+    for (Pattern pattern : validPosPatternList) {
+      if (pattern != null) return true;
+    }
+    return false;
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class
+    )));
+  }
+
+  @Override
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     // TODO: we might want to allow for different RegexNER annotators
     // to satisfy different requirements
     return Collections.emptySet();

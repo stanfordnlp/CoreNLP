@@ -1,4 +1,7 @@
 package edu.stanford.nlp.trees;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.trees.ud.EnhancementOptions;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -29,11 +32,71 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
  * @author John Bauer
  * @author Sebastian Schuster
  */
-public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
+public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(UniversalEnglishGrammaticalStructure.class);
 
   private static final long serialVersionUID = 1L;
 
   private static final boolean DEBUG = System.getProperty("UniversalEnglishGrammaticalStructure", null) != null;
+
+  private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
+
+  /*
+   * Options for "Enhanced" representation:
+   *
+   * - Process multi-word prepositions: No
+   * - Add prepositions to relation labels: Yes
+   * - Add prepositions only to nmod relations: No
+   * - Add coordinating conjunctions to relation labels: Yes
+   * - Propagate dependents: Yes
+   * - Add "referent" relations: Yes
+   * - Add copy nodes for conjoined Ps and PPs: No
+   * - Turn quantificational modifiers into flat MWEs: No
+   * - Add relations between controlling subject and controlled verbs: Yes
+   *
+   */
+  public static final EnhancementOptions ENHANCED_OPTIONS = new EnhancementOptions(false, true, false, true, true, true,
+      false, false, true);
+
+  /*
+   * Options for "Enhanced++" representation:
+   *
+   * - Process multi-word prepositions: Yes
+   * - Add prepositions to relation labels: Yes
+   * - Add prepositions only to nmod relations: No
+   * - Add coordinating conjunctions to relation labels: Yes
+   * - Propagate dependents: Yes
+   * - Add "referent" relations: Yes
+   * - Add copy nodes for conjoined Ps and PPs: Yes
+   * - Turn quantificational modifiers into flat MWEs: Yes
+   * - Add relations between controlling subject and controlled verbs: Yes
+   *
+   */
+  public static final EnhancementOptions ENHANCED_PLUS_PLUS_OPTIONS = new EnhancementOptions(true, true, false, true, true, true,
+      true, true, true);
+
+  /*
+   * Options for "Collapsed" representation.
+   * This represenation is similar to the "collapsed" SD representation
+   * without any "Extra" relations.
+   *
+   * - Process multi-word prepositions: Yes
+   * - Add prepositions to relation labels: Yes
+   * - Add prepositions only to nmod relations: Yes
+   * - Add coordinating conjunctions to relation labels: Yes
+   * - Propagate dependents: No
+   * - Add "referent" relations: No
+   * - Add copy nodes for conjoined Ps and PPs: Yes
+   * - Turn quantificational modifiers into flat MWEs: No
+   * - Add relations between controlling subject and controlled verbs: No
+   *
+   */
+  @Deprecated
+  public static final EnhancementOptions COLLAPSED_OPTIONS = new EnhancementOptions(true, true, true, true, false, false,
+      true, false, false);
+
 
   /**
    * Construct a new {@code EnglishGrammaticalStructure} from an existing parse
@@ -149,6 +212,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After correctSubjPass:", sg.typedDependencies());
     }
+    processNames(sg);
+    if (DEBUG) {
+      printListSorted("After processNames:", sg.typedDependencies());
+    }
     removeExactDuplicates(sg);
     if (DEBUG) {
       printListSorted("After removeExactDuplicates:", sg.typedDependencies());
@@ -159,14 +226,20 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     List<TypedDependency> lis = new ArrayList<>(list);
     Collections.sort(lis);
     if (title != null) {
-      System.err.println(title);
+      log.info(title);
     }
-    System.err.println(lis);
+    log.info(lis);
   }
 
   @Override
   protected void postProcessDependencies(List<TypedDependency> list) {
     SemanticGraph sg = new SemanticGraph(list);
+    postProcessDependencies(sg);
+    list.clear();
+    list.addAll(sg.typedDependencies());
+  }
+
+  protected void postProcessDependencies(SemanticGraph sg) {
     if (DEBUG) {
       printListSorted("At postProcessDependencies:", sg.typedDependencies());
     }
@@ -178,8 +251,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After converting rel:", sg.typedDependencies());
     }
-    list.clear();
-    list.addAll(sg.typedDependencies());
   }
 
   @Override
@@ -202,18 +273,31 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   /* Semgrex patterns for prepositional phrases. */
   private static SemgrexPattern PASSIVE_AGENT_PATTERN = SemgrexPattern.compile("{}=gov >nmod=reln ({}=mod >case {word:/^(?i:by)$/}=c1) >auxpass {}");
-  private static SemgrexPattern PREP_MW3_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2 >mwe ({}=c3 !== {}=c2) ))]");
-  private static SemgrexPattern PREP_MW2_PATTERN = SemgrexPattern.compile("{}=gov >/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2))");
-  private static SemgrexPattern PREP_PATTERN = SemgrexPattern.compile("{}=gov   >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1)");
+  private static SemgrexPattern[] PREP_MW3_PATTERNS = {
+      SemgrexPattern.compile("{}=gov   [>/^nmod$/=reln ({}=mod >case ({}=c1 >mwe {}=c2 >mwe ({}=c3 !== {}=c2) ))]"),
+      SemgrexPattern.compile("{}=gov   [>/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ ({}=c1 >mwe {}=c2 >mwe ({}=c3 !== {}=c2) ))]")
 
+  };
+  private static SemgrexPattern[] PREP_MW2_PATTERNS = {
+      SemgrexPattern.compile("{}=gov >/^nmod$/=reln ({}=mod >case ({}=c1 >mwe {}=c2))"),
+    SemgrexPattern.compile("{}=gov >/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ ({}=c1 >mwe {}=c2))")
+
+  };
+  private static SemgrexPattern[] PREP_PATTERNS = {
+      SemgrexPattern.compile("{}=gov   >/^nmod$/=reln ({}=mod >case {}=c1)"),
+      SemgrexPattern.compile("{}=gov   >/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ {}=c1)")
+  };
 
   /**
    * Adds the case marker(s) to all nmod, acl and advcl relations that are
    * modified by one or more case markers(s).
    *
+   * @param enhanceOnlyNmods If this is set to true, then prepositons will only be appended to nmod
+   *                         relations (and not to acl or advcl) relations.
+   *
    * @see UniversalEnglishGrammaticalStructure#addCaseMarkersToReln
    */
-  private static void addCaseMarkerInformation(SemanticGraph sg) {
+  private static void addCaseMarkerInformation(SemanticGraph sg, boolean enhanceOnlyNmods) {
 
     /* Semgrexes require a graph with a root. */
     if (sg.getRoots().isEmpty())
@@ -233,65 +317,83 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
 
     /* 3-word prepositions */
-    sgCopy = sg.makeSoftCopy();
-    matcher = PREP_MW3_PATTERN.matcher(sgCopy);
-    while (matcher.find()) {
-      List<IndexedWord> caseMarkers = Generics.newArrayList(3);
-      caseMarkers.add(matcher.getNode("c1"));
-      caseMarkers.add(matcher.getNode("c2"));
-      caseMarkers.add(matcher.getNode("c3"));
+    for (SemgrexPattern p: PREP_MW3_PATTERNS) {
+      sgCopy = sg.makeSoftCopy();
+      matcher = p.matcher(sgCopy);
+      while (matcher.find()) {
+        if (enhanceOnlyNmods && ! matcher.getRelnString("reln").equals("nmod")) {
+          continue;
+        }
 
-      Collections.sort(caseMarkers);
+        List<IndexedWord> caseMarkers = Generics.newArrayList(3);
+        caseMarkers.add(matcher.getNode("c1"));
+        caseMarkers.add(matcher.getNode("c2"));
+        caseMarkers.add(matcher.getNode("c3"));
+
+        Collections.sort(caseMarkers);
 
       /* We only want to match every case marker once. */
-      if (caseMarkers.equals(oldCaseMarkers))
-        continue;
+        if (caseMarkers.equals(oldCaseMarkers))
+          continue;
 
 
-      IndexedWord gov = matcher.getNode("gov");
-      IndexedWord mod = matcher.getNode("mod");
+        IndexedWord gov = matcher.getNode("gov");
+        IndexedWord mod = matcher.getNode("mod");
 
-      addCaseMarkersToReln(sg, gov, mod, caseMarkers);
+        addCaseMarkersToReln(sg, gov, mod, caseMarkers);
 
-      oldCaseMarkers = caseMarkers;
+        oldCaseMarkers = caseMarkers;
+      }
     }
 
 
     /* 2-word prepositions */
-    sgCopy = sg.makeSoftCopy();
-    matcher = PREP_MW2_PATTERN.matcher(sgCopy);
-    while (matcher.find()) {
-      List<IndexedWord> caseMarkers = Generics.newArrayList(2);
-      caseMarkers.add(matcher.getNode("c1"));
-      caseMarkers.add(matcher.getNode("c2"));
-      Collections.sort(caseMarkers);
+    for (SemgrexPattern p: PREP_MW2_PATTERNS) {
+      sgCopy = sg.makeSoftCopy();
+      matcher = p.matcher(sgCopy);
+      while (matcher.find()) {
+        if (enhanceOnlyNmods && ! matcher.getRelnString("reln").equals("nmod")) {
+          continue;
+        }
+
+        List<IndexedWord> caseMarkers = Generics.newArrayList(2);
+        caseMarkers.add(matcher.getNode("c1"));
+        caseMarkers.add(matcher.getNode("c2"));
+        Collections.sort(caseMarkers);
 
       /* We only want to match every case marker once. */
-      if (caseMarkers.equals(oldCaseMarkers))
-        continue;
+        if (caseMarkers.equals(oldCaseMarkers))
+          continue;
 
-      IndexedWord gov = matcher.getNode("gov");
-      IndexedWord mod = matcher.getNode("mod");
-      addCaseMarkersToReln(sg, gov, mod, caseMarkers);
+        IndexedWord gov = matcher.getNode("gov");
+        IndexedWord mod = matcher.getNode("mod");
+        addCaseMarkersToReln(sg, gov, mod, caseMarkers);
 
-      oldCaseMarkers = caseMarkers;
+        oldCaseMarkers = caseMarkers;
+      }
     }
 
     /* Single-word prepositions */
-    sgCopy = sg.makeSoftCopy();
-    matcher = PREP_PATTERN.matcher(sgCopy);
-    while (matcher.find()) {
-      List<IndexedWord> caseMarkers = Generics.newArrayList(1);
-      caseMarkers.add(matcher.getNode("c1"));
+    for (SemgrexPattern p: PREP_PATTERNS) {
+      sgCopy = sg.makeSoftCopy();
+      matcher = p.matcher(sgCopy);
+      while (matcher.find()) {
+        if (enhanceOnlyNmods && ! matcher.getRelnString("reln").equals("nmod")) {
+          continue;
+        }
 
-      if (caseMarkers.equals(oldCaseMarkers))
-        continue;
+        List<IndexedWord> caseMarkers = Generics.newArrayList(1);
+        caseMarkers.add(matcher.getNode("c1"));
 
-      IndexedWord gov = matcher.getNode("gov");
-      IndexedWord mod = matcher.getNode("mod");
-      addCaseMarkersToReln(sg, gov, mod, caseMarkers);
+        if (caseMarkers.equals(oldCaseMarkers))
+          continue;
 
-      oldCaseMarkers = caseMarkers;
+        IndexedWord gov = matcher.getNode("gov");
+        IndexedWord mod = matcher.getNode("mod");
+        addCaseMarkersToReln(sg, gov, mod, caseMarkers);
+
+        oldCaseMarkers = caseMarkers;
+      }
     }
 
   }
@@ -752,6 +854,94 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
+  @Override
+  protected void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
+
+    SemanticGraph sg = new SemanticGraph(list);
+
+    if (DEBUG) {
+      printListSorted("addEnhancements: before correctDependencies()", sg.typedDependencies());
+    }
+
+    correctDependencies(sg);
+
+    if (DEBUG) {
+      printListSorted("addEnhancements: after correctDependencies()", sg.typedDependencies());
+    }
+
+    /* Turn multi-word prepositions into flat mwe. */
+    if (options.processMultiWordPrepositions) {
+      processMultiwordPreps(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after processMultiwordPreps()", sg.typedDependencies());
+      }
+    }
+    /* Turn quantificational modifiers into flat mwe. */
+    if (options.demoteQuantMod) {
+      demoteQuantificationalModifiers(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after demoteQuantificationalModifiers()", sg.typedDependencies());
+      }
+    }
+    /* Add copy nodes for conjoined Ps and PPs. */
+    if (options.addCopyNodes) {
+      expandPPConjunctions(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after expandPPConjunctions()", sg.typedDependencies());
+      }
+      expandPrepConjunctions(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after expandPrepConjunctions()", sg.typedDependencies());
+      }
+    }
+    /* Add propositions to relation names. */
+    if (options.enhancePrepositionalModifiers) {
+      addCaseMarkerInformation(sg, options.enhanceOnlyNmods);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after addCaseMarkerInformation()", sg.typedDependencies());
+      }
+    }
+    /* Add coordinating conjunctions to relation names. */
+    if (options.enhanceConjuncts) {
+      addConjInformation(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after addConjInformation()", sg.typedDependencies());
+      }
+    }
+    /* Add "referent" relations. */
+    if (options.addReferent) {
+      addRef(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after addRef()", sg.typedDependencies());
+      }
+      collapseReferent(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after collapseReferent()", sg.typedDependencies());
+      }
+    }
+    /* Propagate dependents. */
+    if (options.propagateDependents) {
+      treatCC(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after treatCC()", sg.typedDependencies());
+      }
+    }
+    /* Add relations between controlling subjects and controlled verbs. */
+    if (options.addXSubj) {
+      addExtraNSubj(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after addExtraNSubj()", sg.typedDependencies());
+      }
+    }
+
+    correctSubjPass(sg);
+    list.clear();
+    list.addAll(sg.typedDependencies());
+
+    Collections.sort(list);
+  }
+
+
   /**
    * Destructively modifies this {@code Collection<TypedDependency>}
    * by collapsing several types of transitive pairs of dependencies or
@@ -787,85 +977,19 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    */
   @Override
   protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
-    SemanticGraph sg = new SemanticGraph(list);
-
-    if (DEBUG) {
-      printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, sg.typedDependencies());
-    }
-
-
-    correctDependencies(sg);
-    if (DEBUG) {
-      printListSorted("After correctDependencies:", sg.typedDependencies());
-    }
-
-    processMultiwordPreps(sg);
-    if (DEBUG) {
-      printListSorted("After processMultiwordPreps:", sg.typedDependencies());
-    }
-
-
-    expandPPConjunctions(sg);
-    if (DEBUG) {
-      printListSorted("After expandPPConjunctions:", sg.typedDependencies());
-    }
-
-    expandPrepConjunctions(sg);
-    if (DEBUG) {
-      printListSorted("After expandPrepConjunctions:", sg.typedDependencies());
-    }
-
-    addCaseMarkerInformation(sg);
-    if (DEBUG) {
-      printListSorted("After addCaseMarkerInformation:", sg.typedDependencies());
-    }
-
-    addConjInformation(sg);
-    if (DEBUG) {
-      printListSorted("After addConjInformation:", sg.typedDependencies());
-    }
-
+    EnhancementOptions options = new EnhancementOptions(COLLAPSED_OPTIONS);
     if (includeExtras.doRef) {
-      addRef(sg);
-      if (DEBUG) {
-        printListSorted("After adding ref:", sg.typedDependencies());
-      }
-
-      if (includeExtras.collapseRef) {
-        collapseReferent(sg);
-        if (DEBUG) {
-          printListSorted("After collapse referent:",  sg.typedDependencies());
-        }
-      }
-    }
-
-    if (CCprocess) {
-      treatCC(sg);
-      if (DEBUG) {
-        printListSorted("After treatCC:", sg.typedDependencies());
-      }
+      options.addReferent = true;
     }
 
     if (includeExtras.doSubj) {
-      addExtraNSubj(sg);
-
-      if (DEBUG) {
-        printListSorted("After adding extra nsubj:", sg.typedDependencies());
-      }
-      correctSubjPass(sg);
-
-      if (DEBUG) {
-        printListSorted("After correctSubjPass:", sg.typedDependencies());
-      }
+      options.addXSubj = true;
     }
 
-    list.clear();
-    list.addAll(sg.typedDependencies());
-
-    Collections.sort(list);
-    if (DEBUG) {
-      printListSorted("After all collapse:", list);
+    if (CCprocess) {
+      options.propagateDependents = true;
     }
+    addEnhancements(list, options);
   }
 
   @Override
@@ -987,10 +1111,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
-    // System.err.println(map);
-    // if (DEBUG) System.err.println("Subject map: " + subjectMap);
-    // if (DEBUG) System.err.println("Object map: " + objectMap);
-    // System.err.println(rcmodHeads);
+    // log.info(map);
+    // if (DEBUG) log.info("Subject map: " + subjectMap);
+    // if (DEBUG) log.info("Object map: " + objectMap);
+    // log.info(rcmodHeads);
 
     // create a new list of typed dependencies
     //Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>(list);
@@ -1005,10 +1129,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
         // look at the dep in the conjunct
         Set<SemanticGraphEdge> gov_relations = map.get(gov);
-        // System.err.println("gov " + gov);
+        // log.info("gov " + gov);
         if (gov_relations != null) {
           for (SemanticGraphEdge edge1 : gov_relations) {
-            // System.err.println("gov rel " + td1);
+            // log.info("gov rel " + td1);
             IndexedWord newGov = edge1.getGovernor();
             // in the case of errors in the basic dependencies, it
             // is possible to have overlapping newGov & dep
@@ -1023,13 +1147,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
                 // to prevent wrong propagation in the case of long dependencies in relative clauses
                 if (newRel != DIRECT_OBJECT && newRel != NOMINAL_SUBJECT) {
                   if (DEBUG) {
-                    System.err.println("Adding new " + newRel + " dependency from " + newGov + " to " + dep + " (subj/obj case)");
+                    log.info("Adding new " + newRel + " dependency from " + newGov + " to " + dep + " (subj/obj case)");
                   }
                   sg.addEdge(newGov, dep, newRel, Double.NEGATIVE_INFINITY, true);
                 }
               } else {
                 if (DEBUG) {
-                  System.err.println("Adding new " + newRel + " dependency from " + newGov + " to " + dep);
+                  log.info("Adding new " + newRel + " dependency from " + newGov + " to " + dep);
                 }
                 sg.addEdge(newGov, dep, newRel, Double.NEGATIVE_INFINITY, true);
               }
@@ -1071,7 +1195,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
             }
           }
           if (DEBUG) {
-            System.err.println("Adding new " + relation + " dependency from " + dep + " to " + tdsubj.getDependent() + " (subj propagation case)");
+            log.info("Adding new " + relation + " dependency from " + dep + " to " + tdsubj.getDependent() + " (subj propagation case)");
           }
           sg.addEdge(dep, tdsubj.getDependent(), relation, Double.NEGATIVE_INFINITY, true);
         }
@@ -1090,7 +1214,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         // && ! prepcDep.contains(gov)) {
         // TypedDependency tdobj = objectMap.get(gov);
         // if (DEBUG) {
-        // System.err.println("Adding new " + tdobj.reln() + " dependency from "
+        // log.info("Adding new " + tdobj.reln() + " dependency from "
         // + dep + " to " + tdobj.dep() + " (obj propagation case)");
         // }
         // newTypedDeps.add(new TypedDependency(tdobj.reln(), dep,
@@ -1176,7 +1300,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         newDep = leftChildEdge.getDependent();
       }
       if (newDep != null && ! sg.containsEdge(head, newDep)) {
-        sg.addEdge(head, newDep, REFERENT, Double.NEGATIVE_INFINITY, true);
+        sg.addEdge(head, newDep, REFERENT, Double.NEGATIVE_INFINITY, false);
       }
     }
   }
@@ -1243,18 +1367,18 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       if (objects.size() > 0) {
         for (IndexedWord object : objects) {
           if ( ! sg.containsEdge(modifier, object))
-            sg.addEdge(modifier, object, NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
+            sg.addEdge(modifier, object, CONTROLLING_NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
         }
       } else {
         for (IndexedWord subject : subjects) {
           if ( ! sg.containsEdge(modifier, subject))
-            sg.addEdge(modifier, subject, NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
+            sg.addEdge(modifier, subject, CONTROLLING_NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
         }
       }
     }
   }
 
-  private static SemgrexPattern CORRECT_SUBJPASS_PATTERN = SemgrexPattern.compile("{}=gov >auxpass {} >/^(nsubj|csubj)$/ {}=subj");
+  private static SemgrexPattern CORRECT_SUBJPASS_PATTERN = SemgrexPattern.compile("{}=gov >auxpass {} >/^(nsubj|csubj).*$/ {}=subj");
 
   /**
    * This method corrects subjects of verbs for which we identified an auxpass,
@@ -1283,6 +1407,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         reln = NOMINAL_PASSIVE_SUBJECT;
       } else if (edge.getRelation() == CLAUSAL_SUBJECT) {
         reln = CLAUSAL_PASSIVE_SUBJECT;
+      } else if (edge.getRelation() == CONTROLLING_NOMINAL_SUBJECT) {
+        reln = CONTROLLING_NOMINAL_PASSIVE_SUBJECT;
+      } else if (edge.getRelation() == CONTROLLING_CLAUSAL_SUBJECT) {
+        reln = CONTROLLING_CLAUSAL_PASSIVE_SUBJECT;
       }
 
       if (reln != null) {
@@ -1344,7 +1472,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     int numWords = vertexList.size();
 
     for (int i = 1; i < numWords; i++) {
-      String bigram = vertexList.get(i-1).value().toLowerCase() + "_" + vertexList.get(i).value().toLowerCase();
+      String bigram = vertexList.get(i-1).value().toLowerCase() + '_' + vertexList.get(i).value().toLowerCase();
 
       if (bigrams.get(bigram) == null) {
         bigrams.put(bigram, new HashSet<>());
@@ -1592,6 +1720,217 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         first = false;
       } else {
         sg.addEdge(mweHead, word, MULTI_WORD_EXPRESSION, Double.NEGATIVE_INFINITY, false);
+      }
+    }
+  }
+
+
+  /** A lot of, an assortment of, ... */
+  private static final SemgrexPattern QUANT_MOD_3W_PATTERN = SemgrexPattern.compile("{word:/(?i:lot|assortment|number|couple|bunch|handful|litany|sheaf|slew|dozen|series|variety|multitude|wad|clutch|wave|mountain|array|spate|string|ton|range|plethora|heap|sort|form|kind|type|version|bit|pair|triple|total)/}=w2 >det {word:/(?i:an?)/}=w1 !>amod {} >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w3) . {}=w3");
+
+  private static final SemgrexPattern[] QUANT_MOD_2W_PATTERNS = {
+      /* Lots of, dozens of, heaps of ... */
+      SemgrexPattern.compile("{word:/(?i:lots|many|several|plenty|tons|dozens|multitudes|mountains|loads|pairs|tens|hundreds|thousands|millions|billions|trillions|[0-9]+s)/}=w1 >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w2) . {}=w2"),
+
+      /* Some of the ..., all of them, ... */
+      SemgrexPattern.compile("{word:/(?i:some|all|both|neither|everyone|nobody|one|two|three|four|five|six|seven|eight|nine|ten|hundred|thousand|million|billion|trillion|[0-9]+)/}=w1 [>nmod ({tag:/(NN.*)/}=gov >case ({word:/(?i:of)/}=w2 $+ {}=det) >det {}=det) |  >nmod ({tag:/(PRP.*)/}=gov >case {word:/(?i:of)/}=w2)] . {}=w2")
+  };
+
+
+  private static void demoteQuantificationalModifiers(SemanticGraph sg) {
+    SemanticGraph sgCopy = sg.makeSoftCopy();
+    SemgrexMatcher matcher = QUANT_MOD_3W_PATTERN.matcher(sgCopy);
+
+    while (matcher.findNextMatchingNode()) {
+      IndexedWord w1 = matcher.getNode("w1");
+      IndexedWord w2 = matcher.getNode("w2");
+      IndexedWord w3 = matcher.getNode("w3");
+      IndexedWord gov = matcher.getNode("gov");
+
+      demoteQmodParentHelper(sg, gov, w2);
+
+      List<IndexedWord> otherDeps = Generics.newLinkedList();
+
+      otherDeps.add(w1);
+      otherDeps.add(w2);
+      otherDeps.add(w3);
+
+      demoteQmodMWEHelper(sg, otherDeps, gov, w2);
+    }
+
+    for (SemgrexPattern p : QUANT_MOD_2W_PATTERNS) {
+      sgCopy = sg.makeSoftCopy();
+      matcher = p.matcher(sgCopy);
+      while (matcher.findNextMatchingNode()) {
+        IndexedWord w1 = matcher.getNode("w1");
+        IndexedWord w2 = matcher.getNode("w2");
+        IndexedWord gov = matcher.getNode("gov");
+
+        demoteQmodParentHelper(sg, gov, w1);
+
+        List<IndexedWord> otherDeps = Generics.newLinkedList();
+        otherDeps.add(w1);
+        otherDeps.add(w2);
+
+        demoteQmodMWEHelper(sg, otherDeps, gov, w1);
+      }
+    }
+
+
+  }
+
+  private static void demoteQmodMWEHelper(SemanticGraph sg, List<IndexedWord> otherDeps, IndexedWord gov, IndexedWord oldHead) {
+    createMultiWordExpression(sg, gov, QMOD, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
+  }
+
+
+  private static void demoteQmodParentHelper(SemanticGraph sg, IndexedWord gov, IndexedWord oldHead) {
+    if (!sg.getRoots().contains(oldHead)) {
+      IndexedWord parent = sg.getParent(oldHead);
+      if (parent == null) {
+        return;
+      }
+      SemanticGraphEdge edge = sg.getEdge(parent, oldHead);
+      sg.addEdge(parent, gov, edge.getRelation(), edge.getWeight(), edge.isExtra());
+      sg.removeEdge(edge);
+    } else {
+      sg.getRoots().remove(oldHead);
+      sg.addRoot(gov);
+    }
+
+    //temporary relation to keep the graph connected
+    sg.addEdge(gov, oldHead, DEPENDENT, Double.NEGATIVE_INFINITY, false);
+    sg.removeEdge(sg.getEdge(oldHead, gov));
+  }
+
+
+  private static final SemgrexPattern[] NAME_PATTERNS = {
+    SemgrexPattern.compile("{ner:PERSON}=w1 >compound {}=w2"),
+    SemgrexPattern.compile("{ner:LOCATION}=w1 >compound {}=w2")
+  };
+  private static final Predicate<String> PUNCT_TAG_FILTER = new PennTreebankLanguagePack().punctuationWordRejectFilter();
+
+
+  /**
+   *
+   * Looks for NPs that should have the {@code name} relation and
+   * a) changes the structure such that the leftmost token becomes the head
+   * b) changes the relation from {@code compound} to {@code name}.
+   *
+   * Requires NER tags.
+   *
+   * @param sg A semantic graph.
+   */
+  private static void processNames(SemanticGraph sg) {
+
+    if ( ! USE_NAME) {
+      return;
+    }
+
+    // check whether NER tags are available
+    IndexedWord rootToken = sg.getFirstRoot();
+    if (rootToken == null || !rootToken.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {
+      return;
+    }
+
+    SemanticGraph sgCopy = sg.makeSoftCopy();
+    for (SemgrexPattern pattern : NAME_PATTERNS) {
+      SemgrexMatcher matcher = pattern.matcher(sgCopy);
+      List<IndexedWord> nameParts = new ArrayList<>();
+      IndexedWord head = null;
+      while (matcher.find()) {
+        IndexedWord w1 = matcher.getNode("w1");
+        IndexedWord w2 = matcher.getNode("w2");
+        if (head != w1) {
+          if (head != null) {
+            processNamesHelper(sg, head, nameParts);
+            nameParts = new ArrayList<>();
+          }
+          head = w1;
+        }
+        if (w2.ner().equals(w1.ner())) {
+          nameParts.add(w2);
+        }
+      }
+      if (head != null) {
+        processNamesHelper(sg, head, nameParts);
+        sgCopy = sg.makeSoftCopy();
+      }
+    }
+  }
+
+
+  private static void processNamesHelper(SemanticGraph sg, IndexedWord oldHead, List<IndexedWord> nameParts) {
+
+    if (nameParts.size() < 1) {
+      // if the named entity only spans one token, change compound relations
+      // to nmod relations to get the right structure for NPs with additional modifiers
+      // such as "Mrs. Clinton".
+      Set<IndexedWord> children = new HashSet<>(sg.getChildren(oldHead));
+      for (IndexedWord child : children) {
+        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, child);
+        if (oldEdge.getRelation() == UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER) {
+          sg.addEdge(oldHead, child, UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER,
+              oldEdge.getWeight(), oldEdge.isExtra());
+          sg.removeEdge(oldEdge);
+        }
+      }
+      return;
+    }
+
+    // sort nameParts
+    Collections.sort(nameParts);
+
+    // check whether {nameParts[0], ..., nameParts[n], oldHead} are a contiguous NP
+    for (int i = nameParts.get(0).index(), end = oldHead.index(); i < end; i++) {
+      IndexedWord node = sg.getNodeByIndexSafe(i);
+      if (node == null) {
+        return;
+      }
+      if ( ! nameParts.contains(node) && PUNCT_TAG_FILTER.test(node.tag())) {
+        // not in nameParts and not a punctuation mark => not a contiguous NP
+        return;
+      }
+    }
+
+
+    IndexedWord gov = sg.getParent(oldHead);
+    if (gov == null && ! sg.getRoots().contains(oldHead)) {
+      return;
+    }
+    IndexedWord newHead = nameParts.get(0);
+    Set<IndexedWord> children = new HashSet<>(sg.getChildren(oldHead));
+
+    //change structure and relations
+    for (IndexedWord child : children) {
+      if (child == newHead) {
+        // make the leftmost word the new head
+        if (gov == null) {
+          sg.getRoots().add(newHead);
+          sg.getRoots().remove(oldHead);
+        } else {
+          SemanticGraphEdge oldEdge = sg.getEdge(gov, oldHead);
+          sg.addEdge(gov, newHead, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
+          sg.removeEdge(oldEdge);
+        }
+        // swap direction of relation between old head and new head and change it to name relation.
+        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, newHead);
+        sg.addEdge(newHead, oldHead, UniversalEnglishGrammaticalRelations.NAME_MODIFIER, oldEdge.getWeight(), oldEdge.isExtra());
+        sg.removeEdge(oldEdge);
+      } else  if (nameParts.contains(child)) {
+        // remove relation between the old head and part of the name
+        // and introduce new relation between new head and part of the name
+        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, child);
+        sg.addEdge(newHead, child, UniversalEnglishGrammaticalRelations.NAME_MODIFIER, oldEdge.getWeight(), oldEdge.isExtra());
+        sg.removeEdge(oldEdge);
+      } else {
+        // attach word to new head
+        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, child);
+        //if not the entire compound is part of a named entity, attach the other tokens via an nmod relation
+        GrammaticalRelation reln = oldEdge.getRelation() == UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER ?
+            UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER : oldEdge.getRelation();
+        sg.addEdge(newHead, child, reln, oldEdge.getWeight(), oldEdge.isExtra());
+        sg.removeEdge(oldEdge);
       }
     }
   }

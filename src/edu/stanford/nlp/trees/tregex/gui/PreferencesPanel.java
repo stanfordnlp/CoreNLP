@@ -154,7 +154,7 @@ public class PreferencesPanel extends JDialog {
     advOptions.setBorder(BorderFactory.createTitledBorder("Advanced "));
     advOptions.setLayout(new GridLayout(3,2,0,4));
     JLabel headfinderName = new JLabel("Head finder:");
-    final JComboBox headfinderPicker = new JComboBox(new String[] {"ArabicHeadFinder", "BikelChineseHeadFinder", "ChineseHeadFinder", "ChineseSemanticHeadFinder", "CollinsHeadFinder", "DybroFrenchHeadFinder", "LeftHeadFinder", "ModCollinsHeadFinder", "NegraHeadFinder", "SemanticHeadFinder", "SunJurafskyChineseHeadFinder", "TueBaDZHeadFinder"}); //
+    final JComboBox headfinderPicker = new JComboBox(new String[] {"ArabicHeadFinder", "BikelChineseHeadFinder", "ChineseHeadFinder", "ChineseSemanticHeadFinder", "CollinsHeadFinder", "DybroFrenchHeadFinder", "LeftHeadFinder", "ModCollinsHeadFinder", "NegraHeadFinder", "SemanticHeadFinder", "SunJurafskyChineseHeadFinder", "TueBaDZHeadFinder", "UniversalSemanticHeadFinder"}); //
     headfinderPicker.setEditable(true);
     headfinderPicker.setSelectedItem(Preferences.getHeadFinder()
                                      .getClass().getSimpleName());

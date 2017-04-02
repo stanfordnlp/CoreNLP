@@ -1,12 +1,13 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
 import edu.stanford.nlp.parser.common.ParserConstraint;
@@ -15,11 +16,11 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * This class will add parse information to an Annotation.
@@ -34,7 +35,10 @@ import java.util.function.Predicate;
  *
  * @author Jenny Finkel
  */
-public class ParserAnnotator extends SentenceAnnotator {
+public class ParserAnnotator extends SentenceAnnotator  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ParserAnnotator.class);
 
   private final boolean VERBOSE;
   private final boolean BUILD_GRAPHS;
@@ -132,7 +136,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     String buildGraphsProperty = annotatorName + ".buildgraphs";
     if (!this.parser.getTLPParams().supportsBasicDependencies()) {
       if (props.getProperty(buildGraphsProperty) != null && PropertiesUtils.getBool(props, buildGraphsProperty)) {
-        System.err.println("WARNING: " + buildGraphsProperty + " set to true, but " + this.parser.getTLPParams().getClass() + " does not support dependencies");
+        log.info("WARNING: " + buildGraphsProperty + " set to true, but " + this.parser.getTLPParams().getClass() + " does not support dependencies");
       }
       this.BUILD_GRAPHS = false;
     } else {
@@ -156,6 +160,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     this.extraDependencies = MetaClass.cast(props.getProperty(annotatorName + ".extradependencies", "NONE"), GrammaticalStructure.Extras.class);
   }
 
+  @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
   public static String signature(String annotatorName, Properties props) {
     StringBuilder os = new StringBuilder();
     os.append(annotatorName + ".model:" +
@@ -202,12 +207,12 @@ public class ParserAnnotator extends SentenceAnnotator {
                                          boolean verbose,
                                          String[] flags) {
     if (verbose) {
-      System.err.println("Loading Parser Model [" + parserLoc + "] ...");
-      System.err.print("  Flags:");
+      log.info("Loading Parser Model [" + parserLoc + "] ...");
+      log.info("  Flags:");
       for (String flag : flags) {
-        System.err.print("  " + flag);
+        log.info("  " + flag);
       }
-      System.err.println();
+      log.info();
     }
     ParserGrammar result = ParserGrammar.loadModel(parserLoc);
     result.setOptionFlags(result.defaultCoreNLPFlags());
@@ -237,7 +242,7 @@ public class ParserAnnotator extends SentenceAnnotator {
 
     final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (VERBOSE) {
-      System.err.println("Parsing: " + words);
+      log.info("Parsing: " + words);
     }
     List<Tree> trees = null;
     // generate the constituent tree
@@ -247,7 +252,7 @@ public class ParserAnnotator extends SentenceAnnotator {
         trees = doOneSentence(constraints, words);
       } catch (RuntimeInterruptedException e) {
         if (VERBOSE) {
-          System.err.println("Took too long parsing: " + words);
+          log.info("Took too long parsing: " + words);
         }
         trees = null;
       }
@@ -297,7 +302,6 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
   }
 
-  // todo [cdm 2015]: This should just use bestParse method if only getting 1 best parse.
   private List<Tree> doOneSentence(List<ParserConstraint> constraints,
                              List<CoreLabel> words) {
     ParserQuery pq = parser.parserQuery();
@@ -305,49 +309,120 @@ public class ParserAnnotator extends SentenceAnnotator {
     pq.parse(words);
     List<Tree> trees = Generics.newLinkedList();
     try {
-      List<ScoredObject<Tree>> scoredObjects = pq.getKBestPCFGParses(this.kBest);
-      if (scoredObjects == null || scoredObjects.size() < 1) {
-        System.err.println("WARNING: Parsing of sentence failed.  " +
-                "Will ignore and continue: " +
-                Sentence.listToString(words));
+      // Use bestParse if kBest is set to 1.
+      if (this.kBest == 1) {
+        Tree t = pq.getBestParse();
+        if (t == null) {
+          log.warn("Parsing of sentence failed.  " +
+              "Will ignore and continue: " +
+              SentenceUtils.listToString(words));
+        } else {
+          double score = pq.getBestScore();
+          t.setScore(score % -10000.0);
+          trees.add(t);
+        }
       } else {
-        for (ScoredObject<Tree> so : scoredObjects) {
-          // -10000 denotes unknown words
-          Tree tree = so.object();
-          tree.setScore(so.score() % - 10000.0);
-          trees.add(tree);
+        List<ScoredObject<Tree>> scoredObjects = pq.getKBestParses(this.kBest);
+        if (scoredObjects == null || scoredObjects.size() < 1) {
+          log.info("WARNING: Parsing of sentence failed.  " +
+              "Will ignore and continue: " +
+              SentenceUtils.listToString(words));
+        } else {
+          for (ScoredObject<Tree> so : scoredObjects) {
+            // -10000 denotes unknown words
+            Tree tree = so.object();
+            tree.setScore(so.score() % -10000.0);
+            trees.add(tree);
+          }
         }
       }
     } catch (OutOfMemoryError e) {
       Runtime.getRuntime().gc();
-      System.err.println("WARNING: Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
+      log.info("WARNING: Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
               "Will ignore and continue.");
     } catch (NoSuchParseException e) {
-      System.err.println("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
+      log.info("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
               "Will ignore and continue: " +
-              Sentence.listToString(words));
+              SentenceUtils.listToString(words));
     }
     return trees;
   }
 
   @Override
-  public Set<Requirement> requires() {
-    return parser.requiresTags() ? TOKENIZE_SSPLIT_POS : TOKENIZE_AND_SSPLIT;
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    if (parser.requiresTags()) {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.ValueAnnotation.class,
+          CoreAnnotations.OriginalTextAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class,
+          CoreAnnotations.PartOfSpeechAnnotation.class
+      )));
+    } else {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.ValueAnnotation.class,
+          CoreAnnotations.OriginalTextAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class
+      )));
+    }
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     if (this.BUILD_GRAPHS) {
       if (this.saveBinaryTrees) {
-        return PARSE_TAG_DEPPARSE_BINARIZED_TREES;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            TreeCoreAnnotations.BinarizedTreeAnnotation.class,
+            SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class,
+            CoreAnnotations.BeginIndexAnnotation.class,
+            CoreAnnotations.EndIndexAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       } else {
-        return PARSE_TAG_DEPPARSE;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class,
+            CoreAnnotations.BeginIndexAnnotation.class,
+            CoreAnnotations.EndIndexAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       }
     } else {
       if (this.saveBinaryTrees) {
-        return PARSE_TAG_BINARIZED_TREES;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            TreeCoreAnnotations.BinarizedTreeAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       } else {
-        return PARSE_AND_TAG;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       }
     }
   }

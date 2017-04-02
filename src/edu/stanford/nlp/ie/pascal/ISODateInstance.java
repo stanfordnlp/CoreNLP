@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.pascal;
+package edu.stanford.nlp.ie.pascal; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.QuantifiableEntityNormalizer;
 import edu.stanford.nlp.ling.Word;
@@ -32,7 +33,10 @@ import java.util.regex.Pattern;
  * @author Anna Rafferty
  *         TODO: add time support - currently just dates are supported
  */
-public class ISODateInstance {
+public class ISODateInstance  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ISODateInstance.class);
 
   private static final boolean DEBUG = false;
   private ArrayList<String> tokens = new ArrayList<>(); //each token contains some piece of the date, from our input.
@@ -362,7 +366,7 @@ public class ISODateInstance {
       tokenizeDate(inputDate);
     }
     if (DEBUG) {
-      System.err.println("Extracting date: " + inputDate);
+      log.info("Extracting date: " + inputDate);
     }
     //first we see if it's a hyphen and two parseable dates - if not, we treat it as one date
     Pair<String, String> dateEndpoints = getRangeDates(inputDate);
@@ -901,7 +905,7 @@ public class ISODateInstance {
     Matcher m = pat.matcher(inputDate);
     if (m.matches()) {
       if (DEBUG) {
-        System.err.println("YYYYMMDD succeeded");
+        log.info("YYYYMMDD succeeded");
       }
       String monthValue = m.group(2);
       if (monthValue.length() < 2)//we always use two digit months
@@ -929,7 +933,7 @@ public class ISODateInstance {
     Matcher m = pat.matcher(inputDate);
     if (m.matches()) {
       if (DEBUG) {
-        System.err.println("MMDDYY succeeded");
+        log.info("MMDDYY succeeded");
       }
       String monthValue = m.group(1);
       if (monthValue.length() < 2)//we always use two digit months
@@ -965,7 +969,7 @@ public class ISODateInstance {
 
   public boolean extractYear(String inputDate) {
     if (DEBUG) {
-      System.err.println("Extracting year from: |" + inputDate + '|');
+      log.info("Extracting year from: |" + inputDate + '|');
     }
     String extract;
     Matcher m1 = re1.matcher(inputDate);
@@ -1005,7 +1009,7 @@ public class ISODateInstance {
       }
       isoDate = extract;
       if (DEBUG) {
-        System.err.println("year extracted:" + extract);
+        log.info("year extracted:" + extract);
       }
       return true;
     }
@@ -1080,7 +1084,7 @@ public class ISODateInstance {
       if ( ! "".equals(extract)) {
         if (!foundMonth) {
           if (DEBUG) {
-            System.err.println("month extracted: " + extract);
+            log.info("month extracted: " + extract);
           }
           int monthNum = i + 1;
           if (isoDate.length() != 4) {
@@ -1121,8 +1125,8 @@ public class ISODateInstance {
         }
       }
     } catch (NumberFormatException e) {
-      System.err.println("Exception in extract Day.");
-      System.err.println("tokens size :" + tokens.size());
+      log.info("Exception in extract Day.");
+      log.info("tokens size :" + tokens.size());
       e.printStackTrace();
     }
     return false;

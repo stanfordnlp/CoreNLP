@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie;
+package edu.stanford.nlp.ie; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Index;
@@ -12,7 +13,10 @@ import java.util.List;
  * @author Mengqiu Wang
  */
 
-public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstractSequencePriorBIO<IN> {
+public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstractSequencePriorBIO<IN>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(EmpiricalNERPriorBIO.class);
 
   private double[][] entityMatrix, subEntityMatrix;
   private SeqClassifierFlags flags;
@@ -74,12 +78,12 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
           double factor; // initialized in 2 cases below
           if (exact) {
             if (DEBUG) {
-              System.err.print("Exact match of tag1=" + tagIndex.get(tag1) + ", tag2=" + tagIndex.get(tag2));
+              log.info("Exact match of tag1=" + tagIndex.get(tag1) + ", tag2=" + tagIndex.get(tag2));
             }
             // entity not complete
             if (length != oLength) {
               // if (DEBUG)
-              //   System.err.println("Entity Not Complete");
+              //   log.info("Entity Not Complete");
               if (tag1 == tag2) {
                 p += Math.abs(oLength - length) * p1;
               } else if (!(tag1 == ORGIndex && tag2 == LOCIndex) &&
@@ -91,7 +95,7 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
             factor = entityMatrix[tag1][tag2];
           } else {
             if (DEBUG)
-              System.err.print("Sub  match of tag1=" + tagIndex.get(tag1) + ", tag2=" + tagIndex.get(tag2));
+              log.info("Sub  match of tag1=" + tagIndex.get(tag1) + ", tag2=" + tagIndex.get(tag2));
             factor = subEntityMatrix[tag1][tag2];
           }
           if (tag1 == tag2) {
@@ -102,7 +106,7 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
               factor = 0;
           }
           if (DEBUG)
-            System.err.println(" of factor=" + factor + ", p += " + (length * factor));
+            log.info(" of factor=" + factor + ", p += " + (length * factor));
           p += length * factor;
         }
       }

@@ -956,4 +956,43 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertTrue(matches);
   }
 
+
+  public void testThrowAway() {
+    String conll =
+        "1\tI\t2\tnsubj\tPRP\n" +
+        "2\tthrow\t0\troot\tVB\n" +
+        "3\taway\t2\tcompound:ptr\tRP\n" +
+        "4\tmy\t5\tnmod:poss\tPRP$\n" +
+        "5\tlaptop\t2\tdobj\tNN\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tI\tthrow away\tmy laptop", extraction.get().toString());
+  }
+
+  public void testMassOfIron() {
+    String conll =
+       "1\tmass\t5\tnsubj\tNN\n" +
+       "2\tof\t3\tcase\tIN\n" +
+       "3\tiron\t1\tnmod:of\tNN\n" +
+       "4\tis\t5\tcop\tVBZ\n" +
+       "5\t55amu\t0\troot\tNN\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tiron\tmass of is\t55amu", extraction.get().toString());
+  }
+
+  public void testStateOfTheUnion() {
+    String conll =
+        "1\tState\t5\tnsubj\tNNP\n" +
+        "2\tof\t3\tcase\tIN\n" +
+        "3\tUnion\t1\tnmod:of\tNNP\n" +
+        "4\tis\t5\tcop\tVBZ\n" +
+        "5\ttomorrow\t0\troot\tNN\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, true);
+    assertFalse("Extraction found when we shouldn't have: " + extraction, extraction.isPresent());
+  }
+
 }

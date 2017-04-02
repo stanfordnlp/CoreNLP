@@ -24,7 +24,8 @@
 //    USA
 //
 
-package edu.stanford.nlp.dcoref;
+package edu.stanford.nlp.dcoref; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -56,7 +57,10 @@ import edu.stanford.nlp.util.Generics;
  * @author Mihai Surdeanu
  * @author Karthik Raghunathan
  */
-public class MUCMentionExtractor extends MentionExtractor {
+public class MUCMentionExtractor extends MentionExtractor  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MUCMentionExtractor.class);
 
   private final TokenizerFactory<CoreLabel> tokenizerFactory;
   private final String fileContents;
@@ -268,7 +272,7 @@ public class MUCMentionExtractor extends MentionExtractor {
       List<CoreLabel> unannotatedSent = allWords.get(i);
       List<Mention> mentionInSent = allGoldMentions.get(i);
       for (Mention m : mentionInSent){
-        m.dependency = allSentences.get(i).get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
+        m.dependency = allSentences.get(i).get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
       }
       if(annotatedSent.size() != unannotatedSent.size()){
         throw new IllegalStateException("annotatedSent != unannotatedSent");

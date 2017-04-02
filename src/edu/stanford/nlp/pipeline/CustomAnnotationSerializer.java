@@ -1,13 +1,15 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import edu.stanford.nlp.dcoref.CorefChain;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.dcoref.Dictionaries;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+
+import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -30,7 +32,10 @@ import edu.stanford.nlp.util.*;
  *
  * @author Mihai
  */
-public class CustomAnnotationSerializer extends AnnotationSerializer {
+public class CustomAnnotationSerializer extends AnnotationSerializer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CustomAnnotationSerializer.class);
 
   private final boolean compress;
 
@@ -481,7 +486,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
     String word = bits[0].replaceAll(SPACE_HOLDER, " ");
     token.set(CoreAnnotations.TextAnnotation.class, word);
     token.set(CoreAnnotations.ValueAnnotation.class, word);
-    // if(word.length() == 0) System.err.println("FOUND 0-LENGTH TOKEN!");
+    // if(word.length() == 0) log.info("FOUND 0-LENGTH TOKEN!");
 
     // lemma
     if(bits[1].length() > 0 || bits[0].length() == 0){
@@ -586,9 +591,9 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       CustomAnnotationSerializer ser = new CustomAnnotationSerializer(false, false);
       PrintStream os = new PrintStream(new FileOutputStream(file + ".ser"));
       ser.write(doc, os).close();
-      System.err.println("Serialized annotation saved in " + file + ".ser");
+      log.info("Serialized annotation saved in " + file + ".ser");
     } else {
-      System.err.println("usage: CustomAnnotationSerializer [-file file] [-loadFile file]");
+      log.info("usage: CustomAnnotationSerializer [-file file] [-loadFile file]");
     }
   }
 

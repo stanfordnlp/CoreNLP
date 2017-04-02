@@ -1,6 +1,6 @@
 package edu.stanford.nlp.international.spanish.pipeline;
 
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.spanish.SpanishSplitTreeNormalizer;
 import edu.stanford.nlp.util.Pair;
@@ -656,7 +656,7 @@ public class AnCoraProcessorITest extends TestCase {
     assertEquals(splitPoint.toString(), "(fp .)");
     assertEquals("Hay tres ciclistas que están por encima de los demás . Son Armstrong , " +
                    "Pantani y Ulrich ,",
-                 Sentence.listToString(splitPoint.parent(t1).yield()));
+                 SentenceUtils.listToString(splitPoint.parent(t1).yield()));
   }
 
   public void testSplitTrivial() {

@@ -33,6 +33,8 @@ message Document {
   repeated Sentence   sentence    = 2;
   repeated CorefChain corefChain  = 3;
   optional string     docID       = 4;
+  optional string     docDate     = 7;
+  optional uint64     calendar    = 8;
 
   /**
    * A peculiar field, for the corner case when a Document is
@@ -41,6 +43,10 @@ message Document {
   repeated Token      sentencelessToken = 5;
 
   repeated Quote      quote = 6;
+  /**
+   * This field is for entity mentions across the document.
+   */
+  repeated NERMention mentions = 9;
 
   extensions 100 to 255;
 }
@@ -64,8 +70,12 @@ message Sentence {
   optional DependencyGraph  collapsedDependencies               = 9;
   optional DependencyGraph  collapsedCCProcessedDependencies    = 10;
   optional DependencyGraph  alternativeDependencies             = 13;
-  repeated OpenIETriple     openieTriple                        = 14;   // The OpenIE triples in the sentence
+  repeated RelationTriple   openieTriple                        = 14;   // The OpenIE triples in the sentence
+  repeated RelationTriple   kbpTriple                           = 16;   // The KBP triples in this sentence
   repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
+  optional DependencyGraph  enhancedDependencies                = 17;
+  optional DependencyGraph  enhancedPlusPlusDependencies        = 18;
+
   optional uint32           paragraph                           = 11;
 
   optional string           text                                = 12;   // Only needed if we're only saving the sentence.
@@ -125,6 +135,7 @@ message Token {
   optional Span conllUTokenSpan     = 34;
   optional string conllUMisc        = 35;
   optional MapIntString conllUSecondaryDeps = 36;
+  optional string   wikipediaEntity = 37;
 
 
   // Fields set by other annotators in CoreNLP
@@ -259,7 +270,7 @@ message Mention {
   optional bool generic                = 25;
   optional bool isSingleton            = 26;
   optional bool hasBasicDependency     = 27;
-  optional bool hasCollapsedDependency = 28;
+  optional bool hasEnhancedDepenedncy  = 28;
   optional bool hasContextParseTree    = 29;
   optional IndexedWord headIndexedWord = 30;
   optional IndexedWord   dependingVerb = 31;
@@ -409,6 +420,7 @@ message NERMention {
   optional string normalizedNER                 = 5;
   optional string entityType                    = 6;
   optional Timex  timex                         = 7;
+  optional string wikipediaEntity               = 8;
 }
 
 //
@@ -426,7 +438,7 @@ message SentenceFragment {
 // An OpenIE relation triple.
 // Created by the openie annotator.
 //
-message OpenIETriple {
+message RelationTriple {
   optional string          subject        = 1;   // The surface form of the subject
   optional string          relation       = 2;   // The surface form of the relation (required)
   optional string          object         = 3;   // The surface form of the object

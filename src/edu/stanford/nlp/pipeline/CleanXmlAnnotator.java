@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.MultiTokenTag;
@@ -22,7 +23,8 @@ import edu.stanford.nlp.util.*;
  * @author John Bauer
  * @author Angel Chang
  */
-public class CleanXmlAnnotator implements Annotator{
+public class CleanXmlAnnotator implements Annotator {
+
   /**
    * A regular expression telling us where to look for tokens
    * we care about
@@ -237,7 +239,7 @@ public class CleanXmlAnnotator implements Annotator{
 
   @Override
   public void annotate(Annotation annotation) {
-    if (annotation.has(CoreAnnotations.TokensAnnotation.class)) {
+    if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> newTokens = process(annotation, tokens);
       // We assume that if someone is using this annotator, they don't
@@ -372,8 +374,7 @@ public class CleanXmlAnnotator implements Annotator{
 
     // Keeps track of what we still need to doc level annotations
     // we still need to look for
-    Set<Class> toAnnotate = new HashSet<>();
-    toAnnotate.addAll(docAnnotationPatterns.keySet());
+    Set<Class> toAnnotate = new HashSet<>(docAnnotationPatterns.keySet());
 
     int utteranceIndex = 0;
     boolean inUtterance = false;
@@ -691,13 +692,13 @@ public class CleanXmlAnnotator implements Annotator{
   }
 
   @Override
-  public Set<Requirement> requires() {
-    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(CLEAN_XML_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.emptySet();
   }
 
 }

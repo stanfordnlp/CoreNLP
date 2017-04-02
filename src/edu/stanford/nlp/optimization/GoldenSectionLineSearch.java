@@ -1,4 +1,5 @@
-package edu.stanford.nlp.optimization;
+package edu.stanford.nlp.optimization; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
@@ -13,7 +14,10 @@ import java.util.Arrays;
  *
  * @author Galen Andrew
  */
-public class GoldenSectionLineSearch implements LineSearcher {
+public class GoldenSectionLineSearch implements LineSearcher  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(GoldenSectionLineSearch.class);
 
   private static final double GOLDEN_RATIO = (1.0 + Math.sqrt(5.0)) / 2.0;
   private static final double GOLDEN_SECTION = (GOLDEN_RATIO / (1.0 + GOLDEN_RATIO));
@@ -78,7 +82,7 @@ public class GoldenSectionLineSearch implements LineSearcher {
     double flow = function.apply(low);
     double fhigh = function.apply(high);
     if (VERBOSE) {
-      System.err.println("Finding min between " + low + " (value: " +
+      log.info("Finding min between " + low + " (value: " +
                 flow + ") and " + high + " (value: " + fhigh + ")");
     }
 
@@ -89,41 +93,41 @@ public class GoldenSectionLineSearch implements LineSearcher {
       // initialize with golden means
       mid = goldenMean(low, high);
       oldY = function.apply(mid);
-      if (VERBOSE) System.err.println("Initially probed at " + mid + ", value is " + oldY);
+      if (VERBOSE) log.info("Initially probed at " + mid + ", value is " + oldY);
       if (oldY < flow || oldY < fhigh) {
         searchRight = false; // Galen had this true; should be false
       } else {
         mid = goldenMean(high, low);
         oldY = function.apply(mid);
-        if (VERBOSE) System.err.println("Probed at " + mid + ", value is " + oldY);
+        if (VERBOSE) log.info("Probed at " + mid + ", value is " + oldY);
         searchRight = true;
         if ( ! (oldY < flow || oldY < fhigh)) {
-          System.err.println("Warning: GoldenSectionLineSearch init didn't find slope!!");
+          log.info("Warning: GoldenSectionLineSearch init didn't find slope!!");
         }
       }
     } else {
         // grid search a little; this case doesn't do geometric differently...
-        if (VERBOSE) System.err.println("20 point gridsearch for good mid point....");
+        if (VERBOSE) log.info("20 point gridsearch for good mid point....");
         double bestPoint = low;
         double bestVal = flow;
         double incr = (high - low)/22.0;
         for (mid = low+incr; mid < high; mid += incr) {
           oldY = function.apply(mid);
-          if (VERBOSE) System.err.print("Probed at " + mid + ", value is " + oldY);
+          if (VERBOSE) log.info("Probed at " + mid + ", value is " + oldY);
           if (oldY < bestVal) {
             bestPoint = mid;
             bestVal = oldY;
-            if (VERBOSE) System.err.print(" [best so far!]");
+            if (VERBOSE) log.info(" [best so far!]");
           }
-          if (VERBOSE) System.err.println();
+          if (VERBOSE) log.info();
         }
         mid = bestPoint;
         oldY = bestVal;
         searchRight = mid < low + (high - low)/2.0;
         if (oldY < flow && oldY < fhigh) {
-          if (VERBOSE) System.err.println("Found a good mid point at (" + mid + ", " + oldY + ")");
+          if (VERBOSE) log.info("Found a good mid point at (" + mid + ", " + oldY + ")");
         } else {
-          System.err.println("Warning: GoldenSectionLineSearch grid search couldn't find slope!!");
+          log.info("Warning: GoldenSectionLineSearch grid search couldn't find slope!!");
           // revert to initial positioning and pray
           mid = goldenMean(low, high);
           oldY = function.apply(mid);
@@ -133,11 +137,11 @@ public class GoldenSectionLineSearch implements LineSearcher {
 
     memory.put(mid, oldY);
     while (geometric ? (high / low > 1 + tol) : high - low > tol) {
-      if (VERBOSE) System.err.println("Current low, mid, high: " + nf.format(low) + " " + nf.format(mid) + " " + nf.format(high));
+      if (VERBOSE) log.info("Current low, mid, high: " + nf.format(low) + " " + nf.format(mid) + " " + nf.format(high));
       double newX = goldenMean(searchRight ? high : low, mid);
       double newY = function.apply(newX);
       memory.put(newX, newY);
-      if (VERBOSE) System.err.println("Probed " + (searchRight ? "right": "left") + " at " + newX + ", value is " + newY);
+      if (VERBOSE) log.info("Probed " + (searchRight ? "right": "left") + " at " + newX + ", value is " + newY);
       if (newY < oldY) {
         // keep going in this direction
         if (searchRight) low = mid; else high = mid;
@@ -160,7 +164,7 @@ public class GoldenSectionLineSearch implements LineSearcher {
     Double[] keys = memory.keySet().toArray(new Double[memory.keySet().size()]);
     Arrays.sort(keys);
     for (Double key : keys) {
-      System.err.println(key + "\t" + memory.get(key));
+      log.info(key + "\t" + memory.get(key));
     }
   }
 
@@ -172,7 +176,7 @@ public class GoldenSectionLineSearch implements LineSearcher {
       double x = low + i * inc;
       double y = function.apply(x);
       memory.put(x, y);
-      System.err.println("for point " + x + "\t" + y);
+      log.info("for point " + x + "\t" + y);
     }
     dumpMemory();
   }

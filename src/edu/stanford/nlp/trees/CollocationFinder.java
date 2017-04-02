@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import static java.lang.System.err;
 
@@ -27,7 +28,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Eric Yeh
  */
 
-public class CollocationFinder {
+public class CollocationFinder  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CollocationFinder.class);
 
   private static boolean DEBUG = false;
   private final Tree qTree;
@@ -60,7 +64,7 @@ public class CollocationFinder {
     this.hf = hf;
     this.getCollocationsList();
     if (DEBUG) {
-      System.err.println("Collected collocations: " + collocationCollector);
+      log.info("Collected collocations: " + collocationCollector);
     }
   }
 

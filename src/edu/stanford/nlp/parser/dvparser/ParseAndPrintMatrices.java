@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.dvparser;
+package edu.stanford.nlp.parser.dvparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,11 +13,11 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.stanford.nlp.ling.SentenceUtils;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.FileSystem;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -30,7 +31,10 @@ import edu.stanford.nlp.util.Pair;
 
 
 
-public class ParseAndPrintMatrices {
+public class ParseAndPrintMatrices  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ParseAndPrintMatrices.class);
 
   public static void outputMatrix(BufferedWriter bout, SimpleMatrix matrix) throws IOException {
     for (int i = 0; i < matrix.getNumElements(); ++i) {
@@ -119,13 +123,13 @@ public class ParseAndPrintMatrices {
         IdentityHashMap<Tree, SimpleMatrix> vectors = deepTree.getVectors();
 
         for (Map.Entry<Tree, SimpleMatrix> entry : vectors.entrySet()) {
-          System.err.println(entry.getKey() + "   " +  entry.getValue());
+          log.info(entry.getKey() + "   " +  entry.getValue());
         }
 
         FileWriter fout = new FileWriter(outputPath + File.separator + "sentence" + count + ".txt");
         BufferedWriter bout = new BufferedWriter(fout);
 
-        bout.write(Sentence.listToString(sentence));
+        bout.write(SentenceUtils.listToString(sentence));
         bout.newLine();
         bout.write(deepTree.getTree().toString());
         bout.newLine();

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.optimization;
+package edu.stanford.nlp.optimization; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -15,7 +16,10 @@ import java.util.Random;
  * 
  * @author Sida Wang
  */
-public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implements SparseMinimizer<K, F> {
+public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implements SparseMinimizer<K, F>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SparseAdaGradMinimizer.class);
   public boolean quiet = false;
 
   protected int numPasses;
@@ -145,7 +149,7 @@ public class SparseAdaGradMinimizer<K, F extends SparseOnlineFunction<K>> implem
 
   protected void sayln(String s) {
 	if (!quiet) {
-	  System.err.println(s);
+	  log.info(s);
 	}
   }
 }

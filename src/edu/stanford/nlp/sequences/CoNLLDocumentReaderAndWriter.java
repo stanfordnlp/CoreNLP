@@ -36,7 +36,7 @@ import java.io.*;
  * @author Huy Nguyen
  * @author Christopher Manning
  */
-public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
+public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
 
   private static final long serialVersionUID = 6281374154299530460L;
 
@@ -217,7 +217,7 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
       } else {
         String gold = fl.getString(CoreAnnotations.GoldAnswerAnnotation.class);
         String guess = fl.get(CoreAnnotations.AnswerAnnotation.class);
-        // System.err.println(word + "\t" + gold + "\t" + guess));
+        // log.info(word + "\t" + gold + "\t" + guess));
         String pos = fl.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
         String chunk = fl.getString(CoreAnnotations.ChunkAnnotation.class);
         out.println(fl.word() + '\t' + pos + '\t' + chunk + '\t' +

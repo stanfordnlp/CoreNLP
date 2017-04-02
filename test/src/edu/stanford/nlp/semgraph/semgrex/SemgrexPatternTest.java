@@ -6,15 +6,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+import edu.stanford.nlp.trees.*;
 
 /**
  * @author Chloe Kiddon
@@ -49,7 +49,7 @@ public class SemgrexPatternTest extends TestCase {
     String s =
         "(ROOT\n(S\n(NP (DT The) (NN chimney) (NNS sweeps))\n(VP (VBP do) (RB not)\n(VP (VB like)\n(S\n(VP (VBG working)\n(PP (IN on)\n(NP (DT an) (JJ empty) (NN stomach)))))))\n(. .)))";
     Tree tree = Tree.valueOf(s);
-    SemanticGraph sg = SemanticGraphFactory.allTypedDependencies(tree, true);
+    SemanticGraph sg = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.COLLAPSED, GrammaticalStructure.Extras.MAXIMAL, null);
     SemgrexPattern pat = SemgrexPattern.compile("{}=gov ![>det {}] & > {word:/^(?!not).*$/}=dep");
     sg.prettyPrint();
     // SemgrexPattern pat =

@@ -550,7 +550,7 @@ public class MetaClass {
       return (E) Lazy.of(() -> MetaClass.castWithoutKnowingType(v) );
     }else if(Optional.class.isAssignableFrom(clazz)) {
       //(case: Optional)
-      return (E) ((value == null || "null".equals(value.toLowerCase()) || "empty".equals(value.toLowerCase()) || "none".equals(value.toLowerCase())) ? Optional.empty() : Optional.of(castWithoutKnowingType(value)));
+      return (E) ((value == null || "null".equals(value.toLowerCase()) || "empty".equals(value.toLowerCase()) || "none".equals(value.toLowerCase())) ? Optional.empty() : Optional.of(value));
     }else if(java.util.Date.class.isAssignableFrom(clazz)){
       //(case: date)
       try {
@@ -652,8 +652,8 @@ public class MetaClass {
       }
     } else if (PrintWriter.class.isAssignableFrom(clazz)) {
       // (case: input stream)
-      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
-      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
+      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) new PrintWriter(System.out); }
+      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) new PrintWriter(System.err); }
       try {
         return (E) IOUtils.getPrintWriter(value);
       } catch (IOException e) {
@@ -725,7 +725,6 @@ public class MetaClass {
   }
 
   public static <E> E castWithoutKnowingType(String value){
-    Object rtn;
     Class[] typesToTry = new Class[]{
       Integer.class, Double.class,
       File.class, Date.class, List.class, Set.class, Queue.class,
@@ -736,6 +735,7 @@ public class MetaClass {
       if (Collection.class.isAssignableFrom(toTry) && !value.contains(",") || value.contains(" ")) { continue; }
       //noinspection EmptyCatchBlock
       try {
+        Object rtn;
         if ((rtn = cast(value, toTry)) != null &&
             (!File.class.isAssignableFrom(rtn.getClass()) || ((File) rtn).exists())) {
           return ErasureUtils.uncheckedCast(rtn);
@@ -749,6 +749,7 @@ public class MetaClass {
     int argmin = argmin(scores, atLeast);
     return argmin >= 0 ? elems[argmin] : null;
   }
+
   private static int argmin(int[] scores, int atLeast) {
     int min = Integer.MAX_VALUE;
     int argmin = -1;
@@ -769,4 +770,5 @@ public class MetaClass {
     abstractToConcreteCollectionMap.put(Queue.class, MetaClass.create(LinkedList.class));
     abstractToConcreteCollectionMap.put(Deque.class, MetaClass.create(LinkedList.class));
   }
+
 }

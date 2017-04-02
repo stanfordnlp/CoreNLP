@@ -1,4 +1,5 @@
-package edu.stanford.nlp.fsm;
+package edu.stanford.nlp.fsm; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -27,7 +28,10 @@ import edu.stanford.nlp.util.StringUtils;
 // TODO: needs some work to make type-safe.
 // (In several places, it takes an Object and does instanceof to see what
 // it is, or assumes one of the alphabets is a Double, etc....)
-public class TransducerGraph implements Cloneable {
+public class TransducerGraph implements Cloneable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TransducerGraph.class);
 
   public static final String EPSILON_INPUT = "EPSILON";
 
@@ -660,7 +664,7 @@ public class TransducerGraph implements Cloneable {
     double result = 0.0;
     Set<Arc> arcs = getArcsBySource(node);
     if (arcs.isEmpty()) {
-      System.err.println("No outbound arcs from node.");
+      log.info("No outbound arcs from node.");
       return result;
     }
     for (Arc arc : arcs) {

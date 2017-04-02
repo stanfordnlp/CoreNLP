@@ -1,9 +1,11 @@
 package edu.stanford.nlp.ling;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
 import edu.stanford.nlp.util.ArrayCoreMap;
@@ -29,7 +31,10 @@ import edu.stanford.nlp.util.Generics;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext {
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CoreLabel.class);
 
   private static final long serialVersionUID = 2L;
 
@@ -77,9 +82,12 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   @SuppressWarnings({"unchecked"})
   public CoreLabel(CoreMap label) {
     super(label.size());
+    Consumer<Class<? extends Key<?>>> listener = ArrayCoreMap.listener;  // don't listen to the clone operation
+    ArrayCoreMap.listener = null;
     for (Class key : label.keySet()) {
       set(key, label.get(key));
     }
+    ArrayCoreMap.listener = listener;
   }
 
   /**
@@ -133,6 +141,20 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     initFromStrings(keys, values);
   }
 
+  /** This is provided as a simple way to make a CoreLabel for a word from a String.
+   *  It's often useful in fixup or test code. It sets all three of the Text, OriginalText,
+   *  and Value annotations to the given value.
+   *
+   *  @param word The word string to make a CoreLabel for
+   *  @return A CoreLabel for this word string
+   */
+  public static CoreLabel wordFromString(String word) {
+    CoreLabel cl = new CoreLabel();
+    cl.setWord(word);
+    cl.setOriginalText(word);
+    cl.setValue(word);
+    return cl;
+  }
 
   /**
    * Class that all "generic" annotations extend.
@@ -182,7 +204,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
         //}
         // unknown key; ignore
         //if (VERBOSE) {
-        //  System.err.println("CORE: CoreLabel.fromAbstractMapLabel: " +
+        //  log.info("CORE: CoreLabel.fromAbstractMapLabel: " +
         //      "Unknown key "+key);
         //}
       } else {
@@ -566,15 +588,15 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
 
   /**
    * Returns a formatted string representing this label.  The
-   * desired format is passed in as a <code>String</code>.
+   * desired format is passed in as a {@code String}.
    * Currently supported formats include:
    * <ul>
    * <li>"value": just prints the value</li>
    * <li>"{map}": prints the complete map</li>
    * <li>"value{map}": prints the value followed by the contained
-   * map (less the map entry containing key <code>CATEGORY_KEY</code>)</li>
+   * map (less the map entry containing key {@code CATEGORY_KEY})</li>
    * <li>"value-index": extracts a value and an integer index from
-   * the contained map using keys  <code>INDEX_KEY</code>,
+   * the contained map using keys  {@code INDEX_KEY},
    * respectively, and prints them with a hyphen in between</li>
    * <li>"value-tag"
    * <li>"value-tag-index"

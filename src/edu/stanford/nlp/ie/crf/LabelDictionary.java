@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -18,7 +19,10 @@ import edu.stanford.nlp.util.Index;
  * @author Spence Green
  *
  */
-public class LabelDictionary implements Serializable {
+public class LabelDictionary implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LabelDictionary.class);
 
   private static final long serialVersionUID = 6790400453922524056L;
 
@@ -88,7 +92,7 @@ public class LabelDictionary implements Serializable {
    */
   public void lock(int threshold, Index<String> labelIndex) {
     if (labelDictionary != null) throw new RuntimeException("Label dictionary is already locked");
-    System.err.println("Label dictionary enabled");
+    log.info("Label dictionary enabled");
     System.err.printf("#observations: %d%n", (int) observationCounts.totalCount());
     Counters.retainAbove(observationCounts, threshold);
     Set<String> constrainedObservations = observationCounts.keySet();

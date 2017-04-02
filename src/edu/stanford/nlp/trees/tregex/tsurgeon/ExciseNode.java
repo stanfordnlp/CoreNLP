@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.tregex.tsurgeon;
+package edu.stanford.nlp.trees.tregex.tsurgeon; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Map;
 
@@ -9,7 +10,10 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 /** Excises all nodes from the top to the bottom, and puts all the children of bottom node in where the top was.
  * @author Roger Levy (rog@stanford.edu)
  */
-class ExciseNode extends TsurgeonPattern {
+public class ExciseNode extends TsurgeonPattern  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ExciseNode.class);
 
   /**
    * Top should evaluate to a node that dominates bottom, but this is not checked!
@@ -40,9 +44,9 @@ class ExciseNode extends TsurgeonPattern {
       Tree topNode = childMatcher[0].evaluate(tree, tregex);
       Tree bottomNode = childMatcher[1].evaluate(tree, tregex);
       if(Tsurgeon.verbose) {
-        System.err.println("Excising...original tree:");
+        log.info("Excising...original tree:");
         tree.pennPrint(System.err);
-        System.err.println("top: " + topNode + "\nbottom:" + bottomNode);
+        log.info("top: " + topNode + "\nbottom:" + bottomNode);
       }
       if (topNode == tree) {
         if (bottomNode.children().length == 1) {
@@ -53,7 +57,7 @@ class ExciseNode extends TsurgeonPattern {
       }
       Tree parent = topNode.parent(tree);
       if(Tsurgeon.verbose)
-        System.err.println("Parent: " + parent);
+        log.info("Parent: " + parent);
       int i = Trees.objectEqualityIndexOf(parent,topNode);
       parent.removeChild(i);
       for(Tree child : bottomNode.children()) {

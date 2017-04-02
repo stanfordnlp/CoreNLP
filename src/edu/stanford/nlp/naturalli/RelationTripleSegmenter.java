@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
  *
  * @author Gabor Angeli
  */
+@SuppressWarnings("WeakerAccess")
 public class RelationTripleSegmenter {
 
   private final boolean allowNominalsWithoutNER;
@@ -41,6 +42,8 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{$}=verb ?>/aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Tom and Jerry were fighting }
     add(SemgrexPattern.compile("{$}=verb >/nsubj(pass)?/ ( {}=subject >/conj:and/=subjIgnored {}=object )"));
+    // { mass of iron is 55amu }
+    add(SemgrexPattern.compile("{pos:/NNS?/}=object >cop {}=relappend1 >/nsubj(pass)?/ ( {}=verb >/nmod:of/ ( {pos:/NNS?/}=subject >case {}=relappend0 ) )"));
   }});
 
   /**
@@ -279,7 +282,9 @@ public class RelationTripleSegmenter {
           }
           List<IndexedWord> prepChunk = Collections.EMPTY_LIST;
           if (prepWord != null && !expected.equals("tmod")) {
-            prepChunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true).get();
+            Optional<List<IndexedWord>> optionalPrepChunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true);
+            if (!optionalPrepChunk.isPresent()) { continue; }
+            prepChunk = optionalPrepChunk.get();
             Collections.sort(prepChunk, (a, b) -> {
               double val = a.pseudoPosition() - b.pseudoPosition();
               if (val < 0) { return -1; }
@@ -392,7 +397,8 @@ public class RelationTripleSegmenter {
 
   /** A set of valid arcs denoting an adverbial modifier we are interested in */
   public final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or"); add("auxpass");
+    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or");
+    add("auxpass"); add("compound:*");
   }});
 
   /**
@@ -542,17 +548,6 @@ public class RelationTripleSegmenter {
         if ("nmod:poss".equals(m.getRelnString("prepEdge"))) {
           continue PATTERN_LOOP;   // nmod:poss is not a preposition!
         }
-        // some JIT on the pattern ordering
-        // note[Gabor]: This actually helps quite a bit; 72->86 sentences per second for the entire OpenIE pipeline.
-//        VERB_PATTERN_HITS.incrementCount(pattern);
-//        if (((int) VERB_PATTERN_HITS.totalCount()) % 1000 == 0) {
-//          ArrayList<SemgrexPattern> newPatterns = new ArrayList<>(VERB_PATTERNS);
-//          Collections.sort(newPatterns, (x, y) ->
-//                  (int) (VERB_PATTERN_HITS.getCount(y) - VERB_PATTERN_HITS.getCount(x))
-//          );
-//          VERB_PATTERNS = newPatterns;
-//        }
-        // Main code
         int numKnownDependents = 2;  // subject and object, at minimum
         boolean istmod = false;      // this is a tmod relation
 
@@ -576,7 +571,9 @@ public class RelationTripleSegmenter {
         // Case: a standard extraction with a main verb
         IndexedWord relObj = m.getNode("relObj");
         for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(verb)) {
-          if ("advmod".equals(edge.getRelation().toString()) || "amod".equals(edge.getRelation().toString())) {
+          if ("advmod".equals(edge.getRelation().toString()) ||
+              "amod".equals(edge.getRelation().toString()) ||
+              "compound:*".equals(edge.getRelation().toString().replaceAll(":.*", ":*"))) {
             // Add adverb modifiers
             String tag = edge.getDependent().backingLabel().tag();
             if (tag == null ||
@@ -612,8 +609,6 @@ public class RelationTripleSegmenter {
           for (IndexedWord word : chunk.get()) {
             verbChunk.add(word, Integer.MIN_VALUE / 2 - word.pseudoPosition());
           }
-          // (register the edge)
-//          numKnownDependents += 1;  // TODO(gabor) do we need this?
         }
         // (handle special prepositions)
         if (prepEdge != null) {
@@ -649,6 +644,13 @@ public class RelationTripleSegmenter {
           continue PATTERN_LOOP;  // Too many outgoing edges; we didn't consume them all.
         }
         List<IndexedWord> relation = verbChunk.toSortedList();
+        int appendI = 0;
+        IndexedWord relAppend = m.getNode("relappend" + appendI);
+        while (relAppend != null) {
+          relation.add(relAppend);
+          appendI += 1;
+          relAppend = m.getNode("relappend" + appendI);
+        }
 
         // Last chance to register ignored edges
         if (!subjNoopArc.isPresent()) {
@@ -823,7 +825,10 @@ public class RelationTripleSegmenter {
     // sometimes not _really_ its own clause
     IndexedWord root = parse.getFirstRoot();
     if ( (root.lemma() != null && root.lemma().equalsIgnoreCase("be")) ||
-         (root.lemma() == null && (root.word().equalsIgnoreCase("is") || root.word().equalsIgnoreCase("are") || root.word().equalsIgnoreCase("were") || root.word().equalsIgnoreCase("be")))) {
+         (root.lemma() == null && ("is".equalsIgnoreCase(root.word()) ||
+                                   "are".equalsIgnoreCase(root.word()) ||
+                                   "were".equalsIgnoreCase(root.word()) ||
+                                   "be".equalsIgnoreCase(root.word())))) {
       // Check for the "there is" construction
       boolean foundThere = false;
       boolean tooMayArcs = false;  // an indicator for there being too much nonsense hanging off of the root

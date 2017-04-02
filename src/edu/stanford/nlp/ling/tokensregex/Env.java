@@ -15,43 +15,46 @@ import java.util.regex.Pattern;
 
 /**
  * Holds environment variables to be used for compiling string into a pattern.
- * Use {@link EnvLookup} to perform actual lookup (it will provide reasonable defaults)
+ * Use {@link EnvLookup} to perform actual lookup (it will provide reasonable defaults).
  *
  * <p>
  * Some of the types of variables to bind are:
- * <ul>
- * <li><code>SequencePattern</code> (compiled pattern)</li>
- * <li><code>PatternExpr</code> (sequence pattern expression - precompiled)</li>
- * <li><code>NodePattern</code> (pattern for matching one element)</li>
- * <li><code>Class</code> (binding of CoreMap attribute to java Class)</li>
- * </ul>
  * </p>
+ * * <ul>
+ * <li>{@code SequencePattern} (compiled pattern)</li>
+ * <li>{@code PatternExpr} (sequence pattern expression - precompiled)</li>
+ * <li>{@code NodePattern} (pattern for matching one element)</li>
+ * <li>{@code Class} (binding of CoreMap attribute to java Class)</li>
+ * </ul>
  */
 public class Env {
+
   /**
    * Parser that converts a string into a SequencePattern.
    * @see edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser
    */
   SequencePattern.Parser parser;
+
   /**
    * Mapping of variable names to their values
    */
-  Map<String, Object> variables = new HashMap<>();//Generics.newHashMap();
+  private Map<String, Object> variables = new HashMap<>();//Generics.newHashMap();
 
   /**
-   * Mapping of per thread temporary variables to their values
+   * Mapping of per thread temporary variables to their values.
    */
-  ThreadLocal<Map<String,Object>> threadLocalVariables = new ThreadLocal<>();
+  private ThreadLocal<Map<String,Object>> threadLocalVariables = new ThreadLocal<>();
+
   /**
    * Mapping of variables that can be expanded in a regular expression for strings,
    *   to their regular expressions.
    * The variable name must start with "$" and include only the alphanumeric characters
-   *   (it should follow the pattern <code>$[A-Za-z0-9_]+</code>).
-   * Each variable is mapped to a pair, consisting of the <code>Pattern</code> representing
-   *   the name of the variable to be replaced, and a <code>String</code> representing the
+   *   (it should follow the pattern {@code $[A-Za-z0-9_]+}).
+   * Each variable is mapped to a pair, consisting of the {@code Pattern} representing
+   *   the name of the variable to be replaced, and a {@code String} representing the
    *   regular expression (escaped) that is used to replace the name of the variable.
    */
-  Map<String, Pair<Pattern,String>> stringRegexVariables = new HashMap<>();//Generics.newHashMap();
+  private Map<String, Pair<Pattern,String>> stringRegexVariables = new HashMap<>(); //Generics.newHashMap();
 
   /**
    * Default parameters (used when reading in rules for {@link SequenceMatchRules}.
@@ -92,10 +95,10 @@ public class Env {
   public List<Class> defaultTokensResultAnnotationKey;
 
   /**
-   * List of keys indicating what fields should be annotated for the aggregated coremap.
-   * If specified, the aggregated coremap is annotated with the extracted results from the
+   * List of keys indicating what fields should be annotated for the aggregated CoreMap.
+   * If specified, the aggregated CoreMap is annotated with the extracted results from the
    *   {@link #defaultResultsAnnotationExtractor}.
-   * If null, then the aggregated coremap is not annotated.
+   * If null, then the aggregated CoreMap is not annotated.
    */
   public List<Class> defaultResultAnnotationKey;
 
@@ -112,7 +115,7 @@ public class Env {
   private CoreMapAggregator defaultTokensAggregator;
 
   /**
-   * Whether we should merge and output corelabels or not
+   * Whether we should merge and output CoreLabels or not
    */
   public boolean aggregateToTokens;
 
@@ -285,12 +288,12 @@ public class Env {
     String replace = Matcher.quoteReplacement(regex);
     stringRegexVariables.put(var, new Pair<>(varPattern, replace));
   }
-  public String expandStringRegex(String regex)
-  {
+
+  public String expandStringRegex(String regex) {
     // Replace all variables in regex
     String expanded = regex;
-    for (String v:stringRegexVariables.keySet()) {
-      Pair<Pattern,String> p = stringRegexVariables.get(v);
+    for (Map.Entry<String, Pair<Pattern, String>> stringPairEntry : stringRegexVariables.entrySet()) {
+      Pair<Pattern,String> p = stringPairEntry.getValue();
       expanded = p.first().matcher(expanded).replaceAll(p.second());
     }
     return expanded;
@@ -380,10 +383,11 @@ public class Env {
 
   // Functions for storing temporary thread specific variables
   //  that are used when running tokensregex
+
   public void push(String name, Object value) {
     Map<String,Object> vars = threadLocalVariables.get();
     if (vars == null) {
-      threadLocalVariables.set(vars = new HashMap<>());//Generics.newHashMap());
+      threadLocalVariables.set(vars = new HashMap<>()); //Generics.newHashMap());
     }
     Stack<Object> stack = (Stack<Object>) vars.get(name);
     if (stack == null) {

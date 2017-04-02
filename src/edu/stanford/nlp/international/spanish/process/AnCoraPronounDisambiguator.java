@@ -1,4 +1,5 @@
 package edu.stanford.nlp.international.spanish.process;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Pair;
 
@@ -31,7 +32,10 @@ import java.util.Set;
  * @author Jon Gauthier
  * @see edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer
  */
-public class AnCoraPronounDisambiguator {
+public class AnCoraPronounDisambiguator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AnCoraPronounDisambiguator.class);
 
   public static enum PersonalPronounType {OBJECT, REFLEXIVE, UNKNOWN}
 
@@ -46,18 +50,31 @@ public class AnCoraPronounDisambiguator {
   private static final Set<String> alwaysReflexiveVerbs = new HashSet<>(Arrays.asList(
           "acercar",
           "acostumbrar",
+          "adaptar",
           "afeitar",
+          "agarrar",
           "ahincar",
+          "alegrar",
           "Anticipar",
           "aplicar",
+          "aprobar",
           "aprovechar",
+          "asegurar",
           "Atreve",
+          "bajar",
+          "beneficiar",
           "callar",
           "casar",
+          "cobrar",
           "colocar",
+          "comer",
           "comportar",
           "comprar",
+          "concentrar",
+          "cuidar",
           "deber",
+          "decidir",
+          "defender",
           "desplazar",
           "detectar",
           "divirtiendo",
@@ -71,6 +88,7 @@ public class AnCoraPronounDisambiguator {
           "esforzando",
           "felicitar",
           "fija",
+          "Fija",
           "ganar",
           "Habituar",
           "hacer",
@@ -98,6 +116,7 @@ public class AnCoraPronounDisambiguator {
           "reconstruir",
           "recuperar",
           "referir",
+          "registrar",
           "rendir",
           "reservar",
           "reunir",
@@ -116,14 +135,18 @@ public class AnCoraPronounDisambiguator {
    * object sense in the corpus.
    */
   private static final Set<String> neverReflexiveVerbs = new HashSet<>(Arrays.asList(
+          "abrir",
           "aguar",
           "anunciar",
           "arrebatando",
           "arruinar",
           "clasificar",
+          "compensar",
+          "comprar",
           "concretar",
           "contar",
           "crea",
+          "crear",
           "Cuente",
           "Decir",
           "devolver",
@@ -170,6 +193,8 @@ public class AnCoraPronounDisambiguator {
             new Pair<>("Creer", "Creerselo todo"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
             new Pair<>("creer", "creérselo todo ..."), PersonalPronounType.REFLEXIVE);
+    bruteForceDecisions.put(
+            new Pair<>("creer", "creerte"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
             new Pair<>("dar", "darme la enhorabuena"), PersonalPronounType.OBJECT);
     bruteForceDecisions.put(
@@ -268,7 +293,7 @@ public class AnCoraPronounDisambiguator {
       return bruteForceDecisions.get(bruteForceKey);
 
     // DEV
-    System.err.println("DISAMB " + splitVerb.first() + "\nDISAMB\t" + clauseYield);
+    log.info("DISAMB " + splitVerb.first() + "\nDISAMB\t" + clauseYield);
 
     return PersonalPronounType.UNKNOWN;
   }

@@ -1,4 +1,5 @@
 package edu.stanford.nlp.ie;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -52,7 +53,10 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * @author Chris Cox
  * @author Mihai Surdeanu
  */
-public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSequenceClassifier<IN> {
+public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSequenceClassifier<IN>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ClassifierCombiner.class);
 
   private static final boolean DEBUG = false;
 
@@ -208,13 +212,13 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     int i = 0;
     while (i < numClassifiers) {
       try {
-        System.err.println("loading CRF...");
+        log.info("loading CRF...");
         CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois, props));
         baseClassifiers.add(newCRF);
         i++;
       } catch (Exception e) {
         try {
-          System.err.println("loading CMM...");
+          log.info("loading CMM...");
           CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois, props));
           baseClassifiers.add(newCMM);
           i++;
@@ -246,12 +250,12 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     try {
       return extractCombinationMode(p);
     } catch (IllegalArgumentException e) {
-      System.err.print("Illegal value of " + COMBINATION_MODE_PROPERTY + ": " + p.getProperty(COMBINATION_MODE_PROPERTY));
-      System.err.print("  Legal values:");
+      log.info("Illegal value of " + COMBINATION_MODE_PROPERTY + ": " + p.getProperty(COMBINATION_MODE_PROPERTY));
+      log.info("  Legal values:");
       for (CombinationMode mode : CombinationMode.values()) {
-        System.err.print("  " + mode);
+        log.info("  " + mode);
       }
-      System.err.println();
+      log.info();
       return CombinationMode.NORMAL;
     }
   }
@@ -284,7 +288,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       return ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(path));
     } catch (Exception e) {
       //fail
-      //System.err.println("Couldn't load classifier from path :"+path);
+      //log.info("Couldn't load classifier from path :"+path);
       throw new IOException("Couldn't load classifier from " + path, e);
     }
   }
@@ -335,17 +339,17 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
     if (DEBUG) {
       for(int i = 0; i < baseLabels.size(); i ++)
-        System.err.println("mergeDocuments: Using classifier #" + i + " for " + baseLabels.get(i));
-      System.err.println("mergeDocuments: Background symbol is " + background);
+        log.info("mergeDocuments: Using classifier #" + i + " for " + baseLabels.get(i));
+      log.info("mergeDocuments: Background symbol is " + background);
 
-      System.err.println("Base model outputs:");
+      log.info("Base model outputs:");
       for( int i = 0; i < baseDocuments.size(); i ++){
         System.err.printf("Output of model #%d:", i);
         for (IN l : baseDocuments.get(i)) {
-          System.err.print(' ');
-          System.err.print(l.get(CoreAnnotations.AnswerAnnotation.class));
+          log.info(' ');
+          log.info(l.get(CoreAnnotations.AnswerAnnotation.class));
         }
-        System.err.println();
+        log.info();
       }
     }
 
@@ -358,13 +362,13 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
 
     if (DEBUG) {
-      System.err.print("Output of combined model:");
+      log.info("Output of combined model:");
       for (IN l: mainDocument) {
-        System.err.print(' ');
-        System.err.print(l.get(CoreAnnotations.AnswerAnnotation.class));
+        log.info(' ');
+        log.info(l.get(CoreAnnotations.AnswerAnnotation.class));
       }
-      System.err.println();
-      System.err.println();
+      log.info();
+      log.info();
     }
 
     return mainDocument;
@@ -474,13 +478,13 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   // write a ClassifierCombiner to disk, this is based on CRFClassifier code
   @Override
   public void serializeClassifier(String serializePath) {
-    System.err.print("Serializing classifier to " + serializePath + "...");
+    log.info("Serializing classifier to " + serializePath + "...");
 
     ObjectOutputStream oos = null;
     try {
       oos = IOUtils.writeStreamFromString(serializePath);
       serializeClassifier(oos);
-      System.err.println("done.");
+      log.info("done.");
 
     } catch (Exception e) {
       throw new RuntimeIOException("Failed to save classifier", e);
@@ -509,10 +513,10 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       Integer numClassifiers = baseClassifiers.size();
       oos.writeInt(numClassifiers);
       // go through baseClassifiers and write each one to disk with CRFClassifier's serialize method
-      System.err.println("");
+      log.info("");
       for (AbstractSequenceClassifier<IN> asc : baseClassifiers) {
         //CRFClassifier crfc = (CRFClassifier) asc;
-        //System.err.println("Serializing a base classifier...");
+        //log.info("Serializing a base classifier...");
         asc.serializeClassifier(oos);
       }
     } catch (IOException e) {
@@ -550,7 +554,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   // this does not currently support drill down on CMM's
   public static void examineCRF(ClassifierCombiner cc, String crfNameOrIndex, SeqClassifierFlags flags,
                                 String testFile, String testFiles,
-                                DocumentReaderAndWriter readerAndWriter) throws Exception {
+                                DocumentReaderAndWriter<CoreLabel> readerAndWriter) throws Exception {
     CRFClassifier<CoreLabel> crf;
     // potential index into baseClassifiers
     int ci;
@@ -594,7 +598,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           crf.printLabelInformation(testFile, readerAndWriter);
         } else {
           // no crf test flag provided
-          System.err.println("Warning: no crf test flag was provided, running classify and write answers");
+          log.info("Warning: no crf test flag was provided, running classify and write answers");
           crf.classifyAndWriteAnswers(testFile,readerAndWriter,true);
         }
       } else if (testFiles != null) {
@@ -605,7 +609,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           // there is a crf and printProbs
           crf.printProbs(files, crf.defaultReaderAndWriter());
         } else {
-          System.err.println("Warning: no crf test flag was provided, running classify files and write answers");
+          log.info("Warning: no crf test flag was provided, running classify files and write answers");
           crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
         }
       }
@@ -614,21 +618,21 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
   // show some info about a ClassifierCombiner
   public static void showCCInfo(ClassifierCombiner cc) {
-    System.err.println("");
-    System.err.println("classifiers used:");
-    System.err.println("");
+    log.info("");
+    log.info("classifiers used:");
+    log.info("");
     if (cc.initLoadPaths.size() == cc.baseClassifiers.size()) {
       for (int i = 0 ; i < cc.initLoadPaths.size() ; i++) {
-        System.err.println("baseClassifiers index "+i+" : "+cc.initLoadPaths.get(i));
+        log.info("baseClassifiers index "+i+" : "+cc.initLoadPaths.get(i));
       }
     } else {
       for (int i = 0 ; i < cc.initLoadPaths.size() ; i++) {
-        System.err.println("baseClassifiers index "+i);
+        log.info("baseClassifiers index "+i);
       }
     }
-    System.err.println("");
-    System.err.println("combinationMode: "+cc.combinationMode);
-    System.err.println("");
+    log.info("");
+    log.info("combinationMode: "+cc.combinationMode);
+    log.info("");
   }
 
   /**
@@ -641,7 +645,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     Properties props = StringUtils.argsToProperties(args);
     ClassifierCombiner ec = new ClassifierCombiner(props);
 
-    System.err.println(ec.classifyToString("Marketing : Sony Hopes to Win Much Bigger Market For Wide Range of Small-Video Products --- By Andrew B. Cohen Staff Reporter of The Wall Street Journal"));
+    log.info(ec.classifyToString("Marketing : Sony Hopes to Win Much Bigger Market For Wide Range of Small-Video Products --- By Andrew B. Cohen Staff Reporter of The Wall Street Journal"));
   }
 
 }
