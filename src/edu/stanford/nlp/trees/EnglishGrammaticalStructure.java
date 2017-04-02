@@ -149,7 +149,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("At postProcessDependencies:", list);
     }
-
+    
     SemanticGraph sg = new SemanticGraph(list);
     correctWHAttachment(sg);
     list.clear();
@@ -157,7 +157,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After correcting WH movement", list);
     }
-
+    
     convertRel(list);
     if (DEBUG) {
       printListSorted("After converting rel:", list);
@@ -257,25 +257,25 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
-
+  
   /* Used by correctWHAttachment */
   private static SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
-
+  
   private static Morphology morphology = new Morphology();
-
+  
   /**
    * Tries to correct complicated cases of WH-movement in
    * sentences such as "What does Mary seem to have?" in
    * which "What" should attach to "have" instead of the
-   * control verb.
-   *
+   * control verb. 
+   * 
    * @param sg The Semantic graph to operate on.
    */
   private static void correctWHAttachment(SemanticGraph sg) {
     /* Semgrexes require a graph with a root. */
     if (sg.getRoots().isEmpty())
       return;
-
+    
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = XCOMP_PATTERN.matcher(sgCopy);
     while (matcher.findNextMatchingNode()) {
@@ -283,7 +283,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       IndexedWord embeddedVerb = matcher.getNode("embedded");
       IndexedWord wh = matcher.getNode("wh");
       IndexedWord dobj = matcher.getNode("obj");
-
+      
       /* Check if the object is a WH-word. */
       if (wh.tag().startsWith("W")) {
         boolean reattach = false;
@@ -298,7 +298,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
             reattach = true;
           }
         }
-
+        
         if (reattach) {
           SemanticGraphEdge edge = sg.getEdge(root, wh);
           if (edge != null) {
@@ -309,7 +309,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
   }
-
+  
   /**
    * What we do in this method is look for temporary dependencies of
    * the type "rel".  These occur in sentences such as "I saw the man
@@ -334,24 +334,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           continue;
         }
         if (!prep.gov().equals(rel.gov())) {
-
-          //Try to find a clausal complement with a preposition without an
-          //object. For sentences such as "What am I good at?"
-          boolean hasCompParent = false;
-          for (TypedDependency prep2 : list) {
-            if (prep2.reln() == XCLAUSAL_COMPLEMENT
-                || prep2.reln() == ADJECTIVAL_COMPLEMENT
-                || prep2.reln() == CLAUSAL_COMPLEMENT
-                || prep2.reln() == ROOT) {
-              if (prep.gov().equals(prep2.dep()) && prep2.gov().equals(rel.gov())) {
-                hasCompParent = true;
-                break;
-              }
-            }
-          }
-
-          if ( ! hasCompParent)
-            continue;
+          continue;
         }
 
         // at this point, we have two dependencies as in the Mr. Bush

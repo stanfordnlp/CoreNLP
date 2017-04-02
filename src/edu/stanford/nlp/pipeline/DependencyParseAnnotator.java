@@ -30,10 +30,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
    * Maximum parse time (in milliseconds) for a sentence
    */
   private final long maxTime;
-  /**
-   * The default maximum parse time.
-   */
-  private static final long DEFAULT_MAXTIME = -1;
+  private static final long DEFAULT_MAXTIME = Long.MAX_VALUE;
 
   /**
    * If true, include the extra arcs in the dependency representation.

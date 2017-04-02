@@ -875,7 +875,7 @@ public class StringUtils {
   /**
    * In this version each flag has zero or one argument. It has one argument
    * if there is a thing following a flag that does not begin with '-'.  See
-   * {@link #argsToProperties(String[], Map)} for full documentation.
+   * {@link #argsToPtroperties(String[], Map)} for full documentation.
    *
    * @param args Command line arguments
    * @return A Properties object representing the arguments.
@@ -2153,57 +2153,5 @@ public class StringUtils {
    */
   public static String toString(CoreMap sentence) {
     return toString(sentence.get(CoreAnnotations.TokensAnnotation.class));
-  }
-
-  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
-  public static int levenshteinDistance(String s1, String s2) {
-    s1 = s1.toLowerCase();
-    s2 = s2.toLowerCase();
-
-    int[] costs = new int[s2.length() + 1];
-    for (int i = 0; i <= s1.length(); i++) {
-      int lastValue = i;
-      for (int j = 0; j <= s2.length(); j++) {
-        if (i == 0)
-          costs[j] = j;
-        else {
-          if (j > 0) {
-            int newValue = costs[j - 1];
-            if (s1.charAt(i - 1) != s2.charAt(j - 1))
-              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-            costs[j - 1] = lastValue;
-            lastValue = newValue;
-          }
-        }
-      }
-      if (i > 0)
-        costs[s2.length()] = lastValue;
-    }
-    return costs[s2.length()];
-  }
-
-  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
-  public static <E> int levenshteinDistance(E[] s1, E[] s2) {
-
-    int[] costs = new int[s2.length + 1];
-    for (int i = 0; i <= s1.length; i++) {
-      int lastValue = i;
-      for (int j = 0; j <= s2.length; j++) {
-        if (i == 0)
-          costs[j] = j;
-        else {
-          if (j > 0) {
-            int newValue = costs[j - 1];
-            if (!s1[i - 1].equals(s2[j - 1]))
-              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-            costs[j - 1] = lastValue;
-            lastValue = newValue;
-          }
-        }
-      }
-      if (i > 0)
-        costs[s2.length] = lastValue;
-    }
-    return costs[s2.length];
   }
 }

@@ -393,7 +393,7 @@ if (pp == null) {
 
 	        <% if (!(parserSelect.equals("Arabic") || parserSelect.equals("Spanish"))) { %>
 
-          <h3>Universal dependencies</h3>
+          <h3>Typed dependencies</h3>
           <div class="parserOutput">
           <pre class="spacingFree"><%
             for (Tree parse : trees) {
@@ -407,7 +407,7 @@ if (pp == null) {
           %></pre>
           </div>
 
-          <h3>Universal dependencies, enhanced</h3>
+          <h3>Typed dependencies, collapsed</h3>
           <div class="parserOutput">
           <pre class="spacingFree"><%
             for (Tree parse : trees) {
@@ -439,7 +439,7 @@ if (pp == null) {
   <p>
     <em><a href="http://nlp.stanford.edu/software/lex-parser.shtml">Back to parser home</a></em>
     <br/>
-    <em>Last updated 2015-05-18</em>
+    <em>Last updated 2012-07-10</em>
   </p>
 
   <p style="text-align: right">

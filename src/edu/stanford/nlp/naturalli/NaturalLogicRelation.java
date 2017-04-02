@@ -1,7 +1,5 @@
 package edu.stanford.nlp.naturalli;
 
-import edu.stanford.nlp.util.Trilean;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,48 +23,21 @@ import java.util.Map;
  */
 @SuppressWarnings("UnusedDeclaration")
 public enum NaturalLogicRelation {
-  EQUIVALENT         (0, true,  false, true,  false),
-  FORWARD_ENTAILMENT (1, true,  false, false, false),
-  REVERSE_ENTAILMENT (2, false, false, true,  false),
-  NEGATION           (3, false, true,  false, true),
-  ALTERNATION        (4, false, true,  false, false),
-  COVER              (5, false, false, false, true),
-  INDEPENDENCE       (6, false, false, false, false),
-  ;
+  EQUIVALENT(0, true, false),
+  FORWARD_ENTAILMENT(1, true, false),
+  REVERSE_ENTAILMENT(2, false, false),
+  NEGATION(3, false, true),
+  ALTERNATION(4, false, true),
+  COVER(5, false, false),
+  INDEPENDENCE(6, false, false), ;
 
-  /**
-   * A fixed index for this relation, so that it can be serialized more efficiently.
-   * DO NOT CHANGE THIS INDEX or you will break existing serialization, and probably a bunch of other stuff too.
-   * Otherwise, the index is arbitrary.
-   */
   public final int fixedIndex;
-  /**
-   * Determines whether this relation maintains the truth of a fact in a true context.
-   * So, if the premise is true, and this relation is applied, the conclusion remains true.
-   */
-  public final boolean maintainsTruth;
-  /**
-   * Determines whether this relation negates the truth of a fact in a true context.
-   * So, if the premise is true, and this relation is applied, the conclusion becomes false.
-   */
-  public final boolean negatesTruth;
-  /**
-   * Determines whether this relation maintains the falsehood of a false fact.
-   * So, if the premise is false, and this relation is applied, the conclusion remains false.
-   */
-  public final boolean maintainsFalsehood;
-  /**
-   * Determines whether this relation negates the truth of a fact in a false context.
-   * So, if the premise is false, and this relation is applied, the conclusion becomes true.
-   */
-  public final boolean negatesFalsehood;
+  public final boolean isEntailed, isNegated;
 
-  NaturalLogicRelation(int fixedIndex, boolean maintainsTruth, boolean negatesTruth, boolean maintainsFalsehood, boolean negatesFalsehood) {
+  NaturalLogicRelation(int fixedIndex, boolean isEntailed, boolean isNegated) {
     this.fixedIndex = fixedIndex;
-    this.maintainsTruth = maintainsTruth;
-    this.negatesTruth = negatesTruth;
-    this.maintainsFalsehood = maintainsFalsehood;
-    this.negatesFalsehood = negatesFalsehood;
+    this.isEntailed = isEntailed;
+    this.isNegated = isNegated;
   }
 
   protected static NaturalLogicRelation byFixedIndex(int index) {
@@ -169,34 +140,6 @@ public enum NaturalLogicRelation {
     throw new IllegalStateException("[should be impossible]: Incomplete join table for " + this + " joined with " + other);
   }
 
-  /**
-   * Implements the finite state automata of composing the truth value of a sentence with a natural logic relation being
-   * applied.
-   * @param initialTruthValue The truth value of the premise (the original sentence).
-   * @return The truth value of the consequent -- that is, the sentence once it's been modified with this relation.
-   *         A value of {@link Trilean#UNKNOWN} indicates that natural logic cannot either confirm or disprove the truth
-   *         of the consequent.
-   */
-  public Trilean applyToTruthValue(boolean initialTruthValue) {
-    if (initialTruthValue) {
-      if (maintainsTruth) {
-        return Trilean.TRUE;
-      } else if (negatesTruth) {
-        return Trilean.FALSE;
-      } else {
-        return Trilean.UNKNOWN;
-      }
-    } else {
-      if (maintainsFalsehood) {
-        return Trilean.FALSE;
-      } else if (negatesFalsehood) {
-        return Trilean.TRUE;
-      } else {
-        return Trilean.UNKNOWN;
-      }
-    }
-  }
-
   private static final Map<String, NaturalLogicRelation> insertArcToNaturalLogicRelation = Collections.unmodifiableMap(new HashMap<String, NaturalLogicRelation>() {{
     put("acomp", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("advcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -208,13 +151,13 @@ public enum NaturalLogicRelation {
     put("auxpass", NaturalLogicRelation.INDEPENDENCE);  // some cat adopts -/-> some cat got adopted
     put("ccomp", NaturalLogicRelation.INDEPENDENCE);  // interesting project here... "he said x" -> "x"?
     put("cc", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_conj
-    put("conj:and\\/or", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj:and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj:both", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj:but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj:nor", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
-    put("conj:or", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
-    put("conj:plus", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj_and\\/or", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj_and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj_both", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj_but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj_nor", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj_or", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj_plus", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
     put("conj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_cc
     put("conj_x", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("cop", NaturalLogicRelation.INDEPENDENCE);  //
@@ -243,11 +186,9 @@ public enum NaturalLogicRelation {
     put("pcomp", NaturalLogicRelation.INDEPENDENCE);  // though, not so in collapsed dependencies
     put("pobj", NaturalLogicRelation.INDEPENDENCE);  // must delete whole preposition
     put("possessive", NaturalLogicRelation.INDEPENDENCE);  // see dep_poss
-    put("poss", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
-    put("nmod:poss", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("poss", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("preconj", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
     put("predet", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
-    put("case", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:about", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:above", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -349,7 +290,7 @@ public enum NaturalLogicRelation {
     put("nmod:pursuant_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:regarding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:regardless_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("nmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:round", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:save", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:since", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -412,9 +353,9 @@ public enum NaturalLogicRelation {
     if (!isSubject) {
       switch (dependencyLabel) {
         // 'or' in the object position behaves as and.
-        case "conj:or":
-        case "conj:nor":
-          return forDependencyInsertion("conj:and", false);
+        case "conj_or":
+        case "conj_nor":
+          return forDependencyInsertion("conj_and", false);
       }
     }
     NaturalLogicRelation rel = insertArcToNaturalLogicRelation.get(dependencyLabel.toLowerCase());
@@ -424,7 +365,7 @@ public enum NaturalLogicRelation {
 //      System.err.println("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
       if (dependencyLabel.startsWith("nmod:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
-      } else if (dependencyLabel.startsWith("conj:")) {
+      } else if (dependencyLabel.startsWith("conj_")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
       } else {
         return NaturalLogicRelation.INDEPENDENCE;

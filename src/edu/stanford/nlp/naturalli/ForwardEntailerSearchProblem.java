@@ -28,11 +28,6 @@ public class ForwardEntailerSearchProblem {
   public final SemanticGraph   parseTree;
 
   /**
-   * The truth of the premise -- determines the direction we can mutate the sentences.
-   */
-  public final boolean truthOfPremise;
-
-  /**
    * The maximum number of ticks top search for. Otherwise, the search will be exhaustive.
    */
   public final int maxTicks;
@@ -100,12 +95,10 @@ public class ForwardEntailerSearchProblem {
    * @see edu.stanford.nlp.naturalli.ForwardEntailer
    */
   protected ForwardEntailerSearchProblem(SemanticGraph parseTree,
-                                         boolean truthOfPremise,
                                          int maxResults, int maxTicks,
                                          NaturalLogicWeights weights
                                       ) {
     this.parseTree = parseTree;
-    this.truthOfPremise = truthOfPremise;
     this.maxResults = maxResults;
     this.maxTicks = maxTicks;
     this.weights = weights;
@@ -131,7 +124,7 @@ public class ForwardEntailerSearchProblem {
       return Collections.EMPTY_LIST;
     } else {
       return searchImplementation().stream()
-          .map(x -> new SentenceFragment(x.tree, truthOfPremise, false).changeScore(x.confidence))
+          .map(x -> new SentenceFragment(x.tree, false).changeScore(x.confidence))
           .filter(x -> x.words.size() > 0 )
           .collect(Collectors.toList());
     }
@@ -187,7 +180,6 @@ public class ForwardEntailerSearchProblem {
       if (incomingEdges.hasNext()) {
         edge = incomingEdges.next();
       }
-      int numIters = 0;
       while (edge != null) {
         if (edge.getRelation().toString().endsWith("subj")) {
           isSubject[vertex.index() - 1] = true;
@@ -198,11 +190,6 @@ public class ForwardEntailerSearchProblem {
           edge = incomingEdges.next();
         } else {
           edge = null;
-        }
-        numIters += 1;
-        if (numIters > 100) {
-          System.err.println("ERROR: tree has apparent depth > 100");
-          return Collections.EMPTY_LIST;
         }
       }
     }
@@ -255,7 +242,6 @@ public class ForwardEntailerSearchProblem {
 
       // Push the case where we don't delete
       int nextIndex = state.currentIndex + 1;
-      int numIters = 0;
       while (nextIndex < topologicalVertices.size()) {
         IndexedWord nextWord = topologicalVertices.get(nextIndex);
         if (  ((state.deletionMask >>> (indexToMaskIndex[nextWord.index() - 1])) & 0x1l) == 0) {
@@ -263,11 +249,6 @@ public class ForwardEntailerSearchProblem {
           break;
         } else {
           nextIndex += 1;
-        }
-        numIters += 1;
-        if (numIters > 10000) {
-          System.err.println("ERROR: logic error (apparent infinite loop); returning");
-          return results;
         }
       }
 
@@ -294,7 +275,7 @@ public class ForwardEntailerSearchProblem {
           }
           NaturalLogicRelation projectedRelation = tokenPolarity.projectLexicalRelation(lexicalRelation);
           // Make sure this is a valid entailment
-          if (!projectedRelation.applyToTruthValue(truthOfPremise).isTrue()) {
+          if (!projectedRelation.isEntailed) {
             canDelete = false;
           }
         }
@@ -332,7 +313,6 @@ public class ForwardEntailerSearchProblem {
 
           // Push the state with this subtree deleted
           nextIndex = state.currentIndex + 1;
-          numIters = 0;
           while (nextIndex < topologicalVertices.size()) {
             IndexedWord nextWord = topologicalVertices.get(nextIndex);
             long newMask = treeWithDeletionsAndNewMask.get().second;
@@ -343,11 +323,6 @@ public class ForwardEntailerSearchProblem {
               break;
             } else {
               nextIndex += 1;
-            }
-            numIters += 1;
-            if (numIters > 10000) {
-              System.err.println("ERROR: logic error (apparent infinite loop); returning");
-              return results;
             }
           }
         }

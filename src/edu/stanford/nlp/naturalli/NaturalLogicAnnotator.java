@@ -131,7 +131,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     int min = root.index();
     int max = root.index();
     Queue<IndexedWord> fringe = new LinkedList<>();
-    for (SemanticGraphEdge edge : tree.outgoingEdgeIterable(root)) {
+    for (SemanticGraphEdge edge : tree.getOutEdgesSorted(root)) {
       String edgeLabel = edge.getRelation().getShortName();
       if ((validArcs == null || validArcs.contains(edgeLabel)) &&
           !"punct".equals(edgeLabel)) {

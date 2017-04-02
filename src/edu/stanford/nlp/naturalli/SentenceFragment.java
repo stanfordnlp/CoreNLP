@@ -3,12 +3,9 @@ package edu.stanford.nlp.naturalli;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,21 +24,16 @@ public class SentenceFragment {
    */
   public final SemanticGraph parseTree;
   /**
-   * The assumed truth of this fragment; this is relevant for what entailments are supported
-   */
-  public final boolean assumedTruth;
-  /**
    * A score for this fragment. This is 1.0 by default.
    */
   public double score = 1.0;
 
-  public SentenceFragment(SemanticGraph tree, boolean assumedTruth, boolean copy) {
+  public SentenceFragment(SemanticGraph tree, boolean copy) {
     if (copy) {
       this.parseTree = new SemanticGraph(tree);
     } else {
       this.parseTree = tree;
     }
-    this.assumedTruth = assumedTruth;
     words.addAll(this.parseTree.vertexListSorted().stream().map(IndexedWord::backingLabel).collect(Collectors.toList()));
   }
 
@@ -96,29 +88,6 @@ public class SentenceFragment {
 
   @Override
   public String toString() {
-    List<Pair<String, Integer>> glosses = new ArrayList<>();
-    for (CoreLabel word : words) {
-      // Add the word itself
-      glosses.add(Pair.makePair(word.word(), word.index() - 1));
-      String addedConnective = null;
-      // Find additional connectives
-      for (SemanticGraphEdge edge : parseTree.incomingEdgeIterable(new IndexedWord(word))) {
-        String rel = edge.getRelation().toString();
-        if (rel.contains(":") && !rel.endsWith("npmod")) {
-          addedConnective = rel.substring(rel.indexOf(":") + 1);
-        } else if (rel.contains("_")) {
-          addedConnective = rel.substring(rel.indexOf("_") + 1);
-        }
-      }
-      if (addedConnective != null) {
-        // Found a connective (e.g., a preposition or conjunction)
-        Pair<Integer, Integer> yield = parseTree.yieldSpan(new IndexedWord(word));
-        glosses.add(Pair.makePair(addedConnective.replaceAll("_", " "), yield.first - 1));
-      }
-    }
-    // Sort the sentence
-    Collections.sort(glosses, (a, b) -> a.second - b.second);
-    // Return the sentence
-    return StringUtils.join(glosses.stream().map(Pair::first), " ");
+    return StringUtils.join(words.stream().map(CoreLabel::word), " ");
   }
 }

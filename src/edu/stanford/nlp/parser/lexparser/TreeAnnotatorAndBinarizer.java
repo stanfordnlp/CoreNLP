@@ -197,7 +197,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
   }
 
 
-  /** @return A Triple of binaryTrainTreebank, binarySecondaryTreebank, binaryTuneTreebank.
+  /** @return a pair of binaryTrainTreebank,binaryTuneTreebank.
    */
   public static Triple<Treebank, Treebank, Treebank> getAnnotatedBinaryTreebankFromTreebank(Treebank trainTreebank,
       Treebank secondaryTreebank,

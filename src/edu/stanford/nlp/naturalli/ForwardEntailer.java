@@ -4,7 +4,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -15,7 +14,7 @@ import java.util.function.Function;
  * @author Gabor Angeli
  */
 @SuppressWarnings("UnusedDeclaration")
-public class ForwardEntailer implements BiFunction<SemanticGraph, Boolean, ForwardEntailerSearchProblem> {
+public class ForwardEntailer implements Function<SemanticGraph, ForwardEntailerSearchProblem> {
 
   /**
    * The maximum number of ticks top search for. Otherwise, the search will be exhaustive.
@@ -64,18 +63,19 @@ public class ForwardEntailer implements BiFunction<SemanticGraph, Boolean, Forwa
    * parse tree.
    *
    * @param parseTree The original tree of the sentence we are beginning with
-   * @param truthOfPremise The truth of the premise. In most applications, this will just be true.
    *
    * @return A new search problem instance.
    */
   @Override
-  public ForwardEntailerSearchProblem apply(SemanticGraph parseTree, Boolean truthOfPremise) {
+  public ForwardEntailerSearchProblem apply(SemanticGraph parseTree) {
     for (IndexedWord vertex : parseTree.vertexSet()) {
       CoreLabel token = vertex.backingLabel();
       if (token != null && !token.containsKey(NaturalLogicAnnotations.PolarityAnnotation.class)) {
         throw new IllegalArgumentException("Cannot run Natural Logic forward entailment without polarity annotations set. See " + NaturalLogicAnnotator.class.getSimpleName());
       }
     }
-    return new ForwardEntailerSearchProblem(parseTree, truthOfPremise, maxResults, maxTicks, weights);
+    return new ForwardEntailerSearchProblem(parseTree, maxResults, maxTicks, weights);
   }
+
+
 }

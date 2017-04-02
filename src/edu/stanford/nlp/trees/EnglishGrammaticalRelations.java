@@ -722,12 +722,8 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation RELATIVE =
     new GrammaticalRelation(Language.English, "rel", "relative",
-        COMPLEMENT, "SBAR|SBARQ", tregexCompiler,
-            "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))",
-
-            // Rule for copular Wh-questions, e.g. "What am I good at?"
-            "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV) (/^(?:VB|AUX)/ < " + copularWordRegex + " !$++ VP)");
-
+        COMPLEMENT, "SBAR", tregexCompiler,
+            "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))");
 
   /**
    * The "referent" grammatical relation.  A
@@ -772,10 +768,8 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation ADJECTIVAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "acomp", "adjectival complement",
-        COMPLEMENT, "VP|SQ", tregexCompiler,
-            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]",
-            //Questions like "What am I good at?" with the copula being the head
-            "SQ < (/^VB/ < " + copularWordRegex + " $++ ADJP=target !$++ VP)");
+        COMPLEMENT, "VP", tregexCompiler,
+            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]");
 
 
   /**

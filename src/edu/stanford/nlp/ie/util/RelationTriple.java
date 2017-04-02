@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.naturalli.Util;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.*;
@@ -133,10 +134,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return getSpan(subject, x -> x.index() - 1, x -> x.index() - 1);
   }
 
-  public Pair<Integer, Integer> relationTokenSpan() {
-    return getSpan(relation, x -> x.index() - 1, x -> x.index() - 1);
-  }
-
   public Pair<Integer, Integer> objectTokenSpan() {
     return getSpan(object, x -> x.index() - 1, x -> x.index() - 1);
   }
@@ -178,11 +175,10 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   /** {@inheritDoc} */
   @Override
   public int hashCode() {
-    return toString().hashCode();  // Faster than checking CoreLabels
-//    int result = subject.hashCode();
-//    result = 31 * result + relation.hashCode();
-//    result = 31 * result + object.hashCode();
-//    return result;
+    int result = subject.hashCode();
+    result = 31 * result + relation.hashCode();
+    result = 31 * result + object.hashCode();
+    return result;
   }
 
   /** Print a human-readable description of this relation triple, as a tab-separated line */
@@ -285,4 +281,5 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       return Optional.of(sourceTree);
     }
   }
+
 }
