@@ -21,7 +21,7 @@ Note: extracts everything within these pairs as a whole quote segment, which may
 
 ## Options
 
-* quote.singleQuotes: "true" or "false", indicating whether or not to consider ' tokens to be quotation marks (default=false).
+* quote.singleQuotes: "true" or "false", indicating whether or not to consider ' tokens (single quotes) to be quotation marks (default=false).
 * quote.maxLength: maximum character length of quotes to consider (default=-1).
 * quote.asciiQuotes: "true" or "false", indicating whether or not to convert all quotes to ascii quotes before processing (can help when there are errors in quote directionality) (default=false).
 * quote.allowEmbeddedSame: "true" or "false" indicating whether or not to allow smart/directed (everything except " and ') quotes of the same kind to be embedded within one another (default=false).

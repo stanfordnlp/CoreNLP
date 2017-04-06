@@ -28,6 +28,10 @@ Okay, Docker isn't a language, but you know what we mean…. Note on running the
 * [corenlp-server](https://github.com/hotpxl/corenlp-server) Another by hotpxl.
 * [corenlp-docker](https://github.com/vzhong/corenlp-docker) And another by vzhong, a Stanford NLP graduate.
 
+### Erlang/Elixir
+
+* [corenlp](https://hex.pm/packages/corenlp) by Robert Bates provides a thin client interface in Erlang to a CoreNLP server. [GitHub](https://github.com/arpieb/corenlp).
+
 ### Java
 
 * [DKPro Core](https://dkpro.github.io/dkpro-core/) is a collection of NLP components, wrapped as **UIMA** components.
