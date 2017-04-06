@@ -6,8 +6,8 @@ permalink: '/new_annotator.html'
 
 Users can add custom annotators to StanfordCoreNLP.
 
-1. First write the custom annotator class.  Here is an example which
-will take in a dictionary of lemmas.
+First write the custom annotator class.  Here is an example which
+will take in a dictionary that maps words to lemmas:
 
 ```java
 package edu.stanford.nlp.examples;
@@ -57,4 +57,21 @@ public class CustomLemmaAnnotator implements Annotator {
   }
   
 }
+```
+
+Then produce a properties file which allows Stanford CoreNLP to use
+your custom annotator:
+
+```bash
+customAnnotatorClass.custom.lemma = edu.stanford.nlp.examples.CustomLemmaAnnotator
+
+annotators = tokenize,ssplit,pos,custom.lemma
+
+custom.lemma.lemmaFile = custom-lemmas.txt
+```
+
+Finally you can run this example with this command:
+
+```bash
+java -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -props custom-lemmas-example.properties -file example.txt -outputFormat text
 ```
