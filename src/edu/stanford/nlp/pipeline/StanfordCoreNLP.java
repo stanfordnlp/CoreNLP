@@ -534,7 +534,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       pool = new AnnotatorPool();
     }
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
-      pool.register(entry.getKey(), inputProps, Lazy.of( () -> entry.getValue().apply(inputProps, annotatorImplementation)));
+      pool.register(entry.getKey(), inputProps, Lazy.cache( () -> entry.getValue().apply(inputProps, annotatorImplementation)));
     }
     registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
@@ -557,7 +557,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         logger.info("Registering annotator " + customName + " with class " + customClassName);
-        pool.register(customName, inputProps, Lazy.of(() -> annotatorImplementation.custom(inputProps, property)));
+        pool.register(customName, inputProps, Lazy.cache(() -> annotatorImplementation.custom(inputProps, property)));
       }
     }
   }
@@ -574,7 +574,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
     AnnotatorPool pool = new AnnotatorPool();
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
-      pool.register(entry.getKey(), inputProps, Lazy.of(() -> entry.getValue().apply(inputProps, annotatorImplementation)));
+      pool.register(entry.getKey(), inputProps, Lazy.cache(() -> entry.getValue().apply(inputProps, annotatorImplementation)));
     }
     registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
