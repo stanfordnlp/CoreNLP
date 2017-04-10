@@ -499,6 +499,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     pool.put(STANFORD_POS, (props, impl) -> impl.posTagger(props));
     pool.put(STANFORD_LEMMA, (props, impl) -> impl.morpha(props, false));
     pool.put(STANFORD_NER, (props, impl) -> impl.ner(props));
+    pool.put(STANFORD_TOKENSREGEX, (props, impl) -> impl.tokensregex(props, STANFORD_TOKENSREGEX));
     pool.put(STANFORD_REGEXNER, (props, impl) -> impl.tokensRegexNER(props, STANFORD_REGEXNER));
     pool.put(STANFORD_ENTITY_MENTIONS, (props, impl) -> impl.entityMentions(props, STANFORD_ENTITY_MENTIONS));
     pool.put(STANFORD_GENDER, (props, impl) -> impl.gender(props, false));

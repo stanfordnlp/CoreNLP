@@ -71,15 +71,16 @@ public class TokensRegexAnnotator implements Annotator {
     }
     env = TokenSequencePattern.getNewEnv();
     env.bind("options", options);
+    if (PropertiesUtils.getBool(props, prefix+"caseInsensitive")) {
+      System.err.println("using case insensitive!");
+      env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
+      env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+    }
     extractor = CoreMapExpressionExtractor.createExtractorFromFiles(env, files);
     verbose = PropertiesUtils.getBool(props, prefix + "verbose", false);
     options.setTokenOffsets = PropertiesUtils.getBool(props, prefix + "setTokenOffsets", options.setTokenOffsets);
     options.extractWithTokens = PropertiesUtils.getBool(props, prefix + "extractWithTokens", options.extractWithTokens);
     options.flatten = PropertiesUtils.getBool(props, prefix + "flatten", options.flatten);
-    if (PropertiesUtils.getBool(props, prefix+".caseInsensitive")) {
-      env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
-      env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
-    }
     String matchedExpressionsAnnotationKeyName = props.getProperty(prefix + "matchedExpressionsAnnotationKey");
     if (matchedExpressionsAnnotationKeyName != null) {
       options.matchedExpressionsAnnotationKey = EnvLookup.lookupAnnotationKeyWithClassname(env, matchedExpressionsAnnotationKeyName);

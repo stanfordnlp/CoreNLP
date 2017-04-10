@@ -90,6 +90,7 @@ public interface Annotator {
   String STANFORD_LEMMA = "lemma";
   String STANFORD_NER = "ner";
   String STANFORD_REGEXNER = "regexner";
+  String STANFORD_TOKENSREGEX = "tokensregex";
   String STANFORD_ENTITY_MENTIONS = "entitymentions";
   String STANFORD_GENDER = "gender";
   String STANFORD_TRUECASE = "truecase";
@@ -124,6 +125,7 @@ public interface Annotator {
     put(STANFORD_POS,                      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
     put(STANFORD_LEMMA,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS)));
     put(STANFORD_NER,                      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA)));
+    put(STANFORD_TOKENSREGEX,              new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE)));
     put(STANFORD_REGEXNER,                 new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
     put(STANFORD_ENTITY_MENTIONS,          new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER)));
     put(STANFORD_GENDER,                   new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER)));

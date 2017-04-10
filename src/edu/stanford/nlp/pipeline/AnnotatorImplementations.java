@@ -74,6 +74,13 @@ public class AnnotatorImplementations  {
   }
 
   /**
+   * Run TokensRegex -- annotate patterns found in tokens
+   */
+  public Annotator tokensregex(Properties properties, String name) {
+    return new TokensRegexAnnotator(name, properties);
+  }
+
+  /**
    * Run RegexNER -- rule-based NER based on a deterministic mapping file
    */
   public Annotator tokensRegexNER(Properties properties, String name) {
