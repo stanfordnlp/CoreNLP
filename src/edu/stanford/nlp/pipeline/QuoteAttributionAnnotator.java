@@ -110,9 +110,9 @@ public class QuoteAttributionAnnotator implements Annotator {
       log.info("Loading QuoteAttribution characters [" + CHARACTERS_FILE + "]...");
     }
     // loading all our word lists
-    FAMILY_WORD_LIST = props.getProperty("familyWordsFile", null);
-    ANIMACY_WORD_LIST = props.getProperty("animacyWordsFile", null);
-    GENDER_WORD_LIST = props.getProperty("genderNamesFile", null);
+    FAMILY_WORD_LIST = props.getProperty("familyWordsFile");
+    ANIMACY_WORD_LIST = props.getProperty("animacyWordsFile");
+    GENDER_WORD_LIST = props.getProperty("genderNamesFile");
     familyRelations = QuoteAttributionUtils.readFamilyRelations(FAMILY_WORD_LIST);
     genderMap = QuoteAttributionUtils.readGenderedNounList(GENDER_WORD_LIST);
     animacyList = QuoteAttributionUtils.readAnimacyList(ANIMACY_WORD_LIST);
