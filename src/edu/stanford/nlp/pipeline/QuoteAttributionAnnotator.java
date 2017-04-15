@@ -97,7 +97,7 @@ public class QuoteAttributionAnnotator implements Annotator {
       log.err("Warning: no coreference map!");
     }
     MODEL_PATH = props.getProperty("modelPath", DEFAULT_MODEL_PATH);
-    CHARACTERS_FILE = props.getProperty("quoteattribution.charactersPath", null);
+    CHARACTERS_FILE = props.getProperty("charactersPath", null);
     if(CHARACTERS_FILE == null) {
       log.err("Warning: no characters file!");
     }
