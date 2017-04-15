@@ -73,9 +73,9 @@ public class QuoteAttributionAnnotator implements Annotator {
   public static final String DEFAULT_MODEL_PATH = "edu/stanford/nlp/models/quoteattribution/quoteattribution_model.ser";
 
   // these paths go in the props file
-  public static String FAMILY_WORD_LIST = "edu/stanford/nlp/data/quoteattribution/family_words.txt";
-  public static String ANIMACY_WORD_LIST = "edu/stanford/nlp/data/quoteattribution/animate.unigrams.txt";
-  public static String GENDER_WORD_LIST = "edu/stanford/nlp/data/quoteattribution/gender_filtered.txt";
+  public static String FAMILY_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/family_words.txt";
+  public static String ANIMACY_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/animate.unigrams.txt";
+  public static String GENDER_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/gender_filtered.txt";
   public static String COREF_PATH = "";
   public static String MODEL_PATH = "edu/stanford/nlp/models/quoteattribution/quoteattribution_model.ser";
   public static String CHARACTERS_FILE = "";
@@ -110,9 +110,9 @@ public class QuoteAttributionAnnotator implements Annotator {
       log.info("Loading QuoteAttribution characters [" + CHARACTERS_FILE + "]...");
     }
     // loading all our word lists
-    FAMILY_WORD_LIST = props.getProperty("familyWordsFile");
-    ANIMACY_WORD_LIST = props.getProperty("animacyWordsFile");
-    GENDER_WORD_LIST = props.getProperty("genderNamesFile");
+    FAMILY_WORD_LIST = props.getProperty("familyWordsFile", FAMILY_WORD_LIST);
+    ANIMACY_WORD_LIST = props.getProperty("animacyWordsFile", ANIMACY_WORD_LIST);
+    GENDER_WORD_LIST = props.getProperty("genderNamesFile", GENDER_WORD_LIST);
     familyRelations = QuoteAttributionUtils.readFamilyRelations(FAMILY_WORD_LIST);
     genderMap = QuoteAttributionUtils.readGenderedNounList(GENDER_WORD_LIST);
     animacyList = QuoteAttributionUtils.readAnimacyList(ANIMACY_WORD_LIST);
