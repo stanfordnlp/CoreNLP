@@ -179,8 +179,13 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
   public List<TimeExpression> extractTimeExpressions(CoreMap annotation, SUTime.Time refDate, SUTime.TimeIndex timeIndex) {
     if (!annotation.containsKey(CoreAnnotations.NumerizedTokensAnnotation.class)) {
-      List<CoreMap> mergedNumbers = NumberNormalizer.findAndMergeNumbers(annotation);
-      annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, mergedNumbers);
+      try {
+        List<CoreMap> mergedNumbers = NumberNormalizer.findAndMergeNumbers(annotation);
+        annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, mergedNumbers);
+      } catch (NumberFormatException e) {
+        logger.warn("Caught bad number: " + e.getMessage());
+        annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, new ArrayList<>());
+      }
     }
 
     List<? extends MatchedExpression> matchedExpressions = expressionExtractor.extractExpressions(annotation);

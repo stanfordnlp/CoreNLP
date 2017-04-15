@@ -5,10 +5,7 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 
 /** Utilities methods for standard (but woeful) Java Properties objects.
@@ -409,13 +406,33 @@ public class PropertiesUtils {
   }
 
   public static String getSignature(String name, Properties properties) {
-    String prefix = (name != null && !name.isEmpty())? name + '.' : "";
+    String[] prefixes = new String[]{(name != null && !name.isEmpty())? name + '.' : ""};
+    if ("tokenize".equals(name) || "ssplit".equals(name)) {  // TODO(gabor) This is a hack, as tokenize and ssplit depend on each other so heavily
+      prefixes = new String[]{"tokenize", "ssplit"};
+    }
+    if ("mention".equals(name)) {
+      prefixes = new String[]{"mention", "coref"};
+    }
+    if ("ner".equals(name)) {
+      prefixes = new String[]{"ner", "sutime"};
+    }
+    // handle special case of implied properties (e.g. sentiment implies parse should set parse.binaryTrees = true
+    Properties propertiesCopy = new Properties();
+    propertiesCopy.putAll(properties);
+    // TODO(jb) This is a hack: handle implied need for binary trees if sentiment annotator is present
+    Set<String> annoNames =
+        Generics.newHashSet(Arrays.asList(properties.getProperty("annotators", "").split("[, \t]+")));
+    if ("parse".equals(name) && annoNames.contains("sentiment") && !properties.containsKey("parse.binaryTrees")) {
+      propertiesCopy.setProperty("parse.binaryTrees", "true");
+    }
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
-    for (String pname : properties.stringPropertyNames()) {
-      if (pname.startsWith(prefix)) {
-        String pvalue = properties.getProperty(pname);
-        sb.append(pname).append(':').append(pvalue).append(';');
+    for (String pname : propertiesCopy.stringPropertyNames()) {
+      for (String prefix : prefixes) {
+        if (pname.startsWith(prefix)) {
+          String pvalue = propertiesCopy.getProperty(pname);
+          sb.append(pname).append(':').append(pvalue).append(';');
+        }
       }
     }
     return sb.toString();

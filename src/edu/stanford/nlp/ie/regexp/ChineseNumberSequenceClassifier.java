@@ -161,7 +161,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
           // TIME may have more variants (really?) so always add as TIME by default
           me.set(CoreAnnotations.AnswerAnnotation.class, TIME_TAG);
         }
-      } else if(DATE_AGE_LOCALIZER.equals(me.word()) && prev.word().length() == 2 &&
+      } else if(DATE_AGE_LOCALIZER.equals(me.word()) && prev.word() != null && prev.word().length() == 2 &&
           CHINESE_AND_ARABIC_NUMERALS_PATTERN.matcher(prev.word()).matches()) {
         // Label 后 as DATE if the sequence is 70 后 or 七零 后
         me.set(CoreAnnotations.AnswerAnnotation.class, DATE_TAG);

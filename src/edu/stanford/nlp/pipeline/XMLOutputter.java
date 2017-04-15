@@ -238,8 +238,8 @@ public class XMLOutputter extends AnnotationOutputter  {
     if (corefChains != null) {
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       Element corefInfo = new Element("coreference", NAMESPACE_URI);
-      if (addCorefGraphInfo(options, corefInfo, sentences, corefChains, NAMESPACE_URI))
-        docElem.appendChild(corefInfo);
+      addCorefGraphInfo(options, corefInfo, sentences, corefChains, NAMESPACE_URI);
+      docElem.appendChild(corefInfo);
     }
 
     //

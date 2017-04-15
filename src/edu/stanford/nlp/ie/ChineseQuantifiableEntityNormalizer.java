@@ -50,7 +50,7 @@ public class ChineseQuantifiableEntityNormalizer {
 
   // Patterns we need
   // TODO (yuhao): here we are not considering 1) negative numbers, 2) Chinese traditional characters
-  private static final Pattern ARABIC_NUMBERS_PATTERN = Pattern.compile("[\\d\\.]+");
+  private static final Pattern ARABIC_NUMBERS_PATTERN = Pattern.compile("[-+]?\\d*\\.?\\d+");
   // This is the all-literal-number-characters sequence, excluding unit characters like 十 or 万
   private static final Pattern CHINESE_LITERAL_NUMBER_SEQUENCE_PATTERN = Pattern.compile("[一二三四五六七八九零〇]+");
   // The decimal part of a float number should be exactly literal number sequence without units
@@ -166,6 +166,7 @@ public class ChineseQuantifiableEntityNormalizer {
   // Patterns used by DATE and TIME (must be after the static initializers to make use of the modifiers)
   private static final String CHINESE_DATE_NUMERALS_PATTERN = "[一二三四五六七八九零十〇]";
   private static final String CHINESE_AND_ARABIC_NUMERALS_PATTERN = "[一二三四五六七八九零十〇\\d]";
+  private static final String CHINESE_AND_ARABIC_NUMERALS_PATTERN_WO_TEN = "[一二三四五六七八九零〇\\d]";
   private static final String YEAR_MODIFIER_PATTERN = "[" + String.join("", yearModifiers.keySet()) + "]";
   private static final String MONTH_DAY_MODIFIER_PATTERN = "[" + String.join("", monthDayModifiers.keySet()) + "]";
 
@@ -173,7 +174,7 @@ public class ChineseQuantifiableEntityNormalizer {
           + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "{1,3}|" + MONTH_DAY_MODIFIER_PATTERN + ")[日号&&[^年月]]?";
   private static final String BASIC_MMDD_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "{1,2}|"
           + MONTH_DAY_MODIFIER_PATTERN + ")(?:月份?|\\-|/|\\.)(?:" + BASIC_DD_PATTERN + ")?";
-  private static final String BASIC_YYYYMMDD_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "{2,4}|"
+  private static final String BASIC_YYYYMMDD_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN_WO_TEN + "{2,4}|"
           + YEAR_MODIFIER_PATTERN + ")(?:年[份度]?|\\-|/|\\.)?" + "(?:" + BASIC_MMDD_PATTERN + ")?";
   private static final String ENGLISH_MMDDYYYY_PATTERN = "(\\d{1,2})[/\\-\\.](\\d{1,2})(?:[/\\-\\.](\\d{4}))?";
 

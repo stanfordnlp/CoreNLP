@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.tokensregex.CoreMapExpressionExtractor;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
 import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
+import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.*;
 import java.util.Set;
 
 /**
@@ -69,6 +71,11 @@ public class TokensRegexAnnotator implements Annotator {
     }
     env = TokenSequencePattern.getNewEnv();
     env.bind("options", options);
+    if (PropertiesUtils.getBool(props, prefix+"caseInsensitive")) {
+      System.err.println("using case insensitive!");
+      env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
+      env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+    }
     extractor = CoreMapExpressionExtractor.createExtractorFromFiles(env, files);
     verbose = PropertiesUtils.getBool(props, prefix + "verbose", false);
     options.setTokenOffsets = PropertiesUtils.getBool(props, prefix + "setTokenOffsets", options.setTokenOffsets);

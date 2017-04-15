@@ -338,7 +338,7 @@ public class ParserAnnotator extends SentenceAnnotator  {
       } else {
         List<ScoredObject<Tree>> scoredObjects = pq.getKBestParses(this.kBest);
         if (scoredObjects == null || scoredObjects.size() < 1) {
-          log.info("WARNING: Parsing of sentence failed.  " +
+          log.warn("Parsing of sentence failed.  " +
               "Will ignore and continue: " +
               SentenceUtils.listToString(words));
         } else {
@@ -351,11 +351,11 @@ public class ParserAnnotator extends SentenceAnnotator  {
         }
       }
     } catch (OutOfMemoryError e) {
-      Runtime.getRuntime().gc();
-      log.info("WARNING: Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
-              "Will ignore and continue.");
+      log.error(e); // Beware that we can now get an OOM in logging, too.
+      log.warn("Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
+              "Will ignore and try to continue.");
     } catch (NoSuchParseException e) {
-      log.info("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
+      log.warn("Parsing of sentence failed, possibly because of out of memory.  " +
               "Will ignore and continue: " +
               SentenceUtils.listToString(words));
     }
