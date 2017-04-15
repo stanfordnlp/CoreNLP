@@ -262,7 +262,7 @@ public class JSONOutputter extends AnnotationOutputter {
 
     });
 
-    l0.writer.flush();  // flush
+    l0.flush();  // flush
   }
 
   /**
@@ -323,7 +323,7 @@ public class JSONOutputter extends AnnotationOutputter {
   public static class JSONWriter {
     private final PrintWriter writer;
     private final Options options;
-    private JSONWriter(PrintWriter writer, Options options) {
+    public JSONWriter(PrintWriter writer, Options options) {
       this.writer = writer;
       this.options = options;
     }
@@ -494,6 +494,10 @@ public class JSONOutputter extends AnnotationOutputter {
           writer.write(INDENT_CHAR);
         }
       }
+    }
+
+    public void flush() {
+      writer.flush();
     }
 
     private void space() {
