@@ -18,7 +18,7 @@ Here are some helpful instructions to use the latest code:
 #### provided build
 Periodically we will provide updated jars here which have the latest version of the code:
 
-[stanford-corenlp.jar](http://nlp.stanford.edu/software/stanford-corenlp-2017-04-14-build.jar)
+[stanford-corenlp.jar (last built: 2017-04-14)](http://nlp.stanford.edu/software/stanford-corenlp-2017-04-14-build.jar)
 
 #### build with Ant
 
