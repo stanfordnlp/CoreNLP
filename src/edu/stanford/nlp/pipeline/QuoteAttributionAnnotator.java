@@ -14,6 +14,7 @@ import edu.stanford.nlp.quoteattribution.Sieves.MSSieves.MajoritySpeakerSieve;
 import edu.stanford.nlp.quoteattribution.Sieves.QMSieves.*;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.*;
 
 import java.util.*;
 
@@ -79,6 +80,7 @@ public class QuoteAttributionAnnotator implements Annotator {
   public static String COREF_PATH = "";
   public static String MODEL_PATH = "edu/stanford/nlp/models/quoteattribution/quoteattribution_model.ser";
   public static String CHARACTERS_FILE = "";
+  public boolean buildCharacterMapPerAnnotation = false;
 
   public static final Boolean VERBOSE = true;
 
@@ -116,14 +118,38 @@ public class QuoteAttributionAnnotator implements Annotator {
     familyRelations = QuoteAttributionUtils.readFamilyRelations(FAMILY_WORD_LIST);
     genderMap = QuoteAttributionUtils.readGenderedNounList(GENDER_WORD_LIST);
     animacyList = QuoteAttributionUtils.readAnimacyList(ANIMACY_WORD_LIST);
-    characterMap = QuoteAttributionUtils.readPersonMap(CHARACTERS_FILE);
+    if (characterMap != null) {
+      characterMap = QuoteAttributionUtils.readPersonMap(CHARACTERS_FILE);
+    } else {
+      buildCharacterMapPerAnnotation = true;
+    }
     if (VERBOSE) {
       timer.stop("done.");
     }
   }
 
+  /** if no character list is provided, produce a list of person names from entity mentions annotation **/
+  public void entityMentionsToCharacterMap(Annotation annotation) {
+    characterMap = new HashMap<String, List<Person>>();
+    for (CoreMap entityMention : annotation.get(CoreAnnotations.MentionsAnnotation.class)) {
+      String entityMentionString = entityMention.toString();
+      if (entityMention.get(CoreAnnotations.NamedEntityTagAnnotation.class) == "PERSON") {
+        Person newPerson = new Person(entityMentionString, "UNK", new ArrayList());
+        List<Person> newPersonList = new ArrayList<Person>();
+        newPersonList.add(newPerson);
+        characterMap.put(entityMentionString, newPersonList);
+      }
+    }
+  }
+
   @Override
   public void annotate(Annotation annotation) {
+    boolean perDocumentCharacterMap = false;
+    if (buildCharacterMapPerAnnotation) {
+      if (annotation.containsKey(CoreAnnotations.MentionsAnnotation.class)) {
+        entityMentionsToCharacterMap(annotation);
+      }
+    }
     // 0. pre-preprocess the text with paragraph annotations
     // TODO: maybe move this out, definitely make it so that you can set paragraph breaks
     Properties propsPara = new Properties();
