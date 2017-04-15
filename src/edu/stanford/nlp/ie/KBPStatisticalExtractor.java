@@ -371,7 +371,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     }
 
     // Get the dependency path
-    List<String> depparsePath = sentence.algorithms().dependencyPathBetween(subjectHead, objectHead, Optional.of(Sentence::lemmas));
+    List<String> depparsePath = sentence.algorithms().dependencyPathBetween(subjectHead, objectHead, Sentence::lemmas);
 
     // Chop out appos edges
     if (depparsePath.size() > 3) {

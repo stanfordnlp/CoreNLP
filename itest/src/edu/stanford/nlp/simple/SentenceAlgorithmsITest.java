@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -159,12 +158,6 @@ public class SentenceAlgorithmsITest {
         add("green");
     }},s.algorithms().dependencyPathBetween(5, 6));
 
-    assertEquals(new ArrayList<String>() {{
-      add("the");
-      add("<-det-");
-      add("cat");
-    }}, s.algorithms().dependencyPathBetween(0, 2));
-
     s = new Sentence("I visited River Road Asset Management of Louisville , Kentucky .");
     assertEquals(new ArrayList<String>(){{
       add("Management");
@@ -173,43 +166,5 @@ public class SentenceAlgorithmsITest {
       add("-appos->");
       add("Kentucky");
     }},s.algorithms().dependencyPathBetween(5, 9));
-  }
-
-
-  @Test
-  public void testLoopyDependencyPathBetween() throws IOException {
-    Sentence s = new Sentence("the blue cat sat on the green mat");
-    for (int start = 0; start < s.length(); ++start) {
-      for (int end = 0; end < s.length(); ++end) {
-        assertEquals(
-            s.algorithms().dependencyPathBetween(start, end, Optional.of(Sentence::words)),
-            s.algorithms().loopyDependencyPathBetween(start, end, Optional.of(Sentence::words))
-        );
-      }
-    }
-  }
-
-
-  @Test
-  public void testDependencyPathBetweenRegressions() throws IOException {
-    Sentence s = new Sentence("In the Middle Ages, several powerful Somali empires dominated the regional trade including the Ajuran Sultanate, which excelled in hydraulic engineering and fortress building, the Sultanate of Adal, whose general Ahmad ibn Ibrahim al-Ghazi (Ahmed Gurey) was the first commander to use cannon warfare on the continent during Adal's conquest of the Ethiopian Empire, and the Sultanate of the Geledi, whose military dominance forced governors of the Omani empire north of the city of Lamu to pay tribute to the Somali Sultan Ahmed Yusuf.");
-    s.dependencyGraph();
-    assertEquals(new ArrayList<String>(){{
-      add("forced");
-      add("<-acl:relcl-");
-      add("Geledi");
-      add("<-nmod:of-");
-      add("Sultanate");
-      add("<-conj:and-");
-      add("Sultanate");
-      add("<-nmod:including-");
-      add("trade");
-      add("<-dobj-");
-      add("dominated");
-      add("-nmod:in->");
-      add("Ages");
-      add("-compound->");
-      add("Middle");
-    }}, s.algorithms().dependencyPathBetween(72, 2));
   }
 }

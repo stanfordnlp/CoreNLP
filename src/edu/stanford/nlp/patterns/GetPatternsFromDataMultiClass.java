@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.time.Duration;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -45,6 +44,8 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
 import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 
 /**
  * Given text and a seed list, this class gives more words like the seed words
@@ -3043,7 +3044,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     }
 
     if(props.getProperty(Flags.patternType) == null)
-      throw new RuntimeException("PatternType not specified. Options are SURFACE and DEP");
+      throw new RuntimeException("PattenrType not specified. Options are SURFACE and DEP");
 
     PatternFactory.PatternType patternType = PatternFactory.PatternType.valueOf(props.getProperty(Flags.patternType));
 
@@ -3579,16 +3580,9 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
 
   public static String elapsedTime(Date d1, Date d2){
     try{
-      Duration period = Duration.between(d1.toInstant(), d2.toInstant());
-      // Note: this will become easier with Java 9, using toDaysPart() etc.
-      long days = period.toDays();
-      period = period.minusDays(days);
-      long hours = period.toHours();
-      period = period.minusHours(hours);
-      long minutes = period.toMinutes();
-      period = period.minusMinutes(minutes);
-      long seconds = period.getSeconds();
-      return days + " days, " + hours + " hours, " + minutes + " minutes, " + seconds + " seconds";
+    Interval interval = new Interval(d1.getTime(), d2.getTime());
+    Period period = interval.toPeriod();
+    return period.getDays() + " days, " + period.getHours()+" hours, " + period.getMinutes()  +" minutes, " +period.getSeconds()+" seconds";
     } catch(java.lang.IllegalArgumentException e) {
       log.warn(e);
     }

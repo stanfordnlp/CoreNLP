@@ -488,37 +488,34 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   /**
    * This function defines the list of named annotators in CoreNLP, along with how to construct
    * them.
-   *
    * @return A map from annotator name, to the function which constructs that annotator.
    */
-  private static Map<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> getNamedAnnotators() {
-    Map<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> pool = new HashMap<>();
-    pool.put(STANFORD_TOKENIZE, (props, impl) -> impl.tokenizer(props));
-    pool.put(STANFORD_CLEAN_XML, (props, impl) -> impl.cleanXML(props));
-    pool.put(STANFORD_SSPLIT, (props, impl) -> impl.wordToSentences(props));
-    pool.put(STANFORD_POS, (props, impl) -> impl.posTagger(props));
-    pool.put(STANFORD_LEMMA, (props, impl) -> impl.morpha(props, false));
-    pool.put(STANFORD_NER, (props, impl) -> impl.ner(props));
-    pool.put(STANFORD_TOKENSREGEX, (props, impl) -> impl.tokensregex(props, STANFORD_TOKENSREGEX));
-    pool.put(STANFORD_REGEXNER, (props, impl) -> impl.tokensRegexNER(props, STANFORD_REGEXNER));
-    pool.put(STANFORD_ENTITY_MENTIONS, (props, impl) -> impl.entityMentions(props, STANFORD_ENTITY_MENTIONS));
-    pool.put(STANFORD_GENDER, (props, impl) -> impl.gender(props, false));
-    pool.put(STANFORD_TRUECASE, (props, impl) -> impl.trueCase(props));
-    pool.put(STANFORD_PARSE, (props, impl) -> impl.parse(props));
-    pool.put(STANFORD_MENTION, (props, impl) -> impl.mention(props));
-    pool.put(STANFORD_DETERMINISTIC_COREF, (props, impl) -> impl.dcoref(props));
-    pool.put(STANFORD_COREF, (props, impl) -> impl.coref(props));
-    pool.put(STANFORD_RELATION, (props, impl) -> impl.relations(props));
-    pool.put(STANFORD_SENTIMENT, (props, impl) -> impl.sentiment(props, STANFORD_SENTIMENT));
-    pool.put(STANFORD_COLUMN_DATA_CLASSIFIER, (props, impl) -> impl.columnData(props));
-    pool.put(STANFORD_DEPENDENCIES, (props, impl) -> impl.dependencies(props));
-    pool.put(STANFORD_NATLOG, (props, impl) -> impl.natlog(props));
-    pool.put(STANFORD_OPENIE, (props, impl) -> impl.openie(props));
-    pool.put(STANFORD_QUOTE, (props, impl) -> impl.quote(props));
-    pool.put(STANFORD_QUOTE_ATTRIBUTION, (props, impl) -> impl.quoteattribution(props));
-    pool.put(STANFORD_UD_FEATURES, (props, impl) -> impl.udfeats(props));
-    pool.put(STANFORD_LINK, (props, impl) -> impl.link(props));
-    pool.put(STANFORD_KBP, (props, impl) -> impl.kbp(props));
+  private static Map<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> getNamedAnnotators() {
+    Map<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> pool = new HashMap<>();
+    pool.put(STANFORD_TOKENIZE, AnnotatorFactories::tokenize);
+    pool.put(STANFORD_CLEAN_XML, AnnotatorFactories::cleanXML);
+    pool.put(STANFORD_SSPLIT, AnnotatorFactories::sentenceSplit);
+    pool.put(STANFORD_POS, AnnotatorFactories::posTag);
+    pool.put(STANFORD_LEMMA, AnnotatorFactories::lemma);
+    pool.put(STANFORD_NER, AnnotatorFactories::nerTag);
+    pool.put(STANFORD_REGEXNER, AnnotatorFactories::regexNER);
+    pool.put(STANFORD_ENTITY_MENTIONS, AnnotatorFactories::entityMentions);
+    pool.put(STANFORD_GENDER, AnnotatorFactories::gender);
+    pool.put(STANFORD_TRUECASE, AnnotatorFactories::truecase);
+    pool.put(STANFORD_PARSE, AnnotatorFactories::parse);
+    pool.put(STANFORD_MENTION, AnnotatorFactories::mention);
+    pool.put(STANFORD_DETERMINISTIC_COREF, AnnotatorFactories::dcoref);
+    pool.put(STANFORD_COREF, AnnotatorFactories::coref);
+    pool.put(STANFORD_RELATION, AnnotatorFactories::relation);
+    pool.put(STANFORD_SENTIMENT, AnnotatorFactories::sentiment);
+    pool.put(STANFORD_COLUMN_DATA_CLASSIFIER, AnnotatorFactories::columnDataClassifier);
+    pool.put(STANFORD_DEPENDENCIES, AnnotatorFactories::dependencies);
+    pool.put(STANFORD_NATLOG, AnnotatorFactories::natlog);
+    pool.put(STANFORD_OPENIE, AnnotatorFactories::openie);
+    pool.put(STANFORD_QUOTE, AnnotatorFactories::quote);
+    pool.put(STANFORD_UD_FEATURES, AnnotatorFactories::udfeats);
+    pool.put(STANFORD_LINK, AnnotatorFactories::link);
+    pool.put(STANFORD_KBP, AnnotatorFactories::kbp);
     return pool;
   }
 
@@ -534,8 +531,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     if (pool == null) {
       pool = new AnnotatorPool();
     }
-    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
-      pool.register(entry.getKey(), inputProps, Lazy.cache( () -> entry.getValue().apply(inputProps, annotatorImplementation)));
+    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
+      pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
     }
     registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
@@ -558,7 +555,13 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         logger.info("Registering annotator " + customName + " with class " + customClassName);
-        pool.register(customName, inputProps, Lazy.cache(() -> annotatorImplementation.custom(inputProps, property)));
+        pool.register(customName, new AnnotatorFactory(customName, customClassName, inputProps) {
+          private static final long serialVersionUID = 1L;
+          @Override
+          public Annotator create() {
+            return annotatorImplementation.custom(properties, property);
+          }
+        });
       }
     }
   }
@@ -574,8 +577,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    */
   public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
     AnnotatorPool pool = new AnnotatorPool();
-    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
-      pool.register(entry.getKey(), inputProps, Lazy.cache(() -> entry.getValue().apply(inputProps, annotatorImplementation)));
+    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
+      pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
     }
     registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
@@ -597,9 +600,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     }
   }
 
-
   @Override
-  /** {@inheritDoc} */
   public void annotate(Annotation annotation) {
     super.annotate(annotation);
     List<CoreLabel> words = annotation.get(CoreAnnotations.TokensAnnotation.class);
@@ -1047,7 +1048,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       case CONLLU: defaultExtension = ".conllu"; break;
       case TEXT: defaultExtension = ".out"; break;
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
-    
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
     }
 
@@ -1165,9 +1165,9 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
           timing.done(logger, "Annotating file " + file.getAbsoluteFile());
           Throwable ex = finishedAnnotation.get(CoreAnnotations.ExceptionAnnotation.class);
           if (ex == null) {
-            try{
             //--Output File
-	      OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+            try {
+              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
               print.accept(finishedAnnotation, fos);
               fos.close();
             } catch(IOException e) {
@@ -1320,10 +1320,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       }
     }
     // Run the pipeline
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    pipeline.run();
-    pool.clear();
-
+    new StanfordCoreNLP(props).run();
   }
 
 }

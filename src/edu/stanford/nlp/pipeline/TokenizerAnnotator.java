@@ -7,7 +7,11 @@ import java.util.*;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.process.*;
+import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.util.Generics;
@@ -135,35 +139,6 @@ public class TokenizerAnnotator implements Annotator  {
   /** Gives a non-verbose, English tokenizer. */
   public TokenizerAnnotator() {
     this(false);
-  }
-
-
-  private static String computeExtraOptions(Properties properties) {
-    String extraOptions = null;
-    boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false")); // ssplit.eolonly
-
-    String hasSsplit = properties.getProperty("annotators");
-    if (hasSsplit != null && hasSsplit.contains(StanfordCoreNLP.STANFORD_SSPLIT)) { // ssplit
-      // Only possibly put in *NL* if not all one (the Boolean method treats null as false)
-      if ( ! Boolean.parseBoolean(properties.getProperty("ssplit.isOneSentence"))) {
-        // Set to { NEVER, ALWAYS, TWO_CONSECUTIVE } based on  ssplit.newlineIsSentenceBreak
-        String nlsbString = properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
-            StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
-        WordToSentenceProcessor.NewlineIsSentenceBreak nlsb = WordToSentenceProcessor.stringToNewlineIsSentenceBreak(nlsbString);
-        if (nlsb != WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER) {
-          keepNewline = true;
-        }
-      }
-    }
-    if (keepNewline) {
-      extraOptions = "tokenizeNLs,";
-    }
-    return extraOptions;
-  }
-
-
-  public TokenizerAnnotator(Properties properties) {
-    this(false, properties, computeExtraOptions(properties));
   }
 
   public TokenizerAnnotator(boolean verbose) {
