@@ -5,12 +5,14 @@ import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.classify.LinearClassifierFactory;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.QuoteAttributionAnnotator;
 import edu.stanford.nlp.quoteattribution.Sieves.Sieve;
 import edu.stanford.nlp.quoteattribution.Sieves.training.SupervisedSieveTraining;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -34,8 +36,9 @@ public class ExtractQuotesClassifier {
 
   public ExtractQuotesClassifier(String modelPath) {
     try {
-      FileInputStream fi = new FileInputStream(modelPath);
-      ObjectInputStream si = new ObjectInputStream(fi);
+      //FileInputStream fi = new FileInputStream(modelPath);
+      //ObjectInputStream si = new ObjectInputStream(fi);
+      ObjectInputStream si = IOUtils.readStreamFromString(modelPath);
       quoteToMentionClassifier = (Classifier<String, String>) si.readObject();
       si.close();
     } catch (FileNotFoundException e) {
