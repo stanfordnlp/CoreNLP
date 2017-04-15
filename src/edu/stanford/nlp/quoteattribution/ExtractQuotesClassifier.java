@@ -36,8 +36,6 @@ public class ExtractQuotesClassifier {
 
   public ExtractQuotesClassifier(String modelPath) {
     try {
-      //FileInputStream fi = new FileInputStream(modelPath);
-      //ObjectInputStream si = new ObjectInputStream(fi);
       ObjectInputStream si = IOUtils.readStreamFromString(modelPath);
       quoteToMentionClassifier = (Classifier<String, String>) si.readObject();
       si.close();
