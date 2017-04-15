@@ -133,7 +133,7 @@ public class QuoteAttributionAnnotator implements Annotator {
     characterMap = new HashMap<String, List<Person>>();
     for (CoreMap entityMention : annotation.get(CoreAnnotations.MentionsAnnotation.class)) {
       String entityMentionString = entityMention.toString();
-      if (entityMention.get(CoreAnnotations.NamedEntityTagAnnotation.class) == "PERSON") {
+      if (entityMention.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("PERSON")) {
         Person newPerson = new Person(entityMentionString, "UNK", new ArrayList());
         List<Person> newPersonList = new ArrayList<Person>();
         newPersonList.add(newPerson);
