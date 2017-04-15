@@ -323,7 +323,7 @@ public class JSONOutputter extends AnnotationOutputter {
   public static class JSONWriter {
     private final PrintWriter writer;
     private final Options options;
-    private JSONWriter(PrintWriter writer, Options options) {
+    public JSONWriter(PrintWriter writer, Options options) {
       this.writer = writer;
       this.options = options;
     }
