@@ -1,13 +1,12 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.StringOutputStream;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -20,6 +19,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Pointer;
 
@@ -30,6 +30,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+
+import edu.stanford.nlp.coref.data.CorefChain;
 
 /**
  * Output an Annotation to human readable JSON.
@@ -259,7 +262,7 @@ public class JSONOutputter extends AnnotationOutputter {
 
     });
 
-    l0.flush();  // flush
+    l0.writer.flush();  // flush
   }
 
   /**
@@ -311,17 +314,16 @@ public class JSONOutputter extends AnnotationOutputter {
 
 
   /**
-   * Our very own little JSON writing class.
-   * For usage, see the test cases in JSONOutputterTest.
+   * <p>Our very own little JSON writing class.
+   * For usage, see the test cases in JSONOutputterTest.</p>
    *
-   * For the love of all that is holy, don't try to write JSON multithreaded.
-   * It should go without saying that this is not threadsafe.
+   * <p>For the love of all that is holy, don't try to write JSON multithreaded.
+   * It should go without saying that this is not threadsafe.</p>
    */
   public static class JSONWriter {
     private final PrintWriter writer;
     private final Options options;
-
-    public JSONWriter(PrintWriter writer, Options options) {
+    private JSONWriter(PrintWriter writer, Options options) {
       this.writer = writer;
       this.options = options;
     }
@@ -492,10 +494,6 @@ public class JSONOutputter extends AnnotationOutputter {
           writer.write(INDENT_CHAR);
         }
       }
-    }
-
-    public void flush() {
-      writer.flush();
     }
 
     private void space() {

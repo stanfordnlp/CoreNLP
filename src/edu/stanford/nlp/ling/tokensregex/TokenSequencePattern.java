@@ -160,7 +160,7 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   }
 
   /**
-   * Compiles a regular expression over tokens into a TokenSequencePattern
+   * Compiles a regular expressions over tokens into a TokenSequencePattern
    * using the default environment.
    *
    * @param string Regular expression to be compiled
