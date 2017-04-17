@@ -60,6 +60,11 @@ public class PTBTokenizerTest {
       "School-aged parents should be aware of the unique problems that they face.",
       "I dispute Art. 53 of the convention.",
       "I like Art. And I like History.",
+          "Contact: sue@google.com, fred@stanford.edu; michael.inman@lab.rpi.cs.cmu.edu.",
+          "Email: recruiters@marvelconsultants.com <mailto:recruiters@marvelconsultants.com>",
+          " Jeremy Meier <jermeier@earthlink.net>",
+          "Ram Tackett,  (mailto:rtackett@abacustech.net)",
+          "[Jgerma5@aol.com]. Danny_Jones%ENRON@eott.com"
   };
 
   private final String[][] ptbGold = {
@@ -114,6 +119,12 @@ public class PTBTokenizerTest {
       {"School-aged", "parents", "should", "be", "aware", "of", "the", "unique", "problems", "that", "they", "face","."},
       { "I", "dispute", "Art.", "53", "of", "the", "convention", "." },
       { "I", "like", "Art", ".", "And", "I", "like", "History", "." },
+          { "Contact", ":", "sue@google.com", ",", "fred@stanford.edu", ";", "michael.inman@lab.rpi.cs.cmu.edu", "." },
+          { "Email", ":", "recruiters@marvelconsultants.com", "<mailto:recruiters@marvelconsultants.com>" },
+          { "Jeremy", "Meier", "<jermeier@earthlink.net>" },
+          { "Ram", "Tackett", ",", "-LRB-", "mailto:rtackett@abacustech.net", "-RRB-" },
+          { "-LSB-", "Jgerma5@aol.com", "-RSB-", ".", "Danny_Jones%ENRON@eott.com" },
+
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -168,6 +179,11 @@ public class PTBTokenizerTest {
       {"School", "-", "aged", "parents", "should", "be", "aware", "of", "the", "unique", "problems", "that", "they", "face","."},
       { "I", "dispute", "Art.", "53", "of", "the", "convention", "." },
       { "I", "like", "Art", ".", "And", "I", "like", "History", "." },
+          { "Contact", ":", "sue@google.com", ",", "fred@stanford.edu", ";", "michael.inman@lab.rpi.cs.cmu.edu", "." },
+          { "Email", ":", "recruiters@marvelconsultants.com", "<mailto:recruiters@marvelconsultants.com>" },
+          { "Jeremy", "Meier", "<jermeier@earthlink.net>" },
+          { "Ram", "Tackett", ",", "-LRB-", "mailto:rtackett@abacustech.net", "-RRB-" },
+          { "-LSB-", "Jgerma5@aol.com", "-RSB-", ".", "Danny_Jones%ENRON@eott.com" },
 
   };
 
@@ -208,11 +224,13 @@ public class PTBTokenizerTest {
         i++;
       }
       if (i != corpGold[sent % 2].length) {
-        System.out.println("Gold: " + Arrays.toString(corpGold[sent % 2]));
+        System.out.print("Gold: ");
+        System.out.println(Arrays.toString(corpGold[sent % 2]));
         List<CoreLabel> tokens = new PTBTokenizer<>(new StringReader(corpInputs[sent / 2]),
               new CoreLabelTokenFactory(),
               (sent % 2 == 0) ? "strictTreebank3": "").tokenize();
-        System.out.println("Guess: " + SentenceUtils.listToString(tokens));
+        System.out.print("Guess: ");
+        System.out.println(SentenceUtils.listToString(tokens));
         System.out.flush();
       }
       assertEquals("PTBTokenizer num tokens problem", i, corpGold[sent % 2].length);
