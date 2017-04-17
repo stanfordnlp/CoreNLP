@@ -65,6 +65,8 @@ public class NumberNormalizerITest {
             "a hundred and one\n" +
 //            "five oh four\n"
             "four score.\n" +
+            "a dozen bagels\n" +
+            "five dozen\n" +
             "An IQ score of 161.\n" +     // only 161, not 20 for score
             "thirty two\n"
             ;
@@ -74,7 +76,7 @@ public class NumberNormalizerITest {
             24.0, 600.0, 412.0, 4650211.0, 600005650376.0, 5786345, 25.0,
             /* 1500000.0, */
             1300000.0, 1224.0, 10000000000.0, 3.625,
-            0, -15.0, 1, 2, 3, 4, 155.0, 101.0 /*504.0, */, 80.0, 161, 32.0 ).iterator();
+            0, -15.0, 1, 2, 3, 4, 155.0, 101.0 /*504.0, */, 80.0, 12, 60.0, 161, 32.0 ).iterator();
     Iterator<String> expectedTexts = Arrays.asList(
             "two dozen", "six hundred", "four hundred, and twelve",
             "4 million six hundred fifty thousand, two hundred and eleven",
@@ -89,7 +91,10 @@ public class NumberNormalizerITest {
             "zero", "-15", "one", "two", "three", "four",
             "one hundred and fifty five",
             "hundred and one" /* "five oh four", */,
-            "four score", "161", "thirty two").iterator();
+            "four score",
+            "dozen",
+            "five dozen",
+            "161", "thirty two").iterator();
 
     // create document
     Annotation document = createDocument(testText);

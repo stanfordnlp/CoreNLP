@@ -74,6 +74,7 @@ public class NumberNormalizer {
   //static final Pattern tensNumsPattern = Pattern.compile("(?i)(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)");
   private static final Pattern numUnitPattern = Pattern.compile("(?i)(hundred|thousand|million|billion|trillion)");
   private static final Pattern numEndUnitPattern = Pattern.compile("(?i)(gross|dozen|score)");
+  private static final Pattern numNotStandaloneUnitPattern = Pattern.compile("(?i)(gross|score)");
 
   /***********************/
 
@@ -424,7 +425,7 @@ public class NumberNormalizer {
         //   continue;
         // }
         // Don't count an end unit if not previous number
-        if (NumberNormalizer.numEndUnitPattern.matcher(w).matches()) {
+        if (NumberNormalizer.numNotStandaloneUnitPattern.matcher(w).matches()) {
           if (lastToken == null || ! lastToken.containsKey(CoreAnnotations.NumericValueAnnotation.class)) {
             continue;
           }
@@ -649,20 +650,20 @@ public class NumberNormalizer {
     return numbers;
   }
 
+  private static final TokenSequencePattern rangePattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
+
   /**
    * Find and mark number ranges.
-   * Ranges are NUM1 [-|to] NUM2 where NUM2 > NUM1
+   * Ranges are NUM1 [-|to] NUM2 where NUM2 > NUM1.
    *
    * Each number range is marked with
    * - CoreAnnotations.NumericTypeAnnotation.class: NUMBER_RANGE
-   * - CoreAnnotations.NumericObjectAnnotation.class: {@code Pair<Number>} representing the start/end of the range
+   * - CoreAnnotations.NumericObjectAnnotation.class: {@code Pair<Number>} representing the start/end of the range.
    *
    * @param annotation - annotation where numbers have already been identified
    * @return list of CoreMap representing the identified number ranges
    */
-  private static final TokenSequencePattern rangePattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
-
-  public static List<CoreMap> findNumberRanges(CoreMap annotation) {
+  private static List<CoreMap> findNumberRanges(CoreMap annotation) {
     List<CoreMap> numerizedTokens = annotation.get(CoreAnnotations.NumerizedTokensAnnotation.class);
     for (CoreMap token:numerizedTokens) {
       String w = token.get(CoreAnnotations.TextAnnotation.class);
@@ -674,7 +675,7 @@ public class NumberNormalizer {
           String w2 = rangeMatcher.group(2);
           Number v1 = NumberNormalizer.wordToNumber(w1);
           Number v2 = NumberNormalizer.wordToNumber(w2);
-          if (v2.doubleValue() > v1.doubleValue()) {
+          if (v1 !=null && v2 != null && v2.doubleValue() > v1.doubleValue()) {
             token.set(CoreAnnotations.NumericTypeAnnotation.class, "NUMBER_RANGE");
             token.set(CoreAnnotations.NumericCompositeTypeAnnotation.class, "NUMBER_RANGE");
             Pair<Number,Number> range = new Pair<>(v1, v2);
