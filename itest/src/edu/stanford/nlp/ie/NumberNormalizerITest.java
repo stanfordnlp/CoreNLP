@@ -21,7 +21,7 @@ import static org.junit.Assert.assertFalse;
 public class NumberNormalizerITest {
 
   private static AnnotationPipeline pipeline; // = null;
-  private static final boolean VERBOSE = true;
+  private static final boolean VERBOSE = false;
 
   @BeforeClass
   public static void runOnceBeforeClass() {

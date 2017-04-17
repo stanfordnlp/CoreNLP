@@ -27,7 +27,7 @@ public class QuantifiableEntityExtractor {
 
   private Env env;
   private Options options;
-  private CoreMapExpressionExtractor extractor;
+  private CoreMapExpressionExtractor<MatchedExpression> extractor;
 
   public SimpleQuantifiableEntity get(double amount, String unitName) {
     return new SimpleQuantifiableEntity(amount, (Unit) env.get(unitName));
@@ -53,7 +53,7 @@ public class QuantifiableEntityExtractor {
     extractor = createExtractor();
   }
 
-  public CoreMapExpressionExtractor createExtractor() {
+  private CoreMapExpressionExtractor<MatchedExpression> createExtractor() {
     List<String> filenames = StringUtils.split(options.grammarFilename, "\\s*[,;]\\s*");
     return CoreMapExpressionExtractor.createExtractorFromFiles(env, filenames);
   }
@@ -86,7 +86,7 @@ public class QuantifiableEntityExtractor {
     PrintWriter pw = IOUtils.getPrintWriter(outfile);
     pw.println("SI_PREFIX_MAP = {");
     List<String> items = new ArrayList<>();
-    for (UnitPrefix prefix:prefixes) {
+    for (UnitPrefix prefix : prefixes) {
       if ("SI".equals(prefix.system)) {
         items.add("\"" + prefix.name + "\": " + prefix.getName().toUpperCase());
       }
