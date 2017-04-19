@@ -37,7 +37,8 @@ java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCore
 The crucial `StanfordCoreNLP-chinese.properties` file sets up models for Chinese. Its contents might be something like this (but this version in the documentation may well be dated, so extract the version from the jar file that you are using if you really want to be sure of its contents!):
 
 ```
-# Pipeline options - lemma is no-op for Chinese but currently needed because coref demands it (bad old requirements system)
+# Pipeline options - lemma is no-op for Chinese but currently needed because coref 
+# demands it (bad old requirements system)
 annotators = tokenize, ssplit, pos, lemma, ner, parse, mention, coref
 
 # segment
