@@ -213,6 +213,17 @@ public class JSONOutputter extends AnnotationOutputter {
             }));
           }
         }));
+      } else {
+        if (doc.get(CoreAnnotations.TokensAnnotation.class) != null) {
+          l1.set("tokens", doc.get(CoreAnnotations.TokensAnnotation.class).stream().map(token ->
+              (Consumer<Writer>) (Writer l2) -> {
+                l2.set("index", token.index());
+                l2.set("word", token.word());
+                l2.set("originalText", token.originalText());
+                l2.set("characterOffsetBegin", token.beginPosition());
+                l2.set("characterOffsetEnd", token.endPosition());
+          }));
+        }
       }
 
       // Add coref values
