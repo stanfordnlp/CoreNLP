@@ -37,18 +37,64 @@ java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCore
 The crucial `StanfordCoreNLP-chinese.properties` file sets up models for Chinese. Its contents might be something like this (but this version in the documentation may well be dated, so extract the version from the jar file that you are using if you really want to be sure of its contents!):
 
 ```
-annotators = segment, ssplit, pos, ner, parse
-customAnnotatorClass.segment = edu.stanford.nlp.pipeline.ChineseSegmenterAnnotator
+# Pipeline options - lemma is no-op for Chinese but currently needed because coref demands it (bad old requirements system)
+annotators = tokenize, ssplit, pos, lemma, ner, parse, mention, coref
+
+# segment
+tokenize.language = zh
 segment.model = edu/stanford/nlp/models/segmenter/chinese/ctb.gz
 segment.sighanCorporaDict = edu/stanford/nlp/models/segmenter/chinese
 segment.serDictionary = edu/stanford/nlp/models/segmenter/chinese/dict-chris6.ser.gz
 segment.sighanPostProcessing = true
-ssplit.boundaryTokenRegex = [.]|[!?]+|[。]|[！？]+
+
+# sentence split
+ssplit.boundaryTokenRegex = [.。]|[!?！？]+
+
+# pos
 pos.model = edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger
+
+# ner
+ner.language = chinese
 ner.model = edu/stanford/nlp/models/ner/chinese.misc.distsim.crf.ser.gz
-ner.applyNumericClassifiers = false
+ner.applyNumericClassifiers = true
 ner.useSUTime = false
-parse.model = edu/stanford/nlp/models/lexparser/chineseFactored.ser.gz
+
+# regexner
+regexner.mapping = edu/stanford/nlp/models/kbp/cn_regexner_mapping.tab
+regexner.validpospattern = ^(NR|NN|JJ).*
+regexner.ignorecase = true
+regexner.noDefaultOverwriteLabels = CITY
+
+# parse
+parse.model = edu/stanford/nlp/models/srparser/chineseSR.ser.gz
+
+# depparse
+depparse.model    = edu/stanford/nlp/models/parser/nndep/UD_Chinese.gz
+depparse.language = chinese
+
+# coref
+coref.sieves = ChineseHeadMatch, ExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, PronounMatch
+coref.input.type = raw
+coref.postprocessing = true
+coref.calculateFeatureImportance = false
+coref.useConstituencyTree = true
+coref.useSemantics = false
+coref.algorithm = hybrid
+coref.path.word2vec =
+coref.language = zh
+coref.defaultPronounAgreement = true
+coref.zh.dict = edu/stanford/nlp/models/dcoref/zh-attributes.txt.gz
+coref.print.md.log = false
+coref.md.type = RULE
+coref.md.liberalChineseMD = false
+
+# kbp
+kbp.semgrex = edu/stanford/nlp/models/kbp/chinese/semgrex
+kbp.tokensregex = edu/stanford/nlp/models/kbp/chinese/tokensregex
+kbp.model = none
+
+# entitylink
+entitylink.wikidict = edu/stanford/nlp/models/kbp/wikidict_chinese.tsv.gz
 ```
 
 In code, an example would look something like this:
