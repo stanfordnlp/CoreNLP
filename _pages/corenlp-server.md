@@ -269,10 +269,10 @@ sudo wget https://raw.githubusercontent.com/stanfordnlp/CoreNLP/master/src/edu/s
 
 5. Give executable permissions to the startup script:  ```sudo chmod a+x /etc/init.d/corenlp```
 
-6. Link the script to `/etc/rc.d/`:  ```ln -s /etc/init.d/corenlp
-   /etc/rc.d/rc2.d/S75corenlp``` On Ubuntu, there is no `rc.d`
-   directory, so the equivalent is to do ```ln -s /etc/init.d/corenlp
-   /etc/rc2.d/S75corenlp``` 
+6. Link the script to `/etc/rc.d/`:
+   ```ln -s /etc/init.d/corenlp /etc/rc.d/rc2.d/S75corenlp```
+   On Ubuntu, there is no intervening `rc.d` directory, so the equivalent is to do:
+   ```ln -s /etc/init.d/corenlp /etc/rc2.d/S75corenlp```
 
 The above steps work using traditional SysVinit scripts. The other
    alternative on Ubuntu is to use Upstart instead. We haven't tried
