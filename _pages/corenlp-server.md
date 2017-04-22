@@ -238,7 +238,11 @@ wget "localhost:9000/shutdown?key=`cat /tmp/corenlp.shutdown`" -O -
 
 ### Dedicated Server
 
-This section describes how to set up a dedicated CoreNLP server on a fresh Linux install. As always, make sure you understand the commands being run below, as they largely require root permissions:
+This section describes how to set up a dedicated CoreNLP server on a
+fresh Linux install. These instructions are definitely okay on a
+CentOS 6 system, which is what our demo server runs on. We include a
+couple of notes of variations below.
+As always, make sure you understand the commands being run below, as they largely require root permissions:
 
 1. Place all of the CoreNLP jars (code, models, and library dependencies) in a directory `/opt/corenlp`. The code will be in a jar named `stanford-corenlp-<version>.jar`. The models will be in a jar named `stanford-corenlp-<version>-models.jar`; other language, caseless or shift-reduce models can also be added here. The minimal library dependencies, included in the CoreNLP release, are:
 	* `joda-time.jar`
@@ -263,9 +267,20 @@ sudo chmod 600 /etc/authbind/byport/80
 sudo wget https://raw.githubusercontent.com/stanfordnlp/CoreNLP/master/src/edu/stanford/nlp/pipeline/demo/corenlp -O /etc/init.d/corenlp
 ```
 
-5. Give executable permissions to startup script:  ```sudo chmod a+x /etc/init.d/corenlp```
+5. Give executable permissions to the startup script:  ```sudo chmod a+x /etc/init.d/corenlp```
 
-6. Link the script to `/etc/rc.d/`:  ```ln -s /etc/init.d/corenlp /etc/rc.d/rc2.d/S75corenlp```
+6. Link the script to `/etc/rc.d/`:  ```ln -s /etc/init.d/corenlp
+   /etc/rc.d/rc2.d/S75corenlp``` On Ubuntu, there is no `rc.d`
+   directory, so the equivalent is to do ```ln -s /etc/init.d/corenlp
+   /etc/rc2.d/S75corenlp``` 
+
+The above steps work using traditional SysVinit scripts. The other
+   alternative on Ubuntu is to use Upstart instead. We haven't tried
+   that but believe that the corresponding thing to do is:
+   ```bash
+   sudo wget https://raw.githubusercontent.com/stanfordnlp/CoreNLP/master/src/edu/stanford/nlp/pipeline/demo/corenlp -O /etc/init/corenlp
+   initctl reload-configuration
+   ```
 
 The CoreNLP server will now start on startup, running on port 80 under the user `nlp`. To manually start/stop/restart the server, you can use:
 
