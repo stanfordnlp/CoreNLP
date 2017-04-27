@@ -97,12 +97,20 @@ public class MUCMentionExtractor extends MentionExtractor  {
     Annotation docAnno = new Annotation("");
 
     Pattern docPattern = Pattern.compile("<DOC>(.*?)</DOC>", Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
-    Pattern sentencePattern = Pattern.compile("(<s>|<hl>|<dd>|<DATELINE>)(.*?)(</s>|</hl>|</dd>|</DATELINE>)", Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
+    Pattern sentencePattern = Pattern.compile("(<s>|<hl>|<dd>|<DATELINE>|<p>)(.*?)(</s>|</hl>|</dd>|</DATELINE>|</p>|<p>)", Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
     Matcher docMatcher = docPattern.matcher(fileContents);
     if (! docMatcher.find(currentOffset)) return null;
 
     currentOffset = docMatcher.end();
     String doc = docMatcher.group(1);
+    // in MUC7 as distributed by LDC,
+    // <p> are not ended with </p>, just a new <p> starts
+    // we handle this here and in the regex above
+    if (doc.endsWith("<p>"))
+      currentOffset -= 3;
+    // replace malformed escaped quotes by HTML entities so that tokenizer recognizes tags
+    // (such malformed tokens exist in the MUC6 corpus as distributed by LDC) 
+    doc = doc.replace("\\\"","&quot;");
     Matcher sentenceMatcher = sentencePattern.matcher(doc);
     String ner = null;
 
@@ -236,7 +244,22 @@ public class MUCMentionExtractor extends MentionExtractor  {
     Map<Integer, Mention> idMention = Generics.newHashMap();    // temporary use
     for (List<Mention> goldMentions : allGoldMentions) {
       for (Mention m : goldMentions) {
+        if (idMention.containsKey(m.mentionID) && !idMention.containsKey(m.originalRef)) {
+          // use reverse (some annotations in MUC6 as distributed by LDC contain swapped IDs (REF and ID is swapped))
+          Integer tmp = m.mentionID;
+          m.mentionID = m.originalRef;
+          m.originalRef = tmp;
+        }
         idMention.put(m.mentionID, m);
+      }
+    }
+    // check if all originalRef pointers point to existing mentions
+    // (in MUC7 as distributed by LDC there are some that point to non-existing mentions, causing problems in dcoref)
+    for (List<Mention> goldMentions : allGoldMentions) {
+      for (Mention m : goldMentions) {
+        if (!idMention.containsKey(m.originalRef))
+          // delete ref to non-existing mention
+          m.originalRef = -1;
       }
     }
     for (List<Mention> goldMentions : allGoldMentions) {

@@ -249,6 +249,10 @@ public class MentionExtractor {
   public static void mergeLabels(Tree tree, List<CoreLabel> sentence) {
     int idx = 0;
     for (Tree t : tree.getLeaves()) {
+      if (idx >= sentence.size()) {
+        System.err.printf("warning: could not assing CoreLabel to tree leaf %s (skipping)", t.value());
+        continue;
+      }
       CoreLabel cl = sentence.get(idx ++);
       String value = t.value();
       cl.set(CoreAnnotations.ValueAnnotation.class, value);
