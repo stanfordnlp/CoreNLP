@@ -481,6 +481,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * release the memory associated with the annotators.
    */
   public static synchronized void clearAnnotatorPool() {
+    if (pool != null)
+      pool.clear();
     pool = null;
   }
 
