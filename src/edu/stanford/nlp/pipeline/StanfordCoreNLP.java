@@ -1333,7 +1333,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.run();
     // clear the pool if not running in multi-thread mode
-    if (!props.containsKey("threads") || Integer.parseInt(props.getProperty("threads")) > 1)
+    if (!props.containsKey("threads") || Integer.parseInt(props.getProperty("threads")) <= 1)
       pool.clear();
   }
 
