@@ -58,7 +58,7 @@ Stanford CoreNLP can be downloaded via the link below. This will download a larg
 Alternatively, Stanford CoreNLP is [available on **Maven Central**](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
 Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html). 
-To download earlier versions of Stanford CoreNLP, including the last stable release (3.6.0), or language packs for earlier versions, go to the [history page](history.html).
+To download earlier versions of Stanford CoreNLP or language packs for earlier versions, go to the [history page](history.html).
 
 You can find the jars for 3.7.0 containing the models for each language we support in the table below.
 Due to size issues we have divided the English resources into two jars.  The English (KBP) models jar contains extra resources needed to run relation extraction and
@@ -96,10 +96,10 @@ various human languages on the
 
 Stanford CoreNLP is written in **Java**; current releases  require **Java 1.8+**. 
 
-You can use Stanford CoreNLP from the command-line, via its Java
-programmatic API, via [third party APIs](other-languages.html) for most major modern
+You can use Stanford CoreNLP from the [command-line](cmdline.html), via its Java
+[programmatic API](api.html), via [third party APIs](other-languages.html) for most major modern
 programming languages, or via a [service](corenlp-server.html).
-It works on Linux, OS X, and Windows.
+It works on Linux, macOS, and Windows.
 
 ## License
 
