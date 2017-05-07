@@ -60,7 +60,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
   public enum DocType {Plain, XML}
 
   // todo: Should probably change this to be regex, but I've added some multi-character punctuation in the meantime
-  public static final String[] DEFAULT_SENTENCE_DELIMS = {".", "?", "!", "!!", "!!!", "??", "?!", "!?"};
+  private static final String[] DEFAULT_SENTENCE_DELIMS = {".", "?", "!", "!!", "!!!", "??", "?!", "!?"};
 
   // inputReader is used in a fairly yucky way at the moment to communicate
   // from a XMLIterator across to a PlainTextIterator.  Maybe redo by making
@@ -253,7 +253,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
         delimFollowers = Generics.newHashSet();
         eolIsSignificant = wsPattern.matcher(sentenceDelimiter).matches();
         if(eolIsSignificant) { // For Stanford English Tokenizer
-          sentDelims.add(PTBLexer.NEWLINE_TOKEN);
+          sentDelims.add(PTBTokenizer.getNewlineToken());
         }
       }
 
@@ -336,7 +336,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
         }
 
         if ( ! (wsPattern.matcher(token.word()).matches() ||
-                token.word().equals(PTBLexer.NEWLINE_TOKEN))) {
+                token.word().equals(PTBTokenizer.getNewlineToken()))) {
           nextSent.add(token);
         }
 
