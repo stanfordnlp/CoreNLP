@@ -712,7 +712,7 @@ SREDAUX = n{APOSETCETERA}t
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
 APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
-FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"<>|.!?(){},-]
+FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"\'<>|.!?(){},;:&=+\[\]\\\/-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
@@ -818,10 +818,12 @@ BANGMAGAZINES = OK\!
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
 ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)
 /* First part is for 2 geographic char symbols as flag. */
-EMOJI = [\u{01F1E6}-\u{01F1FF}]{2,2}|[\u{01F000}-\u{01F9FF}]
+/* Skin colors or choice of emoji or non-emoji rendering can follow emoji. */
+/* There are special precomposed families made of people */
+EMOJI = [\u{01F1E6}-\u{01F1FF}]{2,2}|[\u2194-\u2199\u25FB-\u27BF\u{01F000}-\u{01F9FF}][\uFE0E\uFE0F\u{01F3FB}-\u{01F3FF}]?|[\u{01F466}-\u{01F469}](\u200D[\u{01F466}-\u{01F469}]){1,3}
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
-MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2025\u2030-\u2038\u203B\u2043\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3001-\u3006\u3008-\u3020\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
+MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2025\u2030-\u2038\u203B\u203C\u2043\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3001-\u3006\u3008-\u3020\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
 /* Math and other symbols that stand alone: °²× ∀ */
 // Consider this list of bullet chars: 2219, 00b7, 2022, 2024
