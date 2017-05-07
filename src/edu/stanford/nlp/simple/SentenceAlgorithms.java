@@ -514,7 +514,6 @@ public class SentenceAlgorithms {
     return dependencyPathBetween(start, end, Optional.of(Sentence::words));
   }
 
-
   /**
    * A funky little helper method to interpret each token of the sentence as an HTML string, and translate it back to text.
    * Note that this is <b>in place</b>.

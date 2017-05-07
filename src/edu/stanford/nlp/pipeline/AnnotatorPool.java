@@ -1,8 +1,10 @@
 package edu.stanford.nlp.pipeline;
+import java.lang.ref.SoftReference;
 import java.util.*;
 
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Lazy;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 

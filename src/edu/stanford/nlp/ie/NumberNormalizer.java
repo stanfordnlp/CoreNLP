@@ -19,32 +19,35 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Provides functions for converting words to numbers.
+ * Provides functions for converting words to numbers
  * Unlike QuantifiableEntityNormalizer that normalizes various
- * types of quantifiable entities like money and dates,
+ *   types of quantifiable entities like money and dates,
  * NumberNormalizer only normalizes numeric expressions
- * (e.g., one =&gt; 1, two hundred =&gt; 200.0 )
+ *   (e.g. one =&gt; 1, two hundred =&gt; 200.0 )
  *
+ * <br>
  * This code is somewhat hacked together, so should be reworked.
  *
+ * <br>
  * There is a library in perl for parsing english numbers:
  * http://blog.cordiner.net/2010/01/02/parsing-english-numbers-with-perl/
  *
+ * <p>
  * TODO: To be merged into QuantifiableEntityNormalizer.
  *        It can be used by QuantifiableEntityNormalizer
  *        to first convert numbers expressed as words
  *        into numeric quantities before figuring
  *        out how to do higher level combos
  *        (like one hundred dollars and five cents)
- *
+ * <br>
  * TODO: Known to not handle the following:
  *       oh: two oh one
  *       non-integers: one and a half, one point five, three fifth
  *       funky numbers: pi
- *
+ * <br>
  * TODO: This class is very language dependent
  *        Should really be AmericanEnglishNumberNormalizer
- *
+ * <br>
  * TODO: Make things not static
  *
  * @author Angel Chang
@@ -74,7 +77,6 @@ public class NumberNormalizer {
   //static final Pattern tensNumsPattern = Pattern.compile("(?i)(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)");
   private static final Pattern numUnitPattern = Pattern.compile("(?i)(hundred|thousand|million|billion|trillion)");
   private static final Pattern numEndUnitPattern = Pattern.compile("(?i)(gross|dozen|score)");
-  private static final Pattern numNotStandaloneUnitPattern = Pattern.compile("(?i)(gross|score)");
 
   /***********************/
 
@@ -220,23 +222,29 @@ public class NumberNormalizer {
    * @param str The String to convert
    * @return numeric value of string
    */
-  public static Number wordToNumber(String str) {
-    // Trims and lowercases stuff
-    String originalString = str;
-    str = str.trim();
-    if (str.isEmpty()) {
+  public static Number wordToNumber(String str){
+    if (str.trim().equals("")) {
       return null;
     }
+
+    boolean neg = false;
+
+    String originalString = str;
+
+    // Trims and lowercases stuff
+    str = str.trim();
     str = str.toLowerCase();
 
-    boolean neg = str.startsWith("-");
+    if (str.startsWith("-")) {
+      neg = true;
+    }
 
     // eliminate hyphens, commas, and the word "and"
     str = str.replaceAll("\\band\\b", " ");
     str = str.replaceAll("-", " ");
     str = str.replaceAll("(\\d),(\\d)", "$1$2");  // Maybe something like 4,233,000 ??
     str = str.replaceAll(",", " ");
-    // str = str.replaceAll("(\\d)(\\w)","$1 $2");
+//    str = str.replaceAll("(\\d)(\\w)","$1 $2");
 
     // Trims again (do we need this?)
     str = str.trim();
@@ -313,11 +321,13 @@ public class NumberNormalizer {
     return (neg)? -n.doubleValue():n;
   }
 
-  private static Number wordToNumberRecurse(Number[] numFields) {
+  private static Number wordToNumberRecurse(Number[] numFields)
+  {
     return wordToNumberRecurse(numFields, 0, numFields.length);
   }
 
-  private static Number wordToNumberRecurse(Number[] numFields, int start, int end) {
+  private static Number wordToNumberRecurse(Number[] numFields, int start, int end)
+  {
     // return solitary number
     if (end <= start) return 0;
     if (end - start == 1) {
@@ -351,7 +361,8 @@ public class NumberNormalizer {
     return evaluatedNumber;
   }
 
-  public static Env getNewEnv() {
+  public static Env getNewEnv()
+  {
     Env env = TokenSequencePattern.getNewEnv();
 
     // Do case insensitive matching
@@ -361,7 +372,8 @@ public class NumberNormalizer {
     return env;
   }
 
-  private static void initEnv(Env env) {
+  public static void initEnv(Env env)
+  {
     // Custom binding for numeric values expressions
     env.bind("numtype", CoreAnnotations.NumericTypeAnnotation.class);
     env.bind("numvalue", CoreAnnotations.NumericValueAnnotation.class);
@@ -383,22 +395,21 @@ public class NumberNormalizer {
 
   private static final TokenSequencePattern numberPattern = TokenSequencePattern.compile(
           env, "$NUMTERM ( [/,/ & $BEFORE_WS]? [$POSINTTERM & $BEFORE_WS]  )* ( [/,/ & $BEFORE_WS]? [/and/ & $BEFORE_WS] [$POSINTTERM & $BEFORE_WS]+ )? ");
-
   /**
    * Find and mark numbers (does not need NumberSequenceClassifier)
-   * Each token is annotated with the numeric value and type:
+   * Each token is annotated with the numeric value and type
    * - CoreAnnotations.NumericTypeAnnotation.class: ORDINAL, UNIT (hundred, thousand,..., dozen, gross,...), NUMBER
    * - CoreAnnotations.NumericValueAnnotation.class: Number representing the numeric value of the token
-   *   ( two thousand =&gt; 2 1000 ).
+   *   ( two thousand =&gt; 2 1000 )
    *
    * Tries also to separate individual numbers like four five six,
    *   while keeping numbers like four hundred and seven together
    * Annotate tokens belonging to each composite number with
    * - CoreAnnotations.NumericCompositeTypeAnnotation.class: ORDINAL (1st, 2nd), NUMBER (one hundred)
    * - CoreAnnotations.NumericCompositeValueAnnotation.class: Number representing the composite numeric value
-   *   ( two thousand =&gt; 2000 2000 ).
+   *   ( two thousand =&gt; 2000 2000 )
    *
-   * Also returns list of CoreMap representing the identified numbers.
+   * Also returns list of CoreMap representing the identified numbers
    *
    * The function is overly aggressive in marking possible numbers
    *  - should either do more checks or use in conjunction with NumberSequenceClassifier
@@ -407,30 +418,18 @@ public class NumberNormalizer {
    * @param annotation The annotation structure
    * @return list of CoreMap representing the identified numbers
    */
-  public static List<CoreMap> findNumbers(CoreMap annotation) {
+  public static List<CoreMap> findNumbers(CoreMap annotation)
+  {
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    CoreLabel lastToken = null;
-    for (CoreLabel token : tokens) {
+    for (CoreLabel token:tokens) {
       String w = token.word();
       w = w.trim().toLowerCase();
 
-      if (NumberNormalizer.numPattern.matcher(w).matches() || NumberNormalizer.numberTermPattern2.matcher(w).matches() ||
+      if (/*("CD".equals(token.get(CoreAnnotations.PartOfSpeechAnnotation.class))  || */
+           NumberNormalizer.numPattern.matcher(w).matches() || NumberNormalizer.numberTermPattern2.matcher(w).matches() ||
               NumberSequenceClassifier.ORDINAL_PATTERN.matcher(w).matches() || NumberNormalizer.numEndUnitPattern.matcher(w).matches()) {
         // TODO: first ADVERB and second NN shouldn't be marked as ordinals
         // But maybe we don't care, this can just mark the potential numbers, something else can disregard those
-        // Don't count as number if an adverb (e.g., First/RB) or verb (e.g. second/VB)
-        // Too unreliable
-        // String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-        // if ("RB".equals(pos) || "VBP".equals(pos)) {
-        //   continue;
-        // }
-        // Don't count an end unit if not previous number
-        if (NumberNormalizer.numNotStandaloneUnitPattern.matcher(w).matches()) {
-          if (lastToken == null || ! lastToken.containsKey(CoreAnnotations.NumericValueAnnotation.class)) {
-            continue;
-          }
-        }
-
         try {
           token.set(CoreAnnotations.NumericValueAnnotation.class, NumberNormalizer.wordToNumber(w));
           if (NumberSequenceClassifier.ORDINAL_PATTERN.matcher(w).find()) {
@@ -446,9 +445,7 @@ public class NumberNormalizer {
           logger.warning("Error interpreting number " + w + ": " + ex.getMessage());
         }
       }
-      lastToken = token;
     }
-
     // TODO: Should we allow "," in written out numbers?
     // TODO: Handle "-" that is not with token?
     TokenSequenceMatcher matcher = numberPattern.getMatcher(tokens);
@@ -624,7 +621,7 @@ public class NumberNormalizer {
         numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, matcher.end()));
       }
     }
-    for (CoreMap n : numbers) {
+    for (CoreMap n:numbers) {
       String exp = n.get(CoreAnnotations.TextAnnotation.class);
       if (exp.trim().equals("")) { continue; }
       List<CoreLabel> ts = n.get(CoreAnnotations.TokensAnnotation.class);
@@ -650,20 +647,20 @@ public class NumberNormalizer {
     return numbers;
   }
 
-  private static final TokenSequencePattern rangePattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
-
   /**
-   * Find and mark number ranges.
-   * Ranges are NUM1 [-|to] NUM2 where NUM2 > NUM1.
+   * Find and mark number ranges
+   * Ranges are NUM1 [-|to] NUM2 where NUM2 > NUM1
    *
    * Each number range is marked with
    * - CoreAnnotations.NumericTypeAnnotation.class: NUMBER_RANGE
-   * - CoreAnnotations.NumericObjectAnnotation.class: {@code Pair<Number>} representing the start/end of the range.
+   * - CoreAnnotations.NumericObjectAnnotation.class: {@code Pair<Number>} representing the start/end of the range
    *
    * @param annotation - annotation where numbers have already been identified
    * @return list of CoreMap representing the identified number ranges
    */
-  private static List<CoreMap> findNumberRanges(CoreMap annotation) {
+  private static final TokenSequencePattern rangePattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
+  public static List<CoreMap> findNumberRanges(CoreMap annotation)
+  {
     List<CoreMap> numerizedTokens = annotation.get(CoreAnnotations.NumerizedTokensAnnotation.class);
     for (CoreMap token:numerizedTokens) {
       String w = token.get(CoreAnnotations.TextAnnotation.class);
@@ -675,7 +672,7 @@ public class NumberNormalizer {
           String w2 = rangeMatcher.group(2);
           Number v1 = NumberNormalizer.wordToNumber(w1);
           Number v2 = NumberNormalizer.wordToNumber(w2);
-          if (v1 !=null && v2 != null && v2.doubleValue() > v1.doubleValue()) {
+          if (v2.doubleValue() > v1.doubleValue()) {
             token.set(CoreAnnotations.NumericTypeAnnotation.class, "NUMBER_RANGE");
             token.set(CoreAnnotations.NumericCompositeTypeAnnotation.class, "NUMBER_RANGE");
             Pair<Number,Number> range = new Pair<>(v1, v2);
@@ -708,17 +705,16 @@ public class NumberNormalizer {
   }
 
   /**
-   * Takes annotation and identifies numbers in the annotation.
-   * Returns a list of tokens (as CoreMaps) with numbers merged.
+   * Takes annotation and identifies numbers in the annotation
+   * Returns a list of tokens (as CoreMaps) with numbers merged
    * As by product, also marks each individual token with the TokenBeginAnnotation and TokenEndAnnotation
    * - this is mainly to make it easier to the rest of the code to figure out what the token offsets are.
    *
-   * Note that this copies the annotation, since it modifies token offsets in the original.
-   *
+   * Note that this copies the annotation, since it modifies token offsets in the original
    * @param annotationRaw The annotation to find numbers in
    * @return list of CoreMap representing the identified numbers
    */
-  public static List<CoreMap> findAndMergeNumbers(CoreMap annotationRaw) {
+  public static List<CoreMap> findAndMergeNumbers(CoreMap annotationRaw){
     //copy annotation to preserve its integrity
     CoreMap annotation = new ArrayCoreMap(annotationRaw);
     // Find and label numbers
@@ -771,13 +767,15 @@ public class NumberNormalizer {
     return mergedNumbers;
   }
 
-  public static List<CoreMap> findAndAnnotateNumericExpressions(CoreMap annotation) {
+  public static List<CoreMap> findAndAnnotateNumericExpressions(CoreMap annotation)
+  {
     List<CoreMap> mergedNumbers = NumberNormalizer.findAndMergeNumbers(annotation);
     annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, mergedNumbers);
     return mergedNumbers;
   }
 
-  public static List<CoreMap> findAndAnnotateNumericExpressionsWithRanges(CoreMap annotation) {
+  public static List<CoreMap> findAndAnnotateNumericExpressionsWithRanges(CoreMap annotation)
+  {
     Integer startTokenOffset = annotation.get(CoreAnnotations.TokenBeginAnnotation.class);
     if (startTokenOffset == null) {
       startTokenOffset = 0;

@@ -20,15 +20,13 @@ import java.util.regex.Pattern;
  * <p>
  * Some of the types of variables to bind are:
  * </p>
- * <ul>
+ * * <ul>
  * <li>{@code SequencePattern} (compiled pattern)</li>
  * <li>{@code PatternExpr} (sequence pattern expression - precompiled)</li>
  * <li>{@code NodePattern} (pattern for matching one element)</li>
  * <li>{@code Class} (binding of CoreMap attribute to java Class)</li>
  * </ul>
  */
-// Various of the public variables in this class are instantiated by reflection from TokensRegex rules
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class Env {
 
   /**
@@ -117,7 +115,7 @@ public class Env {
   private CoreMapAggregator defaultTokensAggregator;
 
   /**
-   * Whether we should merge and output CoreLabels or not.
+   * Whether we should merge and output CoreLabels or not
    */
   public boolean aggregateToTokens;
 

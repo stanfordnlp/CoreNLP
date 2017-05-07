@@ -97,8 +97,8 @@ public class CorefProperties {
     props.setProperty("removeNestedMentions", String.valueOf(val));
   }
 
-  public static boolean liberalMD(Properties props) {
-    return PropertiesUtils.getBool(props, "coref.md.liberalMD", false);
+  public static boolean liberalChineseMD(Properties props) {
+    return PropertiesUtils.getBool(props, "coref.md.liberalChineseMD", true);
   }
 
   public static boolean useGoldMentions(Properties props) {

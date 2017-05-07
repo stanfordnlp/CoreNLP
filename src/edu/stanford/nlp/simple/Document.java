@@ -282,7 +282,7 @@ public class Document {
    * @return An annotator as specified by the given name and properties.
    */
   private synchronized static Supplier<Annotator> getOrCreate(String name, Properties props, Supplier<Annotator> annotator) {
-    customAnnotators.register(name, props, Lazy.cache(annotator));
+    customAnnotators.register(name, props, Lazy.of(annotator));
     return () -> customAnnotators.get(name);
   }
 

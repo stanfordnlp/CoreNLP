@@ -74,13 +74,6 @@ public class AnnotatorImplementations  {
   }
 
   /**
-   * Run TokensRegex -- annotate patterns found in tokens
-   */
-  public Annotator tokensregex(Properties properties, String name) {
-    return new TokensRegexAnnotator(name, properties);
-  }
-
-  /**
    * Run RegexNER -- rule-based NER based on a deterministic mapping file
    */
   public Annotator tokensRegexNER(Properties properties, String name) {
@@ -267,15 +260,6 @@ public class AnnotatorImplementations  {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_QUOTE + '.');
     return new QuoteAnnotator(relevantProperties);
-  }
-
-  /**
-   * Attribute quotes to speakers
-   */
-  public Annotator quoteattribution(Properties properties) {
-    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_QUOTE_ATTRIBUTION + '.');
-    return new QuoteAttributionAnnotator(relevantProperties);
   }
 
   /**

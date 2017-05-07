@@ -91,7 +91,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
       mentionSpanSetList.add(mentionSpanSet);
     }
 
-    if (CorefProperties.liberalMD(props)) {
+    if (lang == Locale.CHINESE && CorefProperties.liberalChineseMD(props)) {
       extractNamedEntityModifiers(sentences, mentionSpanSetList, predictedMentions, neStrings);
     }
 
@@ -102,10 +102,10 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
     }
 
     // mention selection based on document-wise info
-    if (lang == Locale.ENGLISH && !CorefProperties.liberalMD(props)) {
+    if (lang == Locale.ENGLISH) {
       removeSpuriousMentionsEn(doc, predictedMentions, dict);
     } else if (lang == Locale.CHINESE) {
-      if (CorefProperties.liberalMD(props)) {
+      if (CorefProperties.liberalChineseMD(props)) {
         removeSpuriousMentionsZhSimple(doc, predictedMentions, dict);
       } else {
         removeSpuriousMentionsZh(doc, predictedMentions, dict,

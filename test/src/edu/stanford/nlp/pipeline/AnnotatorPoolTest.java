@@ -38,11 +38,6 @@ public class AnnotatorPoolTest extends TestCase {
         }
       };
     }
-
-    @Override
-    protected boolean shouldGC() {
-      return false;
-    }
   }
 
 
