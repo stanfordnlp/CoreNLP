@@ -404,13 +404,21 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   private static final Pattern CENTS_PATTERN = Pattern.compile("\u00A2");
   private static final Pattern POUND_PATTERN = Pattern.compile("\u00A3");
-  private static final Pattern GENERIC_CURRENCY_PATTERN = Pattern.compile("[\u0080\u00A4\u20A0\u20AC]");
+  private static final Pattern GENERIC_CURRENCY_PATTERN = Pattern.compile("[\u0080\u00A4\u20A0\u20AC\u20B9]");
+  private static final Pattern CP1252_EURO_PATTERN = Pattern.compile("\u0080");
 
   private static String normalizeCurrency(String in) {
     String s1 = in;
     s1 = CENTS_PATTERN.matcher(s1).replaceAll("cents");
     s1 = POUND_PATTERN.matcher(s1).replaceAll("#");  // historically used for pound in PTB3
     s1 = GENERIC_CURRENCY_PATTERN.matcher(s1).replaceAll("\\$");  // Euro (ECU, generic currency)  -- no good translation!
+    return s1;
+  }
+
+  /** Still at least turn cp1252 euro symbol to Unicode one. */
+  private static String minimallyNormalizeCurrency(String in) {
+    String s1 = in;
+    s1 = CP1252_EURO_PATTERN.matcher(s1).replaceAll("\u20AC");
     return s1;
   }
 
@@ -650,7 +658,7 @@ FRAC = ({DIGIT}{1,4}[- \u00A0])?{DIGIT}{1,4}(\\?\/|\u2044){DIGIT}{1,4}
 FRAC2 = [\u00BC\u00BD\u00BE\u2153-\u215E]
 DOLSIGN = ([A-Z]*\$|#)
 /* These are cent and pound sign, euro and euro, and Yen, Lira */
-DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AC\u060B\u0E3F\u20A4\uFFE0\uFFE1\uFFE5\uFFE6]
+DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20B9\u20AC\u060B\u0E3F\u20A4\uFFE0\uFFE1\uFFE5\uFFE6]
 /* not used DOLLAR      {DOLSIGN}[ \t]*{NUMBER}  */
 /* |\( ?{NUMBER} ?\))    # is for pound signs */
 /* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
@@ -773,8 +781,9 @@ ACRONYM = ({ACRO})\.
  * est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa.
  * "Art(s)." is for "article(s)" -- common in legal context, Sec(t). for section(s)
  */
-/* Maybe also "op." for "op. cit." but also get a photo op. pt for part. Rs. for Rupees */
-ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|bldg|prop|pp|op|approx|pt|rs)\.
+/* Maybe also "op." for "op. cit." but also get a photo op. Rs. for Rupees */
+/* Pt for part needs to be case sensitive (vs. country code for Portugal). */
+ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|bldg|prop|pp|op|approx|[P][t]|rs)\.
 /* Case for south/north before a few places. */
 ABBREVSN = So\.|No\.
 
@@ -808,14 +817,18 @@ BANGMAGAZINES = OK\!
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
 ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)
-
+/* First part is for 2 geographic char symbols as flag. */
+EMOJI = [\u{01F1E6}-\u{01F1FF}]{2,2}|[\u{01F000}-\u{01F9FF}]
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
-MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2023\u2030-\u2038\u203B\u2043\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3001-\u3006\u3008-\u3020\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
+MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2025\u2030-\u2038\u203B\u2043\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3001-\u3006\u3008-\u3020\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
 /* Math and other symbols that stand alone: °²× ∀ */
 // Consider this list of bullet chars: 2219, 00b7, 2022, 2024
 
+/* CP1252 letters */
+/* 83 = f with hook --> U+0192; 8a = S with Caron --> U+0160; 9c = ligature oe --> U+0153; */
+/* CP1252LETTER = [\u0083\u008A\u009c] */
 
 %%
 
@@ -962,9 +975,9 @@ nno/[^A-Za-z0-9]
                         }
 {DOLSIGN}               { return getNext(); }
 {DOLSIGN2}              { if (normalizeCurrency) {
-                            return getNext(normalizeCurrency(yytext()), yytext()); }
-                          else {
-                            return getNext();
+                            return getNext(normalizeCurrency(yytext()), yytext());
+			  } else {
+                            return getNext(minimallyNormalizeCurrency(yytext()), yytext());
                           }
                         }
 /* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!). A one letter acronym candidate like "Z." or "I." in this context usually isn't, and so we return the leter and pushback the period for next time. */
@@ -1048,6 +1061,7 @@ nno/[^A-Za-z0-9]
                   }
                   return getNext(txt, origText);
                 }
+{EMOJI}		{ return getNext(); }
 \{              { if (normalizeOtherBrackets) {
                     return getNext(openbrace, yytext()); }
                   else {
@@ -1162,7 +1176,7 @@ nno/[^A-Za-z0-9]
                   }
                 }
 .       { String str = yytext();
-          int first = str.charAt(0);
+          int first = str.codePointAt(0);
           String msg = String.format("Untokenizable: %s (U+%s, decimal: %s)", yytext(), Integer.toHexString(first).toUpperCase(), Integer.toString(first));
           switch (untokenizable) {
             case NONE_DELETE:
