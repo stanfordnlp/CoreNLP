@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.util.function.Function;
@@ -44,14 +45,46 @@ public class EntityMentionsAnnotator implements Annotator {
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
+  /** the CoreAnnotation keys to use for this entity mentions annotator **/
+  private Class<? extends CoreAnnotation<String>> nerCoreAnnotationClass =
+      CoreAnnotations.NamedEntityTagAnnotation.class;
+  private Class<? extends CoreAnnotation<String>> nerNormalizedCoreAnnotationClass =
+      CoreAnnotations.NormalizedNamedEntityTagAnnotation.class;
+  private Class<? extends CoreAnnotation<List<CoreMap>>> mentionsCoreAnnotationClass =
+      CoreAnnotations.MentionsAnnotation.class;
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(EntityMentionsAnnotator.class);
+
   public EntityMentionsAnnotator() {
+    // defaults
     chunkIdentifier = new LabeledChunkIdentifier();
     doAcronyms = false;
   }
 
   // note: used in annotate.properties
-  @SuppressWarnings("UnusedDeclaration")
+  @SuppressWarnings({"UnusedDeclaration", "unchecked"})
   public EntityMentionsAnnotator(String name, Properties props) {
+    // if the user has supplied custom CoreAnnotations for the ner tags and entity mentions override the default keys
+    try {
+      if (props.containsKey(name + ".nerCoreAnnotation")) {
+        nerCoreAnnotationClass =
+            (Class<? extends CoreAnnotation<String>>)
+                Class.forName(props.getProperty(name + ".nerCoreAnnotation"));
+      }
+      if (props.containsKey(name + ".nerNormalizedCoreAnnotation")) {
+        nerNormalizedCoreAnnotationClass =
+            (Class<? extends CoreAnnotation<String>>)
+                Class.forName(props.getProperty(name + ".nerNormalizedCoreAnnotation"));
+      }
+      if (props.containsKey(name + ".mentionsCoreAnnotation")) {
+        mentionsCoreAnnotationClass =
+            (Class<? extends CoreAnnotation<List<CoreMap>>>)
+                Class.forName(props.getProperty(name + ".mentionsCoreAnnotation"));
+      }
+    } catch (ClassNotFoundException e) {
+      log.error(e.getMessage());
+    }
     chunkIdentifier = new LabeledChunkIdentifier();
     doAcronyms = Boolean.parseBoolean(props.getProperty(name + ".acronyms", props.getProperty("acronyms", "false")));
   }
@@ -72,7 +105,7 @@ public class EntityMentionsAnnotator implements Annotator {
     }
   }
 
-  private static final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = in -> {
+  private final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = in -> {
     // First argument is the current token
     CoreLabel cur = in.first;
     // Second argument the previous token
@@ -83,12 +116,12 @@ public class EntityMentionsAnnotator implements Annotator {
     }
 
     // Get NormalizedNamedEntityTag and say two entities are incompatible if they are different
-    String v1 = cur.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-    String v2 = prev.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+    String v1 = cur.get(nerNormalizedCoreAnnotationClass);
+    String v2 = prev.get(nerNormalizedCoreAnnotationClass);
     if ( ! checkStrings(v1,v2)) return false;
 
     // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
-    String nerTag = cur.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+    String nerTag = cur.get(nerCoreAnnotationClass);
     if ("NUMBER".equals(nerTag) || "ORDINAL".equals(nerTag)) {
       // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
       Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
@@ -122,24 +155,24 @@ public class EntityMentionsAnnotator implements Annotator {
         annoTokenBegin = 0;
       }
       List<CoreMap> chunks = chunkIdentifier.getAnnotatedChunks(tokens, annoTokenBegin,
-              CoreAnnotations.TextAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class, IS_TOKENS_COMPATIBLE);
-      sentence.set(CoreAnnotations.MentionsAnnotation.class, chunks);
+              CoreAnnotations.TextAnnotation.class, nerCoreAnnotationClass, IS_TOKENS_COMPATIBLE);
+      sentence.set(mentionsCoreAnnotationClass, chunks);
 
       // By now entity mentions have been annotated and TextAnnotation and NamedEntityAnnotation marked
       // Some additional annotations
-      List<CoreMap> mentions = sentence.get(CoreAnnotations.MentionsAnnotation.class);
+      List<CoreMap> mentions = sentence.get(mentionsCoreAnnotationClass);
       if (mentions != null) {
         for (CoreMap mention : mentions) {
           List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
           String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
-                  CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, mentionTokens);
+                  nerNormalizedCoreAnnotationClass, mentionTokens);
           if (name == null) {
             name = mention.get(CoreAnnotations.TextAnnotation.class);
           } else {
-            mention.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, name);
+            mention.set(nerNormalizedCoreAnnotationClass, name);
           }
           //mention.set(CoreAnnotations.EntityNameAnnotation.class, name);
-          String type = mention.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+          String type = mention.get(nerCoreAnnotationClass);
           mention.set(CoreAnnotations.EntityTypeAnnotation.class, type);
 
           // set sentence index annotation for mention
@@ -175,15 +208,15 @@ public class EntityMentionsAnnotator implements Annotator {
       addAcronyms(annotation, allMentions);
     }
 
-    annotation.set(CoreAnnotations.MentionsAnnotation.class, allMentions);
+    annotation.set(mentionsCoreAnnotationClass, allMentions);
   }
 
 
-  private static void addAcronyms(Annotation ann, List<CoreMap> mentions) {
+  private void addAcronyms(Annotation ann, List<CoreMap> mentions) {
     // Find all the organizations in a document
     List<List<CoreLabel>> organizations = new ArrayList<>();
     for (CoreMap mention : mentions) {
-      if ("ORGANIZATION".equals(mention.get(CoreAnnotations.NamedEntityTagAnnotation.class))) {
+      if ("ORGANIZATION".equals(mention.get(nerCoreAnnotationClass))) {
         organizations.add(mention.get(CoreAnnotations.TokensAnnotation.class));
       }
     }
@@ -219,16 +252,25 @@ public class EntityMentionsAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class
-    )));
+    //TODO(jb) for now not fully enforcing pipeline if user customizes keys
+    if (!nerCoreAnnotationClass.getCanonicalName().
+        equals(CoreAnnotations.NamedEntityTagAnnotation.class.getCanonicalName())) {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class
+      )));
+    } else {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.NamedEntityTagAnnotation.class
+      )));
+    }
   }
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.MentionsAnnotation.class);
+    return Collections.singleton(mentionsCoreAnnotationClass);
   }
 
 }

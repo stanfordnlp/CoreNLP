@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.tokensregex.CoreMapExpressionExtractor;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
 import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
+import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.*;
 import java.util.Set;
 
 /**
@@ -64,12 +66,18 @@ public class TokensRegexAnnotator implements Annotator {
   public TokensRegexAnnotator(String name, Properties props) {
     String prefix = (name == null)? "": name + '.';
     String[] files  = PropertiesUtils.getStringArray(props, prefix + "rules");
-    if (files.length == 0) {
-      throw new RuntimeException("No rules specified for TokensRegexAnnotator " + name + ", check " + prefix + "rules property");
-    }
     env = TokenSequencePattern.getNewEnv();
     env.bind("options", options);
-    extractor = CoreMapExpressionExtractor.createExtractorFromFiles(env, files);
+    if (PropertiesUtils.getBool(props, prefix+"caseInsensitive")) {
+      System.err.println("using case insensitive!");
+      env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
+      env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+    }
+    if (files.length != 0) {
+      extractor = CoreMapExpressionExtractor.createExtractorFromFiles(env, files);
+    } else {
+      extractor = null;
+    }
     verbose = PropertiesUtils.getBool(props, prefix + "verbose", false);
     options.setTokenOffsets = PropertiesUtils.getBool(props, prefix + "setTokenOffsets", options.setTokenOffsets);
     options.extractWithTokens = PropertiesUtils.getBool(props, prefix + "extractWithTokens", options.extractWithTokens);
@@ -125,31 +133,32 @@ public class TokensRegexAnnotator implements Annotator {
     if (verbose) {
       Redwood.log(Redwood.DBG, "Adding TokensRegexAnnotator annotation...");
     }
-
     if (options.setTokenOffsets) {
       addTokenOffsets(annotation);
     }
-    List<CoreMap> allMatched;
-    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-      allMatched = new ArrayList<>();
-      List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
-      for (CoreMap sentence : sentences) {
-        List<CoreMap> matched = extract(sentence);
-        if (matched != null && options.matchedExpressionsAnnotationKey != null) {
-          allMatched.addAll(matched);
-          sentence.set(options.matchedExpressionsAnnotationKey, matched);
-          for (CoreMap cm:matched) {
-            cm.set(CoreAnnotations.SentenceIndexAnnotation.class, sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
+    // just do nothing if no extractor is specified
+    if (extractor != null) {
+      List<CoreMap> allMatched;
+      if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+        allMatched = new ArrayList<>();
+        List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+        for (CoreMap sentence : sentences) {
+          List<CoreMap> matched = extract(sentence);
+          if (matched != null && options.matchedExpressionsAnnotationKey != null) {
+            allMatched.addAll(matched);
+            sentence.set(options.matchedExpressionsAnnotationKey, matched);
+            for (CoreMap cm : matched) {
+              cm.set(CoreAnnotations.SentenceIndexAnnotation.class, sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
+            }
           }
         }
+      } else {
+        allMatched = extract(annotation);
       }
-    } else {
-      allMatched = extract(annotation);
+      if (options.matchedExpressionsAnnotationKey != null) {
+        annotation.set(options.matchedExpressionsAnnotationKey, allMatched);
+      }
     }
-    if (options.matchedExpressionsAnnotationKey != null) {
-      annotation.set(options.matchedExpressionsAnnotationKey, allMatched);
-    }
-
     if (verbose) {
       Redwood.log(Redwood.DBG, "done.");
     }

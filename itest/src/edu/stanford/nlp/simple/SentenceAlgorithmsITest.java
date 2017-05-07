@@ -200,9 +200,7 @@ public class SentenceAlgorithmsITest {
       add("Geledi");
       add("<-nmod:of-");
       add("Sultanate");
-      add("<-nmod:of-");
-      add("Sultanate");
-      add("<-appos-");
+      add("<-conj:and-");
       add("Sultanate");
       add("<-nmod:including-");
       add("trade");

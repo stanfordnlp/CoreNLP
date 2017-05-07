@@ -7,12 +7,14 @@ import junit.framework.TestCase;
 import java.util.List;
 
 /**
- * Test for quantifiable entity extractor
+ * Test for quantifiable entity extractor.
+ *
  * @author Angel Chang
  */
 public class QuantifiableEntityExtractorITest extends TestCase {
-  static AnnotationPipeline pipeline = null;
-  static QuantifiableEntityExtractor extractor = null;
+
+  private static AnnotationPipeline pipeline; // = null;
+  private static QuantifiableEntityExtractor extractor; // = null;
 
   public void test() throws Exception {
     // TODO: Enable tests after rules files are added to models
@@ -20,6 +22,7 @@ public class QuantifiableEntityExtractorITest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     synchronized(QuantifiableEntityExtractorITest.class) {
       if (pipeline == null) {
         pipeline = new AnnotationPipeline();
@@ -51,7 +54,7 @@ public class QuantifiableEntityExtractorITest extends TestCase {
     }
   }
 
-  public void runAndCheck(String prefix, String[] sentences, ExpectedQuantity[][] expected) throws Exception {
+  private static void runAndCheck(String prefix, String[] sentences, ExpectedQuantity[][] expected) throws Exception {
     for (int si = 0; si < sentences.length; si++) {
       String sentence = sentences[si];
       Annotation annotation = createDocument(sentence);
@@ -59,9 +62,9 @@ public class QuantifiableEntityExtractorITest extends TestCase {
 
       // Print out matched text and value
       if (expected == null) {
-        for (int i = 0; i < matchedExpressions.size(); i++) {
-          String text = matchedExpressions.get(i).getText();
-          Object value = matchedExpressions.get(i).getValue();
+        for (MatchedExpression matchedExpression : matchedExpressions) {
+          String text = matchedExpression.getText();
+          Object value = matchedExpression.getValue();
           System.out.println(prefix + ": Got expression " + text + " with value " + value);
         }
         assertTrue(prefix + ": No expected provided", false);
@@ -80,7 +83,7 @@ public class QuantifiableEntityExtractorITest extends TestCase {
     }
   }
 
-  public void _testMoney() throws Exception {
+  public static void _testMoney() throws Exception {
     String[] sentences = {
         "I have 1 dollar and 2 cents.",
         "It cost 10 thousand million dollars."
@@ -94,7 +97,7 @@ public class QuantifiableEntityExtractorITest extends TestCase {
     runAndCheck("testMoney", sentences, expected);
   }
 
-  public void _testLength() throws Exception {
+  public static void _testLength() throws Exception {
     String[] sentences = {
         "We are 2 kilometer away.",
         "We are 2 kilometers away.",
@@ -118,7 +121,7 @@ public class QuantifiableEntityExtractorITest extends TestCase {
 
   // We do weight instead of mass since in typical natural language
   //  kilograms are used to refer to weight vs mass (in scientific usage)
-  public void _testWeight() throws Exception {
+  public static void _testWeight() throws Exception {
     String[] sentences = {
         "The ball is 2 kilograms in weight.",
         "There are five grams.",

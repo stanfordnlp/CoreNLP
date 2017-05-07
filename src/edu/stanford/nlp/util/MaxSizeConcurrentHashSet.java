@@ -71,11 +71,13 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
    */
   @Override
   public boolean add(E e) {
-    if (maxSize >= 0 && size() >= maxSize) {
-      // can't put new value
-      return false;
-    } else {
-      return m.put(e, Boolean.TRUE) == null;
+    synchronized(this) {
+      if (maxSize >= 0 && size() >= maxSize) {
+        // can't put new value
+        return false;
+      } else {
+        return m.put(e, Boolean.TRUE) == null;
+      }
     }
   }
 
