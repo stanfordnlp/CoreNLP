@@ -51,6 +51,7 @@ public abstract class CorefMentionFinder  {
 
   protected HeadFinder headFinder;
   protected Annotator parserProcessor;
+  protected Annotator taggerProcessor;
   protected boolean allowReparsing;
 
   protected static final TregexPattern npOrPrpMentionPattern = TregexPattern.compile("/^(?:NP|PN|PRP)/");
@@ -512,8 +513,8 @@ public abstract class CorefMentionFinder  {
     if (allowReparsing) {
       int approximateness = 0;
       List<CoreLabel> extentTokens = new ArrayList<>();
-      extentTokens.add(initCoreLabel("It"));
-      extentTokens.add(initCoreLabel("was"));
+      extentTokens.add(initCoreLabel("It", "PRP"));
+      extentTokens.add(initCoreLabel("was", "VBD"));
       final int ADDED_WORDS = 2;
       for (int i = m.startIndex; i < endIdx; i++) {
         // Add everything except separated dashes! The separated dashes mess with the parser too badly.
@@ -524,7 +525,7 @@ public abstract class CorefMentionFinder  {
           approximateness++;
         }
       }
-      extentTokens.add(initCoreLabel("."));
+      extentTokens.add(initCoreLabel(".", "."));
 
       // constrain the parse to the part we're interested in.
       // Starting from ADDED_WORDS comes from skipping "It was".
@@ -622,10 +623,11 @@ public abstract class CorefMentionFinder  {
     return leaves.get(fallback); // last except for the added period.
   }
 
-  private static CoreLabel initCoreLabel(String token) {
+  private static CoreLabel initCoreLabel(String token, String posTag) {
     CoreLabel label = new CoreLabel();
     label.set(CoreAnnotations.TextAnnotation.class, token);
     label.set(CoreAnnotations.ValueAnnotation.class, token);
+    label.set(CoreAnnotations.PartOfSpeechAnnotation.class, posTag);
     return label;
   }
 
