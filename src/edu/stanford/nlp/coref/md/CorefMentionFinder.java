@@ -51,7 +51,6 @@ public abstract class CorefMentionFinder  {
 
   protected HeadFinder headFinder;
   protected Annotator parserProcessor;
-  protected Annotator taggerProcessor;
   protected boolean allowReparsing;
 
   protected static final TregexPattern npOrPrpMentionPattern = TregexPattern.compile("/^(?:NP|PN|PRP)/");
