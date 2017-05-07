@@ -481,7 +481,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * release the memory associated with the annotators.
    */
   public static synchronized void clearAnnotatorPool() {
-    logger.warn("Clearing CoreNLP annotation pool; this should be unecessary in production");
+    logger.warn("Clearing CoreNLP annotation pool; this should be unnecessary in production");
     if (pool != null) {
       pool.clear();
     }
