@@ -671,20 +671,6 @@ HTHING = ({LETTER}|{DIGIT})[A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))
 /* from the CLEAR (biomedical?) treebank documentation */
 /* we're going to split on most hypens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
-/*
-Hyphenated words that are allowed to be kept together match these patterns.
-Note that this list is case-insensitive and non-exhaustive.
-a- adeno- agro- ante- anti- aorto- arch- ambi- -able -ahol -aholic -ation axio- be- bi- bio- broncho-
-co- counter- cross- centi- -centric circum- cis- colo- contra- cortico- cran- crypto- -cracy -crat cyber-
-de- deca- demi- dis- -dom e- eco- electro- ennea- -esque -ette ex- extra- -er -ery ferro- -ful -fest -fold
-gastro- -gate -gon giga- hepta- hemi- hypo- hexa- -hood
-in- inter- intra- -ian -ible -ing -isation -ise -ising -ism -ist - itis -ization -ize -izing ideo- idio- infra- iso-
--less -logist -logy -ly judeo- macro- mega- micro- mid- mini- mono- musculo- mm-hm mm-mm -most multi- medi- milli-
-neo- neuro- nitro- non- novem- octa- octo- o-kay -o-torium ortho- over-
-paleo- pan- para- pelvi- penta- peri- pheno- phospho- pica- pneumo- poly- post- pre- preter- pro- pseudo-
-quasi- quadri- quinque- -rama re- recto- salpingo- sero- semi- sept- soci- sub- super- supra- sur-
-tele- tera- tetra- tri- u- uber- uh-huh uh-oh ultra- un- uni- vice- veno- ventriculo- -wise x-
-*/
 HTHINGEXCEPTIONPREFIXED = (e|a|u|x|agro|ante|anti|arch|be|bi|bio|co|counter|cross|cyber|de|eco|ex|extra|inter|intra|macro|mega|micro|mid|mini|multi|neo|non|over|pan|para|peri|post|pre|pro|pseudo|quasi|re|semi|sub|super|tri|ultra|un|uni|vice)(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
 HTHINGEXCEPTIONSUFFIXED = ([A-Za-z0-9][A-Za-z0-9.,\u00AD]*)(-)(esque|ette|fest|fold|gate|itis|less|most|o-torium|rama|wise)(s|es|d|ed)?
 HTHINGEXCEPTIONWHOLE = (mm-hm|mm-mm|o-kay|uh-huh|uh-oh)(s|es|d|ed)?
@@ -752,7 +738,7 @@ ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq|Bld
 ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 /* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
-ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
+ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
 ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
