@@ -417,11 +417,11 @@ import edu.stanford.nlp.util.logging.Redwood;
   private static final Pattern singleQuote = Pattern.compile("&apos;|'");
   private static final Pattern doubleQuote = Pattern.compile("\"|&quot;");
 
-  // 91,92,93,94 aren't valid unicode points, but sometimes they show
+  // 82,84,91,92,93,94 aren't valid unicode points, but sometimes they show
   // up from cp1252 and need to be translated
-  private static final Pattern leftSingleQuote = Pattern.compile("[\u0091\u2018\u201B\u2039]");
+  private static final Pattern leftSingleQuote = Pattern.compile("[\u0082\u0091\u2018\u201A\u201B\u2039]");
   private static final Pattern rightSingleQuote = Pattern.compile("[\u0092\u2019\u203A]");
-  private static final Pattern leftDoubleQuote = Pattern.compile("[\u0093\u201C\u00AB]");
+  private static final Pattern leftDoubleQuote = Pattern.compile("[\u0084\u0093\u201C\u201E\u00AB]");
   private static final Pattern rightDoubleQuote = Pattern.compile("[\u0094\u201D\u00BB]");
 
   private static String latexQuotes(String in, boolean probablyLeft) {
@@ -440,8 +440,8 @@ import edu.stanford.nlp.util.logging.Redwood;
     return s1;
   }
 
-  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
-  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
+  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
+  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
 
   private static String asciiQuotes(String in) {
     String s1 = in;
@@ -657,7 +657,7 @@ DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AC\u060B\u0E3F\u20A4\uFFE0\u
 LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
 WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
 FILENAME_EXT = bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|3gp|wm[va]|avi|flv|mov|mp[34g]
-FILENAME = ({LETTER}|{DIGIT})+([-._/]({LETTER}|{DIGIT})+)*([.]{FILENAME_EXT})
+FILENAME = ({LETTER}|{DIGIT})+([-._/]({LETTER}|{DIGIT})+)*\.{FILENAME_EXT}
 /* The $ was for things like New$ */
 /* WAS: only keep hyphens with short one side like co-ed */
 /* But treebank just allows hyphenated things as words! */
@@ -707,7 +707,8 @@ APOWORD2 = y{APOS}
 FULLURL = https?:\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
-EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)?
+/* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
+EMAIL = (&lt;|<)?[a-zA-Z0-9._%+-]+@[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9](&gt;|>)?
 
 /* Technically, names should be capped at 15 characters.  However, then
    you get into weirdness with what happens to the rest of the characters. */
@@ -772,8 +773,8 @@ ACRONYM = ({ACRO})\.
  * est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa.
  * "Art(s)." is for "article(s)" -- common in legal context, Sec(t). for section(s)
  */
-/* Maybe also "op." for "op. cit." but also get a photo op. */
-ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|bldg|prop|pp|op)\.
+/* Maybe also "op." for "op. cit." but also get a photo op. pt for part. Rs. for Rupees */
+ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|bldg|prop|pp|op|approx|pt|rs)\.
 /* Case for south/north before a few places. */
 ABBREVSN = So\.|No\.
 
@@ -796,7 +797,7 @@ ASTS = \*+|(\\\*){1,3}
 HASHES = #+
 FNMARKS = {ATS}|{HASHES}|{UNDS}
 INSENTP = [,;:\u3001]
-QUOTES = {APOS}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0091\u0092\u0093\u0094\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
+QUOTES = {APOS}|''|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;
 /* Cap'n for captain, c'est for french */
 TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|f\*[c*]k(in[g']|e[dr])?|sh\*t(ty)?
@@ -1011,8 +1012,8 @@ nno/[^A-Za-z0-9]
 {TBSPEC2}/{SPACENL}     { return getNext(); }
 {ISO8601DATETIME}       { return getNext(); }
 {DEGREES}               { return getNext(); }
-<YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'])      { return getNext(); }
-<YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'])      { return getNext(); }
+<YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<])      { return getNext(); }
+<YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<])      { return getNext(); }
 {WORD}\./{INSENTP}      { return getNext(removeSoftHyphens(yytext()), yytext()); }
 {PHONE}                 { String txt = yytext();
                           if (normalizeSpace) {

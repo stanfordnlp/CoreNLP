@@ -438,15 +438,24 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       IOUtils.closeIgnoringExceptions(writer);
 
     } else {
+      BufferedWriter out = null;
+      if (outputFileList == null) {
+        out = new BufferedWriter(new OutputStreamWriter(System.out, charset));
+      }
       for (int j = 0; j < numFiles; j++) {
         Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
-        BufferedWriter out = (outputFileList == null) ?
-          new BufferedWriter(new OutputStreamWriter(System.out, charset)) :
-            new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
+        if (out == null) {
+          out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
+        }
         numTokens += tokReader(r, out, parseInsidePattern, options, preserveLines, dump, lowerCase);
         r.close();
-        IOUtils.closeIgnoringExceptions(out);
+        if (outputFileList != null) {
+          IOUtils.closeIgnoringExceptions(out);
+        }
       } // end for j going through inputFileList
+      if (outputFileList == null) {
+        IOUtils.closeIgnoringExceptions(out);
+      }
     }
 
     final long duration = System.nanoTime() - start;
@@ -720,10 +729,10 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    *      one filename per line, the output filename is the input filename with ".tok" appended.
    * <li> -fileList file* The remaining command-line arguments are treated as
    *      filenames that contain filenames, one per line. The output of tokenization is sent to
-   *      stdout
-   * <li> -dump Print the whole of each CoreLabel, not just the value (word)
-   * <li> -untok Heuristically untokenize tokenized text
-   * <li> -h, -help Print usage info
+   *      stdout.
+   * <li> -dump Print the whole of each CoreLabel, not just the value (word).
+   * <li> -untok Heuristically untokenize tokenized text.
+   * <li> -h, -help Print usage info.
    * </ul>
    *
    * @param args Command line arguments
