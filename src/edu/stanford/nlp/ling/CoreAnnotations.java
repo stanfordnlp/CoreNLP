@@ -1953,4 +1953,14 @@ public class CoreAnnotations {
     @Override
     public Class<String> getType() { return ErasureUtils.uncheckedCast(String.class); }
   }
+
+  /**
+   * An annotation for the posts in a document which is a collection of discusion forum posts.
+   */
+  public static class DiscussionForumPostsAnnotation implements CoreAnnotation<List<CoreMap>>{
+    @Override
+    public Class<List<CoreMap>> getType() { return ErasureUtils.uncheckedCast(List.class); }
+  }
+
+
 }
