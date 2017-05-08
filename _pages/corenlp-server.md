@@ -254,25 +254,26 @@ As always, make sure you understand the commands being run below, as they largel
 
 3. Create a user `nlp` with permissions to read the directory `/opt/corenlp`. Allow the user to bind to port 80:
     
-```bash
-sudo mkdir -p /etc/authbind/byport/
-sudo touch /etc/authbind/byport/80
-sudo chown nlp:nlp /etc/authbind/byport/80
-sudo chmod 600 /etc/authbind/byport/80
-```
+    ```bash
+    sudo mkdir -p /etc/authbind/byport/
+    sudo touch /etc/authbind/byport/80
+    sudo chown nlp:nlp /etc/authbind/byport/80
+    sudo chmod 600 /etc/authbind/byport/80
+    ```
 
 4. Copy the startup script from the source jar at path `edu/stanford/nlp/pipeline/demo/corenlp` to `/etc/init.d/corenlp`. An easy way to get this is:
 
-```bash
-sudo wget https://raw.githubusercontent.com/stanfordnlp/CoreNLP/master/src/edu/stanford/nlp/pipeline/demo/corenlp -O /etc/init.d/corenlp
-```
+    ```bash
+    sudo wget https://raw.githubusercontent.com/stanfordnlp/CoreNLP/master/src/edu/stanford/nlp/pipeline/demo/corenlp -O /etc/init.d/corenlp
+    ```
 
 5. Give executable permissions to the startup script:  ```sudo chmod a+x /etc/init.d/corenlp```
 
 6. Link the script to `/etc/rc.d/`:
-   ```ln -s /etc/init.d/corenlp /etc/rc.d/rc2.d/S75corenlp```
-   On Ubuntu, there is no intervening `rc.d` directory, so the equivalent is to do:
-   ```ln -s /etc/init.d/corenlp /etc/rc2.d/S75corenlp```
+    ```ln -s /etc/init.d/corenlp /etc/rc.d/rc2.d/S75corenlp```
+
+    On Ubuntu, there is no intervening `rc.d` directory, so the equivalent is to do:
+    ```ln -s /etc/init.d/corenlp /etc/rc2.d/S75corenlp```
 
 The above steps work using traditional SysVinit scripts. The other
    alternative on Ubuntu is to use Upstart instead. We haven't tried
