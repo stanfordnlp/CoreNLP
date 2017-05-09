@@ -271,6 +271,26 @@ public class WordsToSentencesAnnotator implements Annotator  {
         }
       }
 
+      // if keeping track of discussion post forums, find which post this belongs to and add it
+      if (annotation.get(CoreAnnotations.DiscussionForumPostsAnnotation.class) != null) {
+        int sentenceSize = sentence.get(CoreAnnotations.TokensAnnotation.class).size();
+        CoreLabel firstToken =
+            sentence.get(CoreAnnotations.TokensAnnotation.class).get(0);
+        CoreLabel endToken = sentence.get(CoreAnnotations.TokensAnnotation.class).get(sentenceSize-1);
+        int sentenceCharBegin = firstToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        int sentenceCharEnd = endToken.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        // go through each discussion forum post, find the one for this sentence
+        for (CoreMap discussionForumPost : annotation.get(CoreAnnotations.DiscussionForumPostsAnnotation.class)) {
+          if (discussionForumPost.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) <= sentenceCharBegin
+            && discussionForumPost.get(CoreAnnotations.CharacterOffsetEndAnnotation.class) >= sentenceCharEnd) {
+            discussionForumPost.get(CoreAnnotations.SentencesAnnotation.class).add(sentence);
+            // set sentence's discussion forum post date
+            sentence.set(CoreAnnotations.DiscussionForumPostDateAnnotation.class,
+                discussionForumPost.get(CoreAnnotations.DiscussionForumPostDateAnnotation.class));
+          }
+        }
+      }
+
       // add the sentence to the list
       sentences.add(sentence);
     }
