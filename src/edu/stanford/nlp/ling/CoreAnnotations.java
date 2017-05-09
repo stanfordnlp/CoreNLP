@@ -1962,5 +1962,15 @@ public class CoreAnnotations {
     public Class<List<CoreMap>> getType() { return ErasureUtils.uncheckedCast(List.class); }
   }
 
+  /**
+   * An annotation for the date of a forum post
+   */
+  public static class DiscussionForumPostDateAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
 
 }
