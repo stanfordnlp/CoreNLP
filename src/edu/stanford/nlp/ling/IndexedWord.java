@@ -290,6 +290,17 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   }
 
   @Override
+  public String before() {
+    return label.before();
+  }
+
+  @Override
+  public void setBefore(String before) {
+    label.setBefore(before);
+
+  }
+
+  @Override
   public String originalText() {
     return label.originalText();
   }
@@ -297,6 +308,16 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   @Override
   public void setOriginalText(String originalText) {
     label.setOriginalText(originalText);
+  }
+
+  @Override
+  public String after() {
+    return label.after();
+  }
+
+  @Override
+  public void setAfter(String after) {
+    label.setAfter(after);
   }
 
   @Override

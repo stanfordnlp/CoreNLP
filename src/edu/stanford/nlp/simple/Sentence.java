@@ -424,6 +424,45 @@ public class Sentence {
     return characterOffsetEnd().get(index);
   }
 
+
+  /** The whitespace before each token in the sentence. This will match {@link #after()} of the previous token. */
+  public List<String> before() {
+    synchronized (impl) {
+      return lazyList(tokensBuilders, CoreNLPProtos.Token.Builder::getBefore);
+    }
+  }
+
+
+  /** The whitespace before this token in the sentence. This will match {@link #after()} of the previous token. */
+  public String before(int index) {
+    return before().get(index);
+  }
+
+
+  /** The whitespace after each token in the sentence. This will match {@link #before()} of the next token. */
+  public List<String> after() {
+    synchronized (impl) {
+      return lazyList(tokensBuilders, CoreNLPProtos.Token.Builder::getAfter);
+    }
+  }
+
+
+  /** The whitespace after this token in the sentence. This will match {@link #before()} of the next token. */
+  public String after(int index) {
+    return after().get(index);
+  }
+
+
+  /** The tokens in this sentence. Each token class is just a helper for the methods in this class. */
+  public List<Token> tokens() {
+    ArrayList<Token> tokens = new ArrayList<>(this.length());
+    for (int i = 0; i < length(); ++i) {
+      tokens.add(new Token(this, i));
+    }
+    return tokens;
+  }
+
+
   //
   // SET BY ANNOTATORS
   //
