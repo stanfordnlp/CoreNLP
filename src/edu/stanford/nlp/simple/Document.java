@@ -47,6 +47,7 @@ public class Document {
       "tokenize.language", "en",
       "parse.binaryTrees", "true",
       "mention.type", "dep",
+      "coref.mode", "statistical",  // Use the new coref
       "coref.md.type", "dep"
   );
 
@@ -272,7 +273,7 @@ public class Document {
   /**
    * Cache the most recently used custom annotators.
    */
-  private static final AnnotatorPool customAnnotators = new AnnotatorPool();
+  private static final AnnotatorPool customAnnotators = AnnotatorPool.SINGLETON;
 
 
   /**

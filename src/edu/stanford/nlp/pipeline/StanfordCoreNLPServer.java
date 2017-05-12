@@ -50,6 +50,7 @@ import static java.net.HttpURLConnection.*;
 public class StanfordCoreNLPServer implements Runnable {
 
   protected HttpServer server;
+  @SuppressWarnings("unused")
   @ArgumentParser.Option(name="server_id", gloss="a name for this server")
   protected String serverID = null; // currently not used
   @ArgumentParser.Option(name="port", gloss="The port to run the server on")
@@ -172,7 +173,7 @@ public class StanfordCoreNLPServer implements Runnable {
     // overwrite all default properties with provided server properties
     // for instance you might want to provide a default ner model
     if (serverPropertiesPath != null) {
-      Properties serverProperties = StringUtils.argsToProperties(new String[]{"-props", serverPropertiesPath});
+      Properties serverProperties = StringUtils.argsToProperties("-props", serverPropertiesPath);
       PropertiesUtils.overWriteProperties(this.defaultProps, serverProperties);
     }
 
