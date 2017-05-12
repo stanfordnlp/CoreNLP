@@ -47,7 +47,10 @@ public class Sentence {
           "language", "english",
           "ssplit.isOneSentence", "true",
           "tokenize.class", "PTBTokenizer",
-          "tokenize.language", "en");
+          "tokenize.language", "en",
+          "mention.type", "dep",
+          "coref.md.type", "dep"
+  );
 
   /** A Properties object for creating a document from a single tokenized sentence. */
   private static Properties SINGLE_SENTENCE_TOKENIZED_DOCUMENT = PropertiesUtils.asProperties(
@@ -55,7 +58,10 @@ public class Sentence {
           "ssplit.isOneSentence", "true",
           "tokenize.class", "WhitespaceTokenizer",
           "tokenize.language", "en",
-          "tokenize.whitespace", "true");  // redundant?
+          "tokenize.whitespace", "true",
+          "mention.type", "dep",
+          "coref.md.type", "dep"
+  );  // redundant?
 
   /**
    *  The protobuf representation of a Sentence.
