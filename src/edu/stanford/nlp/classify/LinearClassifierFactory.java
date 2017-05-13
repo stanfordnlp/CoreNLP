@@ -31,6 +31,7 @@ package edu.stanford.nlp.classify;
 import java.io.BufferedReader;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -740,7 +741,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     labelIndex = dataset.labelIndex;
 
     final CrossValidator<L, F> crossValidator = new CrossValidator<>(dataset, kfold);
-    final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> scoreFn =
+    final ToDoubleFunction<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>> scoreFn =
         fold -> {
           GeneralDataset<L, F> trainSet = fold.first();
           GeneralDataset<L, F> devSet   = fold.second();
