@@ -97,9 +97,9 @@
     </dependency>
 
     <dependency>
-      <groupId>com.googlecode.efficient-java-matrix-library</groupId>
-      <artifactId>ejml</artifactId>
-      <version>0.23</version>
+      <groupId>org.ejml</groupId>
+      <artifactId>all</artifactId>
+      <version>0.29</version>
     </dependency>
 
     <dependency>
