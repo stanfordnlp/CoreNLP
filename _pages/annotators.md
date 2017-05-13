@@ -4,10 +4,10 @@ keywords: annotators
 permalink: '/annotators.html'
 ---
 
-| Property name | Annotator class name | Generated Annotation | Description |
+| Name | Annotator class name | Generated Annotation | Description |
 | --- | --- | --- | --- | 
-| [tokenize](tokenize.html) | TokenizerAnnotator | TokensAnnotation (list of tokens), and CharacterOffsetBeginAnnotation, CharacterOffsetEndAnnotation, TextAnnotation (for each token) | Tokenizes the text. This component started as a PTB-style tokenizer, but was extended since then to handle noisy and web text. The tokenizer saves the character offsets of each token in the input text, as CharacterOffsetBeginAnnotation and CharacterOffsetEndAnnotation. |
-| [cleanxml](cleanxml.html) | CleanXmlAnnotator | XmlContextAnnotation | Remove xml tokens from the document |
+| [tokenize](tokenize.html) | TokenizerAnnotator | TokensAnnotation (list of tokens); CharacterOffsetBeginAnnotation, CharacterOffsetEndAnnotation, TextAnnotation (for each token) | Tokenizes the text. This splits the text into roughly "words", using rules or methods suitable for the language being processed. Sometimes the tokens split up surface words in ways suitable for further NLP-processing, for example "isn't" becomes "is" and "n't". The tokenizer saves the beginning and end character offsets of each token in the input text. |
+| [cleanxml](cleanxml.html) | CleanXmlAnnotator | XmlContextAnnotation | Remove xml tokens from the document. May use them to mark sentence ends or to extract metadata. |
 | [ssplit](ssplit.html) | WordsToSentencesAnnotator | SentencesAnnotation | Splits a sequence of tokens into sentences. |
 | [pos](pos.html) | POSTaggerAnnotator | PartOfSpeechAnnotation | Labels tokens with their POS tag. For more details see [this page](http://nlp.stanford.edu/software/tagger.shtml). |
 | [lemma](lemma.html) | MorphaAnnotator | LemmaAnnotation | Generates the word lemmas for all tokens in the corpus. |
