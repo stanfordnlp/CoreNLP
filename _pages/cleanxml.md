@@ -58,7 +58,7 @@ are case sensitive, so get them right!
 | clean.docTypetags | regex| `"doctype"` | A regular expression that specifies which tags to treat as giving the document type of a document. |
 | clean.turntags | regex| `"turn"` | A regular expression that specifies which tags to treat as marking a turn in a dialog. |
 | clean.speakertags | regex| `"speaker"` | A regular expression that specifies which tags to treat as marking a speaker in a dialog. |
-| clean.docAnnotations | String| `"docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]"` | A map of document level annotation keys (i.e., docid) along with a pattern indicating the tag to match, and the attribute to match. |
+| clean.docAnnotations | String| `"docID=doc[id],` `doctype=doc[type],` `docsourcetype=doctype[source]"` | A map of document level annotation keys (i.e., docid) along with a pattern indicating the tag to match, and the attribute to match. |
 | clean.tokenAnnotations | String| `""` | A map of token level annotation keys (i.e., link, speaker) along with a pattern indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated). |
 | clean.sectiontags | regex | `""` | A regular expression that specifies which tags to treat as marking sections of a document. |
 | clean.sectionAnnotations | String | `""` | A map of section level annotation keys along with a pattern indicating the tag to match, and the attribute to match. |
