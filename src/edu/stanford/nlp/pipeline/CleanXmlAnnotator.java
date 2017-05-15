@@ -92,14 +92,14 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_SPEAKER_TAGS = "speaker";
 
   /**
-   * A map of document level annotation keys (i.e. docid) along with a pattern
+   * A map of document level annotation keys (i.e., docid) along with a pattern
    *  indicating the tag to match, and the attribute to match.
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
 
   /**
-   * A map of token level annotation keys (i.e. link, speaker) along with a pattern
+   * A map of token level annotation keys (i.e., link, speaker) along with a pattern
    *  indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated).
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<>();
@@ -132,14 +132,14 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
 
   /**
-   * This setting allows handling of flawed XML.  For example,
+   * This setting allows handling of "flawed XML", which may be valid SGML.  For example,
    * a lot of the news articles we parse go: <br>
    *  &lt;text&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;/text&gt; <br>
-   * ... eg, no closing &lt;/turn&gt; tags.
+   * ... i.e., no closing &lt;/turn&gt; tags.
    */
   private final boolean allowFlawedXml;
 
@@ -488,7 +488,7 @@ public class CleanXmlAnnotator implements Annotator {
     List<CoreLabel> docIdTokens = new ArrayList<>();
 
     // add an annotation for the discussion forum posts
-    annotation.set(CoreAnnotations.DiscussionForumPostsAnnotation.class, new ArrayList<CoreMap>());
+    annotation.set(CoreAnnotations.DiscussionForumPostsAnnotation.class, new ArrayList<>());
 
     // Local variables for additional per token annotations
     CoreMap tokenAnnotations = (tokenAnnotationPatterns != null && !tokenAnnotationPatterns.isEmpty())? new ArrayCoreMap():null;
@@ -638,7 +638,7 @@ public class CleanXmlAnnotator implements Annotator {
           // set author
           currDiscussionForumPost.set(CoreAnnotations.AuthorAnnotation.class, postStartTag.attributes.get("author"));
           // set up empty sentences list
-          currDiscussionForumPost.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<CoreMap>());
+          currDiscussionForumPost.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
           // set doc date for post
           String dateString = postStartTag.attributes.get("datetime");
           try {
