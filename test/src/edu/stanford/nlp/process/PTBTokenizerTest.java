@@ -531,6 +531,22 @@ public class PTBTokenizerTest {
     runOnTwoArrays(tokFactory, emojiInputs, emojiGold);
   }
 
+  private final String[] hyphenInputs = {
+          // Text starting with BOM (should be deleted), words with soft hyphens and non-breaking space.
+          "\uFEFFThis is hy\u00ADphen\u00ADated and non-breaking spaces: 3\u202F456\u202F473.89",
+          // Test that some cp1252 that shouldn't be in file is normalized okay
+          "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092"
+  };
 
+  private final String[][] hyphenGold = {
+          { "This", "is", "hyphenated", "and", "non-breaking", "spaces", ":", "3456473.89" },
+          { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" }
+  };
+
+  @Test
+  public void testHyphensAndBOM() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false");
+    runOnTwoArrays(tokFactory, hyphenInputs, hyphenGold);
+  }
 
 }

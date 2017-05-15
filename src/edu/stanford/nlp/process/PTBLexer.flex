@@ -289,7 +289,7 @@ import edu.stanford.nlp.util.logging.Redwood;
    * at either their correct Unicode codepoints, or in their invalid
    * positions as 8 bit chars inside the iso-8859 control region.
    *
-   * ellipsis   85      0133    2026    8230
+   * ellipsis   85      0133    2026    8230   COMPLICATED!! Also a newline character for IBM 390; we let ellipsis win
    * single quote curly starting        91      0145    2018    8216
    * single quote curly ending  92      0146    2019    8217
    * double quote curly starting        93      0147    201C    8220
@@ -398,6 +398,28 @@ import edu.stanford.nlp.util.logging.Redwood;
     }
     if (out.length() == 0) {
       out.append('-'); // don't create an empty token
+    }
+    return out.toString();
+  }
+
+  private static String removeFromNumber(String in) {
+    StringBuilder out = null;
+    // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
+    // \u066C\u2009\u202F are thousands separator characters that it seems safe to remove.
+    int length = in.length();
+    for (int i = 0; i < length; i++) {
+      char ch = in.charAt(i);
+      if (ch == '\u00AD' || ch == '\u066C' || ch == '\u2009' || ch == '\u202F') {
+        if (out == null) {
+          out = new StringBuilder(length);
+          out.append(in.substring(0, i));
+        }
+      } else if (out != null) {
+        out.append(ch);
+      }
+    }
+    if (out == null) {
+      return in;
     }
     return out.toString();
   }
@@ -646,7 +668,7 @@ SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 DIGIT = [:digit:]|[\u07C0-\u07C9]
 DATE = {DIGIT}{1,2}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{2,4}
-NUM = {DIGIT}+|{DIGIT}*([.:,\u00AD\u066B\u066C]{DIGIT}+)+
+NUM = {DIGIT}+|{DIGIT}*([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)+
 /* Now don't allow bracketed negative numbers!  They have too many uses (e.g.,
    years or times in parentheses), and having them in tokens messes up
    treebank parsing.
@@ -943,8 +965,7 @@ nno/[^A-Za-z0-9]
                           }
                           return getNext(txt, yytext());
                          }
-{NUMBER}                { return getNext(removeSoftHyphens(yytext()),
-                                         yytext()); }
+{NUMBER}                { return getNext(removeFromNumber(yytext()), yytext()); }
 {SUBSUPNUM}             { return getNext(); }
 {FRAC}          { String txt = yytext();
                   // if we are in strictTreebank3 mode, we need to reject everything after a space or non-breaking space...
@@ -978,7 +999,7 @@ nno/[^A-Za-z0-9]
 {DOLSIGN}               { return getNext(); }
 {DOLSIGN2}              { if (normalizeCurrency) {
                             return getNext(normalizeCurrency(yytext()), yytext());
-			  } else {
+                        } else {
                             return getNext(minimallyNormalizeCurrency(yytext()), yytext());
                           }
                         }
