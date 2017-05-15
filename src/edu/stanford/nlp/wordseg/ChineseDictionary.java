@@ -29,9 +29,9 @@ public class ChineseDictionary {
 
   private static Redwood.RedwoodChannels logger = Redwood.channels(ChineseDictionary.class);
   @SuppressWarnings({"unchecked"})
-  Set<String>[] words_ = new HashSet[MAX_LEXICON_LENGTH+1];
+  private final Set<String>[] words_ = new HashSet[MAX_LEXICON_LENGTH+1];
 
-  private ChineseDocumentToSentenceProcessor cdtos_; // = null;
+  private final ChineseDocumentToSentenceProcessor cdtos_; // = null;
 
   private void serializeDictionary(String serializePath) {
     logger.info("Serializing dictionaries to " + serializePath + " ... ");
@@ -111,8 +111,7 @@ public class ChineseDictionary {
 
     for (String dict : dicts) {
       if(dict.endsWith("ser.gz")) {
-        // TODO: the way this is written would not work if we allow
-        // dictionaries to have different settings of MAX_LEXICON_LENGTH
+        // TODO: the way this is written does not work if we allow dictionaries to have different settings of MAX_LEXICON_LENGTH
         Set<String>[] dictwords = loadDictionary(dict);
         for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
           words_[i].addAll(dictwords[i]);
