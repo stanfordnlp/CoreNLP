@@ -746,6 +746,8 @@ public class Document {
         this.runLemma(props).runNER(props);
         if (CorefProperties.mdType(props) != CorefProperties.MentionDetectionType.DEPENDENCY) {
           this.runParse(props);
+        } else {
+          this.runDepparse(props);
         }
         // Run mention
         Supplier<Annotator> mention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultMention : getOrCreate(STANFORD_MENTION, props, () -> backend.mention(props));
