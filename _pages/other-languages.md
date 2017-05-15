@@ -67,7 +67,7 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 * [php-stanford-corenlp-adapter](https://github.com/DennisDeSwart/php-stanford-corenlp-adapter) by Dennis De Swart. Simple connection to Stanford CoreNLP server.
 [PHPclasses](http://www.phpclasses.org/package/10056-PHP-Natural-language-processing-using-Stanford-server.html).
 [Packagist](https://packagist.org/packages/dennis-de-swart/php-stanford-corenlp-adapter).
-* [php-stanford-nlp-datastore](https://github.com/DennisDeSwart/php-stanford-nlp-datastore) by Dennis De Swart. Stores data analyzed by Stanford CoreNLP in SQLite database.
+* [php-stanford-nlp-datastore](https://github.com/DennisDeSwart/php-stanford-nlp-datastore) by Dennis De Swart. Stores data analyzed by Stanford CoreNLP (words, NER, OpenIE triples, coreference) in an SQLite database, which can then be searched.
 [PHPclasses](https://www.phpclasses.org/package/10147-PHP-Analyse-text-with-NLP-and-stores-in-a-database.html).
 [Packagist](https://packagist.org/packages/dennis-de-swart/php-stanford-nlp-datastore).
 
