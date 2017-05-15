@@ -512,7 +512,8 @@ public class PTBTokenizerTest {
           // Some BMP emoji
           "\u00AE\u203C\u2198\u231A\u2328\u23F0\u2620\u26BD\u2705\u2757",
           // Choosing emoji vs. text presentation.
-          "⚠⚠️⚠︎❤️❤"
+          "⚠⚠️⚠︎❤️❤",
+          "¯\\_(ツ)_/¯"
   };
 
   private final String[][] emojiGold = {
@@ -520,7 +521,8 @@ public class PTBTokenizerTest {
           { "\uD83D\uDC66\uD83C\uDFFB", "\uD83D\uDC67\uD83C\uDFFF" },
           { "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67", "\uD83E\uDDC0" },
           { "\u00AE", "\u203C", "\u2198", "\u231A", "\u2328", "\u23F0", "\u2620", "\u26BD", "\u2705", "\u2757" },
-          { "⚠", "⚠️", "⚠︎", "❤️", "❤"}
+          { "⚠", "⚠️", "⚠︎", "❤️", "❤"},
+          { "¯\\_-LRB-ツ-RRB-_/¯" },
   };
 
   @Test

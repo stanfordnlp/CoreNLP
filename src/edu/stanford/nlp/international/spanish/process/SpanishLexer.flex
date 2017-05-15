@@ -156,18 +156,18 @@ import edu.stanford.nlp.util.logging.Redwood;
 	} else if (value.equals("allKeep")) {
 	  untokenizable = UntokenizableOptions.ALL_KEEP;
 	} else {
-        throw new IllegalArgumentException("FrenchLexer: Invalid option value in constructor: " + key + ": " + value);
+        throw new IllegalArgumentException("SpanishLexer: Invalid option value in constructor: " + key + ": " + value);
 	}
       } else if ("strictTreebank3".equals(key)) {
         strictTreebank3 = val;
       } else {
-        System.err.printf("%s: Invalid options key in constructor: %s%n", this.getClass().getName(), key);
+        throw new IllegalArgumentException(String.format("%s: Invalid options key in constructor: %s%n", this.getClass().getName(), key));
       }
     }
     // this.seenUntokenizableCharacter = false; // unnecessary, it's default initialized
     if (invertible) {
       if ( ! (tf instanceof CoreLabelTokenFactory)) {
-        throw new IllegalArgumentException("FrenchLexer: the invertible option requires a CoreLabelTokenFactory");
+        throw new IllegalArgumentException("SpanishLexer: the invertible option requires a CoreLabelTokenFactory");
       }
       prevWord = (CoreLabel) tf.makeToken("", 0, 0);
       prevWordAfter = new StringBuilder();
@@ -274,8 +274,8 @@ import edu.stanford.nlp.util.logging.Redwood;
     return result.length() == 0 ? "-" : result;
   }
 
-  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
-  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
+  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
+  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
 
   private static String  Shlomi2AsciiQuotes(String in) {
     return asciiQuotes(in);
@@ -335,7 +335,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private static final Pattern AMP_PATTERN = Pattern.compile("(?i:&amp;)");
 
   private static String normalizeAmp(final String in) {
-      return AMP_PATTERN.matcher(in).replaceAll("&");
+    return AMP_PATTERN.matcher(in).replaceAll("&");
   }
 
   private static String convertToEl(String l) {
@@ -553,14 +553,14 @@ ASTS = \*+|(\\\*){1,3}
 HASHES = #+
 FNMARKS = {ATS}|{HASHES}|{UNDS}
 INSENTP = [,;:\u3001]
-QUOTES = {APOSETCETERA}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0091\u0092\u0093\u0094\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
+QUOTES = {APOSETCETERA}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0082\u0084\u0091-\u0094\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
+
 DBLQUOT = \"|&quot;
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
 MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2023\u2030-\u2038\u203B\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3012\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
 /* Math and other symbols that stand alone: °²× ∀ */
-// Consider this list of bullet chars: 2219, 00b7, 2022, 2024
 
 
 %%
@@ -730,18 +730,20 @@ cannot			{ yypushback(3) ; return getNext(); }
 
 {FAKEDUCKFEET} |
 {MISCSYMBOL}	{ return getNext(); }
+\u0095          { return getNext("\u2022", yytext()); } /* cp1252 bullet mapped to unicode */
+\u0099          { return getNext("\u2122", yytext()); } /* cp1252 TM sign mapped to unicode */
 
 \0|{SPACES}|[\u200B\u200E-\u200F\uFEFF]	{ if (invertible) {
                      prevWordAfter.append(yytext());
                   }
                 }
-{NEWLINE}	{ if (tokenizeNLs) {
+{NEWLINE}	      { if (tokenizeNLs) {
                       return getNext(NEWLINE_TOKEN, yytext()); // js: for tokenizing carriage returns
                   } else if (invertible) {
                       prevWordAfter.append(yytext());
                   }
                 }
-&nbsp;		{ if (invertible) {
+&nbsp;		      { if (invertible) {
                      prevWordAfter.append(yytext());
                   }
                 }
