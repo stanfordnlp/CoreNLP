@@ -238,6 +238,25 @@ wget "localhost:9000/shutdown?key=`cat /tmp/corenlp.shutdown`" -O -
 
 If you start the server with `-server_id SERVER_NAME` it will store the shutdown key in a file called `corenlp.shutdown.SERVER_NAME`.
 
+### Command line flags
+
+The server can take a number of command-line flags, documented below:
+
+| Flag | Argument type | Default | Description |
+| --- | --- | --- | --- |
+| `-port`        | Integer | 9000    | The port to run the server on. |
+| `-status_port` | Integer | `-port` | The port to run the liveness and readiness server on. Defaults to running on the main server (i.e., also on port 9000). |
+| `-timeout`     | Integer | 15000   | The maximum amount of time, in milliseconds, to wait for an annotation to finish before cancelling it. |
+| `-strict`      | Boolean | false   | If true, follow HTTP standards strictly -- this means not returning in UTF unless it's explicitly requested! |
+| `-ssl`         | Boolean | false   | If true, run an SSL server, with the *.jks key in `-key`. By default, this loads the (very insecure!) key included in the CoreNLP distribution. |
+| `-key`         | String  | edu/stanford/nlp/pipeline/corenlp.jks   | The classpath or filepath to the *.jks key to use for creating an SSL connection |
+| `-username`    | String  | ""      | Along with `-password`, if set this enables basic auth with the given username. |
+| `-password`    | String  | ""      | Along with `-username`, if set this enables basic auth with the given password. |
+| `-annotators` | String  | tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,regexner,kbp | If no annotators are specified with the annotation request, these annotators are run by default. |
+| `-preload` | String  | "" | A set of annotators to warm up in the cache when the server boots up. The `/ready` endpoint won't respond with a success until all of these annotators have been loaded into memory. |
+| `-serverProperties` | String  | "" | A file with the default properties the server should use if no properties are set in the actual annotation request. Useful for, e.g., changing the default language of the server. |
+
+
 ### Dedicated Server
 
 This section describes how to set up a dedicated CoreNLP server on a
@@ -315,7 +334,7 @@ Well, I guess they're documented now:
 
   * Hitting `Shift+Enter` on any input field in the web demo (e.g., the main text input) is equivalent to clicking the `Submit` (or `Match`) button. Furthermore, if the input is empty, it will fill itself with a default input. Useful if – to take a purely hypothetical example – you're developing the web server and don't want to re-type the same sentence everytime you re-load the website.
 
-### Using the Server in a Shell Script
+### Server readiness
 
 When booting up an instance of the server for a shell script, make sure you wait for the server to be available before interacting with it. An example using the `netcat` tool on linux:
 
@@ -329,3 +348,5 @@ done
 # Rest of script
 # ...
 ```
+
+If you're in a production environment, you can also wait for liveness (`/live`) and readiness (`/ready`) endpoints to check if the server is online (liveness) and ready to accept connections (readiness) respectively. These mirror the semantics of the Kubernetes liveness and readiness probes, and can double as health checks for the server.
