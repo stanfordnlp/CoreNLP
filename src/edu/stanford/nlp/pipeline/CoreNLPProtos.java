@@ -1615,7 +1615,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasText()) {
         hash = (37 * hash) + TEXT_FIELD_NUMBER;
         hash = (53 * hash) + getText().hashCode();
@@ -7163,7 +7163,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (getTokenCount() > 0) {
         hash = (37 * hash) + TOKEN_FIELD_NUMBER;
         hash = (53 * hash) + getTokenList().hashCode();
@@ -16535,7 +16535,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasWord()) {
         hash = (37 * hash) + WORD_FIELD_NUMBER;
         hash = (53 * hash) + getWord().hashCode();
@@ -21706,7 +21706,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasText()) {
         hash = (37 * hash) + TEXT_FIELD_NUMBER;
         hash = (53 * hash) + getText().hashCode();
@@ -22921,7 +22921,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (getChildCount() > 0) {
         hash = (37 * hash) + CHILD_FIELD_NUMBER;
         hash = (53 * hash) + getChildList().hashCode();
@@ -24186,7 +24186,7 @@ public final class CoreNLPProtos {
           return memoizedHashCode;
         }
         int hash = 41;
-        hash = (19 * hash) + getDescriptorForType().hashCode();
+        hash = (19 * hash) + getDescriptor().hashCode();
         if (hasSentenceIndex()) {
           hash = (37 * hash) + SENTENCEINDEX_FIELD_NUMBER;
           hash = (53 * hash) + getSentenceIndex();
@@ -25046,7 +25046,7 @@ public final class CoreNLPProtos {
           return memoizedHashCode;
         }
         int hash = 41;
-        hash = (19 * hash) + getDescriptorForType().hashCode();
+        hash = (19 * hash) + getDescriptor().hashCode();
         if (hasSource()) {
           hash = (37 * hash) + SOURCE_FIELD_NUMBER;
           hash = (53 * hash) + getSource();
@@ -25873,7 +25873,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (getNodeCount() > 0) {
         hash = (37 * hash) + NODE_FIELD_NUMBER;
         hash = (53 * hash) + getNodeList().hashCode();
@@ -27629,7 +27629,7 @@ public final class CoreNLPProtos {
           return memoizedHashCode;
         }
         int hash = 41;
-        hash = (19 * hash) + getDescriptorForType().hashCode();
+        hash = (19 * hash) + getDescriptor().hashCode();
         if (hasMentionID()) {
           hash = (37 * hash) + MENTIONID_FIELD_NUMBER;
           hash = (53 * hash) + getMentionID();
@@ -28694,7 +28694,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasChainID()) {
         hash = (37 * hash) + CHAINID_FIELD_NUMBER;
         hash = (53 * hash) + getChainID();
@@ -31777,7 +31777,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasMentionID()) {
         hash = (37 * hash) + MENTIONID_FIELD_NUMBER;
         hash = (53 * hash) + getMentionID();
@@ -35713,7 +35713,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasSentenceNum()) {
         hash = (37 * hash) + SENTENCENUM_FIELD_NUMBER;
         hash = (53 * hash) + getSentenceNum();
@@ -36420,7 +36420,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasSpeakerName()) {
         hash = (37 * hash) + SPEAKERNAME_FIELD_NUMBER;
         hash = (53 * hash) + getSpeakerName().hashCode();
@@ -37073,7 +37073,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasBegin()) {
         hash = (37 * hash) + BEGIN_FIELD_NUMBER;
         hash = (53 * hash) + getBegin();
@@ -38011,7 +38011,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasValue()) {
         hash = (37 * hash) + VALUE_FIELD_NUMBER;
         hash = (53 * hash) + getValue().hashCode();
@@ -39654,7 +39654,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasHeadStart()) {
         hash = (37 * hash) + HEADSTART_FIELD_NUMBER;
         hash = (53 * hash) + getHeadStart();
@@ -41457,7 +41457,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (getArgNameCount() > 0) {
         hash = (37 * hash) + ARGNAME_FIELD_NUMBER;
         hash = (53 * hash) + getArgNameList().hashCode();
@@ -43106,7 +43106,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasName()) {
         hash = (37 * hash) + NAME_FIELD_NUMBER;
         hash = (53 * hash) + getName().hashCode();
@@ -44239,7 +44239,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasProjectEquivalence()) {
         hash = (37 * hash) + PROJECTEQUIVALENCE_FIELD_NUMBER;
         hash = (53 * hash) + projectEquivalence_;
@@ -45483,7 +45483,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasSentenceIndex()) {
         hash = (37 * hash) + SENTENCEINDEX_FIELD_NUMBER;
         hash = (53 * hash) + getSentenceIndex();
@@ -46721,7 +46721,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (getTokenIndexCount() > 0) {
         hash = (37 * hash) + TOKENINDEX_FIELD_NUMBER;
         hash = (53 * hash) + getTokenIndexList().hashCode();
@@ -47418,7 +47418,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasSentenceIndex()) {
         hash = (37 * hash) + SENTENCEINDEX_FIELD_NUMBER;
         hash = (53 * hash) + getSentenceIndex();
@@ -48935,7 +48935,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasSubject()) {
         hash = (37 * hash) + SUBJECT_FIELD_NUMBER;
         hash = (53 * hash) + getSubject().hashCode();
@@ -51381,7 +51381,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (getKeyCount() > 0) {
         hash = (37 * hash) + KEY_FIELD_NUMBER;
         hash = (53 * hash) + getKeyList().hashCode();
@@ -52143,7 +52143,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (getKeyCount() > 0) {
         hash = (37 * hash) + KEY_FIELD_NUMBER;
         hash = (53 * hash) + getKeyList().hashCode();
@@ -53053,7 +53053,7 @@ public final class CoreNLPProtos {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasCharBegin()) {
         hash = (37 * hash) + CHARBEGIN_FIELD_NUMBER;
         hash = (53 * hash) + getCharBegin();
