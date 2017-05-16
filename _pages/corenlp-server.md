@@ -248,6 +248,7 @@ The server can take a number of command-line flags, documented below:
 | `-status_port` | Integer | `-port` | The port to run the liveness and readiness server on. Defaults to running on the main server (i.e., also on port 9000). |
 | `-timeout`     | Integer | 15000   | The maximum amount of time, in milliseconds, to wait for an annotation to finish before cancelling it. |
 | `-strict`      | Boolean | false   | If true, follow HTTP standards strictly -- this means not returning in UTF unless it's explicitly requested! |
+| `-quiet`       | Boolean | false   | If true, don't log the incoming requests to stdout (this does not affect CoreNLP's default logging) |
 | `-ssl`         | Boolean | false   | If true, run an SSL server, with the *.jks key in `-key`. By default, this loads the (very insecure!) key included in the CoreNLP distribution. |
 | `-key`         | String  | edu/stanford/nlp/pipeline/corenlp.jks   | The classpath or filepath to the *.jks key to use for creating an SSL connection |
 | `-username`    | String  | ""      | Along with `-password`, if set this enables basic auth with the given username. |
