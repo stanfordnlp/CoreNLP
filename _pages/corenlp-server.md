@@ -252,7 +252,7 @@ The server can take a number of command-line flags, documented below:
 | `-key`         | String  | edu/stanford/nlp/pipeline/corenlp.jks   | The classpath or filepath to the *.jks key to use for creating an SSL connection |
 | `-username`    | String  | ""      | Along with `-password`, if set this enables basic auth with the given username. |
 | `-password`    | String  | ""      | Along with `-username`, if set this enables basic auth with the given password. |
-| `-annotators` | String  | tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,regexner,kbp | If no annotators are specified with the annotation request, these annotators are run by default. |
+| `-annotators` | String  | all | If no annotators are specified with the annotation request, these annotators are run by default. |
 | `-preload` | String  | "" | A set of annotators to warm up in the cache when the server boots up. The `/ready` endpoint won't respond with a success until all of these annotators have been loaded into memory. |
 | `-serverProperties` | String  | "" | A file with the default properties the server should use if no properties are set in the actual annotation request. Useful for, e.g., changing the default language of the server. |
 
