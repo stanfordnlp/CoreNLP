@@ -122,15 +122,7 @@ public class CleanXmlAnnotator implements Annotator {
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> sectionAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
-
-  /** tags that indicate section authorship **/
-  private static final String DEFAULT_SECTION_AUTHOR_TAGS = "author";
-  List<String> sectionAuthorTags;
-
-  /** tags that indicate section date **/
-  private static final String DEFAULT_SECTION_DATE_TAGS = "datetime";
-  List<String> sectionDateTags;
-
+  
   /**
    * This setting allows handling of "flawed XML", which may be valid SGML.  For example,
    * a lot of the news articles we parse go: <br>
@@ -194,12 +186,6 @@ public class CleanXmlAnnotator implements Annotator {
 
     String ssplitDiscardTokens =
         properties.getProperty("clean.ssplitDiscardTokens");
-
-    sectionAuthorTags = Arrays.asList(properties.getProperty("clean.sectionAuthorTags",
-        CleanXmlAnnotator.DEFAULT_SECTION_AUTHOR_TAGS).split(","));
-
-    sectionDateTags = Arrays.asList(properties.getProperty("clean.sectionDateTags",
-        CleanXmlAnnotator.DEFAULT_SECTION_DATE_TAGS).split(","));
 
     if (xmlTagsToRemove != null) {
       xmlTagMatcher = toCaseInsensitivePattern(xmlTagsToRemove);
@@ -627,6 +613,7 @@ public class CleanXmlAnnotator implements Annotator {
             previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
           }
           // create a CoreMap to store info about this section
+          String foundAuthor = sectionAnnotations.get(CoreAnnotations.AuthorAnnotation.class);
           CoreMap currSectionCoreMap = new Annotation();
           // set character offset of beginning of section
           currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
@@ -635,12 +622,11 @@ public class CleanXmlAnnotator implements Annotator {
           currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
               token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
           // set author of section
-          currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class,
-              sectionStartTag.getFirstNonNullAttributeFromList(sectionAuthorTags));
+          currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class, foundAuthor);
           // set up empty sentences list
           currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
           // set doc date for post
-          String dateString = sectionStartTag.getFirstNonNullAttributeFromList(sectionDateTags);
+          String dateString = sectionAnnotations.get(CoreAnnotations.SectionDateAnnotation.class);
           try {
             SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
             currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
