@@ -68,8 +68,8 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       }
       // default look for the sentence's forum post date
       // if it doesn't have one, back off to the document date
-      if (annotation.get(CoreAnnotations.DiscussionForumPostDateAnnotation.class) != null) {
-        docDate = annotation.get(CoreAnnotations.DiscussionForumPostDateAnnotation.class);
+      if (annotation.get(CoreAnnotations.SectionDateAnnotation.class) != null) {
+        docDate = annotation.get(CoreAnnotations.SectionDateAnnotation.class);
       } else {
         docDate = docAnnotation.get(CoreAnnotations.DocDateAnnotation.class);
       }
