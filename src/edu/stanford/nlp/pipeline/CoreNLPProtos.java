@@ -52645,28 +52645,17 @@ public final class CoreNLPProtos {
         getAuthorBytes();
 
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+     * <code>repeated uint32 sentenceIndexes = 4;</code>
      */
-    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence> 
-        getSentencesList();
+    java.util.List<java.lang.Integer> getSentenceIndexesList();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+     * <code>repeated uint32 sentenceIndexes = 4;</code>
      */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence getSentences(int index);
+    int getSentenceIndexesCount();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+     * <code>repeated uint32 sentenceIndexes = 4;</code>
      */
-    int getSentencesCount();
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-     */
-    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder> 
-        getSentencesOrBuilderList();
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-     */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder getSentencesOrBuilder(
-        int index);
+    int getSentenceIndexes(int index);
 
     /**
      * <code>optional string datetime = 5;</code>
@@ -52697,7 +52686,7 @@ public final class CoreNLPProtos {
       charBegin_ = 0;
       charEnd_ = 0;
       author_ = "";
-      sentences_ = java.util.Collections.emptyList();
+      sentenceIndexes_ = java.util.Collections.emptyList();
       datetime_ = "";
     }
 
@@ -52745,13 +52734,25 @@ public final class CoreNLPProtos {
               author_ = bs;
               break;
             }
-            case 34: {
+            case 32: {
               if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-                sentences_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence>();
+                sentenceIndexes_ = new java.util.ArrayList<java.lang.Integer>();
                 mutable_bitField0_ |= 0x00000008;
               }
-              sentences_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.PARSER, extensionRegistry));
+              sentenceIndexes_.add(input.readUInt32());
+              break;
+            }
+            case 34: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008) && input.getBytesUntilLimit() > 0) {
+                sentenceIndexes_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                sentenceIndexes_.add(input.readUInt32());
+              }
+              input.popLimit(limit);
               break;
             }
             case 42: {
@@ -52769,7 +52770,7 @@ public final class CoreNLPProtos {
             e).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-          sentences_ = java.util.Collections.unmodifiableList(sentences_);
+          sentenceIndexes_ = java.util.Collections.unmodifiableList(sentenceIndexes_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -52860,39 +52861,26 @@ public final class CoreNLPProtos {
       }
     }
 
-    public static final int SENTENCES_FIELD_NUMBER = 4;
-    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence> sentences_;
+    public static final int SENTENCEINDEXES_FIELD_NUMBER = 4;
+    private java.util.List<java.lang.Integer> sentenceIndexes_;
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+     * <code>repeated uint32 sentenceIndexes = 4;</code>
      */
-    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence> getSentencesList() {
-      return sentences_;
+    public java.util.List<java.lang.Integer>
+        getSentenceIndexesList() {
+      return sentenceIndexes_;
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+     * <code>repeated uint32 sentenceIndexes = 4;</code>
      */
-    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder> 
-        getSentencesOrBuilderList() {
-      return sentences_;
+    public int getSentenceIndexesCount() {
+      return sentenceIndexes_.size();
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+     * <code>repeated uint32 sentenceIndexes = 4;</code>
      */
-    public int getSentencesCount() {
-      return sentences_.size();
-    }
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-     */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence getSentences(int index) {
-      return sentences_.get(index);
-    }
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-     */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder getSentencesOrBuilder(
-        int index) {
-      return sentences_.get(index);
+    public int getSentenceIndexes(int index) {
+      return sentenceIndexes_.get(index);
     }
 
     public static final int DATETIME_FIELD_NUMBER = 5;
@@ -52951,12 +52939,6 @@ public final class CoreNLPProtos {
         memoizedIsInitialized = 0;
         return false;
       }
-      for (int i = 0; i < getSentencesCount(); i++) {
-        if (!getSentences(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -52972,8 +52954,8 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, author_);
       }
-      for (int i = 0; i < sentences_.size(); i++) {
-        output.writeMessage(4, sentences_.get(i));
+      for (int i = 0; i < sentenceIndexes_.size(); i++) {
+        output.writeUInt32(4, sentenceIndexes_.get(i));
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, datetime_);
@@ -52997,9 +52979,14 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, author_);
       }
-      for (int i = 0; i < sentences_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, sentences_.get(i));
+      {
+        int dataSize = 0;
+        for (int i = 0; i < sentenceIndexes_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeUInt32SizeNoTag(sentenceIndexes_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getSentenceIndexesList().size();
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, datetime_);
@@ -53036,8 +53023,8 @@ public final class CoreNLPProtos {
         result = result && getAuthor()
             .equals(other.getAuthor());
       }
-      result = result && getSentencesList()
-          .equals(other.getSentencesList());
+      result = result && getSentenceIndexesList()
+          .equals(other.getSentenceIndexesList());
       result = result && (hasDatetime() == other.hasDatetime());
       if (hasDatetime()) {
         result = result && getDatetime()
@@ -53066,9 +53053,9 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + AUTHOR_FIELD_NUMBER;
         hash = (53 * hash) + getAuthor().hashCode();
       }
-      if (getSentencesCount() > 0) {
-        hash = (37 * hash) + SENTENCES_FIELD_NUMBER;
-        hash = (53 * hash) + getSentencesList().hashCode();
+      if (getSentenceIndexesCount() > 0) {
+        hash = (37 * hash) + SENTENCEINDEXES_FIELD_NUMBER;
+        hash = (53 * hash) + getSentenceIndexesList().hashCode();
       }
       if (hasDatetime()) {
         hash = (37 * hash) + DATETIME_FIELD_NUMBER;
@@ -53188,7 +53175,6 @@ public final class CoreNLPProtos {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
-          getSentencesFieldBuilder();
         }
       }
       public Builder clear() {
@@ -53199,12 +53185,8 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         author_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
-        if (sentencesBuilder_ == null) {
-          sentences_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
-        } else {
-          sentencesBuilder_.clear();
-        }
+        sentenceIndexes_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
         datetime_ = "";
         bitField0_ = (bitField0_ & ~0x00000010);
         return this;
@@ -53243,15 +53225,11 @@ public final class CoreNLPProtos {
           to_bitField0_ |= 0x00000004;
         }
         result.author_ = author_;
-        if (sentencesBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
-            sentences_ = java.util.Collections.unmodifiableList(sentences_);
-            bitField0_ = (bitField0_ & ~0x00000008);
-          }
-          result.sentences_ = sentences_;
-        } else {
-          result.sentences_ = sentencesBuilder_.build();
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          sentenceIndexes_ = java.util.Collections.unmodifiableList(sentenceIndexes_);
+          bitField0_ = (bitField0_ & ~0x00000008);
         }
+        result.sentenceIndexes_ = sentenceIndexes_;
         if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x00000008;
         }
@@ -53309,31 +53287,15 @@ public final class CoreNLPProtos {
           author_ = other.author_;
           onChanged();
         }
-        if (sentencesBuilder_ == null) {
-          if (!other.sentences_.isEmpty()) {
-            if (sentences_.isEmpty()) {
-              sentences_ = other.sentences_;
-              bitField0_ = (bitField0_ & ~0x00000008);
-            } else {
-              ensureSentencesIsMutable();
-              sentences_.addAll(other.sentences_);
-            }
-            onChanged();
+        if (!other.sentenceIndexes_.isEmpty()) {
+          if (sentenceIndexes_.isEmpty()) {
+            sentenceIndexes_ = other.sentenceIndexes_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureSentenceIndexesIsMutable();
+            sentenceIndexes_.addAll(other.sentenceIndexes_);
           }
-        } else {
-          if (!other.sentences_.isEmpty()) {
-            if (sentencesBuilder_.isEmpty()) {
-              sentencesBuilder_.dispose();
-              sentencesBuilder_ = null;
-              sentences_ = other.sentences_;
-              bitField0_ = (bitField0_ & ~0x00000008);
-              sentencesBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getSentencesFieldBuilder() : null;
-            } else {
-              sentencesBuilder_.addAllMessages(other.sentences_);
-            }
-          }
+          onChanged();
         }
         if (other.hasDatetime()) {
           bitField0_ |= 0x00000010;
@@ -53351,11 +53313,6 @@ public final class CoreNLPProtos {
         }
         if (!hasCharEnd()) {
           return false;
-        }
-        for (int i = 0; i < getSentencesCount(); i++) {
-          if (!getSentences(i).isInitialized()) {
-            return false;
-          }
         }
         return true;
       }
@@ -53519,244 +53476,70 @@ public final class CoreNLPProtos {
         return this;
       }
 
-      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence> sentences_ =
-        java.util.Collections.emptyList();
-      private void ensureSentencesIsMutable() {
+      private java.util.List<java.lang.Integer> sentenceIndexes_ = java.util.Collections.emptyList();
+      private void ensureSentenceIndexesIsMutable() {
         if (!((bitField0_ & 0x00000008) == 0x00000008)) {
-          sentences_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence>(sentences_);
+          sentenceIndexes_ = new java.util.ArrayList<java.lang.Integer>(sentenceIndexes_);
           bitField0_ |= 0x00000008;
          }
       }
-
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder> sentencesBuilder_;
-
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+       * <code>repeated uint32 sentenceIndexes = 4;</code>
        */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence> getSentencesList() {
-        if (sentencesBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(sentences_);
-        } else {
-          return sentencesBuilder_.getMessageList();
-        }
+      public java.util.List<java.lang.Integer>
+          getSentenceIndexesList() {
+        return java.util.Collections.unmodifiableList(sentenceIndexes_);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+       * <code>repeated uint32 sentenceIndexes = 4;</code>
        */
-      public int getSentencesCount() {
-        if (sentencesBuilder_ == null) {
-          return sentences_.size();
-        } else {
-          return sentencesBuilder_.getCount();
-        }
+      public int getSentenceIndexesCount() {
+        return sentenceIndexes_.size();
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+       * <code>repeated uint32 sentenceIndexes = 4;</code>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence getSentences(int index) {
-        if (sentencesBuilder_ == null) {
-          return sentences_.get(index);
-        } else {
-          return sentencesBuilder_.getMessage(index);
-        }
+      public int getSentenceIndexes(int index) {
+        return sentenceIndexes_.get(index);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+       * <code>repeated uint32 sentenceIndexes = 4;</code>
        */
-      public Builder setSentences(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence value) {
-        if (sentencesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureSentencesIsMutable();
-          sentences_.set(index, value);
-          onChanged();
-        } else {
-          sentencesBuilder_.setMessage(index, value);
-        }
+      public Builder setSentenceIndexes(
+          int index, int value) {
+        ensureSentenceIndexesIsMutable();
+        sentenceIndexes_.set(index, value);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+       * <code>repeated uint32 sentenceIndexes = 4;</code>
        */
-      public Builder setSentences(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder builderForValue) {
-        if (sentencesBuilder_ == null) {
-          ensureSentencesIsMutable();
-          sentences_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          sentencesBuilder_.setMessage(index, builderForValue.build());
-        }
+      public Builder addSentenceIndexes(int value) {
+        ensureSentenceIndexesIsMutable();
+        sentenceIndexes_.add(value);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+       * <code>repeated uint32 sentenceIndexes = 4;</code>
        */
-      public Builder addSentences(edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence value) {
-        if (sentencesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureSentencesIsMutable();
-          sentences_.add(value);
-          onChanged();
-        } else {
-          sentencesBuilder_.addMessage(value);
-        }
+      public Builder addAllSentenceIndexes(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureSentenceIndexesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, sentenceIndexes_);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
+       * <code>repeated uint32 sentenceIndexes = 4;</code>
        */
-      public Builder addSentences(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence value) {
-        if (sentencesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureSentencesIsMutable();
-          sentences_.add(index, value);
-          onChanged();
-        } else {
-          sentencesBuilder_.addMessage(index, value);
-        }
+      public Builder clearSentenceIndexes() {
+        sentenceIndexes_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
         return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public Builder addSentences(
-          edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder builderForValue) {
-        if (sentencesBuilder_ == null) {
-          ensureSentencesIsMutable();
-          sentences_.add(builderForValue.build());
-          onChanged();
-        } else {
-          sentencesBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public Builder addSentences(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder builderForValue) {
-        if (sentencesBuilder_ == null) {
-          ensureSentencesIsMutable();
-          sentences_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          sentencesBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public Builder addAllSentences(
-          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence> values) {
-        if (sentencesBuilder_ == null) {
-          ensureSentencesIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, sentences_);
-          onChanged();
-        } else {
-          sentencesBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public Builder clearSentences() {
-        if (sentencesBuilder_ == null) {
-          sentences_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
-          onChanged();
-        } else {
-          sentencesBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public Builder removeSentences(int index) {
-        if (sentencesBuilder_ == null) {
-          ensureSentencesIsMutable();
-          sentences_.remove(index);
-          onChanged();
-        } else {
-          sentencesBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder getSentencesBuilder(
-          int index) {
-        return getSentencesFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder getSentencesOrBuilder(
-          int index) {
-        if (sentencesBuilder_ == null) {
-          return sentences_.get(index);  } else {
-          return sentencesBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder> 
-           getSentencesOrBuilderList() {
-        if (sentencesBuilder_ != null) {
-          return sentencesBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(sentences_);
-        }
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder addSentencesBuilder() {
-        return getSentencesFieldBuilder().addBuilder(
-            edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder addSentencesBuilder(
-          int index) {
-        return getSentencesFieldBuilder().addBuilder(
-            index, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentences = 4;</code>
-       */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder> 
-           getSentencesBuilderList() {
-        return getSentencesFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder> 
-          getSentencesFieldBuilder() {
-        if (sentencesBuilder_ == null) {
-          sentencesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder>(
-                  sentences_,
-                  ((bitField0_ & 0x00000008) == 0x00000008),
-                  getParentForChildren(),
-                  isClean());
-          sentences_ = null;
-        }
-        return sentencesBuilder_;
       }
 
       private java.lang.Object datetime_ = "";
@@ -54218,22 +54001,21 @@ public final class CoreNLPProtos {
       "fixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010\"-\n\017MapStri" +
       "ngString\022\013\n\003key\030\001 \003(\t\022\r\n\005value\030\002 \003(\t\"*\n\014" +
       "MapIntString\022\013\n\003key\030\001 \003(\r\022\r\n\005value\030\002 \003(\t" +
-      "\"\207\001\n\007Section\022\021\n\tcharBegin\030\001 \002(\r\022\017\n\007charE" +
-      "nd\030\002 \002(\r\022\016\n\006author\030\003 \001(\t\0226\n\tsentences\030\004 " +
-      "\003(\0132#.edu.stanford.nlp.pipeline.Sentence" +
-      "\022\020\n\010datetime\030\005 \001(\t*\243\001\n\010Language\022\013\n\007Unkno",
-      "wn\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013" +
-      "\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006H" +
-      "ebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish" +
-      "\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentiment\022\023\n" +
-      "\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n" +
-      "\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_" +
-      "POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013E" +
-      "QUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022" +
-      "REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013AL" +
-      "TERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006",
-      "B*\n\031edu.stanford.nlp.pipelineB\rCoreNLPPr" +
-      "otos"
+      "\"h\n\007Section\022\021\n\tcharBegin\030\001 \002(\r\022\017\n\007charEn" +
+      "d\030\002 \002(\r\022\016\n\006author\030\003 \001(\t\022\027\n\017sentenceIndex" +
+      "es\030\004 \003(\r\022\020\n\010datetime\030\005 \001(\t*\243\001\n\010Language\022" +
+      "\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chi",
+      "nese\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006Frenc" +
+      "h\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020Universa" +
+      "lEnglish\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSent" +
+      "iment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGAT" +
+      "IVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n" +
+      "\017STRONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelat" +
+      "ion\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILME" +
+      "NT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION" +
+      "\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPE" +
+      "NDENCE\020\006B*\n\031edu.stanford.nlp.pipelineB\rC",
+      "oreNLPProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -54402,7 +54184,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_Section_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_Section_descriptor,
-        new java.lang.String[] { "CharBegin", "CharEnd", "Author", "Sentences", "Datetime", });
+        new java.lang.String[] { "CharBegin", "CharEnd", "Author", "SentenceIndexes", "Datetime", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
