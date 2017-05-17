@@ -122,7 +122,7 @@ public class CleanXmlAnnotator implements Annotator {
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> sectionAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
-  
+
   /**
    * This setting allows handling of "flawed XML", which may be valid SGML.  For example,
    * a lot of the news articles we parse go: <br>
@@ -463,10 +463,6 @@ public class CleanXmlAnnotator implements Annotator {
     List<CoreLabel> docDateTokens = new ArrayList<>();
     List<CoreLabel> docTypeTokens = new ArrayList<>();
     List<CoreLabel> docIdTokens = new ArrayList<>();
-
-    // add an annotation for storing info about sections of a document
-    // a section could be a discussion forum post, a blog entry, etc...
-    annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<>());
 
     // Local variables for additional per token annotations
     CoreMap tokenAnnotations = (tokenAnnotationPatterns != null && !tokenAnnotationPatterns.isEmpty())? new ArrayCoreMap():null;

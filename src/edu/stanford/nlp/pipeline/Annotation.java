@@ -74,6 +74,7 @@ public class Annotation extends ArrayCoreMap {
    */
   public Annotation(String text) {
     this.set(CoreAnnotations.TextAnnotation.class, text);
+    this.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<CoreMap>());
   }
 
   /** The basic toString() method of an Annotation simply
