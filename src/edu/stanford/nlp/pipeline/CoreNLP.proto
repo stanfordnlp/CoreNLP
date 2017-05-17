@@ -505,10 +505,10 @@ message MapIntString {
 //
 
 message Section {
-  required uint32 charBegin     = 1;
-  required uint32 charEnd       = 2;
-  optional string author        = 3;
-  repeated Sentence sentences   = 4;
-  optional string datetime      = 5;
+  required uint32 charBegin         = 1;
+  required uint32 charEnd           = 2;
+  optional string author            = 3;
+  repeated uint32 sentenceIndexes   = 4;
+  optional string datetime          = 5;
 }
 
