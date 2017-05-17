@@ -9,6 +9,8 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.ling.tokensregex.Env;
+import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
@@ -36,6 +38,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
@@ -836,8 +839,16 @@ public class StanfordCoreNLPServer implements Runnable {
           // (get whether to filter / find)
           String filterStr = params.getOrDefault("filter", "false");
           final boolean filter = filterStr.trim().isEmpty() || "true".equalsIgnoreCase(filterStr.toLowerCase());
+          // (make matching case-insensitive if requested)
+          String caseSensitiveStr = params.getOrDefault("case-sensitive", "true");
+          final boolean caseSensitive = caseSensitiveStr.trim().isEmpty() || "true".equalsIgnoreCase(caseSensitiveStr.toLowerCase());
+          Env env = TokenSequencePattern.getNewEnv();
+          if (!caseSensitive) { 
+        	  env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
+        	  env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+          }
           // (create the matcher)
-          final TokenSequencePattern regex = TokenSequencePattern.compile(pattern);
+          final TokenSequencePattern regex = TokenSequencePattern.compile(env, pattern);
 
           // Run TokensRegex
           return new Pair<>(JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
