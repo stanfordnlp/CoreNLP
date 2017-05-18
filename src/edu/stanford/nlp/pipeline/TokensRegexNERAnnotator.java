@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -15,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 
 /**
@@ -145,10 +147,10 @@ public class TokensRegexNERAnnotator implements Annotator  {
   private final Set<String> commonWords;
   private final List<Entry> entries;
   private final Map<SequencePattern<CoreMap>,Entry> patternToEntry;
-  private final MultiPatternMatcher<CoreMap>  multiPatternMatcher;
+  private MultiPatternMatcher<CoreMap>  multiPatternMatcher;
   private final List<Class> annotationFields; // list of fields to annotate (default to just NamedEntityTag)
 
-  private final Set<String> myLabels;  // set of labels to always overwrite
+  private Set<String> myLabels;  // set of labels to always overwrite
   private final Pattern validPosPattern;
   private final List<Pattern> validPosPatternList;
   private final boolean verbose;
@@ -291,10 +293,10 @@ public class TokensRegexNERAnnotator implements Annotator  {
     ignoreCaseList = new ArrayList<>();
     entryToMappingFileNumber = new HashMap<>();
     processPerFileOptions(name, mappings, ignoreCaseList, validPosPatternList, ignoreCase, validPosPattern);
-    entries = Collections.unmodifiableList(readEntries(name, noDefaultOverwriteLabels, ignoreCaseList, entryToMappingFileNumber, verbose, headerFields, annotationFieldnames, mappings));
+    entries = new ArrayList<>(readEntries(name, noDefaultOverwriteLabels, ignoreCaseList, entryToMappingFileNumber, verbose, headerFields, annotationFieldnames, mappings));
     IdentityHashMap<SequencePattern<CoreMap>, Entry> patternToEntry = new IdentityHashMap<>();
     multiPatternMatcher = createPatternMatcher(patternToEntry);
-    this.patternToEntry = Collections.unmodifiableMap(patternToEntry);
+    this.patternToEntry = new HashMap<>(patternToEntry);
     Set<String> myLabels = Generics.newHashSet();
     // Can always override background or none.
     Collections.addAll(myLabels, backgroundSymbols);
@@ -305,7 +307,8 @@ public class TokensRegexNERAnnotator implements Annotator  {
         myLabels.add(type);
       }
     }
-    this.myLabels = Collections.unmodifiableSet(myLabels);
+    this.myLabels = Generics.newHashSet(myLabels);
+
   }
 
   @Override
@@ -335,10 +338,12 @@ public class TokensRegexNERAnnotator implements Annotator  {
 
   private MultiPatternMatcher<CoreMap> createPatternMatcher(Map<SequencePattern<CoreMap>, Entry> patternToEntry) {
     // Convert to tokensregex pattern
+    patternToEntry.clear();
 
     List<TokenSequencePattern> patterns = new ArrayList<>(entries.size());
     for (Entry entry:entries) {
       TokenSequencePattern pattern;
+
 
       Boolean ignoreCaseEntry = ignoreCaseList.get(entryToMappingFileNumber.get(entry));
       int patternFlags = ignoreCaseEntry? Pattern.CASE_INSENSITIVE:0;
@@ -374,6 +379,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
     }
     return TokenSequencePattern.getMultiPatternMatcher(patterns);
   }
+
 
   private void annotateMatched(List<CoreLabel> tokens) {
     List<SequenceMatchResult<CoreMap>> matched = multiPatternMatcher.findNonOverlapping(tokens);
@@ -792,6 +798,97 @@ public class TokensRegexNERAnnotator implements Annotator  {
        + ", " + isTokensRegex + " TokensRegex patterns.");
     return entries;
   }
+
+  /**
+   * Add regex parterns to  entry by hashmap
+   * @param nerMap
+   */
+  public void addRegexNER(String annotatorName, Map<String,String> nerMap){
+
+    TrieMap<String,Entry> seenRegexes = new TrieMap<>();
+
+    for(Entry entry : entries){
+      String[] key = (entry.regex != null) ? entry.regex : new String[]{entry.tokensRegex};
+      if (ignoreCase) {
+        String[] norm = new String[key.length];
+        for (int i = 0; i < key.length; i++) {
+          norm[i] = key[i].toLowerCase();
+        }
+        key = norm;
+      }
+      seenRegexes.put(key,entry);
+    }
+
+    for(Map.Entry<String,String> iter : nerMap.entrySet()) {
+      String regex = iter.getKey().trim();
+      String tokensRegex = null;
+      String[] regexes = null;
+
+      if (regex.startsWith("( ") && regex.endsWith(" )")) {
+        // Tokens regex (remove start and end parenthesis)
+        tokensRegex = regex.substring(1, regex.length() - 1).trim();
+      } else {
+        regexes = regex.split("\\s+");
+      }
+
+      String[] key = (regexes != null) ? regexes : new String[]{tokensRegex};
+      if (ignoreCase) {
+        String[] norm = new String[key.length];
+        for (int i = 0; i < key.length; i++) {
+          norm[i] = key[i].toLowerCase();
+        }
+        key = norm;
+      }
+
+      String[] types = new String[]{iter.getValue().trim()};
+      Set<String> overwritableTypes = Generics.newHashSet();
+      double priority = 0.0;
+      List<Pattern> tokens = new ArrayList<>();
+
+      try {
+        for (String str : regexes) {
+          if (ignoreCase) tokens.add(Pattern.compile(str, Pattern.CASE_INSENSITIVE));
+          else tokens.add(Pattern.compile(str));
+        }
+      } catch (PatternSyntaxException e) {
+        throw new IllegalArgumentException("ERROR: Invalid map key:" + iter.getKey() + "!", e);
+      }
+      Entry entry = new Entry(tokensRegex, regexes, types, overwritableTypes, priority, 0, 0);
+
+      if (seenRegexes.containsKey(key)) {
+        Entry oldEntry = seenRegexes.get(key);
+        if (priority > oldEntry.priority) {
+          logger.warn("TokensRegexNERAnnotator " + annotatorName +
+                  ": Replace duplicate entry (higher priority): old=" + oldEntry + ", new=" + entry);
+        } else {
+          String oldTypeDesc = oldEntry.getTypeDescription();
+          String newTypeDesc = entry.getTypeDescription();
+          if (!oldTypeDesc.equals(newTypeDesc)) {
+            if (verbose) {
+              logger.warn("TokensRegexNERAnnotator " + annotatorName +
+                      ": Ignoring duplicate entry: " + entry.getTypeDescription() + ", old type = " + oldTypeDesc + ", new type = " + newTypeDesc);
+            }
+          }
+          continue;
+        }
+      }
+
+      // Print some warning if label belongs to noDefaultOverwriteLabels but there is no overwritable types
+      if (entry.overwritableTypes.isEmpty() && hasNoOverwritableType(noDefaultOverwriteLabels, entry.types)) {
+        logger.warn("TokensRegexNERAnnotator " + annotatorName +
+                ": Entry doesn't have overwriteable types " + entry + ", but entry type is in noDefaultOverwriteLabels");
+      }
+
+      for (String type:entry.types) {
+        myLabels.add(type);
+      }
+      entries.add(entry);
+      entryToMappingFileNumber.put(entry,0);
+      seenRegexes.put(key, entry);
+    }
+
+    this.multiPatternMatcher = createPatternMatcher(this.patternToEntry);
+     }
 
   private static boolean hasNoOverwritableType(Set<String> noDefaultOverwriteLabels, String[] types) {
     for (String type:types) {

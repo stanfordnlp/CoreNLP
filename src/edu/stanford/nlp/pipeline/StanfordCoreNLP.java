@@ -1319,10 +1319,39 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         return;
       }
     }
+
+    props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, regexner, parse, dcoref");
+
+    props.setProperty("ssplit.isOneSentence", "true");
+    props.setProperty("tokenize.language", "en");
+//    props.setProperty("regexner.mapping", "/Users/tony/tmp/itest_map");
     // Run the pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    pipeline.run();
-    pool.clear();
+    TokensRegexNERAnnotator regexNERAnnotator = (TokensRegexNERAnnotator)StanfordCoreNLP.getExistingAnnotator("regexner");
+    Map<String,String> regexNER = new HashMap<>();
+    regexNER.put("BABA GROUP", "US_STOCK");
+    regexNERAnnotator.addRegexNER(regexNERAnnotator.toString(),regexNER);
+    String text = "BABA GROUP rasie 300 percent. Gillard was born in Barry, Wales, and migrated with her family to Adelaide, South Australia, in 1966, attending Mitcham Demonstration School and Unley High School. In 1982, she moved to Melbourne, Victoria. She graduated from the University of Melbourne with a Bachelor of Arts and a Bachelor of Laws in 1986. In 1987, Gillard joined the law firm Slater & Gordon, specialising in industrial law, before entering politics. Annotations are the data structure which hold the results of annotators. Annotations are basically maps, from keys to bits of the annotation, such as the parse, the part-of-speech tags, or named entity tags. Annotators are a lot like functions, except that they operate over Annotations instead of Objects. They do things like tokenize, parse, or NER tag sentences. Annotators and Annotations are integrated by AnnotationPipelines, which create sequences of generic Annotators. Stanford CoreNLP inherits from the AnnotationPipeline class, and is customized with NLP Annotators.";
+
+    Annotation document = new Annotation(text);
+    pipeline.annotate(document);
+    List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+    for(CoreMap sentence: sentences) {
+      // traversing the words in the current sentence
+      // a CoreLabel is a CoreMap with additional token-specific methods
+      for (CoreLabel token: sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+        // this is the text of the token
+        String word = token.get(CoreAnnotations.TextAnnotation.class);
+        // this is the POS tag of the token
+        String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+        // this is the NER label of the token
+        String ne = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+        System.out.println("word:" + word + ",ne:" + ne);
+      }
+
+    }
+//    pipeline.run();
+//    pool.clear();
 
   }
 

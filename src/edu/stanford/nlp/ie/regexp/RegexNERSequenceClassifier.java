@@ -6,13 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.Properties;
+import java.util.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -305,6 +299,8 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     // log.info(entries);
     return entries;
   }
+
+
 
   /**
    * Checks if the entry's regex sequence is contained in the tokenized document, starting the search

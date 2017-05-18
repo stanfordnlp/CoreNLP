@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 /** @author jtibs */
 public class RegexNERAnnotatorITest extends TestCase {
-  private static final String MAPPING = "/u/nlp/data/TAC-KBP2010/sentence_extraction/itest_map";
+  private static final String MAPPING = "/Users/tony/tmp/itest_map";
   private static RegexNERAnnotator annotator;
 
   @Override
@@ -39,6 +39,8 @@ public class RegexNERAnnotatorITest extends TestCase {
   public void testBasicMatching() {
     String str = "President Barack Obama lives in Chicago , Illinois , " +
     "and is a practicing Christian .";
+    String text = "Gillard was born in Barry, Wales, and migrated with her family to Adelaide, South Australia, in 1966, attending Mitcham Demonstration School and Unley High School. In 1982, she moved to Melbourne, Victoria. She graduated from the University of Melbourne with a Bachelor of Arts and a Bachelor of Laws in 1986. In 1987, Gillard joined the law firm Slater & Gordon, specialising in industrial law, before entering politics. Annotations are the data structure which hold the results of annotators. Annotations are basically maps, from keys to bits of the annotation, such as the parse, the part-of-speech tags, or named entity tags. Annotators are a lot like functions, except that they operate over Annotations instead of Objects. They do things like tokenize, parse, or NER tag sentences. Annotators and Annotations are integrated by AnnotationPipelines, which create sequences of generic Annotators. Stanford CoreNLP inherits from the AnnotationPipeline class, and is customized with NLP Annotators.";
+
     String[] split = str.split(" ");
 
     List<CoreLabel> tokens = SentenceUtils.toCoreLabelList(split);

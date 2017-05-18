@@ -148,4 +148,8 @@ public class RegexNERAnnotator implements Annotator  {
     // to satisfy different requirements
     return Collections.emptySet();
   }
+
+  public RegexNERSequenceClassifier getClassifier() {
+    return classifier;
+  }
 }
