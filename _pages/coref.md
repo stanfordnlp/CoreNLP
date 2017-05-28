@@ -6,16 +6,16 @@ permalink: '/coref.html'
 
 ## Description
 
-Implements both pronominal and nominal coreference resolution. The entire coreference graph (with head words of mentions as nodes) is saved as a CorefChainAnnotation.
+The CorefAnnotator finds mentions of the same entity in a text, such as when “Theresa May” and “she” refer to the same person. The annotator implements both pronominal and nominal coreference resolution. The entire coreference graph (with head words of mentions as nodes) is saved as a CorefChainAnnotation.
 
 ## Overview
 There are three different coreference systems available in CoreNLP.
 
 * **Deterministic:** Fast rule-based coreference resolution for English and Chinese.
 
-* **Statistical:** Machine-learning-based coreference resolution for English. Unlike the other systems, this one only requires dependency parses, which are faster to produce that constituency parses.
+* **Statistical:** Machine-learning-based coreference resolution for English. Unlike the other systems, this one only requires dependency parses, which are faster to produce than constituency parses.
 
-* **Neural:** Very accurate but slow neural-network-based coreference resolution for English and Chinese.
+* **Neural:** Most accurate but slow neural-network-based coreference resolution for English and Chinese.
 
 The following table gives an overview of the system performances.
 
@@ -156,9 +156,12 @@ The deterministic coreference system for English
 
 > Marta Recasens, Marie-Catherine de Marneffe, and Christopher Potts. 2013. The Life and Death of Discourse Entities: Identifying Singleton Mentions. In *Proceedings of the NAACL*. \[[pdf](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.bib)\]
 
-> Heeyoung Lee, Yves Peirsman, Angel Chang, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky. 2013. Stanford's Multi-Pass Sieve Coreference Resolution System at the CoNLL-2011 Shared Task. In *Proceedings of the CoNLL-2011 Shared Task, 2011*. \[[pdf](http://nlp.stanford.edu/pubs/conllst2011-coref.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/conllst2011-coref.bib)\]
+> Heeyoung Lee, Yves Peirsman, Angel Chang, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky. 2011. Stanford's Multi-Pass Sieve Coreference Resolution System at the CoNLL-2011 Shared Task. In *Proceedings of the CoNLL-2011 Shared Task, 2011*. \[[pdf](http://nlp.stanford.edu/pubs/conllst2011-coref.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/conllst2011-coref.bib)\]
 
-The deterministic coreference system for Chinese
+> Karthik Raghunathan, Heeyoung Lee, Sudarshan Rangarajan, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky and Christopher Manning. 2010. A Multi-Pass Sieve for Coreference Resolution.
+Empirical Methods in Natural Language Processing (EMNLP). \[[pdf](https://nlp.stanford.edu/pubs/coreference-emnlp10.pdf)\] \[[bib](https://nlp.stanford.edu/pubs/coreference-emnlp10.bib)\]
+
+The deterministic coreference system for Chinese and English
 
 > Heeyoung Lee, Angel Chang, Yves Peirsman, Nathanael Chambers, Mihai Surdeanu and Dan Jurafsky. 2013. Deterministic coreference resolution based on entity-centric, precision-ranked rules. In *Computational Linguistics 39(4)*. \[[pdf](http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152)\]
 
@@ -168,8 +171,8 @@ The statistical coreference system
 
 The neural coreference system
 
-> Kevin Clark and Christopher D. Manning. Deep Reinforcement Learning for Mention-Ranking Coreference Models. In *Proceedings of EMNLP*. \[[pdf](http://nlp.stanford.edu/pubs/clark2016deep.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/clark2016deep.bib)\]
+> Kevin Clark and Christopher D. Manning. 2016. Deep Reinforcement Learning for Mention-Ranking Coreference Models. In *Proceedings of EMNLP*. \[[pdf](http://nlp.stanford.edu/pubs/clark2016deep.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/clark2016deep.bib)\]
 
-> Kevin Clark and Christopher D. Manning. Improving Coreference Resolution by Learning Entity-Level Distributed Representations. In *Proceedings of the ACL*. \[[pdf](http://nlp.stanford.edu/pubs/clark2016improving.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/clark2016improvingp.bib)\]
+> Kevin Clark and Christopher D. Manning. 2016. Improving Coreference Resolution by Learning Entity-Level Distributed Representations. In *Proceedings of the ACL*. \[[pdf](http://nlp.stanford.edu/pubs/clark2016improving.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/clark2016improvingp.bib)\]
 
 
