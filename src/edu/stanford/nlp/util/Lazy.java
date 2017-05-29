@@ -29,8 +29,8 @@ public abstract class Lazy<E> {
     E orNull = getIfDefined();
     if (orNull == null) {
       orNull = compute();
-      if (isCache()) {
-        implOrNullCache = new SoftReference<>(orNull);
+      if (shouldGC()) {
+        implOrNullCache = new SoftReference<E>(orNull);
       } else {
         implOrNull = orNull;
       }
@@ -45,12 +45,12 @@ public abstract class Lazy<E> {
    */
   protected abstract E compute();
 
-
   /**
    * Specify whether this lazy should garbage collect its value if needed,
    * or whether it should force it to be persistent.
    */
-  public abstract boolean isCache();
+  protected abstract boolean shouldGC();
+
 
   /**
    * Get the value of this {@link Lazy} if it's been initialized, or else
@@ -58,7 +58,6 @@ public abstract class Lazy<E> {
    */
   public E getIfDefined() {
     if (implOrNullCache != null) {
-      assert implOrNull == null;
       return implOrNullCache.get();
     } else {
       return implOrNull;
@@ -78,7 +77,7 @@ public abstract class Lazy<E> {
       }
 
       @Override
-      public boolean isCache() {
+      protected boolean shouldGC() {
         return false;
       }
     };
@@ -99,7 +98,7 @@ public abstract class Lazy<E> {
       }
 
       @Override
-      public boolean isCache() {
+      protected boolean shouldGC() {
         return false;
       }
     };
@@ -119,7 +118,7 @@ public abstract class Lazy<E> {
       }
 
       @Override
-      public boolean isCache() {
+      protected boolean shouldGC() {
         return true;
       }
     };

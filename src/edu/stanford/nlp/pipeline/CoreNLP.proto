@@ -50,11 +50,6 @@ message Document {
    */
   repeated NERMention mentions = 9;
 
-  /**
-   * Store sections found in the document
-   */
-  repeated Section sections = 11;
-
   extensions 100 to 255;
 }
 
@@ -100,8 +95,6 @@ message Sentence {
   optional bool            hasCorefMentionsAnnotation          = 57;
 
   optional string          sentenceID                          = 58;  // Useful when storing sentences (e.g. ForEach)
-  optional string          sectionDate                         = 59;  // date of section
-  optional uint32          sectionIndex                        = 60;  // section index for this sentence's section
 
   extensions 100 to 255;
 }
@@ -498,17 +491,5 @@ message MapStringString {
 message MapIntString {
   repeated uint32 key   = 1;
   repeated string value = 2;
-}
-
-//
-// Store section info
-//
-
-message Section {
-  required uint32 charBegin         = 1;
-  required uint32 charEnd           = 2;
-  optional string author            = 3;
-  repeated uint32 sentenceIndexes   = 4;
-  optional string datetime          = 5;
 }
 

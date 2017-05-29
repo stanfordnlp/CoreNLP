@@ -207,9 +207,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
     // section annotations to mark sentences with
     CoreMap sectionAnnotations = null;
     List<CoreMap> sentences = new ArrayList<>();
-    // keep track of current section to assign sentences to sections
-    int currSectionIndex = 0;
-    List<CoreMap> sections = annotation.get(CoreAnnotations.SectionsAnnotation.class);
     for (List<CoreLabel> sentenceTokens: wts.process(tokens)) {
       if (countLineNumbers) {
         ++lineNumber;
@@ -261,34 +258,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
         sectionAnnotations = null;
       }
 
-      // determine section index for this sentence if keeping track of sections
-      if (sections != null) {
-        // try to find a section that ends after this sentence ends, check if it encloses sentence
-        // if it doesn't, that means this sentence is in two sections
-        while (currSectionIndex < sections.size()) {
-          int currSectionCharBegin = sections.get(currSectionIndex).get(
-              CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-          int currSectionCharEnd = sections.get(currSectionIndex).get(
-              CoreAnnotations.CharacterOffsetEndAnnotation.class);
-          if (currSectionCharEnd < end) {
-            currSectionIndex++;
-            continue;
-          } else {
-            // if the sentence falls in this current section, link it to this section
-            if (currSectionCharBegin <= begin) {
-              // add the sentence to the section's sentence list
-              sections.get(currSectionIndex).get(CoreAnnotations.SentencesAnnotation.class).add(sentence);
-              // set sentence's section date
-              String sectionDate = sections.get(currSectionIndex).get(CoreAnnotations.SectionDateAnnotation.class);
-              sentence.set(CoreAnnotations.SectionDateAnnotation.class, sectionDate);
-              // set sentence's section index
-              sentence.set(CoreAnnotations.SectionIndexAnnotation.class, currSectionIndex);
-            }
-            break;
-          }
-        }
-      }
-
       if (docID != null) {
         sentence.set(CoreAnnotations.DocIDAnnotation.class, docID);
       }
@@ -299,6 +268,26 @@ public class WordsToSentencesAnnotator implements Annotator  {
         token.setSentIndex(sentences.size());
         if (docID != null) {
           token.setDocID(docID);
+        }
+      }
+
+      // if keeping track of discussion post forums, find which post this belongs to and add it
+      if (annotation.get(CoreAnnotations.DiscussionForumPostsAnnotation.class) != null) {
+        int sentenceSize = sentence.get(CoreAnnotations.TokensAnnotation.class).size();
+        CoreLabel firstToken =
+            sentence.get(CoreAnnotations.TokensAnnotation.class).get(0);
+        CoreLabel endToken = sentence.get(CoreAnnotations.TokensAnnotation.class).get(sentenceSize-1);
+        int sentenceCharBegin = firstToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        int sentenceCharEnd = endToken.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        // go through each discussion forum post, find the one for this sentence
+        for (CoreMap discussionForumPost : annotation.get(CoreAnnotations.DiscussionForumPostsAnnotation.class)) {
+          if (discussionForumPost.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) <= sentenceCharBegin
+            && discussionForumPost.get(CoreAnnotations.CharacterOffsetEndAnnotation.class) >= sentenceCharEnd) {
+            discussionForumPost.get(CoreAnnotations.SentencesAnnotation.class).add(sentence);
+            // set sentence's discussion forum post date
+            sentence.set(CoreAnnotations.DiscussionForumPostDateAnnotation.class,
+                discussionForumPost.get(CoreAnnotations.DiscussionForumPostDateAnnotation.class));
+          }
         }
       }
 

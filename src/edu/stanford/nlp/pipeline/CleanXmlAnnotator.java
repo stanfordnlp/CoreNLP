@@ -92,14 +92,14 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_SPEAKER_TAGS = "speaker";
 
   /**
-   * A map of document level annotation keys (i.e., docid) along with a pattern
+   * A map of document level annotation keys (i.e. docid) along with a pattern
    *  indicating the tag to match, and the attribute to match.
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
 
   /**
-   * A map of token level annotation keys (i.e., link, speaker) along with a pattern
+   * A map of token level annotation keys (i.e. link, speaker) along with a pattern
    *  indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated).
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<>();
@@ -117,6 +117,14 @@ public class CleanXmlAnnotator implements Annotator {
   private Pattern ssplitDiscardTokensMatcher; // = null;
 
   /**
+   * This tells us the boundaries of discussion forum posts
+   */
+
+  private Pattern discussionForumPostMatcher;
+
+  public static final String DEFAULT_DISCUSSION_FORUM_TAGS = "post";
+
+  /**
    * A map of section level annotation keys (i.e. docid) along with a pattern
    *  indicating the tag to match, and the attribute to match.
    */
@@ -124,14 +132,14 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
 
   /**
-   * This setting allows handling of "flawed XML", which may be valid SGML.  For example,
+   * This setting allows handling of flawed XML.  For example,
    * a lot of the news articles we parse go: <br>
    *  &lt;text&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;/text&gt; <br>
-   * ... i.e., no closing &lt;/turn&gt; tags.
+   * ... eg, no closing &lt;/turn&gt; tags.
    */
   private final boolean allowFlawedXml;
 
@@ -183,9 +191,11 @@ public class CleanXmlAnnotator implements Annotator {
     String sectionAnnotations =
         properties.getProperty("clean.sectionAnnotations",
             CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
-
     String ssplitDiscardTokens =
         properties.getProperty("clean.ssplitDiscardTokens");
+    String discussionForumPostTags =
+        properties.getProperty("clean.discussionForumPostTags",
+            CleanXmlAnnotator.DEFAULT_DISCUSSION_FORUM_TAGS);
 
     if (xmlTagsToRemove != null) {
       xmlTagMatcher = toCaseInsensitivePattern(xmlTagsToRemove);
@@ -210,6 +220,7 @@ public class CleanXmlAnnotator implements Annotator {
     setSectionTagMatcher(sectionTags);
     setSectionAnnotationPatterns(sectionAnnotations);
     setSsplitDiscardTokensMatcher(ssplitDiscardTokens);
+    setDiscussionForumPostMatcher(discussionForumPostTags);
 
   }
 
@@ -284,6 +295,10 @@ public class CleanXmlAnnotator implements Annotator {
     addAnnotationPatterns(sectionAnnotationPatterns, conf, false);
   }
 
+  public void setDiscussionForumPostMatcher(String postTags) {
+    discussionForumPostMatcher = toCaseInsensitivePattern(postTags);
+  }
+
   private static final Pattern TAG_ATTR_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
 
   private static void addAnnotationPatterns(CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns, String conf, boolean attrOnly) {
@@ -314,6 +329,14 @@ public class CleanXmlAnnotator implements Annotator {
         }
       }
     }
+  }
+
+  /**
+   * Go through the xml document and find forum post information
+   */
+  public void addDiscussionForumPosts(List<CoreLabel> tokens) {
+    List<CoreMap> discussionForumPosts = new ArrayList<>();
+
   }
 
   @Override
@@ -464,6 +487,9 @@ public class CleanXmlAnnotator implements Annotator {
     List<CoreLabel> docTypeTokens = new ArrayList<>();
     List<CoreLabel> docIdTokens = new ArrayList<>();
 
+    // add an annotation for the discussion forum posts
+    annotation.set(CoreAnnotations.DiscussionForumPostsAnnotation.class, new ArrayList<CoreMap>());
+
     // Local variables for additional per token annotations
     CoreMap tokenAnnotations = (tokenAnnotationPatterns != null && !tokenAnnotationPatterns.isEmpty())? new ArrayCoreMap():null;
     Map<Class, Stack<Pair<String, String>>> savedTokenAnnotations = new ArrayMap<>();
@@ -474,7 +500,9 @@ public class CleanXmlAnnotator implements Annotator {
     CoreMap sectionAnnotations = null;
     Map<Class, List<CoreLabel>> savedTokensForSection = new HashMap<>();
 
-    annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<CoreMap>());
+    XMLUtils.XMLTag postStartTag = null;
+    CoreLabel postStartToken = null;
+
 
     boolean markSingleSentence = false;
     for (CoreLabel token : tokens) {
@@ -597,6 +625,40 @@ public class CleanXmlAnnotator implements Annotator {
         toAnnotate.removeAll(foundAnnotations);
       }
 
+      // handle discussion forum post stuff
+      if (discussionForumPostMatcher != null && discussionForumPostMatcher.matcher(tag.name).matches()) {
+        if (tag.isEndTag) {
+          CoreMap currDiscussionForumPost = new Annotation();
+          // set character offset of beginning of post
+          currDiscussionForumPost.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+              postStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+          // set character offset of end of post
+          currDiscussionForumPost.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
+              token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+          // set author
+          currDiscussionForumPost.set(CoreAnnotations.AuthorAnnotation.class, postStartTag.attributes.get("author"));
+          // set up empty sentences list
+          currDiscussionForumPost.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<CoreMap>());
+          // set doc date for post
+          String dateString = postStartTag.attributes.get("datetime");
+          try {
+            SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
+            currDiscussionForumPost.set(CoreAnnotations.DiscussionForumPostDateAnnotation.class,
+                potentialDate.toString());
+          } catch (Exception e) {
+            log.error("failed to parse datetime for post!");
+          }
+          // add this to the list of discussion forum posts
+          annotation.get(CoreAnnotations.DiscussionForumPostsAnnotation.class).add(currDiscussionForumPost);
+          // reset for next discussion forum post
+          postStartTag = null;
+          postStartToken = null;
+        } else {
+          postStartTag = tag;
+          postStartToken = token;
+        }
+      }
+
       // Check if the tag matches a section
       if (sectionTagMatcher != null && sectionTagMatcher.matcher(tag.name).matches()) {
         if (tag.isEndTag) {
@@ -610,33 +672,6 @@ public class CleanXmlAnnotator implements Annotator {
             previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
             previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
           }
-          // create a CoreMap to store info about this section
-          String foundAuthor = sectionAnnotations.get(CoreAnnotations.AuthorAnnotation.class);
-          CoreMap currSectionCoreMap = new Annotation();
-          // set character offset of beginning of section
-          currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-              sectionStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-          // set character offset of end of section
-          currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
-              token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-          // set author of section
-          currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class, foundAuthor);
-          // set up empty sentences list
-          currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
-          // set doc date for post
-          String dateString = sectionAnnotations.get(CoreAnnotations.SectionDateAnnotation.class);
-          if (dateString != null) {
-            try {
-              SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
-              currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
-                      potentialDate.toString());
-            } catch (Exception e) {
-              log.error("failed to parse datetime for post! " + dateString);
-            }
-          }
-          // add this to the list of sections
-          annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
-          // finish processing section
           savedTokensForSection.clear();
           sectionStartTag = null;
           sectionStartToken = null;

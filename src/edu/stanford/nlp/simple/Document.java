@@ -47,7 +47,6 @@ public class Document {
       "tokenize.language", "en",
       "parse.binaryTrees", "true",
       "mention.type", "dep",
-      "coref.mode", "statistical",  // Use the new coref
       "coref.md.type", "dep"
   );
 
@@ -273,7 +272,7 @@ public class Document {
   /**
    * Cache the most recently used custom annotators.
    */
-  private static final AnnotatorPool customAnnotators = AnnotatorPool.SINGLETON;
+  private static final AnnotatorPool customAnnotators = new AnnotatorPool();
 
 
   /**
@@ -746,8 +745,6 @@ public class Document {
         this.runLemma(props).runNER(props);
         if (CorefProperties.mdType(props) != CorefProperties.MentionDetectionType.DEPENDENCY) {
           this.runParse(props);
-        } else {
-          this.runDepparse(props);
         }
         // Run mention
         Supplier<Annotator> mention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultMention : getOrCreate(STANFORD_MENTION, props, () -> backend.mention(props));
