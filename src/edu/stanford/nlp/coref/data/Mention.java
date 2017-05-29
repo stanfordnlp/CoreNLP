@@ -1241,7 +1241,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return StringUtils.join(phrase_string);
   }
 
-  public boolean isCoordinated(){
+  public boolean isCoordinated() {
     if(headIndexedWord == null) return false;
     for(Pair<GrammaticalRelation,IndexedWord> child : enhancedDependency.childPairs(headIndexedWord)){
       if(child.first().getShortName().equals("cc")) return true;
@@ -1254,10 +1254,11 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     List<AbstractCoreLabel> ne = Generics.newArrayList();
     String previousNEType = "";
     int previousNEIndex = -1;
-    for (int i = 0; i < words.size(); i++) {
+    for (int i = 0, wSize = words.size(); i < wSize; i++) {
       AbstractCoreLabel word = words.get(i);
-      if(!word.ner().equals("O")) {
-        if (!word.ner().equals(previousNEType) || previousNEIndex != i-1) {
+      if (word.ner() != null && ! word.ner().equals("O")) {
+        if ( ! word.ner().equals(previousNEType) || previousNEIndex != i-1) {
+          // todo [cdm 2017]: What is the contract for this method? This looks buggy! The first entity found may be lost; a final empty one may be added....
           ne = Generics.newArrayList();
           namedEntities.add(ne);
         }
