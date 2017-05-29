@@ -1,4 +1,4 @@
-package edu.stanford.nlp.ie; 
+package edu.stanford.nlp.ie;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.pascal.ISODateInstance;
@@ -907,7 +907,7 @@ public class QuantifiableEntityNormalizer  {
     return normalizedOrdinalStringQuiet(s, numberFromSUTime);
   }
 
-  public static final Pattern numberPattern = Pattern.compile("([0-9.]+)");
+  private static final Pattern numberPattern = Pattern.compile("([0-9.]+)");
 
   public static String normalizedOrdinalStringQuiet(String s, Number numberFromSUTime) {
     // clean up string
@@ -1132,7 +1132,7 @@ public class QuantifiableEntityNormalizer  {
    * Takes the strings of the three previous and next words to a quantity and
    * detects a
    * quantity modifier like "less than", "more than", etc.
-   * Any of these words may be <code>null</code> or an empty String.
+   * Any of these words may be {@code null} or an empty String.
    */
   private static <E extends CoreMap> String detectQuantityModifier(List<E> list, int beforeIndex, int afterIndex) {
     String prev = (beforeIndex >= 0) ? list.get(beforeIndex).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
@@ -1175,26 +1175,26 @@ public class QuantifiableEntityNormalizer  {
   }
 
 
-  private static String earlyOneWord = "early";
-  private static String earlyTwoWords = "(?:dawn|eve|beginning) of";
-  private static String earlyThreeWords = "early in the";
-  private static String lateOneWord = "late";
-  private static String lateTwoWords = "late at|end of";
-  private static String lateThreeWords = "end of the";
-  private static String middleTwoWords = "(?:middle|midst) of";
-  private static String middleThreeWords = "(?:middle|midst) of the";
+  private static final String earlyOneWord = "early";
+  private static final String earlyTwoWords = "(?:dawn|eve|beginning) of";
+  private static final String earlyThreeWords = "early in the";
+  private static final String lateOneWord = "late";
+  private static final String lateTwoWords = "late at|end of";
+  private static final String lateThreeWords = "end of the";
+  private static final String middleTwoWords = "(?:middle|midst) of";
+  private static final String middleThreeWords = "(?:middle|midst) of the";
 
-  private static String amOneWord = "[Aa]\\.?[Mm]\\.?";
-  private static String pmOneWord = "[Pp]\\.?[Mm]\\.?";
-  private static String amThreeWords = "in the morning";
-  private static String pmTwoWords = "at night";
-  private static String pmThreeWords = "in the (?:afternoon|evening)";
+  private static final String amOneWord = "[Aa]\\.?[Mm]\\.?";
+  private static final String pmOneWord = "[Pp]\\.?[Mm]\\.?";
+  private static final String amThreeWords = "in the morning";
+  private static final String pmTwoWords = "at night";
+  private static final String pmThreeWords = "in the (?:afternoon|evening)";
 
 
   /**
    * Takes the strings of the three previous words to a quantity and detects a
    * quantity modifier like "less than", "more than", etc.
-   * Any of these words may be <code>null</code> or an empty String.
+   * Any of these words may be {@code null} or an empty String.
    */
   private static <E extends CoreMap> String detectTimeOfDayModifier(List<E> list, int beforeIndex, int afterIndex) {
     String prev = (beforeIndex >= 0) ? list.get(beforeIndex).get(CoreAnnotations.TextAnnotation.class).toLowerCase() : "";

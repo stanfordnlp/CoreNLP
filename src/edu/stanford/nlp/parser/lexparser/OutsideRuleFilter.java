@@ -4,14 +4,17 @@ import java.util.*;
 
 import edu.stanford.nlp.util.Index;
 
+/** This class is currently unused.
+ *  @author Dan Klein
+ */
 public class OutsideRuleFilter {
 
   private final Index<String> tagIndex;
   private int numTags;
   private int numFAs;
 
-  protected FA[] leftFA;
-  protected FA[] rightFA;
+  private FA[] leftFA;
+  private FA[] rightFA;
 
   protected static <A> List<A> reverse(List<A> list) {
     int sz = list.size();
@@ -22,7 +25,7 @@ public class OutsideRuleFilter {
     return reverse;
   }
 
-  protected FA buildFA(List<String> tags) {
+  private FA buildFA(List<String> tags) {
     FA fa = new FA(tags.size() + 1, numTags);
     fa.setLoopState(0, true);
     for (int state = 1; state <= tags.size(); state++) {
@@ -40,7 +43,7 @@ public class OutsideRuleFilter {
     return fa;
   }
 
-  protected final void registerRule(List<String> leftTags, List<String> rightTags, int state) {
+  private void registerRule(List<String> leftTags, List<String> rightTags, int state) {
     leftFA[state] = buildFA(leftTags);
     rightFA[state] = buildFA(reverse(rightTags));
   }
@@ -148,14 +151,15 @@ public class OutsideRuleFilter {
 
   /** This is a simple Finite Automaton implementation. */
   static class FA {
-    protected boolean[] inStatePrev;
-    protected boolean[] inStateNext;
-    protected boolean[] loopState;
-    protected int acceptingState;
-    protected int initialState;
-    protected int numStates;
-    protected int numSymbols;
-    protected int[][] transition; // state x tag
+
+    private boolean[] inStatePrev;
+    private boolean[] inStateNext;
+    private final boolean[] loopState;
+    private final int acceptingState;
+    private static final int initialState = 0;
+    private final int numStates;
+    private final int numSymbols;
+    private final int[][] transition; // state x tag
 
     public void init() {
       Arrays.fill(inStatePrev, false);
@@ -206,5 +210,5 @@ public class OutsideRuleFilter {
     }
 
   } // end class FA
-  
+
 } // end class OutsideRuleFilter

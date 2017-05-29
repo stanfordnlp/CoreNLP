@@ -10,21 +10,27 @@ import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.*;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Applying SurfacePattern to sentences.
+ *
  * @param <E>
+ * @author Sonal Gupta
  */
 public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDimensionalCounter<CandidatePhrase, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>, Set<CandidatePhrase>>> {
-  String label;
-  Map<TokenSequencePattern, E> patterns;
-  List<String> sentids;
-  boolean removeStopWordsFromSelectedPhrases;
-  boolean removePhrasesWithStopWords;
-  ConstantsAndVariables constVars;
-  Map<String, DataInstance> sents = null;
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(ApplyPatterns.class);
+
+  private final String label;
+  private final Map<TokenSequencePattern, E> patterns;
+  private final List<String> sentids;
+  private final boolean removeStopWordsFromSelectedPhrases;
+  private final boolean removePhrasesWithStopWords;
+  private final ConstantsAndVariables constVars;
+  private final Map<String, DataInstance> sents;
 
 
   public ApplyPatterns(Map<String, DataInstance> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases,
@@ -92,7 +98,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
 
             //to make sure we discard phrases with stopwords in between, but include the ones in which stop words were removed at the ends if removeStopWordsFromSelectedPhrases is true
             boolean[] addedindices = new boolean[e-s];
-            Arrays.fill(addedindices, false);
+            // Arrays.fill(addedindices, false); // not needed as initialized false
 
             for (int i = s; i < e; i++) {
               CoreLabel l = sent.get(i);
@@ -121,8 +127,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
                 if (!containsStop || !removeStopWordsFromSelectedPhrases) {
                   if (label == null
                     || l.get(constVars.getAnswerClass().get(label)) == null
-                    || !l.get(constVars.getAnswerClass().get(label)).equals(
-                    label.toString())) {
+                    || !l.get(constVars.getAnswerClass().get(label)).equals(label)) {
                     useWordNotLabeled = true;
                   }
                   phrase += " " + l.word();
@@ -155,20 +160,18 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
         }
       }
       return new Triple<>(allFreq, matchedTokensByPat, alreadyLabeledPhrases);
-    }catch(Exception e){
-      e.printStackTrace();
+    } catch (Exception e) {
+      logger.error(e);
       throw e;
     }
   }
 
-  static boolean lemmaExists(CoreLabel l ){
-    if(l.lemma() != null && l.lemma().length() > 0)
-      return true;
-    else
-      return false;
+  private static boolean lemmaExists(CoreLabel l) {
+    return l.lemma() != null && ! l.lemma().isEmpty();
 
   }
-  boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, java.util.regex.Pattern ignoreWordRegex) {
+
+  private static boolean containsStopWord(CoreLabel l, Set<String> commonEngWords, java.util.regex.Pattern ignoreWordRegex) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 

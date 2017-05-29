@@ -502,4 +502,51 @@ public class PTBTokenizerTest {
     runOnTwoArrays(tokFactory, mtInputs, mtGold);
   }
 
+  private final String[] emojiInputs = {
+          // The non-BMP Emoji end up being surrogate pair encoded in Java! This list includes a flag.
+          "\uD83D\uDE09\uD83D\uDE00\uD83D\uDE02\uD83D\uDE0D\uD83E\uDD21\uD83C\uDDE6\uD83C\uDDFA\uD83C\uDF7A",
+          // People with skin tones
+          "\uD83D\uDC66\uD83C\uDFFB\uD83D\uDC67\uD83C\uDFFF",
+          // A family with cheese
+          "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67\uD83E\uDDC0",
+          // Some BMP emoji
+          "\u00AE\u203C\u2198\u231A\u2328\u23F0\u2620\u26BD\u2705\u2757",
+          // Choosing emoji vs. text presentation.
+          "⚠⚠️⚠︎❤️❤",
+          "¯\\_(ツ)_/¯"
+  };
+
+  private final String[][] emojiGold = {
+          { "\uD83D\uDE09", "\uD83D\uDE00", "\uD83D\uDE02", "\uD83D\uDE0D", "\uD83E\uDD21", "\uD83C\uDDE6\uD83C\uDDFA", "\uD83C\uDF7A" },
+          { "\uD83D\uDC66\uD83C\uDFFB", "\uD83D\uDC67\uD83C\uDFFF" },
+          { "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67", "\uD83E\uDDC0" },
+          { "\u00AE", "\u203C", "\u2198", "\u231A", "\u2328", "\u23F0", "\u2620", "\u26BD", "\u2705", "\u2757" },
+          { "⚠", "⚠️", "⚠︎", "❤️", "❤"},
+          { "¯\\_-LRB-ツ-RRB-_/¯" },
+  };
+
+  @Test
+  public void testEmoji() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory();
+    runOnTwoArrays(tokFactory, emojiInputs, emojiGold);
+  }
+
+  private final String[] hyphenInputs = {
+          // Text starting with BOM (should be deleted), words with soft hyphens and non-breaking space.
+          "\uFEFFThis is hy\u00ADphen\u00ADated and non-breaking spaces: 3\u202F456\u202F473.89",
+          // Test that some cp1252 that shouldn't be in file is normalized okay
+          "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092"
+  };
+
+  private final String[][] hyphenGold = {
+          { "This", "is", "hyphenated", "and", "non-breaking", "spaces", ":", "3456473.89" },
+          { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" }
+  };
+
+  @Test
+  public void testHyphensAndBOM() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false");
+    runOnTwoArrays(tokFactory, hyphenInputs, hyphenGold);
+  }
+
 }

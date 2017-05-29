@@ -9,7 +9,10 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
+import edu.stanford.nlp.time.SUTime;
+import edu.stanford.nlp.time.SUTimeSimpleParser;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -32,6 +35,9 @@ public class CleanXmlAnnotator implements Annotator {
   private final Pattern xmlTagMatcher;
 
   public static final String DEFAULT_XML_TAGS = ".*";
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CleanXmlAnnotator.class);
 
   /**
    * This regular expression tells us which tags end a sentence...
@@ -86,14 +92,14 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_SPEAKER_TAGS = "speaker";
 
   /**
-   * A map of document level annotation keys (i.e. docid) along with a pattern
+   * A map of document level annotation keys (i.e., docid) along with a pattern
    *  indicating the tag to match, and the attribute to match.
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
 
   /**
-   * A map of token level annotation keys (i.e. link, speaker) along with a pattern
+   * A map of token level annotation keys (i.e., link, speaker) along with a pattern
    *  indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated).
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<>();
@@ -118,14 +124,14 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
 
   /**
-   * This setting allows handling of flawed XML.  For example,
+   * This setting allows handling of "flawed XML", which may be valid SGML.  For example,
    * a lot of the news articles we parse go: <br>
    *  &lt;text&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;/text&gt; <br>
-   * ... eg, no closing &lt;/turn&gt; tags.
+   * ... i.e., no closing &lt;/turn&gt; tags.
    */
   private final boolean allowFlawedXml;
 
@@ -177,6 +183,7 @@ public class CleanXmlAnnotator implements Annotator {
     String sectionAnnotations =
         properties.getProperty("clean.sectionAnnotations",
             CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
+
     String ssplitDiscardTokens =
         properties.getProperty("clean.ssplitDiscardTokens");
 
@@ -203,6 +210,7 @@ public class CleanXmlAnnotator implements Annotator {
     setSectionTagMatcher(sectionTags);
     setSectionAnnotationPatterns(sectionAnnotations);
     setSsplitDiscardTokensMatcher(ssplitDiscardTokens);
+
   }
 
   public CleanXmlAnnotator(String xmlTagsToRemove,
@@ -466,6 +474,8 @@ public class CleanXmlAnnotator implements Annotator {
     CoreMap sectionAnnotations = null;
     Map<Class, List<CoreLabel>> savedTokensForSection = new HashMap<>();
 
+    annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<CoreMap>());
+
     boolean markSingleSentence = false;
     for (CoreLabel token : tokens) {
       String word = token.word().trim();
@@ -600,6 +610,31 @@ public class CleanXmlAnnotator implements Annotator {
             previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
             previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
           }
+          // create a CoreMap to store info about this section
+          String foundAuthor = sectionAnnotations.get(CoreAnnotations.AuthorAnnotation.class);
+          CoreMap currSectionCoreMap = new Annotation();
+          // set character offset of beginning of section
+          currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+              sectionStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+          // set character offset of end of section
+          currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
+              token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+          // set author of section
+          currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class, foundAuthor);
+          // set up empty sentences list
+          currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
+          // set doc date for post
+          String dateString = sectionAnnotations.get(CoreAnnotations.SectionDateAnnotation.class);
+          try {
+            SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
+            currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
+                potentialDate.toString());
+          } catch (Exception e) {
+            log.error("failed to parse datetime for post!");
+          }
+          // add this to the list of sections
+          annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
+          // finish processing section
           savedTokensForSection.clear();
           sectionStartTag = null;
           sectionStartToken = null;

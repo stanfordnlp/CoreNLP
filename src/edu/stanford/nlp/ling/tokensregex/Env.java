@@ -26,6 +26,8 @@ import java.util.regex.Pattern;
  * <li>{@code NodePattern} (pattern for matching one element)</li>
  * <li>{@code Class} (binding of CoreMap attribute to java Class)</li>
  * </ul>
+ *
+ * @author Angel Chang
  */
 // Various of the public variables in this class are instantiated by reflection from TokensRegex rules
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -168,7 +170,7 @@ public class Env {
 
   public CoreMapAggregator getDefaultTokensAggregator() {
     if (defaultTokensAggregator == null && (defaultTokensAggregators != null || aggregateToTokens)) {
-      CoreLabelTokenFactory tokenFactory = (aggregateToTokens)? new CoreLabelTokenFactory():null;
+      CoreLabelTokenFactory tokenFactory = (aggregateToTokens) ? new CoreLabelTokenFactory() : null;
       Map<Class, CoreMapAttributeAggregator> aggregators = defaultTokensAggregators;
       if (aggregators == null) {
         aggregators = CoreMapAttributeAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATORS;
@@ -301,8 +303,7 @@ public class Env {
     return expanded;
   }
 
-  public Pattern getStringPattern(String regex)
-  {
+  public Pattern getStringPattern(String regex) {
     String expanded = expandStringRegex(regex);
     return Pattern.compile(expanded, defaultStringPatternFlags);
   }
@@ -323,8 +324,7 @@ public class Env {
     bind(name, null);
   }
 
-  public NodePattern getNodePattern(String name)
-  {
+  public NodePattern getNodePattern(String name) {
     Object obj = variables.get(name);
     if (obj != null) {
       if (obj instanceof SequencePattern) {
@@ -353,8 +353,7 @@ public class Env {
     return null;
   }
 
-  public SequencePattern.PatternExpr getSequencePatternExpr(String name, boolean copy)
-  {
+  public SequencePattern.PatternExpr getSequencePatternExpr(String name, boolean copy) {
     Object obj = variables.get(name);
     if (obj != null) {
       if (obj instanceof SequencePattern) {

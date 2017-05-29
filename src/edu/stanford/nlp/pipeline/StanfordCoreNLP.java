@@ -481,9 +481,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * release the memory associated with the annotators.
    */
   public static synchronized void clearAnnotatorPool() {
-    if (pool != null)
+    logger.warn("Clearing CoreNLP annotation pool; this should be unnecessary in production");
+    if (pool != null) {
       pool.clear();
-    pool = null;
+    }
   }
 
 
@@ -534,7 +535,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   public static synchronized AnnotatorPool getDefaultAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
     // if the pool already exists reuse!
     if (pool == null) {
-      pool = new AnnotatorPool();
+      pool = AnnotatorPool.SINGLETON;
     }
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
       pool.register(entry.getKey(), inputProps, Lazy.cache( () -> entry.getValue().apply(inputProps, annotatorImplementation)));
@@ -575,7 +576,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * @return A populated AnnotatorPool
    */
   public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
-    AnnotatorPool pool = new AnnotatorPool();
+    AnnotatorPool pool = AnnotatorPool.SINGLETON;
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
       pool.register(entry.getKey(), inputProps, Lazy.cache(() -> entry.getValue().apply(inputProps, annotatorImplementation)));
     }

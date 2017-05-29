@@ -75,9 +75,13 @@ public class DocumentPreprocessorTest extends TestCase {
   }
 
   public void testSetSentencePunctWords() {
-    String test = "This is a test of the preprocessor2... it should split this text into sentences? This should be a different sentence.This should be attached to the previous sentence, though.";
-    String[] expectedResults = {"This is a test of the preprocessor2 ...",
-        "it should split this text into sentences ?","This should be a different sentence.This should be attached to the previous sentence , though ."};
+    String test = "This is a test of the preprocessor2... it should split this text into sentences? This should be a different sentence.This should be attached to the previous sentence, though. Calvin Wilson for St. Louis Post Dispatch called it one of LaBeouf's best performances.";
+    String[] expectedResults = {
+            "This is a test of the preprocessor2 ...",
+            "it should split this text into sentences ?",
+            "This should be a different sentence.This should be attached to the previous sentence , though .",
+            "Calvin Wilson for St. Louis Post Dispatch called it one of LaBeouf 's best performances .",
+    };
     String[] sentenceFinalPuncWords = {".", "?","!","...","\n"};
     runTest(test, expectedResults, sentenceFinalPuncWords, false);
   }
