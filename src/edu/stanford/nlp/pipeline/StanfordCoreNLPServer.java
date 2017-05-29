@@ -412,7 +412,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * The canonical use-case for this is for Kubernetes readiness checks.
    */
   protected static class ReadyHandler implements HttpHandler {
-    /** If true, the server is runnning and ready for requets. */
+    /** If true, the server is running and ready for requests. */
     public final AtomicBoolean serverReady;
     /** The creation time of this handler. This is used to tell the caller how long we've been waiting for. */
     public final long startTime;
@@ -597,6 +597,13 @@ public class StanfordCoreNLPServer implements Runnable {
           // Handle direct browser connections (i.e., not a POST request).
           homepage.handle(httpExchange);
           return;
+        } else if (httpExchange.getRequestMethod().equals("HEAD")) {
+          // attempt to handle issue #368; see http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6886723
+          httpExchange.getRequestBody().close();
+          httpExchange.getResponseHeaders().add("Transfer-encoding", "chunked");
+          httpExchange.sendResponseHeaders(200, -1);
+          httpExchange.close();
+          return;
         } else {
           // Handle API request
           if (authenticator != null && !authenticator.test(props)) {
@@ -730,13 +737,13 @@ public class StanfordCoreNLPServer implements Runnable {
       if (language != null && !"default".equals(language)) {
         String languagePropertiesFile = LanguageInfo.getLanguagePropertiesFile(language);
         if (languagePropertiesFile != null) {
-          Properties languageSpecificProperties = new Properties();
           try {
+            Properties languageSpecificProperties = new Properties();
             languageSpecificProperties.load(
                     IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(languagePropertiesFile));
             PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
           } catch (IOException e) {
-            err("Failure to load language specific properties.");
+            err("Failure to load language specific properties: " + languagePropertiesFile + " for " + language);
           }
         } else {
           try {
@@ -1235,7 +1242,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @param context The context to enable authentication for.
    * @param credentials The optional credentials to enforce. This is a (key,value) pair
    */
-  private void withAuth(HttpContext context, Optional<Pair<String,String>> credentials) {
+  private static void withAuth(HttpContext context, Optional<Pair<String,String>> credentials) {
     credentials.ifPresent(c -> context.setAuthenticator(new BasicAuthenticator("corenlp") {
       @Override
       public boolean checkCredentials(String user, String pwd) {
@@ -1328,7 +1335,7 @@ public class StanfordCoreNLPServer implements Runnable {
     }
 
     // Pre-load the models
-    if (StanfordCoreNLPServer.preloadedAnnotators != null && !"".equals(StanfordCoreNLPServer.preloadedAnnotators.trim())) {
+    if (StanfordCoreNLPServer.preloadedAnnotators != null && ! StanfordCoreNLPServer.preloadedAnnotators.trim().isEmpty()) {
       Properties props = new Properties();
       server.defaultProps.entrySet().forEach(entry -> props.setProperty(entry.getKey().toString(), entry.getValue().toString()));
       props.setProperty("annotators", StanfordCoreNLPServer.preloadedAnnotators);
