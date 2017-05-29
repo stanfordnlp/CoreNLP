@@ -89,9 +89,9 @@ public class StanfordCoreNLPServer implements Runnable {
   private final ExecutorService serverExecutor;
   /**
    * To prevent grossly wasteful over-creation of pipeline objects, cache the last
-   * few we created, until the garbage collector decides we can kill them.
+   *  one we created.
    */
-  private final WeakHashMap<Properties, StanfordCoreNLP> pipelineCache = new WeakHashMap<>();
+  private Pair<String, StanfordCoreNLP> lastPipeline = new Pair<>(null, null);
   /**
    * An executor to time out CoreNLP execution with.
    */
@@ -304,18 +304,26 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   private StanfordCoreNLP mkStanfordCoreNLP(Properties props) {
     StanfordCoreNLP impl;
-    synchronized (pipelineCache) {
-      impl = pipelineCache.get(props);
-      if (impl == null) {
-        AnnotatorPool pool = StanfordCoreNLP.constructAnnotatorPool(props, new AnnotatorImplementations());
-        // TO DO: this might cause some problems
-        StanfordCoreNLP.pool = pool;
-        impl = new StanfordCoreNLP(props, pool);
-        pipelineCache.put(props, impl);
+
+    StringBuilder sb = new StringBuilder();
+    props.stringPropertyNames().stream().filter(key -> !key.equalsIgnoreCase("date")).forEach(key -> {
+      String pvalue = props.getProperty(key);
+      sb.append(key).append(':').append(pvalue).append(';');
+    });
+    String cacheKey = sb.toString();
+
+    synchronized (this) {
+      if (Objects.equals(lastPipeline.first, cacheKey)) {
+        return lastPipeline.second;
+      } else {
+        impl = new StanfordCoreNLP(props);
+        lastPipeline = Pair.makePair(cacheKey, impl);
       }
     }
+
     return impl;
   }
+
 
   /**
    * A helper function to respond to a request with an error.

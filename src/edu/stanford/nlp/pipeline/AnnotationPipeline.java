@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * @author Jenny Finkel
  */
 
-public class AnnotationPipeline implements Annotator  {
+public class AnnotationPipeline implements Annotator {
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotationPipeline.class);

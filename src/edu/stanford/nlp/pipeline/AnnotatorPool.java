@@ -37,6 +37,9 @@ public class AnnotatorPool  {
      * The straightforward constructor.
      */
     private CachedAnnotator(String signature, Lazy<Annotator> annotator) {
+      if (!annotator.isCache()) {
+        log.warn("Cached annotator will never GC -- this can cause OOM exceptions!");
+      }
       this.signature = signature;
       this.annotator = annotator;
     }
@@ -60,15 +63,18 @@ public class AnnotatorPool  {
   }
 
 
-  /** The set of factories we know about defining how we should create new annotators of each name */
-  private final Map<String, CachedAnnotator> factories;
+  /**
+   * The set of annotators that we have cached, possibly with garbage collected annotator instances.
+   * This is a map from annotator name to cached annotator instances.
+   */
+  private final Map<String, CachedAnnotator> cachedAnnotators;
 
 
   /**
    * Create an empty AnnotatorPool.
    */
   public AnnotatorPool() {
-    this.factories = Generics.newHashMap();
+    this.cachedAnnotators = Generics.newHashMap();
   }
 
   /**
@@ -89,8 +95,8 @@ public class AnnotatorPool  {
    */
   public boolean register(String name, Properties props, Lazy<Annotator> annotator) {
     boolean newAnnotator = false;
-    synchronized (this.factories) {
-      CachedAnnotator oldAnnotator = this.factories.get(name);
+    synchronized (this.cachedAnnotators) {
+      CachedAnnotator oldAnnotator = this.cachedAnnotators.get(name);
       String newSig = PropertiesUtils.getSignature(name, props);
       if (oldAnnotator == null || !Objects.equals(oldAnnotator.signature, newSig)) {
         // the new annotator uses different properties so we need to update!
@@ -99,7 +105,7 @@ public class AnnotatorPool  {
               + oldAnnotator.signature + "] with new annotator with signature [" + newSig + "]");
         }
         // Add the new annotator
-        this.factories.put(name, new CachedAnnotator(newSig, annotator));
+        this.cachedAnnotators.put(name, new CachedAnnotator(newSig, annotator));
         // Unmount the old annotator
         Optional.ofNullable(oldAnnotator).flatMap(ann -> Optional.ofNullable(ann.annotator.getIfDefined())).ifPresent(Annotator::unmount);
         // Register that we added an annotator
@@ -115,12 +121,12 @@ public class AnnotatorPool  {
    * Clear this pool, and unmount all the annotators mounted on it.
    */
   public synchronized void clear() {
-    synchronized (this.factories) {
-      for (Map.Entry<String, CachedAnnotator> entry : new HashSet<>(this.factories.entrySet())) {
+    synchronized (this.cachedAnnotators) {
+      for (Map.Entry<String, CachedAnnotator> entry : new HashSet<>(this.cachedAnnotators.entrySet())) {
         // Unmount the annotator
         Optional.ofNullable(entry.getValue()).flatMap(ann -> Optional.ofNullable(ann.annotator.getIfDefined())).ifPresent(Annotator::unmount);
         // Remove the annotator
-        this.factories.remove(entry.getKey());
+        this.cachedAnnotators.remove(entry.getKey());
       }
     }
   }
@@ -135,7 +141,7 @@ public class AnnotatorPool  {
    * @throws IllegalArgumentException If the annotator cannot be created
    */
   public synchronized Annotator get(String name) {
-    CachedAnnotator factory =  this.factories.get(name);
+    CachedAnnotator factory =  this.cachedAnnotators.get(name);
     if (factory != null) {
       return factory.annotator.get();
     } else {
