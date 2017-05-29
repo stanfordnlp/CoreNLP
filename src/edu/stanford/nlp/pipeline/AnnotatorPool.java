@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 import java.util.*;
-import java.util.function.Supplier;
 
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Lazy;
@@ -81,10 +80,6 @@ public class AnnotatorPool  {
    * @param name       The name to be associated with the Annotator.
    * @param props The properties we are using to create the annotator
    * @param annotator    A factory that creates an instance of the desired Annotator.
-   *                     This should be an instance of {@link Lazy#cache(Supplier)}, if we want
-   *                     the annotator pool to behave as a cache (i.e., evict old annotators
-   *                     when the GC requires it).
-   *
    * @return true if a new annotator was created; false if we reuse an existing one
    */
   public boolean register(String name, Properties props, Lazy<Annotator> annotator) {
@@ -142,11 +137,5 @@ public class AnnotatorPool  {
       throw new IllegalArgumentException("No annotator named " + name);
     }
   }
-
-
-  /**
-   * A global singleton annotator pool, so that we can cache globally on a JVM instance.
-   */
-  public static final AnnotatorPool SINGLETON = new AnnotatorPool();
 
 }

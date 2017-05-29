@@ -1168,23 +1168,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * Store a list of sections in the document
-   */
-  public static class SectionsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    @Override
-    public Class<List<CoreMap>> getType() { return ErasureUtils.uncheckedCast(List.class); }
-  }
-
-  /**
-   * Store an index into a list of sections
-   */
-  public static class SectionIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
-    public Class<Integer> getType() { return ErasureUtils.uncheckedCast(Integer.class); }
-  }
-
-
-  /**
    * Section of a document
    */
   public static class SectionAnnotation implements CoreAnnotation<String> {
@@ -1970,5 +1953,4 @@ public class CoreAnnotations {
     @Override
     public Class<String> getType() { return ErasureUtils.uncheckedCast(String.class); }
   }
-
 }

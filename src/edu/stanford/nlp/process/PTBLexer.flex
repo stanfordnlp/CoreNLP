@@ -289,7 +289,7 @@ import edu.stanford.nlp.util.logging.Redwood;
    * at either their correct Unicode codepoints, or in their invalid
    * positions as 8 bit chars inside the iso-8859 control region.
    *
-   * ellipsis   85      0133    2026    8230   COMPLICATED!! Also a newline character for IBM 390; we let ellipsis win
+   * ellipsis   85      0133    2026    8230
    * single quote curly starting        91      0145    2018    8216
    * single quote curly ending  92      0146    2019    8217
    * double quote curly starting        93      0147    201C    8220
@@ -398,28 +398,6 @@ import edu.stanford.nlp.util.logging.Redwood;
     }
     if (out.length() == 0) {
       out.append('-'); // don't create an empty token
-    }
-    return out.toString();
-  }
-
-  private static String removeFromNumber(String in) {
-    StringBuilder out = null;
-    // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
-    // \u066C\u2009\u202F are thousands separator characters that it seems safe to remove.
-    int length = in.length();
-    for (int i = 0; i < length; i++) {
-      char ch = in.charAt(i);
-      if (ch == '\u00AD' || ch == '\u066C' || ch == '\u2009' || ch == '\u202F') {
-        if (out == null) {
-          out = new StringBuilder(length);
-          out.append(in.substring(0, i));
-        }
-      } else if (out != null) {
-        out.append(ch);
-      }
-    }
-    if (out == null) {
-      return in;
     }
     return out.toString();
   }
@@ -668,7 +646,7 @@ SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 DIGIT = [:digit:]|[\u07C0-\u07C9]
 DATE = {DIGIT}{1,2}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{2,4}
-NUM = {DIGIT}+|{DIGIT}*([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)+
+NUM = {DIGIT}+|{DIGIT}*([.:,\u00AD\u066B\u066C]{DIGIT}+)+
 /* Now don't allow bracketed negative numbers!  They have too many uses (e.g.,
    years or times in parentheses), and having them in tokens messes up
    treebank parsing.
@@ -734,11 +712,11 @@ SREDAUX = n{APOSETCETERA}t
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
 APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
-FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"\'<>|.!?(){},;:&=+\[\]\\\/-]
+FULLURL = https?:\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
-EMAIL = (&lt;|<)?(mailto:)?[a-zA-Z0-9._%+-]+@[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9](&gt;|>)?
+EMAIL = (&lt;|<)?[a-zA-Z0-9._%+-]+@[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9](&gt;|>)?
 
 /* Technically, names should be capped at 15 characters.  However, then
    you get into weirdness with what happens to the rest of the characters. */
@@ -831,24 +809,22 @@ INSENTP = [,;:\u3001]
 QUOTES = {APOS}|''|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;
 /* Cap'n for captain, c'est for french */
-TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|f\*[c*]k(in[g']|e[dr])?|sh\*t(ty)?
+TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|f[-\*][-c*]k(in[g']|e[dr])?|sh[-\*]t(ty)?|c[-*]nts?
 TBSPEC2 = {APOS}[0-9][0-9]
 BANGWORDS = (E|Yahoo|Jeopardy)\!
 BANGMAGAZINES = OK\!
 
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
-ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)|¯\\_\(ツ\)_\/¯
+ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)
 /* First part is for 2 geographic char symbols as flag. */
-/* Skin colors or choice of emoji or non-emoji rendering can follow emoji. */
-/* There are special precomposed families made of people */
-EMOJI = [\u{01F1E6}-\u{01F1FF}]{2,2}|[\u2194-\u2199\u25FB-\u27BF\u{01F000}-\u{01F9FF}][\uFE0E\uFE0F\u{01F3FB}-\u{01F3FF}]?|[\u{01F466}-\u{01F469}](\u200D[\u{01F466}-\u{01F469}]){1,3}
+EMOJI = [\u{01F1E6}-\u{01F1FF}]{2,2}|[\u{01F000}-\u{01F9FF}]
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
-MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2025\u2030-\u2038\u203B\u203C\u2043\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3001-\u3006\u3008-\u3020\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
+MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2025\u2030-\u2038\u203B\u2043\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3001-\u3006\u3008-\u3020\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
 /* Math and other symbols that stand alone: °²× ∀ */
-
+// Consider this list of bullet chars: 2219, 00b7, 2022, 2024
 
 /* CP1252 letters */
 /* 83 = f with hook --> U+0192; 8a = S with Caron --> U+0160; 9c = ligature oe --> U+0153; */
@@ -965,7 +941,8 @@ nno/[^A-Za-z0-9]
                           }
                           return getNext(txt, yytext());
                          }
-{NUMBER}                { return getNext(removeFromNumber(yytext()), yytext()); }
+{NUMBER}                { return getNext(removeSoftHyphens(yytext()),
+                                         yytext()); }
 {SUBSUPNUM}             { return getNext(); }
 {FRAC}          { String txt = yytext();
                   // if we are in strictTreebank3 mode, we need to reject everything after a space or non-breaking space...
@@ -999,7 +976,7 @@ nno/[^A-Za-z0-9]
 {DOLSIGN}               { return getNext(); }
 {DOLSIGN2}              { if (normalizeCurrency) {
                             return getNext(normalizeCurrency(yytext()), yytext());
-                        } else {
+			  } else {
                             return getNext(minimallyNormalizeCurrency(yytext()), yytext());
                           }
                         }

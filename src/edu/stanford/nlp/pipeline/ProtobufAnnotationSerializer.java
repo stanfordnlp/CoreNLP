@@ -481,13 +481,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // add a sentence id if it exists
     if (keySet.contains(SentenceIDAnnotation.class)) builder.setSentenceID(getAndRegister(sentence, keysToSerialize, SentenceIDAnnotation.class));
-
-    // add section index
-    if (keySet.contains(SectionIndexAnnotation.class)) builder.setSectionIndex(getAndRegister(sentence, keysToSerialize, SectionIndexAnnotation.class));
-
-    // add section date
-    if (keySet.contains(SectionDateAnnotation.class)) builder.setSectionDate(getAndRegister(sentence, keysToSerialize, SectionDateAnnotation.class));
-
     // Return
     return builder;
   }
@@ -580,13 +573,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addCharacter(toProto(c));
       }
       keysToSerialize.remove(SegmenterCoreAnnotations.CharactersAnnotation.class);
-    }
-    // add section info
-    if (doc.containsKey(SectionsAnnotation.class)) {
-      for (CoreMap section : doc.get(SectionsAnnotation.class)) {
-        builder.addSections(toProtoSection(section));
-      }
-      keysToSerialize.remove(SectionsAnnotation.class);
     }
     // Return
     return builder;
@@ -691,31 +677,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Set representative mention
     builder.setRepresentative(mentionToIndex.get(chain.getRepresentativeMention()));
     // Return
-    return builder.build();
-  }
-
-  /**
-   * Create a Section CoreMap protocol buffer from the given Section CoreMap
-   * @param section
-   * @return
-   */
-  public CoreNLPProtos.Section toProtoSection(CoreMap section) {
-    CoreNLPProtos.Section.Builder builder = CoreNLPProtos.Section.newBuilder();
-    // Set char start
-    builder.setCharBegin(section.get(CharacterOffsetBeginAnnotation.class));
-    // Set char end
-    builder.setCharEnd(section.get(CharacterOffsetEndAnnotation.class));
-    // Set author
-    if (section.get(AuthorAnnotation.class) != null)
-      builder.setAuthor(section.get(AuthorAnnotation.class));
-    // Set date time
-    if (section.get(SectionDateAnnotation.class) != null)
-      builder.setDatetime(section.get(SectionDateAnnotation.class));
-    // add the sentence indexes for the sentences in this section
-    for (CoreMap sentence : section.get(SentencesAnnotation.class)) {
-      int sentenceIndex = sentence.get(SentenceIndexAnnotation.class);
-      builder.addSentenceIndexes(sentenceIndex);
-    }
     return builder.build();
   }
 
@@ -1024,11 +985,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
                     .build())
                 .collect(Collectors.toList()))
         .addAllObjectTokens(triple.object.stream().map(token ->
-            CoreNLPProtos.TokenLocation.newBuilder()
-                .setSentenceIndex(token.sentIndex())
-                .setTokenIndex(token.index() - 1)
-                .build())
-            .collect(Collectors.toList()));
+                CoreNLPProtos.TokenLocation.newBuilder()
+                        .setSentenceIndex(token.sentIndex())
+                        .setTokenIndex(token.index() - 1)
+                        .build())
+                .collect(Collectors.toList()));
     Optional<SemanticGraph> treeOptional = triple.asDependencyTree();
     if (treeOptional.isPresent()) {
       builder.setTree(toProto(treeOptional.get()));
@@ -1589,11 +1550,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       mentionToUpdate.speakerInfo = speakerInfo;
     }
 
-    // add section info
-    ann.set(SectionsAnnotation.class, new ArrayList<CoreMap>());
-    for (CoreNLPProtos.Section section : proto.getSectionsList()) {
-      ann.get(SectionsAnnotation.class).add(fromProto(section, ann.get(SentencesAnnotation.class)));
-    }
     // Return
     return ann;
   }
@@ -2153,29 +2109,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (mention.hasTimex()) map.set(TimexAnnotation.class, fromProto(mention.getTimex()));
     if (mention.hasWikipediaEntity()) map.set(WikipediaEntityAnnotation.class, mention.getWikipediaEntity());
 
-    return map;
-  }
-
-  /**
-   * Read a section coremap from its serialized form. Requires the containing sentence to be
-   * passed in along with the protocol buffer.
-   * @param section The serialized section coremap
-   * @return The relation mention corresponding to the serialized object.
-   */
-  private CoreMap fromProto(CoreNLPProtos.Section section, List<CoreMap> annotationSentences) {
-    CoreMap map = new ArrayCoreMap();
-    map.set(CharacterOffsetBeginAnnotation.class, section.getCharBegin());
-    map.set(CharacterOffsetEndAnnotation.class, section.getCharEnd());
-    if (section.hasAuthor())
-      map.set(AuthorAnnotation.class, section.getAuthor());
-    if (section.hasDatetime())
-      map.set(SectionDateAnnotation.class, section.getDatetime());
-    // go through the list of sentences and add them to this section's sentence list
-    ArrayList<CoreMap> sentencesList = new ArrayList<>();
-    for (int sentenceIndex : section.getSentenceIndexesList()) {
-      sentencesList.add(annotationSentences.get(sentenceIndex));
-    }
-    map.set(SentencesAnnotation.class, sentencesList);
     return map;
   }
 

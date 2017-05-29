@@ -30,7 +30,7 @@ public abstract class Lazy<E> {
     if (orNull == null) {
       orNull = compute();
       if (shouldGC()) {
-        implOrNullCache = new SoftReference<>(orNull);
+        implOrNullCache = new SoftReference<E>(orNull);
       } else {
         implOrNull = orNull;
       }
