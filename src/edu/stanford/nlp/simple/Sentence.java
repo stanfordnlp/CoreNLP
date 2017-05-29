@@ -49,6 +49,7 @@ public class Sentence {
           "tokenize.class", "PTBTokenizer",
           "tokenize.language", "en",
           "mention.type", "dep",
+          "coref.mode", "statistical",  // Use the new coref
           "coref.md.type", "dep"
   );
 
@@ -60,6 +61,7 @@ public class Sentence {
           "tokenize.language", "en",
           "tokenize.whitespace", "true",
           "mention.type", "dep",
+          "coref.mode", "statistical",  // Use the new coref
           "coref.md.type", "dep"
   );  // redundant?
 

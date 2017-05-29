@@ -17,16 +17,18 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 
 
+/** @author Sonal Gupta */
 public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> {
-  String label;
-  Map<TokenSequencePattern, E> patterns;
-  List<String> sentids;
-  boolean removeStopWordsFromSelectedPhrases;
-  boolean removePhrasesWithStopWords;
-  ConstantsAndVariables constVars;
+
+  private final String label;
+  private final Map<TokenSequencePattern, E> patterns;
+  private final List<String> sentids;
+  private final boolean removeStopWordsFromSelectedPhrases;
+  private final boolean removePhrasesWithStopWords;
+  private final ConstantsAndVariables constVars;
   //Set<String> ignoreWords;
-  MultiPatternMatcher<CoreMap> multiPatternMatcher;
-  Map<String, DataInstance> sents = null;
+  private final MultiPatternMatcher<CoreMap> multiPatternMatcher;
+  private final Map<String, DataInstance> sents;
 
   public ApplyPatternsMulti(Map<String, DataInstance> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
     this.sents = sents;
@@ -80,7 +82,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
 
         //to make sure we discard phrases with stopwords in between, but include the ones in which stop words were removed at the ends if removeStopWordsFromSelectedPhrases is true
         boolean[] addedindices = new boolean[e-s];
-        Arrays.fill(addedindices, false);
+        // Arrays.fill(addedindices, false); // unneeded as done on initialization
 
         for (int i = s; i < e; i++) {
           CoreLabel l = sent.get(i);
@@ -184,7 +186,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
     return new Pair<>(allFreq, matchedTokensByPat);
   }
 
-  boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, java.util.regex.Pattern ignoreWordRegex) {
+  private static boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, java.util.regex.Pattern ignoreWordRegex) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 

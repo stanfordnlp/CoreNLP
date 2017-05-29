@@ -78,6 +78,12 @@ public class MorphologyTest extends TestCase {
     assertEquals("hunt", lemmatizeStatic(hunt).lemma());
   }
 
+  public void testDunno() {
+    assertEquals("do", stemStatic(new WordTag("du", "VBP")).word());
+    assertEquals("not", stemStatic(new WordTag("n", "RB")).word());
+    assertEquals("know", stemStatic(new WordTag("no", "VB")).word());
+  }
+
   public void testDash() {
     Morphology morpha = new Morphology();
     morpha.stem("b-");

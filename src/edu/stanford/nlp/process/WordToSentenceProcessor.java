@@ -80,7 +80,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
   public static final String DEFAULT_BOUNDARY_FOLLOWERS_REGEX = "[\\p{Pe}\\p{Pf}\"'>＂＇＞]|''|-R[CRS]B-";
 
   public static final Set<String> DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD = Collections.unmodifiableSet(Generics.newHashSet(
-          Arrays.asList(WhitespaceLexer.NEWLINE, PTBLexer.NEWLINE_TOKEN)));
+          Arrays.asList(WhitespaceLexer.NEWLINE, PTBTokenizer.getNewlineToken())));
 
   private static final boolean DEBUG = false;
 

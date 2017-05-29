@@ -158,8 +158,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
    *
    * @param rules
    */
-  public void appendRules(List<SequenceMatchRules.Rule> rules)
-  {
+  public void appendRules(List<SequenceMatchRules.Rule> rules) {
     if (verbose)
       log.info("Read " + rules.size() + " rules");
     // Put rules into stages

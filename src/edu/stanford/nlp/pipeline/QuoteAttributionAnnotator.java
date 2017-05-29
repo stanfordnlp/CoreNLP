@@ -20,6 +20,38 @@ import java.util.*;
 
 
 /**
+ * An annotator uses attributes quotes in a text to their speakers. It uses a two-stage process that first links quotes
+ * to mentions and then mentions to speakers. Each stage consists in a series of sieves that each try to make
+ * predictions on the quote or mentions that have not been linked by previous sieves.
+ *
+ * The annotator will add the following annotations to each QuotationAnnotation:
+ * <ul>
+ *   <li>MentionAnnotation : the text of the mention</li>
+ *   <li>MentionBeginAnnotation : the beginning token index of the mention</li>
+ *   <li>MentionEndAnnotation : the end token index of the mention</li>
+ *   <li>MentionTypeAnnotation : the type of mention (pronoun, name, or animate noun)</li>
+ *   <li>MentionSieveAnnotation : the sieve that made the mention prediction</li>
+ *   <li>SpeakerAnnotation : the name of the speaker</li>
+ *   <li>SpeakerSieveAnnotation : the name of the sieve that made the speaker prediction</li>
+ * </ul>
+ *
+ * The annotator has the following options:
+ * <ul>
+ *   <li>quoteattribution.charactersPath (required): path to file containing the character names, aliases,
+ *   and gender information.</li>
+ *   <li>quoteattribution.booknlpCoref (required): path to tokens file generated from
+ *   <a href="https://github.com/dbamman/book-nlp">book-nlp</a> containing coref information.</li>
+ *   <li>quoteattribution.QMSieves: list of sieves to use in the quote to mention linking phase
+ *   (default=tri,dep,onename,voc,paraend,conv,sup,loose). More information about the sieves can be found at our
+ *   <a href="stanfordnlp.github.io/CoreNLP/quoteattribution.html">website</a>. </li>
+ *   <li>quoteattribution.MSSieves: list of sieves to use in the mention to speaker linking phase
+ *   (default=det,top).</li>
+ *   <li>quoteattribution.model: path to trained model file.</li>
+ *   <li>quoteattribution.familyWordsFile: path to file with family words list.</li>
+ *   <li>quoteattribution.animacyWordsFile: path to file with animacy words list.</li>
+ *   <li>quoteattribution.genderNamesFile: path to file with names list with gender information.</li>
+ * </ul>
+ *
  * @author Grace Muzny, Michael Fang
  */
 public class QuoteAttributionAnnotator implements Annotator {

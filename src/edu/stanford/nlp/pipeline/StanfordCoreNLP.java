@@ -111,10 +111,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   /** Stores the time (in milliseconds) required to construct the last pipeline. */
   private long pipelineSetupTime;
 
-
-  /** Maintains the shared pool of annotators. */
-  protected static AnnotatorPool pool = null;
-
   private Properties properties;
 
   private Semaphore availableProcessors;
@@ -482,9 +478,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    */
   public static synchronized void clearAnnotatorPool() {
     logger.warn("Clearing CoreNLP annotation pool; this should be unnecessary in production");
-    if (pool != null) {
-      pool.clear();
-    }
+    AnnotatorPool.SINGLETON.clear();
   }
 
 
@@ -534,9 +528,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    */
   public static synchronized AnnotatorPool getDefaultAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
     // if the pool already exists reuse!
-    if (pool == null) {
-      pool = new AnnotatorPool();
-    }
+    AnnotatorPool pool = AnnotatorPool.SINGLETON;
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
       pool.register(entry.getKey(), inputProps, Lazy.cache( () -> entry.getValue().apply(inputProps, annotatorImplementation)));
     }
@@ -576,7 +568,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * @return A populated AnnotatorPool
    */
   public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
-    AnnotatorPool pool = new AnnotatorPool();
+    AnnotatorPool pool = AnnotatorPool.SINGLETON;
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
       pool.register(entry.getKey(), inputProps, Lazy.cache(() -> entry.getValue().apply(inputProps, annotatorImplementation)));
     }
@@ -587,12 +579,12 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
 
   public static synchronized Annotator getExistingAnnotator(String name) {
-    if(pool == null){
+    if(AnnotatorPool.SINGLETON == null){
       logger.error("Attempted to fetch annotator \"" + name + "\" before the annotator pool was created!");
       return null;
     }
     try {
-      return pool.get(name);
+      return AnnotatorPool.SINGLETON.get(name);
     } catch(IllegalArgumentException e) {
       logger.error("Attempted to fetch annotator \"" + name +
         "\" but the annotator pool does not store any such type!");
@@ -1184,7 +1176,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
               }
               // check we've processed or errored on every file, if so tell the pool to clear()
               if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size())
-                pool.clear();
+                AnnotatorPool.SINGLETON.clear();
             }
           } else if (continueOnAnnotateError) {
             // Error annotating but still wanna continue
@@ -1194,12 +1186,12 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
               totalErrorAnnotating.incValue(1);
               // check we've processed or errored on every file, if so tell the pool to clear()
               if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size())
-                pool.clear();
+                AnnotatorPool.SINGLETON.clear();
             }
 
           } else {
             // if stopping due to error, make sure to clear the pool
-            pool.clear();
+            AnnotatorPool.SINGLETON.clear();
             throw new RuntimeException("Error annotating " + file.getAbsoluteFile(), ex);
           }
         });
@@ -1335,7 +1327,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     pipeline.run();
     // clear the pool if not running in multi-thread mode
     if (!props.containsKey("threads") || Integer.parseInt(props.getProperty("threads")) <= 1)
-      pool.clear();
+      AnnotatorPool.SINGLETON.clear();
   }
 
 }
