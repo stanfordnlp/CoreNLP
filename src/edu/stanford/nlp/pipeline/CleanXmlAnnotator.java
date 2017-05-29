@@ -474,6 +474,8 @@ public class CleanXmlAnnotator implements Annotator {
     CoreMap sectionAnnotations = null;
     Map<Class, List<CoreLabel>> savedTokensForSection = new HashMap<>();
 
+    annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<CoreMap>());
+
     boolean markSingleSentence = false;
     for (CoreLabel token : tokens) {
       String word = token.word().trim();
