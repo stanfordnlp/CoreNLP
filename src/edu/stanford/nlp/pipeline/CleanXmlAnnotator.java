@@ -625,12 +625,14 @@ public class CleanXmlAnnotator implements Annotator {
           currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
           // set doc date for post
           String dateString = sectionAnnotations.get(CoreAnnotations.SectionDateAnnotation.class);
-          try {
-            SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
-            currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
-                potentialDate.toString());
-          } catch (Exception e) {
-            log.error("failed to parse datetime for post!");
+          if (dateString != null) {
+            try {
+              SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
+              currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
+                      potentialDate.toString());
+            } catch (Exception e) {
+              log.error("failed to parse datetime for post! " + dateString);
+            }
           }
           // add this to the list of sections
           annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
