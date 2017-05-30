@@ -241,6 +241,8 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     boolean inWaitForForcedEnd = false;
     boolean lastTokenWasNewline = false;
 
+    //A new variable boundaryFollower is introduced to detect single quote or double quote followed by sentenceBoundaryToken
+    boolean boundaryFollower = false;
     for (IN o: words) {
       String word = getString(o);
       boolean forcedEnd = isForcedEndToken(o);
@@ -282,7 +284,10 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       }
 
       if (lastSentence != null && currentSentence.isEmpty() && sentenceBoundaryFollowersPattern.matcher(word).matches()) {
-        if (!discardToken) {
+          //boundaryFollower variable is made true when the sentence boundary follower is single quote or double quote
+        if(word.equals("''")||word.equals("'")){
+                        boundaryFollower=true;}
+	if (!discardToken) {
           lastSentence.add(o);
         }
         if (DEBUG) {
@@ -291,6 +296,23 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         lastTokenWasNewline = false;
         continue;
       }
+        //if the boundaryFollower variable is true we should add the rest of the sentence until it encounters sentence boundaryToken
+        //for  example let us consider example as "Where were you?" asked Mary angrily. 
+        //Here it should be one sentence so as we have encountered a double quote we will make boundaryFollower as true
+        //Now we need to add all the rest of words i.e,asked Mary angrily to the last sentence which is done by following loop.
+        //The process should be continued until sentence Boundary Token is encountered 
+        if(boundaryFollower == true){
+                lastSentence.add(o);
+                if (DEBUG) {
+                        log.info("Word is " + word + (discardToken ? "discarded":"  added to last sentence"));
+                }
+                //if the sentence boundary is reached add the next words to next sentence
+                if(sentenceBoundaryTokenPattern.matcher(word).matches()){
+                //Once the boundary token is reached we should reset the boundaryFollower value to False(initial state) 
+                        boundaryFollower=false;
+                }
+         continue;//continue is to be used as we don't want the following lines of code to be executed
+        }
 
       boolean newSent = false;
       String debugText = (discardToken)? "discarded": "added to current";
