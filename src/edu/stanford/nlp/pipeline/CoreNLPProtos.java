@@ -5264,36 +5264,10 @@ public final class CoreNLPProtos {
 
     /**
      * <pre>
-     * label to denote token is end of section
-     * </pre>
-     *
-     * <code>optional string sectionEndLabel = 63;</code>
-     */
-    boolean hasSectionEndLabel();
-    /**
-     * <pre>
-     * label to denote token is end of section
-     * </pre>
-     *
-     * <code>optional string sectionEndLabel = 63;</code>
-     */
-    java.lang.String getSectionEndLabel();
-    /**
-     * <pre>
-     * label to denote token is end of section
-     * </pre>
-     *
-     * <code>optional string sectionEndLabel = 63;</code>
-     */
-    com.google.protobuf.ByteString
-        getSectionEndLabelBytes();
-
-    /**
-     * <pre>
      * doc id
      * </pre>
      *
-     * <code>optional string docID = 64;</code>
+     * <code>optional string docID = 63;</code>
      */
     boolean hasDocID();
     /**
@@ -5301,7 +5275,7 @@ public final class CoreNLPProtos {
      * doc id
      * </pre>
      *
-     * <code>optional string docID = 64;</code>
+     * <code>optional string docID = 63;</code>
      */
     java.lang.String getDocID();
     /**
@@ -5309,7 +5283,7 @@ public final class CoreNLPProtos {
      * doc id
      * </pre>
      *
-     * <code>optional string docID = 64;</code>
+     * <code>optional string docID = 63;</code>
      */
     com.google.protobuf.ByteString
         getDocIDBytes();
@@ -5358,7 +5332,6 @@ public final class CoreNLPProtos {
       sectionIndex_ = 0;
       sectionName_ = "";
       sectionAuthor_ = "";
-      sectionEndLabel_ = "";
       docID_ = "";
     }
 
@@ -5696,12 +5669,6 @@ public final class CoreNLPProtos {
             case 506: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x02000000;
-              sectionEndLabel_ = bs;
-              break;
-            }
-            case 514: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x04000000;
               docID_ = bs;
               break;
             }
@@ -6895,78 +6862,24 @@ public final class CoreNLPProtos {
       }
     }
 
-    public static final int SECTIONENDLABEL_FIELD_NUMBER = 63;
-    private volatile java.lang.Object sectionEndLabel_;
-    /**
-     * <pre>
-     * label to denote token is end of section
-     * </pre>
-     *
-     * <code>optional string sectionEndLabel = 63;</code>
-     */
-    public boolean hasSectionEndLabel() {
-      return ((bitField0_ & 0x02000000) == 0x02000000);
-    }
-    /**
-     * <pre>
-     * label to denote token is end of section
-     * </pre>
-     *
-     * <code>optional string sectionEndLabel = 63;</code>
-     */
-    public java.lang.String getSectionEndLabel() {
-      java.lang.Object ref = sectionEndLabel_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          sectionEndLabel_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * label to denote token is end of section
-     * </pre>
-     *
-     * <code>optional string sectionEndLabel = 63;</code>
-     */
-    public com.google.protobuf.ByteString
-        getSectionEndLabelBytes() {
-      java.lang.Object ref = sectionEndLabel_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        sectionEndLabel_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int DOCID_FIELD_NUMBER = 64;
+    public static final int DOCID_FIELD_NUMBER = 63;
     private volatile java.lang.Object docID_;
     /**
      * <pre>
      * doc id
      * </pre>
      *
-     * <code>optional string docID = 64;</code>
+     * <code>optional string docID = 63;</code>
      */
     public boolean hasDocID() {
-      return ((bitField0_ & 0x04000000) == 0x04000000);
+      return ((bitField0_ & 0x02000000) == 0x02000000);
     }
     /**
      * <pre>
      * doc id
      * </pre>
      *
-     * <code>optional string docID = 64;</code>
+     * <code>optional string docID = 63;</code>
      */
     public java.lang.String getDocID() {
       java.lang.Object ref = docID_;
@@ -6987,7 +6900,7 @@ public final class CoreNLPProtos {
      * doc id
      * </pre>
      *
-     * <code>optional string docID = 64;</code>
+     * <code>optional string docID = 63;</code>
      */
     public com.google.protobuf.ByteString
         getDocIDBytes() {
@@ -7205,10 +7118,7 @@ public final class CoreNLPProtos {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 62, sectionAuthor_);
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 63, sectionEndLabel_);
-      }
-      if (((bitField0_ & 0x04000000) == 0x04000000)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 64, docID_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 63, docID_);
       }
       extensionWriter.writeUntil(256, output);
       unknownFields.writeTo(output);
@@ -7358,10 +7268,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(62, sectionAuthor_);
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(63, sectionEndLabel_);
-      }
-      if (((bitField0_ & 0x04000000) == 0x04000000)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(64, docID_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(63, docID_);
       }
       size += extensionsSerializedSize();
       size += unknownFields.getSerializedSize();
@@ -7528,11 +7435,6 @@ public final class CoreNLPProtos {
         result = result && getSectionAuthor()
             .equals(other.getSectionAuthor());
       }
-      result = result && (hasSectionEndLabel() == other.hasSectionEndLabel());
-      if (hasSectionEndLabel()) {
-        result = result && getSectionEndLabel()
-            .equals(other.getSectionEndLabel());
-      }
       result = result && (hasDocID() == other.hasDocID());
       if (hasDocID()) {
         result = result && getDocID()
@@ -7697,10 +7599,6 @@ public final class CoreNLPProtos {
       if (hasSectionAuthor()) {
         hash = (37 * hash) + SECTIONAUTHOR_FIELD_NUMBER;
         hash = (53 * hash) + getSectionAuthor().hashCode();
-      }
-      if (hasSectionEndLabel()) {
-        hash = (37 * hash) + SECTIONENDLABEL_FIELD_NUMBER;
-        hash = (53 * hash) + getSectionEndLabel().hashCode();
       }
       if (hasDocID()) {
         hash = (37 * hash) + DOCID_FIELD_NUMBER;
@@ -8002,10 +7900,8 @@ public final class CoreNLPProtos {
         bitField1_ = (bitField1_ & ~0x00000004);
         sectionAuthor_ = "";
         bitField1_ = (bitField1_ & ~0x00000008);
-        sectionEndLabel_ = "";
-        bitField1_ = (bitField1_ & ~0x00000010);
         docID_ = "";
-        bitField1_ = (bitField1_ & ~0x00000020);
+        bitField1_ = (bitField1_ & ~0x00000010);
         return this;
       }
 
@@ -8268,10 +8164,6 @@ public final class CoreNLPProtos {
         result.sectionAuthor_ = sectionAuthor_;
         if (((from_bitField1_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x02000000;
-        }
-        result.sectionEndLabel_ = sectionEndLabel_;
-        if (((from_bitField1_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x04000000;
         }
         result.docID_ = docID_;
         result.bitField0_ = to_bitField0_;
@@ -8712,13 +8604,8 @@ public final class CoreNLPProtos {
           sectionAuthor_ = other.sectionAuthor_;
           onChanged();
         }
-        if (other.hasSectionEndLabel()) {
-          bitField1_ |= 0x00000010;
-          sectionEndLabel_ = other.sectionEndLabel_;
-          onChanged();
-        }
         if (other.hasDocID()) {
-          bitField1_ |= 0x00000020;
+          bitField1_ |= 0x00000010;
           docID_ = other.docID_;
           onChanged();
         }
@@ -13734,123 +13621,23 @@ public final class CoreNLPProtos {
         return this;
       }
 
-      private java.lang.Object sectionEndLabel_ = "";
-      /**
-       * <pre>
-       * label to denote token is end of section
-       * </pre>
-       *
-       * <code>optional string sectionEndLabel = 63;</code>
-       */
-      public boolean hasSectionEndLabel() {
-        return ((bitField1_ & 0x00000010) == 0x00000010);
-      }
-      /**
-       * <pre>
-       * label to denote token is end of section
-       * </pre>
-       *
-       * <code>optional string sectionEndLabel = 63;</code>
-       */
-      public java.lang.String getSectionEndLabel() {
-        java.lang.Object ref = sectionEndLabel_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            sectionEndLabel_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * label to denote token is end of section
-       * </pre>
-       *
-       * <code>optional string sectionEndLabel = 63;</code>
-       */
-      public com.google.protobuf.ByteString
-          getSectionEndLabelBytes() {
-        java.lang.Object ref = sectionEndLabel_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          sectionEndLabel_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * label to denote token is end of section
-       * </pre>
-       *
-       * <code>optional string sectionEndLabel = 63;</code>
-       */
-      public Builder setSectionEndLabel(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField1_ |= 0x00000010;
-        sectionEndLabel_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * label to denote token is end of section
-       * </pre>
-       *
-       * <code>optional string sectionEndLabel = 63;</code>
-       */
-      public Builder clearSectionEndLabel() {
-        bitField1_ = (bitField1_ & ~0x00000010);
-        sectionEndLabel_ = getDefaultInstance().getSectionEndLabel();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * label to denote token is end of section
-       * </pre>
-       *
-       * <code>optional string sectionEndLabel = 63;</code>
-       */
-      public Builder setSectionEndLabelBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField1_ |= 0x00000010;
-        sectionEndLabel_ = value;
-        onChanged();
-        return this;
-      }
-
       private java.lang.Object docID_ = "";
       /**
        * <pre>
        * doc id
        * </pre>
        *
-       * <code>optional string docID = 64;</code>
+       * <code>optional string docID = 63;</code>
        */
       public boolean hasDocID() {
-        return ((bitField1_ & 0x00000020) == 0x00000020);
+        return ((bitField1_ & 0x00000010) == 0x00000010);
       }
       /**
        * <pre>
        * doc id
        * </pre>
        *
-       * <code>optional string docID = 64;</code>
+       * <code>optional string docID = 63;</code>
        */
       public java.lang.String getDocID() {
         java.lang.Object ref = docID_;
@@ -13871,7 +13658,7 @@ public final class CoreNLPProtos {
        * doc id
        * </pre>
        *
-       * <code>optional string docID = 64;</code>
+       * <code>optional string docID = 63;</code>
        */
       public com.google.protobuf.ByteString
           getDocIDBytes() {
@@ -13891,14 +13678,14 @@ public final class CoreNLPProtos {
        * doc id
        * </pre>
        *
-       * <code>optional string docID = 64;</code>
+       * <code>optional string docID = 63;</code>
        */
       public Builder setDocID(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField1_ |= 0x00000020;
+  bitField1_ |= 0x00000010;
         docID_ = value;
         onChanged();
         return this;
@@ -13908,10 +13695,10 @@ public final class CoreNLPProtos {
        * doc id
        * </pre>
        *
-       * <code>optional string docID = 64;</code>
+       * <code>optional string docID = 63;</code>
        */
       public Builder clearDocID() {
-        bitField1_ = (bitField1_ & ~0x00000020);
+        bitField1_ = (bitField1_ & ~0x00000010);
         docID_ = getDefaultInstance().getDocID();
         onChanged();
         return this;
@@ -13921,14 +13708,14 @@ public final class CoreNLPProtos {
        * doc id
        * </pre>
        *
-       * <code>optional string docID = 64;</code>
+       * <code>optional string docID = 63;</code>
        */
       public Builder setDocIDBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField1_ |= 0x00000020;
+  bitField1_ |= 0x00000010;
         docID_ = value;
         onChanged();
         return this;
@@ -14911,6 +14698,20 @@ public final class CoreNLPProtos {
      */
     com.google.protobuf.ByteString
         getSectionDateBytes();
+
+    /**
+     * <code>optional string sectionEndLabel = 59;</code>
+     */
+    boolean hasSectionEndLabel();
+    /**
+     * <code>optional string sectionEndLabel = 59;</code>
+     */
+    java.lang.String getSectionEndLabel();
+    /**
+     * <code>optional string sectionEndLabel = 59;</code>
+     */
+    com.google.protobuf.ByteString
+        getSectionEndLabelBytes();
   }
   /**
    * <pre>
@@ -14965,6 +14766,7 @@ public final class CoreNLPProtos {
       sectionName_ = "";
       sectionAuthor_ = "";
       sectionDate_ = "";
+      sectionEndLabel_ = "";
     }
 
     @java.lang.Override
@@ -15293,6 +15095,12 @@ public final class CoreNLPProtos {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField1_ |= 0x00000200;
               sectionDate_ = bs;
+              break;
+            }
+            case 474: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField1_ |= 0x00000400;
+              sectionEndLabel_ = bs;
               break;
             }
           }
@@ -17053,6 +16861,48 @@ public final class CoreNLPProtos {
       }
     }
 
+    public static final int SECTIONENDLABEL_FIELD_NUMBER = 59;
+    private volatile java.lang.Object sectionEndLabel_;
+    /**
+     * <code>optional string sectionEndLabel = 59;</code>
+     */
+    public boolean hasSectionEndLabel() {
+      return ((bitField1_ & 0x00000400) == 0x00000400);
+    }
+    /**
+     * <code>optional string sectionEndLabel = 59;</code>
+     */
+    public java.lang.String getSectionEndLabel() {
+      java.lang.Object ref = sectionEndLabel_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          sectionEndLabel_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string sectionEndLabel = 59;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSectionEndLabelBytes() {
+      java.lang.Object ref = sectionEndLabel_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        sectionEndLabel_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -17225,6 +17075,9 @@ public final class CoreNLPProtos {
       if (((bitField1_ & 0x00000200) == 0x00000200)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 58, sectionDate_);
       }
+      if (((bitField1_ & 0x00000400) == 0x00000400)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 59, sectionEndLabel_);
+      }
       extensionWriter.writeUntil(256, output);
       unknownFields.writeTo(output);
     }
@@ -17385,6 +17238,9 @@ public final class CoreNLPProtos {
       }
       if (((bitField1_ & 0x00000200) == 0x00000200)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(58, sectionDate_);
+      }
+      if (((bitField1_ & 0x00000400) == 0x00000400)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(59, sectionEndLabel_);
       }
       size += extensionsSerializedSize();
       size += unknownFields.getSerializedSize();
@@ -17616,6 +17472,11 @@ public final class CoreNLPProtos {
         result = result && getSectionDate()
             .equals(other.getSectionDate());
       }
+      result = result && (hasSectionEndLabel() == other.hasSectionEndLabel());
+      if (hasSectionEndLabel()) {
+        result = result && getSectionEndLabel()
+            .equals(other.getSectionEndLabel());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       result = result &&
           getExtensionFields().equals(other.getExtensionFields());
@@ -17801,6 +17662,10 @@ public final class CoreNLPProtos {
       if (hasSectionDate()) {
         hash = (37 * hash) + SECTIONDATE_FIELD_NUMBER;
         hash = (53 * hash) + getSectionDate().hashCode();
+      }
+      if (hasSectionEndLabel()) {
+        hash = (37 * hash) + SECTIONENDLABEL_FIELD_NUMBER;
+        hash = (53 * hash) + getSectionEndLabel().hashCode();
       }
       hash = hashFields(hash, getExtensionFields());
       hash = (29 * hash) + unknownFields.hashCode();
@@ -18047,6 +17912,8 @@ public final class CoreNLPProtos {
         bitField1_ = (bitField1_ & ~0x00000200);
         sectionDate_ = "";
         bitField1_ = (bitField1_ & ~0x00000400);
+        sectionEndLabel_ = "";
+        bitField1_ = (bitField1_ & ~0x00000800);
         return this;
       }
 
@@ -18274,6 +18141,10 @@ public final class CoreNLPProtos {
           to_bitField1_ |= 0x00000200;
         }
         result.sectionDate_ = sectionDate_;
+        if (((from_bitField1_ & 0x00000800) == 0x00000800)) {
+          to_bitField1_ |= 0x00000400;
+        }
+        result.sectionEndLabel_ = sectionEndLabel_;
         result.bitField0_ = to_bitField0_;
         result.bitField1_ = to_bitField1_;
         onBuilt();
@@ -18522,6 +18393,11 @@ public final class CoreNLPProtos {
         if (other.hasSectionDate()) {
           bitField1_ |= 0x00000400;
           sectionDate_ = other.sectionDate_;
+          onChanged();
+        }
+        if (other.hasSectionEndLabel()) {
+          bitField1_ |= 0x00000800;
+          sectionEndLabel_ = other.sectionEndLabel_;
           onChanged();
         }
         this.mergeExtensionFields(other);
@@ -22480,6 +22356,82 @@ public final class CoreNLPProtos {
   }
   bitField1_ |= 0x00000400;
         sectionDate_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object sectionEndLabel_ = "";
+      /**
+       * <code>optional string sectionEndLabel = 59;</code>
+       */
+      public boolean hasSectionEndLabel() {
+        return ((bitField1_ & 0x00000800) == 0x00000800);
+      }
+      /**
+       * <code>optional string sectionEndLabel = 59;</code>
+       */
+      public java.lang.String getSectionEndLabel() {
+        java.lang.Object ref = sectionEndLabel_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            sectionEndLabel_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string sectionEndLabel = 59;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSectionEndLabelBytes() {
+        java.lang.Object ref = sectionEndLabel_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          sectionEndLabel_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string sectionEndLabel = 59;</code>
+       */
+      public Builder setSectionEndLabel(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField1_ |= 0x00000800;
+        sectionEndLabel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string sectionEndLabel = 59;</code>
+       */
+      public Builder clearSectionEndLabel() {
+        bitField1_ = (bitField1_ & ~0x00000800);
+        sectionEndLabel_ = getDefaultInstance().getSectionEndLabel();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string sectionEndLabel = 59;</code>
+       */
+      public Builder setSectionEndLabelBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField1_ |= 0x00000800;
+        sectionEndLabel_ = value;
         onChanged();
         return this;
       }
@@ -55208,7 +55160,7 @@ public final class CoreNLPProtos {
       "mentions\030\t \003(\0132%.edu.stanford.nlp.pipeli" +
       "ne.NERMention\022\016\n\006xmlDoc\030\013 \002(\010\0224\n\010section" +
       "s\030\014 \003(\0132\".edu.stanford.nlp.pipeline.Sect" +
-      "ion*\005\010d\020\200\002\"\344\r\n\010Sentence\022/\n\005token\030\001 \003(\0132 " +
+      "ion*\005\010d\020\200\002\"\313\r\n\010Sentence\022/\n\005token\030\001 \003(\0132 " +
       ".edu.stanford.nlp.pipeline.Token\022\030\n\020toke" +
       "nOffsetBegin\030\002 \002(\r\022\026\n\016tokenOffsetEnd\030\003 \002" +
       "(\r\022\025\n\rsentenceIndex\030\004 \001(\r\022\034\n\024characterOf" +
@@ -55251,36 +55203,36 @@ public final class CoreNLPProtos {
       "entionsAnnotation\0309 \001(\010\022\022\n\nsentenceID\030: " +
       "\001(\t\022\023\n\013sectionDate\030; \001(\t\022\024\n\014sectionIndex" +
       "\030< \001(\r\022\023\n\013sectionName\030= \001(\t\022\025\n\rsectionAu" +
-      "thor\030> \001(\t\022\027\n\017sectionEndLabel\030? \001(\t\022\r\n\005d" +
-      "ocID\030@ \001(\t*\005\010d\020\200\002\"\336\010\n\005Token\022\014\n\004word\030\001 \001(" +
-      "\t\022\013\n\003pos\030\002 \001(\t\022\r\n\005value\030\003 \001(\t\022\020\n\010categor" +
-      "y\030\004 \001(\t\022\016\n\006before\030\005 \001(\t\022\r\n\005after\030\006 \001(\t\022\024",
-      "\n\014originalText\030\007 \001(\t\022\013\n\003ner\030\010 \001(\t\022\025\n\rnor" +
-      "malizedNER\030\t \001(\t\022\r\n\005lemma\030\n \001(\t\022\021\n\tbegin" +
-      "Char\030\013 \001(\r\022\017\n\007endChar\030\014 \001(\r\022\021\n\tutterance" +
-      "\030\r \001(\r\022\017\n\007speaker\030\016 \001(\t\022\022\n\nbeginIndex\030\017 " +
-      "\001(\r\022\020\n\010endIndex\030\020 \001(\r\022\027\n\017tokenBeginIndex" +
-      "\030\021 \001(\r\022\025\n\rtokenEndIndex\030\022 \001(\r\0224\n\ntimexVa" +
-      "lue\030\023 \001(\0132 .edu.stanford.nlp.pipeline.Ti" +
-      "mex\022\025\n\rhasXmlContext\030\025 \001(\010\022\022\n\nxmlContext" +
-      "\030\026 \003(\t\022\026\n\016corefClusterID\030\027 \001(\r\022\016\n\006answer" +
-      "\030\030 \001(\t\022\025\n\rheadWordIndex\030\032 \001(\r\0225\n\010operato",
-      "r\030\033 \001(\0132#.edu.stanford.nlp.pipeline.Oper" +
-      "ator\0225\n\010polarity\030\034 \001(\0132#.edu.stanford.nl" +
-      "p.pipeline.Polarity\022-\n\004span\030\035 \001(\0132\037.edu." +
-      "stanford.nlp.pipeline.Span\022\021\n\tsentiment\030" +
-      "\036 \001(\t\022\026\n\016quotationIndex\030\037 \001(\005\022B\n\016conllUF" +
-      "eatures\030  \001(\0132*.edu.stanford.nlp.pipelin" +
-      "e.MapStringString\022\021\n\tcoarseTag\030! \001(\t\0228\n\017" +
-      "conllUTokenSpan\030\" \001(\0132\037.edu.stanford.nlp" +
-      ".pipeline.Span\022\022\n\nconllUMisc\030# \001(\t\022D\n\023co" +
-      "nllUSecondaryDeps\030$ \001(\0132\'.edu.stanford.n",
-      "lp.pipeline.MapIntString\022\027\n\017wikipediaEnt" +
-      "ity\030% \001(\t\022\016\n\006gender\0303 \001(\t\022\020\n\010trueCase\0304 " +
-      "\001(\t\022\024\n\014trueCaseText\0305 \001(\t\022\023\n\013chineseChar" +
-      "\0306 \001(\t\022\022\n\nchineseSeg\0307 \001(\t\022\023\n\013sectionNam" +
-      "e\0308 \001(\t\022\025\n\rsectionAuthor\0309 \001(\t\022\023\n\013sectio" +
-      "nDate\030: \001(\t*\005\010d\020\200\002\"\241\001\n\005Quote\022\014\n\004text\030\001 \001" +
+      "thor\030> \001(\t\022\r\n\005docID\030? \001(\t*\005\010d\020\200\002\"\367\010\n\005Tok" +
+      "en\022\014\n\004word\030\001 \001(\t\022\013\n\003pos\030\002 \001(\t\022\r\n\005value\030\003" +
+      " \001(\t\022\020\n\010category\030\004 \001(\t\022\016\n\006before\030\005 \001(\t\022\r" +
+      "\n\005after\030\006 \001(\t\022\024\n\014originalText\030\007 \001(\t\022\013\n\003n",
+      "er\030\010 \001(\t\022\025\n\rnormalizedNER\030\t \001(\t\022\r\n\005lemma" +
+      "\030\n \001(\t\022\021\n\tbeginChar\030\013 \001(\r\022\017\n\007endChar\030\014 \001" +
+      "(\r\022\021\n\tutterance\030\r \001(\r\022\017\n\007speaker\030\016 \001(\t\022\022" +
+      "\n\nbeginIndex\030\017 \001(\r\022\020\n\010endIndex\030\020 \001(\r\022\027\n\017" +
+      "tokenBeginIndex\030\021 \001(\r\022\025\n\rtokenEndIndex\030\022" +
+      " \001(\r\0224\n\ntimexValue\030\023 \001(\0132 .edu.stanford." +
+      "nlp.pipeline.Timex\022\025\n\rhasXmlContext\030\025 \001(" +
+      "\010\022\022\n\nxmlContext\030\026 \003(\t\022\026\n\016corefClusterID\030" +
+      "\027 \001(\r\022\016\n\006answer\030\030 \001(\t\022\025\n\rheadWordIndex\030\032" +
+      " \001(\r\0225\n\010operator\030\033 \001(\0132#.edu.stanford.nl",
+      "p.pipeline.Operator\0225\n\010polarity\030\034 \001(\0132#." +
+      "edu.stanford.nlp.pipeline.Polarity\022-\n\004sp" +
+      "an\030\035 \001(\0132\037.edu.stanford.nlp.pipeline.Spa" +
+      "n\022\021\n\tsentiment\030\036 \001(\t\022\026\n\016quotationIndex\030\037" +
+      " \001(\005\022B\n\016conllUFeatures\030  \001(\0132*.edu.stanf" +
+      "ord.nlp.pipeline.MapStringString\022\021\n\tcoar" +
+      "seTag\030! \001(\t\0228\n\017conllUTokenSpan\030\" \001(\0132\037.e" +
+      "du.stanford.nlp.pipeline.Span\022\022\n\nconllUM" +
+      "isc\030# \001(\t\022D\n\023conllUSecondaryDeps\030$ \001(\0132\'" +
+      ".edu.stanford.nlp.pipeline.MapIntString\022",
+      "\027\n\017wikipediaEntity\030% \001(\t\022\016\n\006gender\0303 \001(\t" +
+      "\022\020\n\010trueCase\0304 \001(\t\022\024\n\014trueCaseText\0305 \001(\t" +
+      "\022\023\n\013chineseChar\0306 \001(\t\022\022\n\nchineseSeg\0307 \001(" +
+      "\t\022\023\n\013sectionName\0308 \001(\t\022\025\n\rsectionAuthor\030" +
+      "9 \001(\t\022\023\n\013sectionDate\030: \001(\t\022\027\n\017sectionEnd" +
+      "Label\030; \001(\t*\005\010d\020\200\002\"\241\001\n\005Quote\022\014\n\004text\030\001 \001" +
       "(\t\022\r\n\005begin\030\002 \001(\r\022\013\n\003end\030\003 \001(\r\022\025\n\rsenten" +
       "ceBegin\030\005 \001(\r\022\023\n\013sentenceEnd\030\006 \001(\r\022\022\n\nto" +
       "kenBegin\030\007 \001(\r\022\020\n\010tokenEnd\030\010 \001(\r\022\r\n\005doci" +
@@ -55434,13 +55386,13 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_Sentence_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_Sentence_descriptor,
-        new java.lang.String[] { "Token", "TokenOffsetBegin", "TokenOffsetEnd", "SentenceIndex", "CharacterOffsetBegin", "CharacterOffsetEnd", "ParseTree", "BinarizedParseTree", "AnnotatedParseTree", "Sentiment", "KBestParseTrees", "BasicDependencies", "CollapsedDependencies", "CollapsedCCProcessedDependencies", "AlternativeDependencies", "OpenieTriple", "KbpTriple", "EntailedSentence", "EntailedClause", "EnhancedDependencies", "EnhancedPlusPlusDependencies", "Character", "Paragraph", "Text", "HasRelationAnnotations", "Entity", "Relation", "HasNumerizedTokensAnnotation", "Mentions", "MentionsForCoref", "HasCorefMentionsAnnotation", "SentenceID", "SectionDate", "SectionIndex", "SectionName", "SectionAuthor", "SectionEndLabel", "DocID", });
+        new java.lang.String[] { "Token", "TokenOffsetBegin", "TokenOffsetEnd", "SentenceIndex", "CharacterOffsetBegin", "CharacterOffsetEnd", "ParseTree", "BinarizedParseTree", "AnnotatedParseTree", "Sentiment", "KBestParseTrees", "BasicDependencies", "CollapsedDependencies", "CollapsedCCProcessedDependencies", "AlternativeDependencies", "OpenieTriple", "KbpTriple", "EntailedSentence", "EntailedClause", "EnhancedDependencies", "EnhancedPlusPlusDependencies", "Character", "Paragraph", "Text", "HasRelationAnnotations", "Entity", "Relation", "HasNumerizedTokensAnnotation", "Mentions", "MentionsForCoref", "HasCorefMentionsAnnotation", "SentenceID", "SectionDate", "SectionIndex", "SectionName", "SectionAuthor", "DocID", });
     internal_static_edu_stanford_nlp_pipeline_Token_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_edu_stanford_nlp_pipeline_Token_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_Token_descriptor,
-        new java.lang.String[] { "Word", "Pos", "Value", "Category", "Before", "After", "OriginalText", "Ner", "NormalizedNER", "Lemma", "BeginChar", "EndChar", "Utterance", "Speaker", "BeginIndex", "EndIndex", "TokenBeginIndex", "TokenEndIndex", "TimexValue", "HasXmlContext", "XmlContext", "CorefClusterID", "Answer", "HeadWordIndex", "Operator", "Polarity", "Span", "Sentiment", "QuotationIndex", "ConllUFeatures", "CoarseTag", "ConllUTokenSpan", "ConllUMisc", "ConllUSecondaryDeps", "WikipediaEntity", "Gender", "TrueCase", "TrueCaseText", "ChineseChar", "ChineseSeg", "SectionName", "SectionAuthor", "SectionDate", });
+        new java.lang.String[] { "Word", "Pos", "Value", "Category", "Before", "After", "OriginalText", "Ner", "NormalizedNER", "Lemma", "BeginChar", "EndChar", "Utterance", "Speaker", "BeginIndex", "EndIndex", "TokenBeginIndex", "TokenEndIndex", "TimexValue", "HasXmlContext", "XmlContext", "CorefClusterID", "Answer", "HeadWordIndex", "Operator", "Polarity", "Span", "Sentiment", "QuotationIndex", "ConllUFeatures", "CoarseTag", "ConllUTokenSpan", "ConllUMisc", "ConllUSecondaryDeps", "WikipediaEntity", "Gender", "TrueCase", "TrueCaseText", "ChineseChar", "ChineseSeg", "SectionName", "SectionAuthor", "SectionDate", "SectionEndLabel", });
     internal_static_edu_stanford_nlp_pipeline_Quote_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_edu_stanford_nlp_pipeline_Quote_fieldAccessorTable = new
