@@ -51,9 +51,10 @@ message Document {
   repeated NERMention mentions = 9;
 
   /**
-   * Store sections found in the document
+   * xml information
    */
-  repeated Section sections = 11;
+  required bool    xmlDoc = 11;
+  repeated Section sections = 12;
 
   extensions 100 to 255;
 }
@@ -157,6 +158,11 @@ message Token {
   //  Chinese character info
   optional string chineseChar     = 54;
   optional string chineseSeg      = 55;
+
+  // Section info
+  optional string sectionName     = 56;
+  optional string sectionAuthor   = 57;
+  optional string sectionDate     = 58;
   
 
   // Fields in the CoreLabel java class that are moved elsewhere
