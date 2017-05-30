@@ -105,6 +105,7 @@ message Sentence {
   optional uint32          sectionIndex                        = 60;  // section index for this sentence's section
   optional string          sectionName                         = 61;  // name of section
   optional string          sectionAuthor                       = 62;  // author of section
+  optional string          docID                               = 63;  // doc id
 
   extensions 100 to 255;
 }
