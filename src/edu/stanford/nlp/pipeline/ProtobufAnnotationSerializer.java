@@ -273,6 +273,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
     keysToSerialize.remove(HeadWordLabelAnnotation.class);
     keysToSerialize.remove(HeadTagLabelAnnotation.class);
+    // Remove section info
+    keysToSerialize.remove(SectionStartAnnotation.class);
+    keysToSerialize.remove(SectionEndAnnotation.class);
     // Set the word (this may be null if the CoreLabel is storing a character (as in case of segmenter)
     if (coreLabel.word() != null)
       builder.setWord(coreLabel.word());
@@ -302,6 +305,23 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.addAllXmlContext(getAndRegister(coreLabel, keysToSerialize, XmlContextAnnotation.class));
     } else {
       builder.setHasXmlContext(false);
+    }
+    // if there is section info for this token, store it
+    if (keySet.contains(SectionStartAnnotation.class)) {
+      CoreMap sectionAnnotations = coreLabel.get(SectionStartAnnotation.class);
+      // if there is a section name annotation, store it
+      if (sectionAnnotations.get(SectionAnnotation.class) != null)
+        builder.setSectionName(sectionAnnotations.get(SectionAnnotation.class));
+      // if there is a section author annotation, store it
+      if (sectionAnnotations.get(AuthorAnnotation.class) != null)
+        builder.setSectionAuthor(sectionAnnotations.get(AuthorAnnotation.class));
+      // if there is a section date annotation, store it
+      if (sectionAnnotations.get(SectionDateAnnotation.class) != null)
+        builder.setSectionAuthor(sectionAnnotations.get(SectionDateAnnotation.class));
+    }
+    // store section end label
+    if (keySet.contains(SectionEndAnnotation.class)) {
+      builder.setSectionEndLabel(coreLabel.get(SectionEndAnnotation.class));
     }
     if (keySet.contains(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(getAndRegister(coreLabel, keysToSerialize, CorefClusterIdAnnotation.class)); }
     if (keySet.contains(NaturalLogicAnnotations.OperatorAnnotation.class)) { builder.setOperator(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.OperatorAnnotation.class))); }
@@ -488,6 +508,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // add section date
     if (keySet.contains(SectionDateAnnotation.class)) builder.setSectionDate(getAndRegister(sentence, keysToSerialize, SectionDateAnnotation.class));
 
+    // add section name
+    if (keySet.contains(SectionAnnotation.class)) builder.setSectionName(getAndRegister(sentence, keysToSerialize, SectionAnnotation.class));
+
+    // add section author
+    if (keySet.contains(AuthorAnnotation.class)) builder.setSectionAuthor(getAndRegister(sentence, keysToSerialize, AuthorAnnotation.class));
+
+    // add doc id
+    if (keySet.contains(DocIDAnnotation.class)) builder.setDocID(getAndRegister(sentence, keysToSerialize, DocIDAnnotation.class));
+
     // Return
     return builder;
   }
@@ -537,6 +566,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Required fields
     builder.setText(doc.get(TextAnnotation.class));
     keysToSerialize.remove(TextAnnotation.class);
+    // Check if we need to store xml info
+    if (doc.containsKey(SectionsAnnotation.class)) {
+      builder.setXmlDoc(true);
+    } else {
+      builder.setXmlDoc(false);
+    }
     // Optional fields
     if (doc.containsKey(SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(SentencesAnnotation.class)) { builder.addSentence(toProto(sentence)); }
@@ -1159,6 +1194,23 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
     if (proto.hasTrueCaseText()) { word.set(TrueCaseTextAnnotation.class, proto.getTrueCaseText()); }
 
+    // section stuff
+    // handle section start info
+    if (proto.hasSectionName() || proto.hasSectionAuthor() || proto.hasSectionDate()) {
+      CoreMap sectionAnnotations = new ArrayCoreMap();
+      if (proto.hasSectionName())
+        sectionAnnotations.set(SectionAnnotation.class, proto.getSectionName());
+      if (proto.hasSectionDate())
+        sectionAnnotations.set(SectionDateAnnotation.class, proto.getSectionDate());
+      if (proto.hasSectionAuthor())
+        sectionAnnotations.set(AuthorAnnotation.class, proto.getSectionAuthor());
+      word.set(SectionStartAnnotation.class, sectionAnnotations);
+    }
+    // handle sectione end info
+    if (proto.hasSectionEndLabel()) {
+      word.set(SectionEndAnnotation.class, proto.getSectionEndLabel());
+    }
+
     // Return
     return word;
   }
@@ -1226,6 +1278,16 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Add text -- missing by default as it's populated from the Document
     lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
 
+    // add section info
+    if (proto.hasSectionName())
+      lossySentence.set(SectionAnnotation.class, proto.getSectionName());
+    if (proto.hasSectionDate())
+      lossySentence.set(SectionDateAnnotation.class, proto.getSectionDate());
+    if (proto.hasSectionAuthor())
+      lossySentence.set(AuthorAnnotation.class, proto.getSectionAuthor());
+    if (proto.hasSectionIndex())
+      lossySentence.set(SectionIndexAnnotation.class, proto.getSectionIndex());
+
     // Return
     return lossySentence;
   }
@@ -1269,6 +1331,16 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // if there are mentions for this sentence, add them to the annotation
     loadSentenceMentions(proto, sentence);
+
+    // add section info
+    if (proto.hasSectionName())
+      sentence.set(SectionAnnotation.class, proto.getSectionName());
+    if (proto.hasSectionDate())
+      sentence.set(SectionDateAnnotation.class, proto.getSectionDate());
+    if (proto.hasSectionAuthor())
+      sentence.set(AuthorAnnotation.class, proto.getSectionAuthor());
+    if (proto.hasSectionIndex())
+      sentence.set(SectionIndexAnnotation.class, proto.getSectionIndex());
 
     // Return
     return sentence;
