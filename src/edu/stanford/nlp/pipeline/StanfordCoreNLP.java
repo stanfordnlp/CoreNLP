@@ -930,18 +930,19 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * @param base The base input directory to process from.
    * @param files The files to process.
    * @param numThreads The number of threads to annotate on.
+   * @param clearPool Whether or not to clear pool when process is done
    *
    * @throws IOException
    */
-  public void processFiles(String base, final Collection<File> files, int numThreads) throws IOException {
+  public void processFiles(String base, final Collection<File> files, int numThreads, boolean clearPool) throws IOException {
     AnnotationOutputter.Options options = AnnotationOutputter.getOptions(this);
     StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
-    processFiles(base, files, numThreads, properties, this::annotate, createOutputter(properties, options), outputFormat);
+    processFiles(base, files, numThreads, properties, this::annotate, createOutputter(properties, options), outputFormat, clearPool);
   }
 
 
   /**
-   * Create an outputter to be passed into {@link StanfordCoreNLP#processFiles(String, Collection, int, Properties, BiConsumer, BiConsumer, OutputFormat)}.
+   * Create an outputter to be passed into {@link StanfordCoreNLP#processFiles(String, Collection, int, Properties, BiConsumer, BiConsumer, OutputFormat, boolean)}.
    *
    * @param properties The properties file to use.
    * @param outputOptions The means of creating output options
@@ -1006,12 +1007,15 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    *                   This should match the properties file used in the implementation of the annotate function.
    * @param annotate The function used to annotate a document.
    * @param print The function used to print a document.
+   * @param outputFormat The format used for printing out documents
+   * @param clearPool Whether or not to clear the pool when done
+   *
    * @throws IOException
    */
   protected static void processFiles(String base, final Collection<File> files, int numThreads,
                                      Properties properties, BiConsumer<Annotation, Consumer<Annotation>> annotate,
                                      BiConsumer<Annotation, OutputStream> print,
-                                     OutputFormat outputFormat) throws IOException {
+                                     OutputFormat outputFormat, boolean clearPool) throws IOException {
     // List<Runnable> toRun = new LinkedList<>();
 
     // Process properties here
@@ -1175,7 +1179,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
                 logger.info("Processed " + totalProcessed + " documents");
               }
               // check we've processed or errored on every file, if so tell the pool to clear()
-              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size())
+              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size() && clearPool)
                 AnnotatorPool.SINGLETON.clear();
             }
           } else if (continueOnAnnotateError) {
@@ -1185,13 +1189,14 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             synchronized (totalErrorAnnotating) {
               totalErrorAnnotating.incValue(1);
               // check we've processed or errored on every file, if so tell the pool to clear()
-              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size())
+              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size() && clearPool)
                 AnnotatorPool.SINGLETON.clear();
             }
 
           } else {
             // if stopping due to error, make sure to clear the pool
-            AnnotatorPool.SINGLETON.clear();
+            if (clearPool)
+              AnnotatorPool.SINGLETON.clear();
             throw new RuntimeException("Error annotating " + file.getAbsoluteFile(), ex);
           }
         });
@@ -1218,15 +1223,19 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     */
   }
 
-  public void processFiles(final Collection<File> files, int numThreads) throws IOException {
-    processFiles(null, files, numThreads);
+  public void processFiles(final Collection<File> files, int numThreads, boolean clearPool) throws IOException {
+    processFiles(null, files, numThreads, clearPool);
   }
 
-  public void processFiles(final Collection<File> files) throws IOException {
-    processFiles(files, 1);
+  public void processFiles(final Collection<File> files, boolean clearPool) throws IOException {
+    processFiles(files, 1, clearPool);
   }
 
   public void run() throws IOException {
+    run(false);
+  }
+
+  public void run(boolean clearPool) throws IOException {
     Timing tim = new Timing();
     StanfordRedwoodConfiguration.minimalSetup();
 
@@ -1253,7 +1262,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         fileName = properties.getProperty("textFile");
       }
       Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
-      this.processFiles(null, files, numThreads);
+      this.processFiles(null, files, numThreads, clearPool);
     }
 
     //
@@ -1270,7 +1279,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
           files.add(file);
         }
       }
-      this.processFiles(null, files, numThreads);
+      this.processFiles(null, files, numThreads, clearPool);
     }
 
     //
@@ -1324,7 +1333,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     }
     // Run the pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    pipeline.run();
+    pipeline.run(true);
     // clear the pool if not running in multi-thread mode
     if (!props.containsKey("threads") || Integer.parseInt(props.getProperty("threads")) <= 1)
       AnnotatorPool.SINGLETON.clear();
