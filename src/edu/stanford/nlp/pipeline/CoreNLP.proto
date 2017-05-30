@@ -53,7 +53,7 @@ message Document {
   /**
    * xml information
    */
-  required bool    xmlDoc = 11;
+  optional bool    xmlDoc = 11;
   repeated Section sections = 12;
 
   extensions 100 to 255;
