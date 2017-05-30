@@ -1672,11 +1672,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       mentionToUpdate.speakerInfo = speakerInfo;
     }
 
-    // add section info
-    ann.set(SectionsAnnotation.class, new ArrayList<CoreMap>());
-    for (CoreNLPProtos.Section section : proto.getSectionsList()) {
-      ann.get(SectionsAnnotation.class).add(fromProto(section, ann.get(SentencesAnnotation.class)));
-    }
     // Return
     return ann;
   }
