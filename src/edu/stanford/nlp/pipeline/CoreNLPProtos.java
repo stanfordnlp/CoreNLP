@@ -710,7 +710,7 @@ public final class CoreNLPProtos {
      * xml information
      * </pre>
      *
-     * <code>required bool xmlDoc = 11;</code>
+     * <code>optional bool xmlDoc = 11;</code>
      */
     boolean hasXmlDoc();
     /**
@@ -719,7 +719,7 @@ public final class CoreNLPProtos {
      * xml information
      * </pre>
      *
-     * <code>required bool xmlDoc = 11;</code>
+     * <code>optional bool xmlDoc = 11;</code>
      */
     boolean getXmlDoc();
 
@@ -1357,7 +1357,7 @@ public final class CoreNLPProtos {
      * xml information
      * </pre>
      *
-     * <code>required bool xmlDoc = 11;</code>
+     * <code>optional bool xmlDoc = 11;</code>
      */
     public boolean hasXmlDoc() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
@@ -1368,7 +1368,7 @@ public final class CoreNLPProtos {
      * xml information
      * </pre>
      *
-     * <code>required bool xmlDoc = 11;</code>
+     * <code>optional bool xmlDoc = 11;</code>
      */
     public boolean getXmlDoc() {
       return xmlDoc_;
@@ -1416,10 +1416,6 @@ public final class CoreNLPProtos {
       if (isInitialized == 0) return false;
 
       if (!hasText()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasXmlDoc()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -2248,9 +2244,6 @@ public final class CoreNLPProtos {
 
       public final boolean isInitialized() {
         if (!hasText()) {
-          return false;
-        }
-        if (!hasXmlDoc()) {
           return false;
         }
         for (int i = 0; i < getSentenceCount(); i++) {
@@ -4213,7 +4206,7 @@ public final class CoreNLPProtos {
        * xml information
        * </pre>
        *
-       * <code>required bool xmlDoc = 11;</code>
+       * <code>optional bool xmlDoc = 11;</code>
        */
       public boolean hasXmlDoc() {
         return ((bitField0_ & 0x00000400) == 0x00000400);
@@ -4224,7 +4217,7 @@ public final class CoreNLPProtos {
        * xml information
        * </pre>
        *
-       * <code>required bool xmlDoc = 11;</code>
+       * <code>optional bool xmlDoc = 11;</code>
        */
       public boolean getXmlDoc() {
         return xmlDoc_;
@@ -4235,7 +4228,7 @@ public final class CoreNLPProtos {
        * xml information
        * </pre>
        *
-       * <code>required bool xmlDoc = 11;</code>
+       * <code>optional bool xmlDoc = 11;</code>
        */
       public Builder setXmlDoc(boolean value) {
         bitField0_ |= 0x00000400;
@@ -4249,7 +4242,7 @@ public final class CoreNLPProtos {
        * xml information
        * </pre>
        *
-       * <code>required bool xmlDoc = 11;</code>
+       * <code>optional bool xmlDoc = 11;</code>
        */
       public Builder clearXmlDoc() {
         bitField0_ = (bitField0_ & ~0x00000400);
@@ -55158,7 +55151,7 @@ public final class CoreNLPProtos {
       "stanford.nlp.pipeline.Token\022/\n\005quote\030\006 \003" +
       "(\0132 .edu.stanford.nlp.pipeline.Quote\0227\n\010",
       "mentions\030\t \003(\0132%.edu.stanford.nlp.pipeli" +
-      "ne.NERMention\022\016\n\006xmlDoc\030\013 \002(\010\0224\n\010section" +
+      "ne.NERMention\022\016\n\006xmlDoc\030\013 \001(\010\0224\n\010section" +
       "s\030\014 \003(\0132\".edu.stanford.nlp.pipeline.Sect" +
       "ion*\005\010d\020\200\002\"\313\r\n\010Sentence\022/\n\005token\030\001 \003(\0132 " +
       ".edu.stanford.nlp.pipeline.Token\022\030\n\020toke" +
