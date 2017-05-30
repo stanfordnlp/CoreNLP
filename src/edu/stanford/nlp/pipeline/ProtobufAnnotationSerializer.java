@@ -1624,6 +1624,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         mentionInt++;
       }
 
+      // set sections if this was an xmlDoc
+      if (proto.hasXmlDoc() && proto.getXmlDoc()) {
+        // this was an xml doc so set up a list of sections
+        List<CoreMap> listOfSections = new ArrayList<CoreMap>();
+        ann.set(SectionsAnnotation.class, listOfSections);
+        for (CoreNLPProtos.Section section : proto.getSectionsList()) {
+          CoreMap sectionCoreMap = fromProto(section, ann.get(SentencesAnnotation.class));
+          ann.get(SectionsAnnotation.class).add(sectionCoreMap);
+        }
+      }
+
     }
 
     // Set quotes
@@ -1669,6 +1680,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Return
     return ann;
   }
+
 
   /**
    * Retrieve a Tree object from a saved protobuf.
