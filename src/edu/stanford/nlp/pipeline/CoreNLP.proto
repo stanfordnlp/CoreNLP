@@ -103,6 +103,8 @@ message Sentence {
   optional string          sentenceID                          = 58;  // Useful when storing sentences (e.g. ForEach)
   optional string          sectionDate                         = 59;  // date of section
   optional uint32          sectionIndex                        = 60;  // section index for this sentence's section
+  optional string          sectionName                         = 61;  // name of section
+  optional string          sectionAuthor                       = 62;  // author of section
 
   extensions 100 to 255;
 }
