@@ -71,7 +71,7 @@ public class StanfordCoreNLPSlowITest extends TestCase {
     StanfordCoreNLP pipeline = buildPipeline();
     for (File file : getFileList()) {
       try {
-        pipeline.processFiles(Collections.singletonList(file));
+        pipeline.processFiles(Collections.singletonList(file), false);
       } catch (Exception e) {
         // process files one at a time and rethrow exceptions so that
         // we know which file caused the problem
@@ -82,7 +82,7 @@ public class StanfordCoreNLPSlowITest extends TestCase {
 
   public void testParallelism() throws IOException {
     StanfordCoreNLP pipeline = buildPipeline();
-    pipeline.processFiles(getFileList(), Runtime.getRuntime().availableProcessors());
+    pipeline.processFiles(getFileList(), Runtime.getRuntime().availableProcessors(), false);
   }
 
 }
