@@ -1625,7 +1625,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
 
     }
-    
+
     // set sections if this was an xmlDoc
     if (proto.hasXmlDoc() && proto.getXmlDoc()) {
       // this was an xml doc so set up a list of sections
