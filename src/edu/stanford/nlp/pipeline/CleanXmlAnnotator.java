@@ -601,25 +601,31 @@ public class CleanXmlAnnotator implements Annotator {
       if (sectionTagMatcher != null && sectionTagMatcher.matcher(tag.name).matches()) {
         if (tag.isEndTag) {
           annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, null);
+          // create a CoreMap to store info about this section
+          CoreMap currSectionCoreMap = new ArrayCoreMap();
           if (sectionStartToken != null) {
             sectionStartToken.set(CoreAnnotations.SectionStartAnnotation.class, sectionAnnotations);
+            // set character offset info for this section
+            currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+                sectionStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+          } else {
+            // handle case where section has 0 tokens (for instance post that just contains an img)
+            currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,-1);
           }
           // Mark previous token as forcing sentence and section end
           if ( ! newTokens.isEmpty()) {
             CoreLabel previous = newTokens.get(newTokens.size() - 1);
             previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
             previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
+            // set character offset info for this section
+            currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
+                previous.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+          } else {
+            // handle case where section has 0 tokens (for instance post that just contains an img)
+            currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,-1);
           }
-          // create a CoreMap to store info about this section
+          // set author of this section
           String foundAuthor = sectionAnnotations.get(CoreAnnotations.AuthorAnnotation.class);
-          CoreMap currSectionCoreMap = new Annotation();
-          // set character offset of beginning of section
-          currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-              sectionStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-          // set character offset of end of section
-          currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
-              token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-          // set author of section
           currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class, foundAuthor);
           // set up empty sentences list
           currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
