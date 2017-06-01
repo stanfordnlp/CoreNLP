@@ -600,53 +600,58 @@ public class CleanXmlAnnotator implements Annotator {
       // Check if the tag matches a section
       if (sectionTagMatcher != null && sectionTagMatcher.matcher(tag.name).matches()) {
         if (tag.isEndTag) {
-          annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, null);
-          // create a CoreMap to store info about this section
-          CoreMap currSectionCoreMap = new ArrayCoreMap();
-          if (sectionStartToken != null) {
-            sectionStartToken.set(CoreAnnotations.SectionStartAnnotation.class, sectionAnnotations);
-            // set character offset info for this section
-            currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-                sectionStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-          } else {
-            // handle case where section has 0 tokens (for instance post that just contains an img)
-            currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,-1);
-          }
-          // Mark previous token as forcing sentence and section end
-          if ( ! newTokens.isEmpty()) {
-            CoreLabel previous = newTokens.get(newTokens.size() - 1);
-            previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
-            previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
-            // set character offset info for this section
-            currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
-                previous.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-          } else {
-            // handle case where section has 0 tokens (for instance post that just contains an img)
-            currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,-1);
-          }
-          // set author of this section
-          String foundAuthor = sectionAnnotations.get(CoreAnnotations.AuthorAnnotation.class);
-          currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class, foundAuthor);
-          // set up empty sentences list
-          currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
-          // set doc date for post
-          String dateString = sectionAnnotations.get(CoreAnnotations.SectionDateAnnotation.class);
-          if (dateString != null) {
-            try {
-              SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
-              currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
-                      potentialDate.toString());
-            } catch (Exception e) {
-              log.error("failed to parse datetime for post! " + dateString);
+          // sometimes there is malformed xml (post within post)
+          // only store section info if sectionStartTag is not null
+          // if sectionStartTag is null something has gone wrong, like posts within posts, etc...
+          if (sectionStartTag != null) {
+            annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, null);
+            // create a CoreMap to store info about this section
+            CoreMap currSectionCoreMap = new ArrayCoreMap();
+            if (sectionStartToken != null) {
+              sectionStartToken.set(CoreAnnotations.SectionStartAnnotation.class, sectionAnnotations);
+              // set character offset info for this section
+              currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+                  sectionStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+            } else {
+              // handle case where section has 0 tokens (for instance post that just contains an img)
+              currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, -1);
             }
+            // Mark previous token as forcing sentence and section end
+            if (!newTokens.isEmpty()) {
+              CoreLabel previous = newTokens.get(newTokens.size() - 1);
+              previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
+              previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
+              // set character offset info for this section
+              currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
+                  previous.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+            } else {
+              // handle case where section has 0 tokens (for instance post that just contains an img)
+              currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, -1);
+            }
+            // set author of this section
+            String foundAuthor = sectionAnnotations.get(CoreAnnotations.AuthorAnnotation.class);
+            currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class, foundAuthor);
+            // set up empty sentences list
+            currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
+            // set doc date for post
+            String dateString = sectionAnnotations.get(CoreAnnotations.SectionDateAnnotation.class);
+            if (dateString != null) {
+              try {
+                SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
+                currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
+                    potentialDate.toString());
+              } catch (Exception e) {
+                log.error("failed to parse datetime for post! " + dateString);
+              }
+            }
+            // add this to the list of sections
+            annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
+            // finish processing section
+            savedTokensForSection.clear();
+            sectionStartTag = null;
+            sectionStartToken = null;
+            sectionAnnotations = null;
           }
-          // add this to the list of sections
-          annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
-          // finish processing section
-          savedTokensForSection.clear();
-          sectionStartTag = null;
-          sectionStartToken = null;
-          sectionAnnotations = null;
         } else if (!tag.isSingleTag) {
           // Prepare to mark first token with section information
           sectionStartTag = tag;
