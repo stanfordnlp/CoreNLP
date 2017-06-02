@@ -285,7 +285,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       // adjective
       //   retain category, type, grade
       //   drop gender, number, function
-      return pos.substring(0, 3) + "000";
+      char type = pos.charAt(1) == 'o' ? 'o' : 'q';
+      return String.format("%s%s%s000", pos.charAt(0), type, pos.charAt(2));
     case 'n':
       // noun
       //   retain category, type, number, NER label
