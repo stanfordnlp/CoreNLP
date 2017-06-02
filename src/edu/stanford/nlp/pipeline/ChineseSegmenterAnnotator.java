@@ -188,6 +188,8 @@ public class ChineseSegmenterAnnotator implements Annotator  {
             // We mark XML whitespace with a special tag because later they will be handled differently
             // than non-whitespace XML characters. This is because the segmenter eats whitespaces...
             wi.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, "whitespace");
+          } else if (offset == xmlStartOffset) {
+            wi.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, "beginning");
           } else {
             wi.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, "1");
           }
@@ -229,21 +231,9 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     for (String w : words) {
       CoreLabel fl = sentChars.get(pos);
 
-      if (!fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")) {
-        // found an XML character
-        while (fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("whitespace")) {
-          // Print whitespaces into the XML buffer and move on until the next non-whitespace character is found
-          // and we're in sync with segmenter output again
-          xmlbuffer.append(" ");
-          pos += 1;
-          fl = sentChars.get(pos);
-        }
-
-        xmlbuffer.append(w);
-        pos += w.length();
-        if (xmlbegin < 0) xmlbegin = fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-        continue;
-      } else {
+      if (fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")
+        || fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("beginning")) {
+        // Beginnings of plain text and other XML tags are good places to end an XML tag
         if (xmlbuffer.length() > 0) {
           // Form the XML token
           String xmltag = xmlbuffer.toString();
@@ -259,6 +249,22 @@ public class ChineseSegmenterAnnotator implements Annotator  {
           xmlbegin = -1;
           xmlbuffer = new StringBuilder();
         }
+      }
+
+      if (!fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")) {
+        // found an XML character
+        while (fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("whitespace")) {
+          // Print whitespaces into the XML buffer and move on until the next non-whitespace character is found
+          // and we're in sync with segmenter output again
+          xmlbuffer.append(" ");
+          pos += 1;
+          fl = sentChars.get(pos);
+        }
+
+        xmlbuffer.append(w);
+        pos += w.length();
+        if (xmlbegin < 0) xmlbegin = fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        continue;
       }
       fl.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
       if (w.isEmpty()) {
