@@ -47,6 +47,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
@@ -164,12 +165,15 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   public String spanToString() {
 //    synchronized(this) {
       if (spanString == null) {
-        StringBuilder os = new StringBuilder();
-        for(int i = 0; i < originalSpan.size(); i ++){
-          if(i > 0) os.append(" ");
-          os.append(originalSpan.get(i).get(CoreAnnotations.TextAnnotation.class));
+        spanString = SentenceUtils.listToOriginalTextString(originalSpan, false);
+        if (spanString == null) {
+          StringBuilder os = new StringBuilder();
+          for (int i = 0; i < originalSpan.size(); i++) {
+            if (i > 0) os.append(" ");
+            os.append(originalSpan.get(i).get(CoreAnnotations.TextAnnotation.class));
+          }
+          spanString = os.toString();
         }
-        spanString = os.toString();
       }
 //    }
     return spanString;
