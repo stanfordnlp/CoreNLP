@@ -32,7 +32,7 @@ public class ChineseSegmenterAnnotatorITest extends TestCase {
     testOne("你马上回来北京吗？",
         new String[]{"你", "马上", "回来", "北京", "吗", "？"},
         new int[]{0, 1, 3, 5, 7, 8},
-        new int[]{1, 3, 5, 7, 9});
+        new int[]{1, 3, 5, 7, 8, 9});
 
     // Properly handle XML tags
     testOne("<post id=\"something\" anything>这是一个测试</post>",
