@@ -44,7 +44,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
 
   private final AbstractSequenceClassifier<?> segmenter;
   private final boolean VERBOSE;
-
+  private final boolean tokenizeNewline;
 
   public ChineseSegmenterAnnotator() {
     this(DEFAULT_SEG_LOC, false);
@@ -98,6 +98,10 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+    // If newlines are treated as sentence split, we need to retain them in tokenization for ssplit to make use of them
+    tokenizeNewline = (!props.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, "never").equals("never"))
+            || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
   }
 
   @Override
@@ -133,7 +137,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
    *
    *  @param annotation The annotation to process
    */
-  private static void splitCharacters(CoreMap annotation) {
+  private void splitCharacters(CoreMap annotation) {
     String origText = annotation.get(CoreAnnotations.TextAnnotation.class);
     boolean seg = true;
     List<CoreLabel> charTokens = new ArrayList<>();
@@ -173,7 +177,13 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       } else if (Character.isSpaceChar(cp) || Character.isISOControl(cp)) {
         // if this word is a whitespace or a control character, set 'seg' to true for next character
         seg = true;
-        skipCharacter = true;
+        if (tokenizeNewline && (System.lineSeparator().indexOf(charString) >= 0 || charString.equals("\n"))) {
+          // Don't skip newline characters if we're tokenizing them
+          // We always count \n as newline to be consistent with the implementation of ssplit
+          skipCharacter = false;
+        } else {
+          skipCharacter = true;
+        }
       }
       if ( ! skipCharacter) {
         // if this character is a character, put it in as a CoreLabel and set seg to false for next word
@@ -220,7 +230,24 @@ public class ChineseSegmenterAnnotator implements Annotator  {
 
     // Run the segmenter! On the whole String. It knows not about the splitting into chars.
     // Can we change this to have it run directly on the already existing list of tokens. That would help, no?
-    List<String> words = segmenter.segmentString(text);
+    List<String> words;
+    if (!tokenizeNewline) {
+      words = segmenter.segmentString(text);
+    } else {
+      // Run the segmenter on each line so that we don't get tokens that cross line boundaries
+      // Neat trick to keep delimiters from: http://stackoverflow.com/a/2206432
+      String[] lines = text.split(String.format("((?<=%1$s)|(?=%1$s)|(?<=\n)|(?=\n))", System.lineSeparator()));
+
+      words = new ArrayList<>();
+      for (String line : lines) {
+        if (line.equals(System.lineSeparator()) || line.equals("\n")) {
+          // Don't segment newline tokens, keep them as-is
+          words.add(line);
+        } else {
+          words.addAll(segmenter.segmentString(line));
+        }
+      }
+    }
     if (VERBOSE) {
       log.info(text + "--->" + words);
     }
