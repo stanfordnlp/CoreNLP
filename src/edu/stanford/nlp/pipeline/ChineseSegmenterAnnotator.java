@@ -232,6 +232,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     // Can we change this to have it run directly on the already existing list of tokens. That would help, no?
     List<String> words;
     if (!tokenizeNewline) {
+      text = text.replaceAll("[\r\n]", "");
       words = segmenter.segmentString(text);
     } else {
       // Run the segmenter on each line so that we don't get tokens that cross line boundaries
