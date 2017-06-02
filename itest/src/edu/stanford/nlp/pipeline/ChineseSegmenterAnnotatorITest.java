@@ -29,9 +29,13 @@ public class ChineseSegmenterAnnotatorITest extends TestCase {
   }
 
   public void testPipeline() {
-    String query = "你马上回来北京吗？";
-    String[] expectedWords = {"你", "马上", "回来", "北京", "吗", "？"};
-    int[] expectedPositions = {0, 1, 3, 5, 7, 8, 9};
+    testOne("你马上回来北京吗？", new String[]{"你", "马上", "回来", "北京", "吗", "？"}, new int[]{0, 1, 3, 5, 7, 8, 9});
+    testOne("<post id=\"something\" anything>这是一个测试</post>",
+            new String[]{"<post id=\"something\" anything>", "这", "是", "一", "个", "测试", "</post>"},
+            new int[]{0, 30, 31, 32, 33, 34, 36});
+  }
+
+  private void testOne(String query, String[] expectedWords, int[] expectedPositions) {
     Annotation annotation = new Annotation(query);
     pipeline.annotate(annotation);
 
