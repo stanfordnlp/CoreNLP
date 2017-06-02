@@ -175,15 +175,16 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
       final int tagNum_pos = tagNum[pos];
       final double[] windowScore_pos = windowScore[pos];
       // no predecessor type
-      score_pos[product] = windowScore_pos[product];
+      double score_product = windowScore_pos[product];
       if (linearConstraints_pos != null) {
         if (DEBUG) {
           if (linearConstraints_pos[product % tagNum_pos] != 0) {
             log.info("Applying linear constraints=" + linearConstraints_pos[product % tagNum_pos] + " to preScore="+ windowScore_pos[product] + " at pos="+pos+" for tag="+(product % tagNum_pos));
           }
         }
-        score_pos[product] += linearConstraints_pos[product % tagNum_pos];
+        score_product += linearConstraints_pos[product % tagNum_pos];
       }
+      score_pos[product] = score_product;
       trace_pos[product] = -1;
     }
     // loop over the remaining classification spots
@@ -193,28 +194,32 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
         throw new RuntimeInterruptedException();
       }
       // Local copies, to reduce array lookups.
-      final double[] score_pos = score[pos];
+      final double[] score_pos = score[pos], score_posm1 = score[pos - 1];
       final int[] trace_pos = trace[pos];
       final double[] linearConstraints_pos = linearConstraints != null ? linearConstraints[pos] : null;
       final int tagNum_pos = tagNum[pos];
+      final int tagNumRight = tagNum[pos + rightWindow];
+      final int tagNumLeft = tagNum[pos - leftWindow - 1];
       final double[] windowScore_pos = windowScore[pos];
       //log.info(".");
+      final int products = productSizes[pos];
+      final int factor = products / tagNumRight;
       // loop over window product types
-      for (int product = 0, products = productSizes[pos]; product < products; product++) {
+      for (int product = 0; product < products; product++) {
         // loop over possible predecessor types
         score_pos[product] = Double.NEGATIVE_INFINITY;
         trace_pos[product] = -1;
-        int sharedProduct = product / tagNum[pos + rightWindow];
-        int factor = products / tagNum[pos + rightWindow];
-        for (int newTagNum = 0; newTagNum < tagNum[pos - leftWindow - 1]; newTagNum++) {
+        int sharedProduct = product / tagNumRight;
+        final double windowProductScore = windowScore_pos[product];
+        for (int newTagNum = 0; newTagNum < tagNumLeft; newTagNum++) {
           int predProduct = newTagNum * factor + sharedProduct;
-          double predScore = score[pos - 1][predProduct] + windowScore_pos[product];
+          double predScore = score_posm1[predProduct] + windowProductScore;
 
           if (linearConstraints_pos != null) {
             if (DEBUG) {
               if (pos == 2 && linearConstraints_pos[product % tagNum_pos] != 0) {
                 log.info("Applying linear constraints=" + linearConstraints_pos[product % tagNum_pos] + " to preScore="+ predScore + " at pos="+pos+" for tag="+(product % tagNum_pos));
-                log.info("predScore:" + predScore + " = score["+(pos - 1)+"]["+predProduct+"]:" + score[pos - 1][predProduct] + " + windowScore["+pos+"]["+product+"]:" + windowScore_pos[product]);
+                log.info("predScore:" + predScore + " = score["+(pos - 1)+"]["+predProduct+"]:" + score_posm1[predProduct] + " + windowScore["+pos+"]["+product+"]:" + windowProductScore);
               }
             }
             predScore += linearConstraints_pos[product % tagNum_pos];
