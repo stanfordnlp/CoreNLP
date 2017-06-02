@@ -273,8 +273,9 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     case 's':
       // preposition (s)
       //   retain category, type
+      //     ignore rare exceptions in LDC
       //   drop form, gender, number
-      return pos.substring(0, 2) + "000";
+      return pos.charAt(0) + "p000";
     case 'p':
       // pronoun (p)
       //   retain category, type
