@@ -161,6 +161,7 @@ message Token {
   //  Chinese character info
   optional string chineseChar     = 54;
   optional string chineseSeg      = 55;
+  optional string chineseXMLChar  = 60;
 
   // Section info
   optional string sectionName     = 56;
