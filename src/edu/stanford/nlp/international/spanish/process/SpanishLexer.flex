@@ -419,7 +419,7 @@ SUBSUPNUM = [\u207A\u207B\u208A\u208B]?([\u2070\u00B9\u00B2\u00B3\u2074-\u2079]+
 TIMEXP = {DIGIT}{1,2}(h){DIGIT}{1,2}
 
 /* Spanish ordinals */
-ORDINAL = [:digit:]*([13].?er|[:digit:].?[oa\u00BA\u00AA\u\u00B0])
+ORDINAL = [:digit:]*([13]\.?er|[:digit:]\.?[oa\u00BA\u00AA\u\u00B0])
 
 /* Constrain fraction to only match likely fractions */
 FRAC = ({DIGIT}{1,4}[- \u00A0])?{DIGIT}{1,4}(\\?\/|\u2044){DIGIT}{1,4}
