@@ -41,12 +41,6 @@ public class SpanishTokenizerITest extends TestCase {
       "Los hombres sentados están muy guapos.",
       "Hizo abrirlos.",
       "salos ) ( 1 de",
-
-      // Test ordinals (issue #417)
-      "13a",
-      "5 a",
-      "1 a",
-      "5 a el",
   };
 
   private final String[][] spanishGold = {
@@ -73,11 +67,6 @@ public class SpanishTokenizerITest extends TestCase {
       { "Los", "hombres", "sentados", "están", "muy", "guapos", "." },
       { "Hizo", "abrir", "los", "." },
       { "salos", "=RRB=", "=LRB=", "1", "de" },
-
-      { "13a" },
-      { "5", "a" },
-      { "1", "a" },
-      { "5", "a", "el" },
   };
 
 
