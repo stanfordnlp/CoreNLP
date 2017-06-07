@@ -26,25 +26,32 @@ public class EPEOutputter extends JSONOutputter {
     JSONWriter l0 = new JSONWriter(writer, options);
 
     if (doc.get(CoreAnnotations.SentencesAnnotation.class) != null) {
-      doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> {
+      doc.get(CoreAnnotations.SentencesAnnotation.class).stream().forEach(sentence -> {
         l0.object(l1 -> {
-          l1.set("id", sentence.get(CoreAnnotations.SentenceIDAnnotation.class));
+          l1.set("id", sentence.get(CoreAnnotations.SentenceIndexAnnotation.class) + 1);
           l1.set("nodes", getNodes(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)));
         });
+        l0.writer.append("\n");
         l0.writer.flush();
       });
-
-
+     }
   }
 
   private static Object getNodes(SemanticGraph graph) {
     if(graph != null) {
       return graph.vertexListSorted().stream().map( (IndexedWord token) -> (Consumer<Writer>) node -> {
-            node.set("id", token.index());
-            node.set("form", token.word());
-            node.set("start", token.beginPosition());
-            node.set("end", token.endPosition());
-            if (graph.getRoots().contains(node)) node.set("top", true);
+
+            if (token.copyCount() == 0) {
+              node.set("id", "" + token.index());
+              node.set("start", token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+              node.set("end", token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+            } else {
+              node.set("id", "" + token.index() + token.toPrimes());
+              node.set("source", "" + token.index());
+            }
+          node.set("form", token.word());
+
+          if (graph.getRoots().contains(token)) node.set("top", true);
             node.set("properties", (Consumer<Writer>) propertiesWriter -> {
               propertiesWriter.set("xpos", token.tag());
               propertiesWriter.set("upos", token.get(CoreAnnotations.CoarseTagAnnotation.class));
@@ -54,7 +61,7 @@ public class EPEOutputter extends JSONOutputter {
             node.set("edges", graph.getOutEdgesSorted(token).stream().map( (SemanticGraphEdge dep) -> (Consumer<Writer>) edge -> {
               edge.set("target", dep.getDependent().index());
               edge.set("label", dep.getRelation().getShortName());
-            });
+            }));
       } );
     } else {
       return null;
