@@ -18,6 +18,8 @@ import edu.stanford.nlp.util.StringUtils;
 /** This class provides a main method that loads various dictionaries, and
  *  saves them in a serialized version, and runtime compiles them into a word list used as a feature in the segmenter.
  *
+ *  The features are added in the method {@link Sighan2005DocumentReaderAndWriter#addDictionaryFeatures}.
+ *
  *  @author Pi-Chuan Chang
  */
 
@@ -25,13 +27,14 @@ public class ChineseDictionary {
 
   private static final boolean DEBUG = false;
 
+  // todo [2017]: This should be redone sometime to not have such a hardcoded upper limit.
   public static final int MAX_LEXICON_LENGTH = 6;
 
   private static Redwood.RedwoodChannels logger = Redwood.channels(ChineseDictionary.class);
   @SuppressWarnings({"unchecked"})
-  Set<String>[] words_ = new HashSet[MAX_LEXICON_LENGTH+1];
+  private final Set<String>[] words_ = new HashSet[MAX_LEXICON_LENGTH+1];
 
-  private ChineseDocumentToSentenceProcessor cdtos_; // = null;
+  private final ChineseDocumentToSentenceProcessor cdtos_; // = null;
 
   private void serializeDictionary(String serializePath) {
     logger.info("Serializing dictionaries to " + serializePath + " ... ");
@@ -111,8 +114,7 @@ public class ChineseDictionary {
 
     for (String dict : dicts) {
       if(dict.endsWith("ser.gz")) {
-        // TODO: the way this is written would not work if we allow
-        // dictionaries to have different settings of MAX_LEXICON_LENGTH
+        // TODO: the way this is written does not work if we allow dictionaries to have different settings of MAX_LEXICON_LENGTH
         Set<String>[] dictwords = loadDictionary(dict);
         for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
           words_[i].addAll(dictwords[i]);

@@ -1,6 +1,7 @@
 package edu.stanford.nlp.simple;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.ie.util.RelationTriple;
@@ -44,7 +45,11 @@ public class Document {
       "annotators", "",
       "tokenize.class", "PTBTokenizer",
       "tokenize.language", "en",
-      "parse.binaryTrees", "true");
+      "parse.binaryTrees", "true",
+      "mention.type", "dep",
+      "coref.mode", "statistical",  // Use the new coref
+      "coref.md.type", "dep"
+  );
 
 
   /**
@@ -268,7 +273,7 @@ public class Document {
   /**
    * Cache the most recently used custom annotators.
    */
-  private static final AnnotatorPool customAnnotators = new AnnotatorPool();
+  private static final AnnotatorPool customAnnotators = AnnotatorPool.SINGLETON;
 
 
   /**
@@ -738,7 +743,12 @@ public class Document {
     synchronized (this.impl) {
       if (impl.getCorefChainCount() == 0) {
         // Run prerequisites
-        this.runLemma(props).runNER(props).runParse(props);  // default is rule mention annotator
+        this.runLemma(props).runNER(props);
+        if (CorefProperties.mdType(props) != CorefProperties.MentionDetectionType.DEPENDENCY) {
+          this.runParse(props);
+        } else {
+          this.runDepparse(props);
+        }
         // Run mention
         Supplier<Annotator> mention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultMention : getOrCreate(STANFORD_MENTION, props, () -> backend.mention(props));
         // Run coref

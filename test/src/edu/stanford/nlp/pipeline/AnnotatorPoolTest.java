@@ -40,7 +40,7 @@ public class AnnotatorPoolTest extends TestCase {
     }
 
     @Override
-    protected boolean shouldGC() {
+    public boolean isCache() {
       return false;
     }
   }

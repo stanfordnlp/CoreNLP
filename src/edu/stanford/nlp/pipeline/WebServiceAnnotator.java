@@ -23,10 +23,10 @@ import java.util.concurrent.TimeoutException;
  *
  * <ol>
  *   <li>Implement {@link #annotateImpl(Annotation)} with the code to actually call the server.</li>
- *   <li>Implement {@link #ready()} with code to check if the server is available. {@link #ping(String)} may be useful for this.</li>
+ *   <li>Implement {@link #ready(boolean initialTest)} with code to check if the server is available. {@link #ping(String)} may be useful for this.</li>
  *   <li>Optionally implement {@link #startCommand()} with a command to start a local server. If this is specified, we will start
  *       a local server before we start checking for readiness.
- *       Note that the {@link #ready()} endpoint does still have to point to this local server in that case, or else
+ *       Note that the {@link #ready(boolean initialTest)} endpoint does still have to point to this local server in that case, or else
  *       lifecycle won't be managed properly.
  *   </li>
  * </ol>
@@ -119,6 +119,9 @@ public abstract class WebServiceAnnotator implements Annotator {
   /** If true, we have connected to the server at some point. */
   protected boolean everLive      = false;
 
+  /** If true, the server was active last time checked */
+  protected boolean serverWasActive = false;
+
   /** The running server, if any. */
   private   Optional<RunningProcess> server = Optional.empty();
 
@@ -143,9 +146,11 @@ public abstract class WebServiceAnnotator implements Annotator {
    * Check if the server is ready to accept annotations.
    * This client will wait until the ready endpoint returns true.
    *
+   * @param initialTest testing a server that has just been started?
+   *
    * @return True if the server is ready to accept documents to annotate.
    */
-  protected abstract boolean ready();
+  protected abstract boolean ready(boolean initialTest);
 
 
   /**
@@ -160,7 +165,7 @@ public abstract class WebServiceAnnotator implements Annotator {
 
 
   /**
-   * Check if the server is live. Can be overwritten if it differs from {@link #ready()}.
+   * Check if the server is live. Can be overwritten if it differs from {@link #ready(boolean initialTest)}.
    *
    * @return True if the server is live.
    */
@@ -170,7 +175,7 @@ public abstract class WebServiceAnnotator implements Annotator {
 
 
   /**
-   * A utility to ping an endpoint. Useful for {@link #live()} and {@link #ready()}.
+   * A utility to ping an endpoint. Useful for {@link #live()} and {@link #ready(boolean initialTest)}.
    *
    * @param uri The URL we are trying to ping.
    *
@@ -232,6 +237,12 @@ public abstract class WebServiceAnnotator implements Annotator {
   protected void ensureServer() throws TimeoutException, IOException {
     long startTime = System.currentTimeMillis();
 
+    // if the server was active last time we checked, see if the server is still active
+    if (serverWasActive) {
+      if (ready(false))
+        return;
+    }
+
     // 1. Start a server, if applicable
     boolean serverStarted = startCommand().map(this::startServer).orElse(true);
     if (!serverStarted) {
@@ -260,7 +271,7 @@ public abstract class WebServiceAnnotator implements Annotator {
           if (System.currentTimeMillis() > startTime + CONNECT_TIMEOUT) {
             throw new TimeoutException("Never got readiness from annotator: " + this);
           }
-          if (!ready()) {
+          if (!ready(true)) {
             try {
               Thread.sleep(1000);
             } catch (InterruptedException ignored) {
@@ -272,6 +283,7 @@ public abstract class WebServiceAnnotator implements Annotator {
       }
     }
     log.info("Got readiness from server for " + this);
+    serverWasActive = true;
 
     // 4. Server is ensured! We can continue
   }
@@ -314,7 +326,9 @@ public abstract class WebServiceAnnotator implements Annotator {
   private void annotate(Annotation annotation, int tries) {
     try {
       // 1. Ensure that we have a server to annotate against
-      ensureServer();
+      synchronized(this) {
+        ensureServer();
+      }
 
       try {
 
@@ -392,7 +406,7 @@ public abstract class WebServiceAnnotator implements Annotator {
       }
 
       @Override
-      protected boolean ready() {
+      protected boolean ready(boolean initialTest) {
         return this.ping("http://localhost:8000");
       }
 

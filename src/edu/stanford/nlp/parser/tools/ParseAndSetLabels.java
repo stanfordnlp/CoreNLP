@@ -259,7 +259,7 @@ public class ParseAndSetLabels {
     Map<String, String> labelMap = readLabelMap(labelsFile, separator, remapLabels);
 
     List<String> sentences;
-    if (sentencesFile == null) {
+    if (sentencesFile != null) {
       sentences = readSentences(sentencesFile);
     } else {
       sentences = new ArrayList<String>(labelMap.keySet());

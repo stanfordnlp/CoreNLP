@@ -1,12 +1,13 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.StringOutputStream;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -19,7 +20,6 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Pointer;
 
@@ -30,9 +30,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-
-import edu.stanford.nlp.coref.data.CorefChain;
 
 /**
  * Output an Annotation to human readable JSON.
@@ -113,28 +110,10 @@ public class JSONOutputter extends AnnotationOutputter {
           }
           // (openie)
           Collection<RelationTriple> openIETriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-          if (openIETriples != null) {
-            l2.set("openie", openIETriples.stream().map(triple -> (Consumer<Writer>) (Writer tripleWriter) -> {
-              tripleWriter.set("subject", triple.subjectGloss());
-              tripleWriter.set("subjectSpan", Span.fromPair(triple.subjectTokenSpan()));
-              tripleWriter.set("relation", triple.relationGloss());
-              tripleWriter.set("relationSpan", Span.fromPair(triple.relationTokenSpan()));
-              tripleWriter.set("object", triple.objectGloss());
-              tripleWriter.set("objectSpan", Span.fromPair(triple.objectTokenSpan()));
-            }));
-          }
+          writeTriples(l2, "openie", openIETriples);
           // (kbp)
           Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
-          if (kbpTriples != null) {
-            l2.set("kbp", kbpTriples.stream().map(triple -> (Consumer<Writer>) (Writer tripleWriter) -> {
-              tripleWriter.set("subject", triple.subjectGloss());
-              tripleWriter.set("subjectSpan", Span.fromPair(triple.subjectTokenSpan()));
-              tripleWriter.set("relation", triple.relationGloss());
-              tripleWriter.set("relationSpan", Span.fromPair(triple.relationTokenSpan()));
-              tripleWriter.set("object", triple.objectGloss());
-              tripleWriter.set("objectSpan", Span.fromPair(triple.objectTokenSpan()));
-            }));
-          }
+          writeTriples(l2, "kbp", kbpTriples);
 
           // (entity mentions)
           if (sentence.get(CoreAnnotations.MentionsAnnotation.class) != null) {
@@ -161,20 +140,7 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("entitylink", m.get(CoreAnnotations.WikipediaEntityAnnotation.class));
               // Timex
               Timex time = m.get(TimeAnnotations.TimexAnnotation.class);
-              if (time != null) {
-                Timex.Range range = time.range();
-                l3.set("timex", (Consumer<Writer>) l4 -> {
-                  l4.set("tid", time.tid());
-                  l4.set("type", time.timexType());
-                  l4.set("value", time.value());
-                  l4.set("altValue", time.altVal());
-                  l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
-                    l5.set("begin", range.begin);
-                    l5.set("end", range.end);
-                    l5.set("duration", range.duration);
-                  } : null);
-                });
-              }
+              writeTime(l3, time);
             }));
           }
 
@@ -199,23 +165,21 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("entitylink", token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
               // Timex
               Timex time = token.get(TimeAnnotations.TimexAnnotation.class);
-              if (time != null) {
-                Timex.Range range = time.range();
-                l3.set("timex", (Consumer<Writer>) l4 -> {
-                  l4.set("tid", time.tid());
-                  l4.set("type", time.timexType());
-                  l4.set("value", time.value());
-                  l4.set("altValue", time.altVal());
-                  l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
-                    l5.set("begin", range.begin);
-                    l5.set("end", range.end);
-                    l5.set("duration", range.duration);
-                  } : null);
-                });
-              }
+              writeTime(l3, time);
             }));
           }
         }));
+      } else {
+        if (doc.get(CoreAnnotations.TokensAnnotation.class) != null) {
+          l1.set("tokens", doc.get(CoreAnnotations.TokensAnnotation.class).stream().map(token ->
+              (Consumer<Writer>) (Writer l2) -> {
+                l2.set("index", token.index());
+                l2.set("word", token.word());
+                l2.set("originalText", token.originalText());
+                l2.set("characterOffsetBegin", token.beginPosition());
+                l2.set("characterOffsetEnd", token.endPosition());
+          }));
+        }
       }
 
       // Add coref values
@@ -260,9 +224,63 @@ public class JSONOutputter extends AnnotationOutputter {
         }));
       }
 
+      // sections
+      if (doc.get(CoreAnnotations.SectionsAnnotation.class) != null) {
+        List<CoreMap> sections = doc.get(CoreAnnotations.SectionsAnnotation.class);
+        l1.set("sections", sections.stream().map(section -> (Consumer<Writer>) (Writer l2) -> {
+          // Set char start
+          l2.set("charBegin", section.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+          // Set char end
+          l2.set("charEnd", section.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+          // Set author
+          if (section.get(CoreAnnotations.AuthorAnnotation.class) != null) {
+            l2.set("author", section.get(CoreAnnotations.AuthorAnnotation.class));
+          }
+          // Set date time
+          if (section.get(CoreAnnotations.SectionDateAnnotation.class) != null) {
+            l2.set("dateTime", section.get(CoreAnnotations.SectionDateAnnotation.class));
+          }
+          // add the sentence indexes for the sentences in this section
+          List<CoreMap> sentences = section.get(CoreAnnotations.SentencesAnnotation.class);
+          l2.set("sentenceIndexes", sentences.stream().map(sentence -> (Consumer<Writer>) (Writer l3) -> {
+            int sentenceIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
+            l3.set("index", sentenceIndex);
+          }));
+        }));
+      }
     });
 
-    l0.writer.flush();  // flush
+    l0.flush();  // flush
+  }
+
+  private static void writeTriples(Writer l2, String key, Collection<RelationTriple> triples) {
+    if (triples != null) {
+      l2.set(key, triples.stream().map(triple -> (Consumer<Writer>) (Writer tripleWriter) -> {
+        tripleWriter.set("subject", triple.subjectGloss());
+        tripleWriter.set("subjectSpan", Span.fromPair(triple.subjectTokenSpan()));
+        tripleWriter.set("relation", triple.relationGloss());
+        tripleWriter.set("relationSpan", Span.fromPair(triple.relationTokenSpan()));
+        tripleWriter.set("object", triple.objectGloss());
+        tripleWriter.set("objectSpan", Span.fromPair(triple.objectTokenSpan()));
+      }));
+    }
+  }
+
+  private static void writeTime(Writer l3, Timex time) {
+    if (time != null) {
+      Timex.Range range = time.range();
+      l3.set("timex", (Consumer<Writer>) l4 -> {
+        l4.set("tid", time.tid());
+        l4.set("type", time.timexType());
+        l4.set("value", time.value());
+        l4.set("altValue", time.altVal());
+        l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
+          l5.set("begin", range.begin);
+          l5.set("end", range.end);
+          l5.set("duration", range.duration);
+        } : null);
+      });
+    }
   }
 
   /**
@@ -314,16 +332,16 @@ public class JSONOutputter extends AnnotationOutputter {
 
 
   /**
-   * <p>Our very own little JSON writing class.
-   * For usage, see the test cases in JSONOutputterTest.</p>
+   * Our very own little JSON writing class.
+   * For usage, see the test cases in JSONOutputterTest.
    *
-   * <p>For the love of all that is holy, don't try to write JSON multithreaded.
-   * It should go without saying that this is not threadsafe.</p>
+   * For the love of all that is holy, don't try to write JSON multithreaded.
+   * It should go without saying that this is not threadsafe.
    */
   public static class JSONWriter {
     protected final PrintWriter writer;
     protected final Options options;
-    protected JSONWriter(PrintWriter writer, Options options) {
+    public JSONWriter(PrintWriter writer, Options options) {
       this.writer = writer;
       this.options = options;
     }
@@ -372,6 +390,7 @@ public class JSONOutputter extends AnnotationOutputter {
         if (componentType.isPrimitive()) {
           if (int.class.isAssignableFrom(componentType)) {
             ArrayList<Integer> lst = new ArrayList<>();
+            //noinspection Convert2streamapi
             for (int elem : ((int[]) value)) {
               lst.add(elem);
             }
@@ -390,6 +409,7 @@ public class JSONOutputter extends AnnotationOutputter {
             routeObject(indent, lst);
           } else if (long.class.isAssignableFrom(componentType)) {
             ArrayList<Long> lst = new ArrayList<>();
+            //noinspection Convert2streamapi
             for (long elem : ((long[]) value)) {
               lst.add(elem);
             }
@@ -408,6 +428,7 @@ public class JSONOutputter extends AnnotationOutputter {
             routeObject(indent, lst);
           } else if (double.class.isAssignableFrom(componentType)) {
             ArrayList<Double> lst = new ArrayList<>();
+            //noinspection Convert2streamapi
             for (double elem : ((double[]) value)) {
               lst.add(elem);
             }
@@ -494,6 +515,10 @@ public class JSONOutputter extends AnnotationOutputter {
           writer.write(INDENT_CHAR);
         }
       }
+    }
+
+    public void flush() {
+      writer.flush();
     }
 
     private void space() {

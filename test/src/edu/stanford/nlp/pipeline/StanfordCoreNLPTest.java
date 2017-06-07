@@ -15,7 +15,7 @@ public class StanfordCoreNLPTest {
 
   @Test
   public void testPrereqAnnotatorsBasic() {
-    assertEquals("tokenize,ssplit,parse",
+    assertEquals("tokenize,ssplit,pos,parse",
         StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"parse"}, new Properties()));
     assertEquals("tokenize,ssplit,pos,depparse",
         StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"depparse"}, new Properties()));
