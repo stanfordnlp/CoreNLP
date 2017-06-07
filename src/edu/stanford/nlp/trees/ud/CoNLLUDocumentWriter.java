@@ -50,16 +50,16 @@ public class CoNLLUDocumentWriter {
             }
 
             /* Try to find main governor and additional dependencies. */
-            int govIdx = -1;
+            String govIdx = null;
             GrammaticalRelation reln = null;
-            HashMap<Integer, String> enhancedDependencies = new HashMap<>();
+            HashMap<String, String> enhancedDependencies = new HashMap<>();
             for (IndexedWord parent : sg.getParents(token)) {
                 SemanticGraphEdge edge = sg.getEdge(parent, token);
-                if ( govIdx == -1 && ! edge.isExtra()) {
-                    govIdx = parent.index();
+                if ( govIdx == null && ! edge.isExtra()) {
+                    govIdx = parent.toCopyIndex();
                     reln = edge.getRelation();
                 }
-                enhancedDependencies.put(parent.index(), edge.getRelation().toString());
+                enhancedDependencies.put(parent.toCopyIndex(), edge.getRelation().toString());
             }
 
 
@@ -74,8 +74,8 @@ public class CoNLLUDocumentWriter {
             String relnName = reln == null ? "_" : reln.toString();
 
             /* Root. */
-            if (govIdx == -1 && sg.getRoots().contains(token)) {
-                govIdx = 0;
+            if (govIdx == null && sg.getRoots().contains(token)) {
+                govIdx = "0";
                 relnName = GrammaticalRelation.ROOT.toString();
                 additionalDepsString = isTree ? "_" : "0:" + relnName;
             }
@@ -87,7 +87,7 @@ public class CoNLLUDocumentWriter {
                 lemma = lemma.replaceAll(RRB_PATTERN, ")");
             }
 
-            sb.append(String.format("%d\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n", token.index(), word,
+            sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.toCopyIndex(), word,
                     lemma, upos, pos, featuresString, govIdx, relnName, additionalDepsString, misc));
         }
         sb.append("\n");

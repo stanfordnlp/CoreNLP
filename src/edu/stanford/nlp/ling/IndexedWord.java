@@ -352,6 +352,14 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     return StringUtils.repeat('\'', copyCount);
   }
 
+  public String toCopyIndex() {
+    if (copyCount == 0) {
+      return String.valueOf(this.index());
+    } else {
+      return this.index() + "." + copyCount;
+    }
+  }
+
   public boolean isCopy(IndexedWord otherWord) {
     Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
     Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
