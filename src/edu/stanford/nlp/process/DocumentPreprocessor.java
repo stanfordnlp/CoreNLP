@@ -261,7 +261,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
       if (tokenizerFactory == null) {
         eolIsSignificant = sentDelims.contains(WhitespaceLexer.NEWLINE);
         tokenizer = WhitespaceTokenizer.
-          newWordWhitespaceTokenizer(inputReader, eolIsSignificant);
+            newCoreLabelWhitespaceTokenizer(inputReader, eolIsSignificant);
       } else {
         if (eolIsSignificant) {
           tokenizer = tokenizerFactory.getTokenizer(inputReader, "tokenizeNLs");
