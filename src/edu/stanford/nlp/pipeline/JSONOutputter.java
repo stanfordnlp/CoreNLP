@@ -321,9 +321,9 @@ public class JSONOutputter extends AnnotationOutputter {
    * It should go without saying that this is not threadsafe.</p>
    */
   public static class JSONWriter {
-    private final PrintWriter writer;
-    private final Options options;
-    private JSONWriter(PrintWriter writer, Options options) {
+    protected final PrintWriter writer;
+    protected final Options options;
+    protected JSONWriter(PrintWriter writer, Options options) {
       this.writer = writer;
       this.options = options;
     }
