@@ -454,17 +454,18 @@ public class TokensRegexNERAnnotator implements Annotator  {
   }
 
   private boolean checkOrigNerTags(Entry entry, List<CoreLabel> tokens, int start, int end) {
-    // cdm Aug 2016: Add in a special hack for Chinese KBP 2016 -- always allow a sequence of GPE or LOCATION to overwrite
-//    boolean specialCasePass = true;
-//    for (int i = start; i < end; i++) {
-//      if ( ! isLocationOrGpe(tokens.get(i))) {
-//        specialCasePass = false;
-//        break;
-//      }
-//    }
-//    if (specialCasePass) {
-//      return true;
-//    }
+    // cdm Aug 2016: Add in a special hack - always allow a sequence of GPE or LOCATION to overwrite
+    // this is the current expected behavior, and the itest expects this.
+    boolean specialCasePass = true;
+    for (int i = start; i < end; i++) {
+      if ( ! isLocationOrGpe(tokens.get(i))) {
+        specialCasePass = false;
+        break;
+      }
+    }
+    if (specialCasePass) {
+      return true;
+    }
     // end special Chinese KBP 2016 code
 
     int prevNerEndIndex = start-1;
