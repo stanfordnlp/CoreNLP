@@ -77,6 +77,7 @@ public class CoNLLUDocumentWriter {
             if (govIdx == -1 && sg.getRoots().contains(token)) {
                 govIdx = 0;
                 relnName = GrammaticalRelation.ROOT.toString();
+                additionalDepsString = isTree ? "_" : "0:" + relnName;
             }
 
             if (unescapeParenthesis) {

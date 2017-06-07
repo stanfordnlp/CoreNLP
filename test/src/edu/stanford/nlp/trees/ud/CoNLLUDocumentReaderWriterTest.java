@@ -34,16 +34,16 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
             "6     .         .      PUNCT   .     _                                 2   punct   _   _\n\n";
 
     private static String EXTRA_DEPS_TEST_INPUT =
-            "1     They       They       PRON    PRP    _    2   nsubj   4:nsubj         _\n" +
-            "2     buy        buy        VERB    VBP    _    0   root    _               _\n" +
-            "3     and        and        CONJ    CC     _    2   cc      _               _\n" +
-            "4     sell       sell       VERB    VBP    _    5   conj    _               _\n" +
-            "5     books      book       NOUN    NNS    _    2   dobj    4:dobj          _\n" +
-            "6     ,          ,          PUNCT   ,      _    5   punct   _               _\n" +
-            "7     newspapers newspaper  NOUN    NNS    _    5   conj    2:dobj|4:dobj   _\n" +
-            "8     and        and        CONJ    CC     _    5   cc      _               _\n" +
-            "9     magazines  magazine   NOUN    NNS    _    5   conj    2:dobj|4:dobj   _\n" +
-            "10    .          .          PUNCT   .      _    2   punct   _               _\n\n";
+            "1     They       They       PRON    PRP    _    2   nsubj   2:nsubj|4:nsubj         _\n" +
+            "2     buy        buy        VERB    VBP    _    0   root    0:root               _\n" +
+            "3     and        and        CONJ    CC     _    2   cc      2:cc               _\n" +
+            "4     sell       sell       VERB    VBP    _    5   conj    5:conj               _\n" +
+            "5     books      book       NOUN    NNS    _    2   dobj    2:dobj|4:dobj          _\n" +
+            "6     ,          ,          PUNCT   ,      _    5   punct   5:punct               _\n" +
+            "7     newspapers newspaper  NOUN    NNS    _    5   conj    2:dobj|4:dobj|5:conj   _\n" +
+            "8     and        and        CONJ    CC     _    5   cc      5:cc               _\n" +
+            "9     magazines  magazine   NOUN    NNS    _    5   conj    2:dobj|4:dobj|5:conj   _\n" +
+            "10    .          .          PUNCT   .      _    2   punct   2:punct               _\n\n";
 
 
     public void testMultiWords() {
