@@ -2,27 +2,7 @@ package edu.stanford.nlp.ling;
 
 import edu.stanford.nlp.util.TypesafeMap;
 
-public interface AbstractCoreLabel extends Label, HasWord, HasIndex, HasTag, HasLemma, HasOffset, TypesafeMap {
-
-  /**
-   * Return the named entity class of the label (or null if none).
-   *
-   * @return The NER class for the label
-   */
-  public String ner();
-
-  /**
-   * Set the named entity class of the label.
-   *
-   * @param ner The NER class for the label
-   */
-  public void setNER(String ner);
-
-  // These next two are a partial implementation of HasContext. Maybe clean this up someday?
-
-  public String originalText();
-
-  public void setOriginalText(String originalText);
+public interface AbstractCoreLabel extends AbstractToken, Label, TypesafeMap {
 
   /**
    * Return a non-null String value for a key. This method is included

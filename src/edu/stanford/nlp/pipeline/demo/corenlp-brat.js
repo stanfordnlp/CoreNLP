@@ -1067,6 +1067,43 @@ $(document).ready(function() {
   });
 
 
+  // Support passing parameters on page launch, via window.location.hash parameters.
+  // Example: http://localhost:9000/#text=foo%20bar&annotators=pos,lemma,ner
+  (function() {
+    var rawParams = window.location.hash.slice(1).split("&");
+    var params = {};
+    rawParams.forEach(function(paramKV) {
+      paramKV = paramKV.split("=");
+      if (paramKV.length === 2) {
+        var key   = paramKV[0];
+        var value = paramKV[1];
+        params[key] = value;
+      }
+    });
+    if (params.text) {
+      var text = decodeURIComponent(params.text);
+      $('#text').val(text);
+    }
+    if (params.annotators) {
+      var annotators = params.annotators.split(",");
+      // De-select everything
+      $('#annotators').find('option').each(function() {
+        $(this).prop('selected', false);
+      });
+      // Select the specified ones.
+      annotators.forEach(function(a) {
+        $('#annotators').find('option[value="'+a+'"]').prop('selected', true);
+      });
+      // Refresh Chosen
+      $('#annotators').trigger('chosen:updated');
+    }
+    if (params.text || params.annotators) {
+      // Finally, let's auto-submit.
+      $('#submit').click();
+    }
+  })();
+
+
   $('#form_tokensregex').submit( function (e) {
     // Don't actually submit the form
     e.preventDefault();

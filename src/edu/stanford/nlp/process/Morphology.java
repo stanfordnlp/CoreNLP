@@ -1,6 +1,7 @@
 package edu.stanford.nlp.process;
 
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -61,7 +62,7 @@ public class Morphology implements Function  {
   private final Morpha lexer;
 
   public Morphology() {
-    lexer = new Morpha(System.in);
+    lexer = new Morpha(new InputStreamReader(System.in));
   }
 
   /**
@@ -170,7 +171,7 @@ public class Morphology implements Function  {
 
   private static synchronized void initStaticLexer() {
     if (staticLexer == null) {
-      staticLexer = new Morpha(System.in);
+      staticLexer = new Morpha(new InputStreamReader(System.in));
     }
   }
 

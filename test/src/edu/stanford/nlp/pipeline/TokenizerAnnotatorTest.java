@@ -7,15 +7,16 @@ import edu.stanford.nlp.ling.CoreLabel;
 import junit.framework.TestCase;
 
 
-/** 
- * See TokenizerAnnotatorITest for some tests that require model files
+/**
+ * See TokenizerAnnotatorITest for some tests that require model files.
+ * See PTBTokenizerTest, etc. for more detailed language-specific tests.
  *
- * @author Christopher Manning 
+ * @author Christopher Manning
  */
 public class TokenizerAnnotatorTest extends TestCase {
 
   private static final String text = "She'll prove it ain't so.";
-  private static List<String> tokenWords = Arrays.asList(new String[] {
+  private static List<String> tokenWords = Arrays.asList(
           "She",
           "'ll",
           "prove",
@@ -23,8 +24,7 @@ public class TokenizerAnnotatorTest extends TestCase {
           "ai",
           "n't",
           "so",
-          "."
-  });
+          ".");
 
   public void testNewVersion() {
     Annotation ann = new Annotation(text);
@@ -48,7 +48,7 @@ public class TokenizerAnnotatorTest extends TestCase {
     props.setProperty("annotators", "tokenize");
     props.setProperty("tokenize.language", "notalanguage");
     try {
-      StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+      new StanfordCoreNLP(props);
       throw new RuntimeException("Should have failed");
     } catch (IllegalArgumentException e) {
       // yay, passed
@@ -57,14 +57,13 @@ public class TokenizerAnnotatorTest extends TestCase {
 
   public void testDefaultNoNLsPipeline() {
     String t = "Text with \n\n a new \nline.";
-    List<String> tWords = Arrays.asList(new String[] {
-        "Text",
-        "with",
-        "a",
-        "new",
-        "line",
-        "."
-    });
+    List<String> tWords = Arrays.asList(
+            "Text",
+            "with",
+            "a",
+            "new",
+            "line",
+            ".");
 
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize");

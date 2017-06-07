@@ -218,15 +218,15 @@ LAST UPDATE: 2013-11-12
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-jflex-1.5.1.jar
+jflex-1.6.1.jar
 
-ORIGINAL JAR NAME: jflex-1.5.1.jar
+ORIGINAL JAR NAME: jflex-1.6.1.jar
 
-VERSION: 1.5.1
+VERSION: 1.6.1
 
-RELEASE DATE: 2014-03-23
+RELEASE DATE: 2015-03-16
 
-SOURCE AVAILABLE: yes, jflex-1.5.1-src.zip
+SOURCE AVAILABLE: yes, jflex-1.6.1-src.zip
 
 DESCRIPTION: compiles .flex files into .java
 
@@ -235,9 +235,9 @@ URL: http://jflex.de/
 USED BY: Compiling PTBTokenizer, etc.
 Not needed by CoreNLP distributions
 
-LAST UPDATE: 2014-03-24
+LAST UPDATE: 2017-05-06
 
-LAST UPDATE BY: John Bauer
+LAST UPDATE BY: Chris Manning
 
 -----------------------------------------------------------------------
 log4j-1.2.16.jar

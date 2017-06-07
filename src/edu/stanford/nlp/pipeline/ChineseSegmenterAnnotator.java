@@ -1,7 +1,8 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
@@ -11,14 +12,15 @@ import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * This class will add segmentation information to an Annotation.
  * It assumes that the original document is a List of sentences under the
- * SentencesAnnotation.class key, and that each sentence has a
- * TextAnnotation.class key. This Annotator adds corresponding
- * information under a CharactersAnnotation.class key prior to segmentation,
- * and a TokensAnnotation.class key with value of a List of CoreLabel
+ * {@code SentencesAnnotation.class} key, and that each sentence has a
+ * {@code TextAnnotation.class key}. This Annotator adds corresponding
+ * information under a {@code CharactersAnnotation.class} key prior to segmentation,
+ * and a {@code TokensAnnotation.class} key with value of a List of CoreLabel
  * after segmentation.
  *
  * @author Pi-Chuan Chang
@@ -26,10 +28,9 @@ import edu.stanford.nlp.util.PropertiesUtils;
 public class ChineseSegmenterAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseSegmenterAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ChineseSegmenterAnnotator.class);
 
-  private AbstractSequenceClassifier<?> segmenter;
-  private final boolean VERBOSE;
+  private static final String DEFAULT_MODEL_NAME = "segment";
 
   private static final String DEFAULT_SEG_LOC =
     "/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz";
@@ -39,6 +40,11 @@ public class ChineseSegmenterAnnotator implements Annotator  {
 
   private static final String DEFAULT_SIGHAN_CORPORA_DICT =
     "/u/nlp/data/gale/segtool/stanford-seg/releasedata";
+
+
+  private final AbstractSequenceClassifier<?> segmenter;
+  private final boolean VERBOSE;
+  private final boolean tokenizeNewline;
 
   public ChineseSegmenterAnnotator() {
     this(DEFAULT_SEG_LOC, false);
@@ -53,11 +59,12 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   }
 
   public ChineseSegmenterAnnotator(String segLoc, boolean verbose, String serDictionary, String sighanCorporaDict) {
-    VERBOSE = verbose;
-    Properties props = new Properties();
-    props.setProperty("serDictionary", serDictionary);
-    props.setProperty("sighanCorporaDict", sighanCorporaDict);
-    loadModel(segLoc, props);
+    this(DEFAULT_MODEL_NAME,
+            PropertiesUtils.asProperties(
+                    DEFAULT_MODEL_NAME + ".serDictionary", serDictionary,
+                    DEFAULT_MODEL_NAME + ".sighanCorporaDict", sighanCorporaDict,
+                    DEFAULT_MODEL_NAME + ".verbose", Boolean.toString(verbose),
+                    DEFAULT_MODEL_NAME + ".model", segLoc));
   }
 
   public ChineseSegmenterAnnotator(String name, Properties props) {
@@ -80,30 +87,21 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     if (model == null) {
       throw new RuntimeException("Expected a property " + name + ".model");
     }
-    loadModel(model, modelProps);
-  }
-
-  @SuppressWarnings("unused")
-  private void loadModel(String segLoc) {
-    // don't write very much, because the CRFClassifier already reports loading
-    if (VERBOSE) {
-      log.info("Loading segmentation model ... ");
-    }
-    segmenter = CRFClassifier.getClassifierNoExceptions(segLoc);
-  }
-
-  private void loadModel(String segLoc, Properties props) {
     // don't write very much, because the CRFClassifier already reports loading
     if (VERBOSE) {
       log.info("Loading Segmentation Model ... ");
     }
     try {
-      segmenter = CRFClassifier.getClassifier(segLoc, props);
+      segmenter = CRFClassifier.getClassifier(model, modelProps);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+    // If newlines are treated as sentence split, we need to retain them in tokenization for ssplit to make use of them
+    tokenizeNewline = (!props.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, "never").equals("never"))
+            || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
   }
 
   @Override
@@ -126,40 +124,96 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     runSegmentation(annotation);
   }
 
-  private static void splitCharacters(CoreMap annotation) {
+  /** This is based on the "SGML2" pattern from PTBLexer.flex. */
+  private static final Pattern xmlPattern =
+          Pattern.compile("<([!?][A-Za-z-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:.-]*([ ]+([A-Za-z][A-Za-z0-9_:.-]*|[A-Za-z][A-Za-z0-9_:.-]*[ ]*=[ ]*('[^'\r\n]*'|\"[^\"\r\n]*\"|[A-Za-z][A-Za-z0-9_:.-]*)))*[ ]*/?|/[A-Za-z][A-Za-z0-9_:.-]*)[ ]*>");
+
+  /** This gets the TextAnnotation and creates a CharactersAnnotation, where, roughly,
+   *  the text has been separated into one character non-whitespace tokens with ChineseCharAnnotation, and with
+   *  a ChineseSegAnnotation marking the ones after whitespace, so that there will definitely
+   *  be word segmentation there. In 2016, two improvements were added: Handling non-BMP characters
+   *  correctly and not splitting on whitespace in the same types of XML places that are recognized by
+   *  English PTBTokenizer.
+   *
+   *  @param annotation The annotation to process
+   */
+  private void splitCharacters(CoreMap annotation) {
     String origText = annotation.get(CoreAnnotations.TextAnnotation.class);
-
     boolean seg = true;
-    List<CoreLabel> words = new ArrayList<>();
+    List<CoreLabel> charTokens = new ArrayList<>();
+    int length = origText.length();
 
-    for (int i = 0; i < origText.length(); i++) {
+    int xmlStartOffset = Integer.MAX_VALUE;
+    int xmlEndOffset = -1;
+    Matcher m = xmlPattern.matcher(origText);
+    if (m.find()) {
+      xmlStartOffset = m.start();
+      xmlEndOffset = m.end();
+    }
+
+    for (int offset = 0, cpCharCount; offset < length; offset += cpCharCount) {
+      int cp = origText.codePointAt(offset);
+      cpCharCount = Character.charCount(cp);
       CoreLabel wi = new CoreLabel();
-      char[] ca = {origText.charAt(i)};
-      String wordString = new String(ca);
+      String charString = origText.substring(offset, offset + cpCharCount); // new Java 8 substring, don't need to copy.
 
-      // if this word is a whitespace or a control character, set 'seg' to true for next word, and break
-      if ((Character.isSpaceChar(origText.charAt(i)) || Character.isISOControl(origText.charAt(i))) &&
-          ! (origText.charAt(i) == '\n' || origText.charAt(i) == '\r')) {
+      if (offset == xmlEndOffset) {
+        // reset with another search
+        m = xmlPattern.matcher(origText);
+        if (m.find(offset)) {
+          xmlStartOffset = m.start();
+          xmlEndOffset = m.end();
+        }
+      }
+      boolean skipCharacter = false;
+      boolean isXMLCharacter = false;
+      // first two cases are for XML region
+      if (offset == xmlStartOffset) {
         seg = true;
-      } else if (Character.isISOControl(origText.charAt(i))) {
-        // skip it but don't set seg
+        isXMLCharacter = true;
+      } else if (offset > xmlStartOffset && offset < xmlEndOffset) {
         seg = false;
-      } else {
-        // if this word is a word, put it as a feature label and set seg to false for next word
-        wi.set(CoreAnnotations.ChineseCharAnnotation.class, wordString);
+        isXMLCharacter = true;
+      } else if (Character.isSpaceChar(cp) || Character.isISOControl(cp)) {
+        // if this word is a whitespace or a control character, set 'seg' to true for next character
+        seg = true;
+        if (tokenizeNewline && (System.lineSeparator().indexOf(charString) >= 0 || charString.equals("\n"))) {
+          // Don't skip newline characters if we're tokenizing them
+          // We always count \n as newline to be consistent with the implementation of ssplit
+          skipCharacter = false;
+        } else {
+          skipCharacter = true;
+        }
+      }
+      if ( ! skipCharacter) {
+        // if this character is a character, put it in as a CoreLabel and set seg to false for next word
+        wi.set(CoreAnnotations.ChineseCharAnnotation.class, charString);
         if (seg) {
           wi.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
         } else {
           wi.set(CoreAnnotations.ChineseSegAnnotation.class, "0");
         }
-        wi.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, i);
-        wi.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, (i + 1));
-        words.add(wi);
+        if (isXMLCharacter) {
+          if (Character.isSpaceChar(cp) || Character.isISOControl(cp)) {
+            // We mark XML whitespace with a special tag because later they will be handled differently
+            // than non-whitespace XML characters. This is because the segmenter eats whitespaces...
+            wi.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, "whitespace");
+          } else if (offset == xmlStartOffset) {
+            wi.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, "beginning");
+          } else {
+            wi.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, "1");
+          }
+        } else {
+          wi.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, "0");
+        }
+        wi.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, offset);
+        wi.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, (offset + cpCharCount));
+        charTokens.add(wi);
         seg = false;
       }
     }
 
-    annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, words);
+    annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, charTokens);
   }
 
   private void runSegmentation(CoreMap annotation) {
@@ -169,25 +223,80 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     // 0 12 3 4
     // 0, 0+1 ,
 
-    String text = annotation.get(CoreAnnotations.TextAnnotation.class);
-    List<CoreLabel> sentChars = annotation.get(SegmenterCoreAnnotations.CharactersAnnotation.class);
+    String text = annotation.get(CoreAnnotations.TextAnnotation.class); // the original text String
+    List<CoreLabel> sentChars = annotation.get(SegmenterCoreAnnotations.CharactersAnnotation.class); // the way it was divided by splitCharacters
     List<CoreLabel> tokens = new ArrayList<>();
     annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
-    text = text.replaceAll("[\n\r]", "");
-    List<String> words = segmenter.segmentString(text);
+    // Run the segmenter! On the whole String. It knows not about the splitting into chars.
+    // Can we change this to have it run directly on the already existing list of tokens. That would help, no?
+    List<String> words;
+    if (!tokenizeNewline) {
+      text = text.replaceAll("[\r\n]", "");
+      words = segmenter.segmentString(text);
+    } else {
+      // Run the segmenter on each line so that we don't get tokens that cross line boundaries
+      // Neat trick to keep delimiters from: http://stackoverflow.com/a/2206432
+      String[] lines = text.split(String.format("((?<=%1$s)|(?=%1$s)|(?<=\n)|(?=\n))", System.lineSeparator()));
+
+      words = new ArrayList<>();
+      for (String line : lines) {
+        if (line.equals(System.lineSeparator()) || line.equals("\n")) {
+          // Don't segment newline tokens, keep them as-is
+          words.add(line);
+        } else {
+          words.addAll(segmenter.segmentString(line));
+        }
+      }
+    }
     if (VERBOSE) {
-      log.info(text);
-      log.info("--->");
-      log.info(words);
+      log.info(text + "--->" + words);
     }
 
-    int pos = 0;
+    int pos = 0; // This is used to index sentChars, the output from splitCharacters
+    StringBuilder xmlbuffer = new StringBuilder();
+    int xmlbegin = -1;
     for (String w : words) {
       CoreLabel fl = sentChars.get(pos);
+
+      if (fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")
+        || fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("beginning")) {
+        // Beginnings of plain text and other XML tags are good places to end an XML tag
+        if (xmlbuffer.length() > 0) {
+          // Form the XML token
+          String xmltag = xmlbuffer.toString();
+          CoreLabel token = new CoreLabel();
+          token.setWord(xmltag);
+          token.setValue(xmltag);
+          token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, xmlbegin);
+          CoreLabel fl1 = sentChars.get(pos - 1);
+          token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl1.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+          tokens.add(token);
+
+          // Clean up and prepare for the next XML tag
+          xmlbegin = -1;
+          xmlbuffer = new StringBuilder();
+        }
+      }
+
+      if (!fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")) {
+        // found an XML character
+        while (fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("whitespace")) {
+          // Print whitespaces into the XML buffer and move on until the next non-whitespace character is found
+          // and we're in sync with segmenter output again
+          xmlbuffer.append(" ");
+          pos += 1;
+          fl = sentChars.get(pos);
+        }
+
+        xmlbuffer.append(w);
+        pos += w.length();
+        if (xmlbegin < 0) xmlbegin = fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        continue;
+      }
       fl.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
       if (w.isEmpty()) {
-        continue;
+        continue; // [cdm 2016:] surely this shouldn't happen!
       }
       CoreLabel token = new CoreLabel();
       token.setWord(w);
@@ -196,13 +305,21 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       pos += w.length();
       fl = sentChars.get(pos - 1);
       token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-      if (VERBOSE) {
-        log.info("Adding token " + token.toShorterString());
-      }
+      tokens.add(token);
+    }
+
+    if (xmlbuffer.length() > 0) {
+      // Form the last XML token, if any
+      String xmltag = xmlbuffer.toString();
+      CoreLabel token = new CoreLabel();
+      token.setWord(xmltag);
+      token.setValue(xmltag);
+      token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, xmlbegin);
+      CoreLabel fl1 = sentChars.get(pos - 1);
+      token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl1.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
       tokens.add(token);
     }
   }
-
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
