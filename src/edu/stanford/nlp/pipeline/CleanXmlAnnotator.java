@@ -699,7 +699,7 @@ public class CleanXmlAnnotator implements Annotator {
             currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class, foundAuthor);
             // get author mention info
             Pattern p = Pattern.compile(foundAuthor);
-            Matcher matcher = p.matcher(sectionStartToken.word());
+            Matcher matcher = p.matcher(sectionStartTagToken.word());
             if (matcher.find()) {
               int authorMentionStart = matcher.start() + sectionStartTagCharBegin;
               int authorMentionEnd = matcher.end() + sectionStartTagCharBegin;
