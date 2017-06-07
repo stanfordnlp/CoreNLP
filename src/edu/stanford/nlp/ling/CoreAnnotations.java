@@ -859,7 +859,6 @@ public class CoreAnnotations {
    * for Arabic: character level information, segmentation
    */
   public static class ArabicCharAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -867,7 +866,6 @@ public class CoreAnnotations {
 
   /** For Arabic: the segmentation information from the segmenter. */
   public static class ArabicSegAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1166,23 +1164,6 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-
-  /**
-   * Store a list of sections in the document
-   */
-  public static class SectionsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    @Override
-    public Class<List<CoreMap>> getType() { return ErasureUtils.uncheckedCast(List.class); }
-  }
-
-  /**
-   * Store an index into a list of sections
-   */
-  public static class SectionIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
-    public Class<Integer> getType() { return ErasureUtils.uncheckedCast(Integer.class); }
-  }
-
 
   /**
    * Section of a document
@@ -1787,9 +1768,8 @@ public class CoreAnnotations {
     }
   }
 
-  /** Annotation indicating whether the numeric phrase the token is part of
-   * represents a NUMBER or ORDINAL (twenty first => ORDINAL ORDINAL).
-   */
+  // Annotation indicating whether the numeric phrase the token is part of
+  // represents a NUMBER or ORDINAL (twenty first => ORDINAL ORDINAL)
   public static class NumericCompositeValueAnnotation implements CoreAnnotation<Number> {
     @Override
     public Class<Number> getType() {
@@ -1797,9 +1777,8 @@ public class CoreAnnotations {
     }
   }
 
-  /** Annotation indicating the numeric value of the phrase the token is part of
-   * (twenty first => 21 21 ).
-   */
+  // Annotation indicating the numeric value of the phrase the token is part of
+  // (twenty first => 21 21 )
   public static class NumericCompositeTypeAnnotation implements CoreAnnotation<String> {
     @Override
     public Class<String> getType() {
@@ -1970,5 +1949,4 @@ public class CoreAnnotations {
     @Override
     public Class<String> getType() { return ErasureUtils.uncheckedCast(String.class); }
   }
-
 }

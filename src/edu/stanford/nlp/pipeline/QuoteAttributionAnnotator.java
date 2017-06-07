@@ -14,44 +14,11 @@ import edu.stanford.nlp.quoteattribution.Sieves.MSSieves.MajoritySpeakerSieve;
 import edu.stanford.nlp.quoteattribution.Sieves.QMSieves.*;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
-import edu.stanford.nlp.util.*;
 
 import java.util.*;
 
 
 /**
- * An annotator uses attributes quotes in a text to their speakers. It uses a two-stage process that first links quotes
- * to mentions and then mentions to speakers. Each stage consists in a series of sieves that each try to make
- * predictions on the quote or mentions that have not been linked by previous sieves.
- *
- * The annotator will add the following annotations to each QuotationAnnotation:
- * <ul>
- *   <li>MentionAnnotation : the text of the mention</li>
- *   <li>MentionBeginAnnotation : the beginning token index of the mention</li>
- *   <li>MentionEndAnnotation : the end token index of the mention</li>
- *   <li>MentionTypeAnnotation : the type of mention (pronoun, name, or animate noun)</li>
- *   <li>MentionSieveAnnotation : the sieve that made the mention prediction</li>
- *   <li>SpeakerAnnotation : the name of the speaker</li>
- *   <li>SpeakerSieveAnnotation : the name of the sieve that made the speaker prediction</li>
- * </ul>
- *
- * The annotator has the following options:
- * <ul>
- *   <li>quoteattribution.charactersPath (required): path to file containing the character names, aliases,
- *   and gender information.</li>
- *   <li>quoteattribution.booknlpCoref (required): path to tokens file generated from
- *   <a href="https://github.com/dbamman/book-nlp">book-nlp</a> containing coref information.</li>
- *   <li>quoteattribution.QMSieves: list of sieves to use in the quote to mention linking phase
- *   (default=tri,dep,onename,voc,paraend,conv,sup,loose). More information about the sieves can be found at our
- *   <a href="stanfordnlp.github.io/CoreNLP/quoteattribution.html">website</a>. </li>
- *   <li>quoteattribution.MSSieves: list of sieves to use in the mention to speaker linking phase
- *   (default=det,top).</li>
- *   <li>quoteattribution.model: path to trained model file.</li>
- *   <li>quoteattribution.familyWordsFile: path to file with family words list.</li>
- *   <li>quoteattribution.animacyWordsFile: path to file with animacy words list.</li>
- *   <li>quoteattribution.genderNamesFile: path to file with names list with gender information.</li>
- * </ul>
- *
  * @author Grace Muzny, Michael Fang
  */
 public class QuoteAttributionAnnotator implements Annotator {
@@ -106,13 +73,12 @@ public class QuoteAttributionAnnotator implements Annotator {
   public static final String DEFAULT_MODEL_PATH = "edu/stanford/nlp/models/quoteattribution/quoteattribution_model.ser";
 
   // these paths go in the props file
-  public static String FAMILY_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/family_words.txt";
-  public static String ANIMACY_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/animate.unigrams.txt";
-  public static String GENDER_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/gender_filtered.txt";
+  public static String FAMILY_WORD_LIST = "edu/stanford/nlp/data/quoteattribution/family_words.txt";
+  public static String ANIMACY_WORD_LIST = "edu/stanford/nlp/data/quoteattribution/animate.unigrams.txt";
+  public static String GENDER_WORD_LIST = "edu/stanford/nlp/data/quoteattribution/gender_filtered.txt";
   public static String COREF_PATH = "";
   public static String MODEL_PATH = "edu/stanford/nlp/models/quoteattribution/quoteattribution_model.ser";
   public static String CHARACTERS_FILE = "";
-  public boolean buildCharacterMapPerAnnotation = false;
 
   public static final Boolean VERBOSE = true;
 
@@ -144,44 +110,20 @@ public class QuoteAttributionAnnotator implements Annotator {
       log.info("Loading QuoteAttribution characters [" + CHARACTERS_FILE + "]...");
     }
     // loading all our word lists
-    FAMILY_WORD_LIST = props.getProperty("familyWordsFile", FAMILY_WORD_LIST);
-    ANIMACY_WORD_LIST = props.getProperty("animacyWordsFile", ANIMACY_WORD_LIST);
-    GENDER_WORD_LIST = props.getProperty("genderNamesFile", GENDER_WORD_LIST);
+    FAMILY_WORD_LIST = props.getProperty("familyWordsFile", null);
+    ANIMACY_WORD_LIST = props.getProperty("animacyWordsFile", null);
+    GENDER_WORD_LIST = props.getProperty("genderNamesFile", null);
     familyRelations = QuoteAttributionUtils.readFamilyRelations(FAMILY_WORD_LIST);
     genderMap = QuoteAttributionUtils.readGenderedNounList(GENDER_WORD_LIST);
     animacyList = QuoteAttributionUtils.readAnimacyList(ANIMACY_WORD_LIST);
-    if (characterMap != null) {
-      characterMap = QuoteAttributionUtils.readPersonMap(CHARACTERS_FILE);
-    } else {
-      buildCharacterMapPerAnnotation = true;
-    }
+    characterMap = QuoteAttributionUtils.readPersonMap(CHARACTERS_FILE);
     if (VERBOSE) {
       timer.stop("done.");
     }
   }
 
-  /** if no character list is provided, produce a list of person names from entity mentions annotation **/
-  public void entityMentionsToCharacterMap(Annotation annotation) {
-    characterMap = new HashMap<String, List<Person>>();
-    for (CoreMap entityMention : annotation.get(CoreAnnotations.MentionsAnnotation.class)) {
-      String entityMentionString = entityMention.toString();
-      if (entityMention.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("PERSON")) {
-        Person newPerson = new Person(entityMentionString, "UNK", new ArrayList());
-        List<Person> newPersonList = new ArrayList<Person>();
-        newPersonList.add(newPerson);
-        characterMap.put(entityMentionString, newPersonList);
-      }
-    }
-  }
-
   @Override
   public void annotate(Annotation annotation) {
-    boolean perDocumentCharacterMap = false;
-    if (buildCharacterMapPerAnnotation) {
-      if (annotation.containsKey(CoreAnnotations.MentionsAnnotation.class)) {
-        entityMentionsToCharacterMap(annotation);
-      }
-    }
     // 0. pre-preprocess the text with paragraph annotations
     // TODO: maybe move this out, definitely make it so that you can set paragraph breaks
     Properties propsPara = new Properties();

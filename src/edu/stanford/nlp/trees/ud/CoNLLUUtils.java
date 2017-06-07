@@ -110,7 +110,7 @@ public class CoNLLUUtils {
                         .append(extraDeps.get(key));
             }
         }
-    /* Empty feature list. */
+        /* Empty feature list. */
         if (first) {
             sb.append("_");
         }

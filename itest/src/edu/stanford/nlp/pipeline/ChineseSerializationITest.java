@@ -3,7 +3,6 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
-import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import org.junit.Test;
@@ -25,11 +24,6 @@ public class ChineseSerializationITest {
       Properties chineseProperties = StringUtils.argsToProperties("-props",
               "StanfordCoreNLP-chinese.properties");
       Annotation doc = new StanfordCoreNLP(chineseProperties).process(sampleChineseDocument);
-
-      // fake having a section in the annotation so the test passes.
-      // todo [2017] clean up the status of sections.
-      doc.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<CoreMap>());
-
       ByteArrayOutputStream ks = new ByteArrayOutputStream();
       serializer.write(doc, ks).close();
       // read

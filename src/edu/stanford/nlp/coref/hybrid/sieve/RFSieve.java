@@ -1,6 +1,6 @@
 package edu.stanford.nlp.coref.hybrid.sieve;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -39,7 +39,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class RFSieve extends Sieve  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(RFSieve.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(RFSieve.class);
 
   private static final long serialVersionUID = -4090017054885920527L;
 
@@ -57,7 +57,6 @@ public class RFSieve extends Sieve  {
     this.classifierType = ClassifierType.RF;
   }
 
-  @Override
   public void findCoreferentAntecedent(Mention m, int mIdx, Document document, Dictionaries dict, Properties props, StringBuilder sbLog) throws Exception {
     int sentIdx = m.sentNum;
 
@@ -102,7 +101,6 @@ public class RFSieve extends Sieve  {
       Sieve.merge(document, m.mentionID, antID);
     }
   }
-
   public static RVFDatum<Boolean, String> extractDatum(Mention m, Mention candidate,
       Document document, int mentionDist, Dictionaries dict, Properties props, String sievename) {
     try {
@@ -250,39 +248,39 @@ public class RFSieve extends Sieve  {
         StringBuilder sb = new StringBuilder();
         List<Mention> sortedMentions = new ArrayList<>(aC.corefMentions.size());
         sortedMentions.addAll(aC.corefMentions);
-        sortedMentions.sort(new CorefChain.MentionComparator());
+        Collections.sort(sortedMentions, new CorefChain.MentionComparator());
         for(Mention a : sortedMentions) {
           sb.append(a.mentionType).append("-");
         }
-        features.incrementCount("B-A-SHAPE-" + sb);
+        features.incrementCount("B-A-SHAPE-"+sb.toString());
 
         sb = new StringBuilder();
         sortedMentions = new ArrayList<>(mC.corefMentions.size());
         sortedMentions.addAll(mC.corefMentions);
-        sortedMentions.sort(new CorefChain.MentionComparator());
+        Collections.sort(sortedMentions, new CorefChain.MentionComparator());
         for(Mention men : sortedMentions) {
           sb.append(men.mentionType).append("-");
         }
-        features.incrementCount("B-M-SHAPE-" + sb);
+        features.incrementCount("B-M-SHAPE-"+sb.toString());
 
         if(CorefProperties.useConstituencyParse(props)) {
           sb = new StringBuilder();
           Tree mTree = m.contextParseTree;
           Tree mHead = mTree.getLeaves().get(m.headIndex).ancestor(1, mTree);
-          for (Tree node : mTree.pathNodeToNode(mHead, mTree)) {
+          for(Tree node : mTree.pathNodeToNode(mHead, mTree)){
             sb.append(node.value()).append("-");
             if(node.value().equals("S")) break;
           }
-          features.incrementCount("B-M-SYNPATH-" + sb);
+          features.incrementCount("B-M-SYNPATH-"+sb.toString());
 
           sb = new StringBuilder();
           Tree aTree = candidate.contextParseTree;
           Tree aHead = aTree.getLeaves().get(candidate.headIndex).ancestor(1, aTree);
-          for(Tree node : aTree.pathNodeToNode(aHead, aTree)) {
+          for(Tree node : aTree.pathNodeToNode(aHead, aTree)){
             sb.append(node.value()).append("-");
             if(node.value().equals("S")) break;
           }
-          features.incrementCount("B-A-SYNPATH-" + sb);
+          features.incrementCount("B-A-SYNPATH-"+sb.toString());
         }
 
 
@@ -745,8 +743,7 @@ public class RFSieve extends Sieve  {
     double inner = ArrayMath.innerProduct(normalizedVector1, normalizedVector2);
     return inner;
   }
-
-  private static int numEntitiesInList(Mention m) {
+  public static int numEntitiesInList(Mention m) {
     int num = 0;
     for(int i=1 ; i < m.originalSpan.size() ; i++) {
       CoreLabel cl = m.originalSpan.get(i);

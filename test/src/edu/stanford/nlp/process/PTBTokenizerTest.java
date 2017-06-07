@@ -60,11 +60,6 @@ public class PTBTokenizerTest {
       "School-aged parents should be aware of the unique problems that they face.",
       "I dispute Art. 53 of the convention.",
       "I like Art. And I like History.",
-          "Contact: sue@google.com, fred@stanford.edu; michael.inman@lab.rpi.cs.cmu.edu.",
-          "Email: recruiters@marvelconsultants.com <mailto:recruiters@marvelconsultants.com>",
-          " Jeremy Meier <jermeier@earthlink.net>",
-          "Ram Tackett,  (mailto:rtackett@abacustech.net)",
-          "[Jgerma5@aol.com]. Danny_Jones%ENRON@eott.com"
   };
 
   private final String[][] ptbGold = {
@@ -119,12 +114,6 @@ public class PTBTokenizerTest {
       {"School-aged", "parents", "should", "be", "aware", "of", "the", "unique", "problems", "that", "they", "face","."},
       { "I", "dispute", "Art.", "53", "of", "the", "convention", "." },
       { "I", "like", "Art", ".", "And", "I", "like", "History", "." },
-          { "Contact", ":", "sue@google.com", ",", "fred@stanford.edu", ";", "michael.inman@lab.rpi.cs.cmu.edu", "." },
-          { "Email", ":", "recruiters@marvelconsultants.com", "<mailto:recruiters@marvelconsultants.com>" },
-          { "Jeremy", "Meier", "<jermeier@earthlink.net>" },
-          { "Ram", "Tackett", ",", "-LRB-", "mailto:rtackett@abacustech.net", "-RRB-" },
-          { "-LSB-", "Jgerma5@aol.com", "-RSB-", ".", "Danny_Jones%ENRON@eott.com" },
-
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -179,11 +168,6 @@ public class PTBTokenizerTest {
       {"School", "-", "aged", "parents", "should", "be", "aware", "of", "the", "unique", "problems", "that", "they", "face","."},
       { "I", "dispute", "Art.", "53", "of", "the", "convention", "." },
       { "I", "like", "Art", ".", "And", "I", "like", "History", "." },
-          { "Contact", ":", "sue@google.com", ",", "fred@stanford.edu", ";", "michael.inman@lab.rpi.cs.cmu.edu", "." },
-          { "Email", ":", "recruiters@marvelconsultants.com", "<mailto:recruiters@marvelconsultants.com>" },
-          { "Jeremy", "Meier", "<jermeier@earthlink.net>" },
-          { "Ram", "Tackett", ",", "-LRB-", "mailto:rtackett@abacustech.net", "-RRB-" },
-          { "-LSB-", "Jgerma5@aol.com", "-RSB-", ".", "Danny_Jones%ENRON@eott.com" },
 
   };
 
@@ -224,13 +208,11 @@ public class PTBTokenizerTest {
         i++;
       }
       if (i != corpGold[sent % 2].length) {
-        System.out.print("Gold: ");
-        System.out.println(Arrays.toString(corpGold[sent % 2]));
+        System.out.println("Gold: " + Arrays.toString(corpGold[sent % 2]));
         List<CoreLabel> tokens = new PTBTokenizer<>(new StringReader(corpInputs[sent / 2]),
               new CoreLabelTokenFactory(),
               (sent % 2 == 0) ? "strictTreebank3": "").tokenize();
-        System.out.print("Guess: ");
-        System.out.println(SentenceUtils.listToString(tokens));
+        System.out.println("Guess: " + SentenceUtils.listToString(tokens));
         System.out.flush();
       }
       assertEquals("PTBTokenizer num tokens problem", i, corpGold[sent % 2].length);
@@ -500,53 +482,6 @@ public class PTBTokenizerTest {
   public void testPTBTokenizerMT() {
     TokenizerFactory<Word> tokFactory = PTBTokenizer.factory();
     runOnTwoArrays(tokFactory, mtInputs, mtGold);
-  }
-
-  private final String[] emojiInputs = {
-          // The non-BMP Emoji end up being surrogate pair encoded in Java! This list includes a flag.
-          "\uD83D\uDE09\uD83D\uDE00\uD83D\uDE02\uD83D\uDE0D\uD83E\uDD21\uD83C\uDDE6\uD83C\uDDFA\uD83C\uDF7A",
-          // People with skin tones
-          "\uD83D\uDC66\uD83C\uDFFB\uD83D\uDC67\uD83C\uDFFF",
-          // A family with cheese
-          "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67\uD83E\uDDC0",
-          // Some BMP emoji
-          "\u00AE\u203C\u2198\u231A\u2328\u23F0\u2620\u26BD\u2705\u2757",
-          // Choosing emoji vs. text presentation.
-          "⚠⚠️⚠︎❤️❤",
-          "¯\\_(ツ)_/¯"
-  };
-
-  private final String[][] emojiGold = {
-          { "\uD83D\uDE09", "\uD83D\uDE00", "\uD83D\uDE02", "\uD83D\uDE0D", "\uD83E\uDD21", "\uD83C\uDDE6\uD83C\uDDFA", "\uD83C\uDF7A" },
-          { "\uD83D\uDC66\uD83C\uDFFB", "\uD83D\uDC67\uD83C\uDFFF" },
-          { "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67", "\uD83E\uDDC0" },
-          { "\u00AE", "\u203C", "\u2198", "\u231A", "\u2328", "\u23F0", "\u2620", "\u26BD", "\u2705", "\u2757" },
-          { "⚠", "⚠️", "⚠︎", "❤️", "❤"},
-          { "¯\\_-LRB-ツ-RRB-_/¯" },
-  };
-
-  @Test
-  public void testEmoji() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory();
-    runOnTwoArrays(tokFactory, emojiInputs, emojiGold);
-  }
-
-  private final String[] hyphenInputs = {
-          // Text starting with BOM (should be deleted), words with soft hyphens and non-breaking space.
-          "\uFEFFThis is hy\u00ADphen\u00ADated and non-breaking spaces: 3\u202F456\u202F473.89",
-          // Test that some cp1252 that shouldn't be in file is normalized okay
-          "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092"
-  };
-
-  private final String[][] hyphenGold = {
-          { "This", "is", "hyphenated", "and", "non-breaking", "spaces", ":", "3456473.89" },
-          { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" }
-  };
-
-  @Test
-  public void testHyphensAndBOM() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false");
-    runOnTwoArrays(tokFactory, hyphenInputs, hyphenGold);
   }
 
 }

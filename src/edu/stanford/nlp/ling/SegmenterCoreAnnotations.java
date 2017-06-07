@@ -14,11 +14,4 @@ public class SegmenterCoreAnnotations {
       return ErasureUtils.<Class<List<CoreLabel>>> uncheckedCast(List.class);
     }
   }
-
-  public static class XMLCharAnnotation implements CoreAnnotation<String> {
-    @Override
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
 }

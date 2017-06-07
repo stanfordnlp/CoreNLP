@@ -4,6 +4,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
@@ -29,6 +30,8 @@ public class CoNLLUDocumentWriter {
     public String printSemanticGraph(SemanticGraph sg, boolean unescapeParenthesis) {
 
 
+        boolean isTree = SemanticGraphUtils.isTree(sg);
+
         StringBuilder sb = new StringBuilder();
 
         /* Print comments. */
@@ -49,19 +52,19 @@ public class CoNLLUDocumentWriter {
             /* Try to find main governor and additional dependencies. */
             int govIdx = -1;
             GrammaticalRelation reln = null;
-            HashMap<Integer, String> additionalDeps = new HashMap<>();
+            HashMap<Integer, String> enhancedDependencies = new HashMap<>();
             for (IndexedWord parent : sg.getParents(token)) {
                 SemanticGraphEdge edge = sg.getEdge(parent, token);
                 if ( govIdx == -1 && ! edge.isExtra()) {
                     govIdx = parent.index();
                     reln = edge.getRelation();
-                } else {
-                    additionalDeps.put(parent.index(), edge.getRelation().toString());
                 }
+                enhancedDependencies.put(parent.index(), edge.getRelation().toString());
             }
 
 
-            String additionalDepsString = CoNLLUUtils.toExtraDepsString(additionalDeps);
+
+            String additionalDepsString = isTree ? "_" : CoNLLUUtils.toExtraDepsString(enhancedDependencies);
             String word = token.word();
             String featuresString = CoNLLUUtils.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
             String pos = token.getString(CoreAnnotations.PartOfSpeechAnnotation.class, "_");

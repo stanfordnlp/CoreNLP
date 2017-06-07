@@ -1141,18 +1141,6 @@ public class XMLUtils  {
     public String toString() {
       return text;
     }
-
-    /**
-     * Given a list of attributes, return the first one that is non-null
-     */
-    public String getFirstNonNullAttributeFromList(List<String> attributesList) {
-      for (String attribute : attributesList) {
-        if (attributes.get(attribute) != null) {
-          return attributes.get(attribute);
-        }
-      }
-      return null;
-    }
   } // end static class XMLTag
 
 
