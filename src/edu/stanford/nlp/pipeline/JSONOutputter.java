@@ -110,10 +110,28 @@ public class JSONOutputter extends AnnotationOutputter {
           }
           // (openie)
           Collection<RelationTriple> openIETriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-          writeTriples(l2, "openie", openIETriples);
+          if (openIETriples != null) {
+            l2.set("openie", openIETriples.stream().map(triple -> (Consumer<Writer>) (Writer tripleWriter) -> {
+              tripleWriter.set("subject", triple.subjectGloss());
+              tripleWriter.set("subjectSpan", Span.fromPair(triple.subjectTokenSpan()));
+              tripleWriter.set("relation", triple.relationGloss());
+              tripleWriter.set("relationSpan", Span.fromPair(triple.relationTokenSpan()));
+              tripleWriter.set("object", triple.objectGloss());
+              tripleWriter.set("objectSpan", Span.fromPair(triple.objectTokenSpan()));
+            }));
+          }
           // (kbp)
           Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
-          writeTriples(l2, "kbp", kbpTriples);
+          if (kbpTriples != null) {
+            l2.set("kbp", kbpTriples.stream().map(triple -> (Consumer<Writer>) (Writer tripleWriter) -> {
+              tripleWriter.set("subject", triple.subjectGloss());
+              tripleWriter.set("subjectSpan", Span.fromPair(triple.subjectTokenSpan()));
+              tripleWriter.set("relation", triple.relationGloss());
+              tripleWriter.set("relationSpan", Span.fromPair(triple.relationTokenSpan()));
+              tripleWriter.set("object", triple.objectGloss());
+              tripleWriter.set("objectSpan", Span.fromPair(triple.objectTokenSpan()));
+            }));
+          }
 
           // (entity mentions)
           if (sentence.get(CoreAnnotations.MentionsAnnotation.class) != null) {
@@ -140,7 +158,20 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("entitylink", m.get(CoreAnnotations.WikipediaEntityAnnotation.class));
               // Timex
               Timex time = m.get(TimeAnnotations.TimexAnnotation.class);
-              writeTime(l3, time);
+              if (time != null) {
+                Timex.Range range = time.range();
+                l3.set("timex", (Consumer<Writer>) l4 -> {
+                  l4.set("tid", time.tid());
+                  l4.set("type", time.timexType());
+                  l4.set("value", time.value());
+                  l4.set("altValue", time.altVal());
+                  l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
+                    l5.set("begin", range.begin);
+                    l5.set("end", range.end);
+                    l5.set("duration", range.duration);
+                  } : null);
+                });
+              }
             }));
           }
 
@@ -165,7 +196,20 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("entitylink", token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
               // Timex
               Timex time = token.get(TimeAnnotations.TimexAnnotation.class);
-              writeTime(l3, time);
+              if (time != null) {
+                Timex.Range range = time.range();
+                l3.set("timex", (Consumer<Writer>) l4 -> {
+                  l4.set("tid", time.tid());
+                  l4.set("type", time.timexType());
+                  l4.set("value", time.value());
+                  l4.set("altValue", time.altVal());
+                  l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
+                    l5.set("begin", range.begin);
+                    l5.set("end", range.end);
+                    l5.set("duration", range.duration);
+                  } : null);
+                });
+              }
             }));
           }
         }));
@@ -224,63 +268,9 @@ public class JSONOutputter extends AnnotationOutputter {
         }));
       }
 
-      // sections
-      if (doc.get(CoreAnnotations.SectionsAnnotation.class) != null) {
-        List<CoreMap> sections = doc.get(CoreAnnotations.SectionsAnnotation.class);
-        l1.set("sections", sections.stream().map(section -> (Consumer<Writer>) (Writer l2) -> {
-          // Set char start
-          l2.set("charBegin", section.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-          // Set char end
-          l2.set("charEnd", section.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-          // Set author
-          if (section.get(CoreAnnotations.AuthorAnnotation.class) != null) {
-            l2.set("author", section.get(CoreAnnotations.AuthorAnnotation.class));
-          }
-          // Set date time
-          if (section.get(CoreAnnotations.SectionDateAnnotation.class) != null) {
-            l2.set("dateTime", section.get(CoreAnnotations.SectionDateAnnotation.class));
-          }
-          // add the sentence indexes for the sentences in this section
-          List<CoreMap> sentences = section.get(CoreAnnotations.SentencesAnnotation.class);
-          l2.set("sentenceIndexes", sentences.stream().map(sentence -> (Consumer<Writer>) (Writer l3) -> {
-            int sentenceIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
-            l3.set("index", sentenceIndex);
-          }));
-        }));
-      }
     });
 
     l0.flush();  // flush
-  }
-
-  private static void writeTriples(Writer l2, String key, Collection<RelationTriple> triples) {
-    if (triples != null) {
-      l2.set(key, triples.stream().map(triple -> (Consumer<Writer>) (Writer tripleWriter) -> {
-        tripleWriter.set("subject", triple.subjectGloss());
-        tripleWriter.set("subjectSpan", Span.fromPair(triple.subjectTokenSpan()));
-        tripleWriter.set("relation", triple.relationGloss());
-        tripleWriter.set("relationSpan", Span.fromPair(triple.relationTokenSpan()));
-        tripleWriter.set("object", triple.objectGloss());
-        tripleWriter.set("objectSpan", Span.fromPair(triple.objectTokenSpan()));
-      }));
-    }
-  }
-
-  private static void writeTime(Writer l3, Timex time) {
-    if (time != null) {
-      Timex.Range range = time.range();
-      l3.set("timex", (Consumer<Writer>) l4 -> {
-        l4.set("tid", time.tid());
-        l4.set("type", time.timexType());
-        l4.set("value", time.value());
-        l4.set("altValue", time.altVal());
-        l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
-          l5.set("begin", range.begin);
-          l5.set("end", range.end);
-          l5.set("duration", range.duration);
-        } : null);
-      });
-    }
   }
 
   /**
@@ -339,8 +329,9 @@ public class JSONOutputter extends AnnotationOutputter {
    * It should go without saying that this is not threadsafe.
    */
   public static class JSONWriter {
-    protected final PrintWriter writer;
-    protected final Options options;
+    private final PrintWriter writer;
+    private final Options options;
+
     public JSONWriter(PrintWriter writer, Options options) {
       this.writer = writer;
       this.options = options;
@@ -390,7 +381,6 @@ public class JSONOutputter extends AnnotationOutputter {
         if (componentType.isPrimitive()) {
           if (int.class.isAssignableFrom(componentType)) {
             ArrayList<Integer> lst = new ArrayList<>();
-            //noinspection Convert2streamapi
             for (int elem : ((int[]) value)) {
               lst.add(elem);
             }
@@ -409,7 +399,6 @@ public class JSONOutputter extends AnnotationOutputter {
             routeObject(indent, lst);
           } else if (long.class.isAssignableFrom(componentType)) {
             ArrayList<Long> lst = new ArrayList<>();
-            //noinspection Convert2streamapi
             for (long elem : ((long[]) value)) {
               lst.add(elem);
             }
@@ -428,7 +417,6 @@ public class JSONOutputter extends AnnotationOutputter {
             routeObject(indent, lst);
           } else if (double.class.isAssignableFrom(componentType)) {
             ArrayList<Double> lst = new ArrayList<>();
-            //noinspection Convert2streamapi
             for (double elem : ((double[]) value)) {
               lst.add(elem);
             }

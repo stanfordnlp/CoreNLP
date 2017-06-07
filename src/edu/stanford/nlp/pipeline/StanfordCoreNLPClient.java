@@ -601,7 +601,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
       }
       Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
       StanfordCoreNLP.processFiles(null, files, 1, properties, this::annotate,
-          StanfordCoreNLP.createOutputter(properties, new AnnotationOutputter.Options()), outputFormat, false);
+          StanfordCoreNLP.createOutputter(properties, new AnnotationOutputter.Options()), outputFormat);
     }
 
     //
@@ -619,7 +619,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
         }
       }
       StanfordCoreNLP.processFiles(null, files, 1, properties, this::annotate,
-          StanfordCoreNLP.createOutputter(properties, new AnnotationOutputter.Options()), outputFormat, false);
+          StanfordCoreNLP.createOutputter(properties, new AnnotationOutputter.Options()), outputFormat);
     }
 
     //

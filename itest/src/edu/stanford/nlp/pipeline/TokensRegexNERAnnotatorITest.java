@@ -13,12 +13,10 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Test cases for TokensRegexNERAnnotator (taken from RegexNERAnnotator).
- *
+ * Test cases for TokensRegexNERAnnotator (taken from RegexNERAnnotator)
  * @author Angel Chang
  */
 public class TokensRegexNERAnnotatorITest extends TestCase {
-
   private static final String REGEX_ANNOTATOR_NAME = "tokensregexner";
   private static final String MAPPING = "/u/nlp/data/TAC-KBP2010/sentence_extraction/itest_map";
 
@@ -29,7 +27,6 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
-    super.setUp();
     synchronized(TokensRegexNERAnnotatorITest.class) {
       if (pipeline == null) {  // Hack so we don't load the pipeline fresh for every test
         Properties props = new Properties();
@@ -44,16 +41,18 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   }
 
   // Helper methods
-  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props) {
+  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props)
+  {
     return new TokensRegexNERAnnotator(REGEX_ANNOTATOR_NAME, props);
   }
 
-  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(String[][] patterns, boolean ignoreCase) throws Exception {
+  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(String[][] patterns, boolean ignoreCase) throws Exception
+  {
     return getTokensRegexNerAnnotator(new Properties(), patterns, ignoreCase);
   }
 
-  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props, String[][] patterns, boolean ignoreCase)
-          throws Exception {
+  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props, String[][] patterns, boolean ignoreCase) throws Exception
+  {
     File tempFile = File.createTempFile("tokensregexnertest.patterns", "txt");
     tempFile.deleteOnExit();
     PrintWriter pw = IOUtils.getPrintWriter(tempFile.getAbsolutePath());
@@ -78,7 +77,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   private static void checkNerTags(List<CoreLabel> tokens, String... tags) {
     assertEquals(tags.length, tokens.size());
     for (int i = 0; i < tags.length; ++i) {
-      assertEquals("Mismatch for token tag NER " + i + ' ' + tokens.get(i),
+      assertEquals("Mismatch for token tag NER " + i + " " + tokens.get(i),
                    tags[i], tokens.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class));
     }
   }
@@ -86,7 +85,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   private static void checkTags(List<CoreLabel> tokens, Class key, String... tags) {
     assertEquals(tags.length, tokens.size());
     for (int i = 0; i < tags.length; ++i) {
-      assertEquals("Mismatch for token tag " + key + ' ' + i + ' ' + tokens.get(i),
+      assertEquals("Mismatch for token tag " + key + " " + i + " " + tokens.get(i),
         tags[i], tokens.get(i).get(key));
     }
   }
@@ -184,7 +183,6 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   }
 
   public static class TestAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }

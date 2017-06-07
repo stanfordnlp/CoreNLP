@@ -2028,8 +2028,6 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <scan>"am"/_VBP     { return(stem(2,"be","")); }
 <scan>"are"/_VBP    { return(stem(3,"be","")); }
 <scan>"is"/_VBZ     { return(stem(2,"be","s")); }
-<scan>"du"/_VBP     { return(stem(2,"do","")); }    /* In dunno */
-<scan>"no"/_VB     { return(stem(2,"know","")); }    /* In dunno */
 <scan>"'d"/_VH      { return(stem(2,"have","ed")); }    /* disprefer */
 <scan>"'d"/_VBD      { return(stem(2,"have","ed")); }    /* disprefer */
 <scan>"'d"/_VM      { return(stem(2,"would","")); }
@@ -2080,7 +2078,7 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <scan,verb,noun,any>_{G}+       { yybegin(scan); if (option(tag_output)) return yytext(); }
 <scan,verb,noun,any>{SKIP}      { return yytext(); }
 <scan,verb,noun,any>.		{ String str = yytext();
-				int first = str.codePointAt(0);
+                          int first = str.charAt(0);
 	                        logger.warning(String.format("Untokenizable: %s (U+%X, decimal: %d) - this may be because your text isn't using _ as a tag delimiter", yytext(), first, first));
 		}
 <<EOF>> { return null; }

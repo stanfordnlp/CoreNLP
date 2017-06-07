@@ -1,5 +1,4 @@
 package edu.stanford.nlp.semgraph;
-import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
@@ -10,6 +9,10 @@ import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.MapList;
+import edu.stanford.nlp.util.Pair;
 
 import java.io.StringWriter;
 import java.util.*;
@@ -1212,39 +1215,5 @@ public class SemanticGraphUtils  {
       }
       return ret;
     }
-  }
-
-
-  /**
-   *
-   * Checks whether a given SemanticGraph is a strict surface syntax tree.
-   *
-   * @param sg
-   * @return
-   */
-  public static boolean isTree(SemanticGraph sg) {
-
-    if (sg.getRoots().size() != 1) {
-      return false;
-    }
-
-    IndexedWord root = sg.getFirstRoot();
-    Set<IndexedWord> visitedNodes = Generics.newHashSet();
-    Queue<IndexedWord> queue = Generics.newLinkedList();
-
-    queue.add(root);
-    while (!queue.isEmpty()) {
-      IndexedWord current = queue.remove();
-      visitedNodes.add(current);
-      for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(current)) {
-        IndexedWord dep = edge.getDependent();
-        if (visitedNodes.contains(dep)) {
-          return false;
-        }
-        queue.add(dep);
-      }
-    }
-
-    return visitedNodes.size() == sg.size();
   }
 }

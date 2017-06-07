@@ -326,9 +326,7 @@ public abstract class WebServiceAnnotator implements Annotator {
   private void annotate(Annotation annotation, int tries) {
     try {
       // 1. Ensure that we have a server to annotate against
-      synchronized(this) {
-        ensureServer();
-      }
+      ensureServer();
 
       try {
 

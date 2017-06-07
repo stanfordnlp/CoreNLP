@@ -454,41 +454,18 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   }
 
   /** Print a description of this triple, formatted like the ReVerb outputs. */
-  @SuppressWarnings("Duplicates")
   public String toReverbString(String docid, CoreMap sentence) {
-    int sentIndex = -1;
-    int subjIndex = -1;
-    int relationIndex = -1;
-    int objIndex = -1;
-    int subjIndexEnd = -1;
-    int relationIndexEnd = -1;
-    int objIndexEnd = -1;
-    if (!relation.isEmpty()) {
-      sentIndex = relation.get(0).sentIndex();
-      relationIndex = relation.get(0).index() - 1;
-      relationIndexEnd = relation.get(relation.size() - 1).index();
-    }
-    if (!subject.isEmpty()) {
-      if (sentIndex < 0) { sentIndex = subject.get(0).sentIndex(); }
-      subjIndex = subject.get(0).index() - 1;
-      subjIndexEnd = subject.get(subject.size() - 1).index();
-    }
-    if (!object.isEmpty()) {
-      if (sentIndex < 0) { sentIndex = subject.get(0).sentIndex(); }
-      objIndex = object.get(0).index() - 1;
-      objIndexEnd = object.get(object.size() - 1).index();
-    }
     return (docid == null ? "no_doc_id" : docid) + "\t" +
-        sentIndex + "\t" +
+        relation.get(0).sentIndex() + "\t" +
         subjectGloss().replace('\t', ' ') + "\t" +
         relationGloss().replace('\t', ' ') + "\t" +
         objectGloss().replace('\t', ' ') + "\t" +
-        subjIndex + "\t" +
-        subjIndexEnd+ "\t" +
-        relationIndex + "\t" +
-        relationIndexEnd + "\t" +
-        objIndex + "\t" +
-        objIndexEnd + "\t" +
+        (subject.get(0).index() - 1) + "\t" +
+        subject.get(subject.size() - 1).index() + "\t" +
+        (relation.get(0).index() - 1) + "\t" +
+        relation.get(relation.size() - 1).index() + "\t" +
+        (object.get(0).index() - 1) + "\t" +
+        object.get(object.size() - 1).index() + "\t" +
         confidenceGloss() + "\t" +
         StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(x -> x.word().replace('\t', ' ').replace(" ", "")), " ") + "\t" +
         StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(CoreLabel::tag), " ") + "\t" +

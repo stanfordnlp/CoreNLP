@@ -92,13 +92,13 @@ public class CoNLLUUtils {
      * @param extraDeps
      * @return The extra dependencies string.
      */
-    public static String toExtraDepsString(HashMap<String,String> extraDeps) {
+    public static String toExtraDepsString(HashMap<Integer,String> extraDeps) {
         StringBuffer sb = new StringBuffer();
         boolean first = true;
         if (extraDeps != null) {
-            List<String> sortedKeys = new ArrayList<>(extraDeps.keySet());
+            List<Integer> sortedKeys = new ArrayList<>(extraDeps.keySet());
             Collections.sort(sortedKeys);
-            for (String key : sortedKeys) {
+            for (Integer key : sortedKeys) {
                 if (!first) {
                     sb.append("|");
                 } else {
@@ -110,7 +110,7 @@ public class CoNLLUUtils {
                         .append(extraDeps.get(key));
             }
         }
-        /* Empty feature list. */
+    /* Empty feature list. */
         if (first) {
             sb.append("_");
         }
