@@ -106,7 +106,6 @@ message Sentence {
   optional string          sectionName                         = 61;  // name of section
   optional string          sectionAuthor                       = 62;  // author of section
   optional string          docID                               = 63;  // doc id
-  optional bool            sectionQuoted                       = 64;  // is this sentence in an xml quote in a post
 
   extensions 100 to 255;
 }
@@ -205,7 +204,6 @@ message Quote {
   optional uint32 tokenEnd       = 8;
   optional string docid          = 9;
   optional uint32 index          = 10;
-  optional string author         = 11;
 }
 
 //
@@ -523,9 +521,5 @@ message Section {
   optional string author            = 3;
   repeated uint32 sentenceIndexes   = 4;
   optional string datetime          = 5;
-  repeated Quote quotes             = 6;
-  optional uint32 authorCharBegin   = 7;
-  optional uint32 authorCharEnd     = 8;
-  required Token xmlTag             = 9;
 }
 

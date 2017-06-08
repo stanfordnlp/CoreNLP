@@ -276,17 +276,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
           } else {
             // if the sentence falls in this current section, link it to this section
             if (currSectionCharBegin <= begin) {
-              // ... but first check if it's in one of this sections quotes!
-              // if so mark it as quoted
-              for (CoreMap sectionQuote : sections.get(currSectionIndex).get(CoreAnnotations.QuotesAnnotation.class)) {
-                if (sectionQuote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) <= begin &&
-                    end <= sectionQuote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class)) {
-                  sentence.set(CoreAnnotations.QuotedAnnotation.class, true);
-                  // set the author to the quote author
-                  sentence.set(CoreAnnotations.AuthorAnnotation.class,
-                      sectionQuote.get(CoreAnnotations.AuthorAnnotation.class));
-                }
-              }
               // add the sentence to the section's sentence list
               sections.get(currSectionIndex).get(CoreAnnotations.SentencesAnnotation.class).add(sentence);
               // set sentence's section date

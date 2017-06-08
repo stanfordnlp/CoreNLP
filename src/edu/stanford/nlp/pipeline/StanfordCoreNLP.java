@@ -86,7 +86,7 @@ import java.util.regex.Pattern;
 
 public class StanfordCoreNLP extends AnnotationPipeline  {
 
-  public enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED }
+  public enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED, CUSTOM }
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -833,7 +833,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     os.println("\t             output is generated for every input file as file.outputExtension");
     os.println("\t\"outputDirectory\" - where to put output (defaults to the current directory)");
     os.println("\t\"outputExtension\" - extension to use for the output file (defaults to \".xml\" for XML, \".ser.gz\" for serialized).  Don't forget the dot!");
-    os.println("\t\"outputFormat\" - \"xml\" (usual default), \"text\" (default for REPL or if no XML), \"json\", \"conll\", \"conllu\", or \"serialized\"");
+    os.println("\t\"outputFormat\" - \"xml\" (usual default), \"text\" (default for REPL or if no XML), \"json\", \"conll\", \"conllu\", \"serialized\", or \"custom\"");
+    os.println("\t\"customOutputter\" - specify a class to a custom outputter instead of a pre-defined output format");
     os.println("\t\"serializer\" - Class of annotation serializer to use when outputFormat is \"serialized\".  By default, uses Java serialization.");
     os.println("\t\"replaceExtension\" - flag to chop off the last extension before adding outputExtension to file");
     os.println("\t\"noClobber\" - don't automatically override (clobber) output files that already exist");
@@ -900,6 +901,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
           break;
         case TEXT:
           pipeline.prettyPrint(anno, System.out);
+          break;
+        case CUSTOM:
+          AnnotationOutputter outputter = ReflectionLoading.loadByReflection(pipeline.properties.getProperty("customOutputter"));
+          outputter.print(anno, System.out, pipeline);
           break;
         default:
           throw new IllegalArgumentException("Cannot output in format " + outputFormat + " from the interactive shell");
@@ -987,6 +992,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
           case CONLLU:
             new CoNLLUOutputter().print(annotation, fos, outputOptions);
             break;
+          case CUSTOM:
+            AnnotationOutputter outputter = ReflectionLoading.loadByReflection(properties.getProperty("customOutputter"));
+            outputter.print(annotation, System.out, outputOptions);
+            break;
           default:
             throw new IllegalArgumentException("Unknown output format " + outputFormat);
         }
@@ -1046,7 +1055,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       case CONLLU: defaultExtension = ".conllu"; break;
       case TEXT: defaultExtension = ".out"; break;
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
-    
+      case CUSTOM: defaultExtension = ".out"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
     }
 

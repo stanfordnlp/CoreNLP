@@ -518,9 +518,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // add doc id
     if (keySet.contains(DocIDAnnotation.class)) builder.setDocID(getAndRegister(sentence, keysToSerialize, DocIDAnnotation.class));
 
-    // add boolean flag if sentence is quoted
-    if (keySet.contains(QuotedAnnotation.class)) builder.setSectionQuoted(getAndRegister(sentence, keysToSerialize, QuotedAnnotation.class));
-
     // Return
     return builder;
   }
@@ -755,20 +752,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       int sentenceIndex = sentence.get(SentenceIndexAnnotation.class);
       builder.addSentenceIndexes(sentenceIndex);
     }
-    // add the quotes
-    for (CoreMap quote : section.get(QuotesAnnotation.class)) {
-      builder.addQuotes(toProtoQuote(quote));
-    }
-    // add author start character offset if present
-    if (section.get(SectionAuthorCharacterOffsetBeginAnnotation.class) != null) {
-      builder.setAuthorCharBegin(section.get(SectionAuthorCharacterOffsetBeginAnnotation.class));
-    }
-    // add author end character offset if present
-    if (section.get(SectionAuthorCharacterOffsetEndAnnotation.class) != null) {
-      builder.setAuthorCharEnd(section.get(SectionAuthorCharacterOffsetEndAnnotation.class));
-    }
-    // add original xml tag with all info for section
-    builder.setXmlTag(toProto(section.get(SectionTagAnnotation.class)));
     return builder.build();
   }
 
@@ -1136,7 +1119,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.get(TokenBeginAnnotation.class) != null) { builder.setTokenBegin(quote.get(TokenBeginAnnotation.class)); }
     if (quote.get(TokenEndAnnotation.class) != null) { builder.setTokenEnd(quote.get(TokenEndAnnotation.class)); }
     if (quote.get(QuotationIndexAnnotation.class) != null) { builder.setIndex(quote.get(QuotationIndexAnnotation.class)); }
-    if (quote.get(AuthorAnnotation.class) != null) { builder.setAuthor(quote.get(AuthorAnnotation.class)); }
     return builder.build();
   }
 
@@ -1361,10 +1343,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       sentence.set(AuthorAnnotation.class, proto.getSectionAuthor());
     if (proto.hasSectionIndex())
       sentence.set(SectionIndexAnnotation.class, proto.getSectionIndex());
-
-    // add quoted info
-    if (proto.hasSectionQuoted())
-      sentence.set(QuotedAnnotation.class, proto.getSectionQuoted());
 
     // Return
     return sentence;
@@ -2238,7 +2216,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.hasIndex()) { ann.set(QuotationIndexAnnotation.class, quote.getIndex()); }
     if (quote.hasTokenBegin()) { ann.set(TokenBeginAnnotation.class, quote.getTokenBegin()); }
     if (quote.hasTokenEnd()) { ann.set(TokenEndAnnotation.class, quote.getTokenEnd()); }
-    if (quote.hasAuthor()) { ann.set(AuthorAnnotation.class, quote.getAuthor()); }
     return ann;
   }
 
@@ -2280,30 +2257,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       sentencesList.add(annotationSentences.get(sentenceIndex));
     }
     map.set(SentencesAnnotation.class, sentencesList);
-    // go through the list of quotes and rebuild the quotes
-    map.set(QuotesAnnotation.class, new ArrayList<CoreMap>());
-    for (CoreNLPProtos.Quote quote : section.getQuotesList()) {
-      int quoteCharStart = quote.getBegin();
-      int quoteCharEnd = quote.getEnd();
-      String quoteAuthor = null ;
-      if (quote.hasAuthor()) {
-        quoteAuthor = quote.getAuthor();
-      }
-      CoreMap quoteCoreMap = new ArrayCoreMap();
-      quoteCoreMap.set(CharacterOffsetBeginAnnotation.class, quoteCharStart);
-      quoteCoreMap.set(CharacterOffsetEndAnnotation.class, quoteCharEnd);
-      quoteCoreMap.set(AuthorAnnotation.class, quoteAuthor);
-      map.get(QuotesAnnotation.class).add(quoteCoreMap);
-    }
-    // if there is an author character start, add it
-    if (section.hasAuthorCharBegin()) {
-      map.set(SectionAuthorCharacterOffsetBeginAnnotation.class, section.getAuthorCharBegin());
-    }
-    if (section.hasAuthorCharEnd()) {
-      map.set(SectionAuthorCharacterOffsetEndAnnotation.class, section.getAuthorCharEnd());
-    }
-    // add the original xml tag
-    map.set(SectionTagAnnotation.class, fromProto(section.getXmlTag()));
     return map;
   }
 
