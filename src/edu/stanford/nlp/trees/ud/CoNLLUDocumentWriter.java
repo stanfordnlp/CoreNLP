@@ -1,17 +1,16 @@
 package edu.stanford.nlp.trees.ud;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.Pair;
 
-import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 /**
  * @author Sebastian Schuster
@@ -93,6 +92,33 @@ public class CoNLLUDocumentWriter {
         sb.append("\n");
 
         return sb.toString();
+    }
+
+  /**
+   * Outputs a partial CONLL-U file with token information (form, lemma, POS)
+   * but without any dependency information.
+   *
+   * @param sentence
+   * @return
+   */
+
+  public String printPOSAnnotations(CoreMap sentence) {
+      StringBuilder sb = new StringBuilder();
+
+      for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+
+          String upos = token.getString(CoreAnnotations.CoarseTagAnnotation.class, "_");
+          String lemma = token.getString(CoreAnnotations.LemmaAnnotation.class, "_");
+          String pos = token.getString(CoreAnnotations.PartOfSpeechAnnotation.class, "_");
+          String featuresString = CoNLLUUtils.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
+          String misc = token.getString(CoreAnnotations.CoNLLUMisc.class, "_");
+          sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.index(), token.word(),
+              lemma, upos , pos, featuresString, "_", "_", "_", misc));
+      }
+      sb.append("\n");
+
+      return sb.toString();
+
     }
 
 }
