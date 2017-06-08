@@ -112,6 +112,17 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_SECTION_TAGS = null;
 
   /**
+   * This tells us what the quote tag is
+   */
+  private Pattern quoteTagMatcher;
+  public static final String DEFAULT_QUOTE_TAGS = null;
+
+  /**
+   * This tells us the attribute names that indicates quote author
+   */
+  private String[] quoteAuthorAttributeNames = new String[]{};
+
+  /**
    * This tells us what tokens will be discarded by ssplit
    */
   private Pattern ssplitDiscardTokensMatcher; // = null;
@@ -183,6 +194,9 @@ public class CleanXmlAnnotator implements Annotator {
     String sectionAnnotations =
         properties.getProperty("clean.sectionAnnotations",
             CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
+    String quoteTags =
+        properties.getProperty("clean.quotetags",
+            CleanXmlAnnotator.DEFAULT_QUOTE_TAGS);
 
     String ssplitDiscardTokens =
         properties.getProperty("clean.ssplitDiscardTokens");
@@ -209,7 +223,11 @@ public class CleanXmlAnnotator implements Annotator {
     setTokenAnnotationPatterns(tokenAnnotations);
     setSectionTagMatcher(sectionTags);
     setSectionAnnotationPatterns(sectionAnnotations);
+    setQuoteTagMatcher(quoteTags);
     setSsplitDiscardTokensMatcher(ssplitDiscardTokens);
+
+    // set up the labels that indicate quote author
+    quoteAuthorAttributeNames = properties.getProperty("clean.quoteauthorattributes", "").split(",");
 
   }
 
@@ -260,6 +278,10 @@ public class CleanXmlAnnotator implements Annotator {
 
   public void setSectionTagMatcher(String sectionTags) {
     sectionTagMatcher = toCaseInsensitivePattern(sectionTags);
+  }
+
+  public void setQuoteTagMatcher(String quoteTags) {
+    quoteTagMatcher = toCaseInsensitivePattern(quoteTags);
   }
 
   public void setDiscourseTags(String utteranceTurnTags, String speakerTags) {
@@ -470,9 +492,19 @@ public class CleanXmlAnnotator implements Annotator {
 
     // Local variable for annotating sections
     XMLUtils.XMLTag sectionStartTag = null;
+    int sectionStartTagCharBegin = -1;
     CoreLabel sectionStartToken = null;
+    CoreLabel sectionStartTagToken = null;
     CoreMap sectionAnnotations = null;
     Map<Class, List<CoreLabel>> savedTokensForSection = new HashMap<>();
+    // store section quotes
+    List<CoreMap> sectionQuotes = null;
+
+    // Local variable for annotating quotes
+    XMLUtils.XMLTag quoteStartTag = null;
+    String quoteAuthor = null;
+    int quoteStartCharOffset = -1;
+    int quoteEndCharOffset = -1;
 
     annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<CoreMap>());
 
@@ -597,6 +629,40 @@ public class CleanXmlAnnotator implements Annotator {
         toAnnotate.removeAll(foundAnnotations);
       }
 
+      // Check if the tag matches a quote
+      if (quoteTagMatcher != null && quoteTagMatcher.matcher(tag.name).matches()) {
+        if (tag.isEndTag) {
+          // only store quote info if currently processing a section
+          if (sectionQuotes != null) {
+            CoreMap currQuote = new ArrayCoreMap();
+            // set the quote start
+            currQuote.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, quoteStartCharOffset);
+            quoteEndCharOffset = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+            currQuote.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, quoteEndCharOffset);
+            currQuote.set(CoreAnnotations.AuthorAnnotation.class, quoteAuthor);
+            // add this quote to the list of quotes in this section
+            // a Quote has character offsets and an author
+            sectionQuotes.add(currQuote);
+            quoteStartTag = null;
+            quoteStartCharOffset = -1;
+            quoteEndCharOffset = -1;
+            quoteAuthor = null;
+          }
+        } else {
+          // set quote start offset
+          quoteStartCharOffset = token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+          // set quote author
+          for (String quoteAuthorAttribute : quoteAuthorAttributeNames) {
+            if (tag.attributes.containsKey(quoteAuthorAttribute)) {
+              quoteAuthor = tag.attributes.get(quoteAuthorAttribute);
+              break;
+            }
+          }
+          // store quote start tag
+          quoteStartTag = tag;
+        }
+      }
+
       // Check if the tag matches a section
       if (sectionTagMatcher != null && sectionTagMatcher.matcher(tag.name).matches()) {
         if (tag.isEndTag) {
@@ -631,6 +697,22 @@ public class CleanXmlAnnotator implements Annotator {
             // set author of this section
             String foundAuthor = sectionAnnotations.get(CoreAnnotations.AuthorAnnotation.class);
             currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class, foundAuthor);
+            // get author mention info
+            if (foundAuthor != null) {
+              Pattern p = Pattern.compile(foundAuthor, Pattern.LITERAL);
+              Matcher matcher = p.matcher(sectionStartTagToken.word());
+              if (matcher.find()) {
+                int authorMentionStart = matcher.start() + sectionStartTagCharBegin;
+                int authorMentionEnd = matcher.end() + sectionStartTagCharBegin;
+                // set the author mention offsets
+                currSectionCoreMap.set(
+                    CoreAnnotations.SectionAuthorCharacterOffsetBeginAnnotation.class, authorMentionStart);
+                currSectionCoreMap.set(
+                    CoreAnnotations.SectionAuthorCharacterOffsetEndAnnotation.class, authorMentionEnd);
+              }
+            }
+            // add the tag for the section
+            currSectionCoreMap.set(CoreAnnotations.SectionTagAnnotation.class, sectionStartTagToken);
             // set up empty sentences list
             currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
             // set doc date for post
@@ -644,19 +726,27 @@ public class CleanXmlAnnotator implements Annotator {
                 log.error("failed to parse datetime for post! " + dateString);
               }
             }
+            // add the quotes list
+            currSectionCoreMap.set(CoreAnnotations.QuotesAnnotation.class, sectionQuotes);
             // add this to the list of sections
             annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
             // finish processing section
             savedTokensForSection.clear();
             sectionStartTag = null;
+            sectionStartTagCharBegin = -1;
             sectionStartToken = null;
+            sectionStartTagToken = null;
             sectionAnnotations = null;
+            sectionQuotes = null;
           }
         } else if (!tag.isSingleTag) {
           // Prepare to mark first token with section information
           sectionStartTag = tag;
+          sectionStartTagCharBegin = token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+          sectionStartTagToken = token;
           sectionAnnotations = new ArrayCoreMap();
           sectionAnnotations.set(CoreAnnotations.SectionAnnotation.class, sectionStartTag.name);
+          sectionQuotes = new ArrayList<CoreMap>();
         }
       }
       if (sectionStartTag != null) {
