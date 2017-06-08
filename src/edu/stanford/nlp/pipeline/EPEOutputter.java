@@ -50,7 +50,7 @@ public class EPEOutputter extends JSONOutputter {
               node.set("end", token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
             } else {
               node.set("id", getNodeIndex(token, maxIndex));
-              node.set("source", "" + token.index());
+              node.set("source", token.index());
             }
           node.set("form", token.word());
 

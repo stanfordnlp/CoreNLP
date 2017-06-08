@@ -994,7 +994,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             break;
           case CUSTOM:
             AnnotationOutputter outputter = ReflectionLoading.loadByReflection(properties.getProperty("customOutputter"));
-            outputter.print(annotation, System.out, outputOptions);
+            outputter.print(annotation, fos, outputOptions);
             break;
           default:
             throw new IllegalArgumentException("Unknown output format " + outputFormat);
