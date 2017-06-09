@@ -46,6 +46,7 @@ public class GenericWebServiceAnnotator extends WebServiceAnnotator {
     Set<Class<? extends CoreAnnotation>> ret = new HashSet<>();
     for (String s : classList.split(",")) {
       s = s.trim();
+      if (s.length() == 0) continue;
       // If s is not fully specified ASSUME edu.stanford.nlp.ling.CoreAnnotations.{s}
       if (!s.contains(".")) {
         s = "edu.stanford.nlp.ling.CoreAnnotations$" + s;
