@@ -38,6 +38,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static edu.stanford.nlp.pipeline.StanfordCoreNLP.CUSTOM_ANNOTATOR_PREFIX;
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 import static java.net.HttpURLConnection.*;
 
@@ -772,14 +773,16 @@ public class StanfordCoreNLPServer implements Runnable {
           props.remove("mention.type");
         }
       }
-
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
 
+
+
       // Get the annotators
       String annotators = props.getProperty("annotators");
-      if (PropertiesUtils.getBool(props, "enforceRequirements", true)) {
+      // If the properties contains a custom annotator, then do not enforceRequirements.
+      if (!PropertiesUtils.hasPropertyPrefix(props, CUSTOM_ANNOTATOR_PREFIX) && PropertiesUtils.getBool(props, "enforceRequirements", true)) {
         annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"), props);
       }
 

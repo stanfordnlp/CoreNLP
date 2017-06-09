@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
@@ -26,6 +28,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
  * Test for web service annotator
  */
 public class GenericWebServiceAnnotatorTest {
+  // TODO: Abstract into a "AnnotatorBackend" class or something.
   public static class TestServer implements Runnable {
     protected static class PingHandler implements HttpHandler {
       @Override
@@ -102,22 +105,28 @@ public class GenericWebServiceAnnotatorTest {
   }
 
   Thread serverThread;
+  Thread coreNLPServerThread;
 
   @Before
-  public void setUp() throws InterruptedException {
-    serverThread = new Thread(new TestServer());
+  public void setUp() throws InterruptedException, IOException {
+    serverThread = new Thread(new TestServer(), "annotatorServer");
     serverThread.start();
+
+    coreNLPServerThread = new Thread(new StanfordCoreNLPServer(), "corenlpServer");
+    coreNLPServerThread.start();
   }
 
   @After
   public void shutDown() throws InterruptedException {
     serverThread.interrupt();
     serverThread.join();
+    coreNLPServerThread.interrupt();
+    coreNLPServerThread.join();
   }
 
 
   @Test
-  public void testService() {
+  public void testServiceWithCoreNLP() {
     Properties props = new Properties();
     props.setProperty("generic.endpoint", "http://localhost:8432");
     props.setProperty("generic.requires", "TokensAnnotation, SentencesAnnotation, PartOfSpeechAnnotation");
@@ -127,6 +136,7 @@ public class GenericWebServiceAnnotatorTest {
     props.setProperty("customAnnotatorClass.test", "edu.stanford.nlp.pipeline.GenericWebServiceAnnotator");
 
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
     Annotation ann = new Annotation("This is a test sentence. I hope the generic annotator works.");
     pipeline.annotate(ann);
 
@@ -136,6 +146,32 @@ public class GenericWebServiceAnnotatorTest {
     for (int i = 0; i < sentences.size(); i++) {
       assert sentences.get(i).get(CoreAnnotations.SentenceIndexAnnotation.class).equals(i+42);
     }
+  }
+
+  @Test
+  public void testServiceWithCoreNLPServer() throws InterruptedException, MalformedURLException {
+    Properties props = new Properties();
+    props.setProperty("generic.endpoint", "http://localhost:8432");
+    props.setProperty("generic.requires", "TokensAnnotation, SentencesAnnotation, PartOfSpeechAnnotation");
+    props.setProperty("generic.provides", "DocIDAnnotation, SentenceIndexAnnotation");
+
+    props.setProperty("annotators", "tokenize, ssplit, pos, test");
+    props.setProperty("customAnnotatorClass.test", "edu.stanford.nlp.pipeline.GenericWebServiceAnnotator");
+
+    StanfordCoreNLPClient pipeline = new StanfordCoreNLPClient(props, "http://localhost", 9000);
+    assert pipeline.checkStatus(new URL("http://localhost:9000"));
+
+    Annotation ann = new Annotation("This is a test sentence. I hope the generic annotator works.");
+    pipeline.annotate(ann);
+
+    assert ann.get(CoreAnnotations.DocIDAnnotation.class).equals("test");
+
+    List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
+    for (int i = 0; i < sentences.size(); i++) {
+      assert sentences.get(i).get(CoreAnnotations.SentenceIndexAnnotation.class).equals(i+42);
+    }
+
+    pipeline.shutdown();
   }
 
 }
