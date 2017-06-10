@@ -9,6 +9,7 @@ permalink: '/coref.html'
 The CorefAnnotator finds mentions of the same entity in a text, such as when “Theresa May” and “she” refer to the same person. The annotator implements both pronominal and nominal coreference resolution. The entire coreference graph (with head words of mentions as nodes) is saved as a CorefChainAnnotation.
 
 ## Overview
+
 There are three different coreference systems available in CoreNLP.
 
 * **Deterministic:** Fast rule-based coreference resolution for English and Chinese.
@@ -16,6 +17,8 @@ There are three different coreference systems available in CoreNLP.
 * **Statistical:** Machine-learning-based coreference resolution for English. Unlike the other systems, this one only requires dependency parses, which are faster to produce than constituency parses.
 
 * **Neural:** Most accurate but slow neural-network-based coreference resolution for English and Chinese.
+
+(We briefly also had a fourth *hybrid* or *hcoref* system, but it is no longer supported and models are no longer provided in current releases.)
 
 The following table gives an overview of the system performances.
 
@@ -156,10 +159,10 @@ The deterministic coreference system for English
 
 > Marta Recasens, Marie-Catherine de Marneffe, and Christopher Potts. 2013. The Life and Death of Discourse Entities: Identifying Singleton Mentions. In *Proceedings of the NAACL*. \[[pdf](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.bib)\]
 
-> Heeyoung Lee, Yves Peirsman, Angel Chang, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky. 2011. Stanford's Multi-Pass Sieve Coreference Resolution System at the CoNLL-2011 Shared Task. In *Proceedings of the CoNLL-2011 Shared Task, 2011*. \[[pdf](http://nlp.stanford.edu/pubs/conllst2011-coref.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/conllst2011-coref.bib)\]
+> Heeyoung Lee, Yves Peirsman, Angel Chang, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky. 2011. Stanford's Multi-Pass Sieve Coreference Resolution System at the CoNLL-2011 Shared Task. In *Proceedings of the CoNLL-2011 Shared Task.* \[[pdf](http://nlp.stanford.edu/pubs/conllst2011-coref.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/conllst2011-coref.bib)\]
 
 > Karthik Raghunathan, Heeyoung Lee, Sudarshan Rangarajan, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky and Christopher Manning. 2010. A Multi-Pass Sieve for Coreference Resolution.
-Empirical Methods in Natural Language Processing (EMNLP). \[[pdf](https://nlp.stanford.edu/pubs/coreference-emnlp10.pdf)\] \[[bib](https://nlp.stanford.edu/pubs/coreference-emnlp10.bib)\]
+*Empirical Methods in Natural Language Processing (EMNLP).* \[[pdf](https://nlp.stanford.edu/pubs/coreference-emnlp10.pdf)\] \[[bib](https://nlp.stanford.edu/pubs/coreference-emnlp10.bib)\]
 
 The deterministic coreference system for Chinese and English
 
