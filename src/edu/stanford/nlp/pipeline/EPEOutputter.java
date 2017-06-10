@@ -10,7 +10,6 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -40,17 +39,15 @@ public class EPEOutputter extends JSONOutputter {
 
   private static Object getNodes(SemanticGraph graph) {
     if(graph != null) {
+      return graph.vertexListSorted().stream().map( (IndexedWord token) -> (Consumer<Writer>) node -> {
 
-      List<IndexedWord> vertexList = graph.vertexListSorted();
-      int maxIndex = vertexList.get(vertexList.size() - 1).index();
-      return vertexList.stream().map( (IndexedWord token) -> (Consumer<Writer>) node -> {
             if (token.copyCount() == 0) {
-              node.set("id", getNodeIndex(token, maxIndex));
+              node.set("id", "" + token.index());
               node.set("start", token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
               node.set("end", token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
             } else {
-              node.set("id", getNodeIndex(token, maxIndex));
-              node.set("source", token.index());
+              node.set("id", "" + token.index() + token.toPrimes());
+              node.set("source", "" + token.index());
             }
           node.set("form", token.word());
 
@@ -62,20 +59,12 @@ public class EPEOutputter extends JSONOutputter {
             });
 
             node.set("edges", graph.getOutEdgesSorted(token).stream().map( (SemanticGraphEdge dep) -> (Consumer<Writer>) edge -> {
-              edge.set("target", getNodeIndex(dep.getDependent(), maxIndex));
+              edge.set("target", dep.getDependent().index());
               edge.set("label", dep.getRelation().getShortName());
             }));
       } );
     } else {
       return null;
-    }
-  }
-
-  private static int getNodeIndex(IndexedWord token, int maxIndex) {
-    if (token.copyCount() == 0) {
-      return token.index();
-    } else {
-      return token.index() + maxIndex * token.copyCount();
     }
   }
 

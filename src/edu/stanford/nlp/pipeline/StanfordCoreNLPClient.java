@@ -527,24 +527,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     }
   }
 
-  public boolean checkStatus(URL serverURL) {
-    try {
-      // 1. Set up the connection
-      HttpURLConnection connection = (HttpURLConnection) serverURL.openConnection();
-      // 1.1 Set authentication
-      if (apiKey != null && apiSecret != null) {
-        String userpass = apiKey + ":" + apiSecret;
-        String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
-        connection.setRequestProperty("Authorization", basicAuth);
-      }
-
-      connection.setRequestMethod("GET");
-      connection.connect();
-      return connection.getResponseCode() >= 200 && connection.getResponseCode() <= 400;
-    } catch (Throwable t) {
-      throw new RuntimeException(t);
-    }
-  }
 
   /**
    * Runs the entire pipeline on the content of the given text passed in.

@@ -35,13 +35,6 @@ public class PropertiesUtils {
     return ! (value.equals("false") || value.equals("no") || value.equals("off"));
   }
 
-  public static boolean hasPropertyPrefix(Properties props, String prefix) {
-    for (Object o : props.keySet()) {
-      if (o instanceof String && ((String) o).startsWith(prefix)) return true;
-    }
-    return false;
-  }
-
   /** Create a Properties object from the passed in String arguments.
    *  The odd numbered arguments are the names of keys, and the even
    *  numbered arguments are the value of the preceding key
