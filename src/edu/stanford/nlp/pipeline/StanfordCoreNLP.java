@@ -188,7 +188,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   }
 
   public StanfordCoreNLP(Properties props, boolean enforceRequirements, AnnotatorPool annotatorPool)  {
-    this.pool = annotatorPool;
+    this.pool = annotatorPool != null ? annotatorPool : constructAnnotatorPool(props, getAnnotatorImplementations());
     construct(props, enforceRequirements, getAnnotatorImplementations());
   }
 
@@ -205,7 +205,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     if (props == null) {
       throw new RuntimeIOException("ERROR: cannot find properties file \"" + propsFileNamePrefix + "\" in the classpath!");
     }
-    this.pool = new AnnotatorPool();
+    this.pool = constructAnnotatorPool(props, getAnnotatorImplementations());
     construct(props, enforceRequirements, getAnnotatorImplementations());
   }
 

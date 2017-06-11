@@ -449,7 +449,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     if (out == null) {
       return in;
     }
-    return out.toString();
+    return out.toString().trim();
   }
 
   private static final Pattern CENTS_PATTERN = Pattern.compile("\u00A2");

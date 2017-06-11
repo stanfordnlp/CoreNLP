@@ -263,7 +263,7 @@ public class NumberNormalizer {
 
     // get numeric value of each word piece
     for (int curIndex = 0; curIndex < numWords; curIndex++) {
-      String curPart = fields[curIndex];
+      String curPart = fields[curIndex] == null ? "" : fields[curIndex].trim();
       Matcher m = alphaPattern.matcher(curPart);
       if (m.find()) {
         // Some part of the word has alpha characters
