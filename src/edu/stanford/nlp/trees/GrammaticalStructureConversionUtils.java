@@ -285,19 +285,7 @@ public class GrammaticalStructureConversionUtils {
         depPrinter = altDepPrinterClass.getConstructor(String[].class).newInstance((Object) depPrintArgs);
       }
       return depPrinter;
-    } catch (IllegalArgumentException e) {
-      e.printStackTrace();
-      return null;
-    } catch (SecurityException e) {
-      e.printStackTrace();
-      return null;
-    } catch (InstantiationException e) {
-      e.printStackTrace();
-      return null;
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-      return null;
-    } catch (InvocationTargetException e) {
+    } catch (IllegalArgumentException | SecurityException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
       e.printStackTrace();
       return null;
     } catch (NoSuchMethodException e) {
