@@ -88,7 +88,6 @@ public class NumberNormalizer {
   // Converts numbers in words to numeric form
   // works through trillions
   private static final Pattern digitsPattern = Pattern.compile("\\d+");
-  private static final Pattern digitsPatternExtended = Pattern.compile("(\\d+\\.?\\d*)(dozen|score|hundred|thousand|million|billion|trillion)?");  // this is really just second-guessing the tokenizer
   private static final Pattern numPattern = Pattern.compile("[-+]?(?:\\d+(?:,\\d\\d\\d)*(?:\\.\\d*)?|\\.\\d+)");
   private static final Pattern numRangePattern = Pattern.compile("(" + numPattern.pattern() + ")-(" + numPattern.pattern() + ")");
   // private static final Pattern[] endUnitWordsPattern = new Pattern[endUnitWords.length];
@@ -203,93 +202,6 @@ public class NumberNormalizer {
   private static final Pattern wsPattern = Pattern.compile("\\s+");
 
   /**
-   * All the different shitty forms of unicode whitespace.
-   */
-  private static final String whitespaceCharsRegex =  "["       /* dummy empty string for homogeneity */
-                        + "\\u0009" // CHARACTER TABULATION
-                        + "\\u000A" // LINE FEED (LF)
-                        + "\\u000B" // LINE TABULATION
-                        + "\\u000C" // FORM FEED (FF)
-                        + "\\u000D" // CARRIAGE RETURN (CR)
-                        + "\\u0020" // SPACE
-                        + "\\u0085" // NEXT LINE (NEL)
-                        + "\\u00A0" // NO-BREAK SPACE
-                        + "\\u1680" // OGHAM SPACE MARK
-                        + "\\u180E" // MONGOLIAN VOWEL SEPARATOR
-                        + "\\u2000" // EN QUAD
-                        + "\\u2001" // EM QUAD
-                        + "\\u2002" // EN SPACE
-                        + "\\u2003" // EM SPACE
-                        + "\\u2004" // THREE-PER-EM SPACE
-                        + "\\u2005" // FOUR-PER-EM SPACE
-                        + "\\u2006" // SIX-PER-EM SPACE
-                        + "\\u2007" // FIGURE SPACE
-                        + "\\u2008" // PUNCTUATION SPACE
-                        + "\\u2009" // THIN SPACE
-                        + "\\u200A" // HAIR SPACE
-                        + "\\u2028" // LINE SEPARATOR
-                        + "\\u2029" // PARAGRAPH SEPARATOR
-                        + "\\u202F" // NARROW NO-BREAK SPACE
-                        + "\\u205F" // MEDIUM MATHEMATICAL SPACE
-                        + "\\u3000" // IDEOGRAPHIC SPACE
-                        + "]"
-                        ;
-
-
-
-  private static Number parseNumberPart(String input, String originalString, int curIndex) {
-    Matcher matcher = digitsPatternExtended.matcher(input);
-    if (matcher.matches()) {
-      String numPart = matcher.group(1);
-      String magnitudePart = matcher.group(2);
-      if (magnitudePart != null) {
-        long magnitude = 1;
-        switch (magnitudePart.toLowerCase()) {
-          case "dozen":
-            magnitude = 12L;
-            break;
-          case "score":
-            magnitude = 20L;
-            break;
-          case "hundred":
-            magnitude = 100L;
-            break;
-          case "thousand":
-            magnitude = 1000L;
-            break;
-          case "million":
-            magnitude = 1000000L;
-            break;
-          case "billion":
-            magnitude = 1000000000L;
-            break;
-          case "trillion":
-            magnitude = 1000000000000L;
-            break;
-          default:
-            // unknown magnitude! Ignore it.
-            break;
-        }
-        if (digitsPattern.matcher(numPart).matches()) {
-          return Long.parseLong(numPart) * magnitude;
-        } else {
-          return Double.parseDouble(numPart) * magnitude;
-        }
-      } else {
-        if (digitsPattern.matcher(numPart).matches()) {
-          return Long.parseLong(numPart);
-        } else {
-          return Double.parseDouble(numPart);
-        }
-      }
-    } else{
-      throw new NumberFormatException("Bad number put into wordToNumber.  Word is: \"" + input + "\", originally part of \"" + originalString + "\", piece # " + curIndex);
-    }
-
-  }
-
-
-  /**
    * Fairly generous utility function to convert a string representing
    * a number (hopefully) to a Number.
    * Assumes that something else has somehow determined that the string
@@ -351,7 +263,7 @@ public class NumberNormalizer {
 
     // get numeric value of each word piece
     for (int curIndex = 0; curIndex < numWords; curIndex++) {
-      String curPart = fields[curIndex] == null ? "" : fields[curIndex].replaceAll(whitespaceCharsRegex + "+", "").trim();
+      String curPart = fields[curIndex];
       Matcher m = alphaPattern.matcher(curPart);
       if (m.find()) {
         // Some part of the word has alpha characters
@@ -374,18 +286,21 @@ public class NumberNormalizer {
           }
         } else if (Character.isDigit(curPart.charAt(0))) {
           if (curPart.endsWith("th") || curPart.endsWith("rd") || curPart.endsWith("nd") || curPart.endsWith("st")) {
-            curPart = curPart.substring(0, curPart.length()-2).trim();
+            curPart = curPart.substring(0, curPart.length()-2);
           }
-          curNum = parseNumberPart(curPart, originalString, curIndex);
+          if (digitsPattern.matcher(curPart).matches()) {
+            curNum = Long.parseLong(curPart);
+          } else{
+            throw new NumberFormatException("Bad number put into wordToNumber.  Word is: \"" + curPart + "\", originally part of \"" + originalString + "\", piece # " + curIndex);
+          }
         } else {
           throw new NumberFormatException("Bad number put into wordToNumber.  Word is: \"" + curPart + "\", originally part of \"" + originalString + "\", piece # " + curIndex);
         }
         numFields[curIndex] = curNum;
       } else {
         // Word is all numeric
-        Matcher matcher = digitsPatternExtended.matcher(curPart);
-        if (matcher.matches()) {
-          numFields[curIndex] = parseNumberPart(curPart, originalString, curIndex);
+        if (digitsPattern.matcher(curPart).matches()) {
+          numFields[curIndex] = Long.parseLong(curPart);
         } else if (numPattern.matcher(curPart).matches()) {
           numFields[curIndex] = new BigDecimal(curPart);
         } else {
