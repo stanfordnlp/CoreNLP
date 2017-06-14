@@ -64,8 +64,8 @@ public class GenericWebServiceAnnotator extends WebServiceAnnotator {
   public GenericWebServiceAnnotator(Properties props) {
     // annotator endpoint
     annotatorEndpoint = props.getProperty("generic.endpoint");
-    annotatorRequires = parseClasses(props.getProperty("generic.requires"));
-    annotatorProvides = parseClasses(props.getProperty("generic.provides"));
+    annotatorRequires = parseClasses(props.getProperty("generic.requires", ""));
+    annotatorProvides = parseClasses(props.getProperty("generic.provides", ""));
     startCommand = Optional.ofNullable(props.getProperty("generic.start")).map(CommandLineTokenizer::tokenize);
     stopCommand = Optional.ofNullable(props.getProperty("generic.stop")).map(CommandLineTokenizer::tokenize);
 

@@ -1,7 +1,7 @@
 package edu.stanford.nlp.process;
 
-// Stanford English Tokenizer -- a deterministic, fast, high-quality tokenizer
-// Copyright (c) 2002-2017 The Board of Trustees of
+// Stanford English Tokenizer -- a deterministic, fast high-quality tokenizer
+// Copyright (c) 2002-2009 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -20,8 +20,8 @@ package edu.stanford.nlp.process;
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 2A
-//    Stanford CA 94305-9020
+//    Dept of Computer Science, Gates 1A
+//    Stanford CA 94305-9010
 //    USA
 //    java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/
@@ -1006,7 +1006,8 @@ nno/[^A-Za-z0-9]
                     int spaceIndex = indexOfSpace(txt);
                     if (spaceIndex >= 0) {
                       yypushback(txt.length() - spaceIndex);
-                      return getNext();
+                      String newText = yytext();
+                      return getNext(newText, newText);
                     }
                   }
                   if (escapeForwardSlashAsterisk) {
@@ -1015,7 +1016,7 @@ nno/[^A-Za-z0-9]
                   if (normalizeSpace) {
                     txt = txt.replace(' ', '\u00A0'); // change space to non-breaking space
                   }
-                  return getNext(txt, yytext());
+                  return getNext(txt, txt);
                 }
 {FRAC2}                 { return normalizeFractions(yytext()); }
 {TBSPEC}                { return getNormalizedAmpNext(); }
@@ -1223,8 +1224,7 @@ nno/[^A-Za-z0-9]
 {NEWLINE}       { if (tokenizeNLs) {
                       return getNext(NEWLINE_TOKEN, yytext()); // js: for tokenizing carriage returns
                   } else if (invertible) {
-                    // System.err.println("Appending newline: |" + yytext() + "|");
-                    prevWordAfter.append(yytext());
+                      prevWordAfter.append(yytext());
                   }
                 }
 &nbsp;          { if (invertible) {
@@ -1271,13 +1271,10 @@ nno/[^A-Za-z0-9]
           }
         }
 <<EOF>> { if (invertible) {
-            // prevWordAfter.append(yytext());
+            prevWordAfter.append(yytext());
             String str = prevWordAfter.toString();
-            // System.err.println("At end of text making after: |" + str + "|");
-            prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-            // System.err.println("prevWord is |" + prevWord.get(CoreAnnotations.TextAnnotation.class) + "|, its after is |" +
-            //         prevWord.get(CoreAnnotations.AfterAnnotation.class) + "|");
             prevWordAfter.setLength(0);
+            prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
           }
           return null;
         }

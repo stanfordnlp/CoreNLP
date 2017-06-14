@@ -401,10 +401,8 @@ public class PTBTokenizerTest {
 
   @Test
   public void testPTBTokenizerSGML() {
-    // System.err.println("Starting SGML test");
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory();
     runOnTwoArrays(tokFactory, sgmlInputs, sgmlGold);
-    runAgainstOrig(tokFactory, sgmlInputs);
   }
 
 
@@ -441,16 +439,14 @@ public class PTBTokenizerTest {
 
   @Test
   public void testPTBTokenizerTokenizePerLineSGML() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("tokenizePerLine=true,invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("tokenizePerLine=true");
     runOnTwoArrays(tokFactory, sgmlInputs, sgmlPerLineGold);
-    runAgainstOrig(tokFactory, sgmlInputs);
   }
 
   @Test
   public void testPTBTokenizerTokenizeSplitHyphens() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("splitHyphenated=true,invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("splitHyphenated=true");
     runOnTwoArrays(tokFactory, ptbInputs, ptbGoldSplitHyphenated);
-    runAgainstOrig(tokFactory, ptbInputs);
   }
 
 
@@ -459,12 +455,10 @@ public class PTBTokenizerTest {
     String[] sample = { "5-1/4 plus 2 3/16 = 7\u00A07/16 in the U.S.S.R. Why not?" };
     String[][] tokenizedNormal = { { "5-1/4", "plus", "2\u00A03/16", "=", "7\u00A07/16", "in", "the", "U.S.S.R.", ".", "Why", "not", "?" } };
     String[][] tokenizedStrict = { { "5-1/4", "plus", "2", "3/16", "=", "7", "7/16", "in", "the", "U.S.S.R", ".", "Why", "not", "?" } };
-    TokenizerFactory<CoreLabel> tokFactoryNormal = PTBTokenizer.coreLabelFactory("invertible=true");
-    TokenizerFactory<CoreLabel> tokFactoryStrict = PTBTokenizer.coreLabelFactory("strictTreebank3=true,invertible=true");
+    TokenizerFactory<CoreLabel> tokFactoryNormal = PTBTokenizer.coreLabelFactory();
+    TokenizerFactory<CoreLabel> tokFactoryStrict = PTBTokenizer.coreLabelFactory("strictTreebank3");
     runOnTwoArrays(tokFactoryNormal, sample, tokenizedNormal);
     runOnTwoArrays(tokFactoryStrict, sample, tokenizedStrict);
-    runAgainstOrig(tokFactoryNormal, sample);
-    runAgainstOrig(tokFactoryStrict, sample);
   }
 
 
@@ -486,37 +480,7 @@ public class PTBTokenizerTest {
     }
   }
 
-  /** The appending has to run one behind so as to make sure that the after annotation has been filled in!
-   *  Just placing the appendTextFrom() after reading tok.next() in the loop does not work.
-   */
-  private static <T extends CoreLabel> void runAgainstOrig(TokenizerFactory<T> tokFactory, String[] inputs) {
-    for (String input : inputs) {
-      // System.err.println("Running on line: |" + input + "|");
-      StringBuilder origText = new StringBuilder();
-      T last = null;
-      for (Tokenizer<T> tok = tokFactory.getTokenizer(new StringReader(input)); tok.hasNext(); ) {
-        appendTextFrom(origText, last);
-        last = tok.next();
-      }
-      appendTextFrom(origText, last);
-      assertEquals("PTBTokenizer has wrong originalText", input, origText.toString());
-    }
-  }
 
-  private static <T extends CoreLabel> void appendTextFrom(StringBuilder origText, T token) {
-    if (token != null) {
-      // System.err.println("|Before|OrigText|After| = |" + token.get(CoreAnnotations.BeforeAnnotation.class) +
-      //         "|" + token.get(CoreAnnotations.OriginalTextAnnotation.class) + "|" + token.get(CoreAnnotations.AfterAnnotation.class) + "|");
-      if (origText.length() == 0) {
-        origText.append(token.get(CoreAnnotations.BeforeAnnotation.class));
-      }
-      origText.append(token.get(CoreAnnotations.OriginalTextAnnotation.class));
-      origText.append(token.get(CoreAnnotations.AfterAnnotation.class));
-    }
-  }
-
-
-  @SuppressWarnings("unchecked")
   @Test
   public void testPTBTokenizerGerman() {
     String[] sample = { "Das TV-Duell von Kanzlerin Merkel und SPD-Herausforderer Steinbrück war eher lahm - können es die Spitzenleute der kleinen Parteien besser? ",
@@ -591,9 +555,8 @@ public class PTBTokenizerTest {
 
   @Test
   public void testEmoji() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory();
     runOnTwoArrays(tokFactory, emojiInputs, emojiGold);
-    runAgainstOrig(tokFactory, emojiInputs);
   }
 
   private final String[] hyphenInputs = {
@@ -610,9 +573,8 @@ public class PTBTokenizerTest {
 
   @Test
   public void testHyphensAndBOM() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false,invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false");
     runOnTwoArrays(tokFactory, hyphenInputs, hyphenGold);
-    runAgainstOrig(tokFactory, hyphenInputs);
   }
 
 }
