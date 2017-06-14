@@ -317,17 +317,6 @@ public class StanfordCoreNLPServer implements Runnable {
       if (Objects.equals(lastPipeline.first, cacheKey)) {
         return lastPipeline.second;
       } else {
-        // Do some housekeeping on the global cache
-        for (Map.Entry<StanfordCoreNLP.AnnotatorSignature, Lazy<Annotator>> entry : new HashSet<>(StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.entrySet())) {
-          if (!entry.getValue().isCache()) {
-            error("Entry in global cache is not garbage collectable!");
-            StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.remove(entry.getKey());
-          }
-          if (entry.getValue().isCache() && entry.getValue().isGarbageCollected()) {
-            StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.remove(entry.getKey());
-          }
-        }
-        // Create a CoreNLP
         impl = new StanfordCoreNLP(props);
         lastPipeline = Pair.makePair(cacheKey, impl);
       }

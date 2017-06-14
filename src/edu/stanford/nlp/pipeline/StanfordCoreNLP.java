@@ -43,7 +43,6 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -89,43 +88,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
   public enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED, CUSTOM }
 
-
-  /**
-   * An annotator name and its associated signature.
-   * Used in {@link #GLOBAL_ANNOTATOR_CACHE}.
-   */
-  public static class AnnotatorSignature {
-    public final String name;
-    public final String signature;
-
-    public AnnotatorSignature(String name, String signature) {
-      this.name = name;
-      this.signature = signature;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      AnnotatorSignature that = (AnnotatorSignature) o;
-      return Objects.equals(name, that.name) &&
-          Objects.equals(signature, that.signature);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(name, signature);
-    }
-  }
-
-
-  /**
-   * A global cache of annotators, so we don't have to re-create one if there's enough memory floating around.
-   */
-  public static final Map<AnnotatorSignature, Lazy<Annotator>> GLOBAL_ANNOTATOR_CACHE = new ConcurrentHashMap<>();
-
-
-
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
   private static final String PROPS_SUFFIX = ".properties";
@@ -152,9 +114,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   private Properties properties;
 
   private Semaphore availableProcessors;
-
-  /** The annotator pool we should be using to get annotators. */
-  public final AnnotatorPool pool;
 
 
   /**
@@ -188,8 +147,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   }
 
   public StanfordCoreNLP(Properties props, boolean enforceRequirements, AnnotatorPool annotatorPool)  {
-    this.pool = annotatorPool != null ? annotatorPool : constructAnnotatorPool(props, getAnnotatorImplementations());
-    construct(props, enforceRequirements, getAnnotatorImplementations());
+    construct(props, enforceRequirements, getAnnotatorImplementations(), annotatorPool);
   }
 
   /**
@@ -205,8 +163,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     if (props == null) {
       throw new RuntimeIOException("ERROR: cannot find properties file \"" + propsFileNamePrefix + "\" in the classpath!");
     }
-    this.pool = constructAnnotatorPool(props, getAnnotatorImplementations());
-    construct(props, enforceRequirements, getAnnotatorImplementations());
+    construct(props, enforceRequirements, getAnnotatorImplementations(), null);
   }
 
   //
@@ -445,7 +402,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   // AnnotatorPool construction support
   //
 
-  private void construct(Properties props, boolean enforceRequirements, AnnotatorImplementations annotatorImplementations) {
+  private void construct(Properties props, boolean enforceRequirements, AnnotatorImplementations annotatorImplementations, AnnotatorPool pool) {
     Timing tim = new Timing();
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
@@ -464,6 +421,11 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       props = fromClassPath;
     }
     this.properties = props;
+
+    if (pool == null) {
+      // if undefined, load the default annotator pool
+      pool = getDefaultAnnotatorPool(props, annotatorImplementations);
+    }
 
     // Set threading
     if (this.properties.containsKey("threads")) {
@@ -516,7 +478,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    */
   public static synchronized void clearAnnotatorPool() {
     logger.warn("Clearing CoreNLP annotation pool; this should be unnecessary in production");
-    GLOBAL_ANNOTATOR_CACHE.clear();
+    AnnotatorPool.SINGLETON.clear();
   }
 
 
@@ -568,8 +530,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     // if the pool already exists reuse!
     AnnotatorPool pool = AnnotatorPool.SINGLETON;
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
-      AnnotatorSignature key = new AnnotatorSignature(entry.getKey(), PropertiesUtils.getSignature(entry.getKey(), inputProps));
-      pool.register(entry.getKey(), inputProps, GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (sig) -> Lazy.cache(() -> entry.getValue().apply(inputProps, annotatorImplementation))));
+      pool.register(entry.getKey(), inputProps, Lazy.cache( () -> entry.getValue().apply(inputProps, annotatorImplementation)));
     }
     registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
@@ -592,8 +553,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         logger.info("Registering annotator " + customName + " with class " + customClassName);
-        AnnotatorSignature key = new AnnotatorSignature(customName, PropertiesUtils.getSignature(customName, inputProps));
-        pool.register(customName, inputProps, GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (sig) -> Lazy.cache(() -> annotatorImplementation.custom(inputProps, property))));
+        pool.register(customName, inputProps, Lazy.cache(() -> annotatorImplementation.custom(inputProps, property)));
       }
     }
   }
@@ -608,10 +568,9 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * @return A populated AnnotatorPool
    */
   public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
-    AnnotatorPool pool = new AnnotatorPool();
+    AnnotatorPool pool = AnnotatorPool.SINGLETON;
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
-      AnnotatorSignature key = new AnnotatorSignature(entry.getKey(), PropertiesUtils.getSignature(entry.getKey(), inputProps));
-      pool.register(entry.getKey(), inputProps, GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (sig) -> Lazy.cache(() -> entry.getValue().apply(inputProps, annotatorImplementation))));
+      pool.register(entry.getKey(), inputProps, Lazy.cache(() -> entry.getValue().apply(inputProps, annotatorImplementation)));
     }
     registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
@@ -620,17 +579,15 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
 
   public static synchronized Annotator getExistingAnnotator(String name) {
-    Optional<Annotator> annotator = GLOBAL_ANNOTATOR_CACHE.entrySet().stream()
-        .filter(entry -> name.equals(entry.getKey().name))
-        .map(entry -> Optional.ofNullable(entry.getValue().getIfDefined()))
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .findFirst();
-    if (annotator.isPresent()) {
-      return annotator.get();
-    } else {
+    if(AnnotatorPool.SINGLETON == null){
+      logger.error("Attempted to fetch annotator \"" + name + "\" before the annotator pool was created!");
+      return null;
+    }
+    try {
+      return AnnotatorPool.SINGLETON.get(name);
+    } catch(IllegalArgumentException e) {
       logger.error("Attempted to fetch annotator \"" + name +
-          "\" but the annotator pool does not store any such type!");
+        "\" but the annotator pool does not store any such type!");
       return null;
     }
   }
@@ -1231,9 +1188,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
                 logger.info("Processed " + totalProcessed + " documents");
               }
               // check we've processed or errored on every file, if so tell the pool to clear()
-              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size() && clearPool) {
-                GLOBAL_ANNOTATOR_CACHE.clear();
-              }
+              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size() && clearPool)
+                AnnotatorPool.SINGLETON.clear();
             }
           } else if (continueOnAnnotateError) {
             // Error annotating but still wanna continue
@@ -1242,16 +1198,14 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             synchronized (totalErrorAnnotating) {
               totalErrorAnnotating.incValue(1);
               // check we've processed or errored on every file, if so tell the pool to clear()
-              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size() && clearPool) {
-                GLOBAL_ANNOTATOR_CACHE.clear();
-              }
+              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size() && clearPool)
+                AnnotatorPool.SINGLETON.clear();
             }
 
           } else {
             // if stopping due to error, make sure to clear the pool
-            if (clearPool) {
-              GLOBAL_ANNOTATOR_CACHE.clear();
-            }
+            if (clearPool)
+              AnnotatorPool.SINGLETON.clear();
             throw new RuntimeException("Error annotating " + file.getAbsoluteFile(), ex);
           }
         });
@@ -1390,9 +1344,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.run(true);
     // clear the pool if not running in multi-thread mode
-    if (!props.containsKey("threads") || Integer.parseInt(props.getProperty("threads")) <= 1) {
-      pipeline.pool.clear();
-    }
+    if (!props.containsKey("threads") || Integer.parseInt(props.getProperty("threads")) <= 1)
+      AnnotatorPool.SINGLETON.clear();
   }
 
 }
