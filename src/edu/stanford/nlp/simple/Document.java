@@ -273,7 +273,7 @@ public class Document {
   /**
    * Cache the most recently used custom annotators.
    */
-  private static final AnnotatorPool customAnnotators = AnnotatorPool.SINGLETON;
+  private static final AnnotatorPool customAnnotators = new AnnotatorPool();
 
 
   /**
@@ -287,7 +287,8 @@ public class Document {
    * @return An annotator as specified by the given name and properties.
    */
   private synchronized static Supplier<Annotator> getOrCreate(String name, Properties props, Supplier<Annotator> annotator) {
-    customAnnotators.register(name, props, Lazy.cache(annotator));
+    StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(name, PropertiesUtils.getSignature(name, props));
+    customAnnotators.register(name, props, StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (sig) -> Lazy.cache(annotator)));
     return () -> customAnnotators.get(name);
   }
 
