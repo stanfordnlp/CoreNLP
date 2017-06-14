@@ -427,6 +427,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Optional fields
     if (keySet.contains(SentenceIndexAnnotation.class)) { builder.setSentenceIndex(getAndRegister(sentence, keysToSerialize, SentenceIndexAnnotation.class)); }
+    if (keySet.contains(LineNumberAnnotation.class)) { builder.setLineNumber(getAndRegister(sentence), keysToSerialize, LineNumberAnnotation.class)); }
     if (keySet.contains(CharacterOffsetBeginAnnotation.class)) { builder.setCharacterOffsetBegin(getAndRegister(sentence, keysToSerialize, CharacterOffsetBeginAnnotation.class)); }
     if (keySet.contains(CharacterOffsetEndAnnotation.class)) { builder.setCharacterOffsetEnd(getAndRegister(sentence, keysToSerialize, CharacterOffsetEndAnnotation.class)); }
     if (keySet.contains(TreeAnnotation.class)) { builder.setParseTree(toProto(getAndRegister(sentence, keysToSerialize, TreeAnnotation.class))); }
