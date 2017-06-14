@@ -76,6 +76,8 @@ public class PTBTokenizerTest {
       "60-90's",
       "Soft AC-styled",
       "3 p.m., eastern time",
+//      "Total Private\nOrders 779.5 -9.5% ",
+      "From July 23-24. Radisson Miyako Hotel.",
   };
 
   private final String[][] ptbGold = {
@@ -146,6 +148,8 @@ public class PTBTokenizerTest {
       { "60-90", "'s" },
       { "Soft", "AC-styled" },
       { "3", "p.m.", ",", "eastern", "time" },
+//      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "From", "July", "23-24", ".", "Radisson", "Miyako", "Hotel", "." },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -216,6 +220,8 @@ public class PTBTokenizerTest {
       { "60", "-", "90", "'s" },
       { "Soft", "AC", "-", "styled" },
       { "3", "p.m.", ",", "eastern", "time" },
+//      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "From", "July", "23", "-", "24", ".", "Radisson", "Miyako", "Hotel", "." },
   };
 
   @Test
