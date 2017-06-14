@@ -27,7 +27,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
 /**
  * Test for web service annotator
  */
-public class GenericWebServiceAnnotatorTest {
+public class GenericWebServiceAnnotatorITest {
   // TODO: Abstract into a "AnnotatorBackend" class or something.
   public static class TestServer implements Runnable {
     protected static class PingHandler implements HttpHandler {
