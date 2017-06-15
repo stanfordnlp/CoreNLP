@@ -116,7 +116,7 @@ public class GenericWebServiceAnnotator extends WebServiceAnnotator {
       conn = (HttpURLConnection) new URL(annotatorEndpoint + "/annotate/").openConnection();
       conn.setRequestMethod("POST");
       conn.setDoOutput(true);
-      conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+      conn.setRequestProperty("Content-Type", "application/octet-stream; charset=UTF-8");
 
       try(OutputStream outputStream = conn.getOutputStream()) {
         serializer.toProto(ann).writeDelimitedTo(outputStream);
