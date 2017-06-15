@@ -97,6 +97,8 @@ public class CoNLLUOutputter extends AnnotationOutputter {
       SemanticGraph sg = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       if (sg != null) {
         writer.print(conllUWriter.printSemanticGraph(sg));
+      } else {
+        writer.print(conllUWriter.printPOSAnnotations(sentence));
       }
     }
     writer.flush();
