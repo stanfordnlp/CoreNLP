@@ -42,6 +42,9 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2017-06-09    3.8.0     Web service annotator, discussion forum 
+                        handling, new French and Spanish models 
+
 2016-10-31    3.7.0     KBP Annotator, improved coreference, Arabic 
                         pipeline 
 
