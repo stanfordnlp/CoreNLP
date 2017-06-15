@@ -83,3 +83,84 @@ clean.sectionAnnotations = sectionID=post[id],sectionDate=post[date|datetime],se
 clean.tokenAnnotations = link=a[href],speaker=post[author],speaker=quote[orig_author]
 clean.ssplitDiscardTokens = \\n|\\*NL\\*
 ```
+
+### Example: Handling discussion forums
+
+
+Here is some demo code showing how to access information about discussion forum posts
+
+First the properties used:
+
+```
+clean.xmltags = headline|dateline|text|post
+clean.singlesentencetags = HEADLINE|DATELINE|SPEAKER|POSTER|POSTDATE
+clean.sentenceendingtags = P|POST|QUOTE
+clean.turntags = TURN|POST|QUOTE
+clean.speakertags = SPEAKER|POSTER
+clean.docidtags = DOCID
+clean.datetags = DATETIME|DATE|DATELINE
+clean.doctypetags = DOCTYPE
+clean.docAnnotations = docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]
+clean.sectiontags = HEADLINE|DATELINE|POST
+clean.sectionAnnotations = sectionID=post[id],sectionDate=post[date|datetime],sectionDate=postdate,author=post[author],author=poster
+clean.quotetags = quote
+clean.quoteauthorattributes = orig_author
+clean.tokenAnnotations = link=a[href],speaker=post[author],speaker=quote[orig_author]
+clean.ssplitDiscardTokens = \\n|\\*NL\\*
+```
+
+Sample java code:
+
+```java
+package edu.stanford.nlp.examples;
+
+import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.io.*;
+import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.util.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+
+public class ForumPostExample {
+
+  public static void main(String args[]) {
+    // properties
+    Properties props = StringUtils.argsToProperties("-props", args[0]);
+    // set up pipeline
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    // set up document
+    Annotation testDocument = new Annotation(IOUtils.stringFromFile(args[1]));
+    // annotate document
+    pipeline.annotate(testDocument);
+    // print out the forum posts
+    for (CoreMap discussionForumPost : testDocument.get(CoreAnnotations.SectionsAnnotation.class)) {
+      System.err.println("---");
+      System.err.println("author: " + discussionForumPost.get(CoreAnnotations.AuthorAnnotation.class));
+      System.err.println("date: " + discussionForumPost.get(CoreAnnotations.SectionDateAnnotation.class));
+      System.err.println("char begin: " +
+          discussionForumPost.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+      System.err.println("char end: " +
+          discussionForumPost.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+      System.err.println("author start offset: "
+          +discussionForumPost.get(CoreAnnotations.SectionAuthorCharacterOffsetBeginAnnotation.class));
+      System.err.println("author end offset: "
+          +discussionForumPost.get(CoreAnnotations.SectionAuthorCharacterOffsetEndAnnotation.class));
+      System.err.println("section start tag: "
+          +discussionForumPost.get(CoreAnnotations.SectionTagAnnotation.class));
+      // print out the sentences
+      System.err.println("sentences: ");
+      for (CoreMap sentence : discussionForumPost.get(CoreAnnotations.SentencesAnnotation.class)) {
+        System.err.println("\t***");
+        boolean sentenceQuoted = (sentence.get(CoreAnnotations.QuotedAnnotation.class) != null) &&
+            sentence.get(CoreAnnotations.QuotedAnnotation.class);
+        String sentenceAuthor = sentence.get(CoreAnnotations.AuthorAnnotation.class);
+        String potentialQuoteText = sentenceQuoted ? "(QUOTING: "+sentenceAuthor+")" : "" ;
+        System.err.println("\t"+potentialQuoteText+" "+sentence.get(CoreAnnotations.TokensAnnotation.class).
+            stream().map(token -> token.word()).collect(Collectors.joining(" ")));
+      }
+    }
+  }
+}
+```
