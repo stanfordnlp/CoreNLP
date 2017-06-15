@@ -427,7 +427,7 @@ public class CoreAnnotations {
 
   /**
    * Annotation for the whitespace characters appearing before this word. This
-   * can be filled in by an invertible tokenizer so that the original text string can be
+   * can be filled in by the tokenizer so that the original text string can be
    * reconstructed.
    */
   public static class BeforeAnnotation implements CoreAnnotation<String> {
@@ -439,12 +439,8 @@ public class CoreAnnotations {
 
   /**
    * Annotation for the whitespace characters appear after this word. This can
-   * be filled in by an invertible tokenizer so that the original text string can be
+   * be filled in by the tokenizer so that the original text string can be
    * reconstructed.
-   *
-   * Note: When running a tokenizer token-by-token, in general this field will only
-   * be filled in after the next token is read, so you need to be reading this field
-   * one behind. Be careful about this.
    */
   public static class AfterAnnotation implements CoreAnnotation<String> {
     @Override

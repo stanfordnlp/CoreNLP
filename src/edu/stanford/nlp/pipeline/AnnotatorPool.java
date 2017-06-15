@@ -1,5 +1,4 @@
 package edu.stanford.nlp.pipeline;
-
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -7,7 +6,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Lazy;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.logging.Redwood;
-
 
 /**
  * An object for keeping track of Annotators. Typical use is to allow multiple
@@ -23,7 +21,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class AnnotatorPool  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotatorPool.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorPool.class);
+
 
   /**
    * A cached annotator, including the signature it should cache on.
@@ -64,7 +63,6 @@ public class AnnotatorPool  {
   }
 
 
-
   /**
    * The set of annotators that we have cached, possibly with garbage collected annotator instances.
    * This is a map from annotator name to cached annotator instances.
@@ -97,14 +95,13 @@ public class AnnotatorPool  {
    */
   public boolean register(String name, Properties props, Lazy<Annotator> annotator) {
     boolean newAnnotator = false;
-    String newSig = PropertiesUtils.getSignature(name, props);
     synchronized (this.cachedAnnotators) {
       CachedAnnotator oldAnnotator = this.cachedAnnotators.get(name);
+      String newSig = PropertiesUtils.getSignature(name, props);
       if (oldAnnotator == null || !Objects.equals(oldAnnotator.signature, newSig)) {
         // the new annotator uses different properties so we need to update!
         if (oldAnnotator != null) {
-          // Try to get it from the global cache
-          log.debug("Replacing old annotator \"" + name + "\" with signature ["
+          log.info("Replacing old annotator \"" + name + "\" with signature ["
               + oldAnnotator.signature + "] with new annotator with signature [" + newSig + "]");
         }
         // Add the new annotator

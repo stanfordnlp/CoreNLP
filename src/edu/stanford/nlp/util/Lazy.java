@@ -65,14 +65,6 @@ public abstract class Lazy<E> {
     }
   }
 
-  /**
-   * Check if this lazy has been garbage collected, if it is a cached value.
-   * Useful for, e.g., clearing keys in a map when the values are already gone.
-   */
-  public boolean isGarbageCollected() {
-    return this.isCache() && (this.implOrNullCache == null || this.implOrNullCache.get() == null);
-  }
-
 
   /**
    * Create a degenerate {@link Lazy}, which simply returns the given pre-computed

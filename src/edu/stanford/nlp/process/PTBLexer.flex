@@ -1,7 +1,7 @@
 package edu.stanford.nlp.process;
 
-// Stanford English Tokenizer -- a deterministic, fast, high-quality tokenizer
-// Copyright (c) 2002-2017 The Board of Trustees of
+// Stanford English Tokenizer -- a deterministic, fast high-quality tokenizer
+// Copyright (c) 2002-2009 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -20,8 +20,8 @@ package edu.stanford.nlp.process;
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 2A
-//    Stanford CA 94305-9020
+//    Dept of Computer Science, Gates 1A
+//    Stanford CA 94305-9010
 //    USA
 //    java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/
@@ -402,36 +402,8 @@ import edu.stanford.nlp.util.logging.Redwood;
     return out.toString();
   }
 
-
-  /**
-   * If an apparent negative number is generated from a hyphenated word, tokenize the hyphen.
-   */
-  private void handleHyphenatedNumber(String in) {
-    // Strip dashes from hyphenated words
-    if (prevWord != null && in.length() >= 2 && in.charAt(0) == '-' && in.charAt(1) != '-') {
-      String lastWord = prevWord.originalText();
-      switch (lastWord) {
-        case "mid":
-        case "late":
-        case "early":
-          yypushback(in.length() - 1);
-        default:
-          if (lastWord.length() > 0 && lastWord.charAt(0) <= 57 && lastWord.charAt(0) >= 48) {  // last word is a number as well
-            yypushback(in.length() - 1);
-          }
-          break;
-      }
-    }
-  }
-
-
   private static String removeFromNumber(String in) {
     StringBuilder out = null;
-    if ("-".equals(in)) {
-      // Shortcut for if we split on hyphens
-      return in;
-    }
-
     // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
     // \u066C\u2009\u202F are thousands separator characters that it seems safe to remove.
     int length = in.length();
@@ -449,7 +421,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     if (out == null) {
       return in;
     }
-    return out.toString().trim();
+    return out.toString();
   }
 
   private static final Pattern CENTS_PATTERN = Pattern.compile("\u00A2");
@@ -604,11 +576,7 @@ import edu.stanford.nlp.util.logging.Redwood;
       prevWord = word;
       return word;
     } else {
-      Object word = tokenFactory.makeToken(txt, yychar, yylength());
-      if (word instanceof CoreLabel) {
-        prevWord = (CoreLabel) word;
-      }
-      return word;
+      return tokenFactory.makeToken(txt, yychar, yylength());
    }
   }
 
@@ -741,13 +709,13 @@ co- counter- cross- centi- -centric circum- cis- colo- contra- cortico- cran- cr
 de- deca- demi- dis- -dom e- eco- electro- ennea- -esque -ette ex- extra- -er -ery ferro- -ful -fest -fold
 gastro- -gate -gon giga- hepta- hemi- hypo- hexa- -hood
 in- inter- intra- -ian -ible -ing -isation -ise -ising -ism -ist - itis -ization -ize -izing ideo- idio- infra- iso-
--less -logist -logy -ly judeo- macro- mega- micro- mini- mono- musculo- mm-hm mm-mm -most multi- medi- milli-
+-less -logist -logy -ly judeo- macro- mega- micro- mid- mini- mono- musculo- mm-hm mm-mm -most multi- medi- milli-
 neo- neuro- nitro- non- novem- octa- octo- o-kay -o-torium ortho- over-
 paleo- pan- para- pelvi- penta- peri- pheno- phospho- pica- pneumo- poly- post- pre- preter- pro- pseudo-
 quasi- quadri- quinque- -rama re- recto- salpingo- sero- semi- sept- soci- sub- super- supra- sur-
 tele- tera- tetra- tri- u- uber- uh-huh uh-oh ultra- un- uni- vice- veno- ventriculo- -wise x-
 */
-HTHINGEXCEPTIONPREFIXED = (e|a|u|x|agro|ante|anti|arch|be|bi|bio|co|counter|cross|cyber|de|eco|ex|extra|inter|intra|macro|mega|micro|mini|multi|neo|non|over|pan|para|peri|post|pre|pro|pseudo|quasi|re|semi|sub|super|tri|ultra|un|uni|vice)(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
+HTHINGEXCEPTIONPREFIXED = (e|a|u|x|agro|ante|anti|arch|be|bi|bio|co|counter|cross|cyber|de|eco|ex|extra|inter|intra|macro|mega|micro|mid|mini|multi|neo|non|over|pan|para|peri|post|pre|pro|pseudo|quasi|re|semi|sub|super|tri|ultra|un|uni|vice)(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
 HTHINGEXCEPTIONSUFFIXED = ([A-Za-z0-9][A-Za-z0-9.,\u00AD]*)(-)(esque|ette|fest|fold|gate|itis|less|most|o-torium|rama|wise)(s|es|d|ed)?
 HTHINGEXCEPTIONWHOLE = (mm-hm|mm-mm|o-kay|uh-huh|uh-oh)(s|es|d|ed)?
 
@@ -766,7 +734,7 @@ SREDAUX = n{APOSETCETERA}t
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
 APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
-FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"\'<>|.!?(){},;:&=+\[\]-]
+FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"\'<>|.!?(){},;:&=+\[\]\\\/-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
@@ -997,8 +965,7 @@ nno/[^A-Za-z0-9]
                           }
                           return getNext(txt, yytext());
                          }
-{NUMBER}                { handleHyphenatedNumber(yytext());
-                          return getNext(removeFromNumber(yytext()), yytext()); }
+{NUMBER}                { return getNext(removeFromNumber(yytext()), yytext()); }
 {SUBSUPNUM}             { return getNext(); }
 {FRAC}          { String txt = yytext();
                   // if we are in strictTreebank3 mode, we need to reject everything after a space or non-breaking space...
@@ -1006,7 +973,8 @@ nno/[^A-Za-z0-9]
                     int spaceIndex = indexOfSpace(txt);
                     if (spaceIndex >= 0) {
                       yypushback(txt.length() - spaceIndex);
-                      return getNext();
+                      String newText = yytext();
+                      return getNext(newText, newText);
                     }
                   }
                   if (escapeForwardSlashAsterisk) {
@@ -1015,7 +983,7 @@ nno/[^A-Za-z0-9]
                   if (normalizeSpace) {
                     txt = txt.replace(' ', '\u00A0'); // change space to non-breaking space
                   }
-                  return getNext(txt, yytext());
+                  return getNext(txt, txt);
                 }
 {FRAC2}                 { return normalizeFractions(yytext()); }
 {TBSPEC}                { return getNormalizedAmpNext(); }
@@ -1223,8 +1191,7 @@ nno/[^A-Za-z0-9]
 {NEWLINE}       { if (tokenizeNLs) {
                       return getNext(NEWLINE_TOKEN, yytext()); // js: for tokenizing carriage returns
                   } else if (invertible) {
-                    // System.err.println("Appending newline: |" + yytext() + "|");
-                    prevWordAfter.append(yytext());
+                      prevWordAfter.append(yytext());
                   }
                 }
 &nbsp;          { if (invertible) {
@@ -1271,13 +1238,10 @@ nno/[^A-Za-z0-9]
           }
         }
 <<EOF>> { if (invertible) {
-            // prevWordAfter.append(yytext());
+            prevWordAfter.append(yytext());
             String str = prevWordAfter.toString();
-            // System.err.println("At end of text making after: |" + str + "|");
-            prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-            // System.err.println("prevWord is |" + prevWord.get(CoreAnnotations.TextAnnotation.class) + "|, its after is |" +
-            //         prevWord.get(CoreAnnotations.AfterAnnotation.class) + "|");
             prevWordAfter.setLength(0);
+            prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
           }
           return null;
         }
