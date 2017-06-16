@@ -81,27 +81,20 @@ Here is a sample document (which you can also [download]({{ site.github.url }}/a
     Worth looking in to?
     </headline>
     <post author="James Rood" datetime="2010-05-29T17:14:00" id="p1">
-    Yesterday afternoon as I negotiated route 149 from Lake George to Fort Ann in NY I passed a new diner that had opened that day. I didnt notice the na\
-    me but out side it had a Union Jack and a St Georges flag flying
-    I wonder if they serve proper 'English' food, served by proper 'English' people ? I may have to check it out asap <img src="http://britishexpats.com/\
-    forum/images/smilies/wink.gif"/>
+    Yesterday afternoon as I negotiated route 149 from Lake George to Fort Ann in NY I passed a new diner that had opened that day. I didnt notice the name but out side it had a Union Jack and a St Georges flag flying
+    I wonder if they serve proper 'English' food, served by proper 'English' people ? I may have to check it out asap <img src="http://britishexpats.com/forum/images/smilies/wink.gif"/>
     </post>
     <post author="UDDep" datetime="2010-05-30T15:43:00" id="p2">
     <quote orig_author="James Rood">
-    Yesterday afternoon as I negotiated route 149 from Lake George to Fort Ann in NY I passed a new diner that had opened that day. I didnt notice the na\
-    me but out side it had a Union Jack and a St Georges flag flying
-    I wonder if they serve proper 'English' food, served by proper 'English' people ? I may have to check it out asap <img src="http://britishexpats.com/\
-    forum/images/smilies/wink.gif"/>
+    Yesterday afternoon as I negotiated route 149 from Lake George to Fort Ann in NY I passed a new diner that had opened that day. I didnt notice the name but out side it had a Union Jack and a St Georges flag flying
+    I wonder if they serve proper 'English' food, served by proper 'English' people ? I may have to check it out asap <img src="http://britishexpats.com/forum/images/smilies/wink.gif"/>
     </quote>
-    If they don't have english food and beer...tell em they've got a bloody cheek flying the flags and luring un-suspecting expats in....little buggers..\
-    . <img src="http://britishexpats.com/forum/images/smilies/smile.gif"/>
+    If they don't have english food and beer...tell em they've got a bloody cheek flying the flags and luring un-suspecting expats in....little buggers... <img src="http://britishexpats.com/forum/images/smilies/smile.gif"/>
     </post>
     <post author="Mack67" datetime="2010-05-30T18:23:00" id="p3">
     <quote orig_author="James Rood">
-    Yesterday afternoon as I negotiated route 149 from Lake George to Fort Ann in NY I passed a new diner that had opened that day. I didnt notice the na\
-    me but out side it had a Union Jack and a St Georges flag flying
-    I wonder if they serve proper 'English' food, served by proper 'English' people ? I may have to check it out asap <img src="http://britishexpats.com/\
-    forum/images/smilies/wink.gif"/>
+    Yesterday afternoon as I negotiated route 149 from Lake George to Fort Ann in NY I passed a new diner that had opened that day. I didnt notice the name but out side it had a Union Jack and a St Georges flag flying
+    I wonder if they serve proper 'English' food, served by proper 'English' people ? I may have to check it out asap <img src="http://britishexpats.com/forum/images/smilies/wink.gif"/>
     </quote>
     Halal?
     </post>
@@ -113,7 +106,7 @@ Here is a sample document (which you can also [download]({{ site.github.url }}/a
     </post>
     </doc>
 
-Here are the properties used (which you can also [download]({{ site.github.url }}/assets/cleanxml.properties))):
+Here are the properties used (which you can also [download]({{ site.github.url }}/assets/cleanxml.properties)):
 
 ```
 clean.xmltags = headline|dateline|text|post
@@ -191,12 +184,13 @@ public class ForumPostExample {
 }
 ```
 
-Here is running it from the command-line and producing JSON output:
+And here is command-line use of these properties and producing JSON output:
 
 ```
+java -mx1g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props cleanxml.properties -annotatrs tokenize,cleanxml,ssplit -file DF-sample.xml -outputFormat json
 ```
 
-And here is the part of the output json file showing the section information:
+Here is the part of the JSON file output by that command, showing the section information. Information about quotes is not (yet) in out JSON output.
 
 ```json
   "sections": [
