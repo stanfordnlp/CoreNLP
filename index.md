@@ -7,19 +7,19 @@ homepage: true
 
 ## About
 
-Stanford CoreNLP provides a set of natural language analysis
+Stanford CoreNLP provides a set of human language technology analysis
 tools. It can give the base
 forms of words, their parts of speech, whether they are names of
 companies, people, etc., normalize dates, times, and numeric quantities,
 mark up the structure of sentences in terms of
-phrases and word dependencies, indicate which noun phrases refer to
+phrases and syntactic dependencies, indicate which noun phrases refer to
 the same entities, indicate sentiment, 
 extract particular or open-class relations between entity mentions,
 get quotes people said, etc. 
 
 Choose Stanford CoreNLP if you need:
 
-* An integrated toolkit with a good range of grammatical analysis tools
+* An integrated NLP toolkit with a good range of grammatical analysis tools
 * Fast, reliable analysis of arbitrary texts
 * The overall highest quality text analytics
 * Support for a number of major (human) languages
@@ -50,7 +50,7 @@ higher-level and domain-specific text understanding applications.
 
 ## Download
 
-Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks), (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. Unzip this file, open the folder that results and you're ready to use it.
+Stanford CoreNLP can be downloaded via the link below. This will download a large (~500 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks), (3) the libraries required to run CoreNLP, and (4)&nbsp;documentation / source code for the project. Unzip this file, open the folder that results and you're ready to use it.
 
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip">Download CoreNLP 3.8.0 </a> </div>
@@ -60,9 +60,10 @@ Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html). 
 To download earlier versions of Stanford CoreNLP or language packs for earlier versions, go to the [history page](history.html).
 
-You can find the jars for 3.7.0 containing the models for each language we support in the table below.
-Due to size issues we have divided the English resources into two jars.  The English (KBP) models jar contains extra resources needed to run relation extraction and
-entity linking.
+In the table below are jars for the current release with all the models for each language we support.
+Due to size issues we have divided the English resources into two
+jars.  The English (KBP) models jar contains extra resources needed to
+run relation extraction and entity linking.
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
@@ -77,28 +78,26 @@ entity linking.
 ## Human languages supported
 
 The basic distribution provides model files for the analysis of well-edited **English**,
-but the engine is compatible with models for other languages. We provide
-packaged models for
-[Arabic](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2016-10-31-models.jar), 
-[Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar), [French](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-10-31-models.jar), 
-[German](http://nlp.stanford.edu/software/stanford-german-corenlp-2016-10-31-models.jar), and [Spanish](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2016-10-31-models.jar).
-We also provide a jar that contains all of our
-[English](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-10-31-models.jar)
-models, which includes various variant models, and in particular has
-one optimized for working with uncased English (e.g., mostly or all
+but the engine is compatible with models for other languages. In the
+table above, we provide packaged models for
+Arabic, Chinese, French, German, and Spanish.
+We also provide two jars that contain all of our
+English models, which include various variant models, and in particular models
+optimized for working with uncased English (e.g., mostly or all
 either uppercase or lowercase).
-There is also some third party support for additional languages. You can find out more about using CoreNLP with
+There is also some third party support for additional languages (and
+we would welcome more!). You can find out more about using CoreNLP with
 various human languages on the
 [other human languages](human-languages.html) page.
 
 
 ## Programming languages and operating systems
 
-Stanford CoreNLP is written in **Java**; current releases  require **Java 1.8+**. 
+Stanford CoreNLP is written in **Java**; recent releases  require **Java 1.8+**.
 
 You can use Stanford CoreNLP from the [command-line](cmdline.html), via its Java
 [programmatic API](api.html), via [third party APIs](other-languages.html) for most major modern
-programming languages, or via a [service](corenlp-server.html).
+programming languages, or via a [web service](corenlp-server.html).
 It works on Linux, macOS, and Windows.
 
 ## License
@@ -123,8 +122,7 @@ and write "Stanford NLP Group open source software" in the Special Instructions.
 
 ## Citing Stanford CoreNLP in papers
 
-If you&rsquo;re just running the CoreNLP pipeline, please cite this CoreNLP
-demo paper: 
+If you&rsquo;re just running the CoreNLP pipeline, please cite this CoreNLP paper:
 
 > Manning, Christopher D., Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. 2014. [The Stanford CoreNLP Natural Language Processing Toolkit](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf) In *Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics: System Demonstrations*, pp. 55-60. \[[pdf](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.bib)\]
 
@@ -133,8 +131,8 @@ you&rsquo;re also encouraged to cite the papers that cover individual
 components:
 [POS tagging](http://nlp.stanford.edu/software/tagger.shtml),
 [NER](http://nlp.stanford.edu/software/CRF-NER.shtml),
-[parsing (with parse annotator)](http://nlp.stanford.edu/software/lex-parser.shtml),
-[dependency parsing (with depparse annotator)](http://nlp.stanford.edu/software/nndep.shtml),
+[constituency parsing](http://nlp.stanford.edu/software/lex-parser.shtml),
+[dependency parsing](http://nlp.stanford.edu/software/nndep.shtml),
 [coreference resolution](http://nlp.stanford.edu/software/dcoref.shtml),
 [sentiment](http://nlp.stanford.edu/sentiment/), or [Open IE](http://nlp.stanford.edu/software/openie.html).
 You can find more information on the Stanford NLP

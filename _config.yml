@@ -6,7 +6,7 @@ platform: all
 version: all
 destination: ../doc_designers
 topnav_title: Stanford CoreNLP
-homepage_title: Stanford CoreNLP &ndash; Core natural language software
+homepage_title: Stanford CoreNLP &ndash; Natural language software
 site_title: Stanford CoreNLP
 #disqus_shortname: idrbwjekyll
 #google_analytics: UA-66296557-1

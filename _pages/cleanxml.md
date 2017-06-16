@@ -10,10 +10,10 @@ permalink: '/cleanxml.html'
 | --- | --- | --- |
 | cleanxml | CleanXmlAnnotator | XmlContextAnnotation | 
 
- This annotator removes XML tags from an input document.
-Stanford CoreNLP also has the ability to remove most XML from a
+This annotator removes XML tags from an input document.
+Stanford CoreNLP has the ability to remove all or most XML tags from a
 document before processing it. This functionality is provided by a
-finite automaton. It works fine for typical XML, but complex
+finite automaton. It works fine for typical, simple XML, but complex
 constructions and CDATA sections will not be correctly handled. 
 If you want full and correct handling of XML, then you should run XML
 documents through an XML parser (such as the one included standard in
@@ -24,7 +24,8 @@ the original text with XML annotation.
 The cleanxml annotator supports many complex processing options: 
 You can choose to only delete
 some XML tags, to treat certain XML tags as sentence ending, as
-marking the speaker in a dialog, etc. The cleanxml annotator can be
+marking the speaker in a dialog, etc. You can also extract document
+metadata from XML attributes. The cleanxml annotator can be
 placed after tokenize in processing order.
 
 For example, if run with the annotators 
@@ -66,7 +67,8 @@ are case sensitive, so get them right!
 
 ### Example
 
-Here is an example of setting many of these options for various LDC-style XML files:
+Here is an example of setting many of these options for an XML file
+that is similar to various LDC XML formats:
 
 ```
 clean.xmltags = headline|dateline|text|post
