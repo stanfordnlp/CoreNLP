@@ -69,7 +69,7 @@ are case sensitive, so get them right!
 | clean.quoteauthorattributes | String | `""` | A comma-separated list of XML attributes for a quote tag whose value is treated as the author of the quote. |
 | clean.ssplitDiscardTokens | regex | `""` | A regular expression of tokens discarded while processing a section. |
 
-### Example: Handling discussion forums
+## Example: Handling discussion forums
 
 Here is an example of setting many of these options in order to access information from an XML file
 that is similar to the LDC MPDF (multi-post discussion forum) XML format.
