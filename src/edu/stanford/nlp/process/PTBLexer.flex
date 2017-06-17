@@ -416,7 +416,9 @@ import edu.stanford.nlp.util.logging.Redwood;
         case "early":
           yypushback(in.length() - 1);
         default:
-          if (lastWord.length() > 0 && lastWord.charAt(0) <= 57 && lastWord.charAt(0) >= 48) {  // last word is a number as well
+          if (lastWord.length() > 0 &&
+              lastWord.charAt(0) <= 57 && lastWord.charAt(0) >= 48 &&
+              prevWordAfter != null && prevWordAfter.length() == 0) {  // last word is a number as well
             yypushback(in.length() - 1);
           }
           break;
@@ -723,13 +725,13 @@ FILENAME = ({LETTER}|{DIGIT})+([-._/]({LETTER}|{DIGIT})+)*\.{FILENAME_EXT}
 /* The $ was for things like New$ */
 /* WAS: only keep hyphens with short one side like co-ed */
 /* But treebank just allows hyphenated things as words! */
-THING = ([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+({HYPHEN}([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+)*
+THING = ([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?(([:letter:]|[:digit:])+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?(([:letter:]|[:digit:])+|{NUMBER}))*
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [A-Za-z0-9]+(-[A-Za-z]+){0,2}(\\?\/[A-Za-z0-9]+(-[A-Za-z]+){0,2}){1,2}
 APOS = ['\u0092\u2019]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or HTML SGML escape */
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
-HTHING = ({LETTER}|{DIGIT})[A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
+HTHING = ({LETTER}|{DIGIT})[A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+(\.[:digit:]+)?|{ACRO2}\.))+
 /* from the CLEAR (biomedical?) treebank documentation */
 /* we're going to split on most hypens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */

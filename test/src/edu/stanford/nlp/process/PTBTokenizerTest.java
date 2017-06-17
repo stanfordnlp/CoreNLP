@@ -76,7 +76,9 @@ public class PTBTokenizerTest {
       "60-90's",
       "Soft AC-styled",
       "3 p.m., eastern time",
-//      "Total Private\nOrders 779.5 -9.5% ",
+      "Total Private\nOrders 779.5 -9.5%",
+      "2-9.5%",
+      "2- 9.5%",
       "From July 23-24. Radisson Miyako Hotel.",
   };
 
@@ -148,7 +150,9 @@ public class PTBTokenizerTest {
       { "60-90", "'s" },
       { "Soft", "AC-styled" },
       { "3", "p.m.", ",", "eastern", "time" },
-//      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "2-9.5", "%" },
+      { "2", "-", "9.5", "%" },
       { "From", "July", "23-24", ".", "Radisson", "Miyako", "Hotel", "." },
   };
 
@@ -220,7 +224,9 @@ public class PTBTokenizerTest {
       { "60", "-", "90", "'s" },
       { "Soft", "AC", "-", "styled" },
       { "3", "p.m.", ",", "eastern", "time" },
-//      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "2", "-", "9.5", "%" },
+      { "2", "-", "9.5", "%" },
       { "From", "July", "23", "-", "24", ".", "Radisson", "Miyako", "Hotel", "." },
   };
 
@@ -480,6 +486,7 @@ public class PTBTokenizerTest {
   private static <T extends Label> void runOnTwoArrays(TokenizerFactory<T> tokFactory, String[] inputs, String[][] desired) {
     assertEquals("Test data arrays don't match in length", inputs.length, desired.length);
     for (int sent = 0; sent < inputs.length; sent++) {
+      System.out.println("Testing " + inputs[sent]);
       Tokenizer<T> tok = tokFactory.getTokenizer(new StringReader(inputs[sent]));
       for (int i = 0; tok.hasNext() || i < desired[sent].length; i++) {
         if ( ! tok.hasNext()) {
