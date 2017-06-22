@@ -1,12 +1,30 @@
 ---
-title: NERClassifierCombiner 
+title: Named Entity Recognition – NERClassifierCombiner
 keywords: ner
 permalink: '/ner.html'
 ---
 
 ## Description
 
-Recognizes named (PERSON, LOCATION, ORGANIZATION, MISC), numerical (MONEY, NUMBER, ORDINAL, PERCENT), and temporal (DATE, TIME, DURATION, SET) entities. Named entities are recognized using a combination of three CRF sequence taggers trained on various corpora, such as ACE and MUC. Numerical entities are recognized using a rule-based system. Numerical entities that require normalization, e.g., dates, are normalized to NormalizedNamedEntityTagAnnotation.
+Recognizes named entities (person and company names, etc.) in text.
+The set of entities recognized is language-dependent, and for other
+languages, the recognized set is frequently more limited than what is
+described below for English. As the name “NERClassifierCombiner”
+implies, commonly this annotator will run several named entity
+recognizers and then combine their results.
+
+For English, this annotator recognizes
+named (PERSON, LOCATION, ORGANIZATION, MISC), numerical (MONEY,
+NUMBER, ORDINAL, PERCENT), and temporal (DATE, TIME, DURATION, SET)
+entities. Named entities are recognized using a combination of three
+CRF sequence taggers trained on various corpora, such as ACE and
+MUC. Numerical entities are recognized using a rule-based
+system. Numerical entities that require normalization, e.g., dates,
+are normalized to NormalizedNamedEntityTagAnnotation.
+
+It is possible to recognize additional or more fine-grained entity
+classes through the use of TokensRegex patterns.  See also the
+[RegexNER](regexner.html) annotator.
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
@@ -14,11 +32,13 @@ Recognizes named (PERSON, LOCATION, ORGANIZATION, MISC), numerical (MONEY, NUMBE
 
 ## Options
 
-* ner.useSUTime: Whether or not to use sutime.  On by default in the version which includes sutime, off by default in the version that doesn't.  If not processing English, make sure to set this to false.
-* ner.model: NER model(s) in a comma separated list to use instead of the default models.  By default, the models used will be the 3class, 7class, and MISCclass models, in that order.
-* ner.applyNumericClassifiers: Whether or not to use numeric classifiers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false.
-* sutime.markTimeRanges: Tells sutime to mark phrases such as "From January to March" instead of marking "January" and "March" separately
-* sutime.includeRange: If marking time ranges, set the time range in the TIMEX output from sutime
+| Option name | Type | Default | Description |
+| --- | --- | --- | --- |
+| ner.useSUTime | boolean | true | Whether or not to use SUTime.  (On by default in the version which includes sutime, off by default in the version that doesn't.  If not processing English, make sure to set this to false. |
+| ner.model | List(String) | null | A comma-separated list of NER model names (or just a single name is okay). If none are specified, a default list of English models is used (3class, 7class, and MISCclass, in that order). The names will be looked for as classpath resources, filenames, or URLs. |
+| ner.applyNumericClassifiers | boolean | true | Whether or not to use numeric classifiers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
+| sutime.markTimeRanges | boolean | false | Tells SUTime whether to mark phrases such as “From January to March” as a range, instead of marking "January" and "March" separately. |
+| sutime.includeRange | boolean | false | If marking time ranges, set the time range in the TIMEX output from SUTime. |
 
 ## SUTime
 

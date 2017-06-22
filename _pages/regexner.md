@@ -6,7 +6,10 @@ permalink: '/regexner.html'
 
 ## Description
 
-RegexNER Implements a simple, rule-based NER system over token sequences using an extension of Java regular expressions. The original goal of this Annotator was to provide a simple framework to incorporate named entities and named entity labels that are not annotated in traditional NER corpora, and hence not recoginized by our statistical NER classifiers. For example, the default list of regular expressions that we distribute in the models file recognizes ideologies (IDEOLOGY), nationalities (NATIONALITY), religions (RELIGION), and job titles (TITLE). However, you can also use this annotator to simply do rule-based NER. Here is [a simple example](http://nlp.stanford.edu/software/regexner/) of how to use RegexNER. For more complex applications, you might consider using [TokensRegex](http://nlp.stanford.edu/software/tokensregex.shtml) directly.
+RegexNER Implements a simple, rule-based NER system over token sequences using an extension of Java regular expressions. The original goal of this Annotator was to provide a simple framework to incorporate named entities and named entity labels that are not annotated in traditional NER corpora, and hence not recoginized by our statistical NER classifiers. However, you can also use this annotator to simply do rule-based NER. Here is [a simple example](http://nlp.stanford.edu/software/regexner/) of how to use RegexNER. RegexNER is implemented using TokensRegex. For more complex applications, you might consider using [TokensRegex](http://nlp.stanford.edu/software/tokensregex.html) directly.
+
+For English, we distribute CoreNLP with two files containing a default list of regular expressions, many just gazette entries, which label more fine-grained LOCATION-related subcategories (COUNTRY, STATE\_OR\_PROVINCE, CITY, NATIONALITY), the commonest online identifiers (URL, EMAIL), and a few miscellaneous categories originating from the TAC KBP evaluations (TITLE, IDEOLOGY, RELIGION, CRIMINAL\_CHARGE, CAUSE\_OF\_DEATH). Here, TITLE refers to job titles.
+
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
@@ -55,7 +58,7 @@ Note that the `pattern` field can be either
 
 or
 
-* a [TokensRegex expression](http://nlp.stanford.edu/software/tokensregex.shtml#TokensRegexPatterns) (marked by starting with "( " and ending with " )".
+* a [TokensRegex expression](http://nlp.stanford.edu/software/tokensregex.html#TokensRegexPatterns) (marked by starting with "( " and ending with " )".
    <br/><em>Example</em>: `( /University/ /of/ [ {ner:LOCATION} ] )\tSCHOOL`
   
   Using TokensRegex patterns allows for matching on other annotated fields such as POS or NER.
