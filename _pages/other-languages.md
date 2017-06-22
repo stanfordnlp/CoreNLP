@@ -92,8 +92,9 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 ### R (CRAN)
 
+* [cleanNLP: A Tidy Data Model for Natural Language Processing](https://cran.r-project.org/web/packages/cleanNLP/) by Taylor Arnold. [GitHub](https://github.com/statsmaths/cleanNLP). Paper: [pdf](https://arxiv.org/pdf/1703.09570.pdf).
 * [coreNLP: Wrappers Around Stanford CoreNLP Tools](https://cran.r-project.org/web/packages/coreNLP/) by Taylor Arnold and Lauren Tilton.  [Github](https://github.com/statsmaths/coreNLP). Supports CoreNLP version &ge; 3.5.2.
-* [NLP: Natural Language Processing Infrastructure](https://cran.r-project.org/web/packages/NLP/) by Kurt Hornik.
+* [NLP: Natural Language Processing Infrastructure](https://cran.r-project.org/web/packages/NLP/) by Kurt Hornik. Code and models available [here](http://datacube.wu.ac.at/src/contrib/).
 
 ### Ruby
 
