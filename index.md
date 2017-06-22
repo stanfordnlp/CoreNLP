@@ -129,11 +129,11 @@ If you&rsquo;re just running the CoreNLP pipeline, please cite this CoreNLP pape
 If you&rsquo;re dealing in depth with particular annotators,
 you&rsquo;re also encouraged to cite the papers that cover individual
 components:
-[POS tagging](http://nlp.stanford.edu/software/tagger.shtml),
-[NER](http://nlp.stanford.edu/software/CRF-NER.shtml),
-[constituency parsing](http://nlp.stanford.edu/software/lex-parser.shtml),
-[dependency parsing](http://nlp.stanford.edu/software/nndep.shtml),
-[coreference resolution](http://nlp.stanford.edu/software/dcoref.shtml),
+[POS tagging](http://nlp.stanford.edu/software/tagger.html),
+[NER](http://nlp.stanford.edu/software/CRF-NER.html),
+[constituency parsing](http://nlp.stanford.edu/software/lex-parser.html),
+[dependency parsing](http://nlp.stanford.edu/software/nndep.html),
+[coreference resolution](http://nlp.stanford.edu/software/dcoref.html),
 [sentiment](http://nlp.stanford.edu/sentiment/), or [Open IE](http://nlp.stanford.edu/software/openie.html).
 You can find more information on the Stanford NLP
 [software pages](http://nlp.stanford.edu/software/) and/or
