@@ -162,5 +162,5 @@ public class OpenIEDemo {
 
 ## More Information
 More information can be found on the 
-[Open IE homepage](http://nlp.stanford.edu/software/openie.shtml).
+[Open IE homepage](http://nlp.stanford.edu/software/openie.html).
 

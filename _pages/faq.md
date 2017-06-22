@@ -27,7 +27,7 @@ program, be sure to include all of the appropriate jar files in the
 classpath.
 
 Once you have tried this, there is quite a bit of information on the
-[CoreNLP home page](http://nlp.stanford.edu/software/corenlp.shtml) 
+[CoreNLP home page](http://nlp.stanford.edu/software/corenlp.html) 
 describing what Annotators are available, what annotations they add to
 the text, and what options they support.
 
@@ -213,7 +213,7 @@ If you want CoreNLP to output the original Stanford Dependencies instead of the 
 `-parse.originalDependencies` or the property `("parse.originalDependencies", true)` to your command or code, respectively.
 
 Note, however,  that some annotators that use dependencies such as natlog might not function properly if you use this option.
-In case you are using the [Neural Network Dependency Parser](http://nlp.stanford.edu/software/nndep.shtml), use the following model to get Stanford Dependencies: 
+In case you are using the [Neural Network Dependency Parser](http://nlp.stanford.edu/software/nndep.html), use the following model to get Stanford Dependencies: 
 ```
 -depparse.model "edu/stanford/nlp/models/parser/nndep/english_SD.gz"
 ```

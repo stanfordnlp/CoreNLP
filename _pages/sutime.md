@@ -4,7 +4,7 @@ keywords: sutime
 permalink: '/sutime.html'
 ---
 
-StanfordCoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.shtml), Stanford's temporal expression
+Stanford CoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.html), Stanford's temporal expression
 recognizer. SUTime is transparently called from the "ner" annotator,
 so no configuration is necessary. Furthermore, the "cleanxml"
 annotator now extracts the reference date for a given XML document, so

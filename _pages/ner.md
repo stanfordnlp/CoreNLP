@@ -42,7 +42,7 @@ classes through the use of TokensRegex patterns.  See also the
 
 ## SUTime
 
-StanfordCoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.shtml), Stanford's temporal expression
+StanfordCoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.html), Stanford's temporal expression
 recognizer. SUTime is transparently called from the "ner" annotator,
 so no configuration is necessary. Furthermore, the "cleanxml"
 annotator now extracts the reference date for a given XML document, so
@@ -83,4 +83,4 @@ for English. You can find details on the
 
 ## More information 
 
-For more details on the CRF tagger see [this page](http://nlp.stanford.edu/software/CRF-NER.shtml).
+For more details on the CRF tagger see [this page](http://nlp.stanford.edu/software/CRF-NER.html).

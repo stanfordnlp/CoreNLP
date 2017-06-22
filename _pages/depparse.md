@@ -22,4 +22,4 @@ Provides a fast syntactic dependency parser. We generate three dependency-based 
 
 ## More information 
 
-For details about the dependency software, see [this page](http://nlp.stanford.edu/software/nndep.shtml). For more details about dependency parsing in general, see [this page](http://nlp.stanford.edu/software/stanford-dependencies.shtml).
+For details about the dependency software, see [this page](http://nlp.stanford.edu/software/nndep.html). For more details about dependency parsing in general, see [this page](http://nlp.stanford.edu/software/stanford-dependencies.html).

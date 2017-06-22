@@ -39,7 +39,7 @@ In exchange for these advantages, users should be aware of a few disadvantages:
 
   * __Less Customizability__ Although the ability to pass properties to annotators is supported, it is significantly more clunky than the annotation pipeline interface, and is generally discouraged.
   
-  * __Possible Nondeterminism__ There is no guarantee that the same algorithm will be used to compute the requested function on each invocation. For example, if a dependency parse is requested, followed by a constituency parse, we will compute the dependency parse with the [Neural Dependency Parser](http://nlp.stanford.edu/software/nndep.shtml), and then use the [Stanford Parser](http://nlp.stanford.edu/software/lex-parser.shtml) for the constituency parse. If, however, you request the constituency parse before the dependency parse, we will use the Stanford Parser for both.
+  * __Possible Nondeterminism__ There is no guarantee that the same algorithm will be used to compute the requested function on each invocation. For example, if a dependency parse is requested, followed by a constituency parse, we will compute the dependency parse with the [Neural Dependency Parser](http://nlp.stanford.edu/software/nndep.html), and then use the [Stanford Parser](http://nlp.stanford.edu/software/lex-parser.html) for the constituency parse. If, however, you request the constituency parse before the dependency parse, we will use the Stanford Parser for both.
 
 ### Usage
 

@@ -93,7 +93,7 @@ public class CorefExample {
 ## More Details
 
 ### Deterministic System
-This is a multi-pass sieve rule-based coreference system. See [this page](http://nlp.stanford.edu/software/dcoref.shtml) for usage and more details.
+This is a multi-pass sieve rule-based coreference system. See [this page](http://nlp.stanford.edu/software/dcoref.html) for usage and more details.
 
 ### Statistical System
 This is a mention-ranking model using a large set of features. It operates by iterating through each mention in the document, possibly adding a coreference link between the current one and a preceding mention at each step. Some relevant options:

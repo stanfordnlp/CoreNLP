@@ -6,7 +6,7 @@ permalink: '/pos.html'
 
 ## Description
 
-Labels tokens with their POS tag. For more details see [this page](http://nlp.stanford.edu/software/tagger.shtml). 
+Labels tokens with their POS tag. For more details see [this page](http://nlp.stanford.edu/software/tagger.html). 
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
@@ -28,4 +28,4 @@ for English. You can find details on the
 
 ## More information 
 
-The POS tagger is described in detail on the Stanford NLP [website](http://nlp.stanford.edu/software/tagger.shtml).
+The POS tagger is described in detail on the Stanford NLP [website](http://nlp.stanford.edu/software/tagger.html).
