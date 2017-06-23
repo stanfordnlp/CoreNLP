@@ -1,8 +1,9 @@
 package edu.stanford.nlp.math;
-import edu.stanford.nlp.util.Triple;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Collection;
+
+import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * The class {@code SloppyMath} contains methods for performing basic
@@ -19,7 +20,7 @@ import java.util.Collection;
 public final class SloppyMath  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SloppyMath.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SloppyMath.class);
 
   private SloppyMath() {}  // this class is just static methods.
 
@@ -74,45 +75,45 @@ public final class SloppyMath  {
   }
 
   /**
-   * Returns the greater of two <code>int</code> values.  That
+   * Returns the greater of two {@code int} values.  That
    * is, the result is the argument closer to positive infinity. If
    * the arguments have the same value, the result is that same
    * value.  Does none of the special checks for NaN or -0.0f that
-   * <code>Math.max</code> does.
+   * {@code Math.max} does.
    *
    * @param a an argument.
    * @param b another argument.
-   * @return the larger of <code>a</code> and <code>b</code>.
+   * @return the larger of {@code a} and {@code b}.
    */
   public static int max(int a, int b) {
     return (a >= b) ? a : b;
   }
 
   /**
-   * Returns the greater of two <code>float</code> values.  That is,
+   * Returns the greater of two {@code float} values.  That is,
    * the result is the argument closer to positive infinity. If the
    * arguments have the same value, the result is that same
    * value.  Does none of the special checks for NaN or -0.0f that
-   * <code>Math.max</code> does.
+   * {@code Math.max} does.
    *
    * @param a an argument.
    * @param b another argument.
-   * @return the larger of <code>a</code> and <code>b</code>.
+   * @return the larger of {@code a} and {@code b}.
    */
   public static float max(float a, float b) {
     return (a >= b) ? a : b;
   }
 
   /**
-   * Returns the greater of two <code>double</code> values.  That
+   * Returns the greater of two {@code double} values.  That
    * is, the result is the argument closer to positive infinity. If
    * the arguments have the same value, the result is that same
    * value.  Does none of the special checks for NaN or -0.0f that
-   * <code>Math.max</code> does.
+   * {@code Math.max} does.
    *
    * @param a an argument.
    * @param b another argument.
-   * @return the larger of <code>a</code> and <code>b</code>.
+   * @return the larger of {@code a} and {@code b}.
    */
   public static double max(double a, double b) {
     return (a >= b) ? a : b;
@@ -135,15 +136,15 @@ public final class SloppyMath  {
   }
 
   /**
-   * Returns the smaller of two <code>float</code> values.  That is,
+   * Returns the smaller of two {@code float} values.  That is,
    * the result is the value closer to negative infinity. If the
    * arguments have the same value, the result is that same
    * value.  Does none of the special checks for NaN or -0.0f that
-   * <code>Math.max</code> does.
+   * {@code Math.max} does.
    *
    * @param a an argument.
    * @param b another argument.
-   * @return the smaller of <code>a</code> and <code>b.</code>
+   * @return the smaller of {@code a} and {@code b.}
    */
   public static float min(float a, float b) {
     return (a <= b) ? a : b;
@@ -151,19 +152,20 @@ public final class SloppyMath  {
 
 
   /**
-   * Returns the smaller of two <code>double</code> values.  That
+   * Returns the smaller of two {@code double} values.  That
    * is, the result is the value closer to negative infinity. If the
    * arguments have the same value, the result is that same
    * value.  Does none of the special checks for NaN or -0.0f that
-   * <code>Math.max</code> does.
+   * {@code Math.max} does.
    *
    * @param a an argument.
    * @param b another argument.
-   * @return the smaller of <code>a</code> and <code>b</code>.
+   * @return the smaller of {@code a} and {@code b}.
    */
   public static double min(double a, double b) {
     return (a <= b) ? a : b;
   }
+
 
   /** Returns a mod where the sign of the answer is the same as the sign of the second
    *  argument.  This is how languages like Python do it. Helpful for array accesses.
