@@ -253,6 +253,9 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
 
+  /** Turn on to find out how things were tokenized. */
+  private static final boolean DEBUG = false;
+
   /** A logger for this class */
   private static final Redwood.RedwoodChannels logger = Redwood.channels(PTBLexer.class);
 
@@ -533,19 +536,16 @@ import edu.stanford.nlp.util.logging.Redwood;
     return s1;
   }
 
-  private Object handleQuotes(String tok, boolean probablyLeft) {
-    String normTok;
+  private String handleQuotes(String tok, boolean probablyLeft) {
     if (latexQuotes) {
-      normTok = latexQuotes(tok, probablyLeft);
+      return latexQuotes(tok, probablyLeft);
     } else if (unicodeQuotes) {
-      normTok = unicodeQuotes(tok, probablyLeft);
+      return unicodeQuotes(tok, probablyLeft);
     } else if (asciiQuotes) {
-      normTok = asciiQuotes(tok);
+      return asciiQuotes(tok);
     } else {
-      normTok = tok;
+      return tok;
     }
-    // System.err.printf("handleQuotes changed %s to %s.%n", tok, normTok);
-    return getNext(normTok, tok);
   }
 
   private Object handleEllipsis(final String tok) {
@@ -704,6 +704,7 @@ SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 DIGIT = [:digit:]|[\u07C0-\u07C9]
 DATE = {DIGIT}{1,2}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{2,4}
+/* Note that NUM also includes times like 12:55 */
 NUM = {DIGIT}+|{DIGIT}*([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)+
 /* Now don't allow bracketed negative numbers!  They have too many uses (e.g.,
    years or times in parentheses), and having them in tokens messes up
@@ -724,10 +725,11 @@ LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E
 WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
 FILENAME_EXT = bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|3gp|wm[va]|avi|flv|mov|mp[34g]
 FILENAME = ({LETTER}|{DIGIT})+([-._/]({LETTER}|{DIGIT})+)*\.{FILENAME_EXT}
-/* The $ was for things like New$ */
-/* WAS: only keep hyphens with short one side like co-ed */
-/* But treebank just allows hyphenated things as words! */
-THING = ([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?(([:letter:]|[:digit:])+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?(([:letter:]|[:digit:])+|{NUM}))*
+/* THING: The $ was for things like New$;
+   WAS: only keep hyphens with short one side like co-ed
+   But treebank just allows hyphenated things as words!
+   THING allows d'Avignon or NUMBER before HYPHEN and the same things after it. Only first number can be negative. */
+THING = ([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUM}))*
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}(\\?\/[\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}){1,2}
 APOS = ['\u0092\u2019]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or HTML SGML escape */
@@ -751,7 +753,7 @@ paleo- pan- para- pelvi- penta- peri- pheno- phospho- pica- pneumo- poly- post- 
 quasi- quadri- quinque- -rama re- recto- salpingo- sero- semi- sept- soci- sub- super- supra- sur-
 tele- tera- tetra- tri- u- uber- uh-huh uh-oh ultra- un- uni- vice- veno- ventriculo- -wise x-
 */
-HTHINGEXCEPTIONPREFIXED = (e|a|u|x|agro|ante|anti|arch|be|bi|bio|co|counter|cross|cyber|de|eco|ex|extra|inter|intra|macro|mega|micro|mini|multi|neo|non|over|pan|para|peri|post|pre|pro|pseudo|quasi|re|semi|sub|super|tri|ultra|un|uni|vice)(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
+HTHINGEXCEPTIONPREFIXED = (e|a|u|x|agro|ante|anti|arch|be|bi|bio|co|counter|cross|cyber|de|eco|ex|extra|inter|intra|macro|mega|micro|mini|multi|neo|non|over|pan|para|peri|post|pre|pro|pseudo|quasi|re|semi|sub|super|tri|ultra|un|uni|vice)(-([\p{Alpha}\p{Digit}\u00AD]+|{ACRO2}\.))+
 HTHINGEXCEPTIONSUFFIXED = ([\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD]*)(-)(esque|ette|fest|fold|gate|itis|less|most|o-torium|rama|wise)(s|es|d|ed)?
 HTHINGEXCEPTIONWHOLE = (mm-hm|mm-mm|o-kay|uh-huh|uh-oh)(s|es|d|ed)?
 
@@ -975,7 +977,12 @@ nno/[^\p{Alpha}\p{Digit}]
                           }
                           return getNext(tmp, origTxt);
                         }
-{APOWORD}               { return handleQuotes(yytext(), false); }
+{APOWORD}               { String tok = yytext();
+                          String norm = handleQuotes(tok, false);
+                          if (DEBUG) { logger.info("Used {APOWORD} to recognize " + tok + " as " + norm +
+                                                   "; probablyLeft=" + false); }
+                          return getNext(norm, tok);
+                        }
 {APOWORD2}/[:letter:]   { return getNext(); }
 {FULLURL}               { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
@@ -991,9 +998,17 @@ nno/[^\p{Alpha}\p{Digit}]
                           return getNext(txt, yytext()); }
 {EMAIL}                 { return getNext(); }
 {TWITTER}               { return getNext(); }
-{REDAUX}/[^\p{Alpha}]      { return handleQuotes(yytext(), false);
+{REDAUX}/[^\p{Alpha}]   { String tok = yytext();
+                          String norm = handleQuotes(tok, false);
+                          if (DEBUG) { logger.info("Used {REDAUX} to recognize " + tok + " as " + norm +
+                                                   "; probablyLeft=" + false); }
+                          return getNext(norm, tok);
                         }
-{SREDAUX}/[^\p{Alpha}]     { return handleQuotes(yytext(), false);
+{SREDAUX}/[^\p{Alpha}]  { String tok = yytext();
+                          String norm = handleQuotes(tok, false);
+                          if (DEBUG) { logger.info("Used {SREDAUX} to recognize " + tok + " as " + norm +
+                                                   "; probablyLeft=" + false); }
+                          return getNext(norm, tok);
                         }
 {DATE}                  { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
@@ -1002,6 +1017,7 @@ nno/[^\p{Alpha}\p{Digit}]
                           return getNext(txt, yytext());
                          }
 {NUMBER}                { handleHyphenatedNumber(yytext());
+                          if (DEBUG) { logger.info("Used {NUMBER} to recognize " + yytext() + " as " + removeFromNumber(yytext())); }
                           return getNext(removeFromNumber(yytext()), yytext()); }
 {SUBSUPNUM}             { return getNext(); }
 {FRAC}          { String txt = yytext();
@@ -1095,10 +1111,21 @@ nno/[^\p{Alpha}\p{Digit}]
                             txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
                             txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
                           }
+                          if (DEBUG) { logger.info("Used {PHONE} to recognize " + yytext() + " as " + txt); }
                           return getNext(txt, yytext());
                         }
-{DBLQUOT}/[\p{Alpha}\p{Digit}$]  { return handleQuotes(yytext(), true); }
-{DBLQUOT}               { return handleQuotes(yytext(), false); }
+{DBLQUOT}/[\p{Alpha}\p{Digit}$]  { String tok = yytext();
+                                   String norm = handleQuotes(tok, true);
+                                   if (DEBUG) { logger.info("Used {DBLQUOT} to recognize " + tok + " as " + norm +
+                                                            "; probablyLeft=" + true); }
+                                   return getNext(norm, tok);
+                                 }
+{DBLQUOT}               { String tok = yytext();
+                          String norm = handleQuotes(tok, false);
+                          if (DEBUG) { logger.info("Used {SREDAUX} to recognize " + tok + " as " + norm +
+                                                   "; probablyLeft=" + false); }
+                          return getNext(norm, tok);
+                        }
 \x7f                    { if (invertible) {
                             prevWordAfter.append(yytext());
                         } }
@@ -1201,21 +1228,53 @@ nno/[^\p{Alpha}\p{Digit}]
 {HTHINGEXCEPTIONPREFIXED}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
 {HTHINGEXCEPTIONSUFFIXED}  {return getNext(removeSoftHyphens(yytext()), yytext());}
 {HTHINGEXCEPTIONSUFFIXED}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
-{HTHING}        {  breakByHyphens(yytext());
-                    return getNext(removeSoftHyphens(yytext()), yytext()); }
+{HTHING}        { breakByHyphens(yytext());
+                  if (DEBUG) { logger.info("Used {HTHING} to recognize " + yytext() + " as " + removeSoftHyphens(yytext())); }
+                  return getNext(removeSoftHyphens(yytext()), yytext()); }
 {HTHING}\./{INSENTP}         {  breakByHyphens(yytext());
-                    return getNext(removeSoftHyphens(yytext()), yytext()); }
-{THING}\./{INSENTP}          { return handleQuotes(yytext(), false); }  /* A THING can contain quote like O'Malley */
-{THING}         { return handleQuotes(yytext(), false); }
+                  return getNext(removeSoftHyphens(yytext()), yytext()); }
+/* {THING}\./{INSENTP}          { String tok = yytext();       // cdm [2017]: I don't understand what this was for, and it seems harmful....
+                               /* A THING can contain quote like O'Malley */
+                               String norm = handleQuotes(tok, false);
+                                if (DEBUG) { logger.info("Used {THING} to recognize " + tok + " as " + norm +
+                                                         "; probablyLeft=" + false); }
+                                return getNext(norm, tok);
+                              } */
+{THING}         { String tok = yytext();
+                  /* A THING can contain quote like O'Malley */
+                  String norm = handleQuotes(tok, false);
+                  if (DEBUG) { logger.info("Used {THING} (2) to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + false); }
+                  return getNext(norm, tok);
+                }
 {THINGA}\./{INSENTP}    { return getNormalizedAmpNext(); }
 {THINGA}        { return getNormalizedAmpNext(); }
-'/[:letter:][^ \t\n\r\u00A0] { /* invert quote - often but not always right */
-                  return handleQuotes(yytext(), true);
-                }
+'/[:letter:][^ \t\n\r\u00A0] { String tok = yytext();
+                               /* invert single quote - often but not always right */
+                               String norm = handleQuotes(tok, true);
+                               if (DEBUG) { logger.info("Used single straight quote to recognize " + tok + " as " + norm +
+                                                        "; probablyLeft=" + true); }
+                               return getNext(norm, tok);
+                              }
 /* This REDAUX is needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
-{REDAUX}        { return handleQuotes(yytext(), false); }
-{SREDAUX}       { return handleQuotes(yytext(), false); }
-{QUOTES}        { return handleQuotes(yytext(), false); }
+{REDAUX}        { String tok = yytext();
+                  String norm = handleQuotes(tok, false);
+                  if (DEBUG) { logger.info("Used {REDAUX} (2nd) to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + false); }
+                  return getNext(norm, tok);
+                }
+{SREDAUX}       { String tok = yytext();
+                  String norm = handleQuotes(tok, false);
+                  if (DEBUG) { logger.info("Used {SREDAUX} (2nd) to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + false); }
+                  return getNext(norm, tok);
+                }
+{QUOTES}        { String tok = yytext();
+                  String norm = handleQuotes(tok, false);
+                  if (DEBUG) { logger.info("Used {QUOTES} to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + false); }
+                  return getNext(norm, tok);
+                }
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
 \u0095          { return getNext("\u2022", yytext()); } /* cp1252 bullet mapped to unicode */

@@ -618,12 +618,17 @@ public class PTBTokenizerTest {
           // Test that some cp1252 that shouldn't be in file is normalized okay
           "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092",
           "Charles Howard ''Charlie’' Bridges and Helen Hoyle Bridges",
+          "All energy markets close at 1 p.m. except Palo Verde electricity futures and options, closing at\n" +
+                  "12:55.; Palladium and copper markets close at 1 p.m.; Silver markets close at 1:05 p.m.",
   };
 
   private final String[][] hyphenGold = {
           { "This", "is", "hyphenated", "and", "non-breaking", "spaces", ":", "3456473.89" },
           { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" },
           { "Charles", "Howard", "``", "Charlie", "''", "Bridges", "and", "Helen", "Hoyle", "Bridges" },
+          { "All", "energy", "markets", "close", "at", "1", "p.m.", "except", "Palo", "Verde", "electricity", "futures",
+                  "and", "options", ",", "closing", "at", "12:55", ".", ";", "Palladium", "and", "copper", "markets",
+                  "close", "at", "1", "p.m.", ";", "Silver", "markets", "close", "at", "1:05", "p.m." }
   };
 
   @Test
