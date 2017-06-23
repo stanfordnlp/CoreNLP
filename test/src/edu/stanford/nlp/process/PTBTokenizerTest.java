@@ -80,6 +80,8 @@ public class PTBTokenizerTest {
       "2-9.5%",
       "2- 9.5%",
       "From July 23-24. Radisson Miyako Hotel.",
+      "23 percent-2 percent higher than today",
+      "23 percent--2 percent higher than today",
   };
 
   private final String[][] ptbGold = {
@@ -154,6 +156,8 @@ public class PTBTokenizerTest {
       { "2-9.5", "%" },
       { "2", "-", "9.5", "%" },
       { "From", "July", "23-24", ".", "Radisson", "Miyako", "Hotel", "." },
+      { "23", "percent", "-", "2", "percent", "higher", "than", "today" },
+      { "23", "percent", "--", "2", "percent", "higher", "than", "today" },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -228,6 +232,8 @@ public class PTBTokenizerTest {
       { "2", "-", "9.5", "%" },
       { "2", "-", "9.5", "%" },
       { "From", "July", "23", "-", "24", ".", "Radisson", "Miyako", "Hotel", "." },
+      { "23", "percent", "-", "2", "percent", "higher", "than", "today" },
+      { "23", "percent", "--", "2", "percent", "higher", "than", "today" },
   };
 
   @Test
