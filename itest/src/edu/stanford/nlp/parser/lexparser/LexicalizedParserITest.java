@@ -89,6 +89,8 @@ public class LexicalizedParserITest extends TestCase {
                               "chineseFactored.ser.gz");
         chineseParser = LexicalizedParser.loadModel(chinesePath);
         tLP = chineseParser.getOp().tlpParams.treebankLanguagePack();
+        chineseParser.getTLPParams().setGenerateOriginalDependencies(true); // test was made with Chinese SD not UD
+
         chinesePennPrint = new TreePrint("penn", tLP);
         chineseTypDepPrint = new TreePrint("typedDependencies", "basicDependencies", tLP);
       }

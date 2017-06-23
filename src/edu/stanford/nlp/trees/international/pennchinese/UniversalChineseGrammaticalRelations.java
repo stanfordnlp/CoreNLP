@@ -444,7 +444,7 @@ public class UniversalChineseGrammaticalRelations {
   public static final GrammaticalRelation CLAUSAL_MODIFIER =
           new GrammaticalRelation(Language.UniversalChinese, "acl", "clausal modifier of noun",
                   MODIFIER, "NP", tregexCompiler,
-                  "NP  $++ (CP=target << VV) > NP ",
+                  //"NP  $++ (CP=target << VV) > NP ",
                   "NP  < ( CP=target $++ NP << VV)",
                   "NP < IP=target ");
 

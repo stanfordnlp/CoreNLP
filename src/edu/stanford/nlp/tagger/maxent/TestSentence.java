@@ -1,12 +1,30 @@
-/**
- * Title:        StanfordMaxEnt<p>
- * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
- * Company:      Stanford University<p>
- */
+// MaxentTagger -- StanfordMaxEnt, A Maximum Entropy Toolkit
+// Copyright (c) 2002-2016 Leland Stanford Junior University
 
-package edu.stanford.nlp.tagger.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+// For more information, bug reports, fixes, contact:
+// Christopher Manning
+// Dept of Computer Science, Gates 2A
+// Stanford CA 94305-9020
+// USA
+// Support/Questions: stanford-nlp on SO or java-nlp-user@lists.stanford.edu
+// Licensing: java-nlp-support@lists.stanford.edu
+// http://nlp.stanford.edu/software/tagger.html
+
+package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.io.PrintFile;
@@ -19,6 +37,7 @@ import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.SequenceModel;
 import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -49,15 +68,14 @@ public class TestSentence implements SequenceModel  {
   protected final String encoding;
   protected final PairsHolder pairs = new PairsHolder();
   protected List<String> sent;
-  protected List<String> originalTags;
+  private List<String> originalTags;
   // origWords is only set when run with a list of HasWords; when run
   // with a list of strings, this will be null
   protected List<HasWord> origWords;
   protected int size; // TODO this always has the value of sent.size(). Remove it? [cdm 2008]
   // protected double[][][] probabilities;
-  protected String[] correctTags;
+  private String[] correctTags;
   protected String[] finalTags;
-  ArrayList<TaggedWord> result;
   int numRight;
   int numWrong;
   int numUnknown;
@@ -65,8 +83,8 @@ public class TestSentence implements SequenceModel  {
   private int endSizePairs; // = 0;
 
   private volatile History history;
-  protected volatile Map<String,double[]> localScores = Generics.newHashMap();
-  protected volatile double[][] localContextScores;
+  private volatile Map<String,double[]> localScores = Generics.newHashMap();
+  private volatile double[][] localContextScores;
 
   protected final MaxentTagger maxentTagger;
 
@@ -130,7 +148,7 @@ public class TestSentence implements SequenceModel  {
       log.info("Sentence is " + SentenceUtils.listToString(sent, false, tagSeparator));
     }
     init();
-    result = testTagInference();
+    ArrayList<TaggedWord> result = testTagInference();
     if (maxentTagger.wordFunction != null) {
       for (int j = 0; j < sz; ++j) {
         result.get(j).setWord(s.get(j).word());
@@ -482,7 +500,9 @@ public class TestSentence implements SequenceModel  {
     return scores;
   }
 
-  // Returns an unnormalized score (in log space) for each tag
+  // todo [cdm 2016]: Could this be sped up a bit by caching lambda array, extracting method for shared code?
+  // todo [cdm 2016]: Also it's allocating java.util.ArrayList$Itr for for loop - why can't it just random access array?
+  /** Returns an unnormalized score (in log space) for each tag. */
   private double[] getApproximateHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
 
     double[] scores = new double[tags.length];

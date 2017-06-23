@@ -3,6 +3,7 @@ package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.Serializable;
@@ -11,12 +12,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Keeps track of a distributional similarity mapping, eg a map from
+ * Keeps track of a distributional similarity mapping, i.e., a map from
  * word to class.  Returns strings to save time, since that is how the
  * results are used in the tagger.
  */
 public class Distsim implements Serializable {
-  // avoid loading the same lexicon twice but allow different lexicons
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Distsim.class);
+
+  // Avoid loading the same lexicon twice but allow different lexicons
   // TODO: when loading a distsim, should we populate this map?
   private static final Map<String,Distsim> lexiconMap = Generics.newHashMap();
 
@@ -24,7 +29,8 @@ public class Distsim implements Serializable {
 
   private final String unk;
 
-  private boolean mapdigits;
+  private boolean mapdigits; // = false
+  private boolean casedDistSim; // = false;
 
   private static final Pattern digits = Pattern.compile("[0-9]");
 
@@ -40,15 +46,22 @@ public class Distsim implements Serializable {
     for (int arg = 1; arg < pieces.length; ++arg) {
       if (pieces[arg].equalsIgnoreCase("mapdigits")) {
         mapdigits = true;
+      } else if (pieces[arg].equalsIgnoreCase("casedDistSim")) {
+        casedDistSim = true;
       } else {
         throw new IllegalArgumentException("Unknown argument " + pieces[arg]);
       }
     }
 
     lexicon = Generics.newHashMap();
+    // todo [cdm 2016]: Note that this loads file with default file encoding rather than specifying it
     for (String word : ObjectBank.getLineIterator(new File(filename))) {
       String[] bits = word.split("\\s+");
-      lexicon.put(bits[0].toLowerCase(), bits[1]);
+      String w = bits[0];
+      if ( ! casedDistSim) {
+        w = w.toLowerCase();
+      }
+      lexicon.put(w, bits[1]);
     }
 
     if (lexicon.containsKey("<unk>")) {
@@ -58,14 +71,14 @@ public class Distsim implements Serializable {
     }
   }
 
-  static public Distsim initLexicon(String path) {
+  public static Distsim initLexicon(String path) {
     synchronized (lexiconMap) {
       Distsim lex = lexiconMap.get(path);
       if (lex == null) {
-        Timing.startDoing("Loading distsim lexicon from " + path);
+        Timing timer = new Timing();
         lex = new Distsim(path);
         lexiconMap.put(path, lex);
-        Timing.endDoing();
+        timer.done(log, "Loading distsim lexicon from " + path);
       }
       return lex;
     }
@@ -96,4 +109,5 @@ public class Distsim implements Serializable {
 
 
   private static final long serialVersionUID = 2L;
+
 }

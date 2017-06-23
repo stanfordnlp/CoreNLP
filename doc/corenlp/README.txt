@@ -42,6 +42,9 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2016-10-31    3.7.0     KBP Annotator, improved coreference, Arabic 
+                        pipeline 
+
 2015-12-09    3.6.0     Improved coreference, OpenIE integration, 
                         Stanford CoreNLP server 
 

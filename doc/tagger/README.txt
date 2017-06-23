@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.6.0 - 2015-12-09
+Stanford POS Tagger, v3.7.0 - 2016-10-31
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -6,7 +6,7 @@ Original tagger author: Kristina Toutanova
 Code contributions: Christopher Manning, Dan Klein, William Morgan,
 Huihsin Tseng, Anna Rafferty, John Bauer
 Major rewrite for version 2.0 by Michel Galley.
-Current release prepared by: John Bauer
+Current release prepared by: Jason Bolton
 
 This package contains a Maximum Entropy part of speech tagger.
 
@@ -54,7 +54,7 @@ accessed via the command line. To run the demonstration GUI you should
 be able to use any of the following 2 methods:
 
 1)
-java -mx200m -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI models/wsj-0-18-left3words-distsim.tagger
+java -mx200m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI models/wsj-0-18-left3words-distsim.tagger
 
 2) Running the appropriate script for your operating system:
     stanford-postagger-gui.bat
@@ -77,7 +77,7 @@ Many options are available for training, tagging, and testing.  These
 options can be set using a properties file.  To start, you can generate a
 default properties file by:
 
-java -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -genprops > myPropsFile.prop
+java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -genprops > myPropsFile.prop
 
 This will create the file myPropsFile.prop with descriptions of each
 option for the tagger and the default values for these options
@@ -91,7 +91,7 @@ tagger and descriptions of those options).
 To tag a file using the pre-trained bidirectional model
 =======================================================
 
-java -mx300m -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/wsj-0-18-bidirectional-distsim.tagger -textFile sample-input.txt > sample-tagged.txt
+java -mx300m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/wsj-0-18-bidirectional-distsim.tagger -textFile sample-input.txt > sample-tagged.txt
 
 Tagged output will be printed to standard out, which you can redirect
 as above.  Note that the bidirectional model is slightly more accurate
@@ -100,12 +100,12 @@ but significantly slower than the left3words model.
 To train a simple model
 =======================
 
-java -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -trainFile trainingFile
+java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -trainFile trainingFile
 
 To test a model
 ===============
 
-java -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -testFile testFile
+java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -testFile testFile
 
 
 
@@ -125,10 +125,6 @@ stanford-postagger-YYYY-MM-DD.jar
   This is a JAR file containing all the Stanford classes necessary to
   run the Stanford POS Tagger.  The two jar files are identical.  You can use
   either the one with a version (date) indication or without, as you prefer.
-
-lib
-
-  A directory containing dependencies for the Stanford POS Tagger.
 
 src
 
@@ -183,7 +179,7 @@ TaggerDemo.java
   should be able to compile and run it with:
 
   javac -cp stanford-postagger.jar TaggerDemo.java
-  java -cp ".:stanford-postagger.jar" TaggerDemo models/wsj-0-18-left3words.tagger sample-input.txt
+  java -cp ".:stanford-postagger.jar" TaggerDemo models/wsj-0-18-left3words-distsim.tagger sample-input.txt
 
   (If you are on Windows, you need to replace the ":" with a ";" in the
   -cp argument, and should use a "\" in place of the "/" in the filename....)
@@ -199,6 +195,8 @@ processing.
 
 CHANGES
 -----------------------------------------------
+
+2016-10-31    3.7.0     Update for compatibility, German UD model 
 
 2015-12-09    3.6.0     Updated for compatibility 
 

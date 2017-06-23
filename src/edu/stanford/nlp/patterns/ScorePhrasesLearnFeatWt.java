@@ -30,17 +30,18 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
- * Learn a logistic regression classifier to combine weights to score a phrase
+ * Learn a logistic regression classifier to combine weights to score a phrase.
+ *
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
  */
 public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> {
 
   @Option(name = "scoreClassifierType")
-  ClassifierType scoreClassifierType = ClassifierType.LR;
+  private ClassifierType scoreClassifierType = ClassifierType.LR;
 
 
-  static Map<String, double[]> wordVectors = null;
+  private static Map<String, double[]> wordVectors = null;
 
   public ScorePhrasesLearnFeatWt(ConstantsAndVariables constvar) {
     super(constvar);
@@ -261,9 +262,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       if(simsAvgMaxAllLabels == null)
         simsAvgMaxAllLabels = new HashMap<>();
       double[] simsAvgMax = simsAvgMaxAllLabels.get(label);
-      if(simsAvgMax == null) {
+      if (simsAvgMax == null) {
         simsAvgMax = new double[Similarities.values().length];
-        Arrays.fill(simsAvgMax, 0);
+        // Arrays.fill(simsAvgMax, 0); // not needed; Java arrays zero initialized
       }
 
       if(wordVectors.containsKey(p.getPhrase()) && (! ignoreWordRegex || !PatternFactory.ignoreWordRegex.matcher(p.getPhrase()).matches())){
@@ -574,13 +575,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
   }
 
-  static<E,F> boolean hasElement(Map<E, Collection<F>> values, F value, E ignoreLabel){
-      for(Map.Entry<E, Collection<F>> en: values.entrySet()){
-        if(en.getKey().equals(ignoreLabel))
-          continue;
-        if(en.getValue().contains(value))
-          return true;
-      }
+  private static<E,F> boolean hasElement(Map<E, Collection<F>> values, F value, E ignoreLabel){
+    for(Map.Entry<E, Collection<F>> en: values.entrySet()){
+      if(en.getKey().equals(ignoreLabel))
+        continue;
+      if(en.getValue().contains(value))
+        return true;
+    }
     return false;
   }
 
@@ -1081,7 +1082,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
 
   //Map of label to an array of values -- num_items, avg similarity, max similarity
-  public Map<String, double[]> getSimilarities(String phrase){
+  private static Map<String, double[]> getSimilarities(String phrase) {
     return similaritiesWithLabeledPhrases.get(phrase);
   }
 

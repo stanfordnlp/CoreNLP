@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
 
@@ -7,10 +6,13 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -26,7 +28,7 @@ import edu.stanford.nlp.util.CoreMap;
 public class WordsToSentencesAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(WordsToSentencesAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(WordsToSentencesAnnotator.class);
 
   private final WordToSentenceProcessor<CoreLabel> wts;
 
@@ -38,6 +40,93 @@ public class WordsToSentencesAnnotator implements Annotator  {
     this(false);
   }
 
+
+  public WordsToSentencesAnnotator(Properties properties) {
+    // log.info(signature());
+    // todo: The above shows that signature is edu.stanford.nlp.pipeline.AnnotatorImplementations: and doesn't reflect what annotator it is! Should fix. Maybe is fixed now [2016]. Test!
+    boolean nlSplitting = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+    if (nlSplitting) {
+      boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
+      if (whitespaceTokenization) {
+        if (System.lineSeparator().equals("\n")) {
+          // this constructor will keep empty lines as empty sentences
+          WordToSentenceProcessor<CoreLabel> wts1 =
+                  new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{"\n"}));
+          VERBOSE = false;
+          this.countLineNumbers = true;
+          this.wts = wts1;
+        } else {
+          // throw "\n" in just in case files use that instead of
+          // the system separator
+          // this constructor will keep empty lines as empty sentences
+          WordToSentenceProcessor<CoreLabel> wts1 =
+                  new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{System.lineSeparator(), "\n"}));
+          VERBOSE = false;
+          this.countLineNumbers = true;
+          this.wts = wts1;
+        }
+      } else {
+        // this constructor will keep empty lines as empty sentences
+        WordToSentenceProcessor<CoreLabel> wts1 =
+                new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{PTBTokenizer.getNewlineToken()}));
+        VERBOSE = false;
+        this.countLineNumbers = true;
+        this.wts = wts1;
+      }
+
+    } else {
+      // Treat as one sentence: You get a no-op sentence splitter that always returns all tokens as one sentence.
+      String isOneSentence = properties.getProperty("ssplit.isOneSentence");
+      if (Boolean.parseBoolean(isOneSentence)) { // this method treats null as false
+        WordToSentenceProcessor<CoreLabel> wts1 = new WordToSentenceProcessor<>(true);
+        VERBOSE = false;
+        this.countLineNumbers = false;
+        this.wts = wts1;
+      } else {
+
+        // multi token sentence boundaries
+        String boundaryMultiTokenRegex = properties.getProperty("ssplit.boundaryMultiTokenRegex");
+
+        // Discard these tokens without marking them as sentence boundaries
+        String tokenPatternsToDiscardProp = properties.getProperty("ssplit.tokenPatternsToDiscard");
+        Set<String> tokenRegexesToDiscard = null;
+        if (tokenPatternsToDiscardProp != null) {
+          String[] toks = tokenPatternsToDiscardProp.split(",");
+          tokenRegexesToDiscard = Generics.newHashSet(Arrays.asList(toks));
+        }
+        // regular boundaries
+        String boundaryTokenRegex = properties.getProperty("ssplit.boundaryTokenRegex");
+        Set<String> boundariesToDiscard = null;
+
+        // todo [cdm 2016]: Add support for specifying ssplit.boundaryFollowerRegex here and send down to WordsToSentencesAnnotator
+
+        // newline boundaries which are discarded.
+        String bounds = properties.getProperty("ssplit.boundariesToDiscard");
+        if (bounds != null) {
+          String[] toks = bounds.split(",");
+          boundariesToDiscard = Generics.newHashSet(Arrays.asList(toks));
+        }
+        Set<String> htmlElementsToDiscard = null;
+        // HTML boundaries which are discarded
+        bounds = properties.getProperty("ssplit.htmlBoundariesToDiscard");
+        if (bounds != null) {
+          String[] elements = bounds.split(",");
+          htmlElementsToDiscard = Generics.newHashSet(Arrays.asList(elements));
+        }
+        String nlsb = properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
+            StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
+
+        WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<>(boundaryTokenRegex, null,
+            boundariesToDiscard, htmlElementsToDiscard,
+            WordToSentenceProcessor.stringToNewlineIsSentenceBreak(nlsb),
+            (boundaryMultiTokenRegex != null) ? TokenSequencePattern.compile(boundaryMultiTokenRegex) : null, tokenRegexesToDiscard);
+        VERBOSE = false;
+        this.countLineNumbers = false;
+        this.wts = wts;
+      }
+    }
+  }
+
   public WordsToSentencesAnnotator(boolean verbose) {
     this(verbose, false, new WordToSentenceProcessor<>());
   }
@@ -47,7 +136,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
                                    String newlineIsSentenceBreak, String boundaryMultiTokenRegex,
                                    Set<String> tokenRegexesToDiscard) {
     this(verbose, false,
-            new WordToSentenceProcessor<>(boundaryTokenRegex,
+            new WordToSentenceProcessor<>(boundaryTokenRegex, null,
                     boundaryToDiscard, htmlElementsToDiscard,
                     WordToSentenceProcessor.stringToNewlineIsSentenceBreak(newlineIsSentenceBreak),
                     (boundaryMultiTokenRegex != null) ? TokenSequencePattern.compile(boundaryMultiTokenRegex) : null, tokenRegexesToDiscard));
@@ -69,27 +158,25 @@ public class WordsToSentencesAnnotator implements Annotator  {
    *  are used in numbering the sentence. Only this constructor leads to
    *  empty sentences.
    *
-   *  @param verbose Whether it is verbose.
    *  @param  nlToken Zero or more new line tokens, which might be a {@literal \n} or the fake
    *                 newline tokens returned from the tokenizer.
    *  @return A WordsToSentenceAnnotator.
    */
-  public static WordsToSentencesAnnotator newlineSplitter(boolean verbose, String ... nlToken) {
+  public static WordsToSentencesAnnotator newlineSplitter(String... nlToken) {
     // this constructor will keep empty lines as empty sentences
     WordToSentenceProcessor<CoreLabel> wts =
             new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(nlToken));
-    return new WordsToSentencesAnnotator(verbose, true, wts);
+    return new WordsToSentencesAnnotator(false, true, wts);
   }
 
 
   /** Return a WordsToSentencesAnnotator that never splits the token stream. You just get one sentence.
    *
-   *  @param verbose Whether it is verbose.
    *  @return A WordsToSentenceAnnotator.
    */
-  public static WordsToSentencesAnnotator nonSplitter(boolean verbose) {
+  public static WordsToSentencesAnnotator nonSplitter() {
     WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<>(true);
-    return new WordsToSentencesAnnotator(verbose, false, wts);
+    return new WordsToSentencesAnnotator(false, false, wts);
   }
 
 
@@ -120,6 +207,9 @@ public class WordsToSentencesAnnotator implements Annotator  {
     // section annotations to mark sentences with
     CoreMap sectionAnnotations = null;
     List<CoreMap> sentences = new ArrayList<>();
+    // keep track of current section to assign sentences to sections
+    int currSectionIndex = 0;
+    List<CoreMap> sections = annotation.get(CoreAnnotations.SectionsAnnotation.class);
     for (List<CoreLabel> sentenceTokens: wts.process(tokens)) {
       if (countLineNumbers) {
         ++lineNumber;
@@ -169,6 +259,45 @@ public class WordsToSentencesAnnotator implements Annotator  {
       String sectionEnd = sentenceEndToken.get(CoreAnnotations.SectionEndAnnotation.class);
       if (sectionEnd != null) {
         sectionAnnotations = null;
+      }
+
+      // determine section index for this sentence if keeping track of sections
+      if (sections != null) {
+        // try to find a section that ends after this sentence ends, check if it encloses sentence
+        // if it doesn't, that means this sentence is in two sections
+        while (currSectionIndex < sections.size()) {
+          int currSectionCharBegin = sections.get(currSectionIndex).get(
+              CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+          int currSectionCharEnd = sections.get(currSectionIndex).get(
+              CoreAnnotations.CharacterOffsetEndAnnotation.class);
+          if (currSectionCharEnd < end) {
+            currSectionIndex++;
+            continue;
+          } else {
+            // if the sentence falls in this current section, link it to this section
+            if (currSectionCharBegin <= begin) {
+              // ... but first check if it's in one of this sections quotes!
+              // if so mark it as quoted
+              for (CoreMap sectionQuote : sections.get(currSectionIndex).get(CoreAnnotations.QuotesAnnotation.class)) {
+                if (sectionQuote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) <= begin &&
+                    end <= sectionQuote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class)) {
+                  sentence.set(CoreAnnotations.QuotedAnnotation.class, true);
+                  // set the author to the quote author
+                  sentence.set(CoreAnnotations.AuthorAnnotation.class,
+                      sectionQuote.get(CoreAnnotations.AuthorAnnotation.class));
+                }
+              }
+              // add the sentence to the section's sentence list
+              sections.get(currSectionIndex).get(CoreAnnotations.SentencesAnnotation.class).add(sentence);
+              // set sentence's section date
+              String sectionDate = sections.get(currSectionIndex).get(CoreAnnotations.SectionDateAnnotation.class);
+              sentence.set(CoreAnnotations.SectionDateAnnotation.class, sectionDate);
+              // set sentence's section index
+              sentence.set(CoreAnnotations.SectionIndexAnnotation.class, currSectionIndex);
+            }
+            break;
+          }
+        }
       }
 
       if (docID != null) {

@@ -1,6 +1,7 @@
 package edu.stanford.nlp.simple;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.ie.util.RelationTriple;
@@ -8,6 +9,8 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
+import edu.stanford.nlp.naturalli.OperatorSpec;
+import edu.stanford.nlp.naturalli.Polarity;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -24,6 +27,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static edu.stanford.nlp.simple.Sentence.SINGLE_SENTENCE_DOCUMENT;
+import static edu.stanford.nlp.pipeline.Annotator.*;
 
 /**
  * A representation of a Document. Most blobs of raw text should become documents.
@@ -36,13 +40,17 @@ public class Document {
   /**
    * The empty {@link java.util.Properties} object, for use with creating default annotators.
    */
-  static final Properties EMPTY_PROPS = new Properties() {{
-    setProperty("language", "english");
-    setProperty("annotators", "");
-    setProperty("tokenize.class", "PTBTokenizer");
-    setProperty("tokenize.language", "en");
-    setProperty("parse.binaryTrees", "true");
-  }};
+  static final Properties EMPTY_PROPS = PropertiesUtils.asProperties(
+      "language", "english",
+      "annotators", "",
+      "tokenize.class", "PTBTokenizer",
+      "tokenize.language", "en",
+      "parse.binaryTrees", "true",
+      "mention.type", "dep",
+      "coref.mode", "statistical",  // Use the new coref
+      "coref.md.type", "dep"
+  );
+
 
   /**
    * The caseless {@link java.util.Properties} object.
@@ -50,32 +58,32 @@ public class Document {
    * @see Document#caseless()
    * @see Sentence#caseless()
    */
-  static final Properties CASELESS_PROPS = new Properties() {{
-    setProperty("language", "english");
-    setProperty("annotators", "");
-    setProperty("tokenize.class", "PTBTokenizer");
-    setProperty("tokenize.language", "en");
-    setProperty("parse.binaryTrees", "true");
-    setProperty("pos.model", "edu/stanford/nlp/models/pos-tagger/wsj-0-18-caseless-left3words-distsim.tagger");
-    setProperty("parse.model", "edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz");
-    setProperty("ner.model", "edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz," +
+  static final Properties CASELESS_PROPS = PropertiesUtils.asProperties(
+        "language", "english",
+        "annotators", "",
+        "tokenize.class", "PTBTokenizer",
+        "tokenize.language", "en",
+        "parse.binaryTrees", "true",
+        "pos.model", "edu/stanford/nlp/models/pos-tagger/wsj-0-18-caseless-left3words-distsim.tagger",
+        "parse.model", "edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz",
+        "ner.model", "edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz," +
                              "edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz," +
                              "edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz");
-  }};
+
 
   /**
-   * The backend to use for constructing {@link edu.stanford.nlp.pipeline.AnnotatorFactory}s.
+   * The backend to use for constructing {@link edu.stanford.nlp.pipeline.Annotator}s.
    */
   private static AnnotatorImplementations backend = new AnnotatorImplementations();
 
   /**
    * The default {@link edu.stanford.nlp.pipeline.TokenizerAnnotator} implementation
    */
-  private static final Annotator defaultTokenize = AnnotatorFactories.tokenize(EMPTY_PROPS, backend).create();
+  private static final Annotator defaultTokenize = backend.tokenizer(EMPTY_PROPS);
   /**
    * The default {@link edu.stanford.nlp.pipeline.WordsToSentencesAnnotator} implementation
    */
-  private static final Annotator defaultSSplit = AnnotatorFactories.sentenceSplit(EMPTY_PROPS, backend).create();
+  private static final Annotator defaultSSplit = backend.wordToSentences(EMPTY_PROPS);
   /**
    * The default {@link edu.stanford.nlp.pipeline.POSTaggerAnnotator} implementation
    */
@@ -85,7 +93,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.posTag(EMPTY_PROPS, backend).create();
+        impl = backend.posTagger(EMPTY_PROPS);
       }
       return impl;
     }
@@ -93,7 +101,7 @@ public class Document {
   /**
    * The default {@link edu.stanford.nlp.pipeline.MorphaAnnotator} implementation
    */
-  private static final Supplier<Annotator> defaultLemma = () -> AnnotatorFactories.lemma(EMPTY_PROPS, backend).create();
+  private static final Supplier<Annotator> defaultLemma = () -> backend.morpha(EMPTY_PROPS, false);
 
   /**
    * The default {@link edu.stanford.nlp.pipeline.NERCombinerAnnotator} implementation
@@ -104,7 +112,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.nerTag(EMPTY_PROPS, backend).create();
+        impl = backend.ner(EMPTY_PROPS);
       }
       return impl;
     }
@@ -119,7 +127,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.regexNER(EMPTY_PROPS, backend).create();
+        impl = backend.tokensRegexNER(EMPTY_PROPS, Annotator.STANFORD_REGEXNER);
       }
       return impl;
     }
@@ -134,7 +142,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.parse(EMPTY_PROPS, backend).create();
+        impl = backend.parse(EMPTY_PROPS);
       }
       return impl;
     }
@@ -149,7 +157,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.dependencies(EMPTY_PROPS, backend).create();
+        impl = backend.dependencies(EMPTY_PROPS);
       }
       return impl;
     }
@@ -164,7 +172,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.natlog(EMPTY_PROPS, backend).create();
+        impl = backend.natlog(EMPTY_PROPS);
       }
       return impl;
     }
@@ -179,7 +187,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.entityMentions(EMPTY_PROPS, backend).create();
+        impl = backend.entityMentions(EMPTY_PROPS, Annotator.STANFORD_ENTITY_MENTIONS);
       }
       return impl;
     }
@@ -194,7 +202,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.kbp(EMPTY_PROPS, backend).create();
+        impl = backend.kbp(EMPTY_PROPS);
       }
       return impl;
     }
@@ -210,7 +218,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.openie(EMPTY_PROPS, backend).create();
+        impl = backend.openie(EMPTY_PROPS);
       }
       return impl;
     }
@@ -225,7 +233,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.mention(EMPTY_PROPS, backend).create();
+        impl = backend.mention(EMPTY_PROPS);
       }
       return impl;
     }
@@ -240,7 +248,7 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.coref(EMPTY_PROPS, backend).create();
+        impl = backend.coref(EMPTY_PROPS);
       }
       return impl;
     }
@@ -255,38 +263,33 @@ public class Document {
     @Override
     public synchronized Annotator get() {
       if (impl == null) {
-        impl = AnnotatorFactories.sentiment(EMPTY_PROPS, backend).create();
+        impl = backend.sentiment(EMPTY_PROPS, Annotator.STANFORD_SENTIMENT);
       }
       return impl;
     }
   };
 
+
   /**
    * Cache the most recently used custom annotators.
    */
-  private static final LinkedHashMap<String,Annotator> customAnnotators = new LinkedHashMap<>();
+  private static final AnnotatorPool customAnnotators = new AnnotatorPool();
+
 
   /**
    * Either get a custom annotator which was recently defined, or create it if it has never been defined.
    * This method is synchronized to avoid race conditions when loading the annotators.
-   * @param factory The factory specifying the annotator.
-   * @return An annotator created by that factory.
+   *
+   * @param name The name of the annotator.
+   * @param props The properties used to create the annotator, if we need to create it.
+   * @param annotator The actual function used to make the annotator, if needed.
+   *
+   * @return An annotator as specified by the given name and properties.
    */
-  private synchronized static Supplier<Annotator> getOrCreate(AnnotatorFactory factory) {
-    return () -> {
-      Annotator rtn = customAnnotators.get(factory.signature());
-      if (rtn == null) {
-        // Create the annotator
-        rtn = factory.create();
-        // Register the annotator
-        customAnnotators.put(factory.signature(), factory.create());
-        // Clean up memory if needed
-        while (customAnnotators.size() > 10) {
-          customAnnotators.keySet().iterator().remove();
-        }
-      }
-      return rtn;
-    };
+  private synchronized static Supplier<Annotator> getOrCreate(String name, Properties props, Supplier<Annotator> annotator) {
+    StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(name, PropertiesUtils.getSignature(name, props));
+    customAnnotators.register(name, props, StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (sig) -> Lazy.cache(annotator)));
+    return () -> customAnnotators.get(name);
   }
 
   /** The protocol buffer representing this document */
@@ -382,7 +385,7 @@ public class Document {
   }
 
 
-  /**
+  /*
    * A static block that'll automatically fault in the CoreNLP server, if the appropriate environment
    * variables are set.
    * These are:
@@ -663,7 +666,7 @@ public class Document {
     try {
       AnnotationOutputter.Options options = new AnnotationOutputter.Options();
       options.pretty = false;
-      return new XMLOutputter().print(this.asAnnotation(), options);
+      return new XMLOutputter().print(this.asAnnotation(false), options);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -676,7 +679,7 @@ public class Document {
    */
   public List<Sentence> sentences(Properties props) {
     return this.sentences(props,
-        props == EMPTY_PROPS ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create());
+        props == EMPTY_PROPS ? defaultTokenize : getOrCreate(Annotator.STANFORD_TOKENIZE, props, () -> backend.tokenizer(props)).get());
   }
 
   /**
@@ -686,7 +689,7 @@ public class Document {
    */
   protected List<Sentence> sentences(Properties props, Annotator tokenizer) {
     if (sentences == null) {
-      Annotator ssplit = props == EMPTY_PROPS ? defaultSSplit : AnnotatorFactories.sentenceSplit(props, backend).create();
+      Annotator ssplit = props == EMPTY_PROPS ? defaultSSplit : getOrCreate(STANFORD_SSPLIT, props, () -> backend.wordToSentences(props)).get();
       // Annotate
       Annotation ann = new Annotation(this.impl.getText());
       tokenizer.annotate(ann);
@@ -741,12 +744,17 @@ public class Document {
     synchronized (this.impl) {
       if (impl.getCorefChainCount() == 0) {
         // Run prerequisites
-        this.runLemma(props).runNER(props).runParse(props);  // default is rule mention annotator
+        this.runLemma(props).runNER(props);
+        if (CorefProperties.mdType(props) != CorefProperties.MentionDetectionType.DEPENDENCY) {
+          this.runParse(props);
+        } else {
+          this.runDepparse(props);
+        }
         // Run mention
-        Supplier<Annotator> mention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultMention : getOrCreate(AnnotatorFactories.mention(props, backend));
+        Supplier<Annotator> mention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultMention : getOrCreate(STANFORD_MENTION, props, () -> backend.mention(props));
         // Run coref
-        Supplier<Annotator> coref = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultCoref : getOrCreate(AnnotatorFactories.coref(props, backend));
-        Annotation ann = asAnnotation();
+        Supplier<Annotator> coref = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultCoref : getOrCreate(STANFORD_COREF, props, () -> backend.coref(props));
+        Annotation ann = asAnnotation(true);
         mention.get().annotate(ann);
         coref.get().annotate(ann);
         // Convert to proto
@@ -823,8 +831,8 @@ public class Document {
     // Prerequisites
     sentences();
     // Run annotator
-    Supplier<Annotator> pos = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultPOS : getOrCreate(AnnotatorFactories.posTag(props, backend));
-    Annotation ann = asAnnotation();
+    Supplier<Annotator> pos = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultPOS : getOrCreate(STANFORD_POS, props, () -> backend.posTagger(props));
+    Annotation ann = asAnnotation(false);
     pos.get().annotate(ann);
     // Update data
     for (int i = 0; i < sentences.size(); ++i) {
@@ -841,8 +849,8 @@ public class Document {
     // Prerequisites
     runPOS(props);
     // Run annotator
-    Supplier<Annotator> lemma = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultLemma : getOrCreate(AnnotatorFactories.lemma(props, backend));
-    Annotation ann = asAnnotation();
+    Supplier<Annotator> lemma = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultLemma : getOrCreate(STANFORD_LEMMA, props, () -> backend.morpha(props, false));
+    Annotation ann = asAnnotation(true);
     lemma.get().annotate(ann);
     // Update data
     for (int i = 0; i < sentences.size(); ++i) {
@@ -859,7 +867,7 @@ public class Document {
     // Prerequisites
     runPOS(props);
     // Mock lemma with word
-    Annotation ann = asAnnotation();
+    Annotation ann = asAnnotation(true);
     for (int i = 0; i < sentences.size(); ++i) {
       sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setLemma(pair.second), CoreLabel::word);
     }
@@ -874,8 +882,8 @@ public class Document {
     // Run prerequisites
     runPOS(props);
     // Run annotator
-    Supplier<Annotator> ner = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultNER : getOrCreate(AnnotatorFactories.nerTag(props, backend));
-    Annotation ann = asAnnotation();
+    Supplier<Annotator> ner = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultNER : getOrCreate(STANFORD_NER, props, () -> backend.ner(props));
+    Annotation ann = asAnnotation(true);
     ner.get().annotate(ann);
     // Update data
     for (int i = 0; i < sentences.size(); ++i) {
@@ -888,8 +896,8 @@ public class Document {
     // Run prerequisites
     runNER(props);
     // Run annotator
-    Supplier<Annotator> ner = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultRegexner : getOrCreate(AnnotatorFactories.regexNER(props, backend));
-    Annotation ann = asAnnotation();
+    Supplier<Annotator> ner = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultRegexner : getOrCreate(STANFORD_REGEXNER, props, () -> backend.tokensRegexNER(props, STANFORD_REGEXNER));
+    Annotation ann = asAnnotation(true);
     ner.get().annotate(ann);
     // Update data
     for (int i = 0; i < sentences.size(); ++i) {
@@ -903,13 +911,16 @@ public class Document {
       return this;
     }
     // Run annotator
-    Annotator parse = ((props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultParse : getOrCreate(AnnotatorFactories.parse(props, backend))).get();
-    if (parse.requires().contains(CoreAnnotations.PartOfSpeechAnnotation.class)) {
+    boolean cacheAnnotation = false;
+    Annotator parse = ((props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultParse : getOrCreate(STANFORD_PARSE, props, () -> backend.parse(props))).get();
+    if (parse.requires().contains(CoreAnnotations.PartOfSpeechAnnotation.class) || System.getenv("CORENLP_HOST") != null) {
+      // Run the POS tagger if we are (or may be) using the shift reduce parser
       runPOS(props);
+      cacheAnnotation = true;
     } else {
       sentences();
     }
-    Annotation ann = asAnnotation();
+    Annotation ann = asAnnotation(cacheAnnotation);
     parse.annotate(ann);
     // Update data
     synchronized (serializer) {
@@ -936,8 +947,8 @@ public class Document {
     // Run prerequisites
     runPOS(props);
     // Run annotator
-    Supplier<Annotator> depparse = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultDepparse : getOrCreate(AnnotatorFactories.dependencies(props, backend));
-    Annotation ann = asAnnotation();
+    Supplier<Annotator> depparse = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultDepparse : getOrCreate(STANFORD_DEPENDENCIES, props, () -> backend.dependencies(props));
+    Annotation ann = asAnnotation(true);
     depparse.get().annotate(ann);
     // Update data
     synchronized (serializer) {
@@ -960,14 +971,14 @@ public class Document {
     runLemma(props);
     runDepparse(props);
     // Run annotator
-    Supplier<Annotator> natlog = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultNatlog : getOrCreate(AnnotatorFactories.natlog(props, backend));
-    Annotation ann = asAnnotation();
+    Supplier<Annotator> natlog = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultNatlog : getOrCreate(STANFORD_NATLOG, props, () -> backend.natlog(props));
+    Annotation ann = asAnnotation(true);
     natlog.get().annotate(ann);
     // Update data
     synchronized (serializer) {
       for (int i = 0; i < sentences.size(); ++i) {
-        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setPolarity(ProtobufAnnotationSerializer.toProto(pair.second)), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
-        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setOperator(ProtobufAnnotationSerializer.toProto(pair.second)), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, Polarity> pair) -> pair.first().setPolarity(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, OperatorSpec> pair) -> pair.first().setOperator(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
       }
     }
     return this;
@@ -980,8 +991,8 @@ public class Document {
     // Run prerequisites
     runNatlog(props);
     // Run annotator
-    Supplier<Annotator> openie = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultOpenie : getOrCreate(AnnotatorFactories.openie(props, backend));
-    Annotation ann = asAnnotation();
+    Supplier<Annotator> openie = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultOpenie : getOrCreate(STANFORD_OPENIE, props, () -> backend.openie(props));
+    Annotation ann = asAnnotation(true);
     openie.get().annotate(ann);
     // Update data
     synchronized (serializer) {
@@ -1003,11 +1014,11 @@ public class Document {
     }
     // Run prerequisites
     coref(props);
-    Supplier<Annotator> entityMention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultEntityMentions : getOrCreate(AnnotatorFactories.entityMentions(props, backend));
-    Annotation ann = asAnnotation();
+    Supplier<Annotator> entityMention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultEntityMentions : getOrCreate(STANFORD_ENTITY_MENTIONS, props, () -> backend.entityMentions(props, STANFORD_ENTITY_MENTIONS));
+    Annotation ann = asAnnotation(true);
     entityMention.get().annotate(ann);
     // Run annotator
-    Supplier<Annotator> kbp = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultKBP : getOrCreate(AnnotatorFactories.kbp(props, backend));
+    Supplier<Annotator> kbp = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultKBP : getOrCreate(STANFORD_KBP, props, () -> backend.kbp(props));
     kbp.get().annotate(ann);
     // Update data
     synchronized (serializer) {
@@ -1033,8 +1044,8 @@ public class Document {
       throw new IllegalStateException("No binarized parse tree (perhaps it's not supported in this language?)");
     }
     // Run annotator
-    Annotation ann = asAnnotation();
-    Supplier<Annotator> sentiment = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSentiment : getOrCreate(AnnotatorFactories.sentiment(props, backend));
+    Annotation ann = asAnnotation(true);
+    Supplier<Annotator> sentiment = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSentiment : getOrCreate(STANFORD_SENTIMENT, props, () -> backend.sentiment(props, STANFORD_SENTIMENT));
     sentiment.get().annotate(ann);
     // Update data
     synchronized (serializer) {
@@ -1076,8 +1087,8 @@ public class Document {
    * @param cache If true, allow retrieving this object from the cache.
    */
   Annotation asAnnotation(boolean cache) {
-    Annotation ann;
-    if (!cache || cachedAnnotation == null || (ann = cachedAnnotation.get()) == null) {
+    Annotation ann = cachedAnnotation == null ? null : cachedAnnotation.get();
+    if (!cache || ann == null) {
       ann = serializer.fromProto(serialize());
     }
     cachedAnnotation = new SoftReference<>(ann);
@@ -1108,7 +1119,7 @@ public class Document {
       StringBuilder mentionSpan = new StringBuilder();
       Sentence sentence = sentence(mentionProto.getSentenceIndex());
       for (int k = mentionProto.getBeginIndex(); k < mentionProto.getEndIndex(); ++k) {
-        mentionSpan.append(" ").append(sentence.word(k));
+        mentionSpan.append(' ').append(sentence.word(k));
       }
       // Set the coref cluster id for the token
       CorefChain.CorefMention mention = new CorefChain.CorefMention(

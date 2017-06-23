@@ -297,5 +297,4 @@ public class SimpleLinearClassifier {
       }
     };
   }
-
 }

@@ -24,6 +24,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class CorefSystem {
   private final DocumentMaker docMaker;
   private final CorefAlgorithm corefAlgorithm;
+  private final boolean removeSingletonClusters;
   private final boolean verbose;
 
   public CorefSystem(Properties props) {
@@ -31,17 +32,22 @@ public class CorefSystem {
       Dictionaries dictionaries = new Dictionaries(props);
       docMaker = new DocumentMaker(props, dictionaries);
       corefAlgorithm = CorefAlgorithm.fromProps(props, dictionaries);
+      removeSingletonClusters = CorefProperties.removeSingletonClusters(props);
       verbose = CorefProperties.verbose(props);
     } catch (Exception e) {
       throw new RuntimeException("Error initializing coref system", e);
     }
   }
 
-  public void annotate(Annotation ann) {
-    annotate(ann, true);
+  public CorefSystem(DocumentMaker docMaker, CorefAlgorithm corefAlgorithm,
+      boolean removeSingletonClusters, boolean verbose) {
+    this.docMaker = docMaker;
+    this.corefAlgorithm = corefAlgorithm;
+    this.removeSingletonClusters = removeSingletonClusters;
+    this.verbose = verbose;
   }
 
-  public void annotate(Annotation ann, boolean removeSingletonClusters) {
+  public void annotate(Annotation ann) {
     Document document;
     try {
       document = docMaker.makeDocument(ann);
@@ -57,7 +63,7 @@ public class CorefSystem {
     CorefUtils.checkForInterrupt();
 
     Map<Integer, CorefChain> result = Generics.newHashMap();
-    for(CorefCluster c : document.corefClusters.values()) {
+    for (CorefCluster c : document.corefClusters.values()) {
       result.put(c.clusterID, new CorefChain(c, document.positions));
     }
     ann.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
@@ -112,7 +118,7 @@ public class CorefSystem {
   }
 
   public static void main(String[] args) throws Exception {
-    Properties props = StringUtils.argsToProperties(new String[] {"-props", args[0]});
+    Properties props = StringUtils.argsToProperties(args);
     CorefSystem coref = new CorefSystem(props);
     coref.runOnConll(props);
   }

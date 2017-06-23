@@ -1,5 +1,4 @@
 package edu.stanford.nlp.ie;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,6 +29,8 @@ import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.logging.Redwood;
+
 
 /**
  * Merges the outputs of two or more AbstractSequenceClassifiers according to
@@ -56,7 +57,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
 public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSequenceClassifier<IN>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ClassifierCombiner.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ClassifierCombiner.class);
 
   private static final boolean DEBUG = false;
 
@@ -70,18 +71,18 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     NORMAL, HIGH_RECALL
   }
 
-  static final CombinationMode DEFAULT_COMBINATION_MODE = CombinationMode.NORMAL;
-  static final String COMBINATION_MODE_PROPERTY = "ner.combinationMode";
-  final CombinationMode combinationMode;
+  private static final CombinationMode DEFAULT_COMBINATION_MODE = CombinationMode.NORMAL;
+  private static final String COMBINATION_MODE_PROPERTY = "ner.combinationMode";
+  private final CombinationMode combinationMode;
 
   // keep track of properties used to initialize
-  public Properties initProps;
+  private  Properties initProps;
   // keep track of paths used to load CRFs
   private List<String> initLoadPaths = new ArrayList<>();
 
   /**
-   * @param p Properties File that specifies <code>loadClassifier</code>
-   * and <code>loadAuxClassifier</code> properties or, alternatively, <code>loadClassifier[1-10]</code> properties.
+   * @param p Properties File that specifies {@code loadClassifier}
+   * and {@code loadAuxClassifier} properties or, alternatively, {@code loadClassifier[1-10]} properties.
    * @throws FileNotFoundException If classifier files not found
    */
   public ClassifierCombiner(Properties p) throws IOException {
@@ -213,7 +214,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     while (i < numClassifiers) {
       try {
         log.info("loading CRF...");
-        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois, props));
+        CRFClassifier<IN> newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois, props));
         baseClassifiers.add(newCRF);
         i++;
       } catch (Exception e) {
@@ -223,15 +224,14 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           baseClassifiers.add(newCMM);
           i++;
         } catch (Exception ex) {
-          ex.printStackTrace();
-          throw new IOException("Couldn't load classifier!");
+          throw new IOException("Couldn't load classifier!", ex);
         }
       }
     }
   }
 
   /**
-   * Either finds COMBINATION_MODE_PROPERTY or returns a default value
+   * Either finds COMBINATION_MODE_PROPERTY or returns a default value.
    */
   public static CombinationMode extractCombinationMode(Properties p) {
     String mode = p.getProperty(COMBINATION_MODE_PROPERTY);
@@ -494,6 +494,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
   // method for writing a ClassifierCombiner to an ObjectOutputStream
+  @Override
   public void serializeClassifier(ObjectOutputStream oos) {
     try {
       // record the properties used to initialize
@@ -604,7 +605,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       } else if (testFiles != null) {
         // if there is a crf and testFiles was set , do the crf stuff for testFiles
         // if testFile was set as well, testFile overrides
-        List<File> files = Arrays.asList(testFiles.split(",")).stream().map(File::new).collect(Collectors.toList());
+        List<File> files = Arrays.stream(testFiles.split(",")).map(File::new).collect(Collectors.toList());
         if (flags.printProbs) {
           // there is a crf and printProbs
           crf.printProbs(files, crf.defaultReaderAndWriter());

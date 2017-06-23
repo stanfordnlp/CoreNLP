@@ -168,14 +168,6 @@ public class IOUtils  {
   }
 
   /**
-   * Writes a string to a file, as UTF-8.
-   *
-   * @param contents The string to write
-   * @param path The file path
-   * @throws IOException In case of failure
-   */
-
-  /**
    * Writes a string to a file, squashing exceptions
    *
    * @param contents The string to write
@@ -393,6 +385,16 @@ public class IOUtils  {
     return oos;
   }
 
+  /**
+   * Returns an ObjectInputStream reading from any of a URL, a CLASSPATH resource, or a file.
+   * The CLASSPATH takes priority over the file system.
+   * This stream is buffered and, if necessary, gunzipped.
+   *
+   * @param filenameOrUrl The String specifying the URL/resource/file to load
+   * @return An ObjectInputStream for loading a resource
+   * @throws RuntimeIOException On any IO error
+   * @throws NullPointerException Input parameter is null
+   */
   public static ObjectInputStream readStreamFromString(String filenameOrUrl)
           throws IOException {
     InputStream is = getInputStreamFromURLOrClasspathOrFileSystem(filenameOrUrl);
@@ -751,16 +753,19 @@ public class IOUtils  {
       }
     }
 
+    @Override
     public Iterator<String> iterator() {
       return new Iterator<String>() {
 
-        protected BufferedReader reader = this.getReader();
+        protected final BufferedReader reader = this.getReader();
         protected String line = this.getLine();
 
+        @Override
         public boolean hasNext() {
           return this.line != null;
         }
 
+        @Override
         public String next() {
           String nextLine = this.line;
           if (nextLine == null) {
@@ -799,12 +804,13 @@ public class IOUtils  {
         }
 
         @Override
-          public void remove() {
+        public void remove() {
           throw new UnsupportedOperationException();
         }
       };
     }
-  }
+
+  } // end static class GetLinesIterable
 
   /**
    * Given a reader, returns the lines from the reader as an Iterable.
@@ -1308,10 +1314,10 @@ public class IOUtils  {
    * @return The text in the file.
    */
   public static String slurpReader(Reader reader) {
-    BufferedReader r = new BufferedReader(reader);
     StringBuilder buff = new StringBuilder();
     try {
       char[] chars = new char[SLURP_BUFFER_SIZE];
+      BufferedReader r = new BufferedReader(reader);
       while (true) {
         int amountRead = r.read(chars, 0, SLURP_BUFFER_SIZE);
         if (amountRead < 0) {
@@ -1360,7 +1366,7 @@ public class IOUtils  {
    * @param quoteChar - character for enclosing strings, defaults to "
    * @param escapeChar - character for escaping quotes appearing in quoted strings; defaults to " (i.e. "" is used for " inside quotes, consistent with Excel)
    * @return a list of maps representing the rows of the csv. The maps' keys are the header strings and their values are the row contents
-   * @throws IOException
+   * @throws IOException If any IO problem
    */
   public static List<Map<String,String>> readCSVWithHeader(String path, char quoteChar, char escapeChar) throws IOException {
     String[] labels = null;
@@ -1911,7 +1917,7 @@ public class IOUtils  {
         // Case: cp -r a b -- b does not exist
         assert trueTarget == target;
         if (!trueTarget.mkdir()) {
-          // cp -r a b -- canot create b as a directory
+          // cp -r a b -- cannot create b as a directory
           throw new IOException("cp: could not create target directory: " + trueTarget);
         }
       }

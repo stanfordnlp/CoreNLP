@@ -69,7 +69,7 @@
 
     <taskdef classname="jflex.anttask.JFlexTask" name="jflex">
       <classpath>
-        <pathelement location="${project.core}/lib/jflex-1.5.1.jar"/>
+        <pathelement location="${project.core}/lib/jflex-1.6.1.jar"/>
       </classpath>
     </taskdef>
 
@@ -160,7 +160,7 @@
   <target name="itest" depends="classpath,compile"
           description="Run core integration tests">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+    <junit fork="yes" maxmemory="12g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
@@ -389,7 +389,9 @@
         <zipfileset prefix="WEB-INF/data"
                     file="/u/nlp/data/lexparser/arabicFactored.ser.gz"/>
         <zipfileset prefix="WEB-INF/data"
-                    file="/u/nlp/data/lexparser/xinhuaFactored.ser.gz"/>
+                    file="/u/nlp/data/lexparser/frenchFactored.ser.gz"/>
+        <zipfileset prefix="WEB-INF/data"
+                    file="/u/nlp/data/lexparser/chineseFactored.ser.gz"/>
         <zipfileset prefix="WEB-INF/data/chinesesegmenter"
                     file="/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz"/>
         <zipfileset prefix="WEB-INF/data/chinesesegmenter"

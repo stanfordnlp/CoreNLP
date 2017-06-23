@@ -1,12 +1,11 @@
-package edu.stanford.nlp.process; 
-import edu.stanford.nlp.util.logging.Redwood;
-
+package edu.stanford.nlp.process;
 
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.logging.Logger;
+import java.util.function.Function;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -15,7 +14,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.WordLemmaTag;
 import edu.stanford.nlp.ling.WordTag;
-import java.util.function.Function;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -36,7 +35,7 @@ import java.util.function.Function;
  * WordTag stem(String word, string tag) or WordTag stem(WordTag wordTag).
  * <p>
  * Another way of using Morphology is to run it on an input file by running
- * <code>java Morphology filename</code>.  In this case, POS tags MUST be
+ * {@code java Morphology filename}.  In this case, POS tags MUST be
  * separated from words by an underscore ("_").
  * <p>
  * Note that a single instance of Morphology is not thread-safe, as
@@ -57,15 +56,13 @@ public class Morphology implements Function  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(Morphology.class);
 
-  private static final Logger LOGGER = Logger.getLogger(Morphology.class.getName());
-
   private static final boolean DEBUG = false;
   private static Morpha staticLexer;
 
   private final Morpha lexer;
 
   public Morphology() {
-    lexer = new Morpha(System.in);
+    lexer = new Morpha(new InputStreamReader(System.in));
   }
 
   /**
@@ -104,7 +101,7 @@ public class Morphology implements Function  {
       String wordRes = lexer.next();
       return wordRes;
     } catch (IOException e) {
-      LOGGER.warning("Morphology.stem() had error on word " + word);
+      log.warning("Morphology.stem() had error on word " + word);
       return word;
     }
   }
@@ -152,7 +149,7 @@ public class Morphology implements Function  {
       quotedWord = quotedWord.replaceAll("\n", "\u1CF2");
     }
     String wordtag = quotedWord + '_' + tag;
-    if (DEBUG) log.info("Trying to normalize |" + wordtag + "|");
+    if (DEBUG) log.info("Trying to normalize |" + wordtag + '|');
     try {
       lexer.setOption(1, lowercase);
       lexer.yyreset(new StringReader(wordtag));
@@ -167,14 +164,14 @@ public class Morphology implements Function  {
       }
       return wordRes;
     } catch (IOException e) {
-      LOGGER.warning("Morphology.stem() had error on word " + word + "/" + tag);
+      log.warning("Morphology.stem() had error on word " + word + '/' + tag);
       return word;
     }
   }
 
   private static synchronized void initStaticLexer() {
     if (staticLexer == null) {
-      staticLexer = new Morpha(System.in);
+      staticLexer = new Morpha(new InputStreamReader(System.in));
     }
   }
 
@@ -188,6 +185,26 @@ public class Morphology implements Function  {
   }
 
 
+  /** Lemmatize the word, being sensitive to the tag.
+   *  Words other than proper nouns will be changed to all lowercase.
+   *
+   *  @param word The word to lemmatize
+   *  @param tag What part of speech to assume for it.
+   *  @return The lemma for the word
+   */
+  public static synchronized String lemmaStatic(String word, String tag) {
+    return lemmaStatic(word, tag, true);
+  }
+
+
+  /** Lemmatize the word, being sensitive to the tag.
+   *
+   *  @param word The word to lemmatize
+   *  @param tag What part of speech to assume for it.
+   *  @param lowercase If this is true, words other than proper nouns will
+   *      be changed to all lowercase.
+   *  @return The lemma for the word
+   */
   public static synchronized String lemmaStatic(String word, String tag,
                                                 boolean lowercase) {
     initStaticLexer();
@@ -218,7 +235,7 @@ public class Morphology implements Function  {
   }
 
   /**
-   * Lemmatize returning a <code>WordLemmaTag </code>.
+   * Lemmatize returning a {@code WordLemmaTag}.
    */
   public WordLemmaTag lemmatize(WordTag wT) {
     String tag = wT.tag();
@@ -254,7 +271,7 @@ public class Morphology implements Function  {
       String[] words = verbs.split("\\s+");
       System.out.print(" private static final String[] verbStems = { ");
       for (int i = 0; i < words.length; i++) {
-        System.out.print("\"" + words[i] + "\"");
+        System.out.print('"' + words[i] + '"');
         if (i != words.length - 1) {
           System.out.print(", ");
           if (i % 5 == 0) {
@@ -275,7 +292,7 @@ public class Morphology implements Function  {
           try {
             flags = Integer.parseInt(arg.substring(1));
           } catch (NumberFormatException nfe) {
-            log.info("Couldn't handle flag: " + arg + "\n");
+            log.info("Couldn't handle flag: " + arg + '\n');
             // ignore flag
           }
         } else {

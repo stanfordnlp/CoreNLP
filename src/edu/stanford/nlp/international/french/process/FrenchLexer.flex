@@ -1,7 +1,6 @@
 package edu.stanford.nlp.international.french.process;
 
 import java.io.Reader;
-import java.util.logging.Logger;
 import java.util.Properties;
 
 import edu.stanford.nlp.ling.CoreLabel;
@@ -9,11 +8,12 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  *  A tokenizer for French. Adapted from PTBTokenizer, but with extra
  *  rules for French orthography.
-
+ *
  *  @author Spence Green
  */
 
@@ -168,7 +168,9 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   }
 
 
-  private static final Logger LOGGER = Logger.getLogger(FrenchLexer.class.getName());
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels LOGGER = Redwood.channels(FrenchLexer.class);
+
 
   private LexedTokenFactory<?> tokenFactory;
   private CoreLabel prevWord;

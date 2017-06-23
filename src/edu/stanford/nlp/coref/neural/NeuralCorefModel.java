@@ -3,11 +3,14 @@ package edu.stanford.nlp.coref.neural;
 import java.io.Serializable;
 import java.util.List;
 
-import org.ejml.simple.SimpleMatrix;
-
 import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
+import org.ejml.simple.SimpleMatrix;
 
+/**
+ * Stores the weights and implements the matrix operations used by a {@link NeuralCorefAlgorithm}
+ * @author Kevin Clark
+ */
 public class NeuralCorefModel implements Serializable {
   private static final long serialVersionUID = 2139427931784505653L;
   private final SimpleMatrix antecedentMatrix;

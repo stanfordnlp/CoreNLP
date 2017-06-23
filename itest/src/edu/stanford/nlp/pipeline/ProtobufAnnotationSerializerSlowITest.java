@@ -63,7 +63,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     return ann;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "ConstantConditions"})
   public static void sameAsRead(Annotation doc, Annotation readDoc) {
     // Run the original document through the number normalizer
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
@@ -258,7 +258,6 @@ public class ProtobufAnnotationSerializerSlowITest {
   }
   */
 
-
   @Test
   public void testSentiment() {
     testAnnotators("tokenize,ssplit,pos,parse,sentiment");
@@ -313,7 +312,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     assertNotNull(compressedProto);
 
     // Check size
-    assertTrue("" + compressedProto.length, compressedProto.length < 390000);
+    assertTrue("" + compressedProto.length, compressedProto.length < 391000);
     assertTrue("" + uncompressedProto.length, uncompressedProto.length < 2100000);
   }
 

@@ -91,7 +91,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
       mentionSpanSetList.add(mentionSpanSet);
     }
 
-    if (lang == Locale.CHINESE && CorefProperties.liberalChineseMD(props)) {
+    if (CorefProperties.liberalMD(props)) {
       extractNamedEntityModifiers(sentences, mentionSpanSetList, predictedMentions, neStrings);
     }
 
@@ -102,12 +102,11 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
     }
 
     // mention selection based on document-wise info
-    if (lang == Locale.ENGLISH) {
+    if (lang == Locale.ENGLISH && !CorefProperties.liberalMD(props)) {
       removeSpuriousMentionsEn(doc, predictedMentions, dict);
     } else if (lang == Locale.CHINESE) {
-      if (CorefProperties.liberalChineseMD(props)) {
-        removeSpuriousMentionsZhSimple(doc, predictedMentions, dict,
-            CorefProperties.removeNestedMentions(props));
+      if (CorefProperties.liberalMD(props)) {
+        removeSpuriousMentionsZhSimple(doc, predictedMentions, dict);
       } else {
         removeSpuriousMentionsZh(doc, predictedMentions, dict,
             CorefProperties.removeNestedMentions(props));
@@ -209,7 +208,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
   }
 
   private static void removeSpuriousMentionsZhSimple(Annotation doc,
-      List<List<Mention>> predictedMentions, Dictionaries dict, boolean removeNested) {
+      List<List<Mention>> predictedMentions, Dictionaries dict) {
     for(int i=0 ; i < predictedMentions.size() ; i++) {
       List<Mention> mentions = predictedMentions.get(i);
       Set<Mention> remove = Generics.newHashSet();

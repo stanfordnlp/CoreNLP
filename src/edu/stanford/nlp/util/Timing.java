@@ -1,10 +1,13 @@
 package edu.stanford.nlp.util;
+
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
+import java.util.Locale;
 
 /**
  * A class for measuring how long things take.  For backward
@@ -15,7 +18,7 @@ import java.text.DecimalFormat;
  * <p>To use, call {@link #startTime()} before running the code in
  * question. Call {@link #tick()} to print an intermediate update, and {@link #endTime()} to
  * finish the timing and print the result. You can optionally pass a descriptive
- * string and <code>PrintStream</code> to <code>tick</code> and <code>endTime</code>
+ * string and {@code PrintStream} to {@code tick} and {@code endTime}
  * for more control over what gets printed where.</p>
  *
  * <p>Example: time reading in a big file and transforming it:</p>
@@ -30,7 +33,7 @@ import java.text.DecimalFormat;
 public class Timing  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Timing.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Timing.class);
 
   private static final long MILLISECONDS_TO_SECONDS = 1000L;
   private static final long SECOND_DIVISOR = 1000000000L;
@@ -47,7 +50,7 @@ public class Timing  {
   private static long startTime = System.nanoTime();
 
   /** Stores a suitable formatter for printing seconds nicely. */
-  private static final NumberFormat nf = new DecimalFormat("0.0");
+  private static final NumberFormat nf = new DecimalFormat("0.0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
 
   /**
@@ -100,7 +103,7 @@ public class Timing  {
   }
 
   /**
-   * Print elapsed time to <code>System.err</code> (without stopping timer).
+   * Print elapsed time to {@code System.err} (without stopping timer).
    *
    * @param str Additional prefix string to be printed
    * @return Number of milliseconds elapsed
@@ -173,7 +176,7 @@ public class Timing  {
   }
 
   /**
-   * Print elapsed time to <code>System.err</code> and restart timer.
+   * Print elapsed time to {@code System.err} and restart timer.
    *
    * @param str Additional prefix string to be printed
    * @return Number of milliseconds elapsed
@@ -199,7 +202,6 @@ public class Timing  {
    * Print the timing done message with elapsed time in x.y seconds.
    * Restart the timer too.
    */
-  // Thang Mar14
   public void end(String msg) {
     long elapsed = System.nanoTime() - start;
     log.info(msg + " done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) + " sec].");
@@ -233,7 +235,7 @@ public class Timing  {
   }
 
   /**
-   * Print elapsed time to <code>System.err</code> and stop timer.
+   * Print elapsed time to {@code System.err} and stop timer.
    *
    * @param str Additional prefix string to be printed
    * @return Number of milliseconds elapsed
@@ -289,7 +291,7 @@ public class Timing  {
 
   /**
    * Print elapsed time on (static) timer to
-   * <code>System.err</code> (without stopping timer).
+   * {@code System.err} (without stopping timer).
    *
    * @param str Additional prefix string to be printed
    * @return Number of milliseconds elapsed
@@ -307,7 +309,7 @@ public class Timing  {
     start();
   }
 
-  /** Finish the line from startDoing with the end of the timing done message
+  /** Finish the line from doing() with the end of the timing done message
    *  and elapsed time in x.y seconds.
    */
   public void done() {
@@ -391,7 +393,7 @@ public class Timing  {
   }
 
   /**
-   * Print elapsed time to <code>System.err</code> and restart (static) timer.
+   * Print elapsed time to {@code System.err} and restart (static) timer.
    *
    * @param str Additional prefix string to be printed
    * @return Number of milliseconds elapsed
@@ -413,7 +415,7 @@ public class Timing  {
 
   @Override
   public String toString() {
-    return "Timing[start=" + startTime + "]";
+    return "Timing[start=" + startTime + ']';
   }
 
 }

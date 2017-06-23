@@ -1,4 +1,4 @@
-package edu.stanford.nlp.classify; 
+package edu.stanford.nlp.classify;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.lang.reflect.Array;
@@ -159,8 +159,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     Arrays.fill(derivative, 0.0);
     double[] sums = new double[numClasses];
     double[] probs = new double[numClasses];
-    double[] counts = new double[numClasses];
-    Arrays.fill(counts, 0.0);
+    // double[] counts = new double[numClasses];
+    // Arrays.fill(counts, 0.0); // not needed; Java arrays zero initialized
     for (int d = 0; d < data.length; d++) {
       int[] features = data[d];
       // activation
@@ -763,8 +763,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     Arrays.fill(derivative, 0.0);
     double[] sums = new double[numClasses];
     double[] probs = new double[numClasses];
-    double[] counts = new double[numClasses];
-    Arrays.fill(counts, 0.0);
+    //double[] counts = new double[numClasses];
+    // Arrays.fill(counts, 0.0); // not needed; Java arrays zero initialized
     for (int d : batch) {
 
       //Sets the index based on the current batch

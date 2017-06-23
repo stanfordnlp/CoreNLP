@@ -1,6 +1,4 @@
 package edu.stanford.nlp.trees;
-import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -13,12 +11,14 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
+
 import static edu.stanford.nlp.trees.EnglishGrammaticalRelations.*;
 import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 
 /**
  * A GrammaticalStructure for English. This is the class that produces Stanford Dependencies.
- * <p/>
+ *
  * For feeding Stanford parser trees into this class, the Stanford parser should be run with the
  * "-retainNPTmpSubcategories" option for best results!
  *
@@ -256,9 +256,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
 
 
   /* Used by correctWHAttachment */
-  private static SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
-
-  private static Morphology morphology = new Morphology();
+  private static final SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
 
   /**
    * Tries to correct complicated cases of WH-movement in
@@ -290,7 +288,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
           reattach = true;
         } else {
           /* If the control verb can't have an object, we also have to reattach. */
-          String lemma = morphology.lemma(root.value(), root.tag());
+          String lemma = Morphology.lemmaStatic(root.value(), root.tag());
           if (lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
             reattach = true;
           }
@@ -416,25 +414,25 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
    * <dl>
    * <dt>prepositional object dependencies: pobj</dt>
    * <dd>
-   * <code>prep(cat, in)</code> and <code>pobj(in, hat)</code> are collapsed to
-   * <code>prep_in(cat, hat)</code></dd>
+   * {@code prep(cat, in)} and {@code pobj(in, hat)} are collapsed to
+   * {@code prep_in(cat, hat)}</dd>
    * <dt>prepositional complement dependencies: pcomp</dt>
    * <dd>
-   * <code>prep(heard, of)</code> and <code>pcomp(of, attacking)</code> are
-   * collapsed to <code>prepc_of(heard, attacking)</code></dd>
+   * {@code prep(heard, of)} and {@code pcomp(of, attacking)} are
+   * collapsed to {@code prepc_of(heard, attacking)}</dd>
    * <dt>conjunct dependencies</dt>
    * <dd>
-   * <code>cc(investors, and)</code> and
-   * <code>conj(investors, regulators)</code> are collapsed to
-   * <code>conj_and(investors,regulators)</code></dd>
+   * {@code cc(investors, and)} and
+   * {@code conj(investors, regulators)} are collapsed to
+   * {@code conj_and(investors,regulators)}</dd>
    * <dt>possessive dependencies: possessive</dt>
    * <dd>
-   * <code>possessive(Montezuma, 's)</code> will be erased. This is like a collapsing, but
+   * {@code possessive(Montezuma, 's)} will be erased. This is like a collapsing, but
    * due to the flatness of NPs, two dependencies are not actually composed.</dd>
    * <dt>For relative clauses, it will collapse referent</dt>
    * <dd>
-   * <code>ref(man, that)</code> and <code>dobj(love, that)</code> are collapsed
-   * to <code>dobj(love, man)</code></dd>
+   * {@code ref(man, that)} and {@code dobj(love, that)} are collapsed
+   * to {@code dobj(love, man)}</dd>
    * </dl>
    */
   @Override
@@ -773,12 +771,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
 
     // now remove typed dependencies with reln "cc" if we have successfully
     // collapsed
-    for (Iterator<TypedDependency> iter = list.iterator(); iter.hasNext();) {
-      TypedDependency td2 = iter.next();
-      if (td2.reln() == COORDINATION && govs.contains(td2.gov())) {
-        iter.remove();
-      }
-    }
+    list.removeIf(td2 -> td2.reln() == COORDINATION && govs.contains(td2.gov()));
   }
 
   /**
@@ -1806,8 +1799,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
    * <p/>
    *
    *
-   * @param list
-   *          List of typedDependencies to work on
+   * @param list List of typedDependencies to work on
    */
   private static void collapse3WP(Collection<TypedDependency> list) {
     Collection<TypedDependency> newTypedDeps = new ArrayList<>();
@@ -2223,7 +2215,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     GrammaticalStructureConversionUtils.convertTrees(args, "en-sd");
   }
 

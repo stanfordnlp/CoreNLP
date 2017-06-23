@@ -166,7 +166,10 @@ public class CoreAnnotations {
   }
 
   /**
-   * The CoreMap key for getting the sentences contained by an annotation.
+   * The CoreMap key for getting the sentences contained in an annotation.
+   * The sentences are represented as a {@code List<CoreMap>}.
+   * Each sentence might typically have annotations such as {@code TextAnnotation},
+   * {@code TokensAnnotation}, {@code SentenceIndexAnnotation}, and {@code BasicDependenciesAnnotation}.
    *
    * This key is typically set only on document annotations.
    */
@@ -183,6 +186,18 @@ public class CoreAnnotations {
    * This key is typically set only on document annotations.
    */
   public static class QuotationsAnnotation implements CoreAnnotation<List<CoreMap>> {
+    @Override
+    public Class<List<CoreMap>> getType() {
+      return ErasureUtils.uncheckedCast(List.class);
+    }
+  }
+
+  /**
+   * The CoreMap key for getting the quotations contained by an annotation.
+   *
+   * This key is typically set only on document annotations.
+   */
+  public static class UnclosedQuotationsAnnotation implements CoreAnnotation<List<CoreMap>> {
     @Override
     public Class<List<CoreMap>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
@@ -844,6 +859,7 @@ public class CoreAnnotations {
    * for Arabic: character level information, segmentation
    */
   public static class ArabicCharAnnotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -851,6 +867,7 @@ public class CoreAnnotations {
 
   /** For Arabic: the segmentation information from the segmenter. */
   public static class ArabicSegAnnotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1147,6 +1164,64 @@ public class CoreAnnotations {
     @Override
     public Class<String> getType() {
       return String.class;
+    }
+  }
+
+  /**
+   * Store a list of sections in the document
+   */
+  public static class SectionsAnnotation implements CoreAnnotation<List<CoreMap>> {
+    @Override
+    public Class<List<CoreMap>> getType() { return ErasureUtils.uncheckedCast(List.class); }
+  }
+
+  /**
+   * Store an index into a list of sections
+   */
+  public static class SectionIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() { return ErasureUtils.uncheckedCast(Integer.class); }
+  }
+
+  /**
+   * Store the beginning of the author mention for this section
+   */
+  public static class SectionAuthorCharacterOffsetBeginAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() { return ErasureUtils.uncheckedCast(Integer.class); }
+  }
+
+  /**
+   * Store the end of the author mention for this section
+   */
+  public static class SectionAuthorCharacterOffsetEndAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() { return ErasureUtils.uncheckedCast(Integer.class); }
+  }
+
+  /**
+   * Store the xml tag for the section as a CoreLabel
+   */
+  public static class SectionTagAnnotation implements CoreAnnotation<CoreLabel> {
+    @Override
+    public Class<CoreLabel> getType() { return ErasureUtils.uncheckedCast(CoreLabel.class); }
+  }
+
+  /**
+   * Store a list of CoreMaps representing quotes
+   */
+  public static class QuotesAnnotation implements CoreAnnotation<List<CoreMap>> {
+    @Override
+    public Class<List<CoreMap>> getType() { return ErasureUtils.uncheckedCast(List.class); }
+  }
+
+  /**
+   * Indicate whether a sentence is quoted
+   */
+  public static class QuotedAnnotation implements CoreAnnotation<Boolean> {
+    @Override
+    public Class<Boolean> getType() {
+      return Boolean.class;
     }
   }
 
@@ -1753,8 +1828,9 @@ public class CoreAnnotations {
     }
   }
 
-  // Annotation indicating whether the numeric phrase the token is part of
-  // represents a NUMBER or ORDINAL (twenty first => ORDINAL ORDINAL)
+  /** Annotation indicating whether the numeric phrase the token is part of
+   * represents a NUMBER or ORDINAL (twenty first => ORDINAL ORDINAL).
+   */
   public static class NumericCompositeValueAnnotation implements CoreAnnotation<Number> {
     @Override
     public Class<Number> getType() {
@@ -1762,8 +1838,9 @@ public class CoreAnnotations {
     }
   }
 
-  // Annotation indicating the numeric value of the phrase the token is part of
-  // (twenty first => 21 21 )
+  /** Annotation indicating the numeric value of the phrase the token is part of
+   * (twenty first => 21 21 ).
+   */
   public static class NumericCompositeTypeAnnotation implements CoreAnnotation<String> {
     @Override
     public Class<String> getType() {
@@ -1824,6 +1901,17 @@ public class CoreAnnotations {
    * to store paragraph information.
    */
   public static class ParagraphAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+  /**
+   * used in ParagraphAnnotator.
+   * to store paragraph information.
+   */
+  public static class ParagraphIndexAnnotation implements CoreAnnotation<Integer> {
     @Override
     public Class<Integer> getType() {
       return Integer.class;
@@ -1923,4 +2011,5 @@ public class CoreAnnotations {
     @Override
     public Class<String> getType() { return ErasureUtils.uncheckedCast(String.class); }
   }
+
 }

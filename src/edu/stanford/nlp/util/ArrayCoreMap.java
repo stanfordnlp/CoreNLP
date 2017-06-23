@@ -43,7 +43,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    * A listener for when a key is retrieved by the CoreMap.
    * This should only be used for testing.
    */
-  public static Consumer<Class<? extends Key<?>>> listener = null;
+  public static Consumer<Class<? extends Key<?>>> listener; // = null;
 
   /** Initial capacity of the array */
   private static final int INITIAL_CAPACITY = 4;
@@ -209,13 +209,13 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    *         non-null value.
    */
   public Set<Class<?>> keySetNotNull() {
-    Set<Class<?>> keys = new IdentityHashSet<>();
+    Set<Class<?>> mapKeys = new IdentityHashSet<>();
     for (int i = 0; i < size(); ++i) {
       if (values[i] != null) {
-        keys.add(this.keys[i]);
+        mapKeys.add(this.keys[i]);
       }
     }
-    return keys;
+    return mapKeys;
   }
 
   /**

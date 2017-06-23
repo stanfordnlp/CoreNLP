@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
@@ -23,7 +24,7 @@ import java.util.function.Consumer;
  * @author Jenny Finkel
  */
 
-public class AnnotationPipeline implements Annotator  {
+public class AnnotationPipeline implements Annotator {
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotationPipeline.class);
@@ -189,13 +190,15 @@ public class AnnotationPipeline implements Annotator  {
   public String timingInformation() {
     StringBuilder sb = new StringBuilder();
     if (TIME) {
-      sb.append("Annotation pipeline timing information:\n");
+      sb.append("Annotation pipeline timing information:");
+      sb.append(IOUtils.eolChar);
       Iterator<MutableLong> it = accumulatedTime.iterator();
       long total = 0;
       for (Annotator annotator : annotators) {
         MutableLong m = it.next();
         sb.append(StringUtils.getShortClassName(annotator)).append(": ");
-        sb.append(Timing.toSecondsString(m.longValue())).append(" sec.\n");
+        sb.append(Timing.toSecondsString(m.longValue())).append(" sec.");
+        sb.append(IOUtils.eolChar);
         total += m.longValue();
       }
       sb.append("TOTAL: ").append(Timing.toSecondsString(total)).append(" sec.");
@@ -231,7 +234,7 @@ public class AnnotationPipeline implements Annotator  {
     // ap.addAnnotator(new OldNERAnnotator(verbose));
     // ap.addAnnotator(new NERMergingAnnotator(verbose));
     ap.addAnnotator(new ParserAnnotator(verbose, -1));
-/**
+/*
     ap.addAnnotator(new UpdateSentenceFromParseAnnotator(verbose));
     ap.addAnnotator(new NumberAnnotator(verbose));
     ap.addAnnotator(new QuantifiableEntityNormalizingAnnotator(verbose));

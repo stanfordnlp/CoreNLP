@@ -3,7 +3,10 @@ package edu.stanford.nlp.simple;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -342,8 +345,108 @@ public class SentenceAlgorithms {
   }
 
 
-  @SuppressWarnings("unchecked")
-  public List<String> dependencyPathBetween(int start, int end, Function<Sentence, List<String>> selector) {
+  /**
+   * Run a proper BFS over a dependency graph, finding the shortest path between two vertices.
+   *
+   * @param start The start index.
+   * @param end The end index.
+   * @param selector The selector to use for the word nodes.
+   *
+   * @return A path string, analogous to {@link #dependencyPathBetween(int, int)}
+   */
+  protected List<String> loopyDependencyPathBetween(int start, int end, Optional<Function<Sentence, List<String>>> selector) {
+    // Find the start and end
+    SemanticGraph graph = this.sentence.dependencyGraph();
+    IndexedWord[] indexedWords = new IndexedWord[this.sentence.length()];
+    for (IndexedWord vertex : graph.vertexSet()) {
+      indexedWords[vertex.index() - 1] = vertex;
+    }
+
+    // Set up the search
+    BitSet seen = new BitSet();
+    int[] backpointers = new int[sentence.length()];
+    Arrays.fill(backpointers, -1);
+    Queue<IndexedWord> fringe = new LinkedList<>();
+    fringe.add(indexedWords[start]);
+
+    // Run the search
+    while (!fringe.isEmpty()) {
+      IndexedWord vertex = fringe.poll();
+      int vertexIndex = vertex.index() - 1;
+      if (seen.get(vertexIndex)) {
+        continue;  // should not reach here
+      }
+      seen.set(vertexIndex);
+      for (SemanticGraphEdge inEdge : graph.incomingEdgeIterable(vertex)) {
+        IndexedWord governor = inEdge.getGovernor();
+        int govIndex = governor.index() - 1;
+        if (!seen.get(govIndex)) {
+          backpointers[govIndex] = vertexIndex;
+          if (govIndex == end) {
+            break;
+          } else {
+            fringe.add(governor);
+          }
+        }
+      }
+      for (SemanticGraphEdge outEdge : graph.outgoingEdgeIterable(vertex)) {
+        IndexedWord dependent = outEdge.getDependent();
+        int depIndex = dependent.index() - 1;
+        if (!seen.get(depIndex)) {
+          backpointers[depIndex] = vertexIndex;
+          if (depIndex == end) {
+            break;
+          } else {
+            fringe.add(dependent);
+          }
+        }
+      }
+    }
+
+    // Infer the path
+    ArrayList<String> path = new ArrayList<>();
+    Optional<List<String>> words = selector.map(x -> x.apply(sentence));
+    int vertex = end;
+    while (vertex != start) {
+      // 1. Add the word
+      if (words.isPresent()) {
+        path.add(words.get().get(vertex));
+      }
+      // 2. Find the parent
+      for (SemanticGraphEdge inEdge : graph.incomingEdgeIterable(indexedWords[vertex])) {
+        int governor = inEdge.getGovernor().index() - 1;
+        if (backpointers[vertex] == governor) {
+          path.add("-" + inEdge.getRelation().toString() + "->");
+          break;
+        }
+      }
+      for (SemanticGraphEdge outEdge : graph.outgoingEdgeIterable(indexedWords[vertex])) {
+        int dependent = outEdge.getDependent().index() - 1;
+        if (backpointers[vertex] == dependent) {
+          path.add("<-" + outEdge.getRelation().toString() + "-");
+          break;
+        }
+      }
+      // 3. Update the node
+      vertex = backpointers[vertex];
+    }
+    words.ifPresent(strings -> path.add(strings.get(start)));
+    Collections.reverse(path);
+    return path;
+  }
+
+
+  /**
+   * Find the dependency path between two words in a sentence.
+   *
+   * @param start The start word, 0-indexed.
+   * @param end The end word, 0-indexed.
+   * @param selector The selector for the strings between the path, if any. If left empty, these will be omitted from the list.
+   *
+   * @return A list encoding the dependency path between the vertices, suitable for inclusion as features.
+   */
+  @SuppressWarnings({"unchecked", "Duplicates"})
+  public List<String> dependencyPathBetween(int start, int end, Optional<Function<Sentence, List<String>>> selector) {
     // Get paths from a node to the root of the sentence
     LinkedList<Integer> rootToStart = new LinkedList<>();
     LinkedList<Integer> rootToEnd = new LinkedList<>();
@@ -352,7 +455,8 @@ public class SentenceAlgorithms {
     Set<Integer> seenVertices = new HashSet<>();
     while (startAncestor >= 0 && governors.get(startAncestor).isPresent()) {
       if (seenVertices.contains(startAncestor)) {
-        return Collections.EMPTY_LIST;
+        // Found loopiness -- revert to BFS
+        return loopyDependencyPathBetween(start, end, selector);
       }
       seenVertices.add(startAncestor);
       rootToStart.addFirst(startAncestor);
@@ -365,7 +469,8 @@ public class SentenceAlgorithms {
     seenVertices.clear();
     while (endAncestor >= 0 && governors.get(endAncestor).isPresent()) {
       if (seenVertices.contains(endAncestor)) {
-        return Collections.EMPTY_LIST;
+        // Found loopiness -- revert to BFS
+        return loopyDependencyPathBetween(start, end, selector);
       }
       seenVertices.add(endAncestor);
       rootToEnd.addFirst(endAncestor);
@@ -385,24 +490,30 @@ public class SentenceAlgorithms {
 
     // Construct the path
     if (leastCommonNodeIndex < 0) {
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
     List<String> path = new ArrayList<>();
+    Optional<List<String>> words = selector.map(x -> x.apply(sentence));
     for (int i = rootToStart.size() - 1; i > leastCommonNodeIndex; --i) {
-      path.add(selector.apply(sentence).get(rootToStart.get(i)));
+      final int index = i;
+      words.ifPresent(x -> path.add(x.get(rootToStart.get(index))));
       path.add("<-" + sentence.incomingDependencyLabel(rootToStart.get(i)).orElse("dep") + "-");
     }
-    path.add(selector.apply(sentence).get(rootToStart.get(leastCommonNodeIndex)));
+    if (words.isPresent()) {
+      path.add(words.get().get(rootToStart.get(leastCommonNodeIndex)));
+    }
     for (int i = leastCommonNodeIndex + 1; i < rootToEnd.size(); ++i) {
+      final int index = i;
       path.add("-" + sentence.incomingDependencyLabel(rootToEnd.get(i)).orElse("dep") + "->");
-      path.add(selector.apply(sentence).get(rootToEnd.get(i)));
+      words.ifPresent(x -> path.add(x.get(rootToEnd.get(index))));
     }
     return path;
   }
 
   public List<String> dependencyPathBetween(int start, int end) {
-    return dependencyPathBetween(start, end, Sentence::words);
+    return dependencyPathBetween(start, end, Optional.of(Sentence::words));
   }
+
 
   /**
    * A funky little helper method to interpret each token of the sentence as an HTML string, and translate it back to text.

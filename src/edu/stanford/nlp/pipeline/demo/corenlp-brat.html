@@ -1,29 +1,23 @@
 <head>
   <!-- JQuery -->
-  <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <!-- Bootstrap -->
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css"/>
-  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css"/>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
   <!-- Chosen Dropdown Library -->
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.css"/>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.min.js"></script>
   <!-- Brat -->
-  <link rel="stylesheet" type="text/css" href="//storage.googleapis.com/corenlp/style-vis.css"/>
-  <script type="text/javascript" src="//storage.googleapis.com/corenlp/js/brat/client/lib/head.load.min.js"></script>
-  <!-- CoreNLP -->
+  <link rel="stylesheet" type="text/css" href="https://nlp.stanford.edu/js/brat/style-vis.css"/>
+  <script type="text/javascript" src="https://nlp.stanford.edu/js/brat/client/lib/head.load.min.js"></script>
+  <!-- d3 -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.4.17/dagre-d3.min.js"></script>
+
+    <!-- CoreNLP -->
   <link rel="stylesheet" type="text/css" href="corenlp-brat.css"/>
   <script type="text/javascript" src="corenlp-brat.js"></script>
-
-  <!-- Google Analytics -->
-  <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-  ga('create', 'UA-28753732-2', 'auto');
-  ga('send', 'pageview');
-  </script>
 
   <meta charset="UTF-8">
 </head>
@@ -34,7 +28,7 @@
 <nav class="navbar navbar-default navbar-static-top">
   <div class="container">
     <div class="navbar-header">
-      <a class="navbar-brand" href="//nlp.stanford.edu/software/corenlp.shtml">Stanford CoreNLP</a>
+      <a class="navbar-brand" href="https://nlp.stanford.edu/software/corenlp.shtml">Stanford CoreNLP</a>
     </div>
   </div>
 </nav>
@@ -45,18 +39,20 @@
 
     <!-- Text area input -->
     <form id="form_annotate" accept-charset="UTF-8" onsubmit="return false;">
-    <div class="form-group">
-      <label for="text">Please enter your text here:</label>
+    <div class="col-sm-12" style="margin-bottom: 5px;">
+      <label for="text" class="label">&mdash; Text to annotate &mdash;</label>
       <textarea class="form-control" rows="2" id="text" placeholder="e.g., The quick brown fox jumped over the lazy dog." autofocus></textarea>
     </div>
 
     <!-- Annotators select -->
-    <div class="col-sm-10">
+    <div class="col-sm-8">
+      <label for="annotators" class="label">&mdash; Annotations &mdash;</label>
       <select id="annotators" data-placeholder="CoreNLP annotators"
-              multiple class="chosen-select">
+              multiple class="chosen-select" title="Select CoreNLP annotators">
         <option value="pos"            selected > parts-of-speech    </option>
         <option value="lemma"                   > lemmas             </option>
         <option value="ner"            selected > named entities     </option>
+        <option value="parse"                   > constituency parse </option>
         <option value="depparse"       selected > dependency parse   </option>
         <option value="openie"         selected > openie             </option>
         <option value="coref"                   > coreference        </option>
@@ -66,11 +62,22 @@
       </select>
     </div>
 
-    <!-- Submit button -->
     <div class="col-sm-2">
-      <center>
+        <label for="language" class="label">&mdash; Language &mdash;</label>
+        <select id="language" data-placeholder="Language"
+                class="chosen-select" title="Language">
+            <option value="ar"                 > Arabic    </option>
+            <option value="zh"                 > Chinese   </option>
+            <option value="en"        selected > English   </option>
+            <option value="fr"                 > French    </option>
+            <option value="de"                 > German    </option>
+            <option value="es"                 > Spanish   </option>
+        </select>
+    </div>
+
+    <!-- Submit button -->
+    <div class="col-sm-2" style="text-align: center; margin-top: 7px; ">
         <button id="submit" class="btn btn-block">Submit</button>
-      </center>
     </div>
     </form>
 

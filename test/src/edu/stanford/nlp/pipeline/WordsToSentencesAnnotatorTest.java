@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 
+import edu.stanford.nlp.util.PropertiesUtils;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 

@@ -160,6 +160,15 @@ public class TextOutputter extends AnnotationOutputter {
         }
 
       }
+    } else {
+      List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
+      pw.println("Tokens:");
+      pw.println(annotation.get(CoreAnnotations.TextAnnotation.class));
+      for (CoreLabel token : tokens) {
+        int tokenCharBegin = token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        int tokenCharEnd = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        pw.println("[Text="+token.word()+" CharacterOffsetBegin="+tokenCharBegin+" CharacterOffsetEnd="+tokenCharEnd+"]");
+      }
     }
 
     // display the old-style doc-level coref annotations
@@ -197,6 +206,19 @@ public class TextOutputter extends AnnotationOutputter {
         }
       }
     }
+
+    // display quotes if available
+    if (annotation.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
+      pw.println("Extracted quotes: ");
+      List<CoreMap> allQuotes = QuoteAnnotator.gatherQuotes(annotation);
+      for (CoreMap quote : allQuotes) {
+        pw.printf("[QuotationIndexAnnotation=%d, CharacterOffsetBegin=%d, Text=%s]%n",
+            quote.get(CoreAnnotations.QuotationIndexAnnotation.class),
+            quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
+            quote.get(CoreAnnotations.TextAnnotation.class));
+      }
+    }
+
     pw.flush();
   }
 

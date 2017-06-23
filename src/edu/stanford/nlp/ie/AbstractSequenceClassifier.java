@@ -697,7 +697,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   /**
    * Classify a {@link List} of something that extends{@link CoreMap}.
    * The classifications are added in place to the items of the document,
-   * which is also returned by this method
+   * which is also returned by this method.
+   *
+   * <i>Warning:</i> In many circumstances, you should not call this method directly.
+   * In particular, if you call this method directly, your document will not be preprocessed
+   * to add things like word distributional similarity class or word shape features that your
+   * classifier may rely on to work correctly. In such cases, you should call
+   * {@link #classifySentence(List<? extends HasWord>) classifySentence} instead.
    *
    * @param document A {@link List} of something that extends {@link CoreMap}.
    * @return The same {@link List}, but with the elements annotated with their
@@ -708,6 +714,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *         notation or not) or something like "1" vs. "0" on whether to
    *         begin a new token here or not (in word segmentation).
    */
+  // todo [cdm 2017]: Check that our own NER code doesn't call this method wrongly anywhere.
   public abstract List<IN> classify(List<IN> document);
 
   /**
@@ -716,7 +723,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * This is needed for SUTime (NumberSequenceClassifier), which requires
    * the document date to resolve relative dates.
    *
-   * @param tokenSequence
+   * @param tokenSequence A {@link List} of something that extends {@link CoreMap}
    * @param document
    * @param sentence
    * @return Classified version of the input tokenSequence
@@ -806,8 +813,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public ObjectBank<List<IN>>
     makeObjectBankFromString(String string,
-                             DocumentReaderAndWriter<IN> readerAndWriter)
-  {
+                             DocumentReaderAndWriter<IN> readerAndWriter) {
     if (flags.announceObjectBankEntries) {
       log.info("Reading data using " + readerAndWriter.getClass());
 

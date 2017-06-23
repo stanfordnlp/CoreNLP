@@ -463,9 +463,9 @@ public final class MultiWordPreprocessor  {
     // Try treating this word as a verb and stripping any clitic
     // pronouns. If the stripped version exists in the unigram
     // tagger, then stick with the verb hypothesis
-    Pair<String, List<String>> strippedVerb = verbStripper.separatePronouns(word);
-    if (strippedVerb != null && unigramTaggerKeys.contains(strippedVerb.first())) {
-      String pos = Counters.argmax(unigramTagger.getCounter(strippedVerb.first()));
+    SpanishVerbStripper.StrippedVerb strippedVerb = verbStripper.separatePronouns(word);
+    if (strippedVerb != null && unigramTaggerKeys.contains(strippedVerb.getStem())) {
+      String pos = Counters.argmax(unigramTagger.getCounter(strippedVerb.getStem()));
       if (pos.startsWith("v"))
         return pos;
     }

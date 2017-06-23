@@ -1,11 +1,11 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEnglishWordMap;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.XMLUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 /**
  * A class for customizing the print method(s) for a
- * <code>edu.stanford.nlp.trees.Tree</code> as the output of the
+ * {@code edu.stanford.nlp.trees.Tree} as the output of the
  * parser.  This class supports printing in multiple ways and altering
  * behavior via properties specified at construction.
  *
@@ -133,12 +133,11 @@ public class TreePrint  {
    *                CC propagation, which we generally recommend.)
    * @param optionsString Options that additionally specify how trees are to
    *                be printed (for instance, whether stemming should be done).
-   *                Known options are: <code>stem, lexicalize, markHeadNodes,
+   *                Known options are: {@code stem, lexicalize, markHeadNodes,
    *                xml, removeTopBracket, transChinese,
    *                includePunctuationDependencies, basicDependencies, treeDependencies,
    *                CCPropagatedDependencies, collapsedDependencies, nonCollapsedDependencies,
-   *                nonCollapsedDependenciesSeparated, includeTags
-   *                </code>.
+   *                nonCollapsedDependenciesSeparated, includeTags}.
    * @param tlp     The TreebankLanguagePack used to do things like delete
    *                or ignore punctuation in output
    * @param hf      The HeadFinder used in printing output
@@ -233,11 +232,11 @@ public class TreePrint  {
 
   /**
    * Prints the tree according to the options specified for this instance.
-   * If the tree <code>t</code> is <code>null</code>, then the code prints
+   * If the tree {@code t} is {@code null}, then the code prints
    * a line indicating a skipped tree.  Under the XML option this is
-   * an <code>s</code> element with the <code>skipped</code> attribute having
-   * value <code>true</code>, and, otherwise, it is the token
-   * <code>SENTENCE_SKIPPED_OR_UNPARSABLE</code>.
+   * an {@code s} element with the {@code skipped} attribute having
+   * value {@code true}, and, otherwise, it is the token
+   * {@code SENTENCE_SKIPPED_OR_UNPARSABLE}.
    *
    * @param t The tree to display
    * @param id A name for this sentence
@@ -249,7 +248,7 @@ public class TreePrint  {
       // Parsing didn't succeed.
       if (inXml) {
         pw.print("<s");
-        if (id != null && ! "".equals(id)) {
+        if ( ! StringUtils.isNullOrEmpty(id)) {
           pw.print(" id=\"" + XMLUtils.escapeXML(id) + '\"');
         }
         pw.println(" skipped=\"true\"/>");
@@ -260,7 +259,7 @@ public class TreePrint  {
     } else {
       if (inXml) {
         pw.print("<s");
-        if (id != null && ! "".equals(id)) {
+        if ( ! StringUtils.isNullOrEmpty(id)) {
           pw.print(" id=\"" + XMLUtils.escapeXML(id) + '\"');
         }
         pw.println(">");
@@ -276,11 +275,11 @@ public class TreePrint  {
 
   /**
    * Prints the trees according to the options specified for this instance.
-   * If the tree <code>t</code> is <code>null</code>, then the code prints
+   * If the tree {@code t} is {@code null}, then the code prints
    * a line indicating a skipped tree.  Under the XML option this is
-   * an <code>s</code> element with the <code>skipped</code> attribute having
-   * value <code>true</code>, and, otherwise, it is the token
-   * <code>SENTENCE_SKIPPED_OR_UNPARSABLE</code>.
+   * an {@code s} element with the {@code skipped} attribute having
+   * value {@code true}, and, otherwise, it is the token
+   * {@code SENTENCE_SKIPPED_OR_UNPARSABLE}.
    *
    * @param trees The list of trees to display
    * @param id A name for this sentence
@@ -298,7 +297,7 @@ public class TreePrint  {
         // Parsing didn't succeed.
         if (inXml) {
           pw.print("<s");
-          if (id != null && ! "".equals(id)) {
+          if ( ! StringUtils.isNullOrEmpty(id)) {
             pw.print(" id=\"" + XMLUtils.escapeXML(id) + '\"');
           }
           pw.print(" n=\"");
@@ -522,7 +521,7 @@ public class TreePrint  {
         pw.println();
       }
       if (formats.containsKey("oneline")) {
-        pw.println(outputPSTree.toString());
+        pw.println(outputPSTree);
       }
       if (formats.containsKey("penn")) {
         outputPSTree.pennPrint(pw);
@@ -559,7 +558,7 @@ public class TreePrint  {
         it.indexLeaves();
 
         List<CoreLabel> tagged = it.taggedLabeledYield();
-        List<Dependency<Label, Label, Object>> sortedDeps = getSortedDeps(it, Filters.<Dependency<Label, Label, Object>>acceptFilter());
+        List<Dependency<Label, Label, Object>> sortedDeps = getSortedDeps(it, Filters.acceptFilter());
 
         for (Dependency<Label, Label, Object> d : sortedDeps) {
           if (!dependencyFilter.test(d)) {
@@ -645,7 +644,7 @@ public class TreePrint  {
               if (foundRoot) { throw new RuntimeException(); }
               foundRoot = true;
             }
-            pw.println(index+"\t"+word+"\t"+tag+"\t"+parent);
+            pw.println(index + '\t' + word + '\t' + tag + '\t' + parent);
             index++;
           }
           pw.println();
@@ -724,7 +723,7 @@ public class TreePrint  {
         wnc = (WordNetConnection) cl.newInstance();
       } catch (Exception e) {
         log.info("Couldn't open WordNet Connection.  Aborting collocation detection.");
-        e.printStackTrace();
+        log.info(e);
         wnc = null;
       }
     }
@@ -831,7 +830,7 @@ public class TreePrint  {
     try {
       tlp = (TreebankLanguagePack) Class.forName(tlpName).newInstance();
     } catch (Exception e) {
-      e.printStackTrace();
+      log.warning(e);
       return;
     }
     HeadFinder hf;
@@ -839,7 +838,7 @@ public class TreePrint  {
       try {
         hf = (HeadFinder) Class.forName(hfName).newInstance();
       } catch (Exception e) {
-        e.printStackTrace();
+        log.warning(e);
         return;
       }
     } else {
@@ -882,8 +881,8 @@ public class TreePrint  {
    * </dd>
    * <dt>"readable"</dt>
    * <dd>Formats the dependencies as a table with columns
-   * <code>dependent</code>, <code>relation</code>, and
-   * <code>governor</code>, as exemplified by the following:
+   * {@code dependent}, {@code relation}, and
+   * {@code governor}, as exemplified by the following:
    * <pre>
    *  Sam-0               nsubj               died-1
    *  today-2             tmod                died-1
@@ -907,9 +906,9 @@ public class TreePrint  {
    * </dl>
    *
    * @param dependencies The TypedDependencies to print
-   * @param format a <code>String</code> specifying the desired format
-   * @return a <code>String</code> representation of the typed
-   *         dependencies in this <code>GrammaticalStructure</code>
+   * @param format a {@code String} specifying the desired format
+   * @return a {@code String} representation of the typed
+   *         dependencies in this {@code GrammaticalStructure}
    */
   private static String toString(Collection<TypedDependency> dependencies, String format, boolean includeTags) {
     if (format != null && format.equals("xml")) {
@@ -934,7 +933,7 @@ public class TreePrint  {
    *
    * @param dependencies The TypedDependencies to print
    * @param extraSep boolean indicating whether the extra dependencies have to be printed separately, after the basic ones
-   * @return a <code>String</code> representation of this set of
+   * @return a {@code String} representation of this set of
    *         typed dependencies
    */
   private static String toString(Collection<TypedDependency> dependencies, boolean extraSep, boolean includeTags) {
@@ -1018,7 +1017,7 @@ public class TreePrint  {
   /**
    * USED BY TREEPRINT AND WSD.SUPWSD.PREPROCESS
    * Prints this set of typed dependencies to the specified
-   * <code>PrintWriter</code>.
+   * {@code PrintWriter}.
    * @param dependencies The collection of TypedDependency to print
    * @param pw Where to print them
    */
@@ -1029,7 +1028,7 @@ public class TreePrint  {
   /**
    * USED BY TREEPRINT
    * Prints this set of typed dependencies to the specified
-   * <code>PrintWriter</code> in the specified format.
+   * {@code PrintWriter} in the specified format.
    * @param dependencies The collection of TypedDependency to print
    * @param format "xml" or "readable" or other
    * @param pw Where to print them

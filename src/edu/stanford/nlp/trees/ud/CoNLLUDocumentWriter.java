@@ -1,16 +1,16 @@
 package edu.stanford.nlp.trees.ud;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.Pair;
 
-import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 /**
  * @author Sebastian Schuster
@@ -28,6 +28,8 @@ public class CoNLLUDocumentWriter {
 
     public String printSemanticGraph(SemanticGraph sg, boolean unescapeParenthesis) {
 
+
+        boolean isTree = SemanticGraphUtils.isTree(sg);
 
         StringBuilder sb = new StringBuilder();
 
@@ -47,21 +49,21 @@ public class CoNLLUDocumentWriter {
             }
 
             /* Try to find main governor and additional dependencies. */
-            int govIdx = -1;
+            String govIdx = null;
             GrammaticalRelation reln = null;
-            HashMap<Integer, String> additionalDeps = new HashMap<>();
+            HashMap<String, String> enhancedDependencies = new HashMap<>();
             for (IndexedWord parent : sg.getParents(token)) {
                 SemanticGraphEdge edge = sg.getEdge(parent, token);
-                if ( govIdx == -1 && ! edge.isExtra()) {
-                    govIdx = parent.index();
+                if ( govIdx == null && ! edge.isExtra()) {
+                    govIdx = parent.toCopyIndex();
                     reln = edge.getRelation();
-                } else {
-                    additionalDeps.put(parent.index(), edge.getRelation().toString());
                 }
+                enhancedDependencies.put(parent.toCopyIndex(), edge.getRelation().toString());
             }
 
 
-            String additionalDepsString = CoNLLUUtils.toExtraDepsString(additionalDeps);
+
+            String additionalDepsString = isTree ? "_" : CoNLLUUtils.toExtraDepsString(enhancedDependencies);
             String word = token.word();
             String featuresString = CoNLLUUtils.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
             String pos = token.getString(CoreAnnotations.PartOfSpeechAnnotation.class, "_");
@@ -71,9 +73,10 @@ public class CoNLLUDocumentWriter {
             String relnName = reln == null ? "_" : reln.toString();
 
             /* Root. */
-            if (govIdx == -1 && sg.getRoots().contains(token)) {
-                govIdx = 0;
+            if (govIdx == null && sg.getRoots().contains(token)) {
+                govIdx = "0";
                 relnName = GrammaticalRelation.ROOT.toString();
+                additionalDepsString = isTree ? "_" : "0:" + relnName;
             }
 
             if (unescapeParenthesis) {
@@ -83,12 +86,39 @@ public class CoNLLUDocumentWriter {
                 lemma = lemma.replaceAll(RRB_PATTERN, ")");
             }
 
-            sb.append(String.format("%d\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n", token.index(), word,
+            sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.toCopyIndex(), word,
                     lemma, upos, pos, featuresString, govIdx, relnName, additionalDepsString, misc));
         }
         sb.append("\n");
 
         return sb.toString();
+    }
+
+  /**
+   * Outputs a partial CONLL-U file with token information (form, lemma, POS)
+   * but without any dependency information.
+   *
+   * @param sentence
+   * @return
+   */
+
+  public String printPOSAnnotations(CoreMap sentence) {
+      StringBuilder sb = new StringBuilder();
+
+      for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+
+          String upos = token.getString(CoreAnnotations.CoarseTagAnnotation.class, "_");
+          String lemma = token.getString(CoreAnnotations.LemmaAnnotation.class, "_");
+          String pos = token.getString(CoreAnnotations.PartOfSpeechAnnotation.class, "_");
+          String featuresString = CoNLLUUtils.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
+          String misc = token.getString(CoreAnnotations.CoNLLUMisc.class, "_");
+          sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.index(), token.word(),
+              lemma, upos , pos, featuresString, "_", "_", "_", misc));
+      }
+      sb.append("\n");
+
+      return sb.toString();
+
     }
 
 }

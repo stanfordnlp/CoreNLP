@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
 import junit.framework.TestCase;
 
 
@@ -18,12 +19,23 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   private static final Annotator ptb = new TokenizerAnnotator(false, "en");
   private static final Annotator ptbNL = new TokenizerAnnotator(false, "en", "invertible,ptb3Escaping=true,tokenizeNLs=true");
-  private static final WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<CoreLabel>();
+  private static final Annotator wsNL = new TokenizerAnnotator(false,
+          PropertiesUtils.asProperties("tokenize.whitespace", "true", "invertible", "true", "tokenizeNLs", "true"));
+
+  private static final WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<>();
   private static final WordToSentenceProcessor<CoreLabel> wtsNull =
-          new WordToSentenceProcessor<CoreLabel>(true); // treat input as one sentence
+          new WordToSentenceProcessor<>(true); // treat input as one sentence
+  private static final WordToSentenceProcessor<CoreLabel> cwts = new WordToSentenceProcessor<>(
+          "[.。]|[!?！？]+", WordToSentenceProcessor.NewlineIsSentenceBreak.TWO_CONSECUTIVE, false);
 
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
+                                 String testSentence, String ... gold) {
+    checkResult(wts, ptb, testSentence, gold);
+  }
+
+  private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
+                                  Annotator tokenizer,
                                  String testSentence, String ... gold) {
     Annotation annotation = new Annotation(testSentence);
     ptbNL.annotate(annotation);
@@ -37,7 +49,7 @@ public class WordToSentenceProcessorTest extends TestCase {
     Annotation[] goldAnnotations = new Annotation[gold.length];
     for (int i = 0; i < gold.length; ++i) {
       goldAnnotations[i] = new Annotation(gold[i]);
-      ptb.annotate(goldAnnotations[i]);
+      tokenizer.annotate(goldAnnotations[i]);
       List<CoreLabel> goldTokens =
         goldAnnotations[i].get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> testTokens = sentences.get(i);
@@ -100,11 +112,11 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   public void testParagraphStrategies() {
     final WordToSentenceProcessor<CoreLabel> wtsNever =
-            new WordToSentenceProcessor<CoreLabel>(WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER);
+            new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER);
     final WordToSentenceProcessor<CoreLabel> wtsAlways =
-            new WordToSentenceProcessor<CoreLabel>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
+            new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
     final WordToSentenceProcessor<CoreLabel> wtsTwo =
-            new WordToSentenceProcessor<CoreLabel>(WordToSentenceProcessor.NewlineIsSentenceBreak.TWO_CONSECUTIVE);
+            new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.TWO_CONSECUTIVE);
 
     String input1 = "Depending on the options,\nthis could be all sorts of things,\n\n as I like chocolate. And cookies.";
     String input2 = "Depending on the options,\nthis could be all sorts of things,\n as I like chocolate. And cookies.";
@@ -135,8 +147,9 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   public void testXmlElements() {
     final WordToSentenceProcessor<CoreLabel> wtsXml =
-            new WordToSentenceProcessor<CoreLabel>(null, null, Generics.newHashSet(Arrays.asList("p", "chapter")),
-                    WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER);
+            new WordToSentenceProcessor<>(null, null,null,
+                        Generics.newHashSet(Arrays.asList("p", "chapter")),
+                        WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, null, null);
 
     String input1 = "<chapter>Chapter 1</chapter><p>This is text. So is this.</p> <p>One without end</p><p>Another</p><p>And another</p>";
     checkResult(wtsXml, input1,
@@ -150,8 +163,8 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   public void testRegion() {
     final WordToSentenceProcessor<CoreLabel> wtsRegion =
-            new WordToSentenceProcessor<CoreLabel>(WordToSentenceProcessor.DEFAULT_BOUNDARY_REGEX,
-                    WordToSentenceProcessor.DEFAULT_BOUNDARY_FOLLOWERS,
+            new WordToSentenceProcessor<>(WordToSentenceProcessor.DEFAULT_BOUNDARY_REGEX,
+                    WordToSentenceProcessor.DEFAULT_BOUNDARY_FOLLOWERS_REGEX,
                     WordToSentenceProcessor.DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD,
                     Generics.newHashSet(Collections.singletonList("p")),
                     "chapter|preface", WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, null, null, false, false);
@@ -167,7 +180,7 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   public void testBlankLines() {
     final WordToSentenceProcessor<CoreLabel> wtsLines =
-            new WordToSentenceProcessor<CoreLabel>(Generics.newHashSet(WordToSentenceProcessor.DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD));
+            new WordToSentenceProcessor<>(Generics.newHashSet(WordToSentenceProcessor.DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD));
     String input1 = "Depending on the options,\nthis could be all sorts of things,\n\n as I like chocolate. And cookies.";
     checkResult(wtsLines, input1,
             "Depending on the options,",
@@ -196,4 +209,11 @@ public class WordToSentenceProcessorTest extends TestCase {
     assertEquals("Wrong double bang", "[Foo, !!]", list.toString());
   }
 
+  public void testChinese() {
+    checkResult(cwts, wsNL,"巴拉特 说 ： 「 我们 未 再 获得 任何 结果 。 」 ＜ 金融时报 ？ ＞ 《 金融时报 》 周三",
+            "巴拉特 说 ： 「 我们 未 再 获得 任何 结果 。 」",
+             "＜ 金融时报 ？ ＞",
+              "《 金融时报 》 周三");
+
+  }
 }

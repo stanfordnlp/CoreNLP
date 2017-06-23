@@ -1,12 +1,5 @@
-/**
- * Title:        StanfordMaxEnt<p>
- * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
- * Company:      Stanford University<p>
- */
+package edu.stanford.nlp.tagger.maxent;
 
-
-package edu.stanford.nlp.tagger.maxent; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileInputStream;
@@ -17,7 +10,7 @@ import java.util.List;
 
 import edu.stanford.nlp.util.Pair;
 
-/** Maintains a set of feature extractors and applies them.
+/** Maintains a set of feature extractors for a maxent POS tagger and applies them.
  *
  *  @author Kristina Toutanova
  *  @version 1.0
@@ -25,7 +18,7 @@ import edu.stanford.nlp.util.Pair;
 public class Extractors implements Serializable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Extractors.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Extractors.class);
 
   private final Extractor[] v;
 
@@ -72,10 +65,10 @@ public class Extractors implements Serializable  {
       }
     }
     if(DEBUG) {
-      log.info("Extractors: "+this);
-      System.err.printf("Local: %d extractors\n",local.size());
-      System.err.printf("Local context: %d extractors\n",localContext.size());
-      System.err.printf("Dynamic: %d extractors\n",dynamic.size());
+      log.info("Extractors: " + this);
+      log.info("Local: " + local.size() + " extractors");
+      log.info("Local context: " + localContext.size() + " extractors");
+      log.info("Dynamic: " + dynamic.size() + " extractors");
     }
   }
 
@@ -178,7 +171,7 @@ public class Extractors implements Serializable  {
   public String toString() {
     StringBuilder sb = new StringBuilder("Extractors[");
     for (int i = 0; i < v.length; i++) {
-      sb.append(v[i].toString());
+      sb.append(v[i]);
       if (i < v.length - 1) {
         sb.append(", ");
       }
@@ -189,10 +182,10 @@ public class Extractors implements Serializable  {
 
 
   /**
-   * Prints out the pair of <code>Extractors</code> objects found in the
+   * Prints out the pair of {@code Extractors} objects found in the
    * file that is the first and only argument.
    * @param args Filename of extractors file (standardly written with
-   *       <code>.ex<code> extension)
+   *       {@code .ex} extension)
    */
   public static void main(String[] args) {
     try {
@@ -203,7 +196,7 @@ public class Extractors implements Serializable  {
       System.out.println("All words:  " + extrs);
       System.out.println("Rare words: " + extrsRare);
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 

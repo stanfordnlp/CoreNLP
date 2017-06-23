@@ -134,7 +134,8 @@ public class POSTaggerAnnotator implements Annotator  {
       try {
         tagged = pos.tagSentence(tokens, this.reuseTags);
       } catch (OutOfMemoryError e) {
-        log.info("WARNING: Tagging of sentence ran out of memory. " +
+        log.error(e); // Beware that we can now get an OOM in logging, too.
+        log.warn("Tagging of sentence ran out of memory. " +
                            "Will ignore and continue: " +
                            SentenceUtils.listToString(tokens));
       }

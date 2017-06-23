@@ -2,9 +2,9 @@ package edu.stanford.nlp.coref;
 
 import java.util.Properties;
 
-import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
+import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -40,7 +40,6 @@ public interface CorefDocumentProcessor {
     Document document = docMaker.nextDoc();
     long time = System.currentTimeMillis();
     while (document != null) {
-      document.extractGoldCorefClusters();
       process(docId, document);
       Redwood.log(getName(), "Processed document " + docId + " in "
           + (System.currentTimeMillis() - time) / 1000.0 + "s");

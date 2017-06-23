@@ -1,4 +1,5 @@
 package edu.stanford.nlp.pipeline;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
@@ -28,31 +29,22 @@ public class AnnotatorImplementations  {
   /**
    * Tokenize, emulating the Penn Treebank
    */
-  public Annotator tokenizer(Properties properties, boolean verbose, String options) {
-    return new TokenizerAnnotator(verbose, properties, options);
+  public Annotator tokenizer(Properties properties) {
+    return new TokenizerAnnotator(properties);
   }
 
   /**
    * Clean XML input
    */
-  public CleanXmlAnnotator cleanXML(Properties properties,
-                               String xmlTagsToRemove,
-                               String sentenceEndingTags,
-                               String dateTags,
-                               boolean allowFlawedXml) {
-    return new CleanXmlAnnotator(xmlTagsToRemove, sentenceEndingTags, dateTags, allowFlawedXml);
+  public CleanXmlAnnotator cleanXML(Properties properties) {
+    return new CleanXmlAnnotator(properties);
   }
 
   /**
    * Sentence split, in addition to a bunch of other things in this annotator (be careful to check the implementation!)
    */
-  public Annotator wordToSentences(Properties properties,
-                                      boolean verbose, String boundaryTokenRegex,
-                                      Set<String> boundaryToDiscard, Set<String> htmlElementsToDiscard,
-                                      String newlineIsSentenceBreak, String boundaryMultiTokenRegex,
-                                      Set<String> tokenRegexesToDiscard) {
-    return new WordsToSentencesAnnotator(verbose, boundaryTokenRegex, boundaryToDiscard, htmlElementsToDiscard,
-        newlineIsSentenceBreak, boundaryMultiTokenRegex, tokenRegexesToDiscard);
+  public Annotator wordToSentences(Properties properties) {
+    return new WordsToSentencesAnnotator(properties);
   }
 
   /**
@@ -73,59 +65,19 @@ public class AnnotatorImplementations  {
   /**
    * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxiliary things (like temporal tagging)
    */
-  public Annotator ner(Properties properties) throws IOException {
-
-    List<String> models = new ArrayList<>();
-    String modelNames = properties.getProperty("ner.model");
-    if (modelNames == null) {
-      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+  public Annotator ner(Properties properties) {
+    try {
+      return new NERCombinerAnnotator(properties);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
-    if ( ! modelNames.isEmpty()) {
-      models.addAll(Arrays.asList(modelNames.split(",")));
-    }
-    if (models.isEmpty()) {
-      // Allow for no real NER model - can just use numeric classifiers or SUTime.
-      // Have to unset ner.model, so unlikely that people got here by accident.
-      log.info("WARNING: no NER models specified");
-    }
+  }
 
-    boolean applyNumericClassifiers =
-            PropertiesUtils.getBool(properties,
-                    NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
-                    NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-
-    boolean applyRegexner =
-        PropertiesUtils.getBool(properties,
-            NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
-            NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);
-
-    boolean useSUTime =
-            PropertiesUtils.getBool(properties,
-                    NumberSequenceClassifier.USE_SUTIME_PROPERTY,
-                    NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-
-    NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
-        NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
-
-    boolean verbose = PropertiesUtils.getBool(properties, "ner." + "verbose", false);
-
-    String[] loadPaths = models.toArray(new String[models.size()]);
-
-    Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties,
-            NERClassifierCombiner.DEFAULT_PASS_DOWN_PROPERTIES);
-    if (useSUTime) {
-      // Make sure SUTime parameters are included
-      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".", true);
-      PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
-    }
-    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
-            useSUTime, applyRegexner, combinerProperties, loadPaths);
-
-    int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
-    long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
-    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
-
-    return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime, maxSentenceLength);
+  /**
+   * Run TokensRegex -- annotate patterns found in tokens
+   */
+  public Annotator tokensregex(Properties properties, String name) {
+    return new TokensRegexAnnotator(name, properties);
   }
 
   /**
@@ -138,7 +90,7 @@ public class AnnotatorImplementations  {
   /**
    * Annotate mentions
    */
-  public Annotator mentions(Properties properties, String name) {
+  public Annotator entityMentions(Properties properties, String name) {
     return new EntityMentionsAnnotator(name, properties);
   }
 
@@ -179,9 +131,12 @@ public class AnnotatorImplementations  {
   }
 
   public Annotator custom(Properties properties, String property) {
-    String customName = property.substring(StanfordCoreNLP
-            .CUSTOM_ANNOTATOR_PREFIX.length());
-    String customClassName = properties.getProperty(property);
+    String customName = property;
+    String customClassName = properties.getProperty(StanfordCoreNLP.CUSTOM_ANNOTATOR_PREFIX + property);
+    if (property.startsWith(StanfordCoreNLP.CUSTOM_ANNOTATOR_PREFIX)) {
+      customName = property.substring(StanfordCoreNLP.CUSTOM_ANNOTATOR_PREFIX.length());
+      customClassName = properties.getProperty(property);
+    }
 
     try {
       // name + properties
@@ -217,7 +172,14 @@ public class AnnotatorImplementations  {
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
             true);
-    return new MentionAnnotator(corefProperties);
+    Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
+            Annotator.STANFORD_MENTION + ".",
+            true);
+
+    Properties allPropsForCoref = new Properties();
+    allPropsForCoref.putAll(corefProperties);
+    allPropsForCoref.putAll(mentionProperties);
+    return new MentionAnnotator(allPropsForCoref);
   }
 
   /**
@@ -227,7 +189,13 @@ public class AnnotatorImplementations  {
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
             true);
-    return new CorefAnnotator(corefProperties);
+    Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
+            Annotator.STANFORD_MENTION + ".",
+            true);
+    Properties allPropsForCoref = new Properties();
+    allPropsForCoref.putAll(corefProperties);
+    allPropsForCoref.putAll(mentionProperties);
+    return new CorefAnnotator(allPropsForCoref);
   }
 
   /**
@@ -249,6 +217,20 @@ public class AnnotatorImplementations  {
    */
   public Annotator sentiment(Properties properties, String name) {
     return new SentimentAnnotator(name, properties);
+  }
+
+
+  /**
+   * Annotate with the column data classifier.
+   */
+  public Annotator columnData(Properties properties) {
+    if (properties.containsKey("classify.loadClassifier")) {
+      properties.setProperty("loadClassifier", properties.getProperty("classify.loadClassifier"));
+    }
+    if (!properties.containsKey("loadClassifier")) {
+      throw new RuntimeException("Must load a classifier when creating a column data classifier annotator");
+    }
+    return new ColumnDataClassifierAnnotator(properties);
   }
 
   /**
@@ -285,6 +267,15 @@ public class AnnotatorImplementations  {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_QUOTE + '.');
     return new QuoteAnnotator(relevantProperties);
+  }
+
+  /**
+   * Attribute quotes to speakers
+   */
+  public Annotator quoteattribution(Properties properties) {
+    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+        Annotator.STANFORD_QUOTE_ATTRIBUTION + '.');
+    return new QuoteAttributionAnnotator(relevantProperties);
   }
 
   /**

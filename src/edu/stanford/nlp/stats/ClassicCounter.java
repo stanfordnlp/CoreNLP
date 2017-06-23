@@ -72,6 +72,8 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  */
 public class ClassicCounter<E> implements Serializable, Counter<E>, Iterable<E> {
 
+  // todo [cdm 2016]: Get rid of all the tempMDouble stuff. It just can't be the best way in 2016 - use new Map methods?
+
   Map<E, MutableDouble> map;  // accessed by DeltaCounter
   private final MapFactory<E, MutableDouble> mapFactory;
   private double totalCount; // = 0.0
