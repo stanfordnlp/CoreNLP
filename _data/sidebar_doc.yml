@@ -113,6 +113,9 @@ entries:
         - title: Entity Mentions Annotator 
           url: entitymentions.html
           
+        - title: UD Features
+          url: udfeats.html
+          
         - title: Adding a new annotator
           url: new_annotator.html
 
