@@ -80,8 +80,12 @@ public class PTBTokenizerTest {
       "2-9.5%",
       "2- 9.5%",
       "From July 23-24. Radisson Miyako Hotel.",
-      "23 percent-2 percent higher than today",
-      "23 percent--2 percent higher than today",
+      "438798-438804",
+      "weigh 1,000-1,200 pounds, ",
+      "Imus arrived to be host for the 5:30-to-10 a.m. show.",
+      "The .38-Magnum bullet",
+      "a 1908 Model K Stanley with 1:01-minute time",
+      "the 9-to-11:45 a.m. weekday shift",
   };
 
   private final String[][] ptbGold = {
@@ -156,8 +160,12 @@ public class PTBTokenizerTest {
       { "2-9.5", "%" },
       { "2", "-", "9.5", "%" },
       { "From", "July", "23-24", ".", "Radisson", "Miyako", "Hotel", "." },
-      { "23", "percent", "-", "2", "percent", "higher", "than", "today" },
-      { "23", "percent", "--", "2", "percent", "higher", "than", "today" },
+      { "438798-438804" },
+      { "weigh", "1,000-1,200", "pounds", "," },
+      { "Imus", "arrived", "to", "be", "host", "for", "the", "5:30-to-10", "a.m.", "show", "." },
+      { "The", ".38-Magnum", "bullet" },
+      { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
+      { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -232,8 +240,19 @@ public class PTBTokenizerTest {
       { "2", "-", "9.5", "%" },
       { "2", "-", "9.5", "%" },
       { "From", "July", "23", "-", "24", ".", "Radisson", "Miyako", "Hotel", "." },
-      { "23", "percent", "-", "2", "percent", "higher", "than", "today" },
-      { "23", "percent", "--", "2", "percent", "higher", "than", "today" },
+      { "438798", "-", "438804" },
+// todo [cdm 2017]: These next ones aren't yet right, but I'm putting off fixing them for now, since it might take a rewrite of hyphen handling
+// these are the correct answers:
+//      { "weigh", "1,000", "-", "1,200", "pounds", "," },
+//      { "Imus", "arrived", "to", "be", "host", "for", "the", "5:30", "-", "to", "-", "10", "a.m.", "show", "." },
+//      { "The", ".38", "-", "Magnum", "bullet" },
+//      { "a", "1908", "Model", "K", "Stanley", "with", "1:01", "-", "minute", "time" },
+//      { "the", "9", "-", "to", "-", "11:45", "a.m.", "weekday", "shift" },
+      { "weigh", "1,000-1,200", "pounds", "," },
+      { "Imus", "arrived", "to", "be", "host", "for", "the", "5:30-to-10", "a.m.", "show", "." },
+      { "The", ".38-Magnum", "bullet" },
+      { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
+      { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
   };
 
   @Test

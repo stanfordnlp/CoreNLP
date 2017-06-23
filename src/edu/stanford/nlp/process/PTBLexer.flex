@@ -78,15 +78,13 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  handled symbols are changed to ASCII/Unicode forms, but handled accented
  *  letters are just left as character entities in words.
  *  <p>
- *  <i>Character support:</i>  PTBLexer works works for a large subset of
- *  Unicode Base Multilingual Plane characters (only).  It recognizes all
- *  characters that match the JFlex/Java [:letter:] and [:digit] character
- *  class (but, unfortunately, JFlex does not support most
- *  other Unicode character classes available in Java regular expressions).
- *  It also matches all defined characters in the Unicode ranges U+0000-U+07FF
+ *  <i>Character support:</i>  PTBLexer works for a broad range of common Unicode
+ *  characters. It recognizes all characters that are classed as letter (alphabetic)
+ *  or digit in Unicode.
+ *  It also matches all defined characters in the Unicode range U+0000-U+07FF
  *  excluding control characters except the ones very standardly found in
- *  plain text documents. Finally select other characters commonly found in
- *  English unicode text are included.
+ *  plain text documents. Finally, a fair range of other characters, such as many
+ *  symbols commonly found in English Unicode text and emoji are also recognized.
  *  <p>
  *  <i>Implementation note:</i> The scanner is caseless, but note, if adding
  *  or changing regexps, that caseless does not expand inside character
@@ -735,7 +733,9 @@ THING3 = [\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}(\\?\/[\p{Alpha}\p{Digit}]+(-[
 APOS = ['\u0092\u2019]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or HTML SGML escape */
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
-HTHING = ({LETTER}|{DIGIT})[\p{Alpha}\p{Digit}.,\u00AD]*(-([\p{Alpha}\p{Digit}\u00AD]+(\.[:digit:]+)?|{ACRO2}\.))+
+/* HTHING recognizes hyphenated words, including ones with various kinds of numbers in them.
+   It's not quite clear what this recognizes that THING doesn't. Delete this one?!? */
+HTHING = [\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD]*(-([\p{Alpha}\p{Digit}\u00AD]+(\.[:digit:]+)?|{ACRO2}\.))+
 /* from the CLEAR (biomedical?) treebank documentation */
 /* we're going to split on most hypens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
@@ -1231,8 +1231,14 @@ nno/[^\p{Alpha}\p{Digit}]
 {HTHING}        { breakByHyphens(yytext());
                   if (DEBUG) { logger.info("Used {HTHING} to recognize " + yytext() + " as " + removeSoftHyphens(yytext())); }
                   return getNext(removeSoftHyphens(yytext()), yytext()); }
-{HTHING}\./{INSENTP}         {  breakByHyphens(yytext());
-                  return getNext(removeSoftHyphens(yytext()), yytext()); }
+{HTHING}\./{INSENTP}
+                { String tok = yytext();
+                  breakByHyphens(tok);
+                  tok = yytext();
+                  String norm = removeSoftHyphens(tok);
+                  if (DEBUG) { logger.info("Used {HTHING} (2) to recognize " + tok + " as " + norm); }
+                  return getNext(norm, tok);
+                }
 /* {THING}\./{INSENTP}          { String tok = yytext();       // cdm [2017]: I don't understand what this was for, and it seems harmful....
                                /* A THING can contain quote like O'Malley */
                                String norm = handleQuotes(tok, false);
@@ -1240,7 +1246,8 @@ nno/[^\p{Alpha}\p{Digit}]
                                                          "; probablyLeft=" + false); }
                                 return getNext(norm, tok);
                               } */
-{THING}         { String tok = yytext();
+{THING}         { // breakByHyphens(yytext()); // this is causing fail of attempted to pushback too much!
+                  String tok = yytext();
                   /* A THING can contain quote like O'Malley */
                   String norm = handleQuotes(tok, false);
                   if (DEBUG) { logger.info("Used {THING} (2) to recognize " + tok + " as " + norm +
@@ -1249,13 +1256,6 @@ nno/[^\p{Alpha}\p{Digit}]
                 }
 {THINGA}\./{INSENTP}    { return getNormalizedAmpNext(); }
 {THINGA}        { return getNormalizedAmpNext(); }
-'/[:letter:][^ \t\n\r\u00A0] { String tok = yytext();
-                               /* invert single quote - often but not always right */
-                               String norm = handleQuotes(tok, true);
-                               if (DEBUG) { logger.info("Used single straight quote to recognize " + tok + " as " + norm +
-                                                        "; probablyLeft=" + true); }
-                               return getNext(norm, tok);
-                              }
 /* This REDAUX is needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
 {REDAUX}        { String tok = yytext();
                   String norm = handleQuotes(tok, false);
@@ -1269,9 +1269,17 @@ nno/[^\p{Alpha}\p{Digit}]
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
                 }
+{QUOTES}/[:letter:][^ \t\n\r\u00A0]
+                { String tok = yytext();
+                  /* invert single quote - often but not always right */
+                  String norm = handleQuotes(tok, true);
+                  if (DEBUG) { logger.info("Used {QUOTES} to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + true); }
+                  return getNext(norm, tok);
+                }
 {QUOTES}        { String tok = yytext();
                   String norm = handleQuotes(tok, false);
-                  if (DEBUG) { logger.info("Used {QUOTES} to recognize " + tok + " as " + norm +
+                  if (DEBUG) { logger.info("Used {QUOTES} (2) to recognize " + tok + " as " + norm +
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
                 }
