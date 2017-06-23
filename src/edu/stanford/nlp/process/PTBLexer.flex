@@ -1,7 +1,7 @@
 package edu.stanford.nlp.process;
 
-// Stanford English Tokenizer -- a deterministic, fast high-quality tokenizer
-// Copyright (c) 2002-2009 The Board of Trustees of
+// Stanford English Tokenizer -- a deterministic, fast, high-quality tokenizer
+// Copyright (c) 2002-2017 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -20,8 +20,8 @@ package edu.stanford.nlp.process;
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/
@@ -416,7 +416,9 @@ import edu.stanford.nlp.util.logging.Redwood;
         case "early":
           yypushback(in.length() - 1);
         default:
-          if (lastWord.length() > 0 && lastWord.charAt(0) <= 57 && lastWord.charAt(0) >= 48) {  // last word is a number as well
+          if (lastWord.length() > 0 &&
+              lastWord.charAt(0) <= 57 && lastWord.charAt(0) >= 48 &&
+              prevWordAfter != null && prevWordAfter.length() == 0) {  // last word is a number as well
             yypushback(in.length() - 1);
           }
           break;
@@ -723,13 +725,13 @@ FILENAME = ({LETTER}|{DIGIT})+([-._/]({LETTER}|{DIGIT})+)*\.{FILENAME_EXT}
 /* The $ was for things like New$ */
 /* WAS: only keep hyphens with short one side like co-ed */
 /* But treebank just allows hyphenated things as words! */
-THING = ([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+({HYPHEN}([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+)*
+THING = ([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?(([:letter:]|[:digit:])+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?(([:letter:]|[:digit:])+|{NUMBER}))*
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [A-Za-z0-9]+(-[A-Za-z]+){0,2}(\\?\/[A-Za-z0-9]+(-[A-Za-z]+){0,2}){1,2}
 APOS = ['\u0092\u2019]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or HTML SGML escape */
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
-HTHING = ({LETTER}|{DIGIT})[A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
+HTHING = ({LETTER}|{DIGIT})[A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+(\.[:digit:]+)?|{ACRO2}\.))+
 /* from the CLEAR (biomedical?) treebank documentation */
 /* we're going to split on most hypens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
@@ -766,7 +768,7 @@ SREDAUX = n{APOSETCETERA}t
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
 APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
-FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"\'<>|.!?(){},;:&=+\[\]\\\/-]
+FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"\'<>|.!?(){},;:&=+\[\]-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
@@ -1006,8 +1008,7 @@ nno/[^A-Za-z0-9]
                     int spaceIndex = indexOfSpace(txt);
                     if (spaceIndex >= 0) {
                       yypushback(txt.length() - spaceIndex);
-                      String newText = yytext();
-                      return getNext(newText, newText);
+                      return getNext();
                     }
                   }
                   if (escapeForwardSlashAsterisk) {
@@ -1016,7 +1017,7 @@ nno/[^A-Za-z0-9]
                   if (normalizeSpace) {
                     txt = txt.replace(' ', '\u00A0'); // change space to non-breaking space
                   }
-                  return getNext(txt, txt);
+                  return getNext(txt, yytext());
                 }
 {FRAC2}                 { return normalizeFractions(yytext()); }
 {TBSPEC}                { return getNormalizedAmpNext(); }
@@ -1224,7 +1225,8 @@ nno/[^A-Za-z0-9]
 {NEWLINE}       { if (tokenizeNLs) {
                       return getNext(NEWLINE_TOKEN, yytext()); // js: for tokenizing carriage returns
                   } else if (invertible) {
-                      prevWordAfter.append(yytext());
+                    // System.err.println("Appending newline: |" + yytext() + "|");
+                    prevWordAfter.append(yytext());
                   }
                 }
 &nbsp;          { if (invertible) {
@@ -1271,10 +1273,13 @@ nno/[^A-Za-z0-9]
           }
         }
 <<EOF>> { if (invertible) {
-            prevWordAfter.append(yytext());
+            // prevWordAfter.append(yytext());
             String str = prevWordAfter.toString();
-            prevWordAfter.setLength(0);
+            // System.err.println("At end of text making after: |" + str + "|");
             prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
+            // System.err.println("prevWord is |" + prevWord.get(CoreAnnotations.TextAnnotation.class) + "|, its after is |" +
+            //         prevWord.get(CoreAnnotations.AfterAnnotation.class) + "|");
+            prevWordAfter.setLength(0);
           }
           return null;
         }

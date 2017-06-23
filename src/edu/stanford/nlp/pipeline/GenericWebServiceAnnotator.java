@@ -64,8 +64,8 @@ public class GenericWebServiceAnnotator extends WebServiceAnnotator {
   public GenericWebServiceAnnotator(Properties props) {
     // annotator endpoint
     annotatorEndpoint = props.getProperty("generic.endpoint");
-    annotatorRequires = parseClasses(props.getProperty("generic.requires"));
-    annotatorProvides = parseClasses(props.getProperty("generic.provides"));
+    annotatorRequires = parseClasses(props.getProperty("generic.requires", ""));
+    annotatorProvides = parseClasses(props.getProperty("generic.provides", ""));
     startCommand = Optional.ofNullable(props.getProperty("generic.start")).map(CommandLineTokenizer::tokenize);
     stopCommand = Optional.ofNullable(props.getProperty("generic.stop")).map(CommandLineTokenizer::tokenize);
 
@@ -116,7 +116,7 @@ public class GenericWebServiceAnnotator extends WebServiceAnnotator {
       conn = (HttpURLConnection) new URL(annotatorEndpoint + "/annotate/").openConnection();
       conn.setRequestMethod("POST");
       conn.setDoOutput(true);
-      conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+      conn.setRequestProperty("Content-Type", "application/octet-stream; charset=UTF-8");
 
       try(OutputStream outputStream = conn.getOutputStream()) {
         serializer.toProto(ann).writeDelimitedTo(outputStream);

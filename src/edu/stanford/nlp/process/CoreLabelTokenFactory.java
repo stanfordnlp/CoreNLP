@@ -14,7 +14,7 @@ import edu.stanford.nlp.ling.CoreLabel;
  * begin and position after offsets in BeginPositionAnnotation and
  * EndPositionAnnotation.  If the tokens are built in PTBTokenizer with
  * an "invertible" tokenizer, you will also get a BeforeAnnotation and for
- * the last token an AfterAnnotation.You can also get an empty CoreLabel token
+ * the last token an AfterAnnotation. You can also get an empty CoreLabel token.
  *
  * @author Anna Rafferty
  * @author Sonal Gupta (now implements CoreTokenFactory, you can make tokens using many options)
