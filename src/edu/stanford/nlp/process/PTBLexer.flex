@@ -416,7 +416,9 @@ import edu.stanford.nlp.util.logging.Redwood;
         case "early":
           yypushback(in.length() - 1);
         default:
-          if (lastWord.length() > 0 && lastWord.charAt(0) <= 57 && lastWord.charAt(0) >= 48) {  // last word is a number as well
+          if (lastWord.length() > 0 &&
+              lastWord.charAt(0) <= 57 && lastWord.charAt(0) >= 48 &&
+              prevWordAfter != null && prevWordAfter.length() == 0) {  // last word is a number as well
             yypushback(in.length() - 1);
           }
           break;
@@ -473,16 +475,17 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
   private static final Pattern singleQuote = Pattern.compile("&apos;|'");
-  private static final Pattern doubleQuote = Pattern.compile("\"|&quot;");
+  private static final Pattern doubleQuote = Pattern.compile("\"|''|&quot;");
 
   // 82,84,91,92,93,94 aren't valid unicode points, but sometimes they show
   // up from cp1252 and need to be translated
   private static final Pattern leftSingleQuote = Pattern.compile("[\u0082\u0091\u2018\u201A\u201B\u2039]");
   private static final Pattern rightSingleQuote = Pattern.compile("[\u0092\u2019\u203A]");
-  private static final Pattern leftDoubleQuote = Pattern.compile("[\u0084\u0093\u201C\u201E\u00AB]");
-  private static final Pattern rightDoubleQuote = Pattern.compile("[\u0094\u201D\u00BB]");
+  private static final Pattern leftDoubleQuote = Pattern.compile("[\u0084\u0093\u201C\u201E\u00AB]|[\u0091\u2018]'");
+  private static final Pattern rightDoubleQuote = Pattern.compile("[\u0094\u201D\u00BB]|[\u0092\u2019]''");
 
   private static String latexQuotes(String in, boolean probablyLeft) {
+    // System.err.println("Handling quote on " + in + " probablyLeft=" + probablyLeft);
     String s1 = in;
     if (probablyLeft) {
       s1 = singleQuote.matcher(s1).replaceAll("`");
@@ -495,6 +498,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     s1 = rightSingleQuote.matcher(s1).replaceAll("'");
     s1 = leftDoubleQuote.matcher(s1).replaceAll("``");
     s1 = rightDoubleQuote.matcher(s1).replaceAll("''");
+    // System.err.println("  Mapped to " + s1);
     return s1;
   }
 
@@ -679,9 +683,9 @@ SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]*([ ]+([A-Za-z][A-Za-z0
 ( +[A-Za-z][A-Za-z0-9:.-]*)*
 FOO = ([ ]+[A-Za-z][A-Za-z0-9:.-]*)*
 SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]* *)>
+SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*['\"][^\r\n'\"]*['\"]|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)\>
    --- */
-/* SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*['\"][^\r\n'\"]*['\"]|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)\>
-*/
+
 // <STORYID cat=w pri=u>
 // SGML1 allows attribute value match over newline; SGML2 does not.
 SGML1 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^']*'|\"[^\"]*\"|[A-Za-z][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
@@ -723,13 +727,13 @@ FILENAME = ({LETTER}|{DIGIT})+([-._/]({LETTER}|{DIGIT})+)*\.{FILENAME_EXT}
 /* The $ was for things like New$ */
 /* WAS: only keep hyphens with short one side like co-ed */
 /* But treebank just allows hyphenated things as words! */
-THING = ([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+({HYPHEN}([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+)*
+THING = ([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?(([:letter:]|[:digit:])+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?(([:letter:]|[:digit:])+|{NUM}))*
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
-THING3 = [A-Za-z0-9]+(-[A-Za-z]+){0,2}(\\?\/[A-Za-z0-9]+(-[A-Za-z]+){0,2}){1,2}
+THING3 = [\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}(\\?\/[\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}){1,2}
 APOS = ['\u0092\u2019]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or HTML SGML escape */
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
-HTHING = ({LETTER}|{DIGIT})[A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
+HTHING = ({LETTER}|{DIGIT})[\p{Alpha}\p{Digit}.,\u00AD]*(-([\p{Alpha}\p{Digit}\u00AD]+(\.[:digit:]+)?|{ACRO2}\.))+
 /* from the CLEAR (biomedical?) treebank documentation */
 /* we're going to split on most hypens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
@@ -748,14 +752,14 @@ quasi- quadri- quinque- -rama re- recto- salpingo- sero- semi- sept- soci- sub- 
 tele- tera- tetra- tri- u- uber- uh-huh uh-oh ultra- un- uni- vice- veno- ventriculo- -wise x-
 */
 HTHINGEXCEPTIONPREFIXED = (e|a|u|x|agro|ante|anti|arch|be|bi|bio|co|counter|cross|cyber|de|eco|ex|extra|inter|intra|macro|mega|micro|mini|multi|neo|non|over|pan|para|peri|post|pre|pro|pseudo|quasi|re|semi|sub|super|tri|ultra|un|uni|vice)(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
-HTHINGEXCEPTIONSUFFIXED = ([A-Za-z0-9][A-Za-z0-9.,\u00AD]*)(-)(esque|ette|fest|fold|gate|itis|less|most|o-torium|rama|wise)(s|es|d|ed)?
+HTHINGEXCEPTIONSUFFIXED = ([\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD]*)(-)(esque|ette|fest|fold|gate|itis|less|most|o-torium|rama|wise)(s|es|d|ed)?
 HTHINGEXCEPTIONWHOLE = (mm-hm|mm-mm|o-kay|uh-huh|uh-oh)(s|es|d|ed)?
 
 /* things like 'll and 'm */
 REDAUX = {APOS}([msdMSD]|re|ve|ll)
 /* For things that will have n't on the end. They can't end in 'n' */
 /* \u00AD is soft hyphen */
-SWORD = [A-Za-z\u00AD]*[A-MO-Za-mo-z](\u00AD)*
+SWORD = [\p{Alpha}\u00AD]*[A-MO-Za-mo-z](\u00AD)*
 SREDAUX = n{APOSETCETERA}t
 /* Tokens you want but already okay: C'mon 'n' '[2-9]0s '[eE]m 'till?
    [Yy]'all 'Cause Shi'ite B'Gosh o'clock.  Here now only need apostrophe
@@ -860,8 +864,8 @@ ASTS = \*+|(\\\*){1,3}
 HASHES = #+
 FNMARKS = {ATS}|{HASHES}|{UNDS}
 INSENTP = [,;:\u3001]
-QUOTES = {APOS}|''|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB]{1,2}
-DBLQUOT = \"|&quot;
+QUOTES = {APOS}|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB]{1,2}
+DBLQUOT = \"|&quot;|['\u0091\u0092\u2018\u2019]'
 /* Cap'n for captain, c'est for french */
 TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|f[-\*][-c*]k(in[g']|e[dr])?|sh[-\*]t(ty)?|c[-*]nts?
 TBSPEC2 = {APOS}[0-9][0-9]
@@ -923,7 +927,7 @@ dunno
                           }
                         }
 /* Remnant after pushing back from dunno */
-nno/[^A-Za-z0-9]
+nno/[^\p{Alpha}\p{Digit}]
                         { if (splitAssimilations) {
                             yypushback(2) ; return getNext();
                           } else {
@@ -987,9 +991,9 @@ nno/[^A-Za-z0-9]
                           return getNext(txt, yytext()); }
 {EMAIL}                 { return getNext(); }
 {TWITTER}               { return getNext(); }
-{REDAUX}/[^A-Za-z]      { return handleQuotes(yytext(), false);
+{REDAUX}/[^\p{Alpha}]      { return handleQuotes(yytext(), false);
                         }
-{SREDAUX}/[^A-Za-z]     { return handleQuotes(yytext(), false);
+{SREDAUX}/[^\p{Alpha}]     { return handleQuotes(yytext(), false);
                         }
 {DATE}                  { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
@@ -1093,14 +1097,14 @@ nno/[^A-Za-z0-9]
                           }
                           return getNext(txt, yytext());
                         }
-{DBLQUOT}/[A-Za-z0-9$]  { return handleQuotes(yytext(), true); }
+{DBLQUOT}/[\p{Alpha}\p{Digit}$]  { return handleQuotes(yytext(), true); }
 {DBLQUOT}               { return handleQuotes(yytext(), false); }
 \x7f                    { if (invertible) {
                             prevWordAfter.append(yytext());
                         } }
 {LESSTHAN}              { return getNext("<", yytext()); }
 {GREATERTHAN}           { return getNext(">", yytext()); }
-{SMILEY}/[^A-Za-z0-9] { String txt = yytext();
+{SMILEY}/[^\p{Alpha}\p{Digit}] { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
                     txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
@@ -1189,7 +1193,7 @@ nno/[^A-Za-z0-9]
                     return getNext();
                   }
                 }
-/* {HTHING}/[^a-zA-Z0-9.+]    { return getNext(removeSoftHyphens(yytext()),
+/* {HTHING}/[^\p{Alpha}\p{Digit}.+]    { return getNext(removeSoftHyphens(yytext()),
                                                yytext()); } */
 {HTHINGEXCEPTIONWHOLE}  {return getNext(removeSoftHyphens(yytext()), yytext());}
 {HTHINGEXCEPTIONWHOLE}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
@@ -1205,7 +1209,7 @@ nno/[^A-Za-z0-9]
 {THING}         { return handleQuotes(yytext(), false); }
 {THINGA}\./{INSENTP}    { return getNormalizedAmpNext(); }
 {THINGA}        { return getNormalizedAmpNext(); }
-'/[A-Za-z][^ \t\n\r\u00A0] { /* invert quote - often but not always right */
+'/[:letter:][^ \t\n\r\u00A0] { /* invert quote - often but not always right */
                   return handleQuotes(yytext(), true);
                 }
 /* This REDAUX is needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */

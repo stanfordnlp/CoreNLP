@@ -90,6 +90,7 @@ message Sentence {
 
   optional string           text                                = 12;   // Only needed if we're only saving the sentence.
 
+  optional uint32           lineNumber                          = 20;
 
   // Fields set by other annotators in CoreNLP
   optional bool            hasRelationAnnotations              = 51;
