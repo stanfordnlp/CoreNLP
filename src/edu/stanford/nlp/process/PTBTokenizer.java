@@ -444,7 +444,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       }
       for (int j = 0; j < numFiles; j++) {
         Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
-        if (outputFileList != null) {
+        if (out == null) {
           out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
         }
         numTokens += tokReader(r, out, parseInsidePattern, options, preserveLines, dump, lowerCase);
