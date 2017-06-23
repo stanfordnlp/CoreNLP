@@ -1,4 +1,4 @@
-package edu.stanford.nlp.ie;
+package edu.stanford.nlp.ie; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.sequences.ListeningSequenceModel;
@@ -123,7 +123,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
   public void setInitialSequence(int[] initialSequence) {
     this.sequence = initialSequence;
     entities = new EntityBIO[initialSequence.length];
-    // Arrays.fill(entities, null);  // not needed; Java arrays zero initialized
+    Arrays.fill(entities, null);
     for (int i = 0; i < initialSequence.length; i++) {
       if (initialSequence[i] != backgroundSymbol) {
         String rawTag = classIndex.get(sequence[i]);

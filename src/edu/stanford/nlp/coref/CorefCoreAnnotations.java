@@ -27,7 +27,6 @@ public class CorefCoreAnnotations {
    * not used by the new dcoref system.
    */
   public static class CorefAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -41,7 +40,6 @@ public class CorefCoreAnnotations {
    * sentence is IntTuple.get(1)
    */
   public static class CorefDestAnnotation implements CoreAnnotation<IntTuple> {
-    @Override
     public Class<IntTuple> getType() {
       return IntTuple.class;
     }
@@ -55,7 +53,6 @@ public class CorefCoreAnnotations {
    */
   @Deprecated
   public static class CorefGraphAnnotation implements CoreAnnotation<List<Pair<IntTuple, IntTuple>>> {
-    @Override
     public Class<List<Pair<IntTuple, IntTuple>>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -68,7 +65,6 @@ public class CorefCoreAnnotations {
    * annotation is typically attached to tokens (CoreLabel).
    */
   public static class CorefClusterIdAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -80,7 +76,6 @@ public class CorefCoreAnnotations {
    * annotated which creates a cycle.
    */
   public static class CorefClusterAnnotation implements CoreAnnotation<Set<CoreLabel>> {
-    @Override
     public Class<Set<CoreLabel>> getType() {
       return ErasureUtils.uncheckedCast(Set.class);
     }
@@ -90,7 +85,6 @@ public class CorefCoreAnnotations {
    * CorefChainID - CorefChain map
    */
   public static class CorefChainAnnotation implements CoreAnnotation<Map<Integer, CorefChain>> {
-    @Override
     public Class<Map<Integer, CorefChain>> getType() {
       return ErasureUtils.uncheckedCast(Map.class);
     }
@@ -100,7 +94,6 @@ public class CorefCoreAnnotations {
    * this annotation marks in every sentence the mentions used for coref
    */
   public static class CorefMentionsAnnotation implements CoreAnnotation<List<Mention>> {
-    @Override
     public Class<List<Mention>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }

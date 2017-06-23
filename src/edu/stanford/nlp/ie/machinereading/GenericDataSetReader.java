@@ -1,4 +1,4 @@
-package edu.stanford.nlp.ie.machinereading;
+package edu.stanford.nlp.ie.machinereading; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
@@ -135,7 +135,8 @@ public class GenericDataSetReader  {
       //
       retVal = this.read(path);
     } catch (Exception ex) {
-      IOException iox = new IOException(ex);
+      IOException iox = new IOException();
+      iox.initCause(ex);
       throw iox;
     }
 
@@ -148,8 +149,8 @@ public class GenericDataSetReader  {
     }
     return retVal;
   }
-
-  private static void modifyUsingCoreNLPNER(Annotation doc) {
+  
+  private void modifyUsingCoreNLPNER(Annotation doc) {
     Properties ann = new Properties();
     ann.setProperty("annotators", "pos, lemma, ner");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(ann, false);
@@ -170,7 +171,7 @@ public class GenericDataSetReader  {
           //System.out.println("new ner tag is " + entityNertag);
         }
       }
-
+      
     }
   }
 
@@ -501,7 +502,7 @@ public class GenericDataSetReader  {
     label.setValue(token);
     label.set(CoreAnnotations.TextAnnotation.class, token);
     label.set(CoreAnnotations.ValueAnnotation.class, token);
-
+    
     return label;
   }
 

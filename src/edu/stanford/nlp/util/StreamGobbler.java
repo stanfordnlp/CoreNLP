@@ -17,17 +17,11 @@ public class StreamGobbler extends Thread {
 
   InputStream is;
   Writer outputFileHandle;
-  boolean shouldRun = true;
-
 
   public StreamGobbler (InputStream is, Writer outputFileHandle) {
     this.is = is;
     this.outputFileHandle = outputFileHandle;
     this.setDaemon(true);
-  }
-
-  public void kill() {
-    this.shouldRun = false;
   }
 
   public void run() {
@@ -38,7 +32,7 @@ public class StreamGobbler extends Thread {
 
       String s = null;
       //noinspection ConstantConditions
-      while (s == null && shouldRun) {
+      while (s == null) {
         while ( (s = br.readLine()) != null ) {
           outputFileHandle.write(s);
           outputFileHandle.write("\n");

@@ -118,6 +118,7 @@ public class ArabicSegmenterAnnotator implements Annotator  {
 
   private void doOneSentence(CoreMap annotation) {
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
+    List<CoreLabel> sentChars = annotation.get(SegmenterCoreAnnotations.CharactersAnnotation.class);
     List<CoreLabel> tokens = segmenter.segmentStringToTokenList(text);
     annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
   }

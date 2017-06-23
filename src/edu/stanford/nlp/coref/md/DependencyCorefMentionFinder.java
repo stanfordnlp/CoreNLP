@@ -300,8 +300,6 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
       findHeadInDependency(s, m);
     }
   }
-
-  @Override
   public void findHead(CoreMap s, List<Mention> mentions) {
     for (Mention m : mentions){
       findHeadInDependency(s, m);
@@ -337,6 +335,124 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
       m.headIndex = curIdx;
       m.headWord = sent.get(m.headIndex);
       m.headString = m.headWord.word().toLowerCase(Locale.ENGLISH);
+    }
+  }
+
+//  /** Filter out all spurious mentions
+//   * @param goldMentionsByID */
+//  @Override
+//  public void removeSpuriousMentionsEn(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict) {
+//
+//    Set<String> standAlones = new HashSet<String>();
+//    List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
+//
+//    for(int i=0 ; i < predictedMentions.size() ; i++) {
+//      CoreMap s = sentences.get(i);
+//      List<Mention> mentions = predictedMentions.get(i);
+//
+//      Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
+//      List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
+//      Set<Mention> remove = Generics.newHashSet();
+//
+//      for(Mention m : mentions){
+//        String headPOS = m.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+//        String headNE = m.headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+//
+//        // non word such as 'hmm'
+//        if(dict.nonWords.contains(m.headString)) remove.add(m);
+//
+//        // quantRule : not starts with 'any', 'all' etc
+//        if (m.originalSpan.size() > 0) {
+//          String firstWord = m.originalSpan.get(0).get(CoreAnnotations.TextAnnotation.class).toLowerCase(Locale.ENGLISH);
+//          if(firstWord.matches("none|no|nothing|not")) {
+//            remove.add(m);
+//          }
+////          if(dict.quantifiers.contains(firstWord)) remove.add(m);
+//        }
+//
+//        // partitiveRule
+//        if (partitiveRule(m, sent, dict)) {
+//          remove.add(m);
+//        }
+//
+//        // bareNPRule
+//        if (headPOS.equals("NN") && !dict.temporals.contains(m.headString)
+//            && (m.originalSpan.size()==1 || m.originalSpan.get(0).get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("JJ"))) {
+//          remove.add(m);
+//        }
+//
+//        // remove generic rule
+////          if(m.generic==true) remove.add(m);
+//
+//        if (m.headString.equals("%")) {
+//          remove.add(m);
+//        }
+//        if (headNE.equals("PERCENT") || headNE.equals("MONEY")) {
+//          remove.add(m);
+//        }
+//
+//        // adjective form of nations
+//        // the [American] policy -> not mention
+//        // speak in [Japanese] -> mention
+//        // check if the mention is noun and the next word is not noun
+//        if (dict.isAdjectivalDemonym(m.spanToString())) {
+//          remove.add(m);
+//        }
+//
+//        // stop list (e.g., U.S., there)
+//        if (inStopList(m)) remove.add(m);
+//      }
+//
+//      // nested mention with shared headword (except apposition, enumeration): pick larger one
+//      for (Mention m1 : mentions){
+//        for (Mention m2 : mentions){
+//          if (m1==m2 || remove.contains(m1) || remove.contains(m2)) continue;
+//          if (m1.sentNum==m2.sentNum && m1.headWord==m2.headWord && m2.insideIn(m1)) {
+//            if (m2.endIndex < sent.size() && (sent.get(m2.endIndex).get(CoreAnnotations.PartOfSpeechAnnotation.class).equals(",")
+//                || sent.get(m2.endIndex).get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CC"))) {
+//              continue;
+//            }
+//            remove.add(m2);
+//          }
+//        }
+//      }
+//      mentions.removeAll(remove);
+//    }
+//  }
+  /** Filter out all spurious mentions  */
+  @Override
+  public void removeSpuriousMentionsEn(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict) {
+
+    List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
+
+    for(int i=0 ; i < predictedMentions.size() ; i++) {
+      CoreMap s = sentences.get(i);
+      List<Mention> mentions = predictedMentions.get(i);
+
+      List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
+      Set<Mention> remove = Generics.newHashSet();
+
+      for(Mention m : mentions){
+        String headPOS = m.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+
+        // non word such as 'hmm'
+        if(dict.nonWords.contains(m.headString)) remove.add(m);
+
+        // adjective form of nations
+        // the [American] policy -> not mention
+        // speak in [Japanese] -> mention
+        // check if the mention is noun and the next word is not noun
+        if (dict.isAdjectivalDemonym(m.spanToString())) {
+          if(!headPOS.startsWith("N")
+              || (m.endIndex < sent.size() && sent.get(m.endIndex).tag().startsWith("N")) ) {
+            remove.add(m);
+          }
+        }
+
+        // stop list (e.g., U.S., there)
+        if (inStopList(m)) remove.add(m);
+      }
+      mentions.removeAll(remove);
     }
   }
 }

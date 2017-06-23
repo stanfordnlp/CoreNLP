@@ -207,7 +207,7 @@ public class CharniakScoredParsesReaderWriter {
             } else {
               if (score == null) {
                 // read score
-                score = Double.parseDouble(wsDelimiter.split(line, 2)[0]);
+                score = Double.parseDouble(line);
               } else {
                 // Reading a parse
                 curParse = new ScoredObject<>(Trees.readTree(line), score);

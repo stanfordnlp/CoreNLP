@@ -1424,7 +1424,7 @@ public class SeqClassifierFlags implements Serializable  {
         intern = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("mergetags")) {
         mergeTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("iobTags")) {
+      } else if (key.equalsIgnoreCase("iobtags")) {
         iobTags = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useViterbi")) {
         useViterbi = Boolean.parseBoolean(val);

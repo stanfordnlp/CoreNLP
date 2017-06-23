@@ -38,56 +38,51 @@ public class SpanishVerbStripperITest extends TestCase {
     assertTrue(SpanishVerbStripper.isStrippable("ponerlos"));
   }
 
-  private void checkPronouns(String word, String originalStem,
-                             String normalizedStem, String... pronouns) {
+  private void checkPronouns(String word, String verb, String... pronouns) {
     if (pronouns.length == 0) {
       // special case, the method returns null if no pronouns found to separate off
       assertNull(verbStripper.separatePronouns(word));
     } else {
       List<String> pronounList = Arrays.asList(pronouns);
-
-      SpanishVerbStripper.StrippedVerb result = verbStripper.separatePronouns(word);
-      assertEquals(originalStem, result.getOriginalStem());
-      assertEquals(normalizedStem, result.getStem());
-      assertEquals(pronounList, result.getPronouns());
+      assertEquals(new Pair<>(verb, pronounList), verbStripper.separatePronouns(word));
     }
   }
 
   @SuppressWarnings("unchecked")
   public void testSeparatePronouns() {
 
-    checkPronouns("decirme", "decir", "decir", "me");
+    checkPronouns("decirme", "decir", "me");
 
     // Should match capitalized verbs as well
-    checkPronouns("Decirme", "Decir", "Decir", "me");
+    checkPronouns("Decirme", "Decir", "me");
 
-    checkPronouns("contándoselo", "contándo", "contando", "se", "lo");
+    checkPronouns("contándoselo", "contando", "se", "lo");
 
-    checkPronouns("aplicárseles", "aplicár", "aplicar", "se", "les");
+    checkPronouns("aplicárseles", "aplicar", "se", "les");
 
     // Don't treat plural past participles as 2nd-person commands!
-    checkPronouns("sentados", null, null);
+    checkPronouns("sentados", "sentados");
 
-    checkPronouns("sentaos", "senta", "sentad", "os");
+    checkPronouns("sentaos", "sentad", "os");
 
-    checkPronouns("damelo", "da", "da", "me", "lo");
+    checkPronouns("damelo", "da", "me", "lo");
 
-    checkPronouns("Imagínense", "Imagínen", "Imaginen", "se");
+    checkPronouns("Imagínense", "Imaginen", "se");
 
     // Match elided 1P verb forms
-    checkPronouns("vámonos", "vámo", "vamos", "nos");
+    checkPronouns("vámonos", "vamos", "nos");
 
     // Let's write it to her
-    checkPronouns("escribámosela", "escribámo", "escribamos", "se", "la");
+    checkPronouns("escribámosela", "escribamos", "se", "la");
 
     // Looks like a verb with a clitic pronoun.. but it's not! There are
     // a *lot* of these in Spanish.
-    checkPronouns("címbalo", null, null);
+    checkPronouns("címbalo", "címbalo");
 
-    checkPronouns("contando", null, null);
+    checkPronouns("contando", "contando");
 
     // [cdm, Jan 2016] I think this shouldn't be split, but it was being erroneously split as [sal, os, null]. Ouch! */
-    checkPronouns("salos", null, null);
+    checkPronouns("salos", "salos");
 
   }
 

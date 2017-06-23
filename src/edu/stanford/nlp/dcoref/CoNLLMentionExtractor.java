@@ -28,9 +28,7 @@ package edu.stanford.nlp.dcoref;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,8 +49,7 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * Extracts coref mentions from CoNLL2011 data files.
- *
+ * Extracts coref mentions from a CoNLL2011 data files
  * @author Angel Chang
  */
 public class CoNLLMentionExtractor extends MentionExtractor {
@@ -120,8 +117,8 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         }
         // generate the dependency graph
         try {
-          SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.ENHANCED, GrammaticalStructure.Extras.NONE);
-          SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, GrammaticalStructure.Extras.NONE);
+          SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.ENHANCED, GrammaticalStructure.Extras.NONE, threadSafe);
+          SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, GrammaticalStructure.Extras.NONE, threadSafe);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
           sentence.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, deps);
         } catch(Exception e) {
@@ -176,7 +173,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     return doc;
   }
 
-  private static List<List<Mention>> makeCopy(List<List<Mention>> mentions) {
+  public static List<List<Mention>> makeCopy(List<List<Mention>> mentions) {
     List<List<Mention>> copy = new ArrayList<>(mentions.size());
     for (List<Mention> sm:mentions) {
       List<Mention> sm2 = new ArrayList<>(sm.size());
@@ -240,10 +237,10 @@ public class CoNLLMentionExtractor extends MentionExtractor {
       }
     }
     int newMentionID = maxCorefClusterId + 1;
-    for (Map.Entry<String, Collection<CoreMap>> idChainEntry : corefChainMap.entrySet()) {
-      int id = Integer.parseInt(idChainEntry.getKey());
+    for (String corefIdStr:corefChainMap.keySet()) {
+      int id = Integer.parseInt(corefIdStr);
       int clusterMentionCnt = 0;
-      for (CoreMap m : idChainEntry.getValue()) {
+      for (CoreMap m:corefChainMap.get(corefIdStr)) {
         clusterMentionCnt++;
         Mention mention = new Mention();
 

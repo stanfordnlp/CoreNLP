@@ -5,7 +5,10 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.Map.Entry;
 
 /** Utilities methods for standard (but woeful) Java Properties objects.
@@ -33,13 +36,6 @@ public class PropertiesUtils {
     }
     value = value.toLowerCase();
     return ! (value.equals("false") || value.equals("no") || value.equals("off"));
-  }
-
-  public static boolean hasPropertyPrefix(Properties props, String prefix) {
-    for (Object o : props.keySet()) {
-      if (o instanceof String && ((String) o).startsWith(prefix)) return true;
-    }
-    return false;
   }
 
   /** Create a Properties object from the passed in String arguments.
@@ -132,7 +128,9 @@ public class PropertiesUtils {
   @SuppressWarnings("unchecked")
   public static void checkProperties(Properties properties, Properties defaults) {
     Set<String> names = Generics.newHashSet();
-    names.addAll(properties.stringPropertyNames());
+    for (String name : properties.stringPropertyNames()) {
+      names.add(name);
+    }
     for (String defaultName : defaults.stringPropertyNames()) {
       names.remove(defaultName);
     }
@@ -234,11 +232,15 @@ public class PropertiesUtils {
   }
 
   /**
-   * Get the value of a property.  If the key is not present, returns defaultValue.
-   * This is just equivalent to props.getProperty(key, defaultValue).
+   * Load an integer property.  If the key is not present, returns defaultValue.
    */
   public static String getString(Properties props, String key, String defaultValue) {
-    return props.getProperty(key, defaultValue);
+    String value = props.getProperty(key);
+    if (value != null) {
+      return value;
+    } else {
+      return defaultValue;
+    }
   }
 
   /**
@@ -330,27 +332,16 @@ public class PropertiesUtils {
 
   /**
    * Loads a comma-separated list of strings from Properties.  Commas may be quoted if needed, e.g.:
-   *
    *    property1 = value1,value2,"a quoted value",'another quoted value'
    *
    * getStringArray(props, "property1") should return the same thing as
-   *
    *    new String[] { "value1", "value2", "a quoted value", "another quoted value" };
-   *
-   * @return An array of Strings value for the given key in the Properties. May be empty. Never null.
    */
   public static String[] getStringArray(Properties props, String key) {
-    String val = props.getProperty(key);
-    String[] results;
-    if (val == null) {
+    String[] results = MetaClass.cast(props.getProperty(key), String [].class);
+    if (results == null) {
       results = StringUtils.EMPTY_STRING_ARRAY;
-    } else {
-      results = StringUtils.decodeArray(val);
-      if (results == null) {
-        results = StringUtils.EMPTY_STRING_ARRAY;
-      }
     }
-    // System.out.printf("Called with prop key and value %s %s, returned %s.%n", key, val, Arrays.toString(results));
     return results;
   }
 
@@ -404,42 +395,23 @@ public class PropertiesUtils {
     String prefix = (name != null && !name.isEmpty())? name + '.' : "";
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
-    for (Property p : supportedProperties) {
+    for (Property p:supportedProperties) {
       String pname = prefix + p.name();
       String pvalue = properties.getProperty(pname, p.defaultValue());
-      sb.append(pname).append(':').append(pvalue).append(';');
+      sb.append(pname).append(':').append(pvalue).append(";");
     }
     return sb.toString();
   }
 
   public static String getSignature(String name, Properties properties) {
-    String[] prefixes = new String[]{(name != null && !name.isEmpty())? name + '.' : ""};
-    if ("tokenize".equals(name) || "ssplit".equals(name)) {  // TODO(gabor) This is a hack, as tokenize and ssplit depend on each other so heavily
-      prefixes = new String[]{"tokenize", "ssplit"};
-    }
-    if ("mention".equals(name)) {
-      prefixes = new String[]{"mention", "coref"};
-    }
-    if ("ner".equals(name)) {
-      prefixes = new String[]{"ner", "sutime"};
-    }
-    // handle special case of implied properties (e.g. sentiment implies parse should set parse.binaryTrees = true
-    Properties propertiesCopy = new Properties();
-    propertiesCopy.putAll(properties);
-    // TODO(jb) This is a hack: handle implied need for binary trees if sentiment annotator is present
-    Set<String> annoNames =
-        Generics.newHashSet(Arrays.asList(properties.getProperty("annotators", "").split("[, \t]+")));
-    if ("parse".equals(name) && annoNames.contains("sentiment") && !properties.containsKey("parse.binaryTrees")) {
-      propertiesCopy.setProperty("parse.binaryTrees", "true");
-    }
+    String prefix = (name != null && !name.isEmpty())? name + '.' : "";
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
-    for (String pname : propertiesCopy.stringPropertyNames()) {
-      for (String prefix : prefixes) {
-        if (pname.startsWith(prefix)) {
-          String pvalue = propertiesCopy.getProperty(pname);
-          sb.append(pname).append(':').append(pvalue).append(';');
-        }
+    for (String str : properties.stringPropertyNames()) {
+      if (str.startsWith(prefix)) {
+        String pname = str;
+        String pvalue = properties.getProperty(pname);
+        sb.append(pname).append(':').append(pvalue).append(";");
       }
     }
     return sb.toString();

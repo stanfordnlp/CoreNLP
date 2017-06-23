@@ -3,6 +3,7 @@ package edu.stanford.nlp.patterns;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.util.*;
@@ -10,48 +11,49 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * @author Sonal Gupta on 11/7/14.
+ * Created by Sonal Gupta on 11/7/14.
  */
 public class CandidatePhrase implements Serializable, Comparable  {
 
-  private final String phrase;
-  private String phraseLemma;
-  private Counter<String> features;
-  private final int hashCode;
+  final String phrase;
+  String phraseLemma;
+  Counter<String> features;
+  final int hashCode;
 
-  private static final long serialVersionUID = 42L;
+  static final long serialVersionUID = 42L;
 
-  private static final ConcurrentHashMap<String, CandidatePhrase> candidatePhraseMap = new ConcurrentHashMap<>();
+  static ConcurrentHashMap<String, CandidatePhrase> candidatePhraseMap = new ConcurrentHashMap<>();
 
-  // static void setCandidatePhraseMap(ConcurrentHashMap<String, CandidatePhrase> candmap){
-  //  candidatePhraseMap = candmap;
-  // }
-
-  public static CandidatePhrase createOrGet(String phrase){
+  static void setCandidatePhraseMap(ConcurrentHashMap<String, CandidatePhrase> candmap){
+    candidatePhraseMap = candmap;
+  }
+  static public CandidatePhrase createOrGet(String phrase){
     phrase = phrase.trim();
      if(candidatePhraseMap.containsKey(phrase)){
        return candidatePhraseMap.get(phrase);
-     } else {
+     }
+    else{
        CandidatePhrase p=  new CandidatePhrase(phrase);
        candidatePhraseMap.put(phrase, p);
        return p;
      }
   }
 
-  public static CandidatePhrase createOrGet(String phrase, String phraseLemma){
+  static public CandidatePhrase createOrGet(String phrase, String phraseLemma){
     phrase = phrase.trim();
     if(candidatePhraseMap.containsKey(phrase)){
       CandidatePhrase p = candidatePhraseMap.get(phrase);
       p.phraseLemma = phraseLemma;
       return p;
-    } else {
+    }
+    else{
       CandidatePhrase p=  new CandidatePhrase(phrase, phraseLemma);
       candidatePhraseMap.put(phrase, p);
       return p;
     }
   }
 
-  public static CandidatePhrase createOrGet(String phrase, String phraseLemma, Counter<String> features){
+  static public CandidatePhrase createOrGet(String phrase, String phraseLemma, Counter<String> features){
     phrase = phrase.trim();
     if(candidatePhraseMap.containsKey(phrase)){
       CandidatePhrase p = candidatePhraseMap.get(phrase);
@@ -59,9 +61,8 @@ public class CandidatePhrase implements Serializable, Comparable  {
 
       //If features are non-empty, add to the current set
       if(features != null && features.size() > 0){
-        if(p.features == null) {
-          p.features = new ClassicCounter<>();
-        }
+      if(p.features == null)
+        p.features = new ClassicCounter<>();
         p.features.addAll(features);
       }
 

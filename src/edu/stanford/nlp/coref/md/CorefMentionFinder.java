@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Mention;
+
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -31,10 +32,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -171,41 +169,9 @@ public abstract class CorefMentionFinder  {
     else if (lang == Locale.CHINESE) removeSpuriousMentionsZh(doc, predictedMentions, dict, removeNested);
   }
 
-  protected void removeSpuriousMentionsEn(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict) {
-    List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
+  protected abstract void removeSpuriousMentionsEn(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict);
 
-    for(int i=0 ; i < predictedMentions.size() ; i++) {
-      CoreMap s = sentences.get(i);
-      List<Mention> mentions = predictedMentions.get(i);
-
-      List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
-      Set<Mention> remove = Generics.newHashSet();
-
-      for(Mention m : mentions){
-        String headPOS = m.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-
-        // non word such as 'hmm'
-        if(dict.nonWords.contains(m.headString)) remove.add(m);
-
-        // adjective form of nations
-        // the [American] policy -> not mention
-        // speak in [Japanese] -> mention
-        // check if the mention is noun and the next word is not noun
-        if (dict.isAdjectivalDemonym(m.spanToString())) {
-          if(!headPOS.startsWith("N")
-              || (m.endIndex < sent.size() && sent.get(m.endIndex).tag().startsWith("N")) ) {
-            remove.add(m);
-          }
-        }
-
-        // stop list (e.g., U.S., there)
-        if (inStopList(m)) remove.add(m);
-      }
-      mentions.removeAll(remove);
-    }
-  }
-
-  protected void removeSpuriousMentionsZh(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict, boolean removeNested) {
+  protected static void removeSpuriousMentionsZh(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict, boolean removeNested) {
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
 
     // this goes through each sentence -- predictedMentions has a list for each sentence
@@ -512,8 +478,8 @@ public abstract class CorefMentionFinder  {
     if (allowReparsing) {
       int approximateness = 0;
       List<CoreLabel> extentTokens = new ArrayList<>();
-      extentTokens.add(initCoreLabel("It", "PRP"));
-      extentTokens.add(initCoreLabel("was", "VBD"));
+      extentTokens.add(initCoreLabel("It"));
+      extentTokens.add(initCoreLabel("was"));
       final int ADDED_WORDS = 2;
       for (int i = m.startIndex; i < endIdx; i++) {
         // Add everything except separated dashes! The separated dashes mess with the parser too badly.
@@ -524,7 +490,7 @@ public abstract class CorefMentionFinder  {
           approximateness++;
         }
       }
-      extentTokens.add(initCoreLabel(".", "."));
+      extentTokens.add(initCoreLabel("."));
 
       // constrain the parse to the part we're interested in.
       // Starting from ADDED_WORDS comes from skipping "It was".
@@ -622,11 +588,10 @@ public abstract class CorefMentionFinder  {
     return leaves.get(fallback); // last except for the added period.
   }
 
-  private static CoreLabel initCoreLabel(String token, String posTag) {
+  private static CoreLabel initCoreLabel(String token) {
     CoreLabel label = new CoreLabel();
     label.set(CoreAnnotations.TextAnnotation.class, token);
     label.set(CoreAnnotations.ValueAnnotation.class, token);
-    label.set(CoreAnnotations.PartOfSpeechAnnotation.class, posTag);
     return label;
   }
 

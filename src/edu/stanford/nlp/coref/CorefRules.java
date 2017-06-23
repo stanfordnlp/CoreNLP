@@ -421,7 +421,7 @@ public class CorefRules {
 
   /**
    * Exact string match except phrase after head (only for proper noun):
-   * For dealing with a error like {@literal "[Mr. Bickford] <- [Mr. Bickford , an 18-year mediation veteran] }"
+   * For dealing with a error like "[Mr. Bickford] <- [Mr. Bickford , an 18-year mediation veteran]"
    */
   public static boolean entityRelaxedExactStringMatch(
       CorefCluster mentionCluster,

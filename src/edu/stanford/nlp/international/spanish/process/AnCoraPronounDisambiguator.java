@@ -1,7 +1,6 @@
 package edu.stanford.nlp.international.spanish.process;
-
-import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.util.logging.Redwood;
+
 import edu.stanford.nlp.util.Pair;
 
 import java.util.Arrays;
@@ -336,19 +335,19 @@ public class AnCoraPronounDisambiguator  {
    *
    * i.e., those in which the meaning is actually ambiguous.
    *
-   * @param strippedVerb Stripped verb as returned by
-   *                     {@link edu.stanford.nlp.international.spanish.SpanishVerbStripper#separatePronouns(String)}.
+   * @param splitVerb The verb with clitics split off, as returned by
+   *                  {@link edu.stanford.nlp.international.spanish.SpanishVerbStripper#separatePronouns(String)}.
    * @param pronounIdx The index of the pronoun within
-   *                   {@code strippedVerb.getPronouns()} which should be
+   *                   {@code splitVerb.second()} which should be
    *                   disambiguated.
    * @param clauseYield A string representing the yield of the
    *                    clause which contains the given verb
    * @throws java.lang.IllegalArgumentException If the given pronoun is
    *         not ambiguous, or its disambiguation is not supported.
    */
-  public static PersonalPronounType disambiguatePersonalPronoun(SpanishVerbStripper.StrippedVerb strippedVerb,
-                                                                int pronounIdx, String clauseYield) {
-    List<String> pronouns = strippedVerb.getPronouns();
+  public static PersonalPronounType disambiguatePersonalPronoun(Pair<String, List<String>> splitVerb, int pronounIdx,
+                                                                String clauseYield) {
+    List<String> pronouns = splitVerb.second();
     String pronoun = pronouns.get(pronounIdx).toLowerCase();
     if (!ambiguousPersonalPronouns.contains(pronoun))
       throw new IllegalArgumentException("We don't support disambiguating pronoun '" + pronoun + "'");
@@ -356,7 +355,7 @@ public class AnCoraPronounDisambiguator  {
     if (pronouns.size() == 1 && pronoun.equalsIgnoreCase("se"))
       return PersonalPronounType.REFLEXIVE;
 
-    String verb = strippedVerb.getStem();
+    String verb = splitVerb.first();
     if (alwaysReflexiveVerbs.contains(verb))
       return PersonalPronounType.REFLEXIVE;
     else if (neverReflexiveVerbs.contains(verb))
@@ -367,7 +366,7 @@ public class AnCoraPronounDisambiguator  {
       return bruteForceDecisions.get(bruteForceKey);
 
     // Log this instance where a clitic pronoun could not be disambiguated.
-    log.info("Failed to disambiguate: " + verb
+    log.info("Failed to disambiguate: " + splitVerb.first()
              + "\nContaining clause:\t" + clauseYield + "\n");
 
     return PersonalPronounType.UNKNOWN;

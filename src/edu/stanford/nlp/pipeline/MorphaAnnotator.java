@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -6,7 +7,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +27,7 @@ import java.util.Set;
 public class MorphaAnnotator implements Annotator {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(MorphaAnnotator.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(MorphaAnnotator.class);
 
   private boolean VERBOSE = false;
 
@@ -43,7 +43,6 @@ public class MorphaAnnotator implements Annotator {
     VERBOSE = verbose;
   }
 
-  @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
       log.info("Finding lemmas ...");
@@ -69,7 +68,7 @@ public class MorphaAnnotator implements Annotator {
   private static void addLemma(Morphology morpha,
                         Class<? extends CoreAnnotation<String>> ann,
                         CoreMap map, String word, String tag) {
-    if ( ! tag.isEmpty()) {
+    if (tag.length() > 0) {
       String phrasalVerb = phrasalVerb(morpha, word, tag);
       if (phrasalVerb == null) {
         map.set(ann, morpha.lemma(word, tag));
@@ -120,5 +119,4 @@ public class MorphaAnnotator implements Annotator {
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     return Collections.singleton(CoreAnnotations.LemmaAnnotation.class);
   }
-
 }

@@ -60,9 +60,8 @@ public class StanfordCoreNLPSlowITest extends TestCase {
 
     Properties props = new Properties();
     props.setProperty("outputDirectory", dir.getPath());
-    props.setProperty("annotators", "tokenize,cleanxml,ssplit,pos,lemma,ner,regexner,parse,depparse,mention," +
-        "entitymentions,coref,natlog,openie,kbp,entitylink");
-    props.setProperty("coref.algorithm", "neural");
+    props.setProperty("annotators",
+        "tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref");
     props.setProperty("serializer", "AnnotationSerializer");
 
     return new StanfordCoreNLP(props);
@@ -72,7 +71,7 @@ public class StanfordCoreNLPSlowITest extends TestCase {
     StanfordCoreNLP pipeline = buildPipeline();
     for (File file : getFileList()) {
       try {
-        pipeline.processFiles(Collections.singletonList(file), false);
+        pipeline.processFiles(Collections.singletonList(file));
       } catch (Exception e) {
         // process files one at a time and rethrow exceptions so that
         // we know which file caused the problem
@@ -83,7 +82,7 @@ public class StanfordCoreNLPSlowITest extends TestCase {
 
   public void testParallelism() throws IOException {
     StanfordCoreNLP pipeline = buildPipeline();
-    pipeline.processFiles(getFileList(), Runtime.getRuntime().availableProcessors(), false);
+    pipeline.processFiles(getFileList(), Runtime.getRuntime().availableProcessors());
   }
 
 }

@@ -50,9 +50,6 @@ import java.util.stream.Stream;
  */
 public class StringUtils  {
 
-  // todo [cdm 2016]: Remove CoreMap/CoreLabel methods from this class
-  // todo [cdm 2016]: Write a really good join method for this class, like William's Ruby one
-
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(StringUtils.class);
 
@@ -84,15 +81,14 @@ public class StringUtils  {
   }
 
   /**
-   * Convenience method: a case-insensitive variant of Collection.contains.
-   *
+   * Convenience method: a case-insensitive variant of Collection.contains
    * @param c Collection&lt;String&gt;
    * @param s String
    * @return true if s case-insensitively matches a string in c
    */
   public static boolean containsIgnoreCase(Collection<String> c, String s) {
-    for (String sPrime: c) {
-      if (sPrime.equalsIgnoreCase(s))
+    for (String squote: c) {
+      if (squote.equalsIgnoreCase(s))
         return true;
     }
     return false;
@@ -135,7 +131,7 @@ public class StringUtils  {
       }
     }
     String[] mapArr = new String[maxIndex + 1];
-    // Arrays.fill(mapArr, null); // not needed; Java arrays zero initialized
+    Arrays.fill(mapArr, null);
     for (int i = 0; i < m.length; i++) {
       mapArr[indices[i]] = keys[i];
     }
@@ -161,7 +157,8 @@ public class StringUtils  {
     return res;
   }
 
-  public static List<Pattern> regexesToPatterns(Iterable<String> regexes) {
+  public static List<Pattern> regexesToPatterns(Iterable<String> regexes)
+  {
     List<Pattern> patterns = new ArrayList<>();
     for (String regex:regexes) {
       patterns.add(Pattern.compile(regex));
@@ -170,8 +167,7 @@ public class StringUtils  {
   }
 
   /**
-   * Given a pattern, which contains one or more capturing groups, and a String,
-   * returns a list with the values of the
+   * Given a pattern and a string, returns a list with the values of the
    * captured groups in the pattern. If the pattern does not match, returns
    * null. Note that this uses Matcher.find() rather than Matcher.matches().
    * If str is null, returns null.
@@ -182,11 +178,11 @@ public class StringUtils  {
     }
 
     Matcher matcher = regex.matcher(str);
-    if ( ! matcher.find()) {
+    if (!matcher.find()) {
       return null;
     }
 
-    List<String> groups = new ArrayList<>(matcher.groupCount());
+    List<String> groups = new ArrayList<>();
     for (int index = 1; index <= matcher.groupCount(); index++) {
       groups.add(matcher.group(index));
     }
@@ -286,17 +282,20 @@ public class StringUtils  {
 
   public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
                                           final String fieldGlue, String glue, int start, int end, final Function<Object,String> toStringFunc) {
-    return join(l, glue, (Function<CoreMap, String>) in -> {
-      StringBuilder sb = new StringBuilder();
-      for (Class field: fields) {
-        if (sb.length() > 0) {
-          sb.append(fieldGlue);
+    return join(l, glue, new Function<CoreMap, String>() {
+      @Override
+      public String apply(CoreMap in) {
+        StringBuilder sb = new StringBuilder();
+        for (Class field: fields) {
+          if (sb.length() > 0) {
+            sb.append(fieldGlue);
+          }
+          Object val = in.get(field);
+          String str = (val != null)? toStringFunc.apply(val):defaultFieldValue;
+          sb.append(str);
         }
-        Object val = in.get(field);
-        String str = (val != null)? toStringFunc.apply(val):defaultFieldValue;
-        sb.append(str);
+        return sb.toString();
       }
-      return sb.toString();
     }, start, end);
   }
 
@@ -315,8 +314,7 @@ public class StringUtils  {
 
   /**
    * Joins all the tokens together (more or less) according to their original whitespace.
-   * It assumes all whitespace was " ".
-   *
+   * It assumes all whitespace was " "
    * @param tokens list of tokens which implement {@link HasOffset} and {@link HasWord}
    * @return a string of the tokens with the appropriate amount of spacing
    */
@@ -1580,9 +1578,10 @@ public class StringUtils  {
    * @return Object created from string
    */
   public static <T> T columnStringToObject(Class objClass, String str, String delimiterRegex, String[] fieldNames)
-          throws InstantiationException, IllegalAccessException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
+          throws InstantiationException, IllegalAccessException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException
+  {
     Pattern delimiterPattern = Pattern.compile(delimiterRegex);
-    return StringUtils.columnStringToObject(objClass, str, delimiterPattern, fieldNames);
+    return StringUtils.<T>columnStringToObject(objClass, str, delimiterPattern, fieldNames);
   }
 
   /**
@@ -1597,9 +1596,10 @@ public class StringUtils  {
    * @return Object created from string
    */
   public static <T> T columnStringToObject(Class<?> objClass, String str, Pattern delimiterPattern, String[] fieldNames)
-          throws InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+          throws InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException
+  {
     String[] fields = delimiterPattern.split(str);
-    T item = ErasureUtils.uncheckedCast(objClass.newInstance());
+    T item = ErasureUtils.<T>uncheckedCast(objClass.newInstance());
     for (int i = 0; i < fields.length; i++) {
       try {
         Field field = objClass.getDeclaredField(fieldNames[i]);
@@ -2476,68 +2476,71 @@ public class StringUtils  {
    * Decode an array encoded as a String. This entails a comma separated value enclosed in brackets
    * or parentheses.
    *
-   * @param encoded The String encoding an array
+   * @param encoded The String encoded array
    * @return A String array corresponding to the encoded array
    */
-  public static String[] decodeArray(String encoded) {
+  public static String[] decodeArray(String encoded){
     if (encoded.isEmpty()) return EMPTY_STRING_ARRAY;
     char[] chars = encoded.trim().toCharArray();
 
     //--Parse the String
-    // (state)
+    //(state)
     char quoteCloseChar = (char) 0;
-    List<String> terms = new ArrayList<>();
+    List<StringBuilder> terms = new LinkedList<>();
     StringBuilder current = new StringBuilder();
     //(start/stop overhead)
     int start = 0; int end = chars.length;
     if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded array: " + encoded); }
     if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
     if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
-    // (finite state automaton)
-    for (int i=start; i<end; i++) {
+    //(finite state automata)
+    for(int i=start; i<end; i++){
       if (chars[i] == '\r') {
         // Ignore funny windows carriage return
         continue;
-      } else if (quoteCloseChar != 0) {
+      } else if(chars[i] == '\\'){
+        //(case: escaped character)
+        if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
+        current.append(chars[i+1]);
+        i += 1;
+      } else if(quoteCloseChar != 0){
         //(case: in quotes)
         if(chars[i] == quoteCloseChar){
           quoteCloseChar = (char) 0;
         }else{
           current.append(chars[i]);
         }
-      } else if(chars[i] == '\\'){
-        //(case: escaped character)
-        if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded array is escape character: " + encoded);
-        current.append(chars[i+1]);
-        i += 1;
-      } else {
+      }else{
         //(case: normal)
-        if (chars[i] == '"') {
+        if(chars[i] == '"'){
           quoteCloseChar = '"';
-        } else if(chars[i] == '\'') {
+        } else if(chars[i] == '\''){
           quoteCloseChar = '\'';
-        } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == ' ' || chars[i] == '\t' || chars[i] == '\n') {
+        } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == ' ' || chars[i] == '\t' || chars[i] == '\n'){
           //break
           if (current.length() > 0) {
-            terms.add(current.toString().trim());
+            terms.add(current);
           }
           current = new StringBuilder();
-        } else {
+        }else{
           current.append(chars[i]);
         }
       }
     }
 
     //--Return
-    if (current.length() > 0) {
-      terms.add(current.toString().trim());
+    if(current.length() > 0) terms.add(current);
+    String[] rtn = new String[terms.size()];
+    int i=0;
+    for(StringBuilder b : terms){
+      rtn[i] = b.toString().trim();
+      i += 1;
     }
-    return terms.toArray(EMPTY_STRING_ARRAY);
+    return rtn;
   }
 
   /**
-   * Decode a map encoded as a string.
-   *
+   * Decode a map encoded as a string
    * @param encoded The String encoded map
    * @return A String map corresponding to the encoded map
    */
@@ -2563,13 +2566,6 @@ public class StringUtils  {
       if (chars[i] == '\r') {
         // Ignore funny windows carriage return
         continue;
-      } else if(quoteCloseChar != 0){
-        //(case: in quotes)
-        if(chars[i] == quoteCloseChar){
-          quoteCloseChar = (char) 0;
-        }else{
-          current.append(chars[i]);
-        }
       } else if(chars[i] == '\\'){
         //(case: escaped character)
         if(i == chars.length - 1) {
@@ -2577,6 +2573,13 @@ public class StringUtils  {
         }
         current.append(chars[i+1]);
         i += 1;
+      } else if(quoteCloseChar != 0){
+        //(case: in quotes)
+        if(chars[i] == quoteCloseChar){
+          quoteCloseChar = (char) 0;
+        }else{
+          current.append(chars[i]);
+        }
       }else{
         //(case: normal)
         if(chars[i] == '"'){

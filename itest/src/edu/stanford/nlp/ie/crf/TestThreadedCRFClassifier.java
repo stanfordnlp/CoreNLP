@@ -12,7 +12,6 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
 public class TestThreadedCRFClassifier {
-
   TestThreadedCRFClassifier(Properties props) {
     inputEncoding = props.getProperty("inputEncoding", "UTF-8");
   }
@@ -24,8 +23,8 @@ public class TestThreadedCRFClassifier {
 
   private final String inputEncoding;
 
-  static CRFClassifier loadClassifier(String loadPath, Properties props) {
-    CRFClassifier crf = new CRFClassifier(props);
+  CRFClassifier loadClassifier(String loadPath, Properties props) {
+    CRFClassifier crf = new CRFClassifier(props);    
     crf.loadClassifierNoExceptions(loadPath, props);
     return crf;
   }
@@ -59,9 +58,9 @@ public class TestThreadedCRFClassifier {
       Timing t = new Timing();
       resultsString = runClassifier(crf, filename);
       long millis = t.stop();
-      System.out.println("Thread " + threadName + " took " + millis +
+      System.out.println("Thread " + threadName + " took " + millis + 
                          "ms to tag file " + filename);
-    }
+    }        
   }
 
   /**
@@ -72,7 +71,7 @@ public class TestThreadedCRFClassifier {
    * -crf2 ../stanford-releases/stanford-ner-models/dewac_175m_600.ser.gz
    * -testFile ../data/german-ner/deu.testa -inputEncoding iso-8859-1
    */
-  public static void main(String[] args) {
+  static public void main(String[] args) {
     try {
       System.setOut(new PrintStream(System.out, true, "UTF-8"));
       System.setErr(new PrintStream(System.err, true, "UTF-8"));
@@ -82,10 +81,10 @@ public class TestThreadedCRFClassifier {
 
     runTest(StringUtils.argsToProperties(args));
   }
-
+  
   static public void runTest(Properties props) {
     TestThreadedCRFClassifier test = new TestThreadedCRFClassifier(props);
-    test.runThreadedTest(props);
+    test.runThreadedTest(props);    
   }
 
 
@@ -96,7 +95,7 @@ public class TestThreadedCRFClassifier {
     ArrayList<String> modelNames = new ArrayList<String>();
     ArrayList<CRFClassifier> classifiers = new ArrayList<CRFClassifier>();
 
-    for (int i = 1;
+    for (int i = 1; 
          props.getProperty("crf" + Integer.toString(i)) != null; ++i) {
       String model = props.getProperty("crf" + Integer.toString(i));
       CRFClassifier crf = loadClassifier(model, props);
@@ -108,7 +107,7 @@ public class TestThreadedCRFClassifier {
       // must run twice to account for "transductive learning"
       results = runClassifier(crf, testFile);
       baseResults.add(results);
-      System.out.println("Stored base results for " + model +
+      System.out.println("Stored base results for " + model + 
                          "; length " + results.length());
     }
 
@@ -122,13 +121,13 @@ public class TestThreadedCRFClassifier {
       String repeated = runClassifier(crf, testFile);
       if (!base.equals(repeated)) {
         throw new RuntimeException("Repeated unthreaded results " +
-                                   "not the same for " + model +
+                                   "not the same for " + model + 
                                    " run on file " + testFile);
       }
     }
 
     // test the first classifier in several simultaneous threads
-    int numThreads = PropertiesUtils.getInt(props, "simThreads",
+    int numThreads = PropertiesUtils.getInt(props, "simThreads", 
                                             DEFAULT_SIM_THREADS);
 
     ArrayList<CRFThread> threads = new ArrayList<CRFThread>();
@@ -149,11 +148,11 @@ public class TestThreadedCRFClassifier {
         System.out.println("Yay!");
       } else {
         throw new RuntimeException("Results not equal when running " +
-                                   modelNames.get(0) + " under " +
+                                   modelNames.get(0) + " under " + 
                                    numThreads + " simultaneous threads");
       }
     }
-
+    
     // test multiple classifiers (if given) in multiple threads each
     if (classifiers.size() > 1) {
       numThreads = PropertiesUtils.getInt(props, "multipleThreads",
@@ -163,11 +162,11 @@ public class TestThreadedCRFClassifier {
         int classifierNum = i % classifiers.size();
         int repeatNum = i / classifiers.size();
         threads.add(new CRFThread(classifiers.get(classifierNum), testFile,
-                                  ("Simultaneous-" + classifierNum +
+                                  ("Simultaneous-" + classifierNum + 
                                    "-" + repeatNum)));
       }
-      for (CRFThread thread : threads) {
-        thread.start();
+      for (int i = 0; i < threads.size(); ++i) {
+        threads.get(i).start();
       }
       for (int i = 0; i < threads.size(); ++i) {
         int classifierNum = i % classifiers.size();
@@ -183,17 +182,16 @@ public class TestThreadedCRFClassifier {
           System.out.println("Yay!");
         } else {
           throw new RuntimeException("Results not equal when running " +
-                                     modelNames.get(classifierNum) +
-                                     " under " + numThreads +
+                                     modelNames.get(classifierNum) + 
+                                     " under " + numThreads + 
                                      " threads with " +
-                                     classifiers.size() +
+                                     classifiers.size() + 
                                      " total classifiers");
         }
-      }
+      }      
     }
 
     // if no exceptions thrown, great success
     System.out.println("Everything worked!");
   }
-
 }

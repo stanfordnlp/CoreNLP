@@ -40,7 +40,7 @@ public class SemanticGraphTest extends TestCase {
       throw new RuntimeException(e);
     }
 
-    return SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, GrammaticalStructure.Extras.MAXIMAL);
+    return SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, GrammaticalStructure.Extras.MAXIMAL, true);
   }
 
   public void testShortestPath() {

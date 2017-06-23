@@ -23,7 +23,6 @@ enum Language {
   Hebrew   = 7;
   Spanish  = 8;
   UniversalEnglish = 9;
-  UniversalChinese = 10;
 }
 
 //
@@ -42,19 +41,12 @@ message Document {
    * serialized without any sentences. Otherwise
    */
   repeated Token      sentencelessToken = 5;
-  repeated Token      character = 10;
 
   repeated Quote      quote = 6;
   /**
    * This field is for entity mentions across the document.
    */
   repeated NERMention mentions = 9;
-
-  /**
-   * xml information
-   */
-  optional bool    xmlDoc = 11;
-  repeated Section sections = 12;
 
   extensions 100 to 255;
 }
@@ -81,16 +73,13 @@ message Sentence {
   repeated RelationTriple   openieTriple                        = 14;   // The OpenIE triples in the sentence
   repeated RelationTriple   kbpTriple                           = 16;   // The KBP triples in this sentence
   repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
-  repeated SentenceFragment entailedClause                      = 35;   // The entailed clauses, by natural logic
   optional DependencyGraph  enhancedDependencies                = 17;
   optional DependencyGraph  enhancedPlusPlusDependencies        = 18;
-  repeated Token            character                           = 19;
 
   optional uint32           paragraph                           = 11;
 
   optional string           text                                = 12;   // Only needed if we're only saving the sentence.
 
-  optional uint32           lineNumber                          = 20;
 
   // Fields set by other annotators in CoreNLP
   optional bool            hasRelationAnnotations              = 51;
@@ -102,12 +91,6 @@ message Sentence {
   optional bool            hasCorefMentionsAnnotation          = 57;
 
   optional string          sentenceID                          = 58;  // Useful when storing sentences (e.g. ForEach)
-  optional string          sectionDate                         = 59;  // date of section
-  optional uint32          sectionIndex                        = 60;  // section index for this sentence's section
-  optional string          sectionName                         = 61;  // name of section
-  optional string          sectionAuthor                       = 62;  // author of section
-  optional string          docID                               = 63;  // doc id
-  optional bool            sectionQuoted                       = 64;  // is this sentence in an xml quote in a post
 
   extensions 100 to 255;
 }
@@ -117,7 +100,7 @@ message Sentence {
 //
 message Token {
   // Fields set by the default annotators [new CoreNLP(new Properties())]
-  optional string word              = 1;    // the word's gloss (post-tokenization)
+  required string word              = 1;    // the word's gloss (post-tokenization)
   optional string pos               = 2;    // The word's part of speech tag
   optional string value             = 3;    // The word's 'value', (e.g., parse tree node)
   optional string category          = 4;    // The word's 'category' (e.g., parse tree node)
@@ -160,18 +143,6 @@ message Token {
   optional string trueCase        = 52;  // true case type of token
   optional string trueCaseText    = 53;  // true case gloss of token
 
-  //  Chinese character info
-  optional string chineseChar     = 54;
-  optional string chineseSeg      = 55;
-  optional string chineseXMLChar  = 60;
-
-  // Section info
-  optional string sectionName     = 56;
-  optional string sectionAuthor   = 57;
-  optional string sectionDate     = 58;
-  optional string sectionEndLabel = 59;
-  
-
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
   //       uint32 sentenceIndex  @see Sentence#sentenceIndex
@@ -206,7 +177,6 @@ message Quote {
   optional uint32 tokenEnd       = 8;
   optional string docid          = 9;
   optional uint32 index          = 10;
-  optional string author         = 11;
 }
 
 //
@@ -512,21 +482,5 @@ message MapStringString {
 message MapIntString {
   repeated uint32 key   = 1;
   repeated string value = 2;
-}
-
-//
-// Store section info
-//
-
-message Section {
-  required uint32 charBegin         = 1;
-  required uint32 charEnd           = 2;
-  optional string author            = 3;
-  repeated uint32 sentenceIndexes   = 4;
-  optional string datetime          = 5;
-  repeated Quote quotes             = 6;
-  optional uint32 authorCharBegin   = 7;
-  optional uint32 authorCharEnd     = 8;
-  required Token xmlTag             = 9;
 }
 

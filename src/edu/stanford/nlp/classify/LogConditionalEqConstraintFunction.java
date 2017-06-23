@@ -160,8 +160,8 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
     Arrays.fill(derivative, 0.0);
     double[] sums = new double[numClasses];
     double[] probs = new double[numClasses];
-    // double[] counts = new double[numClasses];
-    // Arrays.fill(counts, 0.0); // not needed; Java arrays zero initialized
+    double[] counts = new double[numClasses];
+    Arrays.fill(counts, 0.0);
     for (int d = 0; d < data.length; d++) {
       int[] features = data[d];
       // activation

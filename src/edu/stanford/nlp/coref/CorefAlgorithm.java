@@ -12,29 +12,26 @@ import edu.stanford.nlp.coref.statistical.StatisticalCorefAlgorithm;
 
 /**
  * A CorefAlgorithms makes coreference decisions on the provided {@link Document} after
- * mention detection has been performed.
- *
+ * mention detection has been performed
  * @author Kevin Clark
  */
 public interface CorefAlgorithm {
+    public void runCoref(Document document);
 
-  void runCoref(Document document);
-
-  static CorefAlgorithm fromProps(Properties props, Dictionaries dictionaries) {
-    CorefAlgorithmType algorithm = CorefProperties.algorithm(props);
-    if (algorithm == CorefAlgorithmType.CLUSTERING) {
-      return new ClusteringCorefAlgorithm(props, dictionaries);
-    } else if (algorithm == CorefAlgorithmType.STATISTICAL) {
-      return new StatisticalCorefAlgorithm(props, dictionaries);
-    } else if (algorithm == CorefAlgorithmType.NEURAL) {
-      return new NeuralCorefAlgorithm(props, dictionaries);
-    } else {
-      try {
-        return new HybridCorefSystem(props, dictionaries);
-      } catch (Exception e) {
-        throw new RuntimeException("Error creating hybrid coref system", e);
+    public static CorefAlgorithm fromProps(Properties props, Dictionaries dictionaries) {
+      CorefAlgorithmType algorithm = CorefProperties.algorithm(props);
+      if (algorithm == CorefAlgorithmType.CLUSTERING) {
+        return new ClusteringCorefAlgorithm(props, dictionaries);
+      } else if (algorithm == CorefAlgorithmType.STATISTICAL) {
+        return new StatisticalCorefAlgorithm(props, dictionaries);
+      } else if (algorithm == CorefAlgorithmType.NEURAL) {
+        return new NeuralCorefAlgorithm(props, dictionaries);
+      } else {
+        try {
+          return new HybridCorefSystem(props, dictionaries);
+        } catch (Exception e) {
+          throw new RuntimeException("Error creating hybrid coref system", e);
+        }
       }
     }
-  }
-
 }

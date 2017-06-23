@@ -6,7 +6,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
-//import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.time.TimeExpressionExtractor;
 import edu.stanford.nlp.util.CoreMap;
@@ -161,7 +161,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
           // TIME may have more variants (really?) so always add as TIME by default
           me.set(CoreAnnotations.AnswerAnnotation.class, TIME_TAG);
         }
-      } else if(DATE_AGE_LOCALIZER.equals(me.word()) && prev.word() != null && prev.word().length() == 2 &&
+      } else if(DATE_AGE_LOCALIZER.equals(me.word()) && prev.word().length() == 2 &&
           CHINESE_AND_ARABIC_NUMERALS_PATTERN.matcher(prev.word()).matches()) {
         // Label 后 as DATE if the sequence is 70 后 or 七零 后
         me.set(CoreAnnotations.AnswerAnnotation.class, DATE_TAG);
@@ -200,7 +200,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   @Override
   public List<CoreLabel> classifyWithGlobalInformation(List<CoreLabel> tokenSequence, CoreMap document, CoreMap sentence) {
     if(useSUTime) {
-      log.warn("Warning: ChineseNumberSequenceClassifier does not have SUTime implementation.");
+      log.fatal("ChineseNumberSequenceClassifier does not have SUTime implementation.");
     }
     return classify(tokenSequence);
   }
@@ -223,7 +223,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   }
 
   public static void main(String[] args) throws IOException {
-   /* Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/ChineseNumberClassifierProps.properties");
+    Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/ChineseNumberClassifierProps.properties");
 //    Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/EnglishNumberClassifierProps.properties");
     props.setProperty("outputFormat", "text");
     props.setProperty("ssplit.boundaryTokenRegex", "\\n"); // one sentence per line
@@ -239,6 +239,6 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
       pipeline.prettyPrint(sentenceAnnotation, System.out);
     }
 
-    out.close();*/
+    out.close();
   }
 }

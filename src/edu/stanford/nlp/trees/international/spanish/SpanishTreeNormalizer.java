@@ -264,8 +264,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     if (pos.length() == 0)
       return pos;
 
-    char type;
-
     switch (pos.charAt(0)) {
     case 'd':
       // determinant (d)
@@ -275,45 +273,30 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     case 's':
       // preposition (s)
       //   retain category, type
-      //     ignore rare exceptions in LDC
       //   drop form, gender, number
-      return pos.charAt(0) + "p000";
+      return pos.substring(0, 2) + "000";
     case 'p':
       // pronoun (p)
       //   retain category, type
       //   drop person, gender, number, case, possessor, politeness
-      type = pos.charAt(1);
-
-      return String.format("p%s000000", type);
+      return pos.substring(0, 2) + "000000";
     case 'a':
       // adjective
       //   retain category, type, grade
       //   drop gender, number, function
-      type = pos.charAt(1) == 'o' ? 'o' : 'q';
-      return String.format("a%s%s000", type, pos.charAt(2));
+      return pos.substring(0, 3) + "000";
     case 'n':
       // noun
       //   retain category, type, number, NER label
       //   drop type, gender, classification
-      char number = pos.charAt(3);
-      if (number == 'c')
-        // LDC inconsistency.
-        return "w";
-      else if (number == 'a')
-        // Only appears once in LDC?
-        number = 's';
 
       char ner = retainNER && pos.length() == 7 ? pos.charAt(6) : '0';
-      return pos.substring(0, 2) + '0' + number + "00" + ner;
+      return pos.substring(0, 2) + '0' + pos.charAt(3) + "00" + ner;
     case 'v':
       // verb
       //   retain category, type, mood, tense
       //   drop person, number, gender
       return pos.substring(0, 4) + "000";
-    case 'i':
-      // interjection
-      //   drop LDC extras
-      return "i";
     default:
       // adverb
       //   retain all
@@ -436,7 +419,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       if (!SpanishVerbStripper.isStrippable(verb))
         continue;
 
-      SpanishVerbStripper.StrippedVerb split = verbStripper.separatePronouns(verb);
+      Pair<String, List<String>> split = verbStripper.separatePronouns(verb);
       if (split == null)
         continue;
 
@@ -451,7 +434,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       // Insert clitic pronouns as leaves of pronominal phrases which are
       // siblings of `target`. Iterate in reverse order since pronouns are
       // attached to immediate right of `target`
-      List<String> pronouns = split.getPronouns();
+      List<String> pronouns = split.second();
       for (int i = pronouns.size() - 1; i >= 0; i--) {
         String pronoun = pronouns.get(i);
 
@@ -481,7 +464,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       }
 
       TsurgeonPattern relabelOperation =
-        Tsurgeon.parseOperation(String.format("[relabel vb /%s/]", split.getStem()));
+        Tsurgeon.parseOperation(String.format("[relabel vb /%s/]", split.first()));
       t = relabelOperation.matcher().evaluate(t, matcher);
     }
 

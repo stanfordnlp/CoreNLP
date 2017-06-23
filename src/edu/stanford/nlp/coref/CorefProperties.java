@@ -6,19 +6,13 @@ import java.util.Properties;
 import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
- * Manages the properties for running coref.
- *
+ * Manages the properties for running coref
  * @author Kevin Clark
  */
 public class CorefProperties {
-
-  private CorefProperties() {} // static methods
-
-
   //---------- Coreference Algorithms ----------
 
   public enum CorefAlgorithmType {CLUSTERING, STATISTICAL, NEURAL, HYBRID}
-
   public static CorefAlgorithmType algorithm(Properties props) {
     String type = PropertiesUtils.getString(props, "coref.algorithm",
         getLanguage(props) == Locale.ENGLISH ? "statistical" : "neural");
@@ -28,7 +22,7 @@ public class CorefProperties {
   //---------- General Coreference Options ----------
 
   /**
-   * When conll() is true, coref models:
+   * When conll() is true, coref models
    * <ul>
    *    <li>Use provided POS, NER, Parsing, etc. (instead of using CoreNLP annotators)</li>
    *    <li>Use provided speaker annotations</li>
@@ -46,10 +40,6 @@ public class CorefProperties {
 
   public static boolean verbose(Properties props) {
     return PropertiesUtils.getBool(props, "coref.verbose", false);
-  }
-
-  public static boolean removeSingletonClusters(Properties props) {
-    return PropertiesUtils.getBool(props, "coref.removeSingletonClusters", true);
   }
 
   // ---------- Heuristic Mention Filtering ----------
@@ -77,8 +67,8 @@ public class CorefProperties {
 
   public static String getMentionDetectionModel(Properties props) {
     return PropertiesUtils.getString(props, "coref.md.model",
-        useConstituencyParse(props) ? "edu/stanford/nlp/models/coref/md-model.ser" :
-              "edu/stanford/nlp/models/coref/md-model-dep.ser.gz");
+        useConstituencyParse(props) ? "edu/stanford/nlp/models/coref/hybrid/md-model.ser" :
+              "edu/stanford/nlp/models/coref/hybrid/md-model-dep.ser.gz");
   }
 
   public static boolean isMentionDetectionTraining(Properties props) {
@@ -86,7 +76,7 @@ public class CorefProperties {
   }
 
   public static void setMentionDetectionTraining(Properties props, boolean val) {
-    props.setProperty("coref.md.isTraining", String.valueOf(val));
+    props.put("coref.md.isTraining", val);
   }
 
   public static boolean removeNestedMentions(Properties props) {
@@ -94,39 +84,28 @@ public class CorefProperties {
   }
 
   public static void setRemoveNestedMentions(Properties props, boolean val) {
-    props.setProperty("removeNestedMentions", String.valueOf(val));
+    props.put("removeNestedMentions", val);
   }
 
-  public static boolean liberalMD(Properties props) {
-    return PropertiesUtils.getBool(props, "coref.md.liberalMD", false);
-  }
-
-  public static boolean useGoldMentions(Properties props) {
-    return PropertiesUtils.getBool(props, "coref.md.useGoldMentions", false);
+  public static boolean liberalChineseMD(Properties props) {
+    return PropertiesUtils.getBool(props, "coref.md.liberalChineseMD", true);
   }
 
   // ---------- Input and Output Data ----------
 
   public static final String OUTPUT_PATH_PROP = "coref.conllOutputPath";
   public static String conllOutputPath(Properties props) {
-    String returnPath = props.getProperty("coref.conllOutputPath", "/scr/nlp/coref/logs/");
-    if (!returnPath.substring(returnPath.length()-1).equals("/"))
-      returnPath += "/";
-    return returnPath;
+    return props.getProperty("coref.conllOutputPath");
   }
 
-  public enum Dataset {TRAIN, DEV, TEST}
-
+  public enum Dataset {TRAIN, DEV, TEST};
   public static void setInput(Properties props, Dataset d) {
     props.setProperty("coref.inputPath", d == Dataset.TRAIN ? getTrainDataPath(props) :
       (d == Dataset.DEV ? getDevDataPath(props) : getTestDataPath(props)));
   }
 
   public static String getDataPath(Properties props) {
-    String returnPath = props.getProperty("coref.data", "/scr/nlp/data/conll-2012/");
-    if (!returnPath.substring(returnPath.length()-1).equals("/"))
-      returnPath += "/";
-    return returnPath;
+    return props.getProperty("coref.data", "/scr/nlp/data/conll-2012/");
   }
 
   public static String getTrainDataPath(Properties props) {
@@ -145,12 +124,13 @@ public class CorefProperties {
   }
 
   public static String getInputPath(Properties props) {
-    String input = props.getProperty("coref.inputPath", getTestDataPath(props));
+    String input = props.getProperty("coref.inputPath",
+        props.containsKey("coref.data") ? getTestDataPath(props) : null);
     return input;
   }
 
   public static String getScorerPath(Properties props) {
-    return props.getProperty("coref.scorer", "/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl");
+    return props.getProperty("coref.scorer");
   }
 
   public static Locale getLanguage(Properties props) {

@@ -14,9 +14,9 @@ ENGLISH_TAGGER = /u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagge
 ENGLISH_TLPP   = $(WSJ_TLPP)
 
 
-FRENCH_TRAIN  = /u/nlp/data/lexparser/trees/FrenchCC/FTB-Train.utf8.txt
-FRENCH_DEV    = /u/nlp/data/lexparser/trees/FrenchCC/FTB-Dev.utf8.txt
-FRENCH_TEST   = /u/nlp/data/lexparser/trees/FrenchCC/FTB-Test.utf8.txt
+FRENCH_TRAIN  = /u/nlp/data/lexparser/trees/FrenchCC/FTB-Train.utf8.txt 
+FRENCH_DEV    = /u/nlp/data/lexparser/trees/FrenchCC/FTB-Dev.utf8.txt 
+FRENCH_TEST   = /u/nlp/data/lexparser/trees/FrenchCC/FTB-Test.utf8.txt 
 FRENCH_TAGGER = /u/nlp/data/pos-tagger/distrib-2014-06-09/french.tagger
 FRENCH_TLPP   = edu.stanford.nlp.parser.lexparser.FrenchTreebankParserParams
 
@@ -41,16 +41,10 @@ ARABIC_TEST   = /u/nlp/data/lexparser/trees/Arabic/2-Unvoc-Test.utf8.txt
 ARABIC_TAGGER = /u/nlp/data/pos-tagger/distrib/arabic-train.tagger
 ARABIC_TLPP   = edu.stanford.nlp.parser.lexparser.ArabicTreebankParserParams
 
+
 SPANISH_TRAIN = /u/nlp/data/spanish/ancora/ancora.train
-SPANISH_TRAIN2 = /u/nlp/data/spanish/ldc/ldc-NW.train
-SPANISH_TRAIN3 = /u/nlp/data/spanish/ldc/ldc-DF.train
 SPANISH_DEV   = /u/nlp/data/spanish/ancora/ancora.dev
-SPANISH_DEV2 = /u/nlp/data/spanish/ldc/ldc-NW.dev
-SPANISH_DEV3 = /u/nlp/data/spanish/ldc/ldc-DF.dev
-SPANISH_DEV_TMP = /u/nlp/data/spanish/all.dev.tmp
 SPANISH_TEST  = /u/nlp/data/spanish/ancora/ancora.test
-SPANISH_TEST2 = /u/nlp/data/spanish/ldc/ldc-NW.train
-SPANISH_TEST3 = /u/nlp/data/spanish/ldc/ldc-DF.train
 SPANISH_TAGGER= /u/nlp/data/pos-tagger/distrib/spanish-distsim.tagger
 SPANISH_TLPP  = edu.stanford.nlp.parser.lexparser.SpanishTreebankParserParams
 
@@ -118,14 +112,9 @@ arabicSR.ser.gz:
 
 spanishSR.ser.gz:
 	@echo Training $@
-	@echo Creating unified Spanish development data file $(SPANISH_DEV_TMP)
-	cat $(SPANISH_DEV) $(SPANISH_DEV2) $(SPANISH_DEV3) > $(SPANISH_DEV_TMP)
 	@echo Will test on $(SPANISH_TEST)
-	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(SPANISH_TRAIN) -trainTreebank $(SPANISH_TRAIN2) -trainTreebank $(SPANISH_TRAIN3) -devTreebank $(SPANISH_DEV_TMP) -serializedPath $@ -trainingThreads 4 -batchSize 12 -preTag -taggerSerializedFile $(SPANISH_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 -tlpp $(SPANISH_TLPP) > $@.out 2>&1
-	rm $(SPANISH_DEV_TMP)
+	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(SPANISH_TRAIN) -devTreebank $(SPANISH_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 12 -preTag -taggerSerializedFile $(SPANISH_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 -tlpp $(SPANISH_TLPP) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(SPANISH_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(SPANISH_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 >> $@.out 2>&1
-	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(SPANISH_TEST2) -serializedPath $@ -preTag -taggerSerializedFile $(SPANISH_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 >> $@.out 2>&1
-	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(SPANISH_TEST3) -serializedPath $@ -preTag -taggerSerializedFile $(SPANISH_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 >> $@.out 2>&1
 
 spanishSR.beam.ser.gz:
 	@echo Training $@

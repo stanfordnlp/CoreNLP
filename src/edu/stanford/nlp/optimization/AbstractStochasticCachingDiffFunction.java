@@ -113,7 +113,7 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
   @Override
   public double[] initial() {
     double[] initial = new double[domainDimension()];
-    // Arrays.fill(initial, 0.0); // not needed; Java arrays zero initialized
+    Arrays.fill(initial, 0.0);
     return initial;
   }
 

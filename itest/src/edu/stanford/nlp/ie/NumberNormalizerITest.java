@@ -3,44 +3,33 @@ package edu.stanford.nlp.ie;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.CoreMap;
-
-import org.junit.*;
+import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 /**
- * Test cases for number normalizer.
+ * Test cases for number normalizer
  *
  * @author Angel Chang
  */
-public class NumberNormalizerITest {
+public class NumberNormalizerITest extends TestCase {
 
-  private static AnnotationPipeline pipeline; // = null;
-  private static final boolean VERBOSE = false;
+  static AnnotationPipeline pipeline = null;
 
-  @BeforeClass
-  public static void runOnceBeforeClass() {
-    if (VERBOSE) {
-      System.err.println("Setting up pipeline in @BeforeClasss");
+  @Override
+  public void setUp() throws Exception {
+    synchronized(NumberNormalizerITest.class) {
+      if (pipeline == null) {
+        pipeline = new AnnotationPipeline();
+        pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+        pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+        pipeline.addAnnotator(new POSTaggerAnnotator(DefaultPaths.DEFAULT_POS_MODEL, false));
+      }
     }
-    pipeline = new AnnotationPipeline();
-    pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
-    pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
-    pipeline.addAnnotator(new POSTaggerAnnotator(DefaultPaths.DEFAULT_POS_MODEL, false));
   }
 
-  @AfterClass
-  public static void runOnceAfterClass() {
-    System.err.println("Nulling pipeline in @AfterClass");
-    pipeline = null;
-  }
-
-  @Test
   public void testNumbers() throws IOException {
     // Set up test text
     String testText =
@@ -52,7 +41,7 @@ public class NumberNormalizerITest {
             "5,786,345\n" +
             "twenty-five.\n" +
 
-            // "one and a half million\n" +
+      //      "one and half million\n" +
             "1.3 million.\n" +
             "one thousand two hundred and twenty four\n" +
             "10 thousand million.\n"+
@@ -62,39 +51,29 @@ public class NumberNormalizerITest {
             "-15\n" +
             "one two three four.\n" +
             "one hundred and fifty five\n" +
-            "a hundred and one\n" +
+            "a hundred\n" 
 //            "five oh four\n"
-            "four score.\n" +
-            "a dozen bagels\n" +
-            "five dozen\n" +
-            "An IQ score of 161.\n" +     // only 161, not 20 for score
-            "thirty two\n"
             ;
 
     // set up expected results
     Iterator<? extends Number> expectedNumbers = Arrays.asList(
             24.0, 600.0, 412.0, 4650211.0, 600005650376.0, 5786345, 25.0,
-            /* 1500000.0, */
             1300000.0, 1224.0, 10000000000.0, 3.625,
-            0, -15.0, 1, 2, 3, 4, 155.0, 101.0 /*504.0, */, 80.0, 12, 60.0, 161, 32.0 ).iterator();
+            0, -15.0, 1, 2, 3, 4, 155.0, 100 /*504.0, */ ).iterator();
     Iterator<String> expectedTexts = Arrays.asList(
             "two dozen", "six hundred", "four hundred, and twelve",
             "4 million six hundred fifty thousand, two hundred and eleven",
             "6 hundred billion, five million six hundred fifty thousand, three hundred and seventy six",
             "5,786,345",
             "twenty-five",
-            // "one and half million",
+      //      "one and half million\n" +
             "1.3 million",
             "one thousand two hundred and twenty four",
             "10 thousand million",
             "3.625",
             "zero", "-15", "one", "two", "three", "four",
             "one hundred and fifty five",
-            "hundred and one" /* "five oh four", */,
-            "four score",
-            "dozen",
-            "five dozen",
-            "161", "thirty two").iterator();
+            "hundred" /* "five oh four", */ ).iterator();
 
     // create document
     Annotation document = createDocument(testText);
@@ -112,25 +91,14 @@ public class NumberNormalizerITest {
                 num.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
                 num.get(CoreAnnotations.CharacterOffsetEndAnnotation.class)
         );
-        if (VERBOSE) {
-          System.err.printf("Found %s of type %s with value %s%n",
-                  text,
-                  num.get(CoreAnnotations.NumericCompositeTypeAnnotation.class),
-                  num.get(CoreAnnotations.NumericCompositeValueAnnotation.class));
-        }
         assertEquals(expectedText, text);
         assertEquals(expectedType, num.get(CoreAnnotations.NumericCompositeTypeAnnotation.class));
         assertEquals(expectedNumber.toString(), num.get(CoreAnnotations.NumericCompositeValueAnnotation.class).toString());
-        // This doesn't work as sometimes type is different
-        // assertEquals(expectedNumber, num.get(CoreAnnotations.NumericCompositeValueAnnotation.class));
-      // } else if (VERBOSE) {
-        // System.err.println("num is " + num.toShorterString());
       }
     }
     assertFalse(expectedNumbers.hasNext());
   }
 
-  @Test
   public void testOrdinals() throws IOException {
     // Set up test text
     String testText =
@@ -168,12 +136,6 @@ public class NumberNormalizerITest {
                 num.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
                 num.get(CoreAnnotations.CharacterOffsetEndAnnotation.class)
         );
-        if (VERBOSE) {
-          System.err.printf("Found %s of type %s with value %s%n",
-                  text,
-                  num.get(CoreAnnotations.NumericCompositeTypeAnnotation.class),
-                  num.get(CoreAnnotations.NumericCompositeValueAnnotation.class));
-        }
         assertEquals(expectedText, text);
         assertEquals("Type for " + expectedText, expectedType, num.get(CoreAnnotations.NumericCompositeTypeAnnotation.class));
         assertEquals(expectedNumber.toString(), num.get(CoreAnnotations.NumericCompositeValueAnnotation.class).toString());

@@ -371,7 +371,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     }
 
     // Get the dependency path
-    List<String> depparsePath = sentence.algorithms().dependencyPathBetween(subjectHead, objectHead, Optional.of(Sentence::lemmas));
+    List<String> depparsePath = sentence.algorithms().dependencyPathBetween(subjectHead, objectHead, Sentence::lemmas);
 
     // Chop out appos edges
     if (depparsePath.size() > 3) {
@@ -543,7 +543,10 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
   public static Counter<String> features(KBPInput input) {
-    
+    // Ensure RegexNER Tags!
+    input.sentence.regexner(DefaultPaths.DEFAULT_KBP_REGEXNER_CASED, false);
+    input.sentence.regexner(DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS, true);
+
     // Get useful variables
     ClassicCounter<String> feats = new ClassicCounter<>();
     if (Span.overlaps(input.subjectSpan, input.objectSpan) || input.subjectSpan.size() == 0 || input.objectSpan.size() == 0) {
@@ -669,7 +672,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     String best = Counters.argmax(scores);
     // While it doesn't type check, continue going down the list.
     // NO_RELATION is always an option somewhere in there, so safe to keep going...
-    while (!NO_RELATION.equals(best) && scores.size() > 1 &&
+    while (!NO_RELATION.equals(best) &&
         (!KBPRelationExtractor.RelationType.fromString(best).get().validNamedEntityLabels.contains(input.objectType) ||
          RelationType.fromString(best).get().entityType != input.subjectType) ) {
       scores.remove(best);

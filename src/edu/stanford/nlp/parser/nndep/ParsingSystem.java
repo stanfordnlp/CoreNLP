@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.nndep;
+package edu.stanford.nlp.parser.nndep; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -131,7 +131,7 @@ public abstract class ParsingSystem  {
   private Set<String> getPunctuationTags() {
     if (tlp instanceof PennTreebankLanguagePack) {
       // Hack for English: match punctuation tags used in Danqi's paper
-      return new HashSet<>(Arrays.asList("''", ",", ".", ":", "``", "-LRB-", "-RRB-"));
+      return new HashSet<>(Arrays.asList("``", "''", ".", ",", ":"));
     } else {
       return CollectionUtils.asSet(tlp.punctuationTags());
     }

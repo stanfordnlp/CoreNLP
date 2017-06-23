@@ -1,8 +1,8 @@
-package edu.stanford.nlp.international.spanish;
+package edu.stanford.nlp.international.spanish; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public final class SpanishVerbStripper implements Serializable  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(SpanishVerbStripper.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishVerbStripper.class);
 
   // The following three classes of verb forms can carry attached
   // pronouns:
@@ -36,45 +36,6 @@ public final class SpanishVerbStripper implements Serializable  {
   //   - Infinitives
   //   - Gerunds
   //   - Affirmative imperatives
-
-  /**
-   * A struct describing the result of verb stripping.
-   */
-  public static class StrippedVerb {
-    private String stem;
-    private String originalStem;
-    private List<String> pronouns;
-
-    public StrippedVerb(String originalStem, List<String> pronouns) {
-      this.originalStem = originalStem;
-      this.pronouns = pronouns;
-    }
-
-    public void setStem(String stem) {
-      this.stem = stem;
-    }
-
-    /**
-     * Return the normalized stem of the verb -- the way it would appear in
-     * isolation without attached pronouns.
-     *
-     * Here are example mappings from original verb to normalized stem:
-     *
-     * <ul>
-     *   <li>sentaos -&gt; sentad</li>
-     *   <li>vámonos -&gt; vamos</li>
-     * </ul>
-     */
-    public String getStem() { return stem; }
-
-    /**
-     * Returns the original stem of the verb, simply split off from pronouns.
-     * (Contrast with {@link #getStem()}, which returns a normalized form.)
-     */
-    public String getOriginalStem() { return originalStem; }
-
-    public List<String> getPronouns() { return pronouns; }
-  }
 
   /* HashMap of singleton instances */
   private static final Map<String, SpanishVerbStripper> instances = new HashMap<>();
@@ -234,55 +195,45 @@ public final class SpanishVerbStripper implements Serializable  {
   private static final Pattern nosse = Pattern.compile("nos|se");
 
   /**
-   * Validate and normalize the given verb stripper result.
-   *
-   * Returns <tt>true</tt> if the given data is a valid pairing of verb form
-   * and clitic pronoun(s).
+   * Examines the given verb pair and returns <tt>true</tt> if it is a
+   * valid pairing of verb form and clitic pronoun(s).
    *
    * May modify <tt>pair</tt> in place in order to make the pair valid.
    * For example, if the pair <tt>(senta, os)</tt> is provided, this
    * method will return <tt>true</tt> and modify the pair to be
    * <tt>(sentad, os)</tt>.
    */
-  private boolean normalizeStrippedVerb(StrippedVerb verb) {
-    String normalized = removeAccents(verb.getOriginalStem());
-    String firstPron = verb.getPronouns().get(0).toLowerCase();
+  private boolean validateVerbPair(Pair<String, List<String>> pair) {
+    String stripped = pair.first().toLowerCase();
+    String firstPron = pair.second().get(0).toLowerCase();
 
-    // Look up verb in dictionary.
-    String verbKey = normalized.toLowerCase();
-    String pos = dict.get(verbKey);
-    boolean valid = false;
+    String pos = dict.get(stripped);
 
-    // System.out.println(verbKey + " " + dict.containsKey(verbKey + 's'));
-
-    // Validate resulting split verb and normalize the new form at the same
-    // time.
     if (pos != null) {
       // Check not invalid combination of verb root and pronoun.
       // (If we combine a second-person plural imperative and the
       // second person plural object pronoun, we expect to see an
       // elided verb root, not the normal one that's in the
       // dictionary.)
-      valid = ! (pos.equals("VMM02P0") && firstPron.equalsIgnoreCase("os"));
-    } else if (firstPron.equalsIgnoreCase("os") && dict.containsKey(verbKey + 'd')) {
-      // Special case: de-elide elided verb root in the case of a second
-      // person plural imperative + second person object pronoun
-      //
-      // (e.g., given (senta, os), return (sentad, os))
-      normalized = normalized + getCase(normalized, 'd');
-      valid = true;
-    } else if (nosse.matcher(firstPron).matches() && dict.containsKey(verbKey + 's')) {
-      // Special case: de-elide elided verb root in the case of a first
-      // person plural imperative + object pronoun
-      //
-      // (vámo, nos) -> (vámos, nos)
-      normalized = normalized + getCase(normalized, 's');
-      valid = true;
+      return ! (pos.equals("VMM02P0") && firstPron.equalsIgnoreCase("os"));
+
     }
 
-    if (valid) {
-      // Update normalized form.
-      verb.setStem(normalized);
+    // Special case: de-elide elided verb root in the case of a second
+    // person plural imperative + second person object pronoun
+    //
+    // (e.g., given (senta, os), return (sentad, os))
+    if (firstPron.equalsIgnoreCase("os") && dict.containsKey(stripped + 'd')) {
+      pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
+      return true;
+    }
+
+    // Special case: de-elide elided verb root in the case of a first
+    // person plural imperative + object pronoun
+    //
+    // (vámo, nos) -> (vámos, nos)
+    if (nosse.matcher(firstPron).matches() && dict.containsKey(stripped + 's')) {
+      pair.setFirst(pair.first() + getCase(pair.first(), 's'));
       return true;
     }
 
@@ -294,19 +245,22 @@ public final class SpanishVerbStripper implements Serializable  {
    *
    * @param word A valid Spanish verb with clitic pronouns attached.
    * @param pSuffix A pattern to match these attached pronouns.
-   * @return A {@link StrippedVerb} instance or <tt>null</tt> if no attached
-   *         pronouns were found.
+   * @return A pair containing the verb (pronouns removed by the given
+   *           pattern) and a list of the pronouns which were attached
+   *           to the verb.
    */
-  private StrippedVerb stripSuffix(String word, Pattern pSuffix) {
+  private static Pair<String, List<String>> stripSuffix(String word,
+                                                        Pattern pSuffix) {
     Matcher m = pSuffix.matcher(word);
     if (m.find()) {
       String stripped = word.substring(0, m.start());
+      stripped = removeAccents(stripped);
 
       List<String> attached = new ArrayList<>();
       for (int i = 0; i < m.groupCount(); i++)
         attached.add(m.group(i + 1));
 
-      return new StrippedVerb(stripped, attached);
+      return new Pair<>(stripped, attached);
     }
 
     return null;
@@ -316,35 +270,24 @@ public final class SpanishVerbStripper implements Serializable  {
    * Attempt to separate attached pronouns from the given verb.
    *
    * @param verb Spanish verb
-   * @return Returns a tuple <tt>((originalStem, normalizedStem), pronouns)</tt>,
-   *         or <tt>null</tt> if no pronouns could be located and separated.
-   *         <ul>
-   *           <li>Pair of:
-   *             <ul>
-   *               <li><tt>originalStem</tt>: The verb stem simply split from the
-   *                   following pronouns.</li>
-   *               <li><tt>normalizedStem</tt>: The verb stem normalized to
-   *                   dictionary form, i.e. in the form it would appear with the
-   *                   same conjugation but no pronouns. See
-   *                   {@link #validateVerbPair(Pair<Pair<String, String>, List<String>)}
-   *                   for more details.</li>
-   *             </ul></li>
-   *           <li><tt>pronouns</tt>: Pronouns which were attached to the verb.</li>
-   *         </ul>
+   * @return A pair containing the verb (pronouns removed) and a list of
+   *           the pronouns which were attached to the verb, or
+   *           <tt>null</tt> if no pronouns could be located and
+   *           separated.
    */
-  public StrippedVerb separatePronouns(String verb) {
-    StrippedVerb result;
+  public Pair<String, List<String>> separatePronouns(String verb) {
+    Pair<String, List<String>> separated;
 
     // Try to strip just one pronoun first
-    result = stripSuffix(verb, pOneAttachedPronoun);
-    if (result != null && normalizeStrippedVerb(result)) {
-      return result;
+    separated = stripSuffix(verb, pOneAttachedPronoun);
+    if (separated != null && validateVerbPair(separated)) {
+      return separated;
     }
 
     // Now two
-    result = stripSuffix(verb, pTwoAttachedPronouns);
-    if (result != null && normalizeStrippedVerb(result)) {
-      return result;
+    separated = stripSuffix(verb, pTwoAttachedPronouns);
+    if (separated != null && validateVerbPair(separated)) {
+      return separated;
     }
 
     return null;
@@ -367,9 +310,9 @@ public final class SpanishVerbStripper implements Serializable  {
    *           if no pronouns were located / stripped.
    */
   public String stripVerb(String verb) {
-    StrippedVerb separated = separatePronouns(verb);
+    Pair<String, List<String>> separated = separatePronouns(verb);
     if (separated != null) {
-      return separated.getStem();
+      return separated.first();
     }
     return null;
   }

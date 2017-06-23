@@ -76,8 +76,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
 
       ));
     } catch (Exception e) {
-      e.printStackTrace();
-      log.info("Error with building coref mention annotator!");
+      log.err("Error with building coref mention annotator!", e);
     }
   }
 
@@ -91,13 +90,12 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
     if (docID == null) {
       docID = "";
     }
-    if (docID.contains("nw") && (CorefProperties.conll(corefProperties)
-        || corefProperties.getProperty("coref.input.type", "raw").equals("conll")) &&
-            CorefProperties.getLanguage(corefProperties) == Locale.CHINESE &&
+    if (docID.contains("nw") && corefProperties.getProperty("coref.input.type", "raw").equals("conll") &&
+            corefProperties.getProperty("coref.language", "en").equals("zh") &&
             PropertiesUtils.getBool(corefProperties,"coref.specialCaseNewswire")) {
-      corefProperties.setProperty("removeNestedMentions", "false");
+      CorefProperties.setRemoveNestedMentions(corefProperties, false);
     } else {
-      corefProperties.setProperty("removeNestedMentions", "true");
+      CorefProperties.setRemoveNestedMentions(corefProperties, true);
     }
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
     int mentionIndex = 0;

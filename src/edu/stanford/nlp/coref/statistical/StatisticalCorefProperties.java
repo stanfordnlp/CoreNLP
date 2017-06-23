@@ -46,7 +46,7 @@ public class StatisticalCorefProperties {
   }
 
   public static double[] pairwiseScoreThresholds(Properties props) {
-    String thresholdsProp = props.getProperty("coref.statistical.pairwiseScoreThresholds");
+    String thresholdsProp = (String) props.get("coref.statistical.pairwiseScoreThresholds");
     if (thresholdsProp != null) {
       String[] split = thresholdsProp.split(",");
       if (split.length == 4) {
@@ -62,8 +62,8 @@ public class StatisticalCorefProperties {
     return PropertiesUtils.getDouble(props, "coref.statistical.minClassImbalance", 0);
   }
 
-  public static int maxTrainExamplesPerDocument(Properties props) {
-    return PropertiesUtils.getInt(props, "coref.statistical.maxTrainExamplesPerDocument",
+  public static int minTrainExamplesPerDocument(Properties props) {
+    return PropertiesUtils.getInt(props, "coref.statistical.minTrainExamplesPerDocument",
         Integer.MAX_VALUE);
   }
 }

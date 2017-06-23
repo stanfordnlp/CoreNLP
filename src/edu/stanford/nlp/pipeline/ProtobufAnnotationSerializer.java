@@ -11,7 +11,6 @@ import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.naturalli.*;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
@@ -273,12 +272,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
     keysToSerialize.remove(HeadWordLabelAnnotation.class);
     keysToSerialize.remove(HeadTagLabelAnnotation.class);
-    // Remove section info
-    keysToSerialize.remove(SectionStartAnnotation.class);
-    keysToSerialize.remove(SectionEndAnnotation.class);
-    // Set the word (this may be null if the CoreLabel is storing a character (as in case of segmenter)
-    if (coreLabel.word() != null)
-      builder.setWord(coreLabel.word());
+    // Required fields
+    builder.setWord(coreLabel.word());
     // Optional fields
     if (keySet.contains(PartOfSpeechAnnotation.class)) { builder.setPos(coreLabel.tag()); keysToSerialize.remove(PartOfSpeechAnnotation.class); }
     if (keySet.contains(ValueAnnotation.class)) { builder.setValue(coreLabel.value()); keysToSerialize.remove(ValueAnnotation.class); }
@@ -306,23 +301,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     } else {
       builder.setHasXmlContext(false);
     }
-    // if there is section info for this token, store it
-    if (keySet.contains(SectionStartAnnotation.class)) {
-      CoreMap sectionAnnotations = coreLabel.get(SectionStartAnnotation.class);
-      // if there is a section name annotation, store it
-      if (sectionAnnotations.get(SectionAnnotation.class) != null)
-        builder.setSectionName(sectionAnnotations.get(SectionAnnotation.class));
-      // if there is a section author annotation, store it
-      if (sectionAnnotations.get(AuthorAnnotation.class) != null)
-        builder.setSectionAuthor(sectionAnnotations.get(AuthorAnnotation.class));
-      // if there is a section date annotation, store it
-      if (sectionAnnotations.get(SectionDateAnnotation.class) != null)
-        builder.setSectionAuthor(sectionAnnotations.get(SectionDateAnnotation.class));
-    }
-    // store section end label
-    if (keySet.contains(SectionEndAnnotation.class)) {
-      builder.setSectionEndLabel(coreLabel.get(SectionEndAnnotation.class));
-    }
     if (keySet.contains(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(getAndRegister(coreLabel, keysToSerialize, CorefClusterIdAnnotation.class)); }
     if (keySet.contains(NaturalLogicAnnotations.OperatorAnnotation.class)) { builder.setOperator(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.OperatorAnnotation.class))); }
     if (keySet.contains(NaturalLogicAnnotations.PolarityAnnotation.class)) { builder.setPolarity(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityAnnotation.class))); }
@@ -345,12 +323,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(GenderAnnotation.class)) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (keySet.contains(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
     if (keySet.contains(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
-
-    // Chinese character related stuff
-    if (keySet.contains(ChineseCharAnnotation.class)) { builder.setChineseChar(getAndRegister(coreLabel, keysToSerialize, ChineseCharAnnotation.class)); }
-    if (keySet.contains(ChineseSegAnnotation.class)) { builder.setChineseSeg(getAndRegister(coreLabel, keysToSerialize, ChineseSegAnnotation.class)); }
-    if (keySet.contains(SegmenterCoreAnnotations.XMLCharAnnotation.class)) { builder.setChineseXMLChar(getAndRegister(coreLabel, keysToSerialize, SegmenterCoreAnnotations.XMLCharAnnotation.class)); }
-
     // Return
     return builder;
   }
@@ -418,16 +390,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       for (CoreLabel tok : sentence.get(TokensAnnotation.class)) { builder.addToken(toProto(tok)); }
       keysToSerialize.remove(TokensAnnotation.class);
     }
-    // Characters
-    if (sentence.containsKey(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
-      for (CoreLabel c : sentence.get(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
-        builder.addCharacter(toProto(c));
-      }
-      keysToSerialize.remove(SegmenterCoreAnnotations.CharactersAnnotation.class);
-    }
     // Optional fields
     if (keySet.contains(SentenceIndexAnnotation.class)) { builder.setSentenceIndex(getAndRegister(sentence, keysToSerialize, SentenceIndexAnnotation.class)); }
-    if (keySet.contains(LineNumberAnnotation.class)) { builder.setLineNumber(getAndRegister(sentence, keysToSerialize, LineNumberAnnotation.class)); }
     if (keySet.contains(CharacterOffsetBeginAnnotation.class)) { builder.setCharacterOffsetBegin(getAndRegister(sentence, keysToSerialize, CharacterOffsetBeginAnnotation.class)); }
     if (keySet.contains(CharacterOffsetEndAnnotation.class)) { builder.setCharacterOffsetEnd(getAndRegister(sentence, keysToSerialize, CharacterOffsetEndAnnotation.class)); }
     if (keySet.contains(TreeAnnotation.class)) { builder.setParseTree(toProto(getAndRegister(sentence, keysToSerialize, TreeAnnotation.class))); }
@@ -454,11 +418,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
       for (SentenceFragment entailedSentence : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
         builder.addEntailedSentence(toProto(entailedSentence));
-      }
-    }
-    if (keySet.contains(NaturalLogicAnnotations.EntailedClausesAnnotation.class)) {
-      for (SentenceFragment entailedClause : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.EntailedClausesAnnotation.class)) {
-        builder.addEntailedClause(toProto(entailedClause));
       }
     }
     if (keySet.contains(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
@@ -503,25 +462,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // add a sentence id if it exists
     if (keySet.contains(SentenceIDAnnotation.class)) builder.setSentenceID(getAndRegister(sentence, keysToSerialize, SentenceIDAnnotation.class));
-
-    // add section index
-    if (keySet.contains(SectionIndexAnnotation.class)) builder.setSectionIndex(getAndRegister(sentence, keysToSerialize, SectionIndexAnnotation.class));
-
-    // add section date
-    if (keySet.contains(SectionDateAnnotation.class)) builder.setSectionDate(getAndRegister(sentence, keysToSerialize, SectionDateAnnotation.class));
-
-    // add section name
-    if (keySet.contains(SectionAnnotation.class)) builder.setSectionName(getAndRegister(sentence, keysToSerialize, SectionAnnotation.class));
-
-    // add section author
-    if (keySet.contains(AuthorAnnotation.class)) builder.setSectionAuthor(getAndRegister(sentence, keysToSerialize, AuthorAnnotation.class));
-
-    // add doc id
-    if (keySet.contains(DocIDAnnotation.class)) builder.setDocID(getAndRegister(sentence, keysToSerialize, DocIDAnnotation.class));
-
-    // add boolean flag if sentence is quoted
-    if (keySet.contains(QuotedAnnotation.class)) builder.setSectionQuoted(getAndRegister(sentence, keysToSerialize, QuotedAnnotation.class));
-
     // Return
     return builder;
   }
@@ -571,12 +511,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Required fields
     builder.setText(doc.get(TextAnnotation.class));
     keysToSerialize.remove(TextAnnotation.class);
-    // Check if we need to store xml info
-    if (doc.containsKey(SectionsAnnotation.class)) {
-      builder.setXmlDoc(true);
-    } else {
-      builder.setXmlDoc(false);
-    }
     // Optional fields
     if (doc.containsKey(SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(SentencesAnnotation.class)) { builder.addSentence(toProto(sentence)); }
@@ -613,20 +547,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addMentions(toProtoMention(mention));
       }
       keysToSerialize.remove(MentionsAnnotation.class);
-    }
-    // add character info from segmenter
-    if (doc.containsKey(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
-      for (CoreLabel c : doc.get(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
-        builder.addCharacter(toProto(c));
-      }
-      keysToSerialize.remove(SegmenterCoreAnnotations.CharactersAnnotation.class);
-    }
-    // add section info
-    if (doc.containsKey(SectionsAnnotation.class)) {
-      for (CoreMap section : doc.get(SectionsAnnotation.class)) {
-        builder.addSections(toProtoSection(section));
-      }
-      keysToSerialize.remove(SectionsAnnotation.class);
     }
     // Return
     return builder;
@@ -731,45 +651,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Set representative mention
     builder.setRepresentative(mentionToIndex.get(chain.getRepresentativeMention()));
     // Return
-    return builder.build();
-  }
-
-  /**
-   * Create a Section CoreMap protocol buffer from the given Section CoreMap
-   * @param section
-   * @return
-   */
-  public CoreNLPProtos.Section toProtoSection(CoreMap section) {
-    CoreNLPProtos.Section.Builder builder = CoreNLPProtos.Section.newBuilder();
-    // Set char start
-    builder.setCharBegin(section.get(CharacterOffsetBeginAnnotation.class));
-    // Set char end
-    builder.setCharEnd(section.get(CharacterOffsetEndAnnotation.class));
-    // Set author
-    if (section.get(AuthorAnnotation.class) != null)
-      builder.setAuthor(section.get(AuthorAnnotation.class));
-    // Set date time
-    if (section.get(SectionDateAnnotation.class) != null)
-      builder.setDatetime(section.get(SectionDateAnnotation.class));
-    // add the sentence indexes for the sentences in this section
-    for (CoreMap sentence : section.get(SentencesAnnotation.class)) {
-      int sentenceIndex = sentence.get(SentenceIndexAnnotation.class);
-      builder.addSentenceIndexes(sentenceIndex);
-    }
-    // add the quotes
-    for (CoreMap quote : section.get(QuotesAnnotation.class)) {
-      builder.addQuotes(toProtoQuote(quote));
-    }
-    // add author start character offset if present
-    if (section.get(SectionAuthorCharacterOffsetBeginAnnotation.class) != null) {
-      builder.setAuthorCharBegin(section.get(SectionAuthorCharacterOffsetBeginAnnotation.class));
-    }
-    // add author end character offset if present
-    if (section.get(SectionAuthorCharacterOffsetEndAnnotation.class) != null) {
-      builder.setAuthorCharEnd(section.get(SectionAuthorCharacterOffsetEndAnnotation.class));
-    }
-    // add original xml tag with all info for section
-    builder.setXmlTag(toProto(section.get(SectionTagAnnotation.class)));
     return builder.build();
   }
 
@@ -992,8 +873,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return CoreNLPProtos.Language.Arabic;
       case Chinese:
         return CoreNLPProtos.Language.Chinese;
-      case UniversalChinese:
-        return CoreNLPProtos.Language.UniversalChinese;
       case English:
         return CoreNLPProtos.Language.English;
       case UniversalEnglish:
@@ -1137,7 +1016,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.get(TokenBeginAnnotation.class) != null) { builder.setTokenBegin(quote.get(TokenBeginAnnotation.class)); }
     if (quote.get(TokenEndAnnotation.class) != null) { builder.setTokenEnd(quote.get(TokenEndAnnotation.class)); }
     if (quote.get(QuotationIndexAnnotation.class) != null) { builder.setIndex(quote.get(QuotationIndexAnnotation.class)); }
-    if (quote.get(AuthorAnnotation.class) != null) { builder.setAuthor(quote.get(AuthorAnnotation.class)); }
     return builder.build();
   }
 
@@ -1205,33 +1083,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasConllUTokenSpan()) { word.set(CoNLLUTokenSpanAnnotation.class, new IntPair(proto.getConllUTokenSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasConllUSecondaryDeps()) { word.set(CoNLLUSecondaryDepsAnnotation.class, fromProto(proto.getConllUSecondaryDeps())); }
     if (proto.hasWikipediaEntity()) { word.set(WikipediaEntityAnnotation.class, proto.getWikipediaEntity()); }
-    // Chinese char info
-    if (proto.hasChineseChar()) { word.set(ChineseCharAnnotation.class, proto.getChineseChar()) ; }
-    if (proto.hasChineseSeg()) { word.set(ChineseSegAnnotation.class, proto.getChineseSeg()) ; }
-    if (proto.hasChineseXMLChar()) { word.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, proto.getChineseXMLChar()); }
 
-    // Non-default annotators
+
+            // Non-default annotators
     if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
     if (proto.hasTrueCaseText()) { word.set(TrueCaseTextAnnotation.class, proto.getTrueCaseText()); }
-
-    // section stuff
-    // handle section start info
-    if (proto.hasSectionName() || proto.hasSectionAuthor() || proto.hasSectionDate()) {
-      CoreMap sectionAnnotations = new ArrayCoreMap();
-      if (proto.hasSectionName())
-        sectionAnnotations.set(SectionAnnotation.class, proto.getSectionName());
-      if (proto.hasSectionDate())
-        sectionAnnotations.set(SectionDateAnnotation.class, proto.getSectionDate());
-      if (proto.hasSectionAuthor())
-        sectionAnnotations.set(AuthorAnnotation.class, proto.getSectionAuthor());
-      word.set(SectionStartAnnotation.class, sectionAnnotations);
-    }
-    // handle sectione end info
-    if (proto.hasSectionEndLabel()) {
-      word.set(SectionEndAnnotation.class, proto.getSectionEndLabel());
-    }
-
     // Return
     return word;
   }
@@ -1278,11 +1135,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       List<SentenceFragment> entailedSentences = proto.getEntailedSentenceList().stream().map(frag -> fromProto(frag, lossySentence.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toList());
       lossySentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
     }
-    // Add entailed clauses
-    if (proto.getEntailedClauseCount() > 0) {
-      List<SentenceFragment> entailedClauses = proto.getEntailedClauseList().stream().map(frag -> fromProto(frag, lossySentence.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toList());
-      lossySentence.set(NaturalLogicAnnotations.EntailedClausesAnnotation.class, entailedClauses);
-    }
     // Add relation triples
     if (proto.getOpenieTripleCount() > 0) {
       throw new IllegalStateException("Cannot deserialize OpenIE triples with this method!");
@@ -1290,24 +1142,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getKbpTripleCount() > 0) {
       throw new IllegalStateException("Cannot deserialize KBP triples with this method!");
     }
-    // Add chinese characters
-    if (proto.getCharacterCount() > 0) {
-      List<CoreLabel> sentenceCharacters =
-              proto.getCharacterList().stream().map(c -> fromProto(c)).collect(Collectors.toList());
-      lossySentence.set(SegmenterCoreAnnotations.CharactersAnnotation.class, sentenceCharacters);
-    }
     // Add text -- missing by default as it's populated from the Document
     lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
-
-    // add section info
-    if (proto.hasSectionName())
-      lossySentence.set(SectionAnnotation.class, proto.getSectionName());
-    if (proto.hasSectionDate())
-      lossySentence.set(SectionDateAnnotation.class, proto.getSectionDate());
-    if (proto.hasSectionAuthor())
-      lossySentence.set(AuthorAnnotation.class, proto.getSectionAuthor());
-    if (proto.hasSectionIndex())
-      lossySentence.set(SectionIndexAnnotation.class, proto.getSectionIndex());
 
     // Return
     return lossySentence;
@@ -1352,20 +1188,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // if there are mentions for this sentence, add them to the annotation
     loadSentenceMentions(proto, sentence);
-
-    // add section info
-    if (proto.hasSectionName())
-      sentence.set(SectionAnnotation.class, proto.getSectionName());
-    if (proto.hasSectionDate())
-      sentence.set(SectionDateAnnotation.class, proto.getSectionDate());
-    if (proto.hasSectionAuthor())
-      sentence.set(AuthorAnnotation.class, proto.getSectionAuthor());
-    if (proto.hasSectionIndex())
-      sentence.set(SectionIndexAnnotation.class, proto.getSectionIndex());
-
-    // add quoted info
-    if (proto.hasSectionQuoted())
-      sentence.set(QuotedAnnotation.class, proto.getSectionQuoted());
 
     // Return
     return sentence;
@@ -1439,15 +1261,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Set text
     Annotation ann = new Annotation(proto.getText());
-
-    // if there are characters, add characters
-    if (proto.getCharacterCount() > 0) {
-      List<CoreLabel> docChars = new ArrayList<CoreLabel>();
-      for (CoreNLPProtos.Token c : proto.getCharacterList()) {
-        docChars.add(fromProto(c));
-      }
-      ann.set(SegmenterCoreAnnotations.CharactersAnnotation.class, docChars);
-    }
 
     // Add tokens
     List<CoreLabel> tokens = new ArrayList<>();
@@ -1584,10 +1397,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(EnhancedPlusPlusDependenciesAnnotation.class))).collect(Collectors.toSet());
         map.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
       }
-      if (sentence.getEntailedClauseCount() > 0) {
-        Set<SentenceFragment> entailedClauses = sentence.getEntailedClauseList().stream().map(frag -> fromProto(frag, map.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toSet());
-        map.set(NaturalLogicAnnotations.EntailedClausesAnnotation.class, entailedClauses);
-      }
       // Set relation triples
       if (sentence.getOpenieTripleCount() > 0) {
         List<RelationTriple> triples = new ArrayList<>();
@@ -1651,17 +1460,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     }
 
-    // set sections if this was an xmlDoc
-    if (proto.hasXmlDoc() && proto.getXmlDoc()) {
-      // this was an xml doc so set up a list of sections
-      List<CoreMap> listOfSections = new ArrayList<CoreMap>();
-      ann.set(SectionsAnnotation.class, listOfSections);
-      for (CoreNLPProtos.Section section : proto.getSectionsList()) {
-        CoreMap sectionCoreMap = fromProto(section, ann.get(SentencesAnnotation.class));
-        ann.get(SectionsAnnotation.class).add(sectionCoreMap);
-      }
-    }
-
     // Set quotes
     List<CoreMap> quotes = proto.getQuoteList().stream().map(quote -> fromProto(quote, tokens)).collect(Collectors.toList());
     if (!quotes.isEmpty()) {
@@ -1700,7 +1498,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Return
     return ann;
   }
-
 
   /**
    * Retrieve a Tree object from a saved protobuf.
@@ -1762,8 +1559,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return Language.Hebrew;
       case Spanish:
         return Language.Spanish;
-      case UniversalChinese:
-        return Language.UniversalChinese;
       case UniversalEnglish:
         return Language.UniversalEnglish;
       case Unknown:
@@ -2239,7 +2034,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.hasIndex()) { ann.set(QuotationIndexAnnotation.class, quote.getIndex()); }
     if (quote.hasTokenBegin()) { ann.set(TokenBeginAnnotation.class, quote.getTokenBegin()); }
     if (quote.hasTokenEnd()) { ann.set(TokenEndAnnotation.class, quote.getTokenEnd()); }
-    if (quote.hasAuthor()) { ann.set(AuthorAnnotation.class, quote.getAuthor()); }
     return ann;
   }
 
@@ -2258,53 +2052,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (mention.hasTimex()) map.set(TimexAnnotation.class, fromProto(mention.getTimex()));
     if (mention.hasWikipediaEntity()) map.set(WikipediaEntityAnnotation.class, mention.getWikipediaEntity());
 
-    return map;
-  }
-
-  /**
-   * Read a section coremap from its serialized form. Requires the containing sentence to be
-   * passed in along with the protocol buffer.
-   * @param section The serialized section coremap
-   * @return The relation mention corresponding to the serialized object.
-   */
-  private CoreMap fromProto(CoreNLPProtos.Section section, List<CoreMap> annotationSentences) {
-    CoreMap map = new ArrayCoreMap();
-    map.set(CharacterOffsetBeginAnnotation.class, section.getCharBegin());
-    map.set(CharacterOffsetEndAnnotation.class, section.getCharEnd());
-    if (section.hasAuthor())
-      map.set(AuthorAnnotation.class, section.getAuthor());
-    if (section.hasDatetime())
-      map.set(SectionDateAnnotation.class, section.getDatetime());
-    // go through the list of sentences and add them to this section's sentence list
-    ArrayList<CoreMap> sentencesList = new ArrayList<>();
-    for (int sentenceIndex : section.getSentenceIndexesList()) {
-      sentencesList.add(annotationSentences.get(sentenceIndex));
-    }
-    map.set(SentencesAnnotation.class, sentencesList);
-    // go through the list of quotes and rebuild the quotes
-    map.set(QuotesAnnotation.class, new ArrayList<CoreMap>());
-    for (CoreNLPProtos.Quote quote : section.getQuotesList()) {
-      int quoteCharStart = quote.getBegin();
-      int quoteCharEnd = quote.getEnd();
-      String quoteAuthor = null ;
-      if (quote.hasAuthor()) {
-        quoteAuthor = quote.getAuthor();
-      }
-      CoreMap quoteCoreMap = new ArrayCoreMap();
-      quoteCoreMap.set(CharacterOffsetBeginAnnotation.class, quoteCharStart);
-      quoteCoreMap.set(CharacterOffsetEndAnnotation.class, quoteCharEnd);
-      quoteCoreMap.set(AuthorAnnotation.class, quoteAuthor);
-      map.get(QuotesAnnotation.class).add(quoteCoreMap);
-    }
-    // if there is an author character start, add it
-    if (section.hasAuthorCharBegin()) {
-      map.set(SectionAuthorCharacterOffsetBeginAnnotation.class, section.getAuthorCharBegin());
-    }
-    if (section.hasAuthorCharEnd()) {
-      map.set(SectionAuthorCharacterOffsetEndAnnotation.class, section.getAuthorCharEnd());
-    }
-    // add the original xml tag
-    map.set(SectionTagAnnotation.class, fromProto(section.getXmlTag()));
     return map;
   }
 

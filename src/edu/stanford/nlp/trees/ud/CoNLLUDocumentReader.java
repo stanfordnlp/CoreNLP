@@ -14,8 +14,6 @@ import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.TypedDependency;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
 
@@ -52,24 +50,6 @@ public class CoNLLUDocumentReader implements
   private static class SentenceProcessor implements Function<String,SemanticGraph> {
 
     private int lineNumberCounter = 0;
-
-    private Pair<IndexedWord, GrammaticalRelation> getGovAndReln(int govIdx, IndexedWord word, String relationName,
-                                                                 List<IndexedWord> sortedTokens) {
-      IndexedWord gov;
-      GrammaticalRelation reln;
-      if (relationName.equals("root")) {
-        reln = GrammaticalRelation.ROOT;
-      } else {
-        reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, relationName);
-      }
-      if (govIdx == 0) {
-        gov = new IndexedWord(word.docID(), word.sentIndex(), 0);
-        gov.setValue("ROOT");
-      } else {
-        gov = sortedTokens.get(govIdx - 1);
-      }
-      return Generics.newPair(gov, reln);
-    }
 
     public SemanticGraph apply(String line) {
       if (line == null) return null;
@@ -120,29 +100,31 @@ public class CoNLLUDocumentReader implements
             tokenSpan = null;
             originalToken = null;
           }
-          HashMap<Integer,String> extraDeps = word.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class);
-          if (extraDeps.isEmpty()) {
-            int govIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
-            Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(govIdx, word,
-                word.get(CoreAnnotations.CoNLLDepTypeAnnotation.class), sortedTokens);
-            IndexedWord gov = govReln.first();
-            GrammaticalRelation reln  = govReln.second();
-            TypedDependency dep = new TypedDependency(reln, gov, word);
-            word.set(CoreAnnotations.LineNumberAnnotation.class, lineNumberCounter);
-            deps.add(dep);
-          } else {
-            for (Integer extraGovIdx : extraDeps.keySet()) {
-              int mainGovIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
-              Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(extraGovIdx, word,
-                  extraDeps.get(extraGovIdx), sortedTokens);
-              IndexedWord gov = govReln.first();
-              GrammaticalRelation reln = govReln.second();
-              TypedDependency dep = new TypedDependency(reln, gov, word);
-              if (extraGovIdx != mainGovIdx) {
-                dep.setExtra();
-              }
-              deps.add(dep);
+          GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish,
+                  word.get(CoreAnnotations.CoNLLDepTypeAnnotation.class));
+          int govIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
+          IndexedWord gov;
+          if (govIdx == 0) {
+            gov = new IndexedWord(word.docID(), word.sentIndex(), 0);
+            gov.setValue("ROOT");
+            if (word.get(CoreAnnotations.CoNLLDepTypeAnnotation.class).equals("root")) {
+              reln = GrammaticalRelation.ROOT;
             }
+          } else {
+            gov = sortedTokens.get(govIdx - 1);
+          }
+          TypedDependency dep = new TypedDependency(reln, gov, word);
+          word.set(CoreAnnotations.LineNumberAnnotation.class, lineNumberCounter);
+          deps.add(dep);
+
+          HashMap<Integer,String> extraDeps = word.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class);
+          for (Integer extraGovIdx : extraDeps.keySet()) {
+            GrammaticalRelation extraReln =
+                    GrammaticalRelation.valueOf(Language.UniversalEnglish, extraDeps.get(extraGovIdx));
+            IndexedWord extraGov =  sortedTokens.get(extraGovIdx - 1);
+            TypedDependency extraDep = new TypedDependency(extraReln, extraGov, word);
+            extraDep.setExtra();
+            deps.add(extraDep);
           }
         }
       }

@@ -26,7 +26,7 @@
 //http://www-nlp.stanford.edu/software/tagger.shtml
 
 
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.process.WordShapeClassifier;
@@ -120,7 +120,7 @@ public class ExtractorFrames  {
 
   // all features are implicitly conjoined with the current tag
   static final Extractor cWord = new Extractor(0, false);
-  private static final Extractor prevWord = new Extractor(-1, false);
+  static final Extractor prevWord = new Extractor(-1, false);
   private static final Extractor prevTag = new Extractor(-1, true);
   // prev tag and current word!
   private static final Extractor prevTagWord = new ExtractorWordTag(0, -1);

@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
@@ -17,7 +16,6 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
-import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
@@ -197,7 +195,7 @@ public class ParserAnnotator extends SentenceAnnotator  {
     return os.toString();
   }
 
-  private static String[] convertFlagsToArray(String parserFlags) {
+  public static String[] convertFlagsToArray(String parserFlags) {
     if (parserFlags == null || parserFlags.trim().isEmpty()) {
       return StringUtils.EMPTY_STRING_ARRAY;
     } else {
@@ -302,18 +300,6 @@ public class ParserAnnotator extends SentenceAnnotator  {
       Trees.convertToCoreLabels(binarized);
       sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);
     }
-
-    // for some reason in some corner cases nodes aren't having sentenceIndex set
-    // do a pass and make sure all nodes have sentenceIndex set
-    SemanticGraph sg = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    if (sg != null) {
-      for (IndexedWord iw : sg.vertexSet()) {
-        if (iw.get(CoreAnnotations.SentenceIndexAnnotation.class) == null
-                && sentence.get(CoreAnnotations.SentenceIndexAnnotation.class) != null) {
-          iw.setSentIndex(sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
-        }
-      }
-    }
   }
 
   private List<Tree> doOneSentence(List<ParserConstraint> constraints,
@@ -338,7 +324,7 @@ public class ParserAnnotator extends SentenceAnnotator  {
       } else {
         List<ScoredObject<Tree>> scoredObjects = pq.getKBestParses(this.kBest);
         if (scoredObjects == null || scoredObjects.size() < 1) {
-          log.warn("Parsing of sentence failed.  " +
+          log.info("WARNING: Parsing of sentence failed.  " +
               "Will ignore and continue: " +
               SentenceUtils.listToString(words));
         } else {
@@ -351,11 +337,11 @@ public class ParserAnnotator extends SentenceAnnotator  {
         }
       }
     } catch (OutOfMemoryError e) {
-      log.error(e); // Beware that we can now get an OOM in logging, too.
-      log.warn("Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
-              "Will ignore and try to continue.");
+      Runtime.getRuntime().gc();
+      log.info("WARNING: Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
+              "Will ignore and continue.");
     } catch (NoSuchParseException e) {
-      log.warn("Parsing of sentence failed, possibly because of out of memory.  " +
+      log.info("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
               "Will ignore and continue: " +
               SentenceUtils.listToString(words));
     }

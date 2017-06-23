@@ -1,4 +1,8 @@
-package edu.stanford.nlp.process;
+package edu.stanford.nlp.process; 
+import edu.stanford.nlp.util.logging.Redwood;
+
+
+import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHITEPLUS;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,9 +32,6 @@ import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
-
-import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHITEPLUS;
 
 /**
  * Convert a Chinese Document into a List of sentence Strings.
@@ -46,14 +47,14 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
 
   private static final long serialVersionUID = 4054964767812217460L;
 
-  private static final Set<Character> fullStopsSet = Generics.newHashSet(Arrays.asList(new Character[]{'。', '！', '？', '!', '?'}));
+  private static final Set<Character> fullStopsSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u3002', '\uff01', '\uff1f', '!', '?'}));
   // not \uff0e . (too often separates English first/last name, etc.)
 
-  private static final Set<Character> rightMarkSet = Generics.newHashSet(Arrays.asList(new Character[]{'”', '’', '》', '』', '〉', '」', '＞', '＇', '）', '\'', '"', ')', ']', '>'}));
+  private static final Set<Character> rightMarkSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u201d', '\u2019', '\u300b', '\u300f', '\u3009', '\u300d', '\uff1e', '\uff07', '\uff09', '\'', '"', ')', ']', '>'}));
 
   // private final String normalizationTableFile;
 
-  private static final String encoding = "UTF-8";
+  private final String encoding = "UTF-8";
   private final List<Pair<String,String>> normalizationTable;
 
 
@@ -61,11 +62,11 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
     this(null);
   }
 
-  private static final Pattern PAIR_PATTERN = Pattern.compile("([^\\s]+)\\s+([^\\s]+)");
+  static final Pattern PAIR_PATTERN = Pattern.compile("([^\\s]+)\\s+([^\\s]+)");
 
   /** @param normalizationTableFile A file listing character pairs for
    *     normalization.  Currently the normalization table must be in UTF-8.
-   *     If this parameter is {@code null}, the default normalization
+   *     If this parameter is <code>null</code>, the default normalization
    *     of the zero-argument constructor is used.
    */
   public ChineseDocumentToSentenceProcessor(String normalizationTableFile) {
@@ -106,8 +107,8 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
   }
 
   private static final Pattern WHITEPLUS_PATTERN = Pattern.compile(WHITEPLUS);
-  private static final Pattern START_WHITEPLUS_PATTERN = Pattern.compile('^' + WHITEPLUS);
-  private static final Pattern END_WHITEPLUS_PATTERN = Pattern.compile(WHITEPLUS + '$');
+  private static final Pattern START_WHITEPLUS_PATTERN = Pattern.compile("^" + WHITEPLUS);
+  private static final Pattern END_WHITEPLUS_PATTERN = Pattern.compile(WHITEPLUS + "$");
 
   private String normalize(String inputString) {
     if (normalizationTable == null) {
@@ -135,7 +136,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
    *  The -segmentIBM option is for IBM GALE-specific splitting of an
    *  XML element into sentences.
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws IOException {
     //String encoding = "GB18030";
     Properties props = StringUtils.argsToProperties(args);
     // log.info("Here are the properties:");
@@ -165,12 +166,15 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
       StringBuilder buff = new StringBuilder();
       StringBuilder sgmlbuff = new StringBuilder();
       String lastSgml = "";
-
-      p1 = Pattern.compile("<.*>");
-      p2 = Pattern.compile("\uFEFF?<[\\p{Alpha}]+");
-      p3 = Pattern.compile("[A-Za-z0-9=\"]+>");
-      p4 = Pattern.compile("<(?:" + parseInside + ")[ >]");
-
+      try {
+        p1 = Pattern.compile("<.*>");
+        p2 = Pattern.compile("\uFEFF?<[\\p{Alpha}]+");
+        p3 = Pattern.compile("[A-Za-z0-9=\"]+>");
+        p4 = Pattern.compile("<(?:" + parseInside + ")[ >]");
+      } catch (Exception e) {
+        e.printStackTrace();
+        return;
+      }
       boolean inSGML = false;
       int splitItems = 0;
       int numAdded = 0;
@@ -296,7 +300,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
       // EncodingPrintWriter.out.println("Char is |" + c + "|", "UTF-8");
       String newChar = c.toString();
 
-      if ( ! sentenceEnd) {
+      if (sentenceEnd == false) {
         if (segmented && fullStopsSet.contains(c) &&
             (lastCh == -1 || Character.isSpaceChar(lastCh))) {
           // require it to be a standalone punctuation mark -- cf. URLs

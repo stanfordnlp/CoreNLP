@@ -122,6 +122,43 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
     }
   }
 
+  /** Filter out all spurious mentions  */
+  @Override
+  public void removeSpuriousMentionsEn(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict) {
+
+    List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
+
+    for(int i=0 ; i < predictedMentions.size() ; i++) {
+      CoreMap s = sentences.get(i);
+      List<Mention> mentions = predictedMentions.get(i);
+
+      List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
+      Set<Mention> remove = Generics.newHashSet();
+
+      for(Mention m : mentions){
+        String headPOS = m.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+
+        // non word such as 'hmm'
+        if(dict.nonWords.contains(m.headString)) remove.add(m);
+
+        // adjective form of nations
+        // the [American] policy -> not mention
+        // speak in [Japanese] -> mention
+        // check if the mention is noun and the next word is not noun
+        if (dict.isAdjectivalDemonym(m.spanToString())) {
+          if(!headPOS.startsWith("N")
+              || (m.endIndex < sent.size() && sent.get(m.endIndex).tag().startsWith("N")) ) {
+            remove.add(m);
+          }
+        }
+
+        // stop list (e.g., U.S., there)
+        if (inStopList(m)) remove.add(m);
+      }
+      mentions.removeAll(remove);
+    }
+  }
+
   private static void extractNPorPRP(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);

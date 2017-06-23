@@ -2336,7 +2336,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       loadTextClassifier(br);
       br.close();
     } catch (Exception ex) {
-      log.info("Exception in loading text classifier from " + text, ex);
+      log.info("Exception in loading text classifier from " + text);
+      ex.printStackTrace();
     }
   }
 
@@ -2404,43 +2405,52 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * should now work for Chinese segmenter though. TODO: check things in
    * serializeClassifier and add other necessary serialization back.
    *
-   * @param serializePath File to write text format of classifier to.
+   * @param serializePath
+   *          File to write text format of classifier to.
    */
   public void serializeTextClassifier(String serializePath) {
+    log.info("Serializing Text classifier to " + serializePath + "...");
     try {
       PrintWriter pw = new PrintWriter(new GZIPOutputStream(new FileOutputStream(serializePath)));
       serializeTextClassifier(pw);
 
       pw.close();
-      log.info("Serializing Text classifier to " + serializePath + "... done.");
+      log.info("done.");
+
     } catch (Exception e) {
-      log.info("Serializing Text classifier to " + serializePath + "... FAILED.", e);
+      log.info("Failed");
+      e.printStackTrace();
     }
   }
 
   public void serializeClassIndex(String serializePath) {
+    log.info("Serializing class index to " + serializePath + "...");
 
     ObjectOutputStream oos = null;
     try {
       oos = IOUtils.writeStreamFromString(serializePath);
       oos.writeObject(classIndex);
-      log.info("Serializing class index to " + serializePath + "... done.");
+      log.info("done.");
     } catch (Exception e) {
-      log.info("Serializing class index to " + serializePath + "... FAILED.", e);
+      log.info("Failed");
+      e.printStackTrace();
     } finally {
       IOUtils.closeIgnoringExceptions(oos);
     }
   }
 
   public static Index<String> loadClassIndexFromFile(String serializePath) {
+    log.info("Reading class index from " + serializePath + "...");
+
     ObjectInputStream ois = null;
     Index<String> c = null;
     try {
       ois = IOUtils.readStreamFromString(serializePath);
       c = (Index<String>) ois.readObject();
-      log.info("Reading class index from " + serializePath + "... done.");
+      log.info("done.");
     } catch (Exception e) {
-      log.info("Reading class index from " + serializePath + "... FAILED.", e);
+      log.info("Failed");
+      e.printStackTrace();
     } finally {
       IOUtils.closeIgnoringExceptions(ois);
     }
@@ -2449,28 +2459,33 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   public void serializeWeights(String serializePath) {
+    log.info("Serializing weights to " + serializePath + "...");
+
     ObjectOutputStream oos = null;
     try {
       oos = IOUtils.writeStreamFromString(serializePath);
       oos.writeObject(weights);
-      log.info("Serializing weights to " + serializePath + "... done.");
+      log.info("done.");
     } catch (Exception e) {
-      log.info("Serializing weights to " + serializePath + "... FAILED.", e);
+      log.info("Failed");
+      e.printStackTrace();
     } finally {
       IOUtils.closeIgnoringExceptions(oos);
     }
   }
 
   public static double[][] loadWeightsFromFile(String serializePath) {
+    log.info("Reading weights from " + serializePath + "...");
 
     ObjectInputStream ois = null;
     double[][] w = null;
     try {
       ois = IOUtils.readStreamFromString(serializePath);
       w = (double[][]) ois.readObject();
-      log.info("Reading weights from " + serializePath + "... done.");
+      log.info("done.");
     } catch (Exception e) {
-      log.info("Reading weights from " + serializePath + "... FAILED.", e);
+      log.info("Failed");
+      e.printStackTrace();
     } finally {
       IOUtils.closeIgnoringExceptions(ois);
     }
@@ -2479,28 +2494,33 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   public void serializeFeatureIndex(String serializePath) {
+    log.info("Serializing FeatureIndex to " + serializePath + "...");
+
     ObjectOutputStream oos = null;
     try {
       oos = IOUtils.writeStreamFromString(serializePath);
       oos.writeObject(featureIndex);
-      log.info("Serializing FeatureIndex to " + serializePath + "... done.");
+      log.info("done.");
     } catch (Exception e) {
       log.info("Failed");
-      log.info("Serializing FeatureIndex to " + serializePath + "... FAILED.", e);
+      e.printStackTrace();
     } finally {
       IOUtils.closeIgnoringExceptions(oos);
     }
   }
 
   public static Index<String> loadFeatureIndexFromFile(String serializePath) {
+    log.info("Reading FeatureIndex from " + serializePath + "...");
+
     ObjectInputStream ois = null;
     Index<String> f = null;
     try {
       ois = IOUtils.readStreamFromString(serializePath);
       f = (Index<String>) ois.readObject();
-      log.info("Reading FeatureIndex from " + serializePath + "... done.");
+      log.info("done.");
     } catch (Exception e) {
-      log.info("Reading FeatureIndex from " + serializePath + "... FAILED.", e);
+      log.info("Failed");
+      e.printStackTrace();
     } finally {
       IOUtils.closeIgnoringExceptions(ois);
     }
@@ -2514,14 +2534,16 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    */
   @Override
   public void serializeClassifier(String serializePath) {
+    log.info("Serializing classifier to " + serializePath + "...");
+
     ObjectOutputStream oos = null;
     try {
       oos = IOUtils.writeStreamFromString(serializePath);
       serializeClassifier(oos);
-      log.info("Serializing classifier to " + serializePath + "... done.");
+      log.info("done.");
 
     } catch (Exception e) {
-      throw new RuntimeIOException("Serializing classifier to " + serializePath + "... FAILED", e);
+      throw new RuntimeIOException("Failed to save classifier", e);
     } finally {
       IOUtils.closeIgnoringExceptions(oos);
     }

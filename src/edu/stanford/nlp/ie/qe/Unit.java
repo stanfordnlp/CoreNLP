@@ -1,12 +1,11 @@
 package edu.stanford.nlp.ie.qe;
 
 /**
- * Quantifiable entity unit.
+ * Quantifiable entity unit
  *
  * @author Angel Chang
  */
 public class Unit {
-
   protected String name;
   protected String symbol;
   protected String type;

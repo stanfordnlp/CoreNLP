@@ -41,34 +41,32 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings({"UnusedDeclaration", "WeakerAccess"})
 public class Sentence {
+  /** A properties object for creating a document from a single sentence. Used in the constructor {@link Sentence#Sentence(String)} */
+  static Properties SINGLE_SENTENCE_DOCUMENT = new Properties() {{
+    setProperty("language", "english");
+    setProperty("ssplit.isOneSentence", "true");
+    setProperty("tokenize.class", "PTBTokenizer");
+    setProperty("tokenize.language", "en");
+  }};
 
-  /** A Properties object for creating a document from a single sentence. Used in the constructor {@link Sentence#Sentence(String)} */
-  static Properties SINGLE_SENTENCE_DOCUMENT = PropertiesUtils.asProperties(
-          "language", "english",
-          "ssplit.isOneSentence", "true",
-          "tokenize.class", "PTBTokenizer",
-          "tokenize.language", "en",
-          "mention.type", "dep",
-          "coref.mode", "statistical",  // Use the new coref
-          "coref.md.type", "dep"
-  );
-
-  /** A Properties object for creating a document from a single tokenized sentence. */
-  private static Properties SINGLE_SENTENCE_TOKENIZED_DOCUMENT = PropertiesUtils.asProperties(
-          "language", "english",
-          "ssplit.isOneSentence", "true",
-          "tokenize.class", "WhitespaceTokenizer",
-          "tokenize.language", "en",
-          "tokenize.whitespace", "true",
-          "mention.type", "dep",
-          "coref.mode", "statistical",  // Use the new coref
-          "coref.md.type", "dep"
-  );  // redundant?
+  /** A properties object for creating a document from a single tokenized sentence. */
+  private static Properties SINGLE_SENTENCE_TOKENIZED_DOCUMENT = new Properties() {{
+    setProperty("language", "english");
+    setProperty("ssplit.isOneSentence", "true");
+    setProperty("tokenize.class", "WhitespaceTokenizer");
+    setProperty("tokenize.language", "en");
+    setProperty("tokenize.whitespace", "true");  // redundant?
+  }};
 
   /**
+   * <p>
    *  The protobuf representation of a Sentence.
    *  Note that this does not necessarily have up to date token information.
-   */
+   * </p>
+   * <p>
+   *
+   * </p>
+   * */
   private final CoreNLPProtos.Sentence.Builder impl;
   /** The protobuf representation of the tokens of a sentence. This has up-to-date information on the tokens */
   private final List<CoreNLPProtos.Token.Builder> tokensBuilders;
@@ -228,7 +226,7 @@ public class Sentence {
   /** Helper for creating a sentence from a document and a CoreMap representation */
   protected Sentence(Document doc, CoreMap sentence) {
     this.document = doc;
-    assert ! doc.sentences().isEmpty();
+    assert doc.sentences().size() > 0;
     this.impl = doc.sentence(0).impl;
     this.tokensBuilders = doc.sentence(0).tokensBuilders;
     this.defaultProps = Document.EMPTY_PROPS;
@@ -245,7 +243,7 @@ public class Sentence {
   public Sentence(CoreMap sentence) {
     this(new Document(new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class)) {{
       set(CoreAnnotations.SentencesAnnotation.class, Collections.singletonList(sentence));
-      if (sentence.containsKey(CoreAnnotations.DocIDAnnotation.class)) {
+      if(sentence.containsKey(CoreAnnotations.DocIDAnnotation.class)) {
         set(CoreAnnotations.DocIDAnnotation.class, sentence.get(CoreAnnotations.DocIDAnnotation.class));
       }
     }}), sentence);
@@ -431,45 +429,6 @@ public class Sentence {
   public int characterOffsetEnd(int index) {
     return characterOffsetEnd().get(index);
   }
-
-
-  /** The whitespace before each token in the sentence. This will match {@link #after()} of the previous token. */
-  public List<String> before() {
-    synchronized (impl) {
-      return lazyList(tokensBuilders, CoreNLPProtos.Token.Builder::getBefore);
-    }
-  }
-
-
-  /** The whitespace before this token in the sentence. This will match {@link #after()} of the previous token. */
-  public String before(int index) {
-    return before().get(index);
-  }
-
-
-  /** The whitespace after each token in the sentence. This will match {@link #before()} of the next token. */
-  public List<String> after() {
-    synchronized (impl) {
-      return lazyList(tokensBuilders, CoreNLPProtos.Token.Builder::getAfter);
-    }
-  }
-
-
-  /** The whitespace after this token in the sentence. This will match {@link #before()} of the next token. */
-  public String after(int index) {
-    return after().get(index);
-  }
-
-
-  /** The tokens in this sentence. Each token class is just a helper for the methods in this class. */
-  public List<Token> tokens() {
-    ArrayList<Token> tokens = new ArrayList<>(this.length());
-    for (int i = 0; i < length(); ++i) {
-      tokens.add(new Token(this, i));
-    }
-    return tokens;
-  }
-
 
   //
   // SET BY ANNOTATORS
@@ -1025,13 +984,13 @@ public class Sentence {
   public SentimentClass sentiment(Properties props) {
     document.runSentiment(props);
     switch (impl.getSentiment().toLowerCase()) {
-      case "very positive":
+      case "verypositive":
         return SentimentClass.VERY_POSITIVE;
       case "positive":
         return SentimentClass.POSITIVE;
       case "negative":
         return SentimentClass.NEGATIVE;
-      case "very negative":
+      case "verynegative":
         return SentimentClass.VERY_NEGATIVE;
       case "neutral":
         return SentimentClass.NEUTRAL;
@@ -1044,7 +1003,6 @@ public class Sentence {
    * Get the coreference chain for just this sentence.
    * Note that this method is actually fairly computationally expensive to call, as it constructs and prunes
    * the coreference data structure for the entire document.
-   *
    * @return A coreference chain, but only for this sentence
    */
   public Map<Integer, CorefChain> coref() {
@@ -1052,12 +1010,12 @@ public class Sentence {
     Map<Integer, CorefChain> allCorefs = document.coref();
     // Delete coreference chains not in this sentence
     Set<Integer> toDeleteEntirely = new HashSet<>();
-    for (Map.Entry<Integer, CorefChain> integerCorefChainEntry : allCorefs.entrySet()) {
-      CorefChain chain = integerCorefChainEntry.getValue();
-      List<CorefChain.CorefMention> mentions = new ArrayList<>(chain.getMentionsInTextualOrder());
+    for (Integer clusterID : allCorefs.keySet()) {
+      CorefChain chain = allCorefs.get(clusterID);
+      ArrayList<CorefChain.CorefMention> mentions = new ArrayList<>(chain.getMentionsInTextualOrder());
       mentions.stream().filter(m -> m.sentNum != this.sentenceIndex() + 1).forEach(chain::deleteMention);
       if (chain.getMentionsInTextualOrder().isEmpty()) {
-        toDeleteEntirely.add(integerCorefChainEntry.getKey());
+        toDeleteEntirely.add(clusterID);
       }
     }
     // Clean up dangling empty chains
@@ -1076,7 +1034,7 @@ public class Sentence {
    * Note that, importantly, only the fields which have already been called will be populated in
    * the CoreMap!
    *
-   * Therefore, this method is generally NOT recommended.
+   * <p>Therefore, this method is generally NOT recommended.</p>
    *
    * @param functions A list of functions to call before populating the CoreMap.
    *                  For example, you can specify mySentence::posTags, and then posTags will
@@ -1096,7 +1054,7 @@ public class Sentence {
    * Note that, importantly, only the fields which have already been called will be populated in
    * the CoreMap!
    *
-   * Therefore, this method is generally NOT recommended.
+   * <p>Therefore, this method is generally NOT recommended.</p>
    *
    * @param functions A list of functions to call before populating the CoreMap.
    *                  For example, you can specify mySentence::posTags, and then posTags will
@@ -1238,7 +1196,7 @@ public class Sentence {
       return false;
     }
     // Check each token
-    for (int i = 0, sz = tokensBuilders.size(); i < sz; ++i) {
+    for (int i = 0; i < tokensBuilders.size(); ++i) {
       if (!tokensBuilders.get(i).build().equals(sentence.tokensBuilders.get(i).build())) {
         return false;
       }
@@ -1302,8 +1260,7 @@ public class Sentence {
   }
 
   /**
-   * Apply a TokensRegex pattern to the sentence.
-   *
+   * Apply a tokensregex pattern to the sentence
    * @param pattern The TokensRegex pattern to match against.
    * @return the matcher.
    */
@@ -1312,8 +1269,7 @@ public class Sentence {
   }
 
   /**
-   * Apply a TokensRegex pattern to the sentence.
-   *
+   * Apply a tokensregex pattern
    * @param pattern The TokensRegex pattern to match against.
    * @return True if the tokensregex pattern matches.
    */
@@ -1322,8 +1278,7 @@ public class Sentence {
   }
 
   /**
-   * Apply a TokensRegex pattern to the sentence.
-   *
+   * Apply a tokensregex pattern to the sentence
    * @param pattern The TokensRegex pattern to match against.
    * @param fn The action to do on each match.
    * @return the list of matches, after run through the function.
@@ -1365,5 +1320,4 @@ public class Sentence {
   public <T> List<T> semgrex(String pattern, Function<SemgrexMatcher, T> fn) {
     return semgrex(SemgrexPattern.compile(pattern), fn);
   }
-
 }

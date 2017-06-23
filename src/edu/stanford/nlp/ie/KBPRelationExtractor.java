@@ -89,7 +89,7 @@ public interface KBPRelationExtractor {
     /** Find the slot for a given name */
     public static Optional<NERTag> fromString(String name) {
       // Early termination
-      if (StringUtils.isNullOrEmpty(name)) { return Optional.empty(); }
+      if (name == null || name.equals("")) { return Optional.empty(); }
       // Cycle known NER tags
       name = name.toUpperCase();
       for (NERTag slot : NERTag.values()) {
@@ -108,11 +108,12 @@ public interface KBPRelationExtractor {
    *
    * Note that changing the constants here can have far-reaching consequences in loading serialized
    * models, and various bits of code that have been hard-coded to these relation types (e.g., the various
-   * consistency filters).
+   * consistency filters). <b>If you'd like to change only the output form of these relations.
    *
    * <p>
-   * <i>Note:</i> Neither per:spouse, org:founded_by, or X:organizations_founded are SINGLE relations
-   *       in the spec - these are made single here because our system otherwise over-predicts them.
+   * NOTE: Neither per:spouse, org:founded_by, or X:organizations_founded are SINGLE relations
+   *       in the spec -- these are made single here
+   *       because our system otherwise over-predicts them.
    * </p>
    *
    * @author Gabor Angeli
@@ -383,7 +384,7 @@ public interface KBPRelationExtractor {
           throw new IllegalStateException("Could not parse CoNLL file");
         }
         i += 1;
-      } else if (StringUtils.isNullOrEmpty(line.trim())) {
+      } else if ("".equals(line.trim())) {
         // Case: commit a sentence
         examples.add(Pair.makePair(new KBPInput(
             subject,
@@ -411,7 +412,7 @@ public interface KBPRelationExtractor {
   @SuppressWarnings("unused")
   class Accuracy {
 
-    private static class PerRelationStat implements  Comparable<PerRelationStat> {
+    private class PerRelationStat implements  Comparable<PerRelationStat> {
       public final String name;
       public final double precision;
       public final double recall;
@@ -476,10 +477,10 @@ public interface KBPRelationExtractor {
       if (predictedRelations.size() == 1 && goldRelations.size() == 1) {
         confusion.add(predictedRelations.iterator().next(), goldRelations.iterator().next());
       }
-      if (predictedRelations.size() == 1 && goldRelations.isEmpty()) {
+      if (predictedRelations.size() == 1 && goldRelations.size() == 0) {
         confusion.add(predictedRelations.iterator().next(), "NR");
       }
-      if (predictedRelations.isEmpty() && goldRelations.size() == 1) {
+      if (predictedRelations.size() == 0 && goldRelations.size() == 1) {
         confusion.add("NR", goldRelations.iterator().next());
       }
     }
@@ -546,7 +547,7 @@ public interface KBPRelationExtractor {
       Collections.sort(stats);
       out.println("Per-relation Accuracy");
       for (PerRelationStat stat : stats) {
-        out.println(stat);
+        out.println(stat.toString());
       }
     }
 
@@ -612,5 +613,4 @@ public interface KBPRelationExtractor {
     endTrack("Accuracy");
     return accuracy;
   }
-
 }

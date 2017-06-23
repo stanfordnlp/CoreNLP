@@ -2,11 +2,10 @@ package edu.stanford.nlp.ie;
 
 import junit.framework.TestCase;
 
-/**
- * Notes: This tests the old code that is independent of SUTime!
- * The test that checks the integration of SUTime with QEN is NumberSequenceClassifierITest.
- *
+/** 
  * @author Christopher Manning
+ * Note: this tests the old code that is independent of SUTime!
+ *       the test that checks the integration of SUTime with QEN is NumberSequenceClassifierITest
  */
 public class QuantifiableEntityNormalizerTest extends TestCase {
 

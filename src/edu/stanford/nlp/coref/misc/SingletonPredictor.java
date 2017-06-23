@@ -1,7 +1,6 @@
 // StanfordCoreNLP -- a suite of NLP tools
 
 package edu.stanford.nlp.coref.misc;
-
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -13,9 +12,9 @@ import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.classify.LogisticClassifierFactory;
 import edu.stanford.nlp.coref.data.CorefCluster;
+import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
-import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -48,24 +47,21 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     # Output file where the serialized model is saved.
  *     singleton.predictor.output = /path/to/predictor.output
  *
- * @author Marta Recasens
- * @author Marie-Catherine de Marneffe
+ * @author Marta Recasens, Marie-Catherine de Marneffe
  */
 public class SingletonPredictor  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(SingletonPredictor.class);
-
-  private SingletonPredictor() {} // static main utility
+  private static Redwood.RedwoodChannels log = Redwood.channels(SingletonPredictor.class);
 
   /**
    * Set index for each token and sentence in the document.
    * @param doc
    */
-  private static void setTokenIndices(Document doc) {
+  public static void setTokenIndices(Document doc){
     int token_index = 0;
-    for (CoreMap sent : doc.annotation.get(SentencesAnnotation.class)) {
-      for (CoreLabel token : sent.get(TokensAnnotation.class)) {
+    for(CoreMap sent : doc.annotation.get(SentencesAnnotation.class)){
+      for(CoreLabel token : sent.get(TokensAnnotation.class)){
         token.set(TokenBeginAnnotation.class, token_index++);
       }
     }
@@ -76,7 +72,7 @@ public class SingletonPredictor  {
    * @return Dataset of feature vectors
    * @throws Exception
    */
-  private static GeneralDataset<String, String> generateFeatureVectors(Properties props) throws Exception {
+  public GeneralDataset<String, String> generateFeatureVectors(Properties props) throws Exception {
 
     GeneralDataset<String, String> dataset = new Dataset<>();
 
@@ -86,6 +82,7 @@ public class SingletonPredictor  {
     Document document;
     while((document = docMaker.nextDoc()) != null){
       setTokenIndices(document);
+      document.extractGoldCorefClusters();
       Map<Integer, CorefCluster> entities = document.goldCorefClusters;
 
       // Generate features for coreferent mentions with class label 1
@@ -98,7 +95,8 @@ public class SingletonPredictor  {
               getNodeByIndexSafe(mention.headWord.index());
           if(head == null) continue;
           ArrayList<String> feats = mention.getSingletonFeatures(dict);
-          dataset.add(new BasicDatum<>(feats, "1"));
+          dataset.add(new BasicDatum<>(
+                  feats, "1"));
         }
       }
 
@@ -128,10 +126,10 @@ public class SingletonPredictor  {
 
   /**
    * Train the singleton predictor using a logistic regression classifier.
-   * @param pDataset Dataset of features
+   * @param Dataset of features
    * @return Singleton predictor
    */
-  public static LogisticClassifier<String, String> train(GeneralDataset<String, String> pDataset){
+  public LogisticClassifier<String, String> train(GeneralDataset<String, String> pDataset){
     LogisticClassifierFactory<String, String> lcf =
             new LogisticClassifierFactory<>();
     LogisticClassifier<String, String> classifier = lcf.trainClassifier(pDataset);
@@ -143,8 +141,8 @@ public class SingletonPredictor  {
    * Saves the singleton predictor model to the given filename.
    * If there is an error, a RuntimeIOException is thrown.
    */
-  private static void saveToSerialized(LogisticClassifier<String, String> predictor,
-                                       String filename) {
+  public void saveToSerialized(LogisticClassifier<String, String> predictor,
+                               String filename) {
     try {
       log.info("Writing singleton predictor in serialized format to file " + filename + ' ');
       ObjectOutputStream out = IOUtils.writeStreamFromString(filename);
@@ -156,29 +154,27 @@ public class SingletonPredictor  {
     }
   }
 
-  private static String getPathSingletonPredictor(Properties props) {
+  public static String getPathSingletonPredictor(Properties props) {
     return PropertiesUtils.getString(props, "coref.path.singletonPredictor", "edu/stanford/nlp/models/dcoref/singleton.predictor.ser");
   }
 
   public static void main(String[] args) throws Exception {
-    Properties props;
-    if (args.length > 0) {
-      props = StringUtils.argsToProperties(args);
-    } else {
-      props = new Properties();
-    }
-    if ( ! props.containsKey("dcoref.conll2011")) {
+    Properties props = null;
+    if (args.length > 0) props = StringUtils.argsToProperties(args);
+    if (!props.containsKey("dcoref.conll2011")) {
       log.info("-dcoref.conll2011 [input_CoNLL_corpus]: was not specified");
       return;
     }
-    if ( ! props.containsKey("singleton.predictor.output")) {
+    if (!props.containsKey("singleton.predictor.output")) {
       log.info("-singleton.predictor.output [output_model_file]: was not specified");
       return;
     }
 
-    GeneralDataset<String, String> data = SingletonPredictor.generateFeatureVectors(props);
-    LogisticClassifier<String, String> classifier = SingletonPredictor.train(data);
-    SingletonPredictor.saveToSerialized(classifier, getPathSingletonPredictor(props));
+    SingletonPredictor predictor = new SingletonPredictor();
+
+    GeneralDataset<String, String> data = predictor.generateFeatureVectors(props);
+    LogisticClassifier<String, String> classifier = predictor.train(data);
+    predictor.saveToSerialized(classifier, getPathSingletonPredictor(props));
   }
 
 }

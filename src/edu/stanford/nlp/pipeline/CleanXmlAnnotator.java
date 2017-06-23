@@ -9,10 +9,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
-import edu.stanford.nlp.time.SUTime;
-import edu.stanford.nlp.time.SUTimeSimpleParser;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -36,9 +33,6 @@ public class CleanXmlAnnotator implements Annotator {
 
   public static final String DEFAULT_XML_TAGS = ".*";
 
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CleanXmlAnnotator.class);
-
   /**
    * This regular expression tells us which tags end a sentence...
    * for example, {@code <p>} would be a great candidate.
@@ -50,7 +44,7 @@ public class CleanXmlAnnotator implements Annotator {
   /**
    * This tells us what tags denote single sentences (tokens inside should not be sentence split on)
    */
-  private Pattern singleSentenceTagMatcher; // = null;
+  private Pattern singleSentenceTagMatcher = null;
 
   public static final String DEFAULT_SINGLE_SENTENCE_TAGS = null;
 
@@ -79,7 +73,7 @@ public class CleanXmlAnnotator implements Annotator {
    * This tells us when an utterance turn starts
    * (used in dcoref)
    */
-  private Pattern utteranceTurnTagMatcher; // = null;
+  private Pattern utteranceTurnTagMatcher = null;
 
   public static final String DEFAULT_UTTERANCE_TURN_TAGS = "turn";
 
@@ -87,19 +81,19 @@ public class CleanXmlAnnotator implements Annotator {
    * This tells us what the speaker tag is
    * (used in dcoref)
    */
-  private Pattern speakerTagMatcher; // = null;
+  private Pattern speakerTagMatcher = null;
 
   public static final String DEFAULT_SPEAKER_TAGS = "speaker";
 
   /**
-   * A map of document level annotation keys (i.e., docid) along with a pattern
+   * A map of document level annotation keys (i.e. docid) along with a pattern
    *  indicating the tag to match, and the attribute to match.
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
 
   /**
-   * A map of token level annotation keys (i.e., link, speaker) along with a pattern
+   * A map of token level annotation keys (i.e. link, speaker) along with a pattern
    *  indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated).
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<>();
@@ -108,24 +102,13 @@ public class CleanXmlAnnotator implements Annotator {
   /**
    * This tells us what the section tag is
    */
-  private Pattern sectionTagMatcher; // = null;
+  private Pattern sectionTagMatcher = null;
   public static final String DEFAULT_SECTION_TAGS = null;
-
-  /**
-   * This tells us what the quote tag is
-   */
-  private Pattern quoteTagMatcher;
-  public static final String DEFAULT_QUOTE_TAGS = null;
-
-  /**
-   * This tells us the attribute names that indicates quote author
-   */
-  private String[] quoteAuthorAttributeNames = new String[]{};
 
   /**
    * This tells us what tokens will be discarded by ssplit
    */
-  private Pattern ssplitDiscardTokensMatcher; // = null;
+  private Pattern ssplitDiscardTokensMatcher = null;
 
   /**
    * A map of section level annotation keys (i.e. docid) along with a pattern
@@ -135,14 +118,14 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
 
   /**
-   * This setting allows handling of "flawed XML", which may be valid SGML.  For example,
+   * This setting allows handling of flawed XML.  For example,
    * a lot of the news articles we parse go: <br>
    *  &lt;text&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;turn&gt; <br>
    *  &lt;/text&gt; <br>
-   * ... i.e., no closing &lt;/turn&gt; tags.
+   * ... eg, no closing &lt;/turn&gt; tags.
    */
   private final boolean allowFlawedXml;
 
@@ -152,85 +135,6 @@ public class CleanXmlAnnotator implements Annotator {
     this(DEFAULT_XML_TAGS, DEFAULT_SENTENCE_ENDERS, DEFAULT_DATE_TAGS, DEFAULT_ALLOW_FLAWS);
   }
 
-  public CleanXmlAnnotator(Properties properties) {
-    String xmlTagsToRemove =
-        properties.getProperty("clean.xmltags",
-            CleanXmlAnnotator.DEFAULT_XML_TAGS);
-    String sentenceEndingTags =
-        properties.getProperty("clean.sentenceendingtags",
-            CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS);
-    String singleSentenceTags =
-        properties.getProperty("clean.singlesentencetags",
-            CleanXmlAnnotator.DEFAULT_SINGLE_SENTENCE_TAGS);
-    String allowFlawedString = properties.getProperty("clean.allowflawedxml");
-    boolean allowFlawed = CleanXmlAnnotator.DEFAULT_ALLOW_FLAWS;
-    if (allowFlawedString != null)
-      allowFlawed = Boolean.valueOf(allowFlawedString);
-    this.allowFlawedXml = allowFlawed;
-    String dateTags =
-        properties.getProperty("clean.datetags",
-            CleanXmlAnnotator.DEFAULT_DATE_TAGS);
-    String docIdTags =
-        properties.getProperty("clean.docIdtags",
-            CleanXmlAnnotator.DEFAULT_DOCID_TAGS);
-    String docTypeTags =
-        properties.getProperty("clean.docTypetags",
-            CleanXmlAnnotator.DEFAULT_DOCTYPE_TAGS);
-    String utteranceTurnTags =
-        properties.getProperty("clean.turntags",
-            CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS);
-    String speakerTags =
-        properties.getProperty("clean.speakertags",
-            CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
-    String docAnnotations =
-        properties.getProperty("clean.docAnnotations",
-            CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
-    String tokenAnnotations =
-        properties.getProperty("clean.tokenAnnotations",
-            CleanXmlAnnotator.DEFAULT_TOKEN_ANNOTATIONS_PATTERNS);
-    String sectionTags =
-        properties.getProperty("clean.sectiontags",
-            CleanXmlAnnotator.DEFAULT_SECTION_TAGS);
-    String sectionAnnotations =
-        properties.getProperty("clean.sectionAnnotations",
-            CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
-    String quoteTags =
-        properties.getProperty("clean.quotetags",
-            CleanXmlAnnotator.DEFAULT_QUOTE_TAGS);
-
-    String ssplitDiscardTokens =
-        properties.getProperty("clean.ssplitDiscardTokens");
-
-    if (xmlTagsToRemove != null) {
-      xmlTagMatcher = toCaseInsensitivePattern(xmlTagsToRemove);
-      if (StringUtils.isNullOrEmpty(sentenceEndingTags)) {
-        sentenceEndingTagMatcher = null;
-      } else {
-        sentenceEndingTagMatcher = toCaseInsensitivePattern(sentenceEndingTags);
-      }
-    } else {
-      xmlTagMatcher = null;
-      sentenceEndingTagMatcher = null;
-    }
-
-    dateTagMatcher = toCaseInsensitivePattern(dateTags);
-
-    setSingleSentenceTagMatcher(singleSentenceTags);
-    setDocIdTagMatcher(docIdTags);
-    setDocTypeTagMatcher(docTypeTags);
-    setDiscourseTags(utteranceTurnTags, speakerTags);
-    setDocAnnotationPatterns(docAnnotations);
-    setTokenAnnotationPatterns(tokenAnnotations);
-    setSectionTagMatcher(sectionTags);
-    setSectionAnnotationPatterns(sectionAnnotations);
-    setQuoteTagMatcher(quoteTags);
-    setSsplitDiscardTokensMatcher(ssplitDiscardTokens);
-
-    // set up the labels that indicate quote author
-    quoteAuthorAttributeNames = properties.getProperty("clean.quoteauthorattributes", "").split(",");
-
-  }
-
   public CleanXmlAnnotator(String xmlTagsToRemove,
                            String sentenceEndingTags,
                            String dateTags,
@@ -238,10 +142,11 @@ public class CleanXmlAnnotator implements Annotator {
     this.allowFlawedXml = allowFlawedXml;
     if (xmlTagsToRemove != null) {
       xmlTagMatcher = toCaseInsensitivePattern(xmlTagsToRemove);
-      if (StringUtils.isNullOrEmpty(sentenceEndingTags)) {
-        sentenceEndingTagMatcher = null;
-      } else {
+      if (sentenceEndingTags != null &&
+          sentenceEndingTags.length() > 0) {
         sentenceEndingTagMatcher = toCaseInsensitivePattern(sentenceEndingTags);
+      } else {
+        sentenceEndingTagMatcher = null;
       }
     } else {
       xmlTagMatcher = null;
@@ -250,7 +155,6 @@ public class CleanXmlAnnotator implements Annotator {
 
     dateTagMatcher = toCaseInsensitivePattern(dateTags);
   }
-
 
   private static Pattern toCaseInsensitivePattern(String tags) {
     if (tags != null) {
@@ -280,10 +184,6 @@ public class CleanXmlAnnotator implements Annotator {
     sectionTagMatcher = toCaseInsensitivePattern(sectionTags);
   }
 
-  public void setQuoteTagMatcher(String quoteTags) {
-    quoteTagMatcher = toCaseInsensitivePattern(quoteTags);
-  }
-
   public void setDiscourseTags(String utteranceTurnTags, String speakerTags) {
     utteranceTurnTagMatcher = toCaseInsensitivePattern(utteranceTurnTags);
     speakerTagMatcher = toCaseInsensitivePattern(speakerTags);
@@ -307,7 +207,6 @@ public class CleanXmlAnnotator implements Annotator {
   }
 
   private static final Pattern TAG_ATTR_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
-
   private static void addAnnotationPatterns(CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns, String conf, boolean attrOnly) {
     String[] annoPatternStrings = conf == null ? StringUtils.EMPTY_STRING_ARRAY : conf.trim().split("\\s*,\\s*");
     for (String annoPatternString:annoPatternStrings) {
@@ -492,21 +391,9 @@ public class CleanXmlAnnotator implements Annotator {
 
     // Local variable for annotating sections
     XMLUtils.XMLTag sectionStartTag = null;
-    int sectionStartTagCharBegin = -1;
     CoreLabel sectionStartToken = null;
-    CoreLabel sectionStartTagToken = null;
     CoreMap sectionAnnotations = null;
     Map<Class, List<CoreLabel>> savedTokensForSection = new HashMap<>();
-    // store section quotes
-    List<CoreMap> sectionQuotes = null;
-
-    // Local variable for annotating quotes
-    XMLUtils.XMLTag quoteStartTag = null;
-    String quoteAuthor = null;
-    int quoteStartCharOffset = -1;
-    int quoteEndCharOffset = -1;
-
-    annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<CoreMap>());
 
     boolean markSingleSentence = false;
     for (CoreLabel token : tokens) {
@@ -565,19 +452,19 @@ public class CleanXmlAnnotator implements Annotator {
 
         // is this token part of the doc date sequence?
         if (dateTagMatcher != null &&
-            ! currentTagSet.isEmpty() &&
+            currentTagSet.size() > 0 &&
             dateTagMatcher.matcher(currentTagSet.get(currentTagSet.size() - 1)).matches()) {
           docDateTokens.add(token);
         }
 
         if (docIdTagMatcher != null &&
-                ! currentTagSet.isEmpty() &&
+                currentTagSet.size() > 0 &&
                 docIdTagMatcher.matcher(currentTagSet.get(currentTagSet.size() - 1)).matches()) {
           docIdTokens.add(token);
         }
 
         if (docTypeTagMatcher != null &&
-                ! currentTagSet.isEmpty() &&
+                currentTagSet.size() > 0 &&
                 docTypeTagMatcher.matcher(currentTagSet.get(currentTagSet.size() - 1)).matches()) {
           docTypeTokens.add(token);
         }
@@ -629,124 +516,28 @@ public class CleanXmlAnnotator implements Annotator {
         toAnnotate.removeAll(foundAnnotations);
       }
 
-      // Check if the tag matches a quote
-      if (quoteTagMatcher != null && quoteTagMatcher.matcher(tag.name).matches()) {
-        if (tag.isEndTag) {
-          // only store quote info if currently processing a section
-          if (sectionQuotes != null) {
-            CoreMap currQuote = new ArrayCoreMap();
-            // set the quote start
-            currQuote.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, quoteStartCharOffset);
-            quoteEndCharOffset = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-            currQuote.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, quoteEndCharOffset);
-            currQuote.set(CoreAnnotations.AuthorAnnotation.class, quoteAuthor);
-            // add this quote to the list of quotes in this section
-            // a Quote has character offsets and an author
-            sectionQuotes.add(currQuote);
-            quoteStartTag = null;
-            quoteStartCharOffset = -1;
-            quoteEndCharOffset = -1;
-            quoteAuthor = null;
-          }
-        } else {
-          // set quote start offset
-          quoteStartCharOffset = token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-          // set quote author
-          for (String quoteAuthorAttribute : quoteAuthorAttributeNames) {
-            if (tag.attributes.containsKey(quoteAuthorAttribute)) {
-              quoteAuthor = tag.attributes.get(quoteAuthorAttribute);
-              break;
-            }
-          }
-          // store quote start tag
-          quoteStartTag = tag;
-        }
-      }
-
       // Check if the tag matches a section
       if (sectionTagMatcher != null && sectionTagMatcher.matcher(tag.name).matches()) {
         if (tag.isEndTag) {
-          // sometimes there is malformed xml (post within post)
-          // only store section info if sectionStartTag is not null
-          // if sectionStartTag is null something has gone wrong, like posts within posts, etc...
-          if (sectionStartTag != null) {
-            annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, null);
-            // create a CoreMap to store info about this section
-            CoreMap currSectionCoreMap = new ArrayCoreMap();
-            if (sectionStartToken != null) {
-              sectionStartToken.set(CoreAnnotations.SectionStartAnnotation.class, sectionAnnotations);
-              // set character offset info for this section
-              currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-                  sectionStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-            } else {
-              // handle case where section has 0 tokens (for instance post that just contains an img)
-              currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, -1);
-            }
-            // Mark previous token as forcing sentence and section end
-            if (!newTokens.isEmpty()) {
-              CoreLabel previous = newTokens.get(newTokens.size() - 1);
-              previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
-              previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
-              // set character offset info for this section
-              currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
-                  previous.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-            } else {
-              // handle case where section has 0 tokens (for instance post that just contains an img)
-              currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, -1);
-            }
-            // set author of this section
-            String foundAuthor = sectionAnnotations.get(CoreAnnotations.AuthorAnnotation.class);
-            currSectionCoreMap.set(CoreAnnotations.AuthorAnnotation.class, foundAuthor);
-            // get author mention info
-            if (foundAuthor != null) {
-              Pattern p = Pattern.compile(foundAuthor, Pattern.LITERAL);
-              Matcher matcher = p.matcher(sectionStartTagToken.word());
-              if (matcher.find()) {
-                int authorMentionStart = matcher.start() + sectionStartTagCharBegin;
-                int authorMentionEnd = matcher.end() + sectionStartTagCharBegin;
-                // set the author mention offsets
-                currSectionCoreMap.set(
-                    CoreAnnotations.SectionAuthorCharacterOffsetBeginAnnotation.class, authorMentionStart);
-                currSectionCoreMap.set(
-                    CoreAnnotations.SectionAuthorCharacterOffsetEndAnnotation.class, authorMentionEnd);
-              }
-            }
-            // add the tag for the section
-            currSectionCoreMap.set(CoreAnnotations.SectionTagAnnotation.class, sectionStartTagToken);
-            // set up empty sentences list
-            currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
-            // set doc date for post
-            String dateString = sectionAnnotations.get(CoreAnnotations.SectionDateAnnotation.class);
-            if (dateString != null) {
-              try {
-                SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
-                currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
-                    potentialDate.toString());
-              } catch (Exception e) {
-                log.error("failed to parse datetime for post! " + dateString);
-              }
-            }
-            // add the quotes list
-            currSectionCoreMap.set(CoreAnnotations.QuotesAnnotation.class, sectionQuotes);
-            // add this to the list of sections
-            annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
-            // finish processing section
-            savedTokensForSection.clear();
-            sectionStartTag = null;
-            sectionStartTagCharBegin = -1;
-            sectionStartToken = null;
-            sectionStartTagToken = null;
-            sectionAnnotations = null;
-            sectionQuotes = null;
+          annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, null);
+          if (sectionStartToken != null) {
+            sectionStartToken.set(CoreAnnotations.SectionStartAnnotation.class, sectionAnnotations);
           }
+          // Mark previous token as forcing sentence and section end
+          if (newTokens.size() > 0) {
+            CoreLabel previous = newTokens.get(newTokens.size() - 1);
+            previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
+            previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
+          }
+          savedTokensForSection.clear();
+          sectionStartTag = null;
+          sectionStartToken = null;
+          sectionAnnotations = null;
         } else if (!tag.isSingleTag) {
           // Prepare to mark first token with section information
           sectionStartTag = tag;
-          sectionStartTagCharBegin = token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-          sectionStartTagToken = token;
           sectionAnnotations = new ArrayCoreMap();
           sectionAnnotations.set(CoreAnnotations.SectionAnnotation.class, sectionStartTag.name);
-          sectionQuotes = new ArrayList<CoreMap>();
         }
       }
       if (sectionStartTag != null) {
@@ -761,13 +552,14 @@ public class CleanXmlAnnotator implements Annotator {
       // existing words, mark that word as being somewhere we want
       // to end the sentence.
       if (sentenceEndingTagMatcher != null &&
-          sentenceEndingTagMatcher.matcher(tag.name).matches() && ! newTokens.isEmpty()) {
+          sentenceEndingTagMatcher.matcher(tag.name).matches() &&
+          newTokens.size() > 0) {
         CoreLabel previous = newTokens.get(newTokens.size() - 1);
         previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
       }
 
       if (utteranceTurnTagMatcher != null && utteranceTurnTagMatcher.matcher(tag.name).matches()) {
-        if ( ! newTokens.isEmpty()) {
+        if (newTokens.size() > 0) {
           // Utterance turn is also sentence ending
           CoreLabel previous = newTokens.get(newTokens.size() - 1);
           previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
@@ -782,7 +574,7 @@ public class CleanXmlAnnotator implements Annotator {
       }
 
       if (speakerTagMatcher != null && speakerTagMatcher.matcher(tag.name).matches()) {
-        if ( ! newTokens.isEmpty()) {
+        if (newTokens.size() > 0) {
           // Speaker is not really part of sentence
           CoreLabel previous = newTokens.get(newTokens.size() - 1);
           previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
@@ -806,7 +598,7 @@ public class CleanXmlAnnotator implements Annotator {
       if (singleSentenceTagMatcher != null && singleSentenceTagMatcher.matcher(tag.name).matches()) {
         if (tag.isEndTag) {
           // Mark previous token as forcing sentence end
-          if ( ! newTokens.isEmpty()) {
+          if (newTokens.size() > 0) {
             CoreLabel previous = newTokens.get(newTokens.size() - 1);
             previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
           }
@@ -858,7 +650,7 @@ public class CleanXmlAnnotator implements Annotator {
       }
     }
 
-    if ( ! enclosingTags.isEmpty() && ! allowFlawedXml) {
+    if (enclosingTags.size() > 0 && !allowFlawedXml) {
       throw new IllegalArgumentException("Unclosed tags, starting with " +
                                          enclosingTags.pop());
     }
@@ -870,7 +662,7 @@ public class CleanXmlAnnotator implements Annotator {
     // dropped an xml tag.  Therefore we ignore that old After
     // annotation, since that text was already absorbed in the Before
     // annotation of the xml tag we threw away
-    if ( ! newTokens.isEmpty() && removedText.length() > 0) {
+    if (newTokens.size() > 0 && removedText.length() > 0) {
       CoreLabel lastToken = newTokens.get(newTokens.size() - 1);
       // sometimes AfterAnnotation seems to be null even when we are
       // collecting before & after annotations, but OriginalTextAnnotation

@@ -5,7 +5,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.SimpleDateFormat;
@@ -47,7 +46,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
   @Override
   public void init(Options options) {
     this.options = options;
-    // NumberNormalizer.setVerbose(options.verbose); // cdm 2016: Try omitting this: Don't we want to see errors?
+    NumberNormalizer.setVerbose(options.verbose);
     CoreMapExpressionExtractor.setVerbose(options.verbose);
     if (options.grammarFilename == null) {
       options.grammarFilename = Options.DEFAULT_GRAMMAR_FILES;
@@ -66,13 +65,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       if (timeIndex == null) {
         docAnnotation.set(TimeExpression.TimeIndexAnnotation.class, timeIndex = new SUTime.TimeIndex());
       }
-      // default look for the sentence's forum post date
-      // if it doesn't have one, back off to the document date
-      if (annotation.get(CoreAnnotations.SectionDateAnnotation.class) != null) {
-        docDate = annotation.get(CoreAnnotations.SectionDateAnnotation.class);
-      } else {
-        docDate = docAnnotation.get(CoreAnnotations.DocDateAnnotation.class);
-      }
+      docDate = docAnnotation.get(CoreAnnotations.DocDateAnnotation.class);
       if (docDate == null) {
         Calendar cal = docAnnotation.get(CoreAnnotations.CalendarAnnotation.class);
         if (cal == null) {
@@ -87,7 +80,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     } else {
       timeIndex = new SUTime.TimeIndex();
     }
-    if (StringUtils.isNullOrEmpty(docDate)) {
+    if ("".equals(docDate)) {
       docDate = null;
     }
     if (timeIndex.docDate == null && docDate != null) {
@@ -146,8 +139,8 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
           }
         } catch (Exception e) {
           if (options.verbose) {
+            e.printStackTrace();
             logger.warn("Failed to get attributes from " + text + ", timeIndex " + timeIndex);
-            logger.warn(e);
           }
           continue;
         }
@@ -156,8 +149,8 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
           timex = Timex.fromMap(text, timexAttributes);
         } catch (Exception e) {
           if (options.verbose) {
+            e.printStackTrace();
             logger.warn("Failed to process timex " + text + " with attributes " + timexAttributes);
-            logger.warn(e);
           }
           continue;
         }
@@ -185,13 +178,8 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
   public List<TimeExpression> extractTimeExpressions(CoreMap annotation, SUTime.Time refDate, SUTime.TimeIndex timeIndex) {
     if (!annotation.containsKey(CoreAnnotations.NumerizedTokensAnnotation.class)) {
-      try {
-        List<CoreMap> mergedNumbers = NumberNormalizer.findAndMergeNumbers(annotation);
-        annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, mergedNumbers);
-      } catch (NumberFormatException e) {
-        logger.warn("Caught bad number: " + e.getMessage());
-        annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, new ArrayList<>());
-      }
+      List<CoreMap> mergedNumbers = NumberNormalizer.findAndMergeNumbers(annotation);
+      annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, mergedNumbers);
     }
 
     List<? extends MatchedExpression> matchedExpressions = expressionExtractor.extractExpressions(annotation);
@@ -288,8 +276,8 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
         }
       } catch (Exception ex) {
         if (options.verbose) {
+          ex.printStackTrace();
           logger.warn("Error resolving " + temporal, ex);
-          logger.warn(ex);
         }
       }
     }

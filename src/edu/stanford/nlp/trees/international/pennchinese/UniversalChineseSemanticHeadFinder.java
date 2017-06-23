@@ -42,7 +42,7 @@ public class UniversalChineseSemanticHeadFinder extends ChineseHeadFinder {
 
     nonTerminalInfo.put("PP", new String[][]{{"leftexcept", "P"}});  // Preposition
     nonTerminalInfo.put("LCP", new String[][]{{"leftexcept", "LC"}});  // Localizer
-    nonTerminalInfo.put("DNP", new String[][]{{"rightexcept", "DEG", "DEC"}});  // Associative
+    nonTerminalInfo.put("DNP", new String[][]{{"rightexcept", "DEG"}});  // Associative
   }
 
   private static final long serialVersionUID = 2L;

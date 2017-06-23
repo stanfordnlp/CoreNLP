@@ -7,6 +7,7 @@ import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.Iterator;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  *
- * Command-line utility to:
+ * Command-line utility to
  *
  * a) convert constituency trees to basic English UD trees
  * b) convert basic dependency trees to enhanced and enhanced++ UD graphs
@@ -28,8 +29,6 @@ public class UniversalDependenciesConverter {
 
 
   private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
-
-  private UniversalDependenciesConverter() {} // static main
 
 
   private static GrammaticalStructure semanticGraphToGrammaticalStructure(SemanticGraph sg) {
@@ -67,7 +66,7 @@ public class UniversalDependenciesConverter {
     addLemmata(tree);
     addNERTags(tree);
     SemanticGraph sg = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC,
-        GrammaticalStructure.Extras.NONE, null, false, true);
+        GrammaticalStructure.Extras.NONE, false, null, false, true);
 
     addLemmata(sg);
 
@@ -81,7 +80,7 @@ public class UniversalDependenciesConverter {
   private static class TreeToSemanticGraphIterator implements Iterator<SemanticGraph> {
 
     private Iterator<Tree> treeIterator;
-    private Tree currentTree; // = null;
+    private Tree currentTree = null;
 
     public TreeToSemanticGraphIterator(Iterator<Tree> treeIterator) {
       this.treeIterator = treeIterator;
@@ -106,9 +105,13 @@ public class UniversalDependenciesConverter {
   }
 
 
-  private static Morphology MORPH = new Morphology();
+  private static Morphology MORPH = null;
 
   private static void addLemmata(SemanticGraph sg) {
+    if (MORPH == null) {
+      MORPH = new Morphology();
+    }
+
     sg.vertexListSorted().forEach(w -> {
       if(w.lemma() == null) {
         w.setLemma(MORPH.lemma(w.word(), w.tag()));
@@ -117,6 +120,10 @@ public class UniversalDependenciesConverter {
   }
 
   private static void addLemmata(Tree tree) {
+    if (MORPH == null) {
+      MORPH = new Morphology();
+    }
+
     tree.yield().forEach(l-> {
       CoreLabel w = (CoreLabel) l;
       if(w.lemma() == null) {
@@ -135,7 +142,7 @@ public class UniversalDependenciesConverter {
       NER_TAGGER = NERClassifierCombiner.createNERClassifierCombiner(null, new Properties());
     }
 
-    List<CoreLabel> labels = sg.vertexListSorted().stream().map(IndexedWord::backingLabel).collect(Collectors.toList());
+    List<CoreLabel> labels = sg.vertexListSorted().stream().map(w -> w.backingLabel()).collect(Collectors.toList());
     NER_TAGGER.classify(labels);
   }
 
@@ -153,21 +160,22 @@ public class UniversalDependenciesConverter {
    * Converts a constituency tree to the English basic, enhanced, or
    * enhanced++ Universal dependencies representation, or an English basic
    * Universal dependencies tree to the enhanced or enhanced++ representation.
-   *
+   * <p>
    * Command-line options:<br>
    * {@code -treeFile}: File with PTB-formatted constituency trees<br>
    * {@code -conlluFile}: File with basic dependency trees in CoNLL-U format<br>
    * {@code -outputRepresentation}: "basic" (default), "enhanced", or "enhanced++"
    *
    */
-  public static void main(String[] args) {
+  public static void main(String args[]) {
     Properties props = StringUtils.argsToProperties(args);
 
     String treeFileName = props.getProperty("treeFile");
     String conlluFileName = props.getProperty("conlluFile");
     String outputRepresentation = props.getProperty("outputRepresentation", "basic");
 
-    Iterator<SemanticGraph> sgIterator; // = null;
+
+    Iterator<SemanticGraph> sgIterator = null;
 
     if (treeFileName != null) {
       MemoryTreebank tb = new MemoryTreebank(new NPTmpRetainingTreeNormalizer(0, false, 1, false));
@@ -185,8 +193,8 @@ public class UniversalDependenciesConverter {
       System.err.println("No input file specified!");
       System.err.println("");
       System.err.printf("Usage: java %s [-treeFile trees.tree | -conlluFile deptrees.conllu]"
-                      + " [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
-              UniversalDependenciesConverter.class.getCanonicalName());
+          + " [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
+          UniversalDependenciesConverter.class.getCanonicalName());
       return;
     }
 
@@ -194,6 +202,7 @@ public class UniversalDependenciesConverter {
 
     while (sgIterator.hasNext()) {
       SemanticGraph sg = sgIterator.next();
+
 
       if (treeFileName != null) {
         //add UPOS tags
@@ -212,12 +221,16 @@ public class UniversalDependenciesConverter {
         }
       }
 
-      if (outputRepresentation.equalsIgnoreCase("enhanced")) {
+
+
+
+     if (outputRepresentation.equalsIgnoreCase("enhanced")) {
         sg = convertBasicToEnhanced(sg);
       } else if (outputRepresentation.equalsIgnoreCase("enhanced++")) {
         sg = convertBasicToEnhancedPlusPlus(sg);
       }
       System.out.print(writer.printSemanticGraph(sg));
+
     }
 
   }
