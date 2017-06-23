@@ -40,9 +40,6 @@ public class WikidictAnnotator extends SentenceAnnotator {
   @ArgumentParser.Option(name="threshold", gloss="The score threshold under which to discard links")
   private double threshold = 0.0;
 
-  @ArgumentParser.Option(name="caseless", gloss="Ignore case when looking up entries in wikidict")
-  private boolean wikidictCaseless = false;
-
   /**
    * The actual Wikidict dictionary.
    */
@@ -74,8 +71,6 @@ public class WikidictAnnotator extends SentenceAnnotator {
           }
         }
         String surfaceForm = fields[0];
-        if (wikidictCaseless)
-          surfaceForm = surfaceForm.toLowerCase();
         String link = fields[1].intern();  // intern, as most entities have multiple surface forms
         // Add the entry
         dictionary.put(surfaceForm, link);
@@ -117,14 +112,8 @@ public class WikidictAnnotator extends SentenceAnnotator {
    */
   public Optional<String> link(CoreMap mention) {
     String surfaceForm = mention.get(CoreAnnotations.OriginalTextAnnotation.class) == null ? mention.get(CoreAnnotations.TextAnnotation.class) : mention.get(CoreAnnotations.OriginalTextAnnotation.class);
-    // set up key for wikidict ; if caseless use lower case version of surface form
-    String mentionSurfaceFormKey;
-    if (wikidictCaseless)
-      mentionSurfaceFormKey = surfaceForm.toLowerCase();
-    else
-      mentionSurfaceFormKey = surfaceForm;
-    // get ner
     String ner = mention.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+
     if (ner != null &&
         (KBPRelationExtractor.NERTag.DATE.name.equalsIgnoreCase(ner) ||
           "TIME".equalsIgnoreCase(ner) ||
@@ -153,9 +142,9 @@ public class WikidictAnnotator extends SentenceAnnotator {
     } else if (NUMBER_PATTERN.matcher(surfaceForm).matches()) {
       // Case: keep numbers as is
       return Optional.of(surfaceForm);
-    } else if (ner != null && !"O".equals(ner) && dictionary.containsKey(mentionSurfaceFormKey)) {
+    } else if (ner != null && !"O".equals(ner) && dictionary.containsKey(surfaceForm)) {
       // Case: link with Wikidict
-      return Optional.of(dictionary.get(mentionSurfaceFormKey));
+      return Optional.of(dictionary.get(surfaceForm));
     } else {
       // Else: keep the surface form as is
       return Optional.empty();

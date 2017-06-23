@@ -76,9 +76,7 @@ public class PTBTokenizerTest {
       "60-90's",
       "Soft AC-styled",
       "3 p.m., eastern time",
-      "Total Private\nOrders 779.5 -9.5%",
-      "2-9.5%",
-      "2- 9.5%",
+//      "Total Private\nOrders 779.5 -9.5% ",
       "From July 23-24. Radisson Miyako Hotel.",
   };
 
@@ -150,9 +148,7 @@ public class PTBTokenizerTest {
       { "60-90", "'s" },
       { "Soft", "AC-styled" },
       { "3", "p.m.", ",", "eastern", "time" },
-      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
-      { "2-9.5", "%" },
-      { "2", "-", "9.5", "%" },
+//      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
       { "From", "July", "23-24", ".", "Radisson", "Miyako", "Hotel", "." },
   };
 
@@ -224,9 +220,7 @@ public class PTBTokenizerTest {
       { "60", "-", "90", "'s" },
       { "Soft", "AC", "-", "styled" },
       { "3", "p.m.", ",", "eastern", "time" },
-      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
-      { "2", "-", "9.5", "%" },
-      { "2", "-", "9.5", "%" },
+//      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
       { "From", "July", "23", "-", "24", ".", "Radisson", "Miyako", "Hotel", "." },
   };
 
@@ -486,7 +480,6 @@ public class PTBTokenizerTest {
   private static <T extends Label> void runOnTwoArrays(TokenizerFactory<T> tokFactory, String[] inputs, String[][] desired) {
     assertEquals("Test data arrays don't match in length", inputs.length, desired.length);
     for (int sent = 0; sent < inputs.length; sent++) {
-      // System.err.println("Testing " + inputs[sent]);
       Tokenizer<T> tok = tokFactory.getTokenizer(new StringReader(inputs[sent]));
       for (int i = 0; tok.hasNext() || i < desired[sent].length; i++) {
         if ( ! tok.hasNext()) {
@@ -616,18 +609,16 @@ public class PTBTokenizerTest {
           // Text starting with BOM (should be deleted), words with soft hyphens and non-breaking space.
           "\uFEFFThis is hy\u00ADphen\u00ADated and non-breaking spaces: 3\u202F456\u202F473.89",
           // Test that some cp1252 that shouldn't be in file is normalized okay
-          "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092",
-          "Charles Howard ''Charlie’' Bridges and Helen Hoyle Bridges",
+          "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092"
   };
 
   private final String[][] hyphenGold = {
           { "This", "is", "hyphenated", "and", "non-breaking", "spaces", ":", "3456473.89" },
-          { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" },
-          { "Charles", "Howard", "``", "Charlie", "''", "Bridges", "and", "Helen", "Hoyle", "Bridges" },
+          { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" }
   };
 
   @Test
-  public void testHyphensQuoteAndBOM() {
+  public void testHyphensAndBOM() {
     TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false,invertible");
     runOnTwoArrays(tokFactory, hyphenInputs, hyphenGold);
     runAgainstOrig(tokFactory, hyphenInputs);

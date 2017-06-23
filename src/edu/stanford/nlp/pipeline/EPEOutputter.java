@@ -21,9 +21,6 @@ import java.util.function.Consumer;
  */
 public class EPEOutputter extends JSONOutputter {
 
-
-  String OUTPUT_REPRESENTATION = System.getProperty("outputRepresenation", "basic");
-
   @Override
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
     PrintWriter writer = new PrintWriter(IOUtils.encodedOutputStreamWriter(target, options.encoding));
@@ -33,15 +30,7 @@ public class EPEOutputter extends JSONOutputter {
       doc.get(CoreAnnotations.SentencesAnnotation.class).stream().forEach(sentence -> {
         l0.object(l1 -> {
           l1.set("id", sentence.get(CoreAnnotations.SentenceIndexAnnotation.class) + 1);
-          SemanticGraph sg;
-          if (OUTPUT_REPRESENTATION.equalsIgnoreCase("basic")) {
-            sg = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-          } else if (OUTPUT_REPRESENTATION.equalsIgnoreCase("enhanced")) {
-            sg = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-          } else {
-            sg = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
-          }
-          l1.set("nodes", getNodes(sg));
+          l1.set("nodes", getNodes(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)));
         });
         l0.writer.append("\n");
         l0.writer.flush();

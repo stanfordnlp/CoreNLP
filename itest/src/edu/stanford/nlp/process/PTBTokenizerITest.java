@@ -39,7 +39,9 @@ public class PTBTokenizerITest extends TestCase {
     final String charset = "utf-8";
     BufferedReader reader;
     try {
-      reader = new BufferedReader(new InputStreamReader(PTBTokenizerITest.class.getResourceAsStream(filename), charset));
+      reader = new BufferedReader
+      (new InputStreamReader
+       (PTBTokenizerITest.class.getResourceAsStream(filename), charset));
     } catch (NullPointerException npe) {
       Map<String,String> env = System.getenv();
       String path = "projects/core/data/edu/stanford/nlp/process" + File.separator + filename;
