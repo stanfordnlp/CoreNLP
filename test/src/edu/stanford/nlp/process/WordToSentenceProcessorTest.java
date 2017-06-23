@@ -143,6 +143,10 @@ public class WordToSentenceProcessorTest extends TestCase {
     checkResult(wtsTwo, input2,
             "Depending on the options,\nthis could be all sorts of things,\nas I like chocolate.",
             "And cookies.");
+    String input3 = "Specific descriptions are absent.\n\n''Mossy Head Industrial Park'' it says.";
+    checkResult(wtsTwo, input3,
+            "Specific descriptions are absent.",
+            "''Mossy Head Industrial Park'' it says.");
   }
 
   public void testXmlElements() {
