@@ -636,8 +636,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   }
 
 
-  @Override
   /** {@inheritDoc} */
+  @Override
   public void annotate(Annotation annotation) {
     super.annotate(annotation);
     List<CoreLabel> words = annotation.get(CoreAnnotations.TokensAnnotation.class);
