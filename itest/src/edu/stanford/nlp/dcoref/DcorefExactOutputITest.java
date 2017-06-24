@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.io.IOUtils;
@@ -16,32 +20,29 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.Generics;
 
-import junit.framework.TestCase;
-
 /**
  * Run the dcoref system on a particular input file from the DEFT
  * project.  Check that the output is an exact match for the output we
  * expect to get.
- * <br>
+ *
  * Expected results are represented in a data file in the source tree.
  * Rather than try to rebuild the CorefChain objects from the expected
  * results, we keep an internal class which represents them in a very
  * simple manner.  Also included are utility methods to rewrite the
  * expected results file if we change the sample input used.
- * <br>
+ *
  * Assuming the test file has not changed, the command line to rebuild
  * the expected output is
- * <br>
- * <code>
- * java edu.stanford.nlp.dcoref.DcorefExactOutputITest projects/core/data/edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.sgm projects/core/data/edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.expectedcoref
- * </code>
+ *
+ * {@code java edu.stanford.nlp.dcoref.DcorefExactOutputITest projects/core/data/edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.sgm projects/core/data/edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.expectedcoref }
  *
  * @author John Bauer
  */
-public class DcorefExactOutputITest extends TestCase {
-  static StanfordCoreNLP pipeline = null;
+public class DcorefExactOutputITest {
 
-  @Override
+  private static StanfordCoreNLP pipeline; // = null;
+
+  @Before
   public void setUp() {
     synchronized (DcorefExactOutputITest.class) {
       if (pipeline == null) {
@@ -52,7 +53,7 @@ public class DcorefExactOutputITest extends TestCase {
     }
   }
 
-  static class ExpectedMention {
+  private static class ExpectedMention {
     int sentNum;
     String mentionSpan;
 
@@ -68,11 +69,11 @@ public class DcorefExactOutputITest extends TestCase {
     }
   }
 
-  public static Map<Integer, List<ExpectedMention>> loadExpectedResults(String filename) throws IOException {
+  private static Map<Integer, List<ExpectedMention>> loadExpectedResults(String filename) throws IOException {
     Map<Integer, List<ExpectedMention>> results = Generics.newHashMap();
 
     int id = -1;
-    List<String> mentionLines = new ArrayList<String>();
+    List<String> mentionLines = new ArrayList<>();
     for (String line : IOUtils.readLines(filename)) {
       if (line.trim().isEmpty()) {
         if (mentionLines.isEmpty()) {
@@ -81,7 +82,7 @@ public class DcorefExactOutputITest extends TestCase {
           }
           continue;
         }
-        List<ExpectedMention> mentions = new ArrayList<ExpectedMention>();
+        List<ExpectedMention> mentions = new ArrayList<>();
         for (String mentionLine : mentionLines) {
           mentions.add(new ExpectedMention(mentionLine));
         }
@@ -101,11 +102,11 @@ public class DcorefExactOutputITest extends TestCase {
     return results;
   }
 
-  public static void saveResults(String filename, Map<Integer, CorefChain> chains) throws IOException {
+  private static void saveResults(String filename, Map<Integer, CorefChain> chains) throws IOException {
     FileWriter fout = new FileWriter(filename);
     BufferedWriter bout = new BufferedWriter(fout);
 
-    List<Integer> keys = new ArrayList<Integer>(chains.keySet());
+    List<Integer> keys = new ArrayList<>(chains.keySet());
     Collections.sort(keys);
 
     for (Integer key : keys) {
@@ -117,7 +118,7 @@ public class DcorefExactOutputITest extends TestCase {
     fout.close();
   }
 
-  public static void saveKey(BufferedWriter bout, Integer key, CorefChain chain) throws IOException {
+  private static void saveKey(BufferedWriter bout, Integer key, CorefChain chain) throws IOException {
     bout.write(key.toString());
     bout.newLine();
     for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
@@ -127,7 +128,7 @@ public class DcorefExactOutputITest extends TestCase {
     bout.newLine();
   }
 
-  public static boolean compareChain(List<ExpectedMention> expectedChain, CorefChain chain) {
+  private static boolean compareChain(List<ExpectedMention> expectedChain, CorefChain chain) {
     for (ExpectedMention expectedMention : expectedChain) {
       boolean found = false;
       for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
@@ -141,8 +142,8 @@ public class DcorefExactOutputITest extends TestCase {
     return true;
   }
 
-  public static void compareResults(Map<Integer, List<ExpectedMention>> expected, Map<Integer, CorefChain> chains) {
-    assertEquals("Unexpected difference in number of chains", expected.size(), chains.size());
+  private static void compareResults(Map<Integer, List<ExpectedMention>> expected, Map<Integer, CorefChain> chains) {
+    Assert.assertEquals("Unexpected difference in number of chains", expected.size(), chains.size());
 
     // Note that we don't insist on the chain ID numbers being the same
     for (Map.Entry<Integer, List<ExpectedMention>> mapEntry : expected.entrySet()) {
@@ -154,7 +155,7 @@ public class DcorefExactOutputITest extends TestCase {
           break;
         }
       }
-      assertTrue("Could not find expected coref chain " + mapEntry.getKey() + " " + expectedChain + " in the results", found);
+      Assert.assertTrue("Could not find expected coref chain " + mapEntry.getKey() + " " + expectedChain + " in the results", found);
     }
 
     for (Map.Entry<Integer, CorefChain> integerCorefChainEntry : chains.entrySet()) {
@@ -166,10 +167,11 @@ public class DcorefExactOutputITest extends TestCase {
           break;
         }
       }
-      assertTrue("Dcoref produced chain " + chain + " which was not in the expected results", found);
+      Assert.assertTrue("Dcoref produced chain " + chain + " which was not in the expected results", found);
     }
   }
 
+  @Test
   public void testCoref() throws IOException {
     String doc = IOUtils.slurpFile("edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.sgm");
     Annotation annotation = pipeline.process(doc);
