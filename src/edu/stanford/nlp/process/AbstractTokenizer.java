@@ -22,6 +22,15 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T>  {
   // /** A logger for this class */
   // private static final Redwood.RedwoodChannels log = Redwood.channels(AbstractTokenizer.class);
 
+  /** For tokenizing carriage returns.
+   *  We return this token as a representation of newlines when a tokenizer has the option
+   *  {@code tokenizeNLs = true}. It is assumed that no tokenizer allows *NL* as a token.
+   *  This is certainly true for PTBTokenizer-derived tokenizers, where the asterisks would
+   *  become separate tokens.
+   */
+  public static final String NEWLINE_TOKEN = "*NL*";
+
+
   protected T nextToken; // = null;
 
   /**
