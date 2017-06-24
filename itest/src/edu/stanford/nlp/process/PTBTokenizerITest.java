@@ -56,7 +56,7 @@ public class PTBTokenizerITest extends TestCase {
     throws IOException
   {
     BufferedReader goldReader = getReaderFromInJavaNlp("ptblexer.gold");
-    List<String> goldResults = new ArrayList<String>();
+    List<String> goldResults = new ArrayList<>();
     for (String line; (line = goldReader.readLine()) != null; ) {
       goldResults.add(line.trim());
     }
