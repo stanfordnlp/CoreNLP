@@ -669,6 +669,7 @@ public class PTBTokenizerTest {
           "BHP is `` making the right noises.''",
           "``There's a saying nowadays,'' he said. ```The more you owe, the longer you live.' It means the mafia " +
                   "won't come until we have money.''\n",
+          "\"Whereas strategic considerations have to be based on 'real- politick' and harsh facts,\" Saleem said.",
   };
 
   private final String[][] hyphenGold = {
@@ -682,6 +683,8 @@ public class PTBTokenizerTest {
           { "``", "There", "'s", "a", "saying", "nowadays", ",", "''", "he", "said", ".", "``", "`", "The", "more", "you",
                   "owe", ",", "the", "longer", "you", "live", ".", "'", "It", "means", "the", "mafia",
                   "wo", "n't", "come", "until", "we", "have", "money", ".", "''" },
+          { "``", "Whereas", "strategic", "considerations", "have", "to", "be", "based", "on",
+                  "`", "real", "-", "politick", "'", "and", "harsh", "facts", ",", "''", "Saleem", "said", "." },
   };
 
   @Test

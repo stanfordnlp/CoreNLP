@@ -47,7 +47,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  issues, such as recognizing URLs and common Unicode characters, and a
  *  variety of options for doing or suppressing certain normalizations.
  *  Although they shouldn't really be there, it also interprets certain of the
- *  characters between U+0080 and U+009F as Windows CP1252 characters.
+ *  characters between U+0080 and U+009F as Windows CP1252 characters, since many
+ *  LDC corpora actually mix CP1252 content into supposedly utf-8 text.
  *
  *  <i>Fine points:</i> Output normalized tokens should not contain spaces,
  *  providing the normalizeSpace option is true.  The space will be turned
@@ -282,21 +283,6 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean splitAssimilations = true;
   private boolean splitHyphenated = false;
 
-  /*
-   * This class has now been extended to cover the main Windows CP1252 characters,
-   * at either their correct Unicode codepoints, or in their invalid
-   * positions as 8 bit chars inside the iso-8859 control region.
-   *
-   * ellipsis   85      0133    2026    8230   COMPLICATED!! Also a newline character for IBM 390; we let ellipsis win
-   * single quote curly starting        91      0145    2018    8216
-   * single quote curly ending  92      0146    2019    8217
-   * double quote curly starting        93      0147    201C    8220
-   * double quote curly ending  94      0148    201D    8221
-   * bullet     95
-   * en dash    96      0150    2013    8211
-   * em dash    97      0151    2014    8212
-   */
-
   /* Bracket characters and forward slash and asterisk:
    *
    * Original Treebank 3 WSJ
@@ -450,6 +436,22 @@ import edu.stanford.nlp.util.logging.Redwood;
     }
     return out.toString().trim();
   }
+
+
+  /*
+   * This class has now been extended to cover the main Windows CP1252 characters,
+   * at either their correct Unicode codepoints, or in their invalid
+   * positions as 8 bit chars inside the iso-8859 control region.
+   *
+   * ellipsis   85      0133    2026    8230   COMPLICATED!! Also a newline character for IBM 390; we let ellipsis win
+   * single quote curly starting        91      0145    2018    8216
+   * single quote curly ending  92      0146    2019    8217
+   * double quote curly starting        93      0147    201C    8220
+   * double quote curly ending  94      0148    201D    8221
+   * bullet     95
+   * en dash    96      0150    2013    8211
+   * em dash    97      0151    2014    8212
+   */
 
   private static final Pattern CENTS_PATTERN = Pattern.compile("\u00A2");
   private static final Pattern POUND_PATTERN = Pattern.compile("\u00A3");
@@ -608,7 +610,7 @@ import edu.stanford.nlp.util.logging.Redwood;
         prevWord = (CoreLabel) word;
       }
       return word;
-   }
+    }
   }
 
   private Object getNormalizedAmpNext() {
@@ -770,9 +772,10 @@ SREDAUX = n{APOSETCETERA}t
 /* [yY]' is for Y'know, y'all and I for I.  So exclude from one letter first */
 /* Rest are for French borrowings.  n allows n'ts in "don'ts" */
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
-APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
+APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
-FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"\'<>|.!?(){},;:&=+\[\]-]
+/* Some Wired URLs end in + or = so omit that too. */
+FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"\'<>|.!?(){},;:&\[\]-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
@@ -869,7 +872,7 @@ INSENTP = [,;:\u3001]
 QUOTES = {APOS}|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;|[`'\u0091\u0092\u2018\u2019]'
 /* Cap'n for captain, c'est for french */
-TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|diff{APOSETCETERA}rent|f[-*][-c*]k(in[g']|e[dr])?|sh[-\*]t(ty)?|c[-*]nts?
+TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|f[-*][-c*]k(in[g']|e[dr])?|sh[-\*]t(ty)?|c[-*]nts?
 TBSPEC2 = {APOS}[0-9][0-9]
 BANGWORDS = (E|Yahoo|Jeopardy)\!
 BANGMAGAZINES = OK\!
@@ -887,6 +890,10 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
 /* Math and other symbols that stand alone: °²× ∀ */
 
+PROG_LANGS = c[+][+]|(c|f)#
+ASSIMILATIONS3 = cannot|'twas|dunno
+/* "nno" is a remnant after pushing back from dunno in ASSIMILATIONS3 */
+ASSIMILATIONS2 = {APOS}tis|gonna|gotta|lemme|gimme|wanna|nno
 
 /* CP1252 letters */
 /* 83 = f with hook --> U+0192; 8a = S with Caron --> U+0160; 9c = ligature oe --> U+0153; */
@@ -894,48 +901,26 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
-c[+][+]                 { return getNext(); }
-(c|f)#                  { return getNext(); }
-cannot                  { if (splitAssimilations) {
-                            yypushback(3) ; return getNext();
-                          } else {
-                            return getNext();
-                          }
-                        }
-'twas                   { if (splitAssimilations) {
-                            yypushback(3) ; return getNext();
-                          } else {
-                            return getNext();
-                          }
-                        }
-'tis                   { if (splitAssimilations) {
-                            yypushback(2) ; return getNext();
-                          } else {
-                            return getNext();
-                          }
-                        }
-gonna|gotta|lemme|gimme|wanna
-                        { if (splitAssimilations) {
-                            yypushback(2) ; return getNext();
-                          } else {
-                            return getNext();
-                          }
-                        }
-dunno
-                        { if (splitAssimilations) {
-                            yypushback(3) ; return getNext();
-                          } else {
-                            return getNext();
-                          }
-                        }
-/* Remnant after pushing back from dunno */
-nno/[^\p{Alpha}\p{Digit}]
-                        { if (splitAssimilations) {
-                            yypushback(2) ; return getNext();
-                          } else {
-                            return getNext();
-                          }
-                        }
+{PROG_LANGS}      { String tok = yytext();
+                    if (DEBUG) { logger.info("Used {PROG_LANGS} to recognize " + tok + " as " + tok); }
+                    return getNext(tok, tok);
+                  }
+{ASSIMILATIONS3}  { if (splitAssimilations) {
+                      yypushback(3);
+                    }
+                    String tok = yytext();
+                    if (DEBUG) { logger.info("Used {ASSIMILATIONS3} to recognize " + tok + " as " + tok +
+                            "; splitAssimilations=" + splitAssimilations); }
+                    return getNext(tok, tok);
+                  }
+{ASSIMILATIONS2}  { if (splitAssimilations) {
+                      yypushback(2);
+                    }
+                    String tok = yytext();
+                    if (DEBUG) { logger.info("Used {ASSIMILATIONS3} to recognize " + tok + " as " + tok +
+                            "; splitAssimilations=" + splitAssimilations); }
+                    return getNext(tok, tok);
+                  }
 <YyNotTokenizePerLine>{SGML1}
                         { final String origTxt = yytext();
                           String txt = origTxt;
@@ -961,21 +946,25 @@ nno/[^\p{Alpha}\p{Digit}]
 {SPAMP}                 { return getNormalizedAmpNext(); }
 {SPPUNC}                { return getNext(); }
 {WORD}/{REDAUX}         { final String origTxt = yytext();
-                          String tmp = removeSoftHyphens(origTxt);
+                          String tok = removeSoftHyphens(origTxt);
                           if (americanize) {
-                            tmp = Americanize.americanize(tmp);
+                            tok = Americanize.americanize(tok);
                           }
-                          return getNext(tmp, origTxt);
+                          if (DEBUG) { logger.info("Used {WORD} to recognize " + origTxt + " as " + tok +
+                                                   "; probablyLeft=" + false); }
+                          return getNext(tok, origTxt);
                         }
 {SWORD}/{SREDAUX}       { final String txt = yytext();
                           return getNext(removeSoftHyphens(txt),
                                          txt); }
 {WORD}                  { final String origTxt = yytext();
-                          String tmp = removeSoftHyphens(origTxt);
+                          String tok = removeSoftHyphens(origTxt);
                           if (americanize) {
-                            tmp = Americanize.americanize(tmp);
+                            tok = Americanize.americanize(tok);
                           }
-                          return getNext(tmp, origTxt);
+                          if (DEBUG) { logger.info("Used {WORD} (2) to recognize " + origTxt + " as " + tok +
+                                                   "; probablyLeft=" + false); }
+                          return getNext(tok, origTxt);
                         }
 {APOWORD}               { String tok = yytext();
                           String norm = handleQuotes(tok, false);
@@ -1262,20 +1251,9 @@ nno/[^\p{Alpha}\p{Digit}]
                 }
 {THINGA}\./{INSENTP}    { return getNormalizedAmpNext(); }
 {THINGA}        { return getNormalizedAmpNext(); }
-/* This REDAUX is needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
-{REDAUX}        { String tok = yytext();
-                  String norm = handleQuotes(tok, false);
-                  if (DEBUG) { logger.info("Used {REDAUX} (2nd) to recognize " + tok + " as " + norm +
-                                           "; probablyLeft=" + false); }
-                  return getNext(norm, tok);
-                }
-{SREDAUX}       { String tok = yytext();
-                  String norm = handleQuotes(tok, false);
-                  if (DEBUG) { logger.info("Used {SREDAUX} (2nd) to recognize " + tok + " as " + norm +
-                                           "; probablyLeft=" + false); }
-                  return getNext(norm, tok);
-                }
-{QUOTES}/([:letter:]{NOT_SPACENL_ONE_CHAR}|[AaIiUu]{SPACENL_ONE_CHAR})
+/* This QUOTES must proceed (S)REDAUX (2) so it by preference matches straight quote before word.
+   Trying to collapse the first two cases seemed to break things (?!?). */
+{QUOTES}/[:letter:]{NOT_SPACENL_ONE_CHAR}
                 { // Extra context is to not match on ones like 'd but you do want words like "a"
                   // can't have digit here because of cases like '90s
                   String tok = yytext();
@@ -1285,9 +1263,32 @@ nno/[^\p{Alpha}\p{Digit}]
                                            "; probablyLeft=" + true); }
                   return getNext(norm, tok);
                 }
+{QUOTES}/[AaIiUu]{SPACENL_ONE_CHAR}
+                { // Extra context is to not match on ones like 'd but you do want words like "a"
+                  // can't have digit here because of cases like '90s
+                  String tok = yytext();
+                  /* invert single quote - often but not always right */
+                  String norm = handleQuotes(tok, true);
+                  if (DEBUG) { logger.info("Used {QUOTES} (2) to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + true); }
+                  return getNext(norm, tok);
+                }
 {QUOTES}        { String tok = yytext();
                   String norm = handleQuotes(tok, false);
-                  if (DEBUG) { logger.info("Used {QUOTES} (2) to recognize " + tok + " as " + norm +
+                  if (DEBUG) { logger.info("Used {QUOTES} (3) to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + false); }
+                  return getNext(norm, tok);
+                }
+/* These (S)REDAUX (2) are needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
+{REDAUX}        { String tok = yytext();
+                  String norm = handleQuotes(tok, false);
+                  if (DEBUG) { logger.info("Used {REDAUX} (2) to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + false); }
+                  return getNext(norm, tok);
+                }
+{SREDAUX}       { String tok = yytext();
+                  String norm = handleQuotes(tok, false);
+                  if (DEBUG) { logger.info("Used {SREDAUX} (2) to recognize " + tok + " as " + norm +
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
                 }
