@@ -666,6 +666,9 @@ public class PTBTokenizerTest {
           "Charles Howard ''Charlie’' Bridges and Helen Hoyle Bridges",
           "All energy markets close at 1 p.m. except Palo Verde electricity futures and options, closing at\n" +
                   "12:55.; Palladium and copper markets close at 1 p.m.; Silver markets close at 1:05 p.m.",
+          "BHP is `` making the right noises.''",
+          "``There's a saying nowadays,'' he said. ```The more you owe, the longer you live.' It means the mafia " +
+                  "won't come until we have money.''\n",
   };
 
   private final String[][] hyphenGold = {
@@ -674,7 +677,11 @@ public class PTBTokenizerTest {
           { "Charles", "Howard", "``", "Charlie", "''", "Bridges", "and", "Helen", "Hoyle", "Bridges" },
           { "All", "energy", "markets", "close", "at", "1", "p.m.", "except", "Palo", "Verde", "electricity", "futures",
                   "and", "options", ",", "closing", "at", "12:55", ".", ";", "Palladium", "and", "copper", "markets",
-                  "close", "at", "1", "p.m.", ";", "Silver", "markets", "close", "at", "1:05", "p.m." }
+                  "close", "at", "1", "p.m.", ";", "Silver", "markets", "close", "at", "1:05", "p.m." },
+          { "BHP", "is", "``", "making", "the", "right", "noises", ".", "''" },
+          { "``", "There", "'s", "a", "saying", "nowadays", ",", "''", "he", "said", ".", "``", "`", "The", "more", "you",
+                  "owe", ",", "the", "longer", "you", "live", ".", "'", "It", "means", "the", "mafia",
+                  "wo", "n't", "come", "until", "we", "have", "money", ".", "''" },
   };
 
   @Test

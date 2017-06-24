@@ -472,7 +472,8 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
   private static final Pattern singleQuote = Pattern.compile("&apos;|'");
-  private static final Pattern doubleQuote = Pattern.compile("\"|['`]['`]|&quot;");
+  // If they typed `` they probably meant it, but if it's '' or mixed, we use our heuristics.
+  private static final Pattern doubleQuote = Pattern.compile("\"|''|'`|`'|&quot;");
 
   // 82,84,91,92,93,94 aren't valid unicode points, but sometimes they show
   // up from cp1252 and need to be translated
