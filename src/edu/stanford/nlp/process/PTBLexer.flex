@@ -472,14 +472,14 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
   private static final Pattern singleQuote = Pattern.compile("&apos;|'");
-  private static final Pattern doubleQuote = Pattern.compile("\"|['`]['`]|&quot;");
+  private static final Pattern doubleQuote = Pattern.compile("\"|''|&quot;");
 
   // 82,84,91,92,93,94 aren't valid unicode points, but sometimes they show
   // up from cp1252 and need to be translated
   private static final Pattern leftSingleQuote = Pattern.compile("[\u0082\u0091\u2018\u201A\u201B\u2039]");
   private static final Pattern rightSingleQuote = Pattern.compile("[\u0092\u2019\u203A]");
   private static final Pattern leftDoubleQuote = Pattern.compile("[\u0084\u0093\u201C\u201E\u00AB]|[\u0091\u2018]'");
-  private static final Pattern rightDoubleQuote = Pattern.compile("[\u0094\u201D\u00BB]|[\u0092\u2019]'");
+  private static final Pattern rightDoubleQuote = Pattern.compile("[\u0094\u201D\u00BB]|[\u0092\u2019]''");
 
   private static String latexQuotes(String in, boolean probablyLeft) {
     // System.err.println("Handling quote on " + in + " probablyLeft=" + probablyLeft);
@@ -694,9 +694,6 @@ SPACES = {SPACE}+
 NEWLINE = \r|\r?\n|\u2028|\u2029|\u000B|\u000C|\u0085
 SPACENL = ({SPACE}|{NEWLINE})
 SPACENLS = {SPACENL}+
-/* These next ones are useful to get a fixed length trailing context. */
-SPACENL_ONE_CHAR = [ \t\u00A0\u2000-\u200A\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
-NOT_SPACENL_ONE_CHAR = [^ \t\u00A0\u2000-\u200A\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
 SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 DIGIT = [:digit:]|[\u07C0-\u07C9]
@@ -1274,10 +1271,8 @@ nno/[^\p{Alpha}\p{Digit}]
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
                 }
-{QUOTES}/([:letter:]{NOT_SPACENL_ONE_CHAR}|[AaIiUu]{SPACENL_ONE_CHAR})
-                { // Extra context is to not match on ones like 'd but you do want words like "a"
-                  // can't have digit here because of cases like '90s
-                  String tok = yytext();
+{QUOTES}/[:letter:][^ \t\n\r\u00A0]
+                { String tok = yytext();
                   /* invert single quote - often but not always right */
                   String norm = handleQuotes(tok, true);
                   if (DEBUG) { logger.info("Used {QUOTES} to recognize " + tok + " as " + norm +
