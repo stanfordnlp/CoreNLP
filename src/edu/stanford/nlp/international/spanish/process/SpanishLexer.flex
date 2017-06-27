@@ -175,6 +175,9 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
 
+  /** Turn on to find out how things were tokenized. */
+  private static final boolean DEBUG = false;
+
   /** A logger for this class */
   private static final Redwood.RedwoodChannels LOGGER = Redwood.channels(SpanishLexer.class);
 
@@ -263,16 +266,30 @@ import edu.stanford.nlp.util.logging.Redwood;
     return getNext(out, in);
   }
 
-  private static final Pattern softHyphen = Pattern.compile("\u00AD");
 
-
-  /* Soft hyphens are used to indicate line breaks in
-   * typesetting.
+  /** Removes soft hyphens are used to indicate possible line breaks in typesetting.
+   *  (Note: implementing it this way runs much faster than as a regex replaceAll()!
    */
   private static String removeSoftHyphens(String in) {
-    String result = softHyphen.matcher(in).replaceAll("");
-    return result.length() == 0 ? "-" : result;
+    // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
+    if (in.indexOf('\u00AD') < 0) {
+      // shortcut doing work
+      return in;
+    }
+    int length = in.length();
+    StringBuilder out = new StringBuilder(length - 1);
+    for (int i = 0; i < length; i++) {
+      char ch = in.charAt(i);
+      if (ch != '\u00AD') {
+        out.append(ch);
+      }
+    }
+    if (out.length() == 0) {
+      out.append('-'); // don't create an empty token
+    }
+    return out.toString();
   }
+
 
   private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
   private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
@@ -292,9 +309,31 @@ import edu.stanford.nlp.util.logging.Redwood;
     return s1;
   }
 
+  private static String nonCp1252Quotes(String in) {
+    switch(in) {
+    case "\u008B":
+      return "\u2039";
+    case "\u0091":
+      return "\u2018";
+    case "\u0092":
+      return "\u2019";
+    case "\u0093":
+      return "\u201C";
+    case "\u0094":
+      return "\u201D";
+    case "\u009B":
+      return "\u203A";
+    default:
+      return in;
+    }
+  }
+
   private String handleQuotes(String in){
-    if (asciiQuotes) return asciiQuotes(in);
-    else return in;
+    if (asciiQuotes) {
+      return asciiQuotes(in);
+    } else {
+      return nonCp1252Quotes(in);
+    }
   }
 
   private static final Pattern dashes = Pattern.compile("[_\u058A\u2010\u2011]");
@@ -384,6 +423,26 @@ import edu.stanford.nlp.util.logging.Redwood;
       getNext(normalizeAmp(txt), txt) : getNext();
   }
 
+  /* CP1252: dagger, double dagger, per mille, bullet, small tilde, trademark */
+  private String processCp1252misc(String arg) {
+    switch (arg) {
+    case "\u0086":
+      return "\u2020";
+    case "\u0087":
+      return "\u2021";
+    case "\u0089":
+      return "\u2030";
+    case "\u0095":
+      return "\u2022";
+    case "\u0098":
+      return "\u02DC";
+    case "\u0099":
+      return "\u2122";
+    default:
+      throw new IllegalArgumentException("Bad process cp1252");
+    }
+  }
+
 %}
 
 /* Don't allow SGML to cross lines, even though it can...
@@ -428,7 +487,7 @@ FRAC2 = [\u00BC\u00BD\u00BE\u2153-\u215E]
 
 
 /* These are cent and pound sign, euro and euro, and Yen, Lira */
-MONEYSIGN = [\$\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AC\u060B\u0E3F\u20A4\uFFE0\uFFE1\uFFE5\uFFE6]
+MONEYSIGN = [\$\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AA\u20AC\u060B\u0E3F\u20A4\uFFE0\uFFE1\uFFE5\uFFE6]
 
 
 /* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
@@ -544,6 +603,8 @@ PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{2,4}[\- \u00A0])?[0-9]{2,4}[\- 
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 
 FAKEDUCKFEET = <<|>>
+LESSTHAN = <|&lt;
+GREATERTHAN = >|&gt;
 OPBRAC = [<\[]|&lt;
 CLBRAC = [>\]]|&gt;
 LDOTS = \.{3,5}|(\.[ \u00A0]){2,4}\.|[\u0085\u2026]
@@ -553,14 +614,21 @@ ASTS = \*+|(\\\*){1,3}
 HASHES = #+
 FNMARKS = {ATS}|{HASHES}|{UNDS}
 INSENTP = [,;:\u3001]
-QUOTES = {APOSETCETERA}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0082\u0084\u0091-\u0094\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
+QUOTES = {APOSETCETERA}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0082\u0084\u008B\u0091-\u0094\u009B\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
 
 DBLQUOT = \"|&quot;
+
+/* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
+SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
+
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
 MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2023\u2030-\u2038\u203B\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3012\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
 /* Math and other symbols that stand alone: °²× ∀ */
+
+/* CP1252: dagger, double dagger, per mille, bullet, small tilde, trademark */
+CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 
 
 %%
@@ -619,9 +687,15 @@ cannot			{ yypushback(3) ; return getNext(); }
                           return getNext(txt, yytext());
                          }
 {NUMBER} |
-{SUBSUPNUM} |
-{MONEYSIGN}		{ return getNext(); }
-
+{SUBSUPNUM}             { return getNext(); }
+{MONEYSIGN}		{ String tok = yytext();
+			  String norm = tok;
+			  if ("\u0080".equals(tok)) {
+			      norm = "\u20AC";
+                          }
+                          if (DEBUG) { LOGGER.info("Used {MONEYSIGN} to recognize " + tok + " as " + norm); }
+                          return getNext(norm, tok);
+			}
 {FRAC} |
 {FRACSTB3} |
 {FRAC2}			{ return normalizeFractions(yytext()); }
@@ -663,9 +737,20 @@ cannot			{ yypushback(3) ; return getNext(); }
 			  }
 			  return getNext(txt, yytext());
 			}
-0x7f		{ if (invertible) {
+\x7F		{ if (invertible) {
                      prevWordAfter.append(yytext());
-                  } }
+                  } 
+                }
+{LESSTHAN}      { return getNext("<", yytext()); }
+{GREATERTHAN}   { return getNext(">", yytext()); }
+{SMILEY}/[^\p{Alpha}\p{Digit}] { String txt = yytext();
+                  String origText = txt;
+                  if (normalizeParentheses) {
+                    txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
+                    txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
+                  }
+                  return getNext(txt, origText);
+                }
 {OPBRAC}	{ if (normalizeOtherBrackets) {
                     return getNext(openparen, yytext()); }
                   else {
@@ -730,8 +815,11 @@ cannot			{ yypushback(3) ; return getNext(); }
 
 {FAKEDUCKFEET} |
 {MISCSYMBOL}	{ return getNext(); }
-\u0095          { return getNext("\u2022", yytext()); } /* cp1252 bullet mapped to unicode */
-\u0099          { return getNext("\u2122", yytext()); } /* cp1252 TM sign mapped to unicode */
+{CP1252_MISC_SYMBOL}  { String tok = yytext();
+                        String norm = processCp1252misc(tok);
+                        if (DEBUG) { LOGGER.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
+                        return getNext(norm, tok);
+                      }
 
 \0|{SPACES}|[\u200B\u200E-\u200F\uFEFF]	{ if (invertible) {
                      prevWordAfter.append(yytext());
