@@ -88,14 +88,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.POSTaggerAnnotator} implementation
    */
   private static Supplier<Annotator> defaultPOS = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_POS,
+        PropertiesUtils.getSignature(STANFORD_POS, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.posTagger(EMPTY_PROPS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.posTagger(EMPTY_PROPS))).get();
     }
   };
   /**
@@ -107,14 +104,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.NERCombinerAnnotator} implementation
    */
   private static Supplier<Annotator> defaultNER = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_NER,
+        PropertiesUtils.getSignature(STANFORD_NER, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.ner(EMPTY_PROPS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.ner(EMPTY_PROPS))).get();
     }
   };
 
@@ -122,14 +116,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.RegexNERAnnotator} implementation
    */
   private static Supplier<Annotator> defaultRegexner = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_REGEXNER,
+        PropertiesUtils.getSignature(STANFORD_REGEXNER, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.tokensRegexNER(EMPTY_PROPS, Annotator.STANFORD_REGEXNER);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.tokensRegexNER(EMPTY_PROPS, STANFORD_REGEXNER))).get();
     }
   };
 
@@ -137,14 +128,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.ParserAnnotator} implementation
    */
   private static Supplier<Annotator> defaultParse = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_PARSE,
+        PropertiesUtils.getSignature(STANFORD_PARSE, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.parse(EMPTY_PROPS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.parse(EMPTY_PROPS))).get();
     }
   };
 
@@ -152,14 +140,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.DependencyParseAnnotator} implementation
    */
   private static Supplier<Annotator> defaultDepparse = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_DEPENDENCIES,
+        PropertiesUtils.getSignature(STANFORD_DEPENDENCIES, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.dependencies(EMPTY_PROPS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.dependencies(EMPTY_PROPS))).get();
     }
   };
 
@@ -167,14 +152,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotator} implementation
    */
   private static Supplier<Annotator> defaultNatlog = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_NATLOG,
+        PropertiesUtils.getSignature(STANFORD_NATLOG, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.natlog(EMPTY_PROPS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.natlog(EMPTY_PROPS))).get();
     }
   };
 
@@ -182,14 +164,11 @@ public class Document {
    * The default {@link EntityMentionsAnnotator} implementation
    */
   private static Supplier<Annotator> defaultEntityMentions = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_ENTITY_MENTIONS,
+        PropertiesUtils.getSignature(STANFORD_ENTITY_MENTIONS, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.entityMentions(EMPTY_PROPS, Annotator.STANFORD_ENTITY_MENTIONS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.entityMentions(EMPTY_PROPS, STANFORD_ENTITY_MENTIONS))).get();
     }
   };
 
@@ -197,14 +176,11 @@ public class Document {
    * The default {@link KBPAnnotator} implementation
    */
   private static Supplier<Annotator> defaultKBP = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_KBP,
+        PropertiesUtils.getSignature(STANFORD_KBP, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.kbp(EMPTY_PROPS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.kbp(EMPTY_PROPS))).get();
     }
   };
 
@@ -213,14 +189,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.naturalli.OpenIE} implementation
    */
   private static Supplier<Annotator> defaultOpenie = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_OPENIE,
+        PropertiesUtils.getSignature(STANFORD_OPENIE, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.openie(EMPTY_PROPS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.openie(EMPTY_PROPS))).get();
     }
   };
 
@@ -228,14 +201,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.MentionAnnotator} implementation
    */
   private static Supplier<Annotator> defaultMention = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_MENTION,
+        PropertiesUtils.getSignature(STANFORD_MENTION, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.mention(EMPTY_PROPS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.mention(EMPTY_PROPS))).get();
     }
   };
 
@@ -243,14 +213,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.CorefAnnotator} implementation
    */
   private static Supplier<Annotator> defaultCoref = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_COREF,
+        PropertiesUtils.getSignature(STANFORD_COREF, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.coref(EMPTY_PROPS);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.coref(EMPTY_PROPS))).get();
     }
   };
 
@@ -258,14 +225,11 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.SentimentAnnotator} implementation
    */
   private static Supplier<Annotator> defaultSentiment = new Supplier<Annotator>() {
-    Annotator impl = null;
-
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_SENTIMENT,
+        PropertiesUtils.getSignature(STANFORD_SENTIMENT, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      if (impl == null) {
-        impl = backend.sentiment(EMPTY_PROPS, Annotator.STANFORD_SENTIMENT);
-      }
-      return impl;
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.sentiment(EMPTY_PROPS, STANFORD_SENTIMENT))).get();
     }
   };
 

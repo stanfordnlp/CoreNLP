@@ -30,18 +30,18 @@ public class CleanXmlAnnotator implements Annotator {
 
   /**
    * A regular expression telling us where to look for tokens
-   * we care about
+   * we care about.
    */
   private final Pattern xmlTagMatcher;
 
   public static final String DEFAULT_XML_TAGS = ".*";
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CleanXmlAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CleanXmlAnnotator.class);
 
   /**
-   * This regular expression tells us which tags end a sentence...
-   * for example, {@code <p>} would be a great candidate.
+   * This regular expression tells us which tags end a sentence.
+   * For example, {@code <p>} would be a great candidate.
    */
   private final Pattern sentenceEndingTagMatcher;
 
@@ -76,16 +76,14 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_DOCTYPE_TAGS = "doctype";
 
   /**
-   * This tells us when an utterance turn starts
-   * (used in dcoref)
+   * This tells us when an utterance turn starts (used in dcoref).
    */
   private Pattern utteranceTurnTagMatcher; // = null;
 
   public static final String DEFAULT_UTTERANCE_TURN_TAGS = "turn";
 
   /**
-   * This tells us what the speaker tag is
-   * (used in dcoref)
+   * This tells us what the speaker tag is (used in dcoref).
    */
   private Pattern speakerTagMatcher; // = null;
 
@@ -96,6 +94,7 @@ public class CleanXmlAnnotator implements Annotator {
    *  indicating the tag to match, and the attribute to match.
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<>();
+
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
 
   /**
@@ -103,35 +102,41 @@ public class CleanXmlAnnotator implements Annotator {
    *  indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated).
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<>();
+
   public static final String DEFAULT_TOKEN_ANNOTATIONS_PATTERNS = null;
 
   /**
-   * This tells us what the section tag is
+   * This tells us what the section tag is.
    */
   private Pattern sectionTagMatcher; // = null;
+
   public static final String DEFAULT_SECTION_TAGS = null;
 
   /**
-   * This tells us what the quote tag is
+   * This tells us what the quote tag is.
    */
   private Pattern quoteTagMatcher;
+
   public static final String DEFAULT_QUOTE_TAGS = null;
 
   /**
    * This tells us the attribute names that indicates quote author
    */
-  private String[] quoteAuthorAttributeNames = new String[]{};
+  private String[] quoteAuthorAttributeNames = StringUtils.EMPTY_STRING_ARRAY;
+
+  public static final String DEFAULT_QUOTE_AUTHOR_ATTRIBUTES = "";
 
   /**
-   * This tells us what tokens will be discarded by ssplit
+   * This tells us what tokens will be discarded by ssplit.
    */
   private Pattern ssplitDiscardTokensMatcher; // = null;
 
   /**
-   * A map of section level annotation keys (i.e. docid) along with a pattern
+   * A map of section level annotation keys (i.e., docid) along with a pattern
    *  indicating the tag to match, and the attribute to match.
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> sectionAnnotationPatterns = new CollectionValuedMap<>();
+
   public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
 
   /**
@@ -166,7 +171,6 @@ public class CleanXmlAnnotator implements Annotator {
     boolean allowFlawed = CleanXmlAnnotator.DEFAULT_ALLOW_FLAWS;
     if (allowFlawedString != null)
       allowFlawed = Boolean.valueOf(allowFlawedString);
-    this.allowFlawedXml = allowFlawed;
     String dateTags =
         properties.getProperty("clean.datetags",
             CleanXmlAnnotator.DEFAULT_DATE_TAGS);
@@ -197,9 +201,10 @@ public class CleanXmlAnnotator implements Annotator {
     String quoteTags =
         properties.getProperty("clean.quotetags",
             CleanXmlAnnotator.DEFAULT_QUOTE_TAGS);
-
     String ssplitDiscardTokens =
         properties.getProperty("clean.ssplitDiscardTokens");
+    String quoteAuthorAttributes = properties.getProperty("clean.quoteauthorattributes",
+            DEFAULT_QUOTE_AUTHOR_ATTRIBUTES);
 
     if (xmlTagsToRemove != null) {
       xmlTagMatcher = toCaseInsensitivePattern(xmlTagsToRemove);
@@ -214,7 +219,7 @@ public class CleanXmlAnnotator implements Annotator {
     }
 
     dateTagMatcher = toCaseInsensitivePattern(dateTags);
-
+    this.allowFlawedXml = allowFlawed;
     setSingleSentenceTagMatcher(singleSentenceTags);
     setDocIdTagMatcher(docIdTags);
     setDocTypeTagMatcher(docTypeTags);
@@ -225,10 +230,8 @@ public class CleanXmlAnnotator implements Annotator {
     setSectionAnnotationPatterns(sectionAnnotations);
     setQuoteTagMatcher(quoteTags);
     setSsplitDiscardTokensMatcher(ssplitDiscardTokens);
-
     // set up the labels that indicate quote author
-    quoteAuthorAttributeNames = properties.getProperty("clean.quoteauthorattributes", "").split(",");
-
+    quoteAuthorAttributeNames = quoteAuthorAttributes.split(",");
   }
 
   public CleanXmlAnnotator(String xmlTagsToRemove,
@@ -501,12 +504,11 @@ public class CleanXmlAnnotator implements Annotator {
     List<CoreMap> sectionQuotes = null;
 
     // Local variable for annotating quotes
-    XMLUtils.XMLTag quoteStartTag = null;
+    // XMLUtils.XMLTag quoteStartTag = null;
     String quoteAuthor = null;
     int quoteStartCharOffset = -1;
-    int quoteEndCharOffset = -1;
 
-    annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<CoreMap>());
+    annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<>());
 
     boolean markSingleSentence = false;
     for (CoreLabel token : tokens) {
@@ -637,15 +639,14 @@ public class CleanXmlAnnotator implements Annotator {
             CoreMap currQuote = new ArrayCoreMap();
             // set the quote start
             currQuote.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, quoteStartCharOffset);
-            quoteEndCharOffset = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+            int quoteEndCharOffset = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
             currQuote.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, quoteEndCharOffset);
             currQuote.set(CoreAnnotations.AuthorAnnotation.class, quoteAuthor);
             // add this quote to the list of quotes in this section
             // a Quote has character offsets and an author
             sectionQuotes.add(currQuote);
-            quoteStartTag = null;
+            // quoteStartTag = null;
             quoteStartCharOffset = -1;
-            quoteEndCharOffset = -1;
             quoteAuthor = null;
           }
         } else {
@@ -659,7 +660,7 @@ public class CleanXmlAnnotator implements Annotator {
             }
           }
           // store quote start tag
-          quoteStartTag = tag;
+          // quoteStartTag = tag;
         }
       }
 
@@ -746,7 +747,7 @@ public class CleanXmlAnnotator implements Annotator {
           sectionStartTagToken = token;
           sectionAnnotations = new ArrayCoreMap();
           sectionAnnotations.set(CoreAnnotations.SectionAnnotation.class, sectionStartTag.name);
-          sectionQuotes = new ArrayList<CoreMap>();
+          sectionQuotes = new ArrayList<>();
         }
       }
       if (sectionStartTag != null) {
@@ -829,20 +830,27 @@ public class CleanXmlAnnotator implements Annotator {
       if (tag.isEndTag) {
         while (true) {
           if (enclosingTags.isEmpty()) {
-            throw new IllegalArgumentException("Got a close tag " + tag.name +
-                                               " which does not match" +
-                                               " any open tag");
+            String mesg = "Got a close tag </" + tag.name + "> which does not match any open tag";
+            if (allowFlawedXml) {
+              log.warn(mesg);
+              break;
+            } else {
+              throw new IllegalArgumentException(mesg);
+            }
           }
           String lastTag = enclosingTags.pop();
-          if (xmlTagMatcher.matcher(lastTag).matches()){
-            --matchDepth;
+          if (xmlTagMatcher.matcher(lastTag).matches()) {
+            matchDepth--;
           }
-          if (lastTag.equals(tag.name))
+          if (lastTag.equals(tag.name)) {
             break;
-          if (!allowFlawedXml)
-            throw new IllegalArgumentException("Mismatched tags... " +
-                                               tag.name + " closed a " +
-                                               lastTag + " tag.");
+          }
+          String mesg = "Mismatched tags: </" + tag.name + "> closed a <" + lastTag + "> tag.";
+          if ( ! allowFlawedXml) {
+            throw new IllegalArgumentException(mesg);
+          } else {
+            log.warn(mesg);
+          }
         }
         if (matchDepth < 0) {
           // this should be impossible, since we already assert that
@@ -858,9 +866,13 @@ public class CleanXmlAnnotator implements Annotator {
       }
     }
 
-    if ( ! enclosingTags.isEmpty() && ! allowFlawedXml) {
-      throw new IllegalArgumentException("Unclosed tags, starting with " +
-                                         enclosingTags.pop());
+    if ( ! enclosingTags.isEmpty()) {
+      String mesg = "Unclosed tags, starting with <" + enclosingTags.pop() + '>';
+      if (allowFlawedXml) {
+        log.warn(mesg);
+      } else {
+        throw new IllegalArgumentException();
+      }
     }
 
     // If we ended with a string of xml tokens, that text needs to be
@@ -882,15 +894,15 @@ public class CleanXmlAnnotator implements Annotator {
 
     // Populate docid, docdate, doctype
     if (annotation != null) {
-      if (!docIdTokens.isEmpty()) {
+      if ( ! docIdTokens.isEmpty()) {
         String str = tokensToString(annotation, docIdTokens).trim();
         annotation.set(CoreAnnotations.DocIDAnnotation.class, str);
       }
-      if (!docDateTokens.isEmpty()) {
+      if ( ! docDateTokens.isEmpty()) {
         String str = tokensToString(annotation, docDateTokens).trim();
         annotation.set(CoreAnnotations.DocDateAnnotation.class, str);
       }
-      if (!docTypeTokens.isEmpty()) {
+      if ( ! docTypeTokens.isEmpty()) {
         String str = tokensToString(annotation, docTypeTokens).trim();
         annotation.set(CoreAnnotations.DocTypeAnnotation.class, str);
       }

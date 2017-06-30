@@ -76,8 +76,21 @@ public class PTBTokenizerTest {
       "60-90's",
       "Soft AC-styled",
       "3 p.m., eastern time",
-//      "Total Private\nOrders 779.5 -9.5% ",
+      "Total Private\nOrders 779.5 -9.5%",
+      "2-9.5%",
+      "2- 9.5%",
       "From July 23-24. Radisson Miyako Hotel.",
+      "23 percent-2 percent higher than today",
+      "23 percent--2 percent higher than today",
+      "438798-438804",
+      "He earned eligibility by virtue of a top-35 finish.",
+      "Witt was 2-for-34 as a hitter",
+      "An Atlanta-bound DC-9 crashed",
+      "weigh 1,000-1,200 pounds, ",
+      "Imus arrived to be host for the 5:30-to-10 a.m. show.",
+      "The .38-Magnum bullet",
+      "a 1908 Model K Stanley with 1:01-minute time",
+      "the 9-to-11:45 a.m. weekday shift",
   };
 
   private final String[][] ptbGold = {
@@ -148,8 +161,21 @@ public class PTBTokenizerTest {
       { "60-90", "'s" },
       { "Soft", "AC-styled" },
       { "3", "p.m.", ",", "eastern", "time" },
-//      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "2-9.5", "%" },
+      { "2", "-", "9.5", "%" },
       { "From", "July", "23-24", ".", "Radisson", "Miyako", "Hotel", "." },
+      { "23", "percent-2", "percent", "higher", "than", "today" },
+      { "23", "percent", "--", "2", "percent", "higher", "than", "today" },
+      { "438798-438804" },
+      { "He", "earned", "eligibility", "by", "virtue", "of", "a", "top-35", "finish", "." },
+      { "Witt", "was", "2-for-34", "as", "a", "hitter" },
+      { "An", "Atlanta-bound", "DC-9", "crashed" },
+      { "weigh", "1,000-1,200", "pounds", "," },
+      { "Imus", "arrived", "to", "be", "host", "for", "the", "5:30-to-10", "a.m.", "show", "." },
+      { "The", ".38-Magnum", "bullet" },
+      { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
+      { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -220,8 +246,34 @@ public class PTBTokenizerTest {
       { "60", "-", "90", "'s" },
       { "Soft", "AC", "-", "styled" },
       { "3", "p.m.", ",", "eastern", "time" },
-//      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
+      { "2", "-", "9.5", "%" },
+      { "2", "-", "9.5", "%" },
       { "From", "July", "23", "-", "24", ".", "Radisson", "Miyako", "Hotel", "." },
+// todo [gabor 2017]: This one probably isn't what you want either:
+//      { "23", "percent", "-", "2", "percent", "higher", "than", "today" },
+      { "23", "percent", "-2", "percent", "higher", "than", "today" },
+      { "23", "percent", "--", "2", "percent", "higher", "than", "today" },
+      { "438798", "-", "438804" },
+// todo [gabor 2017]: This one probably isn't what you want either:
+//      { "He", "earned", "eligibility", "by", "virtue", "of", "a", "top", "-", "35", "finish", "." },
+//      { "Witt", "was", "2", "-", "for", "-", "34", "as", "a", "hitter" },
+//      { "An", "Atlanta", "-", "bound", "DC", "-9", "crashed" },
+      { "He", "earned", "eligibility", "by", "virtue", "of", "a", "top", "-35", "finish", "." },
+      { "Witt", "was", "2", "-", "for", "-34", "as", "a", "hitter" },
+      { "An", "Atlanta", "-", "bound", "DC", "-9", "crashed" },
+// todo [cdm 2017]: These next ones aren't yet right, but I'm putting off fixing them for now, since it might take a rewrite of hyphen handling
+// these are the correct answers:
+//      { "weigh", "1,000", "-", "1,200", "pounds", "," },
+//      { "Imus", "arrived", "to", "be", "host", "for", "the", "5:30", "-", "to", "-", "10", "a.m.", "show", "." },
+//      { "The", ".38", "-", "Magnum", "bullet" },
+//      { "a", "1908", "Model", "K", "Stanley", "with", "1:01", "-", "minute", "time" },
+//      { "the", "9", "-", "to", "-", "11:45", "a.m.", "weekday", "shift" },
+      { "weigh", "1,000-1,200", "pounds", "," },
+      { "Imus", "arrived", "to", "be", "host", "for", "the", "5:30-to-10", "a.m.", "show", "." },
+      { "The", ".38-Magnum", "bullet" },
+      { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
+      { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
   };
 
   @Test
@@ -480,6 +532,7 @@ public class PTBTokenizerTest {
   private static <T extends Label> void runOnTwoArrays(TokenizerFactory<T> tokFactory, String[] inputs, String[][] desired) {
     assertEquals("Test data arrays don't match in length", inputs.length, desired.length);
     for (int sent = 0; sent < inputs.length; sent++) {
+      // System.err.println("Testing " + inputs[sent]);
       Tokenizer<T> tok = tokFactory.getTokenizer(new StringReader(inputs[sent]));
       for (int i = 0; tok.hasNext() || i < desired[sent].length; i++) {
         if ( ! tok.hasNext()) {
@@ -609,16 +662,35 @@ public class PTBTokenizerTest {
           // Text starting with BOM (should be deleted), words with soft hyphens and non-breaking space.
           "\uFEFFThis is hy\u00ADphen\u00ADated and non-breaking spaces: 3\u202F456\u202F473.89",
           // Test that some cp1252 that shouldn't be in file is normalized okay
-          "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092"
+          "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092",
+          "Charles Howard ''Charlie’' Bridges and Helen Hoyle Bridges",
+          "All energy markets close at 1 p.m. except Palo Verde electricity futures and options, closing at\n" +
+                  "12:55.; Palladium and copper markets close at 1 p.m.; Silver markets close at 1:05 p.m.",
+          "BHP is `` making the right noises.''",
+          "``There's a saying nowadays,'' he said. ```The more you owe, the longer you live.' It means the mafia " +
+                  "won't come until we have money.''\n",
+          "\"Whereas strategic considerations have to be based on 'real- politick' and harsh facts,\" Saleem said.",
+          "F*ck, cr-p, I met Uchenna Nnobuko yesterday.",  // remnant of "dunno" should not match prefix
   };
 
   private final String[][] hyphenGold = {
           { "This", "is", "hyphenated", "and", "non-breaking", "spaces", ":", "3456473.89" },
-          { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" }
+          { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" },
+          { "Charles", "Howard", "``", "Charlie", "''", "Bridges", "and", "Helen", "Hoyle", "Bridges" },
+          { "All", "energy", "markets", "close", "at", "1", "p.m.", "except", "Palo", "Verde", "electricity", "futures",
+                  "and", "options", ",", "closing", "at", "12:55", ".", ";", "Palladium", "and", "copper", "markets",
+                  "close", "at", "1", "p.m.", ";", "Silver", "markets", "close", "at", "1:05", "p.m." },
+          { "BHP", "is", "``", "making", "the", "right", "noises", ".", "''" },
+          { "``", "There", "'s", "a", "saying", "nowadays", ",", "''", "he", "said", ".", "``", "`", "The", "more", "you",
+                  "owe", ",", "the", "longer", "you", "live", ".", "'", "It", "means", "the", "mafia",
+                  "wo", "n't", "come", "until", "we", "have", "money", ".", "''" },
+          { "``", "Whereas", "strategic", "considerations", "have", "to", "be", "based", "on",
+                  "`", "real", "-", "politick", "'", "and", "harsh", "facts", ",", "''", "Saleem", "said", "." },
+          { "F*ck", ",", "cr-p", ",", "I", "met", "Uchenna", "Nnobuko", "yesterday", "." },
   };
 
   @Test
-  public void testHyphensAndBOM() {
+  public void testHyphensQuoteAndBOM() {
     TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false,invertible");
     runOnTwoArrays(tokFactory, hyphenInputs, hyphenGold);
     runAgainstOrig(tokFactory, hyphenInputs);

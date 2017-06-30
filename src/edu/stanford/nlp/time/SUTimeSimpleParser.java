@@ -34,16 +34,17 @@ public class SUTimeSimpleParser {
       this.timeExpression = timeExpression;
     }
 
+    @Override
     public String getLocalizedMessage() {
-      return "Error while parsing '" + timeExpression + "'";
+      return "Error while parsing '" + timeExpression + '\'';
     }
 
   }
 
   private static AnnotationPipeline pipeline;
   private static Map<String, Temporal> cache;
-  public static int calls = 0;
-  public static int misses = 0;
+  public static int calls; // = 0;
+  public static int misses; // = 0;
 
   static {
     pipeline = makeNumericPipeline();
@@ -66,14 +67,14 @@ public class SUTimeSimpleParser {
     if (doc.get(CoreAnnotations.SentencesAnnotation.class) == null) {
       return null;
     }
-    if (doc.get(CoreAnnotations.SentencesAnnotation.class).size() == 0) {
+    if (doc.get(CoreAnnotations.SentencesAnnotation.class).isEmpty()) {
       return null;
     }
 
     List<CoreMap> timexAnnotations = doc.get(TimeAnnotations.TimexAnnotations.class);
     if (timexAnnotations.size() > 1) {
       return null;
-    } else if (timexAnnotations.size() == 0) {
+    } else if (timexAnnotations.isEmpty()) {
       return null;
     }
 
@@ -97,10 +98,10 @@ public class SUTimeSimpleParser {
       pipeline.annotate(doc);
 
       assert doc.get(CoreAnnotations.SentencesAnnotation.class) != null;
-      assert doc.get(CoreAnnotations.SentencesAnnotation.class).size() > 0;
+      assert ! doc.get(CoreAnnotations.SentencesAnnotation.class).isEmpty();
       List<CoreMap> timexAnnotations = doc.get(TimeAnnotations.TimexAnnotations.class);
       if (timexAnnotations.size() > 1) {
-        throw new RuntimeException("Too many timexes for '" + str + "'");
+        throw new RuntimeException("Too many timexes for '" + str + '\'');
       }
       CoreMap timex = timexAnnotations.get(0);
 
