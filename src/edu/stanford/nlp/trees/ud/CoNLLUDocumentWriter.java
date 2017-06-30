@@ -77,6 +77,9 @@ public class CoNLLUDocumentWriter {
                 govIdx = "0";
                 relnName = GrammaticalRelation.ROOT.toString();
                 additionalDepsString = isTree ? "_" : "0:" + relnName;
+            } else if (govIdx == null) {
+                govIdx = "_";
+                relnName = "_";
             }
 
             if (unescapeParenthesis) {

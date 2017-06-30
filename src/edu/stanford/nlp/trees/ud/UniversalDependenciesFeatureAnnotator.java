@@ -285,11 +285,12 @@ public class UniversalDependenciesFeatureAnnotator  {
     return tb.iterator();
   }
 
-  private static final TregexPattern IMPERATIVE_PATTERN = TregexPattern.compile("__ > VB >+(/^[^S]/) S-IMP");
+  private static TregexPattern IMPERATIVE_PATTERN = TregexPattern.compile("__ > VB >+(/^[^S]/) S-IMP");
 
   /**
    * Returns the indices of all imperative verbs in the
    * tree t.
+   *
    */
   private static Set<Integer> getImperatives(Tree t) {
     Set<Integer> imps = new HashSet<>();
@@ -348,7 +349,7 @@ public class UniversalDependenciesFeatureAnnotator  {
     return false;
   }
 
-  private static final String BE_REGEX = EnglishPatterns.beAuxiliaryRegex.replace("/", "");
+  private static String BE_REGEX = EnglishPatterns.beAuxiliaryRegex.replace("/", "");
 
   /**
    * Returns true if {@code word} has an inflection of "be" as an auxiliary.
@@ -424,7 +425,7 @@ public class UniversalDependenciesFeatureAnnotator  {
       t = UniversalPOSMapper.mapTree(t);
       List<Label> uPOSTags = t.preTerminalYield();
       List<IndexedWord> yield = sg.vertexListSorted();
-      // int len = yield.size();
+      int len = yield.size();
       for (IndexedWord word : yield) {
         Label uPOSTag = uPOSTags.get(word.index() - 1);
         word.set(CoreAnnotations.CoarseTagAnnotation.class, uPOSTag.value());
@@ -480,12 +481,13 @@ public class UniversalDependenciesFeatureAnnotator  {
 
         throw new RuntimeException("CoNLL-U file and tree file are not aligned. \n"
                 + "Sentence: " + sentenceSb + '\n'
-                + "Tree: " + ((t == null) ? "null" : t.pennString()));
+                + "Tree: " + t.pennString());
       }
 
       featureAnnotator.addFeatures(sg, t, true, addUPOS);
 
       System.out.print(depWriter.printSemanticGraph(sg, !escapeParens));
+
     }
   }
 

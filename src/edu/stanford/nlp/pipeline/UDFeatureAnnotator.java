@@ -7,13 +7,16 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.ud.UniversalDependenciesFeatureAnnotator;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
 /**
+ *
  * Extracts universal dependencies features from a tree
  *
  * @author Sebastian Schuster
@@ -60,9 +63,8 @@ public class UDFeatureAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(Collections.singleton(
-            SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class
-    ));
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class
+    )));
   }
-
 }

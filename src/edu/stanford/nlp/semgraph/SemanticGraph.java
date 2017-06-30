@@ -610,6 +610,32 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
+   * Returns the <em>first</em> {@link edu.stanford.nlp.ling.IndexedWord
+   * IndexedWord} in this {@code SemanticGraph} having the given integer index,
+   * or throws {@code IllegalArgumentException} if no such node is found.
+   */
+  public IndexedWord getNodeByIndexAndCopyCount(int index, int copyCount) throws IllegalArgumentException {
+    IndexedWord node = getNodeByIndexAndCopyCountSafe(index, copyCount);
+    if (node == null)
+      throw new IllegalArgumentException("No SemanticGraph vertex with index " + index + " and copyCount " + copyCount);
+    else
+      return node;
+  }
+
+  /**
+   * Same as above, but returns {@code null} if the index does not exist
+   * (instead of throwing an exception).
+   */
+  public IndexedWord getNodeByIndexAndCopyCountSafe(int index, int copyCount) {
+    for (IndexedWord vertex : vertexSet()) {
+      if (vertex.index() == index && vertex.copyCount() == copyCount) {
+        return vertex;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Returns the <i>first</i> {@link edu.stanford.nlp.ling.IndexedWord
    * IndexedWord} in this <code>SemanticGraph</code> having the given word or
    * regex, or return null if no such found.

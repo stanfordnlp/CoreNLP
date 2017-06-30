@@ -14093,17 +14093,17 @@ public final class CoreNLPProtos {
         getConllUMiscBytes();
 
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+     * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
      */
     boolean hasConllUSecondaryDeps();
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+     * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
      */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString getConllUSecondaryDeps();
+    edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUSecondaryDeps();
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+     * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
      */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntStringOrBuilder getConllUSecondaryDepsOrBuilder();
+    edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder getConllUSecondaryDepsOrBuilder();
 
     /**
      * <code>optional string wikipediaEntity = 37;</code>
@@ -14610,11 +14610,11 @@ public final class CoreNLPProtos {
               break;
             }
             case 290: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.Builder subBuilder = null;
+              edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder subBuilder = null;
               if (((bitField1_ & 0x00000001) == 0x00000001)) {
                 subBuilder = conllUSecondaryDeps_.toBuilder();
               }
-              conllUSecondaryDeps_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.PARSER, extensionRegistry);
+              conllUSecondaryDeps_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.PARSER, extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(conllUSecondaryDeps_);
                 conllUSecondaryDeps_ = subBuilder.buildPartial();
@@ -16003,23 +16003,23 @@ public final class CoreNLPProtos {
     }
 
     public static final int CONLLUSECONDARYDEPS_FIELD_NUMBER = 36;
-    private edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString conllUSecondaryDeps_;
+    private edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString conllUSecondaryDeps_;
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+     * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
      */
     public boolean hasConllUSecondaryDeps() {
       return ((bitField1_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+     * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString getConllUSecondaryDeps() {
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUSecondaryDeps() {
       return conllUSecondaryDeps_;
     }
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+     * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntStringOrBuilder getConllUSecondaryDepsOrBuilder() {
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder getConllUSecondaryDepsOrBuilder() {
       return conllUSecondaryDeps_;
     }
 
@@ -16579,7 +16579,7 @@ public final class CoreNLPProtos {
       coarseTag_ = "";
       conllUTokenSpan_ = edu.stanford.nlp.pipeline.CoreNLPProtos.Span.getDefaultInstance();
       conllUMisc_ = "";
-      conllUSecondaryDeps_ = edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.getDefaultInstance();
+      conllUSecondaryDeps_ = edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance();
       wikipediaEntity_ = "";
       gender_ = "";
       trueCase_ = "";
@@ -17187,7 +17187,7 @@ public final class CoreNLPProtos {
         conllUMisc_ = "";
         bitField1_ = (bitField1_ & ~0x00000001);
         if (conllUSecondaryDepsBuilder_ == null) {
-          conllUSecondaryDeps_ = edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.getDefaultInstance();
+          conllUSecondaryDeps_ = edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance();
         } else {
           conllUSecondaryDepsBuilder_.clear();
         }
@@ -20694,19 +20694,19 @@ public final class CoreNLPProtos {
         return this;
       }
 
-      private edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString conllUSecondaryDeps_ = edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.getDefaultInstance();
+      private edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString conllUSecondaryDeps_ = edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntStringOrBuilder> conllUSecondaryDepsBuilder_;
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder> conllUSecondaryDepsBuilder_;
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+       * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
        */
       public boolean hasConllUSecondaryDeps() {
         return ((bitField1_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+       * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString getConllUSecondaryDeps() {
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUSecondaryDeps() {
         if (conllUSecondaryDepsBuilder_ == null) {
           return conllUSecondaryDeps_;
         } else {
@@ -20714,9 +20714,9 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+       * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
        */
-      public Builder setConllUSecondaryDeps(edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString value) {
+      public Builder setConllUSecondaryDeps(edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString value) {
         if (conllUSecondaryDepsBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -20730,10 +20730,10 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+       * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
        */
       public Builder setConllUSecondaryDeps(
-          edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.Builder builderForValue) {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder builderForValue) {
         if (conllUSecondaryDepsBuilder_ == null) {
           conllUSecondaryDeps_ = builderForValue.build();
           onChanged();
@@ -20744,14 +20744,14 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+       * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
        */
-      public Builder mergeConllUSecondaryDeps(edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString value) {
+      public Builder mergeConllUSecondaryDeps(edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString value) {
         if (conllUSecondaryDepsBuilder_ == null) {
           if (((bitField1_ & 0x00000002) == 0x00000002) &&
-              conllUSecondaryDeps_ != edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.getDefaultInstance()) {
+              conllUSecondaryDeps_ != edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance()) {
             conllUSecondaryDeps_ =
-              edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.newBuilder(conllUSecondaryDeps_).mergeFrom(value).buildPartial();
+              edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.newBuilder(conllUSecondaryDeps_).mergeFrom(value).buildPartial();
           } else {
             conllUSecondaryDeps_ = value;
           }
@@ -20763,11 +20763,11 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+       * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
        */
       public Builder clearConllUSecondaryDeps() {
         if (conllUSecondaryDepsBuilder_ == null) {
-          conllUSecondaryDeps_ = edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.getDefaultInstance();
+          conllUSecondaryDeps_ = edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance();
           onChanged();
         } else {
           conllUSecondaryDepsBuilder_.clear();
@@ -20776,17 +20776,17 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+       * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.Builder getConllUSecondaryDepsBuilder() {
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder getConllUSecondaryDepsBuilder() {
         bitField1_ |= 0x00000002;
         onChanged();
         return getConllUSecondaryDepsFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+       * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntStringOrBuilder getConllUSecondaryDepsOrBuilder() {
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder getConllUSecondaryDepsOrBuilder() {
         if (conllUSecondaryDepsBuilder_ != null) {
           return conllUSecondaryDepsBuilder_.getMessageOrBuilder();
         } else {
@@ -20794,14 +20794,14 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.MapIntString conllUSecondaryDeps = 36;</code>
+       * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntStringOrBuilder> 
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder> 
           getConllUSecondaryDepsFieldBuilder() {
         if (conllUSecondaryDepsBuilder_ == null) {
           conllUSecondaryDepsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntStringOrBuilder>(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder>(
                   getConllUSecondaryDeps(),
                   getParentForChildren(),
                   isClean());
@@ -52614,7 +52614,7 @@ public final class CoreNLPProtos {
       "\001(\010\022\022\n\nsentenceID\030: \001(\t\022\023\n\013sectionDate\030;" +
       " \001(\t\022\024\n\014sectionIndex\030< \001(\r\022\023\n\013sectionNam" +
       "e\030= \001(\t\022\025\n\rsectionAuthor\030> \001(\t\022\r\n\005docID\030" +
-      "? \001(\t\022\025\n\rsectionQuoted\030@ \001(\010*\005\010d\020\200\002\"\217\t\n\005" +
+      "? \001(\t\022\025\n\rsectionQuoted\030@ \001(\010*\005\010d\020\200\002\"\222\t\n\005" +
       "Token\022\014\n\004word\030\001 \001(\t\022\013\n\003pos\030\002 \001(\t\022\r\n\005valu" +
       "e\030\003 \001(\t\022\020\n\010category\030\004 \001(\t\022\016\n\006before\030\005 \001(",
       "\t\022\r\n\005after\030\006 \001(\t\022\024\n\014originalText\030\007 \001(\t\022\013" +
@@ -52636,148 +52636,148 @@ public final class CoreNLPProtos {
       "anford.nlp.pipeline.MapStringString\022\021\n\tc" +
       "oarseTag\030! \001(\t\0228\n\017conllUTokenSpan\030\" \001(\0132" +
       "\037.edu.stanford.nlp.pipeline.Span\022\022\n\nconl" +
-      "lUMisc\030# \001(\t\022D\n\023conllUSecondaryDeps\030$ \001(",
-      "\0132\'.edu.stanford.nlp.pipeline.MapIntStri" +
-      "ng\022\027\n\017wikipediaEntity\030% \001(\t\022\016\n\006gender\0303 " +
-      "\001(\t\022\020\n\010trueCase\0304 \001(\t\022\024\n\014trueCaseText\0305 " +
-      "\001(\t\022\023\n\013chineseChar\0306 \001(\t\022\022\n\nchineseSeg\0307" +
-      " \001(\t\022\026\n\016chineseXMLChar\030< \001(\t\022\023\n\013sectionN" +
-      "ame\0308 \001(\t\022\025\n\rsectionAuthor\0309 \001(\t\022\023\n\013sect" +
-      "ionDate\030: \001(\t\022\027\n\017sectionEndLabel\030; \001(\t*\005" +
-      "\010d\020\200\002\"\261\001\n\005Quote\022\014\n\004text\030\001 \001(\t\022\r\n\005begin\030\002" +
-      " \001(\r\022\013\n\003end\030\003 \001(\r\022\025\n\rsentenceBegin\030\005 \001(\r" +
-      "\022\023\n\013sentenceEnd\030\006 \001(\r\022\022\n\ntokenBegin\030\007 \001(",
-      "\r\022\020\n\010tokenEnd\030\010 \001(\r\022\r\n\005docid\030\t \001(\t\022\r\n\005in" +
-      "dex\030\n \001(\r\022\016\n\006author\030\013 \001(\t\"\307\001\n\tParseTree\022" +
-      "3\n\005child\030\001 \003(\0132$.edu.stanford.nlp.pipeli" +
-      "ne.ParseTree\022\r\n\005value\030\002 \001(\t\022\027\n\017yieldBegi" +
-      "nIndex\030\003 \001(\r\022\025\n\ryieldEndIndex\030\004 \001(\r\022\r\n\005s" +
-      "core\030\005 \001(\001\0227\n\tsentiment\030\006 \001(\0162$.edu.stan" +
-      "ford.nlp.pipeline.Sentiment\"\226\003\n\017Dependen" +
-      "cyGraph\022=\n\004node\030\001 \003(\0132/.edu.stanford.nlp" +
-      ".pipeline.DependencyGraph.Node\022=\n\004edge\030\002" +
-      " \003(\0132/.edu.stanford.nlp.pipeline.Depende",
-      "ncyGraph.Edge\022\020\n\004root\030\003 \003(\rB\002\020\001\032D\n\004Node\022" +
-      "\025\n\rsentenceIndex\030\001 \002(\r\022\r\n\005index\030\002 \002(\r\022\026\n" +
-      "\016copyAnnotation\030\003 \001(\r\032\254\001\n\004Edge\022\016\n\006source" +
-      "\030\001 \002(\r\022\016\n\006target\030\002 \002(\r\022\013\n\003dep\030\003 \001(\t\022\017\n\007i" +
-      "sExtra\030\004 \001(\010\022\022\n\nsourceCopy\030\005 \001(\r\022\022\n\ntarg" +
-      "etCopy\030\006 \001(\r\022>\n\010language\030\007 \001(\0162#.edu.sta" +
-      "nford.nlp.pipeline.Language:\007Unknown\"\306\002\n" +
-      "\nCorefChain\022\017\n\007chainID\030\001 \002(\005\022C\n\007mention\030" +
-      "\002 \003(\01322.edu.stanford.nlp.pipeline.CorefC" +
-      "hain.CorefMention\022\026\n\016representative\030\003 \002(",
-      "\r\032\311\001\n\014CorefMention\022\021\n\tmentionID\030\001 \001(\005\022\023\n" +
-      "\013mentionType\030\002 \001(\t\022\016\n\006number\030\003 \001(\t\022\016\n\006ge" +
-      "nder\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t\022\022\n\nbeginInde" +
-      "x\030\006 \001(\r\022\020\n\010endIndex\030\007 \001(\r\022\021\n\theadIndex\030\t" +
-      " \001(\r\022\025\n\rsentenceIndex\030\n \001(\r\022\020\n\010position\030" +
-      "\013 \001(\r\"\357\010\n\007Mention\022\021\n\tmentionID\030\001 \001(\005\022\023\n\013" +
-      "mentionType\030\002 \001(\t\022\016\n\006number\030\003 \001(\t\022\016\n\006gen" +
-      "der\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t\022\016\n\006person\030\006 \001" +
-      "(\t\022\022\n\nstartIndex\030\007 \001(\r\022\020\n\010endIndex\030\t \001(\r" +
-      "\022\021\n\theadIndex\030\n \001(\r\022\022\n\nheadString\030\013 \001(\t\022",
-      "\021\n\tnerString\030\014 \001(\t\022\023\n\013originalRef\030\r \001(\r\022" +
-      "\032\n\022goldCorefClusterID\030\016 \001(\005\022\026\n\016corefClus" +
-      "terID\030\017 \001(\005\022\022\n\nmentionNum\030\020 \001(\r\022\017\n\007sentN" +
-      "um\030\021 \001(\r\022\r\n\005utter\030\022 \001(\r\022\021\n\tparagraph\030\023 \001" +
-      "(\r\022\021\n\tisSubject\030\024 \001(\010\022\026\n\016isDirectObject\030" +
-      "\025 \001(\010\022\030\n\020isIndirectObject\030\026 \001(\010\022\033\n\023isPre" +
-      "positionObject\030\027 \001(\010\022\017\n\007hasTwin\030\030 \001(\010\022\017\n" +
-      "\007generic\030\031 \001(\010\022\023\n\013isSingleton\030\032 \001(\010\022\032\n\022h" +
-      "asBasicDependency\030\033 \001(\010\022\035\n\025hasEnhancedDe" +
-      "penedncy\030\034 \001(\010\022\033\n\023hasContextParseTree\030\035 ",
-      "\001(\010\022?\n\017headIndexedWord\030\036 \001(\0132&.edu.stanf" +
-      "ord.nlp.pipeline.IndexedWord\022=\n\rdependin" +
-      "gVerb\030\037 \001(\0132&.edu.stanford.nlp.pipeline." +
-      "IndexedWord\0228\n\010headWord\030  \001(\0132&.edu.stan" +
-      "ford.nlp.pipeline.IndexedWord\022;\n\013speaker" +
-      "Info\030! \001(\0132&.edu.stanford.nlp.pipeline.S" +
-      "peakerInfo\022=\n\rsentenceWords\0302 \003(\0132&.edu." +
-      "stanford.nlp.pipeline.IndexedWord\022<\n\014ori" +
-      "ginalSpan\0303 \003(\0132&.edu.stanford.nlp.pipel" +
-      "ine.IndexedWord\022\022\n\ndependents\0304 \003(\t\022\031\n\021p",
-      "reprocessedTerms\0305 \003(\t\022\023\n\013appositions\0306 " +
-      "\003(\005\022\034\n\024predicateNominatives\0307 \003(\005\022\030\n\020rel" +
-      "ativePronouns\0308 \003(\005\022\023\n\013listMembers\0309 \003(\005" +
-      "\022\025\n\rbelongToLists\030: \003(\005\"X\n\013IndexedWord\022\023" +
-      "\n\013sentenceNum\030\001 \001(\r\022\022\n\ntokenIndex\030\002 \001(\r\022" +
-      "\r\n\005docID\030\003 \001(\r\022\021\n\tcopyCount\030\004 \001(\r\"4\n\013Spe" +
-      "akerInfo\022\023\n\013speakerName\030\001 \001(\t\022\020\n\010mention" +
-      "s\030\002 \003(\005\"\"\n\004Span\022\r\n\005begin\030\001 \002(\r\022\013\n\003end\030\002 " +
-      "\002(\r\"w\n\005Timex\022\r\n\005value\030\001 \001(\t\022\020\n\010altValue\030" +
-      "\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004type\030\004 \001(\t\022\013\n\003tid",
-      "\030\005 \001(\t\022\022\n\nbeginPoint\030\006 \001(\r\022\020\n\010endPoint\030\007" +
-      " \001(\r\"\333\001\n\006Entity\022\021\n\theadStart\030\006 \001(\r\022\017\n\007he" +
-      "adEnd\030\007 \001(\r\022\023\n\013mentionType\030\010 \001(\t\022\026\n\016norm" +
-      "alizedName\030\t \001(\t\022\026\n\016headTokenIndex\030\n \001(\r" +
-      "\022\017\n\007corefID\030\013 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013e" +
-      "xtentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004t" +
-      "ype\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\267\001\n\010Relation\022" +
-      "\017\n\007argName\030\006 \003(\t\022.\n\003arg\030\007 \003(\0132!.edu.stan" +
-      "ford.nlp.pipeline.Entity\022\021\n\tsignature\030\010 " +
-      "\001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentStart\030\002 \001",
-      "(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007s" +
-      "ubtype\030\005 \001(\t\"\262\001\n\010Operator\022\014\n\004name\030\001 \002(\t\022" +
-      "\033\n\023quantifierSpanBegin\030\002 \002(\005\022\031\n\021quantifi" +
-      "erSpanEnd\030\003 \002(\005\022\030\n\020subjectSpanBegin\030\004 \002(" +
-      "\005\022\026\n\016subjectSpanEnd\030\005 \002(\005\022\027\n\017objectSpanB" +
-      "egin\030\006 \002(\005\022\025\n\robjectSpanEnd\030\007 \002(\005\"\251\004\n\010Po" +
-      "larity\022K\n\022projectEquivalence\030\001 \002(\0162/.edu" +
+      "lUMisc\030# \001(\t\022G\n\023conllUSecondaryDeps\030$ \001(",
+      "\0132*.edu.stanford.nlp.pipeline.MapStringS" +
+      "tring\022\027\n\017wikipediaEntity\030% \001(\t\022\016\n\006gender" +
+      "\0303 \001(\t\022\020\n\010trueCase\0304 \001(\t\022\024\n\014trueCaseText" +
+      "\0305 \001(\t\022\023\n\013chineseChar\0306 \001(\t\022\022\n\nchineseSe" +
+      "g\0307 \001(\t\022\026\n\016chineseXMLChar\030< \001(\t\022\023\n\013secti" +
+      "onName\0308 \001(\t\022\025\n\rsectionAuthor\0309 \001(\t\022\023\n\013s" +
+      "ectionDate\030: \001(\t\022\027\n\017sectionEndLabel\030; \001(" +
+      "\t*\005\010d\020\200\002\"\261\001\n\005Quote\022\014\n\004text\030\001 \001(\t\022\r\n\005begi" +
+      "n\030\002 \001(\r\022\013\n\003end\030\003 \001(\r\022\025\n\rsentenceBegin\030\005 " +
+      "\001(\r\022\023\n\013sentenceEnd\030\006 \001(\r\022\022\n\ntokenBegin\030\007",
+      " \001(\r\022\020\n\010tokenEnd\030\010 \001(\r\022\r\n\005docid\030\t \001(\t\022\r\n" +
+      "\005index\030\n \001(\r\022\016\n\006author\030\013 \001(\t\"\307\001\n\tParseTr" +
+      "ee\0223\n\005child\030\001 \003(\0132$.edu.stanford.nlp.pip" +
+      "eline.ParseTree\022\r\n\005value\030\002 \001(\t\022\027\n\017yieldB" +
+      "eginIndex\030\003 \001(\r\022\025\n\ryieldEndIndex\030\004 \001(\r\022\r" +
+      "\n\005score\030\005 \001(\001\0227\n\tsentiment\030\006 \001(\0162$.edu.s" +
+      "tanford.nlp.pipeline.Sentiment\"\226\003\n\017Depen" +
+      "dencyGraph\022=\n\004node\030\001 \003(\0132/.edu.stanford." +
+      "nlp.pipeline.DependencyGraph.Node\022=\n\004edg" +
+      "e\030\002 \003(\0132/.edu.stanford.nlp.pipeline.Depe",
+      "ndencyGraph.Edge\022\020\n\004root\030\003 \003(\rB\002\020\001\032D\n\004No" +
+      "de\022\025\n\rsentenceIndex\030\001 \002(\r\022\r\n\005index\030\002 \002(\r" +
+      "\022\026\n\016copyAnnotation\030\003 \001(\r\032\254\001\n\004Edge\022\016\n\006sou" +
+      "rce\030\001 \002(\r\022\016\n\006target\030\002 \002(\r\022\013\n\003dep\030\003 \001(\t\022\017" +
+      "\n\007isExtra\030\004 \001(\010\022\022\n\nsourceCopy\030\005 \001(\r\022\022\n\nt" +
+      "argetCopy\030\006 \001(\r\022>\n\010language\030\007 \001(\0162#.edu." +
+      "stanford.nlp.pipeline.Language:\007Unknown\"" +
+      "\306\002\n\nCorefChain\022\017\n\007chainID\030\001 \002(\005\022C\n\007menti" +
+      "on\030\002 \003(\01322.edu.stanford.nlp.pipeline.Cor" +
+      "efChain.CorefMention\022\026\n\016representative\030\003",
+      " \002(\r\032\311\001\n\014CorefMention\022\021\n\tmentionID\030\001 \001(\005" +
+      "\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006number\030\003 \001(\t\022\016\n" +
+      "\006gender\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t\022\022\n\nbeginI" +
+      "ndex\030\006 \001(\r\022\020\n\010endIndex\030\007 \001(\r\022\021\n\theadInde" +
+      "x\030\t \001(\r\022\025\n\rsentenceIndex\030\n \001(\r\022\020\n\010positi" +
+      "on\030\013 \001(\r\"\357\010\n\007Mention\022\021\n\tmentionID\030\001 \001(\005\022" +
+      "\023\n\013mentionType\030\002 \001(\t\022\016\n\006number\030\003 \001(\t\022\016\n\006" +
+      "gender\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t\022\016\n\006person\030" +
+      "\006 \001(\t\022\022\n\nstartIndex\030\007 \001(\r\022\020\n\010endIndex\030\t " +
+      "\001(\r\022\021\n\theadIndex\030\n \001(\r\022\022\n\nheadString\030\013 \001",
+      "(\t\022\021\n\tnerString\030\014 \001(\t\022\023\n\013originalRef\030\r \001" +
+      "(\r\022\032\n\022goldCorefClusterID\030\016 \001(\005\022\026\n\016corefC" +
+      "lusterID\030\017 \001(\005\022\022\n\nmentionNum\030\020 \001(\r\022\017\n\007se" +
+      "ntNum\030\021 \001(\r\022\r\n\005utter\030\022 \001(\r\022\021\n\tparagraph\030" +
+      "\023 \001(\r\022\021\n\tisSubject\030\024 \001(\010\022\026\n\016isDirectObje" +
+      "ct\030\025 \001(\010\022\030\n\020isIndirectObject\030\026 \001(\010\022\033\n\023is" +
+      "PrepositionObject\030\027 \001(\010\022\017\n\007hasTwin\030\030 \001(\010" +
+      "\022\017\n\007generic\030\031 \001(\010\022\023\n\013isSingleton\030\032 \001(\010\022\032" +
+      "\n\022hasBasicDependency\030\033 \001(\010\022\035\n\025hasEnhance" +
+      "dDepenedncy\030\034 \001(\010\022\033\n\023hasContextParseTree",
+      "\030\035 \001(\010\022?\n\017headIndexedWord\030\036 \001(\0132&.edu.st" +
+      "anford.nlp.pipeline.IndexedWord\022=\n\rdepen" +
+      "dingVerb\030\037 \001(\0132&.edu.stanford.nlp.pipeli" +
+      "ne.IndexedWord\0228\n\010headWord\030  \001(\0132&.edu.s" +
+      "tanford.nlp.pipeline.IndexedWord\022;\n\013spea" +
+      "kerInfo\030! \001(\0132&.edu.stanford.nlp.pipelin" +
+      "e.SpeakerInfo\022=\n\rsentenceWords\0302 \003(\0132&.e" +
+      "du.stanford.nlp.pipeline.IndexedWord\022<\n\014" +
+      "originalSpan\0303 \003(\0132&.edu.stanford.nlp.pi" +
+      "peline.IndexedWord\022\022\n\ndependents\0304 \003(\t\022\031",
+      "\n\021preprocessedTerms\0305 \003(\t\022\023\n\013appositions" +
+      "\0306 \003(\005\022\034\n\024predicateNominatives\0307 \003(\005\022\030\n\020" +
+      "relativePronouns\0308 \003(\005\022\023\n\013listMembers\0309 " +
+      "\003(\005\022\025\n\rbelongToLists\030: \003(\005\"X\n\013IndexedWor" +
+      "d\022\023\n\013sentenceNum\030\001 \001(\r\022\022\n\ntokenIndex\030\002 \001" +
+      "(\r\022\r\n\005docID\030\003 \001(\r\022\021\n\tcopyCount\030\004 \001(\r\"4\n\013" +
+      "SpeakerInfo\022\023\n\013speakerName\030\001 \001(\t\022\020\n\010ment" +
+      "ions\030\002 \003(\005\"\"\n\004Span\022\r\n\005begin\030\001 \002(\r\022\013\n\003end" +
+      "\030\002 \002(\r\"w\n\005Timex\022\r\n\005value\030\001 \001(\t\022\020\n\010altVal" +
+      "ue\030\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004type\030\004 \001(\t\022\013\n\003",
+      "tid\030\005 \001(\t\022\022\n\nbeginPoint\030\006 \001(\r\022\020\n\010endPoin" +
+      "t\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\theadStart\030\006 \001(\r\022\017\n" +
+      "\007headEnd\030\007 \001(\r\022\023\n\013mentionType\030\010 \001(\t\022\026\n\016n" +
+      "ormalizedName\030\t \001(\t\022\026\n\016headTokenIndex\030\n " +
+      "\001(\r\022\017\n\007corefID\030\013 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023" +
+      "\n\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014" +
+      "\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\267\001\n\010Relati" +
+      "on\022\017\n\007argName\030\006 \003(\t\022.\n\003arg\030\007 \003(\0132!.edu.s" +
+      "tanford.nlp.pipeline.Entity\022\021\n\tsignature" +
+      "\030\010 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentStart\030",
+      "\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t\022\017" +
+      "\n\007subtype\030\005 \001(\t\"\262\001\n\010Operator\022\014\n\004name\030\001 \002" +
+      "(\t\022\033\n\023quantifierSpanBegin\030\002 \002(\005\022\031\n\021quant" +
+      "ifierSpanEnd\030\003 \002(\005\022\030\n\020subjectSpanBegin\030\004" +
+      " \002(\005\022\026\n\016subjectSpanEnd\030\005 \002(\005\022\027\n\017objectSp" +
+      "anBegin\030\006 \002(\005\022\025\n\robjectSpanEnd\030\007 \002(\005\"\251\004\n" +
+      "\010Polarity\022K\n\022projectEquivalence\030\001 \002(\0162/." +
+      "edu.stanford.nlp.pipeline.NaturalLogicRe" +
+      "lation\022Q\n\030projectForwardEntailment\030\002 \002(\016" +
+      "2/.edu.stanford.nlp.pipeline.NaturalLogi",
+      "cRelation\022Q\n\030projectReverseEntailment\030\003 " +
+      "\002(\0162/.edu.stanford.nlp.pipeline.NaturalL" +
+      "ogicRelation\022H\n\017projectNegation\030\004 \002(\0162/." +
+      "edu.stanford.nlp.pipeline.NaturalLogicRe" +
+      "lation\022K\n\022projectAlternation\030\005 \002(\0162/.edu" +
       ".stanford.nlp.pipeline.NaturalLogicRelat" +
-      "ion\022Q\n\030projectForwardEntailment\030\002 \002(\0162/." +
-      "edu.stanford.nlp.pipeline.NaturalLogicRe",
-      "lation\022Q\n\030projectReverseEntailment\030\003 \002(\016" +
-      "2/.edu.stanford.nlp.pipeline.NaturalLogi" +
-      "cRelation\022H\n\017projectNegation\030\004 \002(\0162/.edu" +
-      ".stanford.nlp.pipeline.NaturalLogicRelat" +
-      "ion\022K\n\022projectAlternation\030\005 \002(\0162/.edu.st" +
-      "anford.nlp.pipeline.NaturalLogicRelation" +
-      "\022E\n\014projectCover\030\006 \002(\0162/.edu.stanford.nl" +
-      "p.pipeline.NaturalLogicRelation\022L\n\023proje" +
-      "ctIndependence\030\007 \002(\0162/.edu.stanford.nlp." +
-      "pipeline.NaturalLogicRelation\"\361\001\n\nNERMen",
-      "tion\022\025\n\rsentenceIndex\030\001 \001(\r\022%\n\035tokenStar" +
-      "tInSentenceInclusive\030\002 \002(\r\022#\n\033tokenEndIn" +
-      "SentenceExclusive\030\003 \002(\r\022\013\n\003ner\030\004 \002(\t\022\025\n\r" +
-      "normalizedNER\030\005 \001(\t\022\022\n\nentityType\030\006 \001(\t\022" +
-      "/\n\005timex\030\007 \001(\0132 .edu.stanford.nlp.pipeli" +
-      "ne.Timex\022\027\n\017wikipediaEntity\030\010 \001(\t\"Y\n\020Sen" +
-      "tenceFragment\022\022\n\ntokenIndex\030\001 \003(\r\022\014\n\004roo" +
-      "t\030\002 \001(\r\022\024\n\014assumedTruth\030\003 \001(\010\022\r\n\005score\030\004" +
-      " \001(\001\":\n\rTokenLocation\022\025\n\rsentenceIndex\030\001" +
-      " \001(\r\022\022\n\ntokenIndex\030\002 \001(\r\"\232\003\n\016RelationTri",
-      "ple\022\017\n\007subject\030\001 \001(\t\022\020\n\010relation\030\002 \001(\t\022\016" +
-      "\n\006object\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(\001\022?\n\rsu" +
-      "bjectTokens\030\r \003(\0132(.edu.stanford.nlp.pip" +
-      "eline.TokenLocation\022@\n\016relationTokens\030\016 " +
-      "\003(\0132(.edu.stanford.nlp.pipeline.TokenLoc" +
-      "ation\022>\n\014objectTokens\030\017 \003(\0132(.edu.stanfo" +
-      "rd.nlp.pipeline.TokenLocation\0228\n\004tree\030\010 " +
-      "\001(\0132*.edu.stanford.nlp.pipeline.Dependen" +
-      "cyGraph\022\016\n\006istmod\030\t \001(\010\022\020\n\010prefixBe\030\n \001(" +
-      "\010\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010\"-\n",
-      "\017MapStringString\022\013\n\003key\030\001 \003(\t\022\r\n\005value\030\002" +
-      " \003(\t\"*\n\014MapIntString\022\013\n\003key\030\001 \003(\r\022\r\n\005val" +
-      "ue\030\002 \003(\t\"\374\001\n\007Section\022\021\n\tcharBegin\030\001 \002(\r\022" +
-      "\017\n\007charEnd\030\002 \002(\r\022\016\n\006author\030\003 \001(\t\022\027\n\017sent" +
-      "enceIndexes\030\004 \003(\r\022\020\n\010datetime\030\005 \001(\t\0220\n\006q" +
-      "uotes\030\006 \003(\0132 .edu.stanford.nlp.pipeline." +
-      "Quote\022\027\n\017authorCharBegin\030\007 \001(\r\022\025\n\rauthor" +
-      "CharEnd\030\010 \001(\r\0220\n\006xmlTag\030\t \002(\0132 .edu.stan" +
-      "ford.nlp.pipeline.Token*\243\001\n\010Language\022\013\n\007" +
-      "Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chines",
-      "e\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006" +
-      "\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEn" +
-      "glish\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentime" +
-      "nt\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE" +
-      "\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017ST" +
-      "RONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation" +
-      "\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020" +
-      "\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022" +
-      "\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDE" +
-      "NCE\020\006B*\n\031edu.stanford.nlp.pipelineB\rCore",
-      "NLPProtos"
+      "ion\022E\n\014projectCover\030\006 \002(\0162/.edu.stanford" +
+      ".nlp.pipeline.NaturalLogicRelation\022L\n\023pr" +
+      "ojectIndependence\030\007 \002(\0162/.edu.stanford.n" +
+      "lp.pipeline.NaturalLogicRelation\"\361\001\n\nNER",
+      "Mention\022\025\n\rsentenceIndex\030\001 \001(\r\022%\n\035tokenS" +
+      "tartInSentenceInclusive\030\002 \002(\r\022#\n\033tokenEn" +
+      "dInSentenceExclusive\030\003 \002(\r\022\013\n\003ner\030\004 \002(\t\022" +
+      "\025\n\rnormalizedNER\030\005 \001(\t\022\022\n\nentityType\030\006 \001" +
+      "(\t\022/\n\005timex\030\007 \001(\0132 .edu.stanford.nlp.pip" +
+      "eline.Timex\022\027\n\017wikipediaEntity\030\010 \001(\t\"Y\n\020" +
+      "SentenceFragment\022\022\n\ntokenIndex\030\001 \003(\r\022\014\n\004" +
+      "root\030\002 \001(\r\022\024\n\014assumedTruth\030\003 \001(\010\022\r\n\005scor" +
+      "e\030\004 \001(\001\":\n\rTokenLocation\022\025\n\rsentenceInde" +
+      "x\030\001 \001(\r\022\022\n\ntokenIndex\030\002 \001(\r\"\232\003\n\016Relation",
+      "Triple\022\017\n\007subject\030\001 \001(\t\022\020\n\010relation\030\002 \001(" +
+      "\t\022\016\n\006object\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(\001\022?\n" +
+      "\rsubjectTokens\030\r \003(\0132(.edu.stanford.nlp." +
+      "pipeline.TokenLocation\022@\n\016relationTokens" +
+      "\030\016 \003(\0132(.edu.stanford.nlp.pipeline.Token" +
+      "Location\022>\n\014objectTokens\030\017 \003(\0132(.edu.sta" +
+      "nford.nlp.pipeline.TokenLocation\0228\n\004tree" +
+      "\030\010 \001(\0132*.edu.stanford.nlp.pipeline.Depen" +
+      "dencyGraph\022\016\n\006istmod\030\t \001(\010\022\020\n\010prefixBe\030\n" +
+      " \001(\010\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010",
+      "\"-\n\017MapStringString\022\013\n\003key\030\001 \003(\t\022\r\n\005valu" +
+      "e\030\002 \003(\t\"*\n\014MapIntString\022\013\n\003key\030\001 \003(\r\022\r\n\005" +
+      "value\030\002 \003(\t\"\374\001\n\007Section\022\021\n\tcharBegin\030\001 \002" +
+      "(\r\022\017\n\007charEnd\030\002 \002(\r\022\016\n\006author\030\003 \001(\t\022\027\n\017s" +
+      "entenceIndexes\030\004 \003(\r\022\020\n\010datetime\030\005 \001(\t\0220" +
+      "\n\006quotes\030\006 \003(\0132 .edu.stanford.nlp.pipeli" +
+      "ne.Quote\022\027\n\017authorCharBegin\030\007 \001(\r\022\025\n\raut" +
+      "horCharEnd\030\010 \001(\r\0220\n\006xmlTag\030\t \002(\0132 .edu.s" +
+      "tanford.nlp.pipeline.Token*\243\001\n\010Language\022" +
+      "\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chi",
+      "nese\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006Frenc" +
+      "h\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020Universa" +
+      "lEnglish\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSent" +
+      "iment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGAT" +
+      "IVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n" +
+      "\017STRONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelat" +
+      "ion\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILME" +
+      "NT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION" +
+      "\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPE" +
+      "NDENCE\020\006B*\n\031edu.stanford.nlp.pipelineB\rC",
+      "oreNLPProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

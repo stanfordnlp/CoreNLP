@@ -2572,7 +2572,7 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("useGEforSup")){
         useGEforSup = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useKnownLCWords")) {
-        log.info("useKnownLCWords is deprecated; see maxAdditionalKnownLCWords (true = -1, false = 0)");
+        log.info("useKnownLCWords is deprecated; see maxAdditionalKnownLCWords (true = -1, false = 0");
         maxAdditionalKnownLCWords = Boolean.parseBoolean(val) ? -1: 0;
       } else if (key.equalsIgnoreCase("useNoisyLabel")) {
         useNoisyLabel = Boolean.parseBoolean(val);
