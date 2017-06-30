@@ -22,11 +22,10 @@ import java.util.function.Consumer;
 public class EPEOutputter extends JSONOutputter {
 
 
-  private static String OUTPUT_REPRESENTATION = System.getProperty("outputRepresentation", "basic");
+  String OUTPUT_REPRESENTATION = System.getProperty("outputRepresenation", "basic");
 
   @Override
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
-    
     PrintWriter writer = new PrintWriter(IOUtils.encodedOutputStreamWriter(target, options.encoding));
     JSONWriter l0 = new JSONWriter(writer, options);
 
@@ -75,7 +74,7 @@ public class EPEOutputter extends JSONOutputter {
 
             node.set("edges", graph.getOutEdgesSorted(token).stream().map( (SemanticGraphEdge dep) -> (Consumer<Writer>) edge -> {
               edge.set("target", getNodeIndex(dep.getDependent(), maxIndex));
-              edge.set("label", dep.getRelation().toString());
+              edge.set("label", dep.getRelation().getShortName());
             }));
       } );
     } else {
