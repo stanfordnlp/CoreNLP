@@ -5,6 +5,7 @@ import java.util.function.Function;
 import edu.stanford.nlp.util.PriorityQueue;
 
 import java.util.*;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Map that is sorted by cost - keep lowest scores
@@ -28,9 +29,9 @@ public class BoundedCostOrderedMap<K,V> extends AbstractMap<K,V> {
   /** Map of keys to their values */
   Map<K,V> valueMap = new HashMap<>();
   /** Cost function on the values */
-  Function<V,Double> costFunction;
+  ToDoubleFunction<V> costFunction;
 
-  public BoundedCostOrderedMap(Function<V,Double> costFunction, int maxSize, double maxCost) {
+  public BoundedCostOrderedMap(ToDoubleFunction<V> costFunction, int maxSize, double maxCost) {
     this.costFunction = costFunction;
     this.maxSize = maxSize;
     this.maxCost = maxCost;
@@ -62,7 +63,7 @@ public class BoundedCostOrderedMap<K,V> extends AbstractMap<K,V> {
   }
 
   public double getCost(V value) {
-    return costFunction.apply(value);
+    return costFunction.applyAsDouble(value);
   }
 
   @Override

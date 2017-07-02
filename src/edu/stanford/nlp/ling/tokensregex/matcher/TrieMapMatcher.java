@@ -4,6 +4,7 @@ import edu.stanford.nlp.util.*;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 /**
  * The <code>TrieMapMatcher</code> provides functions to match against a trie.
@@ -557,7 +558,7 @@ public class TrieMapMatcher<K,V> {
     protected final int maxSize;
     protected final double maxCost;
 
-    public final Function<PartialApproxMatch<K,V>, Double> MATCH_COST_FUNCTION = in -> in.cost;
+    public final ToDoubleFunction<PartialApproxMatch<K,V>> MATCH_COST_FUNCTION = in -> in.cost;
 
     public MatchQueue(int maxSize, double maxCost) {
       this.maxSize = maxSize;
