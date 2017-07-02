@@ -17,7 +17,7 @@ import java.util.Properties;
  */
 public class TokensRegexRetokenizeDemo {
 
-  public static void runPipeline(StanfordCoreNLP pipeline, String text, PrintWriter out) {
+  private static void runPipeline(StanfordCoreNLP pipeline, String text, PrintWriter out) {
     Annotation annotation = new Annotation(text);
     pipeline.annotate(annotation);
 
