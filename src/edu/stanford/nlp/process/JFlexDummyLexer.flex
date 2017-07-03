@@ -1,34 +1,30 @@
 package edu.stanford.nlp.process;
 
-
 %%
 
 %class JFlexDummyLexer
-%standalone
 %unicode
 %int
 
 %implements edu.stanford.nlp.io.Lexer
 
 %{
+
 public void pushBack(int n) {
-yypushback(n);
+  yypushback(n);
 }
 
 public int getYYEOF() {
-return YYEOF;
+  return YYEOF;
 }
+
 %}
 
 
-SPACE = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
-SPACES = {SPACE}+
-TEXT = [^ \t\r\n\u2028\u2029\u000B\u000C\u0085]+
+SPACES = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]+
+TEXT =  [^ \t\r\n\u2028\u2029\u000B\u000C\u0085]+
 
 %%
 
 {SPACES} {}
 {TEXT}   {return ACCEPT; }
-.		{ System.err.println(yytext()); }
-
-

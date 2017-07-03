@@ -9,6 +9,7 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
+import edu.stanford.nlp.process.LexerUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -34,7 +35,7 @@ import edu.stanford.nlp.util.logging.Redwood;
    * LexedTokenFactory, and can specify the treatment of tokens by boolean
    * options given in a comma separated String
    * (e.g., "invertible,normalizeParentheses=true").
-   * If the String is <code>null</code> or empty, you get the traditional
+   * If the String is {@code null} or empty, you get the traditional
    * PTB3 normalization behaviour (i.e., you get ptb3Escaping=false).  If you
    * want no normalization, then you should pass in the String
    * "ptb3Escaping=false".  The known option names are:
@@ -267,30 +268,6 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
 
-  /** Removes soft hyphens are used to indicate possible line breaks in typesetting.
-   *  (Note: implementing it this way runs much faster than as a regex replaceAll()!
-   */
-  private static String removeSoftHyphens(String in) {
-    // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
-    if (in.indexOf('\u00AD') < 0) {
-      // shortcut doing work
-      return in;
-    }
-    int length = in.length();
-    StringBuilder out = new StringBuilder(length - 1);
-    for (int i = 0; i < length; i++) {
-      char ch = in.charAt(i);
-      if (ch != '\u00AD') {
-        out.append(ch);
-      }
-    }
-    if (out.length() == 0) {
-      out.append('-'); // don't create an empty token
-    }
-    return out.toString();
-  }
-
-
   private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
   private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
 
@@ -398,7 +375,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
   private Object getNext(String txt, String originalText, String annotation) {
-    txt = removeSoftHyphens(txt);
+    txt = LexerUtils.removeSoftHyphens(txt);
     Label w = (Label) tokenFactory.makeToken(txt, yychar, yylength());
     if (invertible || annotation != null) {
       CoreLabel word = (CoreLabel) w;
@@ -421,26 +398,6 @@ import edu.stanford.nlp.util.logging.Redwood;
     final String txt = yytext();
     return normalizeAmpersandEntity ?
       getNext(normalizeAmp(txt), txt) : getNext();
-  }
-
-  /* CP1252: dagger, double dagger, per mille, bullet, small tilde, trademark */
-  private String processCp1252misc(String arg) {
-    switch (arg) {
-    case "\u0086":
-      return "\u2020";
-    case "\u0087":
-      return "\u2021";
-    case "\u0089":
-      return "\u2030";
-    case "\u0095":
-      return "\u2022";
-    case "\u0098":
-      return "\u02DC";
-    case "\u0099":
-      return "\u2122";
-    default:
-      throw new IllegalArgumentException("Bad process cp1252");
-    }
   }
 
 %}
@@ -633,7 +590,6 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 
 %%
 
-cannot			{ yypushback(3) ; return getNext(); }
 {SGML}			{ if (!noSGML) {
              	 return getNext();
 					    }
@@ -739,7 +695,7 @@ cannot			{ yypushback(3) ; return getNext(); }
 			}
 \x7F		{ if (invertible) {
                      prevWordAfter.append(yytext());
-                  } 
+                  }
                 }
 {LESSTHAN}      { return getNext("<", yytext()); }
 {GREATERTHAN}   { return getNext(">", yytext()); }
@@ -816,7 +772,7 @@ cannot			{ yypushback(3) ; return getNext(); }
 {FAKEDUCKFEET} |
 {MISCSYMBOL}	{ return getNext(); }
 {CP1252_MISC_SYMBOL}  { String tok = yytext();
-                        String norm = processCp1252misc(tok);
+                        String norm = LexerUtils.processCp1252misc(tok);
                         if (DEBUG) { LOGGER.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
                         return getNext(norm, tok);
                       }
