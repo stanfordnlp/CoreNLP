@@ -1241,6 +1241,9 @@ public class SemanticGraphUtils  {
         if (visitedNodes.contains(dep)) {
           return false;
         }
+        if (dep.copyCount() > 0) {
+          return false;
+        }
         queue.add(dep);
       }
     }

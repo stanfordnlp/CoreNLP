@@ -339,7 +339,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (keySet.contains(CoNLLUMisc.class)) { builder.setConllUMisc(getAndRegister(coreLabel, keysToSerialize, CoNLLUMisc.class));}
     if (keySet.contains(CoarseTagAnnotation.class)) { builder.setCoarseTag(getAndRegister(coreLabel, keysToSerialize, CoarseTagAnnotation.class));}
-    if (keySet.contains(CoNLLUSecondaryDepsAnnotation.class)) { builder.setConllUSecondaryDeps(toMapIntStringProto(getAndRegister(coreLabel, keysToSerialize, CoNLLUSecondaryDepsAnnotation.class)));}
+    if (keySet.contains(CoNLLUSecondaryDepsAnnotation.class)) { builder.setConllUSecondaryDeps(toMapStringStringProto(getAndRegister(coreLabel, keysToSerialize, CoNLLUSecondaryDepsAnnotation.class)));}
 
         // Non-default annotators
     if (keySet.contains(GenderAnnotation.class)) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }

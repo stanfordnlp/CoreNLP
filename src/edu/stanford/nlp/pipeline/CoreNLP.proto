@@ -151,7 +151,7 @@ message Token {
   optional string coarseTag         = 33; //  The coarse POS tag (used to store the UPOS tag)
   optional Span conllUTokenSpan     = 34;
   optional string conllUMisc        = 35;
-  optional MapIntString conllUSecondaryDeps = 36;
+  optional MapStringString conllUSecondaryDeps = 36;
   optional string   wikipediaEntity = 37;
 
 

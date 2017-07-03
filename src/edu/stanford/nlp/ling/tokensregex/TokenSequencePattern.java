@@ -1,48 +1,49 @@
 package edu.stanford.nlp.ling.tokensregex;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser;
 import edu.stanford.nlp.util.*;
 
 /**
- * Token Sequence Pattern for regular expressions over sequences of tokens (each represented as a <code>CoreMap</code>).
+ * Token Sequence Pattern for regular expressions over sequences of tokens (each represented as a {@code CoreMap}).
  * Sequences over tokens can be matched like strings.
  * <p>
  * To use:
  * </p>
- * <pre><code>
+ * <pre>{@code
  *   TokenSequencePattern p = TokenSequencePattern.compile("....");
  *   TokenSequenceMatcher m = p.getMatcher(tokens);
  *   while (m.find()) ....
- * </code></pre>
+ * }</pre>
  *
  * <p>
  * Supports the following:
  * <ul>
- *  <li>Concatenation: <code>X Y</code></li>
- *  <li>Or: <code>X | Y</code></li>
+ *  <li>Concatenation: {@code X Y}</li>
+ *  <li>Or: {@code X | Y}</li>
  *  <li>And: {@code X & Y}</li>
  *  <li>Groups:
  *     <ul>
- *     <li>capturing: <code>(X)</code> (with numeric group id)</li>
- *     <li>capturing: <code>(?$var X)</code> (with group name "$var")</li>
- *     <li>noncapturing: <code>(?:X)</code></li>
+ *     <li>capturing: {@code (X)} (with numeric group id)</li>
+ *     <li>capturing: {@code (?$var X)} (with group name "$var")</li>
+ *     <li>noncapturing: {@code (?:X)}</li>
  *     </ul>
  *  Capturing groups can be retrieved with group id or group variable, as matched string
- *     (<code>m.group()</code>) or list of tokens (<code>m.groupNodes()</code>).
+ *     ({@code m.group()}) or list of tokens ({@code m.groupNodes()}).
  *  <ul>
- *     <li>To retrieve group using id: <code>m.group(id)</code> or <code>m.groupNodes(id)</code>
+ *     <li>To retrieve group using id: {@code m.group(id)} or {@code m.groupNodes(id)}
  *     <br> NOTE: Capturing groups are indexed from left to right, starting at one.  Group zero is the entire matched sequence.
  *     </li>
- *     <li>To retrieve group using bound variable name: <code>m.group("$var")</code> or <code>m.groupNodes("$var")</code>
+ *     <li>To retrieve group using bound variable name: {@code m.group("$var")} or {@code m.groupNodes("$var")}
  *     </li>
  *  </ul>
  *  See {@link SequenceMatchResult} for more accessor functions to retrieve matches.
  * </li>
- * <li>Greedy Quantifiers:  <code>X+, X?, X*, X{n,m}, X{n}, X{n,}</code></li>
- * <li>Reluctant Quantifiers: <code>X+?, X??, X*?, X{n,m}?, X{n}?, X{n,}?</code></li>
- * <li>Back references: <code>\captureid</code> </li>
+ * <li>Greedy Quantifiers:  {@code X+, X?, X*, X{n,m}, X{n}, X{n,}}</li>
+ * <li>Reluctant Quantifiers: {@code X+?, X??, X*?, X{n,m}?, X{n}?, X{n,}?}</li>
+ * <li>Back references: {@code \captureid} </li>
  * <li>Value binding for groups: {@code [pattern] => [value]}.
  *   Value for matched expression can be accessed using {@code m.groupValue()}
  *   <br></br>Example: {@code ( one => 1 | two => 2 | three => 3 | ...)}
@@ -50,50 +51,50 @@ import edu.stanford.nlp.util.*;
  * </ul>
  *
  * <p>
- * Individual tokens are marked by <code>"[" TOKEN_EXPR "]" </code>
- * <br>Possible <code>TOKEN_EXPR</code>:
+ * Individual tokens are marked by {@code "[" TOKEN_EXPR "]" }
+ * <br>Possible {@code TOKEN_EXPR}:
  * </p>
  * <ul>
  * <li> All specified token attributes match:
  * <br> For Strings:
- *     <code> { lemma:/.../; tag:"NNP" } </code> = attributes that need to all match.
+ *     {@code { lemma:/.../; tag:"NNP" } } = attributes that need to all match.
  *     If only one attribute, the {} can be dropped.
  * <br> See {@link edu.stanford.nlp.ling.AnnotationLookup AnnotationLookup} for a list of predefined token attribute names.
  * <br> Additional attributes can be bound using the environment (see below).
- * <br> NOTE: <code>/.../</code> used for regular expressions,
- *            <code>"..."</code> for exact string matches
+ * <br> NOTE: {@code /.../} used for regular expressions,
+ *            {@code "..."} for exact string matches
  * <br> For Numbers:
- *      <code>{ word&gt;=2 }</code>
+ *      {@code { word>=2 }}
  * <br> NOTE: Relation can be {@code ">=", "<=", ">", "<",} or {@code "=="}
  * <br> Others:
- *      <code>{ word::IS_NUM } , { word::IS_NIL } </code> or
- *      <code>{ word::NOT_EXISTS }, { word::NOT_NIL } </code> or <code> { word::EXISTS } </code>
+ *      {@code { word::IS_NUM } , { word::IS_NIL } } or
+ *      {@code { word::NOT_EXISTS }, { word::NOT_NIL } } or {@code { word::EXISTS } }
  * </li>
  * <li>Short hand for just word/text match:
- *     <code> /.../ </code>  or  <code>"..." </code>
+ *     {@code /.../ }  or  {@code "..." }
  * </li>
  * <li>
  *  Negation:
- *     <code> !{...} </code>
+ *     {@code !{...} }
  * </li>
  * <li>
  *  Conjunction or Disjunction:
- *     <code> {...} &amp; {...} </code>   or  <code> {...} | {...} </code>
+ *     {@code {...} & {...} }   or  {@code {...} | {...} }
  * </li>
  * </ul>
  *
  * <p>
  * Special tokens:
- *   Any token: <code>[]</code>
+ *   Any token: {@code []}
  * </p>
  *
  * <p>
  * String pattern match across multiple tokens:
- *   <code>(?m){min,max} /pattern/</code>
+ *   {@code (?m){min,max} /pattern/}
  * </p>
  *
  * <p>
- * Special expressions: indicated by double braces: <code>{{ expr }}</code>
+ * Special expressions: indicated by double braces: {@code {{ expr }}}
  *   <br> See {@link edu.stanford.nlp.ling.tokensregex.types.Expressions} for syntax.
  * </p>
  *
@@ -106,19 +107,19 @@ import edu.stanford.nlp.util.*;
  *    {@code env.bind("numtype", CoreAnnotations.NumericTypeAnnotation.class);}
  * </li>
  * <li> Bind patterns / strings for compiling patterns
- *    <pre><code>
+ *    <pre>{@code
  *    // Bind string for later compilation using: compile("/it/ /was/ $RELDAY");
  *    env.bind("$RELDAY", "/today|yesterday|tomorrow|tonight|tonite/");
  *    // Bind pre-compiled patter for later compilation using: compile("/it/ /was/ $RELDAY");
  *    env.bind("$RELDAY", TokenSequencePattern.compile(env, "/today|yesterday|tomorrow|tonight|tonite/"));
- *    </code></pre>
+ *    }</pre>
  * </li>
  * <li> Bind custom node pattern functions (currently no arguments are supported)
- *    <pre><code>
+ *    <pre>{@code
  *    // Bind node pattern so we can do patterns like: compile("... temporal::IS_TIMEX_DATE ...");
  *    //   (TimexTypeMatchNodePattern is a NodePattern that implements some custom logic)
  *    env.bind("::IS_TIMEX_DATE", new TimexTypeMatchNodePattern(SUTime.TimexType.DATE));
- *   </code></pre>
+ *   }</pre>
  * </li>
  * </ol>
  *
@@ -128,9 +129,9 @@ import edu.stanford.nlp.util.*;
  * <ul>
  * <li> {@code pattern ==> action} </li>
  * <li> Supported action:
- *    <code> &amp;annotate( { ner="DATE" } ) </code> </li>
+ *    {@code &annotate( { ner="DATE" } ) } </li>
  * <li> Not applied automatically, associated with a pattern.</li>
- * <li> To apply, call <code>pattern.getAction().apply(match, groupid)</code></li>
+ * <li> To apply, call {@code pattern.getAction().apply(match, groupid)}</li>
  * </ul>
  *
  * @author Angel Chang
@@ -235,8 +236,7 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
    * @param nodeSequencePattern A sequence pattern expression (before translation into a NFA)
    * @return Compiled TokenSequencePattern
    */
-  public static TokenSequencePattern compile(SequencePattern.PatternExpr nodeSequencePattern)
-  {
+  public static TokenSequencePattern compile(SequencePattern.PatternExpr nodeSequencePattern) {
     return new TokenSequencePattern(null, nodeSequencePattern);
   }
 
@@ -275,26 +275,38 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
 
   /**
    * Create a multi-pattern matcher for matching across multiple TokensRegex patterns.
+   *
    * @param patterns Collection of input patterns
-   * @return a MultiPatternMatcher
+   * @return A MultiPatternMatcher
    */
   public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(Collection<TokenSequencePattern> patterns) {
     return new MultiPatternMatcher<>(
-            new MultiPatternMatcher.BasicSequencePatternTrigger<>(
-                    new CoreMapNodePatternTrigger(patterns)
-            ), patterns);
+            new MultiPatternMatcher.BasicSequencePatternTrigger<>(new CoreMapNodePatternTrigger(patterns)),
+            patterns);
   }
 
   /**
    * Create a multi-pattern matcher for matching across multiple TokensRegex patterns.
-   * @param patterns input patterns
-   * @return a MultiPatternMatcher
+   *
+   * @param patterns Input patterns
+   * @return A MultiPatternMatcher
    */
   public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(TokenSequencePattern... patterns) {
     return new MultiPatternMatcher<>(
-            new MultiPatternMatcher.BasicSequencePatternTrigger<>(
-                    new CoreMapNodePatternTrigger(patterns)
-            ), patterns);
+            new MultiPatternMatcher.BasicSequencePatternTrigger<>(new CoreMapNodePatternTrigger(patterns)),
+            patterns);
+  }
+
+  /**
+   * Create a multi-pattern matcher for matching across multiple TokensRegex patterns from Strings.
+   *
+   * @param patterns Input patterns in String format
+   * @return A MultiPatternMatcher
+   */
+  public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(String... patterns) {
+    List<TokenSequencePattern> tokenSequencePatterns = Arrays.stream(patterns).map(TokenSequencePattern::compile)
+            .collect(Collectors.toList());
+    return TokenSequencePattern.getMultiPatternMatcher(tokenSequencePatterns);
   }
 
 }

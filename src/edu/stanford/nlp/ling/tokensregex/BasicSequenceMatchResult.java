@@ -13,8 +13,8 @@ import java.util.List;
 *
 * @author Angel Chang
 */
-public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
-{
+public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T> {
+
   SequencePattern<T> pattern;     // Pattern we matched against
   List<? extends T> elements;      // Original sequence
   MatchedGroup[] matchedGroups;    // Groups that we matched
@@ -182,7 +182,7 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
       // return a new list so the resulting object is serializable
       return new ArrayList<>(elements.subList(start(group), end(group)));
     }
-    if (matchedGroups[group] != null) {
+    if (matchedGroups.length > group && matchedGroups[group] != null) {
       // return a new list so the resulting object is serializable
       return new ArrayList<>(elements.subList(matchedGroups[group].matchBegin, matchedGroups[group].matchEnd));
     } else {

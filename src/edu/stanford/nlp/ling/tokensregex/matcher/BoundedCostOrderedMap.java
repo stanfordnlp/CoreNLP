@@ -1,36 +1,42 @@
 package edu.stanford.nlp.ling.tokensregex.matcher;
 
+import java.util.*;
+import java.util.function.ToDoubleFunction;
+
 import edu.stanford.nlp.util.BinaryHeapPriorityQueue;
-import java.util.function.Function;
 import edu.stanford.nlp.util.PriorityQueue;
 
-import java.util.*;
-
 /**
- * Map that is sorted by cost - keep lowest scores
- *  When deciding what item to keep with the same cost, ties are arbitrarily broken
+ * Map that is sorted by cost. Keeps lowest scores.
+ * When deciding what item to keep with the same cost, ties are arbitrarily broken.
+ *
  * @author Angel Chang
  */
 public class BoundedCostOrderedMap<K,V> extends AbstractMap<K,V> {
+
   /**
    * Limit on the size of the map
    */
-  final int maxSize;
+  private final int maxSize;
+
   /**
    * Limit on the maximum allowed cost
    */
-  final double maxCost;
+  private final double maxCost;
+
   /**
    * Priority queue on the keys - note that the priority queue only orders on the cost,
    * We can't control the ordering of keys with the same cost
    */
-  PriorityQueue<K> priorityQueue = new BinaryHeapPriorityQueue<>();
-  /** Map of keys to their values */
-  Map<K,V> valueMap = new HashMap<>();
-  /** Cost function on the values */
-  Function<V,Double> costFunction;
+  private PriorityQueue<K> priorityQueue = new BinaryHeapPriorityQueue<>();
 
-  public BoundedCostOrderedMap(Function<V,Double> costFunction, int maxSize, double maxCost) {
+  /** Map of keys to their values */
+  private Map<K,V> valueMap = new HashMap<>();
+
+  /** Cost function on the values */
+  private ToDoubleFunction<V> costFunction;
+
+  public BoundedCostOrderedMap(ToDoubleFunction<V> costFunction, int maxSize, double maxCost) {
     this.costFunction = costFunction;
     this.maxSize = maxSize;
     this.maxCost = maxCost;
@@ -62,7 +68,7 @@ public class BoundedCostOrderedMap<K,V> extends AbstractMap<K,V> {
   }
 
   public double getCost(V value) {
-    return costFunction.apply(value);
+    return costFunction.applyAsDouble(value);
   }
 
   @Override
@@ -86,6 +92,7 @@ public class BoundedCostOrderedMap<K,V> extends AbstractMap<K,V> {
     return null;
   }
 
+  @SuppressWarnings("SuspiciousMethodCalls")
   @Override
   public V remove(Object key) {
     priorityQueue.remove(key);
@@ -94,8 +101,8 @@ public class BoundedCostOrderedMap<K,V> extends AbstractMap<K,V> {
 
   @Override
   public void putAll(Map<? extends K, ? extends V> m) {
-    for (K key:m.keySet()) {
-      put(key, m.get(key));
+    for (Entry<? extends K, ? extends V> entry : m.entrySet()) {
+      put(entry.getKey(), entry.getValue());
     }
   }
 
@@ -130,5 +137,7 @@ public class BoundedCostOrderedMap<K,V> extends AbstractMap<K,V> {
   }
 
   public double topCost() { return priorityQueue.getPriority(); }
+
   public K topKey() { return priorityQueue.getFirst(); }
+
 }

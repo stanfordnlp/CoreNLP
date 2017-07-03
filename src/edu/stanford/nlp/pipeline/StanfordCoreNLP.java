@@ -1207,6 +1207,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
           String encoding = properties.getProperty("encoding", "UTF-8");
           String text = IOUtils.slurpFile(file.getAbsoluteFile(), encoding);
           annotation = new Annotation(text);
+          annotation.set(CoreAnnotations.DocIDAnnotation.class, file.getName());
         }
 
         Timing timing = new Timing();

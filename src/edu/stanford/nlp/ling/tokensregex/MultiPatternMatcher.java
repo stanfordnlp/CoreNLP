@@ -208,7 +208,8 @@ public class MultiPatternMatcher<T> {
     this.matchWithResult = matchWithResult;
   }
 
-/** Interfaces for optimizing application of many SequencePatterns over a particular sequence */
+
+  /* Interfaces for optimizing application of many SequencePatterns over a particular sequence */
 
   /**
    * A function which returns a collections of patterns that may match when
