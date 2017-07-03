@@ -517,9 +517,9 @@ public class CoreAnnotations {
   /**
    * CoNLL-U dep parsing - List of secondary dependencies
    */
-  public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<HashMap<String,String>> {
+  public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<HashMap<Integer,String>> {
     @Override
-    public Class<HashMap<String,String>> getType() {
+    public Class<HashMap<Integer,String>> getType() {
       return ErasureUtils.uncheckedCast(Pair.class);
     }
   }

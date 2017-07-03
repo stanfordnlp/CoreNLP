@@ -45,15 +45,6 @@ public final class SloppyMath  {
     return round(x * power) / power;
   }
 
-
-  /* --- extra min and max methods; see also ArrayMath for ones that operate on arrays and varargs */
-
-  /* Note: Math.max(a, b) and Math.min(a, b) do no extra checks when
-   * a and b are int or long; they are simply {@code a >= b ? a : b},
-   * so you can just call those methods and no extra methods for these
-   * are needed here.
-   */
-
   /**
    * max() that works on three integers.  Like many of the other max() functions in this class,
    * doesn't perform special checks like NaN or -0.0f to save time.
@@ -81,6 +72,21 @@ public final class SloppyMath  {
     }
 
     return max;
+  }
+
+  /**
+   * Returns the greater of two {@code int} values.  That
+   * is, the result is the argument closer to positive infinity. If
+   * the arguments have the same value, the result is that same
+   * value.  Does none of the special checks for NaN or -0.0f that
+   * {@code Math.max} does.
+   *
+   * @param a an argument.
+   * @param b another argument.
+   * @return the larger of {@code a} and {@code b}.
+   */
+  public static int max(int a, int b) {
+    return (a >= b) ? a : b;
   }
 
   /**
@@ -235,7 +241,7 @@ public final class SloppyMath  {
   }
 
   /**
-   * Convenience method for log to a different base.
+   * Convenience method for log to a different base
    */
   public static double log(double num, double base) {
     return Math.log(num)/Math.log(base);
@@ -693,7 +699,7 @@ public final class SloppyMath  {
   /**
    * Taken from http://nerds-central.blogspot.com/2011/05/high-speed-parse-double-for-jvm.html
    */
-  private static final double[] exps = new double[617];
+  private final static double exps[] = new double[617];
   static {
     for(int i=-308;i<308;++i) {
       String toParse = "1.0e" + i;

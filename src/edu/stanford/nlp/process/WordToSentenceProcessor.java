@@ -79,8 +79,8 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
    */
   public static final String DEFAULT_BOUNDARY_FOLLOWERS_REGEX = "[\\p{Pe}\\p{Pf}\"'>＂＇＞]|''|-R[CRS]B-";
 
-  public static final Set<String> DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD = Collections.unmodifiableSet(
-          Generics.newHashSet(Arrays.asList(WhitespaceLexer.NEWLINE, PTBTokenizer.getNewlineToken())));
+  public static final Set<String> DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD = Collections.unmodifiableSet(Generics.newHashSet(
+          Arrays.asList(WhitespaceLexer.NEWLINE, PTBTokenizer.getNewlineToken())));
 
   /** Turning this on is good for debugging sentence splitting. */
   private static final boolean DEBUG = false;
@@ -293,7 +293,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       }
 
       if ( ! lastSentenceEndForced && lastSentence != null && currentSentence.isEmpty() &&
-              ! lastTokenWasNewline && sentenceBoundaryFollowersPattern.matcher(word).matches()) {
+              sentenceBoundaryFollowersPattern.matcher(word).matches()) {
         if ( ! discardToken) {
           lastSentence.add(o);
         }
@@ -353,10 +353,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
           if (DEBUG) { log.info("Word is " + word + "; annotated to be the end of a sentence; " + debugText); }
         } else {
           if ( ! discardToken) currentSentence.add(o);
-          // chris added this next test in 2017; a bit weird, but KBP setup doesn't have newline in sentenceBoundary patterns, just in toDiscard
-          if (AbstractTokenizer.NEWLINE_TOKEN.equals(word)) {
-            lastTokenWasNewline = true;
-          }
           if (DEBUG) { log.info("Word is " + word + "; " + debugText); }
         }
       }

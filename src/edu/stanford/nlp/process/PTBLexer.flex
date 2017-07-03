@@ -444,8 +444,6 @@ import edu.stanford.nlp.util.logging.Redwood;
    * positions as 8 bit chars inside the iso-8859 control region.
    *
    * ellipsis   85      0133    2026    8230   COMPLICATED!! Also a newline character for IBM 390; we let ellipsis win
-   * dagger     86    2020
-   * double dagger 87 2021
    * single quote curly starting        91      0145    2018    8216
    * single quote curly ending  92      0146    2019    8217
    * double quote curly starting        93      0147    201C    8220
@@ -481,8 +479,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   // 82,84,91,92,93,94 aren't valid unicode points, but sometimes they show
   // up from cp1252 and need to be translated
-  private static final Pattern leftSingleQuote = Pattern.compile("[\u0082\u008B\u0091\u2018\u201A\u201B\u2039]");
-  private static final Pattern rightSingleQuote = Pattern.compile("[\u0092\u009B\u2019\u203A]");
+  private static final Pattern leftSingleQuote = Pattern.compile("[\u0082\u0091\u2018\u201A\u201B\u2039]");
+  private static final Pattern rightSingleQuote = Pattern.compile("[\u0092\u2019\u203A]");
   private static final Pattern leftDoubleQuote = Pattern.compile("[\u0084\u0093\u201C\u201E\u00AB]|[\u0091\u2018]'");
   private static final Pattern rightDoubleQuote = Pattern.compile("[\u0094\u201D\u00BB]|[\u0092\u2019]'");
 
@@ -504,7 +502,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     return s1;
   }
 
-  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u008B\u0091\u2018\u0092\u2019\u009B\u201A\u201B\u2039\u203A']");
+  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
   private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
 
   private static String asciiQuotes(String in) {
@@ -518,8 +516,6 @@ import edu.stanford.nlp.util.logging.Redwood;
   private static final Pattern unicodeRightSingleQuote = Pattern.compile("\u0092");
   private static final Pattern unicodeLeftDoubleQuote = Pattern.compile("\u0093");
   private static final Pattern unicodeRightDoubleQuote = Pattern.compile("\u0094");
-  private static final Pattern leftDuck = Pattern.compile("\u008B");
-  private static final Pattern rightDuck = Pattern.compile("\u009B");
 
   private static String unicodeQuotes(String in, boolean probablyLeft) {
     String s1 = in;
@@ -534,8 +530,6 @@ import edu.stanford.nlp.util.logging.Redwood;
     s1 = unicodeRightSingleQuote.matcher(s1).replaceAll("\u2019");
     s1 = unicodeLeftDoubleQuote.matcher(s1).replaceAll("\u201c");
     s1 = unicodeRightDoubleQuote.matcher(s1).replaceAll("\u201d");
-    s1 = leftDuck.matcher(s1).replaceAll("\u2039");
-    s1 = rightDuck.matcher(s1).replaceAll("\u203A");
     return s1;
   }
 
@@ -625,26 +619,6 @@ import edu.stanford.nlp.util.logging.Redwood;
       return getNext(normalizeAmp(txt), txt);
     } else {
       return getNext();
-    }
-  }
-
-  /* CP1252: dagger, double dagger, per mille, bullet, small tilde, trademark */
-  private String processCp1252misc(String arg) {
-    switch (arg) {
-    case "\u0086":
-      return "\u2020";
-    case "\u0087":
-      return "\u2021";
-    case "\u0089":
-      return "\u2030";
-    case "\u0095":
-      return "\u2022";
-    case "\u0098":
-      return "\u02DC";
-    case "\u0099":
-      return "\u2122";
-    default:
-      throw new IllegalArgumentException("Bad process cp1252");
     }
   }
 
@@ -742,8 +716,8 @@ SUBSUPNUM = [\u207A\u207B\u208A\u208B]?([\u2070\u00B9\u00B2\u00B3\u2074-\u2079]+
 FRAC = ({DIGIT}{1,4}[- \u00A0])?{DIGIT}{1,4}(\\?\/|\u2044){DIGIT}{1,4}
 FRAC2 = [\u00BC\u00BD\u00BE\u2153-\u215E]
 DOLSIGN = ([A-Z]*\$|#)
-/* These are cent and pound; currency, yen; CP1252 euro, ECU, new shekel, euro; rupee ... Lira */
-DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AA\u20AC\u20B9\u060B\u0E3F\u20A4\uFFE0\uFFE1\uFFE5\uFFE6]
+/* These are cent and pound sign, euro and euro, and Yen, Lira */
+DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20B9\u20AC\u060B\u0E3F\u20A4\uFFE0\uFFE1\uFFE5\uFFE6]
 /* not used DOLLAR      {DOLSIGN}[ \t]*{NUMBER}  */
 /* |\( ?{NUMBER} ?\))    # is for pound signs */
 /* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
@@ -800,8 +774,8 @@ SREDAUX = n{APOSETCETERA}t
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
 APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
-/* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
-FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}\[\]]+[^ \t\n\f\r\"\'<>|.!?(){},;:&\[\]-]
+/* Some Wired URLs end in + or = so omit that too. */
+FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"\'<>|.!?(){},;:&\[\]-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
@@ -898,8 +872,7 @@ INSENTP = [,;:\u3001]
 QUOTES = {APOS}|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;|[`'\u0091\u0092\u2018\u2019]'
 /* Cap'n for captain, c'est for french */
-TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
-SWEARING = f[-*][-c*]k(in[g']?|e[dr])?|(bull|dip)?sh[-\*]t(ty|e|box)?|c[-*]nts?|p[-*]ss(e[sd]|ing)?|c[-*]ck|b[-*]tch|t[-*]ts|tw[-*]ts?|cr[-*]p|d[-*]cks?|b[-*][-*s]t[-*]rds?|pr[-*]ck|d[-*]mn
+TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|f[-*][-c*]k(in[g']|e[dr])?|sh[-\*]t(ty)?|c[-*]nts?
 TBSPEC2 = {APOS}[0-9][0-9]
 BANGWORDS = (E|Yahoo|Jeopardy)\!
 BANGMAGAZINES = OK\!
@@ -922,12 +895,9 @@ ASSIMILATIONS3 = cannot|'twas|dunno
 /* "nno" is a remnant after pushing back from dunno in ASSIMILATIONS3 */
 ASSIMILATIONS2 = {APOS}tis|gonna|gotta|lemme|gimme|wanna|nno
 
-/* CP1252: dagger, double dagger, per mille, bullet, small tilde, trademark */
-CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
-
 /* CP1252 letters */
 /* 83 = f with hook --> U+0192; 8a = S with Caron --> U+0160; 9c = ligature oe --> U+0153; */
-/* CP1252LETTER = [\u0083\u008A\u009C] */
+/* CP1252LETTER = [\u0083\u008A\u009c] */
 
 %%
 
@@ -1064,14 +1034,6 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                   return getNext(norm, txt);
                 }
 {TBSPEC}        { return getNormalizedAmpNext(); }
-{SWEARING}      { String txt = yytext();
-                  String normTok = txt;
-                  if (escapeForwardSlashAsterisk) {
-                    normTok = delimit(normTok, '*');
-                  }
-                  if (DEBUG) { logger.info("Used {SWEARING} to recognize " + txt + " as " + normTok); }
-                  return getNext(normTok, txt);
-                }
 {BANGWORDS}     { return getNext(); }
 <YyNotTokenizePerLine>{BANGMAGAZINES}/{SPACENL}magazine   { return getNext(); }
 <YyTokenizePerLine>{BANGMAGAZINES}/{SPACE}magazine   { return getNext(); }
@@ -1159,7 +1121,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
-\x7F                    { if (invertible) {
+\x7f                    { if (invertible) {
                             prevWordAfter.append(yytext());
                         } }
 {LESSTHAN}              { return getNext("<", yytext()); }
@@ -1332,11 +1294,8 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                 }
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
-{CP1252_MISC_SYMBOL}  { String tok = yytext();
-                        String norm = processCp1252misc(tok);
-                        if (DEBUG) { logger.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
-                        return getNext(norm, tok);
-                      }
+\u0095          { return getNext("\u2022", yytext()); } /* cp1252 bullet mapped to unicode */
+\u0099          { return getNext("\u2122", yytext()); } /* cp1252 TM sign mapped to unicode */
 \0|{SPACES}|[\u200B\u200E-\u200F\uFEFF] { if (invertible) {
                      prevWordAfter.append(yytext());
                   }

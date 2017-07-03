@@ -56,20 +56,13 @@ public class TokensRegexDemo {
     out.println(annotation.toShorterString());
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
-    int i = 0;
     for (CoreMap sentence : sentences) {
-      out.println("Sentence #" + ++i);
-      for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-        out.println("  Token: " + "word="+ token.get(CoreAnnotations.TextAnnotation.class) + ",  pos=" +
-                token.get(CoreAnnotations.PartOfSpeechAnnotation.class) + ", ne=" + token.get(CoreAnnotations.NamedEntityTagAnnotation.class));
-      }
       List<MatchedExpression> matchedExpressions = extractor.extractExpressions(sentence);
-      for (MatchedExpression matched : matchedExpressions) {
+      for (MatchedExpression matched:matchedExpressions) {
         // Print out matched text and value
         out.println("Matched expression: " + matched.getText() + " with value " + matched.getValue());
         // Print out token information
         CoreMap cm = matched.getAnnotation();
-
         for (CoreLabel token : cm.get(CoreAnnotations.TokensAnnotation.class)) {
           String word = token.get(CoreAnnotations.TextAnnotation.class);
           String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);

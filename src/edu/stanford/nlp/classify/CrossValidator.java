@@ -6,7 +6,6 @@ import java.util.function.Function;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.function.ToDoubleFunction;
 
 /**
  * This class is meant to simplify performing cross validation of
@@ -48,11 +47,11 @@ public class CrossValidator<L, F> {
    * The input triple contains, in order, the train set, the test set, and the saved state.
    * You don't have to use the saved state if you don't want to.
    */
-  public double computeAverage (ToDoubleFunction<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>> function) {
+  public double computeAverage (Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>,Double> function) {
     double sum = 0;
     Iterator<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>> foldIt = iterator();
     while (foldIt.hasNext()) {
-      sum += function.applyAsDouble(foldIt.next());
+      sum += function.apply(foldIt.next());
     }
     return sum / kFold;
   }

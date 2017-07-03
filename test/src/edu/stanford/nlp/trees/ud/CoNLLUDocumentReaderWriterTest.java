@@ -45,19 +45,6 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
             "9     magazines  magazine   NOUN    NNS    _    5   conj    2:dobj|4:dobj|5:conj   _\n" +
             "10    .          .          PUNCT   .      _    2   punct   2:punct               _\n\n";
 
-    private static String EXTRA_DEPS_TEST_EMPTY_NODEINPUT =
-            "1     They       They       PRON    PRP    _    2   nsubj   2:nsubj|2.1:nsubj|2.2:nsubj         _\n" +
-            "2     buy        buy        VERB    VBP    _    0   root    0:root               _\n" +
-            "2.1     buy        buy        VERB    VBP    _    _   _    2:conj:and               _\n" +
-            "2.2     buy        buy        VERB    VBP    _    _   _    2:conj:and               _\n" +
-            "3     books      book       NOUN    NNS    _    2   dobj    2:dobj          _\n" +
-            "4     ,          ,          PUNCT   ,      _    3   punct   3:punct               _\n" +
-            "5     newspapers newspaper  NOUN    NNS    _    3   conj    2.1:dobj|3:conj   _\n" +
-            "6     and        and        CONJ    CC     _    3   cc      3:cc               _\n" +
-            "7     magazines  magazine   NOUN    NNS    _    3   conj    2.2:dobj|3:conj   _\n" +
-            "8    .          .          PUNCT   .      _    2   punct   2:punct               _\n\n";
-
-
 
     public void testMultiWords() {
         CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
@@ -142,7 +129,6 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
         testSingleReadAndWrite(COMMENT_TEST_INPUT);
         testSingleReadAndWrite(EXTRA_DEPS_TEST_INPUT);
         testSingleReadAndWrite(MULTIWORD_TEST_INPUT);
-        testSingleReadAndWrite(EXTRA_DEPS_TEST_EMPTY_NODEINPUT);
     }
 
 }

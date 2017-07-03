@@ -11,7 +11,6 @@ import java.io.*;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
 import java.util.regex.Pattern;
 
 
@@ -266,7 +265,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     useSigmoid = false;
 
     final CrossValidator<L, F> crossValidator = new CrossValidator<>(dataset, numFolds);
-    final ToDoubleFunction<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>> score =
+    final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> score =
         fold -> {
           GeneralDataset<L, F> trainSet = fold.first();
           GeneralDataset<L, F> devSet = fold.second();

@@ -215,7 +215,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     if (reln == null) {
       // TODO this breaks the hierarchical structure of the classes,
       //      but it makes English relations that much likelier to work.
-      reln = UniversalEnglishGrammaticalRelations.valueOf(s);
+      reln = EnglishGrammaticalRelations.valueOf(s);
     }
     if (reln == null) {
       // the block below fails when 'specific' includes underscores.
@@ -227,8 +227,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       */
       String name;
       String specific;
-      char separator = language == Language.UniversalEnglish ? ':' : '_';
-      int underscorePosition = s.indexOf(separator);
+      int underscorePosition = s.indexOf('_');
       if (underscorePosition > 0) {
         name = s.substring(0, underscorePosition);
         specific = s.substring(underscorePosition + 1);

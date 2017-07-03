@@ -670,7 +670,6 @@ public class PTBTokenizerTest {
           "``There's a saying nowadays,'' he said. ```The more you owe, the longer you live.' It means the mafia " +
                   "won't come until we have money.''\n",
           "\"Whereas strategic considerations have to be based on 'real- politick' and harsh facts,\" Saleem said.",
-          "F*ck, cr-p, I met Uchenna Nnobuko yesterday.",  // remnant of "dunno" should not match prefix
   };
 
   private final String[][] hyphenGold = {
@@ -686,7 +685,6 @@ public class PTBTokenizerTest {
                   "wo", "n't", "come", "until", "we", "have", "money", ".", "''" },
           { "``", "Whereas", "strategic", "considerations", "have", "to", "be", "based", "on",
                   "`", "real", "-", "politick", "'", "and", "harsh", "facts", ",", "''", "Saleem", "said", "." },
-          { "F*ck", ",", "cr-p", ",", "I", "met", "Uchenna", "Nnobuko", "yesterday", "." },
   };
 
   @Test
