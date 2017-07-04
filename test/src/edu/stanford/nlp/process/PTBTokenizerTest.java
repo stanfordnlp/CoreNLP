@@ -53,7 +53,6 @@ public class PTBTokenizerTest {
       "Download from ftp://myname@host.dom/%2Fetc/motd",
       "Download from svn://user@location.edu/path/to/magic/unicorns",
       "Download from svn+ssh://user@location.edu/path/to/magic/unicorns",
-      "Independent Living can be reached at http://www.inlv.demon.nl/.",
       "We traveled from No. Korea to So. Calif. yesterday.",
       "I dunno.",
       "The o-kay was received by the anti-acquisition front on its foolishness-filled fish market.",
@@ -76,21 +75,6 @@ public class PTBTokenizerTest {
       "60-90's",
       "Soft AC-styled",
       "3 p.m., eastern time",
-      "Total Private\nOrders 779.5 -9.5%",
-      "2-9.5%",
-      "2- 9.5%",
-      "From July 23-24. Radisson Miyako Hotel.",
-      "23 percent-2 percent higher than today",
-      "23 percent--2 percent higher than today",
-      "438798-438804",
-      "He earned eligibility by virtue of a top-35 finish.",
-      "Witt was 2-for-34 as a hitter",
-      "An Atlanta-bound DC-9 crashed",
-      "weigh 1,000-1,200 pounds, ",
-      "Imus arrived to be host for the 5:30-to-10 a.m. show.",
-      "The .38-Magnum bullet",
-      "a 1908 Model K Stanley with 1:01-minute time",
-      "the 9-to-11:45 a.m. weekday shift",
   };
 
   private final String[][] ptbGold = {
@@ -133,12 +117,11 @@ public class PTBTokenizerTest {
       { "First", "sentence", "...", ".", "Second", "sentence", "." },
       { "I", "was", "n't", "really", "...", "well", ",", "what", "I", "mean", "...", "see", "...", "what", "I", "'m", "saying",
           ",", "the", "thing", "is", "...", "I", "did", "n't", "mean", "it", "." },
-      { "This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "http://google.com", "." },
-      { "This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "htvp", ":", "/", "/", "google.com", "." },
-      { "Download", "from", "ftp://myname@host.dom/%2Fetc/motd" },
-      { "Download", "from", "svn://user@location.edu/path/to/magic/unicorns" },
-      { "Download", "from", "svn+ssh://user@location.edu/path/to/magic/unicorns" },
-      { "Independent", "Living", "can", "be", "reached", "at", "http://www.inlv.demon.nl/", "." },
+      {"This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "http://google.com", "."},
+      {"This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "htvp", ":", "/", "/", "google.com", "."},
+      {"Download", "from", "ftp://myname@host.dom/%2Fetc/motd"},
+      {"Download", "from", "svn://user@location.edu/path/to/magic/unicorns"},
+      {"Download", "from", "svn+ssh://user@location.edu/path/to/magic/unicorns"},
       { "We", "traveled", "from", "No.", "Korea", "to", "So.", "Calif.", "yesterday", "." },
       { "I", "du", "n", "no", "." },
       {"The", "o-kay", "was", "received", "by", "the", "anti-acquisition", "front", "on", "its", "foolishness-filled", "fish", "market", "."},
@@ -161,21 +144,6 @@ public class PTBTokenizerTest {
       { "60-90", "'s" },
       { "Soft", "AC-styled" },
       { "3", "p.m.", ",", "eastern", "time" },
-      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
-      { "2-9.5", "%" },
-      { "2", "-", "9.5", "%" },
-      { "From", "July", "23-24", ".", "Radisson", "Miyako", "Hotel", "." },
-      { "23", "percent-2", "percent", "higher", "than", "today" },
-      { "23", "percent", "--", "2", "percent", "higher", "than", "today" },
-      { "438798-438804" },
-      { "He", "earned", "eligibility", "by", "virtue", "of", "a", "top-35", "finish", "." },
-      { "Witt", "was", "2-for-34", "as", "a", "hitter" },
-      { "An", "Atlanta-bound", "DC-9", "crashed" },
-      { "weigh", "1,000-1,200", "pounds", "," },
-      { "Imus", "arrived", "to", "be", "host", "for", "the", "5:30-to-10", "a.m.", "show", "." },
-      { "The", ".38-Magnum", "bullet" },
-      { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
-      { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -218,12 +186,11 @@ public class PTBTokenizerTest {
       { "First", "sentence", "...", ".", "Second", "sentence", "." },
       { "I", "was", "n't", "really", "...", "well", ",", "what", "I", "mean", "...", "see", "...", "what", "I", "'m", "saying",
           ",", "the", "thing", "is", "...", "I", "did", "n't", "mean", "it", "." },
-      { "This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "http://google.com", "." },
-      { "This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "htvp", ":", "/", "/", "google.com", "." },
-      { "Download", "from", "ftp://myname@host.dom/%2Fetc/motd" },
-      { "Download", "from", "svn://user@location.edu/path/to/magic/unicorns" },
-      { "Download", "from", "svn+ssh://user@location.edu/path/to/magic/unicorns" },
-      { "Independent", "Living", "can", "be", "reached", "at", "http://www.inlv.demon.nl/", "." },
+      {"This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "http://google.com", "."},
+      {"This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "htvp", ":", "/", "/", "google.com", "."},
+      {"Download", "from", "ftp://myname@host.dom/%2Fetc/motd"},
+      {"Download", "from", "svn://user@location.edu/path/to/magic/unicorns"},
+      {"Download", "from", "svn+ssh://user@location.edu/path/to/magic/unicorns"},
       { "We", "traveled", "from", "No.", "Korea", "to", "So.", "Calif.", "yesterday", "." },
       { "I", "du", "n", "no", "." },
       {"The", "o-kay", "was", "received", "by", "the", "anti-acquisition", "front", "on", "its", "foolishness", "-", "filled", "fish", "market", "."},
@@ -246,34 +213,6 @@ public class PTBTokenizerTest {
       { "60", "-", "90", "'s" },
       { "Soft", "AC", "-", "styled" },
       { "3", "p.m.", ",", "eastern", "time" },
-      { "Total", "Private", "Orders", "779.5", "-9.5", "%" },
-      { "2", "-", "9.5", "%" },
-      { "2", "-", "9.5", "%" },
-      { "From", "July", "23", "-", "24", ".", "Radisson", "Miyako", "Hotel", "." },
-// todo [gabor 2017]: This one probably isn't what you want either:
-//      { "23", "percent", "-", "2", "percent", "higher", "than", "today" },
-      { "23", "percent", "-2", "percent", "higher", "than", "today" },
-      { "23", "percent", "--", "2", "percent", "higher", "than", "today" },
-      { "438798", "-", "438804" },
-// todo [gabor 2017]: This one probably isn't what you want either:
-//      { "He", "earned", "eligibility", "by", "virtue", "of", "a", "top", "-", "35", "finish", "." },
-//      { "Witt", "was", "2", "-", "for", "-", "34", "as", "a", "hitter" },
-//      { "An", "Atlanta", "-", "bound", "DC", "-9", "crashed" },
-      { "He", "earned", "eligibility", "by", "virtue", "of", "a", "top", "-35", "finish", "." },
-      { "Witt", "was", "2", "-", "for", "-34", "as", "a", "hitter" },
-      { "An", "Atlanta", "-", "bound", "DC", "-9", "crashed" },
-// todo [cdm 2017]: These next ones aren't yet right, but I'm putting off fixing them for now, since it might take a rewrite of hyphen handling
-// these are the correct answers:
-//      { "weigh", "1,000", "-", "1,200", "pounds", "," },
-//      { "Imus", "arrived", "to", "be", "host", "for", "the", "5:30", "-", "to", "-", "10", "a.m.", "show", "." },
-//      { "The", ".38", "-", "Magnum", "bullet" },
-//      { "a", "1908", "Model", "K", "Stanley", "with", "1:01", "-", "minute", "time" },
-//      { "the", "9", "-", "to", "-", "11:45", "a.m.", "weekday", "shift" },
-      { "weigh", "1,000-1,200", "pounds", "," },
-      { "Imus", "arrived", "to", "be", "host", "for", "the", "5:30-to-10", "a.m.", "show", "." },
-      { "The", ".38-Magnum", "bullet" },
-      { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
-      { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
   };
 
   @Test
@@ -462,10 +401,8 @@ public class PTBTokenizerTest {
 
   @Test
   public void testPTBTokenizerSGML() {
-    // System.err.println("Starting SGML test");
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory();
     runOnTwoArrays(tokFactory, sgmlInputs, sgmlGold);
-    runAgainstOrig(tokFactory, sgmlInputs);
   }
 
 
@@ -502,16 +439,14 @@ public class PTBTokenizerTest {
 
   @Test
   public void testPTBTokenizerTokenizePerLineSGML() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("tokenizePerLine=true,invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("tokenizePerLine=true");
     runOnTwoArrays(tokFactory, sgmlInputs, sgmlPerLineGold);
-    runAgainstOrig(tokFactory, sgmlInputs);
   }
 
   @Test
   public void testPTBTokenizerTokenizeSplitHyphens() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("splitHyphenated=true,invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("splitHyphenated=true");
     runOnTwoArrays(tokFactory, ptbInputs, ptbGoldSplitHyphenated);
-    runAgainstOrig(tokFactory, ptbInputs);
   }
 
 
@@ -520,19 +455,16 @@ public class PTBTokenizerTest {
     String[] sample = { "5-1/4 plus 2 3/16 = 7\u00A07/16 in the U.S.S.R. Why not?" };
     String[][] tokenizedNormal = { { "5-1/4", "plus", "2\u00A03/16", "=", "7\u00A07/16", "in", "the", "U.S.S.R.", ".", "Why", "not", "?" } };
     String[][] tokenizedStrict = { { "5-1/4", "plus", "2", "3/16", "=", "7", "7/16", "in", "the", "U.S.S.R", ".", "Why", "not", "?" } };
-    TokenizerFactory<CoreLabel> tokFactoryNormal = PTBTokenizer.coreLabelFactory("invertible=true");
-    TokenizerFactory<CoreLabel> tokFactoryStrict = PTBTokenizer.coreLabelFactory("strictTreebank3=true,invertible=true");
+    TokenizerFactory<CoreLabel> tokFactoryNormal = PTBTokenizer.coreLabelFactory();
+    TokenizerFactory<CoreLabel> tokFactoryStrict = PTBTokenizer.coreLabelFactory("strictTreebank3");
     runOnTwoArrays(tokFactoryNormal, sample, tokenizedNormal);
     runOnTwoArrays(tokFactoryStrict, sample, tokenizedStrict);
-    runAgainstOrig(tokFactoryNormal, sample);
-    runAgainstOrig(tokFactoryStrict, sample);
   }
 
 
   private static <T extends Label> void runOnTwoArrays(TokenizerFactory<T> tokFactory, String[] inputs, String[][] desired) {
     assertEquals("Test data arrays don't match in length", inputs.length, desired.length);
     for (int sent = 0; sent < inputs.length; sent++) {
-      // System.err.println("Testing " + inputs[sent]);
       Tokenizer<T> tok = tokFactory.getTokenizer(new StringReader(inputs[sent]));
       for (int i = 0; tok.hasNext() || i < desired[sent].length; i++) {
         if ( ! tok.hasNext()) {
@@ -548,37 +480,7 @@ public class PTBTokenizerTest {
     }
   }
 
-  /** The appending has to run one behind so as to make sure that the after annotation has been filled in!
-   *  Just placing the appendTextFrom() after reading tok.next() in the loop does not work.
-   */
-  private static <T extends CoreLabel> void runAgainstOrig(TokenizerFactory<T> tokFactory, String[] inputs) {
-    for (String input : inputs) {
-      // System.err.println("Running on line: |" + input + "|");
-      StringBuilder origText = new StringBuilder();
-      T last = null;
-      for (Tokenizer<T> tok = tokFactory.getTokenizer(new StringReader(input)); tok.hasNext(); ) {
-        appendTextFrom(origText, last);
-        last = tok.next();
-      }
-      appendTextFrom(origText, last);
-      assertEquals("PTBTokenizer has wrong originalText", input, origText.toString());
-    }
-  }
 
-  private static <T extends CoreLabel> void appendTextFrom(StringBuilder origText, T token) {
-    if (token != null) {
-      // System.err.println("|Before|OrigText|After| = |" + token.get(CoreAnnotations.BeforeAnnotation.class) +
-      //         "|" + token.get(CoreAnnotations.OriginalTextAnnotation.class) + "|" + token.get(CoreAnnotations.AfterAnnotation.class) + "|");
-      if (origText.length() == 0) {
-        origText.append(token.get(CoreAnnotations.BeforeAnnotation.class));
-      }
-      origText.append(token.get(CoreAnnotations.OriginalTextAnnotation.class));
-      origText.append(token.get(CoreAnnotations.AfterAnnotation.class));
-    }
-  }
-
-
-  @SuppressWarnings("unchecked")
   @Test
   public void testPTBTokenizerGerman() {
     String[] sample = { "Das TV-Duell von Kanzlerin Merkel und SPD-Herausforderer Steinbrück war eher lahm - können es die Spitzenleute der kleinen Parteien besser? ",
@@ -653,47 +555,26 @@ public class PTBTokenizerTest {
 
   @Test
   public void testEmoji() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory();
     runOnTwoArrays(tokFactory, emojiInputs, emojiGold);
-    runAgainstOrig(tokFactory, emojiInputs);
   }
 
   private final String[] hyphenInputs = {
           // Text starting with BOM (should be deleted), words with soft hyphens and non-breaking space.
           "\uFEFFThis is hy\u00ADphen\u00ADated and non-breaking spaces: 3\u202F456\u202F473.89",
           // Test that some cp1252 that shouldn't be in file is normalized okay
-          "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092",
-          "Charles Howard ''Charlie’' Bridges and Helen Hoyle Bridges",
-          "All energy markets close at 1 p.m. except Palo Verde electricity futures and options, closing at\n" +
-                  "12:55.; Palladium and copper markets close at 1 p.m.; Silver markets close at 1:05 p.m.",
-          "BHP is `` making the right noises.''",
-          "``There's a saying nowadays,'' he said. ```The more you owe, the longer you live.' It means the mafia " +
-                  "won't come until we have money.''\n",
-          "\"Whereas strategic considerations have to be based on 'real- politick' and harsh facts,\" Saleem said.",
-          "F*ck, cr-p, I met Uchenna Nnobuko yesterday.",  // remnant of "dunno" should not match prefix
+          "\u0093I need \u008080.\u0094 \u0082And \u0085 dollars.\u0092"
   };
 
   private final String[][] hyphenGold = {
           { "This", "is", "hyphenated", "and", "non-breaking", "spaces", ":", "3456473.89" },
-          { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" },
-          { "Charles", "Howard", "``", "Charlie", "''", "Bridges", "and", "Helen", "Hoyle", "Bridges" },
-          { "All", "energy", "markets", "close", "at", "1", "p.m.", "except", "Palo", "Verde", "electricity", "futures",
-                  "and", "options", ",", "closing", "at", "12:55", ".", ";", "Palladium", "and", "copper", "markets",
-                  "close", "at", "1", "p.m.", ";", "Silver", "markets", "close", "at", "1:05", "p.m." },
-          { "BHP", "is", "``", "making", "the", "right", "noises", ".", "''" },
-          { "``", "There", "'s", "a", "saying", "nowadays", ",", "''", "he", "said", ".", "``", "`", "The", "more", "you",
-                  "owe", ",", "the", "longer", "you", "live", ".", "'", "It", "means", "the", "mafia",
-                  "wo", "n't", "come", "until", "we", "have", "money", ".", "''" },
-          { "``", "Whereas", "strategic", "considerations", "have", "to", "be", "based", "on",
-                  "`", "real", "-", "politick", "'", "and", "harsh", "facts", ",", "''", "Saleem", "said", "." },
-          { "F*ck", ",", "cr-p", ",", "I", "met", "Uchenna", "Nnobuko", "yesterday", "." },
+          { "``", "I", "need", "€", "80", ".", "''", "`", "And", "...", "dollars", ".", "'" }
   };
 
   @Test
-  public void testHyphensQuoteAndBOM() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false,invertible");
+  public void testHyphensAndBOM() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false");
     runOnTwoArrays(tokFactory, hyphenInputs, hyphenGold);
-    runAgainstOrig(tokFactory, hyphenInputs);
   }
 
 }

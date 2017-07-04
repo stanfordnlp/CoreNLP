@@ -1,12 +1,13 @@
 package edu.stanford.nlp.process;
 
+
+import edu.stanford.nlp.io.Lexer;
+import edu.stanford.nlp.io.RuntimeIOException;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-
-import edu.stanford.nlp.io.Lexer;
-import edu.stanford.nlp.io.RuntimeIOException;
 
 
 /**
@@ -18,7 +19,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
  */
 public class LexerTokenizer extends AbstractTokenizer<String> {
 
-  private final Lexer lexer;
+  private Lexer lexer;
 
   /**
    * Internally fetches the next token.
@@ -30,20 +31,21 @@ public class LexerTokenizer extends AbstractTokenizer<String> {
     String token = null;
     try {
       int a = Lexer.IGNORE;
-      while (a == Lexer.IGNORE) {
-        a = lexer.yylex(); // skip tokens to be ignored
+      while ((a = lexer.yylex()) == Lexer.IGNORE) {
+        ; // skip tokens to be ignored
       }
-      if (a != lexer.getYYEOF()) {
+      if (a == lexer.getYYEOF()) {
+        token = null;
+      } else {
         token = lexer.yytext();
       }
-      // else token remains null
     } catch (IOException e) {
       // do nothing, return null
     }
     return token;
   }
 
-  /** Constructs a tokenizer from a {@link Lexer}.
+  /* Constructs a tokenizer from a {@link Lexer}
    */
   public LexerTokenizer(Lexer l) {
     if (l == null) {
@@ -53,8 +55,8 @@ public class LexerTokenizer extends AbstractTokenizer<String> {
     }
   }
 
-  /** Constructs a tokenizer from a {@link Lexer} and makes a {@link Reader}
-   *  the active input stream for the tokenizer.
+  /* Constructs a tokenizer from a {@link Lexer} and makes a {@link
+   * Reader} the active input stream for the tokenizer.
    */
   public LexerTokenizer(Lexer l, Reader r) {
     this(l);
@@ -70,7 +72,7 @@ public class LexerTokenizer extends AbstractTokenizer<String> {
 
 
   /**
-   * For testing only.
+   * for testing only
    */
   public static void main(String[] args) throws IOException {
     Tokenizer<String> t = new LexerTokenizer(new JFlexDummyLexer((Reader) null), new BufferedReader(new FileReader(args[0])));

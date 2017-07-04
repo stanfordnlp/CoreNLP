@@ -1,10 +1,17 @@
 package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -709,7 +716,7 @@ public class QuestionToStatementTranslator {
   }
 
   /**
-   * The pattern for "where is..."  sentences.
+   * The pattern for "what do..."  sentences.
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processWhatDo(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
    */
   private final TokenSequencePattern triggerWhatDo = TokenSequencePattern.compile(
@@ -870,6 +877,152 @@ public class QuestionToStatementTranslator {
     return sentence;
   }
 
+
+  /**
+   * Post-process a statement, e.g., replacing 'I' with 'you', capitalizing the
+   * first letter (and not capitalizing the other letters), etc.
+   *
+   * @param question The original question that we converted to a statement.
+   * @param statement The statement to post-process.
+   *
+   * @return The post-processed utterance.
+   */
+  private List<List<CoreLabel>> postProcess(List<CoreLabel> question, List<CoreLabel> statement) {
+    // 1. Replace 'i' with 'you', etc.
+    for (CoreLabel token : statement) {
+      String originalText = token.originalText();
+      if (originalText == null || "".equals(originalText)) {
+        originalText = token.word();
+      }
+      switch (originalText.toLowerCase()) {
+        case "i":
+          token.set(CoreAnnotations.StatementTextAnnotation.class, "you");
+          break;
+        case "you":
+          token.set(CoreAnnotations.StatementTextAnnotation.class, "i");
+          break;
+        case "my":
+          token.set(CoreAnnotations.StatementTextAnnotation.class, "your");
+          break;
+        case "your":
+          token.set(CoreAnnotations.StatementTextAnnotation.class, "my");
+          break;
+        default:
+          token.set(CoreAnnotations.StatementTextAnnotation.class, originalText);
+          break;
+      }
+    }
+
+    // 2. Property upper-case the sentence
+    for (int i = 0; i < statement.size(); ++i) {
+      CoreLabel token = statement.get(i);
+      String originalText = token.get(CoreAnnotations.StatementTextAnnotation.class);
+      String uppercase = originalText.length() == 0
+              ? originalText
+              : Character.toUpperCase(originalText.charAt(0)) + originalText.substring(1);
+      if (i == 0) {
+        token.set(CoreAnnotations.StatementTextAnnotation.class, uppercase);
+      } else if (Optional.ofNullable(token.tag()).map(x -> x.startsWith("NNP")).orElse(false)) {
+        token.set(CoreAnnotations.StatementTextAnnotation.class, uppercase);
+      } else {
+        switch (originalText.toLowerCase()) {
+          case "i":
+            token.set(CoreAnnotations.StatementTextAnnotation.class, uppercase);
+            break;
+          default:
+            token.set(CoreAnnotations.StatementTextAnnotation.class, originalText.toLowerCase());
+            break;
+        }
+      }
+    }
+
+    // 3. Fix the tense of the question
+    // 3.1. Get tense + participality(sp?)
+    boolean past = false;
+    boolean participle = false;
+    TENSE_LOOP: for (CoreLabel token : question) {
+      switch (Optional.ofNullable(token.lemma()).orElse(token.word()).toLowerCase()) {
+        case "do":
+          switch (token.tag()) {
+            case "VBG":
+              participle = true;
+            case "VB":
+              past = false;
+              break TENSE_LOOP;
+            case "VBN":
+              participle = true;
+            case "VBD":
+              past = true;
+              break TENSE_LOOP;
+          }
+          break;
+      }
+    }
+    // 3.2. Get plurality
+    boolean plural = false;
+    PLURALITY_LOOP: for (CoreLabel token : statement) {
+      switch (Optional.ofNullable(token.tag()).orElse("")) {
+        case "NN":
+        case "NNP":
+          plural = false;
+          break PLURALITY_LOOP;
+        case "NNS":
+        case "NNPS":
+          plural = true;
+          break PLURALITY_LOOP;
+      }
+    }
+    // 3.3. Get person
+    int person = 3;  // 1st, 2nd, or 3rd
+    PERSON_LOOP: for (CoreLabel token : statement) {
+      if (Optional.ofNullable(token.tag()).map(x -> x.startsWith("N")).orElse(false)) {
+        break;
+      }
+      switch (token.get(CoreAnnotations.StatementTextAnnotation.class).toLowerCase()) {
+        case "us":
+          plural = true;
+          person = 1;
+          break PERSON_LOOP;
+        case "i":
+        case "me":
+        case "mine":
+        case "my":
+          plural = false;
+          person = 1;
+          break PERSON_LOOP;
+        case "you":
+          plural = false;
+          person = 2;
+          break PERSON_LOOP;
+        case "they":
+        case "them":
+          plural = true;
+          person = 2;
+          break PERSON_LOOP;
+        case "he":
+        case "she":
+        case "him":
+        case "her":
+        case "it":
+          plural = false;
+          person = 3;
+          break PERSON_LOOP;
+      }
+    }
+    // 3.4. Conjugate the verb
+    VerbTense tense = VerbTense.of(past, plural, participle, person);
+    for (CoreLabel token : statement) {
+      if (Optional.ofNullable(token.tag()).map(x -> x.startsWith("V")).orElse(false)) {
+        token.set(CoreAnnotations.StatementTextAnnotation.class,
+            tense.conjugateEnglish(token.get(CoreAnnotations.StatementTextAnnotation.class), false));
+      }
+    }
+
+    // Return
+    return Collections.singletonList(statement);
+  }
+
+
   /**
    * Convert a question to a statement, if possible.
    * <ul>
@@ -883,32 +1036,48 @@ public class QuestionToStatementTranslator {
   public List<List<CoreLabel>> toStatement(List<CoreLabel> question) {
     TokenSequenceMatcher matcher;
     if ((matcher = triggerWhatIsThere.matcher(question)).matches()) {  // must come before triggerWhatIs
-      return Collections.singletonList(processWhatIsThere(matcher));
+      return postProcess(question, processWhatIsThere(matcher));
     } else if ((matcher = triggerWhNNIs.matcher(question)).matches()) {  // must come before triggerWhatIs
-      return Collections.singletonList(processWhNNIs(matcher));
+      return postProcess(question, processWhNNIs(matcher));
     } else if ((matcher = triggerWhNNHave.matcher(question)).matches()) {  // must come before triggerWhatHave
-      return Collections.singletonList(processWhNNHave(matcher));
+      return postProcess(question, processWhNNHave(matcher));
     } else if ((matcher = triggerWhNNHaveNN.matcher(question)).matches()) {  // must come before triggerWhatHave
-      return Collections.singletonList(processWhNNHaveNN(matcher));
+      return postProcess(question, processWhNNHaveNN(matcher));
     } else if ((matcher = triggerWhatIs.matcher(question)).matches()) {
-      return Collections.singletonList(processWhatIs(matcher));
+      return postProcess(question, processWhatIs(matcher));
     } else if ((matcher = triggerWhatHave.matcher(question)).matches()) {
-      return Collections.singletonList(processWhatHave(matcher));
+      return postProcess(question, processWhatHave(matcher));
     } else if ((matcher = triggerWhereDo.matcher(question)).matches()) {
-      return Collections.singletonList(processWhereDo(matcher));
+      return postProcess(question, processWhereDo(matcher));
     } else if ((matcher = triggerWhereIs.matcher(question)).matches()) {
-      return Collections.singletonList(processWhereIs(matcher));
+      return postProcess(question, processWhereIs(matcher));
     } else if ((matcher = triggerWhoIs.matcher(question)).matches()) {
-      return Collections.singletonList(processWhoIs(matcher));
+      return postProcess(question, processWhoIs(matcher));
     } else if ((matcher = triggerWhoDid.matcher(question)).matches()) {
-      return Collections.singletonList(processWhoDid(matcher));
+      return postProcess(question, processWhoDid(matcher));
     } else if ((matcher = triggerWhatDo.matcher(question)).matches()) {
-      return Collections.singletonList(processWhatDo(matcher));
+      return postProcess(question, processWhatDo(matcher));
     } else if ((matcher = triggerWhenDo.matcher(question)).matches()) {
-      return Collections.singletonList(processWhenDo(matcher));
+      return postProcess(question, processWhenDo(matcher));
     } else {
       return Collections.emptyList();
     }
+  }
+
+
+  public static void main(String[] args) throws IOException {
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma"));
+    QuestionToStatementTranslator translator = new QuestionToStatementTranslator();
+
+    IOUtils.console("question> ", question -> {
+      Annotation ann = new Annotation(question);
+      pipeline.annotate(ann);
+      List<CoreLabel> tokens = ann.get(CoreAnnotations.TokensAnnotation.class);
+      List<List<CoreLabel>> statements = translator.toStatement(tokens);
+      for (List<CoreLabel> statement : statements) {
+        System.out.println("  -> " + StringUtils.join(statement.stream().map(CoreLabel::word), " "));
+      }
+    });
   }
 
 }

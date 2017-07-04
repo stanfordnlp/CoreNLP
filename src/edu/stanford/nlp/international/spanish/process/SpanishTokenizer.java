@@ -1,11 +1,8 @@
 package edu.stanford.nlp.international.spanish.process;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -30,6 +27,7 @@ import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 
 /**
@@ -470,36 +468,32 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     int nTokens = 0;
     final long startTime = System.nanoTime();
     try {
-      Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new BufferedReader(new InputStreamReader(System.in, encoding)));
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out, encoding));
+      Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new InputStreamReader(System.in, encoding));
       boolean printSpace = false;
       while (tokenizer.hasNext()) {
         ++nTokens;
         String word = tokenizer.next().word();
         if (word.equals(SpanishLexer.NEWLINE_TOKEN)) {
           ++nLines;
+          System.out.println();
           if ( ! onePerLine) {
-            writer.newLine();
             printSpace = false;
           }
         } else {
           String outputToken = toLower ? word.toLowerCase(es) : word;
           if (onePerLine) {
-            writer.write(outputToken);
-            writer.newLine();
+            System.out.println(outputToken);
           } else {
             if (printSpace) {
-              writer.write(" ");
+              System.out.print(" ");
             }
-            writer.write(outputToken);
+            System.out.print(outputToken);
             printSpace = true;
           }
         }
       }
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeIOException("Bad character encoding", e);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
     }
     long elapsedTime = System.nanoTime() - startTime;
     double linesPerSec = (double) nLines / (elapsedTime / 1e9);

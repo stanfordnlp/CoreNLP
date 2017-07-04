@@ -1,8 +1,5 @@
 package edu.stanford.nlp.ie;
-
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.pascal.ISODateInstance;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
@@ -17,7 +14,11 @@ import edu.stanford.nlp.util.EditDistance;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
+
+import static java.lang.System.err;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -29,11 +30,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@link edu.stanford.nlp.pipeline.QuantifiableEntityNormalizingAnnotator}.
  * Please keep the substantive content here, however, so as to lessen code
  * duplication.
- *
- * <i>Implementation note:</i> The extensive test code for this class is
- * now in a separate JUnit Test class.  This class depends on the background
- * symbol for NER being the default background symbol.  This should be fixed
- * at some point.
+ *  <p>
+ *  <i>Implementation note:</i> The extensive test code for this class is
+ *  now in a separate JUnit Test class.  This class depends on the background
+ *  symbol for NER being the default background symbol.  This should be fixed
+ *  at some point.
  *
  * @author Chris Cox
  * @author Christopher Manning (extended for RTE)
@@ -42,10 +43,10 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class QuantifiableEntityNormalizer  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(QuantifiableEntityNormalizer.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(QuantifiableEntityNormalizer.class);
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG2 = false;  // String normalizing functions
+  private static final boolean DEBUG2 = false;  // String normlz functions
 
   public static String BACKGROUND_SYMBOL = SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL; // this isn't a constant; it's set by the QuantifiableEntityNormalizingAnnotator
 
@@ -223,10 +224,9 @@ public class QuantifiableEntityNormalizer  {
     // TODO (?) pass the EditDistance around more places to make this
     // more efficient.  May not really matter.
     EditDistance ed = new EditDistance();
-    for (String cur : set) {
-      if (isOneSubstitutionMatch(word, cur, ed)) {
+    for(String cur : set) {
+      if(isOneSubstitutionMatch(word, cur, ed))
         return cur;
-      }
     }
     return null;
   }
@@ -249,7 +249,7 @@ public class QuantifiableEntityNormalizer  {
    *  @param l The List
    *  @return one string containing all words in the list, whitespace separated
    */
-  private static <E extends CoreMap> String singleEntityToString(List<E> l) {
+  public static <E extends CoreMap> String singleEntityToString(List<E> l) {
     String entityType = l.get(0).get(CoreAnnotations.NamedEntityTagAnnotation.class);
     StringBuilder sb = new StringBuilder();
     for (E w : l) {
@@ -262,10 +262,10 @@ public class QuantifiableEntityNormalizer  {
 
 
   /**
-   * Currently this populates a {@code List<CoreLabel>} with words from the passed List,
+   * Currently this populates a List&lt;CoreLabel&gt; with words from the passed List,
    * but NER entities are collapsed and {@link CoreLabel} constituents of entities have
    * NER information in their "quantity" fields.
-   *
+   * <p>
    * NOTE: This now seems to be used nowhere.  The collapsing is done elsewhere.
    * That's probably appropriate; it doesn't seem like this should be part of
    * QuantifiableEntityNormalizer, since it's set to collapse non-quantifiable
@@ -274,7 +274,7 @@ public class QuantifiableEntityNormalizer  {
    * @param l a list of CoreLabels with NER labels,
    * @return a Sentence where PERSON, ORG, LOC, entities are collapsed.
    */
-  public static List<CoreLabel> collapseNERLabels(List<CoreLabel> l) {
+  public static List<CoreLabel> collapseNERLabels(List<CoreLabel> l){
     if(DEBUG) {
       for (CoreLabel w: l) {
         log.info("<<"+w.get(CoreAnnotations.TextAnnotation.class)+"::"+w.get(CoreAnnotations.PartOfSpeechAnnotation.class)+"::"+w.get(CoreAnnotations.NamedEntityTagAnnotation.class)+">>");
@@ -297,7 +297,8 @@ public class QuantifiableEntityNormalizer  {
         nextWord.set(CoreAnnotations.NamedEntityTagAnnotation.class, lastEntity);
         s.add(nextWord);
         if (DEBUG) {
-          log.info("Quantifiable: Collapsing " + entityStringCollector);
+          err.print("Quantifiable: Collapsing ");
+          err.println(entityStringCollector.toString());
         }
         entityStringCollector = null;
       }
@@ -345,7 +346,6 @@ public class QuantifiableEntityNormalizer  {
    * Returns a string that represents either a single date or a range of
    * dates.  Representation pattern is roughly ISO8601, with some extensions
    * for greater expressivity; see {@link ISODateInstance} for details.
-   *
    * @param s Date string to normalize
    * @param openRangeMarker a marker for whether this date is not involved in
    * an open range, is involved in an open range that goes forever backward and
@@ -353,7 +353,7 @@ public class QuantifiableEntityNormalizer  {
    * starts at s.  See {@link ISODateInstance}.
    * @return A yyyymmdd format normalized date
    */
-  private static String normalizedDateString(String s, String openRangeMarker, Timex timexFromSUTime) {
+  static String normalizedDateString(String s, String openRangeMarker, Timex timexFromSUTime) {
     if(timexFromSUTime != null) {
       if(timexFromSUTime.value() != null){
         // fully disambiguated temporal
@@ -365,11 +365,11 @@ public class QuantifiableEntityNormalizer  {
     }
 
     ISODateInstance d = new ISODateInstance(s, openRangeMarker);
-    if (DEBUG2) { log.info("normalizeDate: " + s + " to " + d.getDateString()); }
-    return d.getDateString();
+    if (DEBUG2) err.println("normalizeDate: " + s + " to " + d.getDateString());
+    return (d.getDateString());
   }
 
-  private static String normalizedDurationString(String s, Timex timexFromSUTime) {
+  static String normalizedDurationString(String s, Timex timexFromSUTime) {
     if(timexFromSUTime != null) {
       if(timexFromSUTime.value() != null){
         // fully disambiguated temporal
@@ -386,7 +386,7 @@ public class QuantifiableEntityNormalizer  {
   /**
    * Tries to heuristically determine if the given word is a year
    */
-  private static boolean isYear(CoreMap word) {
+  static boolean isYear(CoreMap word) {
     String wordString = word.get(CoreAnnotations.TextAnnotation.class);
     if(word.get(CoreAnnotations.PartOfSpeechAnnotation.class) == null || word.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
       //one possibility: it's a two digit year with an apostrophe: '90
@@ -433,8 +433,7 @@ public class QuantifiableEntityNormalizer  {
 
   /**
    * Takes the strings of the one previous and 3 next words to a date to
-   * detect date range modifiers like "before" or "between {@code <date>} and {@code <date>}.
-   *
+   * detect date range modifiers like "before" or "between \<date\> and \<date\>
    * @param <E>
    */
   private static <E extends CoreMap> String detectDateRangeModifier(List<E> date, List<E> list, int beforeIndex, int afterIndex) {
@@ -446,8 +445,8 @@ public class QuantifiableEntityNormalizer  {
 
 
     if (DEBUG) {
-      log.info("DateRange: previous: " + prev);
-      log.info("Quantifiable: next: " + next + ' ' + next2 + ' ' + next3);
+      err.println("DateRange: previous: " + prev);
+      err.println("Quantifiable: next: " + next + ' ' + next2 + ' ' + next3);
     }
 
     //sometimes the year gets tagged as CD but not as a date - if this happens, we want to add it in
@@ -587,7 +586,7 @@ public class QuantifiableEntityNormalizer  {
    * Concatenates separate words of a date or other numeric quantity into one node (e.g., 3 November -> 3_November)
    * Tag is CD or NNP, and other words are added to the remove list
    */
-  private static <E extends CoreMap> void concatenateNumericString(List<E> words, List<E> toRemove) {
+  static <E extends CoreMap> void concatenateNumericString(List<E> words, List<E> toRemove) {
     if (words.size() <= 1) return;
     boolean first = true;
     StringBuilder newText = new StringBuilder();
@@ -619,7 +618,7 @@ public class QuantifiableEntityNormalizer  {
     return normalizedTimeString(s, null, timexFromSUTime);
   }
 
-  private static String normalizedTimeString(String s, String ampm, Timex timexFromSUTime) {
+  public static String normalizedTimeString(String s, String ampm, Timex timexFromSUTime) {
     if(timexFromSUTime != null){
       if(timexFromSUTime.value() != null){
         // this timex is fully disambiguated
@@ -630,7 +629,7 @@ public class QuantifiableEntityNormalizer  {
       }
     }
 
-    if (DEBUG2) { log.info("normalizingTime: " + s); }
+    if (DEBUG2) err.println("normalizingTime: " + s);
     s = s.replaceAll("[ \t\n\0\f\r]", "");
     Matcher m = timePattern.matcher(s);
     if (s.equalsIgnoreCase("noon")) {
@@ -669,7 +668,7 @@ public class QuantifiableEntityNormalizer  {
       return "EM";
     } else if (m.matches()) {
       if (DEBUG2) {
-        log.info("timePattern matched groups: |%s| |%s| |%s| |%s|\n", m.group(0), m.group(1), m.group(2), m.group(3));
+        err.printf("timePattern matched groups: |%s| |%s| |%s| |%s|\n", m.group(0), m.group(1), m.group(2), m.group(3));
       }
       // group 1 is hours, group 2 is minutes and maybe seconds; group 3 is am/pm
       StringBuilder sb = new StringBuilder();
@@ -686,16 +685,16 @@ public class QuantifiableEntityNormalizer  {
         sb.append(suffix);
       } else if (ampm != null) {
         sb.append(ampm);
-      // } else {
+      } else {
         // Do nothing; leave ambiguous
         // sb.append("pm");
       }
       if (DEBUG2) {
-        log.info("normalizedTimeString new str: " + sb);
+        err.println("normalizedTimeString new str: " + sb.toString());
       }
       return sb.toString();
     } else if (DEBUG) {
-      log.info("Quantifiable: couldn't normalize " + s);
+      err.println("Quantifiable: couldn't normalize " + s);
     }
     return null;
   }
@@ -728,23 +727,22 @@ public class QuantifiableEntityNormalizer  {
     s = s.replaceAll("[ \t\n\0\f\r,]", "");
     s = s.toLowerCase();
     if (DEBUG2) {
-      log.info("normalizedMoneyString: Normalizing "+s);
+      err.println("normalizedMoneyString: Normalizing "+s);
     }
 
     double multiplier = 1.0;
 
     // do currency words
     char currencySign = '$';
-    for (Map.Entry<String, Character> stringCharacterEntry : currencyWords.entrySet()) {
-      String key = stringCharacterEntry.getKey();
-      if (StringUtils.find(s, key)) {
-        if (DEBUG2) { log.info("Found units: " + key); }
-        if (key.equals("pence|penny") || key.equals("cents?") || key.equals("\u00A2")) {
+    for (String currencyWord : currencyWords.keySet()) {
+      if (StringUtils.find(s, currencyWord)) {
+        if (DEBUG2) { err.println("Found units: " + currencyWord); }
+        if (currencyWord.equals("pence|penny") || currencyWord.equals("cents?") || currencyWord.equals("\u00A2")) {
           multiplier *= 0.01;
         }
-        // if(DEBUG) { log.info("Quantifiable: Found "+ currencyWord); }
-        s = s.replaceAll(key, "");
-        currencySign = stringCharacterEntry.getValue();
+        // if(DEBUG){err.println("Quantifiable: Found "+ currencyWord);}
+        s = s.replaceAll(currencyWord, "");
+        currencySign = currencyWords.get(currencyWord);
       }
     }
 
@@ -758,7 +756,7 @@ public class QuantifiableEntityNormalizer  {
   }
 
   public static String normalizedNumberString(String s, String nextWord, Number numberFromSUTime) {
-    if (DEBUG2) { log.info("normalizedNumberString: normalizing " + s); }
+    if (DEBUG2) { err.println("normalizedNumberString: normalizing "+s); }
     return normalizedNumberStringQuiet(s, 1.0, nextWord, numberFromSUTime);
   }
 
@@ -790,7 +788,7 @@ public class QuantifiableEntityNormalizer  {
     // in some contexts parentheses might indicate a negative number, but ignore that.
     if (s.startsWith("(") && s.endsWith(")")) {
       s = s.substring(1, s.length() - 1);
-      if (DEBUG2) log.info("Deleted (): " + s);
+      if (DEBUG2) err.println("Deleted (): " + s);
     }
     s = s.toLowerCase();
 
@@ -830,7 +828,7 @@ public class QuantifiableEntityNormalizer  {
       }
     }
 
-    if (DEBUG2) log.info("Looking for number words in |" + s + "|; multiplier is " + multiplier);
+    if (DEBUG2) err.println("Looking for number words in |" + s + "|; multiplier is " + multiplier);
 
     // handle numbers written in words
     String[] parts = s.split("[ -]");
@@ -873,15 +871,15 @@ public class QuantifiableEntityNormalizer  {
     Matcher m = moneyPattern.matcher(s);
     if (m.matches()) {
       if (DEBUG2) {
-        log.info("Number matched with |" + m.group(2) + "| |" +
+        err.println("Number matched with |" + m.group(2) + "| |" +
             m.group(3) + '|');
       }
       try {
         double d = 0.0;
-        if (m.group(2) != null && !m.group(2).isEmpty()) {
+        if (m.group(2) != null && ! m.group(2).equals("")) {
           d = Double.parseDouble(m.group(2));
         }
-        if (m.group(3) != null && !m.group(3).isEmpty()) {
+        if (m.group(3) != null && ! m.group(3).equals("")) {
           d += Double.parseDouble(m.group(3));
         }
         if (d == 0.0 && multiplier != 1.0) {
@@ -892,7 +890,7 @@ public class QuantifiableEntityNormalizer  {
         return Double.toString(d);
       } catch (Exception e) {
         if (DEBUG2) {
-          log.warn(e);
+          e.printStackTrace();
         }
         return null;
       }
@@ -905,13 +903,13 @@ public class QuantifiableEntityNormalizer  {
   }
 
   public static String normalizedOrdinalString(String s, Number numberFromSUTime) {
-    if (DEBUG2) { log.info("normalizedOrdinalString: normalizing "+s); }
+    if (DEBUG2) { err.println("normalizedOrdinalString: normalizing "+s); }
     return normalizedOrdinalStringQuiet(s, numberFromSUTime);
   }
 
   private static final Pattern numberPattern = Pattern.compile("([0-9.]+)");
 
-  private static String normalizedOrdinalStringQuiet(String s, Number numberFromSUTime) {
+  public static String normalizedOrdinalStringQuiet(String s, Number numberFromSUTime) {
     // clean up string
     s = s.replaceAll("[ \t\n\0\f\r,]", "");
     // remove parenthesis around numbers
@@ -919,11 +917,11 @@ public class QuantifiableEntityNormalizer  {
     // in some contexts parentheses might indicate a negative number, but ignore that.
     if (s.startsWith("(") && s.endsWith(")")) {
       s = s.substring(1, s.length() - 1);
-      if (DEBUG2) log.info("Deleted (): " + s);
+      if (DEBUG2) err.println("Deleted (): " + s);
     }
     s = s.toLowerCase();
 
-    if (DEBUG2) log.info("Looking for ordinal words in |" + s + '|');
+    if (DEBUG2) err.println("Looking for ordinal words in |" + s + '|');
     if (Character.isDigit(s.charAt(0))) {
       Matcher matcher = numberPattern.matcher(s);
       matcher.find();
@@ -942,7 +940,7 @@ public class QuantifiableEntityNormalizer  {
 
   public static String normalizedPercentString(String s, Number numberFromSUTime) {
     if (DEBUG2) {
-      log.info("normalizedPercentString: " + s);
+      err.println("normalizedPercentString: " + s);
     }
     s = s.replaceAll("\\s", "");
     s = s.toLowerCase();
@@ -1058,7 +1056,7 @@ public class QuantifiableEntityNormalizer  {
       }
     }
     if (DEBUG) {
-      log.info("Quantifiable: Processed '" + s + "' as '" + p + '\'');
+      err.println("Quantifiable: Processed '" + s + "' as '" + p + '\'');
     }
 
     int i = 0;
@@ -1146,8 +1144,8 @@ public class QuantifiableEntityNormalizer  {
     String next3 = (afterIndex + 2 < sz) ? list.get(afterIndex + 2).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
 
     if (DEBUG) {
-      log.info("Quantifiable: previous: " + prev3 + ' ' + prev2+ ' ' + prev);
-      log.info("Quantifiable: next: " + next + ' ' + next2 + ' ' + next3);
+      err.println("Quantifiable: previous: " + prev3 + ' ' + prev2+ ' ' + prev);
+      err.println("Quantifiable: next: " + next + ' ' + next2 + ' ' + next3);
     }
 
     String longPrev = prev3 + ' ' + prev2 + ' ' + prev;
@@ -1172,7 +1170,7 @@ public class QuantifiableEntityNormalizer  {
 
     if (next.matches(other)) { return ">="; }
 
-    if (DEBUG) { log.info("Quantifiable: not a quantity modifier"); }
+    if (DEBUG) { err.println("Quantifiable: not a quantity modifier"); }
     return null;
   }
 
@@ -1300,7 +1298,7 @@ public class QuantifiableEntityNormalizer  {
       Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
       Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
       boolean compatible = checkNumbers(n1,n2);
-      if (!compatible) return false;
+      if (!compatible) return compatible;
     }
 
     if ("TIME".equals(tag) || "SET".equals(tag) || "DATE".equals(tag) || "DURATION".equals(tag)) {
@@ -1310,7 +1308,7 @@ public class QuantifiableEntityNormalizer  {
       String tid1 = (timex1 != null)? timex1.tid():null;
       String tid2 = (timex2 != null)? timex2.tid():null;
       boolean compatible = checkStrings(tid1,tid2);
-      if (!compatible) return false;
+      if (!compatible) return compatible;
     }
 
     return true;
@@ -1351,7 +1349,7 @@ public class QuantifiableEntityNormalizer  {
 
         currNerTag = wi.get(CoreAnnotations.NamedEntityTagAnnotation.class);
         if ("TIME".equals(currNerTag)) {
-          if (timeModifier.isEmpty()) {
+          if (timeModifier.equals("")) {
             timeModifier = detectTimeOfDayModifier(list, i-1, i+1);
           }
         }
@@ -1424,7 +1422,8 @@ public class QuantifiableEntityNormalizer  {
     }
   }
 
-  private static <E extends CoreMap> void fixupNerBeforeNormalization(List<E> list) {
+  public static <E extends CoreMap> void fixupNerBeforeNormalization(List<E> list)
+  {
     // Goes through tokens and tries to fix up NER annotations
     String prevNerTag = BACKGROUND_SYMBOL;
     String prevNumericType = null;
@@ -1452,7 +1451,7 @@ public class QuantifiableEntityNormalizer  {
         }
 
         //repairs mistagged multipliers after a numeric quantity
-        if ( ! curWord.isEmpty() && (moneyMultipliers.containsKey(curWord) ||
+        if (!curWord.equals("") && (moneyMultipliers.containsKey(curWord) ||
                 (getOneSubstitutionMatch(curWord, moneyMultipliers.keySet()) != null)) &&
                 prevNerTag != null && (prevNerTag.equals("MONEY") || prevNerTag.equals("NUMBER"))) {
           wi.set(CoreAnnotations.NamedEntityTagAnnotation.class, prevNerTag);
@@ -1526,8 +1525,8 @@ public class QuantifiableEntityNormalizer  {
       if (DEBUG2) {
         if (i == 1) {
           String tag = l.get(i).get(CoreAnnotations.PartOfSpeechAnnotation.class);
-          if (tag == null || tag.isEmpty()) {
-            log.warn("Quantifiable: error! tag is " + tag);
+          if (tag == null || tag.equals("")) {
+            err.println("Quantifiable: error! tag is " + tag);
           }
         }
       }

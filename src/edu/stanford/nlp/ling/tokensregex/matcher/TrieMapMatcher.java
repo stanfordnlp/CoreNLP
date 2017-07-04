@@ -4,26 +4,22 @@ import edu.stanford.nlp.util.*;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
 
 /**
- * The {@code TrieMapMatcher} provides functions to match against a trie.
+ * The <code>TrieMapMatcher</code> provides functions to match against a trie.
  * It can be used to:
- * <ul>
- * <li> Find matches in a document (findAllMatches and findNonOverlapping) </li>
- * <li> Find approximate matches in a document (findClosestMatches) </li>
- * <li> Segment a sequence based on entries in the trie (segment) </li>
- * </ul>
+ * - Find matches in a document (findAllMatches and findNonOverlapping)
+ * - Find approximate matches in a document (findClosestMatches)
+ * - Segment a sequence based on entries in the trie (segment)
  *
  * TODO: Have TrieMapMatcher implement a matcher interface
  *
  * @author Angel Chang
  */
 public class TrieMapMatcher<K,V> {
-
-  private final TrieMap<K,V> root;
-  private final TrieMap<K,V> rootWithDelimiter;
-  private List<K> multimatchDelimiter;
+  TrieMap<K,V> root;
+  TrieMap<K,V> rootWithDelimiter;
+  List<K> multimatchDelimiter;
 
   public TrieMapMatcher(TrieMap<K, V> root) {
     this.root = root;
@@ -133,8 +129,9 @@ public class TrieMapMatcher<K,V> {
     // (prevMatches (matches[i-1][j]), curMatches (matches[i][j]) that we are working on
     MatchQueue<K,V> best = new MatchQueue<>(n, maxCost);
     List<PartialApproxMatch<K,V>>[] prevMatches = null;
+    List<PartialApproxMatch<K,V>>[] curMatches;
     for (int i = 0; i <= target.size(); i++) {
-      List<PartialApproxMatch<K, V>>[] curMatches = new List[target.size() + 1 + extra];
+      curMatches = new List[target.size()+1+extra];
       for (int j = 0; j <= target.size()+extra; j++) {
         if (j > 0) {
           boolean complete = (i == target.size());
@@ -188,7 +185,7 @@ public class TrieMapMatcher<K,V> {
     }
     // Get the best matches
     List<ApproxMatch<K,V>> res = new ArrayList<>();
-    for (PartialApproxMatch<K,V> m : best.toSortedList()) {
+    for (PartialApproxMatch<K,V> m:best.toSortedList()) {
       res.add(m.toApproxMatch());
     }
     return res;
@@ -196,20 +193,17 @@ public class TrieMapMatcher<K,V> {
 
   /**
    * Given a sequence to search through (e.g. piece of text would be a sequence of words),
-   * finds all matching sub-sequences that matches entries in the trie.
-   *
+   * finds all matching sub-sequences that matches entries in the trie
    * @param list Sequence to search through
    * @return List of matches
    */
-  @SafeVarargs
-  public final List<Match<K,V>> findAllMatches(K... list) {
+  public List<Match<K,V>> findAllMatches(K ... list) {
     return findAllMatches(Arrays.asList(list));
   }
 
   /**
    * Given a sequence to search through (e.g. piece of text would be a sequence of words),
-   * finds all matching sub-sequences that matches entries in the trie.
-   *
+   * finds all matching sub-sequences that matches entries in the trie
    * @param list Sequence to search through
    * @return List of matches
    */
@@ -219,8 +213,7 @@ public class TrieMapMatcher<K,V> {
 
   /**
    * Given a sequence to search through (e.g. piece of text would be a sequence of words),
-   * finds all matching sub-sequences that matches entries in the trie.
-   *
+   * finds all matching sub-sequences that matches entries in the trie
    * @param list Sequence to search through
    * @param start start index to start search at
    * @param end end index (exclusive) to end search at
@@ -236,12 +229,10 @@ public class TrieMapMatcher<K,V> {
    * Given a sequence to search through (e.g. piece of text would be a sequence of words),
    * finds all non-overlapping matching sub-sequences that matches entries in the trie.
    * Sub-sequences that are longer are preferred, then sub-sequences that starts earlier.
-   *
    * @param list Sequence to search through
    * @return List of matches sorted by start position
    */
-  @SafeVarargs
-  public final List<Match<K,V>> findNonOverlapping(K... list) {
+  public List<Match<K,V>> findNonOverlapping(K ... list) {
     return findNonOverlapping(Arrays.asList(list));
   }
 
@@ -256,14 +247,13 @@ public class TrieMapMatcher<K,V> {
     return findNonOverlapping(list, 0, list.size());
   }
 
-  public static final Comparator<Match> MATCH_LENGTH_ENDPOINTS_COMPARATOR = Interval.lengthEndpointsComparator();
-  public static final Function<Match, Double> MATCH_LENGTH_SCORER = Interval.lengthScorer();
+  public final static Comparator<Match> MATCH_LENGTH_ENDPOINTS_COMPARATOR = Interval.<Match>lengthEndpointsComparator();
+  public final static Function<Match, Double> MATCH_LENGTH_SCORER = Interval.<Match>lengthScorer();
 
   /**
    * Given a sequence to search through (e.g. piece of text would be a sequence of words),
    * finds all non-overlapping matching sub-sequences that matches entries in the trie.
    * Sub-sequences that are longer are preferred, then sub-sequences that starts earlier.
-   *
    * @param list Sequence to search through
    * @param start start index to start search at
    * @param end end index (exclusive) to end search at
@@ -276,7 +266,6 @@ public class TrieMapMatcher<K,V> {
   /**
    * Given a sequence to search through (e.g. piece of text would be a sequence of words),
    * finds all non-overlapping matching sub-sequences that matches entries in the trie.
-   *
    * @param list Sequence to search through
    * @param start start index to start search at
    * @param end end index (exclusive) to end search at
@@ -292,7 +281,6 @@ public class TrieMapMatcher<K,V> {
   /**
    * Given a sequence to search through (e.g. piece of text would be a sequence of words),
    * finds all non-overlapping matching sub-sequences that matches entries in the trie while attempting to maximize the scoreFunc.
-   *
    * @param list Sequence to search through
    * @param start start index to start search at
    * @param end end index (exclusive) to end search at
@@ -306,20 +294,17 @@ public class TrieMapMatcher<K,V> {
 
   /**
    * Segment a sequence into sequence of sub-sequences by attempting to find the longest non-overlapping
-   * sub-sequences.  Non-matched parts will be included as a match with a null value.
-   *
+   *  sub-sequences.  Non-matched parts will be included as a match with a null value.
    * @param list Sequence to search through
    * @return List of segments (as matches) sorted by start position
    */
-  @SafeVarargs
-  public final List<Match<K,V>> segment(K... list) {
+  public List<Match<K,V>> segment(K ... list) {
     return segment(Arrays.asList(list));
   }
 
   /**
    * Segment a sequence into sequence of sub-sequences by attempting to find the longest non-overlapping
    *  sub-sequences.  Non-matched parts will be included as a match with a null value.
-   *
    * @param list Sequence to search through
    * @return List of segments (as matches) sorted by start position
    */
@@ -343,7 +328,6 @@ public class TrieMapMatcher<K,V> {
    * Segment a sequence into sequence of sub-sequences by attempting to find the non-overlapping
    *  sub-sequences that comes earlier using the compareFunc.
    * Non-matched parts will be included as a match with a null value.
-   *
    * @param list Sequence to search through
    * @param start start index to start search at
    * @param end end index (exclusive) to end search at
@@ -374,7 +358,6 @@ public class TrieMapMatcher<K,V> {
   /**
    * Segment a sequence into sequence of sub-sequences by attempting to maximize the total score
    * Non-matched parts will be included as a match with a null value.
-   *
    * @param list Sequence to search through
    * @param start start index to start search at
    * @param end end index (exclusive) to end search at
@@ -408,7 +391,6 @@ public class TrieMapMatcher<K,V> {
   /**
    * Given a list of matches, returns all non-overlapping matches.
    * Matches that are longer are preferred, then matches that starts earlier.
-   *
    * @param allMatches List of matches
    * @return List of matches sorted by start position
    */
@@ -418,7 +400,6 @@ public class TrieMapMatcher<K,V> {
 
   /**
    * Given a list of matches, returns all non-overlapping matches.
-   *
    * @param allMatches List of matches
    * @param compareFunc Comparison function to use for evaluating which overlapping sub-sequence to keep.
    *                    Earlier sub-sequences based on the comparison function are favored.
@@ -427,7 +408,7 @@ public class TrieMapMatcher<K,V> {
   public List<Match<K,V>> getNonOverlapping(List<Match<K,V>> allMatches, Comparator<? super Match<K,V>> compareFunc) {
     if (allMatches.size() > 1) {
       List<Match<K,V>> nonOverlapping = IntervalTree.getNonOverlapping(allMatches, compareFunc);
-      nonOverlapping.sort(HasInterval.ENDPOINTS_COMPARATOR);
+      Collections.sort(nonOverlapping, HasInterval.ENDPOINTS_COMPARATOR);
       return nonOverlapping;
     } else {
       return allMatches;
@@ -576,7 +557,7 @@ public class TrieMapMatcher<K,V> {
     protected final int maxSize;
     protected final double maxCost;
 
-    public final ToDoubleFunction<PartialApproxMatch<K,V>> MATCH_COST_FUNCTION = in -> in.cost;
+    public final Function<PartialApproxMatch<K,V>, Double> MATCH_COST_FUNCTION = in -> in.cost;
 
     public MatchQueue(int maxSize, double maxCost) {
       this.maxSize = maxSize;
@@ -604,7 +585,7 @@ public class TrieMapMatcher<K,V> {
 
     public List<PartialApproxMatch<K,V>> toSortedList() {
       List<PartialApproxMatch<K,V>> res = queue.valuesList();
-      res.sort(TrieMapMatcher.<K, V>partialMatchComparator());
+      Collections.sort(res, TrieMapMatcher.<K,V>partialMatchComparator());
       return res;
     }
   }
@@ -630,7 +611,6 @@ public class TrieMapMatcher<K,V> {
       mq.put(m, pam);
     }
 
-    @Override
     public double topCost() {
       double cost = Double.MIN_VALUE;
       for (BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> q:multimatchQueues.values()) {
@@ -652,7 +632,7 @@ public class TrieMapMatcher<K,V> {
       for (BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> q:multimatchQueues.values()) {
         all.addAll(q.valuesList());
       }
-      all.sort(TrieMapMatcher.<K, V>partialMatchComparator());
+      Collections.sort(all, TrieMapMatcher.<K,V>partialMatchComparator());
       return all;
     }
   }
@@ -732,5 +712,8 @@ public class TrieMapMatcher<K,V> {
       return 1;
     } else return (o1.cost < o2.cost)? -1:1;
   };
+
+
+
 
 }

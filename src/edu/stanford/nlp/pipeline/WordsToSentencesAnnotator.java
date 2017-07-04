@@ -116,12 +116,13 @@ public class WordsToSentencesAnnotator implements Annotator  {
         String nlsb = properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
             StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
 
-        VERBOSE = false;
-        this.countLineNumbers = false;
-        this.wts = new WordToSentenceProcessor<>(boundaryTokenRegex, null,
+        WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<>(boundaryTokenRegex, null,
             boundariesToDiscard, htmlElementsToDiscard,
             WordToSentenceProcessor.stringToNewlineIsSentenceBreak(nlsb),
             (boundaryMultiTokenRegex != null) ? TokenSequencePattern.compile(boundaryMultiTokenRegex) : null, tokenRegexesToDiscard);
+        VERBOSE = false;
+        this.countLineNumbers = false;
+        this.wts = wts;
       }
     }
   }
@@ -271,6 +272,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
               CoreAnnotations.CharacterOffsetEndAnnotation.class);
           if (currSectionCharEnd < end) {
             currSectionIndex++;
+            continue;
           } else {
             // if the sentence falls in this current section, link it to this section
             if (currSectionCharBegin <= begin) {

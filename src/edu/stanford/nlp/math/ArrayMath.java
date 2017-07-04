@@ -12,7 +12,7 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * Methods for operating on numerical arrays as vectors and matrices.
+ * Class ArrayMath
  *
  * @author Teg Grenager
  */
@@ -36,17 +36,15 @@ public class ArrayMath {
    * Generate a range of integers from start (inclusive) to end (exclusive).
    * Similar to the Python range() builtin function.
    *
-   * @param start Beginning number (inclusive)
-   * @param end Ending number (exclusive)
+   * @param start
+   * @param end
    * @return integers from [start...end)
    */
   public static int[] range(int start, int end) {
     assert end > start;
     int len = end - start;
     int[] range = new int[len];
-    for (int i = 0; i < range.length; ++i) {
-      range[i] = i+start;
-    }
+    for (int i = 0; i < range.length; ++i) range[i] = i+start;
     return range;
   }
 
@@ -582,7 +580,7 @@ public class ArrayMath {
   // VECTOR PROPERTIES
 
   /**
-   * Returns the sum of an array of doubles.
+   * Returns the sum of an array of numbers.
    */
   public static double sum(double[] a) {
     return sum(a,0,a.length);
@@ -590,8 +588,8 @@ public class ArrayMath {
 
   /**
    * Returns the sum of the portion of an array of numbers between
-   * {@code fromIndex}, inclusive, and {@code toIndex}, exclusive.
-   * Returns 0 if {@code fromIndex >= toIndex}.
+   * <code>fromIndex</code>, inclusive, and <code>toIndex</code>, exclusive.
+   * Returns 0 if <code>fromIndex</code> &gt;= <code>toIndex</code>.
    */
   public static double sum(double[] a, int fromIndex, int toIndex) {
     double result = 0.0;
@@ -600,6 +598,7 @@ public class ArrayMath {
     }
     return result;
   }
+
 
 
   public static int sum(int[] a) {
@@ -807,7 +806,7 @@ public class ArrayMath {
   }
 
   /**
-   * @return the index of the min value; if min is a tie, returns the lowest index one.
+   * @return the index of the min value; if min is a tie, returns the first one.
    */
   public static int argmin(double[] a) {
     double min = Double.POSITIVE_INFINITY;
@@ -824,14 +823,8 @@ public class ArrayMath {
   /**
    * @return The minimum value in an array.
    */
-  public static double min(double... vector) {
-    double min = Double.POSITIVE_INFINITY;
-    for (double x : vector) {
-      if (x < min) {
-        min = x;
-      }
-    }
-    return min;
+  public static double min(double[] a) {
+    return a[argmin(a)];
   }
 
   /**
@@ -879,19 +872,9 @@ public class ArrayMath {
     return argmin;
   }
 
-  /**
-   * @return the min value.
-   */
-  public static int min(int... vector) {
-    int min = Integer.MAX_VALUE;
-    for (int x : vector) {
-      if (x < min) {
-        min = x;
-      }
-    }
-    return min;
+  public static int min(int[] a) {
+    return a[argmin(a)];
   }
-
 
   /**
    * @return the index of the max value; if max is a tie, returns the first one.
@@ -908,19 +891,9 @@ public class ArrayMath {
     return argmax;
   }
 
-  /**
-   * @return the index of the max value; if max is a tie, returns the first one.
-   */
-  public static int max(int... vector) {
-    int max = Integer.MIN_VALUE;
-    for (int x : vector) {
-      if (x > max) {
-        max = x;
-      }
-    }
-    return max;
+  public static int max(int[] a) {
+    return a[argmax(a)];
   }
-
 
   /** Returns the smallest element of the matrix */
   public static int min(int[][] matrix) {
@@ -970,15 +943,15 @@ public class ArrayMath {
   }
 
   /**
-   * Returns the log of the portion between {@code fromIndex}, inclusive, and
-   * {@code toIndex}, exclusive, of an array of numbers, which are
+   * Returns the log of the portion between <code>fromIndex</code>, inclusive, and
+   * <code>toIndex</code>, exclusive, of an array of numbers, which are
    * themselves input in log form.  This is all natural logarithms.
    * Reasonable care is taken to do this as efficiently as possible
    * (under the assumption that the numbers might differ greatly in
    * magnitude), with high accuracy, and without numerical overflow.  Throws an
-   * {@link IllegalArgumentException} if {@code logInputs} is of length zero.
-   * Otherwise, returns Double.NEGATIVE_INFINITY if {@code fromIndex} &gt;=
-   * {@code toIndex}.
+   * {@link IllegalArgumentException} if <code>logInputs</code> is of length zero.
+   * Otherwise, returns Double.NEGATIVE_INFINITY if <code>fromIndex</code> &gt;=
+   * <code>toIndex</code>.
    *
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
    * @param fromIndex The array index to start the sum from
@@ -1019,16 +992,16 @@ public class ArrayMath {
   }
 
   /**
-   * Returns the log of the portion between {@code fromIndex}, inclusive, and
-   * {@code toIndex}, exclusive, of an array of numbers, which are
+   * Returns the log of the portion between <code>fromIndex</code>, inclusive, and
+   * <code>toIndex</code>, exclusive, of an array of numbers, which are
    * themselves input in log form.  This is all natural logarithms.
    * This version incorporates a stride, so you can sum only select numbers.
    * Reasonable care is taken to do this as efficiently as possible
    * (under the assumption that the numbers might differ greatly in
    * magnitude), with high accuracy, and without numerical overflow.  Throws an
-   * {@link IllegalArgumentException} if {@code logInputs} is of length zero.
-   * Otherwise, returns Double.NEGATIVE_INFINITY if {@code fromIndex} &gt;=
-   * {@code toIndex}.
+   * {@link IllegalArgumentException} if <code>logInputs</code> is of length zero.
+   * Otherwise, returns Double.NEGATIVE_INFINITY if <code>fromIndex</code> &gt;=
+   * <code>toIndex</code>.
    *
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
    * @param fromIndex The array index to start the sum from
@@ -1111,7 +1084,7 @@ public class ArrayMath {
    * magnitude), with high accuracy, and without numerical overflow.
    *
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
-   * @return {@literal log(x1 + ... + xn)}
+   * @return log(x1 + ... + xn)
    */
   public static float logSum(float[] logInputs) {
     int leng = logInputs.length;

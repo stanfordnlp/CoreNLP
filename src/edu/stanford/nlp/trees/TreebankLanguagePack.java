@@ -246,7 +246,7 @@ public interface TreebankLanguagePack extends Serializable {
 
   /**
    * Return the charset encoding of the Treebank.  See
-   * documentation for the {@code Charset} class.
+   * documentation for the <code>Charset</code> class.
    *
    * @return Name of Charset
    */
@@ -292,7 +292,7 @@ public interface TreebankLanguagePack extends Serializable {
   /**
    * Returns the basic syntactic category of a String by truncating
    * stuff after a (non-word-initial) occurrence of one of the
-   * {@code labelAnnotationIntroducingCharacters()}.  This
+   * <code>labelAnnotationIntroducingCharacters()</code>.  This
    * function should work on phrasal category and POS tag labels,
    * but needn't (and couldn't be expected to) work on arbitrary
    * Word strings.
@@ -325,7 +325,7 @@ public interface TreebankLanguagePack extends Serializable {
    * This normally involves truncating numerical coindexation
    * showing coreference, etc.  By 'function', this means
    * keeping, say, Penn Treebank functional tags or ICE phrasal functions,
-   * perhaps returning them as {@code category-function}.
+   * perhaps returning them as <code>category-function</code>.
    *
    * @param category The whole String name of the label
    * @return A String giving the category and function

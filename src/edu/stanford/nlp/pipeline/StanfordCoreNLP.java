@@ -188,8 +188,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   }
 
   public StanfordCoreNLP(Properties props, boolean enforceRequirements, AnnotatorPool annotatorPool)  {
-    // cdm [2017]: constructAnnotatorPool (PropertiesUtils.getSignature) requires non-null Properties
-    if (props == null) { props = new Properties(); }
     this.pool = annotatorPool != null ? annotatorPool : constructAnnotatorPool(props, getAnnotatorImplementations());
     construct(props, enforceRequirements, getAnnotatorImplementations());
   }
@@ -216,13 +214,17 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   //
 
   /**
-   * Get the implementation of each relevant annotator in the pipeline.
-   * The primary use of this method is to be overwritten by subclasses of StanfordCoreNLP
-   * to call different annotators that obey the exact same contract as the default
-   * annotator.
+   * <p>
+   *   Get the implementation of each relevant annotator in the pipeline.
+   *   The primary use of this method is to be overwritten by subclasses of StanfordCoreNLP
+   *   to call different annotators that obey the exact same contract as the default
+   *   annotator.
+   * </p>
    *
-   * The canonical use case for this is as an implementation of the Curator server,
-   * where the annotators make server calls rather than calling each annotator locally.
+   * <p>
+   *   The canonical use case for this is as an implementation of the Curator server,
+   *   where the annotators make server calls rather than calling each annotator locally.
+   * </p>
    *
    * @return A class which specifies the actual implementation of each of the annotators called
    *         when creating the annotator pool. The canonical annotators are defaulted to in
@@ -634,8 +636,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   }
 
 
-  /** {@inheritDoc} */
   @Override
+  /** {@inheritDoc} */
   public void annotate(Annotation annotation) {
     super.annotate(annotation);
     List<CoreLabel> words = annotation.get(CoreAnnotations.TokensAnnotation.class);
@@ -1207,7 +1209,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
           String encoding = properties.getProperty("encoding", "UTF-8");
           String text = IOUtils.slurpFile(file.getAbsoluteFile(), encoding);
           annotation = new Annotation(text);
-          annotation.set(CoreAnnotations.DocIDAnnotation.class, file.getName());
         }
 
         Timing timing = new Timing();

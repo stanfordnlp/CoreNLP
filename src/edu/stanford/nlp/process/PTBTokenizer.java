@@ -199,7 +199,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * Constructs a new PTBTokenizer that makes CoreLabel tokens.
    * It optionally returns carriage returns
    * as their own token. CRs come back as Words whose text is
-   * the value of {@code AbstractTokenizer.NEWLINE_TOKEN}.
+   * the value of {@code PTBLexer.NEWLINE_TOKEN}.
    *
    * @param r The Reader to read tokens from
    * @param tokenizeNLs Whether to return newlines as separate tokens
@@ -310,7 +310,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    *
    * @return string literal inserted for "\n".
    */
-  public static String getNewlineToken() { return NEWLINE_TOKEN; }
+  public static String getNewlineToken() { return PTBLexer.NEWLINE_TOKEN; }
 
   /**
    * Returns a presentable version of the given PTB-tokenized text.
@@ -444,7 +444,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       }
       for (int j = 0; j < numFiles; j++) {
         Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
-        if (outputFileList != null) {
+        if (out == null) {
           out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
         }
         numTokens += tokReader(r, out, parseInsidePattern, options, preserveLines, dump, lowerCase);
@@ -492,7 +492,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
           str = obj.toShorterString();
         }
         if (preserveLines) {
-          if (NEWLINE_TOKEN.equals(origStr)) {
+          if (PTBLexer.NEWLINE_TOKEN.equals(origStr)) {
             beginLine = true;
             writer.newLine();
           } else {

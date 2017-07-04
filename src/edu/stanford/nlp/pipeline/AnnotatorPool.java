@@ -1,5 +1,4 @@
 package edu.stanford.nlp.pipeline;
-
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -23,7 +22,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class AnnotatorPool  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotatorPool.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorPool.class);
 
   /**
    * A cached annotator, including the signature it should cache on.
