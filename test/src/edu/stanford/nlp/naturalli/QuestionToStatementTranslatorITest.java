@@ -525,6 +525,12 @@ public class QuestionToStatementTranslatorITest {
         "what/WP did/VBD Tesla/NNP invent/VB ?",
         "Tesla invented thing");
     checkFormatted(
+        "what/WP did/VBD Tesla/NNP experiment/VB with/IN ?",
+        "Tesla experimented with thing");
+    checkFormatted(
+        "what/WP did/VBD Tesla/NNP experiment/NN with/IN ?",  // POS tag error on 'experiment'
+        "Tesla experimented with thing");
+    checkFormatted(
         "where/WRB was/VBD Tesla/NNP born/VB ?",
         "Tesla was born at Location");
     checkFormatted(

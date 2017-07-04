@@ -999,10 +999,20 @@ public class QuestionToStatementTranslator {
     }
     // 3.4. Conjugate the verb
     VerbTense tense = VerbTense.of(past, plural, participle, person);
+    boolean foundVerb = false;
     for (CoreLabel token : statement) {
       if (Optional.ofNullable(token.tag()).map(x -> x.startsWith("V")).orElse(false)) {
+        foundVerb = true;
         token.set(CoreAnnotations.StatementTextAnnotation.class,
             tense.conjugateEnglish(token.get(CoreAnnotations.StatementTextAnnotation.class), false));
+      }
+    }
+    if (!foundVerb) {
+      for (CoreLabel token : statement) {
+        if (Optional.ofNullable(token.tag()).map("NN"::equals).orElse(false)) {
+          token.set(CoreAnnotations.StatementTextAnnotation.class,
+              tense.conjugateEnglish(token.get(CoreAnnotations.StatementTextAnnotation.class), false));
+        }
       }
     }
 
