@@ -21,6 +21,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import javax.net.ssl.*;
 import java.io.*;
+import java.lang.ref.SoftReference;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -92,7 +93,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * To prevent grossly wasteful over-creation of pipeline objects, cache the last
    *  one we created.
    */
-  private Pair<String, StanfordCoreNLP> lastPipeline = new Pair<>(null, null);
+  private SoftReference<Pair<String, StanfordCoreNLP>> lastPipeline = new SoftReference<>(null);
   /**
    * An executor to time out CoreNLP execution with.
    */
@@ -314,7 +315,8 @@ public class StanfordCoreNLPServer implements Runnable {
     String cacheKey = sb.toString();
 
     synchronized (this) {
-      if (Objects.equals(lastPipeline.first, cacheKey)) {
+      Pair<String, StanfordCoreNLP> lastPipeline = this.lastPipeline.get();
+      if (lastPipeline != null && Objects.equals(lastPipeline.first, cacheKey)) {
         return lastPipeline.second;
       } else {
         // Do some housekeeping on the global cache
@@ -329,7 +331,7 @@ public class StanfordCoreNLPServer implements Runnable {
         }
         // Create a CoreNLP
         impl = new StanfordCoreNLP(props);
-        lastPipeline = Pair.makePair(cacheKey, impl);
+        this.lastPipeline = new SoftReference<>(Pair.makePair(cacheKey, impl));
       }
     }
 

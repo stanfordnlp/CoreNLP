@@ -80,6 +80,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   public static final EnhancementOptions ENHANCED_PLUS_PLUS_OPTIONS = new EnhancementOptions(true, true, false, true, true, true,
       true, true, true);
 
+
+
   /*
    * Options for "Collapsed" representation.
    * This represenation is similar to the "collapsed" SD representation

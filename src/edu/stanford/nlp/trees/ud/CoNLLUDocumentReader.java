@@ -53,7 +53,7 @@ public class CoNLLUDocumentReader implements
 
     private int lineNumberCounter = 0;
 
-    private Pair<IndexedWord, GrammaticalRelation> getGovAndReln(int govIdx, IndexedWord word, String relationName,
+    private Pair<IndexedWord, GrammaticalRelation> getGovAndReln(int govIdx, int copyCount, IndexedWord word, String relationName,
                                                                  List<IndexedWord> sortedTokens) {
       IndexedWord gov;
       GrammaticalRelation reln;
@@ -66,10 +66,29 @@ public class CoNLLUDocumentReader implements
         gov = new IndexedWord(word.docID(), word.sentIndex(), 0);
         gov.setValue("ROOT");
       } else {
-        gov = sortedTokens.get(govIdx - 1);
+        gov = this.getToken(sortedTokens, govIdx, copyCount);
       }
       return Generics.newPair(gov, reln);
     }
+
+    private IndexedWord getToken(List<IndexedWord> sortedTokens, int index) {
+      return this.getToken(sortedTokens, index, 0);
+    }
+
+
+    private IndexedWord getToken(List<IndexedWord> sortedTokens, int index, int copyCount) {
+
+
+      int tokenLength = sortedTokens.size();
+      for (int i = index - 1 ; i < tokenLength; i++) {
+        IndexedWord token = sortedTokens.get(i);
+        if (token.index() == index && token.copyCount() == copyCount) {
+          return token;
+        }
+      }
+      return null;
+    }
+
 
     public SemanticGraph apply(String line) {
       if (line == null) return null;
@@ -98,7 +117,15 @@ public class CoNLLUDocumentReader implements
       List<IndexedWord> sortedTokens = new ArrayList<>(wordList.size());
       sorted.stream()
               .filter(w -> !w.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class))
+              .filter(w -> w.copyCount() == 0)
               .forEach(w -> sortedTokens.add(w));
+
+      sorted.stream()
+          .filter(w -> !w.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class))
+          .filter(w -> w.copyCount() != 0)
+          .forEach(w -> sortedTokens.add(sortedTokens.get(w.index() - 1).makeSoftCopy(w.copyCount())));
+
+
 
       /* Construct a semantic graph. */
       List<TypedDependency> deps = new ArrayList<>(sorted.size());
@@ -120,10 +147,10 @@ public class CoNLLUDocumentReader implements
             tokenSpan = null;
             originalToken = null;
           }
-          HashMap<Integer,String> extraDeps = word.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class);
+          HashMap<String,String> extraDeps = word.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class);
           if (extraDeps.isEmpty()) {
             int govIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
-            Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(govIdx, word,
+            Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(govIdx, 0, word,
                 word.get(CoreAnnotations.CoNLLDepTypeAnnotation.class), sortedTokens);
             IndexedWord gov = govReln.first();
             GrammaticalRelation reln  = govReln.second();
@@ -131,17 +158,32 @@ public class CoNLLUDocumentReader implements
             word.set(CoreAnnotations.LineNumberAnnotation.class, lineNumberCounter);
             deps.add(dep);
           } else {
-            for (Integer extraGovIdx : extraDeps.keySet()) {
-              int mainGovIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
-              Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(extraGovIdx, word,
-                  extraDeps.get(extraGovIdx), sortedTokens);
-              IndexedWord gov = govReln.first();
-              GrammaticalRelation reln = govReln.second();
-              TypedDependency dep = new TypedDependency(reln, gov, word);
-              if (extraGovIdx != mainGovIdx) {
+            for (String extraGovIdxStr : extraDeps.keySet()) {
+              if (extraGovIdxStr.contains(".")) {
+                String[] indexParts = extraGovIdxStr.split("\\.");
+                Integer extraGovIdx = Integer.parseInt(indexParts[0]);
+                Integer copyCount = Integer.parseInt(indexParts[1]);
+                Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(extraGovIdx, copyCount, word,
+                    extraDeps.get(extraGovIdxStr), sortedTokens);
+                IndexedWord gov = govReln.first();
+                GrammaticalRelation reln = govReln.second();
+                TypedDependency dep = new TypedDependency(reln, gov, word);
                 dep.setExtra();
+                deps.add(dep);
+              } else {
+                int extraGovIdx = Integer.parseInt(extraGovIdxStr);
+                int mainGovIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class) != null ?
+                    word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class) : -1;
+                Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(extraGovIdx, 0, word,
+                    extraDeps.get(extraGovIdxStr), sortedTokens);
+                IndexedWord gov = govReln.first();
+                GrammaticalRelation reln = govReln.second();
+                TypedDependency dep = new TypedDependency(reln, gov, word);
+                if (extraGovIdx != mainGovIdx) {
+                  dep.setExtra();
+                }
+                deps.add(dep);
               }
-              deps.add(dep);
             }
           }
         }
@@ -179,6 +221,22 @@ public class CoNLLUDocumentReader implements
         Integer end = Integer.parseInt(span[1]);
         word.set(CoreAnnotations.CoNLLUTokenSpanAnnotation.class, new IntPair(start, end));
         word.set(CoreAnnotations.IndexAnnotation.class, start);
+      } else if(bits[0].contains(".")) {
+        String[] indexParts = bits[0].split("\\.");
+        Integer index = Integer.parseInt(indexParts[0]);
+        Integer copyCount = Integer.parseInt(indexParts[1]);
+        word.set(CoreAnnotations.IndexAnnotation.class, index);
+        word.setIndex(index);
+        word.setCopyCount(copyCount);
+        word.setValue(bits[1]);
+
+        /* Parse features. */
+        HashMap<String, String> features = CoNLLUUtils.parseFeatures(bits[5]);
+        word.set(CoreAnnotations.CoNLLUFeats.class, features);
+
+        /* Parse extra dependencies. */
+        HashMap<String,String> extraDeps = CoNLLUUtils.parseExtraDeps(bits[8]);
+        word.set(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class, extraDeps);
       } else {
         word.set(CoreAnnotations.IndexAnnotation.class, Integer.parseInt(bits[0]));
         word.set(CoreAnnotations.LemmaAnnotation.class, bits[2]);
@@ -197,7 +255,7 @@ public class CoNLLUDocumentReader implements
         word.set(CoreAnnotations.CoNLLUFeats.class, features);
 
         /* Parse extra dependencies. */
-        HashMap<Integer,String> extraDeps = CoNLLUUtils.parseExtraDeps(bits[8]);
+        HashMap<String,String> extraDeps = CoNLLUUtils.parseExtraDeps(bits[8]);
         word.set(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class, extraDeps);
       }
 

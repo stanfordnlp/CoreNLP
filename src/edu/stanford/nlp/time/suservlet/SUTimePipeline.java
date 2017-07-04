@@ -72,11 +72,10 @@ public class SUTimePipeline  {
     }
   }
 
-  public Annotation process(String sentence, String dateString, Annotator timeAnnotator)
-  {
+  public Annotation process(String sentence, String dateString, Annotator timeAnnotator) {
     log.info("Processing text \"" + sentence + "\" with dateString = " + dateString);
     Annotation anno = new Annotation(sentence);
-    if (dateString != null && !dateString.equals("")) {
+    if (dateString != null && ! dateString.isEmpty()) {
       anno.set(CoreAnnotations.DocDateAnnotation.class, dateString);
     }
     pipeline.annotate(anno);

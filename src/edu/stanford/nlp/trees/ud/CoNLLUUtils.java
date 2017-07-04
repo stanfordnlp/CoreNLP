@@ -71,14 +71,14 @@ public class CoNLLUUtils {
      * @param extraDepsString
      * @return A HashMap<Integer,String> with the additional dependencies.
      */
-    public static HashMap<Integer,String> parseExtraDeps(String extraDepsString) {
-        HashMap<Integer,String> extraDeps = new HashMap<>();
+    public static HashMap<String,String> parseExtraDeps(String extraDepsString) {
+        HashMap<String,String> extraDeps = new HashMap<>();
         if ( ! extraDepsString.equals("_")) {
             String[] extraDepParts = extraDepsString.split("\\|");
             for (String extraDepString : extraDepParts) {
                 int sepPos = extraDepString.indexOf(":");
                 String reln = extraDepString.substring(sepPos + 1);
-                Integer gov = Integer.parseInt(extraDepString.substring(0, sepPos));
+                String gov = extraDepString.substring(0, sepPos);
                 extraDeps.put(gov, reln);
             }
         }

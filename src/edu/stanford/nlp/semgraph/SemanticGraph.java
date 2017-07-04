@@ -1,7 +1,12 @@
 package edu.stanford.nlp.semgraph;
-import edu.stanford.nlp.util.logging.Redwood;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -15,11 +20,7 @@ import edu.stanford.nlp.util.MapFactory;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringParsingTask;
 import edu.stanford.nlp.util.StringUtils;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
@@ -30,24 +31,24 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 /**
  * Represents a semantic graph of a sentence or document, with IndexedWord
  * objects for nodes.
- * <p>
+ *
  * Notes:
- * <br>
+ *
  * The root is not at present represented as a vertex in the graph.
  * At present you need to get a root/roots
  * from the separate roots variable and to know about it.
  * This should maybe be changed, because otherwise, doing things like
  * simply getting the set of nodes or edges from the graph doesn't give
  * you root nodes or edges.
- * <br>
+ *
  * Given the kinds of representations that we normally use with
  * typedDependenciesCollapsed, there can be (small) cycles in a
  * SemanticGraph, and these cycles may involve the node that is conceptually the
  * root of the graph, so there may be no node without a parent node. You can
  * better get at the root(s) via the variable and methods provided.
- * <br>
- * There is no mechanism for returning all edges at once (eg <code>edgeSet()</code>).
- * This is intentional.  Use <code>edgeIterable()</code> to iterate over the edges if necessary.
+ *
+ * There is no mechanism for returning all edges at once (e.g., {@code edgeSet()}).
+ * This is intentional.  Use {@code edgeIterable()} to iterate over the edges if necessary.
  *
  * @author Christopher Cox
  * @author Teg Grenager
@@ -141,9 +142,9 @@ public class SemanticGraph implements Serializable  {
    * @return Ordered list of vertices
    */
   public List<IndexedWord> vertexListSorted() {
-    ArrayList<IndexedWord> vlist = new ArrayList<>(vertexSet());
-    Collections.sort(vlist);
-    return vlist;
+    ArrayList<IndexedWord> vList = new ArrayList<>(vertexSet());
+    Collections.sort(vList);
+    return vList;
   }
 
   /**
@@ -157,7 +158,7 @@ public class SemanticGraph implements Serializable  {
     for (SemanticGraphEdge edge : edgeIterable()) {
       edgeList.add(edge);
     }
-    Collections.sort(edgeList, SemanticGraphEdge.orderByTargetComparator());
+    edgeList.sort(SemanticGraphEdge.orderByTargetComparator());
     return edgeList;
   }
 
@@ -340,7 +341,7 @@ public class SemanticGraph implements Serializable  {
     pat = pat.replaceAll(">", ",>");
     String[] nodePath = pat.split(",");
     for (String s : nodePath) {
-      if (s.equals("")) {
+      if (s.isEmpty()) {
         continue;
       }
       String word = s.substring(1);
@@ -367,7 +368,7 @@ public class SemanticGraph implements Serializable  {
           boolean match = false;
           for (IndexedWord child : children) {
             String lemma = child.get(CoreAnnotations.LemmaAnnotation.class);
-            if (lemma.equals("")) {
+            if (lemma.isEmpty()) {
               lemma = child.word().toLowerCase();
             }
             if (lemma.equals(word)) {
@@ -386,7 +387,7 @@ public class SemanticGraph implements Serializable  {
               continue;
             IndexedWord child = pair.second();
             String lemma = child.get(CoreAnnotations.LemmaAnnotation.class);
-            if (lemma.equals("")) {
+            if (lemma.isEmpty()) {
               lemma = child.word().toLowerCase();
             }
             if (lemma.equals(word)) {
@@ -414,7 +415,7 @@ public class SemanticGraph implements Serializable  {
     pat = pat.replaceAll(">", ",>");
     String[] nodePath = pat.split(",");
     for (String s : nodePath) {
-      if (s.equals("")) {
+      if (s.isEmpty()) {
         continue;
       }
       String word = s.substring(1);
@@ -437,7 +438,7 @@ public class SemanticGraph implements Serializable  {
         boolean match = false;
         for (IndexedWord child : getChildren(vertex)) {
           String lemma = child.get(CoreAnnotations.LemmaAnnotation.class);
-          if (lemma == null || lemma.equals("")) {
+          if (lemma == null || lemma.isEmpty()) {
             lemma = child.word().toLowerCase();
           }
           if (lemma.equals(word)) {
@@ -566,7 +567,7 @@ public class SemanticGraph implements Serializable  {
    * root is inaccessible (should never happen).
    */
   public List<IndexedWord> getPathToRoot(IndexedWord vertex) {
-    List<IndexedWord> path = getPathToRoot(vertex, Generics.<IndexedWord>newArrayList());
+    List<IndexedWord> path = getPathToRoot(vertex, Generics.newArrayList());
     if (path != null) Collections.reverse(path);
     return path;
   }
@@ -610,8 +611,34 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
+   * Returns the <em>first</em> {@link edu.stanford.nlp.ling.IndexedWord
+   * IndexedWord} in this {@code SemanticGraph} having the given integer index,
+   * or throws {@code IllegalArgumentException} if no such node is found.
+   */
+  public IndexedWord getNodeByIndexAndCopyCount(int index, int copyCount) throws IllegalArgumentException {
+    IndexedWord node = getNodeByIndexAndCopyCountSafe(index, copyCount);
+    if (node == null)
+      throw new IllegalArgumentException("No SemanticGraph vertex with index " + index + " and copyCount " + copyCount);
+    else
+      return node;
+  }
+
+  /**
+   * Same as above, but returns {@code null} if the index does not exist
+   * (instead of throwing an exception).
+   */
+  public IndexedWord getNodeByIndexAndCopyCountSafe(int index, int copyCount) {
+    for (IndexedWord vertex : vertexSet()) {
+      if (vertex.index() == index && vertex.copyCount() == copyCount) {
+        return vertex;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Returns the <i>first</i> {@link edu.stanford.nlp.ling.IndexedWord
-   * IndexedWord} in this <code>SemanticGraph</code> having the given word or
+   * IndexedWord} in this {@code SemanticGraph} having the given word or
    * regex, or return null if no such found.
    */
   public IndexedWord getNodeByWordPattern(String pattern) {
@@ -627,7 +654,7 @@ public class SemanticGraph implements Serializable  {
 
   /**
    * Returns all nodes of type {@link edu.stanford.nlp.ling.IndexedWord
-   * IndexedWord} in this <code>SemanticGraph</code> having the given word or
+   * IndexedWord} in this {@code SemanticGraph} having the given word or
    * regex, or returns empty list if no such found.
    */
   public List<IndexedWord> getAllNodesByWordPattern(String pattern) {
@@ -728,9 +755,9 @@ public class SemanticGraph implements Serializable  {
 
   /**
    * Returns the relation that node a has with node b.
-   * <br>
-   * Note: there may be multiple arcs between <code>a</code> and
-   * <code>b</code>, and this method only returns one relation.
+   *
+   * Note: there may be multiple arcs between {@code a} and
+   * {@code b}, and this method only returns one relation.
    */
   public GrammaticalRelation reln(IndexedWord a, IndexedWord b) {
     if (!containsVertex(a)) {
@@ -879,7 +906,7 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Does the given <code>vertex</code> have at least one child with the given {@code reln} and the lemma <code>childLemma</code>?
+   * Does the given {@code vertex} have at least one child with the given {@code reln} and the lemma {@code childLemma}?
    */
   public boolean hasChild(IndexedWord vertex, GrammaticalRelation reln, String childLemma) {
     if (!containsVertex(vertex)) {
@@ -896,7 +923,7 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Does the given <code>vertex</code> have at least one child with the given {@code reln}?
+   * Does the given {@code vertex} have at least one child with the given {@code reln}?
    */
   public boolean hasChildWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (!containsVertex(vertex)) {
@@ -1104,7 +1131,7 @@ public class SemanticGraph implements Serializable  {
 
 
   /**
-   * Returns all nodes reachable from <code>root</code>.
+   * Returns all nodes reachable from {@code root}.
    *
    * @param root the root node of the subgraph
    * @return all nodes in subgraph
@@ -1145,7 +1172,7 @@ public class SemanticGraph implements Serializable  {
   /**
    *
    * @param root root node of the subgraph.
-   * @return true if the subgraph rooted at <code>root</code> contains no cycles.
+   * @return true if the subgraph rooted at {@code root} contains no cycles.
    */
 
   public boolean isDag(IndexedWord root) {
@@ -1287,7 +1314,7 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Similar to <code>toRecoveredString</code>, but will fill in words that were
+   * Similar to {@code toRecoveredString}, but will fill in words that were
    * collapsed into relations (i.e. prep_for --> 'for'). Mostly to deal with
    * collapsed dependency trees.
    *
@@ -1376,8 +1403,8 @@ public class SemanticGraph implements Serializable  {
    *
    * </dd>
    * <dt>readable</dt>
-   * <dd>Formats the dependencies as a table with columns <code>dependent</code>, <code>relation</code>, and <code>governor</code>, as exemplified by the
-   * following:
+   * <dd>Formats the dependencies as a table with columns {@code dependent}, {@code relation}, and {@code governor},
+   * as exemplified by the following:
    *
    * <pre>
    *  Sam-0               nsubj               died-1
@@ -1437,8 +1464,7 @@ public class SemanticGraph implements Serializable  {
    *  tmod(died-6, today-9)
    * </pre>
    *
-   * @return a <code>String</code> representation of this set of typed
-   *         dependencies
+   * @return a {@code String} representation of this set of typed dependencies
    */
   public String toList() {
     StringBuilder buf = new StringBuilder();
@@ -1447,7 +1473,7 @@ public class SemanticGraph implements Serializable  {
       buf.append(root.toString(CoreLabel.OutputFormat.VALUE_INDEX)).append(")\n");
     }
     for (SemanticGraphEdge edge : this.edgeListSorted()) {
-      buf.append(edge.getRelation().toString()).append("(");
+      buf.append(edge.getRelation()).append("(");
       buf.append(edge.getSource().toString(CoreLabel.OutputFormat.VALUE_INDEX)).append(", ");
       buf.append(edge.getTarget().toString(CoreLabel.OutputFormat.VALUE_INDEX)).append(")\n");
     }
@@ -1460,8 +1486,8 @@ public class SemanticGraph implements Serializable  {
   public String toPOSList() {
     StringBuilder buf = new StringBuilder();
     for (SemanticGraphEdge edge : this.edgeListSorted()) {
-      buf.append(edge.getRelation().toString()).append("(");
-      buf.append(edge.getSource().toString()).append(",");
+      buf.append(edge.getRelation()).append("(");
+      buf.append(edge.getSource()).append(",");
       buf.append(edge.getTarget()).append(")\n");
     }
     return buf.toString();
@@ -1557,7 +1583,7 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Returns a <code>String</code> representation of this semantic graph,
+   * Returns a {@code String} representation of this semantic graph,
    * formatted by the default semantic graph formatter.
    */
   public String toFormattedString() {
@@ -1565,7 +1591,7 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Returns a <code>String</code> representation of this semantic graph,
+   * Returns a {@code String} representation of this semantic graph,
    * formatted by the supplied semantic graph formatter.
    */
   public String toFormattedString(SemanticGraphFormatter formatter) {
@@ -1573,7 +1599,7 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Pretty-prints this semantic graph to <code>System.out</code>, formatted by
+   * Pretty-prints this semantic graph to {@code System.out}, formatted by
    * the supplied semantic graph formatter.
    */
   public void prettyPrint(SemanticGraphFormatter formatter) {
@@ -1581,7 +1607,7 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Pretty-prints this semantic graph to <code>System.out</code>, formatted by
+   * Pretty-prints this semantic graph to {@code System.out}, formatted by
    * the default semantic graph formatter.
    */
   public void prettyPrint() {
@@ -1648,9 +1674,18 @@ public class SemanticGraph implements Serializable  {
    *
    * This is the same format generated by toCompactString().
    */
-  public static SemanticGraph valueOf(String s) {
-    return (new SemanticGraphParsingTask(s)).parse();
+  public static SemanticGraph valueOf(String s, Language language) {
+    return (new SemanticGraphParsingTask(s, language)).parse();
   }
+
+  /**
+   *
+   * @see SemanticGraph#valueOf(String, Language)
+   */
+  public static SemanticGraph valueOf(String s) {
+    return valueOf(s, Language.UniversalEnglish);
+  }
+
 
   public SemanticGraph() {
     graph = new DirectedMultiGraph<>(outerMapFactory, innerMapFactory);
@@ -1750,10 +1785,8 @@ public class SemanticGraph implements Serializable  {
   /**
    * Returns the shortest directed path between two edges in the graph.
    *
-   * @param source
-   *          node
-   * @param target
-   *          node
+   * @param source node
+   * @param target node
    * @return shortest directed path from source to target
    */
   public List<IndexedWord> getShortestDirectedPathNodes(IndexedWord source, IndexedWord target) {
@@ -1786,9 +1819,16 @@ public class SemanticGraph implements Serializable  {
 
     private SemanticGraph sg;
     private Set<Integer> indexesUsed = Generics.newHashSet();
+    private Language language;
+
 
     public SemanticGraphParsingTask(String s) {
+      this(s, Language.UniversalEnglish);
+    }
+
+    public SemanticGraphParsingTask(String s, Language language) {
       super(s);
+      this.language = language;
     }
 
     @Override
@@ -1814,7 +1854,7 @@ public class SemanticGraph implements Serializable  {
         sg.addVertex(dep);
         if (gov == null)
           sg.roots.add(dep);
-        sg.addEdge(gov, dep, GrammaticalRelation.valueOf(reln), Double.NEGATIVE_INFINITY, false);
+        sg.addEdge(gov, dep, GrammaticalRelation.valueOf(this.language, reln), Double.NEGATIVE_INFINITY, false);
       } else {
         readLeftBracket();
         String label = readName();
@@ -1823,7 +1863,7 @@ public class SemanticGraph implements Serializable  {
         if (gov == null)
           sg.roots.add(dep);
         if (gov != null && reln != null) {
-          sg.addEdge(gov, dep, GrammaticalRelation.valueOf(reln), Double.NEGATIVE_INFINITY, false);
+          sg.addEdge(gov, dep, GrammaticalRelation.valueOf(this.language, reln), Double.NEGATIVE_INFINITY, false);
         }
         readWhiteSpace();
         while (!isRightBracket(peek()) && !isEOF) {
