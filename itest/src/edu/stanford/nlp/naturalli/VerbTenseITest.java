@@ -74,4 +74,20 @@ public class VerbTenseITest {
     assertEquals("used", VerbTense.PAST_PARTICIPLE.conjugateEnglish("use"));
   }
 
+
+  @Test
+  public void testLicense() {
+    assertEquals("license", VerbTense.INFINITIVE.conjugateEnglish("license"));
+    assertEquals("license", VerbTense.SINGULAR_PRESENT_FIRST_PERSON.conjugateEnglish("license"));
+    assertEquals("license", VerbTense.SINGULAR_PRESENT_SECOND_PERSON.conjugateEnglish("license"));
+    assertEquals("licenses", VerbTense.SINGULAR_PRESENT_THIRD_PERSON.conjugateEnglish("license"));
+    assertEquals("licensing", VerbTense.PRESENT_PARTICIPLE.conjugateEnglish("license"));
+    assertEquals("licensed", VerbTense.SINGULAR_PAST_FIRST_PERSON.conjugateEnglish("license"));
+    assertEquals("licensed", VerbTense.SINGULAR_PAST_SECOND_PERSON.conjugateEnglish("license"));
+    assertEquals("licensed", VerbTense.SINGULAR_PAST_THIRD_PERSON.conjugateEnglish("license"));
+    assertEquals("licensed", VerbTense.PAST.conjugateEnglish("license"));
+    assertEquals("licensed", VerbTense.PAST_PLURAL.conjugateEnglish("license"));
+    assertEquals("licensed", VerbTense.PAST_PARTICIPLE.conjugateEnglish("license"));
+  }
+
 }

@@ -45,29 +45,35 @@ public class QuestionToStatementTranslatorITest {
   @Test
   public void parseWhatIs() {
     check(
-        "what/WP is/VBZ nina/NNP dobrev/NNP nationality/NN ?",
-        "nina dobrev nationality is thing");
+        "what/WP is/VBZ the/DT first/JJ book/NN sherlock/NNP holmes/NNP appeared/VBD in/IN ?",
+        "the first book sherlock holmes appeared in is thing");
     check(
-        "what/WP is/VBZ the/DT president/NN of/PRP brazil/NNP ?",
-        "the president of brazil is thing");
+        "what/WP is/VBZ the/DT dollar/NN called/VBN in/IN spain/NNP ?",
+        "the dollar is called thing in spain");
     check(
-        "what/WP is/VBZ saint/NNP nicholas/NNP known/VBN for/PRP ?",
+        "what/WP is/VBZ saint/NNP nicholas/NNP known/VBN for/IN ?",
         "saint nicholas is known for thing");
     check(
+        "what/WP island/NN is/VBZ bethany/NNP hamilton/NNP from/IN ?",
+        "bethany hamilton is from island");
+    check(
+        "what/WP is/VBZ nina/NNP dobrev/NNP nationality/NN ?",
+        "thing is nina dobrev nationality");
+    check(
+        "what/WP is/VBZ the/DT president/NN of/PRP brazil/NNP ?",
+        "thing is the president of brazil");
+    check(
         "what/WP is/VBZ cher/NNP 's/POS son/NN 's/POS name/NN ?",
-        "cher 's son 's name is thing");
+        "thing is cher 's son 's name");
     check(
         "what/WP is/VBZ martin/NNP cooper/NNP doing/VBG now/RB ?",
         "martin cooper is now doing thing");
     check(
-        "what/WP is/VBZ medicare/NN a/NN ?",
-        "medicare a is thing");
+        "what/WP is/VBZ medicare/NN a/DT ?",
+        "medicare is a thing");
     check(
-        "what/WP is/VBZ the/DT name/NN of/PRP the first harry potter novel ?",
-        "the first harry potter novel is thing");
-    check(
-        "what/WP is/VBZ the/DT first book sherlock holmes appeared in ?",
-        "the first book sherlock holmes appeared in is thing");
+        "what/WP is/VBZ the/DT name/NN of/PRP the first harry potter novel/NN ?",
+        "thing is the first harry potter novel");
     check(
         "what/WP is/VBZ charles/NN darwin/NN famous/JJ for/IN ?",
         "charles darwin is famous for thing");
@@ -78,8 +84,8 @@ public class QuestionToStatementTranslatorITest {
         "what/WP is/VBZ the/DT money/NN in/IN spain/NNP called/VBN ?",
         "the money in spain is called thing");
     check(
-        "what/WP is/VBZ the/DT name/NN of/PRP the pittsburgh steelers head coach ?",
-        "the pittsburgh steelers head coach is thing");
+        "what/WP is/VBZ the/DT name/NN of/PRP the pittsburgh steelers head coach/NN ?",
+        "thing is the pittsburgh steelers head coach");
     check(
         "what/WP is/VBZ james/NNP madison/NNP most/RBS famous/JJ for/IN ?",
         "james madison is most famous for thing");
@@ -94,38 +100,32 @@ public class QuestionToStatementTranslatorITest {
         "st francis is the patron saint of thing");
     check(
         "what/WP is/VBZ daniel/NNP radcliffe/NNP name/NN in/IN the/DT woman/NN in/IN black/NN ?",
-        "daniel radcliffe name in the woman in black is thing");
-    check(
-        "what/WP island/NN is/VBZ bethany/NNP hamilton/NNP from/IN ?",
-        "bethany hamilton is from island");
+        "thing is daniel radcliffe name in the woman in black");
     check(
         "what/WP is/VBZ the/DT senate/NN responsible/JJ for/IN ?",
         "the senate is responsible for thing");
     check(
         "what/WP is/VBZ the/DT name/NN of/PRP justin/NNP bieber/NNP brother/NN ?",
-        "justin bieber brother is thing");
-    check(
-        "what/WP is/VBZ the/DT dollar/NN called/VBD in/IN spain/NNP ?",
-        "the dollar is called thing in spain");
+        "thing is justin bieber brother");
   }
 
   @Test
   public void parseWhatAre() {
     check(
         "what/WP are/VBZ the/DT major/NN cities/NN in/IN france/NNP ?",
-        "the major cities in france are thing");
+        "thing are the major cities in france");
     check(
         "what/WP are/VBZ dollars/NN called/VBD in/IN spain/NNP ?",
-        "dollars are called thing in spain");
+        "thing are dollars called in spain");
     check(
         "what/WP are/VBZ the/DT main/JJ languages/NNS of/IN nigeria/NNP ?",
-        "the main languages of nigeria are thing");
+        "thing are the main languages of nigeria");
     check(
         "what/WP are/VBZ the/DT major/JJ religions/NNS of/IN russia/NNP ?",
-        "the major religions of russia are thing");
+        "thing are the major religions of russia");
     check(
         "what/WP are/VBZ fun/NN things/NNS to/IN do/DO in/IN seattle/NNP washington/NNP ?",
-        "fun things to do in seattle washington are thing");
+        "thing are fun things to do in seattle washington");
     check(
         "what/WP are/VBZ the/DT holydays/NNS of/IN obligation/NN in/IN the/DT catholic/NNP church/NNP 2013/CD ?",
         "the holydays of obligation in the catholic church in 2013 are thing");
@@ -138,13 +138,13 @@ public class QuestionToStatementTranslatorITest {
         "malcolm x was trying to accomplish thing");
     check(
         "what/WP was/VBD the/DT name/NN of/IN frederick/NNP douglas/NNP book/NN ?",
-        "the name of frederick douglas book was thing");
+        "thing was the name of frederick douglas book");
     check(
-        "what/WP was/VBD marilyn/NNP monroe/NNP known/VBD for/IN ?",
+        "what/WP was/VBD marilyn/NNP monroe/NNP known/VBN for/IN ?",
         "marilyn monroe was known for thing");
     check(
         "what/WP was/VBD lincoln/NNP 's/POS wife/NN 's/POS name/NN ?",
-        "lincoln 's wife 's name was thing");
+        "thing was lincoln 's wife 's name");
   }
 
   @Test
@@ -236,7 +236,7 @@ public class QuestionToStatementTranslatorITest {
         "the grand bahama island is in country");
     check(
         "what/WP was/VBD tupac/NNP name/NN in/IN juice/NNP ?",
-        "tupac name in juice was thing");
+        "thing was tupac name in juice");
     check(
         "what/WP planes/NNP does/VBZ the/DT navy/NNP have/VBZ ?",
         "the navy have planes");
@@ -548,6 +548,9 @@ public class QuestionToStatementTranslatorITest {
     checkFormatted(
         "what/WRB did/VBD isaac/NNP newton/NNP discover/VB as/IN a/DT mathematician/NN ?",
         "Isaac Newton discovered thing as a mathematician");
+    checkFormatted(
+        "when/WRB did/VBD tesla/NNP license/VB his/PRP patents/NN ?",
+        "Tesla licensed his patents in time");
   }
 
 }

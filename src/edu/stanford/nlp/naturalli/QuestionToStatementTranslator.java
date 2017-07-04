@@ -156,7 +156,7 @@ public class QuestionToStatementTranslator {
    */
   private List<CoreLabel> processWhatIs(TokenSequenceMatcher matcher) {
     // Grab the body of the sentence
-    List<CoreLabel> body = (List<CoreLabel>) matcher.groupNodes("$statement_body");
+    LinkedList<CoreLabel> body = new LinkedList<>((List<CoreLabel>) matcher.groupNodes("$statement_body"));
 
     // Add the "be" token
     // [Gabor]: This is black magic -- if the "be" got misplaced, God help us all.
@@ -165,18 +165,19 @@ public class QuestionToStatementTranslator {
     List<CoreLabel> suffix = (List<CoreLabel>) matcher.groupNodes("$suffix");
     boolean addedBe = false;
     boolean addedSuffix = false;
-    for (int i = 1; i < body.size(); ++i) {
+    for (int i = 2; i < body.size(); ++i) {
       CoreLabel tokI = body.get(i);
       if (tokI.tag() != null &&
-          (tokI.tag().startsWith("V") ||
+          ((tokI.tag().startsWith("V") && !tokI.tag().equals("VBD")) ||
               (tokI.tag().startsWith("J") && suffix != null) ||
               (tokI.tag().startsWith("D") && suffix != null) ||
-              (tokI.tag().startsWith("R") && suffix != null) )) {
-        body.add(i, be.get(0)); i += 1;
+              (tokI.tag().startsWith("R") && suffix != null))) {
+        body.add(i, be.get(0));
+        i += 1;
         if (suffix != null) {
           while (i < body.size() && body.get(i).tag() != null &&
               (body.get(i).tag().startsWith("J") || body.get(i).tag().startsWith("V") || body.get(i).tag().startsWith("R") ||
-               body.get(i).tag().startsWith("N") || body.get(i).tag().startsWith("D")) &&
+                  body.get(i).tag().startsWith("N") || body.get(i).tag().startsWith("D")) &&
               !body.get(i).tag().equals("VBG")) {
             i += 1;
           }
@@ -187,6 +188,7 @@ public class QuestionToStatementTranslator {
         break;
       }
     }
+
     // Tweak to handle dropped prepositions
     List<CoreLabel> prepNum = (List<CoreLabel>) matcher.groupNodes("$prep_num");
     if (prepNum != null) {
@@ -195,11 +197,11 @@ public class QuestionToStatementTranslator {
       body.add(prepNum.get(1));
     }
     // Add the "be" and suffix
-    if (!addedBe) {
-      body.addAll(be);
-    }
     if (!addedSuffix && suffix != null) {
       body.addAll(suffix);
+    }
+    if (!addedBe) {
+      body.addAll(be);
     }
 
 
@@ -218,7 +220,25 @@ public class QuestionToStatementTranslator {
       if (i < body.size() - 1 && body.get(i).tag() != null && body.get(i).tag().startsWith("IN")) {
         body.add(i, WORD_MISSING);
       } else {
-        body.add(WORD_MISSING);
+        if (body.size() >= 2 &&
+            body.get(body.size() - 2).tag() != null &&
+            body.get(body.size() - 2).tag().startsWith("N") &&
+            !body.get(body.size() - 1).tag().equals("IN")) {
+          // This is a bit of a giant hack. But:
+          // 1. Add 'thing is' to the beginning of the sentence
+          // 2. remove the 'be' we added to the end of the sentence above
+          if (!addedBe) {
+            Collections.reverse(be);
+            be.forEach(body::addFirst);
+          }
+          body.addFirst(WORD_MISSING);
+          Iterator<CoreLabel> beIter = be.iterator();
+          if (beIter.hasNext() && body.getLast() == beIter.next()) {
+            body.removeLast();
+          }
+        } else {
+          body.addLast(WORD_MISSING);
+        }
       }
     } else {
       // (case: typed)
@@ -226,6 +246,22 @@ public class QuestionToStatementTranslator {
         obj.set(UnknownTokenMarker.class, true);
       }
       body.addAll(objType);
+    }
+
+    // Swap determiner + be -> be determiner
+    for (int k = 1; k < body.size(); ++k) {
+      if ("DT".equals(body.get(k - 1).tag()) && "be".equals(body.get(k).lemma())) {
+        Collections.swap(body, k - 1, k);
+      }
+    }
+    // Swap IN + be -> be IN
+    if (body.stream().noneMatch(x -> x.tag() != null && x.tag().startsWith("V") && (be.isEmpty() || x != be.get(0)))) {
+      for (int k = 1; k < body.size(); ++k) {
+        if ("IN".equals(body.get(k - 1).tag()) && "be".equals(body.get(k).lemma())) {
+          Collections.swap(body, k - 1, k);
+        }
+      }
+
     }
 
     // Return
