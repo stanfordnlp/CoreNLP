@@ -1,12 +1,13 @@
 package edu.stanford.nlp.naturalli;
 
-import edu.stanford.nlp.ie.util.IETestUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -24,18 +25,61 @@ public class QuestionToStatementTranslatorITest {
     instance = new QuestionToStatementTranslator();
   }
 
+
+  /**
+   * Create a sentence (list of CoreLabels) from a given text.
+   * The resulting labels will have a word, lemma (guessed poorly), and
+   * a part of speech if one is specified on the input.
+   *
+   * @param text The text to parse.
+   *
+   * @return A sentence corresponding to the text.
+   */
+  public static List<CoreLabel> parseSentence(String text) {
+    return Arrays.stream(text.split("\\s+")).map(w -> {
+      CoreLabel token = new CoreLabel();
+      if (w.contains("/")) {
+        String[] fields = w.split("/");
+        token.setWord(fields[0]);
+        token.setTag(fields[1]);
+      } else {
+        token.setWord(w);
+      }
+      token.setValue(token.word());
+      token.setLemma(token.word());
+      if (token.word().equals("is") || token.word().equals("was") || token.word().equals("are")) {
+        token.setLemma("be");
+      }
+      if (token.word().equals("has")) {
+        token.setLemma("have");
+      }
+      if (token.word().equals("did") | token.word().equals("will") || token.word().equals("does")) {
+        token.setLemma("do");
+      }
+      if (token.word().endsWith("ed")) {
+        token.setLemma(token.word().substring(0, token.word().length() - 1));
+      }
+      if (token.word().endsWith("ing")) {
+        token.setLemma(token.word().substring(0, token.word().length() - 3));
+      }
+      return token;
+    }).collect(Collectors.toList());
+  }
+
+
+
   @Test
   public void canInitialize() { }
 
   private void check(String input, String output) {
-    List<List<CoreLabel>> results = instance.toStatement(IETestUtils.parseSentence(input));
+    List<List<CoreLabel>> results = instance.toStatement(parseSentence(input));
     assertTrue(input,results.size() > 0);
     assertEquals(output,
         StringUtils.join(results.get(0).stream().map(CoreLabel::word), " "));
   }
 
   private void checkFormatted(String input, String output) {
-    List<List<CoreLabel>> results = instance.toStatement(IETestUtils.parseSentence(input));
+    List<List<CoreLabel>> results = instance.toStatement(parseSentence(input));
     assertTrue(input,results.size() > 0);
     assertEquals(output,
         StringUtils.join(results.get(0).stream().map(x -> x.get(CoreAnnotations.StatementTextAnnotation.class)), " "));
@@ -44,6 +88,9 @@ public class QuestionToStatementTranslatorITest {
 
   @Test
   public void parseWhatIs() {
+    check(
+        "what/WP was/VBD the/DT country/NN Tesla/NNP was/VBD born/VBN in/IN ?",
+        "the country Tesla was born in was thing");
     check(
         "what/WP is/VBZ the/DT first/JJ book/NN sherlock/NNP holmes/NNP appeared/VBD in/IN ?",
         "the first book sherlock holmes appeared in is thing");
@@ -552,5 +599,4 @@ public class QuestionToStatementTranslatorITest {
         "when/WRB did/VBD tesla/NNP license/VB his/PRP patents/NN ?",
         "Tesla licensed his patents in time");
   }
-
 }

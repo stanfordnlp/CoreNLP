@@ -159,8 +159,9 @@ public class QuestionToStatementTranslator {
     LinkedList<CoreLabel> body = new LinkedList<>((List<CoreLabel>) matcher.groupNodes("$statement_body"));
 
     // Add the "be" token
-    // [Gabor]: This is black magic -- if the "be" got misplaced, God help us all.
-    // [Gabor]: Mostly you. You'll need most of the help.
+    // [Gabor]: This is basically the most principled code I've ever written.
+    // [Gabor]: If the "be" gets misplaced, God help us all.
+    // [Gabor]: Mostly you. I'm graduated and gone, so you'll need most of the help.
     List<CoreLabel> be = (List<CoreLabel>) matcher.groupNodes("$be");
     List<CoreLabel> suffix = (List<CoreLabel>) matcher.groupNodes("$suffix");
     boolean addedBe = false;
@@ -168,7 +169,7 @@ public class QuestionToStatementTranslator {
     for (int i = 2; i < body.size(); ++i) {
       CoreLabel tokI = body.get(i);
       if (tokI.tag() != null &&
-          ((tokI.tag().startsWith("V") && !tokI.tag().equals("VBD")) ||
+          ((tokI.tag().startsWith("V") && !tokI.tag().equals("VBD") && !"be".equals(body.get(i - 1).lemma())) ||
               (tokI.tag().startsWith("J") && suffix != null) ||
               (tokI.tag().startsWith("D") && suffix != null) ||
               (tokI.tag().startsWith("R") && suffix != null))) {
