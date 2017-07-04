@@ -180,17 +180,15 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
    * @param string Regular expression to be compiled
    * @return Compiled TokenSequencePattern
    */
-  public static TokenSequencePattern compile(Env env, String string)
-  {
+  public static TokenSequencePattern compile(Env env, String string) {
     try {
 //      SequencePattern.PatternExpr nodeSequencePattern = TokenSequenceParser.parseSequence(env, string);
 //      return new TokenSequencePattern(string, nodeSequencePattern);
       // TODO: Check token sequence parser?
       Pair<PatternExpr, SequenceMatchAction<CoreMap>> p = env.parser.parseSequenceWithAction(env, string);
       return new TokenSequencePattern(string, p.first(), p.second());
-
     } catch (Exception ex) {
-      throw new RuntimeException("When parsing " + string + "\t\t" + ex);
+      throw new RuntimeException("Error when parsing " + string, ex);
     }
   }
 

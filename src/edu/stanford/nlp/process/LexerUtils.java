@@ -81,4 +81,12 @@ public class LexerUtils {
     }
   }
 
+  private static final Pattern AMP_PATTERN = Pattern.compile("(?i:&amp;)");
+
+  /** Convert an XML-escaped ampersand back into an ampersand. */
+  public static String normalizeAmp(final String in) {
+    return AMP_PATTERN.matcher(in).replaceAll("&");
+  }
+
+
 }

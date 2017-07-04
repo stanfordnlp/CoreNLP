@@ -28,6 +28,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  */
 public class CleanXmlAnnotator implements Annotator {
 
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CleanXmlAnnotator.class);
+
+  private static final boolean DEBUG = false;
+
   /**
    * A regular expression telling us where to look for tokens
    * we care about.
@@ -35,9 +40,6 @@ public class CleanXmlAnnotator implements Annotator {
   private final Pattern xmlTagMatcher;
 
   public static final String DEFAULT_XML_TAGS = ".*";
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(CleanXmlAnnotator.class);
 
   /**
    * This regular expression tells us which tags end a sentence.
@@ -511,8 +513,10 @@ public class CleanXmlAnnotator implements Annotator {
     annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<>());
 
     boolean markSingleSentence = false;
+
     for (CoreLabel token : tokens) {
       String word = token.word().trim();
+      if (DEBUG) { log.info("CleanXML: token is " + word); }
       XMLUtils.XMLTag tag = XMLUtils.parseTag(word);
 
       // If it's not a tag, we do manipulations such as unescaping
@@ -549,10 +553,11 @@ public class CleanXmlAnnotator implements Annotator {
           if (added && newTokens.size() > 1) {
             CoreLabel previous = newTokens.get(newTokens.size() - 2);
             String after = previous.get(CoreAnnotations.AfterAnnotation.class);
-            if (after != null)
+            if (after != null) {
               previous.set(CoreAnnotations.AfterAnnotation.class, after + removedText);
-            else
+            } else {
               previous.set(CoreAnnotations.AfterAnnotation.class, removedText.toString());
+            }
           }
           removedText = new StringBuilder();
         }
@@ -626,7 +631,7 @@ public class CleanXmlAnnotator implements Annotator {
       // Process tag
 
       // Check if we want to annotate anything using the tags's attributes
-      if (!toAnnotate.isEmpty() && tag.attributes != null) {
+      if ( ! toAnnotate.isEmpty() && tag.attributes != null) {
         Set<Class> foundAnnotations = annotateWithTag(annotation, annotation, tag, docAnnotationPatterns, null, toAnnotate, null);
         toAnnotate.removeAll(foundAnnotations);
       }
@@ -861,10 +866,11 @@ public class CleanXmlAnnotator implements Annotator {
       } else {
         // open tag, since all other cases are exhausted
         enclosingTags.push(tag.name);
-        if (xmlTagMatcher.matcher(tag.name).matches())
+        if (xmlTagMatcher.matcher(tag.name).matches()) {
           matchDepth++;
+        }
       }
-    }
+    } // end for (CoreLabel token: tokens)
 
     if ( ! enclosingTags.isEmpty()) {
       String mesg = "Unclosed tags, starting with <" + enclosingTags.pop() + '>';
