@@ -90,18 +90,6 @@ public class QuestionToStatementTranslator {
     set(UnknownTokenMarker.class, true);
   }};
 
-  /** The word "," as a CoreLabel */
-  private final CoreLabel WORD_COMMA = new CoreLabel(){{
-    setWord(",");
-    setValue(",");
-    setLemma(",");
-    setTag(",");
-    setNER("O");
-    setIndex(-1);
-    setBeginPosition(-1);
-    setEndPosition(-1);
-  }};
-
   /** The word "from" as a CoreLabel */
   private final CoreLabel WORD_FROM = new CoreLabel(){{
     setWord("from");
@@ -479,10 +467,10 @@ public class QuestionToStatementTranslator {
     sentence.add(missing);
 
     // Add an optional specifier location
-    if (specloc != null && at != null) {
-      sentence.add(WORD_COMMA);
-      sentence.addAll(specloc);
-    }
+//    if (specloc != null && at != null) {
+//      sentence.add(WORD_COMMA);
+//      sentence.addAll(specloc);
+//    }
 
     // Return
     return sentence;

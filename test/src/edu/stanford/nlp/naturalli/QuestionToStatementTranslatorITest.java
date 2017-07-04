@@ -268,10 +268,13 @@ public class QuestionToStatementTranslatorITest {
         "boston terriers come from location");
     check(
         "where/WRB did/VBD madoff/NNP live/VP in/IN nyc/NNP ?",
-        "madoff live in location , nyc");
+        "madoff live in location");
     check(
         "where/WRB did/VBD kaiser/NNP wilhelm/NNP fled/VBD to/IN ?",
         "kaiser wilhelm fled to location");
+    check(
+        "where/WRB did/VBD Tesla/NNP work/VB in/IN New/NNP York/NNP ?",
+        "Tesla work in location");
   }
 
   @Test
@@ -283,8 +286,8 @@ public class QuestionToStatementTranslatorITest {
         "where/WRB does/VB asiana/NNP airlines/NNP fly/VB to/TO ?",
         "asiana airlines fly to location");
     check(
-        "where/WRB does/VB the/DT un/NNP get/VB its/PRP$ funding/NN ?",
-        "the un get its funding from thing");
+        "where/WRB does/VB the/DT UN/NNP get/VB its/PRP$ funding/NN ?",
+        "the UN get its funding from thing");
     check(
         "where/WRB does/VB the/DT name/NN melbourne/NNP come/VB from/IN ?",
         "the name melbourne come from thing");
@@ -518,6 +521,12 @@ public class QuestionToStatementTranslatorITest {
 
   @Test
   public void formattingCorrectTense() {
+    checkFormatted(
+        "what/WP did/VBD Tesla/NNP invent/VB ?",
+        "Tesla invented thing");
+    checkFormatted(
+        "where/WRB was/VBD Tesla/NNP born/VB ?",
+        "Tesla was born at Location");
     checkFormatted(
         "what/WDT batteries/NNS does/VBZ it/DT take/VB ?",
         "It takes batteries");
