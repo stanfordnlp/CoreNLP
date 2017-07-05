@@ -320,6 +320,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false);
   }
 
+  public boolean getIncludeText() {
+    return PropertiesUtils.getBool(properties, "includeText", false);
+  }
+
   /**
    * Take a collection of requested annotators, and produce a list of annotators such that all of the
    * prerequisites for each of the annotators in the input is met.
