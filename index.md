@@ -7,7 +7,7 @@ homepage: true
 
 ## About
 
-Stanford CoreNLP provides a set of human language technology analysis
+Stanford CoreNLP provides a set of human language technology
 tools. It can give the base
 forms of words, their parts of speech, whether they are names of
 companies, people, etc., normalize dates, times, and numeric quantities,
@@ -15,7 +15,7 @@ mark up the structure of sentences in terms of
 phrases and syntactic dependencies, indicate which noun phrases refer to
 the same entities, indicate sentiment, 
 extract particular or open-class relations between entity mentions,
-get quotes people said, etc. 
+get the quotes people said, etc.
 
 Choose Stanford CoreNLP if you need:
 
@@ -23,7 +23,7 @@ Choose Stanford CoreNLP if you need:
 * Fast, reliable analysis of arbitrary texts
 * The overall highest quality text analytics
 * Support for a number of major (human) languages
-* Available interfaces for most major modern programming languages
+* Available APIs for most major modern programming languages
 * Ability to run as a simple web service
 
 Stanford CoreNLP’s goal is to
@@ -31,7 +31,7 @@ make it very easy to apply a bunch of linguistic analysis tools to a piece
 of text. A tool pipeline can be run on a piece of plain text with
 just two lines of code. CoreNLP is designed to be highly
 flexible and extensible.  With a single option you can change which
-tools should be enabled and which should be disabled. 
+tools should be enabled and disabled.
 Stanford CoreNLP integrates many of Stanford&rsquo;s NLP tools,
 including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tagger.html), 
 [the named entity recognizer (NER)](http://nlp.stanford.edu/software/CRF-NER.html),
@@ -60,7 +60,7 @@ Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html). 
 To download earlier versions of Stanford CoreNLP or language packs for earlier versions, go to the [history page](history.html).
 
-In the table below are jars for the current release with all the models for each language we support.
+The table below has jars for the current release with all the models for each language we support.
 Due to size issues we have divided the English resources into two
 jars.  The English (KBP) models jar contains extra resources needed to
 run relation extraction and entity linking.
@@ -80,7 +80,7 @@ run relation extraction and entity linking.
 The basic distribution provides model files for the analysis of well-edited **English**,
 but the engine is compatible with models for other languages. In the
 table above, we provide packaged models for
-Arabic, Chinese, French, German, and Spanish.
+**Arabic**, **Chinese**, **French**, **German**, and **Spanish**.
 We also provide two jars that contain all of our
 English models, which include various variant models, and in particular models
 optimized for working with uncased English (e.g., mostly or all
@@ -111,8 +111,9 @@ which allows many free uses, but not its use in
 which is distributed to others.
 For distributors of
 [proprietary software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem),
+CoreNLP is also available from Stanford under a
 [commercial licensing](http://techfinder.stanford.edu/technology_detail.php?ID=29724)
-is available from Stanford. You can contact us at 
+You can contact us at
 [java-nlp-support@lists.stanford.edu](mailto:java-nlp-support@lists.stanford.edu).
 If you don't need a commercial license, but would like to support
 maintenance of these tools, we welcome gift funding:

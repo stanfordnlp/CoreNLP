@@ -18,13 +18,13 @@ There are three different coreference systems available in CoreNLP.
 
 * **Neural:** Most accurate but slow neural-network-based coreference resolution for English and Chinese.
 
-(We briefly also had a fourth *hybrid* or *hcoref* system, but it is no longer supported and models are no longer provided in current releases.)
+(We briefly also had a fourth **hybrid** or **hcoref** system, but it is no longer supported and models are no longer provided in current releases.)
 
 The following table gives an overview of the system performances.
 
 * The F1 scores are on the [CoNLL 2012](http://conll.cemantix.org/2012/introduction.html) evaluation data. Numbers are lower than reported in the associated [papers](#citing-stanford-coreference) because these models are designed for general-purpose use, not getting a high CoNLL score (see [Running on CoNLL 2012](#running-on-conll-2012)).
 
-* The speed measurements show the average time for processing a document in the CoNLL 2012 test set using a 2013 Macbook Pro with a 2.4 GHz Intel Core i7 processor. Preprocessing speed measures the time required for POS tagging, syntax parsing, mention detection, etc. while coref speed refers to the time spent by the coreference system.
+* The speed measurements show the average time for processing a document in the CoNLL 2012 test set using a 2013 Macbook Pro with a 2.4 GHz Intel Core i7 processor. Preprocessing speed measures the time required for POS tagging, syntax parsing, mention detection, etc., while coref speed refers to the time spent by the coreference system.
 
 
 | System | Language | Preprocessing Time | Coref Time | Total Time | F1 Score |
@@ -36,7 +36,7 @@ The following table gives an overview of the system performances.
 | Neural | Chinese | 0.42s | 7.02s | 7.44s | 53.9 |
 
 ## Command Line Usage
-There are example properties files for using the coreference systems in [edu/stanford/nlp/coref/properties](https://github.com/stanfordnlp/CoreNLP/tree/master/src/edu/stanford/nlp/coref/properties). The properties are named [system]-[language].properties. For example, to run the deterministic system on Chinese:
+There are example properties files for using the coreference systems in [edu/stanford/nlp/coref/properties](https://github.com/stanfordnlp/CoreNLP/tree/master/src/edu/stanford/nlp/coref/properties). The properties are named `[system]-[language].properties`. For example, to run the deterministic system on Chinese:
 
 ```bash
 java -Xmx5g -cp stanford-corenlp-3.7.0.jar:stanford-chinese-corenlp-models-3.7.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -props edu/stanford/nlp/coref/properties/deterministic-chinese.properties -file example_file.txt
@@ -48,7 +48,7 @@ Alternatively, the properties can be set manually. For example, to run the neura
 java -Xmx5g -cp stanford-corenlp-3.7.0.jar:stanford-corenlp-models-3.7.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,mention,coref -coref.algorithm neural -file example_file.txt
 ```
 
-See [here](#more-details) for further options.
+See [below](#more-details) for further options.
 
 ## API
 
@@ -93,7 +93,7 @@ public class CorefExample {
 ## More Details
 
 ### Deterministic System
-This is a multi-pass sieve rule-based coreference system. See [this page](http://nlp.stanford.edu/software/dcoref.html) for usage and more details.
+This is a multi-pass sieve rule-based coreference system. See [the Stanford Deterministic Coreference Resolution System page](http://nlp.stanford.edu/software/dcoref.html) for usage and more details.
 
 ### Statistical System
 This is a mention-ranking model using a large set of features. It operates by iterating through each mention in the document, possibly adding a coreference link between the current one and a preceding mention at each step. Some relevant options:
@@ -132,9 +132,14 @@ The CoNLL 2012 coreference data differs from the normal coreference use case in 
 
 * There are document genre annotations.
 
-Because of this, we train models with a few extra features for running on this dataset. We configure these models for accuracy over speed (e.g., by not having a maximum mention distance for the mention-ranking models). These models can be run using the -conll properties files (e.g., neural-english-conll.properties). Note that the ConLL-specific models for English are in the [English models jar](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar), not the default CoreNLP models jar.
+Because of this, we train models with a few extra features for running on this dataset. We configure these models for accuracy over speed (e.g., by not having a maximum mention distance for the mention-ranking models). These models can be run using the `-conll` properties files (e.g., `neural-english-conll.properties`). Note that the CoNLL-specific models for English are in the
+[English models jar](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar), not the default CoreNLP models jar.
 
 ## Training New Models
+
+### Deterministic System
+
+As a rule-based system, there is nothing to train, but there are various data files for demonyms and to indicate noun gender, animacy, and plurality, which can be edited. See [the Stanford Deterministic Coreference Resolution System page](http://nlp.stanford.edu/software/dcoref.html).
 
 ### Statistical System
 Training a statistical model on the CoNLL data can be done with the following command:

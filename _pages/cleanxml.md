@@ -52,7 +52,7 @@ are case sensitive, so get them right!
 
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
-| clean.xmltags | regex | `".*"` | Discard xml tag tokens that match this regular expression.  For example, the default `.*` will discard all xml tags. |
+| clean.xmltags | regex | `".*"` | Discard xml tag tokens for element names that match this regular expression.  For example, the default `.*` will discard all xml tags and `s|p` will match tags like `<s>` or `</p>`. |
 | clean.sentenceendingtags | regex | `""` | Treat tags (XML elements) that match this regular expression as the end of a sentence. An empty string matches nothing.  For example, "p" will treat &lt;p&gt; or &lt;/p&gt; as the end of a sentence. Matching is case insensitive. |
 | clean.singlesentencetags | regex | `""` | Treat the content of XML elements that match this regular expression as a single sentence. An empty string matches nothing.  For example, "sent" will treat any &lt;sent&gt; element as a single sentence, disabling sentence splitting. Matching is case insensitive. |
 | clean.allowflawedxml | boolean | true | If this is true, allow errors such as unclosed tags.  Otherwise, such XML will cause an exception. |
