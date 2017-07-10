@@ -25,7 +25,7 @@ public class ArraySetTest extends TestCase {
   public void testEquals() {
     assertTrue(set.equals(set));
     
-    HashSet<Integer> hset = new HashSet<Integer>();
+    HashSet<Integer> hset = new HashSet<>();
     hset.addAll(set);
 
     assertTrue(set.equals(hset));

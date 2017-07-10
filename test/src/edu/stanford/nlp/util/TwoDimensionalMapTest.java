@@ -14,7 +14,7 @@ import java.util.function.Function;
  */
 public class TwoDimensionalMapTest extends TestCase {
   public void testBasicOperations() {
-    TwoDimensionalMap<String, String, String> map = new TwoDimensionalMap<String, String, String>();
+    TwoDimensionalMap<String, String, String> map = new TwoDimensionalMap<>();
     assertEquals(0, map.size());
     assertTrue(map.isEmpty());
 
@@ -62,7 +62,7 @@ public class TwoDimensionalMapTest extends TestCase {
    * Test that basic operations on a TwoDimensionalMap iterator work.
    */
   public void testBasicIterator() {
-    TwoDimensionalMap<String, String, String> map = new TwoDimensionalMap<String, String, String>();
+    TwoDimensionalMap<String, String, String> map = new TwoDimensionalMap<>();
     Iterator<TwoDimensionalMap.Entry<String, String, String>> mapIterator = map.iterator();
     assertFalse(mapIterator.hasNext());
 
@@ -82,8 +82,8 @@ public class TwoDimensionalMapTest extends TestCase {
 
     assertEquals(5, map.size());
     int count = 0;
-    Set<String> firstKeys = new HashSet<String>();
-    Set<String> values = new HashSet<String>();
+    Set<String> firstKeys = new HashSet<>();
+    Set<String> values = new HashSet<>();
     for (TwoDimensionalMap.Entry<String, String, String> e : map) {
       ++count;
       firstKeys.add(e.getFirstKey());
@@ -108,7 +108,7 @@ public class TwoDimensionalMapTest extends TestCase {
    * themselves are different.  We can test for that.
    */
   public void testMapFactory() {
-    TwoDimensionalMap<String, String, String> map = new TwoDimensionalMap<String, String, String>(MapFactory.<String, Map<String, String>>identityHashMapFactory(), MapFactory.<String, String>identityHashMapFactory());
+    TwoDimensionalMap<String, String, String> map = new TwoDimensionalMap<>(MapFactory.<String, Map<String, String>>identityHashMapFactory(), MapFactory.<String, String>identityHashMapFactory());
     map.put(new String("A"), "B", "C");
     map.put(new String("A"), "B", "C");
     assertEquals(2, map.size());
@@ -120,7 +120,7 @@ public class TwoDimensionalMapTest extends TestCase {
    * and checking that the iterated elements are sorted
    */
   public void testTreeMapIterator() {
-    TwoDimensionalMap<String, String, String> map = new TwoDimensionalMap<String, String, String>(MapFactory.<String, Map<String, String>>treeMapFactory(), MapFactory.<String, String>treeMapFactory());
+    TwoDimensionalMap<String, String, String> map = new TwoDimensionalMap<>(MapFactory.<String, Map<String, String>>treeMapFactory(), MapFactory.<String, String>treeMapFactory());
     map.put("A", "B", "C");
     map.put("Z", "Y", "X");
     map.put("Z", "B", "C");

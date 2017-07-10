@@ -92,9 +92,9 @@ public class TestThreadedCRFClassifier {
   void runThreadedTest(Properties props) {
     // TODO: check params
     final String testFile = props.getProperty("testFile");
-    ArrayList<String> baseResults = new ArrayList<String>();
-    ArrayList<String> modelNames = new ArrayList<String>();
-    ArrayList<CRFClassifier> classifiers = new ArrayList<CRFClassifier>();
+    ArrayList<String> baseResults = new ArrayList<>();
+    ArrayList<String> modelNames = new ArrayList<>();
+    ArrayList<CRFClassifier> classifiers = new ArrayList<>();
 
     for (int i = 1;
          props.getProperty("crf" + Integer.toString(i)) != null; ++i) {
@@ -131,7 +131,7 @@ public class TestThreadedCRFClassifier {
     int numThreads = PropertiesUtils.getInt(props, "simThreads",
                                             DEFAULT_SIM_THREADS);
 
-    ArrayList<CRFThread> threads = new ArrayList<CRFThread>();
+    ArrayList<CRFThread> threads = new ArrayList<>();
     for (int i = 0; i < numThreads; ++i) {
       threads.add(new CRFThread(classifiers.get(0), testFile,
                                 "Simultaneous-" + i));
