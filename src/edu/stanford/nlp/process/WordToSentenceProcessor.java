@@ -317,6 +317,10 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       boolean newSent = false;
       String debugText = (discardToken)? "discarded": "added to current";
       if (inWaitForForcedEnd && ! forcedEnd) {
+        if (sentenceBoundaryToDiscard.contains(word)) {
+          // there can be newlines even in something to keep together
+          discardToken = true;
+        }
         if ( ! discardToken) currentSentence.add(o);
         if (DEBUG) { log.info("Word is " + word + "; in wait for forced end; " + debugText); }
       } else if (inMultiTokenExpr && ! forcedEnd) {

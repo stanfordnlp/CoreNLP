@@ -10,6 +10,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -33,25 +34,25 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   private static final String DEFAULT_MODEL_NAME = "segment";
 
   private static final String DEFAULT_SEG_LOC =
-    "/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz";
+          "/u/nlp/data/chinese-segmenter/stanford-seg-2010/classifiers-2013/ctb7.chris6.lex.gz";
 
   private static final String DEFAULT_SER_DICTIONARY =
-    "/u/nlp/data/gale/segtool/stanford-seg/classifiers/dict-chris6.ser.gz";
+          "//u/nlp/data/chinese-segmenter/stanford-seg-2010/classifiers-2013/dict-chris6.ser.gz";
 
   private static final String DEFAULT_SIGHAN_CORPORA_DICT =
-    "/u/nlp/data/gale/segtool/stanford-seg/releasedata";
+          "/u/nlp/data/chinese-segmenter/stanford-seg-2010/releasedata/";
+
+  private static final String separator = "(?:\r|\r?\n|" + System.lineSeparator() + ')';
+  private static final Pattern separatorPattern = Pattern.compile(separator);
 
 
   private final AbstractSequenceClassifier<?> segmenter;
   private final boolean VERBOSE;
   private final boolean tokenizeNewline;
+  private final boolean normalizeSpace;
 
   public ChineseSegmenterAnnotator() {
     this(DEFAULT_SEG_LOC, false);
-  }
-
-  public ChineseSegmenterAnnotator(boolean verbose) {
-    this(DEFAULT_SEG_LOC, verbose);
   }
 
   public ChineseSegmenterAnnotator(String segLoc, boolean verbose) {
@@ -84,6 +85,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       }
     }
     this.VERBOSE = PropertiesUtils.getBool(props, name + ".verbose", false);
+    this.normalizeSpace = PropertiesUtils.getBool(props, name + ".normalizeSpace", false);
     if (model == null) {
       throw new RuntimeException("Expected a property " + name + ".model");
     }
@@ -139,7 +141,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
    */
   private void splitCharacters(CoreMap annotation) {
     String origText = annotation.get(CoreAnnotations.TextAnnotation.class);
-    boolean seg = true;
+    boolean seg = true; // false only while inside an XML entity
     List<CoreLabel> charTokens = new ArrayList<>();
     int length = origText.length();
 
@@ -177,16 +179,12 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       } else if (Character.isSpaceChar(cp) || Character.isISOControl(cp)) {
         // if this word is a whitespace or a control character, set 'seg' to true for next character
         seg = true;
-        if (tokenizeNewline && (System.lineSeparator().indexOf(charString) >= 0 || charString.equals("\n"))) {
-          // Don't skip newline characters if we're tokenizing them
-          // We always count \n as newline to be consistent with the implementation of ssplit
-          skipCharacter = false;
-        } else {
-          skipCharacter = true;
-        }
+        // Don't skip newline characters if we're tokenizing them
+        // We always count \n as newline to be consistent with the implementation of ssplit
+        skipCharacter = ! (tokenizeNewline && (cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString)));
       }
       if ( ! skipCharacter) {
-        // if this character is a character, put it in as a CoreLabel and set seg to false for next word
+        // if this character is a normal character, put it in as a CoreLabel and set seg to false for next word
         wi.set(CoreAnnotations.ChineseCharAnnotation.class, charString);
         if (seg) {
           wi.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
@@ -211,7 +209,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         charTokens.add(wi);
         seg = false;
       }
-    }
+    } // for loop through charPoints
 
     annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, charTokens);
   }
@@ -231,17 +229,17 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     // Run the segmenter! On the whole String. It knows not about the splitting into chars.
     // Can we change this to have it run directly on the already existing list of tokens. That would help, no?
     List<String> words;
-    if (!tokenizeNewline) {
+    if ( ! tokenizeNewline) {
       text = text.replaceAll("[\r\n]", "");
       words = segmenter.segmentString(text);
     } else {
       // Run the segmenter on each line so that we don't get tokens that cross line boundaries
       // Neat trick to keep delimiters from: http://stackoverflow.com/a/2206432
-      String[] lines = text.split(String.format("((?<=%1$s)|(?=%1$s)|(?<=\n)|(?=\n))", System.lineSeparator()));
+      String[] lines = text.split(String.format("((?<=%1$s)|(?=%1$s))", separator));
 
       words = new ArrayList<>();
       for (String line : lines) {
-        if (line.equals(System.lineSeparator()) || line.equals("\n")) {
+        if (separatorPattern.matcher(line).matches()) {
           // Don't segment newline tokens, keep them as-is
           words.add(line);
         } else {
@@ -250,75 +248,100 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       }
     }
     if (VERBOSE) {
-      log.info(text + "--->" + words);
+      log.info(text + "\n--->\n" + words);
     }
 
+    // Go through everything again and make the final tokens list
     int pos = 0; // This is used to index sentChars, the output from splitCharacters
-    StringBuilder xmlbuffer = new StringBuilder();
-    int xmlbegin = -1;
+    StringBuilder xmlBuffer = new StringBuilder();
+    int xmlBegin = -1;
     for (String w : words) {
       CoreLabel fl = sentChars.get(pos);
 
       if (fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")
         || fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("beginning")) {
         // Beginnings of plain text and other XML tags are good places to end an XML tag
-        if (xmlbuffer.length() > 0) {
+        if (xmlBuffer.length() > 0) {
           // Form the XML token
-          String xmltag = xmlbuffer.toString();
-          CoreLabel token = new CoreLabel();
-          token.setWord(xmltag);
-          token.setValue(xmltag);
-          token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, xmlbegin);
+          String xmlTag = xmlBuffer.toString();
           CoreLabel fl1 = sentChars.get(pos - 1);
-          token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl1.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-          tokens.add(token);
+          int end = fl1.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+          tokens.add(makeXmlToken(xmlTag, true, xmlBegin, end));
 
           // Clean up and prepare for the next XML tag
-          xmlbegin = -1;
-          xmlbuffer = new StringBuilder();
+          xmlBegin = -1;
+          xmlBuffer = new StringBuilder();
         }
       }
 
-      if (!fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")) {
+      if ( ! fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")) {
         // found an XML character
         while (fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("whitespace")) {
           // Print whitespaces into the XML buffer and move on until the next non-whitespace character is found
           // and we're in sync with segmenter output again
-          xmlbuffer.append(" ");
+          xmlBuffer.append(' ');
           pos += 1;
           fl = sentChars.get(pos);
         }
 
-        xmlbuffer.append(w);
+        xmlBuffer.append(w);
         pos += w.length();
-        if (xmlbegin < 0) xmlbegin = fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        if (xmlBegin < 0) {
+          xmlBegin = fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        }
         continue;
       }
+
       fl.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
       if (w.isEmpty()) {
+        if (VERBOSE) { log.warn("Encountered an empty word. Shouldn't happen?"); }
         continue; // [cdm 2016:] surely this shouldn't happen!
       }
-      CoreLabel token = new CoreLabel();
-      token.setWord(w);
-      token.setValue(w);
-      token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+      int begin = fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
       pos += w.length();
+      if (pos - 1 >= sentChars.size()) {
+        log.error("on word " + w + " at position " + (pos - w.length()) + " trying to get at position " + (pos - 1));
+        log.error("last element of sentChars is " + sentChars.get(sentChars.size() - 1));
+      }
       fl = sentChars.get(pos - 1);
-      token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-      tokens.add(token);
+      int end = fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+      tokens.add(makeXmlToken(w, false, begin, end));
     }
 
-    if (xmlbuffer.length() > 0) {
+    if (xmlBuffer.length() > 0) {
       // Form the last XML token, if any
-      String xmltag = xmlbuffer.toString();
-      CoreLabel token = new CoreLabel();
-      token.setWord(xmltag);
-      token.setValue(xmltag);
-      token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, xmlbegin);
+      String xmlTag = xmlBuffer.toString();
       CoreLabel fl1 = sentChars.get(pos - 1);
-      token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl1.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-      tokens.add(token);
+      int end = fl1.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+      tokens.add(makeXmlToken(xmlTag, true, xmlBegin, end));
     }
+
+    if (VERBOSE) {
+      for (CoreLabel token : tokens) {
+        log.info(token.toShorterString());
+      }
+    }
+  }
+
+  private CoreLabel makeXmlToken(String tokenText, boolean doNormalization, int charOffsetBegin, int charOffsetEnd) {
+    CoreLabel token = new CoreLabel();
+    token.setOriginalText(tokenText);
+
+    if (separatorPattern.matcher(tokenText).matches()) {
+      // Map to CoreNLP newline token
+      tokenText = AbstractTokenizer.NEWLINE_TOKEN;
+    } else if (doNormalization && normalizeSpace) {
+      tokenText = tokenText.replace(' ', '\u00A0'); // change space to non-breaking space
+    }
+
+    token.setWord(tokenText);
+    token.setValue(tokenText);
+    token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, charOffsetBegin);
+    token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, charOffsetEnd);
+    if (VERBOSE) {
+      log.info("Adding token " + token.toShorterString());
+    }
+    return token;
   }
 
   @Override
