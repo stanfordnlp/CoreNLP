@@ -106,8 +106,8 @@ public class RegexNERSequenceClassifierTest extends TestCase {
       String[] nerPieces = ner[snum].split(" ");
       assertEquals(wordPieces.length, tagPieces.length);
       assertEquals("Input " + snum + " " + words[snum] + " of different length than " + ner[snum], wordPieces.length, nerPieces.length);
-      List<CoreLabel> sentence = new ArrayList<CoreLabel>();
-      List<CoreLabel> NERsentence = new ArrayList<CoreLabel>();
+      List<CoreLabel> sentence = new ArrayList<>();
+      List<CoreLabel> NERsentence = new ArrayList<>();
       for (int wnum = 0; wnum < wordPieces.length; ++wnum) {
         CoreLabel token = new CoreLabel();
         token.setWord(wordPieces[wnum]);
@@ -142,7 +142,7 @@ public class RegexNERSequenceClassifierTest extends TestCase {
   }
 
   private static List<CoreLabel> deepCopy(List<CoreLabel> in) {
-    List<CoreLabel> cll = new ArrayList<CoreLabel>(in.size());
+    List<CoreLabel> cll = new ArrayList<>(in.size());
     for (CoreLabel cl : in) {
       cll.add(new CoreLabel(cl));
     }

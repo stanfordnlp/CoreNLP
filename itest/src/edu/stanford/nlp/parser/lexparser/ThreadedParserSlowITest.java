@@ -21,7 +21,7 @@ import edu.stanford.nlp.trees.TreeReaderFactory;
  */
 public class ThreadedParserSlowITest extends TestCase {
   public static List<Tree> readTrees(String filename, String encoding) {
-    ArrayList<Tree> trees = new ArrayList<Tree>();
+    ArrayList<Tree> trees = new ArrayList<>();
     try {
       TreeReaderFactory trf = new LabeledScoredTreeReaderFactory();
       TreeReader tr = trf.newTreeReader(new InputStreamReader(
@@ -39,7 +39,7 @@ public class ThreadedParserSlowITest extends TestCase {
 
   public static List<Tree> processFile(LexicalizedParser parser,
                                        List<Tree> input) {
-    List<Tree> results = new ArrayList<Tree>();
+    List<Tree> results = new ArrayList<>();
     for (Tree tree : input) {
       List<HasWord> sentence = tree.yieldHasWord();
       Tree output = parser.parseTree(sentence);

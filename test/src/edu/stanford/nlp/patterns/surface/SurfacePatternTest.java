@@ -70,14 +70,14 @@ public class SurfacePatternTest {
 
     assert p.compareTo(p2) == 0;
 
-    Counter<SurfacePattern> pats = new ClassicCounter<SurfacePattern>();
+    Counter<SurfacePattern> pats = new ClassicCounter<>();
     pats.setCount(p, 1);
     pats.setCount(p2, 1);
 
     assert pats.size() ==1;
     System.out.println("pats size is " + pats.size());
 
-    ConcurrentHashIndex<SurfacePattern> index = new ConcurrentHashIndex<SurfacePattern>();
+    ConcurrentHashIndex<SurfacePattern> index = new ConcurrentHashIndex<>();
     index.add(p);
     index.add(p2);
     assert index.size() ==1;

@@ -160,7 +160,7 @@ public class ParserAnnotatorITest extends TestCase {
     assertEquals(expectedResult, sentence.get(TreeCoreAnnotations.TreeAnnotation.class).toString());
 
     ParserConstraint constraint = new ParserConstraint(0, 2, "SBAR|SBAR[^a-zA-Z].*");
-    List<ParserConstraint> constraints = new ArrayList<ParserConstraint>();
+    List<ParserConstraint> constraints = new ArrayList<>();
     constraints.add(constraint);
     sentence.set(ConstraintAnnotation.class, constraints);
 

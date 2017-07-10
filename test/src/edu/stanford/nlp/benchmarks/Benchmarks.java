@@ -132,7 +132,7 @@ public class Benchmarks {
         props.setProperty("featureFactory", "edu.stanford.nlp.benchmarks.BenchmarkFeatureFactory");
         props.setProperty("saveFeatureIndexToDisk", "false");
 
-        CRFClassifier<CoreLabel> crf = new CRFClassifier<CoreLabel>(props);
+        CRFClassifier<CoreLabel> crf = new CRFClassifier<>(props);
 
         Random r = new Random(42);
 
