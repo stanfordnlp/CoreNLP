@@ -65,6 +65,9 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(WordToSentenceProcessor.class);
 
+  /** Turning this on is good for debugging sentence splitting. */
+  private static final boolean DEBUG = false;
+
   // todo [cdm Aug 2012]: This should be unified with the PlainTextIterator
   // in DocumentPreprocessor, perhaps by making this one implement Iterator.
   // (DocumentProcessor once used to use this class, but now doesn't....)
@@ -81,9 +84,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
 
   public static final Set<String> DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD = Collections.unmodifiableSet(
           Generics.newHashSet(Arrays.asList(WhitespaceLexer.NEWLINE, PTBTokenizer.getNewlineToken())));
-
-  /** Turning this on is good for debugging sentence splitting. */
-  private static final boolean DEBUG = false;
 
   /**
    * Regex for tokens (Strings) that qualify as sentence-final tokens.
@@ -235,13 +235,15 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     IdentityHashMap<Object, Boolean> isSentenceBoundary = null; // is null unless used by sentenceBoundaryMultiTokenPattern
 
     if (sentenceBoundaryMultiTokenPattern != null) {
+      if (DEBUG) { log.info("  checking for tokensregex pattern: " + sentenceBoundaryMultiTokenPattern); }
       // Do initial pass using TokensRegex to identify multi token patterns that need to be matched
       // and add the last token to our table of sentence boundary tokens
       isSentenceBoundary = new IdentityHashMap<>();
       SequenceMatcher<? super IN> matcher = sentenceBoundaryMultiTokenPattern.getMatcher(words);
       while (matcher.find()) {
-        List nodes = matcher.groupNodes();
+        List<? super IN> nodes = matcher.groupNodes();
         if (nodes != null && ! nodes.isEmpty()) {
+          if (DEBUG) { log.info("    found match at: " + nodes); }
           isSentenceBoundary.put(nodes.get(nodes.size() - 1), true);
         }
       }
@@ -340,7 +342,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
           if (DEBUG) {
             log.info("Word is " + word + "; is sentence boundary (matched multi-token pattern); " + debugText);
           }
-          // todo [cdm 2017]: Clarify semantics; should this also be a newSentForced? Not sure.
           newSent = true;
         } else if (sentenceBoundaryTokenPattern.matcher(word).matches()) {
           if ( ! discardToken) { currentSentence.add(o); }

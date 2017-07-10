@@ -16,11 +16,9 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
- * This class assumes that there is a {@code List<CoreLabel>}
- * under the {@code TokensAnnotation} field, and runs it
- * through {@link edu.stanford.nlp.process.WordToSentenceProcessor}
- * and puts the new {@code List<Annotation>}
- * under the {@code SentencesAnnotation} field.
+ * This class assumes that there is a {@code List<CoreLabel>} under the {@code TokensAnnotation} field,
+ * and runs it through {@link edu.stanford.nlp.process.WordToSentenceProcessor}
+ * and puts the new {@code List<Annotation>} under the {@code SentencesAnnotation} field.
  *
  * @author Jenny Finkel
  * @author Christopher Manning
@@ -42,8 +40,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
 
 
   public WordsToSentencesAnnotator(Properties properties) {
-    // log.info(signature());
-    // todo: The above shows that signature is edu.stanford.nlp.pipeline.AnnotatorImplementations: and doesn't reflect what annotator it is! Should fix. Maybe is fixed now [2016]. Test!
     boolean nlSplitting = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
     if (nlSplitting) {
       boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
@@ -75,15 +71,15 @@ public class WordsToSentencesAnnotator implements Annotator  {
       }
 
     } else {
-      // Treat as one sentence: You get a no-op sentence splitter that always returns all tokens as one sentence.
       String isOneSentence = properties.getProperty("ssplit.isOneSentence");
       if (Boolean.parseBoolean(isOneSentence)) { // this method treats null as false
+        // Treat as one sentence: You get a no-op sentence splitter that always returns all tokens as one sentence.
         WordToSentenceProcessor<CoreLabel> wts1 = new WordToSentenceProcessor<>(true);
         VERBOSE = false;
         this.countLineNumbers = false;
         this.wts = wts1;
-      } else {
 
+      } else {
         // multi token sentence boundaries
         String boundaryMultiTokenRegex = properties.getProperty("ssplit.boundaryMultiTokenRegex");
 
@@ -96,11 +92,11 @@ public class WordsToSentencesAnnotator implements Annotator  {
         }
         // regular boundaries
         String boundaryTokenRegex = properties.getProperty("ssplit.boundaryTokenRegex");
-        Set<String> boundariesToDiscard = null;
 
-        // todo [cdm 2016]: Add support for specifying ssplit.boundaryFollowerRegex here and send down to WordsToSentencesAnnotator
+        String boundaryFollowersRegex = properties.getProperty("ssplit.boundaryFollowersRegex");
 
         // newline boundaries which are discarded.
+        Set<String> boundariesToDiscard = null;
         String bounds = properties.getProperty("ssplit.boundariesToDiscard");
         if (bounds != null) {
           String[] toks = bounds.split(",");
@@ -118,7 +114,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
 
         VERBOSE = false;
         this.countLineNumbers = false;
-        this.wts = new WordToSentenceProcessor<>(boundaryTokenRegex, null,
+        this.wts = new WordToSentenceProcessor<>(boundaryTokenRegex, boundaryFollowersRegex,
             boundariesToDiscard, htmlElementsToDiscard,
             WordToSentenceProcessor.stringToNewlineIsSentenceBreak(nlsb),
             (boundaryMultiTokenRegex != null) ? TokenSequencePattern.compile(boundaryMultiTokenRegex) : null, tokenRegexesToDiscard);
@@ -184,13 +180,13 @@ public class WordsToSentencesAnnotator implements Annotator  {
    * telling the underlying splitter to return empty lists of tokens
    * and then treating those empty lists as empty lines.  We don't
    * actually include empty sentences in the annotation, though.
-   **/
+   */
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
       log.info("Sentence splitting ...");
     }
-    if ( !annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
+    if ( ! annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       throw new IllegalArgumentException("WordsToSentencesAnnotator: unable to find words/tokens in: " + annotation);
     }
 

@@ -278,10 +278,6 @@ import edu.stanford.nlp.util.logging.Redwood;
     return s;
   }
 
-  private static String normalizeAmp(final String in) {
-    return in.replaceAll("(?i:&amp;)", "&");
-  }
-
   private Object getNext() {
     final String txt = yytext();
     return getNext(txt, txt);
@@ -318,7 +314,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private Object getNormalizedAmpNext() {
     final String txt = yytext();
     return normalizeAmpersandEntity ?
-      getNext(normalizeAmp(txt), txt) : getNext();
+      getNext(LexerUtils.normalizeAmp(txt), txt) : getNext();
   }
 
 %}
