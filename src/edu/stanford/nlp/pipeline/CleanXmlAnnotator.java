@@ -696,7 +696,7 @@ public class CleanXmlAnnotator implements Annotator {
               sectionStartToken.set(CoreAnnotations.SectionStartAnnotation.class, sectionAnnotations);
               // set character offset info for this section
               currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-                  sectionStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+                      sectionStartToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
             } else {
               // handle case where section has 0 tokens (for instance post that just contains an img)
               currSectionCoreMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, -1);
@@ -708,7 +708,7 @@ public class CleanXmlAnnotator implements Annotator {
               previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
               // set character offset info for this section
               currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
-                  previous.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+                      previous.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
             } else {
               // handle case where section has 0 tokens (for instance post that just contains an img)
               currSectionCoreMap.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, -1);
@@ -725,9 +725,9 @@ public class CleanXmlAnnotator implements Annotator {
                 int authorMentionEnd = matcher.end() + sectionStartTagCharBegin;
                 // set the author mention offsets
                 currSectionCoreMap.set(
-                    CoreAnnotations.SectionAuthorCharacterOffsetBeginAnnotation.class, authorMentionStart);
+                        CoreAnnotations.SectionAuthorCharacterOffsetBeginAnnotation.class, authorMentionStart);
                 currSectionCoreMap.set(
-                    CoreAnnotations.SectionAuthorCharacterOffsetEndAnnotation.class, authorMentionEnd);
+                        CoreAnnotations.SectionAuthorCharacterOffsetEndAnnotation.class, authorMentionEnd);
               }
             }
             // add the tag for the section
@@ -736,15 +736,19 @@ public class CleanXmlAnnotator implements Annotator {
             currSectionCoreMap.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
             // set doc date for post
             String dateString = sectionAnnotations.get(CoreAnnotations.SectionDateAnnotation.class);
+            currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class, dateString);
+            /*
             if (dateString != null) {
+              // todo [cdm 2017]: This seems bad to have in CleanXmlAnnotator since it uses POS tagger, SUTime and all defaults to English!
               try {
                 SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
                 currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
-                    potentialDate.toString());
+                        potentialDate.toString());
               } catch (Exception e) {
                 log.error("failed to parse datetime for post! " + dateString);
               }
             }
+            */
             // add the quotes list
             currSectionCoreMap.set(CoreAnnotations.QuotesAnnotation.class, sectionQuotes);
             // add this to the list of sections

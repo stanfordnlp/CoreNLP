@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
  *
  *  @author Christopher Manning
  */
-public class SUTimeSimpleParserTest {
+public class SUTimeSimpleParserITest {
 
   @Test
   public void testWorking() throws SUTimeSimpleParser.SUTimeParsingError {
@@ -25,6 +25,5 @@ public class SUTimeSimpleParserTest {
       assertEquals(outputs[i], timeExpression.toString());
     }
   }
-
 
 }
