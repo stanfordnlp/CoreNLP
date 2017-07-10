@@ -136,7 +136,7 @@ public class WordsToSentencesAnnotatorTest {
     String text = "This is \none sentence\n\nThis is not another.";
     Properties props = PropertiesUtils.asProperties(
             "annotators", "tokenize, ssplit",
-            "tokenize.language", "english",
+            "tokenize.language", "en",
             "tokenize.options", "tokenizeNLs,invertible,ptb3Escaping=true",
             "ssplit.newlineIsSentenceBreak", "two"
     );
@@ -214,9 +214,7 @@ public class WordsToSentencesAnnotatorTest {
   public void testDatelineSeparation() {
     Properties props = PropertiesUtils.asProperties(
             "annotators", "tokenize, cleanxml, ssplit",
-            "tokenize.language", "english",
-            // this cleanxml flag is just the same as the default. I tried adding this to see if it fixes things, but it doesn't
-            "clean.xmltags", ".*",
+            "tokenize.language", "en",
             "ssplit.newlineIsSentenceBreak", "two",
             "ssplit.boundaryMultiTokenRegex",
             "( /\\*NL\\*/ /\\p{Lu}[-\\p{L}]+/+ /,/ ( /[-\\p{L}]+/+ /,/ )? " +
@@ -241,6 +239,57 @@ public class WordsToSentencesAnnotatorTest {
       assertEquals("Bad tokens in dateline", dateLineTokens[i], sentenceOne);
     }
   }
+
+  private static final String[] dateLineSpanishTexts =
+          { "<P>\n" +
+                  "\nEL CAIRO, 30 jun (Xinhua) -- Al menos una persona.\n",
+                  "\nMONTEVIDEO, 1 jul (Xinhua) -- Los diarios uruguayos",
+                  "\nRIO DE JANEIRO, 30 jun (Xinhua) -- La selección brasileña",
+                  "\nSALVADOR DE BAHIA, Brasil, 30 jun (Xinhua) -- La selección italiana",
+                  "\nLA HAYA, 31 dic (Xinhua) -- Dos candidatos holandeses",
+                  "\nJERUSALEN, 1 ene (Xinhua) -- El presidente de Israel",
+                  "\nCANBERRA (Xinhua) -- El calentamiento oceánico",
+
+          };
+
+  private static final String[] dateLineSpanishTokens =
+          { "EL CAIRO , 30 jun =LRB= Xinhua =RRB= --",
+                  "MONTEVIDEO , 1 jul =LRB= Xinhua =RRB= --",
+                  "RIO DE JANEIRO , 30 jun =LRB= Xinhua =RRB= --",
+                  "SALVADOR DE BAHIA , Brasil , 30 jun =LRB= Xinhua =RRB= --",
+                  "LA HAYA , 31 dic =LRB= Xinhua =RRB= --",
+                  "JERUSALEN , 1 ene =LRB= Xinhua =RRB= --",
+                  "CANBERRA =LRB= Xinhua =RRB= --",
+          };
+
+  /** Test whether you can separate off a dateline as a separate sentence using ssplit.boundaryMultiTokenRegex. */
+  @Test
+  public void testSpanishDatelineSeparation() {
+    Properties props = PropertiesUtils.asProperties(
+            "annotators", "tokenize, cleanxml, ssplit",
+            "tokenize.language", "es",
+            "tokenize.options", "tokenizeNLs,ptb3Escaping=true",
+            "ssplit.newlineIsSentenceBreak", "two",
+            "ssplit.boundaryMultiTokenRegex",
+            "/\\*NL\\*/ /\\p{Lu}[-\\p{L}]+/+ ( /,/  /[-\\p{L}]+/+ )? " +
+                    "( /,/ /[1-3]?[0-9]/ /\\p{Ll}{3,3}/ )? /=LRB=/ /\\p{Lu}\\p{L}+/ /=RRB=/ /--/"
+    );
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+    assertEquals("Bad test data", dateLineSpanishTexts.length, dateLineSpanishTokens.length);
+    for (int i = 0; i < dateLineSpanishTexts.length; i++) {
+      Annotation document1 = new Annotation(dateLineSpanishTexts[i]);
+      pipeline.annotate(document1);
+      List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
+
+     assertEquals("For " + dateLineSpanishTexts[i] + " annotation is " + document1, 2, sentences.size());
+
+      List<CoreLabel> sentenceOneTokens = sentences.get(0).get(CoreAnnotations.TokensAnnotation.class);
+      String sentenceOne = SentenceUtils.listToString(sentenceOneTokens);
+      assertEquals("Bad tokens in dateline", dateLineSpanishTokens[i], sentenceOne);
+    }
+  }
+
 
 
   private static final String kbpDocument =
@@ -271,12 +320,13 @@ public class WordsToSentencesAnnotatorTest {
 
 
   /** Test written in 2017 to debug why the KBP setup doesn't work once you introduce newlineIsSentenceBreak=two.
-   *  Somehow it fell apart with Angel's complex configuration option, stuck in forced wait. */
+   *  Now fixed.
+   */
   @Test
   public void testKbpWorks() {
     Properties props = PropertiesUtils.asProperties(
             "annotators", "tokenize, cleanxml, ssplit",
-            "tokenize.language", "english",
+            "tokenize.language", "en",
             "tokenize.options", "tokenizeNLs,invertible,ptb3Escaping=true",
             "ssplit.newlineIsSentenceBreak", "two",
             "ssplit.tokenPatternsToDiscard", "\\n,\\*NL\\*",
@@ -312,6 +362,72 @@ public class WordsToSentencesAnnotatorTest {
     }
 
     assertEquals("Bad total number of sentences", kbpSentences.length, sentences.size());
+  }
+
+
+  private static final String kbpSpanishDocument =
+          "<DOC    id=\"SPA_NW_001278_20130701_F00013T62\">\n" +
+                  "<DATE_TIME>2013-07-01T03:06:44</DATE_TIME>\n" +
+                  "<HEADLINE>\n" +
+                  "Muere una persona y 37 resultan heridas en manifestación contra presidente egipcio\n" +
+                  "</HEADLINE>\n" +
+                  "<AUTHOR/>\n" +
+                  "<TEXT>\n" +
+                  "Muere una persona y 37 resultan heridas en manifestación contra presidente egipcio\n" +
+                  "\n" +
+                  "EL CAIRO, 30 jun (Xinhua) -- Al menos una persona murió y 37 resultaron heridas hoy en un ataque armado lanzado en una protesta contra el presidente de Egipto, Mohamed Morsi, en Beni Suef, al sur de la capital egipcia de El Cairo, informó la agencia estatal de noticias MENA. Fin\n" +
+                  "</TEXT>\n" +
+                  "</DOC>\n";
+
+  private static final String[] kbpSpanishSentences = {
+          "Muere una persona y 37 resultan heridas en manifestación contra presidente egipcio",
+          "Muere una persona y 37 resultan heridas en manifestación contra presidente egipcio",
+          "EL CAIRO , 30 jun =LRB= Xinhua =RRB= --",
+          "Al menos una persona murió y 37 resultaron heridas hoy en un ataque armado lanzado en una protesta contra el presidente de Egipto , Mohamed Morsi , en Beni Suef , al sur de la capital egipcia de El Cairo , informó la agencia estatal de noticias MENA .",
+          "Fin",
+  };
+
+
+  /** Test written in 2017 to debug why the KBP setup doesn't work once you introduce newlineIsSentenceBreak=two.
+   *  Somehow it fell apart with Angel's complex configuration option, stuck in forced wait. */
+  @Test
+  public void testKbpSpanishWorks() {
+    Properties props = PropertiesUtils.asProperties(
+            "annotators", "tokenize, cleanxml, ssplit",
+            "tokenize.language", "es",
+            "tokenize.options", "tokenizeNLs,ptb3Escaping=true",
+            "ssplit.newlineIsSentenceBreak", "two",
+            "ssplit.tokenPatternsToDiscard", "\\n,\\*NL\\*",
+            "ssplit.boundaryMultiTokenRegex",
+            "/\\*NL\\*/ /\\p{Lu}[-\\p{L}]+/+ /,/ ( /[-\\p{L}]+/+ /,/ )? " +
+                    "/[1-3]?[0-9]/ /\\p{Ll}{3,5}/ /=LRB=/ /\\p{Lu}\\p{L}+/ /=RRB=/ /--/",
+            "clean.xmltags", "headline|text|post",
+            "clean.singlesentencetags", "HEADLINE|AUTHOR",
+            "clean.sentenceendingtags", "TEXT|POST|QUOTE",
+            "clean.turntags", "POST|QUOTE",
+            "clean.speakertags", "AUTHOR",
+            "clean.datetags", "DATE_TIME",
+            "clean.doctypetags", "DOC",
+            "clean.docAnnotations", "docID=doc[id]",
+            "clean.sectiontags", "HEADLINE|POST",
+            "clean.sectionAnnotations", "sectionID=post[id],sectionDate=post[datetime],author=post[author]",
+            "clean.quotetags", "quote",
+            "clean.quoteauthorattributes", "orig_author",
+            "clean.tokenAnnotations", "link=a[href],speaker=post[author],speaker=quote[orig_author]"
+    );
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+    Annotation document1 = new Annotation(kbpSpanishDocument);
+    pipeline.annotate(document1);
+    List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
+
+    for (int i = 0; i < Math.min(kbpSpanishSentences.length, sentences.size()); i++) {
+      CoreMap sentence = sentences.get(i);
+      String sentenceText = SentenceUtils.listToString(sentence.get(CoreAnnotations.TokensAnnotation.class));
+      assertEquals("Bad sentence #" + i, kbpSpanishSentences[i], sentenceText);
+    }
+
+    assertEquals("Bad total number of sentences", kbpSpanishSentences.length, sentences.size());
   }
 
 }
