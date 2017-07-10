@@ -131,6 +131,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
 
   private final boolean isOneSentence;
 
+  /** Whether to output empty sentences. */
   private final boolean allowEmptySentences;
 
   public static NewlineIsSentenceBreak stringToNewlineIsSentenceBreak(String name) {

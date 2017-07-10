@@ -159,6 +159,7 @@ public class WordsToSentencesAnnotatorTest {
   @Test
   public void testAlwaysNewlineIsSentenceBreakSettings() {
     String text = "This is \none sentence\n\nThis is not another.";
+    String[] sents = { "This is", "one sentence", "This is not another ." };
     Properties props = PropertiesUtils.asProperties(
             "annotators", "tokenize, ssplit",
             "ssplit.newlineIsSentenceBreak", "always"
@@ -170,9 +171,16 @@ public class WordsToSentencesAnnotatorTest {
     List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
     assertEquals(3, sentences.size());
 
-    // make sure that there are the correct # of tokens (does contain NL tokens)
+    // make sure that there are the correct # of tokens (count does contain NL tokens)
     List<CoreLabel> tokens = document1.get(CoreAnnotations.TokensAnnotation.class);
     assertEquals(12, tokens.size());
+
+    for (int i = 0; i < Math.min(sents.length, sentences.size()); i++) {
+      CoreMap sentence = sentences.get(i);
+      String sentenceText = SentenceUtils.listToString(sentence.get(CoreAnnotations.TokensAnnotation.class));
+      assertEquals("Bad sentence #" + i, sents[i], sentenceText);
+    }
+
   }
 
   private static final String[] dateLineTexts =
