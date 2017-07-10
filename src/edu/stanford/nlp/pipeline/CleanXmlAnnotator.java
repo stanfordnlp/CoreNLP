@@ -9,8 +9,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
-import edu.stanford.nlp.time.SUTime;
-import edu.stanford.nlp.time.SUTimeSimpleParser;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -347,7 +345,7 @@ public class CleanXmlAnnotator implements Annotator {
           throw new IllegalArgumentException("Invalid tag pattern: " + pattern + " for annotation key " + annoKeyString);
         } else {
           Pattern tagPattern = toCaseInsensitivePattern(pattern);
-          annotationPatterns.add(annoKey, Pair.makePair(tagPattern, (Pattern) null));
+          annotationPatterns.add(annoKey, Pair.makePair(tagPattern, null));
         }
       }
     }
@@ -737,18 +735,6 @@ public class CleanXmlAnnotator implements Annotator {
             // set doc date for post
             String dateString = sectionAnnotations.get(CoreAnnotations.SectionDateAnnotation.class);
             currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class, dateString);
-            /*
-            if (dateString != null) {
-              // todo [cdm 2017]: This seems bad to have in CleanXmlAnnotator since it uses POS tagger, SUTime and all defaults to English!
-              try {
-                SUTime.Temporal potentialDate = SUTimeSimpleParser.parse(dateString);
-                currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class,
-                        potentialDate.toString());
-              } catch (Exception e) {
-                log.error("failed to parse datetime for post! " + dateString);
-              }
-            }
-            */
             // add the quotes list
             currSectionCoreMap.set(CoreAnnotations.QuotesAnnotation.class, sectionQuotes);
             // add this to the list of sections
