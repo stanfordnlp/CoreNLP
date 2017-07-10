@@ -74,7 +74,8 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
 
   public enum NewlineIsSentenceBreak { NEVER, ALWAYS, TWO_CONSECUTIVE }
 
-  public static final String DEFAULT_BOUNDARY_REGEX = "\\.|[!?]+";
+  /** Default pattern for sentence ending punctuation. Now Chinese-friendly as well as English. */
+  public static final String DEFAULT_BOUNDARY_REGEX = "[.。]|[!?！？]+";
 
   /** Pe = Close_Punctuation (close brackets), Pf = Final_Punctuation (close quotes);
    *  add straight quotes, PTB escaped right brackets (-RRB-, etc.), greater than as close angle bracket,

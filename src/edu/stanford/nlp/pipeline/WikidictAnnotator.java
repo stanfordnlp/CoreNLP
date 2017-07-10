@@ -29,7 +29,7 @@ public class WikidictAnnotator extends SentenceAnnotator {
   private static final Redwood.RedwoodChannels log = Redwood.channels(WikidictAnnotator.class);
 
   /** A pattern for simple numbers */
-  private static final Pattern NUMBER_PATTERN = Pattern.compile("[0-9\\.]+");
+  private static final Pattern NUMBER_PATTERN = Pattern.compile("[0-9.]+");
 
   @ArgumentParser.Option(name="threads", gloss="The number of threads to run this annotator on")
   private int threads = 1;

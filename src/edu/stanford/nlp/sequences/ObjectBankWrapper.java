@@ -173,7 +173,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   private void fixDocLengths(List<List<IN>> docs) {
     final int maxDocSize = flags.maxDocSize;
 
-    WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<>();
+    WordToSentenceProcessor<IN> wts = null; // allocated lazily
     List<List<IN>> newDocuments = new ArrayList<>();
     for (List<IN> document : docs) {
       if (maxDocSize <= 0 || document.size() <= maxDocSize) {
@@ -181,6 +181,9 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
           newDocuments.add(document);
         }
         continue;
+      }
+      if (wts == null) {
+        wts = new WordToSentenceProcessor<>();
       }
       List<List<IN>> sentences = wts.process(document);
       List<IN> newDocument = new ArrayList<>();
