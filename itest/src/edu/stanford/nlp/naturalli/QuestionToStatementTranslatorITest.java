@@ -569,6 +569,9 @@ public class QuestionToStatementTranslatorITest {
   @Test
   public void formattingCorrectTense() {
     checkFormatted(
+        "when/WRB did/VBD there/EX begin/VB to/TO be/VB a/DT renewal/NN of/IN popular/JJ interest/NN in/IN Tesla/NNP ?",
+        "There began to be a renewal of popular interest in Tesla in time");
+    checkFormatted(
         "what/WP did/VBD Tesla/NNP invent/VB ?",
         "Tesla invented thing");
     checkFormatted(

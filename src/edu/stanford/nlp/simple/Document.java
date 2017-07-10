@@ -34,7 +34,7 @@ import static edu.stanford.nlp.pipeline.Annotator.*;
  *
  * @author Gabor Angeli
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public class Document {
 
   /**
