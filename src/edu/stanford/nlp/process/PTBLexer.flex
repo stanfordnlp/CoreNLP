@@ -261,7 +261,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private enum UntokenizableOptions { NONE_DELETE, FIRST_DELETE, ALL_DELETE, NONE_KEEP, FIRST_KEEP, ALL_KEEP }
   private UntokenizableOptions untokenizable = UntokenizableOptions.FIRST_DELETE;
 
-  /* Flags begin with historical ptb3Escaping behavior. */
+  /* Flags begin with historical ptb3Escaping behavior */
   private boolean invertible;
   private boolean tokenizeNLs;
   private boolean tokenizePerLine;
@@ -327,6 +327,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ \r\n]");
   private static final Pattern LEFT_PAREN_PATTERN = Pattern.compile("\\(");
   private static final Pattern RIGHT_PAREN_PATTERN = Pattern.compile("\\)");
+  private static final Pattern AMP_PATTERN = Pattern.compile("(?i:&amp;)");
 
   private static final Pattern ONE_FOURTH_PATTERN = Pattern.compile("\u00BC");
   private static final Pattern ONE_HALF_PATTERN = Pattern.compile("\u00BD");
@@ -363,6 +364,27 @@ import edu.stanford.nlp.util.logging.Redwood;
       yypushback(in.length() - firstHyphen);
     }
   }
+
+  private static String removeSoftHyphens(String in) {
+    // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
+    if (in.indexOf('\u00AD') < 0) {
+      // shortcut doing work
+      return in;
+    }
+    int length = in.length();
+    StringBuilder out = new StringBuilder(length - 1);
+    for (int i = 0; i < length; i++) {
+      char ch = in.charAt(i);
+      if (ch != '\u00AD') {
+        out.append(ch);
+      }
+    }
+    if (out.length() == 0) {
+      out.append('-'); // don't create an empty token
+    }
+    return out.toString();
+  }
+
 
   /**
    * If an apparent negative number is generated from a hyphenated word, tokenize the hyphen.
@@ -433,6 +455,26 @@ import edu.stanford.nlp.util.logging.Redwood;
    * em dash    97      0151    2014    8212
    */
 
+  private static final Pattern CENTS_PATTERN = Pattern.compile("\u00A2");
+  private static final Pattern POUND_PATTERN = Pattern.compile("\u00A3");
+  private static final Pattern GENERIC_CURRENCY_PATTERN = Pattern.compile("[\u0080\u00A4\u20A0\u20AC\u20B9]");
+  private static final Pattern CP1252_EURO_PATTERN = Pattern.compile("\u0080");
+
+  private static String normalizeCurrency(String in) {
+    String s1 = in;
+    s1 = CENTS_PATTERN.matcher(s1).replaceAll("cents");
+    s1 = POUND_PATTERN.matcher(s1).replaceAll("#");  // historically used for pound in PTB3
+    s1 = GENERIC_CURRENCY_PATTERN.matcher(s1).replaceAll("\\$");  // Euro (ECU, generic currency)  -- no good translation!
+    return s1;
+  }
+
+  /** Still at least turn cp1252 euro symbol to Unicode one. */
+  private static String minimallyNormalizeCurrency(String in) {
+    String s1 = in;
+    s1 = CP1252_EURO_PATTERN.matcher(s1).replaceAll("\u20AC");
+    return s1;
+  }
+
   private static final Pattern singleQuote = Pattern.compile("&apos;|'");
   // If they typed `` they probably meant it, but if it's '' or mixed, we use our heuristics.
   private static final Pattern doubleQuote = Pattern.compile("\"|''|'`|`'|&quot;");
@@ -440,7 +482,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   // 82,84,91,92,93,94 aren't valid unicode points, but sometimes they show
   // up from cp1252 and need to be translated
   private static final Pattern leftSingleQuote = Pattern.compile("[\u0082\u008B\u0091\u2018\u201A\u201B\u2039]");
-  private static final Pattern rightSingleQuote = Pattern.compile("[\u0092\u009B\u00B4\u2019\u203A]");
+  private static final Pattern rightSingleQuote = Pattern.compile("[\u0092\u009B\u2019\u203A]");
   private static final Pattern leftDoubleQuote = Pattern.compile("[\u0084\u0093\u201C\u201E\u00AB]|[\u0091\u2018]'");
   private static final Pattern rightDoubleQuote = Pattern.compile("[\u0094\u201D\u00BB]|[\u0092\u2019]'");
 
@@ -462,8 +504,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     return s1;
   }
 
-  // U+00B4 should be acute accent, but stuff happens
-  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u008B\u0091\u00B4\u2018\u0092\u2019\u009B\u201A\u201B\u2039\u203A']");
+  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u008B\u0091\u2018\u0092\u2019\u009B\u201A\u201B\u2039\u203A']");
   private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
 
   private static String asciiQuotes(String in) {
@@ -536,6 +577,10 @@ import edu.stanford.nlp.util.logging.Redwood;
     return s;
   }
 
+  private static String normalizeAmp(final String in) {
+    return AMP_PATTERN.matcher(in).replaceAll("&");
+  }
+
   private int indexOfSpace(String txt) {
     for (int i = 0, len = txt.length(); i < len; i++) {
       char ch = txt.charAt(i);
@@ -571,6 +616,35 @@ import edu.stanford.nlp.util.logging.Redwood;
         prevWord = (CoreLabel) word;
       }
       return word;
+    }
+  }
+
+  private Object getNormalizedAmpNext() {
+    final String txt = yytext();
+    if (normalizeAmpersandEntity) {
+      return getNext(normalizeAmp(txt), txt);
+    } else {
+      return getNext();
+    }
+  }
+
+  /* CP1252: dagger, double dagger, per mille, bullet, small tilde, trademark */
+  private String processCp1252misc(String arg) {
+    switch (arg) {
+    case "\u0086":
+      return "\u2020";
+    case "\u0087":
+      return "\u2021";
+    case "\u0089":
+      return "\u2030";
+    case "\u0095":
+      return "\u2022";
+    case "\u0098":
+      return "\u02DC";
+    case "\u0099":
+      return "\u2122";
+    default:
+      throw new IllegalArgumentException("Bad process cp1252");
     }
   }
 
@@ -656,8 +730,8 @@ SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 DIGIT = [:digit:]|[\u07C0-\u07C9]
 DATE = {DIGIT}{1,2}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{2,4}
-/* Note that NUM also includes times like 12:55. One can start with a . or , but not a : */
-NUM = {DIGIT}*([.,\u066B\u066C]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)*
+/* Note that NUM also includes times like 12:55 */
+NUM = {DIGIT}+|{DIGIT}*([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)+
 /* Now don't allow bracketed negative numbers!  They have too many uses (e.g.,
    years or times in parentheses), and having them in tokens messes up
    treebank parsing.
@@ -676,7 +750,7 @@ DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AA\u20AC\u20B9\u060B\u0E3F\u
 LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
 WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
 FILENAME_EXT = bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|3gp|wm[va]|avi|flv|mov|mp[34g]
-FILENAME = [\p{Alpha}\p{Digit}]+([-._/][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}
+FILENAME = ({LETTER}|{DIGIT})+([-._/]({LETTER}|{DIGIT})+)*\.{FILENAME_EXT}
 /* THING: The $ was for things like New$;
    WAS: only keep hyphens with short one side like co-ed
    But treebank just allows hyphenated things as words!
@@ -684,7 +758,7 @@ FILENAME = [\p{Alpha}\p{Digit}]+([-._/][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}
 THING = ([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUM}))*
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}(\\?\/[\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}){1,2}
-APOS = ['\u0092\u2019´]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or reversed quote or HTML SGML escape */
+APOS = ['\u0092\u2019]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or HTML SGML escape */
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
 /* HTHING recognizes hyphenated words, including ones with various kinds of numbers in them.
@@ -762,7 +836,7 @@ ABNUM = tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
-ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Blvd|Rd|Ave|Esq
+ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Blvd|Rd|Esq
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
  *  If they're followed by an uppercase one, we assume there is also a
@@ -798,7 +872,7 @@ ACRONYM = ({ACRO})\.
  */
 /* Maybe also "op." for "op. cit." but also get a photo op. Rs. for Rupees */
 /* Pt for part needs to be case sensitive (vs. country code for Portugal). */
-ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|paras?|bldg|prop|pp|op|approx|[P][t]|rs)\.
+ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|bldg|prop|pp|op|approx|[P][t]|rs)\.
 /* Case for south/north before a few places. */
 ABBREVSN = So\.|No\.
 
@@ -825,7 +899,7 @@ QUOTES = {APOS}|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB
 DBLQUOT = \"|&quot;|[`'\u0091\u0092\u2018\u2019]'
 /* Cap'n for captain, c'est for french */
 TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
-SWEARING = f[-*][-c*]k(in[g']?|e[dr])?|(bull|dip)?sh[-\*]t(ty|e|box)?|c[-*]nts?|p[-*]ss(e[sd]|ing)?|c[-*]ck|b[-*]tch|t[-*]ts|tw[-*]ts?|cr[-*]p|d[-*]cks?|b[-*][-*s]t[-*]rds?|pr[-*]ck|d[-*]mn|bl[-*]{2,2}dy
+SWEARING = f[-*][-c*]k(in[g']?|e[dr])?|(bull|dip)?sh[-\*]t(ty|e|box)?|c[-*]nts?|p[-*]ss(e[sd]|ing)?|c[-*]ck|b[-*]tch|t[-*]ts|tw[-*]ts?|cr[-*]p|d[-*]cks?|b[-*][-*s]t[-*]rds?|pr[-*]ck|d[-*]mn
 TBSPEC2 = {APOS}[0-9][0-9]
 BANGWORDS = (E|Yahoo|Jeopardy)\!
 BANGMAGAZINES = OK\!
@@ -899,36 +973,27 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                             return getNext();
                           }
                         }
-{SPAMP}                 { final String origTxt = yytext();
-                          String tok;
-                          if (normalizeAmpersandEntity) {
-                            tok = LexerUtils.normalizeAmp(origTxt);
-                          } else {
-                            tok = origTxt;
-                          }
-                          if (DEBUG) { logger.info("Used {SPAMP} to recognize " + origTxt + " as " + tok); }
-                          return getNext(tok, origTxt);
-                         }
+{SPAMP}                 { return getNormalizedAmpNext(); }
 {SPPUNC}                { return getNext(); }
 {WORD}/{REDAUX}         { final String origTxt = yytext();
-                          String tok = LexerUtils.removeSoftHyphens(origTxt);
+                          String tok = removeSoftHyphens(origTxt);
                           if (americanize) {
                             tok = Americanize.americanize(tok);
                           }
-                          if (DEBUG) { logger.info("Used {WORD} to recognize " + origTxt + " as " + tok); }
+                          if (DEBUG) { logger.info("Used {WORD} to recognize " + origTxt + " as " + tok +
+                                                   "; probablyLeft=" + false); }
                           return getNext(tok, origTxt);
                         }
-{SWORD}/{SREDAUX}       { final String origTxt = yytext();
-                          String tok = LexerUtils.removeSoftHyphens(origTxt);
-                          if (DEBUG) { logger.info("Used {SWORD} to recognize " + origTxt + " as " + tok); }
-                          return getNext(tok, origTxt);
-                        }
+{SWORD}/{SREDAUX}       { final String txt = yytext();
+                          return getNext(removeSoftHyphens(txt),
+                                         txt); }
 {WORD}                  { final String origTxt = yytext();
-                          String tok = LexerUtils.removeSoftHyphens(origTxt);
+                          String tok = removeSoftHyphens(origTxt);
                           if (americanize) {
                             tok = Americanize.americanize(tok);
                           }
-                          if (DEBUG) { logger.info("Used {WORD} (2) to recognize " + origTxt + " as " + tok); }
+                          if (DEBUG) { logger.info("Used {WORD} (2) to recognize " + origTxt + " as " + tok +
+                                                   "; probablyLeft=" + false); }
                           return getNext(tok, origTxt);
                         }
 {APOWORD}               { String tok = yytext();
@@ -998,16 +1063,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                                        ", escapeForwardSlashAsterisk=" + escapeForwardSlashAsterisk); }
                   return getNext(norm, txt);
                 }
-{TBSPEC}        { final String origTxt = yytext();
-                  String tok;
-                  if (normalizeAmpersandEntity) {
-                    tok = LexerUtils.normalizeAmp(origTxt);
-                  } else {
-                    tok = origTxt;
-                  }
-                  if (DEBUG) { logger.info("Used {TBSPEC} to recognize " + origTxt + " as " + tok); }
-                  return getNext(tok, origTxt);
-                }
+{TBSPEC}        { return getNormalizedAmpNext(); }
 {SWEARING}      { String txt = yytext();
                   String normTok = txt;
                   if (escapeForwardSlashAsterisk) {
@@ -1027,9 +1083,9 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                         }
 {DOLSIGN}               { return getNext(); }
 {DOLSIGN2}              { if (normalizeCurrency) {
-                            return getNext(LexerUtils.normalizeCurrency(yytext()), yytext());
+                            return getNext(normalizeCurrency(yytext()), yytext());
                         } else {
-                            return getNext(LexerUtils.minimallyNormalizeCurrency(yytext()), yytext());
+                            return getNext(minimallyNormalizeCurrency(yytext()), yytext());
                           }
                         }
 /* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!). A one letter acronym candidate like "Z." or "I." in this context usually isn't, and so we return the leter and pushback the period for next time. */
@@ -1079,11 +1135,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 {DEGREES}               { return getNext(); }
 <YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<])      { return getNext(); }
 <YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<])      { return getNext(); }
-{WORD}\./{INSENTP}      { String origTok = yytext();
-                          String norm = LexerUtils.removeSoftHyphens(origTok);
-                          if (DEBUG) { logger.info("Used {WORD} (3) to recognize " + origTok + " as " + norm); }
-                          return getNext(norm, origTok);
-                        }
+{WORD}\./{INSENTP}      { return getNext(removeSoftHyphens(yytext()), yytext()); }
 {PHONE}                 { String txt = yytext();
                           if (normalizeSpace) {
                             txt = txt.replace(' ', '\u00A0'); // change space to non-breaking space
@@ -1201,22 +1253,22 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                     return getNext();
                   }
                 }
-/* {HTHING}/[^\p{Alpha}\p{Digit}.+]    { return getNext(LexerUtils.removeSoftHyphens(yytext()),
+/* {HTHING}/[^\p{Alpha}\p{Digit}.+]    { return getNext(removeSoftHyphens(yytext()),
                                                yytext()); } */
-{HTHINGEXCEPTIONWHOLE}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONWHOLE}\./{INSENTP}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONPREFIXED}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONPREFIXED}\./{INSENTP}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONSUFFIXED}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONSUFFIXED}\./{INSENTP}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONWHOLE}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONWHOLE}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONPREFIXED}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONPREFIXED}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONSUFFIXED}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONSUFFIXED}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
 {HTHING}        { breakByHyphens(yytext());
-                  if (DEBUG) { logger.info("Used {HTHING} to recognize " + yytext() + " as " + LexerUtils.removeSoftHyphens(yytext())); }
-                  return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext()); }
+                  if (DEBUG) { logger.info("Used {HTHING} to recognize " + yytext() + " as " + removeSoftHyphens(yytext())); }
+                  return getNext(removeSoftHyphens(yytext()), yytext()); }
 {HTHING}\./{INSENTP}
                 { String tok = yytext();
                   breakByHyphens(tok);
                   tok = yytext();
-                  String norm = LexerUtils.removeSoftHyphens(tok);
+                  String norm = removeSoftHyphens(tok);
                   if (DEBUG) { logger.info("Used {HTHING} (2) to recognize " + tok + " as " + norm); }
                   return getNext(norm, tok);
                 }
@@ -1235,26 +1287,8 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
                 }
-{THINGA}\./{INSENTP}    { final String origTxt = yytext();
-                          String tok;
-                          if (normalizeAmpersandEntity) {
-                            tok = LexerUtils.normalizeAmp(origTxt);
-                          } else {
-                            tok = origTxt;
-                          }
-                          if (DEBUG) { logger.info("Used {THINGA} to recognize " + origTxt + " as " + tok); }
-                          return getNext(tok, origTxt);
-                        }
-{THINGA}                { final String origTxt = yytext();
-                          String tok;
-                          if (normalizeAmpersandEntity) {
-                            tok = LexerUtils.normalizeAmp(origTxt);
-                          } else {
-                            tok = origTxt;
-                          }
-                          if (DEBUG) { logger.info("Used {THINGA} (2) to recognize " + origTxt + " as " + tok); }
-                          return getNext(tok, origTxt);
-                        }
+{THINGA}\./{INSENTP}    { return getNormalizedAmpNext(); }
+{THINGA}        { return getNormalizedAmpNext(); }
 /* This QUOTES must proceed (S)REDAUX (2) so it by preference matches straight quote before word.
    Trying to collapse the first two cases seemed to break things (?!?). */
 {QUOTES}/[:letter:]{NOT_SPACENL_ONE_CHAR}
@@ -1299,7 +1333,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
 {CP1252_MISC_SYMBOL}  { String tok = yytext();
-                        String norm = LexerUtils.processCp1252misc(tok);
+                        String norm = processCp1252misc(tok);
                         if (DEBUG) { logger.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
                         return getNext(norm, tok);
                       }

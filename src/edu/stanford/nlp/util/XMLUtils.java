@@ -57,8 +57,8 @@ public class XMLUtils  {
   /**
    * Returns the text content of all nodes in the given file with the given tag.
    * If the text contents contains embedded tags, strips the embedded tags out
-   * of the returned text. E.g., {@code <s>This is a <s>sentence</s> with embedded tags
-   * </s>} would return the list containing ["This is a sentence with embedded
+   * of the returned text. e.g. <s>This is a <s>sentence</s> with embedded tags
+   * </s> would return the list containing ["This is a sentence with embedded
    * tags", "sentence"].
    *
    * @throws SAXException if tag doesn't exist in the file.
@@ -118,8 +118,8 @@ public class XMLUtils  {
   /**
    * Returns the text content of all nodes in the given file with the given tag.
    * If the text contents contains embedded tags, strips the embedded tags out
-   * of the returned text. E.g., {@code <s>This is a <s>sentence</s> with embedded tags
-   * </s>} would return the list containing ["This is a sentence with embedded
+   * of the returned text. e.g. <s>This is a <s>sentence</s> with embedded tags
+   * </s> would return the list containing ["This is a sentence with embedded
    * tags", "sentence"].
    *
    * @throws SAXException if tag doesn't exist in the file.
@@ -167,7 +167,7 @@ public class XMLUtils  {
    * Returns the elements in the given file with the given tag associated with
    * the text content of the previous and next siblings up to max numIncludedSiblings.
    *
-   * @return List of {@code Triple<String, Element, String>} Targeted elements surrounded
+   * @return List of Triple<String, Element, String> Targeted elements surrounded
    * by the text content of the two previous siblings and two next siblings.
    */
   public static List<Triple<String, Element, String>> getTagElementTriplesFromFileNumBounded(File f,
@@ -200,7 +200,7 @@ public class XMLUtils  {
    * the text content of the previous and next siblings up to max numIncludedSiblings.
    *
    * @throws SAXException if tag doesn't exist in the file.
-   * @return List of {@code Triple<String, Element, String>} Targeted elements surrounded
+   * @return List of Triple<String, Element, String> Targeted elements surrounded
    * by the text content of the two previous siblings and two next siblings.
    */
   public static List<Triple<String, Element, String>> getTagElementTriplesFromFileNumBoundedSAXException(
@@ -402,9 +402,11 @@ public class XMLUtils  {
     return ret;
   }
 
-  // Pattern is reentrant, going by the statement "many matchers can share the same pattern"
-  // on the Pattern javadoc.  Therefore, this should be safe as a static final variable.
-  private static final Pattern xmlEscapingPattern = Pattern.compile("&.+?;");
+  // Pattern is reentrant, going by the statement
+  // "many matchers can share the same pattern"
+  // on the Pattern javadoc.  Therefore, this should be
+  // safe as a static final variable.
+  private static final Pattern xmlEscapingPattern = Pattern.compile("\\&.+?;");
 
   public static String unescapeStringForXML(String s) {
     StringBuilder result = new StringBuilder();
@@ -1020,7 +1022,7 @@ public class XMLUtils  {
         if (tag == null) {
           break;
         }
-        result.append(tag);
+        result.append(tag.toString());
       } while (true);
     } catch (IOException e) {
       log.info("Error reading string");
@@ -1058,7 +1060,7 @@ public class XMLUtils  {
      * @param tag String to turn into an XMLTag object
      */
     public XMLTag(String tag) {
-      if (tag == null || tag.isEmpty()) {
+      if (tag == null || tag.length() == 0) {
         throw new NullPointerException("Attempted to parse empty/null tag");
       }
       if (tag.charAt(0) != '<') {
@@ -1161,7 +1163,7 @@ public class XMLUtils  {
    * @param r The reader to read from
    * @return The String representing the tag, or null if one couldn't be read
    *         (i.e., EOF).  The returned item is a complete tag including angle
-   *         brackets, such as {@code <TXT>}
+   *         brackets, such as <code>&lt;TXT&gt;</code>
    */
   public static String readTag(Reader r) throws IOException {
     if ( ! r.ready()) {
@@ -1193,7 +1195,9 @@ public class XMLUtils  {
     return new XMLTag(tagString);
   }
 
-  public static Document readDocumentFromFile(String filename) throws Exception {
+  public static Document readDocumentFromFile(String filename)
+    throws Exception
+  {
     InputSource in = new InputSource(new FileReader(filename));
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(false);
@@ -1220,24 +1224,20 @@ public class XMLUtils  {
       } else if (ex.getPublicId() != null) {
         sb.append(" in entity from publicID ").append(ex.getPublicId());
       }
-      sb.append('.');
+      sb.append(".");
       return sb.toString();
     }
 
-    @Override
     public void warning(SAXParseException exception) {
       log.info(makeBetterErrorString("Warning", exception));
     }
 
-    @Override
     public void error(SAXParseException exception) {
       log.info(makeBetterErrorString("Error", exception));
     }
 
-    @Override
     public void fatalError(SAXParseException ex) throws SAXParseException {
-      throw new SAXParseException(makeBetterErrorString("Fatal Error", ex),
-              ex.getPublicId(), ex.getSystemId(), ex.getLineNumber(), ex.getColumnNumber());
+      throw new SAXParseException(makeBetterErrorString("Fatal Error", ex), ex.getPublicId(), ex.getSystemId(), ex.getLineNumber(), ex.getColumnNumber());
       // throw new RuntimeException(makeBetterErrorString("Fatal Error", ex));
     }
 
@@ -1263,7 +1263,7 @@ public class XMLUtils  {
       String s = IOUtils.slurpFile(args[0]);
       Reader r = new StringReader(s);
       String tag = readTag(r);
-      while (tag != null && ! tag.isEmpty()) {
+      while (tag != null && tag.length() > 0) {
         readUntilTag(r);
         tag = readTag(r);
         if (tag == null || tag.isEmpty()) {

@@ -99,13 +99,12 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     get turned into U+00A0 (non-breaking space).  It's dangerous to turn
  *     this off for most of our Stanford NLP software, which assumes no
  *     spaces in tokens. Default is true.
- * <li>normalizeAmpersandEntity: Whether to map the XML {@code &amp;} to an
+ * <li>normalizeAmpersandEntity: Whether to map the XML &amp;amp; to an
  *      ampersand. Default is true.
  * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
  *     to turn common currency characters into $, #, or "cents", reflecting
  *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
- *     Default is false. (Note: The default was true through CoreNLP v3.8.0, but we're
- *     gradually inching our way towards the modern world!)
+ *     Default is true.
  * <li>normalizeFractions: Whether to map certain common composed
  *     fraction characters to spelled out letter forms like "1/2".
  *     Default is true.
@@ -411,8 +410,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   /**
    * Returns a presentable version of the given PTB-tokenized words.
    * Pass in a List of Words or a Document and this method will
-   * take the word() values (to prevent additional text from creeping in, e.g., POS tags),
-   * and call {@link #ptb2Text(String)} on the output.
+   * join the words with spaces and call {@link #ptb2Text(String)} on the
+   * output. This method will take the word() values to prevent additional
+   * text from creeping in (e.g., POS tags).
    *
    * @param ptbWords A list of HasWord objects
    * @return A presentable version of the given PTB-tokenized words

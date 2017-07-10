@@ -10522,21 +10522,21 @@ class SpanishLexer {
       } else if ("escapeForwardSlashAsterisk".equals(key)) {
         escapeForwardSlashAsterisk = val;
       } else if ("untokenizable".equals(key)) {
-        if (value.equals("noneDelete")) {
-          untokenizable = UntokenizableOptions.NONE_DELETE;
-        } else if (value.equals("firstDelete")) {
-          untokenizable = UntokenizableOptions.FIRST_DELETE;
-        } else if (value.equals("allDelete")) {
-          untokenizable = UntokenizableOptions.ALL_DELETE;
-        } else if (value.equals("noneKeep")) {
-          untokenizable = UntokenizableOptions.NONE_KEEP;
-        } else if (value.equals("firstKeep")) {
-         untokenizable = UntokenizableOptions.FIRST_KEEP;
-        } else if (value.equals("allKeep")) {
-          untokenizable = UntokenizableOptions.ALL_KEEP;
-        } else {
-          throw new IllegalArgumentException("SpanishLexer: Invalid option value in constructor: " + key + ": " + value);
-        }
+	if (value.equals("noneDelete")) {
+	  untokenizable = UntokenizableOptions.NONE_DELETE;
+	} else if (value.equals("firstDelete")) {
+	  untokenizable = UntokenizableOptions.FIRST_DELETE;
+	} else if (value.equals("allDelete")) {
+	  untokenizable = UntokenizableOptions.ALL_DELETE;
+	} else if (value.equals("noneKeep")) {
+	  untokenizable = UntokenizableOptions.NONE_KEEP;
+	} else if (value.equals("firstKeep")) {
+	  untokenizable = UntokenizableOptions.FIRST_KEEP;
+	} else if (value.equals("allKeep")) {
+	  untokenizable = UntokenizableOptions.ALL_KEEP;
+	} else {
+        throw new IllegalArgumentException("SpanishLexer: Invalid option value in constructor: " + key + ": " + value);
+	}
       } else if ("strictTreebank3".equals(key)) {
         strictTreebank3 = val;
       } else {
@@ -10726,6 +10726,11 @@ class SpanishLexer {
     }
     return s;
   }
+  private static final Pattern AMP_PATTERN = Pattern.compile("(?i:&amp;)");
+
+  private static String normalizeAmp(final String in) {
+    return AMP_PATTERN.matcher(in).replaceAll("&");
+  }
 
   private static String convertToEl(String l) {
     if(Character.isLowerCase(l.charAt(0)))
@@ -10770,7 +10775,7 @@ class SpanishLexer {
   private Object getNormalizedAmpNext() {
     final String txt = yytext();
     return normalizeAmpersandEntity ?
-      getNext(LexerUtils.normalizeAmp(txt), txt) : getNext();
+      getNext(normalizeAmp(txt), txt) : getNext();
   }
 
 

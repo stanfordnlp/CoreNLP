@@ -65,9 +65,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(WordToSentenceProcessor.class);
 
-  /** Turning this on is good for debugging sentence splitting. */
-  private static final boolean DEBUG = false;
-
   // todo [cdm Aug 2012]: This should be unified with the PlainTextIterator
   // in DocumentPreprocessor, perhaps by making this one implement Iterator.
   // (DocumentProcessor once used to use this class, but now doesn't....)
@@ -84,6 +81,9 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
 
   public static final Set<String> DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD = Collections.unmodifiableSet(
           Generics.newHashSet(Arrays.asList(WhitespaceLexer.NEWLINE, PTBTokenizer.getNewlineToken())));
+
+  /** Turning this on is good for debugging sentence splitting. */
+  private static final boolean DEBUG = false;
 
   /**
    * Regex for tokens (Strings) that qualify as sentence-final tokens.
@@ -174,7 +174,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     }
   }
 
-  @SuppressWarnings("Convert2streamapi")
   private static boolean matches(List<Pattern> patterns, String word) {
     for (Pattern p: patterns) {
       Matcher m = p.matcher(word);
@@ -232,21 +231,17 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
    * @return A list of sentences.
    * @see #WordToSentenceProcessor(String, String, Set, Set, String, NewlineIsSentenceBreak, SequencePattern, Set, boolean, boolean)
    */
-  @SuppressWarnings("ConstantConditions")
   private List<List<IN>> wordsToSentences(List<? extends IN> words) {
     IdentityHashMap<Object, Boolean> isSentenceBoundary = null; // is null unless used by sentenceBoundaryMultiTokenPattern
 
-    if (DEBUG) { log.info("Cutting up: " + words); }
     if (sentenceBoundaryMultiTokenPattern != null) {
-      if (DEBUG) { log.info("  checking for tokensregex pattern: " + sentenceBoundaryMultiTokenPattern); }
       // Do initial pass using TokensRegex to identify multi token patterns that need to be matched
-      // and add the last token of a match to our table of sentence boundary tokens.
+      // and add the last token to our table of sentence boundary tokens
       isSentenceBoundary = new IdentityHashMap<>();
       SequenceMatcher<? super IN> matcher = sentenceBoundaryMultiTokenPattern.getMatcher(words);
       while (matcher.find()) {
-        List<? super IN> nodes = matcher.groupNodes();
+        List nodes = matcher.groupNodes();
         if (nodes != null && ! nodes.isEmpty()) {
-          if (DEBUG) { log.info("    found match at: " + nodes); }
           isSentenceBoundary.put(nodes.get(nodes.size() - 1), true);
         }
       }
@@ -264,29 +259,25 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     for (IN o: words) {
       String word = getString(o);
       boolean forcedEnd = isForcedEndToken(o);
-      // if (DEBUG) { if (forcedEnd) { log.info("Word is " + word + "; marks forced end of sentence [cont.]"); } }
 
       boolean inMultiTokenExpr = false;
       boolean discardToken = false;
       if (o instanceof CoreMap) {
         // Hacky stuff to ensure sentence breaks do not happen in certain cases
         CoreMap cm = (CoreMap) o;
+        Boolean forcedUntilEndValue = cm.get(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class);
         if ( ! forcedEnd) {
-          Boolean forcedUntilEndValue = cm.get(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class);
-          if (forcedUntilEndValue != null && forcedUntilEndValue) {
-            // if (DEBUG) { log.info("Word is " + word + "; starting wait for forced end of sentence [cont.]"); }
+          if (forcedUntilEndValue != null && forcedUntilEndValue)
             inWaitForForcedEnd = true;
-          } else {
+          else {
             MultiTokenTag mt = cm.get(CoreAnnotations.MentionTokenAnnotation.class);
-            if (mt != null && ! mt.isEnd()) {
+            if (mt != null && !mt.isEnd()) {
               // In the middle of a multi token mention, make sure sentence is not ended here
-              // if (DEBUG) { log.info("Word is " + word + "; inside multi-token mention [cont.]"); }
               inMultiTokenExpr = true;
             }
           }
         }
       }
-
       if (tokenPatternsToDiscard != null) {
         discardToken = matchesTokenPatternsToDiscard(word);
       }
@@ -323,18 +314,16 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         if ( ! discardToken) currentSentence.add(o);
         if (DEBUG) { log.info("Word is " + word + "; in multi token expr; " + debugText); }
       } else if (sentenceBoundaryToDiscard.contains(word)) {
-        if (forcedEnd) {
-          // sentence boundary can easily be forced end
-          inWaitForForcedEnd = false;
+        if (newlineIsSentenceBreak == NewlineIsSentenceBreak.ALWAYS) {
           newSentForced = true;
-        } else if (newlineIsSentenceBreak == NewlineIsSentenceBreak.ALWAYS) {
-          newSentForced = true;
-        } else if (newlineIsSentenceBreak == NewlineIsSentenceBreak.TWO_CONSECUTIVE && lastTokenWasNewline) {
-          newSentForced = true;
+        } else if (newlineIsSentenceBreak == NewlineIsSentenceBreak.TWO_CONSECUTIVE) {
+          if (lastTokenWasNewline) {
+            newSentForced = true;
+          }
         }
         lastTokenWasNewline = true;
         if (DEBUG) {
-          log.info("Word is " + word + "; a discarded sentence boundary; newSentForced=" + newSentForced);
+          log.info("Word is " + word + " - a discarded sentence boundary");
         }
       } else {
         lastTokenWasNewline = false;
@@ -351,6 +340,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
           if (DEBUG) {
             log.info("Word is " + word + "; is sentence boundary (matched multi-token pattern); " + debugText);
           }
+          // todo [cdm 2017]: Clarify semantics; should this also be a newSentForced? Not sure.
           newSent = true;
         } else if (sentenceBoundaryTokenPattern.matcher(word).matches()) {
           if ( ! discardToken) { currentSentence.add(o); }
@@ -608,7 +598,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       log.info("  tokenPatternsToDiscard=" + tokenPatternsToDiscard);
       log.info("  isOneSentence=" + isOneSentence);
       log.info("  allowEmptySentences=" + allowEmptySentences);
-      log.info(new Exception("above WordToSentenceProcessor invoked from here:"));
+      log.info(new Exception("WordToSentenceProcessor invoked from here:"));
     }
   }
 
