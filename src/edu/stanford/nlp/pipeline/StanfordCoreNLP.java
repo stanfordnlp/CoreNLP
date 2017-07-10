@@ -1,6 +1,6 @@
 //
 // StanfordCoreNLP -- a suite of NLP tools.
-// Copyright (c) 2009-2011 The Board of Trustees of
+// Copyright (c) 2009-2017 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -19,8 +19,8 @@
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //
 
@@ -59,7 +59,7 @@ import java.util.regex.Pattern;
  * then other sequence model style annotation can be used to add things like
  * lemmas, POS tags, and named entities.  These are returned as a list of CoreLabels.
  * Other analysis components build and store parse trees, dependency graphs, etc.
- * <p>
+ *
  * This class is designed to apply multiple Annotators
  * to an Annotation.  The idea is that you first
  * build up the pipeline by adding Annotators, and then
@@ -71,9 +71,9 @@ import java.util.regex.Pattern;
  * </pre><br/>
  * Please see the package level javadoc for sample usage
  * and a more complete description.
- * <p>
+ *
  * The main entry point for the API is StanfordCoreNLP.process() .
- * <p>
+ *
  * <i>Implementation note:</i> There are other annotation pipelines, but they
  * don't extend this one. Look for classes that implement Annotator and which
  * have "Pipeline" in their name.
@@ -116,7 +116,14 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     public int hashCode() {
       return Objects.hash(name, signature);
     }
-  }
+
+    @Override
+    public String toString() {
+      return "AnnotatorSignature{name='" + name +
+              "', signature='" + signature + "'}";
+    }
+
+  } // end static class AnnotatorSignature
 
 
   /**
@@ -599,13 +606,14 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
 
   /**
-   * Construct the default annotator pool from the passed properties, and overwriting annotations which have changed
-   * since the last
+   * Construct the default annotator pool from the passed in properties, and overwriting annotators which have changed
+   * since the last call.
+   *
    * @param inputProps
    * @param annotatorImplementation
    * @return A populated AnnotatorPool
    */
-  public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
+  private static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
     AnnotatorPool pool = new AnnotatorPool();
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> entry : getNamedAnnotators().entrySet()) {
       AnnotatorSignature key = new AnnotatorSignature(entry.getKey(), PropertiesUtils.getSignature(entry.getKey(), inputProps));
@@ -923,7 +931,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       if (line == null || line.equalsIgnoreCase("q")) {
         break;
       }
-      if (line.length() > 0) {
+      if ( ! line.isEmpty()) {
         Annotation anno = pipeline.process(line);
         switch (outputFormat) {
         case XML:

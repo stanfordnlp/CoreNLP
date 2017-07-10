@@ -48,7 +48,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
           // this constructor will keep empty lines as empty sentences
           WordToSentenceProcessor<CoreLabel> wts1 =
                   new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{"\n"}));
-          VERBOSE = false;
           this.countLineNumbers = true;
           this.wts = wts1;
         } else {
@@ -57,7 +56,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
           // this constructor will keep empty lines as empty sentences
           WordToSentenceProcessor<CoreLabel> wts1 =
                   new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{System.lineSeparator(), "\n"}));
-          VERBOSE = false;
           this.countLineNumbers = true;
           this.wts = wts1;
         }
@@ -65,7 +63,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
         // this constructor will keep empty lines as empty sentences
         WordToSentenceProcessor<CoreLabel> wts1 =
                 new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{PTBTokenizer.getNewlineToken()}));
-        VERBOSE = false;
         this.countLineNumbers = true;
         this.wts = wts1;
       }
@@ -75,7 +72,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
       if (Boolean.parseBoolean(isOneSentence)) { // this method treats null as false
         // Treat as one sentence: You get a no-op sentence splitter that always returns all tokens as one sentence.
         WordToSentenceProcessor<CoreLabel> wts1 = new WordToSentenceProcessor<>(true);
-        VERBOSE = false;
         this.countLineNumbers = false;
         this.wts = wts1;
 
@@ -112,7 +108,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
         String nlsb = properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
             StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
 
-        VERBOSE = false;
         this.countLineNumbers = false;
         this.wts = new WordToSentenceProcessor<>(boundaryTokenRegex, boundaryFollowersRegex,
             boundariesToDiscard, htmlElementsToDiscard,
@@ -120,6 +115,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
             (boundaryMultiTokenRegex != null) ? TokenSequencePattern.compile(boundaryMultiTokenRegex) : null, tokenRegexesToDiscard);
       }
     }
+    VERBOSE = Boolean.valueOf(properties.getProperty("ssplit.verbose", "false"));
   }
 
   public WordsToSentencesAnnotator(boolean verbose) {
@@ -184,7 +180,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Sentence splitting ...");
+      log.info("Sentence splitting ... " + annotation);
     }
     if ( ! annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       throw new IllegalArgumentException("WordsToSentencesAnnotator: unable to find words/tokens in: " + annotation);
@@ -193,9 +189,11 @@ public class WordsToSentencesAnnotator implements Annotator  {
     // get text and tokens from the document
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
-    // log.info("Tokens are: " + tokens);
+    if (VERBOSE) {
+      log.info("Tokens ae: " + tokens);
+    }
 
+    String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
     // assemble the sentence annotations
     int tokenOffset = 0;
     int lineNumber = 0;

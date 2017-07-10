@@ -35,7 +35,8 @@ public class CleanXmlAnnotator implements Annotator {
 
   /**
    * A regular expression telling us where to look for tokens
-   * we care about.
+   * we care about. If this Pattern only matches certain XML elements, then text in other
+   * elements will be discarded. Text outside any element will be kept iff the pattern matches "".
    */
   private final Pattern xmlTagMatcher;
 
@@ -160,7 +161,7 @@ public class CleanXmlAnnotator implements Annotator {
   }
 
   public CleanXmlAnnotator(Properties properties) {
-    String xmlTagsToRemove =
+    String xmlElementsToProcess =
         properties.getProperty("clean.xmltags",
             CleanXmlAnnotator.DEFAULT_XML_TAGS);
     String sentenceEndingTags =
@@ -208,8 +209,8 @@ public class CleanXmlAnnotator implements Annotator {
     String quoteAuthorAttributes = properties.getProperty("clean.quoteauthorattributes",
             DEFAULT_QUOTE_AUTHOR_ATTRIBUTES);
 
-    if (xmlTagsToRemove != null) {
-      xmlTagMatcher = toCaseInsensitivePattern(xmlTagsToRemove);
+    if (xmlElementsToProcess != null) {
+      xmlTagMatcher = toCaseInsensitivePattern(xmlElementsToProcess);
       if (StringUtils.isNullOrEmpty(sentenceEndingTags)) {
         sentenceEndingTagMatcher = null;
       } else {
@@ -234,6 +235,15 @@ public class CleanXmlAnnotator implements Annotator {
     setSsplitDiscardTokensMatcher(ssplitDiscardTokens);
     // set up the labels that indicate quote author
     quoteAuthorAttributeNames = quoteAuthorAttributes.split(",");
+
+    if (DEBUG) {
+      log.info("CleanXMLAnnotator: xmlElementsToProcess=" + xmlElementsToProcess);
+      log.info("  dateTags=" + dateTags);
+      log.info("  singleSentenceTags=" + singleSentenceTags);
+      log.info("  tokenAnnotations=" + tokenAnnotations);
+      log.info("  sentenceEndingTags=" + sentenceEndingTags);
+      log.info(new Exception("above CleanXMLAnnotator invoked from here:"));
+    }
   }
 
   public CleanXmlAnnotator(String xmlTagsToRemove,
@@ -347,10 +357,12 @@ public class CleanXmlAnnotator implements Annotator {
   public void annotate(Annotation annotation) {
     if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
+      if (DEBUG) { log.info("CleanXML: starting tokens: " + tokens); }
       List<CoreLabel> newTokens = process(annotation, tokens);
       // We assume that if someone is using this annotator, they don't
       // want the old tokens any more and get rid of them
       annotation.set(CoreAnnotations.TokensAnnotation.class, newTokens);
+      if (DEBUG) { log.info("CleanXML: ending tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class)); }
     }
   }
 
@@ -398,7 +410,7 @@ public class CleanXmlAnnotator implements Annotator {
     if (toAnnotate == null) {
       toAnnotate = annotationPatterns.keySet();
     }
-    for (Class key:toAnnotate) {
+    for (Class key : toAnnotate) {
       for (Pair<Pattern,Pattern> pattern: annotationPatterns.get(key)) {
         Pattern tagPattern = pattern.first;
         Pattern attrPattern = pattern.second;
@@ -409,10 +421,7 @@ public class CleanXmlAnnotator implements Annotator {
               for (Map.Entry<String,String> entry:tag.attributes.entrySet()) {
                 if (attrPattern.matcher(entry.getKey()).matches()) {
                   if (savedTokenAnnotations != null) {
-                    Stack<Pair<String, String>> stack = savedTokenAnnotations.get(key);
-                    if (stack == null) {
-                      savedTokenAnnotations.put(key, stack = new Stack<>());
-                    }
+                    Stack<Pair<String, String>> stack = savedTokenAnnotations.computeIfAbsent(key, k -> new Stack<>());
                     stack.push(Pair.makePair(tag.name, entry.getValue()));
                   }
                   cm.set(key, entry.getValue());
@@ -443,7 +452,7 @@ public class CleanXmlAnnotator implements Annotator {
             if (tag.isEndTag && !tag.isSingleTag) {
               // End tag - annotate using saved tokens
               List<CoreLabel> saved = savedTokens.remove(key);
-              if (saved != null && saved.size() > 0) {
+              if (saved != null && ! saved.isEmpty()) {
                 cm.set(key, tokensToString(annotation, saved));
                 foundAnnotations.add(key);
                 matched = true;
@@ -460,7 +469,7 @@ public class CleanXmlAnnotator implements Annotator {
     return foundAnnotations;
   }
 
-  public List<CoreLabel> process(Annotation annotation, List<CoreLabel> tokens) {
+  private List<CoreLabel> process(Annotation annotation, List<CoreLabel> tokens) {
     // As we are processing, this stack keeps track of which tags we
     // are currently inside
     Stack<String> enclosingTags = new Stack<>();
@@ -495,7 +504,7 @@ public class CleanXmlAnnotator implements Annotator {
     CoreMap tokenAnnotations = (tokenAnnotationPatterns != null && !tokenAnnotationPatterns.isEmpty())? new ArrayCoreMap():null;
     Map<Class, Stack<Pair<String, String>>> savedTokenAnnotations = new ArrayMap<>();
 
-    // Local variable for annotating sections
+    // Local variables for annotating sections
     XMLUtils.XMLTag sectionStartTag = null;
     int sectionStartTagCharBegin = -1;
     CoreLabel sectionStartToken = null;
@@ -505,7 +514,7 @@ public class CleanXmlAnnotator implements Annotator {
     // store section quotes
     List<CoreMap> sectionQuotes = null;
 
-    // Local variable for annotating quotes
+    // Local variables for annotating quotes
     // XMLUtils.XMLTag quoteStartTag = null;
     String quoteAuthor = null;
     int quoteStartCharOffset = -1;
@@ -516,7 +525,7 @@ public class CleanXmlAnnotator implements Annotator {
 
     for (CoreLabel token : tokens) {
       String word = token.word().trim();
-      if (DEBUG) { log.info("CleanXML: token is " + word); }
+      if (DEBUG) { log.info("CleanXML: token begins as " + word); }
       XMLUtils.XMLTag tag = XMLUtils.parseTag(word);
 
       // If it's not a tag, we do manipulations such as unescaping
@@ -528,6 +537,7 @@ public class CleanXmlAnnotator implements Annotator {
             xmlTagMatcher == null ||
             xmlTagMatcher.matcher("").matches()) {
           newTokens.add(token);
+          if (DEBUG) { log.info("CleanXML: token added as: " + token.word()); }
           if (inUtterance) {
             token.set(CoreAnnotations.UtteranceAnnotation.class, utteranceIndex);
             if (currentSpeaker != null) token.set(CoreAnnotations.SpeakerAnnotation.class, currentSpeaker);
@@ -539,6 +549,8 @@ public class CleanXmlAnnotator implements Annotator {
           if (tokenAnnotations != null) {
             ChunkAnnotationUtils.copyUnsetAnnotations(tokenAnnotations, token);
           }
+        } else if (DEBUG) {
+          log.info("CleanXML: ignoring tokens because matchDepth=" + matchDepth + "; xmlTagMatcher=" + xmlTagMatcher);
         }
         // if we removed any text, and the tokens are "invertible" and
         // therefore keep track of their before/after text, append
@@ -613,6 +625,7 @@ public class CleanXmlAnnotator implements Annotator {
       }
 
       // At this point, we know we have a tag
+      if (DEBUG) { log.info("CleanXML: processed tag:  " + tag); }
 
       // we are removing a token and its associated text...
       // keep track of that
@@ -913,7 +926,7 @@ public class CleanXmlAnnotator implements Annotator {
         annotation.set(CoreAnnotations.DocTypeAnnotation.class, str);
       }
     }
-
+    if (DEBUG) { log.info("CleanXML: process returning: " + annotation.get(CoreAnnotations.TokensAnnotation.class)); }
     return newTokens;
   }
 

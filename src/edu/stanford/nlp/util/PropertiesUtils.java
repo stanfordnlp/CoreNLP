@@ -400,6 +400,7 @@ public class PropertiesUtils {
   }
 
 
+  // This is CoreNLP-specific-ish and now unused. Delete?
   public static String getSignature(String name, Properties properties, Property[] supportedProperties) {
     String prefix = (name != null && !name.isEmpty())? name + '.' : "";
     // keep track of all relevant properties for this annotator here!
@@ -414,18 +415,24 @@ public class PropertiesUtils {
 
   public static String getSignature(String name, Properties properties) {
     String[] prefixes = new String[]{(name != null && !name.isEmpty())? name + '.' : ""};
-    if ("tokenize".equals(name) || "ssplit".equals(name)) {  // TODO(gabor) This is a hack, as tokenize and ssplit depend on each other so heavily
+    // TODO(gabor) This is a hack, as tokenize and ssplit depend on each other so heavily
+    if ("tokenize".equals(name) || "ssplit".equals(name)) {
       prefixes = new String[]{"tokenize", "ssplit"};
     }
+    // TODO [chris 2017]: Another hack. Traditionally, we have called the cleanxml properties clean!
+    if ("clean".equals(name) || "cleanxml".equals(name)) {
+      prefixes = new String[]{"clean", "cleanxml"};
+    }
+
     if ("mention".equals(name)) {
       prefixes = new String[]{"mention", "coref"};
     }
     if ("ner".equals(name)) {
       prefixes = new String[]{"ner", "sutime"};
     }
-    // handle special case of implied properties (e.g. sentiment implies parse should set parse.binaryTrees = true
     Properties propertiesCopy = new Properties();
     propertiesCopy.putAll(properties);
+    // handle special case of implied properties (e.g. sentiment implies parse should set parse.binaryTrees = true
     // TODO(jb) This is a hack: handle implied need for binary trees if sentiment annotator is present
     Set<String> annoNames =
         Generics.newHashSet(Arrays.asList(properties.getProperty("annotators", "").split("[, \t]+")));
