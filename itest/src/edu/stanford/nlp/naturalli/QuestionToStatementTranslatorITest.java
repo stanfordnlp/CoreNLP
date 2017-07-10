@@ -598,5 +598,11 @@ public class QuestionToStatementTranslatorITest {
     checkFormatted(
         "when/WRB did/VBD tesla/NNP license/VB his/PRP patents/NN ?",
         "Tesla licensed his patents in time");
+    checkFormatted(
+        "where/WRB did/VBD tesla/NNP work/VB before/IN striking/VBG out/RP on/IN his/PRP$ own/JJ ?",
+        "Tesla worked before striking out on his own at Location");
+    checkFormatted(
+        "where/WRB did/VBD tesla/NNP work/NN before/IN striking/VBG out/RP on/IN his/PRP$ own/JJ ?",  // POS error on work/NN
+        "Tesla worked before striking out on his own at Location");
   }
 }
