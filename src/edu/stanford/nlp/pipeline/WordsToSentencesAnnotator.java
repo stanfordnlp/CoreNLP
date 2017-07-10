@@ -190,7 +190,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     if (VERBOSE) {
-      log.info("Tokens ae: " + tokens);
+      log.info("Tokens are: " + tokens);
     }
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
