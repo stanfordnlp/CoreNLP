@@ -34,7 +34,7 @@ To use these models, you need to download a jar file with caseless
 models. Prior to version 3.6, caseless models were packaged separately as
 their own jar file (approximately treating "caseless English" like a
 separate language). Starting with version 3.6, caseless models for
-English were included in the new comprehensive english jar file. You
+English are included in the new comprehensive english jar file. You
 can find these jar files on the [Release history](history.html) page.
 
 Be sure to include the path to the case-insensitive models jar in the
@@ -47,18 +47,55 @@ ask for these models to be used like this:
 -ner.model edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz
 ```
 
-**Important note (2016):** The caseless NER model
-  `edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz`
-  released with version 3.6.0 was defective and has very poor
-  performance. Sorry! Stuff happens. If you want good caseless NER,
-  you should either run with caseless models from a 3.5.x series
-  release (all of which are compatible with version 3.6.0) or download
-  the new fixed model from version 3.7.0 or in the HEAD jar, which is available from
-  [our GitHub page](https://github.com/stanfordnlp/CoreNLP). Since the
-  version 3.5.x releases have a separate caseless jar, it is easy to
-  also specify it as a dependency; you just have to make sure that it
-  appears on your classpath *before* other jars which contain models
-  with the same name.
+## An example
+
+Here is an example text:
+
+    % cat lakers.txt
+    lonzo ball talked about kobe bryant after the lakers game.
+
+With the default English models, no entities (and no proper nouns) are
+found:
+
+    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -file lakers.txt -outputFormat conll -annotators tokenize,ssplit,pos,lemma,ner
+    % cat lakers.txt.conll 
+    1	lonzo	lonzo	NN	O	_	_
+    2	ball	ball	NN	O	_	_
+    3	talked	talk	VBD	O	_	_
+    4	about	about	IN	O	_	_
+    5	kobe	kobe	NN	O	_	_
+    6	bryant	bryant	NN	O	_	_
+    7	after	after	IN	O	_	_
+    8	the	the	DT	O	_	_
+    9	lakers	laker	NNS	O	_	_
+    10	game	game	NN	O	_	_
+    11	.	.	.	O	_	_
+    
+
+However, if we ask to use the caseless models, then we're doing pretty
+well: All the name words are now recognized as proper nouns, and the
+two person names are recognized. However, the team name is still
+missed. Correct named entity recognition is just harder for caseless
+English than for well-edited English!
+
+    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat conll -annotators tokenize,ssplit,pos,lemma,ner -file lakers.txt -pos.model edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger -ner.model edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz
+    % cat lakers.txt.conll 
+    1	lonzo	lonzo	NNP	PERSON	_	_
+    2	ball	ball	NNP	PERSON	_	_
+    3	talked	talk	VBD	O	_	_
+    4	about	about	IN	O	_	_
+    5	kobe	kobe	NNP	PERSON	_	_
+    6	bryant	bryant	NNP	PERSON	_	_
+    7	after	after	IN	O	_	_
+    8	the	the	DT	O	_	_
+    9	lakers	lakers	NNPS	O	_	_
+    10	game	game	NN	O	_	_
+    11	.	.	.	O	_	_
+    
+
+
+
+## Training caseless models
 
 To train your own caseless models, you need one additional property,
 which asks for a function to be called before a token is processed
@@ -74,4 +111,18 @@ but there is also simply:
 ```
 wordFunction = edu.stanford.nlp.process.LowercaseFunction
 ```
+
+## A note on the version 3.6 model
+
+The caseless NER model
+`edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz`
+released with version 3.6.0 was defective and has very poor
+performance. Sorry! Stuff happens. If you want good caseless NER,
+you should either run with caseless models from a 3.5.x series
+release (all of which are compatible with version 3.6.0) or download
+the new fixed model from version 3.7.0 or a later version. Since the
+version 3.5.x releases have a separate caseless jar, it is easy to
+also specify an additional jar as a dependency; you just have to make sure that it
+appears on your classpath *before* other jars which contain models
+with the same name.
 
