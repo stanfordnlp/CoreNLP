@@ -19,9 +19,9 @@ get the quotes people said, etc.
 
 Choose Stanford CoreNLP if you need:
 
-* An integrated NLP toolkit with a good range of grammatical analysis tools
-* Fast, reliable analysis of arbitrary texts
-* The overall highest quality text analytics
+* An integrated NLP toolkit with a broad range of grammatical analysis tools
+* A fast, robust annotator for arbitrary texts, widely used in production
+* A modern, regularly updated package, with the overall highest quality text analytics
 * Support for a number of major (human) languages
 * Available APIs for most major modern programming languages
 * Ability to run as a simple web service
