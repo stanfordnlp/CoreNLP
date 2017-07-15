@@ -52,7 +52,7 @@ are case sensitive, so get them right!
 
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
-| clean.xmltags | regex | `".*"` | Discard xml tag tokens for element names that match this regular expression.  For example, the default `.*` will discard all xml tags and `s|p` will match tags like `<s>` or `</p>`. |
+| clean.xmltags | regex | `".*"` | Only keep text contained inside the XML elements that match this regular expression.  For example, the default `.*` will keep the contents of all XML elements and `s|p` will keep the text of only `<s>` and `<p>` elements. Text outside any XML element will be kept if and only if this regex matches `""`. |
 | clean.sentenceendingtags | regex | `""` | Treat tags (XML elements) that match this regular expression as the end of a sentence. An empty string matches nothing.  For example, "p" will treat &lt;p&gt; or &lt;/p&gt; as the end of a sentence. Matching is case insensitive. |
 | clean.singlesentencetags | regex | `""` | Treat the content of XML elements that match this regular expression as a single sentence. An empty string matches nothing.  For example, "sent" will treat any &lt;sent&gt; element as a single sentence, disabling sentence splitting. Matching is case insensitive. |
 | clean.allowflawedxml | boolean | true | If this is true, allow errors such as unclosed tags.  Otherwise, such XML will cause an exception. |
@@ -67,7 +67,7 @@ are case sensitive, so get them right!
 | clean.sectionAnnotations | String | `""` | A map of section level annotation keys along with a pattern indicating the tag to match, and the attribute to match. |
 | clean.quotetags | regex | `""` | If this regex matches an XML element name, store its contents as a quoted region (such as in an email or discussion forum post quoting earlier authors), including recording character offsets and author. |
 | clean.quoteauthorattributes | String | `""` | A comma-separated list of XML attributes for a quote tag whose value is treated as the author of the quote. |
-| clean.ssplitDiscardTokens | regex | `""` | A regular expression of tokens discarded while processing a section. |
+| clean.ssplitDiscardTokens | regex | `""` | A regular expression saying tokens that will be discarded while doing sentence splitting. CleanXML needs to know this too so that it can correctly set the first token of a section. |
 
 ## Example: Handling discussion forums
 
