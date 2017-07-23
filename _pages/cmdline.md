@@ -119,7 +119,7 @@ If your input files have XML tags in them, you may wish to use the `cleanxml` an
 
 ### Inputting serialized files
 
-If (and only if) the input filename ends with ".ser.gz" then CoreNLP will interpret the file as the output of a previous annotation run, to which you presumably want to add on further annotations. CoreNLP will read these Annotations using the class specified in the `inputSerializer` property. The options for this are the same as for `outputSerializer [below](cmdline.html#output-serializer). Note: To successfully load a pipeline for layering on additional annotations, you need to include the property `enforceRequirements = false` to avoid complaints about required earlier annotators not being present in the pipeline.
+If (and only if) the input filename ends with ".ser.gz" then CoreNLP will interpret the file as the output of a previous annotation run, to which you presumably want to add on further annotations. CoreNLP will read these Annotations using the class specified in the `inputSerializer` property. The options for this are the same as for `outputSerializer` [below](cmdline.html#output-serializer). Note: To successfully load a pipeline for layering on additional annotations, you need to include the property `enforceRequirements = false` to avoid complaints about required earlier annotators not being present in the pipeline.
 
 
 ## Output

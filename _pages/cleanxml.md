@@ -65,7 +65,7 @@ are case sensitive, so get them right!
 | clean.tokenAnnotations | String| `""` | A map of token level annotation keys (i.e., link, speaker) along with a pattern indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated). |
 | clean.sectiontags | regex | `""` | A regular expression that specifies which tags to treat as marking sections of a document. |
 | clean.sectionAnnotations | String | `""` | A map of section level annotation keys along with a pattern indicating the tag to match, and the attribute to match. |
-| clean.quotetags | regex | `""` | If this regex matches an XML element name, store its contents as a quoted region (such as in an email or discussion forum post quoting earlier authors), including recording character offsets and author. |
+| clean.quotetags | regex | `""` | If this regex matches an XML element name, store its contents as a quoted region (such as in an email or discussion forum post quoting earlier authors), including recording character offsets and perhaps author (see `clean.quoteauthorattributes`). For example, `clean.quotetags = quote` |
 | clean.quoteauthorattributes | String | `""` | A comma-separated list of XML attributes for a quote tag whose value is treated as the author of the quote. |
 | clean.ssplitDiscardTokens | regex | `""` | A regular expression saying tokens that will be discarded while doing sentence splitting. CleanXML needs to know this too so that it can correctly set the first token of a section. |
 
