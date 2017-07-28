@@ -143,6 +143,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   public ClassifierCombiner(Properties props, CombinationMode combinationMode, String... loadPaths) throws IOException {
     super(props);
     this.combinationMode = combinationMode;
+    this.useProvidedBaseTags = PropertiesUtils.getBool(props, USE_PROVIDED_BASE_TAGS_PROPERTY, false);
     List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
     loadClassifiers(props, paths);
     this.initLoadPaths = new ArrayList<>(paths);
