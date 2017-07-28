@@ -29,12 +29,12 @@ public class HeidelTimeTest {
     Properties defaultProps = new Properties();
     defaultProps.load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP.properties"));
     Properties props = new Properties(defaultProps);
+    props.setProperty("customAnnotatorClass.heideltime", "edu.stanford.nlp.time.HeidelTimeAnnotator");
     props.setProperty(HeidelTimeAnnotator.HEIDELTIME_PATH_PROPERTY, System.getenv("HEIDELTIME_PATH"));
     props.setProperty(HeidelTimeAnnotator.HEIDELTIME_LANGUAGE_PROPERTY, "english");
-    props.setProperty("annotators", "tokenize,ssplit");
+    props.setProperty("annotators", "tokenize,ssplit,heideltime");
 
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    pipeline.addAnnotator(new HeidelTimeAnnotator("", props));
     pipeline.annotate(ann);
 
     List<CoreMap> outputs = ann.get(TimeAnnotations.TimexAnnotations.class);
@@ -58,12 +58,12 @@ public class HeidelTimeTest {
     Properties defaultProps = new Properties();
     defaultProps.load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-spanish.properties"));
     Properties props = new Properties(defaultProps);
+    props.setProperty("customAnnotatorClass.heideltime", "edu.stanford.nlp.time.HeidelTimeAnnotator");
     props.setProperty(HeidelTimeAnnotator.HEIDELTIME_PATH_PROPERTY, System.getenv("HEIDELTIME_PATH"));
     props.setProperty(HeidelTimeAnnotator.HEIDELTIME_LANGUAGE_PROPERTY, "spanish");
-    props.setProperty("annotators", "tokenize,ssplit");
+    props.setProperty("annotators", "tokenize,ssplit,heideltime");
 
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    pipeline.addAnnotator(new HeidelTimeAnnotator("", props));
     pipeline.annotate(ann);
 
     List<CoreMap> outputs = ann.get(TimeAnnotations.TimexAnnotations.class);
