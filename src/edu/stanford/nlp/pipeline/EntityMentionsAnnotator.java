@@ -223,14 +223,13 @@ public class EntityMentionsAnnotator implements Annotator {
           int charBegin = cmap.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
           int charEnd = cmap.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
           Timex timex = cmap.get(TimeAnnotations.TimexAnnotation.class);
-          List<CoreLabel> timexTokens = tokensForCharacters(tokens, charBegin, charEnd);
-          for (CoreLabel timexToken : timexTokens) {
-            timexToken.set(TimeAnnotations.TimexAnnotation.class, timex);
-          }
+          List<CoreLabel> timexTokens = cmap.get(CoreAnnotations.TokensAnnotation.class);
           String type = "DATE";
 
+          if (timexTokens.size() == 0) continue;
+
           // Create a mention from this data.
-          CoreMap mention = new ArrayCoreMap();
+          ArrayCoreMap mention = new ArrayCoreMap();
           // Text
           mention.set(CoreAnnotations.TextAnnotation.class, timex.text());
           // Character offset
@@ -255,10 +254,12 @@ public class EntityMentionsAnnotator implements Annotator {
 
           timexMentions.add(mention);
         }
-
+        if (sentence.get(mentionsCoreAnnotationClass) == null) {
+          sentence.set(mentionsCoreAnnotationClass, new ArrayList<>());
+        }
+        sentence.get(mentionsCoreAnnotationClass).addAll(timexMentions);
         allMentions.addAll(timexMentions);
       }
-
 
       sentenceIndex++;
     }
