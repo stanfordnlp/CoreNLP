@@ -2822,8 +2822,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return classify(tokenSeq);
   }
 
-
-
   /**
    * This is used to load the default supplied classifier stored within the jar
    * file. THIS FUNCTION WILL ONLY WORK IF THE CODE WAS LOADED FROM A JAR FILE

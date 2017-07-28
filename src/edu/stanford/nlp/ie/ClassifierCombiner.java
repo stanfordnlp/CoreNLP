@@ -73,11 +73,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
   private static final CombinationMode DEFAULT_COMBINATION_MODE = CombinationMode.NORMAL;
   private static final String COMBINATION_MODE_PROPERTY = "ner.combinationMode";
-  // if a previous process has already tagged the tokens, use those tags as the base
-  // instead of the results of the first classifier
-  private static final String USE_PROVIDED_BASE_TAGS_PROPERTY = "ner.useProvidedBaseTags";
   private final CombinationMode combinationMode;
-  private boolean useProvidedBaseTags = false;
 
   // keep track of properties used to initialize
   private  Properties initProps;
@@ -92,7 +88,6 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   public ClassifierCombiner(Properties p) throws IOException {
     super(p);
     this.combinationMode = extractCombinationModeSafe(p);
-    this.useProvidedBaseTags = PropertiesUtils.getBool(p, USE_PROVIDED_BASE_TAGS_PROPERTY, false);
     String loadPath1, loadPath2;
     List<String> paths = new ArrayList<>();
 
@@ -143,7 +138,6 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   public ClassifierCombiner(Properties props, CombinationMode combinationMode, String... loadPaths) throws IOException {
     super(props);
     this.combinationMode = combinationMode;
-    this.useProvidedBaseTags = PropertiesUtils.getBool(props, USE_PROVIDED_BASE_TAGS_PROPERTY, false);
     List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
     loadClassifiers(props, paths);
     this.initLoadPaths = new ArrayList<>(paths);
@@ -191,7 +185,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     super(PropertiesUtils.overWriteProperties((Properties) ois.readObject(),props));
     // read another copy of initProps that I have helpfully included
     // TODO: probably set initProps in AbstractSequenceClassifier to avoid this writing twice thing, its hacky
-    this.initProps = PropertiesUtils.overWriteProperties((Properties) ois.readObject(), props);
+    this.initProps = PropertiesUtils.overWriteProperties((Properties) ois.readObject(),props);
     // read the initLoadPaths
     this.initLoadPaths = (ArrayList<String>) ois.readObject();
     // read the combinationMode from the serialized version
@@ -452,27 +446,15 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
     List<List<IN>> baseOutputs = new ArrayList<>();
 
-    List<IN> output;
-
     // the first base model works in place, modifying the original tokens
-    if (!useProvidedBaseTags) {
-      output = baseClassifiers.get(0).classifySentence(tokens);
-      // classify(List<IN>) is supposed to work in place, so add AnswerAnnotation to tokens!
-      for (int i = 0, sz = output.size(); i < sz; i++) {
-        tokens.get(i).set(CoreAnnotations.AnswerAnnotation.class, output.get(i).get(CoreAnnotations.AnswerAnnotation.class));
-      }
-      baseOutputs.add(tokens);
-    } else {
-      for (int i = 0 ; i < tokens.size() ; i++) {
-        tokens.get(i).set(CoreAnnotations.AnswerAnnotation.class,
-            tokens.get(i).get(CoreAnnotations.BaseAnswerAnnotation.class));
-      }
-      baseOutputs.add(tokens);
+    List<IN> output = baseClassifiers.get(0).classifySentence(tokens);
+    // classify(List<IN>) is supposed to work in place, so add AnswerAnnotation to tokens!
+    for (int i = 0, sz = output.size(); i < sz; i++) {
+      tokens.get(i).set(CoreAnnotations.AnswerAnnotation.class, output.get(i).get(CoreAnnotations.AnswerAnnotation.class));
     }
+    baseOutputs.add(tokens);
 
-    int firstClassifierIndex = useProvidedBaseTags ? 0 : 1 ;
-
-    for (int i = firstClassifierIndex, sz = baseClassifiers.size(); i < sz; i ++) {
+    for (int i = 1, sz = baseClassifiers.size(); i < sz; i ++) {
       //List<CoreLabel> copy = deepCopy(tokens);
       // no need for deep copy: classifySentence creates a copy of the input anyway
       // List<CoreLabel> copy = tokens;

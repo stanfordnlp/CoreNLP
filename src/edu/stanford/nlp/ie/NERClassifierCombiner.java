@@ -197,7 +197,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
 
   public static final Set<String> DEFAULT_PASS_DOWN_PROPERTIES =
           CollectionUtils.asSet("encoding", "inputEncoding", "outputEncoding", "maxAdditionalKnownLCWords","map",
-                  "ner.combinationMode", "ner.useProvidedBaseTags");
+                  "ner.combinationMode");
 
   /** This factory method is used to create the NERClassifierCombiner used in NERCombinerAnnotator
    *  (and, thence, in StanfordCoreNLP).
