@@ -48,6 +48,8 @@ public class QuestionToStatementTranslator {
     setIndex(-1);
     setBeginPosition(-1);
     setEndPosition(-1);
+    setBefore(" ");
+    setAfter(" ");
     set(UnknownTokenMarker.class, true);
   }};
 
@@ -61,6 +63,8 @@ public class QuestionToStatementTranslator {
     setIndex(-1);
     setBeginPosition(-1);
     setEndPosition(-1);
+    setBefore(" ");
+    setAfter(" ");
     set(UnknownTokenMarker.class, true);
   }};
 
@@ -87,6 +91,8 @@ public class QuestionToStatementTranslator {
     setIndex(-1);
     setBeginPosition(-1);
     setEndPosition(-1);
+    setBefore(" ");
+    setAfter(" ");
     set(UnknownTokenMarker.class, true);
   }};
 
@@ -112,6 +118,8 @@ public class QuestionToStatementTranslator {
     setIndex(-1);
     setBeginPosition(-1);
     setEndPosition(-1);
+    setBefore(" ");
+    setAfter(" ");
   }};
 
   /** The word "in" as a CoreLabel */
@@ -124,6 +132,8 @@ public class QuestionToStatementTranslator {
     setIndex(-1);
     setBeginPosition(-1);
     setEndPosition(-1);
+    setBefore(" ");
+    setAfter(" ");
   }};
 
   private final Set<String> fromNotAtDict = Collections.unmodifiableSet(new HashSet<String>() {{

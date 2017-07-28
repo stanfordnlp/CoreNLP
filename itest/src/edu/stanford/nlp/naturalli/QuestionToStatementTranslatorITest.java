@@ -285,6 +285,9 @@ public class QuestionToStatementTranslatorITest {
   @Test
   public void parseWhatDoVP() {
     check(
+        "what/WP does/VBZ UNICEF/NNP do/VB ?",
+        "UNICEF does thing");
+    check(
         "what/WP kind/JJ of/IN economy/NN does/VB china/NNP have/VBZ ?",
         "china have kind of economy");
     check(
