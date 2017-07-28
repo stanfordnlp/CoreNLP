@@ -11,6 +11,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 import java.util.*;
 import java.util.function.Function;
 
+import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
+
 /**
  * Annotator that marks entity mentions in a document.
  * Entity mentions are:
@@ -153,6 +155,20 @@ public class EntityMentionsAnnotator implements Annotator {
     return true;
   };
 
+  private Optional<CoreMap> overlapsWithMention(CoreMap needle, List<CoreMap> haystack) {
+    List<CoreLabel> tokens = needle.get(CoreAnnotations.TokensAnnotation.class);
+    int charBegin = tokens.get(0).beginPosition();
+    int charEnd = tokens.get(tokens.size()-1).endPosition();
+
+    return (haystack.stream().filter(mention_ -> {
+      List<CoreLabel> tokens_ = mention_.get(CoreAnnotations.TokensAnnotation.class);
+      int charBegin_ = tokens_.get(0).beginPosition();
+      int charEnd_ = tokens_.get(tokens_.size()-1).endPosition();
+      // Check overlap
+      return !(charBegin_ > charEnd || charEnd_ < charBegin);
+    }).findFirst());
+  }
+
   @Override
   public void annotate(Annotation annotation) {
     List<CoreMap> allMentions = new ArrayList<>();
@@ -212,7 +228,6 @@ public class EntityMentionsAnnotator implements Annotator {
         allMentions.addAll(mentions);
       }
 
-
       // And finally any Timex annotations (from e.g. HeidelTime).
       List<CoreMap> timexes = sentence.get(TimeAnnotations.TimexAnnotations.class);
       if (timexes != null) {
@@ -228,6 +243,9 @@ public class EntityMentionsAnnotator implements Annotator {
 
           if (timexTokens.size() == 0) continue;
 
+          int tokenBegin = timexTokens.get(0).index();
+          int tokenEnd = timexTokens.get(timexTokens.size()-1).index();
+
           // Create a mention from this data.
           ArrayCoreMap mention = new ArrayCoreMap();
           // Text
@@ -238,8 +256,8 @@ public class EntityMentionsAnnotator implements Annotator {
           // Tokens
           mention.set(CoreAnnotations.TokensAnnotation.class, timexTokens);
           // TokenBegin, End
-          mention.set(CoreAnnotations.TokenBeginAnnotation.class, timexTokens.get(0).index());
-          mention.set(CoreAnnotations.TokenEndAnnotation.class, timexTokens.get(timexTokens.size()-1).index());
+          mention.set(CoreAnnotations.TokenBeginAnnotation.class, tokenBegin);
+          mention.set(CoreAnnotations.TokenEndAnnotation.class, tokenEnd);
           // SentenceIndex
           mention.set(CoreAnnotations.SentenceIndexAnnotation.class, sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
           // NamedEntityTag
@@ -252,10 +270,28 @@ public class EntityMentionsAnnotator implements Annotator {
           mention.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
           mention.set(TimeAnnotations.TimexAnnotation.class, timex);
 
-          timexMentions.add(mention);
+          Optional<CoreMap> existingMention = overlapsWithMention(mention, timexMentions);
+          if (existingMention.isPresent()) {
+            logf("WARNING: Timex mention %s collides with existing mention %s; skipping.", mention, existingMention.get());
+          } else {
+            timexMentions.add(mention);
+          }
         }
+
         if (sentence.get(mentionsCoreAnnotationClass) == null) {
           sentence.set(mentionsCoreAnnotationClass, new ArrayList<>());
+        } else if (timexMentions.size() > 0) {
+          // Remove any mentions that overlap with this one.
+          ListIterator<CoreMap> it = sentence.get(mentionsCoreAnnotationClass).listIterator();
+          while (it.hasNext()) {
+            CoreMap mention = it.next();
+
+            Optional<CoreMap> newMention = overlapsWithMention(mention, timexMentions);
+            if (newMention.isPresent()) {
+              logf("WARNING: Mention %s collides with new timex mention %s; removing.", mention, newMention.get());
+              it.remove();
+            }
+          }
         }
         sentence.get(mentionsCoreAnnotationClass).addAll(timexMentions);
         allMentions.addAll(timexMentions);

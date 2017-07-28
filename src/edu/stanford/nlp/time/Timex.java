@@ -245,7 +245,7 @@ public class Timex implements Serializable {
   public int endPoint() { return endPoint; }
 
   public String toString() {
-    return this.xml;
+    return (this.xml != null) ? this.xml : this.val;
   }
 
   @Override
