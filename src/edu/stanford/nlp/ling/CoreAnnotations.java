@@ -733,7 +733,7 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-  
+
   /**
    * The standard key for gold answer which is a String
    */
