@@ -25,7 +25,6 @@
 //
 
 package edu.stanford.nlp.coref.hybrid.sieve;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +48,7 @@ import edu.stanford.nlp.coref.hybrid.HybridCorefProperties;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.SpeakerAnnotation;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  *  Base class for a Coref Sieve.
@@ -143,11 +143,11 @@ public abstract class DeterministicCorefSieve extends Sieve  {
           }
 
           int removeID = c1.clusterID;
-//          System.out.println("Merging ant "+c2+" with "+c1);
+//          log.info("Merging ant "+c2+" with "+c1);
           CorefCluster.mergeClusters(c2, c1);
           document.mergeIncompatibles(c2, c1);
           document.mergeAcronymCache(c2, c1);
-//            logger.warning("Removing cluster " + removeID + ", merged with " + c2.getClusterID());
+//            log.warning("Removing cluster " + removeID + ", merged with " + c2.getClusterID());
           document.corefClusters.remove(removeID);
           return;
         }
@@ -426,9 +426,11 @@ public abstract class DeterministicCorefSieve extends Sieve  {
       if(ant.headWord.lemma().equals(mention2.headWord.lemma())) return false;
 
       // Constraint: ignore pairs commonNoun - properNoun
-      if(ant.mentionType != MentionType.PROPER &&
-         ( mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP")
-           || !mention2.headWord.word().substring(1).equals(mention2.headWord.word().substring(1).toLowerCase()) ) ) return false;
+      if (ant.mentionType != MentionType.PROPER &&
+              ( mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP")
+                      || ! mention2.headWord.word().substring(1).equals(mention2.headWord.word().substring(1).toLowerCase()) ) ) {
+        return false;
+      }
 
       // Constraint: ignore plurals
       if(ant.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNS")
