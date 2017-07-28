@@ -21,12 +21,14 @@ import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Normalize trees read from the AnCora Spanish corpus.
+ *
+ * @author Jon Gauthier
  */
 public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
   /**
    * Tag provided to words which are extracted from a multi-word token
-   * into their own independent nodes
+   * into their own independent nodes.
    */
   public static final String MW_TAG = "MW?";
 
@@ -40,6 +42,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   public static final String RIGHT_PARENTHESIS = "=RRB=";
 
   private static final Map<String, String> spellingFixes = new HashMap<>();
+
   static {
     spellingFixes.put("embargp", "embargo"); // 18381_20000322.tbf-4
     spellingFixes.put("jucio", "juicio"); // 4800_2000406.tbf-5
@@ -57,18 +60,15 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     spellingFixes.put(")", RIGHT_PARENTHESIS);
   }
 
+  private static final long serialVersionUID = 7810182997777764277L;
+
+
   /**
    * A filter which rejects preterminal nodes that contain "empty" leaf
    * nodes.
    */
-  private static final Predicate<Tree> emptyFilter = new Predicate<Tree>() {
-    public boolean test(Tree tree) {
-      if (tree.isPreTerminal()
-          && tree.firstChild().value().equals(EMPTY_LEAF_VALUE))
-        return false;
-      return true;
-    }
-  };
+  private static final Predicate<Tree> emptyFilter =
+          tree -> ! (tree.isPreTerminal() && tree.firstChild().value().equals(EMPTY_LEAF_VALUE));
 
   /**
    * Resolves some inconsistencies in constituent naming:
@@ -507,13 +507,12 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
                "[adjoinF (grup.nom.%s foot@) target]")
     };
 
-    // Pairs tagset annotation codes with the annotations used in our
-    // constituents
+    // Pairs tagset annotation codes with the annotations used in our constituents
     @SuppressWarnings("unchecked")
     Pair<Character, String>[] namedEntityTypes = new Pair[] {
       new Pair('0', "otros"), // other
-      new Pair('l', "lug"), // place
-      new Pair('o', "org"), // location
+      new Pair('l', "lug"), // location
+      new Pair('o', "org"), // organization
       new Pair('p', "pers"), // person
     };
 
@@ -537,7 +536,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    * Do this only for "simple" NEs: the multi-word NEs have to be done
    * at a later step in `MultiWordPreprocessor`.
    */
-  void markSimpleNamedEntities(Tree t) {
+  private static void markSimpleNamedEntities(Tree t) {
     Tsurgeon.processPatternsOnTree(markSimpleNEs, t);
   }
 
@@ -546,7 +545,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    * expansion candidate. (True if the node has at least one grandchild
    * which is a leaf node.)
    */
-  boolean isMultiWordCandidate(Tree t) {
+  private static boolean isMultiWordCandidate(Tree t) {
     for (Tree child : t.children())
       for (Tree grandchild : child.children())
         if (grandchild.isLeaf())
@@ -659,7 +658,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    *
    * This method makes up for some various oddities in corpus annotations.
    */
-  private String prepareForMultiWordExtraction(String token) {
+  private static String prepareForMultiWordExtraction(String token) {
     return token.replaceAll("-fpa-", "(").replaceAll("-fpt-", ")");
   }
 
@@ -669,7 +668,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    *
    * TODO can't SpanishTokenizer handle most of this?
    */
-  private String[] getMultiWords(String token) {
+  private static String[] getMultiWords(String token) {
     token = prepareForMultiWordExtraction(token);
 
     Matcher punctMatcher = pPunct.matcher(token);
@@ -753,7 +752,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    * Determine if the given "word" which is part of a multiword token
    * should be dropped.
    */
-  private boolean shouldDropWord(String word) {
+  private static boolean shouldDropWord(String word) {
     return word.length() == 1
       && WORD_SEPARATORS_DROP.indexOf(word.charAt(0)) != -1;
   }
@@ -768,7 +767,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    *
    * @param t Tree representing an entire sentence
    */
-  private Tree expandElisions(Tree t) {
+  private static Tree expandElisions(Tree t) {
     return Tsurgeon.processPatternsOnTree(elisionExpansions, t);
   }
 

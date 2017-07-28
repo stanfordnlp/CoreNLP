@@ -3,29 +3,31 @@ package edu.stanford.nlp.trees.international.spanish;
 import java.io.IOException;
 import java.io.StringReader;
 
-import junit.framework.TestCase;
-
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.PennTreeReader;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.util.Pair;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * @author Jon Gauthier
  */
-public class SpanishTreeNormalizerITest extends TestCase {
+public class SpanishTreeNormalizerITest {
 
   private TreeFactory tf;
   private SpanishTreeNormalizer tn;
 
+  @Before
   public void setUp() {
     tf = new LabeledScoredTreeFactory();
     tn = new SpanishTreeNormalizer(true, true, true);
   }
 
   @SuppressWarnings("unchecked")
-  Pair<String, String>[] multiWordTestCases = new Pair[] {
+  private Pair<String, String>[] multiWordTestCases = new Pair[] {
     // Simplest case
     new Pair("(a (b c_d))",
              "(a (MW_PHRASE?_b (MW? c) (MW? d)))"),
@@ -67,6 +69,7 @@ public class SpanishTreeNormalizerITest extends TestCase {
     new Pair("(a (b entonces,_yo))", "(a (MW_PHRASE?_b (MW? entonces) (MW? ,) (MW? yo)))"),
   };
 
+  @Test
   public void testMultiWordNormalization() {
     for (Pair<String, String> testCase : multiWordTestCases) {
       Tree head = readTree(testCase.first());
@@ -75,7 +78,7 @@ public class SpanishTreeNormalizerITest extends TestCase {
           tn.normalizeForMultiWord(t, tf);
       }
 
-      assertEquals(testCase.second(), head.toString());
+      Assert.assertEquals(testCase.second(), head.toString());
     }
   }
 

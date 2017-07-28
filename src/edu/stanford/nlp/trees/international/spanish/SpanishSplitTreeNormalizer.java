@@ -21,12 +21,13 @@ public class SpanishSplitTreeNormalizer extends SpanishTreeNormalizer {
     TregexPattern.compile("sentence=sentence < (S=S !$ /^[^f]/)");
   private static final TsurgeonPattern eraseClause = Tsurgeon.parseOperation("excise S S");
 
+  private static final long serialVersionUID = -3237606914912983720L;
+
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
     tree = super.normalizeWholeTree(tree, tf);
-
     tree = Tsurgeon.processPattern(nonsensicalClauseRewrite, eraseClause, tree);
-
     return tree;
   }
+
 }
