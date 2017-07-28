@@ -126,7 +126,7 @@ public class SpanishTokenizerITest extends TestCase {
     tf.setOptions("splitAll=true");
     Tokenizer<CoreLabel> spanishTokenizer = tf.getTokenizer(new StringReader(text));
     List<CoreLabel> tokens = spanishTokenizer.tokenize();
-    System.err.println(tokens);
+    // System.err.println(tokens);
     assertEquals(27, tokens.size());
     // assertEquals("  ", tokens.get(0).get(CoreAnnotations.BeforeAnnotation.class));
     // assertEquals("\t", tokens.get(8).get(CoreAnnotations.AfterAnnotation.class));
@@ -158,7 +158,12 @@ public class SpanishTokenizerITest extends TestCase {
     assertEquals("End char offset", 122, (int) tokens.get(22).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
   }
 
-  private void testOffset(String input, int[] beginOffsets, int[] endOffsets) {
+  private static void testOffset(String input, int[] beginOffsets, int[] endOffsets) {
+    testOffsetsTextOriginalText(input, beginOffsets, endOffsets, null, null);
+  }
+
+  private static void testOffsetsTextOriginalText(String input, int[] beginOffsets, int[] endOffsets,
+                                                  String[] texts, String[] originalTexts) {
     TokenizerFactory<CoreLabel> tf = SpanishTokenizer.ancoraFactory();
     Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new StringReader(input));
     List<CoreLabel> tokens = tokenizer.tokenize();
@@ -169,6 +174,14 @@ public class SpanishTokenizerITest extends TestCase {
               beginOffsets[i], tokens.get(i).beginPosition());
       assertEquals("Char end offset of word " + i + " deviates from reference '" + input + "'",
               endOffsets[i], tokens.get(i).endPosition());
+      if (texts != null) {
+        assertEquals("Text of word " + i + " deviates from reference '" + input + "'",
+                texts[i], tokens.get(i).word());
+      }
+      if (originalTexts != null) {
+        assertEquals("Original text of word " + i + " deviates from reference '" + input + "'",
+                originalTexts[i], tokens.get(i).originalText());
+      }
     }
   }
 
@@ -184,13 +197,23 @@ public class SpanishTokenizerITest extends TestCase {
 
   public void testContractionOffsets() {
     // y de el y
-    testOffset("y del y", new int[] {0, 2, 3, 6}, new int[] {1, 3, 5, 7});
+    testOffsetsTextOriginalText("y del y", new int[] {0, 2, 3, 6}, new int[] {1, 3, 5, 7},
+            new String[] { "y", "de", "el", "y"},
+            new String[] { "y", "de", "el", "y"});  // todo [cdm 2017]: it's very unclear if this is what we actually want! Overlaps, concatenation doesn't work.
+    // according to offsets, it should be "d" + "el"
 
     // y a el y
     testOffset("y al y", new int[] {0, 2, 3, 5}, new int[] {1, 3, 4, 6});
 
     // y con mí y
     testOffset("y conmigo y", new int[] {0, 2, 5, 10}, new int[] {1, 5, 9, 11});
+
+    testOffsetsTextOriginalText("El presidente de Chad y presidente de los Estados del Sahel-Sahara",
+            new int[] { 0, 3, 14, 17, 22, 24, 35, 38, 42, 50, 51, 54, 59, 60 },
+            new int[] { 2, 13, 16, 21, 23, 34, 37, 41, 49, 51, 53, 59, 60, 66 },
+            new String[] { "El", "presidente", "de", "Chad", "y", "presidente", "de", "los", "Estados", "de", "el", "Sahel", "-", "Sahara" },
+            new String[] { "El", "presidente", "de", "Chad", "y", "presidente", "de", "los", "Estados", "de", "el", "Sahel", "-", "Sahara" }
+    );
   }
 
   public void testCompoundOffset() {
