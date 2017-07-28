@@ -45,7 +45,7 @@ public class NERBenchmarkSlowITest extends TestCase{
     private static final String CONLL_OUTPUT_TEST = "conll_output_test.txt";
 
     // CoNLL eval shell script
-    private static final String CONLL_EVAL = "../scripts/ner/eval_conll_cmd.sh";
+    private static final String CONLL_EVAL = "../../scripts/ner/eval_conll_cmd.sh";
     private static final Pattern FB1_Pattern = Pattern.compile("FB1:  (\\d+\\.\\d+)");
 
     private static NERCombinerAnnotator nerAnnotator = null;
