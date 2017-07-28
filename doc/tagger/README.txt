@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.7.0 - 2016-10-31
+Stanford POS Tagger, v3.8.0 - 2017-06-09
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -195,6 +195,8 @@ processing.
 
 CHANGES
 -----------------------------------------------
+
+2017-06-09    3.8.0     new Spanish and French UD models 
 
 2016-10-31    3.7.0     Update for compatibility, German UD model 
 
