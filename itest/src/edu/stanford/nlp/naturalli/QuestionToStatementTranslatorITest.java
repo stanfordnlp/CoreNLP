@@ -73,9 +73,9 @@ public class QuestionToStatementTranslatorITest {
 
   private void check(String input, String output) {
     List<List<CoreLabel>> results = instance.toStatement(parseSentence(input));
-    assertTrue("should have gotten a result for hte translation for: " + input,results.size() > 0);
-    String got = StringUtils.join(results.get(0).stream().map(CoreLabel::word), " ");
-    assertEquals(output, got);
+    assertTrue(input,results.size() > 0);
+    assertEquals(output,
+        StringUtils.join(results.get(0).stream().map(CoreLabel::word), " "));
   }
 
   private void checkFormatted(String input, String output) {
@@ -88,18 +88,6 @@ public class QuestionToStatementTranslatorITest {
 
   @Test
   public void parseWhatIs() {
-    check(
-        "what/WP is/VBZ it/PRP trying/VNG to/TO do/VB ?",
-        "it is trying to thing");
-    check(
-        "what/WP is/VBZ it/PRP made/VBN of/IN ?",
-        "it is made of thing");
-    check(
-        "what/WP is/VBZ that/PRP made/VBN of/IN ?",
-        "that is made of thing");
-    check(
-        "what/WP is/VBZ the/DT dress/NN made/VBN of/IN ?",
-        "the dress is made of thing");
     check(
         "what/WP was/VBD the/DT country/NN Tesla/NNP was/VBD born/VBN in/IN ?",
         "the country Tesla was born in was thing");
