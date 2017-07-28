@@ -96,6 +96,36 @@ public class QuestionToStatementTranslator {
     set(UnknownTokenMarker.class, true);
   }};
 
+  /** The missing word marker typed as a time. */
+  private final CoreLabel WORD_ADJECTIVE = new CoreLabel(){{
+    setWord("adjective");
+    setValue("adjective");
+    setLemma("adjective");
+    setTag("JJ");
+    setNER("O");
+    setIndex(-1);
+    setBeginPosition(-1);
+    setEndPosition(-1);
+    setBefore(" ");
+    setAfter(" ");
+    set(UnknownTokenMarker.class, true);
+  }};
+
+  /** The missing word marker typed as a time. */
+  private final CoreLabel WORD_WAY = new CoreLabel(){{
+    setWord("way");
+    setValue("way");
+    setLemma("way");
+    setTag("RB");
+    setNER("O");
+    setIndex(-1);
+    setBeginPosition(-1);
+    setEndPosition(-1);
+    setBefore(" ");
+    setAfter(" ");
+    set(UnknownTokenMarker.class, true);
+  }};
+
   /** The word "from" as a CoreLabel */
   private final CoreLabel WORD_FROM = new CoreLabel(){{
     setWord("from");
@@ -106,6 +136,8 @@ public class QuestionToStatementTranslator {
     setIndex(-1);
     setBeginPosition(-1);
     setEndPosition(-1);
+    setBefore(" ");
+    setAfter(" ");
   }};
 
   /** The word "at" as a CoreLabel */
@@ -128,6 +160,20 @@ public class QuestionToStatementTranslator {
     setValue("in");
     setLemma("in");
     setTag("IN");
+    setNER("O");
+    setIndex(-1);
+    setBeginPosition(-1);
+    setEndPosition(-1);
+    setBefore(" ");
+    setAfter(" ");
+  }};
+
+  /** The word "to" as a CoreLabel */
+  private final CoreLabel WORD_TO = new CoreLabel(){{
+    setWord("to");
+    setValue("to");
+    setLemma("to");
+    setTag("TO");
     setNER("O");
     setIndex(-1);
     setBeginPosition(-1);
@@ -321,12 +367,12 @@ public class QuestionToStatementTranslator {
 
   /**
    * The pattern for "what/which NN have ..." sentences.
-   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processWhNNHave(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
+   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processWhNNHaveIs(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
    */
   private final TokenSequencePattern triggerWhNNHave = TokenSequencePattern.compile(
       "[{lemma:/what|which/; tag:/W.*/}] " +
           "(?$answer_type [!{tag:/V.*/}]+) " +
-          "(?$have [{lemma:have} | {lemma:do}] ) " +
+          "(?$have [{lemma:have} | {lemma:do} | {lemma:be}] ) " +
           "(?$pre_verb [!{tag:/V.*/}]+ ) " +
           "(?$verb [{tag:/V.*/}] [{tag:IN}]? ) " +
           "(?$post_verb []+ )? " +
@@ -341,14 +387,15 @@ public class QuestionToStatementTranslator {
    *
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#triggerWhNNHave
    */
-  private List<CoreLabel> processWhNNHave(TokenSequenceMatcher matcher) {
+  private List<CoreLabel> processWhNNHaveIs(TokenSequenceMatcher matcher) {
     List<CoreLabel> sentence = new ArrayList<>();
     // Add prefix
     sentence.addAll((Collection<CoreLabel>) matcher.groupNodes("$pre_verb"));
 
     // Add have/do
     List<CoreLabel> have = (List<CoreLabel>) matcher.groupNodes("$have");
-    if (have != null && have.size() > 0 && have.get(0).lemma() != null && have.get(0).lemma().equals("have")) {
+    if (have != null && have.size() > 0 && have.get(0).lemma() != null &&
+        (have.get(0).lemma().equalsIgnoreCase("have") || have.get(0).lemma().equalsIgnoreCase("be"))) {
       sentence.addAll((Collection<CoreLabel>) matcher.groupNodes("$have"));
     }
 
@@ -470,7 +517,7 @@ public class QuestionToStatementTranslator {
 
   /**
    * The pattern for "where do..."  sentences.
-   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processWhereDo(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
+   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processWhereDo(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher, List)
    */
   private final TokenSequencePattern triggerWhereDo = TokenSequencePattern.compile(
       "[{lemma:where; tag:/W.*/}] " +
@@ -485,12 +532,13 @@ public class QuestionToStatementTranslator {
    * Process sentences matching the "where do ..." pattern.
    *
    * @param matcher The matcher that matched the pattern.
+   * @param question The original question we asked
    *
    * @return The converted statement.
    *
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#triggerWhereDo
    */
-  private List<CoreLabel> processWhereDo(TokenSequenceMatcher matcher) {
+  private List<CoreLabel> processWhereDo(TokenSequenceMatcher matcher, List<CoreLabel> question) {
     // Get the "at" preposition and the "location" missing marker to use
     List<CoreLabel> specloc = (List<CoreLabel>) matcher.groupNodes("$loc");
     CoreLabel wordAt = WORD_AT;
@@ -498,6 +546,10 @@ public class QuestionToStatementTranslator {
     if (specloc != null && fromNotAtDict.contains(specloc.get(0).word())) {
       wordAt = WORD_FROM;
       missing = WORD_MISSING;
+    }
+    String questionLemmas = " " + StringUtils.join(question.stream().map(CoreLabel::lemma), " ") + " ";
+    if (questionLemmas.contains(" go ") && !questionLemmas.contains(" go to ")) {
+      wordAt = WORD_TO;
     }
 
     // Grab the prefix of the sentence
@@ -832,6 +884,7 @@ public class QuestionToStatementTranslator {
     return sentence;
   }
 
+
   /**
    * The pattern for "when do..."  sentences.
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processWhenDo(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
@@ -919,6 +972,43 @@ public class QuestionToStatementTranslator {
       sentence.addAll(postVerb);
     }
 
+    return sentence;
+  }
+
+
+  /**
+   * The pattern for "when do..."  sentences.
+   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processHow(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
+   */
+  private final TokenSequencePattern triggerHow = TokenSequencePattern.compile(
+      "[{lemma:how; tag:/W.*/}] " +
+          "((?$do [ {lemma:/do/}]) | (?$jj [ {pos:JJ} ]) (?$be [ {lemma:be} ])) " +
+          "(?$statement_body []+?) " +
+          "(?$punct [word:/[?\\.!]/])" );
+
+  /**
+   * Process sentences matching 'how...'
+   *
+   * @param matcher The matcher that matched the pattern.
+   *
+   * @return The converted statement.
+   *
+   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#triggerHow
+   */
+  private List<CoreLabel> processHow(TokenSequenceMatcher matcher) {
+    // Grab the meat of the statement
+    List<CoreLabel> sentence = (List<CoreLabel>) matcher.groupNodes("$statement_body");
+
+    // Add an optional 'be'
+    List<CoreLabel> wordBe = (List<CoreLabel>) matcher.groupNodes("$be");
+    if (wordBe != null) {
+      sentence.addAll(wordBe);
+      sentence.add(WORD_ADJECTIVE);
+    } else {
+      sentence.add(WORD_WAY);
+    }
+
+    // Return
     return sentence;
   }
 
@@ -1095,7 +1185,7 @@ public class QuestionToStatementTranslator {
     } else if ((matcher = triggerWhNNIs.matcher(question)).matches()) {  // must come before triggerWhatIs
       return postProcess(question, processWhNNIs(matcher));
     } else if ((matcher = triggerWhNNHave.matcher(question)).matches()) {  // must come before triggerWhatHave
-      return postProcess(question, processWhNNHave(matcher));
+      return postProcess(question, processWhNNHaveIs(matcher));
     } else if ((matcher = triggerWhNNHaveNN.matcher(question)).matches()) {  // must come before triggerWhatHave
       return postProcess(question, processWhNNHaveNN(matcher));
     } else if ((matcher = triggerWhatIs.matcher(question)).matches()) {
@@ -1103,7 +1193,7 @@ public class QuestionToStatementTranslator {
     } else if ((matcher = triggerWhatHave.matcher(question)).matches()) {
       return postProcess(question, processWhatHave(matcher));
     } else if ((matcher = triggerWhereDo.matcher(question)).matches()) {
-      return postProcess(question, processWhereDo(matcher));
+      return postProcess(question, processWhereDo(matcher, question));
     } else if ((matcher = triggerWhereIs.matcher(question)).matches()) {
       return postProcess(question, processWhereIs(matcher));
     } else if ((matcher = triggerWhoIs.matcher(question)).matches()) {
@@ -1114,6 +1204,8 @@ public class QuestionToStatementTranslator {
       return postProcess(question, processWhatDo(matcher));
     } else if ((matcher = triggerWhenDo.matcher(question)).matches()) {
       return postProcess(question, processWhenDo(matcher));
+    } else if ((matcher = triggerHow.matcher(question)).matches()) {
+      return postProcess(question, processHow(matcher));
     } else {
       return Collections.emptyList();
     }

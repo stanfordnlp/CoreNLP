@@ -342,6 +342,15 @@ public class QuestionToStatementTranslatorITest {
   @Test
   public void parseWhereDoes() {
     check(
+        "where/WRB does/VB money/NN go/VB ?",
+        "money go to location");
+    check(
+        "where/WRB do/VB pandas/NN sleep/VB ?",
+        "pandas sleep at location");
+    check(
+        "where/WRB do/VB pandas/NN go/VB to/TO sleep/VB ?",
+        "pandas go to sleep at location");
+    check(
         "where/WRB does/VB lani/NNP river/NNP begin/VB and/CC end/VB ?",
         "lani river begin and end at location");
     check(
@@ -567,6 +576,28 @@ public class QuestionToStatementTranslatorITest {
     check(
         "what/WDT currency/NN does/VBZ the/DT USA/NNP use/VB ?",
         "the USA use currency");
+  }
+
+
+  @Test
+  public void parseWhatNNIs() {
+    check(
+        "what/WDT kind/NN of/IN cotton/NN is/VB it/PRP made/VBN of/IN ?",
+        "it is made of kind of cotton");
+  }
+
+
+  @Test
+  public void parseHow() {
+    check(
+        "how/WRB do/VBP these/DT questions/NNS make/VBP you/PRP feel/VP ?",
+        "these questions make you feel way");
+    check(
+        "how/WRB do/VBP I/DT ship/VB my/PRP$ package/NN ?",
+        "I ship my package way");
+    check(
+        "how/WRB big/JJ is/VBZ Texas/NNP ?",
+        "Texas is adjective");
   }
 
 
