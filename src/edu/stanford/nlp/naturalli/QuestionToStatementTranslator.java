@@ -166,27 +166,29 @@ public class QuestionToStatementTranslator {
     List<CoreLabel> suffix = (List<CoreLabel>) matcher.groupNodes("$suffix");
     boolean addedBe = false;
     boolean addedSuffix = false;
-    for (int i = 2; i < body.size(); ++i) {
-      CoreLabel tokI = body.get(i);
-      if (tokI.tag() != null &&
-          ((tokI.tag().startsWith("V") && !tokI.tag().equals("VBD") && !"be".equals(body.get(i - 1).lemma())) ||
-              (tokI.tag().startsWith("J") && suffix != null) ||
-              (tokI.tag().startsWith("D") && suffix != null) ||
-              (tokI.tag().startsWith("R") && suffix != null))) {
-        body.add(i, be.get(0));
-        i += 1;
-        if (suffix != null) {
-          while (i < body.size() && body.get(i).tag() != null &&
-              (body.get(i).tag().startsWith("J") || body.get(i).tag().startsWith("V") || body.get(i).tag().startsWith("R") ||
-                  body.get(i).tag().startsWith("N") || body.get(i).tag().startsWith("D")) &&
-              !body.get(i).tag().equals("VBG")) {
-            i += 1;
+    if (body.size() > 1 && !"PRP".equals(body.get(0).tag())) {
+      for (int i = 2; i < body.size(); ++i) {
+        CoreLabel tokI = body.get(i);
+        if (tokI.tag() != null &&
+            ((tokI.tag().startsWith("V") && !tokI.tag().equals("VBD") && !"be".equals(body.get(i - 1).lemma())) ||
+                (tokI.tag().startsWith("J") && suffix != null) ||
+                (tokI.tag().startsWith("D") && suffix != null) ||
+                (tokI.tag().startsWith("R") && suffix != null))) {
+          body.add(i, be.get(0));
+          i += 1;
+          if (suffix != null) {
+            while (i < body.size() && body.get(i).tag() != null &&
+                (body.get(i).tag().startsWith("J") || body.get(i).tag().startsWith("V") || body.get(i).tag().startsWith("R") ||
+                    body.get(i).tag().startsWith("N") || body.get(i).tag().startsWith("D")) &&
+                !body.get(i).tag().equals("VBG")) {
+              i += 1;
+            }
+            body.add(i, suffix.get(0));
+            addedSuffix = true;
           }
-          body.add(i, suffix.get(0));
-          addedSuffix = true;
+          addedBe = true;
+          break;
         }
-        addedBe = true;
-        break;
       }
     }
 
@@ -202,7 +204,16 @@ public class QuestionToStatementTranslator {
       body.addAll(suffix);
     }
     if (!addedBe) {
-      body.addAll(be);
+      if (body.size() > 1 && "PRP".equals(body.get(0).tag())) {
+        body.add(1, be.get(0));
+      } else {
+        body.addAll(be);
+      }
+    }
+
+    // Drop a final 'do'
+    if (body.size() > 1 && "do".equals(body.get(body.size() - 1).word())) {
+      body = new LinkedList<>(body.subList(0, body.size() - 1));
     }
 
 
@@ -262,7 +273,6 @@ public class QuestionToStatementTranslator {
           Collections.swap(body, k - 1, k);
         }
       }
-
     }
 
     // Return

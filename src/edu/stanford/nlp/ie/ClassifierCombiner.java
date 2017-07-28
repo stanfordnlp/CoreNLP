@@ -262,6 +262,10 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
   private void loadClassifiers(Properties props, List<String> paths) throws IOException {
     baseClassifiers = new ArrayList<>();
+    if (PropertiesUtils.getBool(props, "ner.usePresetNERTags", false)) {
+      AbstractSequenceClassifier<IN> presetASC = new PresetSequenceClassifier(props);
+      baseClassifiers.add(presetASC);
+    }
     for(String path: paths){
       AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(props, path);
       baseClassifiers.add(cls);

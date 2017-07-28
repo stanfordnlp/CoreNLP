@@ -45,6 +45,8 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   public static final String NER_LANGUAGE_PROPERTY = "ner.language";
   public static final String NER_LANGUAGE_PROPERTY_BASE = "language";
 
+  public static final String USE_PRESET_NER_PROPERTY = "ner.usePresetNERTags";
+
   private final boolean useSUTime;
 
   public enum Language {
@@ -197,7 +199,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
 
   public static final Set<String> DEFAULT_PASS_DOWN_PROPERTIES =
           CollectionUtils.asSet("encoding", "inputEncoding", "outputEncoding", "maxAdditionalKnownLCWords","map",
-                  "ner.combinationMode");
+                  "ner.combinationMode", "ner.usePresetNERTags");
 
   /** This factory method is used to create the NERClassifierCombiner used in NERCombinerAnnotator
    *  (and, thence, in StanfordCoreNLP).
