@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v3.7.0 - 2016-10-31
+Stanford Lexicalized Parser v3.8.0 - 2017-06-09
 -----------------------------------------------
 
 Copyright (c) 2002-2015 The Board of Trustees of The Leland Stanford Junior
@@ -247,6 +247,8 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
+
+2017-06-09    3.8.0     Updated for compatibility 
 
 2016-10-31    3.7.0     new UD models 
 
