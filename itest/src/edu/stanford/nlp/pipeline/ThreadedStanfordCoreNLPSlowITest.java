@@ -16,7 +16,7 @@ public class ThreadedStanfordCoreNLPSlowITest extends TestCase {
                                          StanfordCoreNLP pipeline)
       throws IOException
   {
-    List<String> converted = new ArrayList<String>();
+    List<String> converted = new ArrayList<>();
     for (Annotation annotation : annotations) {
       StringWriter out = new StringWriter();
       pipeline.xmlPrint(annotation, out);

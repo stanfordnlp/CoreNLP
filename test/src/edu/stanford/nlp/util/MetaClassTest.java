@@ -433,7 +433,7 @@ public class MetaClassTest {
 
   @Test
   public void testCastCollection() {
-    Set<String> set = new HashSet<String>();
+    Set<String> set = new HashSet<>();
     set.add("apple");
     set.add("banana");
     Set<String> castedSet = MetaClass.cast("[apple, banana]", Set.class);
@@ -443,7 +443,7 @@ public class MetaClassTest {
     assertEquals(set, castedSet2);
     assertEquals(set, castedSet3);
 
-    List<String> list = new LinkedList<String>();
+    List<String> list = new LinkedList<>();
     list.add("apple");
     list.add("banana");
     List<String> castedList = MetaClass.cast("[apple, banana]", List.class);

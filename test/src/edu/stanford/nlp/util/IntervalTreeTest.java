@@ -20,7 +20,7 @@ public class IntervalTreeTest extends TestCase {
     for (Interval<Integer> interval: overlapping) {
       assertTrue(interval.overlaps(target));
     }
-    List<Interval<Integer>> rest = new ArrayList<Interval<Integer>>(all);
+    List<Interval<Integer>> rest = new ArrayList<>(all);
     rest.removeAll(overlapping);
     for (Interval<Integer> interval: rest) {
       assertNotNull(interval);
@@ -35,7 +35,7 @@ public class IntervalTreeTest extends TestCase {
     Interval<Integer> included = Interval.toInterval(249210800, 249212000);
     Interval<Integer> after = Interval.toInterval(249213000, 249214000);
 
-    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<Integer, Interval<Integer>>();
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
     tree.add(a);
 
     List<Interval<Integer>> overlapping1 = tree.getOverlapping(before);
@@ -88,7 +88,7 @@ public class IntervalTreeTest extends TestCase {
     // Add a bunch of random interval before adding a
 
     Random rand = new Random();
-    List<Interval<Integer>> list = new ArrayList<Interval<Integer>>(n+1);
+    List<Interval<Integer>> list = new ArrayList<>(n+1);
     for (int i = 0; i < n; i++) {
       int x = rand.nextInt();
       int y = rand.nextInt();
@@ -111,10 +111,10 @@ public class IntervalTreeTest extends TestCase {
   public void testIteratorRandom() throws Exception
   {
     int n = 1000;
-    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<Integer, Interval<Integer>>();
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
 
     Random rand = new Random();
-    List<Interval<Integer>> list = new ArrayList<Interval<Integer>>(n+1);
+    List<Interval<Integer>> list = new ArrayList<>(n+1);
     for (int i = 0; i < n; i++) {
       int x = rand.nextInt();
       int y = rand.nextInt();
@@ -138,9 +138,9 @@ public class IntervalTreeTest extends TestCase {
   public void testIteratorOrdered() throws Exception
   {
     int n = 1000;
-    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<Integer, Interval<Integer>>();
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
 
-    List<Interval<Integer>> list = new ArrayList<Interval<Integer>>(n+1);
+    List<Interval<Integer>> list = new ArrayList<>(n+1);
     for (int i = 0; i < n; i++) {
       int x = i;
       int y = i+1;

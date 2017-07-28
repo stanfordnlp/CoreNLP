@@ -16,7 +16,7 @@ public class LinearClassifierITest extends TestCase {
   private static <L, F> RVFDatum<L, F> newDatum(L label,
                                                 F[] features,
                                                 Double[] counts) {
-    ClassicCounter<F> counter = new ClassicCounter<F>();
+    ClassicCounter<F> counter = new ClassicCounter<>();
     for (int i = 0; i < features.length; i++) {
       counter.setCount(features[i], counts[i]);
     }
@@ -29,7 +29,7 @@ public class LinearClassifierITest extends TestCase {
    * @throws Exception
    */
   private static void testStrBinaryDatums(double d1f1, double d1f2, double d2f1, double d2f2) throws Exception {
-    RVFDataset<String, String> trainData = new RVFDataset<String, String>();
+    RVFDataset<String, String> trainData = new RVFDataset<>();
     RVFDatum<String, String> d1 = newDatum("alpha",
       new String[]{"f1", "f2"},
       new Double[]{d1f1, d1f2});
@@ -38,7 +38,7 @@ public class LinearClassifierITest extends TestCase {
       new Double[]{d2f1, d2f2});
     trainData.add(d1);
     trainData.add(d2);
-    LinearClassifierFactory<String, String> lfc = new LinearClassifierFactory<String, String>();
+    LinearClassifierFactory<String, String> lfc = new LinearClassifierFactory<>();
     LinearClassifier<String, String> lc = lfc.trainClassifier(trainData);
     // Try the obvious (should get train data with 100% acc)
     Assert.assertEquals(d1.label(), lc.classOf(d1));
@@ -56,8 +56,8 @@ public class LinearClassifierITest extends TestCase {
   }
 
   public void testStrMultiClassDatums() throws Exception {
-    RVFDataset<String, String> trainData = new RVFDataset<String, String>();
-    List<RVFDatum<String, String>> datums = new ArrayList<RVFDatum<String, String>>();
+    RVFDataset<String, String> trainData = new RVFDataset<>();
+    List<RVFDatum<String, String>> datums = new ArrayList<>();
     datums.add(newDatum("alpha",
       new String[]{"f1", "f2"},
       new Double[]{1.0, 0.0}));
@@ -70,7 +70,7 @@ public class LinearClassifierITest extends TestCase {
       new Double[]{5.0, 5.0}));
     for (RVFDatum<String, String> datum : datums)
       trainData.add(datum);
-    LinearClassifierFactory<String, String> lfc = new LinearClassifierFactory<String, String>();
+    LinearClassifierFactory<String, String> lfc = new LinearClassifierFactory<>();
     LinearClassifier<String, String> lc = lfc.trainClassifier(trainData);
 
     RVFDatum td1 = newDatum("alpha",

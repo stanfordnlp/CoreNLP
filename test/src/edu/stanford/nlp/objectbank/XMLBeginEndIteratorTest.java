@@ -30,7 +30,7 @@ public class XMLBeginEndIteratorTest extends TestCase {
   public static final String TWO_TAGS_STRING = "<xml><foo>This is the first sentence</foo><bar>The dog's barking kept the neighbors up all night</bar><foo>The owner could not stop the dog from barking</foo></xml>";
 
   public static ArrayList<String> getResults(XMLBeginEndIterator<String> iterator) {
-    ArrayList<String> results = new ArrayList<String>();
+    ArrayList<String> results = new ArrayList<>();
     while (iterator.hasNext()) {
       results.add(iterator.next());
     }
@@ -47,12 +47,12 @@ public class XMLBeginEndIteratorTest extends TestCase {
   }
 
   public void testNotFound() {
-    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(TEST_STRING)), "zzzz");
+    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<>(new BufferedReader(new StringReader(TEST_STRING)), "zzzz");
     compareResults(iterator);    // eg, should be empty
   }
 
   public void testFound() {
-    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(TEST_STRING)), "text");
+    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<>(new BufferedReader(new StringReader(TEST_STRING)), "text");
     compareResults(iterator,
                    "\n    This tests the xml input.\n  ",
                    "\n    This should be found.\n  ",
@@ -60,25 +60,25 @@ public class XMLBeginEndIteratorTest extends TestCase {
   }
 
   public void testEmpty() {
-    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(EMPTY_TEST_STRING)), "text");
+    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<>(new BufferedReader(new StringReader(EMPTY_TEST_STRING)), "text");
     compareResults(iterator, "");
   }
 
   public void testSingleTags() {
-    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(SINGLE_TAG_TEST_STRING)), "text");
+    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<>(new BufferedReader(new StringReader(SINGLE_TAG_TEST_STRING)), "text");
     compareResults(iterator,
                    "This tests the xml input with single tags, which should not close the input");
   }
 
   public void testNesting() {
-    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(NESTING_TEST_STRING)), "text",
+    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<>(new BufferedReader(new StringReader(NESTING_TEST_STRING)), "text",
                                                                            false, false, true);
     compareResults(iterator,
                    "ABC", "ABCDE", "ABCDE");
   }
 
   public void testInternalTags() {
-    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(NESTING_TEST_STRING)), "text",
+    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<>(new BufferedReader(new StringReader(NESTING_TEST_STRING)), "text",
                                                                            true, false, true);
     compareResults(iterator,
                    "A<text>B</text>C",
@@ -87,7 +87,7 @@ public class XMLBeginEndIteratorTest extends TestCase {
   }
 
   public void testContainingTags() {
-    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(NESTING_TEST_STRING)), "text",
+    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<>(new BufferedReader(new StringReader(NESTING_TEST_STRING)), "text",
                                                                            true, true, true);
     compareResults(iterator,
                    "<text>A<text>B</text>C</text>",
@@ -96,13 +96,13 @@ public class XMLBeginEndIteratorTest extends TestCase {
   }
 
   public void testTagInText() {
-    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(TAG_IN_TEXT_STRING)), "bar");
+    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<>(new BufferedReader(new StringReader(TAG_IN_TEXT_STRING)), "bar");
     compareResults(iterator,
                    "The dog's barking kept the neighbors up all night");
   }
 
   public void testTwoTags() {
-    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(TWO_TAGS_STRING)), "foo|bar");
+    XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<>(new BufferedReader(new StringReader(TWO_TAGS_STRING)), "foo|bar");
     compareResults(iterator,
                    "This is the first sentence",
                    "The dog's barking kept the neighbors up all night",

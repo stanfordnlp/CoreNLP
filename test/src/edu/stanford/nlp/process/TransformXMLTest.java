@@ -28,7 +28,7 @@ public class TransformXMLTest extends TestCase {
   };
 
   public void testTransformXML1() {
-    TransformXML<String> tx = new TransformXML<String>();
+    TransformXML<String> tx = new TransformXML<>();
     StringWriter sw = new StringWriter();
     tx.transformXML(StringUtils.EMPTY_STRING_ARRAY, 
                     new IdentityFunction<String>(),

@@ -78,7 +78,7 @@ public class SemgrexPatternTest extends TestCase {
       // System.out.println(dep + " " + gov);
     }
 
-    HashMap<IndexedWord, IndexedWord> map = new HashMap<IndexedWord, IndexedWord>();
+    HashMap<IndexedWord, IndexedWord> map = new HashMap<>();
     map.put(h.getNodeByWordPattern("Hughes"), t.getNodeByWordPattern("Hughes"));
     map.put(h.getNodeByWordPattern("Gracia"), t.getNodeByWordPattern("Gracia"));
     Alignment alignment = new Alignment(map, 0, "");
