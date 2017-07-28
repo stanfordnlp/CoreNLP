@@ -82,6 +82,7 @@ public abstract class AnnotationOutputter {
     options.printSingletons = pipeline.getPrintSingletons();
     options.beamPrintingOption = pipeline.getBeamPrintingOption();
     options.pretty = pipeline.getPrettyPrint();
+    options.includeText = pipeline.getIncludeText();
     return options;
   }
 
