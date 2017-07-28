@@ -39,33 +39,29 @@ public class HeidelTimeAnnotator implements Annotator {
   private static final String DEFAULT_PATH = DataFilePaths.convert(BASE_PATH);
   private final File heideltimePath;
   private final boolean outputResults;
-  private final String language;
 
   // if used in a pipeline or constructed with a Properties object,
   // this property tells the annotator where to find the script
   public static final String HEIDELTIME_PATH_PROPERTY = "heideltime.path";
-  public static final String HEIDELTIME_LANGUAGE_PROPERTY = "heideltime.language";
   public static final String HEIDELTIME_OUTPUT_RESULTS = "heideltime.outputResults";
 
   public HeidelTimeAnnotator() {
     this(new File(System.getProperty("heideltime", DEFAULT_PATH)));
   }
-  public HeidelTimeAnnotator(File heideltimePath) {
-    this(heideltimePath, "english", false);
-  }
 
-  public HeidelTimeAnnotator(File heideltimePath, String language, boolean outputResults) {
+  public HeidelTimeAnnotator(File heideltimePath) {
     this.heideltimePath = heideltimePath;
-    this.outputResults = outputResults;
-    this.language = language;
+    this.outputResults = false;
   }
 
   public HeidelTimeAnnotator(String name, Properties props) {
-    this(new File(props.getProperty(HEIDELTIME_PATH_PROPERTY,
+    String path = props.getProperty(HEIDELTIME_PATH_PROPERTY,
             System.getProperty("heideltime",
-                    DEFAULT_PATH))),
-        props.getProperty(HEIDELTIME_LANGUAGE_PROPERTY, "english"),
-        Boolean.valueOf(props.getProperty(HEIDELTIME_OUTPUT_RESULTS, "false")));
+                    DEFAULT_PATH));
+    this.heideltimePath = new File(path);
+
+    this.outputResults =
+            Boolean.valueOf(props.getProperty(HEIDELTIME_OUTPUT_RESULTS, "false"));
   }
 
   @Override
@@ -110,7 +106,6 @@ public class HeidelTimeAnnotator implements Annotator {
     args.add("java");
     args.add("-jar"); args.add(this.heideltimePath.getPath() + "/heideltime.jar");
     args.add("-c"); args.add(this.heideltimePath.getPath()+"/config.props");
-    args.add("-l"); args.add(this.language);
     args.add("-t"); args.add("NEWS");
     if(pubDate != null){
       args.add("-dct"); args.add(pubDate);
@@ -128,8 +123,7 @@ public class HeidelTimeAnnotator implements Annotator {
     output = badNestedTimex.matcher(output).replaceAll("</TIMEX3><TIMEX3");
     Pattern badNestedTimex2 = Pattern.compile(Pattern.quote("<TI</TIMEX3>MEX3"));
     output = badNestedTimex2.matcher(output).replaceAll("</TIMEX3><TIMEX3");
-    //output = output.replaceAll("\\n\\n<TimeML>\\n\\n","<TimeML>");
-    output = output.replaceAll("<TimeML>", "");
+    output = output.replaceAll("\\n\\n<TimeML>\\n\\n","<TimeML>");
 
     // parse the HeidelTime output
     Element outputXML;

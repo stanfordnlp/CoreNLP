@@ -725,16 +725,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * The standard key for the answer which is a String
-   */
-  public static class PresetAnswerAnnotation implements CoreAnnotation<String> {
-    @Override
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
    * The standard key for gold answer which is a String
    */
   public static class GoldAnswerAnnotation implements CoreAnnotation<String> {
