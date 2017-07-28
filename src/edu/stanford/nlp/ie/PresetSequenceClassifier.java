@@ -3,6 +3,7 @@ package edu.stanford.nlp.ie;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.HashIndex;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,6 +18,10 @@ public class PresetSequenceClassifier<IN extends CoreMap>  extends AbstractSeque
 
   public PresetSequenceClassifier(Properties props) {
     super(props);
+    if (classIndex == null)
+      classIndex = new HashIndex<>();
+    // classIndex.add("O");
+    classIndex.add(flags.backgroundSymbol);
   }
 
   /**
