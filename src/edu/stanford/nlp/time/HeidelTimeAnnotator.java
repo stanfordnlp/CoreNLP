@@ -128,7 +128,8 @@ public class HeidelTimeAnnotator implements Annotator {
     output = badNestedTimex.matcher(output).replaceAll("</TIMEX3><TIMEX3");
     Pattern badNestedTimex2 = Pattern.compile(Pattern.quote("<TI</TIMEX3>MEX3"));
     output = badNestedTimex2.matcher(output).replaceAll("</TIMEX3><TIMEX3");
-    output = output.replaceAll("\\n\\n<TimeML>\\n\\n","<TimeML>");
+    //output = output.replaceAll("\\n\\n<TimeML>\\n\\n","<TimeML>");
+    output = output.replaceAll("<TimeML>", "");
 
     // parse the HeidelTime output
     Element outputXML;
