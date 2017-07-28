@@ -462,6 +462,12 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
         tokens.get(i).set(CoreAnnotations.AnswerAnnotation.class, output.get(i).get(CoreAnnotations.AnswerAnnotation.class));
       }
       baseOutputs.add(tokens);
+    } else {
+      for (int i = 0 ; i < tokens.size() ; i++) {
+        tokens.get(i).set(CoreAnnotations.AnswerAnnotation.class,
+            tokens.get(i).get(CoreAnnotations.BaseAnswerAnnotation.class));
+      }
+      baseOutputs.add(tokens);
     }
 
     int firstClassifierIndex = useProvidedBaseTags ? 0 : 1 ;
