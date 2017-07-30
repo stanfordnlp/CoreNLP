@@ -28,7 +28,7 @@ Below are a few examples of commands for processing text in different languages.
 
 ### Chinese
 
-You can process Chinese with a command line this:
+You can process Chinese with a command line like this:
 
 ```sh
 java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-chinese.properties -file chinese.txt -outputFormat text
@@ -107,6 +107,8 @@ Annotation document = new Annotation(text);
 // Setup Chinese Properties by loading them from classpath resources
 Properties props = new Properties();
 props.load(IOUtils.readerFromString("StanfordCoreNLP-chinese.properties"));
+// Or this way of doing it also works
+// Properties props = StringUtils.argsToProperties(new String[]{"-props", "StanfordCoreNLP-chinese.properties"});
 StanfordCoreNLP corenlp = new StanfordCoreNLP(props);
 corenlp.annotate(document);
 ```
