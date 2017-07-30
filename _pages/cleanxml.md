@@ -114,7 +114,7 @@ clean.singlesentencetags = HEADLINE|DATELINE|SPEAKER|POSTER|POSTDATE
 clean.sentenceendingtags = P|POST|QUOTE
 clean.turntags = TURN|POST|QUOTE
 clean.speakertags = SPEAKER|POSTER
-clean.docidtags = DOCID
+clean.docIdtags = DOCID
 clean.datetags = DATETIME|DATE|DATELINE
 clean.doctypetags = DOCTYPE
 clean.docAnnotations = docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]
