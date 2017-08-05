@@ -66,7 +66,7 @@ public class ArrayUtilsTest extends TestCase {
 
   public void testAsSet() {
     String[] items = {"larry", "moe", "curly"};
-    Set<String> set = new HashSet<String>(Arrays.asList(items));
+    Set<String> set = new HashSet<>(Arrays.asList(items));
     assertEquals(set, ArrayUtils.asSet(items));
   }
 

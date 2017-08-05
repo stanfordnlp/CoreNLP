@@ -12,8 +12,8 @@ import java.util.function.Function;
  */
 public class MapsTest extends TestCase {
   public void testAddAllWithFunction() {
-    Map<String, String> stringMap = new HashMap<String, String>();
-    Map<String, Integer> intMap = new HashMap<String, Integer>();
+    Map<String, String> stringMap = new HashMap<>();
+    Map<String, Integer> intMap = new HashMap<>();
 
     Function<Integer, String> toString = new Function<Integer, String>() {
       public String apply(Integer i) {

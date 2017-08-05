@@ -103,9 +103,9 @@ public class ChineseCorefBenchmarkSlowITest extends TestCase {
     // So we can see them all at once to speed updating
     printResultsTSV(results, System.err);
 
-    Counter<String> lowResults = new ClassicCounter<String>();
-    Counter<String> highResults = new ClassicCounter<String>();
-    Counter<String> expectedResults = new ClassicCounter<String>();
+    Counter<String> lowResults = new ClassicCounter<>();
+    Counter<String> highResults = new ClassicCounter<>();
+    Counter<String> expectedResults = new ClassicCounter<>();
 
     setLowHighExpected(lowResults, highResults, expectedResults, MENTION_TP, 12550, 12700, 12596); // In 2015 was: 12370
     setLowHighExpected(lowResults, highResults, expectedResults, MENTION_F1, 55.7, 56.0, 55.88); // In 2015 was: 55.59
@@ -130,7 +130,7 @@ public class ChineseCorefBenchmarkSlowITest extends TestCase {
   }
 
   private static Counter<String> getCorefResults(String resultsString) throws IOException {
-    Counter<String> results = new ClassicCounter<String>();
+    Counter<String> results = new ClassicCounter<>();
     BufferedReader r = new BufferedReader(new StringReader(resultsString));
     for (String line; (line = r.readLine()) != null; ) {
       Matcher m1 = MENTION_PATTERN.matcher(line);

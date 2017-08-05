@@ -51,7 +51,7 @@ public class NERBenchmarkSlowITest extends TestCase{
     private static final String ONTO_OUTPUT_TEST = "onto_output_test.txt";
 
     // CoNLL eval shell script
-    private static final String CONLL_EVAL = "../scripts/ner/eval_conll_cmd.sh";
+    private static final String CONLL_EVAL = "../../scripts/ner/eval_conll_cmd.sh";
     private static final Pattern FB1_Pattern = Pattern.compile("FB1:  (\\d+\\.\\d+)");
 
     // Note we need two annotator pipelines because the datasets use different NER models

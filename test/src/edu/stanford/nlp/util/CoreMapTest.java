@@ -142,7 +142,7 @@ public class CoreMapTest extends TestCase {
 
     for (int numKeys = 1; numKeys <= maxNumKeys; numKeys++) {
       // the HashMap instance
-      HashMap<String,String> hashmap = new HashMap<String, String>(numKeys);
+      HashMap<String,String> hashmap = new HashMap<>(numKeys);
 
       // the CoreMap instance
       CoreMap coremap = new ArrayCoreMap(numKeys);

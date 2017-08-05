@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 public class TwoDimensionalIntCounterTest extends TestCase {
 
   public void testTraditionalMain() {
-    TwoDimensionalIntCounter<String,String> cc = new TwoDimensionalIntCounter<String,String>();
+    TwoDimensionalIntCounter<String,String> cc = new TwoDimensionalIntCounter<>();
     cc.setCount("a", "c", 1.0);
     cc.setCount("b", "c", 1.0);
     cc.setCount("a", "d", 1.0);

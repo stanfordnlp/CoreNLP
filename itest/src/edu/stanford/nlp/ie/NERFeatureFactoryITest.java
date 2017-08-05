@@ -31,14 +31,14 @@ public class NERFeatureFactoryITest extends TestCase {
 
   public void testSloppyGazette() {
     List<CoreLabel> sentence = SentenceUtils.toCoreLabelList("For three years , John Bauer has worked at Stanford .".split(" +"));
-    PaddedList<CoreLabel> paddedSentence = new PaddedList<CoreLabel>(sentence, new CoreLabel());
+    PaddedList<CoreLabel> paddedSentence = new PaddedList<>(sentence, new CoreLabel());
 
     Properties props = new Properties();
     props.setProperty("useGazettes", "true");
     props.setProperty("sloppyGazette", "true");
     props.setProperty("gazette", "projects/core/data/edu/stanford/nlp/ie/test_gazette.txt");
     SeqClassifierFlags flags = new SeqClassifierFlags(props);
-    NERFeatureFactory<CoreLabel> factory = new NERFeatureFactory<CoreLabel>();
+    NERFeatureFactory<CoreLabel> factory = new NERFeatureFactory<>();
     factory.init(flags);
 
     Set<String> features;

@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * <p>An interface for outputting CoreNLP Annotations to different output
+ * An interface for outputting CoreNLP Annotations to different output
  * formats.
  * These are intended to be for more or less human consumption (or for transferring
  * to other applications) -- that is, there output is not intended to be read back into
- * CoreNLP losslessly.</p>
+ * CoreNLP losslessly.
  *
- * <p>For lossless (or near lossless) serialization,
+ * For lossless (or near lossless) serialization,
  * see {@link edu.stanford.nlp.pipeline.AnnotationSerializer}; e.g.,
  * {@link edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer}.
  *
@@ -23,6 +23,7 @@ import java.io.OutputStream;
  * @author Gabor Angeli
  */
 public abstract class AnnotationOutputter {
+
   static final TreePrint DEFAULT_CONSTITUENT_TREE_PRINTER = new TreePrint("penn");
   private static final Options DEFAULT_OPTIONS = new Options(); // IMPORTANT: must come after DEFAULT_CONSTITUENCY_TREE_PRINTER
 
@@ -72,7 +73,7 @@ public abstract class AnnotationOutputter {
 
 
   /**
-   * Populates options from StanfordCoreNLP pipeline
+   * Populates options from StanfordCoreNLP pipeline.
    */
   public static Options getOptions(StanfordCoreNLP pipeline) {
     Options options = new Options();
@@ -82,6 +83,7 @@ public abstract class AnnotationOutputter {
     options.printSingletons = pipeline.getPrintSingletons();
     options.beamPrintingOption = pipeline.getBeamPrintingOption();
     options.pretty = pipeline.getPrettyPrint();
+    options.includeText = pipeline.getIncludeText();
     return options;
   }
 

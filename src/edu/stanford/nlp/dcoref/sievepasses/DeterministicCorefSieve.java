@@ -385,9 +385,11 @@ public abstract class DeterministicCorefSieve  {
       if(ant.headWord.lemma().equals(mention2.headWord.lemma())) return false;
 
       // Constraint: ignore pairs commonNoun - properNoun
-      if(ant.mentionType != MentionType.PROPER &&
-         ( mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP")
-           || !mention2.headWord.word().substring(1).equals(mention2.headWord.word().substring(1).toLowerCase()) ) ) return false;
+      if (ant.mentionType != MentionType.PROPER &&
+              ( mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP")
+                      || ! mention2.headWord.word().substring(1).equals(mention2.headWord.word().substring(1).toLowerCase()) ) ) {
+        return false;
+      }
 
       // Constraint: ignore plurals
       if(ant.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNS")
