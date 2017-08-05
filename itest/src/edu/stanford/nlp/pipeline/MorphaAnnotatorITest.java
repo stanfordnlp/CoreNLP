@@ -57,7 +57,7 @@ public class MorphaAnnotatorITest extends TestCase {
   }
 
   private static List<CoreLabel> getTestWords() {
-    List<CoreLabel> words = new ArrayList<>();
+    List<CoreLabel> words = new ArrayList<CoreLabel>();
     if (tokenizedText.length != tokenizedTags.length) {
       throw new AssertionError("tokenizedText and tokenizedTags " +
                                "must be of the same length");
@@ -77,7 +77,7 @@ public class MorphaAnnotatorITest extends TestCase {
 
     CoreMap sentence = new ArrayCoreMap();
     sentence.set(CoreAnnotations.TokensAnnotation.class, words);
-    List<CoreMap> sentences = new ArrayList<>();
+    List<CoreMap> sentences = new ArrayList<CoreMap>();
     sentences.add(sentence);
     Annotation document = new Annotation(text);
     document.set(CoreAnnotations.SentencesAnnotation.class, sentences);

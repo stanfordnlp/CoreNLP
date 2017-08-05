@@ -24,8 +24,8 @@ public class TreeTest extends TestCase {
     if (t == null) {
       fail("testTreeIterator failed to construct tree");
     }
-    Set<Tree> m1 = new HashSet<>();
-    Set<Tree> m2 = new HashSet<>();
+    Set<Tree> m1 = new HashSet<Tree>();
+    Set<Tree> m2 = new HashSet<Tree>();
     // build iterator List
     for (Tree sub : t) {
       m1.add(sub);

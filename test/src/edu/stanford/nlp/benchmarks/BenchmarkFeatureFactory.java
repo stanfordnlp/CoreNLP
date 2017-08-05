@@ -17,7 +17,7 @@ import java.util.Set;
 public class BenchmarkFeatureFactory extends FeatureFactory<CoreLabel> {
     @Override
     public Collection<String> getCliqueFeatures(PaddedList<CoreLabel> info, int position, Clique clique) {
-        Set<String> features = new HashSet<>();
+        Set<String> features = new HashSet<String>();
         for (CoreLabel l : info) {
             for (int i = 0; i < 10; i++) {
                 features.add("feat"+i+":"+l.word());

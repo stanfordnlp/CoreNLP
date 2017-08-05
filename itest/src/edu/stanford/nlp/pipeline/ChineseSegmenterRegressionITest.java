@@ -13,10 +13,10 @@ public class ChineseSegmenterRegressionITest  extends TestCase {
   public StanfordCoreNLP pipeline;
 
   // strings to test on
-  public ArrayList<String> inputStrings = new ArrayList<>();
+  public ArrayList<String> inputStrings = new ArrayList<String>();
 
   // expected token lists
-  ArrayList<ArrayList<String>> expectedTokenLists = new ArrayList<>();
+  ArrayList<ArrayList<String>> expectedTokenLists = new ArrayList<ArrayList<String>>();
 
   public void setUp() {
 
@@ -69,7 +69,7 @@ public class ChineseSegmenterRegressionITest  extends TestCase {
     for (String inputString : inputStrings) {
       Annotation ann = new Annotation(inputString);
       pipeline.annotate(ann);
-      ArrayList<String> foundTokens = new ArrayList<>();
+      ArrayList<String> foundTokens = new ArrayList<String>();
       for (CoreMap sentence : ann.get(SentencesAnnotation.class)) {
         for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
           foundTokens.add(token.word());

@@ -105,7 +105,7 @@ public class ClassifierCombinerTest extends TestCase {
     List<CoreLabel> input1 = CoreUtilities.toCoreLabelList(words, tags, firstInput);
     List<CoreLabel> input2 = CoreUtilities.toCoreLabelList(words, tags, secondInput);
     List<CoreLabel> result = CoreUtilities.toCoreLabelList(words, tags, expectedOutput);
-    Set<String> auxLabels = new HashSet<>();
+    Set<String> auxLabels = new HashSet<String>();
     for (String label : labels) {
       auxLabels.add(label);
     }
@@ -121,7 +121,7 @@ public class ClassifierCombinerTest extends TestCase {
     List<CoreLabel> input1 = CoreUtilities.toCoreLabelList(words, tags, firstInput);
     List<CoreLabel> input2 = CoreUtilities.toCoreLabelList(words, tags, secondInput);
     List<CoreLabel> result = CoreUtilities.toCoreLabelList(words, tags, expectedOutput);
-    Set<String> auxLabels = new HashSet<>();
+    Set<String> auxLabels = new HashSet<String>();
     for (String label : labels) {
       auxLabels.add(label);
     }

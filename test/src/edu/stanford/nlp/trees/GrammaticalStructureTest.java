@@ -23,7 +23,7 @@ public class GrammaticalStructureTest extends TestCase {
   public HashSet<String> tokenSet(String tokenString) {
     Pattern tokenPattern = Pattern.compile("(\\S+\\(\\S+-\\d+, \\S+-\\d+\\))");
     Matcher tpMatcher = tokenPattern.matcher(tokenString);
-    HashSet<String> tokenSet = new HashSet<>();
+    HashSet<String> tokenSet = new HashSet<String>();
     while (tpMatcher.find()) {
       tokenSet.add(tpMatcher.group());
     }
@@ -31,7 +31,7 @@ public class GrammaticalStructureTest extends TestCase {
   }
 
   public HashSet<String> tokenSet(List<TypedDependency> ds) {
-    HashSet<String> tokenSet = new HashSet<>();
+    HashSet<String> tokenSet = new HashSet<String>();
     for (TypedDependency d: ds) {
       tokenSet.add(d.toString());      
     }

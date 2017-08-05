@@ -35,15 +35,15 @@ public class CollectionUtilsTest extends TestCase {
     File collectionFile = new File(this.outputDir, "string.collection");
     StringUtils.printToFile(collectionFile, "-1\n42\n122\n-3.14");
 
-    Set<String> actualSet = new HashSet<>();
+    Set<String> actualSet = new HashSet<String>();
     CollectionUtils.loadCollection(collectionFile, String.class, actualSet);
-    Set<String> expectedSet = new HashSet<>(Arrays.asList("-1 42 122 -3.14".split(" ")));
+    Set<String> expectedSet = new HashSet<String>(Arrays.asList("-1 42 122 -3.14".split(" ")));
     Assert.assertEquals(expectedSet, actualSet);
 
-    List<TestDouble> actualList = new ArrayList<>();
+    List<TestDouble> actualList = new ArrayList<TestDouble>();
     actualList.add(new TestDouble("95.2"));
     CollectionUtils.loadCollection(collectionFile.getPath(), TestDouble.class, actualList);
-    List<TestDouble> expectedList = new ArrayList<>();
+    List<TestDouble> expectedList = new ArrayList<TestDouble>();
     expectedList.add(new TestDouble("95.2"));
     expectedList.add(new TestDouble("-1"));
     expectedList.add(new TestDouble("42"));
@@ -70,7 +70,7 @@ public class CollectionUtilsTest extends TestCase {
     List<Integer> expectedInts = Arrays.asList(1, 2, 3, 4, 5);
     Assert.assertEquals(expectedInts, CollectionUtils.sorted(inputInts));
 
-    Set<String> inputStrings = new HashSet<>(Arrays.asList("d a c b".split(" ")));
+    Set<String> inputStrings = new HashSet<String>(Arrays.asList("d a c b".split(" ")));
     List<String> expectedStrings = Arrays.asList("a b c d".split(" "));
     Assert.assertEquals(expectedStrings, CollectionUtils.sorted(inputStrings));
   }
@@ -120,7 +120,7 @@ public class CollectionUtilsTest extends TestCase {
   }
 
   private static List<List<String>> split(String wordListsString) {
-    List<List<String>> result = new ArrayList<>();
+    List<List<String>> result = new ArrayList<List<String>>();
     for (String wordString: wordListsString.split(" ")) {
       result.add(splitOne(wordString));
     }

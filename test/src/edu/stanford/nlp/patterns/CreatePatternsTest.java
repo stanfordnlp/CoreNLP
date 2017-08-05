@@ -30,7 +30,7 @@ public class CreatePatternsTest {
     props.setProperty("patternType","DEP");
     ConstantsAndVariables constvars = new ConstantsAndVariables(props, new HashSet<String>(), new HashMap<String, Class<? extends TypesafeMap.Key<String>>>());
     CreatePatterns<DepPattern> createPatterns = new CreatePatterns<>(props, constvars);
-    Map<String, DataInstance> sents = new HashMap<>();
+    Map<String, DataInstance> sents = new HashMap<String, DataInstance>();
     CoreMap m = new ArrayCoreMap();
     String text = "We present a paper that focuses on semantic graphs applied to language.";
 

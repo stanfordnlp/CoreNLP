@@ -602,7 +602,7 @@ public class SemgrexTest extends TestCase {
 
     SemgrexPattern pattern =
       SemgrexPattern.compile("{}=a >> {}=b : {}=a >> {}=c");
-    Map<String, IndexedWord> variables = new HashMap<>();
+    Map<String, IndexedWord> variables = new HashMap<String, IndexedWord>();
     variables.put("b", graph.getNodeByIndex(5));
     variables.put("c", graph.getNodeByIndex(2));
     SemgrexMatcher matcher = pattern.matcher(graph, variables);
@@ -744,11 +744,11 @@ public class SemgrexTest extends TestCase {
                              String... expectedMatches) {
     // results are not in the order I would expect.  Using a counter
     // allows them to be in any order
-    IntCounter<String> counts = new IntCounter<>();
+    IntCounter<String> counts = new IntCounter<String>();
     for (int i = 0; i < expectedMatches.length; ++i) {
       counts.incrementCount(expectedMatches[i]);
     }
-    IntCounter<String> originalCounts = new IntCounter<>(counts);
+    IntCounter<String> originalCounts = new IntCounter<String>(counts);
 
     SemgrexMatcher matcher = pattern.matcher(graph);
 

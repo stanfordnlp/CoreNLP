@@ -511,7 +511,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
         if (testFile != null) {
           ncc.classifyAndWriteAnswers(testFile, readerAndWriter, true);
         } else {
-          List<File> files = Arrays.stream(testFiles.split(",")).map(File::new).collect(Collectors.toList());
+          List<File> files = Arrays.asList(testFiles.split(",")).stream().map(File::new).collect(Collectors.toList());
           ncc.classifyFilesAndWriteAnswers(files, ncc.defaultReaderAndWriter(), true);
         }
       } else {

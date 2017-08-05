@@ -123,7 +123,7 @@ public class MaxentTaggerITest extends TestCase {
     //System.out.println(output.toString());
 
     BufferedReader reader = new BufferedReader(new StringReader(output.toString()));
-    ArrayList<String> outputStrings = new ArrayList<>();
+    ArrayList<String> outputStrings = new ArrayList<String>();
     try {
       for (String outputLine; (outputLine = reader.readLine()) != null; ) {
         outputStrings.add(outputLine);
@@ -234,7 +234,7 @@ public class MaxentTaggerITest extends TestCase {
   }
 
   public void testTagCoreLabels() {
-    List<CoreLabel> words = new ArrayList<>();
+    List<CoreLabel> words = new ArrayList<CoreLabel>();
     String[] testWords = {"I", "think", "I", "'ll",
                           "go", "to", "Boston", "."};
 

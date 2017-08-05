@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.Pair;
 public class GeneralDatasetTest extends TestCase {
 
   public static void testCreateFolds() {
-    GeneralDataset<String, String> data = new Dataset<>();
+    GeneralDataset<String, String> data = new Dataset<String, String>();
     data.add(new BasicDatum<String, String>(Arrays.asList(new String[]{"fever", "cough", "congestion"}), "cold"));
     data.add(new BasicDatum<String, String>(Arrays.asList(new String[]{"fever", "cough", "nausea"}), "flu"));
     data.add(new BasicDatum<String, String>(Arrays.asList(new String[]{"cough", "congestion"}), "cold"));

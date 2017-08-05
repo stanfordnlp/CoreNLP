@@ -29,6 +29,7 @@ package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
 import edu.stanford.nlp.international.spanish.SpanishUnknownWordSignatures;
+import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -38,7 +39,6 @@ import java.util.*;
 /**
  * This class contains feature extractors for the MaxentTagger that are only
  * applied to rare (low frequency/unknown) words.
- *
  * The following options are supported:
  * <table>
  * <tr><td>Name</td><td>Args</td><td>Effect</td></tr>

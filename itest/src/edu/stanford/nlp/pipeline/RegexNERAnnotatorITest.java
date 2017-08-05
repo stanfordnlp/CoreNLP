@@ -50,7 +50,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     CoreMap sentence = new ArrayCoreMap();
     sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
-    List<CoreMap> sentences = new ArrayList<>();
+    List<CoreMap> sentences = new ArrayList<CoreMap>();
     sentences.add(sentence);
 
     Annotation corpus = new Annotation("President Barack Obama lives in Chicago, Illinois," +
@@ -82,7 +82,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     CoreMap sentence = new ArrayCoreMap();
     sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
-    List<CoreMap> sentences = new ArrayList<>();
+    List<CoreMap> sentences = new ArrayList<CoreMap>();
     sentences.add(sentence);
 
     Annotation corpus = new Annotation("I like Ontario Place, and I like the Native" +
@@ -108,7 +108,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     CoreMap sentence = new ArrayCoreMap();
     sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
-    List<CoreMap> sentences = new ArrayList<>();
+    List<CoreMap> sentences = new ArrayList<CoreMap>();
     sentences.add(sentence);
 
     Annotation corpus = new Annotation("Christianity is of higher regex priority than Early " +

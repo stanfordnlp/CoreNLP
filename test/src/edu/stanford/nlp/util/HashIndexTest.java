@@ -76,13 +76,13 @@ public class HashIndexTest extends TestCase  {
   }
 
   public void testUnmodifiableViewEtc() {
-    List<String> list = new ArrayList<>();
+    List<String> list = new ArrayList<String>();
     list.add("A");
     list.add("B");
     list.add("A");
     list.add("C");
-    HashIndex<String> index4 = new HashIndex<>(list);
-    HashIndex<String> index5 = new HashIndex<>();
+    HashIndex<String> index4 = new HashIndex<String>(list);
+    HashIndex<String> index5 = new HashIndex<String>();
     index5.addAll(list);
     assertEquals("Equality failure", index4, index5);
     index5.addToIndex("D");
@@ -116,14 +116,14 @@ public class HashIndexTest extends TestCase  {
 
 
   public void testCopyConstructor() {
-    Index<String> test = new HashIndex<>();
+    Index<String> test = new HashIndex<String>();
     test.add("Beauty");
     test.add("And");
     test.add("The");
     test.add("Beast");
 
 
-    HashIndex<String> copy = new HashIndex<>(test);
+    HashIndex<String> copy = new HashIndex<String>(test);
     assertEquals(test, copy);
   }
 }

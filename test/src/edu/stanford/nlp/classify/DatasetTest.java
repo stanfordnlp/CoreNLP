@@ -13,7 +13,7 @@ import edu.stanford.nlp.ling.Datum;
 public class DatasetTest extends TestCase {
 
   public static void testDataset() {
-    Dataset<String, String> data = new Dataset<>();
+    Dataset<String, String> data = new Dataset<String, String>();
     data.add(new BasicDatum<String, String>(Arrays.asList(new String[]{"fever", "cough", "congestion"}), "cold"));
     data.add(new BasicDatum<String, String>(Arrays.asList(new String[]{"fever", "cough", "nausea"}), "flu"));
     data.add(new BasicDatum<String, String>(Arrays.asList(new String[]{"cough", "congestion"}), "cold"));
@@ -37,10 +37,10 @@ public class DatasetTest extends TestCase {
     //double[] scores = data.getInformationGains();
     //System.out.println(ArrayMath.mean(scores));
     //System.out.println(ArrayMath.variance(scores));
-    LinearClassifierFactory<String, String> factory = new LinearClassifierFactory<>();
+    LinearClassifierFactory<String, String> factory = new LinearClassifierFactory<String, String>();
     LinearClassifier<String, String> classifier = factory.trainClassifier(data);
 
-    Datum<String, String> d = new BasicDatum<>(Arrays.asList(new String[]{"cough", "fever"}));
+    Datum<String, String> d = new BasicDatum<String, String>(Arrays.asList(new String[]{"cough", "fever"}));
     assertEquals("Classification incorrect", "flu", classifier.classOf(d));
     Counter<String> probs = classifier.probabilityOf(d);
     assertEquals("Returned probability incorrect", 0.4553, probs.getCount("cold"), 0.0001);

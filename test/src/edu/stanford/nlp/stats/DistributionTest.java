@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 public class DistributionTest extends TestCase {
   
   public void testGetDistributionFromLogValues(){
-    Counter<String> c1 = new ClassicCounter<>();
+    Counter<String> c1 = new ClassicCounter<String>();
     c1.setCount("p", 1.0);
     c1.setCount("q", 2.0);
     c1.setCount("r", 3.0);

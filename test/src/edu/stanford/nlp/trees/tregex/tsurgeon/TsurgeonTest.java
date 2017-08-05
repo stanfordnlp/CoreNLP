@@ -473,7 +473,8 @@ public class TsurgeonTest extends TestCase {
   public void testInsertDelete() {
     // The same bug as the Replace bug, but for a sequence of
     // insert/delete operations
-    List<Pair<TregexPattern, TsurgeonPattern>> surgery = new ArrayList<>();
+    List<Pair<TregexPattern, TsurgeonPattern>> surgery =
+      new ArrayList<Pair<TregexPattern, TsurgeonPattern>>();
 
     TregexPattern tregex = TregexPattern.compile("(/-([0-9]+)$/#1%i=src > /^FILLER$/) : (/^-NONE-/=dest <: /-([0-9]+)$/#1%i !$ ~src)");
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert src $+ dest");
@@ -591,7 +592,8 @@ public class TsurgeonTest extends TestCase {
 
     // run the test on both a list and as a single pattern just to
     // make sure the underlying code works for both
-    Pair<TregexPattern, TsurgeonPattern> surgery = new Pair<>(tregex, tsurgeon);
+    Pair<TregexPattern, TsurgeonPattern> surgery =
+      new Pair<TregexPattern, TsurgeonPattern>(tregex, tsurgeon);
     runTest(Collections.singletonList(surgery), input, expected);
   }
 

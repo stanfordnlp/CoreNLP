@@ -19,7 +19,7 @@ public class CoreMapsTest extends TestCase {
   public void testMaps() {
     Random random = new Random();
 
-    List<CoreMap> maps = new LinkedList<>();
+    List<CoreMap> maps = new LinkedList<CoreMap>();
     for (int i = 0; i < 25; i++) {
       ArrayCoreMap m = new ArrayCoreMap();
       m.set(CoreMapTest.IntegerA.class, random.nextInt());

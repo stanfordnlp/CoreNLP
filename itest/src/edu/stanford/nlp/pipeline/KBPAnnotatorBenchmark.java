@@ -73,7 +73,7 @@ public class KBPAnnotatorBenchmark extends TestCase {
   }
 
   public Set<String> convertKBPTriplesToStrings(List<RelationTriple> relationTripleList) {
-    HashSet<String> foundRelationStrings = new HashSet<>();
+    HashSet<String> foundRelationStrings = new HashSet<String>();
     for (RelationTriple rt : relationTripleList) {
       String relationName = convertRelationName(rt.relationGloss());
       String relationString = relationName+"("+rt.subjectGloss()+","+rt.objectGloss()+")";
@@ -99,7 +99,7 @@ public class KBPAnnotatorBenchmark extends TestCase {
         docGoldRelationSetSize = docIDToRelations.get(docID).size();
       }
       totalGoldRelations += docGoldRelationSetSize;
-      ArrayList<RelationTriple> relationTriplesForThisDoc = new ArrayList<>();
+      ArrayList<RelationTriple> relationTriplesForThisDoc = new ArrayList<RelationTriple>();
       for (CoreMap sentence : currAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         List<RelationTriple> rtList = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
         for (RelationTriple rt : rtList) {
@@ -108,7 +108,7 @@ public class KBPAnnotatorBenchmark extends TestCase {
         }
       }
       Set<String> foundRelationStrings = convertKBPTriplesToStrings(relationTriplesForThisDoc);
-      HashSet<String> intersectionOfFoundAndGold = new HashSet<>(foundRelationStrings);
+      HashSet<String> intersectionOfFoundAndGold = new HashSet<String>(foundRelationStrings);
       if (docIDToRelations.get(docID) != null) {
         intersectionOfFoundAndGold.retainAll(docIDToRelations.get(docID));
         totalCorrectFoundRelations += (intersectionOfFoundAndGold.size());

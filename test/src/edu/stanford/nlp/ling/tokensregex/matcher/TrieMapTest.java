@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class TrieMapTest extends TestCase {
   public void testTrieBasic() throws Exception {
-    TrieMap<String,Boolean> trieMap = new TrieMap<>();
+    TrieMap<String,Boolean> trieMap = new TrieMap<String,Boolean>();
     trieMap.put(new String[]{"a","white","cat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","white","hat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","black","cat"}, Boolean.TRUE);
@@ -34,7 +34,7 @@ public class TrieMapTest extends TestCase {
     assertEquals(3, trieMap.keySet().size());
 
     // Test putAll
-    Map<List<String>,Boolean> m = new HashMap<>();
+    Map<List<String>,Boolean> m = new HashMap<List<String>,Boolean>();
     m.put( Arrays.asList("a", "purple", "giraffe"), Boolean.TRUE);
     m.put( Arrays.asList("four", "orange", "bears"), Boolean.TRUE);
     trieMap.putAll(m);
@@ -45,16 +45,16 @@ public class TrieMapTest extends TestCase {
   }
 
   public void testTrieFindAll() throws Exception {
-    TrieMap<String,Boolean> trieMap = new TrieMap<>();
+    TrieMap<String,Boolean> trieMap = new TrieMap<String,Boolean>();
     trieMap.put(new String[]{"a","white","cat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","white","hat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","black","cat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","black","cat","climbed","on","the","sofa"}, Boolean.TRUE);
     trieMap.put(new String[]{"white"}, Boolean.TRUE);
-    TrieMapMatcher<String,Boolean> matcher = new TrieMapMatcher<>(trieMap);
+    TrieMapMatcher<String,Boolean> matcher = new TrieMapMatcher<String, Boolean>(trieMap);
     List<Match<String,Boolean>> matches =
             matcher.findAllMatches("a","white","cat","is","wearing","a","white","hat");
-    List<Match<String,Boolean>> expected = new ArrayList<>();
+    List<Match<String,Boolean>> expected = new ArrayList<Match<String,Boolean>>();
     expected.add(new Match<String,Boolean>(Arrays.asList("a", "white", "cat"), Boolean.TRUE, 0, 3));
     expected.add(new Match<String,Boolean>(Arrays.asList("white"), Boolean.TRUE, 1, 2));
     expected.add(new Match<String,Boolean>(Arrays.asList("a", "white", "hat"), Boolean.TRUE, 5, 8));
@@ -64,16 +64,16 @@ public class TrieMapTest extends TestCase {
   }
 
   public void testTrieFindNonOverlapping() throws Exception {
-    TrieMap<String,Boolean> trieMap = new TrieMap<>();
+    TrieMap<String,Boolean> trieMap = new TrieMap<String,Boolean>();
     trieMap.put(new String[]{"a","white","cat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","white","hat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","black","cat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","black","cat","climbed","on","the","sofa"}, Boolean.TRUE);
     trieMap.put(new String[]{"white"}, Boolean.TRUE);
-    TrieMapMatcher<String,Boolean> matcher = new TrieMapMatcher<>(trieMap);
+    TrieMapMatcher<String,Boolean> matcher = new TrieMapMatcher<String, Boolean>(trieMap);
     List<Match<String,Boolean>> matches =
             matcher.findNonOverlapping("a","white","cat","is","wearing","a","white","hat","and","a","black","cat","climbed","on","the","sofa");
-    List<Match<String,Boolean>> expected = new ArrayList<>();
+    List<Match<String,Boolean>> expected = new ArrayList<Match<String,Boolean>>();
     expected.add(new Match<String,Boolean>(Arrays.asList("a", "white", "cat"), Boolean.TRUE, 0, 3));
     expected.add(new Match<String,Boolean>(Arrays.asList("a", "white", "hat"), Boolean.TRUE, 5, 8));
     expected.add(new Match<String,Boolean>(Arrays.asList("a","black","cat","climbed","on","the","sofa"), Boolean.TRUE, 9, 16));
@@ -82,16 +82,16 @@ public class TrieMapTest extends TestCase {
   }
 
   public void testTrieSegment() throws Exception {
-    TrieMap<String,Boolean> trieMap = new TrieMap<>();
+    TrieMap<String,Boolean> trieMap = new TrieMap<String,Boolean>();
     trieMap.put(new String[]{"a","white","cat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","white","hat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","black","cat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","black","cat","climbed","on","the","sofa"}, Boolean.TRUE);
     trieMap.put(new String[]{"white"}, Boolean.TRUE);
-    TrieMapMatcher<String,Boolean> matcher = new TrieMapMatcher<>(trieMap);
+    TrieMapMatcher<String,Boolean> matcher = new TrieMapMatcher<String, Boolean>(trieMap);
     List<Match<String,Boolean>> matches =
             matcher.segment("a","white","cat","is","wearing","a","white","hat","and","a","black","cat","climbed","on","the","sofa");
-    List<Match<String,Boolean>> expected = new ArrayList<>();
+    List<Match<String,Boolean>> expected = new ArrayList<Match<String,Boolean>>();
     expected.add(new Match<String,Boolean>(Arrays.asList("a", "white", "cat"), Boolean.TRUE, 0, 3));
     expected.add(new Match<String,Boolean>(Arrays.asList("is", "wearing"), null, 3, 5));
     expected.add(new Match<String,Boolean>(Arrays.asList("a", "white", "hat"), Boolean.TRUE, 5, 8));
@@ -102,15 +102,15 @@ public class TrieMapTest extends TestCase {
   }
 
   public void testTrieFindClosest() throws Exception {
-    TrieMap<String,Boolean> trieMap = new TrieMap<>();
+    TrieMap<String,Boolean> trieMap = new TrieMap<String,Boolean>();
     trieMap.put(new String[]{"a","white","cat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","white","hat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","black","cat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","black","hat"}, Boolean.TRUE);
     trieMap.put(new String[]{"a","colored","hat"}, Boolean.TRUE);
-    TrieMapMatcher<String,Boolean> matcher = new TrieMapMatcher<>(trieMap);
+    TrieMapMatcher<String,Boolean> matcher = new TrieMapMatcher<String, Boolean>(trieMap);
     List<ApproxMatch<String,Boolean>> matches = matcher.findClosestMatches(new String[]{"the", "black", "hat"}, 2);
-    List<ApproxMatch<String,Boolean>> expected = new ArrayList<>();
+    List<ApproxMatch<String,Boolean>> expected = new ArrayList<ApproxMatch<String,Boolean>>();
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "hat"), Boolean.TRUE, 0, 3, 1.0));
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 3, 2.0));
     assertEquals("\nExpecting " + expected + ",\n got " + matches, expected, matches);

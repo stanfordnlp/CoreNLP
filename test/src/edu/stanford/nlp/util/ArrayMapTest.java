@@ -50,7 +50,7 @@ public class ArrayMapTest extends TestCase {
     assertTrue(map.isEmpty());
     map.putAll(hmap);
     testEquals();
-    HashMap<String, Integer> newmap = new HashMap<>();
+    HashMap<String, Integer> newmap = new HashMap<String, Integer>();
     newmap.putAll(map);
     assertEquals(newmap, map);
     assertEquals(map, newmap);
@@ -68,10 +68,10 @@ public class ArrayMapTest extends TestCase {
   }
 
   public void testValues() {
-    Set<Integer> hmapValues = new HashSet<>();
+    Set<Integer> hmapValues = new HashSet<Integer>();
     hmapValues.addAll(hmap.values());
 
-    Set<Integer> mapValues = new HashSet<>();
+    Set<Integer> mapValues = new HashSet<Integer>();
     mapValues.addAll(map.values());
 
     assertEquals(hmapValues, mapValues);
