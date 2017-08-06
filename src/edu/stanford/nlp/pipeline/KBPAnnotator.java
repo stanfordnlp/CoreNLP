@@ -359,8 +359,9 @@ public class KBPAnnotator implements Annotator {
     for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
       for (CoreMap mention : entry.getValue()) {
         // (set the NER tag + link to be axiomatically that of the canonical mention)
-        mention.set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.getKey().get(CoreAnnotations.NamedEntityTagAnnotation.class));
-        mention.set(CoreAnnotations.WikipediaEntityAnnotation.class, entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class));
+        // FOR NOW allow clusters to have inconsistent types, this seems to cause more problems than solve
+        // mention.set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.getKey().get(CoreAnnotations.NamedEntityTagAnnotation.class));
+        // mention.set(CoreAnnotations.WikipediaEntityAnnotation.class, entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class));
         // (add the mention (note: this must come after we set the NER!)
         mentionToCanonicalMention.put(mention, entry.getKey());
       }
