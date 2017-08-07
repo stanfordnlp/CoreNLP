@@ -226,6 +226,15 @@ public class ProtobufAnnotationSerializerSlowITest {
 
   private void testAnnotators(String annotators, Pair<String,String> additionalProperty) {
     try {
+      // check if this list of annotators is valid
+      // if annotators need to be added by ensurePrerequisiteAnnotators, just return
+      String[] annotatorsAsArray = annotators.split(",");
+      Properties emptyProps = new Properties();
+      String completeAnnotatorsList =
+          StanfordCoreNLP.ensurePrerequisiteAnnotators(annotatorsAsArray, emptyProps);
+      if (completeAnnotatorsList.split(",").length != annotatorsAsArray.length) {
+        return;
+      }
       AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
       // Write
       Annotation doc = new StanfordCoreNLP(new Properties(){{
