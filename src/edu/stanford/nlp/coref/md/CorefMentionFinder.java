@@ -650,7 +650,9 @@ public abstract class CorefMentionFinder  {
 
   private Annotator getParser() {
     if(parserProcessor == null){
-      parserProcessor = StanfordCoreNLP.getExistingAnnotator("parse");
+      //parserProcessor = StanfordCoreNLP.getExistingAnnotator("parse");
+      Properties emptyProperties = new Properties();
+      parserProcessor = new edu.stanford.nlp.pipeline.ParserAnnotator("coref.parse", emptyProperties);
       assert(parserProcessor != null);
     }
     return parserProcessor;
