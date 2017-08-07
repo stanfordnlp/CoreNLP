@@ -21,6 +21,7 @@ import edu.stanford.nlp.parser.common.ParserAnnotations;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
+import edu.stanford.nlp.pipeline.ParserAnnotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -650,9 +651,8 @@ public abstract class CorefMentionFinder  {
 
   private Annotator getParser() {
     if(parserProcessor == null){
-      //parserProcessor = StanfordCoreNLP.getExistingAnnotator("parse");
       Properties emptyProperties = new Properties();
-      parserProcessor = new edu.stanford.nlp.pipeline.ParserAnnotator("coref.parse", emptyProperties);
+      parserProcessor = new ParserAnnotator("coref.parse.md", emptyProperties);
       assert(parserProcessor != null);
     }
     return parserProcessor;
