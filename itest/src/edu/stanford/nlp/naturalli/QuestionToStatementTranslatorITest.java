@@ -89,6 +89,12 @@ public class QuestionToStatementTranslatorITest {
   @Test
   public void parseWhatIs() {
     check(
+        "what/WP your/VBZ it/PRP made/VBN of/IN ?",
+        "it is made of thing");
+    check(
+        "what/WP is/VBZ it/PRP made/VBN of/IN ?",
+        "it is made of thing");
+    check(
         "what/WP is/VBZ it/PRP trying/VNG to/TO do/VB ?",
         "it is trying to thing");
     check(

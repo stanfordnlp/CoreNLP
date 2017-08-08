@@ -91,6 +91,7 @@ public class PTBTokenizerTest {
       "The .38-Magnum bullet",
       "a 1908 Model K Stanley with 1:01-minute time",
       "the 9-to-11:45 a.m. weekday shift",
+      "Brighton Rd. Pacifica",
   };
 
   private final String[][] ptbGold = {
@@ -176,6 +177,7 @@ public class PTBTokenizerTest {
       { "The", ".38-Magnum", "bullet" },
       { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
       { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
+      { "Brighton", "Rd.", "Pacifica"},
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -274,6 +276,7 @@ public class PTBTokenizerTest {
       { "The", ".38-Magnum", "bullet" },
       { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
       { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
+      { "Brighton", "Rd.", "Pacifica"},
   };
 
   @Test
