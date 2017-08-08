@@ -73,7 +73,7 @@ public class QuestionToStatementTranslatorITest {
 
   private void check(String input, String output) {
     List<List<CoreLabel>> results = instance.toStatement(parseSentence(input));
-    assertTrue("should have gotten a result for hte translation for: " + input,results.size() > 0);
+    assertTrue("should have gotten a result for the translation for: " + input,results.size() > 0);
     String got = StringUtils.join(results.get(0).stream().map(CoreLabel::word), " ");
     assertEquals(output, got);
   }
@@ -86,11 +86,21 @@ public class QuestionToStatementTranslatorITest {
   }
 
 
+  /**
+   * Check that no results are returned for this sentence.
+   * This is kind of a cop-out, but better than returning some garbage
+   */
+  @SuppressWarnings("SameParameterValue")
+  private void checkEmpty(String input) {
+    List<List<CoreLabel>> results = instance.toStatement(parseSentence(input));
+    assertEquals(0, results.size());
+  }
+
+
+
   @Test
   public void parseWhatIs() {
-    check(
-        "what/WP your/VBZ it/PRP made/VBN of/IN ?",
-        "it is made of thing");
+    checkEmpty("what/WP your/PRP$ average/JJ price/NN was/VBD of/IN wedding/NN dress/NN ?");
     check(
         "what/WP is/VBZ it/PRP made/VBN of/IN ?",
         "it is made of thing");
@@ -596,6 +606,12 @@ public class QuestionToStatementTranslatorITest {
   @Test
   public void parseHow() {
     check(
+        "how/WRB do/VBP I/PRP manage/VB my/PRP$ finances/NN ?",
+        "I manage my finances way");
+    check(
+        "how/WRB can/MD I/PRP manage/VB my/PRP$ finances/NN ?",
+        "I can manage my finances way");
+    check(
         "how/WRB do/VBP these/DT questions/NNS make/VBP you/PRP feel/VP ?",
         "these questions make you feel way");
     check(
@@ -604,6 +620,43 @@ public class QuestionToStatementTranslatorITest {
     check(
         "how/WRB big/JJ is/VBZ Texas/NNP ?",
         "Texas is adjective");
+    check(
+        "how/WRB is/VBZ the/DT weather/NN ?",
+        "the weather is adjective");
+  }
+
+
+  @Test
+  public void parseHowMuch() {
+    check(
+        "how/WRB much/RB do/VBP I/PRP need/VB to/TO open/VB an/DT account/NN ?",
+        "I need thing to open an account");
+    check(
+        "how/WRB much/RB money/NN do/VBP I/PRP need/VB to/TO open/VB an/DT account/NN ?",
+        "I need thing to open an account");
+    check(
+        "how/WRB much/RB does/VBZ it/PRP cost/VB to/TO apply/VB ?",
+        "it cost thing to apply");
+    check(
+        "how/WRB much/RB do/VBP cats/NNS enjoy/VB playing/VBG with/IN mice/NNS ?",
+        "cats enjoy playing with mice way");
+  }
+
+
+  @Test
+  public void parseHowCan() {
+    check(
+        "How/WRB can/MD I/PRP access/VB my/PRP$ money/NN ?",
+        "I can access my money way");
+    check(
+        "what/WP are/VBP ways/NNS I/PRP can/MD access/VB my/PRP$ money/NN ?",
+        "I can access my money way");
+    check(
+        "How/WRB can/MD cats/NNS fly/VB ?",
+        "cats fly way");
+    check(
+        "How/WRB do/VBP cats/NNS fly/VB ?",
+        "cats fly way");
   }
 
 

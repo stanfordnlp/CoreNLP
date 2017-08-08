@@ -341,7 +341,7 @@ public class QuestionToStatementTranslator {
    */
   private final TokenSequencePattern triggerWhNNIs = TokenSequencePattern.compile(
       "[{lemma:/what|which/; tag:/W.*/}] " +
-          "(?$answer_type [!{lemma:be}]+) " +
+          "(?$answer_type [!{lemma:be} & !{pos:\"PRP$\"}]+) " +
           "(?$be [{lemma:be}] [{tag:/[VRIJ].*/}] ) " +
           "(?$statement_body []+?) " +
           "(?$punct [word:/[?\\.!]/])");
@@ -981,8 +981,9 @@ public class QuestionToStatementTranslator {
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processHow(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
    */
   private final TokenSequencePattern triggerHow = TokenSequencePattern.compile(
-      "[{lemma:how; tag:/W.*/}] " +
-          "((?$do [ {lemma:/do/}]) | (?$jj [ {pos:JJ} ]) (?$be [ {lemma:be} ])) " +
+      "([{lemma:/[Hh]ow/; tag:/W.*/}] | /[Ww]hat/ [{lemma:be}] /ways?/ (?$prp0 [{tag:/PRP.?/}]) ) " +
+          "((?$do [ {lemma:/do/} | {lemma:can}]) | (?$jj [ {pos:JJ} ]{0,3}) (?$be [ {lemma:be} ])) " +
+          "(?$prp1 [{tag:/PRP.?/}])? " +
           "(?$statement_body []+?) " +
           "(?$punct [word:/[?\\.!]/])" );
 
@@ -996,8 +997,23 @@ public class QuestionToStatementTranslator {
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#triggerHow
    */
   private List<CoreLabel> processHow(TokenSequenceMatcher matcher) {
-    // Grab the meat of the statement
-    List<CoreLabel> sentence = (List<CoreLabel>) matcher.groupNodes("$statement_body");
+    List<CoreLabel> sentence = new ArrayList<>();
+
+    // Resolve prepositions
+    List<CoreLabel> prp = (List<CoreLabel>) matcher.groupNodes("$prp0");
+    if (prp == null || prp.isEmpty()) {
+      prp = (List<CoreLabel>) matcher.groupNodes("$prp1");
+    }
+    if (prp != null && !prp.isEmpty()) {
+      sentence.addAll(prp);
+      List<CoreLabel> doOrCan = (List<CoreLabel>) matcher.groupNodes("$do");
+      if (doOrCan != null && doOrCan.size() == 1 && "can".equalsIgnoreCase(doOrCan.get(0).lemma())) {
+        sentence.addAll(doOrCan);
+      }
+    }
+
+    // Add the meat
+    sentence.addAll((List<CoreLabel>) matcher.groupNodes("$statement_body"));
 
     // Add an optional 'be'
     List<CoreLabel> wordBe = (List<CoreLabel>) matcher.groupNodes("$be");
@@ -1009,6 +1025,43 @@ public class QuestionToStatementTranslator {
     }
 
     // Return
+    return sentence;
+  }
+
+
+  /**
+   * The pattern for "how much...do..."  sentences.
+   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processHowMuchDo(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
+   */
+  private final TokenSequencePattern triggerHowMuchDo = TokenSequencePattern.compile(
+      "[{lemma:/[Hh]ow/; tag:/W.*/}] " +
+          "(much | many) [{pos:NN}]{0,10} " +
+          "((?$do [ {lemma:/do/} | {lemma:can}]) | (?$jj [ {pos:JJ} ]) (?$be [ {lemma:be} ])) " +
+          "(?$prefix [!{lemma:to}]{1,25}) " +
+          "(?$connective [{lemma:to}])? " +
+          "(?$suffix [!{lemma:to}]{1,25}) " +
+          "(?$punct [word:/[?\\.!]/])" );
+
+  /**
+   * Process sentences matching 'how much do...'
+   *
+   * @param matcher The matcher that matched the pattern.
+   *
+   * @return The converted statement.
+   *
+   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#triggerHowMuchDo
+   */
+  private List<CoreLabel> processHowMuchDo(TokenSequenceMatcher matcher) {
+    List<CoreLabel> sentence = new ArrayList<>((List<CoreLabel>) matcher.groupNodes("$prefix"));
+    List<CoreLabel> connective = (List<CoreLabel>) matcher.groupNodes("$connective");
+    if (connective != null && !connective.isEmpty()) {
+      sentence.add(WORD_MISSING);
+      sentence.addAll(connective);
+      sentence.addAll((List<CoreLabel>) matcher.groupNodes("$suffix"));
+    } else {
+      sentence.addAll((List<CoreLabel>) matcher.groupNodes("$suffix"));
+      sentence.add(WORD_WAY);
+    }
     return sentence;
   }
 
@@ -1188,6 +1241,10 @@ public class QuestionToStatementTranslator {
       return postProcess(question, processWhNNHaveIs(matcher));
     } else if ((matcher = triggerWhNNHaveNN.matcher(question)).matches()) {  // must come before triggerWhatHave
       return postProcess(question, processWhNNHaveNN(matcher));
+    } else if ((matcher = triggerHow.matcher(question)).matches()) {  // must come before triggerWhatIs
+      return postProcess(question, processHow(matcher));
+    } else if ((matcher = triggerHowMuchDo.matcher(question)).matches()) {
+      return postProcess(question, processHowMuchDo(matcher));
     } else if ((matcher = triggerWhatIs.matcher(question)).matches()) {
       return postProcess(question, processWhatIs(matcher));
     } else if ((matcher = triggerWhatHave.matcher(question)).matches()) {
@@ -1204,8 +1261,6 @@ public class QuestionToStatementTranslator {
       return postProcess(question, processWhatDo(matcher));
     } else if ((matcher = triggerWhenDo.matcher(question)).matches()) {
       return postProcess(question, processWhenDo(matcher));
-    } else if ((matcher = triggerHow.matcher(question)).matches()) {
-      return postProcess(question, processHow(matcher));
     } else {
       return Collections.emptyList();
     }
