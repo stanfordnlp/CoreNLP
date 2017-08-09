@@ -612,6 +612,9 @@ public class QuestionToStatementTranslatorITest {
         "how/WRB can/MD I/PRP manage/VB my/PRP$ finances/NN ?",
         "I can manage my finances way");
     check(
+        "how/WRB can/MD i/FW manage/VB my/PRP$ finances/NN ?",
+        "i can manage my finances way");
+    check(
         "how/WRB do/VBP these/DT questions/NNS make/VBP you/PRP feel/VP ?",
         "these questions make you feel way");
     check(
@@ -651,6 +654,9 @@ public class QuestionToStatementTranslatorITest {
     check(
         "what/WP are/VBP ways/NNS I/PRP can/MD access/VB my/PRP$ money/NN ?",
         "I can access my money way");
+    check(
+        "what/WP are/VBP ways/NNS i/FW can/MD access/VB my/PRP$ money/NN ?",
+        "i can access my money way");
     check(
         "How/WRB can/MD cats/NNS fly/VB ?",
         "cats fly way");

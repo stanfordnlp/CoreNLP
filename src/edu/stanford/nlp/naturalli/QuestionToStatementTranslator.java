@@ -341,7 +341,7 @@ public class QuestionToStatementTranslator {
    */
   private final TokenSequencePattern triggerWhNNIs = TokenSequencePattern.compile(
       "[{lemma:/what|which/; tag:/W.*/}] " +
-          "(?$answer_type [!{lemma:be} & !{pos:\"PRP$\"}]+) " +
+          "(?$answer_type [!{lemma:be} & !{pos:\"PRP$\"} | {word:i}]+) " +
           "(?$be [{lemma:be}] [{tag:/[VRIJ].*/}] ) " +
           "(?$statement_body []+?) " +
           "(?$punct [word:/[?\\.!]/])");
@@ -981,9 +981,9 @@ public class QuestionToStatementTranslator {
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processHow(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
    */
   private final TokenSequencePattern triggerHow = TokenSequencePattern.compile(
-      "([{lemma:/[Hh]ow/; tag:/W.*/}] | /[Ww]hat/ [{lemma:be}] /ways?/ (?$prp0 [{tag:/PRP.?/}]) ) " +
+      "([{lemma:/[Hh]ow/; tag:/W.*/}] | /[Ww]hat/ [{lemma:be}] /ways?/ (?$prp0 [{tag:/PRP.?/} | {word:i}]) ) " +
           "((?$do [ {lemma:/do/} | {lemma:can}]) | (?$jj [ {pos:JJ} ]{0,3}) (?$be [ {lemma:be} ])) " +
-          "(?$prp1 [{tag:/PRP.?/}])? " +
+          "(?$prp1 [{tag:/PRP.?/} | {word:i}])? " +
           "(?$statement_body []+?) " +
           "(?$punct [word:/[?\\.!]/])" );
 
