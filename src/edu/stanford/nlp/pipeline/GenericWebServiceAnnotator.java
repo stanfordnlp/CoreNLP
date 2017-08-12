@@ -97,12 +97,12 @@ public class GenericWebServiceAnnotator extends WebServiceAnnotator {
     return this.ping(annotatorEndpoint + "/ping/");
   }
 
-  private <V> void copyValue(CoreMap source, CoreMap target, Class k) {
+  private static <V> void copyValue(CoreMap source, CoreMap target, Class k) {
     Class<? extends TypesafeMap.Key<V>> k_ = (Class<? extends TypesafeMap.Key<V>>) k;
     target.set(k_, source.get(k_));
   }
 
-  private void copy(final Annotation source, final Annotation target) {
+  private static void copy(final Annotation source, final Annotation target) {
     source.keySet().forEach(k -> {
       copyValue(source, target, k);
     });
@@ -127,9 +127,7 @@ public class GenericWebServiceAnnotator extends WebServiceAnnotator {
       try(InputStream inputStream = conn.getInputStream()) {
         Pair<Annotation, InputStream> pair = serializer.read(inputStream);
         ann_ = pair.first;
-      } catch (ClassNotFoundException e) {
-        throw new PermanentlyFailedException(e);
-      } catch (IOException e) {
+      } catch (ClassNotFoundException | IOException e) {
         throw new PermanentlyFailedException(e);
       }
 
@@ -143,4 +141,5 @@ public class GenericWebServiceAnnotator extends WebServiceAnnotator {
     // Copy over annotation.
     copy(ann_, ann);
   }
+
 }

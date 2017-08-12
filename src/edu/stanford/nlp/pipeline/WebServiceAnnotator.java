@@ -33,6 +33,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author <a href="mailto:gabor@eloquent.ai">Gabor Angeli</a>
  */
+
 public abstract class WebServiceAnnotator implements Annotator {
   /** A logger from this class. */
   private static Redwood.RedwoodChannels log = Redwood.channels(WebServiceAnnotator.class);
@@ -47,6 +48,8 @@ public abstract class WebServiceAnnotator implements Annotator {
    * This is the usual exception.
    */
   public static class ShouldRetryException extends Exception {
+    private static final long serialVersionUID = -4292922700733296864L;
+
     public ShouldRetryException() {}
   }
 
@@ -54,6 +57,8 @@ public abstract class WebServiceAnnotator implements Annotator {
   /** An exception thrown if we could not connect to the server, and shouldn't retry / recreate the server. */
   @SuppressWarnings("unused")
   public static class PermanentlyFailedException extends Exception {
+    private static final long serialVersionUID = 6812811056236924923L;
+
     public PermanentlyFailedException() {}
     public PermanentlyFailedException(Throwable t) {
       super(t);
@@ -106,6 +111,7 @@ public abstract class WebServiceAnnotator implements Annotator {
 
 
     /** Make sure we clean up this annotator! */
+    @Override
     protected void finalize() throws Throwable {
       try {
         super.finalize();
@@ -423,6 +429,5 @@ public abstract class WebServiceAnnotator implements Annotator {
     Annotation ann = new Annotation("");
     annotator.annotate(ann);
   }
-
 
 }
