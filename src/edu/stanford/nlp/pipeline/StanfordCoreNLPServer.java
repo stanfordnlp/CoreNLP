@@ -79,10 +79,12 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static String preloadedAnnotators = "";
   @ArgumentParser.Option(name="serverProperties", gloss="Default properties file for server's StanfordCoreNLP instance")
   protected static String serverPropertiesPath = null;
+  @ArgumentParser.Option(name="maxCharLength", gloss="Max length string that will be processed (non-positive means no limit)")
+  protected static int maxCharLength = 100000;
+
 
   protected final String shutdownKey;
 
-  public static int MAX_CHAR_LENGTH = 100000;
   public final Properties defaultProps;
 
   /**
@@ -456,7 +458,7 @@ public class StanfordCoreNLPServer implements Runnable {
         response = "ready\n";
         status = HTTP_OK;
       } else {
-        response = "server is not ready yet. uptime=" + Redwood.formatTimeDifference(System.currentTimeMillis() - this.startTime) + "\n";
+        response = "server is not ready yet. uptime=" + Redwood.formatTimeDifference(System.currentTimeMillis() - this.startTime) + '\n';
         status = HTTP_UNAVAILABLE;
       }
       httpExchange.sendResponseHeaders(status, response.getBytes().length);
@@ -639,8 +641,8 @@ public class StanfordCoreNLPServer implements Runnable {
           if (!quiet) {
             System.out.println(text);
           }
-          if (text.length() > MAX_CHAR_LENGTH) {
-            respondBadInput("Request is too long to be handled by server: " + text.length() + " characters. Max length is " + MAX_CHAR_LENGTH + " characters.", httpExchange);
+          if (maxCharLength > 0 && text.length() > maxCharLength) {
+            respondBadInput("Request is too long to be handled by server: " + text.length() + " characters. Max length is " + maxCharLength + " characters.", httpExchange);
             return;
           }
         }
@@ -695,7 +697,7 @@ public class StanfordCoreNLPServer implements Runnable {
         httpExchange.sendResponseHeaders(HTTP_OK, response.length);
         httpExchange.getResponseBody().write(response);
         httpExchange.close();
-        if (completedAnnotation != null && props.getProperty("annotators") != null && !"".equals(props.getProperty("annotators"))) {
+        if (completedAnnotation != null && ! StringUtils.isNullOrEmpty(props.getProperty("annotators"))) {
           callback.accept(new FinishedRequest(props, completedAnnotation));
         }
       } catch (TimeoutException e) {
@@ -736,7 +738,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Load the default properties
       Properties props = new Properties();
-      defaultProps.entrySet().forEach(entry -> props.setProperty(entry.getKey().toString(), entry.getValue().toString()));
+      defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
 
       // Add GET parameters as properties
       urlParams.entrySet().stream()
@@ -769,7 +771,7 @@ public class StanfordCoreNLPServer implements Runnable {
           }
         } else {
           try {
-            respondError("Invalid language: '" + language + "'", httpExchange);
+            respondError("Invalid language: '" + language + '\'', httpExchange);
           } catch (IOException e) { warn(e); }
           return new Properties();
         }
@@ -787,8 +789,7 @@ public class StanfordCoreNLPServer implements Runnable {
         }
       }
       // (add new properties on top of the default properties)
-      urlProperties.entrySet()
-          .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
+      urlProperties.forEach((key1, value) -> props.setProperty(key1, value));
 
 
 
@@ -892,7 +893,7 @@ public class StanfordCoreNLPServer implements Runnable {
                       SequenceMatchResult.MatchedGroupInfo<CoreMap> info = matcher.groupInfo(groupI + 1);
                       matchWriter.set(info.varName == null ? Integer.toString(groupI + 1) : info.varName, (Consumer<JSONOutputter.Writer>) groupWriter -> {
                         groupWriter.set("text", info.text);
-                        if (info.nodes.size() > 0) {
+                        if ( ! info.nodes.isEmpty()) {
                           groupWriter.set("begin", info.nodes.get(0).get(CoreAnnotations.IndexAnnotation.class) - 1);
                           groupWriter.set("end", info.nodes.get(info.nodes.size() - 1).get(CoreAnnotations.IndexAnnotation.class));
                         }
@@ -921,7 +922,7 @@ public class StanfordCoreNLPServer implements Runnable {
         byte[] content = response.first.getBytes();
         Annotation completedAnnotation = response.second;
         sendAndGetResponse(httpExchange, content);
-        if (completedAnnotation != null && props.getProperty("annotators") != null && !"".equals(props.getProperty("annotators"))) {
+        if (completedAnnotation != null && ! StringUtils.isNullOrEmpty(props.getProperty("annotators"))) {
           callback.accept(new FinishedRequest(props, completedAnnotation, params.get("pattern"), null));
         }
       } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -1045,7 +1046,7 @@ public class StanfordCoreNLPServer implements Runnable {
         Annotation completedAnnotation = pair.second;
         byte[] content = pair.first.getBytes();
         sendAndGetResponse(httpExchange, content);
-        if (completedAnnotation != null && props.getProperty("annotators") != null && !"".equals(props.getProperty("annotators"))) {
+        if (completedAnnotation != null && ! StringUtils.isNullOrEmpty(props.getProperty("annotators"))) {
           callback.accept(new FinishedRequest(props, completedAnnotation, params.get("pattern"), null));
         }
       } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -1187,6 +1188,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Add SSL support to the server
       server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+        @Override
         public void configure(HttpsParameters params) {
           SSLContext context = getSSLContext();
           SSLEngine engine = context.createSSLEngine();
@@ -1361,7 +1363,7 @@ public class StanfordCoreNLPServer implements Runnable {
     // Pre-load the models
     if (StanfordCoreNLPServer.preloadedAnnotators != null && ! StanfordCoreNLPServer.preloadedAnnotators.trim().isEmpty()) {
       Properties props = new Properties();
-      server.defaultProps.entrySet().forEach(entry -> props.setProperty(entry.getKey().toString(), entry.getValue().toString()));
+      server.defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
       props.setProperty("annotators", StanfordCoreNLPServer.preloadedAnnotators);
       try {
         new StanfordCoreNLP(props);

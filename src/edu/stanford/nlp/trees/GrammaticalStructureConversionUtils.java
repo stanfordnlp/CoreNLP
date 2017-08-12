@@ -21,13 +21,15 @@ import java.util.function.Predicate;
  * Contains several utility methods to convert constituency trees to
  * dependency trees.
  *
- * Used by {@link GrammaticalStructure#main(String[])}
+ * Used by {@link GrammaticalStructure#main(String[])}.
  */
 
 public class GrammaticalStructureConversionUtils {
 
-
   public static final String DEFAULT_PARSER_FILE = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
+
+
+  private GrammaticalStructureConversionUtils() {} // static methods
 
   /**
    * Print typed dependencies in either the Stanford dependency representation
@@ -114,7 +116,7 @@ public class GrammaticalStructureConversionUtils {
     if (conllx) {
 
       List<Tree> leaves = tree.getLeaves();
-      List<Label> uposLabels = null;
+      List<Label> uposLabels; // = null; // initialized below
       if (convertToUPOS) {
         Tree uposTree = UniversalPOSMapper.mapTree(tree);
         uposLabels = uposTree.preTerminalYield();
@@ -147,7 +149,7 @@ public class GrammaticalStructureConversionUtils {
             extraDeps.add(dep);
           } else {
             bf.append(toStringIndex(dep, indexToPos));
-            bf.append("\n");
+            bf.append('\n');
           }
         }
         // now we print the separator for extra dependencies, and print these if
@@ -162,7 +164,7 @@ public class GrammaticalStructureConversionUtils {
       } else {
         for (TypedDependency dep : deps) {
           bf.append(toStringIndex(dep, indexToPos));
-          bf.append("\n");
+          bf.append('\n');
         }
       }
     }
@@ -906,7 +908,7 @@ public class GrammaticalStructureConversionUtils {
       if (portray) {
         try {
           // put up a window showing it
-          Class sgu = Class.forName("edu.stanford.nlp.semgraph.SemanticGraphUtils");
+          Class sgu = Class.forName("edu.stanford.nlp.rte.gui.SemanticGraphVisualization");
           Method mRender = sgu.getDeclaredMethod("render", GrammaticalStructure.class, String.class);
           // the first arg is null because it's a static method....
           mRender.invoke(null, gs, "Collapsed, CC processed deps");

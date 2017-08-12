@@ -252,11 +252,9 @@ public class Sentence {
   }
 
   /**
-   * <p>
-   *   Convert a sentence fragment (i.e., entailed sentence) into a simple sentence object.
-   *   Like {@link Sentence#Sentence(CoreMap)}, this copies the information in the fragment into the underlying
-   *   protobuf backed format.
-   * </p>
+   * Convert a sentence fragment (i.e., entailed sentence) into a simple sentence object.
+   * Like {@link Sentence#Sentence(CoreMap)}, this copies the information in the fragment into the underlying
+   * protobuf backed format.
    *
    * @param sentence The sentence fragment to convert.
    */
@@ -302,6 +300,7 @@ public class Sentence {
 
   /**
    * Serialize the given sentence (but not the associated document!) into a Protocol Buffer.
+   *
    * @return The Protocol Buffer representing this sentence.
    */
   public CoreNLPProtos.Sentence serialize() {
@@ -543,7 +542,6 @@ public class Sentence {
    *
    * @param mappingFile The regexner mapping file.
    * @param ignorecase If true, run a caseless match on the regexner file.
-   *
    */
   public void regexner(String mappingFile, boolean ignorecase) {
     Properties props = new Properties();

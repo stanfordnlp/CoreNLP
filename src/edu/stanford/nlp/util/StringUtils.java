@@ -2022,7 +2022,7 @@ public class StringUtils  {
    *  @return Whether the String is either null or empty
    */
   public static boolean isNullOrEmpty(String str) {
-    return str == null || str.equals("");
+    return str == null || str.isEmpty();
   }
 
 
