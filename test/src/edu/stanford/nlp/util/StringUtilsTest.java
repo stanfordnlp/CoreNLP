@@ -1,25 +1,29 @@
 package edu.stanford.nlp.util;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class StringUtilsTest extends TestCase {
+public class StringUtilsTest {
 
+  @Test
   public void testTr() {
-    assertEquals(StringUtils.tr("chris", "irs", "mop"), "chomp");
+    Assert.assertEquals(StringUtils.tr("chris", "irs", "mop"), "chomp");
   }
 
+  @Test
   public void testGetBaseName() {
-    assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt"), "foo.txt");
-    assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ""), "foo.txt");
-    assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ".txt"), "foo");
-    assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ".pdf"), "foo.txt");
+    Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt"), "foo.txt");
+    Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ""), "foo.txt");
+    Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ".txt"), "foo");
+    Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ".pdf"), "foo.txt");
   }
 
+  @Test
   public void testArgsToProperties() {
     Properties p1 = new Properties();
     p1.setProperty("fred", "-2");
@@ -29,72 +33,76 @@ public class StringUtilsTest extends TestCase {
     p2.setProperty("2", "joe");
     Map<String,Integer> argNums = new HashMap<>();
     argNums.put("fred", 1);
-    assertEquals(StringUtils.argsToProperties(new String[]{"-fred", "-2", "joe"}), p2);
-    assertEquals(StringUtils.argsToProperties(new String[]{"-fred", "-2", "joe"}, argNums), p1);
+    Assert.assertEquals(p2, StringUtils.argsToProperties("-fred", "-2", "joe"));
+    Assert.assertEquals(StringUtils.argsToProperties(new String[]{"-fred", "-2", "joe"}, argNums), p1);
   }
 
+  @Test
   public void testValueSplit() {
     List<String> vals1 = StringUtils.valueSplit("arg(a,b),foo(d,e,f)", "[a-z]*(?:\\([^)]*\\))?", "\\s*,\\s*");
     List<String> ans1 = Arrays.asList("arg(a,b)", "foo(d,e,f)");
-    assertEquals("Split failed", ans1, vals1);
+    Assert.assertEquals("Split failed", ans1, vals1);
     vals1 = StringUtils.valueSplit("arg(a,b) , foo(d,e,f) , ", "[a-z]*(?:\\([^)]*\\))?", "\\s*,\\s*");
-    assertEquals("Split failed", ans1, vals1);
+    Assert.assertEquals("Split failed", ans1, vals1);
     vals1 = StringUtils.valueSplit(",arg(a,b),foo(d,e,f)", "[a-z]*(?:\\([^)]*\\))?", "\\s*,\\s*");
     List<String> ans2 = Arrays.asList("", "arg(a,b)", "foo(d,e,f)");
-    assertEquals("Split failed", ans2, vals1);
+    Assert.assertEquals("Split failed", ans2, vals1);
     List<String> vals3 = StringUtils.valueSplit("\"quoted,comma\",\"with \\\"\\\" quote\" , \"stuff\",or not,quoted,",
              "\"(?:[^\"\\\\]+|\\\\\")*\"|[^,\"]+", "\\s*,\\s*");
     List<String> ans3 = Arrays.asList("\"quoted,comma\"", "\"with \\\"\\\" quote\"", "\"stuff\"", "or not", "quoted");
-    assertEquals("Split failed", ans3, vals3);
+    Assert.assertEquals("Split failed", ans3, vals3);
   }
 
+  @Test
   public void testLongestCommonSubstring(){
-    assertEquals(12,StringUtils.longestCommonSubstring("Jo3seph Smarr!", "Joseph R Smarr"));
-    assertEquals(12,StringUtils.longestCommonSubstring("Joseph R Smarr","Jo3seph Smarr!"));
+    Assert.assertEquals(12, StringUtils.longestCommonSubstring("Jo3seph Smarr!", "Joseph R Smarr"));
+    Assert.assertEquals(12, StringUtils.longestCommonSubstring("Joseph R Smarr", "Jo3seph Smarr!"));
   }
 
+  @Test
   public void testEditDistance() {
     // test insert
-    assertEquals(4, StringUtils.editDistance("Hi!","Hi you!"));
-    assertEquals(5, StringUtils.editDistance("Hi!","Hi you!?"));
-    assertEquals(1, StringUtils.editDistance("sdf", "asdf"));
-    assertEquals(1, StringUtils.editDistance("asd", "asdf"));
+    Assert.assertEquals(4, StringUtils.editDistance("Hi!", "Hi you!"));
+    Assert.assertEquals(5, StringUtils.editDistance("Hi!", "Hi you!?"));
+    Assert.assertEquals(1, StringUtils.editDistance("sdf", "asdf"));
+    Assert.assertEquals(1, StringUtils.editDistance("asd", "asdf"));
     // test delete
-    assertEquals(4, StringUtils.editDistance("Hi you!","Hi!"));
-    assertEquals(5, StringUtils.editDistance("Hi you!?", "Hi!"));
-    assertEquals(1, StringUtils.editDistance("asdf", "asd"));
-    assertEquals(1, StringUtils.editDistance("asdf", "sdf"));
+    Assert.assertEquals(4, StringUtils.editDistance("Hi you!", "Hi!"));
+    Assert.assertEquals(5, StringUtils.editDistance("Hi you!?", "Hi!"));
+    Assert.assertEquals(1, StringUtils.editDistance("asdf", "asd"));
+    Assert.assertEquals(1, StringUtils.editDistance("asdf", "sdf"));
     // test modification
-    assertEquals(3, StringUtils.editDistance("Hi you!","Hi Sir!"));
-    assertEquals(5, StringUtils.editDistance("Hi you!","Hi Sir!!!"));
+    Assert.assertEquals(3, StringUtils.editDistance("Hi you!", "Hi Sir!"));
+    Assert.assertEquals(5, StringUtils.editDistance("Hi you!", "Hi Sir!!!"));
     // test transposition
-    assertEquals(2, StringUtils.editDistance("hello", "hlelo"));
-    assertEquals(2, StringUtils.editDistance("asdf", "adsf"));
-    assertEquals(2, StringUtils.editDistance("asdf", "sadf"));
-    assertEquals(2, StringUtils.editDistance("asdf", "asfd"));
+    Assert.assertEquals(2, StringUtils.editDistance("hello", "hlelo"));
+    Assert.assertEquals(2, StringUtils.editDistance("asdf", "adsf"));
+    Assert.assertEquals(2, StringUtils.editDistance("asdf", "sadf"));
+    Assert.assertEquals(2, StringUtils.editDistance("asdf", "asfd"));
     // test empty
-    assertEquals(0, StringUtils.editDistance("", ""));
-    assertEquals(3, StringUtils.editDistance("", "bar"));
-    assertEquals(3, StringUtils.editDistance("foo", ""));
+    Assert.assertEquals(0, StringUtils.editDistance("", ""));
+    Assert.assertEquals(3, StringUtils.editDistance("", "bar"));
+    Assert.assertEquals(3, StringUtils.editDistance("foo", ""));
   }
 
+  @Test
   public void testSplitOnChar() {
-    assertEquals(3, StringUtils.splitOnChar("hello\tthere\tworld", '\t').length);
-    assertEquals(2, StringUtils.splitOnChar("hello\tworld", '\t').length);
-    assertEquals(1, StringUtils.splitOnChar("hello", '\t').length);
+    Assert.assertEquals(3, StringUtils.splitOnChar("hello\tthere\tworld", '\t').length);
+    Assert.assertEquals(2, StringUtils.splitOnChar("hello\tworld", '\t').length);
+    Assert.assertEquals(1, StringUtils.splitOnChar("hello", '\t').length);
 
-    assertEquals("hello", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[0]);
-    assertEquals("there", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[1]);
-    assertEquals("world", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[2]);
+    Assert.assertEquals("hello", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[0]);
+    Assert.assertEquals("there", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[1]);
+    Assert.assertEquals("world", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[2]);
 
-    assertEquals(1, StringUtils.splitOnChar("hello\tthere\tworld\n", ' ').length);
-    assertEquals("hello\tthere\tworld\n", StringUtils.splitOnChar("hello\tthere\tworld\n", ' ')[0]);
+    Assert.assertEquals(1, StringUtils.splitOnChar("hello\tthere\tworld\n", ' ').length);
+    Assert.assertEquals("hello\tthere\tworld\n", StringUtils.splitOnChar("hello\tthere\tworld\n", ' ')[0]);
 
-    assertEquals(5, StringUtils.splitOnChar("a\tb\tc\td\te", '\t').length);
-    assertEquals(5, StringUtils.splitOnChar("\t\t\t\t", '\t').length);
-    assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[0]);
-    assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[1]);
-    assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[4]);
+    Assert.assertEquals(5, StringUtils.splitOnChar("a\tb\tc\td\te", '\t').length);
+    Assert.assertEquals(5, StringUtils.splitOnChar("\t\t\t\t", '\t').length);
+    Assert.assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[0]);
+    Assert.assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[1]);
+    Assert.assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[4]);
   }
 
   /*
@@ -119,24 +127,26 @@ public class StringUtilsTest extends TestCase {
   }
   */
 
+  @Test
   public void testStringIsNullOrEmpty() {
-    assertTrue(StringUtils.isNullOrEmpty(null));
-    assertTrue(StringUtils.isNullOrEmpty(""));
-    assertFalse(StringUtils.isNullOrEmpty(" "));
-    assertFalse(StringUtils.isNullOrEmpty("foo"));
+    Assert.assertTrue(StringUtils.isNullOrEmpty(null));
+    Assert.assertTrue(StringUtils.isNullOrEmpty(""));
+    Assert.assertFalse(StringUtils.isNullOrEmpty(" "));
+    Assert.assertFalse(StringUtils.isNullOrEmpty("foo"));
   }
 
+  @Test
   public void testNormalize() {
-    assertEquals("can't", StringUtils.normalize("can't"));
-    assertEquals("Beyonce", StringUtils.normalize("Beyoncé"));
-    assertEquals("krouzek", StringUtils.normalize("kroužek"));
-    assertEquals("office", StringUtils.normalize("o\uFB03ce"));
-    assertEquals("DZ", StringUtils.normalize("Ǆ"));
-    assertEquals("1⁄4", StringUtils.normalize("¼"));
-    assertEquals("한국어", StringUtils.normalize("한국어"));
-    assertEquals("조선말", StringUtils.normalize("조선말"));
-    assertEquals("が", StringUtils.normalize("が"));
-    assertEquals("か", StringUtils.normalize("か"));
+    Assert.assertEquals("can't", StringUtils.normalize("can't"));
+    Assert.assertEquals("Beyonce", StringUtils.normalize("Beyoncé"));
+    Assert.assertEquals("krouzek", StringUtils.normalize("kroužek"));
+    Assert.assertEquals("office", StringUtils.normalize("o\uFB03ce"));
+    Assert.assertEquals("DZ", StringUtils.normalize("Ǆ"));
+    Assert.assertEquals("1⁄4", StringUtils.normalize("¼"));
+    Assert.assertEquals("한국어", StringUtils.normalize("한국어"));
+    Assert.assertEquals("조선말", StringUtils.normalize("조선말"));
+    Assert.assertEquals("が", StringUtils.normalize("が"));
+    Assert.assertEquals("か", StringUtils.normalize("か"));
   }
 
   private static final char[] escapeInputs = {
@@ -169,16 +179,18 @@ public class StringUtilsTest extends TestCase {
           {"\"", "foo"},
   };
 
+  @Test
   public void testCSV() {
-    assertEquals("Bung test", csvInputs.length, csvOutputs.length);
+    Assert.assertEquals("Bung test", csvInputs.length, csvOutputs.length);
     for (int i = 0; i < csvInputs.length; i++) {
       String[] answer = StringUtils.splitOnCharWithQuoting(csvInputs[i], ',', '"', escapeInputs[i]);
-      assertTrue("Bad CSV line handling of ex " + i +": " + Arrays.toString(csvOutputs[i]) +
-              " vs. " + Arrays.toString(answer),
+      Assert.assertTrue("Bad CSV line handling of ex " + i + ": " + Arrays.toString(csvOutputs[i]) +
+                      " vs. " + Arrays.toString(answer),
               Arrays.equals(csvOutputs[i], answer));
     }
   }
 
+  @Test
   public void testGetCharacterNgrams() {
     testCharacterNgram("abc", 0, 0);
     testCharacterNgram("abc", 1, 1, "a", "b", "c");
@@ -188,19 +200,20 @@ public class StringUtilsTest extends TestCase {
     testCharacterNgram("abc", 1, 4, "a", "b", "c", "ab", "bc", "abc");
   }
 
-  private void testCharacterNgram(String string, int min, int max, String... expected) {
+  private static void testCharacterNgram(String string, int min, int max, String... expected) {
     System.out.println(makeSet(expected));
     System.out.println(StringUtils.getCharacterNgrams(string, min, max));
-    assertEquals(makeSet(expected),
-                 new HashSet<>(StringUtils.getCharacterNgrams(string, min, max)));
+    Assert.assertEquals(makeSet(expected),
+            new HashSet<>(StringUtils.getCharacterNgrams(string, min, max)));
   }
 
   @SafeVarargs
-  private final <T> Set<T> makeSet(T... elems) {
+  private static <T> Set<T> makeSet(T... elems) {
     return new HashSet<>(Arrays.asList(elems));
   }
 
 
+  @Test
   public void testExpandEnvironmentVariables() {
     Map<String, String> env = new HashMap<String, String>() {{
       put("A", "[outA]");
@@ -210,25 +223,26 @@ public class StringUtilsTest extends TestCase {
       put("_A", "[out_A]");
       put("3A", "[out_3A]");
     }};
-    assertEquals("xxx [outA] xxx", StringUtils.expandEnvironmentVariables("xxx $A xxx", env));
-    assertEquals("xxx[outA] xxx", StringUtils.expandEnvironmentVariables("xxx$A xxx", env));
-    assertEquals("xxx[outA]xxx", StringUtils.expandEnvironmentVariables("xxx${A}xxx", env));
-    assertEquals("xxx [outA_B] xxx", StringUtils.expandEnvironmentVariables("xxx $A_B xxx", env));
-    assertEquals("xxx [outa_B] xxx", StringUtils.expandEnvironmentVariables("xxx $a_B xxx", env));
-    assertEquals("xxx [outa_B45] xxx", StringUtils.expandEnvironmentVariables("xxx $a_B45 xxx", env));
-    assertEquals("xxx [out_A] xxx", StringUtils.expandEnvironmentVariables("xxx $_A xxx", env));
-    assertEquals("xxx $3A xxx", StringUtils.expandEnvironmentVariables("xxx $3A xxx", env));
-    assertEquals("xxx  xxx", StringUtils.expandEnvironmentVariables("xxx $UNDEFINED xxx", env));
+    Assert.assertEquals("xxx [outA] xxx", StringUtils.expandEnvironmentVariables("xxx $A xxx", env));
+    Assert.assertEquals("xxx[outA] xxx", StringUtils.expandEnvironmentVariables("xxx$A xxx", env));
+    Assert.assertEquals("xxx[outA]xxx", StringUtils.expandEnvironmentVariables("xxx${A}xxx", env));
+    Assert.assertEquals("xxx [outA_B] xxx", StringUtils.expandEnvironmentVariables("xxx $A_B xxx", env));
+    Assert.assertEquals("xxx [outa_B] xxx", StringUtils.expandEnvironmentVariables("xxx $a_B xxx", env));
+    Assert.assertEquals("xxx [outa_B45] xxx", StringUtils.expandEnvironmentVariables("xxx $a_B45 xxx", env));
+    Assert.assertEquals("xxx [out_A] xxx", StringUtils.expandEnvironmentVariables("xxx $_A xxx", env));
+    Assert.assertEquals("xxx $3A xxx", StringUtils.expandEnvironmentVariables("xxx $3A xxx", env));
+    Assert.assertEquals("xxx  xxx", StringUtils.expandEnvironmentVariables("xxx $UNDEFINED xxx", env));
   }
 
+  @Test
   public void testDecodeArray() throws IOException {
     String tempFile1 = Files.createTempFile("test", "tmp").toString();
     String tempFile2 = Files.createTempFile("test", "tmp").toString();
     String[] decodedArray = StringUtils.decodeArray("'"+tempFile1 + "','" + tempFile2+"'");
 
-    assertEquals(2, decodedArray.length);
-    assertEquals(tempFile1, decodedArray[0]);
-    assertEquals(tempFile2, decodedArray[1]);
+    Assert.assertEquals(2, decodedArray.length);
+    Assert.assertEquals(tempFile1, decodedArray[0]);
+    Assert.assertEquals(tempFile2, decodedArray[1]);
 
     String[] test10 = { "\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"",
                         "[\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"]" };
@@ -238,16 +252,24 @@ public class StringUtilsTest extends TestCase {
     String[] ans11 = { "C:UsersBELLCH~1AppDataLocalTempbill-ie5804201486895318826regex_rules.txt" };
 
     for (String s : test10) {
-      assertEquals(Arrays.asList(ans10), Arrays.asList(StringUtils.decodeArray(s)));
+      Assert.assertEquals(Arrays.asList(ans10), Arrays.asList(StringUtils.decodeArray(s)));
     }
     for (String s : test11) {
-      assertEquals(Arrays.asList(ans11), Arrays.asList(StringUtils.decodeArray(s)));
+      Assert.assertEquals(Arrays.asList(ans11), Arrays.asList(StringUtils.decodeArray(s)));
     }
   }
 
+  @Test
   public void testRegexGroups() {
     List<String> ans = Arrays.asList("42", "123", "1965");
-    assertEquals(ans, StringUtils.regexGroups(Pattern.compile("(\\d+)\\D*(\\d+)\\D*(\\d+)"), "abc-x42!123   -1965."));
+    Assert.assertEquals(ans, StringUtils.regexGroups(Pattern.compile("(\\d+)\\D*(\\d+)\\D*(\\d+)"), "abc-x42!123   -1965."));
+  }
+
+  @Test
+  public void testEscapeJsonString() {
+    Assert.assertEquals("\\u0001\\b\\r\\u001D\\u001Fz", StringUtils.escapeJsonString("\u0001\b\r\u001d\u001fz"));
+    Assert.assertEquals("food", StringUtils.escapeJsonString("food"));
+    Assert.assertEquals("\\\\\\\"here\\u0000goes\\b\\u000B", StringUtils.escapeJsonString("\\\"here\u0000goes\b\u000B"));
   }
 
 }

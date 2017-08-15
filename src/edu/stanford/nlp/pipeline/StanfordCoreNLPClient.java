@@ -268,9 +268,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     serverProperties.setProperty("outputSerializer", ProtobufAnnotationSerializer.class.getName());
 
     // Create a list of all the properties, as JSON map elements
-    List<String> jsonProperties = serverProperties.stringPropertyNames().stream().map(key -> '"' + JSONOutputter.cleanJSON(key) + "\": \"" +
-        JSONOutputter
-            .cleanJSON(serverProperties.getProperty(key)) + '"')
+    List<String> jsonProperties = serverProperties.stringPropertyNames().stream().map(key -> '"' + StringUtils.escapeJsonString(key) +
+            "\": \"" + StringUtils.escapeJsonString(serverProperties.getProperty(key)) + '"')
         .collect(Collectors.toList());
     // Create the JSON object
     this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";

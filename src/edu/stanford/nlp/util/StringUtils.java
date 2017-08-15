@@ -263,11 +263,9 @@ public class StringUtils  {
 
   public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
                                   String glue, int start, int end, final Function<Object,String> toStringFunc) {
-    return join(l, glue, new Function<CoreMap, String>() {
-      public String apply(CoreMap in) {
-        Object val = in.get(field);
-        return (val != null)? toStringFunc.apply(val):defaultFieldValue;
-      }
+    return join(l, glue, (Function<CoreMap, String>) in -> {
+      Object val = in.get(field);
+      return (val != null)? toStringFunc.apply(val): defaultFieldValue;
     }, start, end);
   }
 
@@ -407,10 +405,10 @@ public class StringUtils  {
     boolean isFirst = true;
     for (int i = start; i < end; ++i) {
       if (isFirst) {
-        b.append(elements[i].toString());
+        b.append(elements[i]);
         isFirst = false;
       } else {
-        b.append(glue).append(elements[i].toString());
+        b.append(glue).append(elements[i]);
       }
     }
     return b.toString();
@@ -427,7 +425,7 @@ public class StringUtils  {
 
 
   /**
-   * Joins elems with a space.
+   * Joins elements with a space.
    */
   public static String join(Iterable<?> l) {
     return join(l, " ");
@@ -568,7 +566,7 @@ public class StringUtils  {
     Pattern vPat = Pattern.compile(valueRegex);
     Pattern sPat = Pattern.compile(separatorRegex);
     List<String> ret = new ArrayList<>();
-    while (str.length() > 0) {
+    while ( ! str.isEmpty()) {
       Matcher vm = vPat.matcher(str);
       if (vm.lookingAt()) {
         ret.add(vm.group());
@@ -578,7 +576,7 @@ public class StringUtils  {
       } else {
         throw new IllegalArgumentException("valueSplit: " + valueRegex + " doesn't match " + str);
       }
-      if (str.length() > 0) {
+      if ( ! str.isEmpty()) {
         Matcher sm = sPat.matcher(str);
         if (sm.lookingAt()) {
           str = str.substring(sm.end());
@@ -895,7 +893,7 @@ public class StringUtils  {
         int max = numFlagArgs == null ? 1 : numFlagArgs.intValue();
         int min = numFlagArgs == null ? 0 : numFlagArgs.intValue();
         List<String> flagArgs = new ArrayList<>();
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
         if (result.containsKey(key)) { // append the second specification into the args.
@@ -944,7 +942,7 @@ public class StringUtils  {
    * <li> The value strings are trimmed so trailing spaces do not stop you from loading a file.</li>
    * </ul>
    * Properties are read from left to right, and later properties will override earlier ones with the same name.
-   * Properties loaded from a Properties file with the special args are defaults that can be overriden by command line
+   * Properties loaded from a Properties file with the special args are defaults that can be overridden by command line
    * flags (or earlier Properties files if there is nested usage of the special args.
    *
    * @param args Command line arguments
@@ -1036,9 +1034,9 @@ public class StringUtils  {
    * @return The corresponding Properties object
    */
   public static Properties propFileToProperties(String filename) {
-    Properties result = new Properties();
     try {
       InputStream is = new BufferedInputStream(new FileInputStream(filename));
+      Properties result = new Properties();
       result.load(is);
       // trim all values
       for (String propKey : result.stringPropertyNames()){
@@ -1126,8 +1124,8 @@ public class StringUtils  {
         pw.print(message);
       }
     } catch (Exception e) {
-      log.info("Exception: in printToFile " + file.getAbsolutePath());
-      e.printStackTrace();
+      log.warn("Exception: in printToFile " + file.getAbsolutePath());
+      log.warn(e);
     } finally {
       if (pw != null) {
         pw.flush();
@@ -1148,8 +1146,8 @@ public class StringUtils  {
       pw = new PrintWriter(fw);
       pw.println(message);
     } catch (Exception e) {
-      log.info("Exception: in printToFileLn " + file.getAbsolutePath() + ' ' + message);
-      e.printStackTrace();
+      log.warn("Exception: in printToFileLn " + file.getAbsolutePath() + ' ' + message);
+      log.warn(e);
     } finally {
       if (pw != null) {
         pw.flush();
@@ -1552,8 +1550,7 @@ public class StringUtils  {
    * Returns a short class name for an object.
    * This is the class name stripped of any package name.
    *
-   * @return The name of the class minus a package name, for example
-   *         <code>ArrayList</code>
+   * @return The name of the class minus a package name, for example {@code ArrayList}
    */
   public static String getShortClassName(Object o) {
     if (o == null) {
@@ -2077,7 +2074,7 @@ public class StringUtils  {
         int min = 0;
         List<String> flagArgs = new ArrayList<>();
         // cdm oct 2007: add length check to allow for empty string argument!
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
 
@@ -2133,7 +2130,7 @@ public class StringUtils  {
   }
 
   /**
-   * n grams for already splitted string. the ngrams are joined with a single space
+   * n grams for already split string. the ngrams are joined with a single space
    */
   public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
     List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
@@ -2145,7 +2142,7 @@ public class StringUtils  {
   }
 
   /**
-   * n grams for already splitted string. the ngrams are joined with a single space
+   * n grams for already split string. the ngrams are joined with a single space
    */
   public static Collection<String> getNgramsFromTokens(List<CoreLabel> words, int minSize, int maxSize){
     List<String> wordsStr = new ArrayList<>();
@@ -2684,6 +2681,45 @@ public class StringUtils  {
       sb.append(' ').append(arg);
     }
     logger.info(sb.toString());
+  }
+
+  private static boolean containsJsonEscape(String str) {
+    for (int i = 0; i < str.length(); i++) {
+      char ch = str.charAt(i);
+      if (ch < '\u0020' || ch == '\\' || ch == '"') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static final String escapeLetters = "btnvfr";
+
+  public static String escapeJsonString(String str) {
+     // check if there are any, else return same str without allocation
+    if ( ! containsJsonEscape (str)) {
+      return str;
+    }
+    StringBuilder sb = new StringBuilder(str.length() * 2);
+    for (int i = 0; i < str.length(); i++) {
+      char ch = str.charAt(i);
+      if (ch == '\\' ) {
+        sb.append("\\\\");
+      } else if (ch == '"') {
+        sb.append("\\\"");
+      } else if (ch < '\u0020') {
+        if (ch >= '\b' && ch <= '\r' && ch != '\u000B') {
+          sb.append('\\');
+          sb.append(escapeLetters.charAt(ch - '\b'));
+        } else {
+          sb.append("\\u00");
+          sb.append(String.format("%02X", (int) ch));
+        }
+      } else {
+        sb.append(ch);
+      }
+    }
+    return sb.toString();
   }
 
 }

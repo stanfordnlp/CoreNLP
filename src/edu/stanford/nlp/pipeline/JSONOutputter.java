@@ -22,6 +22,7 @@ import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Pointer;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -43,17 +44,6 @@ import java.util.stream.Stream;
 public class JSONOutputter extends AnnotationOutputter {
 
   protected static final String INDENT_CHAR = "  ";
-
-  public static String cleanJSON(String s) {
-    return s
-        .replace("\\", "\\\\")
-        .replace("\b", "\\b")
-        .replace("\f", "\\f")
-        .replace("\n", "\\n")
-        .replace("\r", "\\r")
-        .replace("\t", "\\t")
-        .replace("\"", "\\\"");
-  }
 
 
   /** {@inheritDoc} */
@@ -351,7 +341,7 @@ public class JSONOutputter extends AnnotationOutputter {
       if (value instanceof String) {
         // Case: simple string (this is easy!)
         writer.write("\"");
-        writer.write(cleanJSON(value.toString()));
+        writer.write(StringUtils.escapeJsonString(value.toString()));
         writer.write("\"");
       } else if (value instanceof Collection) {
         // Case: collection
@@ -370,7 +360,7 @@ public class JSONOutputter extends AnnotationOutputter {
       } else if (value instanceof Enum) {
         // Case: enumeration constant
         writer.write("\"");
-        writer.write(cleanJSON(((Enum) value).name()));
+        writer.write(StringUtils.escapeJsonString(((Enum) value).name()));
         writer.write("\"");
       } else if (value instanceof Pair) {
         routeObject(indent, Arrays.asList(((Pair) value).first, ((Pair) value).second));
@@ -496,7 +486,7 @@ public class JSONOutputter extends AnnotationOutputter {
           newline();
           indent(indent + 1);
           writer.write("\"");
-          writer.write(cleanJSON(key));
+          writer.write(StringUtils.escapeJsonString(key));
           writer.write("\":"); space();
           // Write the value
           routeObject(indent + 1, value);
