@@ -94,7 +94,7 @@ public class JSONOutputter extends AnnotationOutputter {
           Tree sentimentTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
           if (sentimentTree != null) {
             int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
-            List<String> sentimentPredictions =
+            List<Double> sentimentPredictions =
                 RNNCoreAnnotations.getPredictionsAsStringList(sentimentTree);
             String sentimentClass = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
             l2.set("sentimentValue", Integer.toString(sentiment));
