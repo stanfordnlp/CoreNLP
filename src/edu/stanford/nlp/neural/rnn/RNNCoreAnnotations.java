@@ -62,11 +62,11 @@ public class RNNCoreAnnotations {
     return ((CoreLabel) label).get(Predictions.class);
   }
 
-  public static List<String> getPredictionsAsStringList(Tree tree) {
+  public static List<Double> getPredictionsAsStringList(Tree tree) {
     SimpleMatrix predictions = getPredictions(tree);
-    List<String> listOfPredictions = new ArrayList<String>();
+    List<Double> listOfPredictions = new ArrayList<Double>();
     for (int i = 0 ; i < predictions.numRows() ; i++) {
-      listOfPredictions.add(Double.toString(predictions.get(i)));
+      listOfPredictions.add(predictions.get(i));
     }
     return listOfPredictions;
   }
