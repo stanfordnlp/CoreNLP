@@ -282,7 +282,7 @@ public class SentimentModel implements Serializable  {
 
     identity = SimpleMatrix.identity(numHid);
 
-    binaryTransform = TwoDimensionalMap.treeMap();
+    binaryTransform = TwoDimensionalMap.treeMap(); // TODO: tao ra cai' zi?
     binaryTensors = TwoDimensionalMap.treeMap();
     binaryClassification = TwoDimensionalMap.treeMap();
 

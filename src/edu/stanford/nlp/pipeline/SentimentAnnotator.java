@@ -71,19 +71,22 @@ public class SentimentAnnotator implements Annotator {
   public void annotate(Annotation annotation) {
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       // TODO: parallelize
+      // parse inputed sentences to list
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       for (CoreMap sentence : sentences) {
+    	// parse tree
         Tree binarized = sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
         if (binarized == null) {
           throw new AssertionError("Binarized sentences not built by parser");
         }
         Tree collapsedUnary = transformer.transformTree(binarized);
+        // get pre-defined lexicon's score
         SentimentCostAndGradient scorer = new SentimentCostAndGradient(model, null);
         scorer.forwardPropagateTree(collapsedUnary);
         sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, collapsedUnary);
         int sentiment = RNNCoreAnnotations.getPredictedClass(collapsedUnary);
         sentence.set(SentimentCoreAnnotations.SentimentClass.class, SentimentUtils.sentimentString(model, sentiment));
-        Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+        Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class); // tai sao phan tu leaf ko co diem?
         if (tree != null) {
           collapsedUnary.setSpans();
           // map the sentiment annotations onto the tree
@@ -91,7 +94,7 @@ public class SentimentAnnotator implements Annotator {
           for (Tree bt : collapsedUnary) {
             IntPair p = bt.getSpan();
             int sen = RNNCoreAnnotations.getPredictedClass(bt);
-            String sentStr = SentimentUtils.sentimentString(model, sen);
+            String sentStr = SentimentUtils.sentimentString(model, sen); // get name of sentiment from integer
             if ( ! spanSentiment.containsKey(p)) {
               // we'll take the first = highest one discovered
               spanSentiment.put(p, sentStr);
@@ -100,6 +103,7 @@ public class SentimentAnnotator implements Annotator {
           if (((CoreLabel) tree.label()).containsKey(CoreAnnotations.SpanAnnotation.class)) {
             throw new IllegalStateException("This code assumes you don't have SpanAnnotation");
           }
+          // map the sentiment annotations onto real tree
           tree.setSpans();
           for (Tree t : tree) {
             IntPair p = t.getSpan();

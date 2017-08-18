@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<corpus id="resources/prefix/namedEntityPrefix.xml">
+    <body>
+		<!-- classificator prefix -->
+		<w>ông</w>
+		<w>bà</w>
+		<w>bác</w>
+		<w>chú</w>
+		<w>cô</w>
+		<w>thím</w>
+		<w>dì</w>
+		<w>cậu</w>
+		<w>cụ</w>
+		<w>mợ</w>
+		<w>ngài</w>
+		<w>anh</w>
+		<w>chị</w>
+		<w>thằng</w>
+		<w>cái</w>
+		<w>vua</w>
+		<!-- organization prefix -->
+		<w>tỉnh</w>
+		<w>huyện</w>
+		<w>xã</w>
+		<w>phường</w>
+		<w>bộ</w>
+		<w>sở</w>
+		<w>cục</w>
+		<w>ban</w>
+		<w>ngành</w>
+		<!-- Other prefix -->
+		<w>theo</w>
+    </body>
+</corpus>
