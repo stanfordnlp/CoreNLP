@@ -19,7 +19,7 @@ For English, we distribute CoreNLP with two files containing a default list of r
 
 | Option name | Type | Default | Description |
 | --- | --- |
-| `regexner.ignoreCase` | boolean | `false` |  If `true`, case is ignored for all patterns in all files. |
+| `regexner.ignorecase` | boolean | `false` |  If `true`, case is ignored for all patterns in all files. |
 | `regexner.mapping` | String | `edu/stanford/nlp/models/regexner/type_map_clean` | Comma separated list of mapping files to use.  Each mapping file is a <b>tab</b>-delimited file. |
 | `regexner.mapping.header` | String |`pattern,ner,overwrite,priority,group` | Comma separated list of header fields (or `true` if header is specified in the mapping file). |
 | `regexner.mapping.field.<fieldname>` | String | null | Class name for CoreLabel key for annotation fields other than NER. |
