@@ -123,11 +123,12 @@ public final class VietTokenizer {
 				String word = taggedWord.toString();
 				if (TokenizerOptions.USE_UNDERSCORE) {
 					word = word.replaceAll("\\s+", "_");
+					
 				} else {
 					word = "[" + word + "]";
 				}
+				if (!word.equals(".")) result.append(' ');
 				result.append(word);
-				result.append(' ');
 			}
 			// update nTokens
 			nTokens += list.size();
