@@ -84,19 +84,33 @@ This example goes over how to set up CoreNLP from the latest official release. T
 ### Steps
 
 1. Download the CoreNLP zip file at: http://stanfordnlp.github.io/CoreNLP/index.html#download:
-```wget http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip```
+```
+wget http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip
+```
 Or using curl (what you get by default on macOS):
-```curl -O http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip```
+```
+curl -O http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip
+```
 1. Unzip the release:
-```unzip http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip```
+```
+unzip http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip
+```
 1. Enter the newly unzipped directory:
-```cd stanford-corenlp-full-2017-06-09```
+```
+cd stanford-corenlp-full-2017-06-09
+```
 1. Set up your classpath. If you're using an IDE, you should set the
    classpath in your IDE. If you are using bash or a bash-like shell,
    the following will work.
-```for file in `find . -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done```
+   ```
+   for file in `find . -name "*.jar"`; do export
+   CLASSPATH="$CLASSPATH:`realpath $file`"; done
+   ```
 If you'll be using CoreNLP frequently, the below line is a useful line to have in your `~/.bashrc` (or equivalent) file, replacing the directory `/path/to/corenlp/` with the appropriate path to where you unzipped CoreNLP:
-```for file in `find /path/to/corenlp/ -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done```
+```
+for file in `find /path/to/corenlp/ -name "*.jar"`; do export
+CLASSPATH="$CLASSPATH:`realpath $file`"; done
+```
 1. Try it out! For example, the following will make a simple text file to annotate, and run CoreNLP over this file. The output will be saved to `input.txt.out` as a JSON file. Note that CoreNLP requires quite a bit of memory. You should give it at least 2GB (`-mx2g`) in most cases.
 ```
 echo "the quick brown fox jumped over the lazy dog" > input.txt
@@ -116,39 +130,38 @@ java -mx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file in
 ### Steps
 
 1. Clone the CoreNLP Git repository:
-
-```git clone git@github.com:stanfordnlp/CoreNLP.git```
-
+```
+git clone git@github.com:stanfordnlp/CoreNLP.git
+```
 1. Enter the CoreNLP directory:
-
-```cd CoreNLP```
-
+```
+cd CoreNLP
+```
 1. Build the project into a self-contained jar file. The easiest way to do this is with:
-
-```ant jar```
-
+```
+ant jar
+```
 1. Download the latest models.
-
-```wget http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar```
-
+```
+wget http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar
+```
 Or using curl (what you get by default on macOS):
-
-```curl -O http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar```
-
+```
+curl -O http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar
+```
 1. Set up your classpath. If you're using an IDE, you should set the
    classpath in your IDE. For bash or a bash-like shell, the following
    should work.
-
-```export CLASSPATH="$CLASSPATH:javanlp-core.jar:stanford-corenlp-models-current.jar";
-for file in `find lib -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done```
-
+```
+export CLASSPATH="$CLASSPATH:javanlp-core.jar:stanford-corenlp-models-current.jar";
+for file in `find lib -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done
+```
 If you'll be using CoreNLP frequently, the below lines are useful to have in your `~/.bashrc` (or equivalent) file, replacing the directory `/path/to/corenlp/` with the appropriate path to where you unzipped CoreNLP (3 replacements):
-
-```export CLASSPATH="$CLASSPATH:/path/to/corenlp/javanlp-core.jar:/path/to/corenlp/stanford-corenlp-models-current.jar";
-for file in `find /path/to/corenlp/lib -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done```
-
+```
+export CLASSPATH="$CLASSPATH:/path/to/corenlp/javanlp-core.jar:/path/to/corenlp/stanford-corenlp-models-current.jar";
+for file in `find /path/to/corenlp/lib -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done
+```
 1. Try it out! For example, the following will make a simple text file to annotate, and run CoreNLP over this file. The output will be saved to `input.txt.out` as a JSON file. Note that CoreNLP requires quite a bit of memory. You should give it at least 2GB (`-mx2g`) in most cases.
-
 ```
 echo "the quick brown fox jumped over the lazy dog" > input.txt
 java -mx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file input.txt
