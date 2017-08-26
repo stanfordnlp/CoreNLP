@@ -70,53 +70,40 @@ Chinese, German, or Spanish, also add this inside `dependencies` to your `pom.xm
 
 Replace "models-chinese" with one or more of "models-english", "models-english-kbp", "models-arabic", "models-french", "models-german" or "models-spanish" for resources for other languages!
 
-## Step-by-step setup from the official release
+## Steps to setup from the official release
 
 This example goes over how to set up CoreNLP from the latest official release. This example will take you through downloading the package, and running a simple command-line invocation of CoreNLP.
 
-### Prerequisites:
+### Prerequisites
 
 * Java 8. The command `java -version` should complete successfully with a line like: java version "1.8.0_92".
 * Zip tool
 * For following exactly the steps below: bash or a similar shell, and
   wget or a similar downloader.
 
-### Steps:
+### Steps
 
 1. Download the CoreNLP zip file at: http://stanfordnlp.github.io/CoreNLP/index.html#download:
-
 ```wget http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip```
-
 Or using curl (what you get by default on macOS):
-
 ```curl -O http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip```
-
 1. Unzip the release:
-
 ```unzip http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip```
-
 1. Enter the newly unzipped directory:
-
 ```cd stanford-corenlp-full-2017-06-09```
-
 1. Set up your classpath. If you're using an IDE, you should set the
    classpath in your IDE. If you are using bash or a bash-like shell,
    the following will work.
-
 ```for file in `find . -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done```
-
 If you'll be using CoreNLP frequently, the below line is a useful line to have in your `~/.bashrc` (or equivalent) file, replacing the directory `/path/to/corenlp/` with the appropriate path to where you unzipped CoreNLP:
-
 ```for file in `find /path/to/corenlp/ -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done```
-
 1. Try it out! For example, the following will make a simple text file to annotate, and run CoreNLP over this file. The output will be saved to `input.txt.out` as a JSON file. Note that CoreNLP requires quite a bit of memory. You should give it at least 2GB (`-mx2g`) in most cases.
-
 ```
 echo "the quick brown fox jumped over the lazy dog" > input.txt
 java -mx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file input.txt
 ```
 
-## Step-by-step setup from the GitHub HEAD version
+## Steps to setup from the GitHub HEAD version
 
 ### Prerequisites
 
