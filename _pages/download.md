@@ -4,6 +4,8 @@ keywords: download
 permalink: '/download.html'
 ---
 
+## Getting a copy
+
 Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. This is everything for getting going on English!  Unzip this file, open the folder that results and you're ready to use it.
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip">Download CoreNLP 3.8.0 </a> </div>
@@ -32,8 +34,11 @@ but [the JRE](http://java.com/) will do if you are only going to be a user.
 
 **GitHub**: Here is the [Stanford CoreNLP GitHub site](https://github.com/stanfordnlp/CoreNLP).
 
-**Maven**: You can find Stanford CoreNLP on [Maven Central](http://search.maven.org/#browse%7C11864822). The crucial thing to know is that CoreNLP needs its models to run (most parts beyond the tokenizer) and so you need to specify both the code jar and the models jar in your `pom.xml`, as follows:
-(Note: Maven releases are made several days after the release on the website.)
+**Maven**: You can find Stanford CoreNLP on
+[Maven Central](http://search.maven.org/#browse%7C11864822). The
+crucial thing to know is that CoreNLP needs its models to run (most
+parts beyond the tokenizer and sentence splitter) and so you need to specify both the code jar and the models jar in your `pom.xml`, as follows:
+(Note: Maven releases are usually made several days after a release on the website.)
 
 ``` xml
 <dependencies>
@@ -51,7 +56,8 @@ but [the JRE](http://java.com/) will do if you are only going to be a user.
 </dependencies>
 ```
 
-If you want to get a language models jar off of Maven for Arabic, Chinese, German, or Spanish, add this to your `pom.xml`:
+If you want to get a language models jar off of Maven for Arabic,
+Chinese, German, or Spanish, also add this inside `dependencies` to your `pom.xml`:
 
 ``` xml
 <dependency>
@@ -64,7 +70,7 @@ If you want to get a language models jar off of Maven for Arabic, Chinese, Germa
 
 Replace "models-chinese" with one or more of "models-english", "models-english-kbp", "models-arabic", "models-french", "models-german" or "models-spanish" for resources for other languages!
 
-## Step-by-step basic setup from the official release
+## Step-by-step setup from the official release
 
 This example goes over how to set up CoreNLP from the latest official release. This example will take you through downloading the package, and running a simple command-line invocation of CoreNLP.
 
@@ -105,13 +111,14 @@ If you'll be using CoreNLP frequently, the below line is a useful line to have i
 
 1. Try it out! For example, the following will make a simple text file to annotate, and run CoreNLP over this file. The output will be saved to `input.txt.out` as a JSON file. Note that CoreNLP requires quite a bit of memory. You should give it at least 2GB (`-mx2g`) in most cases.
 
-```echo "the quick brown fox jumped over the lazy dog" > input.txt
+```
+echo "the quick brown fox jumped over the lazy dog" > input.txt
 java -mx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file input.txt
 ```
 
-## Step-by-step basic setup from the GitHub HEAD version
+## Step-by-step setup from the GitHub HEAD version
 
-### Prerequisites:
+### Prerequisites
 
 * Java 8. The command `java -version` should complete successfully with a line like: java version "1.8.0_92".
 * [Apache Ant](http://ant.apache.org/)
@@ -119,7 +126,7 @@ java -mx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file in
 * For following exactly the steps below: bash or a similar shell, and
   wget or a similar downloader.
 
-### Steps:
+### Steps
 
 1. Clone the CoreNLP Git repository:
 
@@ -155,6 +162,8 @@ for file in `find /path/to/corenlp/lib -name "*.jar"`; do export CLASSPATH="$CLA
 
 1. Try it out! For example, the following will make a simple text file to annotate, and run CoreNLP over this file. The output will be saved to `input.txt.out` as a JSON file. Note that CoreNLP requires quite a bit of memory. You should give it at least 2GB (`-mx2g`) in most cases.
 
-```echo "the quick brown fox jumped over the lazy dog" > input.txt
-java -mx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file input.txt```
+```
+echo "the quick brown fox jumped over the lazy dog" > input.txt
+java -mx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file input.txt
+```
 
