@@ -25,6 +25,9 @@ import java.util.regex.Pattern;
  */
 public class TSVUtils {
 
+  private TSVUtils() {} // static methods
+
+
   static String unescapeSQL(String input) {
     // If the string is quoted
     if (input.startsWith("\"") && input.endsWith("\"")) {
@@ -33,15 +36,22 @@ public class TSVUtils {
     return input.replace("\"\"","\"").replace("\\\\", "\\");
   }
 
-
+  private static final Pattern nonEscapedDoubleQuote = Pattern.compile("(?<!\\\\)\"\"");
   /**
    * Parse an SQL array.
+   * This code allows fixing "doubly escaped" quotes, but would fail if you actually
+   * wanted \\\\ to become two backslashes in a string (see the tests).
+   *
    * @param array The array to parse.
    * @return The parsed array, as a list.
    */
   public static List<String> parseArray(String array) {
-    array = unescapeSQL(array);
-    if (array.startsWith("{") && array.endsWith("}")) array = array.substring(1, array.length()-1);
+    // array = unescapeSQL(array);
+    if (array.startsWith("{") && array.endsWith("}")) {
+      array = array.substring(1, array.length() - 1);
+    }
+    array = array.replace("\\\\", "\\");
+    array = nonEscapedDoubleQuote.matcher(array).replaceAll("\\\\\\\"");
     char[] input = array.toCharArray();
     List<String> output = new ArrayList<>();
     StringBuilder elem = new StringBuilder();
@@ -79,6 +89,7 @@ public class TSVUtils {
 
   /**
    * Parse a CoNLL formatted tree into a SemanticGraph.
+   *
    * @param conll The CoNLL tree to parse.
    * @param tokens The tokens of the sentence, to form the backing labels of the tree.
    * @return A semantic graph of the sentence, according to the given tree.
@@ -132,6 +143,7 @@ public class TSVUtils {
 
   /**
    * Parse a JSON formatted tree into a SemanticGraph.
+   *
    * @param jsonString The JSON string tree to parse, e.g:
    * "[{\"\"dependent\"\": 7, \"\"dep\"\": \"\"root\"\", \"\"governorgloss\"\": \"\"root\"\", \"\"governor\"\": 0, \"\"dependentgloss\"\": \"\"sport\"\"}, {\"\"dependent\"\": 1, \"\"dep\"\": \"\"nsubj\"\", \"\"governorgloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentgloss\"\": \"\"chess\"\"}, {\"\"dependent\"\": 2, \"\"dep\"\": \"\"cop\"\", \"\"governorgloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentgloss\"\": \"\"is\"\"}, {\"\"dependent\"\": 3, \"\"dep\"\": \"\"neg\"\", \"\"governorgloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentgloss\"\": \"\"not\"\"}, {\"\"dependent\"\": 4, \"\"dep\"\": \"\"det\"\", \"\"governorgloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentgloss\"\": \"\"a\"\"}, {\"\"dependent\"\": 5, \"\"dep\"\": \"\"advmod\"\", \"\"governorgloss\"\": \"\"physical\"\", \"\"governor\"\": 6, \"\"dependentgloss\"\": \"\"predominantly\"\"}, {\"\"dependent\"\": 6, \"\"dep\"\": \"\"amod\"\", \"\"governorgloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentgloss\"\": \"\"physical\"\"}, {\"\"dependent\"\": 9, \"\"dep\"\": \"\"advmod\"\", \"\"governorgloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentgloss\"\": \"\"yet\"\"}, {\"\"dependent\"\": 10, \"\"dep\"\": \"\"nsubj\"\", \"\"governorgloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentgloss\"\": \"\"neither\"\"}, {\"\"dependent\"\": 11, \"\"dep\"\": \"\"cop\"\", \"\"governorgloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentgloss\"\": \"\"are\"\"}, {\"\"dependent\"\": 12, \"\"dep\"\": \"\"parataxis\"\", \"\"governorgloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentgloss\"\": \"\"shooting\"\"}, {\"\"dependent\"\": 13, \"\"dep\"\": \"\"cc\"\", \"\"governorgloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentgloss\"\": \"\"and\"\"}, {\"\"dependent\"\": 14, \"\"dep\"\": \"\"parataxis\"\", \"\"governorgloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentgloss\"\": \"\"curling\"\"}, {\"\"dependent\"\": 14, \"\"dep\"\": \"\"conj:and\"\", \"\"governorgloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentgloss\"\": \"\"curling\"\"}, {\"\"dependent\"\": 16, \"\"dep\"\": \"\"nsubjpass\"\", \"\"governorgloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentgloss\"\": \"\"which\"\"}, {\"\"dependent\"\": 18, \"\"dep\"\": \"\"case\"\", \"\"governorgloss\"\": \"\"fact\"\", \"\"governor\"\": 19, \"\"dependentgloss\"\": \"\"in\"\"}, {\"\"dependent\"\": 19, \"\"dep\"\": \"\"nmod:in\"\", \"\"governorgloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentgloss\"\": \"\"fact\"\"}, {\"\"dependent\"\": 21, \"\"dep\"\": \"\"aux\"\", \"\"governorgloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentgloss\"\": \"\"has\"\"}, {\"\"dependent\"\": 22, \"\"dep\"\": \"\"auxpass\"\", \"\"governorgloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentgloss\"\": \"\"been\"\"}, {\"\"dependent\"\": 23, \"\"dep\"\": \"\"dep\"\", \"\"governorgloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentgloss\"\": \"\"nicknamed\"\"}, {\"\"dependent\"\": 25, \"\"dep\"\": \"\"dobj\"\", \"\"governorgloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentgloss\"\": \"\"chess\"\"}, {\"\"dependent\"\": 26, \"\"dep\"\": \"\"case\"\", \"\"governorgloss\"\": \"\"ice\"\", \"\"governor\"\": 27, \"\"dependentgloss\"\": \"\"on\"\"}, {\"\"dependent\"\": 27, \"\"dep\"\": \"\"nmod:on\"\", \"\"governorgloss\"\": \"\"chess\"\", \"\"governor\"\": 25, \"\"dependentgloss\"\": \"\"ice\"\"}, {\"\"dependent\"\": 29, \"\"dep\"\": \"\"amod\"\", \"\"governorgloss\"\": \"\"chess\"\", \"\"governor\"\": 25, \"\"dependentgloss\"\": \"\"5\"\"}]");
    * @param tokens The tokens of the sentence, to form the backing labels of the tree.
@@ -149,7 +161,7 @@ public class TSVUtils {
 
     IndexedWord[] vertices = new IndexedWord[tokens.size() + 2];
     // Add edges
-    for(int i = 0; i < array.size(); i++) {
+    for (int i = 0; i < array.size(); i++) {
       JsonObject entry = array.getJsonObject(i);
       // Parse row
       int dependentIndex = entry.getInt("dependent");
@@ -188,7 +200,7 @@ public class TSVUtils {
     return tree;
   }
 
-  /** Create an Annotation object (with a single sentence) from the given specification */
+  /** Create an Annotation object (with a single sentence) from the given specification. */
   private static Annotation parseSentence(Optional<String> docid, Optional<Integer> sentenceIndex, String gloss,
                                           Function<List<CoreLabel>,SemanticGraph> tree,
                                           Function<List<CoreLabel>,SemanticGraph> maltTree,
@@ -257,6 +269,5 @@ public class TSVUtils {
         tokens -> parseTree(maltDependencies, tokens),
         parseArray(words), parseArray(lemmas), parseArray(posTags), parseArray(nerTags), sentenceid);
   }
-
 
 }
