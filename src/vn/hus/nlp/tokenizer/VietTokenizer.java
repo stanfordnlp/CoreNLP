@@ -14,6 +14,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -113,7 +114,6 @@ public final class VietTokenizer {
 	 * @return a segmented sentence
 	 */
 	public String segment(String sentence) {
-		StringBuffer result = new StringBuffer(1000);
 		StringReader reader = new StringReader(sentence);
 		// tokenize the sentence
 		try {
@@ -122,13 +122,14 @@ public final class VietTokenizer {
 			for (TaggedWord taggedWord : list) {
 				String word = taggedWord.toString();
 				if (TokenizerOptions.USE_UNDERSCORE) {
-					word = word.replaceAll("\\s+", "_");
-					
+					if (word.split("\\s+").length > 1) {
+						String underscore_word = word.replaceAll("\\s+", "_");
+						sentence = sentence.replaceAll(Pattern.quote(word), underscore_word);
+					}
 				} else {
 					word = "[" + word + "]";
 				}
-				if (!word.equals(".")) result.append(' ');
-				result.append(word);
+
 			}
 			// update nTokens
 			nTokens += list.size();
@@ -136,7 +137,7 @@ public final class VietTokenizer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return result.toString().trim();
+		return sentence.trim();
 	}
 	
 	/**
