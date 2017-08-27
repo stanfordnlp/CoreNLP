@@ -36,11 +36,17 @@ public class TSVUtils {
     return input.replace("\"\"","\"").replace("\\\\", "\\");
   }
 
-  private static final Pattern nonEscapedDoubleQuote = Pattern.compile("(?<!\\\\)\"\"");
+
   /**
    * Parse an SQL array.
+   *
    * This code allows fixing "doubly escaped" quotes, but would fail if you actually
    * wanted \\\\ to become two backslashes in a string (see the tests).
+   * It also doesn't support single quote strings in SQL, since our output/tests write single quotes without
+   * escaping or quoting, but, really you should for SQL, as I understand things....
+   * And it has special support for double double quoting an entire string ... but this disables having empty strings.
+   * I think that output comes from incorrectly not undoubling quotes in a String at an earlier stage, and so it
+   * should be fixed earlier.
    *
    * @param array The array to parse.
    * @return The parsed array, as a list.
@@ -50,20 +56,48 @@ public class TSVUtils {
     if (array.startsWith("{") && array.endsWith("}")) {
       array = array.substring(1, array.length() - 1);
     }
-    array = array.replace("\\\\", "\\");
-    array = nonEscapedDoubleQuote.matcher(array).replaceAll("\\\\\\\"");
+    array = array.replace("\\\\", "\\"); // The questionable code for "doubly escaped" things
     char[] input = array.toCharArray();
     List<String> output = new ArrayList<>();
     StringBuilder elem = new StringBuilder();
     boolean inQuotes = false;
     boolean escaped = false;
-    for (char c : input) {
+    boolean doubledQuotes = false;
+    char lastQuoteChar = '\0';
+    for (int i = 0; i < input.length; i++) {
+      char c  = input[i];
+      char next = (i == input.length -1 ) ? '\0': input[i+1];
       if (escaped) {
         elem.append(c);
         escaped = false;
-      } else if (c == '"') {
-        inQuotes = !inQuotes;
-        escaped = false;
+      } else if (c == '"') {  // to support single quote escaping add:  || c == '\''
+        if ( ! inQuotes) {
+          inQuotes = true;
+          escaped = false;
+          lastQuoteChar = c;
+          if (next == c) {
+            // supporting doubling of beginning quote, expect doubling of ending, disable support for internal doubling
+            i++;
+            doubledQuotes = true;
+          }
+        } else {
+          if (c == lastQuoteChar) {
+            if (next == lastQuoteChar && ! doubledQuotes) {
+              // doubled quote escaping
+              escaped = true;
+            } else {
+              inQuotes = false;
+              escaped = false;
+              if (doubledQuotes) {
+                i++;
+                doubledQuotes = false;
+              }
+            }
+          } else {
+            // different quote char, just like literal
+            elem.append(c);
+          }
+        }
       } else if (c == '\\') {
         escaped = true;
       } else {
