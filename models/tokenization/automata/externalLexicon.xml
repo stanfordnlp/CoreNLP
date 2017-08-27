@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<corpus id="resources/automata/externalLexicon.xml">
+    <body>
+		<w>this is an external word</w>
+		<w>Hà nội</w>
+    </body>
+</corpus>
