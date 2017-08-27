@@ -14,3 +14,8 @@ lib/vn.hus.nlp.fsm-1.0.0.jar
 lib/vn.hus.nlp.sd-2.0.0.jar
 lib/vn.hus.nlp.utils-1.0.0.jar
 ```
+# Run sentiment analysis
+
+```
+java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -props test-data/custom-sentiment.properties -file test-data/sentiment.txt
+```
