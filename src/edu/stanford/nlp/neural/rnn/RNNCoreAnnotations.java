@@ -84,7 +84,7 @@ public class RNNCoreAnnotations {
     if (!(label instanceof CoreLabel)) {
       throw new IllegalArgumentException("CoreLabels required to get the attached predicted class");
     }
-    Integer val = ((CoreLabel) label).get(PredictedClass.class); // TODO: chua hieu PredictedClass.class goi cai' gi?
+    Integer val = ((CoreLabel) label).get(PredictedClass.class);
     return val == null ? -1: val;
   }
 

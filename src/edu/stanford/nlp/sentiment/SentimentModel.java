@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sentiment; 
+package edu.stanford.nlp.sentiment;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
@@ -48,7 +48,7 @@ public class SentimentModel implements Serializable  {
   /**
    * Map from vocabulary words to word vectors.
    *
-   * @see #getWordVector(String) 
+   * @see #getWordVector(String)
    */
   public Map<String, SimpleMatrix> wordVectors;
 
@@ -282,7 +282,7 @@ public class SentimentModel implements Serializable  {
 
     identity = SimpleMatrix.identity(numHid);
 
-    binaryTransform = TwoDimensionalMap.treeMap(); // TODO: tao ra cai' zi?
+    binaryTransform = TwoDimensionalMap.treeMap();
     binaryTensors = TwoDimensionalMap.treeMap();
     binaryClassification = TwoDimensionalMap.treeMap();
 
