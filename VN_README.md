@@ -1,7 +1,7 @@
 
 # Installation
 ## Install CoreNLP model
-Inlcude [CoreNLP model](https://repo1.maven.org/maven2/edu/stanford/nlp/stanford-corenlp/3.8.0/stanford-corenlp-3.8.0-models.jar) to your classpath
+Include [CoreNLP model](https://repo1.maven.org/maven2/edu/stanford/nlp/stanford-corenlp/3.8.0/stanford-corenlp-3.8.0-models.jar) to your classpath
 
 ## Include the library to your classpath to make vnTokenizer work
 
