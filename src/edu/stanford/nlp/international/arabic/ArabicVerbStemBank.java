@@ -66,10 +66,7 @@ public class ArabicVerbStemBank  {
 
       System.err.printf("%s: Loaded %d stems\n", this.getClass().getName(), verbStems.keySet().size());
 
-    } catch (UnsupportedEncodingException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (FileNotFoundException e) {
+    } catch (UnsupportedEncodingException | FileNotFoundException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     } catch (IOException e) {

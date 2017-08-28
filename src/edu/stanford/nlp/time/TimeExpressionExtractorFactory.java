@@ -41,9 +41,7 @@ public class TimeExpressionExtractorFactory implements Factory<TimeExpressionExt
   public static boolean isDefaultExtractorPresent() {
     try {
       Class clazz = Class.forName(DEFAULT_TIME_EXPRESSION_EXTRACTOR_CLASS);
-    } catch (ClassNotFoundException ex) {
-      return false;
-    } catch (NoClassDefFoundError ex) {
+    } catch (ClassNotFoundException | NoClassDefFoundError ex) {
       return false;
     }
     return true;
