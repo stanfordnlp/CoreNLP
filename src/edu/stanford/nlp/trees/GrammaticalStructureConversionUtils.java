@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.international.pennchinese.CTBErrorCorrectingTreeNormalizer;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -158,7 +159,7 @@ public class GrammaticalStructureConversionUtils {
           bf.append("======\n");
           for (TypedDependency dep : extraDeps) {
             bf.append(toStringIndex(dep, indexToPos));
-            bf.append("\n");
+            bf.append('\n');
           }
         }
       } else {
@@ -287,19 +288,8 @@ public class GrammaticalStructureConversionUtils {
         depPrinter = altDepPrinterClass.getConstructor(String[].class).newInstance((Object) depPrintArgs);
       }
       return depPrinter;
-    } catch (IllegalArgumentException e) {
-      e.printStackTrace();
-      return null;
-    } catch (SecurityException e) {
-      e.printStackTrace();
-      return null;
-    } catch (InstantiationException e) {
-      e.printStackTrace();
-      return null;
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-      return null;
-    } catch (InvocationTargetException e) {
+    } catch (IllegalArgumentException | SecurityException | IllegalAccessException | InstantiationException
+            | InvocationTargetException e) {
       e.printStackTrace();
       return null;
     } catch (NoSuchMethodException e) {
@@ -313,7 +303,7 @@ public class GrammaticalStructureConversionUtils {
   }
 
   private static Function<List<? extends HasWord>, Tree> loadParser(String parserFile, String parserOptions, boolean makeCopulaHead) {
-    if (parserFile == null || "".equals(parserFile)) {
+    if (parserFile == null || parserFile.isEmpty()) {
       parserFile = DEFAULT_PARSER_FILE;
       if (parserOptions == null) {
         parserOptions = "-retainTmpSubcategories";
@@ -728,7 +718,7 @@ public class GrammaticalStructureConversionUtils {
       // Do this by reflection to avoid this becoming a dependency when we distribute the parser
       try {
         Class sgf = Class.forName("edu.stanford.nlp.semgraph.SemanticGraphFactory");
-        m = sgf.getDeclaredMethod("makeFromTree", GrammaticalStructure.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, Predicate.class, String.class, int.class);
+        m = sgf.getDeclaredMethod("makeFromTree", GrammaticalStructure.class, SemanticGraphFactory.Mode.class, GrammaticalStructure.Extras.class, Predicate.class);
       } catch (Exception e) {
         log.info("Test cannot check for cycles in tree format (classes not available)");
       }
@@ -813,7 +803,7 @@ public class GrammaticalStructureConversionUtils {
         if (m != null) {
           try {
             // the first arg is null because it's a static method....
-            Object semGraph = m.invoke(null, gs, false, true, false, false, false, false, null, null, 0);
+            Object semGraph = m.invoke(null, gs, SemanticGraphFactory.Mode.CCPROCESSED, GrammaticalStructure.Extras.MAXIMAL, null);
             Class sg = Class.forName("edu.stanford.nlp.semgraph.SemanticGraph");
             Method mDag = sg.getDeclaredMethod("isDag");
             boolean isDag = (Boolean) mDag.invoke(semGraph);
