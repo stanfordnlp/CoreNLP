@@ -3,6 +3,9 @@ package edu.stanford.nlp.coref;
 import java.util.Locale;
 import java.util.Properties;
 
+import edu.stanford.nlp.trees.HeadFinder;
+import edu.stanford.nlp.trees.SemanticHeadFinder;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinder;
 import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
@@ -168,6 +171,16 @@ public class CorefProperties {
 
   private static String getLanguageStr(Properties props) {
     return getLanguage(props).getDisplayName().toLowerCase();
+  }
+
+
+  public static HeadFinder getHeadFinder(Properties props) {
+    Locale lang = getLanguage(props);
+    if (lang == Locale.ENGLISH) return new SemanticHeadFinder();
+    else if (lang == Locale.CHINESE) return new ChineseSemanticHeadFinder();
+    else {
+      throw new RuntimeException("Invalid language setting: cannot load HeadFinder");
+    }
   }
 
 }
