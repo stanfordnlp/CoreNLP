@@ -114,7 +114,13 @@ This is a neural-network-based mention-ranking model. Some relevant options:
 
 ## Running on CoNLL 2012
 
-If you would like to run our system on the CoNLL 2012 eval data:
+### Deterministic System
+
+If you'd like to benchmark our deterministic system of the CoNLL 2011/2012 shared tasks, see [the Usage section for the Stanford Deterministic Coreference Resolution System](https://nlp.stanford.edu/software/dcoref.shtml#Usage).
+
+### Statistical and Neural Systems
+
+If you would like to run our statistical or neural systems on the CoNLL 2012 eval data:
 
 1. Get the CoNLL scoring script from [here](http://conll.cemantix.org/2012/software.html)
 2. Get the CoNLL 2012 eval data from [here](http://conll.cemantix.org/2012/data.html)
