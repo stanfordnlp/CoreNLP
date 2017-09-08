@@ -10,3 +10,4 @@
 /stanford-corenlp-3.8.0-models.jar
 /.classpath
 /.project
+*.log

@@ -278,4 +278,12 @@ public class Extractor implements Serializable  {
     return ans;
   }
 
+  public int getPosition() {
+    return position;
+  }
+
+  public boolean isTag() {
+    return isTag;
+  }
+
 }
