@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--  (C) phuonglh@gmail.com -->
+<corpus id="resources/lexers/lexers.xml">
+    <body>
+        <w msd="numbersign">#</w>
+        <w msd="ampersand">&amp;</w>
+        <w msd="date_mm-dd-yy">(0*[1-9]|1[012])-(0*[1-9]|[12][0-9]|3[01])-\d\d</w>
+        <w msd="date_mm/dd/yy">(0*[1-9]|1[012])/(0*[1-9]|[12][0-9]|3[01])/\d\d</w>
+        <w msd="date_mm.dd.yy">(0*[1-9]|1[012])\.(0*[1-9]|[12][0-9]|3[01])\.\d\d</w>
+        <w msd="date_dd-mm-yy">([12][0-9]|3[01]|0*[1-9])-(1[012]||0*[1-9])-\d\d</w>
+        <w msd="date_dd/mm/yy">([12][0-9]|3[01]|0*[1-9])/(1[012]||0*[1-9])/\d\d</w>
+        <w msd="date_dd.mm.yy">([12][0-9]|3[01]|0*[1-9])[\.](1[012]||0*[1-9])[\.]\d\d</w>
+        <w msd="date_dd-mm-yyyy">([12][0-9]|3[01]|0*[1-9])-(1[012]||0*[1-9])-(19|20)\d\d</w>
+        <w msd="date_dd/mm/yyyy">([12][0-9]|3[01]|0*[1-9])/(1[012]||0*[1-9])/(19|20)\d\d</w>
+        <w msd="date_dd.mm.yyyy">([12][0-9]|3[01]|0*[1-9])\.(1[012]||0*[1-9])\.(19|20)\d\d</w>
+        <w msd="date_dd-mm">(0*[1-9]|[12][0-9]|3[01])[-/\.](1[012]|0*[1-9])</w>
+        <w msd="date_mm-yy">(0*[1-9]|1[012])[-/\.]\d\d</w>
+        <w msd="date_mm-yyyy">(0*[1-9]|1[012])[-/\.](19|20)\d\d</w>
+        <w msd="date_yyyy">(19|20)\d\d</w>
+        <w msd="date_mm-dd-yyyy">(0*[1-9]|1[012])-([12][0-9]|3[01]|0*[1-9])-(19|20)\d\d</w>
+        <w msd="date_mm/dd/yyyy">(0*[1-9]|1[012])/([12][0-9]|3[01]|0*[1-9])/(19|20)\d\d</w>
+        <w msd="date_mm.dd.yyyy">(0*[1-9]|1[012])\.([12][0-9]|3[01]|0*[1-9])\.(19|20)\d\d</w>
+        <w msd="date_yyyy-mm-dd">(19|20)\d\d-(0*[1-9]|1[012])-([12][0-9]|3[01]|0*[1-9])</w>
+        <w msd="date_yyyy/mm/dd">(19|20)\d\d/(0*[1-9]|1[012])/([12][0-9]|3[01]|0*[1-9])</w>
+        <w msd="date_yyyy.mm.dd">(19|20)\d\d\.(0*[1-9]|1[012])\.([12][0-9]|3[01]|0*[1-9])</w>
+        <w msd="hhmmss">([0-1]\d|[2][0-3]):[0-5]\d:[0-5]\d</w>
+        <w msd="percent">([0-9]*[\.,])?[0-9]+%</w>
+        <w msd="name1">[A-ZÁÂĐÐÍÔƯỨÝỶ][aàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz]*</w>
+        <w msd="name2">([A-ZÁÂĐÐÍÔƯỨÝỶ][aàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz]*)(\s+[A-ZÁÂĐÐÍÔƯỨÝỶ][aàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz]+)*</w>
+        <w msd="phrase">([AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬBCDĐÐEÈẺẼÉẸÊỀỂỄẾỆFGHIÌỈĨÍỊJKLMNOÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢPQRSTUÙỦŨÚỤƯỪỬỮỨỰVWXYỲỶỸÝỴZ])?([aàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz\s])*([aàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz])+$*</w>
+        <w msd="allcaps">([AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬBCDĐÐEÈẺẼÉẸÊỀỂỄẾỆFGHIÌỈĨÍỊJKLMNOÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢPQRSTUÙỦŨÚỤƯỪỬỮỨỰVWXYỲỶỸÝỴZ]+)(\s*[AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬBCDĐÐEÈẺẼÉẸÊỀỂỄẾỆFGHIÌỈĨÍỊJKLMNOÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢPQRSTUÙỦŨÚỤƯỪỬỮỨỰVWXYỲỶỸÝỴZ]+)*[^aàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz/\)\(\?!\.;:,\-"']</w>
+        <w msd="fraction">(\d+)/(\d+)</w>
+        <w msd="email">(\w[-._\w]*\w@\w[-._\w]*\w\.\w{2,3})</w>
+        <w msd="return">(^$)</w>
+        <w msd="fslash">/</w>
+        <w msd="langle">&lt;</w>
+        <w msd="xmltags">&lt;/*\w*&gt;</w>
+        <w msd="equal">=</w>
+        <w msd="rangle">&gt;</w>
+        <w msd="aroba">@</w>
+        <w msd="number1">[+]?([0-9]*)?[0-9]+([\.,]\d+)*</w>
+        <!-- 
+        <w msd="number2">[+]?([0-9]*)?[0-9]+([\.,]\d+)*(\s|tỉ|tỷ|triệu|ngàn|nghìn|trăm|chục)*</w>
+        -->
+        <w msd="degree">[-+]?([0-9]*[\.,])?[0-9]+°</w>
+        <w msd="ponctuation">[\\?!\\.:;,\-"']</w>
+        <w msd="dollar">\$</w>
+        <w msd="lparen">\(</w>
+        <w msd="rparen">\)</w>
+        <w msd="asterisk">\*</w>
+        <w msd="plus">\+</w>
+        <w msd="minus">\-</w>
+        <w msd="ellipsis">\.\.\.</w>
+        <w msd="residual">\W</w>
+        <w msd="lbracket">\[</w>
+        <w msd="bslash">\\</w>
+        <w msd="rbracket">\]</w>
+        <w msd="entity0">\d+([\.,]\d+)*[A-Zaàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz]+\d+$</w>
+        <w msd="entity1">[A-Zaàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz]+(\d)*$</w>
+        <w msd="entity2">[A-Zaàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz\d]+([\.\-/][\dA-Zaàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz]+)*[\dA-Zaàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹýỵz]+</w>
+        <w msd="space">\s+</w>
+        <w msd="word">\w</w>
+        <w msd="lcbrace">\{</w>
+        <w msd="rcbrace">\}</w>
+        <w msd="underscore">_</w>
+        <w msd="pound">£</w>
+    </body>
+</corpus>

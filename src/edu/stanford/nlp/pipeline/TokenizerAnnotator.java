@@ -13,8 +13,7 @@ import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.logging.Redwood;
-
-
+import vn.hus.nlp.tokenizer.VietTokenizer;
 /**
  * This class will PTB tokenize the input.  It assumes that the original
  * String is under the CoreAnnotations.TextAnnotation field
@@ -311,8 +310,12 @@ public class TokenizerAnnotator implements Annotator  {
     }
 
     if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
-      String text = annotation.get(CoreAnnotations.TextAnnotation.class);
-      Reader r = new StringReader(text);
+//      String text = annotation.get(CoreAnnotations.TextAnnotation.class);
+      VietTokenizer tokenizer = new VietTokenizer();
+      String sentences = annotation.get(CoreAnnotations.TextAnnotation.class);
+      String vnTokenziedText = tokenizer.segment(sentences);
+
+      Reader r = new StringReader(vnTokenziedText);
       // don't wrap in BufferedReader.  It gives you nothing for in-memory String unless you need the readLine() method!
 
       List<CoreLabel> tokens = getTokenizer(r).tokenize();

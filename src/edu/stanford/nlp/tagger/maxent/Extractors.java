@@ -29,6 +29,33 @@ public class Extractors implements Serializable  {
     localContext, // extractors only looking at words, except those in "local"
     dynamic; // extractors depending on class labels
 
+  public List<Pair<Integer, Extractor>> getLocal() {
+    return local;
+  }
+
+  public void setLocal(List<Pair<Integer, Extractor>> local) {
+    this.local = local;
+  }
+
+  public List<Pair<Integer, Extractor>> getLocalContext() {
+    return localContext;
+  }
+
+  public void setLocalContext(List<Pair<Integer, Extractor>> localContext) {
+    this.localContext = localContext;
+  }
+
+  public List<Pair<Integer, Extractor>> getDynamic() {
+    return dynamic;
+  }
+
+  public void setDynamic(List<Pair<Integer, Extractor>> dynamic) {
+    this.dynamic = dynamic;
+  }
+
+  public Extractor[] getV() {
+    return v;
+  }
 
   /**
    * Set the extractors from an array.
