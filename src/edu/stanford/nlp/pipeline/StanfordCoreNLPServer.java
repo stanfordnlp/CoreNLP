@@ -340,6 +340,89 @@ public class StanfordCoreNLPServer implements Runnable {
     return impl;
   }
 
+  /**
+   * Parse the parameters of a connection into a CoreNLP properties file that can be passed into
+   * {@link StanfordCoreNLP}, and used in the I/O stages.
+   *
+   * @param httpExchange The http exchange; effectively, the request information.
+   *
+   * @return A {@link Properties} object corresponding to a combination of default and passed properties.
+   *
+   * @throws UnsupportedEncodingException Thrown if we could not decode the key/value pairs with UTF-8.
+   */
+  private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
+    Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
+
+    // Load the default properties
+    Properties props = new Properties();
+    defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
+
+    // Add GET parameters as properties
+    urlParams.entrySet().stream()
+        .filter(entry ->
+            !"properties".equalsIgnoreCase(entry.getKey()) &&
+                !"props".equalsIgnoreCase(entry.getKey()))
+        .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
+
+    // Try to get more properties from query string.
+    // (get the properties from the URL params)
+    Map<String, String> urlProperties = new HashMap<>();
+    if (urlParams.containsKey("properties")) {
+      urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8"));
+    } else if (urlParams.containsKey("props")) {
+      urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("props"), "UTF-8"));
+    }
+
+    // check to see if a specific language was set, use language specific properties
+    String language = urlParams.getOrDefault("pipelineLanguage", urlProperties.getOrDefault("pipelineLanguage", "default"));
+    if (language != null && !"default".equals(language)) {
+      String languagePropertiesFile = LanguageInfo.getLanguagePropertiesFile(language);
+      if (languagePropertiesFile != null) {
+        try {
+          Properties languageSpecificProperties = new Properties();
+          languageSpecificProperties.load(
+                  IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(languagePropertiesFile));
+          PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
+        } catch (IOException e) {
+          err("Failure to load language specific properties: " + languagePropertiesFile + " for " + language);
+        }
+      } else {
+        try {
+          respondError("Invalid language: '" + language + '\'', httpExchange);
+        } catch (IOException e) { warn(e); }
+        return new Properties();
+      }
+    }
+
+    // (tweak the default properties a bit)
+    if (!props.containsKey("mention.type")) {
+      // Set coref head to use dependencies
+      props.setProperty("mention.type", "dep");
+      if (urlProperties.containsKey("annotators") && urlProperties.get("annotators") != null &&
+          ArrayUtils.contains(urlProperties.get("annotators").split(","), "parse")) {
+        // (case: the properties have a parse annotator --
+        //        we don't have to use the dependency mention finder)
+        props.remove("mention.type");
+      }
+    }
+    // (add new properties on top of the default properties)
+    urlProperties.forEach((key1, value) -> props.setProperty(key1, value));
+
+
+
+    // Get the annotators
+    String annotators = props.getProperty("annotators");
+    // If the properties contains a custom annotator, then do not enforceRequirements.
+    if (!PropertiesUtils.hasPropertyPrefix(props, CUSTOM_ANNOTATOR_PREFIX) && PropertiesUtils.getBool(props, "enforceRequirements", true)) {
+      annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"), props);
+    }
+
+    // Make sure the properties compile
+    props.setProperty("annotators", annotators);
+
+    return props;
+  }
+
 
   /**
    * A helper function to respond to a request with an error.
@@ -722,89 +805,6 @@ public class StanfordCoreNLPServer implements Runnable {
         }
       }
     }
-
-    /**
-     * Parse the parameters of a connection into a CoreNLP properties file that can be passed into
-     * {@link StanfordCoreNLP}, and used in the I/O stages.
-     *
-     * @param httpExchange The http exchange; effectively, the request information.
-     *
-     * @return A {@link Properties} object corresponding to a combination of default and passed properties.
-     *
-     * @throws UnsupportedEncodingException Thrown if we could not decode the key/value pairs with UTF-8.
-     */
-    private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
-      Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
-
-      // Load the default properties
-      Properties props = new Properties();
-      defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
-
-      // Add GET parameters as properties
-      urlParams.entrySet().stream()
-          .filter(entry ->
-              !"properties".equalsIgnoreCase(entry.getKey()) &&
-                  !"props".equalsIgnoreCase(entry.getKey()))
-          .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
-
-      // Try to get more properties from query string.
-      // (get the properties from the URL params)
-      Map<String, String> urlProperties = new HashMap<>();
-      if (urlParams.containsKey("properties")) {
-        urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8"));
-      } else if (urlParams.containsKey("props")) {
-        urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("props"), "UTF-8"));
-      }
-
-      // check to see if a specific language was set, use language specific properties
-      String language = urlParams.getOrDefault("pipelineLanguage", urlProperties.getOrDefault("pipelineLanguage", "default"));
-      if (language != null && !"default".equals(language)) {
-        String languagePropertiesFile = LanguageInfo.getLanguagePropertiesFile(language);
-        if (languagePropertiesFile != null) {
-          try {
-            Properties languageSpecificProperties = new Properties();
-            languageSpecificProperties.load(
-                    IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(languagePropertiesFile));
-            PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
-          } catch (IOException e) {
-            err("Failure to load language specific properties: " + languagePropertiesFile + " for " + language);
-          }
-        } else {
-          try {
-            respondError("Invalid language: '" + language + '\'', httpExchange);
-          } catch (IOException e) { warn(e); }
-          return new Properties();
-        }
-      }
-
-      // (tweak the default properties a bit)
-      if (!props.containsKey("mention.type")) {
-        // Set coref head to use dependencies
-        props.setProperty("mention.type", "dep");
-        if (urlProperties.containsKey("annotators") && urlProperties.get("annotators") != null &&
-            ArrayUtils.contains(urlProperties.get("annotators").split(","), "parse")) {
-          // (case: the properties have a parse annotator --
-          //        we don't have to use the dependency mention finder)
-          props.remove("mention.type");
-        }
-      }
-      // (add new properties on top of the default properties)
-      urlProperties.forEach((key1, value) -> props.setProperty(key1, value));
-
-
-
-      // Get the annotators
-      String annotators = props.getProperty("annotators");
-      // If the properties contains a custom annotator, then do not enforceRequirements.
-      if (!PropertiesUtils.hasPropertyPrefix(props, CUSTOM_ANNOTATOR_PREFIX) && PropertiesUtils.getBool(props, "enforceRequirements", true)) {
-        annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"), props);
-      }
-
-      // Make sure the properties compile
-      props.setProperty("annotators", annotators);
-
-      return props;
-    }
   }
 
 
@@ -841,8 +841,11 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
-      // Some common fields
-      Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner");
+
+      Properties props = getProperties(httpExchange);
+      // Override with Required annotators for Semgrex
+      props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+
       if (authenticator != null && !authenticator.test(props)) {
         respondUnauthorized(httpExchange);
         return;
@@ -967,8 +970,10 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
-      // Some common properties
-      Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
+      Properties props = getProperties(httpExchange);
+      // Override with Required annotators for Semgrex
+      props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
+
       if (authenticator != null && !authenticator.test(props)) {
         respondUnauthorized(httpExchange);
         return;
@@ -1089,8 +1094,10 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
       httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
 
-      // Some common properties
-      Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,parse");
+      Properties props = getProperties(httpExchange);
+      // Override with Required annotators for Semgrex
+      props.setProperty("annotators", "tokenize,ssplit,parse");
+
       if (authenticator != null && ! authenticator.test(props)) {
         respondUnauthorized(httpExchange);
         return;

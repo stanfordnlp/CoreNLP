@@ -1117,7 +1117,9 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(
+        pattern.replace("&", "\\&").replace('+', '\\+')) +
+        '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.tokensregex_error').remove();  // Clear error messages
@@ -1149,7 +1151,9 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(
+        pattern.replace("&", "\\&").replace('+', '\\+')) +
+        '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.semgrex_error').remove();  // Clear error messages
@@ -1180,7 +1184,9 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + '/tregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      url: serverAddress + '/tregex?pattern=' + encodeURIComponent(
+        pattern.replace("&", "\\&").replace('+', '\\+')) +
+        '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.tregex_error').remove();  // Clear error messages
