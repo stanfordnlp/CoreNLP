@@ -94,9 +94,12 @@ public class JSONOutputter extends AnnotationOutputter {
           Tree sentimentTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
           if (sentimentTree != null) {
             int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
+            List<Double> sentimentPredictions =
+                RNNCoreAnnotations.getPredictionsAsStringList(sentimentTree);
             String sentimentClass = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
             l2.set("sentimentValue", Integer.toString(sentiment));
             l2.set("sentiment", sentimentClass.replaceAll(" ", ""));
+            l2.set("sentimentDistribution", sentimentPredictions);
           }
           // (openie)
           Collection<RelationTriple> openIETriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
