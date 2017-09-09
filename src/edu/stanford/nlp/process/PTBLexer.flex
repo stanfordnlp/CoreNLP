@@ -323,7 +323,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   public static final String ptb3EllipsisStr = "...";
   public static final String unicodeEllipsisStr = "\u2026";
 
-  /* This pattern now also include newlines, since we sometimes allow them in SGML tokens....*/
+  /* This pattern now also include newlines, since we sometimes allow them in SGML tokens.... */
   private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ \r\n]");
   private static final Pattern LEFT_PAREN_PATTERN = Pattern.compile("\\(");
   private static final Pattern RIGHT_PAREN_PATTERN = Pattern.compile("\\)");
@@ -835,7 +835,7 @@ SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
 ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)|¯\\_\(ツ\)_\/¯
 
 /* Slightly generous but generally reasonable emoji parsing */
-/* These are human emoji that can have a zwj gender (as well as skin color)
+/* These are human emoji that can have a zwj gender (as well as skin color) */
 EMOJI_GENDERED = [\u26F9\u{01F3C3}-\u{01F3C4}\u{01F3CA}-\u{01F3CC}\u{01F466}-\u{01F469}\u{01F46E}-\u{01F46F}\u{01F471}\u{01F473}\u{01F477}\u{01F481}-\u{01F482}\u{01F486}-\u{01F487}\u{01F575}\u{01F645}-\u{01F647}\u{01F64B}\u{01F64D}-\u{01F64E}\u{01F6A3}\u{01F6B4}-\u{01F6B6}\u{01F926}\u{01F937}-\u{01F939}\u{01F93C}-\u{01F93E}\u{01F9D6}-\u{01F9DF}]
 /* Emoji follower is variation selector (emoji/non-emoji rendering) or Fitzpatrick skin tone */
 EMOJI_FOLLOW = [\uFE0E\uFE0F\u{01F3FB}-\u{01F3FF}]
@@ -1075,15 +1075,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 <YyTokenizePerLine>{ABBREV1}/[^\r\n][^\r\n]        { return getNext(); }
 {ABBREV1}               { // this one should only match if we're basically at the end of file
                           // since the last one matches two things, even newlines (if not tokenize per line)
-                          String s;
-                          if (strictTreebank3 && ! "U.S.".equals(yytext())) {
-                            yypushback(1); // return a period for next time
-                            s = yytext();
-                          } else {
-                            s = yytext();
-                            yypushback(1); // return a period for next time
-                          }
-                          return getNext(s, yytext());
+                          return processAbbrev1();
                         }
 {ABBREV2}               { return getNext(); }
 {ABBREV4}/{SPACE}       { return getNext(); }
