@@ -15,19 +15,17 @@ public class ReflectionLoading {
   private ReflectionLoading() {}
 
   /**
+   * Create an object of type T by calling the class constructor with the given arguments.
    * You can use this as follows:
    * <br>
-   *  String s =
-   *    ReflectionLoading.loadByReflection("java.lang.String", "foo");
+   *  {@code String s = ReflectionLoading.loadByReflection("java.lang.String", "foo"); }
    * <br>
-   *  String s =
-   *    ReflectionLoading.loadByReflection("java.lang.String");
+   *  {@code String s = ReflectionLoading.loadByReflection("java.lang.String"); }
    * <br>
    * Note that this uses generics for convenience, but this does
-   * nothing for compile-time error checking.  You can do
+   * nothing for compile-time error checking.  You can do:
    * <br>
-   *  Integer i =
-   *    ReflectionLoading.loadByReflection("java.lang.String");
+   *  {@code Integer i = ReflectionLoading.loadByReflection("java.lang.String"); }
    * <br>
    * and it will compile just fine, but will result in a ClassCastException.
    */
