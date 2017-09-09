@@ -679,7 +679,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     public void setOptions(String options) {
       this.options = options;
     }
+
   } // end static class PTBTokenizerFactory
+
 
   /**
    * Command-line option specification.

@@ -551,6 +551,28 @@ public class PTBTokenizerTest {
     }
   }
 
+  private static <T extends CoreLabel> void runOnTwoArraysWithOffsets(TokenizerFactory<T> tokFactory, String[] inputs, String[][] desired) {
+    assertEquals("Test data arrays don't match in length", inputs.length, desired.length);
+    for (int sent = 0; sent < inputs.length; sent++) {
+      // System.err.println("Testing " + inputs[sent]);
+      Tokenizer<T> tok = tokFactory.getTokenizer(new StringReader(inputs[sent]));
+      for (int i = 0; tok.hasNext() || i < desired[sent].length; i++) {
+        if ( ! tok.hasNext()) {
+          fail("PTBTokenizer generated too few tokens for sentence " + sent + "! Missing " + desired[sent][i]);
+        }
+        T w = tok.next();
+        if (i >= desired[sent].length) {
+          fail("PTBTokenizer generated too many tokens for sentence " + sent + "! Added " + w.value());
+        } else {
+          assertEquals("PTBTokenizer got wrong token", desired[sent][i], w.value());
+          assertEquals("PTBTokenizer charOffsets wrong for " + desired[sent][i], desired[sent][i].length(),
+                    w.endPosition() - w.beginPosition());
+        }
+      }
+    }
+  }
+
+
   /** The appending has to run one behind so as to make sure that the after annotation has been filled in!
    *  Just placing the appendTextFrom() after reading tok.next() in the loop does not work.
    */
@@ -609,6 +631,7 @@ public class PTBTokenizerTest {
     "1202-03-04 5:32:56 2004-03-04T18:32:56",
     "20°C is 68°F because 0℃ is 32℉",
     "a.jpg a-b.jpg a.b.jpg a-b.jpg a_b.jpg a-b-c.jpg 0-1-2.jpg a-b/c-d_e.jpg a-b/c-9a9_9a.jpg\n",
+    "¯\\_(ツ)_/¯",
     "#hashtag #Azərbaycanca #mûǁae #Čeština #日本語ハッシュタグ #1 #23 #Trump2016 @3 @acl_2016",
           "Sect. 793 of the Penal Code",
   };
@@ -621,6 +644,7 @@ public class PTBTokenizerTest {
     { "1202-03-04", "5:32:56", "2004-03-04T18:32:56" },
     { "20", "°C", "is", "68", "°F", "because", "0", "℃", "is", "32", "℉" },
     { "a.jpg", "a-b.jpg", "a.b.jpg", "a-b.jpg", "a_b.jpg", "a-b-c.jpg", "0-1-2.jpg", "a-b/c-d_e.jpg", "a-b/c-9a9_9a.jpg"},
+    { "¯\\_-LRB-ツ-RRB-_/¯" },
     { "#hashtag", "#Azərbaycanca", "#mûǁae", "#Čeština", "#日本語ハッシュタグ", "#", "1", "#", "23", "#Trump2016", "@", "3", "@acl_2016" },
           { "Sect.", "793", "of", "the", "Penal", "Code" },
   };
@@ -642,7 +666,7 @@ public class PTBTokenizerTest {
           "\u00AE\u203C\u2198\u231A\u2328\u23F0\u2620\u26BD\u2705\u2757",
           // Choosing emoji vs. text presentation.
           "⚠⚠️⚠︎❤️❤",
-          "¯\\_(ツ)_/¯"
+          "\uD83D\uDC69\u200D⚖\uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4"
   };
 
   private final String[][] emojiGold = {
@@ -651,14 +675,16 @@ public class PTBTokenizerTest {
           { "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67", "\uD83E\uDDC0" },
           { "\u00AE", "\u203C", "\u2198", "\u231A", "\u2328", "\u23F0", "\u2620", "\u26BD", "\u2705", "\u2757" },
           { "⚠", "⚠️", "⚠︎", "❤️", "❤"},
-          { "¯\\_-LRB-ツ-RRB-_/¯" },
+          { "\uD83D\uDC69\u200D⚖", "\uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4" }
   };
 
   @Test
   public void testEmoji() {
     TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
-    runOnTwoArrays(tokFactory, emojiInputs, emojiGold);
+    runOnTwoArraysWithOffsets(tokFactory, emojiInputs, emojiGold);
     runAgainstOrig(tokFactory, emojiInputs);
+    assertEquals(1, "\uD83D\uDCF7".codePointCount(0, 2));
+    assertEquals(2, "❤️".codePointCount(0, 2));
   }
 
   private final String[] hyphenInputs = {
