@@ -7,8 +7,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.trees.Tree;
 
-import java.util.*;
-
 /** Annotations used by Tree Recursive Neural Networks.
  *
  *  @author John Bauer
@@ -60,15 +58,6 @@ public class RNNCoreAnnotations {
       throw new IllegalArgumentException("CoreLabels required to get the attached predictions");
     }
     return ((CoreLabel) label).get(Predictions.class);
-  }
-
-  public static List<Double> getPredictionsAsStringList(Tree tree) {
-    SimpleMatrix predictions = getPredictions(tree);
-    List<Double> listOfPredictions = new ArrayList<Double>();
-    for (int i = 0 ; i < predictions.numRows() ; i++) {
-      listOfPredictions.add(predictions.get(i));
-    }
-    return listOfPredictions;
   }
 
   /**

@@ -19,7 +19,9 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
+import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinder;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -40,7 +42,7 @@ public class DocumentMaker {
     this.props = props;
     this.dict = dictionaries;
     reader = getDocumentReader(props);
-    headFinder = CorefProperties.getHeadFinder(props);
+    headFinder = getHeadFinder(props);
     md = CorefProperties.useGoldMentions(props) ?
         new RuleBasedCorefMentionFinder(headFinder, props) : null;
   }
@@ -58,6 +60,15 @@ public class DocumentMaker {
     options.setFilter(conllFileFilter);
     options.lang = CorefProperties.getLanguage(props);
     return new CoNLLDocumentReader(corpusPath, options);
+  }
+
+  private static HeadFinder getHeadFinder(Properties props) {
+    Locale lang = CorefProperties.getLanguage(props);
+    if (lang == Locale.ENGLISH) return new SemanticHeadFinder();
+    else if (lang == Locale.CHINESE) return new ChineseSemanticHeadFinder();
+    else {
+      throw new RuntimeException("Invalid language setting: cannot load HeadFinder");
+    }
   }
 
   public Document makeDocument(Annotation anno) throws Exception {
@@ -94,9 +105,9 @@ public class DocumentMaker {
     return doc;
   }
 
-  private static void findGoldMentionHeads(Document doc) {
+  private void findGoldMentionHeads(Document doc) {
     List<CoreMap> sentences = doc.annotation.get(SentencesAnnotation.class);
-    for (int i=0 ; i<sentences.size() ; i++ ) {
+    for(int i=0 ; i<sentences.size() ; i++ ) {
       DependencyCorefMentionFinder.findHeadInDependency(sentences.get(i), doc.goldMentions.get(i));
     }
   }
@@ -109,12 +120,12 @@ public class DocumentMaker {
 
     Properties pipelineProps = new Properties(props);
     if (CorefProperties.conll(props)) {
-      pipelineProps.setProperty("annotators", (CorefProperties.getLanguage(props) == Locale.CHINESE ?
-              "lemma, ner" : "lemma") + (CorefProperties.useGoldMentions(props) ? "" : ", mention"));
+      pipelineProps.put("annotators", (CorefProperties.getLanguage(props) == Locale.CHINESE ?
+          "lemma, ner" : "lemma") + (CorefProperties.useGoldMentions(props) ? "" : ", mention"));
     } else {
-      pipelineProps.setProperty("annotators", "pos, lemma, ner, " +
-              (CorefProperties.useConstituencyParse(props) ? "parse" : "depparse") +
-              (CorefProperties.useGoldMentions(props) ? "" : ", mention"));
+      pipelineProps.put("annotators", "pos, lemma, ner, " +
+          (CorefProperties.useConstituencyParse(props) ? "parse" : "depparse") +
+          (CorefProperties.useGoldMentions(props) ? "" : ", mention"));
     }
     return (coreNLP = new StanfordCoreNLP(pipelineProps, false));
   }

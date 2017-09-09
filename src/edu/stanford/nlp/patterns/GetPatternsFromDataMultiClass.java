@@ -49,6 +49,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 /**
  * Given text and a seed list, this class gives more words like the seed words
  * by learning surface word or dependency patterns.
+ * <p>
  *
  * The multi-threaded class ({@code nthread} parameter for number of
  * threads) takes as input.
@@ -91,7 +92,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class GetPatternsFromDataMultiClass<E extends Pattern> implements Serializable  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(GetPatternsFromDataMultiClass.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(GetPatternsFromDataMultiClass.class);
 
   private static final long serialVersionUID = 1L;
 
@@ -2232,26 +2233,10 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
   }
 
   public static String matchedTokensByPhraseJsonString(String phrase){
-    if ( ! Data.matchedTokensForEachPhrase.containsKey(phrase)) {
+    if(!Data.matchedTokensForEachPhrase.containsKey(phrase))
       return "";
-    }
-    JsonArrayBuilder arrobj = jsonArrayBuilderFromMapCounter(Data.matchedTokensForEachPhrase.get(phrase));
-    return arrobj.build().toString();
-  }
-
-  public static String matchedTokensByPhraseJsonString(){
-    JsonObjectBuilder pats = Json.createObjectBuilder();
-
-    for (Entry<String, Map<String, List<Integer>>> en : Data.matchedTokensForEachPhrase.entrySet()) {
-      JsonArrayBuilder arrobj = jsonArrayBuilderFromMapCounter(en.getValue());
-      pats.add(en.getKey(), arrobj);
-    }
-    return pats.build().toString();
-  }
-
-  private static JsonArrayBuilder jsonArrayBuilderFromMapCounter(Map<String, List<Integer>> mapCounter) {
-    JsonArrayBuilder arrobj = Json.createArrayBuilder();
-    for (Entry<String, List<Integer>> sen : mapCounter.entrySet()) {
+    JsonArrayBuilder arrobj =Json.createArrayBuilder();
+    for (Entry<String, List<Integer>> sen : Data.matchedTokensForEachPhrase.get(phrase).entrySet()) {
       JsonObjectBuilder obj = Json.createObjectBuilder();
       JsonArrayBuilder tokens = Json.createArrayBuilder();
       for(Integer i : sen.getValue()){
@@ -2260,7 +2245,27 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       obj.add(sen.getKey(),tokens);
       arrobj.add(obj);
     }
-    return arrobj;
+    return arrobj.build().toString();
+  }
+
+  public static String matchedTokensByPhraseJsonString(){
+    JsonObjectBuilder pats = Json.createObjectBuilder();
+
+    for (Entry<String, Map<String, List<Integer>>> en : Data.matchedTokensForEachPhrase.entrySet()) {
+
+      JsonArrayBuilder arrobj =Json.createArrayBuilder();
+      for (Entry<String, List<Integer>> sen : en.getValue().entrySet()) {
+        JsonObjectBuilder obj = Json.createObjectBuilder();
+        JsonArrayBuilder tokens = Json.createArrayBuilder();
+        for(Integer i : sen.getValue()){
+          tokens.add(i);
+        }
+        obj.add(sen.getKey(),tokens);
+        arrobj.add(obj);
+      }
+      pats.add(en.getKey(), arrobj);
+    }
+    return pats.build().toString();
   }
 
   //numIterTotal = numIter + iterations from previously loaded model!
@@ -2405,9 +2410,9 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
    * Returns false if we ever encounter null for gold or guess. NOTE: The
    * current implementation of counting wordFN/FP is incorrect.
    */
-  private static boolean countResultsPerEntity(List<CoreLabel> doc, Counter<String> entityTP, Counter<String> entityFP, Counter<String> entityFN,
-                                               String background, Counter<String> wordTP, Counter<String> wordTN, Counter<String> wordFP, Counter<String> wordFN,
-                                               Class<? extends TypesafeMap.Key<String>> whichClassToCompare) {
+  public static boolean countResultsPerEntity(List<CoreLabel> doc, Counter<String> entityTP, Counter<String> entityFP, Counter<String> entityFN,
+      String background, Counter<String> wordTP, Counter<String> wordTN, Counter<String> wordFP, Counter<String> wordFN,
+      Class<? extends TypesafeMap.Key<String>> whichClassToCompare) {
     int index = 0;
     int goldIndex = 0, guessIndex = 0;
     String lastGold = background, lastGuess = background;
@@ -3596,7 +3601,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       Properties props = StringUtils.argsToPropertiesWithResolve(args);
       GetPatternsFromDataMultiClass.<SurfacePattern>run(props);
     } catch (OutOfMemoryError e) {
-      System.out.println("Out of memory! Either change the memory allotted by running as java -mx20g ... for example if you want to allocate 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
+      System.out.println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you want to allocate 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
       log.warn(e);
     } catch (Exception e) {
       log.warn(e);

@@ -15,7 +15,6 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 import java.io.IOException;
 import java.util.*;
-import java.text.SimpleDateFormat;
 
 /**
  * This class will add NER information to an Annotation using a combination of NER models.
@@ -38,7 +37,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final NERClassifierCombiner ner;
 
   private final boolean VERBOSE;
-  private boolean usePresentDateForDocDate;
 
   private final long maxTime;
   private final int nThreads;
@@ -75,10 +73,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         PropertiesUtils.getBool(properties,
             NumberSequenceClassifier.USE_SUTIME_PROPERTY,
             NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-
-    // option for setting doc date to be the present during each annotation
-    usePresentDateForDocDate =
-        PropertiesUtils.getBool(properties, "ner." + "usePresentDateForDocDate", false);
 
     NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
         NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
@@ -156,13 +150,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
       log.info("Adding NER Combiner annotation ... ");
-    }
-
-    // if ner.usePresentDateForDocDate is set, use the present date as the doc date
-    if (usePresentDateForDocDate) {
-      String currentDate =
-          new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
-      annotation.set(CoreAnnotations.DocDateAnnotation.class, currentDate);
     }
 
     super.annotate(annotation);
