@@ -6,7 +6,7 @@
 <%@ page import="edu.stanford.nlp.util.ErasureUtils" %>
 
 <%!
-  String SELECTED(boolean value) {
+  private String SELECTED(boolean value) {
     return value ? "selected=\"selected\"" : "";
   }
 %>
@@ -15,7 +15,7 @@
     <div id="Section">
       <div id="ContentBody">
         <h1>Stanford Named Entity Tagger</h1>
-        <FORM name="myform" METHOD="POST" ACTION="process"  
+        <FORM name="myform" METHOD="POST" ACTION="process"
               accept-charset="UTF-8">
           <table>
             <tr><td>
@@ -55,8 +55,8 @@
             </td></tr>
             <tr><td colspan=2>
                 <br>Please enter your text here:<br><br>
-                <textarea valign=top name="input" 
-                          style="width: 400px; height: 8em" rows=31 cols=7><% 
+                <textarea valign=top name="input"
+                          style="width: 400px; height: 8em" rows=31 cols=7><%
                   String input = request.getParameter("input");
                   if (input != null) {
                     %><%=StringEscapeUtils.escapeHtml4(input)%><%
@@ -71,5 +71,5 @@
           </table>
         </FORM>
       </div>
-    </div> 
+    </div>
   </div>
