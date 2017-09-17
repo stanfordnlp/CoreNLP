@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import com.sun.net.httpserver.*;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 import static edu.stanford.nlp.pipeline.StanfordCoreNLP.CUSTOM_ANNOTATOR_PREFIX;
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 import static java.net.HttpURLConnection.*;
+
 
 /**
  * This class creates a server that runs a new Java annotator in each thread.
