@@ -996,10 +996,13 @@ public class StanfordCoreNLPServer implements Runnable {
           // (get whether to filter / find)
           String filterStr = params.getOrDefault("filter", "false");
           final boolean filter = filterStr.trim().isEmpty() || "true".equalsIgnoreCase(filterStr.toLowerCase());
+          // (in case of find, get whether to only keep unique matches)
+          String uniqueStr = params.getOrDefault("unique", "false");
+          final boolean unique = uniqueStr.trim().isEmpty() || "true".equalsIgnoreCase(uniqueStr.toLowerCase());
           // (create the matcher)
           final SemgrexPattern regex = SemgrexPattern.compile(pattern);
 
-          // Run TokensRegex
+          // Run Semgrex
           return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
             if (filter) {
               // Case: just filter sentences
@@ -1011,7 +1014,8 @@ public class StanfordCoreNLPServer implements Runnable {
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
                 SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class));
                 int i = 0;
-                while (matcher.find()) {
+                // Case: find either next node or next unique node
+                while (unique ? matcher.findNextMatchingNode() : matcher.find()) {
                   sentWriter.set(Integer.toString(i), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
                     IndexedWord match = matcher.getMatch();
                     matchWriter.set("text", match.word());
