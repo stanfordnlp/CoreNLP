@@ -1,4 +1,4 @@
-package edu.stanford.nlp.loglinear.benchmarks; 
+package edu.stanford.nlp.loglinear.benchmarks;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.loglinear.inference.CliqueTree;
@@ -237,12 +237,13 @@ public class CoNLLBenchmark   {
     } else {
       ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new FileInputStream(cacheFilename)));
       trimmedSet = (Map<String, double[]>) ois.readObject();
+      ois.close();
     }
 
     return trimmedSet;
   }
 
-  public Map<String, double[]> loadEmbeddingsFromFile(String filename) throws IOException {
+  private static Map<String, double[]> loadEmbeddingsFromFile(String filename) throws IOException {
     Map<String, double[]> embeddings = new HashMap<>();
 
     BufferedReader br = new BufferedReader(new FileReader(filename));

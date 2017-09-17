@@ -40,6 +40,8 @@
                   <option value="inlineXML" <%=SELECTED("inlineXML".equals(format))%> >inlineXML</option>
                   <option value="xml" <%=SELECTED("xml".equals(format))%> >xml</option>
                   <option value="slashTags" <%=SELECTED("slashTags".equals(format))%> >slashTags</option>
+                  <option value="tabbedEntities" <%=SELECTED("tabbedEntities".equals(format))%> >slashTags</option>
+                  <option value="tsv" <%=SELECTED("tsv".equals(format))%> >slashTags</option>
                 </select>
             </td></tr>
             <tr><td>

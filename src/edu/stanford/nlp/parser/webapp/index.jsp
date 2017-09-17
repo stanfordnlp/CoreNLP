@@ -85,7 +85,8 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
     CRFClassifier<CoreLabel> classifier = new CRFClassifier<>(props);
     BufferedInputStream bis = new BufferedInputStream(new GZIPInputStream(
       new FileInputStream(dataDir + File.separator + "05202008-ctb6.processed-chris6.lex.gz")));
-    classifier.loadClassifier(bis,null); bis.close();
+    classifier.loadClassifier(bis,null);
+    bis.close();
 
     // configure segmenter
     SeqClassifierFlags flags = classifier.flags;

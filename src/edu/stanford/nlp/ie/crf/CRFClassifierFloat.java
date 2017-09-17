@@ -24,7 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf; 
+package edu.stanford.nlp.ie.crf;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
@@ -87,12 +87,14 @@ public class CRFClassifierFloat<IN extends CoreMap> extends CRFClassifier<IN>  {
         DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
             flags.initialWeights))));
         initialWeights = ConvertByteArray.readFloatArr(dis);
+        dis.close();
       } catch (IOException e) {
         throw new RuntimeException("Could not read from float initial weight file " + flags.initialWeights);
       }
     }
     log.info("numWeights: " + initialWeights.length);
-    float[] weights = minimizer.minimize(func, (float) flags.tolerance, initialWeights);
-    return ArrayMath.floatArrayToDoubleArray(weights);
+    float[] weightsArray = minimizer.minimize(func, (float) flags.tolerance, initialWeights);
+    return ArrayMath.floatArrayToDoubleArray(weightsArray);
   }
+
 } // end class CRFClassifierFloat
