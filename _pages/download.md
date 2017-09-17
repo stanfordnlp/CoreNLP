@@ -93,7 +93,7 @@ curl -O http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip
 ```
 1. Unzip the release:
 ```
-unzip http://nlp.stanford.edu/software/stanford-corenlp-full-2017-06-09.zip
+unzip stanford-corenlp-full-2017-06-09.zip
 ```
 1. Enter the newly unzipped directory:
 ```
@@ -111,10 +111,13 @@ If you'll be using CoreNLP frequently, the below line is a useful line to have i
 for file in `find /path/to/corenlp/ -name "*.jar"`; do export
 CLASSPATH="$CLASSPATH:`realpath $file`"; done
 ```
-1. Try it out! For example, the following will make a simple text file to annotate, and run CoreNLP over this file. The output will be saved to `input.txt.out` as a JSON file. Note that CoreNLP requires quite a bit of memory. You should give it at least 2GB (`-mx2g`) in most cases.
+1. Try it out! For example, the following will make a simple text file
+to annotate, and run CoreNLP over this file. The output will be saved
+to `input.txt.out` as a JSON file. Note that running all the CoreNLP
+annotators in the default annotation pipeline requires quite a bit of memory. You should give it at least 3GB (`-mx3g`) in most cases.
 ```
 echo "the quick brown fox jumped over the lazy dog" > input.txt
-java -mx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file input.txt
+java -mx3g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file input.txt
 ```
 
 ## Steps to setup from the GitHub HEAD version
@@ -161,9 +164,10 @@ If you'll be using CoreNLP frequently, the below lines are useful to have in you
 export CLASSPATH="$CLASSPATH:/path/to/corenlp/javanlp-core.jar:/path/to/corenlp/stanford-corenlp-models-current.jar";
 for file in `find /path/to/corenlp/lib -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done
 ```
-1. Try it out! For example, the following will make a simple text file to annotate, and run CoreNLP over this file. The output will be saved to `input.txt.out` as a JSON file. Note that CoreNLP requires quite a bit of memory. You should give it at least 2GB (`-mx2g`) in most cases.
+1. Try it out! For example, the following will make a simple text file to annotate, and run CoreNLP over this file. The output will be saved to `input.txt.out` as a JSON file. Note that running all the CoreNLP
+annotators in the default annotation pipeline requires quite a bit of memory. You should give it at least 3GB (`-mx3g`) in most cases.
 ```
 echo "the quick brown fox jumped over the lazy dog" > input.txt
-java -mx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file input.txt
+java -mx3g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file input.txt
 ```
 

@@ -45,11 +45,11 @@ you can do so by adding `normalized` to the headers:
     # Not needed, but illustrate how to link a field to an annotation
     regexner.mapping.field.normalized=edu.stanford.nlp.ling.CoreAnnotations$NormalizedNamedEntityTagAnnotation
 
-And having your mapping file have entries such as:    
+Then you would have in your mapping file have entries such as:
 
     Stanford University\tSCHOOL\thttps://en.wikipedia.org/wiki/Stanford_University
       
-In the example, `\t` is used to indicate where a tab should occur.     
+(In the above example, `\t` is used to indicate where a tab should occur.)
  
 Note that the `pattern` field can be either
 
