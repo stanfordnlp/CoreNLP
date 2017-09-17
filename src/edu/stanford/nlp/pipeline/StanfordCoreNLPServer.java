@@ -85,25 +85,29 @@ public class StanfordCoreNLPServer implements Runnable {
 
   protected final String shutdownKey;
 
-  public final Properties defaultProps;
+  private final Properties defaultProps;
 
   /**
    * The thread pool for the HTTP server.
    */
   private final ExecutorService serverExecutor;
+
   /**
    * To prevent grossly wasteful over-creation of pipeline objects, cache the last
    *  one we created.
    */
   private SoftReference<Pair<String, StanfordCoreNLP>> lastPipeline = new SoftReference<>(null);
+
   /**
    * An executor to time out CoreNLP execution with.
    */
   private final ExecutorService corenlpExecutor;
 
+
   /**
    * Create a new Stanford CoreNLP Server.
-   * @param props A list of properties for the server (server_id ...)
+   *
+   * @param props A list of properties for the server (server_id, ...)
    * @param port The port to host the server from.
    * @param timeout The timeout (in milliseconds) for each command.
    * @param strict If true, conform more strictly to the HTTP spec (e.g., for character encoding).
@@ -112,14 +116,16 @@ public class StanfordCoreNLPServer implements Runnable {
   public StanfordCoreNLPServer(Properties props, int port, int timeout, boolean strict) throws IOException {
     this(props);
     this.serverPort = port;
-    if (props != null && !props.containsKey("status_port"))
+    if (props != null && !props.containsKey("status_port")) {
       this.statusPort = port;
+    }
     this.timeoutMilliseconds = timeout;
     this.strict = strict;
   }
 
   /**
    * Create a new Stanford CoreNLP Server.
+   *
    * @param port The port to host the server from.
    * @param timeout The timeout (in milliseconds) for each command.
    * @param strict If true, conform more strictly to the HTTP spec (e.g., for character encoding).
@@ -130,7 +136,7 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
-   * Create a new Stanford CoreNLP Server, with the default parameters
+   * Create a new Stanford CoreNLP Server, with the default parameters.
    *
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
@@ -139,9 +145,8 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
-   * Create a new Stanford CoreNLP Server with the default parameters and some
-   *
-   * pass in properties (server_id ...)
+   * Create a new Stanford CoreNLP Server with the default parameters and
+   * pass in properties (server_id, ...).
    *
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
@@ -202,10 +207,11 @@ public class StanfordCoreNLPServer implements Runnable {
     this.shutdownKey = new BigInteger(130, new Random()).toString(32);
     IOUtils.writeStringToFile(shutdownKey, tmpFile.getPath(), "utf-8");
     // set status port
-    if (props != null && props.containsKey("status_port"))
+    if (props != null && props.containsKey("status_port")) {
       this.statusPort = Integer.parseInt(props.getProperty("status_port"));
-    else if (props != null && props.containsKey("port"))
+    } else if (props != null && props.containsKey("port")) {
       this.statusPort = Integer.parseInt(props.getProperty("port"));
+    }
   }
 
   /**
@@ -303,6 +309,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
   /**
    * Create (or retrieve) a StanfordCoreNLP object corresponding to these properties.
+   *
    * @param props The properties to create the object with.
    * @return A pipeline parameterized by these properties.
    */
@@ -345,7 +352,6 @@ public class StanfordCoreNLPServer implements Runnable {
    * {@link StanfordCoreNLP}, and used in the I/O stages.
    *
    * @param httpExchange The http exchange; effectively, the request information.
-   *
    * @return A {@link Properties} object corresponding to a combination of default and passed properties.
    *
    * @throws UnsupportedEncodingException Thrown if we could not decode the key/value pairs with UTF-8.
@@ -406,9 +412,7 @@ public class StanfordCoreNLPServer implements Runnable {
       }
     }
     // (add new properties on top of the default properties)
-    urlProperties.forEach((key1, value) -> props.setProperty(key1, value));
-
-
+    urlProperties.forEach(props::setProperty);
 
     // Get the annotators
     String annotators = props.getProperty("annotators");
@@ -472,6 +476,14 @@ public class StanfordCoreNLPServer implements Runnable {
     httpExchange.close();
   }
 
+  private static void setHttpExchangeResponseHeaders(HttpExchange httpExchange) {
+    // Set common response headers
+    httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+    httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+    httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+    httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
+  }
 
   /**
    * A callback object that lets us hook into the result of an annotation request.
@@ -548,7 +560,7 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.getResponseBody().write(response.getBytes());
       httpExchange.close();
     }
-  }
+  } // end static class ReadyHandler
 
 
   /**
@@ -566,7 +578,7 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.getResponseBody().write(response.getBytes());
       httpExchange.close();
     }
-  }
+  } // end static class LiveHandler
 
 
   /**
@@ -592,7 +604,7 @@ public class StanfordCoreNLPServer implements Runnable {
         System.exit(0);
       }
     }
-  }
+  } // end static class ShutdownHandler
 
   /**
    * Serve a file from the filesystem or classpath
@@ -617,7 +629,7 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.getResponseBody().write(bytes);
       httpExchange.close();
     }
-  }
+  } // end static class FileHandler
 
   /**
    * The main handler for taking an annotation request, and annotating it.
@@ -686,12 +698,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      // Set common response headers
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
+      setHttpExchangeResponseHeaders(httpExchange);
 
       // Get sentence.
       Properties props;
@@ -805,7 +812,7 @@ public class StanfordCoreNLPServer implements Runnable {
         }
       }
     }
-  }
+  } // end class CoreNLPHandler
 
 
 
@@ -835,12 +842,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      // Set common response headers
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
+      setHttpExchangeResponseHeaders(httpExchange);
 
       Properties props = getProperties(httpExchange);
       // Override with Required annotators for Semgrex
@@ -963,12 +965,7 @@ public class StanfordCoreNLPServer implements Runnable {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
 
-      // Set common response headers
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
+      setHttpExchangeResponseHeaders(httpExchange);
 
       Properties props = getProperties(httpExchange);
       // Override with Required annotators for Semgrex
@@ -1087,12 +1084,7 @@ public class StanfordCoreNLPServer implements Runnable {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
 
-      // Set common response headers
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
-      httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
+      setHttpExchangeResponseHeaders(httpExchange);
 
       Properties props = getProperties(httpExchange);
       // Override with Required annotators for Semgrex
@@ -1394,6 +1386,6 @@ public class StanfordCoreNLPServer implements Runnable {
       server.run(credentials, req -> true, res -> {}, homepage, false, live);
 
     }
-  }
+  } // end main()
 
 }
