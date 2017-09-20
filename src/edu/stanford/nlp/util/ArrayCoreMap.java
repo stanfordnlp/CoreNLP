@@ -12,27 +12,19 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
 
 /**
- * <p>
  * Base implementation of {@link CoreMap} backed by two Java arrays.
- * </p>
  *
- * <p>
  * Reasonable care has been put into ensuring that this class is both fast and
  * has a light memory footprint.
- * </p>
  *
- * <p>
  * Note that like the base classes in the Collections API, this implementation
  * is <em>not thread-safe</em>. For speed reasons, these methods are not
  * synchronized. A synchronized wrapper could be developed by anyone so
  * inclined.
- * </p>
  *
- * <p>
  * Equality is defined over the complete set of keys and values currently
  * stored in the map.  Because this class is mutable, it should not be used
  * as a key in a Map.
- * </p>
  *
  * @author dramage
  * @author rafferty
@@ -297,11 +289,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    * to null for that particular thread.
    */
   private static final ThreadLocal<IdentityHashSet<CoreMap>> toStringCalled =
-          new ThreadLocal<IdentityHashSet<CoreMap>>() {
-            @Override protected IdentityHashSet<CoreMap> initialValue() {
-              return new IdentityHashSet<>();
-            }
-          };
+          ThreadLocal.withInitial(IdentityHashSet::new);
 
   /** Prints a full dump of a CoreMap. This method is robust to
    *  circularity in the CoreMap.
@@ -407,7 +395,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    *     are just giving the part of the class name without package and up to
    *     "Annotation". That is,
    *     edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation
-   *     -&gt; PartOfSpeech . As a special case, an empty array means
+   *     ➔ PartOfSpeech . As a special case, an empty array means
    *     to print everything, not nothing.
    *  @return Brief string where the field values are just separated by a
    *     character. If the string contains spaces, it is wrapped in "{...}".
@@ -425,7 +413,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    *     are just giving the part of the class name without package and up to
    *     "Annotation". That is,
    *     edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation
-   *     -&gt; PartOfSpeech . As a special case, an empty array means
+   *     ➔ PartOfSpeech . As a special case, an empty array means
    *     to print everything, not nothing.
    *  @return Brief string where the field values are just separated by a
    *     character. If the string contains spaces, it is wrapped in "{...}".
@@ -497,8 +485,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
       return equals((ArrayCoreMap)obj);
     }
 
-    // TODO: make the general equality work in the situation of loops
-    // in the object graph
+    // TODO: make the general equality work in the situation of loops in the object graph
 
     // general equality
     CoreMap other = (CoreMap)obj;
@@ -655,8 +642,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     out.defaultWriteObject();
   }
 
-  // TODO: make prettyLog work in the situation of loops
-  // in the object graph
+  // TODO: make prettyLog work in the situation of loops in the object graph
 
   /**
    * {@inheritDoc}
@@ -668,8 +654,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
 
     // sort keys by class name
     List<Class> sortedKeys = new ArrayList<>(this.keySet());
-    Collections.sort(sortedKeys,
-        (a, b) -> a.getCanonicalName().compareTo(b.getCanonicalName()));
+    sortedKeys.sort(Comparator.comparing(Class::getCanonicalName));
 
     // log key/value pairs
     for (Class key : sortedKeys) {
