@@ -990,7 +990,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         featureValArr = makeDatumUsingEmbedding(info, loc, featureFactories, pInfo, featuresC, windowCliques);
       } else {
         for (Clique c : windowCliques) {
-          for (FeatureFactory featureFactory : featureFactories) {
+          for (FeatureFactory<IN> featureFactory : featureFactories) {
             featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c)); //todo useless copy because of typing reasons
           }
         }
@@ -1084,7 +1084,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (flags.prependEmbedding) {
       int additionalFeatureCount = 0;
       for (Clique c : windowCliques) {
-        for (FeatureFactory featureFactory : featureFactories) {
+        for (FeatureFactory<IN> featureFactory : featureFactories) {
           Collection<String> fCol = featureFactory.getCliqueFeatures(pInfo, loc, c); //todo useless copy because of typing reasons
           featuresC.addAll(fCol);
           additionalFeatureCount += fCol.size();
@@ -1956,10 +1956,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       minimizer = new SGDWithAdaGradAndFOBOS<>(
               flags.initRate, lambda, flags.SGDPasses, flags.stochasticBatchSize,
               flags.priorType, flags.priorAlpha, flags.useAdaDelta, flags.useAdaDiff, flags.adaGradEps, flags.adaDeltaRho);
-      ((SGDWithAdaGradAndFOBOS) minimizer).terminateOnEvalImprovement(flags.terminateOnEvalImprovement);
-      ((SGDWithAdaGradAndFOBOS) minimizer).terminateOnAvgImprovement(flags.terminateOnAvgImprovement, flags.tolerance);
-      ((SGDWithAdaGradAndFOBOS) minimizer).setTerminateOnEvalImprovementNumOfEpoch(flags.terminateOnEvalImprovementNumOfEpoch);
-      ((SGDWithAdaGradAndFOBOS) minimizer).suppressTestPrompt(flags.suppressTestDebug);
+      ((SGDWithAdaGradAndFOBOS<?>) minimizer).terminateOnEvalImprovement(flags.terminateOnEvalImprovement);
+      ((SGDWithAdaGradAndFOBOS<?>) minimizer).terminateOnAvgImprovement(flags.terminateOnAvgImprovement, flags.tolerance);
+      ((SGDWithAdaGradAndFOBOS<?>) minimizer).setTerminateOnEvalImprovementNumOfEpoch(flags.terminateOnEvalImprovementNumOfEpoch);
+      ((SGDWithAdaGradAndFOBOS<?>) minimizer).suppressTestPrompt(flags.suppressTestDebug);
     } else if (flags.useSGDtoQN) {
       minimizer = new SGDToQNMinimizer(flags.initialGain, flags.stochasticBatchSize,
                                        flags.SGDPasses, flags.QNPasses, flags.SGD2QNhessSamples,
@@ -2101,7 +2101,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
-  protected static void saveProcessedData(List datums, String filename) {
+  protected static void saveProcessedData(List<?> datums, String filename) {
     log.info("Saving processed data of size " + datums.size() + " to serialized file...");
     ObjectOutputStream oos = null;
     try {
@@ -2266,7 +2266,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
     featureFactories = Generics.newArrayList();
     for (int ff = 1; ff < featureFactoryName.length - 1; ++ff) {
-      FeatureFactory featureFactory = (edu.stanford.nlp.sequences.FeatureFactory<IN>) Class.forName(featureFactoryName[1]).newInstance();
+      FeatureFactory<IN> featureFactory = (FeatureFactory<IN>) Class.forName(featureFactoryName[1]).newInstance();
       featureFactory.init(flags);
       featureFactories.add(featureFactory);
     }
@@ -2371,7 +2371,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     pw.printf("<featureFactory>");
-    for (FeatureFactory featureFactory : featureFactories) {
+    for (FeatureFactory<IN> featureFactory : featureFactories) {
       pw.printf(" %s ", featureFactory.getClass().getName());
     }
     pw.printf("</featureFactory>%n");
@@ -2536,7 +2536,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // objects doesn't seem to work.  The resulting classifier
       // doesn't have the lexicon (distsim object) correctly saved.  So now custom write the list
       oos.writeObject(featureFactories.size());
-      for (FeatureFactory ff : featureFactories) {
+      for (FeatureFactory<IN> ff : featureFactories) {
         oos.writeObject(ff);
       }
       oos.writeInt(windowSize);
@@ -2592,7 +2592,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 //      }
     } else if (featureFactory instanceof FeatureFactory) {
       featureFactories = Generics.newArrayList();
-      featureFactories.add((FeatureFactory) featureFactory);
+      featureFactories.add((FeatureFactory<IN>) featureFactory);
 //      System.err.println(((NERFeatureFactory) featureFactory).describeDistsimLexicon()); // XXXX
     } else if (featureFactory instanceof Integer) {
       // this is the current format (2014) since writing list didn't work (see note in serializeClassifier).
@@ -2604,7 +2604,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           throw new RuntimeIOException("Should have FeatureFactory but got " + featureFactory.getClass());
         }
 //        System.err.println("FF #" + i + ": " + ((NERFeatureFactory) featureFactory).describeDistsimLexicon()); // XXXX
-        featureFactories.add((FeatureFactory) featureFactory);
+        featureFactories.add((FeatureFactory<IN>) featureFactory);
       }
     }
 

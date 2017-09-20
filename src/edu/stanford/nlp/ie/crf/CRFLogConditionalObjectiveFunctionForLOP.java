@@ -348,7 +348,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
 
       // make a clique tree for this document
       CliquePotentialFunction cliquePotentialFunc = new LinearCliquePotentialFunction(combinedWeights2D);
-      CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, null);
+      CRFCliqueTree<String> cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, null);
 
       // compute the log probability of the document given the model with the parameters x
       int[] given = new int[window - 1];

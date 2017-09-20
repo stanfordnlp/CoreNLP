@@ -61,7 +61,7 @@ public class CRFClassifierFloat<IN extends CoreMap> extends CRFClassifier<IN>  {
   @Override
   protected double[] trainWeights(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr, double[][][][] featureVals) {
     CRFLogConditionalObjectiveFloatFunction func = new CRFLogConditionalObjectiveFloatFunction(data, labels,
-        featureIndex, windowSize, classIndex, labelIndices, map, flags.backgroundSymbol, flags.sigma);
+        windowSize, classIndex, labelIndices, map, flags.backgroundSymbol, flags.sigma);
     cliquePotentialFunctionHelper = func;
 
     QNMinimizer minimizer;

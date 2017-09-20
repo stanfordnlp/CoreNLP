@@ -86,7 +86,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
     }
   }
 
-  CRFNonLinearSecondOrderLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index classIndex, List<Index<CRFLabel>> labelIndices, int[] map, SeqClassifierFlags flags, int numNodeFeatures, int numEdgeFeatures) {
+  CRFNonLinearSecondOrderLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, SeqClassifierFlags flags, int numNodeFeatures, int numEdgeFeatures) {
     this(data, labels, window, classIndex, labelIndices, map, QUADRATIC_PRIOR, flags, numNodeFeatures, numEdgeFeatures);
   }
 
@@ -403,7 +403,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
       NonLinearSecondOrderCliquePotentialFunction cliquePotentialFunction = new NonLinearSecondOrderCliquePotentialFunction(W4Edge, U4Edge, W, U, flags);
 
       // make a clique tree for this document
-      CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex,
+      CRFCliqueTree<String> cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex,
         backgroundSymbol, cliquePotentialFunction, null);
 
       // compute the log probability of the document given the model with the parameters x

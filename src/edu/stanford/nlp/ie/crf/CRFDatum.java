@@ -100,7 +100,7 @@ public class CRFDatum<FEAT,LAB> implements Serializable {
       return (false);
     }
 
-    Datum d = (Datum) o;
+    Datum<?, ?> d = (Datum<?, ?>) o;
     return features.equals(d.asFeatures());
   }
 

@@ -136,7 +136,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       featureVal3DArr = featureVal[docIndex];
 
     // make a clique tree for this document
-    CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, featureVal3DArr);
+    CRFCliqueTree<String> cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, featureVal3DArr);
 
     if (!skipValCalc) {
       if (TIMED)
@@ -363,7 +363,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     log.info("initializing data feature hash done!");
   }
 
-  private double getDropoutPrior(CRFCliqueTree cliqueTree, int[][][] docData,
+  private double getDropoutPrior(CRFCliqueTree<String> cliqueTree, int[][][] docData,
       Map<Integer, double[]> EForADoc, List<Set<Integer>> docDataHash, int[] activeFeatures, Map<Integer, double[]> dropoutPriorGrad,
       Map<Integer, List<Integer>> condensedFeaturesMap, List<Map<Integer, double[]>> EForADocPos) {
 

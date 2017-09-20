@@ -359,7 +359,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
     return Math.exp(logProb(position, labels));
   }
 
-  public GeneralizedCounter logProbs(int position, int window) {
+  public GeneralizedCounter<E> logProbs(int position, int window) {
     GeneralizedCounter<E> gc = new GeneralizedCounter<>(window);
     int[] labels = new int[window];
     // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.)
@@ -383,7 +383,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
     return gc;
   }
 
-  public GeneralizedCounter probs(int position, int window) {
+  public GeneralizedCounter<E> probs(int position, int window) {
     GeneralizedCounter<E> gc = new GeneralizedCounter<>(window);
     int[] labels = new int[window];
     // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.)
