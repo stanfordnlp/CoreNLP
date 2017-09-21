@@ -327,13 +327,7 @@ public abstract class CorefMentionFinder  {
 
   private static boolean mentionIsInterrogativePronoun(Mention m, Set<String> interrogatives) {
     // handling interrogative pronouns
-    for (CoreLabel cl : m.originalSpan) {
-      // if (dict.interrogativePronouns.contains(m.spanToString())) remove.add(m);
-      if (interrogatives.contains(cl.word())) {
-        return true;
-      }
-    }
-    return false;
+    return m.originalSpan.stream().anyMatch(cl -> interrogatives.contains(cl.word()));
   }
 
   // extract mentions which have same string as another stand-alone mention
