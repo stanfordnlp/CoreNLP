@@ -184,7 +184,6 @@ public class UniversalDependenciesConverter {
       } catch (Exception ex) {
         System.err.println("Warning: NERClassifierCombiner Class Not Found, not adding NER tags!");
       }
-
     }
   }
 
