@@ -507,9 +507,9 @@ function render(data, reverse) {
 
     // NER tags
     // Assumption: contiguous occurrence of one non-O is a single entity
-    if (tokens.length > 0 && typeof tokens[0].ner !== 'undefined') {
+    if (tokens.some(function(token) { return token.ner; })) {
       for (var i = 0; i < tokens.length; i++) {
-        var ner = tokens[i].ner;
+        var ner = tokens[i].ner || 'O';
         var normalizedNER = tokens[i].normalizedNER;
         if (typeof normalizedNER === "undefined") {
           normalizedNER = ner;
@@ -1016,7 +1016,12 @@ $(document).ready(function() {
               if (typeof data.sentences[0][selector] !== 'undefined') {
                 ok = true;
               } else if (typeof data.sentences[0].tokens != 'undefined' && data.sentences[0].tokens.length > 0) {
-                ok = (typeof data.sentences[0].tokens[0][selector] !== 'undefined');
+                // (make sure the annotator select is in at least one of the tokens of any sentence)
+                ok = data.sentences.some(function(sentence) {
+                  return sentence.tokens.some(function(token) {
+                    return typeof token[selector] !== 'undefined';
+                  });
+                });
               }
             }
             // (render the element)
@@ -1119,6 +1124,8 @@ $(document).ready(function() {
       type: 'POST',
       url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(
         pattern.replace("&", "\\&").replace('+', '\\+')) +
+        '&properties=' + encodeURIComponent(
+        '{"annotators": "' + annotators() + '", "date": "' + date() + '"}') +
         '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery),
       success: function(data) {
@@ -1148,11 +1155,18 @@ $(document).ready(function() {
     var pattern = $('#semgrex_search').val();
     // Remove existing annotation
     $('#semgrex').remove();
+    // Add missing required annotators
+    var requiredAnnotators = annotators().split(',');
+    if (requiredAnnotators.indexOf('depparse') < 0) {
+      requiredAnnotators.push('depparse');
+    }
     // Make ajax call
     $.ajax({
       type: 'POST',
       url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(
         pattern.replace("&", "\\&").replace('+', '\\+')) +
+        '&properties=' + encodeURIComponent(
+        '{"annotators": "' + requiredAnnotators.join(',') + '", "date": "' + date() + '"}') +
         '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery),
       success: function(data) {
@@ -1181,11 +1195,18 @@ $(document).ready(function() {
     var pattern = $('#tregex_search').val();
     // Remove existing annotation
     $('#tregex').remove();
+    // Add missing required annotators
+    var requiredAnnotators = annotators().split(',');
+    if (requiredAnnotators.indexOf('parse') < 0) {
+      requiredAnnotators.push('parse');
+    }
     // Make ajax call
     $.ajax({
       type: 'POST',
       url: serverAddress + '/tregex?pattern=' + encodeURIComponent(
         pattern.replace("&", "\\&").replace('+', '\\+')) +
+        '&properties=' + encodeURIComponent(
+        '{"annotators": "' + requiredAnnotators.join(',') + '", "date": "' + date() + '"}') +
         '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery),
       success: function(data) {

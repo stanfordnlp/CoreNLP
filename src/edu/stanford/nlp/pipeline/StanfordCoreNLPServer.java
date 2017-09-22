@@ -847,8 +847,6 @@ public class StanfordCoreNLPServer implements Runnable {
       setHttpExchangeResponseHeaders(httpExchange);
 
       Properties props = getProperties(httpExchange);
-      // Override with Required annotators for Semgrex
-      props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
 
       if (authenticator != null && !authenticator.test(props)) {
         respondUnauthorized(httpExchange);
@@ -970,8 +968,6 @@ public class StanfordCoreNLPServer implements Runnable {
       setHttpExchangeResponseHeaders(httpExchange);
 
       Properties props = getProperties(httpExchange);
-      // Override with Required annotators for Semgrex
-      props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
 
       if (authenticator != null && !authenticator.test(props)) {
         respondUnauthorized(httpExchange);
@@ -1093,8 +1089,6 @@ public class StanfordCoreNLPServer implements Runnable {
       setHttpExchangeResponseHeaders(httpExchange);
 
       Properties props = getProperties(httpExchange);
-      // Override with Required annotators for Semgrex
-      props.setProperty("annotators", "tokenize,ssplit,parse");
 
       if (authenticator != null && ! authenticator.test(props)) {
         respondUnauthorized(httpExchange);
