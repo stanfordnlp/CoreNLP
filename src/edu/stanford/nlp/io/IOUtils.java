@@ -191,7 +191,7 @@ public class IOUtils  {
   }
 
   /**
-   * Writes a string to a temporary file.
+   * Writes a string to a temporary file
    *
    * @param contents The string to write
    * @param path The file path
@@ -208,7 +208,6 @@ public class IOUtils  {
       writer = new BufferedOutputStream(new FileOutputStream(tmp));
     }
     writer.write(contents.getBytes(encoding));
-    writer.close();
     return tmp;
   }
 
@@ -760,6 +759,7 @@ public class IOUtils  {
 
         protected final BufferedReader reader = this.getReader();
         protected String line = this.getLine();
+        private boolean readerOpen = true;
 
         @Override
         public boolean hasNext() {
@@ -780,6 +780,7 @@ public class IOUtils  {
           try {
             String result = this.reader.readLine();
             if (result == null) {
+              readerOpen = false;
               this.reader.close();
             }
             return result;
@@ -807,6 +808,14 @@ public class IOUtils  {
         @Override
         public void remove() {
           throw new UnsupportedOperationException();
+        }
+
+        protected void finalize() throws Throwable {
+          super.finalize();
+          if (readerOpen) {
+            logger.warn("Forgot to close FileIterable -- closing from finalize()");
+            reader.close();
+          }
         }
       };
     }

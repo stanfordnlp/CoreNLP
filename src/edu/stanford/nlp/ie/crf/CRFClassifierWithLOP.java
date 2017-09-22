@@ -24,7 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -45,10 +45,10 @@ import java.util.zip.GZIPInputStream;
 public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN>  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierWithLOP.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierWithLOP.class);
 
-  private List<Set<Integer>> featureIndicesSetArray;
-  private List<List<Integer>> featureIndicesListArray;
+  List<Set<Integer>> featureIndicesSetArray;
+  List<List<Integer>> featureIndicesListArray;
 
   protected CRFClassifierWithLOP() {
     super(new SeqClassifierFlags());
@@ -207,7 +207,6 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
         DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
             flags.initialLopScales))));
         initialScales = ConvertByteArray.readDoubleArr(dis);
-        dis.close();
       } catch (IOException e) {
         throw new RuntimeException("Could not read from double initial LOP scales file " + flags.initialLopScales);
       }

@@ -677,14 +677,6 @@ LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E
 WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
 FILENAME_EXT = bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|3gp|wm[va]|avi|flv|mov|mp[34g]
 FILENAME = [\p{Alpha}\p{Digit}]+([-._/][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}
-/* Curse of intelligent tokenization, here we come. To model what LDC does, we separate out some \p{Digit}+\p{Alpha}+ tokens as 2 words */
-/* Go with just the top 20 currencies. */
-SEP_CURRENCY = (USD|EUR|JPY|GBP|AUD|CAD|CHF|CNY|SEK|NZD|MXN|SGD|HKD|NOK|KRW|TRY|RUB|INR|BRL|ZAR)
-/* Can't include s for seconds as too many iPhone 6s, 1990s, etc. */
-SEP_UNITS = (lbs?|ltr|mins?|[kcm][gml]|[MGTP]([B]|[H][z])|fps|bpm|[MG][b][p][s])
-SEP_OTHER = ([ap]m|hrs?|words?|m(on)?ths?|y(ea)?rs?|pts?)
-/* If there is a longer alphabetic match, another longer pattern will match so don't need to filter that. */
-SEP_SUFFIX = ({SEP_CURRENCY}|{SEP_UNITS}|{SEP_OTHER})
 /* THING: The $ was for things like New$;
    WAS: only keep hyphens with short one side like co-ed
    But treebank just allows hyphenated things as words!
@@ -735,17 +727,15 @@ SREDAUX = n{APOSETCETERA}t
 APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
-FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?,;:&`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
-LIKELYURL = ((www\.([^ \t\n\f\r`<>|.!?,\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r`<>|.!?,_:\/$\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r`<>|]+[^ \t\n\f\r`<>|.!?,;:&\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-])?
+FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r\"<>|(){}\[\]]+[^ \t\n\f\r\"\'<>|.!?(){},;:&\[\]-]
+LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
 EMAIL = (&lt;|<)?(mailto:)?[a-zA-Z0-9._%+-]+@[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9](&gt;|>)?
 
-/* Technically, names should be capped at 15 characters and can be any non-zero string of ASCII letters, numbers
-    and underscores. However, if you length limit then you get into weirdness with what happens to the rest of the
-    characters, and allowing ones starting with numbers disables using @ for "at" before numeric quantities, so we
-    just special case in a couple of people like that. */
-TWITTER_NAME = [@\uFF20]([A-Za-z_][a-zA-Z_0-9]*|50cent)
+/* Technically, names should be capped at 15 characters.  However, then
+   you get into weirdness with what happens to the rest of the characters. */
+TWITTER_NAME = [@\uFF20][a-zA-Z_][a-zA-Z_0-9]*
 TWITTER_HASHTAG = [#\uFF03]{LETTER}({LETTER}|{DIGIT}|_)*({LETTER}|{DIGIT})
 TWITTER = {TWITTER_NAME}|{TWITTER_HASHTAG}
 
@@ -763,8 +753,7 @@ ABDAYS = Mon|Tue|Tues|Wed|Thu|Thurs|Fri
 /* Ma. or Me. isn't included as too many errors, and most sources use Mass. etc. */
 /* Fed. is tricky.  Usually sentence end, but not before "Governor" or "Natl. Mtg. Assn." */
 /* Make some states case sensitive, since they're also reasonably common words */
-/* Only allow La since you also get LA for Los Angeles. */
-ABSTATE = Ala|Ariz|[A]z|[A]rk|Calif|Colo|Conn|Ct|Dak|[D]el|Fla|Ga|[I]ll|Ind|Kans?|Ky|[L][a]|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|[P]a|Penn|Tenn|[T]ex|Va|Vt|[W]ash|Wisc?|Wyo
+ABSTATE = Ala|Ariz|[A]z|[A]rk|Calif|Colo|Conn|Ct|Dak|[D]el|Fla|Ga|[I]ll|Ind|Kans?|Ky|[L]a|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|[P]a|Penn|Tenn|[T]ex|Va|Vt|[W]ash|Wisc?|Wyo
 /* Bhd is Malaysian companies! Rt. is Hungarian? */
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
 ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Bhd|Assn|Univ|Intl|Sys
@@ -948,11 +937,6 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {SWORD} to recognize " + origTxt + " as " + tok); }
                           return getNext(tok, origTxt);
                         }
-{DIGIT}+/{SEP_SUFFIX}
-                { String txt = yytext();
-                  if (DEBUG) { logger.info("Used {DIGIT}/{SEP_SUFFIX} to recognize " + txt); }
-                  return getNext(txt, txt);
-                }
 {WORD}                  { final String origTxt = yytext();
                           String tok = LexerUtils.removeSoftHyphens(origTxt);
                           if (americanize) {
@@ -969,23 +953,17 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                         }
 {APOWORD2}/[:letter:]   { return getNext(); }
 {FULLURL}               { String txt = yytext();
-                          String norm = txt;
                           if (escapeForwardSlashAsterisk) {
-                            norm = delimit(norm, '/');
-                            norm = delimit(norm, '*');
+                            txt = delimit(txt, '/');
+                            txt = delimit(txt, '*');
                           }
-                          if (DEBUG) { logger.info("Used {FULLURL} to recognize " + txt + " as " + norm); }
-                          return getNext(norm, txt);
-                        }
-{LIKELYURL}/[^\p{Alpha}]  { String txt = yytext();
-                            String norm = txt;
-                            if (escapeForwardSlashAsterisk) {
-                              norm = delimit(norm, '/');
-                              norm = delimit(norm, '*');
-                            }
-                            if (DEBUG) { logger.info("Used {LIKELYURL} to recognize " + txt + " as " + norm); }
-                            return getNext(norm, txt);
+                          return getNext(txt, yytext()); }
+{LIKELYURL}             { String txt = yytext();
+                          if (escapeForwardSlashAsterisk) {
+                            txt = delimit(txt, '/');
+                            txt = delimit(txt, '*');
                           }
+                          return getNext(txt, yytext()); }
 {EMAIL}                 { return getNext(); }
 {TWITTER}               { return getNext(); }
 {REDAUX}/[^\p{Alpha}]   { String tok = yytext();
@@ -1006,10 +984,6 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           }
                           return getNext(txt, yytext());
                          }
-/* Malaysian currency */
-RM/{NUM}        { String txt = yytext();
-                  return getNext(txt, txt);
-                }
 {NUMBER}                { handleHyphenatedNumber(yytext());
                           if (DEBUG) { logger.info("Used {NUMBER} to recognize " + yytext() + " as " + removeFromNumber(yytext())); }
                           return getNext(removeFromNumber(yytext()), yytext()); }

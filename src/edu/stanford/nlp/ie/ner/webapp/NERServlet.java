@@ -8,7 +8,6 @@ import java.util.zip.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import edu.stanford.nlp.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
@@ -86,7 +85,11 @@ public class NERServlet extends HttpServlet {
       } catch (ClassNotFoundException e) {
         throw new ServletException("Classifier class not found problem.");
       } finally {
-        IOUtils.closeIgnoringExceptions(is);
+        try {
+          is.close();
+        } catch (IOException e) {
+          //do nothing
+        }
       }
       ners.put(classifier, model);
     }
