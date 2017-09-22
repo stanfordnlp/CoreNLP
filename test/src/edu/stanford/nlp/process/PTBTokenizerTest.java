@@ -92,6 +92,7 @@ public class PTBTokenizerTest {
       "a 1908 Model K Stanley with 1:01-minute time",
       "the 9-to-11:45 a.m. weekday shift",
       "Brighton Rd. Pacifica",
+      "Walls keeping water out of the bowl-shaped city have been breached, and emergency teams are using helicopters to drop 1,350kg (3,000lb) sandbags and concrete barriers into the gaps.",
   };
 
   private final String[][] ptbGold = {
@@ -116,7 +117,7 @@ public class PTBTokenizerTest {
       // Unclear if 37%-owned is right or wrong under old PTB....  Maybe should be 37 %-owned even though sort of crazy
       { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  ":-LRB-", ".",
           "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
-      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
+      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84", "km", "-RRB-", ".",
           "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
       { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
       { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
@@ -178,6 +179,9 @@ public class PTBTokenizerTest {
       { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
       { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
       { "Brighton", "Rd.", "Pacifica"},
+      { "Walls", "keeping", "water", "out", "of", "the", "bowl-shaped", "city", "have", "been", "breached", ",", "and",
+              "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
+              "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -202,7 +206,7 @@ public class PTBTokenizerTest {
       // Unclear if 37%-owned is right or wrong under old PTB....  Maybe should be 37 %-owned even though sort of crazy
       { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  ":-LRB-", ".",
           "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
-      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
+      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84", "km", "-RRB-", ".",
           "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
       { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
       { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
@@ -277,6 +281,9 @@ public class PTBTokenizerTest {
       { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
       { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
       { "Brighton", "Rd.", "Pacifica"},
+      { "Walls", "keeping", "water", "out", "of", "the", "bowl", "-", "shaped", "city", "have", "been", "breached", ",", "and",
+              "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
+              "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
   };
 
   @Test
@@ -685,6 +692,51 @@ public class PTBTokenizerTest {
     runAgainstOrig(tokFactory, emojiInputs);
     assertEquals(1, "\uD83D\uDCF7".codePointCount(0, 2));
     assertEquals(2, "❤️".codePointCount(0, 2));
+  }
+
+
+  private final String[] tweetInputs = {
+          "Happy #StarWars week! Ever wonder what was going on with Uncle Owen's dad? Check out .@WHMPodcast's rant on Ep2 https://t.co/9iJMMkAokT",
+          "RT @BiIlionaires: #TheForceAwakens inspired vehicles are a big hit in LA.",
+          "“@people: A woman built the perfect #StarWars costume for her dog https://t.co/VJRQwNZB0t https://t.co/nmNROB7diR”@guacomole123",
+          "I would like to get a 13\" MB Air with an i7@1,7GHz",
+          "So you have audio track 1 @145bpm and global project tempo is now 145bpm",
+          "I know that the inside of the mall opens @5am.",
+          "I have ordered Bose Headfones worth 300USD. Not 156bpmt. FCPX MP4 playback choppy on 5k iMac",
+          "RT @Suns: What happens when you combine @50cent, #StarWars and introductions at an @NBA game? This.",
+          "RT @ShirleyHoman481: '#StarWars' Premiere Street Closures Are “Bigger Than the Oscars\": Four blocks of Hollywood Blvd. -- from Highland… ht…",
+          "In 2009, Wiesel criticized the Vatican for lifting the excommunication of controversial bishop Richard Williamson, a member of the Society of Saint Pius X.",
+  };
+
+  private final String[][] tweetGold = {
+          { "Happy", "#StarWars", "week", "!", "Ever", "wonder", "what", "was", "going", "on", "with", "Uncle",
+                  "Owen", "'s", "dad", "?", "Check", "out", ".@WHMPodcast", "'s", "rant", "on", "Ep2",
+                  "https://t.co/9iJMMkAokT" },
+          { "RT", "@BiIlionaires", ":", "#TheForceAwakens", "inspired", "vehicles", "are", "a", "big", "hit", "in", "LA", "." },
+          { "``", "@people", ":", "A", "woman", "built", "the", "perfect", "#StarWars", "costume", "for", "her", "dog",
+                  "https://t.co/VJRQwNZB0t", "https://t.co/nmNROB7diR", "''", "@guacomole123" },
+          { "I", "would", "like", "to", "get", "a", "13", "''", "MB", "Air", "with", "an", "i7", "@", "1,7", "GHz" },
+          { "So", "you", "have", "audio", "track", "1", "@", "145", "bpm", "and", "global", "project", "tempo", "is",
+                  "now", "145", "bpm" },
+          { "I", "know", "that", "the", "inside", "of", "the", "mall", "opens", "@", "5", "am", "." },
+          { "I", "have", "ordered", "Bose", "Headfones", "worth", "300", "USD", ".", "Not", "156bpmt", ".",
+            "FCPX", "MP4", "playback", "choppy", "on", "5k", "iMac" },
+          { "RT", "@Suns", ":", "What", "happens", "when", "you", "combine", "@50cent", ",", "#StarWars", "and",
+                  "introductions", "at", "an", "@NBA", "game", "?", "This", "." },
+          { "RT", "@ShirleyHoman481", ":", "'", "#StarWars", "'", "Premiere", "Street", "Closures", "Are", "``",
+                  "Bigger", "Than", "the", "Oscars", "''", ":", "Four", "blocks", "of", "Hollywood", "Blvd.", "--",
+                  "from", "Highland", "...", "ht", "..." },
+          // Should really be "Saint Pius X ." but unclear how to achieve.
+          { "In", "2009", ",", "Wiesel", "criticized", "the", "Vatican", "for", "lifting", "the", "excommunication",
+                  "of", "controversial", "bishop", "Richard", "Williamson", ",", "a", "member", "of", "the",
+                  "Society", "of", "Saint", "Pius", "X." },
+  };
+
+  @Test
+  public void testTweets() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
+    runOnTwoArrays(tokFactory, tweetInputs, tweetGold);
+    runAgainstOrig(tokFactory, tweetInputs);
   }
 
   private final String[] hyphenInputs = {
