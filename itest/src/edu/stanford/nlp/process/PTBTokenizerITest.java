@@ -104,8 +104,7 @@ public class PTBTokenizerITest extends TestCase {
       CoreLabel cl;
       cl = tokenizer.next();
       assertEquals("Bad for " + origString, "A", cl.word());
-      // cl =
-      tokenizer.next();
+      cl = tokenizer.next();
       // System.out.println("Emoji: " + cl.word());
       cl = tokenizer.next();
       assertEquals("Line " + lineNumber + " didn't parse right; got " + cl.word() + " for " + origString, "Z", cl.word());
