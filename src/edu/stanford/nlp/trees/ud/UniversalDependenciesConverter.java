@@ -1,6 +1,5 @@
 package edu.stanford.nlp.trees.ud;
 
-import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.process.Morphology;
@@ -14,6 +13,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import java.lang.reflect.*;
+
 /**
  *
  * Command-line utility to:
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  */
 public class UniversalDependenciesConverter {
 
+  public static String NER_COMBINER_NAME = "edu.stanford.nlp.ie.NERClassifierCombiner";
 
   private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
 
@@ -125,27 +127,67 @@ public class UniversalDependenciesConverter {
     });
   }
 
+  /** variables for accessing NERClassifierCombiner via reflection **/
+  private static Object NER_TAGGER = null;
+  private static Method NER_CLASSIFY_METHOD = null;
 
-
-  private static NERClassifierCombiner NER_TAGGER = null;
-
-
-  private static void addNERTags(SemanticGraph sg) {
-    if (NER_TAGGER == null) {
-      NER_TAGGER = NERClassifierCombiner.createNERClassifierCombiner(null, new Properties());
+  /** check for presence of NERClassifierCombiner **/
+  private static boolean isNERClassifierCombinerPresent() {
+    try {
+      Class clazz = Class.forName(NER_COMBINER_NAME);
+    } catch (Exception ex) {
+      System.err.println(
+          "Warning: edu.stanford.nlp.ie.NERClassifierCombiner not found - not applying NER tags!");
+      return false;
     }
-
-    List<CoreLabel> labels = sg.vertexListSorted().stream().map(IndexedWord::backingLabel).collect(Collectors.toList());
-    NER_TAGGER.classify(labels);
+    return true;
   }
 
-  private static void addNERTags(Tree tree) {
-    if (NER_TAGGER == null) {
-      NER_TAGGER = NERClassifierCombiner.createNERClassifierCombiner(null, new Properties());
+  /** try to set up the NER tagger **/
+  private static void setupNERTagger() {
+    try {
+      Class NER_TAGGER_CLASS = Class.forName(NER_COMBINER_NAME);
+      Method createMethod =
+          NER_TAGGER_CLASS.getDeclaredMethod("createNERClassifierCombiner",
+              new Class[]{String.class, Properties.class});
+      NER_TAGGER = createMethod.invoke(null, null, new Properties());
+      NER_CLASSIFY_METHOD = NER_TAGGER_CLASS.getDeclaredMethod("classify", new Class[]{List.class});
+    } catch (Exception ex) {
+      System.err.println("Error setting up NERClassifierCombiner!  Not applying NER tags!");
     }
+  }
 
-    List<CoreLabel> labels = tree.yield().stream().map(w -> (CoreLabel) w).collect(Collectors.toList());
-    NER_TAGGER.classify(labels);
+  /** add NER tags to a semantic graph **/
+  private static void addNERTags(SemanticGraph sg) {
+    if (isNERClassifierCombinerPresent()) {
+      try {
+        // set up tagger if necessary
+        if (NER_TAGGER == null || NER_CLASSIFY_METHOD == null)
+          setupNERTagger();
+        // classify
+        List<CoreLabel> labels =
+            sg.vertexListSorted().stream().map(IndexedWord::backingLabel).collect(Collectors.toList());
+        NER_CLASSIFY_METHOD.invoke(NER_TAGGER, labels);
+      } catch (Exception ex) {
+        System.err.println("Error running NERClassifierCombiner on SemanticGraph!  Not applying NER tags!");
+      }
+    }
+  }
+
+  /** add NER tags to a tree **/
+  private static void addNERTags(Tree tree) {
+    if (isNERClassifierCombinerPresent()) {
+      try {
+        // set up tagger if necessary
+        if (NER_TAGGER == null || NER_CLASSIFY_METHOD == null)
+          setupNERTagger();
+        // classify
+        List<CoreLabel> labels = tree.yield().stream().map(w -> (CoreLabel) w).collect(Collectors.toList());
+        NER_CLASSIFY_METHOD.invoke(NER_TAGGER, labels);
+      } catch (Exception ex) {
+        System.err.println("Error running NERClassifierCombiner on Tree!  Not applying NER tags!");
+      }
+    }
   }
 
   /**

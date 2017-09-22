@@ -40,7 +40,7 @@ var currentText = '';
 /**
  * Add the startsWith function to the String class
  */
-if (typeof String.prototype.startsWith != 'function') {
+if (typeof String.prototype.startsWith !== 'function') {
   // see below for better implementation!
   String.prototype.startsWith = function (str){
     return this.indexOf(str) === 0;
@@ -80,7 +80,7 @@ function posColor(posTag) {
     return '#FFE8BE';
   } else if (posTag.startsWith('R') || posTag.startsWith('W')) {
     return '#FFFDA8';
-  } else if (posTag.startsWith('D') || posTag == 'CD') {
+  } else if (posTag.startsWith('D') || posTag === 'CD') {
     return '#CCADF6';
   } else if (posTag.startsWith('J')) {
     return '#FFFDA8';
@@ -90,7 +90,7 @@ function posColor(posTag) {
     return '#E4CBF6';
   } else if (posTag.startsWith('CC')) {
     return '#FFFFFF';
-  } else if (posTag == 'LS' || posTag == 'FW') {
+  } else if (posTag === 'LS' || posTag === 'FW') {
     return '#FFFFFF';
   } else {
     return '#E3E3E3';
@@ -102,19 +102,19 @@ function posColor(posTag) {
  * visualization color
  */
 function nerColor(nerTag) {
-  if (nerTag == 'PERSON') {
+  if (nerTag === 'PERSON') {
     return '#FFCCAA';
-  } else if (nerTag == 'ORGANIZATION') {
+  } else if (nerTag === 'ORGANIZATION') {
     return '#8FB2FF';
-  } else if (nerTag == 'MISC') {
+  } else if (nerTag === 'MISC') {
     return '#F1F447';
-  } else if (nerTag == 'LOCATION') {
+  } else if (nerTag === 'LOCATION') {
     return '#95DFFF';
-  } else if (nerTag == 'DATE' || nerTag == 'TIME' || nerTag == 'SET') {
+  } else if (nerTag === 'DATE' || nerTag === 'TIME' || nerTag === 'SET') {
     return '#9AFFE6';
-  } else if (nerTag == 'MONEY') {
+  } else if (nerTag === 'MONEY') {
     return '#FFFFFF';
-  } else if (nerTag == 'PERCENT') {
+  } else if (nerTag === 'PERCENT') {
     return '#FFA22B';
   } else {
     return '#E3E3E3';
@@ -127,15 +127,15 @@ function nerColor(nerTag) {
  * visualization color
  */
 function sentimentColor(sentiment) {
-  if (sentiment == "VERY POSITIVE") {
+  if (sentiment === "VERY POSITIVE") {
     return '#00FF00';
-  } else if (sentiment == "POSITIVE") {
+  } else if (sentiment === "POSITIVE") {
     return '#7FFF00';
-  } else if (sentiment == "NEUTRAL") {
+  } else if (sentiment === "NEUTRAL") {
     return '#FFFF00';
-  } else if (sentiment == "NEGATIVE") {
+  } else if (sentiment === "NEGATIVE") {
     return '#FF7F00';
-  } else if (sentiment == "VERY NEGATIVE") {
+  } else if (sentiment === "VERY NEGATIVE") {
     return '#FF0000';
   } else {
     return '#E3E3E3';
@@ -301,25 +301,25 @@ function render(data, reverse) {
     entityTypesSet[type] = true;
     // Get the color of the entity type
     color = '#ffccaa';
-    if (name == 'POS') {
+    if (name === 'POS') {
       color = posColor(type);
-    } else if (name == 'NER') {
+    } else if (name === 'NER') {
       color = nerColor(coarseType);
-    } else if (name == 'NNER') {
+    } else if (name === 'NNER') {
       color = nerColor(coarseType);
-    } else if (name == 'COREF') {
+    } else if (name === 'COREF') {
       color = '#FFE000';
-    } else if (name == 'ENTITY') {
+    } else if (name === 'ENTITY') {
       color = posColor('NN');
-    } else if (name == 'RELATION') {
+    } else if (name === 'RELATION') {
       color = posColor('VB');
-    } else if (name == 'LEMMA') {
+    } else if (name === 'LEMMA') {
       color = '#FFFFFF';
-    } else if (name == 'SENTIMENT') {
+    } else if (name === 'SENTIMENT') {
       color = sentimentColor(type);
-    } else if (name == 'LINK') {
+    } else if (name === 'LINK') {
       color = '#FFFFFF';
-    } else if (name == 'KBP_ENTITY') {
+    } else if (name === 'KBP_ENTITY') {
       color = '#FFFFFF';
     }
     // Register the type
@@ -1117,7 +1117,9 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(
+        pattern.replace("&", "\\&").replace('+', '\\+')) +
+        '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.tokensregex_error').remove();  // Clear error messages
@@ -1149,7 +1151,9 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(
+        pattern.replace("&", "\\&").replace('+', '\\+')) +
+        '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.semgrex_error').remove();  // Clear error messages
@@ -1180,7 +1184,9 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + '/tregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      url: serverAddress + '/tregex?pattern=' + encodeURIComponent(
+        pattern.replace("&", "\\&").replace('+', '\\+')) +
+        '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
       data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.tregex_error').remove();  // Clear error messages

@@ -191,7 +191,7 @@ public class IOUtils  {
   }
 
   /**
-   * Writes a string to a temporary file
+   * Writes a string to a temporary file.
    *
    * @param contents The string to write
    * @param path The file path
@@ -208,6 +208,7 @@ public class IOUtils  {
       writer = new BufferedOutputStream(new FileOutputStream(tmp));
     }
     writer.write(contents.getBytes(encoding));
+    writer.close();
     return tmp;
   }
 
