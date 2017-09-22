@@ -706,6 +706,7 @@ public class PTBTokenizerTest {
           "RT @Suns: What happens when you combine @50cent, #StarWars and introductions at an @NBA game? This.",
           "RT @ShirleyHoman481: '#StarWars' Premiere Street Closures Are “Bigger Than the Oscars\": Four blocks of Hollywood Blvd. -- from Highland… ht…",
           "In 2009, Wiesel criticized the Vatican for lifting the excommunication of controversial bishop Richard Williamson, a member of the Society of Saint Pius X.",
+          "RM460.35 million",
   };
 
   private final String[][] tweetGold = {
@@ -730,6 +731,7 @@ public class PTBTokenizerTest {
           { "In", "2009", ",", "Wiesel", "criticized", "the", "Vatican", "for", "lifting", "the", "excommunication",
                   "of", "controversial", "bishop", "Richard", "Williamson", ",", "a", "member", "of", "the",
                   "Society", "of", "Saint", "Pius", "X." },
+          { "RM", "460.35", "million" },
   };
 
   @Test

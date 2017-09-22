@@ -127,65 +127,62 @@ public class UniversalDependenciesConverter {
     });
   }
 
-  /** variables for accessing NERClassifierCombiner via reflection **/
+  // NERClassifierCombiner variables
   private static Object NER_TAGGER = null;
-  private static Method NER_CLASSIFY_METHOD = null;
+  private static Class NER_TAGGER_CLASS = null;
 
-  /** check for presence of NERClassifierCombiner **/
   private static boolean isNERClassifierCombinerPresent() {
     try {
       Class clazz = Class.forName(NER_COMBINER_NAME);
     } catch (Exception ex) {
-      System.err.println(
-          "Warning: edu.stanford.nlp.ie.NERClassifierCombiner not found - not applying NER tags!");
       return false;
     }
     return true;
   }
 
-  /** try to set up the NER tagger **/
-  private static void setupNERTagger() {
-    try {
-      Class NER_TAGGER_CLASS = Class.forName(NER_COMBINER_NAME);
-      Method createMethod =
-          NER_TAGGER_CLASS.getDeclaredMethod("createNERClassifierCombiner",
-              new Class[]{String.class, Properties.class});
-      NER_TAGGER = createMethod.invoke(null, null, new Properties());
-      NER_CLASSIFY_METHOD = NER_TAGGER_CLASS.getDeclaredMethod("classify", new Class[]{List.class});
-    } catch (Exception ex) {
-      System.err.println("Error setting up NERClassifierCombiner!  Not applying NER tags!");
-    }
-  }
-
-  /** add NER tags to a semantic graph **/
   private static void addNERTags(SemanticGraph sg) {
     if (isNERClassifierCombinerPresent()) {
       try {
-        // set up tagger if necessary
-        if (NER_TAGGER == null || NER_CLASSIFY_METHOD == null)
-          setupNERTagger();
+        // set up class if necessary
+        if (NER_TAGGER_CLASS == null)
+          NER_TAGGER_CLASS = Class.forName(NER_COMBINER_NAME);
+        // build tagger if necessary
+        if (NER_TAGGER == null) {
+          Method createMethod =
+              NER_TAGGER_CLASS.getDeclaredMethod("createNERClassifierCombiner",
+                  new Class[]{String.class, Properties.class});
+          NER_TAGGER = createMethod.invoke(null, null, new Properties());
+        }
         // classify
         List<CoreLabel> labels =
             sg.vertexListSorted().stream().map(IndexedWord::backingLabel).collect(Collectors.toList());
-        NER_CLASSIFY_METHOD.invoke(NER_TAGGER, labels);
+        Method classifyMethod = NER_TAGGER_CLASS.getDeclaredMethod("classify", new Class[]{List.class});
+        classifyMethod.invoke(NER_TAGGER, labels);
       } catch (Exception ex) {
-        System.err.println("Error running NERClassifierCombiner on SemanticGraph!  Not applying NER tags!");
+        System.err.println("Warning: NERClassifierCombiner Class Not Found, not adding NER tags!");
       }
     }
   }
 
-  /** add NER tags to a tree **/
   private static void addNERTags(Tree tree) {
     if (isNERClassifierCombinerPresent()) {
       try {
-        // set up tagger if necessary
-        if (NER_TAGGER == null || NER_CLASSIFY_METHOD == null)
-          setupNERTagger();
+        // set up class if necessary
+        if (NER_TAGGER_CLASS == null)
+          NER_TAGGER_CLASS = Class.forName(NER_COMBINER_NAME);
+        // build tagger if necessary
+        if (NER_TAGGER == null) {
+          Method createMethod =
+              NER_TAGGER_CLASS.getDeclaredMethod("createNERClassifierCombiner",
+                  new Class[]{String.class, Properties.class});
+          NER_TAGGER = createMethod.invoke(null, null, new Properties());
+        }
         // classify
         List<CoreLabel> labels = tree.yield().stream().map(w -> (CoreLabel) w).collect(Collectors.toList());
-        NER_CLASSIFY_METHOD.invoke(NER_TAGGER, labels);
+        Method classifyMethod = NER_TAGGER_CLASS.getDeclaredMethod("classify", new Class[]{List.class});
+        classifyMethod.invoke(NER_TAGGER, labels);
       } catch (Exception ex) {
-        System.err.println("Error running NERClassifierCombiner on Tree!  Not applying NER tags!");
+        System.err.println("Warning: NERClassifierCombiner Class Not Found, not adding NER tags!");
       }
     }
   }

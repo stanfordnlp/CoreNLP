@@ -681,8 +681,8 @@ FILENAME = [\p{Alpha}\p{Digit}]+([-._/][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}
 /* Go with just the top 20 currencies. */
 SEP_CURRENCY = (USD|EUR|JPY|GBP|AUD|CAD|CHF|CNY|SEK|NZD|MXN|SGD|HKD|NOK|KRW|TRY|RUB|INR|BRL|ZAR)
 /* Can't include s for seconds as too many iPhone 6s, 1990s, etc. */
-SEP_UNITS = (lbs?|ltr|mins?|[kcm][gml]|[MGTP]([B]|[H][z])|fps|bpm|[MG][b][p][s])
-SEP_OTHER = ([ap]m|hrs?|words?|m(on)?ths?|y(ea)?rs?|pts?)
+SEP_UNITS = (lbs?|ltr|mins?|[kcm]?[gml]|[MGT]([B][H][z])|fps|bpm)
+SEP_OTHER = ([ap]m|p|hrs?|words?|m(on)?ths?|pts?)
 /* If there is a longer alphabetic match, another longer pattern will match so don't need to filter that. */
 SEP_SUFFIX = ({SEP_CURRENCY}|{SEP_UNITS}|{SEP_OTHER})
 /* THING: The $ was for things like New$;
@@ -736,7 +736,7 @@ APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{AP
 APOWORD2 = y{APOS}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
 FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?,;:&`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
-LIKELYURL = ((www\.([^ \t\n\f\r`<>|.!?,\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r`<>|.!?,_:\/$\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r`<>|]+[^ \t\n\f\r`<>|.!?,;:&\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-])?
+LIKELYURL = ((www\.([^ \t\n\f\r<>|.!?,\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r`<>|.!?,_:\/$\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"’”<>|(){}\[\]]+[^ \t\n\f\r<>|.!?,;:&`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
 EMAIL = (&lt;|<)?(mailto:)?[a-zA-Z0-9._%+-]+@[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9](&gt;|>)?
@@ -977,15 +977,15 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {FULLURL} to recognize " + txt + " as " + norm); }
                           return getNext(norm, txt);
                         }
-{LIKELYURL}/[^\p{Alpha}]  { String txt = yytext();
-                            String norm = txt;
-                            if (escapeForwardSlashAsterisk) {
-                              norm = delimit(norm, '/');
-                              norm = delimit(norm, '*');
-                            }
-                            if (DEBUG) { logger.info("Used {LIKELYURL} to recognize " + txt + " as " + norm); }
-                            return getNext(norm, txt);
+{LIKELYURL}             { String txt = yytext();
+                          String norm = txt;
+                          if (escapeForwardSlashAsterisk) {
+                            norm = delimit(norm, '/');
+                            norm = delimit(norm, '*');
                           }
+                          if (DEBUG) { logger.info("Used {LIKELYURL} to recognize " + txt + " as " + norm); }
+                          return getNext(norm, txt);
+                        }
 {EMAIL}                 { return getNext(); }
 {TWITTER}               { return getNext(); }
 {REDAUX}/[^\p{Alpha}]   { String tok = yytext();
@@ -1006,6 +1006,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           }
                           return getNext(txt, yytext());
                          }
+/* Malaysian currency */
+RM/{NUM}        { String txt = yytext();
+                  return getNext(txt, txt);
+                }
 {NUMBER}                { handleHyphenatedNumber(yytext());
                           if (DEBUG) { logger.info("Used {NUMBER} to recognize " + yytext() + " as " + removeFromNumber(yytext())); }
                           return getNext(removeFromNumber(yytext()), yytext()); }
