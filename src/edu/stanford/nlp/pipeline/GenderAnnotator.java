@@ -39,6 +39,15 @@ public class GenderAnnotator implements Annotator {
     }
   }
 
+  public void annotateEntityMention(CoreMap entityMention, String gender) {
+    // annotate the entity mention
+    entityMention.set(CoreAnnotations.GenderAnnotation.class, gender);
+    // annotate each token of the entity mention
+    for (CoreLabel token : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {
+      token.set(CoreAnnotations.GenderAnnotation.class, gender);
+    }
+  }
+
   public GenderAnnotator(String annotatorName, Properties props) {
     // load the male and female names
     loadGenderNames(maleNames, MALE_FIRST_NAMES_PATH);
@@ -54,9 +63,9 @@ public class GenderAnnotator implements Annotator {
         if (entityMention.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PERSON")) {
           CoreLabel firstName = entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0);
           if (maleNames.contains(firstName.get(CoreAnnotations.TextAnnotation.class).toLowerCase()))
-            entityMention.set(CoreAnnotations.GenderAnnotation.class, "MALE");
+            annotateEntityMention(entityMention, "MALE");
           else if (femaleNames.contains(firstName.get(CoreAnnotations.TextAnnotation.class).toLowerCase()))
-            entityMention.set(CoreAnnotations.GenderAnnotation.class, "FEMALE");
+            annotateEntityMention(entityMention, "FEMALE");
         }
       }
     }

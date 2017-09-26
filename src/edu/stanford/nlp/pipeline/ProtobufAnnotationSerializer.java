@@ -341,8 +341,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(CoarseTagAnnotation.class)) { builder.setCoarseTag(getAndRegister(coreLabel, keysToSerialize, CoarseTagAnnotation.class));}
     if (keySet.contains(CoNLLUSecondaryDepsAnnotation.class)) { builder.setConllUSecondaryDeps(toMapStringStringProto(getAndRegister(coreLabel, keysToSerialize, CoNLLUSecondaryDepsAnnotation.class)));}
 
-        // Non-default annotators
-    if (keySet.contains(GenderAnnotation.class)) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
+    // Non-default annotators
+    if (keySet.contains(edu.stanford.nlp.ling.CoreAnnotations.GenderAnnotation.class)) {
+      builder.setGender(getAndRegister(coreLabel, keysToSerialize,
+          edu.stanford.nlp.ling.CoreAnnotations.GenderAnnotation.class));
+    }
     if (keySet.contains(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
     if (keySet.contains(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
 
@@ -1211,7 +1214,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasChineseXMLChar()) { word.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, proto.getChineseXMLChar()); }
 
     // Non-default annotators
-    if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
+    if (proto.hasGender()) { word.set(edu.stanford.nlp.ling.CoreAnnotations.GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
     if (proto.hasTrueCaseText()) { word.set(TrueCaseTextAnnotation.class, proto.getTrueCaseText()); }
 
