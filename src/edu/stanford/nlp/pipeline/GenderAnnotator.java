@@ -1,63 +1,66 @@
-package edu.stanford.nlp.pipeline; 
+package edu.stanford.nlp.pipeline;
+
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
-import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 
 /**
- * This class adds gender information (MALE / FEMALE) to tokens as GenderAnnotations. It uses the
- * RegexNERSequenceClassifier and a manual mapping from token text to gender labels. Assumes
- * that the Annotation has already been split into sentences, then tokenized into Lists of CoreLabels.
+ * This class adds gender information (MALE / FEMALE) to entity mentions as GenderAnnotations.
+ * The default is to use name lists from our KBP system.
  *
- * @author jtibs
+ * @author jebolton
  */
 
-public class GenderAnnotator implements Annotator  {
+public class GenderAnnotator implements Annotator {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(GenderAnnotator.class);
 
-  private final RegexNERSequenceClassifier classifier;
-  private final boolean verbose;
+  /** paths to lists of male and female first names **/
+  public static String MALE_FIRST_NAMES_PATH = "edu/stanford/nlp/models/gender/male_first_names.txt";
+  public static String FEMALE_FIRST_NAMES_PATH = "edu/stanford/nlp/models/gender/female_first_names.txt";
 
-  public GenderAnnotator() {
-    this(false, DefaultPaths.DEFAULT_GENDER_FIRST_NAMES);
-  }
+  /** HashSets mapping names to potential genders **/
+  public HashSet<String> maleNames = new HashSet<String>();
+  public HashSet<String> femaleNames = new HashSet<String>();
 
-  public GenderAnnotator(boolean verbose, String mapping) {
-    classifier = new RegexNERSequenceClassifier(mapping, true, true);
-    this.verbose = verbose;
-  }
-
-  public void annotate(Annotation annotation) {
-    if (verbose) {
-      log.info("Adding gender annotation...");
-    }
-
-    if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))
-      throw new RuntimeException("Unable to find sentences in " + annotation);
-
-    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
-    for (CoreMap sentence : sentences) {
-      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      classifier.classify(tokens);
-
-      for (CoreLabel token : tokens) {
-        token.set(MachineReadingAnnotations.GenderAnnotation.class, token.get(CoreAnnotations.AnswerAnnotation.class));
+  public void loadGenderNames(HashSet<String> genderSet, String filePath) {
+    List<String> nameFileEntries = IOUtils.linesFromFile(MALE_FIRST_NAMES_PATH);
+    for (String nameCSV : nameFileEntries) {
+      String[] namesForThisLine = nameCSV.split(",");
+      for (String name : namesForThisLine) {
+        genderSet.add(name.toLowerCase());
       }
     }
   }
 
+  public GenderAnnotator(String annotatorName, Properties props) {
+    // load the male and female names
+    loadGenderNames(maleNames, MALE_FIRST_NAMES_PATH);
+    loadGenderNames(femaleNames, FEMALE_FIRST_NAMES_PATH);
+  }
+
+  public void annotate(Annotation annotation) {
+    // iterate through each sentence, iterate through each entity mention in the sentence
+    for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+      for (CoreMap entityMention : sentence.get(CoreAnnotations.MentionsAnnotation.class)) {
+        // if the entityMention is of type PERSON, see if name is in one of the lists for male and female names
+        // annotate the entity mention's CoreMap
+        if (entityMention.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PERSON")) {
+          CoreLabel firstName = entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0);
+          if (maleNames.contains(firstName.get(CoreAnnotations.TextAnnotation.class).toLowerCase()))
+            entityMention.set(CoreAnnotations.GenderAnnotation.class, "MALE");
+          else if (femaleNames.contains(firstName.get(CoreAnnotations.TextAnnotation.class).toLowerCase()))
+            entityMention.set(CoreAnnotations.GenderAnnotation.class, "FEMALE");
+        }
+      }
+    }
+  }
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
@@ -65,13 +68,14 @@ public class GenderAnnotator implements Annotator  {
         CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class
+        CoreAnnotations.NamedEntityTagAnnotation.class,
+        CoreAnnotations.MentionsAnnotation.class
     )));
   }
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(MachineReadingAnnotations.GenderAnnotation.class);
+    return Collections.singleton(CoreAnnotations.GenderAnnotation.class);
   }
 
 }

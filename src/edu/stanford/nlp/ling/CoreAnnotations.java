@@ -2050,4 +2050,18 @@ public class CoreAnnotations {
     }
   }
 
+  /**
+   * The CoreMap key identifying an entity mention's potential gender.
+   *
+   * This is attached to {@link CoreLabel}s.
+   */
+  public static class GenderAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+
+
 }
