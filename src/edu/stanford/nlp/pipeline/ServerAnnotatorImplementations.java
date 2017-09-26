@@ -130,7 +130,7 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
 
   /** {@inheritDoc} */
   @Override
-  public Annotator gender(Properties properties, boolean verbose) {
+  public Annotator gender(Properties properties, String name) {
     return new SingletonAnnotator(host, port, properties, Annotator.STANFORD_GENDER);
   }
 

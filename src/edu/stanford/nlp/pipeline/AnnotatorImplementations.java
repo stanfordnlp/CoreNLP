@@ -97,8 +97,8 @@ public class AnnotatorImplementations  {
   /**
    * Annotate for gender of tokens
    */
-  public Annotator gender(Properties properties, boolean verbose) {
-    return new GenderAnnotator(false, properties.getProperty("gender.firstnames", DefaultPaths.DEFAULT_GENDER_FIRST_NAMES));
+  public Annotator gender(Properties properties, String name) {
+    return new GenderAnnotator(name, properties);
   }
 
   /**

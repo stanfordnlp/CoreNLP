@@ -546,7 +546,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     pool.put(STANFORD_TOKENSREGEX, (props, impl) -> impl.tokensregex(props, STANFORD_TOKENSREGEX));
     pool.put(STANFORD_REGEXNER, (props, impl) -> impl.tokensRegexNER(props, STANFORD_REGEXNER));
     pool.put(STANFORD_ENTITY_MENTIONS, (props, impl) -> impl.entityMentions(props, STANFORD_ENTITY_MENTIONS));
-    pool.put(STANFORD_GENDER, (props, impl) -> impl.gender(props, false));
+    pool.put(STANFORD_GENDER, (props, impl) -> impl.gender(props, STANFORD_GENDER));
     pool.put(STANFORD_TRUECASE, (props, impl) -> impl.trueCase(props));
     pool.put(STANFORD_PARSE, (props, impl) -> impl.parse(props));
     pool.put(STANFORD_MENTION, (props, impl) -> impl.mention(props));
