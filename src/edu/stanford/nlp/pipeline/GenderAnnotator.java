@@ -30,7 +30,7 @@ public class GenderAnnotator implements Annotator {
   public HashSet<String> femaleNames = new HashSet<String>();
 
   public void loadGenderNames(HashSet<String> genderSet, String filePath) {
-    List<String> nameFileEntries = IOUtils.linesFromFile(MALE_FIRST_NAMES_PATH);
+    List<String> nameFileEntries = IOUtils.linesFromFile(filePath);
     for (String nameCSV : nameFileEntries) {
       String[] namesForThisLine = nameCSV.split(",");
       for (String name : namesForThisLine) {
@@ -62,10 +62,16 @@ public class GenderAnnotator implements Annotator {
         // annotate the entity mention's CoreMap
         if (entityMention.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PERSON")) {
           CoreLabel firstName = entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0);
-          if (maleNames.contains(firstName.get(CoreAnnotations.TextAnnotation.class).toLowerCase()))
+          System.err.println(firstName.word());
+          System.err.println(femaleNames);
+          System.err.println(femaleNames.contains(firstName.word().toLowerCase()));
+          if (maleNames.contains(firstName.word().toLowerCase()))
             annotateEntityMention(entityMention, "MALE");
-          else if (femaleNames.contains(firstName.get(CoreAnnotations.TextAnnotation.class).toLowerCase()))
+          else if (femaleNames.contains(firstName.word().toLowerCase())) {
+            System.err.println(firstName.word());
+            System.err.println(femaleNames.contains(firstName.word()));
             annotateEntityMention(entityMention, "FEMALE");
+        }
         }
       }
     }
