@@ -62,16 +62,10 @@ public class GenderAnnotator implements Annotator {
         // annotate the entity mention's CoreMap
         if (entityMention.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PERSON")) {
           CoreLabel firstName = entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0);
-          System.err.println(firstName.word());
-          System.err.println(femaleNames);
-          System.err.println(femaleNames.contains(firstName.word().toLowerCase()));
           if (maleNames.contains(firstName.word().toLowerCase()))
             annotateEntityMention(entityMention, "MALE");
-          else if (femaleNames.contains(firstName.word().toLowerCase())) {
-            System.err.println(firstName.word());
-            System.err.println(femaleNames.contains(firstName.word()));
+          else if (femaleNames.contains(firstName.word().toLowerCase()))
             annotateEntityMention(entityMention, "FEMALE");
-        }
         }
       }
     }
