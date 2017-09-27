@@ -50,6 +50,8 @@ public class GenderAnnotator implements Annotator {
 
   public GenderAnnotator(String annotatorName, Properties props) {
     // load the male and female names
+    MALE_FIRST_NAMES_PATH = props.getProperty("gender.maleNamesFile", MALE_FIRST_NAMES_PATH);
+    FEMALE_FIRST_NAMES_PATH = props.getProperty("gender.femaleNamesFile", FEMALE_FIRST_NAMES_PATH);
     loadGenderNames(maleNames, MALE_FIRST_NAMES_PATH);
     loadGenderNames(femaleNames, FEMALE_FIRST_NAMES_PATH);
   }
