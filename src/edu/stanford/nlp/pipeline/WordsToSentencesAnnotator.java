@@ -231,7 +231,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
       tokenOffset += sentenceTokens.size();
       sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset);
       // update tokenOffset to first token of next sentence (if there is a next sentence)
-      while (tokenOffset < tokens.size()-1 && tokens.get(tokenOffset).isNewline())
+      while (tokenOffset < tokens.size()-1 && Boolean.TRUE.equals(tokens.get(tokenOffset).isNewline()))
         tokenOffset++;
       sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset);
       sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
