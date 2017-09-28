@@ -300,6 +300,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(TimexAnnotation.class)) { builder.setTimexValue(toProto(getAndRegister(coreLabel, keysToSerialize, TimexAnnotation.class))); }
     if (keySet.contains(AnswerAnnotation.class)) { builder.setAnswer(getAndRegister(coreLabel, keysToSerialize, AnswerAnnotation.class)); }
     if (keySet.contains(WikipediaEntityAnnotation.class)) { builder.setWikipediaEntity(getAndRegister(coreLabel, keysToSerialize, WikipediaEntityAnnotation.class)); }
+    if (keySet.contains(IsNewlineAnnotation.class)) { builder.setIsNewline(getAndRegister(coreLabel, keysToSerialize, IsNewlineAnnotation.class)); }
     if (keySet.contains(XmlContextAnnotation.class)) {
       builder.setHasXmlContext(true);
       builder.addAllXmlContext(getAndRegister(coreLabel, keysToSerialize, XmlContextAnnotation.class));
@@ -1157,7 +1158,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (mention.get(EntityTypeAnnotation.class) != null) { builder.setEntityType(mention.get(EntityTypeAnnotation.class)); }
     if (mention.get(TimexAnnotation.class) != null) { builder.setTimex(toProto(mention.get(TimexAnnotation.class))); }
     if (mention.get(WikipediaEntityAnnotation.class) != null) { builder.setWikipediaEntity(mention.get(WikipediaEntityAnnotation.class)); }
-
+    if (mention.get(edu.stanford.nlp.ling.CoreAnnotations.GenderAnnotation.class) != null) {
+      builder.setGender(mention.get(edu.stanford.nlp.ling.CoreAnnotations.GenderAnnotation.class));
+    }
     return builder.build();
   }
 
@@ -1208,6 +1211,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasConllUTokenSpan()) { word.set(CoNLLUTokenSpanAnnotation.class, new IntPair(proto.getConllUTokenSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasConllUSecondaryDeps()) { word.set(CoNLLUSecondaryDepsAnnotation.class, fromProto(proto.getConllUSecondaryDeps())); }
     if (proto.hasWikipediaEntity()) { word.set(WikipediaEntityAnnotation.class, proto.getWikipediaEntity()); }
+    if (proto.hasIsNewline()) { word.set(IsNewlineAnnotation.class, proto.getIsNewline()); }
     // Chinese char info
     if (proto.hasChineseChar()) { word.set(ChineseCharAnnotation.class, proto.getChineseChar()) ; }
     if (proto.hasChineseSeg()) { word.set(ChineseSegAnnotation.class, proto.getChineseSeg()) ; }
@@ -2260,6 +2264,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (mention.hasEntityType()) map.set(EntityTypeAnnotation.class, mention.getEntityType());
     if (mention.hasTimex()) map.set(TimexAnnotation.class, fromProto(mention.getTimex()));
     if (mention.hasWikipediaEntity()) map.set(WikipediaEntityAnnotation.class, mention.getWikipediaEntity());
+    if (mention.hasGender()) map.set(edu.stanford.nlp.ling.CoreAnnotations.GenderAnnotation.class, mention.getGender());
 
     return map;
   }
