@@ -2053,13 +2053,23 @@ public class CoreAnnotations {
   /**
    * The CoreMap key identifying an entity mention's potential gender.
    *
-   * This is attached to {@link CoreLabel}s.
+   * This is attached to {@link CoreMap}s.
    */
   public static class GenderAnnotation implements CoreAnnotation<String> {
     @Override
     public Class<String> getType() {
       return String.class;
     }
+  }
+
+  /**
+   * The CoreLabel key identifying whether a token is a newline or not
+   *
+   * This is attached to {@link CoreLabel}s.
+   */
+  public static class IsNewlineAnnotation implements CoreAnnotation<Boolean> {
+    @Override
+    public Class<Boolean> getType() {return Boolean.class;}
   }
 
 

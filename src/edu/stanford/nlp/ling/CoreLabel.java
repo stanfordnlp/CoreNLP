@@ -490,6 +490,14 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     set(CoreAnnotations.LemmaAnnotation.class, lemma);
   }
 
+  /**
+   * Get value of IsNewlineAnnotation
+   *
+   * @return value of IsNewlineAnnotation
+   */
+  public Boolean isNewline() {
+    return get(CoreAnnotations.IsNewlineAnnotation.class);
+  }
 
   /**
    * {@inheritDoc}
