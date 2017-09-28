@@ -153,6 +153,7 @@ message Token {
   optional string conllUMisc        = 35;
   optional MapStringString conllUSecondaryDeps = 36;
   optional string   wikipediaEntity = 37;
+  optional bool     isNewline = 38;
 
 
   // Fields set by other annotators in CoreNLP
@@ -451,6 +452,7 @@ message NERMention {
   optional string entityType                    = 6;
   optional Timex  timex                         = 7;
   optional string wikipediaEntity               = 8;
+  optional string gender                        = 9;
 }
 
 //
