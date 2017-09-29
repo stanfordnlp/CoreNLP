@@ -46,10 +46,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   public CorefAnnotator(Properties props) {
     this.props = props;
     try {
-      // suppress
-      props.setProperty("coref.printConLLLoadingMessage","false");
-      corefSystem = new CorefSystem(props);
-      props.remove("coref.printConLLLoadingMessage");
       // if user tries to run with coref.language = ENGLISH and coref.algorithm = hybrid, throw Exception
       // we do not support those settings at this time
       if (CorefProperties.algorithm(props).equals(CorefProperties.CorefAlgorithmType.HYBRID) &&
@@ -58,6 +54,10 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
             "please change coref.algorithm or coref.langauge");
         throw new RuntimeException();
       }
+      // suppress
+      props.setProperty("coref.printConLLLoadingMessage","false");
+      corefSystem = new CorefSystem(props);
+      props.remove("coref.printConLLLoadingMessage");
     } catch (Exception e) {
       log.error("Error creating CorefAnnotator...terminating pipeline construction!");
       log.error(e);
