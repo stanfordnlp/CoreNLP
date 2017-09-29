@@ -127,8 +127,8 @@ public class ProtobufAnnotationSerializerSlowITest {
       for (int i = 0; i < doc.get(CoreAnnotations.TokensAnnotation.class).size(); i++) {
         CoreLabel token = doc.get(CoreAnnotations.TokensAnnotation.class).get(i);
         // Remove null gender
-        if (token.get(MachineReadingAnnotations.GenderAnnotation.class) == null) {
-          token.remove(MachineReadingAnnotations.GenderAnnotation.class);
+        if (token.get(CoreAnnotations.GenderAnnotation.class) == null) {
+          token.remove(CoreAnnotations.GenderAnnotation.class);
         }
       }
     }
@@ -440,7 +440,7 @@ public class ProtobufAnnotationSerializerSlowITest {
 
   @Test
   public void testGender() {
-    testAnnotators("tokenize,ssplit,pos,lemma,ner,gender");
+    testAnnotators("tokenize,ssplit,pos,lemma,ner,entitymentions,gender");
   }
 
 
