@@ -51,7 +51,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       if (CorefProperties.algorithm(props).equals(CorefProperties.CorefAlgorithmType.HYBRID) &&
           CorefProperties.getLanguage(props).equals(Locale.ENGLISH)) {
         log.error("Error: coref.algorithm=hybrid is not supported for English, " +
-            "please change coref.algorithm or coref.langauge");
+            "please change coref.algorithm or coref.language");
         throw new RuntimeException();
       }
       // suppress
