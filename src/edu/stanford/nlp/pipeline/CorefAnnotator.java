@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Locale;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.CorefProperties;
@@ -49,8 +50,16 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       props.setProperty("coref.printConLLLoadingMessage","false");
       corefSystem = new CorefSystem(props);
       props.remove("coref.printConLLLoadingMessage");
+      // if user tries to run with coref.language = ENGLISH and coref.algorithm = hybrid, throw Exception
+      // we do not support those settings at this time
+      if (CorefProperties.algorithm(props).equals(CorefProperties.CorefAlgorithmType.HYBRID) &&
+          CorefProperties.getLanguage(props).equals(Locale.ENGLISH)) {
+        log.error("Error: coref.algorithm=hybrid is not supported for English, " +
+            "please change coref.algorithm or coref.langauge");
+        throw new RuntimeException();
+      }
     } catch (Exception e) {
-      log.error("cannot create CorefAnnotator!");
+      log.error("Error creating CorefAnnotator...terminating pipeline construction!");
       log.error(e);
       throw new RuntimeException(e);
     }

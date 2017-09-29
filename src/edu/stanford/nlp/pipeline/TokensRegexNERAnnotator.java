@@ -310,7 +310,7 @@ public class TokensRegexNERAnnotator extends SentenceAnnotator {
     this.nThreads = PropertiesUtils.getInt(properties, name + ".nthreads",
         PropertiesUtils.getInt(properties, "nthreads", 1));
   }
-  
+
   private MultiPatternMatcher<CoreMap> createPatternMatcher(Map<SequencePattern<CoreMap>, Entry> patternToEntry) {
     // Convert to tokensregex pattern
 
