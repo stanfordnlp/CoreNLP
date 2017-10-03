@@ -126,7 +126,7 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class TokensRegexNERAnnotator extends SentenceAnnotator {
+public class TokensRegexNERAnnotator implements Annotator  {
 
   /** A logger for this class */
   protected static final Redwood.RedwoodChannels logger = Redwood.channels(TokensRegexNERAnnotator.class);
@@ -157,10 +157,6 @@ public class TokensRegexNERAnnotator extends SentenceAnnotator {
 
   // Labels for which we don't use the default overwrite types (mylabels)
   private final Set<String> noDefaultOverwriteLabels;
-
-  // variables for SentenceAnnotator
-  private final int nThreads;
-  private final long maxParseTime = 0;
 
   enum PosMatchType {
     // all tokens must match the pos pattern
@@ -307,8 +303,31 @@ public class TokensRegexNERAnnotator extends SentenceAnnotator {
       Collections.addAll(myLabels, entry.types);
     }
     this.myLabels = Collections.unmodifiableSet(myLabels);
-    this.nThreads = PropertiesUtils.getInt(properties, name + ".nthreads",
-        PropertiesUtils.getInt(properties, "nthreads", 1));
+  }
+
+  @Override
+  public void annotate(Annotation annotation) {
+    if (verbose) {
+      logger.info("Adding TokensRegexNER annotations ... ");
+    }
+
+    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+    if (sentences != null) {
+      for (CoreMap sentence : sentences) {
+        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+        annotateMatched(tokens);
+      }
+    } else {
+      List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
+      if (tokens != null){
+        annotateMatched(tokens);
+      } else {
+        throw new RuntimeException("Unable to find sentences or tokens in " + annotation);
+      }
+    }
+
+    if (verbose)
+      logger.info("done.");
   }
 
   private MultiPatternMatcher<CoreMap> createPatternMatcher(Map<SequencePattern<CoreMap>, Entry> patternToEntry) {
@@ -851,28 +870,6 @@ public class TokensRegexNERAnnotator extends SentenceAnnotator {
       if (pattern != null) return true;
     }
     return false;
-  }
-
-  @Override
-  protected void doOneSentence(Annotation annotation, CoreMap sentence) {
-    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    annotateMatched(tokens);
-  }
-
-  @Override
-  protected void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
-    // TODO
-    System.err.println("fail");
-  }
-
-  @Override
-  protected int nThreads() {
-    return nThreads;
-  }
-
-  @Override
-  protected long maxTime() {
-    return maxParseTime;
   }
 
   @Override
