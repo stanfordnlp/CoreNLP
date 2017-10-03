@@ -46,7 +46,7 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 ### JavaScript (node.js)
 
 * [corenlp](https://www.npmjs.com/package/corenlp)
-([github site](https://github.com/gerardobort/node-corenlp)
+([github site](https://github.com/gerardobort/node-corenlp))
 by Gerardo Bort is an actively developed node.js CoreNLP library. Multilingual support.
 You can [run this package in your browser, using RunKit](https://npm.runkit.com/corenlp).
 * [stanford-corenlp](https://www.npmjs.org/package/stanford-corenlp) ([github site](https://github.com/hiteshjoshi/node-stanford-corenlp)) is a simple node.js wrapper by hiteshjoshi.
