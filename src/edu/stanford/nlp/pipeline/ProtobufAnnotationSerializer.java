@@ -1355,6 +1355,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       sentence.set(RelationMentionsAnnotation.class, relations);
     }
 
+    // add entity mentions for this sentence
+    List<CoreMap> mentions = proto.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
+    sentence.set(CoreAnnotations.MentionsAnnotation.class, mentions);
+
     // if there are mentions for this sentence, add them to the annotation
     loadSentenceMentions(proto, sentence);
 
