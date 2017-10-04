@@ -310,6 +310,9 @@ public class WordsToSentencesAnnotator implements Annotator  {
         }
       }
 
+      // set certain annotation keys to empty lists
+      sentence.set(CoreAnnotations.MentionsAnnotation.class, new ArrayList<CoreMap>());
+
       // add the sentence to the list
       sentences.add(sentence);
     }

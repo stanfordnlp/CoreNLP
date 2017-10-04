@@ -1675,10 +1675,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // Set NERmention
     List<CoreMap> mentions = proto.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
-    if (!mentions.isEmpty()) {
-      ann.set(MentionsAnnotation.class, mentions);
-    }
-
+    ann.set(MentionsAnnotation.class, mentions);
     // add SpeakerInfo stuff to Mentions, this requires knowing all mentions in the document
     // also add all the Set<Mention>
     for (int mentionID : idToMention.keySet()) {
@@ -2262,7 +2259,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (mention.hasEntityType()) map.set(EntityTypeAnnotation.class, mention.getEntityType());
     if (mention.hasTimex()) map.set(TimexAnnotation.class, fromProto(mention.getTimex()));
     if (mention.hasWikipediaEntity()) map.set(WikipediaEntityAnnotation.class, mention.getWikipediaEntity());
-    if (mention.hasGender()) map.set(edu.stanford.nlp.ling.CoreAnnotations.GenderAnnotation.class, mention.getGender());
+    if (mention.hasGender()) map.set(CoreAnnotations.GenderAnnotation.class, mention.getGender());
 
     return map;
   }
