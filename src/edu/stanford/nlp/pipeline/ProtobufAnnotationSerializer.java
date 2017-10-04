@@ -1324,6 +1324,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         entityMentionTokens.add(tokens.get(tokenIndex));
       }
       entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
+      String entityMentionText =
+          entityMentionTokens.stream().map(token -> token.word()).collect(Collectors.joining(" "));
+      entityMention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
     }
     lossySentence.set(CoreAnnotations.MentionsAnnotation.class, mentions);
 
