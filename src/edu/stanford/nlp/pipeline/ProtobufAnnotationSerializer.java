@@ -1314,6 +1314,19 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasSectionIndex())
       lossySentence.set(SectionIndexAnnotation.class, proto.getSectionIndex());
 
+    // add entity mentions for this sentence
+    List<CoreMap> mentions = proto.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
+    // add tokens to each entity mention
+    for (CoreMap entityMention : mentions) {
+      List<CoreLabel> entityMentionTokens = new ArrayList<CoreLabel>();
+      for (int tokenIndex = entityMention.get(TokenBeginAnnotation.class) ;
+           tokenIndex < entityMention.get(TokenEndAnnotation.class) ; tokenIndex++ ) {
+        entityMentionTokens.add(tokens.get(tokenIndex));
+      }
+      entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
+    }
+    lossySentence.set(CoreAnnotations.MentionsAnnotation.class, mentions);
+
     // Return
     return lossySentence;
   }
