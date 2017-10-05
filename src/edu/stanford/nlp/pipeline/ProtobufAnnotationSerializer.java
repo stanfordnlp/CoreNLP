@@ -1535,8 +1535,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           List<CoreLabel> entityMentionTokens = new ArrayList<CoreLabel>();
           for (int tokenIndex = entityMention.get(TokenBeginAnnotation.class) ;
                tokenIndex < entityMention.get(TokenEndAnnotation.class) ; tokenIndex++ ) {
-            entityMentionTokens.add(map.get(TokensAnnotation.class).get(tokenIndex));
+            entityMentionTokens.add(tokens.get(tokenIndex));
           }
+          int emCharOffsetBegin = entityMentionTokens.get(0).get(CharacterOffsetBeginAnnotation.class);
+          int emCharOffsetEnd =
+              entityMentionTokens.get(entityMentionTokens.size()-1).get(CharacterOffsetEndAnnotation.class);
+          // set character offsets
+          entityMention.set(CharacterOffsetBeginAnnotation.class, emCharOffsetBegin);
+          entityMention.set(CharacterOffsetEndAnnotation.class, emCharOffsetEnd);
           entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
           String entityMentionText =
               entityMentionTokens.stream().map(token -> token.word()).collect(Collectors.joining(" "));
