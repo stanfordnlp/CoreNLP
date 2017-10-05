@@ -500,11 +500,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Entity mentions
     if (keySet.contains(MentionsAnnotation.class)) {
-      builder.setHasEntityMentionsAnnotation(true);
       for (CoreMap mention : sentence.get(MentionsAnnotation.class)) {
         builder.addMentions(toProtoMention(mention));
       }
       keysToSerialize.remove(MentionsAnnotation.class);
+      builder.setHasEntityMentionsAnnotation(true);
     } else {
       builder.setHasEntityMentionsAnnotation(false);
     }
