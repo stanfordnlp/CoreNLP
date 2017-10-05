@@ -309,7 +309,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
           token.setDocID(docID);
         }
       }
-      
+
       // add the sentence to the list
       sentences.add(sentence);
     }

@@ -1314,22 +1314,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasSectionIndex())
       lossySentence.set(SectionIndexAnnotation.class, proto.getSectionIndex());
 
-    // add entity mentions for this sentence
-    List<CoreMap> mentions = proto.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
-    // add tokens to each entity mention
-    for (CoreMap entityMention : mentions) {
-      List<CoreLabel> entityMentionTokens = new ArrayList<CoreLabel>();
-      for (int tokenIndex = entityMention.get(TokenBeginAnnotation.class) ;
-           tokenIndex < entityMention.get(TokenEndAnnotation.class) ; tokenIndex++ ) {
-        entityMentionTokens.add(tokens.get(tokenIndex));
-      }
-      entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
-      String entityMentionText =
-          entityMentionTokens.stream().map(token -> token.word()).collect(Collectors.joining(" "));
-      entityMention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
-    }
-    lossySentence.set(CoreAnnotations.MentionsAnnotation.class, mentions);
-
     // Return
     return lossySentence;
   }
@@ -1372,8 +1356,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
 
     // add entity mentions for this sentence
-    List<CoreMap> mentions = proto.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
-    sentence.set(CoreAnnotations.MentionsAnnotation.class, mentions);
+    //List<CoreMap> mentions = proto.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
+    //sentence.set(CoreAnnotations.MentionsAnnotation.class, mentions);
 
     // if there are mentions for this sentence, add them to the annotation
     loadSentenceMentions(proto, sentence);
@@ -1544,6 +1528,21 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           // The document text is wrong -- guess the text from the tokens
           map.set(TextAnnotation.class, recoverOriginalText(tokens.subList(tokenBegin, tokenEnd), sentence));
         }
+        // add entity mentions for this sentence
+        List<CoreMap> mentions = sentence.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
+        // add tokens to each entity mention
+        for (CoreMap entityMention : mentions) {
+          List<CoreLabel> entityMentionTokens = new ArrayList<CoreLabel>();
+          for (int tokenIndex = entityMention.get(TokenBeginAnnotation.class) ;
+               tokenIndex < entityMention.get(TokenEndAnnotation.class) ; tokenIndex++ ) {
+            entityMentionTokens.add(map.get(TokensAnnotation.class).get(tokenIndex));
+          }
+          entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
+          String entityMentionText =
+              entityMentionTokens.stream().map(token -> token.word()).collect(Collectors.joining(" "));
+          entityMention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
+        }
+        map.set(CoreAnnotations.MentionsAnnotation.class, mentions);
       }
       // End iteration
       sentences.add(map);
