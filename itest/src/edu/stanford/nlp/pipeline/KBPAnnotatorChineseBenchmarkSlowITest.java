@@ -12,7 +12,7 @@ public class KBPAnnotatorChineseBenchmarkSlowITest  extends KBPAnnotatorBenchmar
     // set the English specific settings
     KBP_DOCS_DIR = "/scr/nlp/data/kbp-benchmark/chinese/kbp-docs-chinese";
     GOLD_RELATIONS_PATH = "/scr/nlp/data/kbp-benchmark/chinese/kbp-gold-relations-chinese.txt";
-    KBP_MINIMUM_SCORE = .290;
+    KBP_MINIMUM_SCORE = .280;
     // load the gold relations from gold relations file
     loadGoldData();
     // set up the pipeline
