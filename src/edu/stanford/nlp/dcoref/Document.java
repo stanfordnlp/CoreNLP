@@ -647,8 +647,8 @@ public class Document implements Serializable {
   }
   private void findSpeakersInArticle(Dictionaries dict) {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
-    Pair<Integer, Integer> beginQuotation = new Pair<>();
-    Pair<Integer, Integer> endQuotation = new Pair<>();
+    IntPair beginQuotation = new IntPair();
+    IntPair endQuotation = new IntPair();
     boolean insideQuotation = false;
     int utterNum = -1;
 
@@ -660,12 +660,12 @@ public class Document implements Serializable {
         if(utterIndex != 0 && !insideQuotation) {
           utterNum = utterIndex;
           insideQuotation = true;
-          beginQuotation.setFirst(i);
-          beginQuotation.setSecond(j);
+          beginQuotation.set(1,i);
+          beginQuotation.set(2,j);
         } else if (utterIndex == 0 && insideQuotation) {
           insideQuotation = false;
-          endQuotation.setFirst(i);
-          endQuotation.setSecond(j);
+          endQuotation.set(1,i);
+          endQuotation.set(2,j);
           findQuotationSpeaker(utterNum, sentences, beginQuotation, endQuotation, dict);
         }
       }
@@ -673,25 +673,25 @@ public class Document implements Serializable {
   }
 
   private void findQuotationSpeaker(int utterNum, List<CoreMap> sentences,
-      Pair<Integer, Integer> beginQuotation, Pair<Integer, Integer> endQuotation, Dictionaries dict) {
+		  IntPair beginQuotation, IntPair endQuotation, Dictionaries dict) {
 
-    if(findSpeaker(utterNum, beginQuotation.first(), sentences, 0, beginQuotation.second(), dict))
+    if(findSpeaker(utterNum, beginQuotation.get(1), sentences, 0, beginQuotation.get(2), dict))
       return ;
 
-    if(findSpeaker(utterNum, endQuotation.first(), sentences, endQuotation.second(),
-        sentences.get(endQuotation.first()).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
+    if(findSpeaker(utterNum, endQuotation.get(1), sentences, endQuotation.get(2),
+        sentences.get(endQuotation.get(1)).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
       return;
 
-    if(beginQuotation.second() <= 1 && beginQuotation.first() > 0) {
-      if(findSpeaker(utterNum, beginQuotation.first()-1, sentences, 0,
-          sentences.get(beginQuotation.first()-1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
+    if(beginQuotation.get(2) <= 1 && beginQuotation.get(1) > 0) {
+      if(findSpeaker(utterNum, beginQuotation.get(1)-1, sentences, 0,
+          sentences.get(beginQuotation.get(1)-1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
         return;
     }
 
-    if(endQuotation.second() == sentences.get(endQuotation.first()).size()-1
-        && sentences.size() > endQuotation.first()+1) {
-      if(findSpeaker(utterNum, endQuotation.first()+1, sentences, 0,
-          sentences.get(endQuotation.first()+1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
+    if(endQuotation.get(2) == sentences.get(endQuotation.get(1)).size()-1
+        && sentences.size() > endQuotation.get(1)+1) {
+      if(findSpeaker(utterNum, endQuotation.get(1)+1, sentences, 0,
+          sentences.get(endQuotation.get(1)+1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
         return;
     }
   }
