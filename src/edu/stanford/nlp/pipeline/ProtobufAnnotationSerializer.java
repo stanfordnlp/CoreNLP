@@ -500,10 +500,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Entity mentions
     if (keySet.contains(MentionsAnnotation.class)) {
+      builder.setHasEntityMentionsAnnotation(true);
       for (CoreMap mention : sentence.get(MentionsAnnotation.class)) {
         builder.addMentions(toProtoMention(mention));
       }
       keysToSerialize.remove(MentionsAnnotation.class);
+    } else {
+      builder.setHasEntityMentionsAnnotation(false);
     }
     // add a sentence id if it exists
     if (keySet.contains(SentenceIDAnnotation.class)) builder.setSentenceID(getAndRegister(sentence, keysToSerialize, SentenceIDAnnotation.class));
@@ -617,6 +620,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addMentions(toProtoMention(mention));
       }
       keysToSerialize.remove(MentionsAnnotation.class);
+      builder.setHasEntityMentionsAnnotation(true);
+    } else {
+      builder.setHasEntityMentionsAnnotation(false);
     }
     // add character info from segmenter
     if (doc.containsKey(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
@@ -1500,7 +1506,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (!tokens.isEmpty()) { ann.set(TokensAnnotation.class, tokens); }
 
     // add entity mentions
-    if (!proto.getMentionsList().isEmpty()) {
+    if (proto.getHasEntityMentionsAnnotation()) {
       ann.set(CoreAnnotations.MentionsAnnotation.class, new ArrayList<CoreMap>());
     }
 
@@ -1553,7 +1559,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
               entityMentionTokens.stream().map(token -> token.word()).collect(Collectors.joining(" "));
           entityMention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
         }
-        map.set(CoreAnnotations.MentionsAnnotation.class, mentions);
+        if (sentence.getHasEntityMentionsAnnotation())
+          map.set(CoreAnnotations.MentionsAnnotation.class, mentions);
         // add to document level list of entity mentions
         for (CoreMap sentenceEM : mentions) {
           ann.get(CoreAnnotations.MentionsAnnotation.class).add(sentenceEM);
