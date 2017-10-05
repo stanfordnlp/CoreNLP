@@ -49,6 +49,7 @@ message Document {
    * This field is for entity mentions across the document.
    */
   repeated NERMention mentions = 9;
+  optional bool hasEntityMentionsAnnotation = 13; // used to differentiate between null and empty list
 
   /**
    * xml information
@@ -108,6 +109,8 @@ message Sentence {
   optional string          sectionAuthor                       = 62;  // author of section
   optional string          docID                               = 63;  // doc id
   optional bool            sectionQuoted                       = 64;  // is this sentence in an xml quote in a post
+
+  optional bool            hasEntityMentionsAnnotation         = 65;  // check if there are entity mentions
 
   extensions 100 to 255;
 }
