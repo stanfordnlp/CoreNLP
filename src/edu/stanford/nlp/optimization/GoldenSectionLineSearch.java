@@ -1,6 +1,7 @@
 package edu.stanford.nlp.optimization; 
 import edu.stanford.nlp.util.logging.Redwood;
 
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 
@@ -59,7 +60,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
 
   private static final NumberFormat nf = new DecimalFormat("0.000");
 
-  public double minimize(Function<Double, Double> function, double tol, double low, double high) {
+  public double minimize(DoubleUnaryOperator function, double tol, double low, double high) {
     this.tol = tol;
     this.low = low;
     this.high = high;
@@ -67,7 +68,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
   }
 
 
-  public double minimize(Function<Double, Double> function) {
+  public double minimize(DoubleUnaryOperator function) {
 
     double tol = this.tol;
     double low = this.low;
@@ -79,8 +80,8 @@ public class GoldenSectionLineSearch implements LineSearcher  {
     // I now try to grid search a little in case the function is very flat
     // (RTE contradictions).
 
-    double flow = function.apply(low);
-    double fhigh = function.apply(high);
+    double flow = function.applyAsDouble(low);
+    double fhigh = function.applyAsDouble(high);
     if (VERBOSE) {
       log.info("Finding min between " + low + " (value: " +
                 flow + ") and " + high + " (value: " + fhigh + ")");
@@ -92,13 +93,13 @@ public class GoldenSectionLineSearch implements LineSearcher  {
     if (false) {
       // initialize with golden means
       mid = goldenMean(low, high);
-      oldY = function.apply(mid);
+      oldY = function.applyAsDouble(mid);
       if (VERBOSE) log.info("Initially probed at " + mid + ", value is " + oldY);
       if (oldY < flow || oldY < fhigh) {
         searchRight = false; // Galen had this true; should be false
       } else {
         mid = goldenMean(high, low);
-        oldY = function.apply(mid);
+        oldY = function.applyAsDouble(mid);
         if (VERBOSE) log.info("Probed at " + mid + ", value is " + oldY);
         searchRight = true;
         if ( ! (oldY < flow || oldY < fhigh)) {
@@ -112,7 +113,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
         double bestVal = flow;
         double incr = (high - low)/22.0;
         for (mid = low+incr; mid < high; mid += incr) {
-          oldY = function.apply(mid);
+          oldY = function.applyAsDouble(mid);
           if (VERBOSE) log.info("Probed at " + mid + ", value is " + oldY);
           if (oldY < bestVal) {
             bestPoint = mid;
@@ -130,7 +131,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
           log.info("Warning: GoldenSectionLineSearch grid search couldn't find slope!!");
           // revert to initial positioning and pray
           mid = goldenMean(low, high);
-          oldY = function.apply(mid);
+          oldY = function.applyAsDouble(mid);
           searchRight = false;
         }
     }
@@ -139,7 +140,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
     while (geometric ? (high / low > 1 + tol) : high - low > tol) {
       if (VERBOSE) log.info("Current low, mid, high: " + nf.format(low) + " " + nf.format(mid) + " " + nf.format(high));
       double newX = goldenMean(searchRight ? high : low, mid);
-      double newY = function.apply(newX);
+      double newY = function.applyAsDouble(newX);
       memory.put(newX, newY);
       if (VERBOSE) log.info("Probed " + (searchRight ? "right": "left") + " at " + newX + ", value is " + newY);
       if (newY < oldY) {
@@ -201,12 +202,12 @@ public class GoldenSectionLineSearch implements LineSearcher  {
   public static void main(String[] args) {
     GoldenSectionLineSearch min =
         new GoldenSectionLineSearch(true, 0.00001, 0.001, 121.0);
-    Function<Double, Double> f1 = x -> Math.log(x * x - x + 1);
+    DoubleUnaryOperator f1 = x -> Math.log(x * x - x + 1);
     System.out.println(min.minimize(f1));
     System.out.println();
 
     min = new GoldenSectionLineSearch(false, 0.00001, 0.0, 1.0);
-    Function<Double,Double> f2 = x -> x < 0.1 ? 0.0: (x > 0.2 ? 0.0: (x - 0.1) * (x - 0.2));
+    DoubleUnaryOperator f2 = x -> x < 0.1 ? 0.0: (x > 0.2 ? 0.0: (x - 0.1) * (x - 0.2));
 
     System.out.println(min.minimize(f2));
   } // end main
