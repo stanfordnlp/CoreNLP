@@ -1499,6 +1499,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (!tokens.isEmpty()) { ann.set(TokensAnnotation.class, tokens); }
 
+    // add entity mentions
+    if (!proto.getMentionsList().isEmpty()) {
+      ann.set(CoreAnnotations.MentionsAnnotation.class, new ArrayList<CoreMap>());
+    }
+
     // Add sentences
     List<CoreMap> sentences = new ArrayList<>(proto.getSentenceCount());
     for (int sentIndex = 0; sentIndex < proto.getSentenceCount(); ++sentIndex) {
@@ -1549,6 +1554,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           entityMention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
         }
         map.set(CoreAnnotations.MentionsAnnotation.class, mentions);
+        // add to document level list of entity mentions
+        for (CoreMap sentenceEM : mentions) {
+          ann.get(CoreAnnotations.MentionsAnnotation.class).add(sentenceEM);
+        }
       }
       // End iteration
       sentences.add(map);
@@ -1699,8 +1708,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
 
     // Set NERmention
-    List<CoreMap> mentions = proto.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
-    ann.set(MentionsAnnotation.class, mentions);
+    //List<CoreMap> mentions = proto.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
+    //ann.set(MentionsAnnotation.class, mentions);
     // add SpeakerInfo stuff to Mentions, this requires knowing all mentions in the document
     // also add all the Set<Mention>
     for (int mentionID : idToMention.keySet()) {
