@@ -49,6 +49,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   private final AbstractSequenceClassifier<?> segmenter;
   private final boolean VERBOSE;
   private final boolean tokenizeNewline;
+  private final boolean sentenceSplitOnTwoNewlines;
   private final boolean normalizeSpace;
 
   public ChineseSegmenterAnnotator() {
@@ -104,6 +105,10 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     // If newlines are treated as sentence split, we need to retain them in tokenization for ssplit to make use of them
     tokenizeNewline = (!props.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, "never").equals("never"))
             || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+
+    // record whether or not sentence splitting on two newlines ; if so, need to remove single newlines
+    sentenceSplitOnTwoNewlines =
+        props.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, "never").equals("two");
   }
 
   @Override
@@ -182,6 +187,14 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         // Don't skip newline characters if we're tokenizing them
         // We always count \n as newline to be consistent with the implementation of ssplit
         skipCharacter = ! (tokenizeNewline && (cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString)));
+        // skip solo newlines when using two newlines as sentence break
+        // we want to skip the solo newlines to avoid segmenter errors
+        if (sentenceSplitOnTwoNewlines && cp == '\n') {
+          int prevCodePoint = origText.codePointAt(offset-cpCharCount);
+          int nextCodePoint = origText.codePointAt(offset+cpCharCount);
+          if (!(prevCodePoint=='\n') && !(nextCodePoint=='\n'))
+            skipCharacter = true;
+        }
       }
       if ( ! skipCharacter) {
         // if this character is a normal character, put it in as a CoreLabel and set seg to false for next word
@@ -212,6 +225,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     } // for loop through charPoints
 
     annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, charTokens);
+    
   }
 
   private void runSegmentation(CoreMap annotation) {
@@ -233,6 +247,11 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       text = text.replaceAll("[\r\n]", "");
       words = segmenter.segmentString(text);
     } else {
+      // if using the sentence split on two newlines option, replace single newlines
+      // single newlines should be ignored for segmenting
+      if (sentenceSplitOnTwoNewlines) {
+        text = text.replaceAll("([^\n])\\n([^\n])", "$1$2");
+      }
       // Run the segmenter on each line so that we don't get tokens that cross line boundaries
       // Neat trick to keep delimiters from: http://stackoverflow.com/a/2206432
       String[] lines = text.split(String.format("((?<=%1$s)|(?=%1$s))", separator));
