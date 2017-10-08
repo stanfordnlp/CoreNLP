@@ -11,10 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.stanford.nlp.util.logging.Redwood;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.SentenceUtils;
@@ -23,40 +19,44 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Given a list of sentences, converts the sentences to trees and then
  * relabels them using a list of new labels.
- * <br>
+ *
  * This tool processes the text using a given parser model, one
  * sentence per line.
- * <br>
+ *
  * The labels file is expected to be a tab separated file.  If there
  * are multiple labels on a line, only the last one is used.
- * <br>
- * There are a few options for how to handle missing labels: 
+ *
+ * There are a few options for how to handle missing labels:
  * FAIL, DEFAULT, KEEP_ORIGINAL
- * <br>
- * The argument for providing the labels is <code>-labels</code>
- * <br>
- * The argument for providing the sentences is <code>-sentences</code>
- * <br>
- * Alternatively, one can provide the flag <code>-useLabelKeys</code>
+ *
+ * The argument for providing the labels is {@code -labels}
+ *
+ * The argument for providing the sentences is {@code -sentences}
+ *
+ * Alternatively, one can provide the flag {@code -useLabelKeys}
  * to specify that the keys in the labels file should be treated as
- * the sentences.  Exactly one of <code>-useLabelKeys</code> or
- * <code>-sentences</code> must be used.
- * <br>
+ * the sentences.  Exactly one of {@code -useLabelKeys} or
+ * {@code -sentences} must be used.
+ *
  * Example command line:
- * <br>
+ *
  * java edu.stanford.nlp.parser.tools.ParseAndSetLabels -output foo.txt -sentences "C:\Users\JohnBauer\Documents\alphasense\dataset\sentences10.txt" -labels "C:\Users\JohnBauer\Documents\alphasense\dataset\phrases10.tsv" -parser edu/stanford/nlp/models/srparser/englishSR.ser.gz -tagger edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger -remapLabels 0=1,1=2,2=2,3=0,4=0
  */
 
 public class ParseAndSetLabels {
-  private static Redwood.RedwoodChannels logger = Redwood.channels(ParseAndSetLabels.class);
+
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(ParseAndSetLabels.class);
 
   public enum MissingLabels {
     FAIL, DEFAULT, KEEP_ORIGINAL
   }
+
+  private ParseAndSetLabels() {} // static methods
 
   public static void setLabels(Tree tree, Map<String, String> labelMap,
                                MissingLabels missing, String defaultLabel,
@@ -271,4 +271,5 @@ public class ParseAndSetLabels {
 
     writeTrees(trees, outputFile);
   }
+
 }
