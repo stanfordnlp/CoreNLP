@@ -24,10 +24,11 @@ public class LabeledScoredTreeNode extends Tree {
   /**
    * Label of the parse tree.
    */
+  @SuppressWarnings("serial")
   private Label label; // = null;
 
   /**
-   * Score of <code>TreeNode</code>
+   * Score of {@code TreeNode}
    */
   private double score = Double.NaN;
 
@@ -46,7 +47,7 @@ public class LabeledScoredTreeNode extends Tree {
   /**
    * Create a leaf parse tree with given word.
    *
-   * @param label the <code>Label</code> representing the <i>word</i> for
+   * @param label the {@code Label} representing the <i>word</i> for
    *              this new tree leaf.
    */
   public LabeledScoredTreeNode(Label label) {
@@ -56,7 +57,7 @@ public class LabeledScoredTreeNode extends Tree {
   /**
    * Create a leaf parse tree with given word and score.
    *
-   * @param label The <code>Label</code> representing the <i>word</i> for
+   * @param label The {@code Label} representing the <i>word</i> for
    * @param score The score for the node
    *              this new tree leaf.
    */
@@ -87,8 +88,8 @@ public class LabeledScoredTreeNode extends Tree {
   }
 
   /**
-   * Sets the children of this <code>Tree</code>.  If given
-   * <code>null</code>, this method sets the Tree's children to
+   * Sets the children of this {@code Tree}.  If given
+   * {@code null}, this method sets the Tree's children to
    * the canonical zero-length Tree[] array.
    *
    * @param children An array of child trees
@@ -137,16 +138,16 @@ public class LabeledScoredTreeNode extends Tree {
   }
 
   /**
-   * Return a <code>TreeFactory</code> that produces trees of the
-   * same type as the current <code>Tree</code>.  That is, this
+   * Return a {@code TreeFactory} that produces trees of the
+   * same type as the current {@code Tree}.  That is, this
    * implementation, will produce trees of type
-   * <code>LabeledScoredTree(Node|Leaf)</code>.
-   * The <code>Label</code> of <code>this</code>
-   * is examined, and providing it is not <code>null</code>, a
-   * <code>LabelFactory</code> which will produce that kind of
-   * <code>Label</code> is supplied to the <code>TreeFactory</code>.
-   * If the <code>Label</code> is <code>null</code>, a
-   * <code>StringLabelFactory</code> will be used.
+   * {@code LabeledScoredTree(Node|Leaf)}.
+   * The {@code Label} of {@code this}
+   * is examined, and providing it is not {@code null}, a
+   * {@code LabelFactory} which will produce that kind of
+   * {@code Label} is supplied to the {@code TreeFactory}.
+   * If the {@code Label} is {@code null}, a
+   * {@code StringLabelFactory} will be used.
    * The factories returned on different calls a different: a new one is
    * allocated each time.
    *
@@ -164,8 +165,8 @@ public class LabeledScoredTreeNode extends Tree {
   }
 
   /**
-   * Return a <code>TreeFactory</code> that produces trees of the
-   * <code>LabeledScoredTree{Node|Leaf}</code> type.
+   * Return a {@code TreeFactory} that produces trees of the
+   * {@code LabeledScoredTree{Node|Leaf}} type.
    * The factory returned is always the same one (a singleton).
    *
    * @return a factory to produce labeled, scored trees
@@ -175,10 +176,10 @@ public class LabeledScoredTreeNode extends Tree {
   }
 
   /**
-   * Return a <code>TreeFactory</code> that produces trees of the
-   * <code>LabeledScoredTree{Node|Leaf}</code> type, with
-   * the <code>Label</code> made with the supplied
-   * <code>LabelFactory</code>.
+   * Return a {@code TreeFactory} that produces trees of the
+   * {@code LabeledScoredTree{Node|Leaf}} type, with
+   * the {@code Label} made with the supplied
+   * {@code LabelFactory}.
    * The factory returned is a different one each time
    *
    * @param lf The LabelFactory to use
@@ -195,7 +196,7 @@ public class LabeledScoredTreeNode extends Tree {
     StringBuilder buff = new StringBuilder();
     buff.append(super.nodeString());
     if ( ! Double.isNaN(score)) {
-      buff.append(" [").append(nf.format(-score)).append("]");
+      buff.append(" [").append(nf.format(-score)).append(']');
     }
     return buff.toString();
   }

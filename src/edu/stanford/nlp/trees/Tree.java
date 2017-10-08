@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.CoreLabel;
@@ -21,7 +22,6 @@ import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -630,7 +630,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return Returns the {@code StringBuilder} passed in with extra stuff in it
    */
   public StringBuilder toStringBuilder(StringBuilder sb) {
-    return toStringBuilder(sb, true);
+    return toStringBuilder(sb, label -> (label.value() == null) ? "": label.value());
   }
 
   /**
@@ -640,36 +640,25 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * {@code toString()} on complex trees.
    *
    * @param sb The {@code StringBuilder} to which the tree will be appended
-   * @param printOnlyLabelValue If true, print only the value() of each node's label
+   * @param labelFormatter Formatting routine for how to print a Label
    * @return Returns the {@code StringBuilder} passed in with extra stuff in it
    */
-  public StringBuilder toStringBuilder(StringBuilder sb, boolean printOnlyLabelValue) {
+  public StringBuilder toStringBuilder(StringBuilder sb, Function<Label,String> labelFormatter) {
     if (isLeaf()) {
       if (label() != null) {
-        if(printOnlyLabelValue) {
-          sb.append(label().value());
-        } else {
-          sb.append(label());
-        }
+        sb.append(labelFormatter.apply(label()));
       }
       return sb;
     } else {
       sb.append('(');
       if (label() != null) {
-        if (printOnlyLabelValue) {
-          if (value() != null) {
-            sb.append(label().value());
-          }
-          // don't print a null, just nothing!
-        } else {
-          sb.append(valueAndSentimentString());
-        }
+        sb.append(labelFormatter.apply(label()));
       }
       Tree[] kids = children();
       if (kids != null) {
         for (Tree kid : kids) {
           sb.append(' ');
-          kid.toStringBuilder(sb, printOnlyLabelValue);
+          kid.toStringBuilder(sb, labelFormatter);
         }
       }
       return sb.append(')');
@@ -679,7 +668,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
   /**
    * Converts parse tree to string in Penn Treebank format.
-   * <p>
+   *
    * Implementation note: Internally, the method gains
    * efficiency by chaining use of a single {@code StringBuilder}
    * through all the printing.
@@ -846,11 +835,12 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
 
-  private static void displayChildren(Tree[] trChildren, int indent, boolean parentLabelNull, boolean onlyLabelValue, PrintWriter pw) {
+  private static void displayChildren(Tree[] trChildren, int indent, boolean parentLabelNull,
+                                      Function<Label,String> labelFormatter, PrintWriter pw) {
     boolean firstSibling = true;
     boolean leftSibIsPreTerm = true;  // counts as true at beginning
     for (Tree currentTree : trChildren) {
-      currentTree.display(indent, parentLabelNull, firstSibling, leftSibIsPreTerm, false, onlyLabelValue, pw);
+      currentTree.display(indent, parentLabelNull, firstSibling, leftSibIsPreTerm, false, labelFormatter, pw);
       leftSibIsPreTerm = currentTree.isPreTerminal();
       // CC is a special case for English, but leave it in so we can exactly match PTB3 tree formatting
       if (currentTree.value() != null && currentTree.value().startsWith("CC")) {
@@ -872,20 +862,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   /**
-   *  Returns the value of the node's label followed by '=' and the node's sentiment.
-   *  This is a bit of a hack at the moment, but let us print out binarized sentiment
-   *  trees with their sentiment.
-   *
-   *  @return The label of a tree node as a String
-   */
-  public String valueAndSentimentString() {
-    return (value() == null) ? "" : value() + '=' + RNNCoreAnnotations.getPredictedClass(this);
-  }
-
-  /**
    * Display a node, implementing Penn Treebank style layout
    */
-  private void display(int indent, boolean parentLabelNull, boolean firstSibling, boolean leftSiblingPreTerminal, boolean topLevel, boolean onlyLabelValue, PrintWriter pw) {
+  private void display(int indent, boolean parentLabelNull, boolean firstSibling, boolean leftSiblingPreTerminal, boolean topLevel, Function<Label,String> labelFormatter, PrintWriter pw) {
     // the condition for staying on the same line in Penn Treebank
     boolean suppressIndent = (parentLabelNull || (firstSibling && isPreTerminal()) || (leftSiblingPreTerminal && isPreTerminal() && (label() == null || !label().value().startsWith("CC"))));
     if (suppressIndent) {
@@ -901,27 +880,19 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       }
     }
     if (isLeaf() || isPreTerminal()) {
-      String terminalString = toStringBuilder(new StringBuilder(), onlyLabelValue).toString();
+      String terminalString = toStringBuilder(new StringBuilder(), labelFormatter).toString();
       pw.print(terminalString);
       pw.flush();
       return;
     }
     pw.print("(");
-    String nodeString;
-    if (onlyLabelValue) {
-      String value = value();
-      nodeString = (value == null) ? "" : value;
-    } else {
-      nodeString = valueAndSentimentString();
-    }
-    pw.print(nodeString);
+    pw.print(labelFormatter.apply(label()));
     // pw.flush();
     boolean parentIsNull = label() == null || label().value() == null;
-    displayChildren(children(), indent + 1, parentIsNull, onlyLabelValue, pw);
+    displayChildren(children(), indent + 1, parentIsNull, labelFormatter, pw);
     pw.print(")");
     pw.flush();
   }
-
 
   /**
    * Print the tree as done in Penn Treebank merged files.
@@ -937,11 +908,11 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @param pw The tree is printed to this {@code PrintWriter}
    */
   public void pennPrint(PrintWriter pw) {
-    pennPrint(pw, true);
+    pennPrint(pw, label -> (label.value() == null) ? "": label.value());
   }
 
-  public void pennPrint(PrintWriter pw, boolean printOnlyLabelValue) {
-    display(0, false, false, false, true, printOnlyLabelValue, pw);
+  public void pennPrint(PrintWriter pw, Function<Label,String> labelFormatter) {
+    display(0, false, false, false, true, labelFormatter, pw);
     pw.println();
     pw.flush();
   }
@@ -964,8 +935,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     pennPrint(new PrintWriter(new OutputStreamWriter(ps), true));
   }
 
-  public void pennPrint(PrintStream ps, boolean printOnlyLabelValue) {
-    pennPrint(new PrintWriter(new OutputStreamWriter(ps), true), printOnlyLabelValue);
+  public void pennPrint(PrintStream ps, Function<Label,String> labelFormatter) {
+    pennPrint(new PrintWriter(new OutputStreamWriter(ps), true), labelFormatter);
   }
 
   /**

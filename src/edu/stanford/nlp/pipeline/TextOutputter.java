@@ -19,6 +19,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.naturalli.OpenIE;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
@@ -119,7 +120,8 @@ public class TextOutputter extends AnnotationOutputter {
           pw.println("Sentiment-annotated binary tree");
           Tree sTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
           if (sTree != null) {
-            sTree.pennPrint(pw, false);
+            sTree.pennPrint(pw, label -> (label.value() == null) ? "": label.value() + '=' +
+                    RNNCoreAnnotations.getPredictedClass(label));
             pw.println();
           }
         }
