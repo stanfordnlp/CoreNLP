@@ -64,11 +64,10 @@ public abstract class GrammaticalStructure implements Serializable  {
    */
   public enum Extras {
     /**
-     * <p> Don't include any additional edges. </p>
-     * <p>
+     * Don't include any additional edges.
+     *
      *   Note: In older code (2014 and before) including extras was a boolean flag. This option is the equivalent of
      *   the {@code false} flag.
-     * </p>
      */
     NONE(false, false, false),
     /**
@@ -96,14 +95,11 @@ public abstract class GrammaticalStructure implements Serializable  {
      */
     REF_COLLAPSED_AND_SUBJ(true, true, true),
     /**
-     * <p>
      *   Do the maximal amount of extra processing.
      *   Currently, this is equivalent to {@link edu.stanford.nlp.trees.GrammaticalStructure.Extras#REF_COLLAPSED_AND_SUBJ}.
-     * </p>
-     * <p>
+     *
      *   Note: In older code (2014 and before) including extras was a boolean flag. This option is the equivalent of
      *   the {@code true} flag.
-     * </p>
      */
     MAXIMAL(true, true, true);
 
@@ -670,7 +666,7 @@ public abstract class GrammaticalStructure implements Serializable  {
 
   /**
    * Get GrammaticalRelation between gov and dep, and null if gov  is not the
-   * governor of dep
+   * governor of dep.
    */
   public GrammaticalRelation getGrammaticalRelation(int govIndex, int depIndex) {
     TreeGraphNode gov = getNodeByIndex(govIndex);
@@ -681,7 +677,7 @@ public abstract class GrammaticalStructure implements Serializable  {
 
   /**
    * Get GrammaticalRelation between gov and dep, and null if gov is not the
-   * governor of dep
+   * governor of dep.
    */
   public GrammaticalRelation getGrammaticalRelation(IndexedWord gov, IndexedWord dep) {
     List<GrammaticalRelation> labels = Generics.newArrayList();
@@ -793,7 +789,6 @@ public abstract class GrammaticalStructure implements Serializable  {
    * @return The typed dependencies of this grammatical structure
    */
   public List<TypedDependency> typedDependencies(Extras includeExtras) {
-    List<TypedDependency> deps;
     // This copy has to be done because of the broken way
     // TypedDependency objects can be mutated by downstream methods
     // such as collapseDependencies.  Without the copy here it is
@@ -801,17 +796,13 @@ public abstract class GrammaticalStructure implements Serializable  {
     // typedDependenciesCollapsed to get different results.  For
     // example, the English dependencies rename existing objects KILL
     // to note that they should be removed.
+    List<TypedDependency> source;
     if (includeExtras != Extras.NONE) {
-      deps = new ArrayList<>(allTypedDependencies.size());
-      for (TypedDependency dep : allTypedDependencies) {
-        deps.add(new TypedDependency(dep));
-      }
+      source = allTypedDependencies;
     } else {
-      deps = new ArrayList<>(typedDependencies.size());
-      for (TypedDependency dep : typedDependencies) {
-        deps.add(new TypedDependency(dep));
-      }
+      source = typedDependencies;
     }
+    List<TypedDependency> deps = new ArrayList<>(source);
     //TODO (sebschu): prevent correctDependencies from getting called multiple times
     correctDependencies(deps);
     return deps;
@@ -1147,7 +1138,6 @@ public abstract class GrammaticalStructure implements Serializable  {
       if (StringUtils.isNullOrEmpty(parentIdStr)) {
         continue;
       }
-      int parentId = Integer.parseInt(parentIdStr) - 1;
       String grelString = tokenFields.get(i).get(CoNLLX_RelnField);
       if (grelString.equals("null") || grelString.equals("erased"))
         continue;
@@ -1160,10 +1150,11 @@ public abstract class GrammaticalStructure implements Serializable  {
           throw new RuntimeException("Unknown grammatical relation '" +
                                      grelString + "' fields: " +
                                      tokenFields.get(i) + "\nNode: " +
-                                     tgWords.get(i) + "\n" +
-                                     "Known Grammatical relations: ["+shortNameToGRel.keySet()+"]" );
+                                     tgWords.get(i) + '\n' +
+                                     "Known Grammatical relations: ["+shortNameToGRel.keySet() + ']');
         }
       } else {
+        int parentId = Integer.parseInt(parentIdStr) - 1;
         if (parentId >= tgWords.size()) {
           System.err.printf("Warning: Invalid Parent Id %d Sentence Length: %d%n", parentId+1, tgWords.size());
           System.err.printf("         Assigning to root (0)%n");
@@ -1176,8 +1167,6 @@ public abstract class GrammaticalStructure implements Serializable  {
     }
     return factory.build(tdeps, root);
   }
-
-
 
 
 
