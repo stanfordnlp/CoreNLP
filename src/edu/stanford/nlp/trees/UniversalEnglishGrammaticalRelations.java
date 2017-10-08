@@ -949,7 +949,7 @@ public class UniversalEnglishGrammaticalRelations {
    * For this reason, we use the {@code compound} relation for all flat NPs and replace it with the {@code name}
    * relation during post-processing.
    * <p/>
-   * See also {@link UniversalEnglishGrammaticalStructure#processNames(SemanticGraph)}.
+   * See also {@link UniversalEnglishGrammaticalStructure#processNames}.
    * <p/>
    * Example: <br/>
    * "Hillary Rodham Clinton" &rarr;
