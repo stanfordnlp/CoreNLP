@@ -54,8 +54,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  */
 public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
 
+  // todo [cdm 2017]: This class is used in all our parsers, but we should probably work to move over to WordToSetenceProcessor, which has been used in CoreNLP and has been developed more.
+
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DocumentPreprocessor.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(DocumentPreprocessor.class);
 
   public enum DocType {Plain, XML}
 
@@ -467,6 +469,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
     sb.append("-tokenizerOptions opts  : Specify custom tokenizer options.").append(nl);
     sb.append("-tag delim              : Input tokens are tagged. Split tags.").append(nl);
     sb.append("-whitespaceTokenization : Whitespace tokenization only.").append(nl);
+    sb.append("-sentenceDelimiter delim: Split sentences on this also (\"newline\" for \\n)").append(nl);
     return sb.toString();
   }
 
@@ -481,6 +484,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
     argOptionDefs.put("tag", 1);
     argOptionDefs.put("tokenizerOptions", 1);
     argOptionDefs.put("whitespaceTokenization", 0);
+    argOptionDefs.put("sentenceDelimiter", 1);
     return argOptionDefs;
   }
 
@@ -504,6 +508,14 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
     String xmlElementDelimiter = options.getProperty("xml", null);
     DocType docType = xmlElementDelimiter == null ? DocType.Plain : DocType.XML;
     String sentenceDelimiter = options.containsKey("noTokenization") ? System.getProperty("line.separator") : null;
+    String sDelim = options.getProperty("sentenceDelimiter");
+    if (sDelim != null) {
+      if (sDelim.equalsIgnoreCase("newline")) {
+        sentenceDelimiter = "\n";
+      } else {
+        sentenceDelimiter = sDelim;
+      }
+    }
     String tagDelimiter = options.getProperty("tag", null);
     String[] sentenceDelims = null;
 
