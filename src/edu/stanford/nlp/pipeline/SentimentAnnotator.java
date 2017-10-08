@@ -23,12 +23,12 @@ import edu.stanford.nlp.util.IntPair;
  * to each sentence.  It requires there to already be binarized trees
  * attached to the sentence, which is best done in the
  * ParserAnnotator.
- * <br>
+ *
  * The tree will be attached to each sentence in the
  * SentencesAnnotation via the SentimentCoreAnnotations.SentimentAnnotatedTree
  * annotation.  The class name for the top level class is also set
  * using the SentimentCoreAnnotations.SentimentClass annotation.
- * <br>
+ *
  * The reason the decision was made to do the binarization in the
  * ParserAnnotator is because it may require specific options set in
  * the parser.  An alternative would be to do the binarization here,
