@@ -125,18 +125,18 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
    * A pattern for just trivial unary quantification, in case a quantifier doesn't match any of the patterns in
    * {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotator#PATTERNS}.
    */
-  private static SemgrexPattern UNARY_PATTERN = SemgrexPattern.compile("{pos:/N.*/}=subject >"+DET+" "+QUANTIFIER);
+  private static final SemgrexPattern UNARY_PATTERN = SemgrexPattern.compile("{pos:/N.*/}=subject >"+DET+" "+QUANTIFIER);
 
   /**
    * A list of words that suggest their complement has downward polarity.
    * For example, "doubt" ("I doubt that X")
    */
-  private static List<String> DOUBT_WORDS = Arrays.asList("doubt", "skeptical");
+  private static final List<String> DOUBT_WORDS = Arrays.asList("doubt", "skeptical");
 
   /**
    * A pattern for recognizing the words in {@link NaturalLogicAnnotator#DOUBT_WORDS}.
    */
-  private static TokenSequencePattern DOUBT_PATTERN
+  private static final TokenSequencePattern DOUBT_PATTERN
       = TokenSequencePattern.compile("(?$doubt [{ lemma:/" + StringUtils.join(DOUBT_WORDS, "|") + "/}]) (?$target [{lemma:/that|of/}] []+ )");
 
   /** A helper method for

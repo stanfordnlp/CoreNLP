@@ -1,4 +1,4 @@
-package edu.stanford.nlp.pipeline; 
+package edu.stanford.nlp.pipeline;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -214,9 +214,7 @@ public class XMLOutputter extends AnnotationOutputter  {
           sentElem.appendChild(mrElem);
         }
 
-        /**
-         * Adds sentiment as an attribute of this sentence.
-         */
+        // Adds sentiment as an attribute of this sentence.
         Tree sentimentTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
         if (sentimentTree != null) {
           int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);

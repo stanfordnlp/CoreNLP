@@ -1,4 +1,4 @@
-package edu.stanford.nlp.naturalli; 
+package edu.stanford.nlp.naturalli;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
@@ -77,14 +77,14 @@ import edu.stanford.nlp.coref.data.CorefChain;
 public class OpenIE implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(OpenIE.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(OpenIE.class);
 
   private enum OutputFormat { REVERB, OLLIE, DEFAULT, QA_SRL }
 
   /**
    * A pattern for rewriting "NN_1 is a JJ NN_2" --> NN_1 is JJ"
    */
-  private static SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/an?/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
+  private static final SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/an?/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
 
   //
   // Static Options (for running standalone)

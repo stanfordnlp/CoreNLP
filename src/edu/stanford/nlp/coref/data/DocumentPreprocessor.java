@@ -48,7 +48,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class DocumentPreprocessor  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DocumentPreprocessor.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(DocumentPreprocessor.class);
 
   private DocumentPreprocessor() {}
 

@@ -64,7 +64,7 @@ public class RNNCoreAnnotations {
 
   public static List<Double> getPredictionsAsStringList(Tree tree) {
     SimpleMatrix predictions = getPredictions(tree);
-    List<Double> listOfPredictions = new ArrayList<Double>();
+    List<Double> listOfPredictions = new ArrayList<>();
     for (int i = 0 ; i < predictions.numRows() ; i++) {
       listOfPredictions.add(predictions.get(i));
     }
@@ -72,7 +72,7 @@ public class RNNCoreAnnotations {
   }
 
   /**
-   * Get the argmax of the class predicteions.
+   * Get the argmax of the class predictions.
    * The predicted classes can be an arbitrary set of non-negative integer classes,
    * but in our current sentiment models, the values used are on a 5-point
    * scale of 0 = very negative, 1 = negative, 2 = neutral, 3 = positive,

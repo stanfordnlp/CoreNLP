@@ -1,13 +1,11 @@
 package edu.stanford.nlp.pipeline;
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.util.logging.Redwood;
 
-import edu.stanford.nlp.ie.NERClassifierCombiner;
-import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
 import edu.stanford.nlp.naturalli.OpenIE;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
