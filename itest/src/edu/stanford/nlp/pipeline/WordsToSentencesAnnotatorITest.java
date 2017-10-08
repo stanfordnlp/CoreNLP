@@ -28,11 +28,10 @@ public class WordsToSentencesAnnotatorITest {
     String[] sents = {
             "“ 习 主席 欧洲行 ” 漫评④ ： 为 世界 经济 联动 增长 贡献 “ 中国 方略 ”",
             "7 日 ， 国家 主席 习近平 在 “ 世界 桥 城 ” 汉堡 出席 二十 国 集团 （ G20 ） 领导人 第十二 次 峰会 并 发表 题 为 " +
-                    "《 坚 持 开放 包容 推动 联动 增长 》 的 重要 讲话 ， 提出 四点 “ 中国 主张 ” ， " +
+                    "《 坚持 开放 包容 推动 联动 增长 》 的 重要 讲话 ， 提出 四点 “ 中国 主张 ” ， " +
                     "为 G20 未来 发展 规划 蓝图 ， 为 世界 经济 联动 增长 指明 方向 ， 受到 与会 各 方 和 国际 社会 高度 评价 。",
             "[ 详细 ]"
     };
-    // todo [cdm 2017]: The fact that 坚持 still gets broken into two words when newlineIsSentenceBreak=two is a defect.
     Properties props = PropertiesUtils.asProperties(
             "annotators", "tokenize, ssplit",
             "tokenize.language", "zh",
@@ -63,7 +62,7 @@ public class WordsToSentencesAnnotatorITest {
     String[] sents = {
             "“ 习 主席 欧洲行 ” 漫评④ ： 为 世界 经济 联动 增长 贡献 “ 中国 方略 ”",
             "7 日 ， 国家 主席 习近平 在 “ 世界 桥 城 ” 汉堡 出席 二十 国 集团 （ G20 ） 领导人 第十二 次 峰会 并 发表 题 为 " +
-                    "《 坚 持 开放 包容 推动 联动 增长 》 的 重要 讲话 ， 提出 四点 “ 中国 主张 ” ， " +
+                    "《 坚持 开放 包容 推动 联动 增长 》 的 重要 讲话 ， 提出 四点 “ 中国 主张 ” ， " +
                     "为 G20 未来 发展 规划 蓝图 ， 为 世界 经济 联动 增长 指明 方向 ， 受到 与会 各 方 和 国际 社会 高度 评价 。",
             "[ 详细 ]"
     };
