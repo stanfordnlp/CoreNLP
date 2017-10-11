@@ -44,11 +44,12 @@ import java.io.Reader;
   static final String NEWLINE = "\n";
 %}
 
+/* Carriage return/line feed; the IBM special; Unicode line and paragraph separator. */
 CR = \r|\n|\r\n|\u0085|\u2028|\u2029
-OTHERSEP = [\u000B\u000C]
-SPACE = [ \t\u00A0\u1680\u180E\u2002-\u200B\u202F\u205F\u2060\u3000]
+OTHERSEP = [\u000B\u000C\u001E\u001F]
+SPACE = [ \t\u1680\u2000-\u2006\u2008-\u200A\u205F\u3000]
 SPACES = {SPACE}+
-TEXT = [^ \t\u00A0\u1680\u180E\u2002-\u200B\u202F\u205F\u2060\u3000\r\n\u0085\u2028\u2029\u000B\u000C]+
+TEXT = [^ \t\u1680\u2000-\u2006\u2008-\u200A\u205F\u3000\r\n\u0085\u2028\u2029\u000B\u000C\u001E\u001F]+
 
 %%
 

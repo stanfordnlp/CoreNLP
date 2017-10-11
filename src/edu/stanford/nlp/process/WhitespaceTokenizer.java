@@ -18,13 +18,19 @@ import edu.stanford.nlp.util.StringUtils;
 /**
  * A WhitespaceTokenizer is a tokenizer that splits on and discards only
  * whitespace characters.
- * This implementation returns Word objects. It has a parameter for whether
- * to make EOL a token or whether to treat EOL characters as whitespace.
+ * This implementation can return Word, CoreLabel or other LexedToken objects. It has a parameter
+ * for whether to make EOL a token or whether to treat EOL characters as whitespace.
  * If an EOL is a token, the class returns it as a Word with String value "\n".
- * <p/>
- * <i>Implementation note:</i> This was rewritten in Apr 2006 to discard the
- * old StreamTokenizer based implementation and to replace it with a
- * Unicode compliant JFlex-based version.
+ *
+ * <i>Implementation note:</i> This was rewritten in Apr 2006 to discard the old StreamTokenizer-based
+ * implementation and to replace it with a Unicode compliant JFlex-based version.
+ * This tokenizer treats as Whitespace almost exactly the same characters deemed Whitespace by the
+ * Java function {@link java.lang.Character#isWhitespace(int) isWhitespace}. That is, a whitespace
+ * is a Unicode SPACE_SEPARATOR, LINE_SEPARATOR or PARAGRAPH_SEPARATOR, or one of the control characters
+ * U+0009-U+000D or U+001C-U+001F <i>except</i> the non-breaking space characters. The one addition is
+ * to also allow U+0085 as a line ending character, for compatibility with certain IBM systems.
+ * For including "spaces" in tokens, it is recommended that you represent them as the non-break space
+ * character U+00A0.
  *
  * @author Joseph Smarr (jsmarr@stanford.edu)
  * @author Teg Grenager (grenager@stanford.edu)
@@ -43,8 +49,11 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
    */
   public static class WhitespaceTokenizerFactory<T extends HasWord> implements TokenizerFactory<T> {
 
+    private static final long serialVersionUID = -5438594683910349897L;
+
     private boolean tokenizeNLs;
-    private LexedTokenFactory<T> factory;
+    @SuppressWarnings("serial")
+    private final LexedTokenFactory<T> factory;
 
     /**
      * Constructs a new TokenizerFactory that returns Word objects and
@@ -77,28 +86,32 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
       this.tokenizeNLs = tokenizeNLs;
     }
 
+    @Override
     public Iterator<T> getIterator(Reader r) {
       return getTokenizer(r);
     }
 
+    @Override
     public Tokenizer<T> getTokenizer(Reader r) {
       return new WhitespaceTokenizer<>(factory, r, tokenizeNLs);
     }
 
+    @Override
     public Tokenizer<T> getTokenizer(Reader r, String extraOptions) {
       Properties prop = StringUtils.stringToProperties(extraOptions);
-      boolean tokenizeNewlines =
-        PropertiesUtils.getBool(prop, "tokenizeNLs", this.tokenizeNLs);
+      boolean tokenizeNewlines = PropertiesUtils.getBool(prop, "tokenizeNLs", this.tokenizeNLs);
 
       return new WhitespaceTokenizer<>(factory, r, tokenizeNewlines);
     }
 
-
+    @Override
     public void setOptions(String options) {
       Properties prop = StringUtils.stringToProperties(options);
       tokenizeNLs = PropertiesUtils.getBool(prop, "tokenizeNLs", tokenizeNLs);
     }
+
   } // end class WhitespaceTokenizerFactory
+
 
   public static WhitespaceTokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory(String options) {
     return new WhitespaceTokenizerFactory<>(new CoreLabelTokenFactory(), options);
@@ -116,12 +129,11 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
   @SuppressWarnings("unchecked")
   @Override
   protected T getNext() {
-    T token = null;
     if (lexer == null) {
-      return token;
+      return null;
     }
     try {
-      token = (T) lexer.next();
+      T token = (T) lexer.next();
       while (token != null && token.word().equals(WhitespaceLexer.NEWLINE)) {
         if (eolIsSignificant) {
           return token;
@@ -129,14 +141,16 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
           token = (T) lexer.next();
         }
       }
+      return token;
     } catch (IOException e) {
-      // do nothing, return null
+      return null;
     }
-    return token;
+
   }
 
   /**
-   * Constructs a new WhitespaceTokenizer
+   * Constructs a new WhitespaceTokenizer.
+   *
    * @param r The Reader that is its source.
    * @param eolIsSignificant Whether eol tokens should be returned.
    */
@@ -194,9 +208,8 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
    * Reads a file from the argument and prints its tokens one per line.
    * This is mainly as a testing aid, but it can also be quite useful
    * standalone to turn a corpus into a one token per line file of tokens.
-   * <p/>
-   * Usage: <code>java edu.stanford.nlp.process.WhitespaceTokenizer filename
-   * </code>
+   *
+   * Usage: {@code java edu.stanford.nlp.process.WhitespaceTokenizer filename }
    *
    * @param args Command line arguments
    * @throws IOException If can't open files, etc.
