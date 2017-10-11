@@ -9,22 +9,29 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 
 public class WhitespaceTokenizerTest extends TestCase {
-  public final String[] TEST =
-  { "This is a test . \n This is a second line .",
-    "A \n B \n \n C",
-    "A. B" };
 
-  public final String[][] RESULTS_NO_EOL =
-  { {"This", "is", "a", "test", ".",
+  public static final String[] TEST = {
+    "This is a test . \n This is a second line .",
+    "A \n B \n \n C",
+    "A. B",
+    "皇后\u3000\u3000後世 and (800)\u00A0326-1456",
+  };
+
+  public static final String[][] RESULTS_NO_EOL = {
+    {"This", "is", "a", "test", ".",
      "This", "is", "a", "second", "line", "."},
     {"A", "B", "C"},
-    {"A.", "B"} };
+    {"A.", "B"},
+    { "皇后", "後世", "and", "(800)\u00A0326-1456" },
+  };
 
-  public final String[][] RESULTS_EOL =
-  { {"This", "is", "a", "test", ".", "\n",
+  public static final String[][] RESULTS_EOL = {
+    {"This", "is", "a", "test", ".", "\n",
      "This", "is", "a", "second", "line", "."},
     {"A", "\n", "B", "\n", "\n", "C"},
-    {"A.", "B"} };
+    {"A.", "B"},
+    { "皇后", "後世", "and", "(800)\u00A0326-1456" },
+  };
 
 
   public void runTest(TokenizerFactory<? extends HasWord> factory,
