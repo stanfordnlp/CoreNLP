@@ -40,9 +40,7 @@ public class Iterables {
   public static <K,V> Iterable<V> transform(
       final Iterable<K> iterable, final Function<? super K,? extends V> function) {
 
-    return new Iterable<V>() {
-      public Iterator<V> iterator() {
-        return new Iterator<V>() {
+    return ()-> { return new Iterator<V>() {
           Iterator<K> inner = iterable.iterator();
 
           public boolean hasNext() {
@@ -56,9 +54,7 @@ public class Iterables {
           public void remove() {
             inner.remove();
           }
-        };
-      }
-    };
+        };};
   }
 
   /**
@@ -121,9 +117,7 @@ public class Iterables {
   public static <T> Iterable<T> cast(
       final Iterable<?> iterable, final Class<? extends T> type) {
 
-    return new Iterable<T>() {
-      public Iterator<T> iterator() {
-        return new Iterator<T>() {
+    return ()-> { return new Iterator<T>() {
           Iterator<?> inner = iterable.iterator();
 
           public boolean hasNext() {
@@ -137,9 +131,7 @@ public class Iterables {
           public void remove() {
             inner.remove();
           }
-        };
-      }
-    };
+        };};
   }
 
   /**
@@ -304,11 +296,7 @@ public class Iterables {
   public static <T1, T2> Iterable<Pair<T1,T2>> zip(
       final Iterable<T1> iter1, final Iterable<T2> iter2) {
 
-    return new Iterable<Pair<T1,T2>>() {
-      public Iterator<Pair<T1, T2>> iterator() {
-        return zip(iter1.iterator(), iter2.iterator());
-      }
-    };
+    return ()-> { return zip(iter1.iterator(), iter2.iterator());};
   }
 
   /**

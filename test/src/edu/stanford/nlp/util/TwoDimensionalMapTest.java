@@ -208,9 +208,7 @@ public class TwoDimensionalMapTest extends TestCase {
     m2.addAll(m1, Functions.<String>identityFunction());
     assertEquals(m1, m2);
 
-    Function<String, Integer> valueOf = new Function<String, Integer>() {
-      public Integer apply(String input) { return Integer.valueOf(input); }
-    };
+    Function<String, Integer> valueOf = (String input)->{ return Integer.valueOf(input);};
 
     TwoDimensionalMap<String, String, Integer> m3 = TwoDimensionalMap.hashMap();
     m3.addAll(m1, valueOf);

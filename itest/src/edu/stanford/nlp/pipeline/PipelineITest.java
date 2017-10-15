@@ -142,10 +142,6 @@ public class PipelineITest extends TestCase {
   }
 
   private static String join(List<CoreLabel> tokens) {
-    return StringUtils.join(Iterables.transform(tokens, new Function<CoreLabel, String>() {
-      public String apply(CoreLabel token) {
-        return token.get(CoreAnnotations.TextAnnotation.class);
-      }
-    }));
+    return StringUtils.join(Iterables.transform(tokens, (CoreLabel token)->{ return token.get(CoreAnnotations.TextAnnotation.class);}));
   }
 }
