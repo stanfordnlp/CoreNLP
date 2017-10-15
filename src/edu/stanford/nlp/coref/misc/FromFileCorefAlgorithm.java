@@ -64,7 +64,7 @@ public class FromFileCorefAlgorithm implements CorefAlgorithm {
     currentDocId += 1;
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props = StringUtils.argsToProperties(new String[] {"-props", args[0]});
     new CorefSystem(new DocumentMaker(props, new Dictionaries(props)),
         new FromFileCorefAlgorithm(args[1]), true, false).runOnConll(props);

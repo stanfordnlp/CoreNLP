@@ -488,7 +488,7 @@ public class KBPAnnotator implements Annotator {
    * A debugging method to try relation extraction from the console.
    * @throws IOException If any IO problem
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,regexner,parse,mention,coref,kbp");
     props.setProperty("regexner.mapping", "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab;edu/stanford/nlp/models/kbp/regexner_cased.tab");

@@ -216,7 +216,7 @@ public abstract class WebServiceAnnotator implements Annotator {
    *
    * @return True if the server was started; false otherwise.
    */
-  private boolean startServer(String[] command) {
+  private boolean startServer(String... command) {
     ProcessBuilder proc = new ProcessBuilder(command);
     try {
       synchronized (this) {
@@ -390,7 +390,7 @@ public abstract class WebServiceAnnotator implements Annotator {
   /**
    * A quick script to debug server lifecycle.
    */
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String... args) throws InterruptedException {
     WebServiceAnnotator annotator = new WebServiceAnnotator(){
 
       @Override

@@ -58,7 +58,7 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
     return f * numClasses + c;
   }
 
-  public double[][] to2D(double[] x) {
+  public double[][] to2D(double... x) {
     double[][] x2 = new double[numFeatures][numClasses];
     for (int i = 0; i < numFeatures; i++) {
       for (int j = 0; j < numClasses; j++) {
@@ -69,7 +69,7 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
   }
 
   @Override
-  protected void calculate(double[] x) {
+  protected void calculate(double... x) {
     classifier.setWeights(to2D(x));
     if (derivative == null) {
       derivative = new double[x.length];
@@ -189,7 +189,7 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
       System.out.println("Number of active unlabeled examples:"+activeUnlabeledExamples.size());
     }
 
-    private static void smoothDistribution(double [] dist) {
+    private static void smoothDistribution(double... dist) {
       //perform Laplace smoothing
       double epsilon = 1e-6;
       for(int i = 0; i < dist.length; i++)

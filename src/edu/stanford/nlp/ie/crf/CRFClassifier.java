@@ -1200,7 +1200,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return cliquePotentialFunction;
   }
 
-  public void updateWeightsForTest(double[] x) {
+  public void updateWeightsForTest(double... x) {
     cliquePotentialFunction = cliquePotentialFunctionHelper.getCliquePotentialFunction(x);
   }
 
@@ -2957,7 +2957,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /** The main method. See the class documentation. */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     StringUtils.logInvocationString(log, args);
 
     Properties props = StringUtils.argsToProperties(args);

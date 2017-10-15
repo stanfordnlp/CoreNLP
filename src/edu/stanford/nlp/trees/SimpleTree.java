@@ -72,7 +72,7 @@ public class SimpleTree extends Tree  {
    * @param children An array of child trees
    */
   @Override
-  public void setChildren(Tree[] children) {
+  public void setChildren(Tree... children) {
     if (children == null) {
       log.info("Warning -- you tried to set the children of a SimpleTree to null.\nYou should be really using a zero-length array instead.");
       daughterTrees = EMPTY_TREE_ARRAY;

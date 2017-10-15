@@ -108,7 +108,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     return aMap;
   }
 
-  private Map<Integer, double[]> sparseE(int[] activeFeatures) {
+  private Map<Integer, double[]> sparseE(int... activeFeatures) {
     Map<Integer, double[]> aMap = new HashMap<>(activeFeatures.length);
     for (int f: activeFeatures) {
       // System.err.printf("aMap.put(%d, new double[%d])\n", f, map[f]+1);
@@ -713,7 +713,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
    * Calculates both value and partial derivatives at the point x, and save them internally.
    */
   @Override
-  public void calculate(double[] x) {
+  public void calculate(double... x) {
 
     double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     // final double[][] weights = to2D(x);

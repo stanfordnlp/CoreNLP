@@ -124,7 +124,7 @@ public class CoreMapTest extends TestCase {
    * run 50% each way.
    */
   @SuppressWarnings({"StringEquality"})
-  public static void main(String[] args) {
+  public static void main(String... args) {
     @SuppressWarnings("unchecked")
     Class<CoreAnnotation<String>>[] allKeys = new Class[]{CoreAnnotations.TextAnnotation.class, CoreAnnotations.LemmaAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class, CoreAnnotations.ShapeAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class,

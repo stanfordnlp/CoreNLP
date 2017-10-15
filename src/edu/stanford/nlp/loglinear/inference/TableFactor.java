@@ -548,7 +548,7 @@ public class TableFactor extends NDArrayDoubles {
    * @return the value of the assignment
    */
   @Override
-  public double getAssignmentValue(int[] assignment) {
+  public double getAssignmentValue(int... assignment) {
     double d = super.getAssignmentValue(assignment);
     // if (d == null) d = Double.NEGATIVE_INFINITY;
     return Math.exp(d);
@@ -570,7 +570,7 @@ public class TableFactor extends NDArrayDoubles {
   // PRIVATE IMPLEMENTATION
   ////////////////////////////////////////////////////////////////////////////
 
-  private double getAssignmentLogValue(int[] assignment) {
+  private double getAssignmentLogValue(int... assignment) {
     return super.getAssignmentValue(assignment);
   }
 
@@ -669,7 +669,7 @@ public class TableFactor extends NDArrayDoubles {
    *
    * @param arr the array to normalize
    */
-  private static void normalizeLogArr(double[] arr) {
+  private static void normalizeLogArr(double... arr) {
     // Find the log-scale normalization value
     double max = Double.NEGATIVE_INFINITY;
     for (double d : arr) {

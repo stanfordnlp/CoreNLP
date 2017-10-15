@@ -345,7 +345,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
    */
   @Override
   @SuppressWarnings({"SuspiciousToArrayCall"})
-  public <T> T[] toArray(T[] o) {
+  public <T> T[] toArray(T... o) {
     Iterator<E> iter = iterator();
     ArrayList<E> al = new ArrayList<>();
     while (iter.hasNext()) {

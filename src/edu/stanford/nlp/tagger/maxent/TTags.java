@@ -391,7 +391,7 @@ public class TTags {
     learnClosedTags = learn;
   }
 
-  public void setOpenClassTags(String[] openClassTags) {
+  public void setOpenClassTags(String... openClassTags) {
     openTags = Generics.newHashSet();
     openTags.addAll(Arrays.asList(openClassTags));
     for (String tag : openClassTags) {
@@ -400,7 +400,7 @@ public class TTags {
     openFixed = true;
   }
 
-  public void setClosedClassTags(String[] closedClassTags) {
+  public void setClosedClassTags(String... closedClassTags) {
     for(String tag : closedClassTags) {
       markClosed(tag);
     }
@@ -429,7 +429,7 @@ public class TTags {
    * @param tags Known possible tags for the word
    * @return A superset of tags
    */
-  String[] deterministicallyExpandTags(String[] tags) {
+  String[] deterministicallyExpandTags(String... tags) {
     if (isEnglish && doDeterministicTagExpansion) {
       boolean seenVBN = false;
       boolean seenVBD =	false;

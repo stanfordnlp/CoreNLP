@@ -56,7 +56,7 @@ public class NDArrayDoubles implements Iterable<int[]> {
    * @param assignment a list of variable settings, in the same order as the neighbors array of the factor
    * @return the value for the given assignment. Can be null if not been set yet.
    */
-  public double getAssignmentValue(int[] assignment) {
+  public double getAssignmentValue(int... assignment) {
     return values[getTableAccessOffset(assignment)];
   }
 
@@ -153,7 +153,7 @@ public class NDArrayDoubles implements Iterable<int[]> {
    * @param assignment assignment indices, in same order as neighbors array
    * @return the offset index
    */
-  private int getTableAccessOffset(int[] assignment) {
+  private int getTableAccessOffset(int... assignment) {
     assert (assignment.length == dimensions.length);
     int offset = 0;
     for (int i = 0; i < assignment.length; i++) {

@@ -433,7 +433,7 @@ public class UniversalDependenciesFeatureAnnotator  {
   }
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
 
     if (args.length < 2) {
       log.info("Usage: ");

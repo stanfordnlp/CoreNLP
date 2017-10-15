@@ -440,7 +440,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
     if (options.containsKey("help")) {
       log.info(usage());

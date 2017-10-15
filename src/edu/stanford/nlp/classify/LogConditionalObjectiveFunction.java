@@ -98,7 +98,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     return f * numClasses + c;
   }
 
-  public double[][] to2D(double[] x) {
+  public double[][] to2D(double... x) {
     double[][] x2 = new double[numFeatures][numClasses];
     for (int i = 0; i < numFeatures; i++) {
       for (int j = 0; j < numClasses; j++) {
@@ -115,7 +115,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
    * What's the difference?  See Klein and Manning's 2002 EMNLP paper.
    */
   @Override
-  protected void calculate(double[] x) {
+  protected void calculate(double... x) {
     //If the batchSize is 0 then use the regular calculate methods
     if (useSummedConditionalLikelihood) {
       calculateSCL(x);
@@ -153,7 +153,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
    * conditional estimates.
    *
    */
-  private void calculateSCL(double[] x) {
+  private void calculateSCL(double... x) {
     //System.out.println("Checking at: "+x[0]+" "+x[1]+" "+x[2]);
     value = 0.0;
     Arrays.fill(derivative, 0.0);
@@ -207,7 +207,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
    * Calculate the conditional likelihood of this data by multiplying
    * conditional estimates. Full dataset batch estimation.
    */
-  private void calculateCL(double[] x) {
+  private void calculateCL(double... x) {
     if (values != null) {
       rvfcalculate(x);
     } else if (dataIterable != null) {
@@ -288,7 +288,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     }
   }
 
-  private void calculateCLbatch(double[] x) {
+  private void calculateCLbatch(double... x) {
     //System.out.println("Checking at: "+x[0]+" "+x[1]+" "+x[2]);
     value = 0.0;
     // [cdm Mar 2014] This next bit seems unnecessary: derivative is allocated by ensure() in AbstractCachingDiffFunction
@@ -390,7 +390,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   }
 
 
-  private void calculateCLiterable(double[] x) {
+  private void calculateCLiterable(double... x) {
     //System.out.println("Checking at: "+x[0]+" "+x[1]+" "+x[2]);
     value = 0.0;
     // [cdm Mar 2014] This next bit seems unnecessary: derivative is allocated by ensure() in AbstractCachingDiffFunction
@@ -975,7 +975,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
    * Currently this can calculate CL only (no support for SCL).
    * TODO: sum-conditional obj. fun. with RVFs.
    */
-  protected void rvfcalculate(double[] x) {
+  protected void rvfcalculate(double... x) {
     value = 0.0;
     // This is only calculated once per training run, not worth the effort to multi-thread properly
     if (derivativeNumerator == null) {

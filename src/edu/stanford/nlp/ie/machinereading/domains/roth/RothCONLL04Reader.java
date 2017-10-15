@@ -259,7 +259,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
     }
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     // just a simple test, to make sure stuff works
     Properties props = StringUtils.argsToProperties(args);
     RothCONLL04Reader reader = new RothCONLL04Reader();

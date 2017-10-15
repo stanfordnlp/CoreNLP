@@ -46,7 +46,7 @@ public class TreebankFactoredLexiconStats  {
   /**
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length != 3) {
       System.err.printf("Usage: java %s language filename features%n", TreebankFactoredLexiconStats.class.getName());
       System.exit(-1);

@@ -124,7 +124,7 @@ public class TransformingTreebank extends Treebank {
    *
    * @param args array of command-line arguments
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Timing.startTime();
     Treebank treebank = new DiskTreebank(in -> new PennTreeReader(in));
     Treebank treebank2 = new MemoryTreebank(in -> new PennTreeReader(in));

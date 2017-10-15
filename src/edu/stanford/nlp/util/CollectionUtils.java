@@ -35,7 +35,7 @@ public class CollectionUtils  {
 
   // Utils for making collections out of arrays of primitive types.
 
-  public static List<Integer> asList(int[] a) {
+  public static List<Integer> asList(int... a) {
     List<Integer> result = new ArrayList<>(a.length);
     for (int j : a) {
       result.add(Integer.valueOf(j));
@@ -43,7 +43,7 @@ public class CollectionUtils  {
     return result;
   }
 
-  public static List<Double> asList(double[] a) {
+  public static List<Double> asList(double... a) {
     List<Double> result = new ArrayList<>(a.length);
     for (double v : a) {
       result.add(new Double(v));

@@ -105,7 +105,7 @@ public class DybroFrenchHeadFinder extends AbstractCollinsHeadFinder {
    *
    * @param args The treebankFilePath
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Treebank treebank = new DiskTreebank();
     CategoryWordTag.suppressTerminalDetails = true;
     treebank.loadPath(args[0]);

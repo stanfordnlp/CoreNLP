@@ -310,7 +310,7 @@ public class ChineseUtils  {
    *  @param args Command line arguments as above
    *  @throws IOException If any problems accessing command-line files
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length < 3) {
       log.info("usage: ChineseUtils ascii space midDot word*");
       log.info("  First 3 args are int flags; a filter or maps args as words; assumes UTF-8");

@@ -37,7 +37,7 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
   }
 
   @Override
-  public double scoreOf(int[] sequence) {
+  public double scoreOf(int... sequence) {
     double p = 0.0;
     for (int i = 0; i < entities.length; i++) {
       EntityBIO entity = entities[i];

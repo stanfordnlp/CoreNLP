@@ -222,7 +222,7 @@ public class Buckwalter implements SerializableFunction<String,String>  {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     boolean unicodeToBuck = false;
     boolean outputUnicodeValues = false;

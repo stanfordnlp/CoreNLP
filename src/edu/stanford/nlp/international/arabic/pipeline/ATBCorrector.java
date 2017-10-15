@@ -125,7 +125,7 @@ public class ATBCorrector implements TreeTransformer  {
   /**
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if(args.length != 1) {
       log.info("Usage: java " + ATBCorrector.class.getName() + " filename\n");
       System.exit(-1);

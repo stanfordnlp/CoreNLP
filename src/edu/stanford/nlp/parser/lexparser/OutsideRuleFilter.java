@@ -55,7 +55,7 @@ public class OutsideRuleFilter {
     }
   }
 
-  public void advanceRight(boolean[] tags) {
+  public void advanceRight(boolean... tags) {
     for (int tag = 0; tag < numTags; tag++) {
       if (!tags[tag]) {
         continue;
@@ -69,13 +69,13 @@ public class OutsideRuleFilter {
     }
   }
 
-  public void leftAccepting(boolean[] result) {
+  public void leftAccepting(boolean... result) {
     for (int rule = 0; rule < numFAs; rule++) {
       result[rule] = leftFA[rule].isAccepting();
     }
   }
 
-  public void advanceLeft(boolean[] tags) {
+  public void advanceLeft(boolean... tags) {
     for (int tag = 0; tag < numTags; tag++) {
       if (!tags[tag]) {
         continue;
@@ -89,7 +89,7 @@ public class OutsideRuleFilter {
     }
   }
 
-  public void rightAccepting(boolean[] result) {
+  public void rightAccepting(boolean... result) {
     for (int rule = 0; rule < numFAs; rule++) {
       result[rule] = rightFA[rule].isAccepting();
     }

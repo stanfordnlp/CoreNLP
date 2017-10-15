@@ -316,8 +316,7 @@ public class Iterables {
    * elements in the two underlying iterables.  Ends when the shorter
    * iterable ends.
    */
-  public static <T1,T2> Iterable<Pair<T1,T2>> zip(
-      Iterable<T1> iter, T2 array[]) {
+  public static <T1,T2> Iterable<Pair<T1,T2>> zip(Iterable<T1> iter,  T2  ... array) {
 
     return zip(iter, Arrays.asList(array));
   }
@@ -338,8 +337,7 @@ public class Iterables {
    * elements in the two underlying iterables.  Ends when the shorter
    * iterable ends.
    */
-  public static <T1, T2> Iterable<Pair<T1,T2>> zip(
-      T1 array1[], T2 array2[]) {
+  public static <T1, T2> Iterable<Pair<T1,T2>> zip(T1 array1[],  T2  ... array2) {
 
     return zip(Arrays.asList(array1), Arrays.asList(array2));
   }
@@ -707,7 +705,7 @@ public class Iterables {
   /**
    * For internal debugging purposes only.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String[] test = {"a", "b", "c"};
 
     List<String> l = Arrays.asList(test);

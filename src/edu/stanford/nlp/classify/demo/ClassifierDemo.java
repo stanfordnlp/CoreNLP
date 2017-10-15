@@ -19,7 +19,7 @@ class ClassifierDemo {
 
   private static String where = "";
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     if (args.length > 0) {
       where = args[0] + File.separator;
     }

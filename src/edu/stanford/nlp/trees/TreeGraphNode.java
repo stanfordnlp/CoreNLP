@@ -199,7 +199,7 @@ public class TreeGraphNode extends Tree implements HasParent  {
    * @param children an array of child trees
    */
   @Override
-  public void setChildren(Tree[] children) {
+  public void setChildren(Tree... children) {
     if (children == null || children.length == 0) {
       this.children = ZERO_TGN_CHILDREN;
     } else {
@@ -509,7 +509,7 @@ public class TreeGraphNode extends Tree implements HasParent  {
   /**
    * Just for testing.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     try {
       TreeReader tr = new PennTreeReader(new StringReader("(S (NP (NNP Sam)) (VP (VBD died) (NP (NN today))))"), new LabeledScoredTreeFactory());
       Tree t = tr.readTree();

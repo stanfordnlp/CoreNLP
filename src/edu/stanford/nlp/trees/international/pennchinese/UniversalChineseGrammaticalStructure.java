@@ -150,7 +150,7 @@ public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  
     list.addAll(newTypedDeps);
   }
 
-  public static void main(String args[]) {
+  public static void main(String ... args) {
     Properties params = StringUtils.argsToProperties(args);
 
     if (params.getProperty("sentFile") != null) {

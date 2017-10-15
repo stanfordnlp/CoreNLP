@@ -364,7 +364,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     }
   }
 
-  protected void addFeatureIndices(int [] features) {
+  protected void addFeatureIndices(int... features) {
     data[size] = features;
   }
 
@@ -715,7 +715,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     return ig;
   }
 
-  public void updateLabels(int[] labels) {
+  public void updateLabels(int... labels) {
     if (labels.length != size())
       throw new IllegalArgumentException(
           "size of labels array does not match dataset size");

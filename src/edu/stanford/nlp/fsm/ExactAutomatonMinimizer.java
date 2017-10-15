@@ -237,7 +237,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
   } // end static class ExactBlock
 
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TransducerGraph fa = new TransducerGraph();
     fa.addArc(fa.getStartNode(), "1", "a", "");
     fa.addArc(fa.getStartNode(), "2", "b", "");

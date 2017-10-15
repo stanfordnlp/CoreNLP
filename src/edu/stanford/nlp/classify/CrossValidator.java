@@ -88,7 +88,7 @@ public class CrossValidator<L, F> {
     public Object state;
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Dataset<String, String> d = Dataset.readSVMLightFormat(args[0]);
     Iterator<Triple<GeneralDataset<String, String>,GeneralDataset<String, String>,SavedState>> it = (new CrossValidator<>(d)).iterator();
     while (it.hasNext()) {

@@ -29,7 +29,7 @@ public class ResultStoringMonitor implements Function  {
     this.outputFreq = outputFreq;
   }
 
-  public double valueAt(double[] x) {
+  public double valueAt(double... x) {
     if (++i % outputFreq == 0) {
       log.info("Storing interim (double) weights to " + filename + " ... ");
       try {

@@ -1123,7 +1123,7 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word>  {
     return token;
   }
 
-  public static void main(String argv[]) throws Exception {
+  public static void main(String ... argv)throws Exception {
     if(argv.length != 1){
       log.info("Usage: java edu.stanford.nlp.ie.machinereading.common.RobustTokenizer <file to tokenize>");
       System.exit(1);

@@ -103,12 +103,12 @@ public class DiffFunctionTest extends TestCase {
     gradientCheck(new DiffFunction() {
       // this function does on a large vector x^2+1
       @Override
-      public double[] derivativeAt(double[] x) {
+      public double[] derivativeAt(double... x) {
         return ArrayMath.add(ArrayMath.multiply(x, 2), 1);
       }
 
       @Override
-      public double valueAt(double[] x) {
+      public double valueAt(double... x) {
         return ArrayMath.innerProduct(x, ArrayMath.add(x, 1));
       }
 

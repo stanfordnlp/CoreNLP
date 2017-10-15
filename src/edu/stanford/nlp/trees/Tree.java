@@ -284,7 +284,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @param children The array of children, each a {@code Tree}
    * @see #setChildren(List)
    */
-  public void setChildren(Tree[] children) {
+  public void setChildren(Tree... children) {
     throw new UnsupportedOperationException();
   }
 

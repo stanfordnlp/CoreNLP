@@ -740,7 +740,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * @param args Command line arguments
    * @throws IOException If any file I/O problem
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Properties options = StringUtils.argsToProperties(args, optionArgDefs());
     boolean showHelp = PropertiesUtils.getBool(options, "help", false);
     showHelp = PropertiesUtils.getBool(options, "h", showHelp);

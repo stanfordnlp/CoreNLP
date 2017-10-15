@@ -199,8 +199,7 @@ public class AcronymMatcher {
     return mainTokenStrs;
   }
 
-  private static List<String> getMainTokenStrs(String[] tokens)
-  {
+  private static List<String> getMainTokenStrs(String... tokens) {
     List<String> mainTokenStrs = new ArrayList<String>(tokens.length);
     for (String text:tokens) {
       if ( !text.isEmpty() && ( text.length() >= 4 || Character.isUpperCase(text.charAt(0)) ) ) {

@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class TokensRegexDemo {
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     String rules;
     if (args.length > 0) {
       rules = args[0];

@@ -90,7 +90,7 @@ public class ShiftParamsLogisticClassifierFactory<L, F> implements ClassifierFac
   }
   
   // convert labels to form that the objective function expects
-  private int[][] convertLabels(int[] labels) {
+  private int[][] convertLabels(int... labels) {
     int[][] result = new int[labels.length][numClasses];
     for (int i = 0; i < labels.length; i++) {
       result[i][labels[i]] = 1;

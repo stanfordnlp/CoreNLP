@@ -155,7 +155,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     return (curTrie != null) ? curTrie.value: null;
   }
 
-  public V get(K[] key) {
+  public V get(K... key) {
     return get(Arrays.asList(key));
   }
 
@@ -214,7 +214,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     return v;
   }
 
-  public V remove(K[] key) {
+  public V remove(K... key) {
     return remove(Arrays.asList(key));
   }
 

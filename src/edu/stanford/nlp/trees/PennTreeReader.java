@@ -279,7 +279,7 @@ public class PennTreeReader implements TreeReader  {
    *
    * @param args Array of command-line arguments: specifies a filename
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     try {
       TreeFactory tf = new LabeledScoredTreeFactory();
       Reader r = new BufferedReader(new InputStreamReader(new FileInputStream(args[0]), "UTF-8"));

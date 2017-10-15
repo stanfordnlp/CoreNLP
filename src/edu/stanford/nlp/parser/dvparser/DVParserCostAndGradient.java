@@ -222,7 +222,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
 
 
   // fill value & derivative
-  public void calculate(double[] theta) {
+  public void calculate(double... theta) {
     dvModel.vectorToParams(theta);
 
     double localValue = 0.0;

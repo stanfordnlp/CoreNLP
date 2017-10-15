@@ -27,7 +27,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class ChineseHcorefDemo {
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     long startTime = System.currentTimeMillis();
 
     String text = "俄罗斯 航空 公司 一 名 官员 在 ９号 说 ， " +

@@ -299,7 +299,7 @@ public class Benchmarks {
         System.out.println("Scanning with cache UNfriendly lookups took "+delay+" ms");
     }
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
         for (int i = 0; i < 100; i++) {
             // benchmarkRVFLogisticRegression();
             // benchmarkLogisticRegression();

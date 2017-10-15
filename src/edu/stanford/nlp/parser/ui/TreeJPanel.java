@@ -241,7 +241,7 @@ public class TreeJPanel extends JPanel {
       return new Dimension((int) width(tree, fM), (int) height(tree, fM));
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     TreeJPanel tjp = new TreeJPanel();
     // String ptbTreeString1 = "(ROOT (S (NP (DT This)) (VP (VBZ is) (NP (DT a) (NN test))) (. .)))";
     String ptbTreeString = "(ROOT (S (NP (NNP Interactive_Tregex)) (VP (VBZ works)) (PP (IN for) (PRP me)) (. !))))";

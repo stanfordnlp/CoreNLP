@@ -230,7 +230,7 @@ public class ArrayMathTest extends TestCase {
     assertTrue(ArrayMath.sum(d4) == ArrayMath.mean(d4)*d4.length);
   }
 
-  public static void helpTestSafeSumAndMean(double[] d) {
+  public static void helpTestSafeSumAndMean(double... d) {
     double[] dprime = ArrayMath.filterNaNAndInfinite(d);
     assertTrue(ArrayMath.safeMean(d)*ArrayMath.numRows(dprime)==ArrayMath.sum(dprime));
   }

@@ -32,7 +32,7 @@ public class TreeToMorfette  {
   /**
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length != 1) {
       System.err.printf("Usage: java %s tree_file%n", TreeToMorfette.class.getName());
       System.exit(-1);

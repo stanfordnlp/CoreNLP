@@ -88,7 +88,7 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
   @Override public boolean remove(Object o)   { return m.remove(o) != null; }
   @Override public Iterator<E> iterator()     { return s.iterator(); }
   @Override public Object[] toArray()         { return s.toArray(); }
-  @Override public <T> T[] toArray(T[] a)     { return s.toArray(a); }
+  @Override public <T> T[] toArray(T... a){ return s.toArray(a); }
   @Override public String toString()          { return s.toString(); }
   @Override public int hashCode()             { return s.hashCode(); }
   @Override public boolean equals(Object o)   { return s.equals(o); }

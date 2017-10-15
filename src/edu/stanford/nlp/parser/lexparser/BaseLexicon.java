@@ -959,7 +959,7 @@ public class BaseLexicon implements Lexicon  {
    *  @param args The command line arguments:
    *     java BaseLexicon treebankPath fileRange unknownWordModel words*
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length < 3) {
       log.info("java BaseLexicon treebankPath fileRange unknownWordModel words*");
       return;

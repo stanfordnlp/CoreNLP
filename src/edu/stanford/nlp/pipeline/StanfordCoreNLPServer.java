@@ -1324,7 +1324,7 @@ public class StanfordCoreNLPServer implements Runnable {
    *
    * @throws IOException Thrown if we could not start / run the server.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     // Add a bit of logging
     log("--- " + StanfordCoreNLPServer.class.getSimpleName() + "#main() called ---");
     String build = System.getenv("BUILD");

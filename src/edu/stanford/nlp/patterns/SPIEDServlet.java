@@ -248,7 +248,7 @@ public class SPIEDServlet extends HttpServlet {
   /**
    * A helper so that we can see how the servlet sees the world, modulo model paths, at least.
    */
-  public static void main(String[] args) throws ServletException, IOException {
+  public static void main(String... args) throws ServletException, IOException {
     SPIEDServlet servlet = new SPIEDServlet();
     servlet.init();
 //    IOUtils.console(line -> {

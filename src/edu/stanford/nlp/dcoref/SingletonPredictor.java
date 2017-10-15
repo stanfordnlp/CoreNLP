@@ -151,7 +151,7 @@ public class SingletonPredictor  {
     }
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props;
     if (args.length > 0) {
       props = StringUtils.argsToProperties(args);

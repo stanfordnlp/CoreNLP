@@ -183,7 +183,7 @@ public class DependencyAnalyzer  {
    * @param args takes one argument: the name of a file that contains the output of a run of
    * DependencyExtractor
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
 
     DependencyAnalyzer da = new DependencyAnalyzer(args[0]);
 

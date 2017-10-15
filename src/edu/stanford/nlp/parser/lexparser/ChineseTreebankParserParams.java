@@ -1264,7 +1264,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
   /**
    * For testing: loads a treebank and prints the trees.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TreebankLangParserParams tlpp = new ChineseTreebankParserParams();
     System.out.println("Default encoding is: " +
                        tlpp.diskTreebank().encoding());

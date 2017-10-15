@@ -573,7 +573,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     }
   }
 
-  private void doFileFilters(File[] files) {
+  private void doFileFilters(File... files) {
     //System.out.println("Doing file filters");
 
     final File[] cFiles = files;
@@ -889,7 +889,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
    * <br>
    * All other arguments will be interpreted as filenames to preload.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (isMacOSX()) {
       setMacProperties();
     } else {

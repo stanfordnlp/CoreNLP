@@ -222,7 +222,7 @@ public class WikidictAnnotator extends SentenceAnnotator {
    * A debugging method to try entity linking sentences from the console.
    * @throws IOException
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,entitymentions,entitylink");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);

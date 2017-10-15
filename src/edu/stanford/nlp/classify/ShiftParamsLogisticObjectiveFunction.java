@@ -38,7 +38,7 @@ public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFun
   }
 
   @Override
-  protected void calculate(double[] thetasArray) {
+  protected void calculate(double... thetasArray) {
     clearResults();
 
     double[][] thetas = new double[numClasses - 1][numFeatures];
@@ -86,7 +86,7 @@ public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFun
   }
 
   @Override
-  public Set<Integer> getRegularizerParamRange(double[] x) {
+  public Set<Integer> getRegularizerParamRange(double... x) {
     Set<Integer> result = new HashSet<>();
     for (int i = numL2Parameters; i < x.length; i++)
       result.add(i);

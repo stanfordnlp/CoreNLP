@@ -128,7 +128,7 @@ public class StatisticalCorefTrainer {
    *   each document to speed up and reduce the memory footprint training</li>
    * </ul>
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     doTraining(StringUtils.argsToProperties(args));
   }
 }

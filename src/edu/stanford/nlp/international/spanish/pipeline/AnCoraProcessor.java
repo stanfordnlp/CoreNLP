@@ -437,8 +437,7 @@ public class AnCoraProcessor  {
     argOptionDefs.put("ner", 0);
   }
 
-  public static void main(String[] args)
-    throws InterruptedException, IOException, ExecutionException, ClassNotFoundException {
+  public static void main(String... args) throws InterruptedException, IOException, ExecutionException, ClassNotFoundException {
     if (args.length < 1)
       log.info(usage);
 

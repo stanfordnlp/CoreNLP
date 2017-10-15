@@ -38,7 +38,7 @@ import java.util.List;
 
 public class NERDemo {
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
 
     String serializedClassifier = "classifiers/english.all.3class.distsim.crf.ser.gz";
 

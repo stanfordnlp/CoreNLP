@@ -1247,7 +1247,7 @@ public class DependencyParser  {
    *   <tr><td><tt>&#8209;tagger.model</tt></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger</td><td>Only applicable for testing with <tt>-textFile</tt>. Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
    * </table>
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Properties props = StringUtils.argsToProperties(args, numArgs);
     DependencyParser parser = new DependencyParser(props);
 

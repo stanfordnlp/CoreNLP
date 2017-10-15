@@ -233,7 +233,7 @@ public class SsurgeonPattern {
    * Simply reads the given Ssurgeon pattern from file (args[0]), parses it, and prints it out.
    * Use this for debugging the class and patterns. 
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length == 0) {
       System.out.println("Usage: SsurgeonPattern FILEPATH [\"COMPACT_SEMANTIC_GRAPH\"], FILEPATH=path to ssurgeon pattern to parse and print., SENTENCE=test sentence (in quotes)");
       System.exit(-1);

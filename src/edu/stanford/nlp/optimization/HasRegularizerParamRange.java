@@ -10,6 +10,6 @@ import java.util.Set;
  */
 public interface HasRegularizerParamRange {
 
-  Set<Integer> getRegularizerParamRange(double[] x);
+  Set<Integer> getRegularizerParamRange(double... x);
 
 }

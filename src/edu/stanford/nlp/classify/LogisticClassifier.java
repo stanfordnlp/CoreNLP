@@ -354,7 +354,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
    *  @param args The arguments/flags are: -trainFile trainFile -testFile testFile [-l1reg num] [-biased]
    *  @throws Exception
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties prop = StringUtils.argsToProperties(args);
 
     double l1reg = Double.parseDouble(prop.getProperty("l1reg","0.0"));

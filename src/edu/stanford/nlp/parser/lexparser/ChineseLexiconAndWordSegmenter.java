@@ -390,7 +390,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter  {
    *  LexicalizedParser's main method.  Should we try to have it be able
    *  to train segmenters to stop things going out of sync?
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     boolean train = false;
     boolean saveToSerializedFile = false;
     boolean saveToTextFile = false;

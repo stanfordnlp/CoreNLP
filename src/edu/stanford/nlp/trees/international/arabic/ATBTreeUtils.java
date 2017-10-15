@@ -111,7 +111,7 @@ public class ATBTreeUtils {
     return SentenceUtils.listToString(taggedSentence, false, separator);
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String debug = "( the big lion ) + (the small rabbit)";
     String escaped = ATBTreeUtils.escape(debug);
     System.out.println(escaped);

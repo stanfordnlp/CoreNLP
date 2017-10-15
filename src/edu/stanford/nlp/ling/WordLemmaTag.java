@@ -240,7 +240,7 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
 
 
   /*for debugging only*/
-  public static void main(String[] args) {
+  public static void main(String... args) {
     WordLemmaTag wLT = new WordLemmaTag();
     wLT.setFromString("hunter/NN");
 

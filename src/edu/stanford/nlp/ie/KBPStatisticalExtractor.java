@@ -680,7 +680,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String... args) throws IOException, ClassNotFoundException {
     RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
     ArgumentParser.fillOptions(KBPStatisticalExtractor.class, args);  // Fill command-line options
 

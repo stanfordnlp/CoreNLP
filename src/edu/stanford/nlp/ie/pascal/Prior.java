@@ -58,7 +58,7 @@ public class Prior {
     return matrix[index];
   }
 
-  public static void main(String args[]) throws Exception {
+  public static void main(String ... args) throws Exception {
 
     BufferedReader br = new BufferedReader(new FileReader("/tmp/acstats"));
 

@@ -232,7 +232,7 @@ public class CGRunner  {
 
 
     @Override
-    public double valueAt(double[] lambda) {
+    public double valueAt(double... lambda) {
       valueAtCalls++;
       model.lambda = lambda;
       double lik = model.logLikelihoodScratch();
@@ -252,7 +252,7 @@ public class CGRunner  {
 
 
     @Override
-    public double[] derivativeAt(double[] lambda) {
+    public double[] derivativeAt(double... lambda) {
       boolean eq = true;
       for (int j = 0; j < lambda.length; j++) {
         if (Math.abs(lambda[j] - model.lambda[j]) > tol) {
@@ -304,7 +304,7 @@ public class CGRunner  {
 
     @Override
     @SuppressWarnings({"ConstantConditions", "PointlessBooleanExpression"})
-    public double valueAt(double[] lambda) {
+    public double valueAt(double... lambda) {
       double likelihood = lf.likelihood();
       // this line is printed in the middle of the normal line of QN minimization, so put println at beginning
       log.info();

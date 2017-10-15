@@ -335,7 +335,7 @@ public class ChineseEnglishWordMap implements Serializable  {
    * The input and output encoding can be specified using the "-encoding" flag.
    * Otherwise UTF-8 is assumed.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Map<String, Integer> flagsToNumArgs = Generics.newHashMap();
     flagsToNumArgs.put("-dictPath" , 1);
     flagsToNumArgs.put("-encoding" , 1);

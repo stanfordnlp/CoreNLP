@@ -353,7 +353,7 @@ public class PRCurve {
     return ((score >= .5) && (cls == 1)) || ((score < .5) && (cls == 0));
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     PriorityQueue<String> q = new BinaryHeapPriorityQueue<>();
     q.add("bla", 2);

@@ -17,7 +17,7 @@ public interface SequenceListener {
   /**
    * Informs this sequence listener that the value of the whole sequence is initialized to sequence.
    */
-  public abstract void setInitialSequence(int[] sequence);
+  public abstract void setInitialSequence(int... sequence);
 
 
 }

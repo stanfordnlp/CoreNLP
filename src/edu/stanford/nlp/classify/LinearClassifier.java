@@ -163,7 +163,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    *  the labels and values the score (unnormalized log probability)
    *  for each class.
    */
-  public Counter<L> scoresOf(int[] features) {
+  public Counter<L> scoresOf(int... features) {
     Counter<L> scores = new ClassicCounter<>();
     for (L label : labels())
       scores.setCount(label, scoreOf(features, label));
@@ -329,13 +329,13 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    * class name to the log probability of that class.
    * Looking at the the sum of e^v for each count v, should be 1.
    */
-  public Counter<L> logProbabilityOf(int[] features) {
+  public Counter<L> logProbabilityOf(int... features) {
     Counter<L> scores = scoresOf(features);
     Counters.logNormalizeInPlace(scores);
     return scores;
   }
 
-  public Counter<L> probabilityOf(int [] features) {
+  public Counter<L> probabilityOf(int... features) {
     Counter<L> scores = logProbabilityOf(features);
     for (L label : scores.keySet()) {
       scores.setCount(label, Math.exp(scores.getCount(label)));

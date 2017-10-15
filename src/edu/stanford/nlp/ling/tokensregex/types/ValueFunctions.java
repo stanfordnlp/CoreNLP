@@ -1632,7 +1632,7 @@ public class ValueFunctions {
     registeredFunctions.add("Print", PRINT_FUNCTION);
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     // Dumps the registered functions
     for (Map.Entry<String, Collection<ValueFunction>> entry : registeredFunctions.entrySet()) {
       for (ValueFunction vf: entry.getValue()) {

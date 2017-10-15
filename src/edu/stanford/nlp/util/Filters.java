@@ -87,7 +87,7 @@ public class Filters {
   /**
    * The collectionAcceptFilter accepts a certain collection.
    */
-  public static <E> Predicate<E> collectionAcceptFilter(E[] objs) {
+  public static <E> Predicate<E> collectionAcceptFilter(E... objs) {
     return new CollectionAcceptFilter<>(Arrays.asList(objs), true);
   }
 
@@ -101,7 +101,7 @@ public class Filters {
   /**
    * The collectionRejectFilter rejects a certain collection.
    */
-  public static <E> Predicate<E> collectionRejectFilter(E[] objs) {
+  public static <E> Predicate<E> collectionRejectFilter(E... objs) {
     return new CollectionAcceptFilter<>(Arrays.asList(objs), false);
   }
 

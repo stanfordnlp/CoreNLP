@@ -31,7 +31,7 @@ public class TaggerDemo2  {
 
   private TaggerDemo2() {}
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     if (args.length != 2) {
       log.info("usage: java TaggerDemo2 modelFile fileToTag");
       return;

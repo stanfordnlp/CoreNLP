@@ -57,7 +57,7 @@ public class SplitTrainingSet {
     return weights.size() - 1;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     // Parse the arguments
     Properties props = StringUtils.argsToProperties(args);
     ArgumentParser.fillOptions(new Class[]{ArgumentParser.class, SplitTrainingSet.class}, props);

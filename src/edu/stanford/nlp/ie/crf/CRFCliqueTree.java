@@ -182,7 +182,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
    * @return the score for the sequence
    */
   @Override
-  public double scoreOf(int[] sequence) {
+  public double scoreOf(int... sequence) {
 
     int[] given = new int[window() - 1];
     Arrays.fill(given, classIndex.indexOf(backgroundSymbol));
@@ -411,7 +411,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
   // HELPER METHODS
   //
 
-  private int[] objectArrayToIntArray(E[] os) {
+  private int[] objectArrayToIntArray(E... os) {
     int[] is = new int[os.length];
     for (int i = 0; i < os.length; i++) {
       is[i] = classIndex.indexOf(os[i]);
@@ -419,7 +419,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
     return is;
   }
 
-  private List<E> intArrayToListE(int[] is) {
+  private List<E> intArrayToListE(int... is) {
     List<E> os = new ArrayList<>(is.length);
     for (int i : is) {
       os.add(classIndex.get(i));
@@ -739,7 +739,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
    * initialized to sequence
    */
   @Override
-  public void setInitialSequence(int[] sequence) {
+  public void setInitialSequence(int... sequence) {
     // do nothing
   }
 

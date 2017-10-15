@@ -21,7 +21,7 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
    * Calculate the value at x and the derivative and save them in the respective fields
    *
    */
-  abstract protected void calculate(float[] x);
+  abstract protected void calculate(float... x);
 
   @Override
   public float[] initial() {
@@ -34,7 +34,7 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
     System.arraycopy(x, 0, y, 0, x.length);
   }
 
-  void ensure(float[] x) {
+  void ensure(float... x) {
     if (Arrays.equals(x, lastX)) {
       return;
     }
@@ -49,12 +49,12 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
   }
 
   @Override
-  public float valueAt(float[] x) {
+  public float valueAt(float... x) {
     ensure(x);
     return value;
   }
 
-  static float norm2(float[] x) {
+  static float norm2(float... x) {
     float sum = 0.0f;
     for (float aX : x) {
       sum += aX * aX;
@@ -63,7 +63,7 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
   }
 
   @Override
-  public float[] derivativeAt(float[] x) {
+  public float[] derivativeAt(float... x) {
     ensure(x);
     return derivative;
   }

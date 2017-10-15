@@ -21,7 +21,7 @@ public class NegraPennTokenizer extends LexerTokenizer {
   }
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
 
     Reader in = new FileReader(args[0]);
     Tokenizer st = new NegraPennTokenizer(in);

@@ -236,7 +236,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
 //  static Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
 //      + Pattern.quote("]"));
 
-  public String[] getSimplerTokens(Token[] p){
+  public String[] getSimplerTokens(Token... p) {
     if (p == null)
       return null;
 
@@ -297,7 +297,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     return prevContext;
   }
 
-  public void setPrevContext(Token[] prevContext) {
+  public void setPrevContext(Token... prevContext) {
     this.prevContext = prevContext;
   }
 
@@ -305,7 +305,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     return nextContext;
   }
 
-  public void setNextContext(Token[] nextContext) {
+  public void setNextContext(Token... nextContext) {
     this.nextContext = nextContext;
   }
 

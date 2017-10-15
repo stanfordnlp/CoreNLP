@@ -266,7 +266,7 @@ public class Experiments {
   } // end ptilde()
 
 
-  public void setMaxY(int[] maxY) {
+  public void setMaxY(int... maxY) {
     this.maxY = maxY;
   }
 

@@ -75,7 +75,7 @@ public class DefaultPaths {
    *
    * @param args Ignored.
    */
-  public static void main(String[] args) throws IllegalAccessException {
+  public static void main(String... args) throws IllegalAccessException {
     for (Field field : DefaultPaths.class.getFields()) {
       System.out.println(field.getName() + "\t" + field.get(null));
     }

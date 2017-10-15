@@ -41,7 +41,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
   /**
    * for test only
    **/
-  public static void main(String[] args) throws IOException{
+  public static void main(String... args) throws IOException{
     Reader reader = new BufferedReader(new FileReader(args[0]));
     TrueCasingForNISTDocumentReaderAndWriter raw = new TrueCasingForNISTDocumentReaderAndWriter();
     raw.init(null);

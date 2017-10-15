@@ -2215,7 +2215,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     GrammaticalStructureConversionUtils.convertTrees(args, "en-sd");
   }
 

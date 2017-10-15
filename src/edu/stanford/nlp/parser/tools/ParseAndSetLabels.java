@@ -172,7 +172,7 @@ public class ParseAndSetLabels {
     return trees;
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     // TODO: rather than always rolling our own arg parser, we should
     // find a library which does it for us nicely
     String outputFile = null;

@@ -22,7 +22,7 @@ public class NullOutputStream extends OutputStream {
   }
 
   @Override
-  public void write(byte[] b) {
+  public void write(byte... b) {
     // this doesn't do anything either
   }
 

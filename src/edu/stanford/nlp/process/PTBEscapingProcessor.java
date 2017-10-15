@@ -221,7 +221,7 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
    *
    * @param args Command line argument: a file or URL
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length != 1) {
       System.out.println("usage: java edu.stanford.nlp.process.PTBEscapingProcessor fileOrUrl");
       return;

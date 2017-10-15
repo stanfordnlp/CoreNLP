@@ -106,7 +106,7 @@ public class LogLikelihoodDifferentiableFunction extends AbstractDifferentiableF
    * @param distribution the potentially deterministic distribution
    * @return the assignment given by the distribution with probability 1, if one exists, else -1
    */
-  private static int getDeterministicAssignment(double[] distribution) {
+  private static int getDeterministicAssignment(double... distribution) {
     int assignment = -1;
     for (int i = 0; i < distribution.length; i++) {
       if (distribution[i] == 1.0) {

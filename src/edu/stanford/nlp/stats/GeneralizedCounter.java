@@ -877,7 +877,7 @@ public class GeneralizedCounter<K> implements Serializable {
   /**
    * for testing purposes only
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     Object[] a1 = new Object[]{"a", "b"};
     Object[] a2 = new Object[]{"a", "b"};
@@ -976,7 +976,7 @@ public class GeneralizedCounter<K> implements Serializable {
   }
 
 
-  private static void arrayPrintDouble(double[] o) {
+  private static void arrayPrintDouble(double... o) {
     for (double anO : o) {
       System.out.print(anO + "\t");
     }

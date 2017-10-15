@@ -49,9 +49,9 @@ import java.util.regex.Pattern;
  *   <tr><td>{@code DOUBLE}</td><td>{@code [+-]\d*\.\d+}</td><td>{@code 6.98}</td><td></td></tr>
  *   <tr><td>{@code REGEX}</td><td>{@code /.../}</td><td>{@code /[Aa]pril/}</td>
  *       <td>String regular expression {@link Pattern}</td></tr>
- *   <tr><td>{@code TOKENS_REGEX}</td><td>{@code ( [...] [...] ... ) }</td><td>{@code ( /up/ /to/ /4/ /months/ )}</td>
+ *   <tr><td>{@code TOKENS_REGEX}</td><td>{@code ([...] [...] ... ) }</td><td>{@code ( /up/ /to/ /4/ /months/ )}</td>
  *       <td>Tokens regular expression {@link TokenSequencePattern}</td></tr>
- *   <tr><td>{@code LIST}</td><td>{@code ( [item1] , [item2], ... )}</td><td>{@code ("red", "blue", "yellow" )}</td>
+ *   <tr><td>{@code LIST}</td><td>{@code ([item1] , [item2], ... )}</td><td>{@code ("red", "blue", "yellow" )}</td>
  *       <td></td></tr>
  * </table>
  * </p>

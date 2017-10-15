@@ -72,7 +72,7 @@ public class ExtractorMerger implements Extractor {
     }
   }
   
-  public static Extractor buildRelationExtractorMerger(String[] extractorModelNames) {
+  public static Extractor buildRelationExtractorMerger(String... extractorModelNames) {
     BasicRelationExtractor[] relationExtractorComponents = new BasicRelationExtractor[extractorModelNames.length];
     for (int i = 0; i < extractorModelNames.length; i++) {
       String modelName = extractorModelNames[i];

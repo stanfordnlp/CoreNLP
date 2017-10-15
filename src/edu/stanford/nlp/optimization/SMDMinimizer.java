@@ -175,7 +175,7 @@ public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T>  {
   }
 
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     // optimizes test function using doubles and floats
     // test function is (0.5 sum(x_i^2 * var_i)) ^ PI
     // where var is a vector of random nonnegative numbers
@@ -193,7 +193,7 @@ public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T>  {
     final DiffFunction f = new DiffFunction() {
 
       @Override
-      public double[] derivativeAt(double[] x) {
+      public double[] derivativeAt(double... x) {
         double val = Math.PI * valuePow(x, Math.PI - 1);
         final double[] grads = new double[dim];
         for (int i = 0; i < dim; i++) {
@@ -203,7 +203,7 @@ public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T>  {
       }
 
       @Override
-      public double valueAt(double[] x) {
+      public double valueAt(double... x) {
         return 1.0 + valuePow(x, Math.PI);
       }
 

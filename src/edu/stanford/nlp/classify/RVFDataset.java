@@ -899,7 +899,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
     pw.println();
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     RVFDataset<String, String> data = new RVFDataset<>();
     ClassicCounter<String> c1 = new ClassicCounter<>();
     c1.incrementCount("fever", 3.5);

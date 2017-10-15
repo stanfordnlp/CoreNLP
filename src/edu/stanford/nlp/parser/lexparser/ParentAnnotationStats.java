@@ -427,7 +427,7 @@ public class ParentAnnotationStats implements TreeVisitor  {
    *
    * @param args One argument: path to the Treebank
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     boolean doTags = false;
     if (args.length < 1) {
       System.out.println("Usage: java edu.stanford.nlp.parser.lexparser.ParentAnnotationStats [-tags] treebankPath");

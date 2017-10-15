@@ -84,7 +84,7 @@ public class SUTimePipeline  {
     return anno;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     SUTimePipeline pipeline = new SUTimePipeline();
     Annotator timeAnnotator = pipeline.getTimeAnnotator("sutime", new Properties());
     BufferedReader is = new BufferedReader(new InputStreamReader(System.in));

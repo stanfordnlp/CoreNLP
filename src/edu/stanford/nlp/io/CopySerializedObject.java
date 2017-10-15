@@ -14,7 +14,7 @@ import java.io.IOException;
  * @author John Bauer
  */
 public class CopySerializedObject {
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String... args) throws IOException, ClassNotFoundException {
     Object o = IOUtils.readObjectFromFile(args[0]);
     IOUtils.writeObjectToFile(o, args[1]);
   }

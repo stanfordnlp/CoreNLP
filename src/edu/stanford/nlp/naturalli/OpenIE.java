@@ -679,7 +679,7 @@ public class OpenIE implements Annotator  {
   /**
    * An entry method for annotating standard in with OpenIE extractions.
    */
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String... args) throws IOException, InterruptedException {
     // Parse the arguments
     Properties props = StringUtils.argsToProperties(args, new HashMap<String, Integer>(){{
       put("openie.resolve_coref", 0);

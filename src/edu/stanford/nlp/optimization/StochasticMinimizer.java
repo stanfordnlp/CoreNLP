@@ -343,7 +343,7 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
   }
 
 
-  private void doEvaluation(double[] x) {
+  private void doEvaluation(double... x) {
     // Evaluate solution
     if (evaluators == null) return;
     for (Evaluator eval:evaluators) {

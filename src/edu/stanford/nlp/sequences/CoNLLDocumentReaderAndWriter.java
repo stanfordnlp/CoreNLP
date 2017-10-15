@@ -236,7 +236,7 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
 
   /** Count some stats on what occurs in a file.
    */
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String... args) throws IOException, ClassNotFoundException {
     CoNLLDocumentReaderAndWriter rw = new CoNLLDocumentReaderAndWriter();
     rw.init(new SeqClassifierFlags());
     int numDocs = 0;

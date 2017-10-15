@@ -398,7 +398,7 @@ public class NumberNormalizer {
     return (neg)? -n.doubleValue():n;
   }
 
-  private static Number wordToNumberRecurse(Number[] numFields) {
+  private static Number wordToNumberRecurse(Number... numFields) {
     return wordToNumberRecurse(numFields, 0, numFields.length);
   }
 

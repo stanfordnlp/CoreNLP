@@ -307,7 +307,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
     return temp;
   }
 
-  public Quadruple<double[][], double[][], double[][], double[][]> separateWeights(double[] x) {
+  public Quadruple<double[][], double[][], double[][], double[][]> separateWeights(double... x) {
     int index = 0;
     double[][] inputLayerWeights4Edge = emptyW4Edge();
     for (int i = 0; i < inputLayerWeights4Edge.length; i++) {
@@ -346,7 +346,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
     return new Quadruple<>(inputLayerWeights4Edge, outputLayerWeights4Edge, inputLayerWeights, outputLayerWeights);
   }
 
-  public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
+  public CliquePotentialFunction getCliquePotentialFunction(double... x) {
     Quadruple<double[][], double[][], double[][], double[][]> allParams = separateWeights(x);
     double[][] W4Edge = allParams.first(); // inputLayerWeights4Edge
     double[][] U4Edge = allParams.second(); // outputLayerWeights4Edge
@@ -361,7 +361,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
    * Calculates both value and partial derivatives at the point x, and save them internally.
    */
   @Override
-  public void calculate(double[] x) {
+  public void calculate(double... x) {
 
     double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     Quadruple<double[][], double[][], double[][], double[][]> allParams = separateWeights(x);

@@ -393,8 +393,7 @@ public final class ConcatVectorProto {
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
       }
-      public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(byte[] data)
-          throws com.google.protobuf.InvalidProtocolBufferException {
+      public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(byte... data)throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
       public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(
@@ -793,8 +792,7 @@ public final class ConcatVectorProto {
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(byte... data)throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(

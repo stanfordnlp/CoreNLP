@@ -1267,7 +1267,7 @@ public class QuestionToStatementTranslator {
   }
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma"));
     QuestionToStatementTranslator translator = new QuestionToStatementTranslator();
 

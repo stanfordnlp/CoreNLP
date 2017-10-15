@@ -6,5 +6,5 @@ package edu.stanford.nlp.ie.crf;
  * @author Mengqiu Wang
  */
 public interface HasCliquePotentialFunction {
-  public CliquePotentialFunction getCliquePotentialFunction(double[] x);
+  public CliquePotentialFunction getCliquePotentialFunction(double... x);
 }

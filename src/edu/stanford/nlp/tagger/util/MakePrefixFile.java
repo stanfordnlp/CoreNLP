@@ -29,7 +29,7 @@ public class MakePrefixFile  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(MakePrefixFile.class);
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Properties config = StringUtils.argsToProperties(args);
     log.info(config);
 

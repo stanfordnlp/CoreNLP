@@ -66,7 +66,7 @@ public class FilteredIterator<T> implements Iterator<T> {
     skipUnacceptableCandidates();
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Collection<String> c = Arrays.asList(new String[]{"a", "aa", "b", "bb", "cc"});
     Iterator<String> i = new FilteredIterator<>(c.iterator(), new Predicate<String>() {
       private static final long serialVersionUID = 1L;

@@ -29,7 +29,7 @@ class ParserDemo {
    * e.g.: java ParserDemo edu/stanford/nlp/models/lexparser/chineseFactored.ser.gz data/chinese-onesent-utf8.txt
    *
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String parserModel = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
     if (args.length > 0) {
       parserModel = args[0];

@@ -1436,7 +1436,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
 
     @Override
-    public double scoreOf(int[] sequence) {
+    public double scoreOf(int... sequence) {
       throw new UnsupportedOperationException();
     }
 
@@ -1549,7 +1549,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       return scores;
     }
 
-    static double[] recenter(double[] x) {
+    static double[] recenter(double... x) {
       double[] r = new double[x.length];
       // double logTotal = Double.NEGATIVE_INFINITY;
       // for (int i = 0; i < x.length; i++)
@@ -1620,7 +1620,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    *  comments for examples of use, and SeqClassifierFlags
    *  for more information on supported flags.
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     StringUtils.logInvocationString(log, args);
 
     Properties props = StringUtils.argsToProperties(args);

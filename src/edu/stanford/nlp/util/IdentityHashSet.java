@@ -169,7 +169,7 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
   }
 
   /** Just for testing. */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Integer x = Integer.valueOf(3);
     Integer y = Integer.valueOf(4);
     Integer z = Integer.valueOf(5);

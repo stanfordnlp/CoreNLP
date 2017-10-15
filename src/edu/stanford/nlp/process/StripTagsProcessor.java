@@ -118,7 +118,7 @@ public class StripTagsProcessor<L, F> extends AbstractListProcessor<Word, Word, 
   /**
    * For internal debugging purposes only.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     new BasicDocument<String>();
     Document<String, Word, Word> htmlDoc = BasicDocument.init("top text <h1>HEADING text</h1> this is <p>new paragraph<br>next line<br/>xhtml break etc.");
     System.out.println("Before:");

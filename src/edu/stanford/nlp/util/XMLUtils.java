@@ -1255,7 +1255,7 @@ public class XMLUtils  {
    *  readDocumentFromFile.
    *  Otherwise, it tests readTag/readUntilTag and slurpFile.
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     if (args[0].equals("-readDoc")) {
       Document doc = readDocumentFromFile(args[1]);
       System.out.println(doc);

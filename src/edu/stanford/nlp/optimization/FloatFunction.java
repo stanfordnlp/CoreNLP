@@ -14,7 +14,7 @@ public interface FloatFunction {
    * @param x a <code>double[]</code> input
    * @return the function value at the input
    */
-  float valueAt(float[] x);
+  float valueAt(float... x);
 
   /**
    * Returns the number of dimensions in the function's domain

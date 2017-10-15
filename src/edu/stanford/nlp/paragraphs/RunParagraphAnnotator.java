@@ -16,7 +16,7 @@ public class RunParagraphAnnotator {
   public static String TEST2 = "Easy Peasy. \nLemon squeezy.\n\n Blop dop bop.";
   public static String TEST3 = "Easy Peasy. \n\nLemon squeezy. \n\n Bam! \n Not this one.";
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     runTest(TEST1, "one");
     runTest(TEST1, "two");
     runTest(TEST2, "one");

@@ -241,7 +241,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
   }
 
   @Override
-  public void calculate(double[] theta) {
+  public void calculate(double... theta) {
     model.vectorToParams(theta);
 
     final ModelDerivatives derivatives;

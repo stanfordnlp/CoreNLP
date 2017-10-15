@@ -233,7 +233,7 @@ public class GoogleNGramsSQLBacked  {
     connection = null;
   }
 
-  public static void main(String[] args){
+  public static void main(String... args) {
     try{
       Properties props = StringUtils.argsToPropertiesWithResolve(args);
       ArgumentParser.fillOptions(GoogleNGramsSQLBacked.class, props);

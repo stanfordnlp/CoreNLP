@@ -2370,7 +2370,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
     return RETAIN_TMP_ARGS;
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TreebankLangParserParams tlpp = new EnglishTreebankParserParams();
     Treebank tb = tlpp.memoryTreebank();
     tb.loadPath(args[0]);

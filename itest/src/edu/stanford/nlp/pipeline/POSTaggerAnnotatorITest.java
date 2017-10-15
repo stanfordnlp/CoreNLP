@@ -58,7 +58,7 @@ public class POSTaggerAnnotatorITest extends TestCase {
     }
   }
 
-  private static void checkLabels(CoreMap sentence, String... tags){
+  private static void checkLabels(CoreMap sentence, String... tags) {
     checkLabels(sentence.get(CoreAnnotations.TokensAnnotation.class), tags);
   }
 

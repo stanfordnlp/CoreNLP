@@ -84,7 +84,7 @@ public class BestSequenceFinderTest extends TestCase {
 
     /** {@inheritDoc} */
     @Override
-    public double scoreOf(int[] sequence) {
+    public double scoreOf(int... sequence) {
       double score = 0.0;
       for (int i = leftWindow(); i < leftWindow() + length(); i++) {
         score += scoreOf(sequence, i);
@@ -178,7 +178,7 @@ public class BestSequenceFinderTest extends TestCase {
 
     /** {@inheritDoc} */
     @Override
-    public double scoreOf(int[] sequence) {
+    public double scoreOf(int... sequence) {
       double score = 0.0;
       for (int i = leftWindow(); i < leftWindow() + length(); i++) {
         score += scoreOf(sequence, i);
@@ -272,7 +272,7 @@ public class BestSequenceFinderTest extends TestCase {
 
     /** {@inheritDoc} */
     @Override
-    public double scoreOf(int[] sequence) {
+    public double scoreOf(int... sequence) {
       double score = 0.0;
       for (int i = leftWindow(); i < leftWindow() + length(); i++) {
         score += scoreOf(sequence, i);
@@ -366,7 +366,7 @@ public class BestSequenceFinderTest extends TestCase {
 
     /** {@inheritDoc} */
     @Override
-    public double scoreOf(int[] sequence) {
+    public double scoreOf(int... sequence) {
       double score = 0.0;
       for (int i = leftWindow(); i < leftWindow() + length(); i++) {
         score += scoreOf(sequence, i);

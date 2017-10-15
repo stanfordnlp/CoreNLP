@@ -277,7 +277,7 @@ public class LeafAncestorEval  {
     optionArgDefs.put("-v", 0);
   }
 
-  private static boolean validateCommandLine(String[] args) {
+  private static boolean validateCommandLine(String... args) {
     Map<String, String[]> argsMap = StringUtils.argsToMap(args,optionArgDefs);
 
     for(Map.Entry<String, String[]> opt : argsMap.entrySet()) {
@@ -315,7 +315,7 @@ public class LeafAncestorEval  {
   /**
    * Execute with no arguments for usage.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     if(!validateCommandLine(args)) {
       log.info(USAGE);

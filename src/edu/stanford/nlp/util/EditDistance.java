@@ -146,7 +146,7 @@ public class EditDistance  {
     return score(source, source.length, target, target.length);
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length >= 2) {
       EditDistance d = new EditDistance();
       System.out.println(d.score(args[0], args[1]));

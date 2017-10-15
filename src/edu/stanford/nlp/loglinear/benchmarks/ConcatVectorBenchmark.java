@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Random;
 
 public class ConcatVectorBenchmark {
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String... args) throws IOException, ClassNotFoundException {
     long randomSeed = 10101L;
 
     // Create the templates we'll use for our truly random dense vectors benchmarks
@@ -111,7 +111,7 @@ public class ConcatVectorBenchmark {
     return System.currentTimeMillis() - before;
   }
 
-  static ConcatVector[] makeVectors(ConcatVectorConstructionRecord[] records) {
+  static ConcatVector[] makeVectors(ConcatVectorConstructionRecord... records) {
     ConcatVector[] vectors = new ConcatVector[records.length];
     for (int i = 0; i < records.length; i++) {
       vectors[i] = records[i].create();
@@ -119,7 +119,7 @@ public class ConcatVectorBenchmark {
     return vectors;
   }
 
-  static long addBenchmark(ConcatVectorConstructionRecord[] records) {
+  static long addBenchmark(ConcatVectorConstructionRecord... records) {
     ConcatVector[] vectors = makeVectors(records);
     long before = System.currentTimeMillis();
     for (int i = 1; i < vectors.length; i++) {
@@ -128,7 +128,7 @@ public class ConcatVectorBenchmark {
     return System.currentTimeMillis() - before;
   }
 
-  static long dotProductBenchmark(ConcatVectorConstructionRecord[] records) {
+  static long dotProductBenchmark(ConcatVectorConstructionRecord... records) {
     ConcatVector[] vectors = makeVectors(records);
     long before = System.currentTimeMillis();
     for (int i = 0; i < vectors.length; i++) {
@@ -137,7 +137,7 @@ public class ConcatVectorBenchmark {
     return System.currentTimeMillis() - before;
   }
 
-  static long constructionBenchmark(ConcatVectorConstructionRecord[] records) {
+  static long constructionBenchmark(ConcatVectorConstructionRecord... records) {
 
     // Then run the ConcatVector parts
 
@@ -216,7 +216,7 @@ public class ConcatVectorBenchmark {
     public int size;
   }
 
-  static SerializationReport protoSerializationBenchmark(ConcatVectorConstructionRecord[] records) throws IOException, ClassNotFoundException {
+  static SerializationReport protoSerializationBenchmark(ConcatVectorConstructionRecord... records)throws IOException, ClassNotFoundException {
     ConcatVector[] vectors = makeVectors(records);
     ByteArrayOutputStream bArr = new ByteArrayOutputStream();
 

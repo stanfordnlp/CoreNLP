@@ -256,7 +256,7 @@ public class TaggingEval extends AbstractEval  {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     if(args.length < minArgs) {
       System.out.println(usage.toString());

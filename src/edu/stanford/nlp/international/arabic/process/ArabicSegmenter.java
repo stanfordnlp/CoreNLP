@@ -521,7 +521,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     // Strips off hyphens
     Properties options = StringUtils.argsToProperties(args, optionArgDefs());
     if (options.containsKey("help") || args.length == 0) {

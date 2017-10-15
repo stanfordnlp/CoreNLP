@@ -422,7 +422,7 @@ public class DependencyScoring  {
   } // end static class Score
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
     boolean verbose = Boolean.parseBoolean(props.getProperty("v", "False"));
     boolean conllx = Boolean.parseBoolean(props.getProperty("conllx", "False"));

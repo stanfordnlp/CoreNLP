@@ -131,7 +131,7 @@ public class BuildBinarizedDataset  {
    * will be used to prelabel the sentences.  Any spans with given
    * labels will then be used to adjust those labels.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     CollapseUnaryTransformer transformer = new CollapseUnaryTransformer();
 
     String parserModel = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";

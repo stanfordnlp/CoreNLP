@@ -106,7 +106,7 @@ public class MachineReading  {
   private static final int EVENT_LEVEL = 2;
 
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     MachineReading mr = makeMachineReading(args);
     mr.run();
   }
@@ -200,7 +200,7 @@ public class MachineReading  {
     return mr;
   }
 
-  public static MachineReading makeMachineReading(String [] args) throws IOException {
+  public static MachineReading makeMachineReading(String ... args) throws IOException {
     // install global parameters
     MachineReading mr = new MachineReading(args);
     //TODO:
@@ -761,7 +761,7 @@ public class MachineReading  {
    * Creates ResultsPrinter instances based on the resultsPrinters argument
    * @param args
    */
-  private void makeResultsPrinters(String[] args) {
+  private void makeResultsPrinters(String... args) {
     entityResultsPrinterSet = makeResultsPrinters(MachineReadingProperties.entityResultsPrinters, args);
     setRelationResultsPrinterSet(makeResultsPrinters(MachineReadingProperties.relationResultsPrinters, args));
     eventResultsPrinterSet = makeResultsPrinters(MachineReadingProperties.eventResultsPrinters, args);
@@ -934,7 +934,7 @@ public class MachineReading  {
     this.forceParseSentences = forceParseSentences;
   }
 
-  public void setDatasets(Pair<Annotation, Annotation> [] datasets) {
+  public void setDatasets(Pair<Annotation, Annotation>... datasets) {
     this.datasets = datasets;
   }
 

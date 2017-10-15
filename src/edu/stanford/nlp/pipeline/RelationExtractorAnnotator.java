@@ -107,7 +107,7 @@ public class RelationExtractorAnnotator implements Annotator  {
     )));
   }
 
-  public static void main(String[] args){
+  public static void main(String... args) {
     try{
       Properties props = StringUtils.argsToProperties(args);
       props.setProperty("annotators", "tokenize,ssplit,lemma,pos,parse,ner");

@@ -148,12 +148,12 @@ public abstract class AbstractDependencyGrammar implements DependencyGrammar  {
     return (short) coarseDistanceBins.length;
   }
 
-  void setCoarseDistanceBins(int[] bins) {
+  void setCoarseDistanceBins(int... bins) {
     assert(bins.length == 3);
     coarseDistanceBins = bins;
   }
 
-  void setRegDistanceBins(int[] bins) {
+  void setRegDistanceBins(int... bins) {
     assert(bins.length == 4);
     regDistanceBins = bins;
   }

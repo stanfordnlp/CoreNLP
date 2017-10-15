@@ -123,7 +123,7 @@ public class LogisticUtils {
     return prior.compute(flatWeights, new double[flatWeights.length]);
   }
   
-  public static int sample(double[] sigmoids) {
+  public static int sample(double... sigmoids) {
     double probability = Math.random();
     System.out.println("sigmoids: " + Arrays.toString(sigmoids));
     System.out.println("probability: " + probability);

@@ -627,7 +627,7 @@ public class DVModel implements Serializable  {
   }
 
   @SuppressWarnings("unchecked")
-  public void vectorToParams(double[] theta) {
+  public void vectorToParams(double... theta) {
     if (op.trainOptions.trainWordVectors) {
       NeuralUtils.vectorToParams(theta,
                                  binaryTransform.valueIterator(), unaryTransform.values().iterator(),

@@ -89,7 +89,7 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
     return index;
   }
 
-  public double[][][] to3D(double[] x1) {
+  public double[][][] to3D(double... x1) {
     double[] x = normalize(x1);
     double[][][] x2 = new double[numClasses][numFeatures][];
     for (int c = 0; c < numClasses; c++) {
@@ -103,7 +103,7 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
     return x2;
   }
 
-  public double[] priors(double[] x1) {
+  public double[] priors(double... x1) {
     double[] x = normalize(x1);
     double[] x2 = new double[numClasses];
     for (int c = 0; c < numClasses; c++) {
@@ -116,7 +116,7 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
    * normalize the parameters s.t qi=log(e^li/Z);
    *
    */
-  private double[] normalize(double[] x) {
+  private double[] normalize(double... x) {
     double[] x1 = new double[x.length];
     copy(x1, x);
     //the priors
@@ -149,7 +149,7 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
   }
 
   @Override
-  protected void calculate(double[] x1) {
+  protected void calculate(double... x1) {
 
     double[] x = normalize(x1);
     double[] xExp = new double[x.length];

@@ -37,7 +37,7 @@ public class WordStemmer implements TreeVisitor {
    *
    * @param args Usage: WordStemmer file
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Treebank treebank = new DiskTreebank();
     treebank.loadPath(args[0]);
     WordStemmer ls = new WordStemmer();

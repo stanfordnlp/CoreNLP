@@ -20,7 +20,7 @@ class ParserDemo2 {
    *
    *  Usage: ParserDemo2 [grammar [textFile]]
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     String grammar = args.length > 0 ? args[0] : "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
     String[] options = { "-maxLength", "80", "-retainTmpSubcategories" };
     LexicalizedParser lp = LexicalizedParser.loadModel(grammar, options);

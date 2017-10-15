@@ -187,7 +187,7 @@ public class Extractors implements Serializable  {
    * @param args Filename of extractors file (standardly written with
    *       {@code .ex} extension)
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     try {
       ObjectInputStream in = new ObjectInputStream(new FileInputStream(args[0]));
       Extractors extrs = (Extractors) in.readObject();

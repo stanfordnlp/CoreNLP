@@ -25,7 +25,7 @@ public class FixLocation  {
 
   private FixLocation() {} // static class
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     if (args.length < 1) {
       log.info("Input filename?");
       inputFilename = in.readLine();

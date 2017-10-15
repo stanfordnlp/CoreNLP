@@ -81,11 +81,11 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
     return domainDimension;
   }
 
-  public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
+  public CliquePotentialFunction getCliquePotentialFunction(double... x) {
     throw new UnsupportedOperationException("CRFLogConditionalObjectiveFloatFunction is not clique potential compatible yet");
   }
 
-  public float[][] to2D(float[] weights) {
+  public float[][] to2D(float... weights) {
     float[][] newWeights = new float[map.length][];
     int index = 0;
     for (int i = 0; i < map.length; i++) {
@@ -235,7 +235,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
   }
 
   @Override
-  public void calculate(float[] x) {
+  public void calculate(float... x) {
 
     // if (crfType.equalsIgnoreCase("weird")) {
     //   calculateWeird(x);
@@ -342,7 +342,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
 
   }
 
-  public void calculateWeird1(float[] x) {
+  public void calculateWeird1(float... x) {
 
     float[][] weights = to2D(x);
     float[][] E = empty2D();

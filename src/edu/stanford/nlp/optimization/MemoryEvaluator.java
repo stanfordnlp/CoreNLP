@@ -24,7 +24,7 @@ public class MemoryEvaluator implements Evaluator  {
     return "Memory Usage";
   }
 
-  public double evaluate(double[] x) {
+  public double evaluate(double... x) {
     StringBuilder sb = new StringBuilder("Memory Usage: ");
     sb.append(" used(KB):").append(memMonitor.getUsedMemory(false));
     sb.append(" maxAvailable(KB):").append(memMonitor.getMaxAvailableMemory(false));

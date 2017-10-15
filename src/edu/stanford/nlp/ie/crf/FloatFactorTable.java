@@ -91,7 +91,7 @@ public class FloatFactorTable  {
     return indices;
   }
 
-  private int indexOf(int[] entry) {
+  private int indexOf(int... entry) {
     int index = 0;
     for (int anEntry : entry) {
       index *= numClasses;
@@ -111,7 +111,7 @@ public class FloatFactorTable  {
     return index;
   }
 
-  private int[] indicesEnd(int[] entries) {
+  private int[] indicesEnd(int... entries) {
     int[] indices = new int[SloppyMath.intPow(numClasses, windowSize - entries.length)];
     int offset = SloppyMath.intPow(numClasses, entries.length);
     int index = 0;
@@ -126,7 +126,7 @@ public class FloatFactorTable  {
     return indices;
   }
 
-  private int[] indicesFront(int[] entries) {
+  private int[] indicesFront(int... entries) {
     int[] indices = new int[SloppyMath.intPow(numClasses, windowSize - entries.length)];
     int offset = SloppyMath.intPow(numClasses, windowSize - entries.length);
     int start = 0;
@@ -166,16 +166,16 @@ public class FloatFactorTable  {
     return ArrayMath.logSum(table);
   }
 
-  public float unnormalizedLogProb(int[] label) {
+  public float unnormalizedLogProb(int... label) {
     return getValue(label);
   }
 
-  public float logProb(int[] label) {
+  public float logProb(int... label) {
     return unnormalizedLogProb(label) - totalMass();
   }
 
 
-  public float prob(int[] label) {
+  public float prob(int... label) {
     return (float) Math.exp(unnormalizedLogProb(label) - totalMass());
   }
 
@@ -195,7 +195,7 @@ public class FloatFactorTable  {
     return table[indexOf(given, of)] - z;
   }
 
-  public float unnormalizedLogProbFront(int[] label) {
+  public float unnormalizedLogProbFront(int... label) {
     label = indicesFront(label);
     float[] masses = new float[label.length];
     for (int i = 0; i < masses.length; i++) {
@@ -204,11 +204,11 @@ public class FloatFactorTable  {
     return ArrayMath.logSum(masses);
   }
 
-  public float logProbFront(int[] label) {
+  public float logProbFront(int... label) {
     return unnormalizedLogProbFront(label) - totalMass();
   }
 
-  public float unnormalizedLogProbEnd(int[] label) {
+  public float unnormalizedLogProbEnd(int... label) {
     label = indicesEnd(label);
     float[] masses = new float[label.length];
     for (int i = 0; i < masses.length; i++) {
@@ -217,7 +217,7 @@ public class FloatFactorTable  {
     return ArrayMath.logSum(masses);
   }
 
-  public float logProbEnd(int[] label) {
+  public float logProbEnd(int... label) {
     return unnormalizedLogProbEnd(label) - totalMass();
   }
 
@@ -239,7 +239,7 @@ public class FloatFactorTable  {
     return table[index];
   }
 
-  public float getValue(int[] label) {
+  public float getValue(int... label) {
     return table[indexOf(label)];
   }
 
@@ -303,7 +303,7 @@ public class FloatFactorTable  {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     FloatFactorTable ft = new FloatFactorTable(6, 3);
 
     /**

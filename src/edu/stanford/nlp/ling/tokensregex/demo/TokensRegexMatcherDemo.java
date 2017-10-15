@@ -21,7 +21,7 @@ public class TokensRegexMatcherDemo {
 
   private TokensRegexMatcherDemo() {} // static main only
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(
             PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner"));
     Annotation annotation = new Annotation("Casey is 21. Sally Atkinson's age is 30.");

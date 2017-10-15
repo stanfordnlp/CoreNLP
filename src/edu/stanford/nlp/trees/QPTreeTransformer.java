@@ -117,7 +117,7 @@ public class QPTreeTransformer implements TreeTransformer {
   }
 
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     QPTreeTransformer transformer = new QPTreeTransformer();
     Treebank tb = new MemoryTreebank();

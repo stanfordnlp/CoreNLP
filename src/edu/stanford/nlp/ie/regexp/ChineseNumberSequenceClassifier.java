@@ -222,7 +222,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   public void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException, ClassNotFoundException {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
    /* Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/ChineseNumberClassifierProps.properties");
 //    Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/EnglishNumberClassifierProps.properties");
     props.setProperty("outputFormat", "text");

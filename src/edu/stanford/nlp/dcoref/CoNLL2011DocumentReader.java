@@ -961,7 +961,7 @@ public class CoNLL2011DocumentReader  {
   }
 
   /** Reads and dumps output, mainly for debugging. */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
     boolean debug = Boolean.parseBoolean(props.getProperty("debug", "false"));
     String filepath = props.getProperty("i");

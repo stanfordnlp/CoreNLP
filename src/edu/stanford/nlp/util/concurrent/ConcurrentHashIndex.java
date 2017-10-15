@@ -138,7 +138,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   }
 
   @Override
-  public Collection<E> objects(final int[] indices) {
+  public Collection<E> objects(final int... indices) {
     return new AbstractList<E>() {
       @Override
       public E get(int index) {

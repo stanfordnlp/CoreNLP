@@ -24,7 +24,7 @@ import edu.stanford.nlp.ling.TaggedWord;
  * @author John Bauer
  */
 public class FindTreebankTree {
-  public static void main(String[] args) {
+  public static void main(String... args) {
     // Args specified with -tagSeparator, -encoding, etc are assigned
     // to the appropriate option.  Otherwise, the first arg found is
     // the sentence to look for, and all other args are paths in which

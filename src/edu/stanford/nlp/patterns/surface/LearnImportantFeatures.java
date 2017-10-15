@@ -231,7 +231,7 @@ public class LearnImportantFeatures {
     return new RVFDatum<>(feat, label);
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     try {
 
       LearnImportantFeatures lmf = new LearnImportantFeatures();

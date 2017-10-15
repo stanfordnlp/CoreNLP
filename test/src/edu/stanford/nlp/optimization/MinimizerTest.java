@@ -15,7 +15,7 @@ public class MinimizerTest extends TestCase {
   private static class RosenbrockFunction implements DiffFunction {
 
     @Override
-    public double[] derivativeAt(double[] x) {
+    public double[] derivativeAt(double... x) {
       double[] derivatives = new double[2];
       // df/dx = -400x(y-x^2) - 2(1-x)
       derivatives[0] = -400.0 * x[0] * (x[1] - x[0] * x[0]) - 2 * (1.0 - x[0]);
@@ -26,7 +26,7 @@ public class MinimizerTest extends TestCase {
 
     /** f(x,y) = (1-x)^2 + 100(y-x^2)^2 */
     @Override
-    public double valueAt(double[] x) {
+    public double valueAt(double... x) {
       double t1 = (1.0 - x[0]);
       double t2 = x[1] - x[0] * x[0];
       return t1 * t1 + 100.0 * t2 * t2;

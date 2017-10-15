@@ -802,7 +802,7 @@ public class TreePrint  {
    *
    *  @param args Command line arguments, as above.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String format = "penn";
     String options = "";
     String tlpName = "edu.stanford.nlp.trees.PennTreebankLanguagePack";

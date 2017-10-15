@@ -83,8 +83,7 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
   }
 
   @Override
-  public void setValues(double[] x)
-  {
+  public void setValues(double... x) {
     classifier.updateWeightsForTest(x);
   }
 
@@ -123,7 +122,7 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
   }
 
   @Override
-  public double evaluate(double[] x) {
+  public double evaluate(double... x) {
     double score; // initialized below
     setValues(x);
     if (getCmd() != null) {

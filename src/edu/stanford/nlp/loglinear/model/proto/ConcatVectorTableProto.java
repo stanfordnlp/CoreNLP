@@ -308,8 +308,7 @@ public final class ConcatVectorTableProto {
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable parseFrom(byte... data)throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable parseFrom(

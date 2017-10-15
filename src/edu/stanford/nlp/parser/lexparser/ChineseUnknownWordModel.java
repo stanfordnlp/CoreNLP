@@ -194,7 +194,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel  {
 
 
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     System.out.println("Testing unknown matching");
     String s = "\u5218\u00b7\u9769\u547d";
     if (s.matches(properNameMatch)) {

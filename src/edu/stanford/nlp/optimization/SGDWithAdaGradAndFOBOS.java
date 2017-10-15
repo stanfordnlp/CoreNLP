@@ -175,8 +175,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
   }
 
   // really this is the the L2 norm....
-  private static double getNorm(double[] w)
-  {
+  private static double getNorm(double... w) {
     double norm = 0;
     for (double aW : w) {
       norm += aW * aW;
@@ -184,7 +183,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
     return Math.sqrt(norm);
   }
 
-  private double doEvaluation(double[] x) {
+  private double doEvaluation(double... x) {
     // Evaluate solution
     if (evaluators == null) return Double.NEGATIVE_INFINITY;
     double score = Double.NEGATIVE_INFINITY;

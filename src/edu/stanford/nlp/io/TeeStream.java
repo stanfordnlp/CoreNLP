@@ -35,8 +35,7 @@ public class TeeStream extends OutputStream
     s2.flush();
   }
   
-  public void write(byte[] b) 
-    throws IOException
+  public void write(byte... b)throws IOException
   {
     s1.write(b);
     s2.write(b);

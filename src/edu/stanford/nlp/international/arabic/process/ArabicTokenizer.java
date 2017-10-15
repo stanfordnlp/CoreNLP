@@ -172,7 +172,7 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length > 0 && args[0].contains("help")) {
       System.err.printf("Usage: java %s [OPTIONS] < file%n", ArabicTokenizer.class.getName());
       System.err.printf("%nOptions:%n");

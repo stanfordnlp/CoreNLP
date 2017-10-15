@@ -153,7 +153,7 @@ public class TreeFunctions {
   /**
    * This method just tests the functionality of the included transformers.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     //TreeFactory tf = new LabeledScoredTreeFactory();
     Tree stringyTree = null;
     try {

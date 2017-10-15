@@ -195,7 +195,7 @@ public class ArabicTreebankLanguagePack extends AbstractTreebankLanguagePack {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TreebankLanguagePack tlp = new PennTreebankLanguagePack();
     System.out.println("Start symbol: " + tlp.startSymbol());
     String start = tlp.startSymbol();

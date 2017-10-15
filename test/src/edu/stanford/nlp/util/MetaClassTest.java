@@ -152,7 +152,7 @@ public class MetaClassTest {
 
   public static class VarArgs{
     public int a[];
-    public VarArgs(int ...args){
+    public VarArgs(int ...args) {
       a = args;
     }
   }

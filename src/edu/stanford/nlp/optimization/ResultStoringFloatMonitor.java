@@ -29,7 +29,7 @@ public class ResultStoringFloatMonitor implements FloatFunction  {
     this.outputFreq = outputFreq;
   }
 
-  public float valueAt(float[] x) {
+  public float valueAt(float... x) {
     if (++i % outputFreq == 0) {
       log.info("Storing interim (float) weights to " + filename + " ... ");
       try {

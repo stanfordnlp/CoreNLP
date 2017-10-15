@@ -9,7 +9,7 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
  * @author John Bauer
  */
 public class AddTaggerToParser {
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String... args) throws IOException, ClassNotFoundException {
     String taggerFile = null;
     String inputFile = null;
     String outputFile = null;

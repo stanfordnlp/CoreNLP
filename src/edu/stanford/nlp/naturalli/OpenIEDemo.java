@@ -27,7 +27,7 @@ public class OpenIEDemo {
 
   private OpenIEDemo() {} // static main
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     // Create the Stanford CoreNLP pipeline
     Properties props = PropertiesUtils.asProperties(
             "annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie"

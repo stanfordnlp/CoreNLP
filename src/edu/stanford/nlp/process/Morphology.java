@@ -263,7 +263,7 @@ public class Morphology implements Function  {
    *  words, they must be in the format of whitespace separated word_tag pairs.
    * </ul>
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length == 0) {
       log.info("java Morphology [-rebuildVerbTable file|-stem word+|file+]");
     } else if (args.length == 2 && args[0].equals("-rebuildVerbTable")) {
