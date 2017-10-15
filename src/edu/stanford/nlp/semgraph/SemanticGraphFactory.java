@@ -232,14 +232,13 @@ public class SemanticGraphFactory  {
             filter);
   }
 
-
-
   // TODO: these booleans would be more readable as enums similar to Mode.
   // Then the arguments would make more sense
-  public static SemanticGraph makeFromTree(GrammaticalStructure gs,
-                                           Mode mode,
-                                           GrammaticalStructure.Extras includeExtras,
-                                           Predicate<TypedDependency> filter) {
+  public static SemanticGraph makeFromTree(
+      GrammaticalStructure gs,
+      Mode mode,
+      GrammaticalStructure.Extras includeExtras,
+      Predicate<TypedDependency> filter) {
     Collection<TypedDependency> deps;
     switch(mode) {
       case ENHANCED:
@@ -266,11 +265,12 @@ public class SemanticGraphFactory  {
 
     if (filter != null) {
       List<TypedDependency> depsFiltered = Generics.newArrayList();
-      for (TypedDependency td : deps) {
-        if (filter.test(td)) {
-          depsFiltered.add(td);
-        }
-      }
+      deps.stream()
+          .filter(td -> filter.test(td))
+          .forEach(
+              td -> {
+                depsFiltered.add(td);
+              });
       deps = depsFiltered;
     }
 
@@ -284,15 +284,15 @@ public class SemanticGraphFactory  {
     return new SemanticGraph(deps);
   }
 
-
   /**
    * @see #makeFromTree(GrammaticalStructure, Mode, GrammaticalStructure.Extras, Predicate
    */
   @Deprecated
-  public static SemanticGraph makeFromTree(GrammaticalStructure tree,
-                                           Mode mode,
-                                           boolean includeExtras,
-                                           Predicate<TypedDependency> filter) {
+  public static SemanticGraph makeFromTree(
+      GrammaticalStructure tree,
+      Mode mode,
+      boolean includeExtras,
+      Predicate<TypedDependency> filter) {
     return makeFromTree(tree, mode, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, filter);
   }
 
@@ -347,16 +347,17 @@ public class SemanticGraphFactory  {
 
   /**
    * Given a list of edges, attempts to create and return a rooted SemanticGraph.
-   * <p>
-   * TODO: throw Exceptions, or flag warnings on conditions for concern (no root, etc)
+   *
+   * <p>TODO: throw Exceptions, or flag warnings on conditions for concern (no root, etc)
    */
   public static SemanticGraph makeFromEdges(Iterable<SemanticGraphEdge> edges) {
     // Identify the root(s) of this graph
     SemanticGraph sg = new SemanticGraph();
     Collection<IndexedWord> vertices = getVerticesFromEdgeSet(edges);
-    for (IndexedWord vertex : vertices) {
-      sg.addVertex(vertex);
-    }
+    vertices.forEach(
+        vertex -> {
+          sg.addVertex(vertex);
+        });
     for (SemanticGraphEdge edge : edges) {
       sg.addEdge(edge.getSource(),edge.getTarget(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
@@ -380,14 +381,13 @@ public class SemanticGraphFactory  {
     return retSet;
   }
 
-
   /**
-   * Given a set of vertices, and the source graph they are drawn from, create a path composed
-   * of the minimum paths between the vertices.  i.e. this is a simple brain-dead attempt at getting
+   * Given a set of vertices, and the source graph they are drawn from, create a path composed of
+   * the minimum paths between the vertices. i.e. this is a simple brain-dead attempt at getting
    * something approximating a minimum spanning graph.
    *
-   * NOTE: the hope is the vertices will already be contiguous, but facilities are added just in case for
-   * adding additional nodes.
+   * <p>NOTE: the hope is the vertices will already be contiguous, but facilities are added just in
+   * case for adding additional nodes.
    */
   public static SemanticGraph makeFromVertices(SemanticGraph sg, Collection<IndexedWord> nodes) {
     List<SemanticGraphEdge> edgesToAdd = new ArrayList<>();
@@ -417,9 +417,15 @@ public class SemanticGraphFactory  {
     for (IndexedWord node : nodesToAdd) {
       retSg.addVertex(node);
     }
-    for (SemanticGraphEdge edge : edgesToAdd) {
-      retSg.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
-    }
+    edgesToAdd.forEach(
+        edge -> {
+          retSg.addEdge(
+              edge.getGovernor(),
+              edge.getDependent(),
+              edge.getRelation(),
+              edge.getWeight(),
+              edge.isExtra());
+        });
 
     retSg.resetRoots();
     return retSg;

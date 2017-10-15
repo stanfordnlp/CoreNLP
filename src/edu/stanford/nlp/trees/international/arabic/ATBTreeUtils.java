@@ -90,11 +90,11 @@ public class ATBTreeUtils {
 
     return flatString;
   }
-  
+
   /**
-   * Converts a parse tree into a string of tokens. Each token is a word and
-   * its POS tag separated by the delimiter specified by <code>separator</code>
-   * 
+   * Converts a parse tree into a string of tokens. Each token is a word and its POS tag separated
+   * by the delimiter specified by <code>separator</code>
+   *
    * @param t - A parse tree
    * @param removeEscaping - If true, remove LDC escape characters. Otherwise, leave them.
    * @param separator Word/tag separator
@@ -103,11 +103,12 @@ public class ATBTreeUtils {
   public static String taggedStringFromTree(Tree t, boolean removeEscaping, String separator) {
     t = t.prune(emptyFilter, tf);
     List<CoreLabel> taggedSentence = t.taggedLabeledYield();
-    for (CoreLabel token : taggedSentence) {
-      String word = (removeEscaping) ? unEscape(token.word()) : token.word();
-      token.setWord(word);
-      token.setValue(word);
-    }
+    taggedSentence.forEach(
+        token -> {
+          String word = (removeEscaping) ? unEscape(token.word()) : token.word();
+          token.setWord(word);
+          token.setValue(word);
+        });
     return SentenceUtils.listToString(taggedSentence, false, separator);
   }
 

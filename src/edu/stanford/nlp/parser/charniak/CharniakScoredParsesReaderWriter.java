@@ -131,21 +131,27 @@ public class CharniakScoredParsesReaderWriter {
 
   /**
    * Print scored parse trees for one sentence in format used by charniak parser
+   *
    * @param pw - printwriter
    * @param id - sentence id
    * @param trees - trees to output
    */
-  public void printScoredTrees(PrintWriter pw, int id, List<ScoredObject<Tree>> trees)
-  {
+  public void printScoredTrees(PrintWriter pw, int id, List<ScoredObject<Tree>> trees) {
     pw.println(trees.size() + "\t" + id);
-    for (ScoredObject<Tree> scoredTree:trees) {
-      pw.println(scoredTree.score());
-      pw.println(scoredTree.object());
+    trees
+        .stream()
+        .map(
+            scoredTree -> {
+              pw.println(scoredTree.score());
+              return scoredTree;
+            })
+        .forEach(
+            scoredTree -> {
+              pw.println(scoredTree.object());
+            });
     }
-  }
 
-  private static class ScoredParsesIterator extends AbstractIterator<List<ScoredObject<Tree>>>
-  {
+  private static class ScoredParsesIterator extends AbstractIterator<List<ScoredObject<Tree>>> {
     String inputDesc;
     BufferedReader br;
     List<ScoredObject<Tree>> next;

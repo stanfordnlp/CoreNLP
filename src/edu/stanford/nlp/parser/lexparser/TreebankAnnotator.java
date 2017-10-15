@@ -6,7 +6,6 @@ import edu.stanford.nlp.ling.WordFactory;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Generics;
 
-import java.io.Reader;
 import java.util.*;
 
 // todo [cdm 2014]: This class is all but dead. Delete it.
@@ -24,38 +23,42 @@ public class TreebankAnnotator {
 
   public List<Tree> annotateTrees(List<Tree> trees) {
     List<Tree> annotatedTrees = new ArrayList<>();
-    for (Tree tree : trees) {
-      annotatedTrees.add(treeTransformer.transformTree(tree));
-    }
+    trees.forEach(
+        tree -> {
+          annotatedTrees.add(treeTransformer.transformTree(tree));
+        });
     return annotatedTrees;
   }
 
   public List<Tree> deannotateTrees(List<Tree> trees) {
     List<Tree> deannotatedTrees = new ArrayList<>();
-    for (Tree tree : trees) {
-      deannotatedTrees.add(treeUnTransformer.transformTree(tree));
-    }
+    trees.forEach(
+        tree -> {
+          deannotatedTrees.add(treeUnTransformer.transformTree(tree));
+        });
     return deannotatedTrees;
   }
-
 
   public static List<Tree> getTrees(String path, int low, int high, int minLength, int maxLength) {
     Treebank treebank = new DiskTreebank(in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new WordFactory()), new BobChrisTreeNormalizer()));
     treebank.loadPath(path, new NumberRangeFileFilter(low, high, true));
     List<Tree> trees = new ArrayList<>();
-    for (Tree tree : treebank) {
-      if (tree.yield().size() <= maxLength && tree.yield().size() >= minLength) {
-        trees.add(tree);
-      }
-    }
+    treebank
+        .stream()
+        .filter(tree -> tree.yield().size() <= maxLength && tree.yield().size() >= minLength)
+        .forEach(
+            tree -> {
+              trees.add(tree);
+            });
     return trees;
   }
 
   public static List<Tree> removeDependencyRoots(List<Tree> trees) {
     List<Tree> prunedTrees = new ArrayList<>();
-    for (Tree tree : trees) {
-      prunedTrees.add(removeDependencyRoot(tree));
-    }
+    trees.forEach(
+        tree -> {
+          prunedTrees.add(removeDependencyRoot(tree));
+        });
     return prunedTrees;
   }
 

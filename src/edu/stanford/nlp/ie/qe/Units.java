@@ -98,14 +98,24 @@ public class Units {
   }
 
   public static void registerUnits(Env env, List<Unit> units) {
-    for (Unit unit: units) {
-      registerUnit(env, unit);
-      if ("LENGTH".equals(unit.getType())) {
-        registerDerivedUnit(env, unit, "AREA", "2", "2");
-        registerDerivedUnit(env, unit, "VOLUME", "3", "3");
-      }
+    units
+        .stream()
+        .map(
+            unit -> {
+              registerUnit(env, unit);
+              return unit;
+            })
+        .filter(unit -> "LENGTH".equals(unit.getType()))
+        .map(
+            unit -> {
+              registerDerivedUnit(env, unit, "AREA", "2", "2");
+              return unit;
+            })
+        .forEach(
+            unit -> {
+              registerDerivedUnit(env, unit, "VOLUME", "3", "3");
+            });
     }
-  }
 
   public static List<Unit> loadUnits(String filename) throws IOException {
     Pattern commaPattern = Pattern.compile("\\s*,\\s*");

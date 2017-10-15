@@ -366,10 +366,11 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   }
 
   private void sendToListeners() {
-    for (MatchesPanelListener l : listeners) {
-      l.matchesChanged();
+    listeners.forEach(
+        l -> {
+          l.matchesChanged();
+        });
     }
-  }
 
   private class MatchCellRenderer extends JLabel implements ListCellRenderer {
 

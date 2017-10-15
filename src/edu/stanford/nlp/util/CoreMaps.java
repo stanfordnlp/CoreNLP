@@ -58,20 +58,20 @@ public class CoreMaps {
   }
 
   /**
-   * Returns a view of a collection of CoreMaps as a Map from each CoreMap to
-   * the value it stores under valueKey. Changes to the map are propagated
-   * directly to the coremaps in the collection and to the collection itself in
-   * the case of removal operations.  Keys added or removed from the given
-   * collection by anything other than the returned map will leave the map
-   * in an undefined state.
+   * Returns a view of a collection of CoreMaps as a Map from each CoreMap to the value it stores
+   * under valueKey. Changes to the map are propagated directly to the coremaps in the collection
+   * and to the collection itself in the case of removal operations. Keys added or removed from the
+   * given collection by anything other than the returned map will leave the map in an undefined
+   * state.
    */
-  public static <V, CM extends CoreMap, COLL extends Collection<CM>> Map<CM,V>
-    asMap(final COLL coremaps, final Class<? extends TypesafeMap.Key<V>> valueKey) {
+  public static <V, CM extends CoreMap, COLL extends Collection<CM>> Map<CM, V> asMap(
+      final COLL coremaps, final Class<? extends TypesafeMap.Key<V>> valueKey) {
 
     final IdentityHashMap<CM,Boolean> references = new IdentityHashMap<>();
-    for(CM map : coremaps){
-      references.put(map, true);
-    }
+    coremaps.forEach(
+        map -> {
+          references.put(map, true);
+        });
 
     // an EntrySet view of the elements of coremaps
     final Set<Map.Entry<CM, V>> entrySet = new AbstractSet<Map.Entry<CM,V>>() {

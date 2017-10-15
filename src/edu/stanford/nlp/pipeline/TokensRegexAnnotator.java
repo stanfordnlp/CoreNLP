@@ -147,9 +147,12 @@ public class TokensRegexAnnotator implements Annotator {
           if (matched != null && options.matchedExpressionsAnnotationKey != null) {
             allMatched.addAll(matched);
             sentence.set(options.matchedExpressionsAnnotationKey, matched);
-            for (CoreMap cm : matched) {
-              cm.set(CoreAnnotations.SentenceIndexAnnotation.class, sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
-            }
+            matched.forEach(
+                cm -> {
+                  cm.set(
+                      CoreAnnotations.SentenceIndexAnnotation.class,
+                      sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
+                });
           }
         }
       } else {

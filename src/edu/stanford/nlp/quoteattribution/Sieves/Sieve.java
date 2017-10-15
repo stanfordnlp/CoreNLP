@@ -447,22 +447,24 @@ public class Sieve {
       }
 
       if (same && text != null && existantMentions.size() > 0) {
-        for (CoreMap quote : quotesInSent) {
-          if (quote.get(QuoteAttributionAnnotator.MentionAnnotation.class) == null) {
-            Mention firstM = existantMentions.get(0);
-            quote.set(QuoteAttributionAnnotator.MentionAnnotation.class, firstM.text);
-            quote.set(QuoteAttributionAnnotator.MentionBeginAnnotation.class, firstM.begin);
-            quote.set(QuoteAttributionAnnotator.MentionEndAnnotation.class, firstM.end);
-            quote.set(QuoteAttributionAnnotator.MentionSieveAnnotation.class, "Deterministic one speaker sentence");
-            quote.set(QuoteAttributionAnnotator.MentionTypeAnnotation.class, firstM.type);
-          }
-        }
+        quotesInSent.forEach(
+            quote -> {
+              if (quote.get(QuoteAttributionAnnotator.MentionAnnotation.class) == null) {
+                Mention firstM = existantMentions.get(0);
+                quote.set(QuoteAttributionAnnotator.MentionAnnotation.class, firstM.text);
+                quote.set(QuoteAttributionAnnotator.MentionBeginAnnotation.class, firstM.begin);
+                quote.set(QuoteAttributionAnnotator.MentionEndAnnotation.class, firstM.end);
+                quote.set(
+                    QuoteAttributionAnnotator.MentionSieveAnnotation.class,
+                    "Deterministic one speaker sentence");
+                quote.set(QuoteAttributionAnnotator.MentionTypeAnnotation.class, firstM.type);
+              }
+            });
       }
     }
   }
 
-  //convert token range to char range, check if charIndex is in it.
-  public  boolean rangeContainsCharIndex(Pair<Integer, Integer> tokenRange, int charIndex) {
+  public boolean rangeContainsCharIndex(Pair<Integer, Integer> tokenRange, int charIndex) {
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
     CoreLabel startToken = tokens.get(tokenRange.first());
     CoreLabel endToken = tokens.get(tokenRange.second());

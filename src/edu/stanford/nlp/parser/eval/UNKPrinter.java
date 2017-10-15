@@ -118,8 +118,10 @@ public class UNKPrinter {
     List<String> biggestKeys = new ArrayList<>(unkCounter.keySet());
     Collections.sort(biggestKeys, Counters.toComparatorDescending(unkCounter));
 
-    for(String wordType : biggestKeys)
-      pw.printf("%s\t%d%n", wordType,(int) unkCounter.getCount(wordType));
+    biggestKeys.forEach(
+        wordType -> {
+          pw.printf("%s\t%d%n", wordType, (int) unkCounter.getCount(wordType));
+        });
     pw.close();
 
     

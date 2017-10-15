@@ -50,10 +50,11 @@ public class MLEDependencyGrammarExtractor extends AbstractTreeExtractor<Depende
   protected void tallyRoot(Tree lt, double weight) {
     // this list is in full (not reduced) tag space
     List<IntDependency> deps = MLEDependencyGrammar.treeToDependencyList(lt, wordIndex, tagIndex);
-    for (IntDependency dependency : deps) {
-      dependencyCounter.incrementCount(dependency, weight);
+    deps.forEach(
+        dependency -> {
+          dependencyCounter.incrementCount(dependency, weight);
+        });
     }
-  }
 
   @Override
   public DependencyGrammar formResult() {

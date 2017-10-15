@@ -831,15 +831,14 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
     printlnErr(chineseParams);
   }
 
-
   private List<String> listBasicCategories(List<String> l) {
     List<String> l1 = new ArrayList<>();
-    for (String s : l) {
-      l1.add(ctlp.basicCategory(s));
-    }
+    l.forEach(
+        s -> {
+          l1.add(ctlp.basicCategory(s));
+        });
     return l1;
   }
-
   // TODO: Rewrite this as general matching predicate
   private static boolean hasV(List tags) {
     for (Object tag : tags) {
@@ -1261,9 +1260,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
     return generateOriginalDependencies;
   }
 
-  /**
-   * For testing: loads a treebank and prints the trees.
-   */
+  /** For testing: loads a treebank and prints the trees. */
   public static void main(String[] args) {
     TreebankLangParserParams tlpp = new ChineseTreebankParserParams();
     System.out.println("Default encoding is: " +
@@ -1275,11 +1272,11 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
       Treebank m = tlpp.diskTreebank();
       m.loadPath(args[0], new NumberRangesFileFilter(args[1], false));
 
-      for (Tree t : m ) {
-        t.pennPrint(tlpp.pw());
-      }
+      m.forEach(
+          t -> {
+            t.pennPrint(tlpp.pw());
+          });
       System.out.println("There were " + m.size() + " trees.");
     }
   }
-
 }

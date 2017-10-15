@@ -25,10 +25,11 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   @Override
   public void train(Collection<Tree> trees) {
-    for (Tree tree : trees) {
-      train(tree);
+    trees.forEach(
+        tree -> {
+          train(tree);
+        });
     }
-  }
 
   @Override
   public void train(Tree tree) {
@@ -37,12 +38,14 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   @Override
   public void train(List<TaggedWord> sentence) {
-    for (TaggedWord word : sentence) {
-      if (word.word().length() <= maxLength) {
-        words.add(word.word());
-      }
+    sentence
+        .stream()
+        .filter(word -> word.word().length() <= maxLength)
+        .forEach(
+            word -> {
+              words.add(word.word());
+            });
     }
-  }
 
   @Override
   public void finishTraining() {}

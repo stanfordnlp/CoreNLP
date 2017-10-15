@@ -101,9 +101,10 @@ public class CountTrees  {
       
       } else if (printTnT) {
         List<CoreLabel> yield = tree.taggedLabeledYield();
-        for (CoreLabel label : yield) {
-          pw.printf("%s\t%s%n", label.word(), label.tag());
-        }
+        yield.forEach(
+            label -> {
+              pw.printf("%s\t%s%n", label.word(), label.tag());
+            });
         pw.println();
       }      
     }

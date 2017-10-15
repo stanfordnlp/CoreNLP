@@ -43,11 +43,11 @@ public class UnknownGTTrainer  {
   }
 
   public void train(Collection<Tree> trees, double weight) {
-    for (Tree t : trees) {
-      train(t, weight);
+    trees.forEach(
+        t -> {
+          train(t, weight);
+        });
     }
-  }
-
 
   public void train(Tree tree, double weight) {
     /* get TaggedWord and total tag counts, and get set of all
@@ -87,12 +87,13 @@ public class UnknownGTTrainer  {
 
     /* find # of unseen words for each tag */
     for (String tag : tagCount.keySet()) {
-      for (String word : seenWords) {
-        Pair<String,String> wt = new Pair<>(word, tag);
-        if (!(wtCount.keySet().contains(wt))) {
-          r0.incrementCount(tag);
-        }
-      }
+      seenWords.forEach(
+          word -> {
+            Pair<String, String> wt = new Pair<>(word, tag);
+            if (!(wtCount.keySet().contains(wt))) {
+              r0.incrementCount(tag);
+            }
+          });
     }
 
     /* set unseen word probability for each tag */
@@ -100,8 +101,5 @@ public class UnknownGTTrainer  {
       float logprob = (float) Math.log(r1.getCount(tag) / (tagCount.getCount(tag) * r0.getCount(tag)));
       unknownGT.put(tag, Float.valueOf(logprob));
     }
-
   }
-
 }
-

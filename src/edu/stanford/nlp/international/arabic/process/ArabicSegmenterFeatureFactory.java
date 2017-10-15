@@ -37,7 +37,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
    * Extracts all the features from the input data at a certain index.
    *
    * @param cInfo The complete data set as a List of WordInfo
-   * @param loc  The index at which to extract features.
+   * @param loc The index at which to extract features.
    */
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
     Collection<String> features = Generics.newHashSet();
@@ -55,9 +55,10 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     String domain = cInfo.get(loc).get(CoreAnnotations.DomainAnnotation.class);
     if (domain != null) {
       Collection<String> domainFeatures = Generics.newHashSet();
-      for (String feature : features) {
-        domainFeatures.add(feature + DOMAIN_MARKER + domain);
-      }
+      features.forEach(
+          feature -> {
+            domainFeatures.add(feature + DOMAIN_MARKER + domain);
+          });
       features.addAll(domainFeatures);
     }
     

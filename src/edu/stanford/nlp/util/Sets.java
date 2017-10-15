@@ -15,16 +15,14 @@ public class Sets {
   // private to prevent instantiation
   private Sets() {}
 
-
-  /**
-   * Returns the set cross product of s1 and s2, as <code>Pair</code>s
-   */
-  public static <E,F> Set<Pair<E,F>> cross(Set<E> s1, Set<F> s2) {
+  /** Returns the set cross product of s1 and s2, as <code>Pair</code>s */
+  public static <E, F> Set<Pair<E, F>> cross(Set<E> s1, Set<F> s2) {
     Set<Pair<E,F>> s = Generics.newHashSet();
     for (E o1 : s1) {
-      for (F o2 : s2) {
-        s.add(new Pair<>(o1, o2));
-      }
+      s2.forEach(
+          o2 -> {
+            s.add(new Pair<>(o1, o2));
+          });
     }
     return s;
   }
@@ -34,11 +32,12 @@ public class Sets {
    */
   public static <E> Set<E> diff(Set<E> s1, Set<E> s2) {
     Set<E> s = Generics.newHashSet();
-    for (E o : s1) {
-      if (!s2.contains(o)) {
-        s.add(o);
-      }
-    }
+    s1.stream()
+        .filter(o -> !s2.contains(o))
+        .forEach(
+            o -> {
+              s.add(o);
+            });
     return s;
   }
 
@@ -52,11 +51,12 @@ public class Sets {
         s.add(o);
       }
     }
-    for (E o : s2) {
-      if (!s1.contains(o)) {
-        s.add(o);
-      }
-    }
+    s2.stream()
+        .filter(o -> !s1.contains(o))
+        .forEach(
+            o -> {
+              s.add(o);
+            });
     return s;
   }
 
@@ -91,9 +91,7 @@ public class Sets {
     return !Collections.disjoint(s1, s2);
   }
 
-  /**
-   * Returns the powerset (the set of all subsets) of set s.
-   */
+  /** Returns the powerset (the set of all subsets) of set s. */
   public static <E> Set<Set<E>> powerSet(Set<E> s) {
     if (s.isEmpty()) {
       Set<Set<E>> h = Generics.newHashSet();
@@ -107,11 +105,16 @@ public class Sets {
       Set<Set<E>> pow = powerSet(s);
       Set<Set<E>> pow1 = powerSet(s);
       // for (Iterator j = pow1.iterator(); j.hasNext();) {
-      for (Set<E> t : pow1) {
-        // Set<E> t = Generics.newHashSet((Set<E>) j.next());
-        t.add(elt);
-        pow.add(t);
-      }
+      pow1.stream()
+          .map(
+              t -> {
+                t.add(elt);
+                return t;
+              })
+          .forEach(
+              t -> {
+                pow.add(t);
+              });
       s.add(elt);
       return pow;
     }

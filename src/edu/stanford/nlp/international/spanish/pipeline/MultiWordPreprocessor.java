@@ -19,7 +19,6 @@ import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -427,17 +426,17 @@ public final class MultiWordPreprocessor  {
     }
   }
 
-  /**
-   * Get a string representation of the immediate phrase which contains the given node.
-   */
+  /** Get a string representation of the immediate phrase which contains the given node. */
   private static String getContainingPhrase(Tree t, Tree parent) {
     if (parent == null)
       return null;
 
     List<Label> phraseYield = parent.yield();
     StringBuilder containingPhrase = new StringBuilder();
-    for (Label l : phraseYield)
-      containingPhrase.append(l.value()).append(" ");
+    phraseYield.forEach(
+        l -> {
+          containingPhrase.append(l.value()).append(" ");
+        });
 
     return containingPhrase.toString().substring(0, containingPhrase.length() - 1);
   }

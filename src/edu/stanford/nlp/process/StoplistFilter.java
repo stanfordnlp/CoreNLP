@@ -39,17 +39,17 @@ public class StoplistFilter<L, F> implements DocumentProcessor<Word, Word, L, F>
   }
 
   /**
-   * Returns a new Document with the same meta-data as <tt>in</tt> and the same words
-   * except those on the stop list this filter was constructed with.
+   * Returns a new Document with the same meta-data as <tt>in</tt> and the same words except those
+   * on the stop list this filter was constructed with.
    */
   public Document<L, F, Word> processDocument(Document<L, F, Word> in) {
     Document<L, F, Word> out = in.blankDocument();
-    for (Word w: in) {
-      if (!stoplist.contains(w)) {
-        out.add(w);
-      }
-    }
+    in.stream()
+        .filter(w -> !stoplist.contains(w))
+        .forEach(
+            w -> {
+              out.add(w);
+            });
     return (out);
   }
 }
-

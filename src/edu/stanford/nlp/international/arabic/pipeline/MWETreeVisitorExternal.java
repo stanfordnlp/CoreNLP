@@ -84,17 +84,18 @@ public class MWETreeVisitorExternal implements TreeVisitor  {
       }
     }
   }
-  
+
   private List<Tree> getPreterminalSubtrees(Tree tree) {
     List<Tree> preterminals = new ArrayList<>();
-    for (Tree subTree : tree) {
-      if (subTree.isPreTerminal()) {
-        preterminals.add(subTree);
-      }
-    }
+    tree.stream()
+        .filter(subTree -> subTree.isPreTerminal())
+        .forEach(
+            subTree -> {
+              preterminals.add(subTree);
+            });
     return preterminals;
   }
-  
+
   /**
    * For debugging.
    * 

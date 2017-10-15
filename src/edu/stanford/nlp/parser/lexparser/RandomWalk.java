@@ -6,7 +6,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.io.Serializable;
 
@@ -56,29 +55,23 @@ class RandomWalk implements Serializable {
     }
   }
 
-
-  public void train(Collection<Pair<?,?>> data) {
-    for (Pair p : data) {
-      Object seen = p.first();
-      Object hidden = p.second();
-      if (!hiddenToSeen.keySet().contains(hidden)) {
-        hiddenToSeen.put(hidden, new ClassicCounter());
-      }
-      hiddenToSeen.get(hidden).incrementCount(seen);
-
-      if (!seenToHidden.keySet().contains(seen)) {
-        seenToHidden.put(seen, new ClassicCounter());
-      }
-      seenToHidden.get(seen).incrementCount(hidden);
+  public void train(Collection<Pair<?, ?>> data) {
+    data.forEach(
+        p -> {
+          Object seen = p.first();
+          Object hidden = p.second();
+          if (!hiddenToSeen.keySet().contains(hidden)) {
+            hiddenToSeen.put(hidden, new ClassicCounter());
+          }
+          hiddenToSeen.get(hidden).incrementCount(seen);
+          if (!seenToHidden.keySet().contains(seen)) {
+            seenToHidden.put(seen, new ClassicCounter());
+          }
+          seenToHidden.get(seen).incrementCount(hidden);
+        });
     }
-  }
 
-  /**
-   * builds a random walk model with n steps.
-   *
-   * @param data A collection of seen/hidden event <code>Pair</code>s
-   */
-  public RandomWalk(Collection<Pair<?,?>> data, int steps) {
+  public RandomWalk(Collection<Pair<?, ?>> data, int steps) {
     train(data);
     for (Object seen : seenToHidden.keySet()) {
       if (!model.containsKey(seen)) {

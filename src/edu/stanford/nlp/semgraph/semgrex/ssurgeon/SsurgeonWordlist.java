@@ -14,21 +14,25 @@ public class SsurgeonWordlist {
   private static final String WORD_ELT = "word";
   private String id;
   private HashSet<String> words = new java.util.HashSet<>();
-  
+
   @Override
   public String toString() {
     StringWriter buf = new StringWriter();
     buf.write("Ssurgeon Wordlist Resource, id=");
     buf.write(id);
     buf.write(", elements=(");
-    for (String word : words) {
-      buf.write(" ");
-      buf.write(word);
-    }
+    words.forEach(
+        word -> {
+          buf.write(" ");
+          buf.write(word);
+        });
     buf.write(")");
     return buf.toString();
   }
-  public String getID() { return id ; }
+
+  public String getID() {
+    return id;
+  }
   /**
    * Reconstructs the resource from the XML file
    */

@@ -2374,11 +2374,11 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
     TreebankLangParserParams tlpp = new EnglishTreebankParserParams();
     Treebank tb = tlpp.memoryTreebank();
     tb.loadPath(args[0]);
-    for (Tree t : tb) {
-      t.pennPrint();
+    tb.forEach(
+        t -> {
+          t.pennPrint();
+        });
     }
-  }
 
   private static final long serialVersionUID = 4153878351331522581L;
-
 }

@@ -126,9 +126,9 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   @Override
   public boolean addAll(Collection<? extends E> c) {
     boolean changed = false;
-    for (E element: c) {
-      changed |= add(element);
-    }
+    c.stream()
+        .map(element -> add(element))
+        .reduce(changed, (accumulator, _item) -> accumulator |= _item);
     return changed;
   }
 

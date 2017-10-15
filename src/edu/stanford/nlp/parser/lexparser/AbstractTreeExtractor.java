@@ -61,13 +61,14 @@ public abstract class AbstractTreeExtractor<T> implements Extractor<T> {
   }
 
   protected void tallyTrees(Collection<Tree> trees, double weight) {
-    for (Tree tree : trees) {
-      tallyTree(tree, weight);
+    trees.forEach(
+        tree -> {
+          tallyTree(tree, weight);
+        });
     }
-  }
 
-  protected void tallyTreeIterator(Iterator<Tree> treeIterator, 
-                                   Function<Tree, Tree> f, double weight) {
+  protected void tallyTreeIterator(
+      Iterator<Tree> treeIterator, Function<Tree, Tree> f, double weight) {
     while (treeIterator.hasNext()) {
       Tree tree = treeIterator.next();
       try {

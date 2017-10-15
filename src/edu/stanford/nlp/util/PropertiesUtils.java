@@ -84,8 +84,7 @@ public class PropertiesUtils {
 
   // printing -------------------------------------------------------------------
 
-  public static void printProperties(String message, Properties properties,
-                                     PrintStream stream) {
+  public static void printProperties(String message, Properties properties, PrintStream stream) {
     if (message != null) {
       stream.println(message);
     }
@@ -93,11 +92,13 @@ public class PropertiesUtils {
       stream.println("  [empty]");
     } else {
       List<Map.Entry<String, String>> entries = getSortedEntries(properties);
-      for (Map.Entry<String, String> entry : entries) {
-        if ( ! "".equals(entry.getKey())) {
-          stream.format("  %-30s = %s%n", entry.getKey(), entry.getValue());
-        }
-      }
+      entries
+          .stream()
+          .filter(entry -> !"".equals(entry.getKey()))
+          .forEach(
+              entry -> {
+                stream.format("  %-30s = %s%n", entry.getKey(), entry.getValue());
+              });
     }
     stream.println();
   }

@@ -202,20 +202,23 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
 
     List<ExtractedPhrase> extractedPhrases = new ArrayList<>();
 
-    Function<Pair<IndexedWord, SemanticGraph>, Counter<String>> extractFeatures = new Function<Pair<IndexedWord, SemanticGraph>, Counter<String>>() {
-      @Override
-      public Counter<String> apply(Pair<IndexedWord, SemanticGraph> indexedWordSemanticGraphPair) {
-        //TODO: make features;
-        Counter<String> feat = new ClassicCounter<>();
-        IndexedWord vertex = indexedWordSemanticGraphPair.first();
-        SemanticGraph graph = indexedWordSemanticGraphPair.second();
-        List<Pair<GrammaticalRelation, IndexedWord>> pt = graph.parentPairs(vertex);
-        for(Pair<GrammaticalRelation, IndexedWord> en: pt) {
-          feat.incrementCount("PARENTREL-" + en.first());
-        }
-        return feat;
-      }
-    };
+    Function<Pair<IndexedWord, SemanticGraph>, Counter<String>> extractFeatures =
+        new Function<Pair<IndexedWord, SemanticGraph>, Counter<String>>() {
+          @Override
+          public Counter<String> apply(
+              Pair<IndexedWord, SemanticGraph> indexedWordSemanticGraphPair) {
+            // TODO: make features;
+            Counter<String> feat = new ClassicCounter<>();
+            IndexedWord vertex = indexedWordSemanticGraphPair.first();
+            SemanticGraph graph = indexedWordSemanticGraphPair.second();
+            List<Pair<GrammaticalRelation, IndexedWord>> pt = graph.parentPairs(vertex);
+            pt.forEach(
+                en -> {
+                  feat.incrementCount("PARENTREL-" + en.first());
+                });
+            return feat;
+          }
+        };
 
     extract.getSemGrexPatternNodes(graph, tokens, outputPhrases, outputIndices,
             pattern, findSubTrees, extractedPhrases, constVars.matchLowerCaseContext, matchingWordRestriction);

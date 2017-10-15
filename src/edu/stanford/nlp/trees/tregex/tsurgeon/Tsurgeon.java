@@ -124,188 +124,172 @@ public class Tsurgeon  {
 
   private Tsurgeon() {} // not an instantiable class
 
-  /** Usage: java edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon [-s] -treeFile file-with-trees [-po matching-pattern operation] operation-file-1 operation-file-2 ... operation-file-n
+  /**
+   * Usage: java edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon [-s] -treeFile file-with-trees [-po
+   * matching-pattern operation] operation-file-1 operation-file-2 ... operation-file-n
    *
    * <h4>Arguments:</h4>
    *
-   * Each argument should be the name of a transformation file that contains a list of pattern
-   * and transformation operation list pairs.  That is, it is a sequence of pairs of a
-   * {@link TregexPattern} pattern on one or more lines, then a
-   * blank line (empty or whitespace), then a list of transformation operations one per line
-   * (as specified by <b>Legal operation syntax</b> below) to apply when the pattern is matched,
-   * and then another blank line (empty or whitespace).
-   * Note the need for blank lines: The code crashes if they are not present as separators
-   * (although the blank line at the end of the file can be omitted).
-   * The script file can include comment lines, either whole comment lines or
-   * trailing comments introduced by %, which extend to the end of line.  A needed percent
-   * mark can be escaped by a preceding backslash.
-   * <p>
-   * For example, if you want to excise an SBARQ node whenever it is the parent of an SQ node,
+   * Each argument should be the name of a transformation file that contains a list of pattern and
+   * transformation operation list pairs. That is, it is a sequence of pairs of a {@link
+   * TregexPattern} pattern on one or more lines, then a blank line (empty or whitespace), then a
+   * list of transformation operations one per line (as specified by <b>Legal operation syntax</b>
+   * below) to apply when the pattern is matched, and then another blank line (empty or whitespace).
+   * Note the need for blank lines: The code crashes if they are not present as separators (although
+   * the blank line at the end of the file can be omitted). The script file can include comment
+   * lines, either whole comment lines or trailing comments introduced by %, which extend to the end
+   * of line. A needed percent mark can be escaped by a preceding backslash.
+   *
+   * <p>For example, if you want to excise an SBARQ node whenever it is the parent of an SQ node,
    * and relabel the SQ node to S, your transformation file would look like this:
    *
    * <blockquote>
+   *
    * <code>
    *    SBARQ=n1 < SQ=n2<br>
    *    <br>
    *    excise n1 n1<br>
    *    relabel n2 S
    * </code>
+   *
    * </blockquote>
    *
    * <h4>Options:</h4>
+   *
    * <ul>
-   *   <li>{@code -treeFile <filename>}  specify the name of the file that has the trees you want to transform.
-   *   <li>{@code -po <matchPattern> <operation>}  Apply a single operation to every tree using the specified match pattern and the specified operation.  Use this option
-   *   when you want to quickly try the effect of one pattern/surgery combination, and are too lazy to write a transformation file.
+   *   <li>{@code -treeFile <filename>} specify the name of the file that has the trees you want to
+   *       transform.
+   *   <li>{@code -po <matchPattern> <operation>} Apply a single operation to every tree using the
+   *       specified match pattern and the specified operation. Use this option when you want to
+   *       quickly try the effect of one pattern/surgery combination, and are too lazy to write a
+   *       transformation file.
    *   <li>{@code -s} Print each output tree on one line (default is pretty-printing).
-   *   <li>{@code -m} For every tree that had a matching pattern, print "before" (prepended as "Operated on:") and "after" (prepended as "Result:").  Unoperated on trees just pass through the transducer as usual.
+   *   <li>{@code -m} For every tree that had a matching pattern, print "before" (prepended as
+   *       "Operated on:") and "after" (prepended as "Result:"). Unoperated on trees just pass
+   *       through the transducer as usual.
    *   <li>{@code -encoding X} Uses character set X for input and output of trees.
-   *   <li>{@code -macros <filename>} A file of macros to use on the tregex pattern.  Macros should be one per line, with original and replacement separated by tabs.
-   *   <li>{@code -hf <headFinder-class-name>} use the specified {@link HeadFinder} class to determine headship relations.
-   *   <li>{@code -hfArg <string>} pass a string argument in to the {@link HeadFinder} class's constructor.  {@code -hfArg} can be used multiple times to pass in multiple arguments.
-   *   <li> {@code -trf <TreeReaderFactory-class-name>} use the specified {@link TreeReaderFactory} class to read trees from files.
+   *   <li>{@code -macros <filename>} A file of macros to use on the tregex pattern. Macros should
+   *       be one per line, with original and replacement separated by tabs.
+   *   <li>{@code -hf <headFinder-class-name>} use the specified {@link HeadFinder} class to
+   *       determine headship relations.
+   *   <li>{@code -hfArg <string>} pass a string argument in to the {@link HeadFinder} class's
+   *       constructor. {@code -hfArg} can be used multiple times to pass in multiple arguments.
+   *   <li>{@code -trf <TreeReaderFactory-class-name>} use the specified {@link TreeReaderFactory}
+   *       class to read trees from files.
    * </ul>
    *
    * <h4>Legal operation syntax:</h4>
    *
    * <ul>
-   *
-   * <li>{@code delete <name>}  deletes the node and everything below it.
-   *
-   * <li>{@code prune <name>}  Like delete, but if, after the pruning, the parent has no children anymore, the parent is pruned too.  Pruning continues to affect all ancestors until one is found with remaining children.  This may result in a null tree.
-   *
-   * <li>{@code excise <name1> <name2>}
-   *   The name1 node should either dominate or be the same as the name2 node.  This excises out everything from
-   * name1 to name2.  All the children of name2 go into the parent of name1, where name1 was.
-   *
-   * <li>{@code relabel <name> <new-label>} Relabels the node to have the new label. <br>
-   * There are three possible forms: <br>
-   * {@code relabel nodeX VP} - for changing a node label to an
-   * alphanumeric string <br>
-   * {@code relabel nodeX /''/} - for relabeling a node to
-   * something that isn't a valid identifier without quoting <br>
-   *
-   * {@code relabel nodeX /^VB(.*)$/verb\\/$1/} - for regular
-   * expression based relabeling. In this case, all matches of the
-   * regular expression against the node label are replaced with the
-   * replacement String.  This has the semantics of Java/Perl's
-   * replaceAll: you may use capturing groups and put them in
-   * replacements with $n. For example, if the pattern is /foo/bar/
-   * and the node matched is "foo", the replaceAll semantics result in
-   * "barbar".  If the pattern is /^foo(.*)$/bar$1/ and node matched is
-   * "foofoo", relabel will result in "barfoo".  <br>
-   *
-   * When using the regex replacement method, you can also use the
-   * sequences ={node} and %{var} in the replacement string to use
-   * captured nodes or variable strings in the replacement string.
-   * For example, if the Tregex pattern was "duck=bar" and the relabel
-   * is /foo/={bar}/, "foofoo" will be replaced with "duckduck". <br>
-   *
-   * To concatenate two nodes named in the tregex pattern, for
-   * example, you can use the pattern /^.*$/={foo}={bar}/.  Note that
-   * the ^.*$ is necessary to make sure the regex pattern only matches
-   * and replaces once on the entire node name. <br>
-   *
-   * To get an "=" or a "%" in the replacement, using \ escaping.
-   * Also, as in the example you can escape a slash in the middle of
-   * the second and third forms with \\/ and \\\\. <br>
-   *
-   * <li>{@code insert <name> <position>} or {@code insert <tree> <position>}
-   *   inserts the named node or tree into the position specified.
-   *
-   * <li>{@code move <name> <position>} moves the named node into the specified position.
-   * <p>Right now the  only ways to specify position are:
-   * <p>
-   *      {@code $+ <name>}     the left sister of the named node<br>
-   *      {@code $- <name>}     the right sister of the named node<br>
-   *      {@code >i <name>} the i_th daughter of the named node<br>
-   *      {@code >-i <name>} the i_th daughter, counting from the right, of the named node.
-   *
-   * <li>{@code replace <name1> <name2>}
-   *     deletes name1 and inserts a copy of name2 in its place.
-   *
-   * <li>{@code replace <name> <tree> <tree2>...}
-   *     deletes name and inserts the new tree(s) in its place.  If
-   *     more than one replacement tree is given, each of the new
-   *     subtrees will be added in order where the old tree was.
-   *     Multiple subtrees at the root is an illegal operation and
-   *     will throw an exception.
-   *
-   * <li>{@code createSubtree <auxiliary-tree-or-label> <name1> [<name2>]}
-   *     Create a subtree out of all the nodes from {@code <name1>} through
-   *     {@code <name2>}. The subtree is moved to the foot of the given
-   *     auxiliary tree, and the tree is inserted where the nodes of
-   *     the subtree used to reside. If a simple label is provided as
-   *     the first argument, the subtree is given a single parent with
-   *     a name corresponding to the label.  To limit the operation to
-   *     just one node, elide {@code <name2>}.
-   *
-   * <li>{@code adjoin <auxiliary_tree> <name>} Adjoins the specified auxiliary tree into the named node.
-   *     The daughters of the target node will become the daughters of the foot of the auxiliary tree.
-   * <li>{@code adjoinH <auxiliary_tree> <name>} Similar to adjoin, but preserves the target node
-   *     and makes it the root of {@code <tree>}. (It is still accessible as {@code name}.  The root of the
-   *     auxiliary tree is ignored.)
-   *
-   * <li> {@code adjoinF <auxiliary_tree> <name>} Similar to adjoin,
-   *     but preserves the target node and makes it the foot of {@code <tree>}.
-   *     (It is still accessible as {@code name}, and retains its status as parent of its children.
-   *     The root of the auxiliary tree is ignored.)
-   *
-   * <li> <dt>{@code coindex <name1> <name2> ... <nameM>} Puts a (Penn Treebank style)
-   *     coindexation suffix of the form "-N" on each of nodes name_1 through name_m.  The value of N will be
-   *     automatically generated in reference to the existing coindexations in the tree, so that there is never
-   *     an accidental clash of indices across things that are not meant to be coindexed.
-   *
+   *   <li>{@code delete <name>} deletes the node and everything below it.
+   *   <li>{@code prune <name>} Like delete, but if, after the pruning, the parent has no children
+   *       anymore, the parent is pruned too. Pruning continues to affect all ancestors until one is
+   *       found with remaining children. This may result in a null tree.
+   *   <li>{@code excise <name1> <name2>} The name1 node should either dominate or be the same as
+   *       the name2 node. This excises out everything from name1 to name2. All the children of
+   *       name2 go into the parent of name1, where name1 was.
+   *   <li>{@code relabel <name> <new-label>} Relabels the node to have the new label. <br>
+   *       There are three possible forms: <br>
+   *       {@code relabel nodeX VP} - for changing a node label to an alphanumeric string <br>
+   *       {@code relabel nodeX /''/} - for relabeling a node to something that isn't a valid
+   *       identifier without quoting <br>
+   *       {@code relabel nodeX /^VB(.*)$/verb\\/$1/} - for regular expression based relabeling. In
+   *       this case, all matches of the regular expression against the node label are replaced with
+   *       the replacement String. This has the semantics of Java/Perl's replaceAll: you may use
+   *       capturing groups and put them in replacements with $n. For example, if the pattern is
+   *       /foo/bar/ and the node matched is "foo", the replaceAll semantics result in "barbar". If
+   *       the pattern is /^foo(.*)$/bar$1/ and node matched is "foofoo", relabel will result in
+   *       "barfoo". <br>
+   *       When using the regex replacement method, you can also use the sequences ={node} and
+   *       %{var} in the replacement string to use captured nodes or variable strings in the
+   *       replacement string. For example, if the Tregex pattern was "duck=bar" and the relabel is
+   *       /foo/={bar}/, "foofoo" will be replaced with "duckduck". <br>
+   *       To concatenate two nodes named in the tregex pattern, for example, you can use the
+   *       pattern /^.*$/={foo}={bar}/. Note that the ^.*$ is necessary to make sure the regex
+   *       pattern only matches and replaces once on the entire node name. <br>
+   *       To get an "=" or a "%" in the replacement, using \ escaping. Also, as in the example you
+   *       can escape a slash in the middle of the second and third forms with \\/ and \\\\. <br>
+   *   <li>{@code insert <name> <position>} or {@code insert <tree> <position>} inserts the named
+   *       node or tree into the position specified.
+   *   <li>{@code move <name> <position>} moves the named node into the specified position.
+   *       <p>Right now the only ways to specify position are:
+   *       <p>{@code $+ <name>} the left sister of the named node<br>
+   *       {@code $- <name>} the right sister of the named node<br>
+   *       {@code >i <name>} the i_th daughter of the named node<br>
+   *       {@code >-i <name>} the i_th daughter, counting from the right, of the named node.
+   *   <li>{@code replace <name1> <name2>} deletes name1 and inserts a copy of name2 in its place.
+   *   <li>{@code replace <name> <tree> <tree2>...} deletes name and inserts the new tree(s) in its
+   *       place. If more than one replacement tree is given, each of the new subtrees will be added
+   *       in order where the old tree was. Multiple subtrees at the root is an illegal operation
+   *       and will throw an exception.
+   *   <li>{@code createSubtree <auxiliary-tree-or-label> <name1> [<name2>]} Create a subtree out of
+   *       all the nodes from {@code <name1>} through {@code <name2>}. The subtree is moved to the
+   *       foot of the given auxiliary tree, and the tree is inserted where the nodes of the subtree
+   *       used to reside. If a simple label is provided as the first argument, the subtree is given
+   *       a single parent with a name corresponding to the label. To limit the operation to just
+   *       one node, elide {@code <name2>}.
+   *   <li>{@code adjoin <auxiliary_tree> <name>} Adjoins the specified auxiliary tree into the
+   *       named node. The daughters of the target node will become the daughters of the foot of the
+   *       auxiliary tree.
+   *   <li>{@code adjoinH <auxiliary_tree> <name>} Similar to adjoin, but preserves the target node
+   *       and makes it the root of {@code <tree>}. (It is still accessible as {@code name}. The
+   *       root of the auxiliary tree is ignored.)
+   *   <li>{@code adjoinF <auxiliary_tree> <name>} Similar to adjoin, but preserves the target node
+   *       and makes it the foot of {@code <tree>}. (It is still accessible as {@code name}, and
+   *       retains its status as parent of its children. The root of the auxiliary tree is ignored.)
+   *   <li>
+   *   <dt>{@code coindex <name1> <name2> ... <nameM>} Puts a (Penn Treebank style) coindexation
+   *       suffix of the form "-N" on each of nodes name_1 through name_m. The value of N will be
+   *       automatically generated in reference to the existing coindexations in the tree, so that
+   *       there is never an accidental clash of indices across things that are not meant to be
+   *       coindexed.
    * </ul>
    *
-   * <p>
-   * In the context of {@code adjoin}, {@code adjoinH},
-   * {@code adjoinF}, and {@code createSubtree}, an auxiliary
-   * tree is a tree in Penn Treebank format with {@code @} on
-   * exactly one of the leaves denoting the foot of the tree.
-   * The operations which use the foot use the labeled node.
-   * For example:
-   * </p>
+   * <p>In the context of {@code adjoin}, {@code adjoinH}, {@code adjoinF}, and {@code
+   * createSubtree}, an auxiliary tree is a tree in Penn Treebank format with {@code @} on exactly
+   * one of the leaves denoting the foot of the tree. The operations which use the foot use the
+   * labeled node. For example:
+   *
    * <blockquote>
+   *
    * Tsurgeon: {@code adjoin (FOO (BAR@)) foo} <br>
    * Tregex: {@code B=foo} <br>
-   * Input: {@code (A (B 1 2))}
-   * Output: {@code (A (FOO (BAR 1 2)))}
+   * Input: {@code (A (B 1 2))} Output: {@code (A (FOO (BAR 1 2)))}
+   *
    * </blockquote>
-   * <p>
-   * Tsurgeon applies the same operation to the same tree for as long
-   * as the given tregex operation matches.  This means that infinite
-   * loops are very easy to cause.  One common situation where this comes up
-   * is with an insert operation will repeats infinitely many times
-   * unless you add an expression to the tregex that matches against
-   * the inserted pattern.  For example, this pattern will infinite loop:
-   * </p>
+   *
+   * <p>Tsurgeon applies the same operation to the same tree for as long as the given tregex
+   * operation matches. This means that infinite loops are very easy to cause. One common situation
+   * where this comes up is with an insert operation will repeats infinitely many times unless you
+   * add an expression to the tregex that matches against the inserted pattern. For example, this
+   * pattern will infinite loop:
+   *
    * <blockquote>
+   *
    * <code>
    *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP"); <br>
    *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) >-1 node");
    * </code>
+   *
    * </blockquote>
-   * <p>
-   * This pattern, though, will terminate:
-   * </p>
+   *
+   * <p>This pattern, though, will terminate:
+   *
    * <blockquote>
+   *
    * <code>
    *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP !&lt;&lt; foo"); <br>
    *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) >-1 node");
    * </code>
+   *
    * </blockquote>
    *
-   * <p>
-   * Tsurgeon has (very) limited support for conditional statements.
-   * If a pattern is prefaced with
-   * {@code if exists <name>},
-   * the rest of the pattern will only execute if
-   * the named node was found in the corresponding TregexMatcher.
-   * </p>
+   * <p>Tsurgeon has (very) limited support for conditional statements. If a pattern is prefaced
+   * with {@code if exists <name>}, the rest of the pattern will only execute if the named node was
+   * found in the corresponding TregexMatcher.
    *
-   * @param args a list of names of files each of which contains a single tregex matching pattern plus a list, one per line,
-   *        of transformation operations to apply to the matched pattern.
+   * @param args a list of names of files each of which contains a single tregex matching pattern
+   *     plus a list, one per line, of transformation operations to apply to the matched pattern.
    * @throws Exception If an I/O or pattern syntax error
    */
   public static void main(String[] args) throws Exception {
@@ -396,17 +380,18 @@ public class Tsurgeon  {
       }
     }
 
-    for (Tree t : trees ) {
-      Tree original = t.deepCopy();
-      Tree result = processPatternsOnTree(ops, t);
-      if (argsMap.containsKey(matchedOption) && matchedOnTree) {
-        pwOut.println("Operated on: ");
-        displayTree(original,tp,pwOut);
-        pwOut.println("Result: ");
-      }
-      displayTree(result,tp,pwOut);
+    trees.forEach(
+        t -> {
+          Tree original = t.deepCopy();
+          Tree result = processPatternsOnTree(ops, t);
+          if (argsMap.containsKey(matchedOption) && matchedOnTree) {
+            pwOut.println("Operated on: ");
+            displayTree(original, tp, pwOut);
+            pwOut.println("Result: ");
+          }
+          displayTree(result, tp, pwOut);
+        });
     }
-  }
 
   private static void displayTree(Tree t, TreePrint tp, PrintWriter pw) {
     if (t==null) {

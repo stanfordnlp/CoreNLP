@@ -1,5 +1,4 @@
 package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.util.function.Function;
@@ -770,23 +769,24 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   }
 
   public static <T, E extends Comparable<E>> List<T> getNonOverlapping(
-          List<? extends T> items, Function<? super T,Interval<E>> toIntervalFunc)
-  {
+      List<? extends T> items, Function<? super T, Interval<E>> toIntervalFunc) {
     List<T> nonOverlapping = new ArrayList<>();
     IntervalTree<E,Interval<E>> intervals = new IntervalTree<>();
-    for (T item:items) {
-      Interval<E> i = toIntervalFunc.apply(item);
-      boolean addOk = intervals.addNonOverlapping(i);
-      if (addOk) {
-        nonOverlapping.add(item);
-      }
-    }
+    items.forEach(
+        item -> {
+          Interval<E> i = toIntervalFunc.apply(item);
+          boolean addOk = intervals.addNonOverlapping(i);
+          if (addOk) {
+            nonOverlapping.add(item);
+          }
+        });
     return nonOverlapping;
   }
 
   public static <T, E extends Comparable<E>> List<T> getNonOverlapping(
-          List<? extends T> items, Function<? super T,Interval<E>> toIntervalFunc, Comparator<? super T> compareFunc)
-  {
+      List<? extends T> items,
+      Function<? super T, Interval<E>> toIntervalFunc,
+      Comparator<? super T> compareFunc) {
     List<T> sorted = new ArrayList<>(items);
     Collections.sort(sorted, compareFunc);
     return getNonOverlapping(sorted, toIntervalFunc);

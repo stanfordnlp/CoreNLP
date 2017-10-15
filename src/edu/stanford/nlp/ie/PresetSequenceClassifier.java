@@ -50,15 +50,17 @@ public class PresetSequenceClassifier<IN extends CoreMap>  extends AbstractSeque
 
   @Override
   public List<IN> classify(List<IN> document) {
-    for (IN token : document) {
-      String presetAnswer = token.get(CoreAnnotations.PresetAnswerAnnotation.class);
-      token.set(CoreAnnotations.AnswerAnnotation.class, presetAnswer);
-    }
+    document.forEach(
+        token -> {
+          String presetAnswer = token.get(CoreAnnotations.PresetAnswerAnnotation.class);
+          token.set(CoreAnnotations.AnswerAnnotation.class, presetAnswer);
+        });
     return document;
   }
 
   @Override
-  public List<IN> classifyWithGlobalInformation(List<IN> tokenSeq, final CoreMap doc, final CoreMap sent) {
+  public List<IN> classifyWithGlobalInformation(
+      List<IN> tokenSeq, final CoreMap doc, final CoreMap sent) {
     return classify(tokenSeq);
   }
 

@@ -58,24 +58,31 @@ public class SentimentUtils {
         return readTreesWithLabels(path, RNNCoreAnnotations.PredictedClass.class);
     }
 
-    /**
-     * Given a file name, reads in those trees and returns them as a List
-     */
-    public static List<Tree> readTreesWithLabels(String path, Class<? extends CoreAnnotation<Integer>> annotationClass) {
+  /** Given a file name, reads in those trees and returns them as a List */
+  public static List<Tree> readTreesWithLabels(
+      String path, Class<? extends CoreAnnotation<Integer>> annotationClass) {
         List<Tree> trees = Generics.newArrayList();
         MemoryTreebank treebank = new MemoryTreebank("utf-8");
         treebank.loadPath(path, null);
-        for (Tree tree : treebank) {
-            attachLabels(tree, annotationClass);
-            trees.add(tree);
-        }
+    treebank
+        .stream()
+        .map(
+            tree -> {
+              attachLabels(tree, annotationClass);
+              return tree;
+            })
+        .forEach(
+            tree -> {
+              trees.add(tree);
+            });
         return trees;
     }
 
-  static final Predicate<Tree> UNKNOWN_ROOT_FILTER = tree -> {
-    int gold = RNNCoreAnnotations.getGoldClass(tree);
-    return gold != -1;
-  };
+  static final Predicate<Tree> UNKNOWN_ROOT_FILTER =
+      tree -> {
+        int gold = RNNCoreAnnotations.getGoldClass(tree);
+        return gold != -1;
+      };
 
   public static List<Tree> filterUnknownRoots(List<Tree> trees) {
     return CollectionUtils.filterAsList(trees, UNKNOWN_ROOT_FILTER);

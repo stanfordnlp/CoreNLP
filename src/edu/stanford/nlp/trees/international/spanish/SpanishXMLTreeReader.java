@@ -405,8 +405,10 @@ public class SpanishXMLTreeReader implements TreeReader  {
 
     StringBuilder sb = new StringBuilder();
     List<Tree> leaves = tree.getLeaves();
-    for (Tree leaf : leaves)
-      sb.append(((CoreLabel) leaf.label()).value()).append(" ");
+    leaves.forEach(
+        leaf -> {
+          sb.append(((CoreLabel) leaf.label()).value()).append(" ");
+        });
 
     return sb.toString();
   }
@@ -415,9 +417,9 @@ public class SpanishXMLTreeReader implements TreeReader  {
    * Read trees from the given file and output their processed forms to
    * standard output.
    */
-  public static void process(File file, TreeReader tr,
-                             Pattern posPattern, Pattern wordPattern,
-                             boolean plainPrint) throws IOException {
+  public static void process(
+      File file, TreeReader tr, Pattern posPattern, Pattern wordPattern, boolean plainPrint)
+      throws IOException {
     Tree t;
     int numTrees = 0, numTreesRetained = 0;
     String canonicalFileName = file.getName().substring(0, file.getName().lastIndexOf('.'));
@@ -489,22 +491,26 @@ public class SpanishXMLTreeReader implements TreeReader  {
     ExecutorService pool =
       Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    for (final File file : fileList) {
-      pool.execute(new Runnable() {
-          public void run() {
-            try {
-              Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "ISO-8859-1"));
-              TreeReader tr = trf.newTreeReader(file.getPath(), in);
-              process(file, tr, posPattern, wordPattern, plainPrint);
-              tr.close();
-            } catch (FileNotFoundException e) {
-              e.printStackTrace();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-          }
+    fileList.forEach(
+        file -> {
+          pool.execute(
+              new Runnable() {
+                public void run() {
+                  try {
+                    Reader in =
+                        new BufferedReader(
+                            new InputStreamReader(new FileInputStream(file), "ISO-8859-1"));
+                    TreeReader tr = trf.newTreeReader(file.getPath(), in);
+                    process(file, tr, posPattern, wordPattern, plainPrint);
+                    tr.close();
+                  } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                  } catch (IOException e) {
+                    e.printStackTrace();
+                  }
+                }
+              });
         });
-    }
 
     pool.shutdown();
     try {

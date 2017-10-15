@@ -81,8 +81,10 @@ public class FileTreeNode extends DefaultMutableTreeNode {
   }
 
   private void sendToListeners() {
-    for(FileTreeNodeListener l : listeners)
-      l.treeNodeChanged(this);
+    listeners.forEach(
+        l -> {
+          l.treeNodeChanged(this);
+        });
   }
 
   public Treebank getTreebank() {

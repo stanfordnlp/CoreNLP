@@ -128,56 +128,59 @@ public class RothCONLL04Reader extends GenericDataSetReader {
             sentence, span, type, null, args);
         AnnotationUtils.addRelationMention(sentence, relationMention);
         break;
-      case 9: // token
-        /*
-         * Roth token lines look like this:
-         *
-         * 19 Peop 9 O NNP/NNP Jamal/Ghosheh O O O
-         */
+        case 9: // token
+          /*
+           * Roth token lines look like this:
+           *
+           * 19 Peop 9 O NNP/NNP Jamal/Ghosheh O O O
+           */
 
-        // Entities may be multiple words joined by '/'; we split these up
-        List<String> words = StringUtils.split(pieces.get(5), "/");
-        //List<String> postags = StringUtils.split(pieces.get(4),"/");
+          // Entities may be multiple words joined by '/'; we split these up
+          List<String> words = StringUtils.split(pieces.get(5), "/");
+          // List<String> postags = StringUtils.split(pieces.get(4),"/");
 
-        String text = StringUtils.join(words, " ");
-        identifier = "entity" + pieces.get(0) + '-' + pieces.get(2);
-        String nerTag = getNormalizedNERTag(pieces.get(1)); // entity type of the word/expression
+          String text = StringUtils.join(words, " ");
+          identifier = "entity" + pieces.get(0) + '-' + pieces.get(2);
+          String nerTag = getNormalizedNERTag(pieces.get(1)); // entity type of the word/expression
 
-        if (sentenceID == null)
-          sentenceID = pieces.get(0);
+          if (sentenceID == null) sentenceID = pieces.get(0);
 
-        if (!nerTag.equals("O")) {
-          Span extentSpan = new Span(tokenCount, tokenCount + words.size());
-          // Temporarily sets the head span to equal the extent span.
-          // This is so the entity has a head (in particular, getValue() works) even if preprocessSentences isn't called.
-          // The head span is later modified if preprocessSentences is called.
-          EntityMention entity = new EntityMention(identifier, sentence,
-              extentSpan, extentSpan, nerTag, null, null);
-          AnnotationUtils.addEntityMention(sentence, entity);
+          if (!nerTag.equals("O")) {
+            Span extentSpan = new Span(tokenCount, tokenCount + words.size());
+            // Temporarily sets the head span to equal the extent span.
+            // This is so the entity has a head (in particular, getValue() works) even
+            // if preprocessSentences isn't called.
+            // The head span is later modified if preprocessSentences is called.
+            EntityMention entity =
+                new EntityMention(identifier, sentence, extentSpan, extentSpan, nerTag, null, null);
+            AnnotationUtils.addEntityMention(sentence, entity);
 
-          // we can get by using these indices as strings since we only use them
-          // as a hash key
-          String index = pieces.get(2);
-          indexToEntityMention.put(index, entity);
-        }
+            // we can get by using these indices as strings since we only use them
+            // as a hash key
+            String index = pieces.get(2);
+            indexToEntityMention.put(index, entity);
+          }
 
-        // int i =0;
-        for (String word : words) {
-          CoreLabel label = new CoreLabel();
-          label.setWord(word);
-          //label.setTag(postags.get(i));
-          label.set(CoreAnnotations.TextAnnotation.class, word);
-          label.set(CoreAnnotations.ValueAnnotation.class, word);
-          // we don't set TokenBeginAnnotation or TokenEndAnnotation since we're
-          // not keeping track of character offsets
-          tokens.add(label);
-          // i++;
-        }
+          // int i =0;
+          words
+              .stream()
+              .map(
+                  word -> {
+                    CoreLabel label = new CoreLabel();
+                    label.setWord(word);
+                    label.set(CoreAnnotations.TextAnnotation.class, word);
+                    label.set(CoreAnnotations.ValueAnnotation.class, word);
+                    return label;
+                  })
+              .forEach(
+                  label -> {
+                    tokens.add(label);
+                  });
 
-        textContent.append(text);
-        textContent.append(' ');
-        tokenCount += words.size();
-        break;
+          textContent.append(text);
+          textContent.append(' ');
+          tokenCount += words.size();
+          break;
       }
     }
 

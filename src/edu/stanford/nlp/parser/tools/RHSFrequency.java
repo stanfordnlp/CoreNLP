@@ -94,9 +94,10 @@ public class RHSFrequency {
     Collections.sort(biggestKeys, Counters.toComparatorDescending(rhsCounter));
 
     PrintWriter pw = tlpp.pw();
-    for(String rhs : biggestKeys)
-      pw.printf("%s\t%d%n", rhs,(int) rhsCounter.getCount(rhs));
+    biggestKeys.forEach(
+        rhs -> {
+          pw.printf("%s\t%d%n", rhs, (int) rhsCounter.getCount(rhs));
+        });
     pw.close();
   }
-  
 }

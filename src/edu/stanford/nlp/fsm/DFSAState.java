@@ -61,12 +61,13 @@ public final class DFSAState<T,S> implements Scored {
     return inputToTransition.keySet();
   }
 
-  public Set<DFSAState<T,S>> successorStates() {
+  public Set<DFSAState<T, S>> successorStates() {
     Set<DFSAState<T,S>> successors = Generics.newHashSet();
     Collection<DFSATransition<T, S>> transitions = inputToTransition.values();
-    for (DFSATransition<T,S> transition : transitions) {
-      successors.add(transition.getTarget());
-    }
+    transitions.forEach(
+        transition -> {
+          successors.add(transition.getTarget());
+        });
     return successors;
   }
 

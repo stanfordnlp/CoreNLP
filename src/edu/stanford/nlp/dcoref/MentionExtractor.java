@@ -143,11 +143,12 @@ public class MentionExtractor {
 
   /**
    * Post-processes the extracted mentions. Here we set the Mention fields required for coref and order mentions by tree-traversal order.
+   *
    * @param words List of words in each sentence, in textual order
    * @param trees List of trees, one per sentence
-   * @param unorderedMentions List of unordered, unprocessed mentions
+   * @param unorderedMentions List of unordered, unprocessed mentions 
    *                 Each mention MUST have startIndex and endIndex set!
-   *                 Optionally, if scoring is desired, mentions must have mentionID and originalRef set.
+   *                 Optionally, if scoring is desired, mentions must have mentionID and originalRef set. 
    *                 All the other Mention fields are set here.
    * @return List of mentions ordered according to the tree traversal
    * @throws Exception
@@ -225,9 +226,10 @@ public class MentionExtractor {
       for (Tree t : tree.preOrderNodeList()) {
         List<Mention> lm = mentionsToTrees.get(treeToKey(t));
         if(lm != null){
-          for(Mention m: lm){
-            orderedMentions.add(m);
-          }
+          lm.forEach(
+              m -> {
+                orderedMentions.add(m);
+              });
         }
       }
 
@@ -435,11 +437,12 @@ public class MentionExtractor {
   }
 
   public static void initializeUtterance(List<CoreLabel> tokens) {
-    for(CoreLabel l : tokens){
-      if (l.get(CoreAnnotations.UtteranceAnnotation.class) == null) {
-        l.set(CoreAnnotations.UtteranceAnnotation.class, 0);
-      }
+    tokens
+        .stream()
+        .filter(l -> l.get(CoreAnnotations.UtteranceAnnotation.class) == null)
+        .forEach(
+            l -> {
+              l.set(CoreAnnotations.UtteranceAnnotation.class, 0);
+            });
     }
-  }
-
 }

@@ -90,10 +90,16 @@ public class DependencyIndexITest extends TestCase {
 
     // collect all nodes in deps
     Set<IndexedWord> nodes = Generics.newHashSet();
-    for (TypedDependency dep: deps) {
-      nodes.add(dep.gov());
-      nodes.add(dep.dep());
-    }
+    deps.stream()
+        .map(
+            dep -> {
+              nodes.add(dep.gov());
+              return dep;
+            })
+        .forEach(
+            dep -> {
+              nodes.add(dep.dep());
+            });
 
     // check the indices for all nodes
     for (IndexedWord n: nodes) {

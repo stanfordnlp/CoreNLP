@@ -41,13 +41,14 @@ public class KNNClassifier<K,V> implements Classifier<K, V> {
   }
 
   protected void addInstances(Collection<RVFDatum<K, V>> datums) {
-    for (RVFDatum<K, V> datum : datums) {
-      K label = datum.label();
-      Counter<V> vec = datum.asFeaturesCounter();
-      instances.add(label, vec);
-      classLookup.put(vec, label);
+    datums.forEach(
+        datum -> {
+          K label = datum.label();
+          Counter<V> vec = datum.asFeaturesCounter();
+          instances.add(label, vec);
+          classLookup.put(vec, label);
+        });
     }
-  }
 
   /**
    * NOTE: currently does not support standard Datums, only RVFDatums.

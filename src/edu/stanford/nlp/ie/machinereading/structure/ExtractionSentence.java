@@ -193,17 +193,18 @@ public class ExtractionSentence implements Serializable {
     sb.append("\"" + textContent + "\"");
     sb.append("\n");
 
-    for (RelationMention rel : this.relationMentions) {
-      sb.append("\n");
-      sb.append(rel);
-    }
+    this.relationMentions.forEach(
+        rel -> {
+          sb.append("\n");
+          sb.append(rel);
+        });
 
     // TODO: add event mentions
 
     return sb.toString();
   }
 
-  public static String tokensToString(Word [] tokens) {
+  public static String tokensToString(Word[] tokens) {
     StringBuilder  sb = new StringBuilder(512);
     for(int i = 0; i < tokens.length; i ++){
       if(i > 0) sb.append(" ");

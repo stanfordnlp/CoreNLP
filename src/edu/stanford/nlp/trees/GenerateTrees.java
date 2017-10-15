@@ -180,7 +180,7 @@ public class GenerateTrees {
       tp.printTree(tree, pout);
     }
   }
-  
+
   public Tree produceTree(String state) {
     Counter<String> terminal = terminals.get(state);
     if (terminal != null) {
@@ -201,9 +201,10 @@ public class GenerateTrees {
       // the expected state
       List<String> labels = Counters.sample(nonTerminal, random);
       List<Tree> children = new ArrayList<>();
-      for (String childLabel : labels) {
-        children.add(produceTree(childLabel));
-      }
+      labels.forEach(
+          childLabel -> {
+            children.add(produceTree(childLabel));
+          });
       Tree root = tf.newTreeNode(state, children);
       return root;
     }

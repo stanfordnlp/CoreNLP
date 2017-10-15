@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
@@ -57,18 +56,20 @@ public class EventMention extends RelationMention  {
     args = new ArrayList<>();
     argNames = new ArrayList<>();
   }
-  
+
   public void removeFromParents() {
     // remove this from the arg list of all parents
-    for(ExtractionObject parent: parents){
-      if(parent instanceof RelationMention){
-        ((RelationMention) parent).removeArgument(this, false);
-      }
-    }
+    parents
+        .stream()
+        .filter(parent -> parent instanceof RelationMention)
+        .forEach(
+            parent -> {
+              ((RelationMention) parent).removeArgument(this, false);
+            });
     // reset the parent links
     parents.clear();
   }
-  
+
   public void removeParent(ExtractionObject p) {
     parents.remove(p);
   }
@@ -173,19 +174,21 @@ public class EventMention extends RelationMention  {
       ((EventMention) a).addParent(this);
     }
   }
-  
+
   @Override
   public void setArgs(List<ExtractionObject> args) {
     this.args = args;
-    // set ourselves as the parent of any EventMentions in our args 
-    for (ExtractionObject arg : args) {
-      if (arg instanceof EventMention) {
-        ((EventMention) arg).addParent(this);
-      }
+    // set ourselves as the parent of any EventMentions in our args
+    args.stream()
+        .filter(arg -> arg instanceof EventMention)
+        .forEach(
+            arg -> {
+              ((EventMention) arg).addParent(this);
+            });
     }
-  }
-  
-  public void addArgs(List<ExtractionObject> args, List<String> argNames, boolean discardSameArgDifferentName){
+
+  public void addArgs(
+      List<ExtractionObject> args, List<String> argNames, boolean discardSameArgDifferentName) {
     if(args == null) return;
     assert (args.size() == argNames.size());
     for(int i = 0; i < args.size(); i ++){

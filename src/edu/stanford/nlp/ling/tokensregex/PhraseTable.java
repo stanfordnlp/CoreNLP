@@ -280,15 +280,14 @@ public class PhraseTable implements Serializable
     return new StringList(list);
   }
 
-  public void addPhrases(Collection<String> phraseTexts)
-  {
-    for (String phraseText:phraseTexts) {
-      addPhrase(phraseText, null);
+  public void addPhrases(Collection<String> phraseTexts) {
+    phraseTexts.forEach(
+        phraseText -> {
+          addPhrase(phraseText, null);
+        });
     }
-  }
 
-  public void addPhrases(Map<String,String> taggedPhraseTexts)
-  {
+  public void addPhrases(Map<String, String> taggedPhraseTexts) {
     for (String phraseText:taggedPhraseTexts.keySet()) {
       addPhrase(phraseText, taggedPhraseTexts.get(phraseText));
     }

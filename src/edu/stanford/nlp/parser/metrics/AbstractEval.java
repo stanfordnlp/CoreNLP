@@ -267,12 +267,13 @@ public abstract class AbstractEval implements Eval  {
           over.incrementCount(o1);
         }
       }
-      for (String o2 : s2) {
-        if (!s1.contains(o2)) {
-          under.incrementCount(o2);
+      s2.stream()
+          .filter(o2 -> !s1.contains(o2))
+          .forEach(
+              o2 -> {
+                under.incrementCount(o2);
+              });
         }
-      }
-    }
 
     private static <T> void display(ClassicCounter<T> c, int num, PrintWriter pw) {
       List<T> rules = new ArrayList<>(c.keySet());
@@ -335,19 +336,21 @@ public abstract class AbstractEval implements Eval  {
           over.incrementCount(o1);
         }
       }
-      for (String o2 : s2) {
-        if (! s1.remove(o2)) {
-          under.incrementCount(o2);
+      s2.stream()
+          .filter(o2 -> !s1.remove(o2))
+          .forEach(
+              o2 -> {
+                under.incrementCount(o2);
+              });
         }
-      }
-    }
 
     private static <T> void display(ClassicCounter<T> c, PrintWriter pw) {
       List<T> cats = new ArrayList<>(c.keySet());
       Collections.sort(cats, Counters.toComparatorDescending(c));
-      for (T ob : cats) {
-        pw.println(ob + " " + c.getCount(ob));
-      }
+      cats.forEach(
+          ob -> {
+            pw.println(ob + " " + c.getCount(ob));
+          });
     }
 
     @Override

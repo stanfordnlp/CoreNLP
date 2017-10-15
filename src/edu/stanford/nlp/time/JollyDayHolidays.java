@@ -77,14 +77,15 @@ public class JollyDayHolidays implements Env.Binder {
 
   public Map<String, JollyHoliday> getAllHolidaysMap(Set<de.jollyday.config.Holiday> allHolidays) {
     Map<String, JollyHoliday> map = Generics.newHashMap();
-    for (de.jollyday.config.Holiday h : allHolidays) {
-      String descKey = h.getDescriptionPropertiesKey();
-      if (descKey != null) {
-        descKey = descKey.replaceAll(".*\\.","");
-        JollyHoliday jh = new JollyHoliday(descKey, holidayManager, h);
-        map.put(jh.label, jh);
-      }
-    }
+    allHolidays.forEach(
+        h -> {
+          String descKey = h.getDescriptionPropertiesKey();
+          if (descKey != null) {
+            descKey = descKey.replaceAll(".*\\.", "");
+            JollyHoliday jh = new JollyHoliday(descKey, holidayManager, h);
+            map.put(jh.label, jh);
+          }
+        });
     return map;
   }
 
@@ -93,16 +94,18 @@ public class JollyDayHolidays implements Env.Binder {
     return getAllHolidaysMap(s);
   }
 
-  public CollectionValuedMap<String, JollyHoliday> getAllHolidaysCVMap(Set<de.jollyday.config.Holiday> allHolidays) {
+  public CollectionValuedMap<String, JollyHoliday> getAllHolidaysCVMap(
+      Set<de.jollyday.config.Holiday> allHolidays) {
     CollectionValuedMap<String, JollyHoliday> map = new CollectionValuedMap<>();
-    for (de.jollyday.config.Holiday h:allHolidays) {
-      String descKey = h.getDescriptionPropertiesKey();
-      if (descKey != null) {
-        descKey = descKey.replaceAll(".*\\.","");
-        JollyHoliday jh = new JollyHoliday(descKey, holidayManager, h);
-        map.add(jh.label, jh);
-      }
-    }
+    allHolidays.forEach(
+        h -> {
+          String descKey = h.getDescriptionPropertiesKey();
+          if (descKey != null) {
+            descKey = descKey.replaceAll(".*\\.", "");
+            JollyHoliday jh = new JollyHoliday(descKey, holidayManager, h);
+            map.add(jh.label, jh);
+          }
+        });
     return map;
   }
 
@@ -124,14 +127,16 @@ public class JollyDayHolidays implements Env.Binder {
     }
   }
 
-  public static void getAllHolidays(Configuration config, Set<de.jollyday.config.Holiday> allHolidays) {
+  public static void getAllHolidays(
+      Configuration config, Set<de.jollyday.config.Holiday> allHolidays) {
     Holidays holidays = config.getHolidays();
     getAllHolidays(holidays, allHolidays);
     List<Configuration> subConfigs = config.getSubConfigurations();
-    for (Configuration c:subConfigs) {
-      getAllHolidays(c, allHolidays);
+    subConfigs.forEach(
+        c -> {
+          getAllHolidays(c, allHolidays);
+        });
     }
-  }
 
   public static Set<de.jollyday.config.Holiday> getAllHolidays(Configuration config) {
     Set<de.jollyday.config.Holiday> allHolidays = Generics.newHashSet();

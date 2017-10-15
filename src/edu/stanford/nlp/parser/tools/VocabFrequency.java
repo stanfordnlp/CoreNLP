@@ -85,8 +85,10 @@ public class VocabFrequency {
     Collections.sort(biggestKeys, Counters.toComparatorDescending(vocab));
 
     PrintWriter pw = tlpp.pw();
-    for(String wordType : biggestKeys)
-      pw.printf("%s\t%d%n", wordType,(int) vocab.getCount(wordType));
+    biggestKeys.forEach(
+        wordType -> {
+          pw.printf("%s\t%d%n", wordType, (int) vocab.getCount(wordType));
+        });
     pw.close();
   }
 }

@@ -117,21 +117,23 @@ public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements
     return tree;
   }
 
-  private static void testTransAndUntrans(CharacterLevelTagExtender e, Treebank tb, PrintWriter pw) {
-    for (Tree tree : tb) {
-      Tree oldTree = tree.treeSkeletonCopy();
-      e.transformTree(tree);
-      e.untransformTree(tree);
-      if (!tree.equals(oldTree)) {
-        pw.println("NOT EQUAL AFTER UNTRANSFORMATION!!!");
-        pw.println();
-        oldTree.pennPrint(pw);
-        pw.println();
-        tree.pennPrint(pw);
-        pw.println("------------------");
-      }
+  private static void testTransAndUntrans(
+      CharacterLevelTagExtender e, Treebank tb, PrintWriter pw) {
+    tb.forEach(
+        tree -> {
+          Tree oldTree = tree.treeSkeletonCopy();
+          e.transformTree(tree);
+          e.untransformTree(tree);
+          if (!tree.equals(oldTree)) {
+            pw.println("NOT EQUAL AFTER UNTRANSFORMATION!!!");
+            pw.println();
+            oldTree.pennPrint(pw);
+            pw.println();
+            tree.pennPrint(pw);
+            pw.println("------------------");
+          }
+        });
     }
-  }
 
   /**
    * for testing -- CURRENTLY BROKEN!!!

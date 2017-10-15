@@ -455,19 +455,25 @@ public interface KBPRelationExtractor {
     private Counter<String> totalCount     = new ClassicCounter<>();
     public final ConfusionMatrix<String> confusion = new ConfusionMatrix<>();
 
-
     public void predict(Set<String> predictedRelationsRaw, Set<String> goldRelationsRaw) {
       Set<String> predictedRelations = new HashSet<>(predictedRelationsRaw);
       predictedRelations.remove(NO_RELATION);
       Set<String> goldRelations = new HashSet<>(goldRelationsRaw);
       goldRelations.remove(NO_RELATION);
       // Register the prediction
-      for (String pred : predictedRelations) {
-        if (goldRelations.contains(pred)) {
-          correctCount.incrementCount(pred);
-        }
-        predictedCount.incrementCount(pred);
-      }
+      predictedRelations
+          .stream()
+          .map(
+              pred -> {
+                if (goldRelations.contains(pred)) {
+                  correctCount.incrementCount(pred);
+                }
+                return pred;
+              })
+          .forEach(
+              pred -> {
+                predictedCount.incrementCount(pred);
+              });
       goldRelations.forEach(goldCount::incrementCount);
       HashSet<String> allRelations = new HashSet<String>(){{ addAll(predictedRelations); addAll(goldRelations); }};
       allRelations.forEach(totalCount::incrementCount);
@@ -545,9 +551,10 @@ public interface KBPRelationExtractor {
       List<PerRelationStat> stats = goldCount.keySet().stream().map(relation -> new PerRelationStat(relation, precision(relation), recall(relation), (int) predictedCount.getCount(relation), (int) goldCount.getCount(relation))).collect(Collectors.toList());
       Collections.sort(stats);
       out.println("Per-relation Accuracy");
-      for (PerRelationStat stat : stats) {
-        out.println(stat);
-      }
+      stats.forEach(
+          stat -> {
+            out.println(stat);
+          });
     }
 
     public void dumpPerRelationStats() {

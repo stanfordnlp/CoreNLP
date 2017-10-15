@@ -16,9 +16,10 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 
 class ParserDemo2 {
 
-  /** This example shows a few more ways of providing input to a parser.
+  /**
+   * This example shows a few more ways of providing input to a parser.
    *
-   *  Usage: ParserDemo2 [grammar [textFile]]
+   * <p>Usage: ParserDemo2 [grammar [textFile]]
    */
   public static void main(String[] args) throws IOException {
     String grammar = args.length > 0 ? args[0] : "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
@@ -32,9 +33,10 @@ class ParserDemo2 {
       DocumentPreprocessor dp = new DocumentPreprocessor(args[1]);
       List<List<? extends HasWord>> tmp =
               new ArrayList<>();
-      for (List<HasWord> sentence : dp) {
-        tmp.add(sentence);
-      }
+      dp.forEach(
+          sentence -> {
+            tmp.add(sentence);
+          });
       sentences = tmp;
     } else {
       // Showing tokenization and parsing in code a couple of different ways.
@@ -98,5 +100,4 @@ class ParserDemo2 {
   }
 
   private ParserDemo2() {} // static methods only
-
 }

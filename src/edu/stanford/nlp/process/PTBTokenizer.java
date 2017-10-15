@@ -407,27 +407,34 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     return ptb2Text(StringUtils.join(ptbWords));
   }
 
-
   /**
-   * Returns a presentable version of the given PTB-tokenized words.
-   * Pass in a List of Words or a Document and this method will
-   * take the word() values (to prevent additional text from creeping in, e.g., POS tags),
-   * and call {@link #ptb2Text(String)} on the output.
+   * Returns a presentable version of the given PTB-tokenized words. Pass in a List of Words or a
+   * Document and this method will take the word() values (to prevent additional text from creeping
+   * in, e.g., POS tags), and call {@link #ptb2Text(String)} on the output.
    *
    * @param ptbWords A list of HasWord objects
    * @return A presentable version of the given PTB-tokenized words
    */
   public static String labelList2Text(List<? extends HasWord> ptbWords) {
     List<String> words = new ArrayList<>();
-    for (HasWord hw : ptbWords) {
-      words.add(hw.word());
-    }
+    ptbWords.forEach(
+        hw -> {
+          words.add(hw.word());
+        });
 
     return ptb2Text(words);
   }
 
-
-  private static void tok(List<String> inputFileList, List<String> outputFileList, String charset, Pattern parseInsidePattern, String options, boolean preserveLines, boolean dump, boolean lowerCase) throws IOException {
+  private static void tok(
+      List<String> inputFileList,
+      List<String> outputFileList,
+      String charset,
+      Pattern parseInsidePattern,
+      String options,
+      boolean preserveLines,
+      boolean dump,
+      boolean lowerCase)
+      throws IOException {
     final long start = System.nanoTime();
     long numTokens = 0;
     int numFiles = inputFileList.size();

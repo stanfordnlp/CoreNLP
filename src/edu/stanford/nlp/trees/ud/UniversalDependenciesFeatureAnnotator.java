@@ -425,13 +425,13 @@ public class UniversalDependenciesFeatureAnnotator  {
       List<Label> uPOSTags = t.preTerminalYield();
       List<IndexedWord> yield = sg.vertexListSorted();
       // int len = yield.size();
-      for (IndexedWord word : yield) {
-        Label uPOSTag = uPOSTags.get(word.index() - 1);
-        word.set(CoreAnnotations.CoarseTagAnnotation.class, uPOSTag.value());
-      }
+      yield.forEach(
+          word -> {
+            Label uPOSTag = uPOSTags.get(word.index() - 1);
+            word.set(CoreAnnotations.CoarseTagAnnotation.class, uPOSTag.value());
+          });
     }
-  }
-
+    }
 
   public static void main(String[] args) throws IOException {
 

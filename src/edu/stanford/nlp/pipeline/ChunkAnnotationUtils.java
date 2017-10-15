@@ -610,9 +610,11 @@ public class ChunkAnnotationUtils  {
 
   /**
    * Annotates tokens in chunk.
+   *
    * @param chunk - CoreMap representing chunk (should have TextAnnotation and TokensAnnotation)
    * @param tokenChunkKey - If not null, each token is annotated with the chunk using this key
-   * @param tokenLabelKey - If not null, each token is annotated with the text associated with the chunk using this key
+   * @param tokenLabelKey - If not null, each token is annotated with the text associated with the
+   *     chunk using this key
    */
   public static void annotateChunkTokens(CoreMap chunk, Class tokenChunkKey, Class tokenLabelKey) {
     List<CoreLabel> chunkTokens = chunk.get(CoreAnnotations.TokensAnnotation.class);
@@ -623,9 +625,10 @@ public class ChunkAnnotationUtils  {
       }
     }
     if (tokenChunkKey != null) {
-      for (CoreLabel t: chunkTokens) {
-        t.set(tokenChunkKey, chunk);
-      }
+      chunkTokens.forEach(
+          t -> {
+            t.set(tokenChunkKey, chunk);
+          });
     }
   }
 
@@ -644,7 +647,8 @@ public class ChunkAnnotationUtils  {
    * @param totalTokenOffset - Index of tokens to offset by
    * @return Annotation representing new chunk
    */
-  public static Annotation getAnnotatedChunk(List<CoreLabel> tokens, int tokenStartIndex, int tokenEndIndex, int totalTokenOffset) {
+  public static Annotation getAnnotatedChunk(
+      List<CoreLabel> tokens, int tokenStartIndex, int tokenEndIndex, int totalTokenOffset) {
     Annotation chunk = new Annotation("");
     annotateChunk(chunk, tokens, tokenStartIndex, tokenEndIndex, totalTokenOffset);
     return chunk;
@@ -874,14 +878,16 @@ public class ChunkAnnotationUtils  {
     }
   }
 
-  public static void annotateChunks(List<? extends CoreMap> chunks, Map<String,String> attributes) {
-    for (CoreMap chunk:chunks) {
-      annotateChunk(chunk, attributes);
+  public static void annotateChunks(
+      List<? extends CoreMap> chunks, Map<String, String> attributes) {
+    chunks.forEach(
+        chunk -> {
+          annotateChunk(chunk, attributes);
+        });
     }
-  }
 
-  public static <T extends CoreMap> T createCoreMap(CoreMap cm, String text, int start, int end,
-                                                    CoreTokenFactory<T> factory) {
+  public static <T extends CoreMap> T createCoreMap(
+      CoreMap cm, String text, int start, int end, CoreTokenFactory<T> factory) {
     if (end > start) {
       T token = factory.makeToken();
       Integer cmCharStart = cm.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);

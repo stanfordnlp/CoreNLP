@@ -52,12 +52,13 @@ public class MorphaAnnotator implements Annotator {
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-        //log.info("Lemmatizing sentence: " + tokens);
-        for (CoreLabel token : tokens) {
-          String text = token.get(CoreAnnotations.TextAnnotation.class);
-          String posTag = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-          addLemma(morphology, CoreAnnotations.LemmaAnnotation.class, token, text, posTag);
-        }
+        // log.info("Lemmatizing sentence: " + tokens);
+        tokens.forEach(
+            token -> {
+              String text = token.get(CoreAnnotations.TextAnnotation.class);
+              String posTag = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+              addLemma(morphology, CoreAnnotations.LemmaAnnotation.class, token, text, posTag);
+            });
       }
     } else {
       throw new RuntimeException("Unable to find words/tokens in: " +
@@ -65,10 +66,12 @@ public class MorphaAnnotator implements Annotator {
     }
   }
 
-
-  private static void addLemma(Morphology morpha,
-                        Class<? extends CoreAnnotation<String>> ann,
-                        CoreMap map, String word, String tag) {
+  private static void addLemma(
+      Morphology morpha,
+      Class<? extends CoreAnnotation<String>> ann,
+      CoreMap map,
+      String word,
+      String tag) {
     if ( ! tag.isEmpty()) {
       String phrasalVerb = phrasalVerb(morpha, word, tag);
       if (phrasalVerb == null) {

@@ -116,10 +116,10 @@ public class RuleBranchingFactor {
 
   private static double standardDeviation(List<Integer> branchingFactors, double mean) {
     double variance = 0.0;
-    for (int i : branchingFactors) {
-      variance += (i-mean)*(i-mean);
-    }
+    branchingFactors
+        .stream()
+        .map(i -> (i - mean) * (i - mean))
+        .reduce(variance, (accumulator, _item) -> accumulator += _item);
     return Math.sqrt(variance / (branchingFactors.size()-1));
   }
-
 }

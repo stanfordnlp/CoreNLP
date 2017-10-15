@@ -230,13 +230,16 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
   public void printAnswers(List<CoreLabel> doc, PrintWriter pw) {
     pw.println("Answer\tGoldAnswer\tCharacter");
-    for(CoreLabel word : doc) {
-      pw.printf("%s\t%s\t%s%n", word.get(CoreAnnotations.AnswerAnnotation.class),
-                                word.get(CoreAnnotations.GoldAnswerAnnotation.class),
-                                word.get(CoreAnnotations.CharAnnotation.class));
+    doc.forEach(
+        word -> {
+          pw.printf(
+              "%s\t%s\t%s%n",
+              word.get(CoreAnnotations.AnswerAnnotation.class),
+              word.get(CoreAnnotations.GoldAnswerAnnotation.class),
+              word.get(CoreAnnotations.CharAnnotation.class));
+        });
     }
-  }
-  
+
   /**
    * For debugging.
    * 

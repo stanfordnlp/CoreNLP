@@ -112,18 +112,20 @@ public class RelationMention extends ExtractionObject {
   public void setArgs(List<ExtractionObject> args) {
     this.args = args;
   }
-  
+
   /**
    * Fetches the arguments of this relation that are entity mentions
+   *
    * @return List of entity-mention args sorted in semantic order
    */
   public List<EntityMention> getEntityMentionArgs() {
     List<EntityMention> ents = new ArrayList<>();
-    for(ExtractionObject o: args) {
-      if(o instanceof EntityMention){
-        ents.add((EntityMention) o);
-      }
-    }
+    args.stream()
+        .filter(o -> o instanceof EntityMention)
+        .forEach(
+            o -> {
+              ents.add((EntityMention) o);
+            });
     return ents;
   }
 
@@ -269,21 +271,24 @@ public class RelationMention extends ExtractionObject {
   
   public void setSignature(String s) { signature = s; }
   public String getSignature() { return signature; }
-  
+
   /*
    * Static utility functions
    */
 
-  public static Collection<RelationMention> filterUnrelatedRelations(Collection<RelationMention> relationMentions) {
+  public static Collection<RelationMention> filterUnrelatedRelations(
+      Collection<RelationMention> relationMentions) {
     Collection<RelationMention> filtered = new ArrayList<>();
-    for (RelationMention relation : relationMentions) {
-      if (!relation.getType().equals(UNRELATED)) {
-        filtered.add(relation);
-      }
-    }
+    relationMentions
+        .stream()
+        .filter(relation -> !relation.getType().equals(UNRELATED))
+        .forEach(
+            relation -> {
+              filtered.add(relation);
+            });
     return filtered;
   }
-  
+
   /**
    * Creates a new unique id for a relation mention
    * @return the new id

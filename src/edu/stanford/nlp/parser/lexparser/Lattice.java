@@ -50,31 +50,38 @@ public class Lattice implements Serializable, Iterable<LatticeEdge> {
 	}
 	
 	public int getNumEdges() { return edges.size(); }
-	
-	public List<LatticeEdge> getEdgesOverSpan(int start, int end) {
-	 
+
+  public List<LatticeEdge> getEdgesOverSpan(int start, int end) {
+
 	  List<LatticeEdge> allEdges = edgeStartsAt.get(start);
 	  List<LatticeEdge> spanningEdges = new ArrayList<>();
-	  if(allEdges != null)
-	    for(LatticeEdge e : allEdges)
-	      if(e.end == end)
-	        spanningEdges.add(e);
-	  
+    if (allEdges != null)
+      allEdges
+          .stream()
+          .filter(e -> e.end == end)
+          .forEach(
+              e -> {
+                spanningEdges.add(e);
+              });
+
 	  return spanningEdges;
-	}
-	
-	
-	@Override
-	public String toString() {
+  }
+
+  @Override
+  public String toString() {
 	  StringBuilder sb = new StringBuilder();
 	  sb.append(String.format("[ Lattice: %d edges  %d nodes ]\n",edges.size(), nodes.size()));
-	  for(LatticeEdge e : edges)
-	    sb.append("  " + e.toString() + "\n");
+    edges.forEach(
+        e -> {
+          sb.append("  " + e.toString() + "\n");
+        });
 		return sb.toString();
-	}
+  }
 
-	public void setEdge(int id, LatticeEdge e) { edges.set(id, e); }
-	
+  public void setEdge(int id, LatticeEdge e) {
+    edges.set(id, e);
+  }
+
 	public Iterator<LatticeEdge> iterator() { return edges.iterator(); }
 
   public void addBoundary() {
