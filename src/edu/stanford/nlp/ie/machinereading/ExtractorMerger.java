@@ -79,10 +79,7 @@ public class ExtractorMerger implements Extractor {
       logger.info("Loading model " + i + " for model merging from " + modelName);
       try {
         relationExtractorComponents[i] = BasicRelationExtractor.load(modelName);
-      } catch (IOException e) {
-        logger.severe("Error loading model:");
-        e.printStackTrace();
-      } catch (ClassNotFoundException e) {
+      } catch (IOException | ClassNotFoundException e) {
         logger.severe("Error loading model:");
         e.printStackTrace();
       }

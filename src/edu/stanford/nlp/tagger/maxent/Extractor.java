@@ -270,9 +270,7 @@ public class Extractor implements Serializable  {
     int ans = 0;
     try {
       ans = Integer.parseInt(args[num]);
-    } catch (NumberFormatException nfe) {
-      // just leave ans as 0
-    } catch (ArrayIndexOutOfBoundsException aioobe) {
+    } catch (NumberFormatException | ArrayIndexOutOfBoundsException nfe) {
       // just leave ans as 0
     }
     return ans;

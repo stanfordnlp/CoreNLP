@@ -56,9 +56,7 @@ public class SystemUtils {
         String msg = "process %s exited with value %d";
         throw new ProcessException(String.format(msg, builder.command(), result));
       }
-    } catch (InterruptedException e) {
-      throw new ProcessException(e);
-    } catch (IOException e) {
+    } catch (InterruptedException | IOException e) {
       throw new ProcessException(e);
     }
   }
