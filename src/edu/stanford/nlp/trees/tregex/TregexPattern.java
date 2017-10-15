@@ -575,7 +575,7 @@ public abstract class TregexPattern implements Serializable  {
    *
    * </ul>
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Timing.startTime();
 
     StringBuilder treePrintFormats = new StringBuilder();

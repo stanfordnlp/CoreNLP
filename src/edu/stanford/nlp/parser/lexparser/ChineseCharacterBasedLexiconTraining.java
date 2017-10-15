@@ -114,7 +114,7 @@ public class ChineseCharacterBasedLexiconTraining  {
     pw.println(wordLengthDist);
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Map<String,Integer> flagsToNumArgs = Generics.newHashMap();
     flagsToNumArgs.put("-parser", Integer.valueOf(3));
     flagsToNumArgs.put("-lex", Integer.valueOf(3));

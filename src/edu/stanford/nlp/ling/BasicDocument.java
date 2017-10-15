@@ -443,7 +443,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * For internal debugging purposes only. Creates and tests various instances
    * of BasicDocument.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     try {
       printState(BasicDocument.init("this is the text", "this is the title [String]", true));
       printState(BasicDocument.init(new StringReader("this is the text"), "this is the title [Reader]", true));

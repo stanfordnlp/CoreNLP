@@ -779,7 +779,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "advmod(act-5, now-6)\n"},
          {TestType.BASIC,
           // Two tricky conjunctions with punctuation and/or interjections
-          "( (S (NP-SBJ (DT The) (NNPS Parks) (NNP Council)) (VP (VBD wrote) (NP (DT the) (NNP BPCA)) (SBAR (IN that) (S (NP-SBJ (DT this) (ADJP (`` ``) (RB too) (`` `) (JJ private) ('' ') (: ...) (JJ exclusive) (, ,) ('' '') (JJ complex) (CC and) (JJ expensive)) (`` ``) (VBN enclosed) (NN garden)) (: ...) (VP (VBZ belongs) (PP-LOC-CLR (IN in) (NP (NP (RB almost) (DT any) (NN location)) (CC but) (NP (DT the) (NN waterfront)))))))) (. .) ('' '')))",
+          "((S (NP-SBJ (DT The) (NNPS Parks) (NNP Council)) (VP (VBD wrote) (NP (DT the) (NNP BPCA)) (SBAR (IN that) (S (NP-SBJ (DT this) (ADJP (`` ``) (RB too) (`` `) (JJ private) ('' ') (: ...) (JJ exclusive) (, ,) ('' '') (JJ complex) (CC and) (JJ expensive)) (`` ``) (VBN enclosed) (NN garden)) (: ...) (VP (VBZ belongs) (PP-LOC-CLR (IN in) (NP (NP (RB almost) (DT any) (NN location)) (CC but) (NP (DT the) (NN waterfront)))))))) (. .) ('' '')))",
           "det(Council-3, The-1)\n" +
            "compound(Council-3, Parks-2)\n" +
            "nsubj(wrote-4, Council-3)\n" +
@@ -925,7 +925,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "cop(soft-11, is-10)\n" +
               "advcl(mean-4, soft-11)\n"},
             {TestType.BASIC,
-             "( (S (NP-SBJ (PRP it)) (VP (VBD wase) (RB nt) (VP (VBG going))) (. ....)))",
+             "((S (NP-SBJ (PRP it)) (VP (VBD wase) (RB nt) (VP (VBG going))) (. ....)))",
              "nsubj(going-4, it-1)\n" +
               "aux(going-4, wase-2)\n" +
               "neg(going-4, nt-3)\n" +

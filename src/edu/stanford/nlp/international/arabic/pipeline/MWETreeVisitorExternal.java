@@ -100,7 +100,7 @@ public class MWETreeVisitorExternal implements TreeVisitor  {
    * 
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length != 1) {
       System.err.printf("Usage: java %s atb_tree_file > atb_tree_file.out%n", MWETreeVisitorExternal.class.getName());
       System.exit(-1);

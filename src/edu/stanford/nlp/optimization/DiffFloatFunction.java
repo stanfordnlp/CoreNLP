@@ -17,5 +17,5 @@ public interface DiffFloatFunction extends FloatFunction {
    * @param x a <code>double[]</code> input vector
    * @return the vector of first partial derivatives.
    */
-  float[] derivativeAt(float[] x);
+  float[] derivativeAt(float... x);
 }

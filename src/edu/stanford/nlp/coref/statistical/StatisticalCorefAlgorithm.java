@@ -68,7 +68,7 @@ public class StatisticalCorefAlgorithm implements CorefAlgorithm {
     this.thresholds = makeThresholds(thresholds);
   }
 
-  private static Map<Pair<Boolean, Boolean>, Double> makeThresholds(double[] thresholds) {
+  private static Map<Pair<Boolean, Boolean>, Double> makeThresholds(double... thresholds) {
     Map<Pair<Boolean, Boolean>, Double> thresholdsMap = new HashMap<>();
     thresholdsMap.put(new Pair<>(true, true), thresholds[0]);
     thresholdsMap.put(new Pair<>(true, false), thresholds[1]);

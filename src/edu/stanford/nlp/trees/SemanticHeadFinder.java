@@ -611,7 +611,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
 
 
   // now overly complex so it deals with coordinations.  Maybe change this class to use tregrex?f
-  private boolean hasPassiveProgressiveAuxiliary(Tree[] kids) {
+  private boolean hasPassiveProgressiveAuxiliary(Tree... kids) {
     if (DEBUG) {
       log.info("Checking for passive/progressive auxiliary");
     }

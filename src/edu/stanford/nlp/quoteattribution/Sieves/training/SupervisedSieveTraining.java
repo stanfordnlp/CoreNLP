@@ -531,7 +531,7 @@ public class SupervisedSieveTraining {
   }
 
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     String home = "/home/mjfang/action_grammars/";
     // make the first argument one for a base directory
     String specificFile = "1PPDevUncollapsed.props";

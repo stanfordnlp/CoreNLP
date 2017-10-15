@@ -355,7 +355,7 @@ public class CreateClauseDataset implements TSVSentenceProcessor  {
   /**
    * The main entry point of the code.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     forceTrack("Processing treebanks");
     List<Pair<CoreMap, Collection<Pair<Span, Span>>>> trainingData = new ArrayList<>();
     trainingData.addAll(processDirectory("WSJ", new File("/home/gabor/lib/data/penn_treebank/wsj")));

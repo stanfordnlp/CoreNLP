@@ -143,7 +143,7 @@ public class FTBCorrector implements TreeTransformer  {
   /**
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if(args.length != 1) {
       log.info("Usage: java " + FTBCorrector.class.getName() + " filename\n");
       System.exit(-1);

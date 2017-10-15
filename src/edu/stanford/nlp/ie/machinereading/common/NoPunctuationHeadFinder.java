@@ -48,7 +48,7 @@ public class NoPunctuationHeadFinder extends ModCollinsHeadFinder {
     return index;
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     // simple testing code
     Treebank treebank = new DiskTreebank();
     CategoryWordTag.suppressTerminalDetails = true;

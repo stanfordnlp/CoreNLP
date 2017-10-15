@@ -17,5 +17,5 @@ public interface DiffFunction extends Function {
    * @param x a <code>double[]</code> input vector
    * @return the vector of first partial derivatives.
    */
-  double[] derivativeAt(double[] x);
+  double[] derivativeAt(double... x);
 }

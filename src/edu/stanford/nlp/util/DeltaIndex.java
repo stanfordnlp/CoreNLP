@@ -114,7 +114,7 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
   }
 
   @Override
-  public Collection<E> objects(int[] indices) {
+  public Collection<E> objects(int... indices) {
     List<E> result = new ArrayList<>();
     for (int index : indices) {
       result.add(get(index));

@@ -527,7 +527,7 @@ public class ConfusionMatrix<U> {
     gui.setVisible(true);
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     ConfusionMatrix<String> confusion = new ConfusionMatrix<>();
     confusion.add("a", "a");
     confusion.add("a", "b");

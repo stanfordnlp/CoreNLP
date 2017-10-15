@@ -77,7 +77,7 @@ public class QuoteAttributionTest {
    * @throws IOException
    * @throws ClassNotFoundException
    */
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String... args) throws IOException, ClassNotFoundException {
     if (args.length != 5) {
       System.out.println("Usage: java QuoteAttributionTest familywordsfile animatefile gendernamesfile charactersfile modelfile");
       System.exit(1);

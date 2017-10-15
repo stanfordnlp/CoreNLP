@@ -314,7 +314,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
     return temp;
   }
 
-  public Triple<double[][], double[][], double[][]> separateWeights(double[] x) {
+  public Triple<double[][], double[][], double[][]> separateWeights(double... x) {
     double[] linearWeights = new double[edgeParamCount];
     System.arraycopy(x, 0, linearWeights, 0, edgeParamCount);
     double[][] linearWeights2D = to2D(linearWeights);
@@ -343,7 +343,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
     return new Triple<>(linearWeights2D, inputLayerWeights, outputLayerWeights);
   }
 
-  public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
+  public CliquePotentialFunction getCliquePotentialFunction(double... x) {
     Triple<double[][], double[][], double[][]> allParams = separateWeights(x);
     double[][] linearWeights = allParams.first();
     double[][] W = allParams.second(); // inputLayerWeights
@@ -355,7 +355,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
    * Calculates both value and partial derivatives at the point x, and save them internally.
    */
   @Override
-  public void calculate(double[] x) {
+  public void calculate(double... x) {
 
     double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     Triple<double[][], double[][], double[][]> allParams = separateWeights(x);
@@ -785,14 +785,14 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
     if (DEBUG) log.info("done!");
   }
 
-  public Set<Integer> getRegularizerParamRange(double[] x) {
+  public Set<Integer> getRegularizerParamRange(double... x) {
     Set<Integer> paramRange = Generics.newHashSet(x.length);
     for (int i = 0; i < beforeOutputWeights; i++)
       paramRange.add(i);
     return paramRange;
   }
 
-  public double[][] to2D(double[] linearWeights) {
+  public double[][] to2D(double... linearWeights) {
     double[][] newWeights = new double[numEdgeFeatures][];
     int index = 0;
     int labelIndicesSize = labelIndices.get(1).size();

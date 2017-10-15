@@ -367,7 +367,7 @@ public class SimpleSentiment {
   }
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     RedwoodConfiguration.standard().apply();
     startTrack("main");
 

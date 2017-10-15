@@ -46,7 +46,7 @@ import edu.stanford.nlp.util.*;
  * <li>Back references: {@code \captureid} </li>
  * <li>Value binding for groups: {@code [pattern] => [value]}.
  *   Value for matched expression can be accessed using {@code m.groupValue()}
- *   <br></br>Example: {@code ( one => 1 | two => 2 | three => 3 | ...)}
+ *   <br></br>Example: {@code (one => 1 | two => 2 | three => 3 | ...)}
  * </li>
  * </ul>
  *

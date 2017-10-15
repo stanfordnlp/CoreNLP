@@ -50,7 +50,7 @@ public class Evaluate extends AbstractEvaluate  {
    * the external predictor. Flags of interest include
    * <code> -equivalenceClasses </code>.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String modelPath = null;
     String treePath = null;
     boolean filterUnknown = false;

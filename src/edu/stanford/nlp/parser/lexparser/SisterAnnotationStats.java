@@ -321,7 +321,7 @@ public class SisterAnnotationStats implements TreeVisitor {
    *
    * @param args One argument: path to the Treebank
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     ClassicCounter<String> c = new ClassicCounter<>();
     c.setCount("A", 0);

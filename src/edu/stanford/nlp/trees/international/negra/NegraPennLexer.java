@@ -588,7 +588,7 @@ public class NegraPennLexer implements Lexer  {
    * @param argv   the command line, contains the filenames to run
    *               the scanner on.
    */
-  public static void main(String argv[]) {
+  public static void main(String ... argv) {
     if (argv.length == 0) {
       System.out.println("Usage : java NegraPennLexer [ --encoding <name> ] <inputfile(s)>");
     }

@@ -59,7 +59,7 @@ public class Weight implements Serializable {
     return pack;
   }
 
-  public void score(float[] scores) {
+  public void score(float... scores) {
     for (int i = 0; i < size(); ++i) {
       // Since this is the critical method, we optimize it even further.
       // We could do this:

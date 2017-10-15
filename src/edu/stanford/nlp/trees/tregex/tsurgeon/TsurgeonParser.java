@@ -11,7 +11,7 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants, Tsu
   protected JJTTsurgeonParserState jjtree = new JJTTsurgeonParserState();
   private TreeFactory treeFactory = new LabeledScoredTreeFactory();
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     System.out.println("Reading from standard input...");
     TsurgeonParser t = new TsurgeonParser(System.in);
     try {

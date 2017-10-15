@@ -28,7 +28,7 @@ public class FactoredSequenceListener implements SequenceListener {
    * Informs this sequence model that the value of the whole sequence is initialized to sequence
    *
    */
-  public void setInitialSequence(int[] sequence) {
+  public void setInitialSequence(int... sequence) {
     if(models != null){
       for (SequenceListener model : models) model.setInitialSequence(sequence);
       return;

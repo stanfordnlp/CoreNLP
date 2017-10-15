@@ -307,7 +307,7 @@ public class NERServer  {
    * @throws Exception If file or Java class problems with serialized classifier
    */
   @SuppressWarnings({"StringEqualsEmptyString"})
-  public static void main (String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props = StringUtils.argsToProperties(args);
     String loadFile = props.getProperty("loadClassifier");
     String loadJarFile = props.getProperty("loadJarClassifier");

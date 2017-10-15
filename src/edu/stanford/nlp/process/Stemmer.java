@@ -570,7 +570,7 @@ public class Stemmer implements Function<Word,Word> {
    * forcing lower case must be done outside the Stemmer class.
    * Usage: Stemmer file-name file-name ...
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Stemmer s = new Stemmer();
     if (args[0].equals("-file")) {
       Iterator<Word> it = PTBTokenizer.newPTBTokenizer(new InputStreamReader(new FileInputStream(args[1]), "utf-8"));

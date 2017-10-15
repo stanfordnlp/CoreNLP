@@ -857,7 +857,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if(args.length != 1) {
       System.exit(-1);
     }

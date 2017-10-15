@@ -59,7 +59,7 @@ public class CRFLogConditionalObjectiveFunctionNoisyLabel extends CRFLogConditio
    * Calculates both value and partial derivatives at the point x, and save them internally.
    */
   @Override
-  public void calculate(double[] x) {
+  public void calculate(double... x) {
     clear2D(Ehat);
     super.calculate(x);
   }

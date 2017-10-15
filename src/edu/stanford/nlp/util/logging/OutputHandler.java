@@ -76,7 +76,7 @@ public abstract class OutputHandler extends LogRecordHandler {
   protected Style trackStyle = Style.NONE;
   protected Map<String,Style> channelStyles = null;
 
-  static Pair<String,Redwood.Flag> getSourceStringAndLevel(Object[] channel) {
+  static Pair<String,Redwood.Flag> getSourceStringAndLevel(Object... channel) {
     // Parse the channels
     Class source = null;  // The class the message is coming from
     Object backupSource = null;  // Another identifier for the message

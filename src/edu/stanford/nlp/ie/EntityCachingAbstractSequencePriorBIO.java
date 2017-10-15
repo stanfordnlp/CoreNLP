@@ -120,7 +120,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
   }
 
   @Override
-  public void setInitialSequence(int[] initialSequence) {
+  public void setInitialSequence(int... initialSequence) {
     this.sequence = initialSequence;
     entities = new EntityBIO[initialSequence.length];
     // Arrays.fill(entities, null);  // not needed; Java arrays zero initialized

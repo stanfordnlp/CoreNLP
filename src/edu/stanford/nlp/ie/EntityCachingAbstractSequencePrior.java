@@ -101,7 +101,7 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
   }
 
   @Override
-  public void setInitialSequence(int[] initialSequence) {
+  public void setInitialSequence(int... initialSequence) {
     this.sequence = initialSequence;
     entities = new Entity[initialSequence.length];
     // Arrays.fill(entities, null); // not needed; Java arrays zero initialized

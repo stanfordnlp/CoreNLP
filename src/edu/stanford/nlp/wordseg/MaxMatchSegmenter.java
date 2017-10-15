@@ -291,7 +291,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
     return new ArrayList<>(segmentedWords);
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Properties props = StringUtils.argsToProperties(args);
     // logger.debug(props.toString());
     SeqClassifierFlags flags = new SeqClassifierFlags(props);

@@ -32,7 +32,7 @@ public class CoNLLBenchmark   {
 
   Map<String, double[]> embeddings = new HashMap<>();
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     new CoNLLBenchmark().benchmarkOptimizer();
   }
 

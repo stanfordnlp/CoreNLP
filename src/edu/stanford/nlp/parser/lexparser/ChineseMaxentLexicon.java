@@ -346,7 +346,7 @@ public class ChineseMaxentLexicon implements Lexicon  {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TreebankLangParserParams tlpParams = new ChineseTreebankParserParams();
     TreebankLanguagePack ctlp = tlpParams.treebankLanguagePack();
     Options op = new Options(tlpParams);

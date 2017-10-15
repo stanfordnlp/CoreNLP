@@ -608,7 +608,7 @@ public final class MultiWordPreprocessor  {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Properties options = StringUtils.argsToProperties(args, argOptionDefs);
     if(!options.containsKey("") || options.containsKey("help")) {
       log.info(usage());

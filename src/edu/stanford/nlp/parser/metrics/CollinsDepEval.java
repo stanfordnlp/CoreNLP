@@ -209,7 +209,7 @@ public class CollinsDepEval extends AbstractEval  {
    * 
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if(args.length < MIN_ARGS) {
       log.info(usage());
       System.exit(-1);

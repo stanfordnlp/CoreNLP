@@ -46,7 +46,7 @@ public class MentionDetectionEvaluator implements CorefDocumentProcessor {
   @Override
   public void finish() throws Exception {}
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props = StringUtils.argsToProperties(new String[] {"-props", args[0]});
     Dictionaries dictionaries = new Dictionaries(props);
     CorefProperties.setInput(props, Dataset.TRAIN);

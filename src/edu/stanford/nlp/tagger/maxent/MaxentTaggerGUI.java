@@ -73,7 +73,7 @@ public class MaxentTaggerGUI extends JFrame {
    *
    *  @param args None or a modelPath, as above
    */
-  public static void main(final String[] args) {
+  public static void main(final String... args) {
 
     Thread t = new Thread() {
       @Override

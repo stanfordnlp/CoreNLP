@@ -189,7 +189,7 @@ public class TextAnnotationPatternsInterface {
    * client that connects just to show interesting logging
    * messages.  It is certainly not necessary to do this.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     System.out.println("The modeling server is running.");
     int clientNumber = 0;
     ServerSocket listener = new ServerSocket(9898);

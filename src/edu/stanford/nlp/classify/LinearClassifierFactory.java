@@ -1018,7 +1018,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       this.labelIndex = labelIndex;
     }
 
-    public LinearClassifier createLinearClassifier(double[] weights) {
+    public LinearClassifier createLinearClassifier(double... weights) {
       double[][] weights2D;
       if (objective != null) {
         weights2D = objective.to2D(weights);
@@ -1029,12 +1029,12 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     }
 
     @Override
-    public Classifier createClassifier(double[] weights) {
+    public Classifier createClassifier(double... weights) {
       return createLinearClassifier(weights);
     }
 
     @Override
-    public ProbabilisticClassifier createProbabilisticClassifier(double[] weights) {
+    public ProbabilisticClassifier createProbabilisticClassifier(double... weights) {
       return createLinearClassifier(weights);
     }
   }

@@ -181,7 +181,7 @@ public class ChineseCorefBenchmarkSlowITest extends TestCase {
             results.getCount(CEAFE_TP), results.getCount(CEAFE_F1), results.getCount(BLANC_F1), results.getCount(CONLL_SCORE));
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     String actualResults = IOUtils.slurpFile(args[0]);
     Counter<String> results = getCorefResults(actualResults);
     printResultsTSV(results, System.out);

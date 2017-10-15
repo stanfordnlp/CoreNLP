@@ -227,7 +227,7 @@ public class SemanticGraphFormatter {
     System.out.println();
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     SemanticGraphFormatter fmt = new SemanticGraphFormatter();
 

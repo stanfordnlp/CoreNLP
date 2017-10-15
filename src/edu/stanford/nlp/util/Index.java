@@ -94,7 +94,7 @@ public interface Index<E> extends Iterable<E>, Serializable {
    * @param indices An array of indices
    * @return a {@link Collection} of the objects corresponding to the indices argument.
    */
-  public Collection<E> objects(int[] indices);
+  public Collection<E> objects(int... indices);
 
   /**
    * Queries the Index for whether it's locked or not.

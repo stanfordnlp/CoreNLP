@@ -133,7 +133,7 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
   }
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
     ArgumentParser.fillOptions(KBPTokensregexExtractor.class, args);
     KBPTokensregexExtractor extractor = new KBPTokensregexExtractor(DIR);

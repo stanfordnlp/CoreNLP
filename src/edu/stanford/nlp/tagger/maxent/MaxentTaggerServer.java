@@ -249,7 +249,7 @@ public class MaxentTaggerServer  {
    * @throws Exception If file or Java class problems with serialized classifier
    */
   @SuppressWarnings({"StringEqualsEmptyString"})
-  public static void main (String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     if (args.length == 0) {
       log.info(USAGE);
       return;

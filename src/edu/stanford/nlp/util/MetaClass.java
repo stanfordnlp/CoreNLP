@@ -407,7 +407,7 @@ public class MetaClass {
     }
   }
 
-  public boolean checkConstructor(Object... params){
+  public boolean checkConstructor(Object... params) {
     try{
       createInstance(params);
       return true;

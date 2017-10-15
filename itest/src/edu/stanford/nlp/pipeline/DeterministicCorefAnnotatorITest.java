@@ -130,7 +130,7 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     //    Assert.assertEquals(denverToken1.get(CorefCoreAnnotations.CorefClusterAnnotation.class), denverToken2.get(CorefCoreAnnotations.CorefClusterAnnotation.class));
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     DeterministicCorefAnnotatorITest itest = new DeterministicCorefAnnotatorITest();
     itest.testDeterministicCorefAnnotator();
   }

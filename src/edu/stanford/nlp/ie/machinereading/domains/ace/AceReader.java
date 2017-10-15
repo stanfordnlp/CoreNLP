@@ -489,7 +489,7 @@ public class AceReader extends GenericDataSetReader  {
   }
 
   // simple testing code
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
     AceReader r = new AceReader(new StanfordCoreNLP(props, false), false);
     r.setLoggerLevel(Level.INFO);

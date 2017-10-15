@@ -21,7 +21,7 @@ public class AdaptedGaussianPriorObjectiveFunction<L, F> extends LogConditionalO
    * Calculate the conditional likelihood.
    */
   @Override
-  protected void calculate(double[] x) {
+  protected void calculate(double... x) {
     if (useSummedConditionalLikelihood) {
       calculateSCL(x);
     } else {
@@ -32,13 +32,13 @@ public class AdaptedGaussianPriorObjectiveFunction<L, F> extends LogConditionalO
 
   /**
    */
-  private void calculateSCL(double[] x) {
+  private void calculateSCL(double... x) {
     throw new UnsupportedOperationException();
   }
 
   /**
    */
-  private void calculateCL(double[] x) {
+  private void calculateCL(double... x) {
     value = 0.0;
     if (derivativeNumerator == null) {
       derivativeNumerator = new double[x.length];
@@ -97,7 +97,7 @@ public class AdaptedGaussianPriorObjectiveFunction<L, F> extends LogConditionalO
   /**
    */
   @Override
-  protected void rvfcalculate(double[] x) {
+  protected void rvfcalculate(double... x) {
     throw new UnsupportedOperationException();
   }
 

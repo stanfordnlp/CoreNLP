@@ -309,7 +309,7 @@ public class SieveCoreferenceSystem  {
    *  -props 'Location of coref.properties'
    * @throws Exception
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props = StringUtils.argsToProperties(args);
     initializeAndRunCoref(props);
   }

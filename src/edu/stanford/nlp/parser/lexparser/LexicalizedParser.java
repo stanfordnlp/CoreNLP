@@ -1177,7 +1177,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    *
    * @param args Command line arguments, as above
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     boolean train = false;
     boolean saveToSerializedFile = false;
     boolean saveToTextFile = false;

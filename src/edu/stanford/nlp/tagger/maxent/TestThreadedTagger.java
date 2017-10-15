@@ -121,8 +121,7 @@ class TestThreadedTagger {
     }
   }
 
-  public static void main(final String[] args)
-    throws ClassNotFoundException, IOException, InterruptedException
+  public static void main(final String... args) throws ClassNotFoundException, IOException, InterruptedException
   {
     Properties props = StringUtils.argsToProperties(args);
     runThreadedTest(props);

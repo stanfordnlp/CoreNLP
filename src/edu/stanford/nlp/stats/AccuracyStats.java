@@ -90,7 +90,7 @@ public class AccuracyStats<L> implements Scorer<L> {
     return sb.toString();
   }
 
-  public static String toStringArr(int[] acc) {
+  public static String toStringArr(int... acc) {
     StringBuilder sb = new StringBuilder();
     int total = acc.length;
     for (int i = 0; i < acc.length; i++) {

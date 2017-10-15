@@ -223,7 +223,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
     }
   }
 
-  private List<CoreLabel> readProtoBufAnnotation(byte[] sent) throws IOException {
+  private List<CoreLabel> readProtoBufAnnotation(byte... sent)throws IOException {
     ProtobufAnnotationSerializer p = new ProtobufAnnotationSerializer();
     List<CoreLabel> toks = new ArrayList<>();
     ByteArrayInputStream is = new ByteArrayInputStream(sent);

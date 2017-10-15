@@ -154,7 +154,7 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
     return getConllEvalString(true);
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     StringUtils.logInvocationString(log, args);
     Properties props = StringUtils.argsToProperties(args);
     String boundary = props.getProperty("b","-X-");

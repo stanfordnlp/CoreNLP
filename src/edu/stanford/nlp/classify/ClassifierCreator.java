@@ -6,5 +6,5 @@ package edu.stanford.nlp.classify;
  * @author Angel Chang
  */
 public interface ClassifierCreator<L,F> {
-  public Classifier<L,F> createClassifier(double[] weights);
+  public Classifier<L,F> createClassifier(double... weights);
 }

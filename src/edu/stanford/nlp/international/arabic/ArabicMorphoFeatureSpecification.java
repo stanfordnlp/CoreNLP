@@ -274,7 +274,7 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if(args.length != 2) {
       System.err.printf("Usage: java %s filename feats%n", ArabicMorphoFeatureSpecification.class.getName());
       System.exit(-1);

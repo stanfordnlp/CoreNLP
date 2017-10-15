@@ -418,7 +418,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       monitorX(x);
     }
 
-    void monitorX(double[] x) {
+    void monitorX(double... x) {
       if (this.mon != null) {
         this.mon.valueAt(x);
       }
@@ -828,7 +828,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     return d;
   }
 
-  private double doEvaluation(double[] x) {
+  private double doEvaluation(double... x) {
     // Evaluate solution
     if (evaluators == null) return Double.NEGATIVE_INFINITY;
     double score = 0;

@@ -620,7 +620,7 @@ public class TreeBinarizer implements TreeTransformer  {
    *  @param args Command line arguments: flags as above, as above followed by
    *     treebankPath
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TreebankLangParserParams tlpp = null;
     // TreebankLangParserParams tlpp = new EnglishTreebankParserParams();
     // TreeReaderFactory trf = new LabeledScoredTreeReaderFactory();

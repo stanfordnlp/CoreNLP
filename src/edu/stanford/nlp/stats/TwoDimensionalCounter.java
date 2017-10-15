@@ -465,7 +465,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TwoDimensionalCounter<String, String> cc = new TwoDimensionalCounter<>();
     cc.setCount("a", "c", 1.0);
     cc.setCount("b", "c", 1.0);

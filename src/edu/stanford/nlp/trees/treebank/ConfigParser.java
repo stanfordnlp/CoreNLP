@@ -217,7 +217,7 @@ public class ConfigParser implements Iterable<Properties>  {
     return sb.toString();
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     ConfigParser cp = new ConfigParser("configurations/sample.conf");
     cp.parse();
 

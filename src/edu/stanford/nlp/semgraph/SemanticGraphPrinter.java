@@ -32,7 +32,7 @@ public class SemanticGraphPrinter  {
   private static Redwood.RedwoodChannels log = Redwood.channels(SemanticGraphPrinter.class);
   private SemanticGraphPrinter() {} // main method only
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     Treebank tb = new MemoryTreebank();
     Properties props = StringUtils.argsToProperties(args);

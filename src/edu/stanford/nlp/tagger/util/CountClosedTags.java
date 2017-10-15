@@ -240,7 +240,7 @@ public class CountClosedTags  {
     }
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     System.setOut(new PrintStream(System.out, true, "UTF-8"));
     System.setErr(new PrintStream(System.err, true, "UTF-8"));
 

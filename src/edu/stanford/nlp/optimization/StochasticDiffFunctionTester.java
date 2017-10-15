@@ -406,7 +406,7 @@ public class StochasticDiffFunctionTester  {
   }
 
 
-  public double[] getVariance(double[] x){
+  public double[] getVariance(double... x) {
     return getVariance(x,testBatchSize);
   }
 
@@ -484,7 +484,7 @@ public class StochasticDiffFunctionTester  {
   }
 
 
-  public void testVariance(double[] x){
+  public void testVariance(double... x) {
 
     int[] batchSizes = {10,20,35,50,75,150,300,500,750,1000,5000,10000};
     double[] varResult;

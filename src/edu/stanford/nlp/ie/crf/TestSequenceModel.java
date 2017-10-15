@@ -109,7 +109,7 @@ public class TestSequenceModel implements SequenceModel {
   }
 
   @Override
-  public double scoreOf(int[] sequence) {
+  public double scoreOf(int... sequence) {
     throw new UnsupportedOperationException();
   }
 

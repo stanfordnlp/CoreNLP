@@ -89,7 +89,7 @@ public class FactoredParser  {
  * tree4b is the best combo parse, binarized
  */
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Options op = new Options(new EnglishTreebankParserParams());
     // op.tlpParams may be changed to something else later, so don't use it till
     // after options are parsed.

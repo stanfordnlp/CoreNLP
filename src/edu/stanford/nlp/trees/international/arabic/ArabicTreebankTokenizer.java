@@ -79,7 +79,7 @@ public class ArabicTreebankTokenizer extends PennTreebankTokenizer  {
     return null;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Tokenizer<String> att = new ArabicTreebankTokenizer(new FileReader(args[0]));
     while (att.hasNext()) {
       System.out.print(att.next());

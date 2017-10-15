@@ -24,7 +24,7 @@ public class WeightedRVFDataset<L, F> extends RVFDataset<L, F> {
     this.weights = trainWeights;
   }
 
-  private float[] trimToSize(float[] i) {
+  private float[] trimToSize(float... i) {
     float[] newI = new float[size];
     synchronized (System.class) {
       System.arraycopy(i, 0, newI, 0, size);

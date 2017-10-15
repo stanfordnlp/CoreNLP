@@ -126,7 +126,7 @@ public final class ConvertByteArray {
     return c;
   }
 
-  public static String byteArrToUString(byte[] b) {
+  public static String byteArrToUString(byte... b) {
     String s;
     if (b.length == 0) {
       s = "";
@@ -156,7 +156,7 @@ public final class ConvertByteArray {
     return s;
   }
 
-  public static String byteArrToAString(byte[] b) {
+  public static String byteArrToAString(byte... b) {
     return new String(b);
   }
 
@@ -187,7 +187,7 @@ public final class ConvertByteArray {
 
   //-----------------------------------------------------------------
 
-  public static byte[] intArrToByteArr(int[] i) {
+  public static byte[] intArrToByteArr(int... i) {
     return intArrToByteArr(i, 0, i.length);
   }
 
@@ -211,7 +211,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static byte[] longArrToByteArr(long[] l) {
+  public static byte[] longArrToByteArr(long... l) {
     return longArrToByteArr(l, 0, l.length);
   }
 
@@ -233,7 +233,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static byte[] booleanArrToByteArr(boolean[] b) {
+  public static byte[] booleanArrToByteArr(boolean... b) {
     return booleanArrToByteArr(b, 0, b.length);
   }
 
@@ -259,7 +259,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static byte[] charArrToByteArr(char[] c) {
+  public static byte[] charArrToByteArr(char... c) {
     return charArrToByteArr(c, 0, c.length);
   }
 
@@ -279,7 +279,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static byte[] floatArrToByteArr(float[] f) {
+  public static byte[] floatArrToByteArr(float... f) {
     return floatArrToByteArr(f, 0, f.length);
   }
 
@@ -305,7 +305,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static byte[] doubleArrToByteArr(double[] d) {
+  public static byte[] doubleArrToByteArr(double... d) {
     return doubleArrToByteArr(d, 0, d.length);
   }
 
@@ -329,7 +329,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static byte[] shortArrToByteArr(short[] s) {
+  public static byte[] shortArrToByteArr(short... s) {
     return shortArrToByteArr(s, 0, s.length);
   }
 
@@ -349,7 +349,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static byte[] uStringArrToByteArr(String[] s) {
+  public static byte[] uStringArrToByteArr(String... s) {
     return uStringArrToByteArr(s, 0, s.length);
   }
 
@@ -390,7 +390,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static byte[] aStringArrToByteArr(String[] s) {
+  public static byte[] aStringArrToByteArr(String... s) {
     return aStringArrToByteArr(s, 0, s.length);
   }
 
@@ -433,7 +433,7 @@ public final class ConvertByteArray {
 
   //-----------------------------------------------------------------
 
-  public static int[] byteArrToIntArr(byte[] b) {
+  public static int[] byteArrToIntArr(byte... b) {
     return byteArrToIntArr(b, 0, b.length / 4);
   }
 
@@ -459,7 +459,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static long[] byteArrToLongArr(byte[] b) {
+  public static long[] byteArrToLongArr(byte... b) {
     return byteArrToLongArr(b, 0, b.length / 8);
   }
 
@@ -483,7 +483,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static boolean[] byteArrToBooleanArr(byte[] b) {
+  public static boolean[] byteArrToBooleanArr(byte... b) {
     return byteArrToBooleanArr(b, 0, b.length);
   }
 
@@ -501,7 +501,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static char[] byteArrToCharArr(byte[] b) {
+  public static char[] byteArrToCharArr(byte... b) {
     return byteArrToCharArr(b, 0, b.length / 2);
   }
 
@@ -519,7 +519,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static short[] byteArrToShortArr(byte[] b) {
+  public static short[] byteArrToShortArr(byte... b) {
     return byteArrToShortArr(b, 0, b.length / 2);
   }
 
@@ -537,7 +537,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static float[] byteArrToFloatArr(byte[] b) {
+  public static float[] byteArrToFloatArr(byte... b) {
     return byteArrToFloatArr(b, 0, b.length / 4);
   }
 
@@ -570,7 +570,7 @@ public final class ConvertByteArray {
    * @param b Array to decode to doubles
    * @return Array of doubles.
    */
-  public static double[] byteArrToDoubleArr(byte[] b) {
+  public static double[] byteArrToDoubleArr(byte... b) {
     return byteArrToDoubleArr(b, 0, b.length / 8);
   }
 
@@ -596,7 +596,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static String[] byteArrToUStringArr(byte[] b) {
+  public static String[] byteArrToUStringArr(byte... b) {
     int off = 0;
     Vector<String> v = new Vector<>();
     while (off < b.length) {
@@ -643,7 +643,7 @@ public final class ConvertByteArray {
     }
   }
 
-  public static String[] byteArrToAStringArr(byte[] b) {
+  public static String[] byteArrToAStringArr(byte... b) {
     int off = 0;
     Vector<String> v = new Vector<>();
     while (off < b.length) {

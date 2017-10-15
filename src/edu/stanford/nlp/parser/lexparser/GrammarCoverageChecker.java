@@ -125,11 +125,11 @@ public class GrammarCoverageChecker {
   /**
    * Usage: java edu.stanford.nlp.parser.lexparser.GrammarCoverageChecker parserFile treebankPath low high [optionFlags*]
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     new GrammarCoverageChecker().runTest(args);
   }
 
-  public void runTest(String[] args) {
+  public void runTest(String... args) {
     // get a parser from file
     LexicalizedParser pd = LexicalizedParser.loadModel(args[0]);
     op = pd.getOp(); // in case a serialized options was read in

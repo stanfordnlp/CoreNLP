@@ -162,7 +162,7 @@ public class Evalb extends AbstractEval  {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length < minArgs) {
       log.info(usage());
       System.exit(-1);

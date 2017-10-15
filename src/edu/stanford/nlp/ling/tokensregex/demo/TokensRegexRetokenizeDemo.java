@@ -44,7 +44,7 @@ public class TokensRegexRetokenizeDemo {
     out.flush();
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     PrintWriter out;
 
     String rules;

@@ -125,7 +125,7 @@ public class FactorTable  {
     index % numClasses -> curr timestamp index
     index / numClasses -> prev timestamp index
   */
-  private int indexOf(int[] entry) {
+  private int indexOf(int... entry) {
     int index = 0;
     for (int item : entry) {
       index *= numClasses;
@@ -155,7 +155,7 @@ public class FactorTable  {
     return index;
   }
 
-  private int[] indicesEnd(int[] entries) {
+  private int[] indicesEnd(int... entries) {
     int index = 0;
     for (int entry : entries) {
       index *= numClasses;
@@ -179,7 +179,7 @@ public class FactorTable  {
    *  @param entries The class indices of size windowsSize
    *  @return First index of requested entries
    */
-  private int indicesFront(int[] entries) {
+  private int indicesFront(int... entries) {
     int start = 0;
     for (int entry : entries) {
       start *= numClasses;
@@ -206,15 +206,15 @@ public class FactorTable  {
   }
 
   /** Returns a single clique potential. */
-  public double unnormalizedLogProb(int[] label) {
+  public double unnormalizedLogProb(int... label) {
     return getValue(label);
   }
 
-  public double logProb(int[] label) {
+  public double logProb(int... label) {
     return unnormalizedLogProb(label) - totalMass();
   }
 
-  public double prob(int[] label) {
+  public double prob(int... label) {
     return Math.exp(unnormalizedLogProb(label) - totalMass());
   }
 
@@ -274,7 +274,7 @@ public class FactorTable  {
    *
    * @return the probabilities of the tag at the end of the table
    */
-  public double[] conditionalLogProbsGivenPrevious(int[] given) {
+  public double[] conditionalLogProbsGivenPrevious(int... given) {
     if (given.length != windowSize - 1) {
       throw new IllegalArgumentException("conditionalLogProbsGivenPrevious requires given one less than clique size (" +
           windowSize + ") but was " + Arrays.toString(given));
@@ -365,7 +365,7 @@ public class FactorTable  {
     return table[indexOf(of, given)] - z;
   }
 
-  public double unnormalizedLogProbFront(int[] labels) {
+  public double unnormalizedLogProbFront(int... labels) {
     int startIndex = indicesFront(labels);
     int numCellsToSum = SloppyMath.intPow(numClasses, windowSize - labels.length);
     // double[] masses = new double[labels.length];
@@ -375,7 +375,7 @@ public class FactorTable  {
     return ArrayMath.logSum(table, startIndex, startIndex + numCellsToSum);
   }
 
-  public double logProbFront(int[] label) {
+  public double logProbFront(int... label) {
     return unnormalizedLogProbFront(label) - totalMass();
   }
 
@@ -388,7 +388,7 @@ public class FactorTable  {
     return unnormalizedLogProbFront(label) - totalMass();
   }
 
-  public double unnormalizedLogProbEnd(int[] labels) {
+  public double unnormalizedLogProbEnd(int... labels) {
     labels = indicesEnd(labels);
     double[] masses = new double[labels.length];
     for (int i = 0; i < masses.length; i++) {
@@ -397,7 +397,7 @@ public class FactorTable  {
     return ArrayMath.logSum(masses);
   }
 
-  public double logProbEnd(int[] labels) {
+  public double logProbEnd(int... labels) {
     return unnormalizedLogProbEnd(labels) - totalMass();
   }
 
@@ -414,7 +414,7 @@ public class FactorTable  {
     return table[index];
   }
 
-  public double getValue(int[] label) {
+  public double getValue(int... label) {
     return table[indexOf(label)];
   }
 
@@ -495,7 +495,7 @@ public class FactorTable  {
   }
 
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     int numClasses = 6;
     final int cliqueSize = 3;
     System.err.printf("Creating factor table with %d classes and window (clique) size %d%n", numClasses, cliqueSize);

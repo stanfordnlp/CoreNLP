@@ -14,7 +14,7 @@ public interface Function {
    * @param x a <code>double[]</code> input
    * @return the function value at the input
    */
-  double valueAt(double[] x);
+  double valueAt(double... x);
 
   /**
    * Returns the number of dimensions in the function's domain

@@ -1170,7 +1170,7 @@ public abstract class GrammaticalStructure implements Serializable  {
 
 
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     /* Language-specific default properties. The default
      * options produce English Universal dependencies.
      * This should be overwritten in every subclass.

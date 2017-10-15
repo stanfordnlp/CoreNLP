@@ -66,7 +66,7 @@ public class ConvertMatlabModel  {
     throw new RuntimeException("Could not find either " + binaryName + " or " + textName);
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     String basePath = "/user/socherr/scr/projects/semComp/RNTN/src/params/";
     int numSlices = 25;
 

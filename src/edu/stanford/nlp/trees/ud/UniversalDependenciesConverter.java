@@ -202,7 +202,7 @@ public class UniversalDependenciesConverter {
    * {@code -outputRepresentation}: "basic" (default), "enhanced", or "enhanced++"
    *
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Properties props = StringUtils.argsToProperties(args);
 
     String treeFileName = props.getProperty("treeFile");

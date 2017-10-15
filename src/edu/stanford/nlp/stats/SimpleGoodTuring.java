@@ -262,7 +262,7 @@ public class SimpleGoodTuring {
    * The last column represents the smoothed probabilities, and the first item
    * in this column represents the probability assigned to unseen items.
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     int[][] input = readInput();
     SimpleGoodTuring sgt = new SimpleGoodTuring(input[0], input[1]);
     sgt.print();

@@ -1147,7 +1147,7 @@ public class PhraseTable implements Serializable
       throw new UnsupportedOperationException("toArray is not supported for PhraseTable.PhraseStringCollection");
     }
 
-    public <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(T... a) {
       throw new UnsupportedOperationException("toArray is not supported for PhraseTable.PhraseStringCollection");
     }
 

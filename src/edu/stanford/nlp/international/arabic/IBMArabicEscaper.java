@@ -193,7 +193,7 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
    *  @param args A list of filenames.  The files must be UTF-8 encoded.
    *  @throws IOException If there are any issues
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     IBMArabicEscaper escaper = new IBMArabicEscaper();
     boolean printToStdout = false;
     for (String arg : args) {

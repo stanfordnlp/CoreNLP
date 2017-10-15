@@ -72,7 +72,7 @@ public class TestThreadedCRFClassifier {
    * -crf2 ../stanford-releases/stanford-ner-models/dewac_175m_600.ser.gz
    * -testFile ../data/german-ner/deu.testa -inputEncoding iso-8859-1
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     try {
       System.setOut(new PrintStream(System.out, true, "UTF-8"));
       System.setErr(new PrintStream(System.err, true, "UTF-8"));

@@ -31,7 +31,7 @@ public class WeightedDataset<L, F> extends Dataset<L, F> {
     weights = new float[initSize];
   }
 
-  private float[] trimToSize(float[] i) {
+  private float[] trimToSize(float... i) {
     float[] newI = new float[size];
     synchronized (System.class) {
       System.arraycopy(i, 0, newI, 0, size);

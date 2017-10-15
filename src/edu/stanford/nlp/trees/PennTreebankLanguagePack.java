@@ -216,7 +216,7 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   /** Prints a few aspects of the TreebankLanguagePack, just for debugging.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TreebankLanguagePack tlp = new PennTreebankLanguagePack();
     System.out.println("Start symbol: " + tlp.startSymbol());
     String start = tlp.startSymbol();

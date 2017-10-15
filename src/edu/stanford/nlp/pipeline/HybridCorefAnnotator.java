@@ -203,7 +203,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
     return document;
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
 //    String text = "Since the implementation of the Individual Visit Scheme between Hong Kong and the mainland , more and more mainland tourists are coming to visit Hong Kong. "
 //                  +"From the beginning up till now , more than seven million individual tourists , have come to Hong Kong. "

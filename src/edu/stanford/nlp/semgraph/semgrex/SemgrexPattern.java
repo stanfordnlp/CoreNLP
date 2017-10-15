@@ -407,7 +407,7 @@ public abstract class SemgrexPattern implements Serializable  {
    * <br>
    * See the help() function for a list of possible arguments to provide.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Map<String,Integer> flagMap = Generics.newHashMap();
 
     flagMap.put(PATTERN, 1);

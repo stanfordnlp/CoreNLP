@@ -151,7 +151,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure  {
   }
 
 
-  public static void main(String args[]) {
+  public static void main(String ... args) {
     Properties params = StringUtils.argsToProperties(args);
 
     if (params.getProperty("sentFile") != null) {

@@ -70,7 +70,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @return a {@link Collection} of the objects corresponding to the indices argument.
    */
   @Override
-  public Collection<E> objects(final int[] indices) {
+  public Collection<E> objects(final int... indices) {
     return new AbstractList<E>() {
       @Override
       public E get(int index) {

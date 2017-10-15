@@ -243,7 +243,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
    * @param args
    * @throws IOException 
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length != 1) {
       System.err.printf("Usage: java %s file > output%n", ArabicDocumentReaderAndWriter.class.getName());
       System.exit(-1);

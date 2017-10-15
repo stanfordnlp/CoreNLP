@@ -827,7 +827,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   public void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException, ClassNotFoundException {
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props = StringUtils.argsToProperties(args);
     NumberSequenceClassifier nsc =
       new NumberSequenceClassifier(props, true, props);

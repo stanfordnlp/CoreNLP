@@ -773,7 +773,7 @@ public final class SloppyMath  {
    * @param args Either none, and the log add routines are tested, or the
    *             following 4 arguments: k (cell), n (total), r (row), m (col)
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length == 0) {
       log.info("Usage: java edu.stanford.nlp.math.SloppyMath " + "[-logAdd|-fishers k n r m|-binomial r n p");
     } else if (args[0].equals("-logAdd")) {

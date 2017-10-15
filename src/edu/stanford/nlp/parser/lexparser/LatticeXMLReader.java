@@ -156,7 +156,7 @@ public class LatticeXMLReader implements Iterable<Lattice>  {
 
   /**
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     LatticeXMLReader reader = new LatticeXMLReader();
     try {
       System.setIn(new FileInputStream(args[0]));

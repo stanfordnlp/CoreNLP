@@ -28,7 +28,7 @@ public class MnistConverter {
 
   private MnistConverter() {}
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length != 4) {
       logger.info("Usage: MnistConverter dataFile labelFile outFile propsFile");
       return;

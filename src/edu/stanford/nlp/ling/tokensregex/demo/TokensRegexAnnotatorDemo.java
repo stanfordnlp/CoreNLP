@@ -17,7 +17,7 @@ import edu.stanford.nlp.util.CoreMap;
  */
 public class TokensRegexAnnotatorDemo {
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     PrintWriter out;
 
     String rules;

@@ -94,7 +94,7 @@ public class CNFTransformers {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     CategoryWordTag.printWordTag = false;
     String path = args[0];
     List<Tree> trees = TreebankAnnotator.getTrees(path, 200, 219, 0, 10);

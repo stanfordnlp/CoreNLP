@@ -28,7 +28,7 @@ public class GamePlayerBenchmark  {
   private static Redwood.RedwoodChannels log = Redwood.channels(GamePlayerBenchmark.class);
   static final String DATA_PATH = "/u/nlp/data/ner/conll/";
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String... args) throws IOException, ClassNotFoundException {
 
     //////////////////////////////////////////////////////////////
     // Generate the CoNLL CliqueTrees to use during gameplay

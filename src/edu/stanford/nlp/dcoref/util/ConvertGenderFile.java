@@ -23,7 +23,7 @@ public class ConvertGenderFile {
 
   private ConvertGenderFile() {} // static class
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     String input = null;
     String output = null;
     for (int argIndex = 0; argIndex < args.length; ) {

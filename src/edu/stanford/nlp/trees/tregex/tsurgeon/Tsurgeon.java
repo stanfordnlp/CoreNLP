@@ -308,7 +308,7 @@ public class Tsurgeon  {
    *        of transformation operations to apply to the matched pattern.
    * @throws Exception If an I/O or pattern syntax error
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     String headFinderClassName = null;
     String headFinderOption = "-hf";
     String[] headFinderArgs = null;

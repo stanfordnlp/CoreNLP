@@ -420,7 +420,7 @@ public class EquivalenceClassEval<IN, OUT> {
     return pads;
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     final Pattern p = Pattern.compile("^([^:]*):(.*)$");
     Collection<String> guesses = Arrays.asList(new String[]{"S:a", "S:b", "VP:c", "VP:d", "S:a"});
     Collection<String> golds = Arrays.asList(new String[]{"S:a", "S:b", "S:b", "VP:d", "VP:a"});

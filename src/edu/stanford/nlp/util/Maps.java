@@ -186,7 +186,7 @@ public class Maps {
     return sb.toString();
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Map<String, String> map1 = Generics.newHashMap();
     map1.put("a", "1");
     map1.put("b", "2");

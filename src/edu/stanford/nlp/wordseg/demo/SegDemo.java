@@ -25,7 +25,7 @@ public class SegDemo {
 
   private static final String basedir = System.getProperty("SegDemo", "data");
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     System.setOut(new PrintStream(System.out, true, "utf-8"));
 
     Properties props = new Properties();

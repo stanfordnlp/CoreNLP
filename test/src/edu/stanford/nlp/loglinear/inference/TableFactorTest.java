@@ -123,7 +123,7 @@ public class TableFactorTest {
     assertArrayEquals(gold, factor.getSummedMarginals()[indexOfVariable], 1.0e-5);
   }
 
-  private void normalize(double[] arr) {
+  private void normalize(double... arr) {
     double sum = 0;
     for (double d : arr) sum += d;
     if (sum == 0) {

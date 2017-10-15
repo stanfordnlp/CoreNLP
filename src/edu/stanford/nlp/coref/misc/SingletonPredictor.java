@@ -160,7 +160,7 @@ public class SingletonPredictor  {
     return PropertiesUtils.getString(props, "coref.path.singletonPredictor", "edu/stanford/nlp/models/dcoref/singleton.predictor.ser");
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props;
     if (args.length > 0) {
       props = StringUtils.argsToProperties(args);

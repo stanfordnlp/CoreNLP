@@ -357,7 +357,7 @@ public class HybridCorefPrinter  {
     return sb.toString();
   }
 
-  public static void linkDistanceAnalysis(String[] args) throws Exception {
+  public static void linkDistanceAnalysis(String... args) throws Exception {
     Properties props = StringUtils.argsToProperties(args);
 
     HybridCorefSystem cs = new HybridCorefSystem(props);
@@ -432,7 +432,7 @@ public class HybridCorefPrinter  {
 
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     linkDistanceAnalysis(args);
   }
 }

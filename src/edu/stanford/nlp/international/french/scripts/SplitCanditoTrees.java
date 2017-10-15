@@ -97,8 +97,7 @@ public final class SplitCanditoTrees  {
     return ids;
   }
 
-  static Map<String, Tree> readTrees(String[] filenames)
-    throws IOException
+  static Map<String, Tree> readTrees(String... filenames)throws IOException
   {
     // TODO: perhaps we can just pass in CC_TAGSET and get rid of replacePOSTags
     // need to test that
@@ -350,7 +349,7 @@ public final class SplitCanditoTrees  {
    * projects/core/src/edu/stanford/nlp/international/french/pipeline/splits/ftb-uc-2010.id_mrg
    * ../data/french/corpus-fonctions/*.xml
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length < 2) {
       System.err.printf("Usage: java %s id_file [xml files]%n", SplitCanditoTrees.class.getName());
       System.exit(-1);

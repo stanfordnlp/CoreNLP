@@ -203,7 +203,7 @@ public class ExtractionSentence implements Serializable {
     return sb.toString();
   }
 
-  public static String tokensToString(Word [] tokens) {
+  public static String tokensToString(Word ... tokens) {
     StringBuilder  sb = new StringBuilder(512);
     for(int i = 0; i < tokens.length; i ++){
       if(i > 0) sb.append(" ");

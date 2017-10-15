@@ -763,7 +763,7 @@ public class Ssurgeon  {
    * Performs a simple test and print of a given file.
    * Usage Ssurgeon [-info infoFile] -patterns patternDir [-type interactive|testinfo]
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     for (int argIndex = 0; argIndex < args.length; ++argIndex) {
       if (args[argIndex].equalsIgnoreCase("-info")) {
         argsBox.info = args[argIndex + 1];

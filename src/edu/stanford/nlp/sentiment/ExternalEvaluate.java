@@ -55,7 +55,7 @@ public class ExternalEvaluate extends AbstractEvaluate  {
    * For example <br>
    * {@code java edu.stanford.nlp.sentiment.ExternalEvaluate annotatedTrees.txt predictedTrees.txt }
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     RNNOptions curOptions = new RNNOptions();
     String goldPath = null;
     String predictedPath = null;

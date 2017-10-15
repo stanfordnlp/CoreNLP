@@ -18,7 +18,7 @@ public class CrossValidateTestOptions  {
   private static Redwood.RedwoodChannels log = Redwood.channels(CrossValidateTestOptions.class);
   public static final double[] weights = { 0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 1.0 };
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String... args) throws IOException, ClassNotFoundException {
     String dvmodelFile = null;
     String lexparserFile = null;
     String testTreebankPath = null;

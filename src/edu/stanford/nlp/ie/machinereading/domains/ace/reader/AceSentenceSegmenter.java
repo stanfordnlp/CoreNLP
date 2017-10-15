@@ -94,7 +94,7 @@ public class AceSentenceSegmenter extends DomReader {
   }
   
   // simple testing code
-  public static void main(String[] args) throws IOException, SAXException,
+  public static void main(String... args) throws IOException, SAXException,
       ParserConfigurationException {
     String testFilename = "/home/mcclosky/data/ACE2005/English/wl/timex2norm/AGGRESSIVEVOICEDAILY_20041101.1144";
     // testFilename =

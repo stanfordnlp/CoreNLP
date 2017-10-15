@@ -447,7 +447,7 @@ public class FactoredLexicon extends BaseLexicon  {
   /**
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length != 4) {
       System.err.printf("Usage: java %s language features train_file dev_file%n", FactoredLexicon.class.getName());
       System.exit(-1);

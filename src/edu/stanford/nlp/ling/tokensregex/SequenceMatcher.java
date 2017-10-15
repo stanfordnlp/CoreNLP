@@ -810,8 +810,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       }
     }
 
-    private void addBidsToCollapse(int[] bids)
-    {
+    private void addBidsToCollapse(int... bids) {
       if (bidsToCollapse == null) {
         bidsToCollapse = new ArraySet<>(bids.length);
       }
@@ -1108,7 +1107,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
         Map<Integer,MatchedGroup> matchedGroups = getMatchedGroups(bid, true);
         MatchedGroup mg = matchedGroups.get(captureGroupId);
         if (mg != null) {
-          // This is possible if we have patterns like "( ... )+" in which case multiple nodes can match as the subgroup
+          // This is possible if we have patterns like "(... )+" in which case multiple nodes can match as the subgroup
           // We will match the first occurrence and use that as the subgroup  (Java uses the last match as the subgroup)
           logger.fine("Setting matchBegin=" + curPosition + ": Capture group " + captureGroupId + " already exists: " + mg);
         }

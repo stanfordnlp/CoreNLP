@@ -69,7 +69,7 @@ public class CHTBTokenizer extends AbstractTokenizer<String>  {
    * and prints it to standard output in the specified Encoding.
    * Its arguments are (Infile, Encoding).
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length < 2) {
       log.error("Usage: CHTBTokenizer inputFile encoding");
     }

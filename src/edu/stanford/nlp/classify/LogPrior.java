@@ -191,7 +191,7 @@ public class LogPrior implements Serializable {
     }
   }
 
-  public void setSigmaSquaredM(double[] sigmaSq) {
+  public void setSigmaSquaredM(double... sigmaSq) {
     if (type == LogPriorType.ADAPT) { otherPrior.setSigmaSquaredM(sigmaSq); }
     if (type == LogPriorType.MULTIPLE_QUADRATIC) {
       //    this.sigma = Math.sqrt(sigmaSq);

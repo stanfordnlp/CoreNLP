@@ -434,7 +434,7 @@ public class StringUtils  {
   /**
    * Joins elements with a space.
    */
-  public static String join(Object[] elements) {
+  public static String join(Object... elements) {
     return (join(elements, " "));
   }
 
@@ -846,7 +846,7 @@ public class StringUtils  {
    * @return a {@link Map} of flag names to flag argument {@link
    *         String} arrays.
    */
-  public static Map<String, String[]> argsToMap(String[] args) {
+  public static Map<String, String[]> argsToMap(String... args) {
     return argsToMap(args, Collections.emptyMap());
   }
 
@@ -1220,7 +1220,7 @@ public class StringUtils  {
    * @return A Map from keys to possible values (String or null)
    */
   @SuppressWarnings("unchecked")
-  public static Map<String, String> parseCommandLineArguments(String[] args) {
+  public static Map<String, String> parseCommandLineArguments(String... args) {
     return (Map)parseCommandLineArguments(args, false);
   }
 
@@ -1756,7 +1756,7 @@ public class StringUtils  {
   /**
    * Tests the string edit distance function.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
 
     String[] s = {"there once was a man", "this one is a manic", "hey there", "there once was a mane", "once in a manger.", "where is one match?", "Jo3seph Smarr!", "Joseph R Smarr"};
     for (int i = 0; i < 8; i++) {
@@ -1839,7 +1839,7 @@ public class StringUtils  {
   }
 
 
-  public static String toCSVString(String[] fields) {
+  public static String toCSVString(String... fields) {
     StringBuilder b = new StringBuilder();
     for (String fld : fields) {
       if (b.length() > 0) {
@@ -2058,7 +2058,7 @@ public class StringUtils  {
    * listed in the props file, and if not found then using the environment
    * variables. if the variable is not found then substitute it for empty string
    */
-  public static Properties argsToPropertiesWithResolve(String[] args) {
+  public static Properties argsToPropertiesWithResolve(String... args) {
     LinkedHashMap<String, String> result = new LinkedHashMap<>();
     Map<String, String> existingArgs = new LinkedHashMap<>();
 

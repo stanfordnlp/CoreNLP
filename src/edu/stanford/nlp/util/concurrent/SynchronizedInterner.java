@@ -125,7 +125,7 @@ public class SynchronizedInterner<T> {
    * Test method: interns its arguments and says whether they == themselves.
    * @throws InterruptedException
    */
-  public static void main(final String[] args) throws InterruptedException {
+  public static void main(final String... args) throws InterruptedException {
     final Thread[] threads = new Thread[100];
     for (int i = 0; i < threads.length; i++) {
       threads[i] = new Thread(() -> {

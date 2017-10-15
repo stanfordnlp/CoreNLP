@@ -99,7 +99,7 @@ public class KNNClassifier<K,V> implements Classifier<K, V> {
   }
 
   // Quick little sanity check
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Collection<RVFDatum<String, String>> trainingInstances = new ArrayList<>();
     {
       ClassicCounter<String> f1 = new ClassicCounter<>();

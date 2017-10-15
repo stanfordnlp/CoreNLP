@@ -220,7 +220,7 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
     return !(numMatcher.find() || parentTagsToEscape.contains(parent));
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Mapper m = new DefaultLexicalMapper();
 
     System.out.printf("< :-> %s\n",m.map(null, "FNKqq"));

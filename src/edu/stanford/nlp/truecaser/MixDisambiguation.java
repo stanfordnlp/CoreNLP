@@ -22,7 +22,7 @@ public class MixDisambiguation {
 
   private MixDisambiguation() {} // static class
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     boolean outputLowercase = true;
     for (String arg : args) {
       if (arg.equalsIgnoreCase("-noLowercase")) {

@@ -570,7 +570,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer  {
     }
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props = StringUtils.argsToProperties(args);
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     String file = props.getProperty("file");

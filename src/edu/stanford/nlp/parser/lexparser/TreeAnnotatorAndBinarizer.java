@@ -313,7 +313,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
    *  @param args Command line arguments: All flags accepted by FactoredParser.setOptionFlag
    *     and -train treebankPath [fileRanges]
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Options op = new Options();
     String treebankPath = null;
     FileFilter trainFilter = null;

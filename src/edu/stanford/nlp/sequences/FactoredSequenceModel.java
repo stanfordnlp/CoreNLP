@@ -50,7 +50,7 @@ public class FactoredSequenceModel implements SequenceModel {
 
   /** {@inheritDoc} */
   @Override
-  public double scoreOf(int[] sequence) {
+  public double scoreOf(int... sequence) {
     if(models != null){
       double score = 0;
       for(int i = 0; i < models.length; i++)

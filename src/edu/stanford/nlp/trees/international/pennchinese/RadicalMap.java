@@ -106,7 +106,7 @@ public class RadicalMap {
    *
    * @throws IOException
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length == 0) {
       System.out.println("usage: RadicalMap [-rebuild <dict_file>] [-infile <file>] [-encoding <encoding>] [char]+");
     }

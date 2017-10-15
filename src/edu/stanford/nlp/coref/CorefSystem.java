@@ -117,7 +117,7 @@ public class CorefSystem {
     writerAfterCoref.close();
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props = StringUtils.argsToProperties(args);
     CorefSystem coref = new CorefSystem(props);
     coref.runOnConll(props);

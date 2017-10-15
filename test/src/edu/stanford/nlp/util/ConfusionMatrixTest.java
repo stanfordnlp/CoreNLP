@@ -143,7 +143,7 @@ public class ConfusionMatrixTest extends TestCase {
     }
   }
   
-  public static void main(String[] args) {
+  public static void main(String... args) {
     ConfusionMatrixTest tester = new ConfusionMatrixTest(true);
     System.out.println("Test 1");
     tester.testBasic();

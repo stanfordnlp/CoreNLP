@@ -1880,7 +1880,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * @param args Command-line arguments
    * @throws IOException If any file problems
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     TaggerConfig config = new TaggerConfig(args);
 
     if (config.getMode() == TaggerConfig.Mode.TRAIN) {

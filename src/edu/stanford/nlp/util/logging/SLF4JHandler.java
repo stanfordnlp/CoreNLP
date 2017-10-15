@@ -14,7 +14,7 @@ import java.util.List;
 @SuppressWarnings("unused")  // Called via reflection from RedwoodConfiguration
 public class SLF4JHandler extends OutputHandler {
 
-  private static Pair<Logger, Redwood.Flag> getLoggerAndLevel(Object[] channel) {
+  private static Pair<Logger, Redwood.Flag> getLoggerAndLevel(Object... channel) {
     Pair<String, Redwood.Flag> pair = getSourceStringAndLevel(channel);
     // Get the logger for slf4j
     Logger impl = LoggerFactory.getLogger(pair.first());

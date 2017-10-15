@@ -540,7 +540,7 @@ public class HTKLatticeReader  {
     return words;
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
 
     boolean mergeType = USESUM;
     boolean prettyPrint = true;

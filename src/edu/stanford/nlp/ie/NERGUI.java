@@ -745,7 +745,7 @@ public class NERGUI  {
   /** Run the GUI.  This program accepts no command-line arguments.
    *  Everything is entered into the GUI.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     //Schedule a job for the event-dispatching thread:
     //creating and showing this application's GUI.
     SwingUtilities.invokeLater(() -> {

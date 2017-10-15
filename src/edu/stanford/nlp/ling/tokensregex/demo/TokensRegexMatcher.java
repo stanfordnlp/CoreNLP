@@ -25,7 +25,7 @@ public class TokensRegexMatcher {
 
   private TokensRegexMatcher() {} // static demo class
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length < 2) {
       System.err.println("TokensRegexMatcher rules file [outFile]");
       return;

@@ -312,7 +312,7 @@ public class Redwood  {
    * @param format The format string, as per java's Formatter.format() object.
    * @param args The arguments to format.
    */
-  public static void logf(String format, Object... args){
+  public static void logf(String format, Object... args) {
     log((Supplier<String>) () -> new Formatter().format(format, args).toString());
   }
 
@@ -323,7 +323,7 @@ public class Redwood  {
    * @param format The format string, as per java's Formatter.format() object.
    * @param args The arguments to format.
    */
-  public static void logf(Flag level, String format, Object... args){
+  public static void logf(Flag level, String format, Object... args) {
     log(level, (Supplier<String>) () -> new Formatter().format(format, args).toString());
   }
 
@@ -332,7 +332,7 @@ public class Redwood  {
    * Channels other than the FORCE channel are ignored.
    * @param args The title of the track to begin, with an optional FORCE flag.
    */
-  public static void startTrack(final Object... args){
+  public static void startTrack(final Object... args) {
     if(isClosed){ return; }
     //--Create Record
     final int len = args.length == 0 ? 0 : args.length-1;
@@ -515,7 +515,7 @@ public class Redwood  {
    * Hide multiple channels.  All other channels will be unaffected.
    * @param channels The channels to hide
    */
-  public static void hideChannelsEverywhere(Object... channels){
+  public static void hideChannelsEverywhere(Object... channels) {
     for(LogRecordHandler handler : handlers){
       if(handler instanceof VisibilityHandler){
         VisibilityHandler visHandler = (VisibilityHandler) handler;
@@ -1311,7 +1311,7 @@ public class Redwood  {
    */
   // TODO(gabor) update this with the new RedwoodConfiguration
   @SuppressWarnings("deprecation")
-  public static void main(String[] args){
+  public static void main(String... args) {
 
     RedwoodConfiguration.current().listenOnChannels(record -> {
       System.out.println(">>> " + record.content.toString());

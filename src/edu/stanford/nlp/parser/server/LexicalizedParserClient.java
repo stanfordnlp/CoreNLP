@@ -167,8 +167,7 @@ public class LexicalizedParserClient {
     socket.close();
   }
 
-  public static void main(String[] args) 
-    throws IOException
+  public static void main(String... args) throws IOException
   {
     System.setOut(new PrintStream(System.out, true, "utf-8"));
     System.setErr(new PrintStream(System.err, true, "utf-8"));

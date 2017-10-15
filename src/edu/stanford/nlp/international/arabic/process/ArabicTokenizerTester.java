@@ -28,7 +28,7 @@ public class ArabicTokenizerTester  {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length != 2) {
       System.out.printf("Usage: java %s OPTS filename%n", ArabicTokenizerTester.class.getName());
       System.exit(-1);

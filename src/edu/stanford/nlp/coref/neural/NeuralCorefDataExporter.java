@@ -182,7 +182,7 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
         goldClusterPath + dataset.toString().toLowerCase()).run(props, dictionaries);
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Properties props = StringUtils.argsToProperties(new String[] {"-props", args[0]});
     Dictionaries dictionaries = new Dictionaries(props);
     String outputPath = args[1];

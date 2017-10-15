@@ -183,7 +183,7 @@ public class DcorefExactOutputITest {
   /**
    * If run as a program, writes the expected output of args[0] to args[1]
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     if (args.length != 2) {
       System.err.println("Expected args <input> <output>");
       throw new IllegalArgumentException();

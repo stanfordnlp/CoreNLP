@@ -784,7 +784,7 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  
   /**
    * For internal testing purposes only.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Counter<String> c2 = new ClassicCounter<>();
     c2.incrementCount("p", 13);
     c2.setCount("q", 12);

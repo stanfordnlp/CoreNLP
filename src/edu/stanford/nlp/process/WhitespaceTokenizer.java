@@ -214,7 +214,7 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
    * @param args Command line arguments
    * @throws IOException If can't open files, etc.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
 
     boolean eolIsSignificant = (args.length > 0 && args[0].equals("-cr"));
     Reader reader = ((args.length > 0 &&

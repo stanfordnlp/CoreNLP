@@ -139,7 +139,7 @@ public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements
    * @param args input dir and output filename
    * @throws IOException
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length != 3) {
       throw new RuntimeException("args: treebankPath trainNums testNums");
     }

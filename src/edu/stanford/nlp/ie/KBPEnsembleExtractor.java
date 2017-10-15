@@ -70,7 +70,7 @@ public class KBPEnsembleExtractor implements KBPRelationExtractor {
     return prediction;
   }
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String... args) throws IOException, ClassNotFoundException {
     RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
     ArgumentParser.fillOptions(KBPEnsembleExtractor.class, args);
 

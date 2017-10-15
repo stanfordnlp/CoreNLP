@@ -148,7 +148,7 @@ public class TraditionalSimplifiedCharacterMap implements Function<String, Strin
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TraditionalSimplifiedCharacterMap mapper = new TraditionalSimplifiedCharacterMap();
     mapper.translateFile(args[0], args[1]);
   }

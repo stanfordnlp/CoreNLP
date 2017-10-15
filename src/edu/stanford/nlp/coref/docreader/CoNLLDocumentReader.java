@@ -1019,7 +1019,7 @@ public class CoNLLDocumentReader implements DocReader  {
   }
 
   /** Reads and dumps output, mainly for debugging. */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
     boolean debug = false;
     String filepath = props.getProperty("i");

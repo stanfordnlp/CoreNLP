@@ -348,7 +348,7 @@ public class Dictionary  {
     return get(word).getAmbClassId();
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String s = "word";
     String tag = "tag";
     Dictionary d = new Dictionary();

@@ -124,7 +124,7 @@ public class UnlabeledAttachmentEval extends AbstractEval  {
    *
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TreebankLangParserParams tlpp = new EnglishTreebankParserParams();
     int maxGoldYield = Integer.MAX_VALUE;
     boolean VERBOSE = false;

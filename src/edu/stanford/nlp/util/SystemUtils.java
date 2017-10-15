@@ -247,8 +247,7 @@ public class SystemUtils {
    * given <code>String</code> array.  If there is any output, it is swallowed
    * (!).
    */
-  public static void runShellCommand(String[] cmd)
-    throws IOException {
+  public static void runShellCommand(String... cmd)throws IOException {
     runShellCommand(cmd, null, null);
   }
 
@@ -300,7 +299,7 @@ public class SystemUtils {
   }
 
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     StringBuilder out = new StringBuilder();
     runShellCommand("date", out);
     System.out.println("The date is " + out);

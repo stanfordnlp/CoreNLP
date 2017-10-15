@@ -33,7 +33,7 @@ public class UniformPrior<IN extends CoreMap> implements ListeningSequenceModel 
   }
 
   @Override
-  public double scoreOf(int[] sequence) {
+  public double scoreOf(int... sequence) {
     return 0;
   }
 
@@ -71,7 +71,7 @@ public class UniformPrior<IN extends CoreMap> implements ListeningSequenceModel 
   }
 
   @Override
-  public void setInitialSequence(int[] sequence) {
+  public void setInitialSequence(int... sequence) {
   }
 
   @Override

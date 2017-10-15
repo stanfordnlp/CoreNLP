@@ -19,7 +19,7 @@ import edu.stanford.nlp.util.*;
 public class StanfordCoreNlpDemo {
 
   /** Usage: java -cp "*" StanfordCoreNlpDemo [inputFile [outputTextFile [outputXmlFile]]] */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     // set up optional output files
     PrintWriter out;
     if (args.length > 1) {

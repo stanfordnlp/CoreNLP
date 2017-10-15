@@ -102,11 +102,11 @@ public class GrammarCompactionTester  {
   }
 
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     new GrammarCompactionTester().runTest(args);
   }
 
-  public void runTest(String[] args) {
+  public void runTest(String... args) {
     System.out.println("Currently " + new Date());
     System.out.print("Invoked with arguments:");
     for (String arg : args) {

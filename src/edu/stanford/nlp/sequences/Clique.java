@@ -82,7 +82,7 @@ public class Clique implements Serializable {
 
   /** Make a clique over the provided relativeIndices.
    *  relativeIndices should be sorted. */
-  public static Clique valueOf(int[] relativeIndices) {
+  public static Clique valueOf(int... relativeIndices) {
     checkSorted(relativeIndices);
     // copy the array so as to be safe
     return valueOfHelper(ArrayUtils.copy(relativeIndices));
@@ -101,14 +101,14 @@ public class Clique implements Serializable {
    *  checked or assured by construction that relativeIndices
    *  is sorted.
    */
-  private static Clique valueOfHelper(int[] relativeIndices) {
+  private static Clique valueOfHelper(int... relativeIndices) {
     // if clique already exists, return that one
     Clique c = new Clique(relativeIndices);
     return intern(c);
   }
 
   /** Parameter validity check. */
-  private static void checkSorted(int[] sorted) {
+  private static void checkSorted(int... sorted) {
     for (int i = 0; i < sorted.length-1; i++) {
       if (sorted[i] > sorted[i+1]) {
         throw new RuntimeException("input must be sorted!");

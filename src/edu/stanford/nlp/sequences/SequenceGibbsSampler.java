@@ -52,7 +52,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
   private int chromaticSize;
   private List<List<Integer>> partition;
 
-  public static int[] copy(int[] a) {
+  public static int[] copy(int... a) {
     int[] result = new int[a.length];
     System.arraycopy(a, 0, result, 0, a.length);
     return result;

@@ -25,7 +25,7 @@ public class MulticoreWrapperDemo  {
   /**
    * @param args Command-line arguments: modelFile (runs as a filter from stdin to stdout)
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length != 1) {
       System.err.printf("Usage: java %s model_file < input_file%n", MulticoreWrapperDemo.class.getName());
       System.exit(-1);

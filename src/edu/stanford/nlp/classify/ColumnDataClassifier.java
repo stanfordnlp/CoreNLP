@@ -280,7 +280,7 @@ public class ColumnDataClassifier  {
    * @param strings The elements that features are made from (the columns of a TSV/CSV file)
    * @return A Datum (may be an RVFDatum; never null)
    */
-  public Datum<String,String> makeDatumFromStrings(String[] strings) {
+  public Datum<String,String> makeDatumFromStrings(String... strings) {
     if (globalFlags.usesRealValues) {
       return makeRVFDatumFromStrings(strings);
     }
@@ -307,7 +307,7 @@ public class ColumnDataClassifier  {
     return flags != null && (flags.isRealValued || flags.logTransform || flags.logitTransform || flags.sqrtTransform);
   }
 
-  private RVFDatum<String,String> makeRVFDatumFromStrings(String[] strings) {
+  private RVFDatum<String,String> makeRVFDatumFromStrings(String... strings) {
     if (globalFlags.featureFormat) {
       ClassicCounter<String> theFeatures = new ClassicCounter<>();
       for (int i = 0; i < strings.length; i++) {
@@ -831,7 +831,7 @@ public class ColumnDataClassifier  {
    * @param strs The data String[] to extract features from
    * @return The constructed Datum
    */
-  private Datum<String,String> makeDatum(String[] strs) {
+  private Datum<String,String> makeDatum(String... strs) {
     String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     List<String> theFeatures = new ArrayList<>();
     Collection<String> globalFeatures = Generics.newHashSet();
@@ -861,7 +861,7 @@ public class ColumnDataClassifier  {
    * @param strs The data String[] to extract features from
    * @return The constructed RVFDatum
    */
-  private RVFDatum<String,String> makeRVFDatum(String[] strs) {
+  private RVFDatum<String,String> makeRVFDatum(String... strs) {
     String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     ClassicCounter<String> theFeatures = new ClassicCounter<>();
     ClassicCounter<String> globalFeatures = new ClassicCounter<>();
@@ -2011,7 +2011,7 @@ public class ColumnDataClassifier  {
    * @param args Command line arguments, as described in the class documentation
    * @throws IOException If IO problems
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     StringUtils.logInvocationString(logger, args);
     // the constructor will load a classifier if one is specified with loadClassifier
     ColumnDataClassifier cdc = new ColumnDataClassifier(StringUtils.argsToProperties(args));

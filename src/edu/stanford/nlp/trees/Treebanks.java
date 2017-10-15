@@ -57,7 +57,7 @@ public class Treebanks  {
    * @param args Array of command-line arguments
    * @throws java.io.IOException If there is a treebank file access problem
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length == 0) {
       printUsage();
       return;

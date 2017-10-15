@@ -63,7 +63,7 @@ public class ParseAndPrintMatrices  {
   }
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     String modelPath = null;
     String outputPath = null;
     String inputPath = null;

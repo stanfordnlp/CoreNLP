@@ -101,7 +101,7 @@ public class AverageDVModels  {
    * -output: the model file to output
    * -input: a list of model files to input
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String outputModelFilename = null;
     List<String> inputModelFilenames = Generics.newArrayList();
     

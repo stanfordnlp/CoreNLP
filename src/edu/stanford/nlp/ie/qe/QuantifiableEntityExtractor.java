@@ -158,7 +158,7 @@ public class QuantifiableEntityExtractor {
     pw.close();
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     // Generate rules files
     Properties props = StringUtils.argsToProperties(args);
     Options options = new Options("qe", props);

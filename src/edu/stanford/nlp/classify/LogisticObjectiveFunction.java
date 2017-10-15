@@ -29,7 +29,7 @@ public class LogisticObjectiveFunction extends AbstractCachingDiffFunction {
   }
 
   @Override
-  protected void calculate(double[] x) {
+  protected void calculate(double... x) {
 
     if (dataValues != null) {
       calculateRVF(x);
@@ -72,7 +72,7 @@ public class LogisticObjectiveFunction extends AbstractCachingDiffFunction {
     value += prior.compute(x, derivative);
   }
 
-  protected void calculateRVF(double[] x) {
+  protected void calculateRVF(double... x) {
 
     value = 0.0;
     Arrays.fill(derivative, 0.0);

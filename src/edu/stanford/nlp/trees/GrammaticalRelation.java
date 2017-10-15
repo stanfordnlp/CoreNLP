@@ -624,7 +624,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return parent;
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     final String[] names = {"dep", "pred", "prep_to","rcmod"};
     for (String name : names) {
       GrammaticalRelation reln = valueOf(Language.English, name);

@@ -33,7 +33,7 @@ public class RHSFrequency {
     usage.append("  -e enc     : Encoding.\n");
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if(args.length < minArgs) {
       System.out.println(usage.toString());
       System.exit(-1);

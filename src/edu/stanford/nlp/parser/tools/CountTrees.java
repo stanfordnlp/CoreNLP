@@ -57,7 +57,7 @@ public class CountTrees  {
     optionArgDefinitions.put("t", 0);
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if(args.length < minArgs) {
       System.out.println(usage);
       System.exit(-1);

@@ -151,7 +151,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
   }
 
   /** The main method, which is essentially the same as in CRFClassifier. See the class documentation. */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     log.info("CRFBiasedClassifier invoked at " + new Date()
             + " with arguments:");
     for (String arg : args) {

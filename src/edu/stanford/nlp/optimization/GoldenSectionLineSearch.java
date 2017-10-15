@@ -198,7 +198,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     GoldenSectionLineSearch min =
         new GoldenSectionLineSearch(true, 0.00001, 0.001, 121.0);
     Function<Double, Double> f1 = x -> Math.log(x * x - x + 1);

@@ -126,7 +126,7 @@ public class QuasiDeterminizer implements TransducerGraph.GraphProcessor {
     return result;
   }
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     TransducerGraph.GraphProcessor qd = new QuasiDeterminizer();
     List pathList = new ArrayList();
     TransducerGraph graph = TransducerGraph.createRandomGraph(1000, 10, 1.0, 10, pathList);

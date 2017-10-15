@@ -16,7 +16,7 @@ public class PrintTagList  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(PrintTagList.class);
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String parserFile = null;
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-model")) {

@@ -25,7 +25,7 @@ public class DependencyParserCoreNLPDemo {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParserDemo.class);
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String text;
     if (args.length > 0) {
       text = IOUtils.slurpFileNoExceptions(args[0], "utf-8");

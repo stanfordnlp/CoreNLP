@@ -155,12 +155,12 @@ public class MultiWordStringMatcher {
     }
   }
 
-  public Pattern getPattern(String[] targetStrings) {
+  public Pattern getPattern(String... targetStrings) {
     String regex = getRegex(targetStrings);
     return Pattern.compile(regex);
   }
 
-  public String getRegex(String[] targetStrings) {
+  public String getRegex(String... targetStrings) {
     List<String> strings = Arrays.asList(targetStrings);
     // Sort by longest string first
     Collections.sort(strings, LONGEST_STRING_COMPARATOR);

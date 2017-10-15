@@ -67,7 +67,7 @@ public class RedwoodPrintStream extends PrintStream {
   @Override public void print(long l) { logB(l); }
   @Override public void print(float f) { logB(f); }
   @Override public void print(double d) { logB(d); }
-  @Override public void print(char[] chars) { logB(new String(chars)); }
+  @Override public void print(char... chars){ logB(new String(chars)); }
   @Override public void print(String s) { logB(s); }
   @Override public void print(Object o) { logB(o); }
 
@@ -77,7 +77,7 @@ public class RedwoodPrintStream extends PrintStream {
   @Override public void println(long l) { log(l); }
   @Override public void println(float f) { log(f); }
   @Override public void println(double d) { log(d); }
-  @Override public void println(char[] chars) { log(new String(chars)); }
+  @Override public void println(char... chars){ log(new String(chars)); }
   @Override public void println(String s) {
     if(checkForThrowable){
       //(check if from throwable)

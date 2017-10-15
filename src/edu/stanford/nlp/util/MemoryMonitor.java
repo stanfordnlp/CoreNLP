@@ -284,7 +284,7 @@ public class MemoryMonitor  {
     }
   }
 
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String... args) throws InterruptedException {
     Thread pmm = new Thread(new PeakMemoryMonitor());
     pmm.start();
 

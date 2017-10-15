@@ -490,7 +490,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
   static final String[] FORCE_TAGS = { "-forceTags" };
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     List<String> remainingArgs = Generics.newArrayList();
 
     List<Pair<String, FileFilter>> trainTreebankPath = null;

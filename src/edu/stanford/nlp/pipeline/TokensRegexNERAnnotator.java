@@ -603,7 +603,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
     return entries;
   }
 
-  private static Map<String,Integer> getHeaderIndexMap(String[] headerFields) {
+  private static Map<String,Integer> getHeaderIndexMap(String... headerFields) {
     Map<String,Integer> map = new HashMap<>();
     for (int i = 0; i < headerFields.length; i++) {
       String field = headerFields[i];

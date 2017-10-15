@@ -246,7 +246,7 @@ public class Americanize implements Function<HasWord,HasWord>  {
    *
    * @param args Command line arguments: a list of words
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     log.info(new Americanize());
     log.info();
 

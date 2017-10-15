@@ -157,7 +157,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
    *
    * @param sentenceFinalPuncWords An array of words that count as sentence final punctuation.
    */
-  public void setSentenceFinalPuncWords(String[] sentenceFinalPuncWords) {
+  public void setSentenceFinalPuncWords(String... sentenceFinalPuncWords) {
     this.sentenceFinalPuncWords = sentenceFinalPuncWords;
   }
 
@@ -495,7 +495,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
    *
    * @param args Command-line arguments
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
     if (options.containsKey("help")) {
       log.info(usage());

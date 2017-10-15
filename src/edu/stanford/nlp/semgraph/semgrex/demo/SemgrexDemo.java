@@ -21,7 +21,7 @@ public class SemgrexDemo  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(SemgrexDemo.class);
-  public static void main(String[] args) {
+  public static void main(String... args) {
     String treeString = "(ROOT  (S (NP (PRP$ My) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))";
     // Typically the tree is constructed by parsing or reading a
     // treebank.  This is just for example purposes

@@ -24,7 +24,7 @@ public class StanfordCoreNlpDemoChinese {
 
   private StanfordCoreNlpDemoChinese() { }  // static main
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     // set up optional output files
     PrintWriter out;
     if (args.length > 1) {

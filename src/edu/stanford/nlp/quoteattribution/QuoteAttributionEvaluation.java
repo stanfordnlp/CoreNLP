@@ -165,7 +165,7 @@ public class QuoteAttributionEvaluation {
    * @param args
    * @throws Exception
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     // make the first argument one for a base directory
     if (args.length != 1) {
       System.out.println("Usage: java QuoteAttributionEvaluation path_to_properties_file");

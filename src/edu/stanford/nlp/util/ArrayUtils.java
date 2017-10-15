@@ -26,7 +26,7 @@ public class ArrayUtils  {
    */
   private ArrayUtils() {}
 
-  public static byte[] gapEncode(int[] orig) {
+  public static byte[] gapEncode(int... orig) {
     List<Byte> encodedList = gapEncodeList(orig);
     byte[] arr = new byte[encodedList.size()];
     int i = 0;
@@ -34,7 +34,7 @@ public class ArrayUtils  {
     return arr;
   }
 
-  public static List<Byte> gapEncodeList(int[] orig) {
+  public static List<Byte> gapEncodeList(int... orig) {
     for (int i = 1; i < orig.length; i++) {
       if (orig[i] < orig[i-1]) {
         throw new IllegalArgumentException("Array must be sorted!");
@@ -96,7 +96,7 @@ public class ArrayUtils  {
     return bytes;
   }
 
-  public static int[] gapDecode(byte[] gapEncoded) {
+  public static int[] gapDecode(byte... gapEncoded) {
     return gapDecode(gapEncoded, 0, gapEncoded.length);
   }
 
@@ -108,7 +108,7 @@ public class ArrayUtils  {
     return arr;
   }
 
-  public static List<Integer> gapDecodeList(byte[] gapEncoded) {
+  public static List<Integer> gapDecodeList(byte... gapEncoded) {
     return gapDecodeList(gapEncoded, 0, gapEncoded.length);
   }
 
@@ -156,7 +156,7 @@ public class ArrayUtils  {
     return ints;
   }
 
-  public static byte[] deltaEncode(int[] orig) {
+  public static byte[] deltaEncode(int... orig) {
     List<Byte> encodedList = deltaEncodeList(orig);
     byte[] arr = new byte[encodedList.size()];
     int i = 0;
@@ -164,7 +164,7 @@ public class ArrayUtils  {
     return arr;
   }
 
-  public static List<Byte> deltaEncodeList(int[] orig) {
+  public static List<Byte> deltaEncodeList(int... orig) {
 
     for (int i = 1; i < orig.length; i++) {
       if (orig[i] < orig[i-1]) {
@@ -244,7 +244,7 @@ public class ArrayUtils  {
   }
 
 
-  public static int[] deltaDecode(byte[] deltaEncoded) {
+  public static int[] deltaDecode(byte... deltaEncoded) {
     return deltaDecode(deltaEncoded, 0, deltaEncoded.length);
   }
 
@@ -256,7 +256,7 @@ public class ArrayUtils  {
     return arr;
   }
 
-  public static List<Integer> deltaDecodeList(byte[] deltaEncoded) {
+  public static List<Integer> deltaDecodeList(byte... deltaEncoded) {
     return deltaDecodeList(deltaEncoded, 0, deltaEncoded.length);
   }
 
@@ -339,7 +339,7 @@ public class ArrayUtils  {
   }
 
   /** helper for gap encoding. */
-  private static BitSet byteArrayToBitSet(byte[] array) {
+  private static BitSet byteArrayToBitSet(byte... array) {
 
     BitSet bitSet = new BitSet();
     int index = 0;
@@ -586,7 +586,7 @@ public class ArrayUtils  {
 
   /** Return a Set containing the same elements as the specified array.
    */
-  public static <T> Set<T> asSet(T[] a) {
+  public static <T> Set<T> asSet(T... a) {
     return Generics.newHashSet(Arrays.asList(a));
   }
 
@@ -594,7 +594,7 @@ public class ArrayUtils  {
    *  array. Arrays with 0 or 1 elements are special cased to return the
    *  efficient small sets from the Collections class.
    */
-  public static <T> Set<T> asImmutableSet(T[] a) {
+  public static <T> Set<T> asImmutableSet(T... a) {
     if (a.length == 0) {
       return Collections.emptySet();
     } else if (a.length == 1) {
@@ -645,7 +645,7 @@ public class ArrayUtils  {
   /**
   * Casts to a double array
   */
-  public static double[] toDouble(float[] a) {
+  public static double[] toDouble(float... a) {
     double[] d = new double[a.length];
     for (int i = 0; i < a.length; i++) {
       d[i] = a[i];
@@ -656,7 +656,7 @@ public class ArrayUtils  {
   /**
    * Casts to a double array.
    */
-  public static double[] toDouble(int[] array) {
+  public static double[] toDouble(int... array) {
     double[] rv = new double[array.length];
     for (int i = 0; i < array.length; i++) {
       rv[i] = array[i];
@@ -668,7 +668,7 @@ public class ArrayUtils  {
    * so if you give it a primitive array you get a
    * singleton list back with just that array as an element.
    */
-  public static List<Integer> asList(int[] array) {
+  public static List<Integer> asList(int... array) {
     List<Integer> l = new ArrayList<>();
     for (int i : array) {
       l.add(i);
@@ -696,14 +696,14 @@ public class ArrayUtils  {
     return newI;
   }
 
-  public static long[] copy(long[] arr) {
+  public static long[] copy(long... arr) {
     if (arr == null) { return null; }
     long[] newArr = new long[arr.length];
     System.arraycopy(arr, 0, newArr, 0, arr.length);
     return newArr;
   }
 
-  public static int[] copy(int[] i) {
+  public static int[] copy(int... i) {
     if (i == null) { return null; }
     int[] newI = new int[i.length];
     System.arraycopy(i, 0, newI, 0, i.length);
@@ -720,7 +720,7 @@ public class ArrayUtils  {
   }
 
 
-  public static double[] copy(double[] d) {
+  public static double[] copy(double... d) {
     if (d == null) { return null; }
     double[] newD = new double[d.length];
     System.arraycopy(d, 0, newD, 0, d.length);
@@ -745,7 +745,7 @@ public class ArrayUtils  {
     return newD;
   }
 
-  public static float[] copy(float[] d) {
+  public static float[] copy(float... d) {
     if (d == null) { return null; }
     float[] newD = new float[d.length];
     System.arraycopy(d, 0, newD, 0, d.length);
@@ -792,23 +792,23 @@ public class ArrayUtils  {
     return result.toString();
   }
 
-  public static long[] toPrimitive(Long[] in) {
+  public static long[] toPrimitive(Long... in) {
     return toPrimitive(in,0L);
   }
 
-  public static int[] toPrimitive(Integer[] in) {
+  public static int[] toPrimitive(Integer... in) {
     return toPrimitive(in,0);
   }
 
-  public static short[] toPrimitive(Short[] in) {
+  public static short[] toPrimitive(Short... in) {
     return toPrimitive(in,(short)0);
   }
 
-  public static char[] toPrimitive(Character[] in) {
+  public static char[] toPrimitive(Character... in) {
     return toPrimitive(in,(char)0);
   }
 
-  public static double[] toPrimitive(Double[] in) {
+  public static double[] toPrimitive(Double... in) {
     return toPrimitive(in,0.0);
   }
 
@@ -856,7 +856,7 @@ public class ArrayUtils  {
     return out;
   }
 
-  public static double[] toDoubleArray(String[] in) {
+  public static double[] toDoubleArray(String... in) {
     double[] ret = new double[in.length];
     for (int i = 0; i < in.length; i++)
       ret[i] = Double.parseDouble(in[i]);
@@ -967,7 +967,7 @@ public class ArrayUtils  {
    *  @param ar Input array
    *  @return New array that has L1 normalized form of input array
    */
-  public static double[] normalize(double[] ar) {
+  public static double[] normalize(double... ar) {
     double[] ar2 = new double[ar.length];
     double total = 0.0;
     for (double d : ar) {

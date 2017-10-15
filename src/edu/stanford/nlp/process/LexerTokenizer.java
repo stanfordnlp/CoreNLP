@@ -72,7 +72,7 @@ public class LexerTokenizer extends AbstractTokenizer<String> {
   /**
    * For testing only.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Tokenizer<String> t = new LexerTokenizer(new JFlexDummyLexer((Reader) null), new BufferedReader(new FileReader(args[0])));
     while (t.hasNext()) {
       System.out.println("token " + t.next());

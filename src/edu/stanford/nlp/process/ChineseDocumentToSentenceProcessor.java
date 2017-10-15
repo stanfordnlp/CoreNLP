@@ -135,7 +135,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
    *  The -segmentIBM option is for IBM GALE-specific splitting of an
    *  XML element into sentences.
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     //String encoding = "GB18030";
     Properties props = StringUtils.argsToProperties(args);
     // log.info("Here are the properties:");

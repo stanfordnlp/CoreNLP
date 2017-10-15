@@ -273,7 +273,7 @@ public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Itera
         return map.values().toArray();
       }
       @Override
-      public <T> T[] toArray(T[] a) {
+      public <T> T[] toArray(T... a) {
         return map.values().toArray(a);
       }
       @Override

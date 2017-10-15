@@ -162,7 +162,7 @@ public class CRFFeatureExporter<IN extends CoreMap>  {
     }
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     StringUtils.logInvocationString(log, args);
     Properties props = StringUtils.argsToProperties(args);
     CRFClassifier<CoreLabel> crf = new CRFClassifier<>(props);

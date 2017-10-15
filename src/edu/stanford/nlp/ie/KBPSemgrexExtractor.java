@@ -130,7 +130,7 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
   }
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
     ArgumentParser.fillOptions(KBPSemgrexExtractor.class, args);
     KBPSemgrexExtractor extractor = new KBPSemgrexExtractor(DIR);

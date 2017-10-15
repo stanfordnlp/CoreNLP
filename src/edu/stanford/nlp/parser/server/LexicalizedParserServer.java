@@ -293,8 +293,7 @@ public class LexicalizedParserServer  {
 
   static final int DEFAULT_PORT = 4466;
 
-  public static void main(String[] args) 
-    throws IOException
+  public static void main(String... args) throws IOException
   {
     System.setOut(new PrintStream(System.out, true, "utf-8"));
     System.setErr(new PrintStream(System.err, true, "utf-8"));

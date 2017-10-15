@@ -112,7 +112,7 @@ public final class MungeTreesWithMorfetteAnalyses  {
   /**
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     if (args.length != 2) {
       System.err.printf("Usage: java %s tree_file morfette_tnt_file%n", MungeTreesWithMorfetteAnalyses.class.getName());
       System.exit(-1);

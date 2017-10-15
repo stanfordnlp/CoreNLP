@@ -86,7 +86,7 @@ public class ArabicVerbStemBank  {
 
   /**
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     ArabicVerbStemBank vsb = ArabicVerbStemBank.getInstance();
 
     vsb.load("e.test");

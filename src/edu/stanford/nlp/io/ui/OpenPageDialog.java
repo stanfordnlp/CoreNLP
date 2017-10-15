@@ -186,7 +186,7 @@ public class OpenPageDialog extends javax.swing.JDialog {
   /**
    * @param args the command line arguments
    */
-  public static void main(String args[]) {
+  public static void main(String ... args) {
     new OpenPageDialog(new javax.swing.JFrame(), true).setVisible(true);
   }
 

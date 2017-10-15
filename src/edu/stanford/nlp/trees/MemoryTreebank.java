@@ -476,7 +476,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    *
    * @param args array of command-line arguments
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Timing.startTime();
     Treebank treebank = new MemoryTreebank(in -> new PennTreeReader(in));
     treebank.loadPath(args[0]);

@@ -77,7 +77,7 @@ public class AnCoraPOSStats  {
     argOptionDefs.put("o", 1);
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     if (args.length < 1) {
       log.info(usage);
       System.exit(1);

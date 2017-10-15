@@ -296,7 +296,7 @@ public class CollocationFinder  {
     return sb.substring(0,sb.length() -1);
   }
 
-  private static String mergeLeavesIntoCollocatedString(Tree[] trees) {
+  private static String mergeLeavesIntoCollocatedString(Tree... trees) {
     StringBuilder sb = new StringBuilder(160);
     for (Tree t: trees) {
       ArrayList<TaggedWord> sent = t.taggedYield();

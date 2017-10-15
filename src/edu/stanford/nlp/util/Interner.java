@@ -105,7 +105,7 @@ public class Interner<T>  {
   /**
    * Test method: interns its arguments and says whether they == themselves.
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     for (String str : args) {
       System.out.println(Interner.globalIntern(str) == str);
     }

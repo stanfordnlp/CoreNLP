@@ -90,7 +90,7 @@ public class ADMath {
   }
 
 
-  public static DoubleAD logSum(DoubleAD[] logInputs) {
+  public static DoubleAD logSum(DoubleAD... logInputs) {
     return logSum(logInputs,0,logInputs.length);
   }
 

@@ -26,7 +26,7 @@ public class ArrayMath {
 
   // BASIC INFO -----------------------------------------------------------------
 
-  public static int numRows(double[] v) {
+  public static int numRows(double... v) {
     return v.length;
   }
 
@@ -53,7 +53,7 @@ public class ArrayMath {
 
   // CASTS ----------------------------------------------------------------------
 
-  public static float[] doubleArrayToFloatArray(double[] a) {
+  public static float[] doubleArrayToFloatArray(double... a) {
     float[] result = new float[a.length];
     for (int i = 0; i < a.length; i++) {
       result[i] = (float) a[i];
@@ -61,7 +61,7 @@ public class ArrayMath {
     return result;
   }
 
-  public static double[] floatArrayToDoubleArray(float[] a) {
+  public static double[] floatArrayToDoubleArray(float... a) {
     double[] result = new double[a.length];
     for (int i = 0; i < a.length; i++) {
       result[i] = a[i];
@@ -93,7 +93,7 @@ public class ArrayMath {
 
   // OPERATIONS ON AN ARRAY - NONDESTRUCTIVE
 
-  public static double[] exp(double[] a) {
+  public static double[] exp(double... a) {
     double[] result = new double[a.length];
     for (int i = 0; i < a.length; i++) {
       result[i] = Math.exp(a[i]);
@@ -101,7 +101,7 @@ public class ArrayMath {
     return result;
   }
 
-  public static double[] log(double[] a) {
+  public static double[] log(double... a) {
     double[] result = new double[a.length];
     for (int i = 0; i < a.length; i++) {
       result[i] = Math.log(a[i]);
@@ -111,19 +111,19 @@ public class ArrayMath {
 
   // OPERATIONS ON AN ARRAY - DESTRUCTIVE
 
-  public static void expInPlace(double[] a) {
+  public static void expInPlace(double... a) {
     for (int i = 0; i < a.length; i++) {
       a[i] = Math.exp(a[i]);
     }
   }
 
-  public static void logInPlace(double[] a) {
+  public static void logInPlace(double... a) {
     for (int i = 0; i < a.length; i++) {
       a[i] = Math.log(a[i]);
     }
   }
 
-  public static double[] softmax(double[] scales) {
+  public static double[] softmax(double... scales) {
     double[] newScales = new double[scales.length];
     double sum = 0;
     for (int i = 0; i < scales.length; i++) {
@@ -477,21 +477,21 @@ public class ArrayMath {
 
   // ERROR CHECKING
 
-  public static boolean hasNaN(double[] a) {
+  public static boolean hasNaN(double... a) {
     for (double x : a) {
       if (Double.isNaN(x)) return true;
     }
     return false;
   }
 
-  public static boolean hasInfinite(double[] a) {
+  public static boolean hasInfinite(double... a) {
     for (double anA : a) {
       if (Double.isInfinite(anA)) return true;
     }
     return false;
   }
 
-  public static boolean hasNaN(float[] a) {
+  public static boolean hasNaN(float... a) {
     for (float x : a) {
       if (Float.isNaN(x)) return true;
     }
@@ -500,7 +500,7 @@ public class ArrayMath {
 
   // methods for filtering vectors ------------------------------------------
 
-  public static int countNaN(double[] v) {
+  public static int countNaN(double... v) {
     int c = 0;
     for (double d : v) {
       if (Double.isNaN(d)) {
@@ -510,7 +510,7 @@ public class ArrayMath {
     return c;
   }
 
-  public static double[] filterNaN(double[] v) {
+  public static double[] filterNaN(double... v) {
     double[] u = new double[numRows(v) - countNaN(v)];
     int j = 0;
     for (double d : v) {
@@ -521,7 +521,7 @@ public class ArrayMath {
     return u;
   }
 
-  public static int countInfinite(double[] v) {
+  public static int countInfinite(double... v) {
     int c = 0;
     for (double aV : v)
       if (Double.isInfinite(aV))
@@ -529,7 +529,7 @@ public class ArrayMath {
     return c;
   }
 
-  public static int countNonZero(double[] v) {
+  public static int countNonZero(double... v) {
     int c = 0;
     for (double aV : v)
       if (aV != 0.0)
@@ -545,7 +545,7 @@ public class ArrayMath {
     return c;
   }
 
-  public static int countPositive(double[] v) {
+  public static int countPositive(double... v) {
     int c = 0;
     for (double a : v) {
       if (a > 0.0) {
@@ -555,7 +555,7 @@ public class ArrayMath {
     return c;
   }
 
-  public static int countNegative(double[] v) {
+  public static int countNegative(double... v) {
     int c = 0;
     for (double aV : v)
       if (aV < 0.0)
@@ -563,7 +563,7 @@ public class ArrayMath {
     return c;
   }
 
-  public static double[] filterInfinite(double[] v) {
+  public static double[] filterInfinite(double... v) {
     double[] u = new double[numRows(v) - countInfinite(v)];
     int j = 0;
     for (double aV : v) {
@@ -574,7 +574,7 @@ public class ArrayMath {
     return u;
   }
 
-  public static double[] filterNaNAndInfinite(double[] v) {
+  public static double[] filterNaNAndInfinite(double... v) {
     return filterInfinite(filterNaN(v));
   }
 
@@ -584,7 +584,7 @@ public class ArrayMath {
   /**
    * Returns the sum of an array of doubles.
    */
-  public static double sum(double[] a) {
+  public static double sum(double... a) {
     return sum(a,0,a.length);
   }
 
@@ -602,7 +602,7 @@ public class ArrayMath {
   }
 
 
-  public static int sum(int[] a) {
+  public static int sum(int... a) {
     int result = 0;
     for (int i : a) {
       result += i;
@@ -610,7 +610,7 @@ public class ArrayMath {
     return result;
   }
 
-  public static float sum(float[] a) {
+  public static float sum(float... a) {
     float result = 0.0F;
     for (float f : a) {
       result += f;
@@ -639,13 +639,13 @@ public class ArrayMath {
     return rv;
   }
 
-  public static double average(double[] a) {
+  public static double average(double... a) {
     double total = ArrayMath.sum(a);
     return total / a.length;
   }
 
   /** This version avoids any possibility of overflow. */
-  public static double iterativeAverage(double[] a) {
+  public static double iterativeAverage(double... a) {
     double avg = 0.0;
     int t = 1;
     for (double x : a) {
@@ -662,7 +662,7 @@ public class ArrayMath {
    * @param a Array of double
    * @return inf-norm of a
    */
-  public static double norm_inf(double[] a) {
+  public static double norm_inf(double... a) {
     double max = Double.NEGATIVE_INFINITY;
     for (double d : a) {
       if (Math.abs(d) > max) {
@@ -678,7 +678,7 @@ public class ArrayMath {
    *
    * @return inf-norm of a
    */
-  public static double norm_inf(float[] a) {
+  public static double norm_inf(float... a) {
     double max = Double.NEGATIVE_INFINITY;
     for (float anA : a) {
       if (Math.abs(anA) > max) {
@@ -694,7 +694,7 @@ public class ArrayMath {
    * @param a A vector of double
    * @return 1-norm of a
    */
-  public static double norm_1(double[] a) {
+  public static double norm_1(double... a) {
     double sum = 0;
     for (double anA : a) {
       sum += (anA < 0 ? -anA : anA);
@@ -708,7 +708,7 @@ public class ArrayMath {
    * @param a A vector of floats
    * @return 1-norm of a
    */
-  public static double norm_1(float[] a) {
+  public static double norm_1(float... a) {
     double sum = 0;
     for (float anA : a) {
       sum += (anA < 0 ? -anA : anA);
@@ -723,7 +723,7 @@ public class ArrayMath {
    * @param a A vector of double
    * @return Euclidean norm of a
    */
-  public static double norm(double[] a) {
+  public static double norm(double... a) {
     double squaredSum = 0;
     for (double anA : a) {
       squaredSum += anA * anA;
@@ -737,7 +737,7 @@ public class ArrayMath {
    * @param a A vector of floats
    * @return Euclidean norm of a
    */
-  public static double norm(float[] a) {
+  public static double norm(float... a) {
     double squaredSum = 0;
     for (float anA : a) {
       squaredSum += anA * anA;
@@ -748,7 +748,7 @@ public class ArrayMath {
   /**
    * @return the index of the max value; if max is a tie, returns the first one.
    */
-  public static int argmax(double[] a) {
+  public static int argmax(double... a) {
     double max = Double.NEGATIVE_INFINITY;
     int argmax = 0;
     for (int i = 0; i < a.length; i++) {
@@ -763,7 +763,7 @@ public class ArrayMath {
   /**
    * @return the index of the max value; if max is a tie, returns the last one.
    */
-  public static int argmax_tieLast(double[] a) {
+  public static int argmax_tieLast(double... a) {
     double max = Double.NEGATIVE_INFINITY;
     int argmax = 0;
     for (int i = 0; i < a.length; i++) {
@@ -775,7 +775,7 @@ public class ArrayMath {
     return argmax;
   }
 
-  public static double max(double[] a) {
+  public static double max(double... a) {
     return a[argmax(a)];
   }
 
@@ -790,7 +790,7 @@ public class ArrayMath {
   /**
    * @return the index of the max value; if max is a tie, returns the first one.
    */
-  public static int argmax(float[] a) {
+  public static int argmax(float... a) {
     float max = Float.NEGATIVE_INFINITY;
     int argmax = 0;
     for (int i = 0; i < a.length; i++) {
@@ -802,14 +802,14 @@ public class ArrayMath {
     return argmax;
   }
 
-  public static float max(float[] a) {
+  public static float max(float... a) {
     return a[argmax(a)];
   }
 
   /**
    * @return the index of the min value; if min is a tie, returns the lowest index one.
    */
-  public static int argmin(double[] a) {
+  public static int argmin(double... a) {
     double min = Double.POSITIVE_INFINITY;
     int argmin = 0;
     for (int i = 0; i < a.length; i++) {
@@ -839,7 +839,7 @@ public class ArrayMath {
    * are NaN or infinite are ignored.  If the vector is empty, 0.0 is
    * returned.
    */
-  public static double safeMin(double[] v) {
+  public static double safeMin(double... v) {
     double[] u = filterNaNAndInfinite(v);
     if (numRows(u) == 0) return 0.0;
     return min(u);
@@ -848,7 +848,7 @@ public class ArrayMath {
   /**
    * @return the index of the min value; if min is a tie, returns the first one.
    */
-  public static int argmin(float[] a) {
+  public static int argmin(float... a) {
     float min = Float.POSITIVE_INFINITY;
     int argmin = 0;
     for (int i = 0; i < a.length; i++) {
@@ -860,14 +860,14 @@ public class ArrayMath {
     return argmin;
   }
 
-  public static float min(float[] a) {
+  public static float min(float... a) {
     return a[argmin(a)];
   }
 
   /**
    * @return the index of the min value; if min is a tie, returns the first one.
    */
-  public static int argmin(int[] a) {
+  public static int argmin(int... a) {
     int min = Integer.MAX_VALUE;
     int argmin = 0;
     for (int i = 0; i < a.length; i++) {
@@ -896,7 +896,7 @@ public class ArrayMath {
   /**
    * @return the index of the max value; if max is a tie, returns the first one.
    */
-  public static int argmax(int[] a) {
+  public static int argmax(int... a) {
     int max = Integer.MIN_VALUE;
     int argmax = 0;
     for (int i = 0; i < a.length; i++) {
@@ -949,7 +949,7 @@ public class ArrayMath {
    * are NaN or infinite are ignored.  If the vector is empty, 0.0 is
    * returned.
    */
-  public static double safeMax(double[] v) {
+  public static double safeMax(double... v) {
     double[] u = filterNaNAndInfinite(v);
     if (numRows(u) == 0) return 0.0;
     return max(u);
@@ -1113,7 +1113,7 @@ public class ArrayMath {
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
    * @return {@literal log(x1 + ... + xn)}
    */
-  public static float logSum(float[] logInputs) {
+  public static float logSum(float... logInputs) {
     int leng = logInputs.length;
     if (leng == 0) {
       throw new IllegalArgumentException();
@@ -1179,7 +1179,7 @@ public class ArrayMath {
     return result;
   }
 
-  public static Integer[] box(int[] assignment) {
+  public static Integer[] box(int... assignment) {
     Integer[] result = new Integer[assignment.length];
     for (int i=0; i<assignment.length; i++) {
       result[i] = Integer.valueOf(assignment[i]);
@@ -1196,7 +1196,7 @@ public class ArrayMath {
     return result;
   }
 
-  public static Double[] box(double[] assignment) {
+  public static Double[] box(double... assignment) {
     Double[] result = new Double[assignment.length];
     for (int i=0; i<assignment.length; i++) {
       result[i] = Double.valueOf(assignment[i]);
@@ -1237,7 +1237,7 @@ public class ArrayMath {
    * Makes the values in this array sum to 1.0. Does it in place.
    * If the total is 0.0 or NaN, throws an RuntimeException.
    */
-  public static void normalize(double[] a) {
+  public static void normalize(double... a) {
     double total = sum(a);
     if (total == 0.0 || Double.isNaN(total)) {
       throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
@@ -1245,7 +1245,7 @@ public class ArrayMath {
     multiplyInPlace(a, 1.0/total); // divide each value by total
   }
 
-  public static void L1normalize(double[] a) {
+  public static void L1normalize(double... a) {
     double total = L1Norm(a);
     if (total == 0.0 || Double.isNaN(total)) {
       if (a.length < 100) {
@@ -1259,7 +1259,7 @@ public class ArrayMath {
     }
     multiplyInPlace(a, 1.0/total); // divide each value by total
   }
-  public static void L2normalize(double[] a) {
+  public static void L2normalize(double... a) {
     double total = L2Norm(a);
     if (total == 0.0 || Double.isNaN(total)) {
       if (a.length < 100) {
@@ -1278,14 +1278,14 @@ public class ArrayMath {
    * Makes the values in this array sum to 1.0. Does it in place.
    * If the total is 0.0 or NaN, throws an RuntimeException.
    */
-  public static void normalize(float[] a) {
+  public static void normalize(float... a) {
     float total = sum(a);
     if (total == 0.0f || Double.isNaN(total)) {
       throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN");
     }
     multiplyInPlace(a, 1.0f/total); // divide each value by total
   }
-  public static void L2normalize(float[] a) {
+  public static void L2normalize(float... a) {
     float total = L2Norm(a);
     if (total == 0.0 || Float.isNaN(total)) {
       if (a.length < 100) {
@@ -1304,7 +1304,7 @@ public class ArrayMath {
    * Standardize values in this array, i.e., subtract the mean and divide by the standard deviation.
    * If standard deviation is 0.0, throws a RuntimeException.
    */
-  public static void standardize(double[] a) {
+  public static void standardize(double... a) {
     double m = mean(a);
     if (Double.isNaN(m)) {
       throw new RuntimeException("Can't standardize array whose mean is NaN");
@@ -1317,14 +1317,14 @@ public class ArrayMath {
     multiplyInPlace(a, 1.0/s); // divide by standard deviation
   }
 
-  public static double L2Norm(double[] a) {
+  public static double L2Norm(double... a) {
     double result = 0.0;
     for(double d: a) {
       result += Math.pow(d,2);
     }
     return Math.sqrt(result);
   }
-  public static float L2Norm(float[] a) {
+  public static float L2Norm(float... a) {
     double result = 0;
     for(float d: a) {
       result += Math.pow(d,2);
@@ -1332,7 +1332,7 @@ public class ArrayMath {
     return (float) Math.sqrt(result);
   }
 
-  public static double L1Norm(double[] a) {
+  public static double L1Norm(double... a) {
     double result = 0.0;
     for (double d: a) {
       result += Math.abs(d);
@@ -1347,7 +1347,7 @@ public class ArrayMath {
    * array with a normalized uniform distribution. CDM: This last bit is
    * weird!  Do we really want that?
    */
-  public static void logNormalize(double[] a) {
+  public static void logNormalize(double... a) {
     double logTotal = logSum(a);
     if (logTotal == Double.NEGATIVE_INFINITY) {
       // to avoid NaN values
@@ -1367,7 +1367,7 @@ public class ArrayMath {
    * @param d the distribution to sample from
    * @return a value from 0 to d.length
    */
-  public static int sampleFromDistribution(double[] d) {
+  public static int sampleFromDistribution(double... d) {
     return sampleFromDistribution(d, rand);
   }
 
@@ -1469,16 +1469,16 @@ public class ArrayMath {
 
   // SAMPLE ANALYSIS
 
-  public static double mean(double[] a) {
+  public static double mean(double... a) {
     return sum(a) / a.length;
   }
 
   /** Return the mean of an array of int. */
-  public static double mean(int[] a) {
+  public static double mean(int... a) {
     return ((double) sum(a)) / a.length;
   }
 
-  public static double median(double[] a) {
+  public static double median(double... a) {
     double[] b = new double[a.length];
     System.arraycopy(a, 0, b, 0, b.length);
     Arrays.sort(b);
@@ -1494,13 +1494,13 @@ public class ArrayMath {
    * Returns the mean of a vector of doubles.  Any values which are NaN or
    * infinite are ignored.  If the vector is empty, 0.0 is returned.
    */
-  public static double safeMean(double[] v) {
+  public static double safeMean(double... v) {
     double[] u = filterNaNAndInfinite(v);
     if (numRows(u) == 0) return 0.0;
     return mean(u);
   }
 
-  public static double sumSquaredError(double[] a) {
+  public static double sumSquaredError(double... a) {
     double mean = mean(a);
     double result = 0.0;
     for (double anA : a) {
@@ -1510,7 +1510,7 @@ public class ArrayMath {
     return result;
   }
 
-  public static double sumSquared(double[] a) {
+  public static double sumSquared(double... a) {
     double result = 0.0;
     for (double anA : a) {
       result += (anA * anA);
@@ -1518,11 +1518,11 @@ public class ArrayMath {
     return result;
   }
 
-  public static double variance(double[] a) {
+  public static double variance(double... a) {
     return sumSquaredError(a) / (a.length - 1);
   }
 
-  public static double stdev(double[] a) {
+  public static double stdev(double... a) {
     return Math.sqrt(variance(a));
   }
 
@@ -1531,13 +1531,13 @@ public class ArrayMath {
    * are NaN or infinite are ignored.  If the vector contains fewer than two
    * values, 1.0 is returned.
    */
-  public static double safeStdev(double[] v) {
+  public static double safeStdev(double... v) {
     double[] u = filterNaNAndInfinite(v);
     if (numRows(u) < 2) return 1.0;
     return stdev(u);
   }
 
-  public static double standardErrorOfMean(double[] a) {
+  public static double standardErrorOfMean(double... a) {
     return stdev(a) / Math.sqrt(a.length);
   }
 
@@ -1560,7 +1560,7 @@ public class ArrayMath {
     System.arraycopy(temp, 0, array, 0, array.length);
   }
 
-  public static void shuffle(int[] a) {
+  public static void shuffle(int... a) {
     shuffle(a, rand);
   }
 
@@ -1580,7 +1580,7 @@ public class ArrayMath {
     }
   }
 
-  public static void reverse(int[] a) {
+  public static void reverse(int... a) {
     for (int i=0; i<a.length/2; i++) {
       int j = a.length - i - 1;
       int tmp = a[i];
@@ -1742,7 +1742,7 @@ public class ArrayMath {
 
   // PRINTING FUNCTIONS
 
-  public static String toBinaryString(byte[] b) {
+  public static String toBinaryString(byte... b) {
     StringBuilder s = new StringBuilder();
     for (byte by : b) {
       for (int j = 7; j >= 0; j--) {
@@ -1757,7 +1757,7 @@ public class ArrayMath {
     return s.toString();
   }
 
-  public static String toString(double[] a) {
+  public static String toString(double... a) {
     return toString(a, null);
   }
 
@@ -1787,7 +1787,7 @@ public class ArrayMath {
     return b.toString();
   }
 
-  public static String toString(float[] a) {
+  public static String toString(float... a) {
     return toString(a, null);
   }
 
@@ -1817,7 +1817,7 @@ public class ArrayMath {
     return b.toString();
   }
 
-  public static String toString(int[] a) {
+  public static String toString(int... a) {
     return toString(a, null);
   }
 
@@ -1847,7 +1847,7 @@ public class ArrayMath {
     return b.toString();
   }
 
-  public static String toString(byte[] a) {
+  public static String toString(byte... a) {
     return toString(a, null);
   }
 
@@ -2064,7 +2064,7 @@ public class ArrayMath {
    * For testing only.
    * @param args Ignored
    */
-  public static void main(String[] args) {
+  public static void main(String... args) {
     Random random = new Random();
     int length = 100;
     double[] A = new double[length];
@@ -2127,7 +2127,7 @@ public class ArrayMath {
     }
   }
 
-  public static double entropy(double[] probs) {
+  public static double entropy(double... probs) {
     double e = 0.0;
     for (double p : probs) {
       if (p != 0.0)

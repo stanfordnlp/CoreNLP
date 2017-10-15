@@ -6,5 +6,5 @@ package edu.stanford.nlp.classify;
  * @author Angel Chang
  */
 public interface ProbabilisticClassifierCreator<L,F> {
-  public ProbabilisticClassifier<L,F> createProbabilisticClassifier(double[] weights);
+  public ProbabilisticClassifier<L,F> createProbabilisticClassifier(double... weights);
 }

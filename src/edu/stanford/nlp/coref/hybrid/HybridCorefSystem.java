@@ -77,7 +77,7 @@ public class HybridCorefSystem implements CorefAlgorithm {
   public Dictionaries dictionaries() { return dictionaries; }
 
 
-  public static void runCoref(String[] args) throws Exception {
+  public static void runCoref(String... args) throws Exception {
       runCoref(StringUtils.argsToProperties(args));
   }
 
@@ -328,7 +328,7 @@ public class HybridCorefSystem implements CorefAlgorithm {
     log.info("USED MEMORY (bytes): " + memory);
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String... args) throws Exception {
     Date startTime = new Date();
     System.err.printf("Start time: %s\n", startTime);
     runCoref(args);

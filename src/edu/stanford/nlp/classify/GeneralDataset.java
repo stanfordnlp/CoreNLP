@@ -314,7 +314,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     labels = trimToSize(labels);
   }
 
-  protected int[] trimToSize(int[] i) {
+  protected int[] trimToSize(int... i) {
     int[] newI = new int[size];
     synchronized (System.class) {
       System.arraycopy(i, 0, newI, 0, size);
