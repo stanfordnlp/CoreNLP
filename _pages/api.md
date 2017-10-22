@@ -39,8 +39,16 @@ public class BasicPipelineExample {
 }
 ```
 
-You can give other properties to CoreNLP by build a Properties object
-with more stuff in it. If you want to do that, you might find it
+You can give other properties to CoreNLP by building a Properties object
+with more stuff in it. There are some overall properties like
+`"annotators"` but most properties apply to one annotator and are
+written as `annotator.property`. Note that **the value of a property is
+always a String**. In our documentation of individual annotators, we
+variously refer to their Type as "boolean", "file, classpath, or URL"
+or "List(String)". This means that the String value will be
+interpreted as objects of this type by using String parsing
+methods. The value itself in the Properties object is always a String.
+If you want to set several properties, you might find it
 conventient to use our `PropertiesUtils.asProperties(String ...)`
 method which will take a list of Strings that are alternately keys and
 values and build a Properties object:
