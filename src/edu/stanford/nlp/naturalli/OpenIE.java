@@ -1,5 +1,7 @@
 package edu.stanford.nlp.naturalli;
-import edu.stanford.nlp.util.logging.Redwood;
+
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
@@ -20,6 +22,7 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,15 +34,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-
-import edu.stanford.nlp.coref.data.CorefChain;
 
 /**
- * <p>
  * An OpenIE system based on valid Natural Logic deletions of a sentence.
  * The system is described in:
- * </p>
  *
  * <pre>
  *   "Leveraging Linguistic Structure For Open Domain Information Extraction." Gabor Angeli, Melvin Johnson Premkumar, Christopher Manning. ACL 2015.
@@ -51,7 +49,7 @@ import edu.stanford.nlp.coref.data.CorefChain;
 
  * <p>
  * Documentation on the system can be found on
- * <a href="http://nlp.stanford.edu/software/openie.shtml">the project homepage</a>,
+ * <a href="https://nlp.stanford.edu/software/openie.html">the project homepage</a>,
  * or the <a href="http://stanfordnlp.github.io/CoreNLP/openie.html">CoreNLP annotator documentation page</a>.
  * The simplest invocation of the system would be something like:
  * </p>

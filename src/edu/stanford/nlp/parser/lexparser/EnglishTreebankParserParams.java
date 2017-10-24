@@ -13,19 +13,17 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/lex-parser.shtml
+//    https://nlp.stanford.edu/software/lex-parser.html
 
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -37,6 +35,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -159,7 +158,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
 
   private EnglishTrain englishTrain = new EnglishTrain();
 
-  protected EnglishTest englishTest = new EnglishTest();
+  private EnglishTest englishTest = new EnglishTest();
 
   @Override
   public HeadFinder headFinder() {
@@ -480,7 +479,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
      *     cases that are not headed by a verbal category to an appropriate
      *     category based on word suffix (ing, d, t, s, to) or to VB otherwise.
      * We usually use a value of 3; 2 or 3 is much better than 0.
-     * See also <code>splitVPNPAgr</code>. If it is true, its effects override
+     * See also {@code splitVPNPAgr}. If it is true, its effects override
      * any value set for this parameter.
      */
     public int splitVP = 0;
@@ -656,7 +655,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
    * applied to each node in the tree (depth first, left-to-right),
    * so you shouldn't write this method to apply recursively to tree
    * members.  This method is allowed to (and in some cases does)
-   * destructively change the input tree <code>t</code>. It changes both
+   * destructively change the input tree {@code t}. It changes both
    * labels and the tree shape.
    *
    * @param t The input tree (with non-language-specific annotation already

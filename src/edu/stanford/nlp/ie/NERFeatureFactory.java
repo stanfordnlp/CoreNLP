@@ -14,17 +14,16 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
-//    http://nlp.stanford.edu/downloads/crf-classifier.shtml
+//    https://nlp.stanford.edu/software/CRF-NER.html
 
 package edu.stanford.nlp.ie;
 
@@ -2293,7 +2292,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     return l;
   }
 
-  String intern(String s) {
+  private String intern(String s) {
     if (flags.intern) {
       return s.intern();
     } else {
@@ -2301,7 +2300,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     }
   }
 
-  public void initGazette() {
+  private void initGazette() {
     try {
       // read in gazettes
       if (flags.gazettes == null) { flags.gazettes = new ArrayList<>(); }

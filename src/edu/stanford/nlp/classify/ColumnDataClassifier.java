@@ -13,8 +13,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // This code is a parameter language for front-end feature
 // generation for the loglinear model classification code in
@@ -22,12 +21,12 @@
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
-//    http://www-nlp.stanford.edu/software/classifier.shtml
+//    https://nlp.stanford.edu/software/classifier.html
 
 package edu.stanford.nlp.classify;
 
@@ -108,7 +107,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * To illustrate simple uses, and the behavior of Naive Bayes and Maximum
  * entropy classifiers, example files corresponding to the examples from the
  * Manning and Klein maxent classifier tutorial, slides 46-49, available at
- * http://nlp.stanford.edu/downloads/classifier.shtml are included in the
+ * https://nlp.stanford.edu/software/classifier.html are included in the
  * classify package source directory (files starting with "easy").  Other
  * examples appear in the {@code examples} directory of the distributed
  * classifier.

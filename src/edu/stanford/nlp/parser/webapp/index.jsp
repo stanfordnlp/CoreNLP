@@ -297,7 +297,7 @@ if (pp == null) {
         String toParse = null;
         long time = -System.currentTimeMillis();
         long tokens = 0;
-        List<Tree> trees = new ArrayList<Tree>();
+        List<Tree> trees = new ArrayList<>();
 
         try {
           if (pp.segmenter != null) {
@@ -448,7 +448,7 @@ if (pp == null) {
   <% sentenceLog.close(); %>
 
   <p>
-    <em><a href="http://nlp.stanford.edu/software/lex-parser.shtml">Back to parser home</a></em>
+    <em><a href="https://nlp.stanford.edu/software/lex-parser.html">Back to parser home</a></em>
     <br/>
     <em>Last updated 2016-09-12</em>
   </p>

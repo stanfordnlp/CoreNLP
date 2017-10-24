@@ -13,23 +13,22 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/lex-parser.shtml
+//    https://nlp.stanford.edu/software/lex-parser.html
 
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.process.DistSimClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -145,7 +144,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel  {
     int sig = wordIndex.addToIndex(uwSig);
     if (DEBUG_UWM) {
       log.info("Signature (" + unknownLevel + "): mapped " + word +
-                         " (" + index + ") to " + uwSig + " (" + sig + ")");
+                         " (" + index + ") to " + uwSig + " (" + sig + ')');
     }
     return sig;
   }
