@@ -21,7 +21,7 @@ import java.util.*;
  * of code you could just add the implements directly, but I recommend
  * wrapping instead because I believe that it will help to keep the
  * pipeline code more manageable.
- * <br>
+ *
  * An Annotator should also provide a description of what it produces and
  * a description of what it requires to have been produced by using Sets
  * of requirements.

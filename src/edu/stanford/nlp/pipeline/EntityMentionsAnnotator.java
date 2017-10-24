@@ -23,11 +23,11 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
  *   <li> Times (identified by TimeAnnotator) </li>
  *   <li> Measurements (identified by ???) </li>
  *   </ul>
- *   </li>
+ * </li>
  * </ul>
  *
  * Each sentence is annotated with a list of the mentions
- * (MentionsAnnotation as a list of CoreMap).
+ * (MentionsAnnotation is a list of CoreMap).
  *
  * @author Angel Chang
  */
@@ -47,7 +47,7 @@ public class EntityMentionsAnnotator implements Annotator {
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
-  /** the CoreAnnotation keys to use for this entity mentions annotator **/
+  /** The CoreAnnotation keys to use for this entity mentions annotator. */
   private Class<? extends CoreAnnotation<String>> nerCoreAnnotationClass =
       CoreAnnotations.NamedEntityTagAnnotation.class;
   private Class<? extends CoreAnnotation<String>> nerNormalizedCoreAnnotationClass =
@@ -56,7 +56,7 @@ public class EntityMentionsAnnotator implements Annotator {
       CoreAnnotations.MentionsAnnotation.class;
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EntityMentionsAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(EntityMentionsAnnotator.class);
 
   public EntityMentionsAnnotator() {
     // defaults
@@ -155,7 +155,7 @@ public class EntityMentionsAnnotator implements Annotator {
     return true;
   };
 
-  private Optional<CoreMap> overlapsWithMention(CoreMap needle, List<CoreMap> haystack) {
+  private static Optional<CoreMap> overlapsWithMention(CoreMap needle, List<CoreMap> haystack) {
     List<CoreLabel> tokens = needle.get(CoreAnnotations.TokensAnnotation.class);
     int charBegin = tokens.get(0).beginPosition();
     int charEnd = tokens.get(tokens.size()-1).endPosition();
@@ -241,13 +241,13 @@ public class EntityMentionsAnnotator implements Annotator {
           List<CoreLabel> timexTokens = cmap.get(CoreAnnotations.TokensAnnotation.class);
           String type = "DATE";
 
-          if (timexTokens.size() == 0) continue;
+          if (timexTokens.isEmpty()) continue;
 
           int tokenBegin = timexTokens.get(0).index();
           int tokenEnd = timexTokens.get(timexTokens.size()-1).index();
 
           // Create a mention from this data.
-          ArrayCoreMap mention = new ArrayCoreMap();
+          CoreMap mention = new ArrayCoreMap();
           // Text
           mention.set(CoreAnnotations.TextAnnotation.class, timex.text());
           // Character offset
@@ -280,7 +280,7 @@ public class EntityMentionsAnnotator implements Annotator {
 
         if (sentence.get(mentionsCoreAnnotationClass) == null) {
           sentence.set(mentionsCoreAnnotationClass, new ArrayList<>());
-        } else if (timexMentions.size() > 0) {
+        } else if ( ! timexMentions.isEmpty()) {
           // Remove any mentions that overlap with this one.
           ListIterator<CoreMap> it = sentence.get(mentionsCoreAnnotationClass).listIterator();
           while (it.hasNext()) {
