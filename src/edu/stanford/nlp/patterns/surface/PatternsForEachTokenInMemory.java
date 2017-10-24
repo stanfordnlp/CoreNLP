@@ -88,9 +88,7 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
   public void load(String allPatternsDir) {
     try {
       addPatterns(IOUtils.readObjectFromFile(allPatternsDir+"/allpatterns.ser"));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (ClassNotFoundException e) {
+    } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
   }

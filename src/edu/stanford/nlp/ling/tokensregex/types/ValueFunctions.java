@@ -1340,9 +1340,7 @@ public class ValueFunctions {
           }
         }
         return Expressions.createValue(null, f.get(obj));
-      } catch (NoSuchFieldException ex) {
-        throw new RuntimeException("Cannot get field " + fieldName + " from " + v, ex);
-      } catch (IllegalAccessException ex) {
+      } catch (NoSuchFieldException | IllegalAccessException ex) {
         throw new RuntimeException("Cannot get field " + fieldName + " from " + v, ex);
       }
     }
