@@ -653,24 +653,28 @@ public class Document {
    */
   protected List<Sentence> sentences(Properties props, Annotator tokenizer) {
     if (sentences == null) {
-      Annotator ssplit = props == EMPTY_PROPS ? defaultSSplit : getOrCreate(STANFORD_SSPLIT, props, () -> backend.wordToSentences(props)).get();
-      // Annotate
-      Annotation ann = new Annotation(this.impl.getText());
-      tokenizer.annotate(ann);
-      ssplit.annotate(ann);
-      // Grok results
-      // (docid)
-      if (ann.containsKey(CoreAnnotations.DocIDAnnotation.class)) {
-        impl.setDocID(ann.get(CoreAnnotations.DocIDAnnotation.class));
-      }
-      // (sentences)
-      List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
-      this.sentences = new ArrayList<>(sentences.size());
-      for (CoreMap sentence : sentences) {
-        //Sentence sent = new Sentence(this, sentence);
-        Sentence sent = new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class), defaultProps);
-        this.sentences.add(sent);
-        this.impl.addSentence(sent.serialize());
+      synchronized (this) {
+        if (sentences == null) {
+          Annotator ssplit = props == EMPTY_PROPS ? defaultSSplit : getOrCreate(STANFORD_SSPLIT, props, () -> backend.wordToSentences(props)).get();
+          // Annotate
+          Annotation ann = new Annotation(this.impl.getText());
+          tokenizer.annotate(ann);
+          ssplit.annotate(ann);
+          // Grok results
+          // (docid)
+          if (ann.containsKey(CoreAnnotations.DocIDAnnotation.class)) {
+            impl.setDocID(ann.get(CoreAnnotations.DocIDAnnotation.class));
+          }
+          // (sentences)
+          List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
+          this.sentences = new ArrayList<>(sentences.size());
+          for (CoreMap sentence : sentences) {
+            //Sentence sent = new Sentence(this, sentence);
+            Sentence sent = new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class), defaultProps);
+            this.sentences.add(sent);
+            this.impl.addSentence(sent.serialize());
+          }
+        }
       }
     }
 
@@ -787,7 +791,7 @@ public class Document {
   // Begin helpers
   //
 
-  Document runPOS(Properties props) {
+  synchronized Document runPOS(Properties props) {
     // Cached result
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPos()) {
       return this;
@@ -805,7 +809,7 @@ public class Document {
     return this;
   }
 
-  Document runLemma(Properties props) {
+  synchronized Document runLemma(Properties props) {
     // Cached result
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasLemma()) {
       return this;
@@ -823,7 +827,7 @@ public class Document {
     return this;
   }
 
-  Document mockLemma(Properties props) {
+  synchronized Document mockLemma(Properties props) {
     // Cached result
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasLemma()) {
       return this;
@@ -839,7 +843,7 @@ public class Document {
 
   }
 
-  Document runNER(Properties props) {
+  synchronized Document runNER(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasNer()) {
       return this;
     }
@@ -856,7 +860,7 @@ public class Document {
     return this;
   }
 
-  Document runRegexner(Properties props) {
+  synchronized Document runRegexner(Properties props) {
     // Run prerequisites
     runNER(props);
     // Run annotator
@@ -870,7 +874,7 @@ public class Document {
     return this;
   }
 
-  Document runParse(Properties props) {
+  synchronized Document runParse(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasParseTree()) {
       return this;
     }
@@ -903,7 +907,7 @@ public class Document {
     return this;
   }
 
-  Document runDepparse(Properties props) {
+  synchronized Document runDepparse(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 &&
         this.sentences.get(0).rawSentence().hasBasicDependencies()) {
       return this;
@@ -927,7 +931,7 @@ public class Document {
     return this;
   }
 
-  Document runNatlog(Properties props) {
+  synchronized Document runNatlog(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPolarity()) {
       return this;
     }
@@ -948,7 +952,7 @@ public class Document {
     return this;
   }
 
-  Document runOpenie(Properties props) {
+  synchronized Document runOpenie(Properties props) {
     if (haveRunOpenie) {
       return this;
     }
@@ -972,7 +976,7 @@ public class Document {
   }
 
 
-  Document runKBP(Properties props) {
+  synchronized Document runKBP(Properties props) {
     if (haveRunKBP) {
       return this;
     }
@@ -998,7 +1002,7 @@ public class Document {
   }
 
 
-  Document runSentiment(Properties props) {
+  synchronized Document runSentiment(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasSentiment()) {
         return this;
     }
