@@ -98,9 +98,7 @@ public class FrenchXMLTreeReader implements TreeReader  {
       sentences = root.getElementsByTagName(NODE_SENT);
       sentIdx = 0;
 
-    } catch (SAXException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
+    } catch (SAXException | IOException e) {
       e.printStackTrace();
     }
   }

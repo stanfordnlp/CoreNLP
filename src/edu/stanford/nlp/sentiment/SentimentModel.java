@@ -629,9 +629,7 @@ public class SentimentModel implements Serializable  {
   public static SentimentModel loadSerialized(String path) {
     try {
       return IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    } catch (ClassNotFoundException e) {
+    } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
   }
