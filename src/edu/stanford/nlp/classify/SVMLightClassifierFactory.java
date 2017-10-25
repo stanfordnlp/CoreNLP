@@ -10,6 +10,7 @@ import edu.stanford.nlp.optimization.LineSearcher;
 import java.io.*;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import java.util.regex.Pattern;
@@ -277,7 +278,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
           return scorer.score(classifier,devSet);
         };
 
-    Function<Double,Double> negativeScorer =
+    DoubleUnaryOperator negativeScorer =
         cToTry -> {
           C = cToTry;
           if (verbose) { System.out.print("C = "+cToTry+" "); }
@@ -309,7 +310,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     boolean oldUseSigmoid = useSigmoid;
     useSigmoid = false;
 
-    Function<Double,Double> negativeScorer =
+    DoubleUnaryOperator negativeScorer =
         cToTry -> {
           C = cToTry;
           SVMLightClassifier<L, F> classifier = trainClassifierBasic(trainSet);
