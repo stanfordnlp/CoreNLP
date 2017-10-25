@@ -27,7 +27,7 @@ import java.lang.reflect.*;
  */
 public class UniversalDependenciesConverter {
 
-  public static String NER_COMBINER_NAME = "edu.stanford.nlp.ie.NERClassifierCombiner";
+  private static String NER_COMBINER_NAME = "edu.stanford.nlp.ie.NERClassifierCombiner";
 
   private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
 
