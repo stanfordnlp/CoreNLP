@@ -258,19 +258,21 @@ public class QuoteAttributionAnnotator implements Annotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return new HashSet<>(Arrays.asList(
-      CoreAnnotations.TextAnnotation.class,
-      CoreAnnotations.TokensAnnotation.class,
-      CoreAnnotations.SentencesAnnotation.class,
-      CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-      CoreAnnotations.CharacterOffsetEndAnnotation.class,
-      CoreAnnotations.PartOfSpeechAnnotation.class,
-      CoreAnnotations.LemmaAnnotation.class,
-      CoreAnnotations.BeforeAnnotation.class,
-      CoreAnnotations.AfterAnnotation.class,
-      CoreAnnotations.TokenBeginAnnotation.class,
-      CoreAnnotations.TokenEndAnnotation.class,
-      CoreAnnotations.IndexAnnotation.class,
-      CoreAnnotations.OriginalTextAnnotation.class
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class,
+        CoreAnnotations.PartOfSpeechAnnotation.class,
+        CoreAnnotations.LemmaAnnotation.class,
+        CoreAnnotations.NamedEntityTagAnnotation.class,
+        CoreAnnotations.MentionsAnnotation.class,
+        CoreAnnotations.BeforeAnnotation.class,
+        CoreAnnotations.AfterAnnotation.class,
+        CoreAnnotations.TokenBeginAnnotation.class,
+        CoreAnnotations.TokenEndAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
+        CoreAnnotations.OriginalTextAnnotation.class
 //      CoreAnnotations.ParagraphIndexAnnotation.class
     ));
   }

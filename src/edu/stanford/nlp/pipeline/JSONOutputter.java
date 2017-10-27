@@ -206,14 +206,19 @@ public class JSONOutputter extends AnnotationOutputter {
       if (doc.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
         List<CoreMap> quotes = QuoteAnnotator.gatherQuotes(doc);
         l1.set("quotes", quotes.stream().map(quote -> (Consumer<Writer>) (Writer l2) -> {
-            l2.set("id", quote.get(CoreAnnotations.QuotationIndexAnnotation.class));
-            l2.set("text", quote.get(CoreAnnotations.TextAnnotation.class));
-            l2.set("beginIndex", quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-            l2.set("endIndex", quote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-            l2.set("beginToken", quote.get(CoreAnnotations.TokenBeginAnnotation.class));
-            l2.set("endToken", quote.get(CoreAnnotations.TokenEndAnnotation.class));
-            l2.set("beginSentence", quote.get(CoreAnnotations.SentenceBeginAnnotation.class));
-            l2.set("endSentence", quote.get(CoreAnnotations.SentenceEndAnnotation.class));
+          l2.set("id", quote.get(CoreAnnotations.QuotationIndexAnnotation.class));
+          l2.set("text", quote.get(CoreAnnotations.TextAnnotation.class));
+          l2.set("beginIndex", quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+          l2.set("endIndex", quote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+          l2.set("beginToken", quote.get(CoreAnnotations.TokenBeginAnnotation.class));
+          l2.set("endToken", quote.get(CoreAnnotations.TokenEndAnnotation.class));
+          l2.set("beginSentence", quote.get(CoreAnnotations.SentenceBeginAnnotation.class));
+          l2.set("endSentence", quote.get(CoreAnnotations.SentenceEndAnnotation.class));
+          l2.set("speaker",
+              quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null ?
+                  quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) :
+                  "Unknown");
+
         }));
       }
 

@@ -56,12 +56,6 @@ public class ChineseSegmenterAnnotatorITest {
           "希望", "你们", "都", "能", "看看", "。"},
         new int[]{0, 2, 3, 4, 5, 7, 8, 86, 88, 90, 91, 92, 94},
         new int[]{2, 3, 4, 5, 7, 8, 84, 88, 90, 91, 92, 94, 95});
-
-    // Check still works with non-BMP chars
-    testOne("买点咖啡提点精神\uD83D\uDE0A",
-            new String[] { "买", "点", "咖啡", "提", "点", "精神", "\uD83D\uDE0A" },
-            new int[] { 0, 1, 2, 4, 5, 6, 8 },
-            new int[] { 1, 2, 4, 5, 6, 8, 10});
   }
 
   private void testOne(String query, String[] expectedWords, int[] expectedBeginPositions, int[] expectedEndPositions) {
