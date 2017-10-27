@@ -164,7 +164,7 @@ An example programmatic usage of the client, hitting a server at localhost:9000 
 // creates a StanfordCoreNLP object with POS tagging, lemmatization, NER, parsing, and coreference resolution
 Properties props = new Properties();
 props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
-StanfordCoreNLPClient pipeline = new StanfordCoreNLPClient(props, "localhost", 9000, 2);
+StanfordCoreNLPClient pipeline = new StanfordCoreNLPClient(props, "http://localhost", 9000, 2);
 // read some text in the text variable
 String text = ... // Add your text here!
 // create an empty Annotation just with the given text
@@ -184,7 +184,7 @@ java -cp "*" -Xmx1g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators 
 Once you have your own server(s) set up, you can run against them with a command like this:
 
 ```bash
-java edu.stanford.nlp.pipeline.StanfordCoreNLPClient -cp "*" -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt  -backends localhost:9000
+java edu.stanford.nlp.pipeline.StanfordCoreNLPClient -cp "*" -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt  -backends http://localhost:9000
 ```
 
 You specify one or more back-end servers in a comma-separated list as the arguments of the `-backends` option. Each is specified as `host:port`.
