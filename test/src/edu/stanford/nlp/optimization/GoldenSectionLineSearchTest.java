@@ -1,8 +1,7 @@
 package edu.stanford.nlp.optimization;
 
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
+
 import junit.framework.TestCase;
 
 public class GoldenSectionLineSearchTest extends TestCase {

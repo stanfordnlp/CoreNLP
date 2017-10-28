@@ -1,9 +1,5 @@
 package edu.stanford.nlp.process;
 
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.util.TSVUtils;
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,7 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
-import java.util.function.IntUnaryOperator;
+
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.util.TSVUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * A callback function which operates on each line of a TSV file representing a collection of sentences.

@@ -13,7 +13,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Predicate;
 
 /**
  * Utilities for helping out with Iterables as Collections is to Collection.

@@ -1,6 +1,11 @@
 package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.function.DoubleUnaryOperator;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
@@ -10,16 +15,10 @@ import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.StringUtils;
-
-import java.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * CRFBiasedClassifier is used to adjust the precision-recall tradeoff

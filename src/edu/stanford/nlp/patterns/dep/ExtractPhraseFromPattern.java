@@ -9,17 +9,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.function.Predicate;
-import java.util.function.Predicate;
-import java.util.function.Predicate;
-import java.util.function.Predicate;
-
 //import org.jdom.Element;
 //import org.jdom.Namespace;
-
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;

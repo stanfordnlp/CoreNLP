@@ -2,8 +2,6 @@ package edu.stanford.nlp.util;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
 import java.util.function.ToDoubleFunction;
 
 /**

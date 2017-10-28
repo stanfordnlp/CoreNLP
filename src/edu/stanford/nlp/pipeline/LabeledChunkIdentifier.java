@@ -1,16 +1,13 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 
 /**
  * Identifies chunks based on labels that uses IOB-like encoding
