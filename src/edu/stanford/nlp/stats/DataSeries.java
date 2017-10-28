@@ -1,13 +1,14 @@
 package edu.stanford.nlp.stats; 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.IntToDoubleFunction;
-import java.util.function.ToIntFunction;
+import edu.stanford.nlp.util.logging.Redwood;
+
+
 import edu.stanford.nlp.io.RecordIterator;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.logging.Redwood;
+import java.util.function.Function;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.*;
+import java.io.*;
 
 /**
  * A <code>DataSeries</code> represents a named sequence of <code>double</code>

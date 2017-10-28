@@ -41,14 +41,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.MultiClassAccuracyStats;
 import edu.stanford.nlp.stats.Scorer;
-import edu.stanford.nlp.util.ArrayUtils;
-import edu.stanford.nlp.util.Factory;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.HashIndex;
-import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 
