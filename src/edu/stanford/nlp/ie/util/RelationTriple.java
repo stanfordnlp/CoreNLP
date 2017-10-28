@@ -3,23 +3,16 @@ package edu.stanford.nlp.ie.util;
 import static edu.stanford.nlp.util.logging.Redwood.Util.err;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.ToIntFunction;
+import edu.stanford.nlp.util.PriorityQueue;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.FixedPrioritiesPriorityQueue;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.PriorityQueue;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
 /**
  * A (subject, relation, object) triple; e.g., as used in the KBP challenges or in OpenIE systems.
