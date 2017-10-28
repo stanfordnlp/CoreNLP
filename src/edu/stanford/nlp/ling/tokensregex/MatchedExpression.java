@@ -2,7 +2,7 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import java.util.*;
 import java.util.function.Function;
-
+import java.util.function.ToDoubleFunction;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
@@ -384,12 +384,12 @@ public class MatchedExpression {
     }
   }
 
-  public static <T extends MatchedExpression> T getBestMatched(List<T> matches, Function<MatchedExpression, Double> scorer) {
+  public static <T extends MatchedExpression> T getBestMatched(List<T> matches, ToDoubleFunction<MatchedExpression> scorer) {
     if (matches == null || matches.isEmpty()) return null;
     T best = null;
     double bestScore = Double.NEGATIVE_INFINITY;
     for (T m : matches) {
-      double s = scorer.apply(m);
+      double s = scorer.applyAsDouble(m);
       if (best == null || s > bestScore) {
         best = m;
         bestScore = s;
@@ -503,9 +503,9 @@ public class MatchedExpression {
           Comparators.chain(EXPR_LENGTH_COMPARATOR, EXPR_PRIORITY_COMPARATOR,
                   EXPR_ORDER_COMPARATOR, EXPR_TOKEN_OFFSET_COMPARATOR);
 
-  public static final Function<MatchedExpression, Double> EXPR_WEIGHT_SCORER = new Function<MatchedExpression, Double>() {
+  public static final ToDoubleFunction<MatchedExpression> EXPR_WEIGHT_SCORER = new ToDoubleFunction<MatchedExpression>() {
     @Override
-    public Double apply(MatchedExpression in) {
+    public double applyAsDouble(MatchedExpression in) {
       return in.weight;
     }
   };

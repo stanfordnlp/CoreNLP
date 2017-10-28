@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.IntUnaryOperator;
+import java.util.function.IntUnaryOperator;
 
 /**
  * A callback function which operates on each line of a TSV file representing a collection of sentences.
@@ -89,7 +91,7 @@ public interface TSVSentenceProcessor {
    * @param sentenceTableSpec The header of the sentence table fields being fed as input to this function.
    *                          By default, this can be {@link TSVSentenceProcessor#DEFAULT_SENTENCE_TABLE}.
    */
-  default void runAndExit(InputStream in, PrintStream debugStream, Function<Integer, Integer> cleanup,
+  default void runAndExit(InputStream in, PrintStream debugStream, IntUnaryOperator cleanup,
                           List<SentenceField> sentenceTableSpec) {
     int exceptions = 0;
 
@@ -146,13 +148,13 @@ public interface TSVSentenceProcessor {
       debugStream.flush();
       debugStream.close();
     }
-    System.exit(cleanup.apply(exceptions));
+    System.exit(cleanup.applyAsInt(exceptions));
   }
 
   /**
    * @see TSVSentenceProcessor#runAndExit(InputStream, PrintStream, Function, List)
    */
-  default void runAndExit(InputStream in, PrintStream debugStream, Function<Integer, Integer> cleanup) {
+  default void runAndExit(InputStream in, PrintStream debugStream, IntUnaryOperator cleanup) {
     runAndExit(in, debugStream, cleanup, DEFAULT_SENTENCE_TABLE);
   }
 

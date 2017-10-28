@@ -8,6 +8,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.classify.*;
@@ -357,7 +359,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     for(Map.Entry<String, Collection<CandidatePhrase>> en: allPossibleNegativePhrases.entrySet())
       negSims.addAll(computeSimWithWordVectors(candidatePhrases, en.getValue(), true, en.getKey()));
 
-    Function<CandidatePhrase, Boolean> retainPhrasesNotCloseToNegative = candidatePhrase -> {
+    Predicate<CandidatePhrase> retainPhrasesNotCloseToNegative = candidatePhrase -> {
       if(negSims.getCount(candidatePhrase) > posSims.getCount(candidatePhrase))
         return false;
       else
@@ -506,7 +508,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(maxNum == 0)
       return unknownSamples;
 
-    Function<CoreLabel, Boolean> acceptWord = coreLabel -> {
+    Predicate<CoreLabel> acceptWord = coreLabel -> {
       if(coreLabel.get(positiveClass).equals(label) || constVars.functionWords.contains(coreLabel.word()))
         return false;
       else
@@ -529,7 +531,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     List<String> textTokens = sent.getTokens().stream().map(x -> x.word()).collect(Collectors.toList());
 
     for(CoreLabel l: sampledHeads) {
-      if(!acceptWord.apply(l))
+      if(!acceptWord.test(l))
         continue;
       IndexedWord w = g.getNodeByIndex(l.index());
       List<String> outputPhrases = new ArrayList<>();

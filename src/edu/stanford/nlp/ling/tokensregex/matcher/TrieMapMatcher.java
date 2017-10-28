@@ -257,7 +257,7 @@ public class TrieMapMatcher<K,V> {
   }
 
   public static final Comparator<Match> MATCH_LENGTH_ENDPOINTS_COMPARATOR = Interval.lengthEndpointsComparator();
-  public static final Function<Match, Double> MATCH_LENGTH_SCORER = Interval.lengthScorer();
+  public static final ToDoubleFunction<Match> MATCH_LENGTH_SCORER = Interval.lengthScorer();
 
   /**
    * Given a sequence to search through (e.g. piece of text would be a sequence of words),
@@ -299,7 +299,7 @@ public class TrieMapMatcher<K,V> {
    * @param scoreFunc Scoring function indicating how good the match is
    * @return List of matches sorted by start position
    */
-  public List<Match<K,V>> findNonOverlapping(List<K> list, int start, int end, Function<? super Match<K,V>, Double> scoreFunc) {
+  public List<Match<K,V>> findNonOverlapping(List<K> list, int start, int end, ToDoubleFunction<? super Match<K, V>> scoreFunc) {
     List<Match<K,V>> allMatches = findAllMatches(list, start, end);
     return getNonOverlapping(allMatches, scoreFunc);
   }
@@ -381,7 +381,7 @@ public class TrieMapMatcher<K,V> {
    * @param scoreFunc Scoring function indicating how good the match is
    * @return List of segments (as matches) sorted by start position
    */
-  public List<Match<K,V>> segment(List<K> list, int start, int end, Function<? super Match<K,V>, Double> scoreFunc) {
+  public List<Match<K,V>> segment(List<K> list, int start, int end, ToDoubleFunction<? super Match<K, V>> scoreFunc) {
     List<Match<K,V>> nonOverlapping = findNonOverlapping(list, start, end, scoreFunc);
     List<Match<K,V>> segments = new ArrayList<>(nonOverlapping.size());
     int last = 0;
@@ -401,7 +401,7 @@ public class TrieMapMatcher<K,V> {
     return segments;
   }
 
-  public List<Match<K,V>> segment(List<K> list, Function<? super Match<K,V>, Double> scoreFunc) {
+  public List<Match<K,V>> segment(List<K> list, ToDoubleFunction<? super Match<K, V>> scoreFunc) {
     return segment(list, 0, list.size(), scoreFunc);
   }
 
@@ -434,7 +434,7 @@ public class TrieMapMatcher<K,V> {
     }
   }
 
-  public List<Match<K,V>> getNonOverlapping(List<Match<K,V>> allMatches, Function<? super Match<K,V>, Double> scoreFunc) {
+  public List<Match<K,V>> getNonOverlapping(List<Match<K,V>> allMatches, ToDoubleFunction<? super Match<K, V>> scoreFunc) {
     return IntervalTree.getNonOverlappingMaxScore(allMatches, scoreFunc);
   }
 
