@@ -75,7 +75,7 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
     env.bind("nested", TimeExpression.ChildrenAnnotation.class);
     env.bind("time", new TimeFormatter.TimePatternExtractRuleCreator());
     // Do case insensitive matching
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     env.bind("options", options);
     env.bind("TIME_REF", SUTime.TIME_REF);
