@@ -71,6 +71,8 @@ public class RNNCoreAnnotations {
     return listOfPredictions;
   }
 
+
+
   /**
    * Get the argmax of the class predictions.
    * The predicted classes can be an arbitrary set of non-negative integer classes,
@@ -106,6 +108,25 @@ public class RNNCoreAnnotations {
     Integer val = ((CoreLabel) label).get(PredictedClass.class);
     return val == null ? -1: val;
   }
+
+  /** Return as a double the probability of the predicted class. If it is not defined for a node,
+   *  it will return -1
+   *
+   *  @return Either the label probability or -1.0 if none
+   */
+  public static double getPredictedClassProb(Label label) {
+    if (!(label instanceof CoreLabel)) {
+      throw new IllegalArgumentException("CoreLabels required to get the attached predicted class");
+    }
+    Integer val = ((CoreLabel) label).get(PredictedClass.class);
+    SimpleMatrix predictions = ((CoreLabel) label).get(Predictions.class);
+    if (val != null) {
+      return predictions.get(val);
+    } else {
+      return -1.0;
+    }
+  }
+
 
   /**
    * The index of the correct class.
