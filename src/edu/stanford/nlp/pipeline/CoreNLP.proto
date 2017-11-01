@@ -57,6 +57,9 @@ message Document {
   optional bool    xmlDoc = 11;
   repeated Section sections = 12;
 
+  /** coref mentions for entire document **/
+  repeated Mention         mentionsForCoref                    = 14;
+
   extensions 100 to 255;
 }
 
