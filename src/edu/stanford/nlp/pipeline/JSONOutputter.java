@@ -107,7 +107,7 @@ public class JSONOutputter extends AnnotationOutputter {
                         (label.value() + "|sentiment=" + RNNCoreAnnotations.getPredictedClass(label) + "|prob=" +
                             (String.format("%.3f", RNNCoreAnnotations.getPredictedClassProb(label)))) : label.value());
             String treeString = sentimentTreeStringWriter.toString();
-            l2.set("sentimentTree", treeString);
+            l2.set("sentimentTree", treeString.trim());
           }
           // (openie)
           Collection<RelationTriple> openIETriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
