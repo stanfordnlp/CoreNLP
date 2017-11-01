@@ -116,7 +116,7 @@ public class RNNCoreAnnotations {
    */
   public static double getPredictedClassProb(Label label) {
     if (!(label instanceof CoreLabel)) {
-      throw new IllegalArgumentException("CoreLabels required to get the attached predicted class");
+      throw new IllegalArgumentException("CoreLabels required to get the attached predicted class probability");
     }
     Integer val = ((CoreLabel) label).get(PredictedClass.class);
     SimpleMatrix predictions = ((CoreLabel) label).get(Predictions.class);
