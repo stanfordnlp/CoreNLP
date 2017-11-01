@@ -1,4 +1,4 @@
-## tagger training invoked at Mon Jun 09 17:36:16 PDT 2014 with arguments:
+## tagger training invoked at Thurs Apr 27 00:00:00 PDT 2017 with arguments:
                    model = french-ud.tagger
                     arch = left3words,naacl2003unknowns,unicodeshapes(-1,1)
             wordFunction = 
