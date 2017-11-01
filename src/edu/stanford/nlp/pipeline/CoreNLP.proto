@@ -59,7 +59,8 @@ message Document {
 
   /** coref mentions for entire document **/
   repeated Mention         mentionsForCoref                    = 14;
-  optional bool hasCorefAnnotation = 15;
+  optional bool hasCorefMentionAnnotation = 15;
+  optional bool hasCorefAnnotation = 16;
 
   extensions 100 to 255;
 }
