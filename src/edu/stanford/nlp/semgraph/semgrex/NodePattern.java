@@ -1,4 +1,5 @@
-package edu.stanford.nlp.semgraph.semgrex;
+package edu.stanford.nlp.semgraph.semgrex; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,12 +13,11 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.logging.Redwood;
 
 public class NodePattern extends SemgrexPattern  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(NodePattern.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(NodePattern.class);
 
   private static final long serialVersionUID = -5981133879119233896L;
   private GraphRelation reln;
@@ -78,7 +78,7 @@ public class NodePattern extends SemgrexPattern  {
         if (isRegexp) {
           attributes.put(key, Pair.makePair(
               Pattern.compile(patternContent),
-              Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE))
+              Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE))
           );
         } else {
           attributes.put(key, Pair.makePair(patternContent, patternContent));
@@ -214,7 +214,7 @@ public class NodePattern extends SemgrexPattern  {
     }
     sb.append(' ');
     if (reln != null) {
-      sb.append(reln);
+      sb.append(reln.toString());
       sb.append(' ');
     }
     if (!hasPrecedence && addChild && child != null) {

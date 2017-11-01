@@ -860,7 +860,8 @@ public class Expressions  {
             try {
               Class<?> type = (Class<?>) paramTypes[i].getField("TYPE").get(null);
               if (type.equals(targetParamTypes[i])) { compatible = true; }
-            } catch (NoSuchFieldException | IllegalAccessException ex2) {
+            } catch (NoSuchFieldException ex2) {
+            } catch (IllegalAccessException ex2) {
             }
           }
           if (!compatible) break;
@@ -1001,7 +1002,11 @@ public class Expressions  {
           }
           Object obj = constructor.newInstance(objs);
           return new PrimitiveValue<>(function, obj);
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException ex) {
+        } catch (InvocationTargetException ex) {
+          throw new RuntimeException("Cannot instantiate " + c, ex);
+        } catch (InstantiationException ex) {
+          throw new RuntimeException("Cannot instantiate " + c, ex);
+        } catch (IllegalAccessException ex) {
           throw new RuntimeException("Cannot instantiate " + c, ex);
         }
       } else {
@@ -1117,7 +1122,9 @@ public class Expressions  {
       try {
         Object res = method.invoke(mainObj, objs);
         return new PrimitiveValue<>(function, res);
-      } catch (InvocationTargetException | IllegalAccessException ex) {
+      } catch (InvocationTargetException ex) {
+        throw new RuntimeException("Cannot evaluate method " + function + " on object " + mainObj, ex);
+      } catch (IllegalAccessException ex) {
         throw new RuntimeException("Cannot evaluate method " + function + " on object " + mainObj, ex);
       }
     }
@@ -1271,7 +1278,9 @@ public class Expressions  {
                   }
                 }
                 return new PrimitiveValue<>(typeName, obj);
-              } catch (InstantiationException | IllegalAccessException ex) {
+              } catch (InstantiationException ex) {
+                throw new RuntimeException("Cannot instantiate " + c, ex);
+              } catch (IllegalAccessException ex) {
                 throw new RuntimeException("Cannot instantiate " + c, ex);
               }
             } else if (typeValue.get() != null){
@@ -1284,7 +1293,9 @@ public class Expressions  {
                 CompositeValue evaluatedCv = cv.evaluateNoTypeConversion(env, args);
                 try {
                   return new PrimitiveValue<>(typeName, m.invoke(typeValue.get(), evaluatedCv));
-                } catch (InvocationTargetException | IllegalAccessException ex) {
+                } catch (InvocationTargetException ex) {
+                  throw new RuntimeException("Cannot instantiate " + c, ex);
+                } catch (IllegalAccessException ex) {
                   throw new RuntimeException("Cannot instantiate " + c, ex);
                 }
               } catch (NoSuchMethodException ex) {}

@@ -726,7 +726,9 @@ public class LambdaSolve  {
         return (double[]) o;
       }
       throw new RuntimeIOException("Failed to read lambdas from given input stream");
-    } catch (IOException | ClassNotFoundException e) {
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
   }

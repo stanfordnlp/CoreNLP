@@ -64,13 +64,19 @@ public abstract class PatternsForEachToken<E> {
       }
       case LUCENE:
       {
-        try {
+        try{
         Class c = Class.forName("edu.stanford.nlp.patterns.surface.PatternsForEachTokenLucene");
           p = (PatternsForEachToken) c.getDeclaredConstructor(Properties.class).newInstance(props);
           break;
-        } catch (ClassNotFoundException e) {
+        }catch (ClassNotFoundException e) {
           throw new RuntimeException("Lucene option is not distributed (license clash). Email us if you really want it.");
-        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+        } catch (InvocationTargetException e) {
+          throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+          throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+          throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
           throw new RuntimeException(e);
         }
 

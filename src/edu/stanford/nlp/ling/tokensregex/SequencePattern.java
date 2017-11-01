@@ -1027,7 +1027,7 @@ public class SequencePattern<T> implements Serializable {
       for (Map.Entry<Pair<Class, Boolean>, Pair<Collection<PatternExpr>, Set<String>>> entry : stringPatterns.entrySet()) {
         Pair<Collection<PatternExpr>, Set<String>> saved = entry.getValue();
         Set<String> set = saved.second;
-        int flags = (entry.getKey().second)? (NodePattern.CASE_INSENSITIVE | NodePattern.UNICODE_CASE):0;
+        int flags = (entry.getKey().second)? NodePattern.CASE_INSENSITIVE:0;
         if (set.size() > OPTIMIZE_MIN_SIZE) {
           PatternExpr optimized = new NodePatternExpr(
                   new CoreMapNodePattern(entry.getKey().first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, flags)));

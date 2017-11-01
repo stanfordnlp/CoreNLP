@@ -26,7 +26,7 @@ public class UtilTest {
   }
 
   private List<CoreLabel> mockLabels(String input) {
-    return Arrays.asList(input.split(" ")).stream().map(x -> x.indexOf("_") > 0 ? mkLabel(x.substring(0, x.indexOf("_")), x.substring(x.indexOf("_") + 1)) : mkLabel(x, "O")).collect(Collectors.toList());
+    return Arrays.stream(input.split(" ")).map(x -> x.indexOf("_") > 0 ? mkLabel(x.substring(0, x.indexOf("_")), x.substring(x.indexOf("_") + 1)) : mkLabel(x, "O")).collect(Collectors.toList());
   }
 
   @Test

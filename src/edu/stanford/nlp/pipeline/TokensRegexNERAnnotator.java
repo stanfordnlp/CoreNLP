@@ -338,8 +338,8 @@ public class TokensRegexNERAnnotator implements Annotator  {
       TokenSequencePattern pattern;
 
       Boolean ignoreCaseEntry = ignoreCaseList.get(entryToMappingFileNumber.get(entry));
-      int patternFlags = ignoreCaseEntry? Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE:0;
-      int stringMatchFlags = ignoreCaseEntry? (NodePattern.CASE_INSENSITIVE | NodePattern.UNICODE_CASE):0;
+      int patternFlags = ignoreCaseEntry? Pattern.CASE_INSENSITIVE:0;
+      int stringMatchFlags = ignoreCaseEntry? NodePattern.CASE_INSENSITIVE:0;
       Env env = TokenSequencePattern.getNewEnv();
       env.setDefaultStringPatternFlags(patternFlags);
       env.setDefaultStringMatchFlags(stringMatchFlags);

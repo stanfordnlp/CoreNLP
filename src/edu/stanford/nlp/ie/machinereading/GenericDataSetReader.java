@@ -216,7 +216,10 @@ public class GenericDataSetReader  {
     Tree sh = null;
     try {
       sh = findSyntacticHead(ent, tree, tokens);
-    } catch (Exception | AssertionError e) {
+    } catch(Exception e) {
+      logger.severe("WARNING: failed to parse sentence. Will continue with the right-most head heuristic: " + sentenceToString(tokens));
+      e.printStackTrace();
+    } catch(AssertionError e) {
       logger.severe("WARNING: failed to parse sentence. Will continue with the right-most head heuristic: " + sentenceToString(tokens));
       e.printStackTrace();
     }

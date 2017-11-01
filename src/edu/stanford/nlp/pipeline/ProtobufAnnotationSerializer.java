@@ -603,35 +603,18 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setCalendar(doc.get(CalendarAnnotation.class).toInstant().toEpochMilli());
       keysToSerialize.remove(CalendarAnnotation.class);
     }
-    // add coref info
     if (doc.containsKey(CorefChainAnnotation.class)) {
-      // mark that annotation has coref info
-      builder.setHasCorefAnnotation(true);
       for (Map.Entry<Integer, CorefChain> chain : doc.get(CorefChainAnnotation.class).entrySet()) {
        builder.addCorefChain(toProto(chain.getValue()));
       }
       keysToSerialize.remove(CorefChainAnnotation.class);
-    } else {
-      builder.setHasCorefAnnotation(false);
     }
-    // add document level coref mentions info
-    if (doc.containsKey(CorefMentionsAnnotation.class)) {
-      builder.setHasCorefMentionAnnotation(true);
-      for (Mention corefMention : doc.get(CorefMentionsAnnotation.class)) {
-        builder.addMentionsForCoref(toProto(corefMention));
-      }
-      keysToSerialize.remove(CorefMentionsAnnotation.class);
-    } else {
-      builder.setHasCorefMentionAnnotation(false);
-    }
-    // add quote information
     if (doc.containsKey(QuotationsAnnotation.class)) {
       for (CoreMap quote : doc.get(QuotationsAnnotation.class)) {
         builder.addQuote(toProtoQuote(quote));
       }
       keysToSerialize.remove(QuotationsAnnotation.class);
     }
-    // add document level entity mentions info
     if (doc.containsKey(MentionsAnnotation.class)) {
       for (CoreMap mention : doc.get(MentionsAnnotation.class)) {
         builder.addMentions(toProtoMention(mention));
@@ -1610,12 +1593,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       CorefChain chain = fromProto(chainProto, ann);
       corefChains.put(chain.getChainID(), chain);
     }
-    if (proto.getHasCorefAnnotation()) { ann.set(CorefChainAnnotation.class, corefChains); }
-
-    // Set document coref mentions list ; this gets populated when sentences build CorefMentions below
-    if (proto.getHasCorefMentionAnnotation()) {
-      ann.set(CorefMentionsAnnotation.class, new ArrayList<Mention>());
-    }
+    if (!corefChains.isEmpty()) { ann.set(CorefChainAnnotation.class, corefChains); }
 
     // hashes to access Mentions , later in this method need to add speakerInfo to Mention
     // so we need to create id -> Mention, CoreNLPProtos.Mention maps to do this, since SpeakerInfo could reference
@@ -1676,8 +1654,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       for (CoreNLPProtos.Mention protoMention : sentence.getMentionsForCorefList()) {
         // get the mention
         Mention mentionToUpdate = map.get(CorefMentionsAnnotation.class).get(mentionInt);
-        // add to document level coref mention list
-        ann.get(CorefMentionsAnnotation.class).add(mentionToUpdate);
         // store these in hash for more processing later in this method
         idToMention.put(mentionToUpdate.mentionID, mentionToUpdate);
         idToProtoMention.put(mentionToUpdate.mentionID, protoMention);

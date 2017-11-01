@@ -440,7 +440,7 @@ public class NumberNormalizer {
     Env env = TokenSequencePattern.getNewEnv();
 
     // Do case insensitive matching
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
 
     initEnv(env);
     return env;

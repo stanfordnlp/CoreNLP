@@ -290,7 +290,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
 
       try {
         for (String str : regexes) {
-          if(ignoreCase) tokens.add(Pattern.compile(str, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE));
+          if(ignoreCase) tokens.add(Pattern.compile(str, Pattern.CASE_INSENSITIVE));
           else tokens.add(Pattern.compile(str));
         }
       } catch (PatternSyntaxException e) {

@@ -100,14 +100,6 @@ public class JSONOutputter extends AnnotationOutputter {
             l2.set("sentimentValue", Integer.toString(sentiment));
             l2.set("sentiment", sentimentClass.replaceAll(" ", ""));
             l2.set("sentimentDistribution", sentimentPredictions);
-            StringWriter sentimentTreeStringWriter = new StringWriter();
-            sentimentTree.pennPrint(new PrintWriter(sentimentTreeStringWriter),
-                label -> (label.value() == null) ? "" :
-                    (RNNCoreAnnotations.getPredictedClass(label) != -1) ?
-                        (label.value() + "|sentiment=" + RNNCoreAnnotations.getPredictedClass(label) + "|prob=" +
-                            (String.format("%.3f", RNNCoreAnnotations.getPredictedClassProb(label)))) : label.value());
-            String treeString = sentimentTreeStringWriter.toString();
-            l2.set("sentimentTree", treeString.trim());
           }
           // (openie)
           Collection<RelationTriple> openIETriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
@@ -214,19 +206,14 @@ public class JSONOutputter extends AnnotationOutputter {
       if (doc.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
         List<CoreMap> quotes = QuoteAnnotator.gatherQuotes(doc);
         l1.set("quotes", quotes.stream().map(quote -> (Consumer<Writer>) (Writer l2) -> {
-          l2.set("id", quote.get(CoreAnnotations.QuotationIndexAnnotation.class));
-          l2.set("text", quote.get(CoreAnnotations.TextAnnotation.class));
-          l2.set("beginIndex", quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-          l2.set("endIndex", quote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-          l2.set("beginToken", quote.get(CoreAnnotations.TokenBeginAnnotation.class));
-          l2.set("endToken", quote.get(CoreAnnotations.TokenEndAnnotation.class));
-          l2.set("beginSentence", quote.get(CoreAnnotations.SentenceBeginAnnotation.class));
-          l2.set("endSentence", quote.get(CoreAnnotations.SentenceEndAnnotation.class));
-          l2.set("speaker",
-              quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null ?
-                  quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) :
-                  "Unknown");
-
+            l2.set("id", quote.get(CoreAnnotations.QuotationIndexAnnotation.class));
+            l2.set("text", quote.get(CoreAnnotations.TextAnnotation.class));
+            l2.set("beginIndex", quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+            l2.set("endIndex", quote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+            l2.set("beginToken", quote.get(CoreAnnotations.TokenBeginAnnotation.class));
+            l2.set("endToken", quote.get(CoreAnnotations.TokenEndAnnotation.class));
+            l2.set("beginSentence", quote.get(CoreAnnotations.SentenceBeginAnnotation.class));
+            l2.set("endSentence", quote.get(CoreAnnotations.SentenceEndAnnotation.class));
         }));
       }
 

@@ -734,7 +734,7 @@ public class TimeFormatter {
     }
 
     public Pattern toTextPattern() {
-      return Pattern.compile(toTextRegex(), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+      return Pattern.compile(toTextRegex(), Pattern.CASE_INSENSITIVE);
     }
 
     private void appendNumericFields(DateTimeFieldType[] fieldTypes, int digits) {

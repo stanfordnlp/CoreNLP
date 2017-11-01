@@ -18,7 +18,7 @@ Here are some helpful instructions to use the latest code:
 
 Sometimes we will provide updated jars here which have the latest version of the code.
 
-At present [the current released version of the code](https://stanfordnlp.github.io/CoreNLP/#download) is our most recent released jar, though you can always build the very latest from GitHub HEAD yourself.
+At present the current released version of the code is our most recent released jar, though you can always build the very latest from GitHub HEAD yourself.
 
 <!---
 [stanford-corenlp.jar (last built: 2017-04-14)](http://nlp.stanford.edu/software/stanford-corenlp-2017-04-14-build.jar)

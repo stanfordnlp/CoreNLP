@@ -267,7 +267,7 @@ public class CleanXmlAnnotator implements Annotator {
 
   private static Pattern toCaseInsensitivePattern(String tags) {
     if (tags != null) {
-      return Pattern.compile(tags, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+      return Pattern.compile(tags, Pattern.CASE_INSENSITIVE);
     } else {
       return null;
     }
