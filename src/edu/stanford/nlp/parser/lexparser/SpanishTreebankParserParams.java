@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
+package edu.stanford.nlp.parser.lexparser;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.HasWord;
@@ -54,14 +54,14 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   }
 
   private static final String PODER_FORM =
-    "(?i)^(?:pued(?:o|[ea][sn]?)|" +
+    "(?iu)^(?:pued(?:o|[ea][sn]?)|" +
       "pod(?:e[dr]|ido|[ea]mos|[éá]is|r(?:é(?:is)?|á[sn]?|emos)|r?ía(?:s|mos|is|n)?)|" +
       "pud(?:[eo]|i(?:ste(?:is)?|mos|eron|er[ea](?:[sn]|is)?|ér[ea]mos|endo)))$";
 
   /**
    * Forms of hacer which may lead time expressions
    */
-  private static final String HACER_TIME_FORM = "(?i)^(?:hac(?:er|ía))$";
+  private static final String HACER_TIME_FORM = "(?iu)^(?:hac(?:er|ía))$";
 
   @SuppressWarnings("unchecked")
   private void buildAnnotations() {
@@ -80,7 +80,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
                                              new AnnotateHeadFunction(headFinder)));
 
     // +.1 F1
-    annotations.put("-markComo", new Pair("@cs < /(?i)^como$/",
+    annotations.put("-markComo", new Pair("@cs < /(?iu)^como$/",
                                           new SimpleStringFunction("[como]")));
     annotations.put("-markSpecHeads", new Pair("@spec", new AnnotateHeadFunction(headFinder)));
 
@@ -101,7 +101,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
     // +1.39 F1
     annotations.put("-markParticipleAdjs", new Pair(
-      "@aq0000 < /(?i)([aeií]d|puest|biert|vist|(ben|mal)dit|[fh]ech|scrit|muert|[sv]uelt|[rl]ect|"
+      "@aq0000 < /(?iu)([aeií]d|puest|biert|vist|(ben|mal)dit|[fh]ech|scrit|muert|[sv]uelt|[rl]ect|"
         + "frit|^(rot|dich|impres|desnud|sujet|exent))[oa]s?$/",
       new SimpleStringFunction("-part")));
 

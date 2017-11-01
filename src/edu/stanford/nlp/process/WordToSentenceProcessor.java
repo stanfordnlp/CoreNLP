@@ -579,7 +579,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         String regex = "<\\s*(?:/\\s*)?(?:" + s + ")(?:\\s+[^>]+?|\\s*(?:/\\s*)?)>";
         // log.info("Regex is |" + regex + "|");
         // todo: Historically case insensitive, but maybe better and more proper to make case sensitive?
-        this.xmlBreakElementsToDiscard.add(Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
+        this.xmlBreakElementsToDiscard.add(Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE));
       }
     }
     if (regionElementRegex != null) {
