@@ -430,7 +430,7 @@ public class ChineseQuantifiableEntityNormalizer {
     boolean notMatched = true;
     // We check multiCharCurrencyWords first
     for (String currencyWord : multiCharCurrencyWords.keySet()) {
-      if(notMatched && StringUtils.find(s, currencyWord)) {
+      if (notMatched && StringUtils.find(s, currencyWord)) {
         switch(currencyWord) {
           case "美分" :
             multiplier = 0.01;

@@ -145,8 +145,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   // Mention is identified as being this speaker....
   public SpeakerInfo speakerInfo;
 
-  transient private String spanString = null;
-  transient private String lowercaseNormalizedSpanString = null;
+  private transient String spanString = null;
+  private transient String lowercaseNormalizedSpanString = null;
 
   public IntCounter<Integer> antecedentOrdering = new IntCounter<>();
 
@@ -303,16 +303,17 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       List<String> convertedStr = new ArrayList<>(2);
       convertedStr.add(mStr.get(firstNameIdx));
       convertedStr.add("!");
-      if(dict.genderNumber.containsKey(convertedStr)) return dict.genderNumber.get(convertedStr);
+      if (dict.genderNumber.containsKey(convertedStr)) return dict.genderNumber.get(convertedStr);
 
-      if(dict.genderNumber.containsKey(mStr.subList(firstNameIdx, firstNameIdx+1))) return dict.genderNumber.get(mStr.subList(firstNameIdx, firstNameIdx+1));
+      if (dict.genderNumber.containsKey(mStr.subList(firstNameIdx, firstNameIdx+1))) return dict.genderNumber.get(mStr.subList(firstNameIdx, firstNameIdx+1));
     }
 
-    if(mStr.size() > 0 && dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
+    if (mStr.size() > 0 && dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
     return null;
   }
+
   private void setDiscourse() {
-//    utter = headWord.get(CoreAnnotations.UtteranceAnnotation.class);
+    // utter = headWord.get(CoreAnnotations.UtteranceAnnotation.class);
 
     Pair<IndexedWord, String> verbDependency = findDependentVerb(this);
     String dep = verbDependency.second();
@@ -323,24 +324,29 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     isIndirectObject = false;
     isPrepositionObject = false;
 
-    if(dep==null) {
-      return;
-    } else if(dep.equals("nsubj") || dep.equals("csubj")) {
-      isSubject = true;
-    } else if(dep.equals("dobj") || dep.equals("nsubjpass")){
-      isDirectObject = true;
-    } else switch(dep) {
-      case "iobj" :
-        isIndirectObject = true;
-        break;
-      default :
-        if(dep.startsWith("nmod")
-            && ! dep.equals("nmod:npmod")
-            && ! dep.equals("nmod:tmod")
-            && ! dep.equals("nmod:poss")
-            && ! dep.equals("nmod:agent")) {
-          isPrepositionObject = true;
-        }
+    if (dep != null) {
+      switch(dep) {
+        case "nsubj":
+        case "csubj":
+          isSubject = true;
+          break;
+        case "dobj":
+        case "nsubjpass":
+        case "nsubj:pass":
+          isDirectObject = true;
+          break;
+        case "iobj":
+          isIndirectObject = true;
+          break;
+        default:
+          if (dep.startsWith("nmod")
+                  && !dep.equals("nmod:npmod")
+                  && !dep.equals("nmod:tmod")
+                  && !dep.equals("nmod:poss")
+                  && !dep.equals("nmod:agent")) {
+            isPrepositionObject = true;
+          }
+      }
     }
   }
 
@@ -627,54 +633,66 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       } else {
         animacy = Animacy.UNKNOWN;
       }
-    } else if (nerString.equals("PERSON") || nerString.startsWith("PER")) {
-      animacy = Animacy.ANIMATE;
-    } else if (nerString.equals("LOCATION")|| nerString.startsWith("LOC")) {
-      animacy = Animacy.INANIMATE;
-    } else switch(nerString) {
-      case "MONEY" :
-        animacy = Animacy.INANIMATE;
-        break;
-      case "NUMBER" :
-        animacy = Animacy.INANIMATE;
-        break;
-      case "PERCENT" :
-        animacy = Animacy.INANIMATE;
-        break;
-      case "DATE" :
-        animacy = Animacy.INANIMATE;
-        break;
-      case "TIME" :
-        animacy = Animacy.INANIMATE;
-        break;
-      case "MISC" :
-        animacy = Animacy.UNKNOWN;
-        break;
-      default :
-        if (nerString.startsWith("VEH")) {
-          animacy = Animacy.UNKNOWN;
-        } else if (nerString.startsWith("FAC")) {
-          animacy = Animacy.INANIMATE;
-        } else if (nerString.startsWith("GPE")) {
-          animacy = Animacy.INANIMATE;
-        } else if (nerString.startsWith("WEA")) {
-          animacy = Animacy.INANIMATE;
-        } else if (nerString.startsWith("ORG")) {
-          animacy = Animacy.INANIMATE;
-        } else {
-          animacy = Animacy.UNKNOWN;
-        }
-    }
-    if(mentionType != MentionType.PRONOMINAL) {
-      // Better heuristics using DekangLin:
-      if(animacy == Animacy.UNKNOWN)  {
-        if(dict.animateWords.contains(headString))  {
+    } else {
+      switch(nerString) {
+        case "PERSON":
+        case "PER":
+        case "PERS":
           animacy = Animacy.ANIMATE;
-        }
-        else if(dict.inanimateWords.contains(headString)) {
+          break;
+        case "LOCATION":
+        case "LOC":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "MONEY":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "NUMBER":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "PERCENT":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "DATE":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "TIME":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "MISC":
+          animacy = Animacy.UNKNOWN;
+          break;
+        case "VEH":
+        case "VEHICLE":
+          animacy = Animacy.UNKNOWN;
+          break;
+        case "FAC":
+        case "FACILITY":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "GPE":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "WEA":
+        case "WEAPON":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "ORG":
+        case "ORGANIZATION":
+          animacy = Animacy.INANIMATE;
+          break;
+        default:
+          animacy = Animacy.UNKNOWN;
+      }
+      // Better heuristics using DekangLin:
+      if (animacy == Animacy.UNKNOWN) {
+        if (dict.animateWords.contains(headString))  {
+          animacy = Animacy.ANIMATE;
+        } else if (dict.inanimateWords.contains(headString)) {
           animacy = Animacy.INANIMATE;
         }
       }
+
     }
   }
 

@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees.treebank; 
+package edu.stanford.nlp.trees.treebank;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Date;
@@ -107,12 +107,11 @@ public final class TreebankPreprocessor  {
       String key = opt.getKey();
       if (key == null) {
         // continue;
-
-      } else if(key.equals("-d")) {
-        MAKE_DISTRIB = true;
-        distribName = opt.getValue()[0];
-
       } else switch(key) {
+        case "-d":
+          MAKE_DISTRIB = true;
+          distribName = opt.getValue()[0];
+          break;
         case "-v" :
           VERBOSE = true;
           break;
