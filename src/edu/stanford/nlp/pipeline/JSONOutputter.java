@@ -100,6 +100,14 @@ public class JSONOutputter extends AnnotationOutputter {
             l2.set("sentimentValue", Integer.toString(sentiment));
             l2.set("sentiment", sentimentClass.replaceAll(" ", ""));
             l2.set("sentimentDistribution", sentimentPredictions);
+            StringWriter sentimentTreeStringWriter = new StringWriter();
+            sentimentTree.pennPrint(new PrintWriter(sentimentTreeStringWriter),
+                label -> (label.value() == null) ? "" :
+                    (RNNCoreAnnotations.getPredictedClass(label) != -1) ?
+                        (label.value() + "|sentiment=" + RNNCoreAnnotations.getPredictedClass(label) + "|prob=" +
+                            (String.format("%.3f", RNNCoreAnnotations.getPredictedClassProb(label)))) : label.value());
+            String treeString = sentimentTreeStringWriter.toString();
+            l2.set("sentimentTree", treeString.trim());
           }
           // (openie)
           Collection<RelationTriple> openIETriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);

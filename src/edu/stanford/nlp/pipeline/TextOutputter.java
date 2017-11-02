@@ -120,8 +120,11 @@ public class TextOutputter extends AnnotationOutputter {
           pw.println("Sentiment-annotated binary tree");
           Tree sTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
           if (sTree != null) {
-            sTree.pennPrint(pw, label -> (label.value() == null) ? "": label.value() + '=' +
-                    RNNCoreAnnotations.getPredictedClass(label));
+            sTree.pennPrint(pw,
+                label -> (label.value() == null) ? "" :
+                    (RNNCoreAnnotations.getPredictedClass(label) != -1) ?
+                        (label.value() + "|sentiment=" + RNNCoreAnnotations.getPredictedClass(label) + "|prob=" +
+                            (String.format("%.3f", RNNCoreAnnotations.getPredictedClassProb(label)))) : label.value());
             pw.println();
           }
         }
