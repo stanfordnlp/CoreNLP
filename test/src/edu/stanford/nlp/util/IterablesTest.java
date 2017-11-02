@@ -53,12 +53,7 @@ public class IterablesTest extends TestCase {
     List<String> values = Arrays.asList("a","HI","tHere","YO");
 
     Iterator<String> iterator = Iterables.filter(values,
-        new Function<String,Boolean>(){
-
-      public Boolean apply(String in) {
-        return in.equals(in.toUpperCase());
-      }
-    }).iterator();
+        (String in)->{ return in.equals(in.toUpperCase());}).iterator();
 
     assertTrue(iterator.hasNext());
     assertEquals(iterator.next(), "HI");
@@ -70,11 +65,7 @@ public class IterablesTest extends TestCase {
     List<Integer> values = Arrays.asList(1,2,3,4);
     List<Integer> squares = Arrays.asList(1,4,9,16);
 
-    Function<Integer,Integer> squarer = new Function<Integer,Integer>() {
-      public Integer apply(Integer in) {
-        return in * in;
-      }
-    };
+    Function<Integer,Integer> squarer = (Integer in)->{ return in * in;};
 
     for (Pair<Integer,Integer> pair : Iterables.zip(Iterables.transform(values, squarer), squares)) {
       assertEquals(pair.first, pair.second);

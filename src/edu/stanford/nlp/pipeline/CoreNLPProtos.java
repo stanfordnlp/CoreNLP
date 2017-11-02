@@ -150,11 +150,7 @@ public final class CoreNLPProtos {
     }
     private static final com.google.protobuf.Internal.EnumLiteMap<
         Language> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<Language>() {
-            public Language findValueByNumber(int number) {
-              return Language.forNumber(number);
-            }
-          };
+          (int number)->{ return Language.forNumber(number);};
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
@@ -271,11 +267,7 @@ public final class CoreNLPProtos {
     }
     private static final com.google.protobuf.Internal.EnumLiteMap<
         Sentiment> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<Sentiment>() {
-            public Sentiment findValueByNumber(int number) {
-              return Sentiment.forNumber(number);
-            }
-          };
+          (int number)->{ return Sentiment.forNumber(number);};
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
@@ -410,11 +402,7 @@ public final class CoreNLPProtos {
     }
     private static final com.google.protobuf.Internal.EnumLiteMap<
         NaturalLogicRelation> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<NaturalLogicRelation>() {
-            public NaturalLogicRelation findValueByNumber(int number) {
-              return NaturalLogicRelation.forNumber(number);
-            }
-          };
+          (int number)->{ return NaturalLogicRelation.forNumber(number);};
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
