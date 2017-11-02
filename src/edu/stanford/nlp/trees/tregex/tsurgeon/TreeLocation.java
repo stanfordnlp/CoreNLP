@@ -62,12 +62,15 @@ class TreeLocation {
           throw new RuntimeException("Error: looking for a non-existent parent in tree " + tree + " for \"" + toString() + "\"");
         }
         int index = parent.objectIndexOf(relativeNode);
-        if (relation.equals("$+")) {
-          newIndex = index;
-        } else if (relation.equals("$-")) {
-          newIndex = index+1;
-        } else {
-          throw new RuntimeException("Error: Haven't dealt with relation " + relation + " yet.");
+        switch(relation) {
+          case "$+" :
+            newIndex = index;
+            break;
+          case "$-" :
+            newIndex = index+1;
+            break;
+          default :
+            throw new RuntimeException("Error: Haven't dealt with relation " + relation + " yet.");
         }
       }
       return new Pair<>(parent, newIndex);

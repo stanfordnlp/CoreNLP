@@ -4,7 +4,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.util.Lazy;
 import org.junit.Test;
 
 import java.util.List;
@@ -21,21 +20,18 @@ import static org.junit.Assert.*;
  */
 public class NaturalLogicAnnotatorITest {
 
-  private static Lazy<StanfordCoreNLP> pipeline = Lazy.of(() -> new StanfordCoreNLP(new Properties(){{
-    setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog");
-    setProperty("ssplit.isOneSentence", "true");
-    setProperty("tokenize.class", "PTBTokenizer");
-    setProperty("tokenize.language", "en");
-    setProperty("enforceRequirements", "false");
-  }}));
-
-
-
   @Test
   public void testAnnotatorRuns() {
     // Run pipeline
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
+      setProperty("annotators", "tokenize,ssplit,pos,lemma,parse,natlog");
+      setProperty("ssplit.isOneSentence", "true");
+      setProperty("tokenize.class", "PTBTokenizer");
+      setProperty("tokenize.language", "en");
+      setProperty("enforceRequirements", "false");
+    }});
     Annotation ann = new Annotation("All cats have tails");
-    pipeline.get().annotate(ann);
+    pipeline.annotate(ann);
 
     // Check output
     List<CoreLabel> tokens = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(CoreAnnotations.TokensAnnotation.class);

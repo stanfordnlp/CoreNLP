@@ -324,16 +324,21 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       return;
     } else if(dep.equals("nsubj") || dep.equals("csubj")) {
       isSubject = true;
-    } else if(dep.equals("dobj")){
-      isDirectObject = true;
-    } else if(dep.equals("iobj")){
-      isIndirectObject = true;
-    } else if(dep.startsWith("nmod")
-        && ! dep.equals("nmod:npmod")
-        && ! dep.equals("nmod:tmod")
-        && ! dep.equals("nmod:poss")
-        && ! dep.equals("nmod:agent")){
-      isPrepositionObject = true;
+    } else switch(dep) {
+      case "dobj" :
+        isDirectObject = true;
+        break;
+      case "iobj" :
+        isIndirectObject = true;
+        break;
+      default :
+        if(dep.startsWith("nmod")
+            && ! dep.equals("nmod:npmod")
+            && ! dep.equals("nmod:tmod")
+            && ! dep.equals("nmod:poss")
+            && ! dep.equals("nmod:agent")) {
+          isPrepositionObject = true;
+        }
     }
   }
 
@@ -618,30 +623,39 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       animacy = Animacy.ANIMATE;
     } else if (nerString.equals("LOCATION")|| nerString.startsWith("LOC")) {
       animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("MONEY")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("NUMBER")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("PERCENT")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("DATE")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("TIME")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("MISC")) {
-      animacy = Animacy.UNKNOWN;
-    } else if (nerString.startsWith("VEH")) {
-      animacy = Animacy.UNKNOWN;
-    } else if (nerString.startsWith("FAC")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.startsWith("GPE")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.startsWith("WEA")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.startsWith("ORG")) {
-      animacy = Animacy.INANIMATE;
-    } else {
-      animacy = Animacy.UNKNOWN;
+    } else switch(nerString) {
+      case "MONEY" :
+        animacy = Animacy.INANIMATE;
+        break;
+      case "NUMBER" :
+        animacy = Animacy.INANIMATE;
+        break;
+      case "PERCENT" :
+        animacy = Animacy.INANIMATE;
+        break;
+      case "DATE" :
+        animacy = Animacy.INANIMATE;
+        break;
+      case "TIME" :
+        animacy = Animacy.INANIMATE;
+        break;
+      case "MISC" :
+        animacy = Animacy.UNKNOWN;
+        break;
+      default :
+        if (nerString.startsWith("VEH")) {
+          animacy = Animacy.UNKNOWN;
+        } else if (nerString.startsWith("FAC")) {
+          animacy = Animacy.INANIMATE;
+        } else if (nerString.startsWith("GPE")) {
+          animacy = Animacy.INANIMATE;
+        } else if (nerString.startsWith("WEA")) {
+          animacy = Animacy.INANIMATE;
+        } else if (nerString.startsWith("ORG")) {
+          animacy = Animacy.INANIMATE;
+        } else {
+          animacy = Animacy.UNKNOWN;
+        }
     }
     if(mentionType != MentionType.PRONOMINAL) {
       if(Constants.USE_ANIMACY_LIST){

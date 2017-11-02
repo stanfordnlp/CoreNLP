@@ -53,7 +53,6 @@ public class PolarityTest {
     assertEquals(NaturalLogicRelation.INDEPENDENCE, none.projectLexicalRelation(NaturalLogicRelation.INDEPENDENCE));
   }
 
-  @SuppressWarnings("Duplicates")
   @Test
   public void additive_antimultiplicativeProject() {
     assertEquals(NaturalLogicRelation.EQUIVALENT, additiveAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT));
@@ -87,7 +86,6 @@ public class PolarityTest {
     assertEquals(NaturalLogicRelation.INDEPENDENCE, additive.projectLexicalRelation(NaturalLogicRelation.INDEPENDENCE));
   }
 
-  @SuppressWarnings("Duplicates")
   @Test
   public void antimultiplicativeProject() {
     assertEquals(NaturalLogicRelation.EQUIVALENT, antimultiplicative.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT));

@@ -59,18 +59,14 @@ public class OperatorScopeITest {
 
   private void checkScope(int subjBegin, int subjEnd, Optional<OperatorSpec> guess) {
     assertTrue("No quantifier found", guess.isPresent());
-    assertEquals("Bad subject begin " + guess.get() + "  (expected=" + subjBegin + " got=" + guess.get().subjectBegin + ")", subjBegin, guess.get().subjectBegin);
-    assertEquals("Bad subject end " + guess.get() + "  (expected=" + subjEnd + " got=" + guess.get().subjectEnd + ")", subjEnd, guess.get().subjectEnd);
+    assertEquals("Bad subject begin " + guess.get(), subjBegin, guess.get().subjectBegin);
+    assertEquals("Bad subject end " + guess.get(), subjEnd, guess.get().subjectEnd);
     assertEquals("Two-place quantifier matched", subjEnd, guess.get().objectBegin);
     assertEquals("Two place quantifier matched", subjEnd, guess.get().objectEnd);
   }
 
-  @SuppressWarnings("ConstantConditions")
   private void checkScope(String spec) {
-    String[] terms = spec
-        .replace(",", " ,")
-        .replace(".", " .")
-        .split("\\s+");
+    String[] terms = spec.split("\\s+");
 //    int quantStart = -1;
     int quantEnd = -1;
     int subjBegin = -1;
@@ -125,7 +121,7 @@ public class OperatorScopeITest {
 
   @Test
   public void negationMidSentence() {
-    checkScope(0, 1, 3, 6, annotate("Obama was not born in Dallas")[2]);
+    checkScope(3, 6, 6, 6, annotate("Obama was not born in Dallas")[2]);
   }
 
   @Test
@@ -214,7 +210,6 @@ public class OperatorScopeITest {
     checkScope(1, 2, 2, 4, annotate("no cats chase dogs")[0]);
   }
 
-  @SuppressWarnings("ConstantConditions")
   @Test
   public void unary_not() {
     Optional<OperatorSpec>[] quantifiers = annotate("some cats don't like dogs");
@@ -682,8 +677,6 @@ public class OperatorScopeITest {
     checkScope("[ { Mickey } ] [ is smaller than Dumbo ]");
 
     checkScope("[ { Pavarotti } ] [ is a leading tenor who comes cheap ]");
-
-    checkScope("[ { Tuesday } ] [ is not good for me ] .");
   }
 
   @Test
@@ -771,46 +764,6 @@ public class OperatorScopeITest {
 //    checkScope("{ No one } [ who starts gambling seriously ] [ stops until he is broke ]");
 
     checkScope("{ Nobody } [ who is asleep ] [ ever knows that he is asleep ]");
-  }
-
-
-  @Test
-  public void temporalRegressions() {
-    checkScope("[ I ] can { not } [ make tomorrow ]");  // was missing the nmod:tmod on GEN_PREP
-    checkScope("Anytime { but } [ next Tuesday ]");     // @see implicitNegationsBut
-    checkScope("Anytime { except } [ next Tuesday ]");  // @see implicitNegationsExcept
-    checkScope("{ not } [ on Tuesday ]");
-  }
-
-
-  @Test
-  public void implicitNegationsBut() {
-    checkScope("Anytime { but } [ next Tuesday ]");
-    checkScope("food but { not } [ water ]");
-  }
-
-
-  @Test
-  public void implicitNegationsExcept() {
-    checkScope("I like everything , { except } [ cabbage ]");
-    checkScope("Anytime { except } [ next Tuesday ]");
-  }
-
-
-  @Test
-  public void doubleNegatives() {
-    checkScope("No, { not } [ Tuesday ]");
-    checkScope("[ No , I ] can { not } [ do Tuesday ]");
-    checkScope("[ No I ] can { not } [ do Tuesday ]");
-  }
-
-
-  @Test
-  public void binaryNegationOutOfOrder() {
-//    checkScope("Can { not } do [ Tuesday ]");  // TODO(gabor) This is a strange one...
-    checkScope("[ Tuesday ] will { not } [ work ]");
-    checkScope("[ Cats ] are { not } [ fluffy ]");
-    checkScope("[ Tuesday ] is { not } [ good for me ] .");
   }
 
 

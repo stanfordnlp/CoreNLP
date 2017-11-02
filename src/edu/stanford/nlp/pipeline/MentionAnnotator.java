@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -99,13 +98,11 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       corefProperties.setProperty("removeNestedMentions", "true");
     }
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
-    annotation.set(CorefCoreAnnotations.CorefMentionsAnnotation.class , new ArrayList<Mention>());
     int mentionIndex = 0;
     int currIndex = 0;
     for (CoreMap sentence : sentences) {
       List<Mention> mentionsForThisSentence = mentions.get(currIndex);
       sentence.set(CorefCoreAnnotations.CorefMentionsAnnotation.class, mentionsForThisSentence);
-      annotation.get(CorefCoreAnnotations.CorefMentionsAnnotation.class).addAll(mentionsForThisSentence);
       // increment to next list of mentions
       currIndex++;
       // assign latest mentionID

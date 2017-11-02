@@ -431,12 +431,16 @@ public class ChineseQuantifiableEntityNormalizer {
     // We check multiCharCurrencyWords first
     for (String currencyWord : multiCharCurrencyWords.keySet()) {
       if(notMatched && StringUtils.find(s, currencyWord)) {
-        if(currencyWord.equals("美分")) {
-          multiplier = 0.01;
-        } else if(currencyWord.equals("先令")) {
-          multiplier = 0.05;
-        } else if(currencyWord.equals("便士")) {
-          multiplier = 1.0/240;
+        switch(currencyWord) {
+          case "美分" :
+            multiplier = 0.01;
+            break;
+          case "先令" :
+            multiplier = 0.05;
+            break;
+          case "便士" :
+            multiplier = 1.0/240;
+            break;
         }
         s = s.replaceAll(currencyWord, "");
         currencySign = multiCharCurrencyWords.get(currencyWord);

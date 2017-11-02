@@ -112,14 +112,15 @@ public final class TreebankPreprocessor  {
         MAKE_DISTRIB = true;
         distribName = opt.getValue()[0];
 
-      } else if(key.equals("-v")) {
-        VERBOSE = true;
-
-      } else if(key.equals("-p")) {
-        outputPath = opt.getValue()[0];
-
-      } else {
-        return false;
+      } else switch(key) {
+        case "-v" :
+          VERBOSE = true;
+          break;
+        case "-p" :
+          outputPath = opt.getValue()[0];
+          break;
+        default :
+          return false;
       }
     }
 
