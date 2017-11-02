@@ -308,6 +308,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(mStr.size() > 0 && dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
     return null;
   }
+
   private void setDiscourse() {
     utter = headWord.get(CoreAnnotations.UtteranceAnnotation.class);
 
@@ -320,22 +321,32 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     isIndirectObject = false;
     isPrepositionObject = false;
 
-    if(dep==null) {
-      return;
-    } else if(dep.equals("nsubj") || dep.equals("csubj")) {
-      isSubject = true;
-    } else if(dep.equals("dobj")){
-      isDirectObject = true;
-    } else if(dep.equals("iobj")){
-      isIndirectObject = true;
-    } else if(dep.startsWith("nmod")
-        && ! dep.equals("nmod:npmod")
-        && ! dep.equals("nmod:tmod")
-        && ! dep.equals("nmod:poss")
-        && ! dep.equals("nmod:agent")){
-      isPrepositionObject = true;
+    if (dep != null) {
+      switch(dep) {
+        case "nsubj":
+        case "csubj":
+          isSubject = true;
+          break;
+        case "dobj":
+        case "nsubjpass":
+        case "nsubj:pass":
+          isDirectObject = true;
+          break;
+        case "iobj":
+          isIndirectObject = true;
+          break;
+        default:
+          if (dep.startsWith("nmod")
+                  && !dep.equals("nmod:npmod")
+                  && !dep.equals("nmod:tmod")
+                  && !dep.equals("nmod:poss")
+                  && !dep.equals("nmod:agent")) {
+            isPrepositionObject = true;
+          }
+      }
     }
   }
+
 
   private void setPerson(Dictionaries dict) {
     // only do for pronoun
@@ -614,44 +625,65 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       } else {
         animacy = Animacy.UNKNOWN;
       }
-    } else if (nerString.equals("PERSON") || nerString.startsWith("PER")) {
-      animacy = Animacy.ANIMATE;
-    } else if (nerString.equals("LOCATION")|| nerString.startsWith("LOC")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("MONEY")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("NUMBER")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("PERCENT")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("DATE")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("TIME")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.equals("MISC")) {
-      animacy = Animacy.UNKNOWN;
-    } else if (nerString.startsWith("VEH")) {
-      animacy = Animacy.UNKNOWN;
-    } else if (nerString.startsWith("FAC")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.startsWith("GPE")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.startsWith("WEA")) {
-      animacy = Animacy.INANIMATE;
-    } else if (nerString.startsWith("ORG")) {
-      animacy = Animacy.INANIMATE;
     } else {
-      animacy = Animacy.UNKNOWN;
-    }
-    if(mentionType != MentionType.PRONOMINAL) {
-      if(Constants.USE_ANIMACY_LIST){
+      switch(nerString) {
+        case "PERSON":
+        case "PER":
+        case "PERS":
+          animacy = Animacy.ANIMATE;
+          break;
+        case "LOCATION":
+        case "LOC":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "MONEY":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "NUMBER":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "PERCENT":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "DATE":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "TIME":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "MISC":
+          animacy = Animacy.UNKNOWN;
+          break;
+        case "VEH":
+        case "VEHICLE":
+          animacy = Animacy.UNKNOWN;
+          break;
+        case "FAC":
+        case "FACILITY":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "GPE":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "WEA":
+        case "WEAPON":
+          animacy = Animacy.INANIMATE;
+          break;
+        case "ORG":
+        case "ORGANIZATION":
+          animacy = Animacy.INANIMATE;
+          break;
+        default:
+          animacy = Animacy.UNKNOWN;
+      }
+      if (Constants.USE_ANIMACY_LIST) {
         // Better heuristics using DekangLin:
-        if(animacy == Animacy.UNKNOWN)  {
-          if(dict.animateWords.contains(headString))  {
+        if(animacy == Animacy.UNKNOWN) {
+          if (dict.animateWords.contains(headString))  {
             animacy = Animacy.ANIMATE;
             SieveCoreferenceSystem.logger.finest("Assigned Dekang Lin animacy:\tANIMATE:\t" + headString);
           }
-          else if(dict.inanimateWords.contains(headString)) {
+          else if (dict.inanimateWords.contains(headString)) {
             animacy = Animacy.INANIMATE;
             SieveCoreferenceSystem.logger.finest("Assigned Dekang Lin animacy:\tINANIMATE:\t" + headString);
           }
@@ -659,6 +691,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       }
     }
   }
+
 
   private static final String [] commonNESuffixes = {
     "Corp", "Co", "Inc", "Ltd"

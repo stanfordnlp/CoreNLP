@@ -30,7 +30,7 @@ class TreeLocation {
 
   public LocationMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
     return new LocationMatcher(newNodeNames, coindexer);
-  }  
+  }
 
   /** TODO: it would be nice to refactor this with TsurgeonMatcher somehow */
   class LocationMatcher {
@@ -42,13 +42,13 @@ class TreeLocation {
     LocationMatcher(Map<String, Tree> newNodeNames, CoindexationGenerator coindexer) {
       this.newNodeNames = newNodeNames;
       this.coindexer = coindexer;
-      
+
       this.childMatcher = child.matcher(newNodeNames, coindexer);
     }
 
     Pair<Tree,Integer> evaluate(Tree tree, TregexMatcher tregex) {
-      int newIndex = -1;
-      Tree parent = null;
+      int newIndex; // initialized below
+      Tree parent; // initialized below
       Tree relativeNode = childMatcher.evaluate(tree, tregex);
       Matcher m = daughterPattern.matcher(relation);
       if (m.matches()) {
@@ -59,15 +59,18 @@ class TreeLocation {
       } else {
         parent = relativeNode.parent(tree);
         if (parent == null) {
-          throw new RuntimeException("Error: looking for a non-existent parent in tree " + tree + " for \"" + toString() + "\"");
+          throw new RuntimeException("Error: looking for a non-existent parent in tree " + tree + " for \"" + toString() + '"');
         }
         int index = parent.objectIndexOf(relativeNode);
-        if (relation.equals("$+")) {
-          newIndex = index;
-        } else if (relation.equals("$-")) {
-          newIndex = index+1;
-        } else {
-          throw new RuntimeException("Error: Haven't dealt with relation " + relation + " yet.");
+        switch(relation) {
+          case "$+" :
+            newIndex = index;
+            break;
+          case "$-" :
+            newIndex = index+1;
+            break;
+          default :
+            throw new RuntimeException("Error: Haven't dealt with relation " + relation + " yet.");
         }
       }
       return new Pair<>(parent, newIndex);
@@ -76,7 +79,7 @@ class TreeLocation {
 
   @Override
   public String toString() {
-    return relation + " " + child;
+    return relation + ' ' + child;
   }
 
 }
