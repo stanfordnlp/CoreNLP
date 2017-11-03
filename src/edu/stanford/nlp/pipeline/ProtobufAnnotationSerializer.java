@@ -355,6 +355,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(ChineseSegAnnotation.class)) { builder.setChineseSeg(getAndRegister(coreLabel, keysToSerialize, ChineseSegAnnotation.class)); }
     if (keySet.contains(SegmenterCoreAnnotations.XMLCharAnnotation.class)) { builder.setChineseXMLChar(getAndRegister(coreLabel, keysToSerialize, SegmenterCoreAnnotations.XMLCharAnnotation.class)); }
 
+    // French tokens potentially have ParentAnnotation
+    if (keySet.contains(ParentAnnotation.class)) { builder.setParent(getAndRegister(coreLabel, keysToSerialize, ParentAnnotation.class)); }
+
     // Return
     return builder;
   }
@@ -1258,6 +1261,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // handle sectione end info
     if (proto.hasSectionEndLabel()) {
       word.set(SectionEndAnnotation.class, proto.getSectionEndLabel());
+    }
+
+    // get parents for French tokens
+    if (proto.hasParent()) {
+      word.set(ParentAnnotation.class, proto.getParent());
     }
 
     // Return
