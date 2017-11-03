@@ -328,6 +328,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(getAndRegister(coreLabel, keysToSerialize, CorefClusterIdAnnotation.class)); }
     if (keySet.contains(NaturalLogicAnnotations.OperatorAnnotation.class)) { builder.setOperator(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.OperatorAnnotation.class))); }
     if (keySet.contains(NaturalLogicAnnotations.PolarityAnnotation.class)) { builder.setPolarity(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityAnnotation.class))); }
+    if (keySet.contains(NaturalLogicAnnotations.PolarityDirectionAnnotation.class)) { builder.setPolarityDir(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityDirectionAnnotation.class)); }
     if (keySet.contains(SpanAnnotation.class)) {
       IntPair span = getAndRegister(coreLabel, keysToSerialize, SpanAnnotation.class);
       builder.setSpan(CoreNLPProtos.Span.newBuilder().setBegin(span.getSource()).setEnd(span.getTarget()).build());
@@ -354,9 +355,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(ChineseCharAnnotation.class)) { builder.setChineseChar(getAndRegister(coreLabel, keysToSerialize, ChineseCharAnnotation.class)); }
     if (keySet.contains(ChineseSegAnnotation.class)) { builder.setChineseSeg(getAndRegister(coreLabel, keysToSerialize, ChineseSegAnnotation.class)); }
     if (keySet.contains(SegmenterCoreAnnotations.XMLCharAnnotation.class)) { builder.setChineseXMLChar(getAndRegister(coreLabel, keysToSerialize, SegmenterCoreAnnotations.XMLCharAnnotation.class)); }
-
-    // French tokens potentially have ParentAnnotation
-    if (keySet.contains(ParentAnnotation.class)) { builder.setParent(getAndRegister(coreLabel, keysToSerialize, ParentAnnotation.class)); }
 
     // Return
     return builder;
@@ -1226,6 +1224,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasAnswer()) { word.set(AnswerAnnotation.class, proto.getAnswer()); }
     if (proto.hasOperator()) { word.set(NaturalLogicAnnotations.OperatorAnnotation.class, fromProto(proto.getOperator())); }
     if (proto.hasPolarity()) { word.set(NaturalLogicAnnotations.PolarityAnnotation.class, fromProto(proto.getPolarity())); }
+    if (proto.hasPolarityDir()) { word.set(NaturalLogicAnnotations.PolarityDirectionAnnotation.class, proto.getPolarityDir()); }
     if (proto.hasSpan()) { word.set(SpanAnnotation.class, new IntPair(proto.getSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasSentiment()) { word.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     if (proto.hasQuotationIndex()) { word.set(QuotationIndexAnnotation.class, proto.getQuotationIndex()); }
@@ -1261,11 +1260,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // handle sectione end info
     if (proto.hasSectionEndLabel()) {
       word.set(SectionEndAnnotation.class, proto.getSectionEndLabel());
-    }
-
-    // get parents for French tokens
-    if (proto.hasParent()) {
-      word.set(ParentAnnotation.class, proto.getParent());
     }
 
     // Return

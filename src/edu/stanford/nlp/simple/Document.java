@@ -946,6 +946,7 @@ public class Document {
     synchronized (serializer) {
       for (int i = 0; i < sentences.size(); ++i) {
         sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, Polarity> pair) -> pair.first().setPolarity(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, String> pair) -> pair.first().setPolarityDir(pair.second()), x -> x.get(NaturalLogicAnnotations.PolarityDirectionAnnotation.class));
         sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, OperatorSpec> pair) -> pair.first().setOperator(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
       }
     }

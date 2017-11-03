@@ -604,6 +604,20 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
       // Set polarity
       token.set(PolarityAnnotation.class, polarity);
     }
+
+    // Set the PolarityDirectionAnnotation
+    for (CoreLabel token : tokens) {
+      Polarity polarity = token.get(PolarityAnnotation.class);
+      if (polarity != null) {
+        if (polarity.isUpwards()) {
+          token.set(PolarityDirectionAnnotation.class, "up");
+        } else if (polarity.isDownwards()) {
+          token.set(PolarityDirectionAnnotation.class, "down");
+        } else {
+          token.set(PolarityDirectionAnnotation.class, "flat");
+        }
+      }
+    }
   }
 
   /**

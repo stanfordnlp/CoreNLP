@@ -522,8 +522,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
         if (Thread.interrupted()) {
           throw new RuntimeInterruptedException();
         }
-        boolean match = cStates.match(i);
-        if (cStates == null || cStates.size() == 0) {
+        cStates.match(i);
+        if (cStates.size() == 0) {
           break;
         }
         if (!matchAllTokens) {
