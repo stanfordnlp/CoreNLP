@@ -3546,12 +3546,16 @@ public class SUTime  {
    *  returns it as a SUTime.Time
    *   YYYYMMDDThhmmss
    *
-   * @param dateStr
+   * @param dateStr The serialized date we are parsing to a document date.
    * @param allowPartial (allow partial ISO)
    */
   public static SUTime.Time parseDateTime(String dateStr, boolean allowPartial)
   {
     if (dateStr == null) return null;
+
+    try {
+      return new SUTime.GroundedTime(Instant.parse(dateStr));
+    } catch (IllegalArgumentException ignored) {}
 
     Matcher m = PATTERN_ISO.matcher(dateStr);
     if (m.matches()) {
