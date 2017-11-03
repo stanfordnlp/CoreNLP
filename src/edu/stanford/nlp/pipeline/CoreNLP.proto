@@ -179,6 +179,9 @@ message Token {
   optional string sectionAuthor   = 57;
   optional string sectionDate     = 58;
   optional string sectionEndLabel = 59;
+
+  // French tokens have parents
+  optional string parent          = 61;
   
 
   // Fields in the CoreLabel java class that are moved elsewhere
