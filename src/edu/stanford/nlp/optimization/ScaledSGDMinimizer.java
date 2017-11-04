@@ -1,15 +1,13 @@
 package edu.stanford.nlp.optimization;
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.function.DoubleUnaryOperator;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.math.ArrayMath;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Stochastic Gradient Descent To Quasi Newton Minimizer.
@@ -252,10 +250,10 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     say(" alpha " + nf.format(alpha));
     high = Math.sqrt(high)/(2*alpha);
 
-    Function<Double,Double> func = new lagrange(s,y,diag,alpha);
+    DoubleUnaryOperator func = new lagrange(s,y,diag,alpha);
 
     double lamStar;
-    if( func.apply(low) > 0 ){
+    if( func.applyAsDouble(low) > 0 ){
       lamStar = getRoot(func,low,high);
     } else{
       lamStar = 0.0;
@@ -275,17 +273,17 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
 
 
-  private double getRoot(Function<Double,Double> func, double lower, double upper){
+  private double getRoot(DoubleUnaryOperator func, double lower, double upper){
     double mid = 0.5*(lower + upper);
     double TOL = 1e-8;
     double skew = 0.4;
     int count = 0;
 
-    if(func.apply(upper) > 0 || func.apply(lower) < 0){
+    if(func.applyAsDouble(upper) > 0 || func.applyAsDouble(lower) < 0){
       say("LOWER AND UPPER SUPPLIED TO GET ROOT DO NOT BOUND THE ROOT.");
     }
 
-    double fval = func.apply(mid);
+    double fval = func.applyAsDouble(mid);
     while( Math.abs(fval) > TOL ){
       count += 1;
       if( fval > 0 ){
@@ -295,7 +293,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
       }
 
       mid = skew*lower + (1-skew)*upper;
-      fval = func.apply(mid);
+      fval = func.applyAsDouble(mid);
       if (count > 100){
         break;
       }
@@ -305,7 +303,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
   }
 
 
-  static class lagrange implements Function<Double,Double>  {
+  static class lagrange implements DoubleUnaryOperator  {
 
     private final double[] s;
     private final double[] y;
@@ -320,7 +318,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     }
 
     @Override
-    public Double apply(Double lam) {
+    public double applyAsDouble(double lam) {
       double val = 0.0;
       for(int i=0;i<s.length;i++){
         double tmp = (y[i]*s[i] + 2*lam*d[i])/(s[i]*s[i] + 2*lam) - d[i];

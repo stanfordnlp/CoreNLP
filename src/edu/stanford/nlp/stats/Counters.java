@@ -54,7 +54,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -3082,9 +3084,9 @@ public class Counters  {
     return fscores;
   }
 
-  public static <E> void transformValuesInPlace(Counter<E> counter, Function<Double, Double> func){
+  public static <E> void transformValuesInPlace(Counter<E> counter, DoubleUnaryOperator func){
     for(E key: counter.keySet()){
-      counter.setCount(key, func.apply(counter.getCount(key)));
+      counter.setCount(key, func.applyAsDouble(counter.getCount(key)));
     }
   }
 
@@ -3096,10 +3098,10 @@ public class Counters  {
   }
 
 
-  public static<E> void retainKeys(Counter<E> counter, Function<E, Boolean> retainFunction) {
+  public static<E> void retainKeys(Counter<E> counter, Predicate<E> retainFunction) {
     Set<E> remove = new HashSet<>();
     for(Entry<E, Double> en: counter.entrySet()){
-      if(!retainFunction.apply(en.getKey())){
+      if(!retainFunction.test(en.getKey())){
         remove.add(en.getKey());
       }
     }

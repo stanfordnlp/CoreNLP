@@ -9,13 +9,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Function;
-
+import java.util.Set;
+import java.util.function.Predicate;
 //import org.jdom.Element;
 //import org.jdom.Namespace;
-
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
@@ -125,7 +123,7 @@ public class ExtractPhraseFromPattern {
   public Set<IndexedWord> getSemGrexPatternNodes(SemanticGraph g,
       List<String> tokens, Collection<String> outputNodes, Collection<IntPair> outputIndices,
       SemgrexPattern pattern, boolean findSubTrees,
-      Collection<ExtractedPhrase> extractedPhrases, boolean lowercase, Function<CoreLabel, Boolean> acceptWord) {
+      Collection<ExtractedPhrase> extractedPhrases, boolean lowercase, Predicate<CoreLabel> acceptWord) {
 
     Set<IndexedWord> foundWordsParents = new HashSet<>();
     SemgrexMatcher m = pattern.matcher(g, lowercase);
@@ -179,7 +177,7 @@ public class ExtractPhraseFromPattern {
                              Collection<String> listOfOutput, Collection<IntPair> listOfOutputIndices,
                              List<IndexedWord> seenNodes, List<IndexedWord> doNotAddThese,
                              boolean findSubTrees, Collection<ExtractedPhrase> extractedPhrases,
-                             SemgrexPattern pattern, Function<CoreLabel, Boolean> acceptWord) {
+                             SemgrexPattern pattern, Predicate<CoreLabel> acceptWord) {
     try {
       if (seenNodes.contains(w))
         return;
@@ -297,14 +295,14 @@ public class ExtractPhraseFromPattern {
 
   public static Set<IndexedWord> descendants(SemanticGraph g,
       IndexedWord vertex, List<String> allCutOffRels,
-      List<IndexedWord> doNotAddThese, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, CollectionValuedMap<Integer, String> feat) throws Exception {
+      List<IndexedWord> doNotAddThese, boolean ignoreCommonTags, Predicate<CoreLabel> acceptWord, CollectionValuedMap<Integer, String> feat) throws Exception {
     // Do a depth first search
     Set<IndexedWord> descendantSet = new HashSet<>();
 
     if (doNotAddThese !=null && doNotAddThese.contains(vertex))
       return descendantSet;
 
-    if(!acceptWord.apply(vertex.backingLabel()))
+    if(!acceptWord.test(vertex.backingLabel()))
       return descendantSet;
 
     descendantsHelper(g, vertex, descendantSet, allCutOffRels, doNotAddThese,
@@ -335,14 +333,14 @@ public class ExtractPhraseFromPattern {
 
   private static void descendantsHelper(SemanticGraph g, IndexedWord curr,
       Set<IndexedWord> descendantSet, List<String> allCutOffRels,
-      List<IndexedWord> doNotAddThese, List<IndexedWord> seenNodes, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, CollectionValuedMap<Integer, String> feat)
+      List<IndexedWord> doNotAddThese, List<IndexedWord> seenNodes, boolean ignoreCommonTags, Predicate<CoreLabel> acceptWord, CollectionValuedMap<Integer, String> feat)
       throws Exception {
 
     if (seenNodes.contains(curr))
       return;
 
     seenNodes.add(curr);
-    if (descendantSet.contains(curr) || (doNotAddThese!=null && doNotAddThese.contains(curr)) || !acceptWord.apply(curr.backingLabel())) {
+    if (descendantSet.contains(curr) || (doNotAddThese!=null && doNotAddThese.contains(curr)) || !acceptWord.test(curr.backingLabel())) {
       return;
     }
 

@@ -3,8 +3,7 @@ package edu.stanford.nlp.patterns;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
-
+import java.util.function.ToDoubleFunction;
 import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -55,7 +54,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
     boolean useFreqPhraseExtractedByPat = false;
     if (patternScoring.equals(PatternScoring.SqrtAllRatio))
       useFreqPhraseExtractedByPat = true;
-    Function<Pair<E, CandidatePhrase>, Double> numeratorScore = x -> patternsandWords4Label.getCount(x.first(), x.second());
+    ToDoubleFunction<Pair<E, CandidatePhrase>> numeratorScore = x -> patternsandWords4Label.getCount(x.first(), x.second());
 
     Counter<E> numeratorPatWt = this.convert2OneDim(label,
         numeratorScore, allCandidatePhrases, patternsandWords4Label, constVars.sqrtPatScore, false, null,
@@ -63,7 +62,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
     Counter<E> denominatorPatWt = null;
 
-    Function<Pair<E, CandidatePhrase>, Double> denoScore;
+    ToDoubleFunction<Pair<E, CandidatePhrase>> denoScore;
     if (patternScoring.equals(PatternScoring.PosNegUnlabOdds)) {
       denoScore = x -> negPatternsandWords4Label.getCount(x.first(), x.second()) + unLabeledPatternsandWords4Label.getCount(x.first(), x.second());
 
@@ -115,7 +114,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
   }
 
   Counter<E> convert2OneDim(String label,
-      Function<Pair<E, CandidatePhrase>, Double> scoringFunction, Set<CandidatePhrase> allCandidatePhrases, TwoDimensionalCounter<E, CandidatePhrase> positivePatternsAndWords,
+      ToDoubleFunction<Pair<E, CandidatePhrase>> scoringFunction, Set<CandidatePhrase> allCandidatePhrases, TwoDimensionalCounter<E, CandidatePhrase> positivePatternsAndWords,
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
       Counter<CandidatePhrase> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat) throws IOException, ClassNotFoundException {
 
@@ -282,7 +281,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
           }
 
           if (useFreqPhraseExtractedByPat)
-            score = score * scoringFunction.apply(new Pair(en.getKey(), word));
+            score = score * scoringFunction.applyAsDouble(new Pair(en.getKey(), word));
           if (constVars.sqrtPatScore)
             patterns.incrementCount(en.getKey(), Math.sqrt(score));
           else

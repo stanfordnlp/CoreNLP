@@ -6,6 +6,7 @@ import edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 
 /**
@@ -352,7 +353,7 @@ public class ConcatVector  {
    *
    * @param fn the function to apply to every element of every component.
    */
-  public void mapInPlace(Function<Double, Double> fn) {
+  public void mapInPlace(DoubleUnaryOperator fn) {
     for (int i = 0; i < pointers.length; i++) {
       if (pointers[i] == null) continue;
 
@@ -362,10 +363,10 @@ public class ConcatVector  {
       }
 
       if (sparse[i]) {
-        pointers[i][1] = fn.apply(pointers[i][1]);
+        pointers[i][1] = fn.applyAsDouble(pointers[i][1]);
       } else {
         for (int j = 0; j < pointers[i].length; j++) {
-          pointers[i][j] = fn.apply(pointers[i][j]);
+          pointers[i][j] = fn.applyAsDouble(pointers[i][j]);
         }
       }
     }

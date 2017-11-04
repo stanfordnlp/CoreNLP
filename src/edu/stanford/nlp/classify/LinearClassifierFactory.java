@@ -29,9 +29,8 @@ package edu.stanford.nlp.classify;
 
 import java.io.BufferedReader;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.ToDoubleFunction;
-
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.Datum;
@@ -760,7 +759,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
           return score;
         };
 
-    Function<Double,Double> negativeScorer =
+    DoubleUnaryOperator negativeScorer =
         sigmaToTry -> {
           //sigma = sigmaToTry;
           setSigma(sigmaToTry);
@@ -828,7 +827,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     return ArrayUtils.flatten(trainWeights(trainSet,negativeScorer.weights,true)); // make sure it's actually the interim weights from best sigma
   }
 
-  class NegativeScorer implements Function<Double, Double> {
+  class NegativeScorer implements DoubleUnaryOperator {
     public double[] weights; // = null;
     GeneralDataset<L, F> trainSet;
     GeneralDataset<L, F> devSet;
@@ -844,7 +843,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     }
 
     @Override
-    public Double apply(Double sigmaToTry) {
+    public double applyAsDouble(double sigmaToTry) {
       double[][] weights2D;
       setSigma(sigmaToTry);
 

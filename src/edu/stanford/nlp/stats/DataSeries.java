@@ -5,6 +5,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.io.RecordIterator;
 import edu.stanford.nlp.util.Pair;
 import java.util.function.Function;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.ToIntFunction;
 import java.util.*;
 import java.io.*;
 
@@ -73,12 +75,12 @@ public interface DataSeries  {
 
   public static class FunctionDataSeries extends AbstractDataSeries {
 
-    private Function<Object, Integer> sizeFn;
-    private Function<Integer, Double> function;
+    private ToIntFunction<Object> sizeFn;
+    private IntToDoubleFunction function;
 
     public FunctionDataSeries(String name, 
-                              Function<Integer, Double> function, 
-                              Function<Object, Integer> sizeFn,
+                              IntToDoubleFunction function, 
+                              ToIntFunction<Object> sizeFn,
                               DataSeries domain) { 
       setName(name);
       this.function = function;
@@ -87,32 +89,32 @@ public interface DataSeries  {
     }
 
     public FunctionDataSeries(String name, 
-                              Function<Integer, Double> function, 
-                              Function<Object, Integer> sizeFn) { 
+                              IntToDoubleFunction function, 
+                              ToIntFunction<Object> sizeFn) { 
       this(name, function, sizeFn, null); 
     }
 
     public FunctionDataSeries(String name, 
-                              Function<Integer, Double> function, 
+                              IntToDoubleFunction function, 
                               int size,
                               DataSeries domain) { 
       this(name, function, constantSizeFn(size), domain); 
     }
     
     public FunctionDataSeries(String name, 
-                              Function<Integer, Double> function, 
+                              IntToDoubleFunction function, 
                               int size) { 
       this(name, function, size, null);
     }
 
     public double get(int i) { 
       if (i < 0 || i >= size()) return i;
-      return function.apply(i); 
+      return function.applyAsDouble(i); 
     }
 
-    public int size() { return sizeFn.apply(null); }
+    public int size() { return sizeFn.applyAsInt(null); }
 
-    private static Function<Object, Integer> constantSizeFn(final int size) {
+    private static ToIntFunction<Object> constantSizeFn(final int size) {
       return o -> size;
     }
 

@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+import java.util.*;
+import java.util.function.DoubleUnaryOperator;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -10,12 +11,10 @@ import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.StringUtils;
-
-import java.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * CRFBiasedClassifier is used to adjust the precision-recall tradeoff
@@ -120,19 +119,19 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
     return l;
   }
 
-  class CRFBiasedClassifierOptimizer implements Function<Double,Double>  {
+  class CRFBiasedClassifierOptimizer implements DoubleUnaryOperator  {
     CRFBiasedClassifier<IN> crf;
-    Function<Double, Double> evalFunction;
+    DoubleUnaryOperator evalFunction;
 
-    CRFBiasedClassifierOptimizer(CRFBiasedClassifier<IN> c, Function<Double, Double> e) {
+    CRFBiasedClassifierOptimizer(CRFBiasedClassifier<IN> c, DoubleUnaryOperator e) {
       crf = c;
       evalFunction = e;
     }
 
     @Override
-    public Double apply(Double w) {
+    public double applyAsDouble(double w) {
       crf.setBiasWeight(0,w);
-      return evalFunction.apply(w);
+      return evalFunction.applyAsDouble(w);
     }
   }
 
@@ -142,7 +141,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
    * (class of index 0), and is thus only useful for binary classification
    * problems.
    */
-  public void adjustBias(List<List<IN>> develData, Function<Double,Double> evalFunction, double low, double high) {
+  public void adjustBias(List<List<IN>> develData, DoubleUnaryOperator evalFunction, double low, double high) {
     LineSearcher ls = new GoldenSectionLineSearch(true,1e-2,low,high);
     CRFBiasedClassifierOptimizer optimizer = new CRFBiasedClassifierOptimizer(this, evalFunction);
     double optVal = ls.minimize(optimizer);

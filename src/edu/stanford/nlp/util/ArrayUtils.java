@@ -915,7 +915,7 @@ public class ArrayUtils  {
    * @param matchingFunction function that takes (tofindtoken, token) pair and returns whether they match
    * @return starting index of the sublist
    */
-  public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens, Function<Pair, Boolean> matchingFunction){
+  public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens, Predicate<Pair> matchingFunction){
     if(tofind.length > tokens.length)
       return null;
     List<Integer> allIndices = new ArrayList<>();
@@ -924,7 +924,7 @@ public class ArrayUtils  {
     int lastUnmatchedIndex = 0;
     for(int i = 0 ; i < tokens.length;){
       for(int j = 0; j < tofind.length ;){
-        if(matchingFunction.apply(new Pair(tofind[j], tokens[i]))){
+        if(matchingFunction.test(new Pair(tofind[j], tokens[i]))){
           index = i;
           i++;
           j++;

@@ -2,7 +2,7 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
-
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 
 
@@ -159,7 +159,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
 
   private void tuneSigma(final int[][] data, final int[] labels) {
 
-    Function<Double, Double> CVSigmaToPerplexity = trialSigma -> {
+    DoubleUnaryOperator CVSigmaToPerplexity = trialSigma -> {
       double score = 0.0;
       double sumScore = 0.0;
       int foldSize, nbCV;

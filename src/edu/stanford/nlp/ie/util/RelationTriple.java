@@ -1,5 +1,11 @@
 package edu.stanford.nlp.ie.util;
 
+import static edu.stanford.nlp.util.logging.Redwood.Util.err;
+
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.function.ToIntFunction;
+import edu.stanford.nlp.util.PriorityQueue;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -7,13 +13,6 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.PriorityQueue;
-
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.function.Function;
-
-import static edu.stanford.nlp.util.logging.Redwood.Util.err;
 
 /**
  * A (subject, relation, object) triple; e.g., as used in the KBP challenges or in OpenIE systems.
@@ -225,12 +224,12 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return new DecimalFormat("0.000").format(confidence);
   }
 
-  protected Pair<Integer, Integer> getSpan(List<CoreLabel> tokens, Function<CoreLabel, Integer> toMin, Function<CoreLabel, Integer> toMax) {
+  protected Pair<Integer, Integer> getSpan(List<CoreLabel> tokens, ToIntFunction<CoreLabel> toMin, ToIntFunction<CoreLabel> toMax) {
     int min = Integer.MAX_VALUE;
     int max = Integer.MIN_VALUE;
     for (CoreLabel token : tokens) {
-      min = Math.min(min, toMin.apply(token));
-      max = Math.max(max, toMax.apply(token) + 1);
+      min = Math.min(min, toMin.applyAsInt(token));
+      max = Math.max(max, toMax.applyAsInt(token) + 1);
     }
     return Pair.makePair(min, max);
   }

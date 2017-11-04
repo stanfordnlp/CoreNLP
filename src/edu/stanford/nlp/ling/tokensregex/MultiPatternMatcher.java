@@ -4,6 +4,7 @@ import edu.stanford.nlp.util.*;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Matcher that takes in multiple patterns
@@ -146,7 +147,7 @@ public class MultiPatternMatcher<T> {
    * @return list of match results that are non-overlapping
    */
   public List<SequenceMatchResult<T>> findNonOverlappingMaxScore(List<? extends T> elements,
-                                                                 Function<? super SequenceMatchResult, Double> scorer)
+                                                                 ToDoubleFunction<? super SequenceMatchResult> scorer)
   {
     Collection<SequencePattern<T>> triggered = getTriggeredPatterns(elements);
     List<SequenceMatchResult<T>> all = new ArrayList<>();

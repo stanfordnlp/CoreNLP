@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Utilities for helping out with Iterables as Collections is to Collection.
@@ -66,7 +67,7 @@ public class Iterables {
    * from the iterable for which the given Function returns true.
    */
   public static <T> Iterable<T> filter(
-      final Iterable<T> iterable, final Function<T,Boolean> accept) {
+      final Iterable<T> iterable, final Predicate<T> accept) {
 
     return new Iterable<T>() {
       public Iterator<T> iterator() {
@@ -99,7 +100,7 @@ public class Iterables {
 
             while (inner.hasNext()) {
               T next = inner.next();
-              if (accept.apply(next)) {
+              if (accept.test(next)) {
                 this.next = next;
                 this.queued = true;
                 return;
@@ -622,9 +623,9 @@ public class Iterables {
     final Set<Integer> indexSet = Generics.newHashSet(indexes.subList(0, k));
 
     // filter down to only the items at the selected indexes
-    return Iterables.filter(items, new Function<T, Boolean>() {
+    return Iterables.filter(items, new Predicate<T>() {
       private int index = -1;
-      public Boolean apply(T item) {
+      public boolean test(T item) {
         ++this.index;
         return indexSet.contains(this.index);
       }

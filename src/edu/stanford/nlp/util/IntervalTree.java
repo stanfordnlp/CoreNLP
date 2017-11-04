@@ -3,6 +3,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 
 /**
  * An interval tree maintains a tree so that all intervals to the left start
@@ -684,17 +686,17 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   }
 
   public static <E extends Comparable<E>, T extends HasInterval<E>> boolean containsInterval(IntervalTree<E,T> node, Interval<E> target, boolean exact) {
-    Function<T,Boolean> containsTargetFunction = new ContainsIntervalFunction(target, exact);
+    Predicate<T> containsTargetFunction = new ContainsIntervalFunction(target, exact);
     return contains(node, target.getInterval(), containsTargetFunction);
   }
 
   public static <E extends Comparable<E>, T extends HasInterval<E>> boolean containsValue(IntervalTree<E,T> node, T target) {
-    Function<T,Boolean> containsTargetFunction = new ContainsValueFunction(target);
+    Predicate<T> containsTargetFunction = new ContainsValueFunction(target);
     return contains(node, target.getInterval(), containsTargetFunction);
   }
 
   private static class ContainsValueFunction<E extends Comparable<E>, T extends HasInterval<E>>
-      implements Function<T,Boolean> {
+      implements Predicate<T> {
     private T target;
 
     public ContainsValueFunction(T target) {
@@ -702,13 +704,13 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
     }
 
     @Override
-    public Boolean apply(T in) {
+    public boolean test(T in) {
       return in.equals(target);
     }
   }
 
   private static class ContainsIntervalFunction<E extends Comparable<E>, T extends HasInterval<E>>
-      implements Function<T,Boolean> {
+      implements Predicate<T> {
     private Interval<E> target;
     private boolean exact;
 
@@ -718,7 +720,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
     }
 
     @Override
-    public Boolean apply(T in) {
+    public boolean test(T in) {
       if (exact) {
         return in.getInterval().equals(target);
       } else {
@@ -728,12 +730,12 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   }
 
   private static <E extends Comparable<E>, T extends HasInterval<E>>
-    boolean contains(IntervalTree<E,T> tree, Interval<E> target, Function<T,Boolean> containsTargetFunction) {
+    boolean contains(IntervalTree<E,T> tree, Interval<E> target, Predicate<T> containsTargetFunction) {
     return contains(tree.root, target, containsTargetFunction);
   }
 
   private static <E extends Comparable<E>, T extends HasInterval<E>>
-    boolean contains(TreeNode<E,T> node, Interval<E> target, Function<T,Boolean> containsTargetFunction) {
+    boolean contains(TreeNode<E,T> node, Interval<E> target, Predicate<T> containsTargetFunction) {
     Stack<TreeNode<E,T>> todo = new Stack<>();
     todo.push(node);
 
@@ -750,7 +752,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
       }
 
       // Check this node
-      if (containsTargetFunction.apply(n.value))
+      if (containsTargetFunction.test(n.value))
         return true;
 
       if (n.left != null) {
@@ -813,7 +815,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
     double score;
   }
   public static <T, E extends Comparable<E>> List<T> getNonOverlappingMaxScore(
-      List<? extends T> items, Function<? super T,Interval<E>> toIntervalFunc, Function<? super T, Double> scoreFunc)
+      List<? extends T> items, Function<? super T,Interval<E>> toIntervalFunc, ToDoubleFunction<? super T> scoreFunc)
   {
     if (items.size() > 1) {
       Map<E,PartialScoredList<T,E>> bestNonOverlapping = new TreeMap<>();
@@ -822,7 +824,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
         E mBegin = itemInterval.getBegin();
         E mEnd = itemInterval.getEnd();
         PartialScoredList<T,E> bestk = bestNonOverlapping.get(mEnd);
-        double itemScore = scoreFunc.apply(item);
+        double itemScore = scoreFunc.applyAsDouble(item);
         if (bestk == null) {
           bestk = new PartialScoredList<>();
           bestk.size = 1;
@@ -879,7 +881,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
     }
   }
   public static <T extends HasInterval<E>, E extends Comparable<E>> List<T> getNonOverlappingMaxScore(
-      List<? extends T> items, Function<? super T, Double> scoreFunc)
+      List<? extends T> items, ToDoubleFunction<? super T> scoreFunc)
   {
     Function<T,Interval<E>> toIntervalFunc = in -> in.getInterval();
     return getNonOverlappingMaxScore(items, toIntervalFunc, scoreFunc);

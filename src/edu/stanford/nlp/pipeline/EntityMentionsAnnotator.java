@@ -1,5 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
+
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -10,6 +12,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
 
@@ -119,7 +122,7 @@ public class EntityMentionsAnnotator implements Annotator {
     return segment;
   }
 
-  private final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = in -> {
+  private final Predicate<Pair<CoreLabel, CoreLabel>> IS_TOKENS_COMPATIBLE = in -> {
     // First argument is the current token
     CoreLabel cur = in.first;
     // Second argument the previous token
