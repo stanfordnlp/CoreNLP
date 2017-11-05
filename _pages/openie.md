@@ -1,21 +1,22 @@
 ---
-title: OpenIE
+title: Open Information Extraction (OpenIE)
 keywords: openie
 permalink: '/openie.html'
 ---
 
 ## Description
 
-Extracts open-domain relation triples, representing a subject, a relation, and the
-object of the relation.
-This is useful for 
+The Open Information Extraction (OpenIE) annotator extracts open-domain relation triples, representing a subject, a relation, and the
+object of the relation.  For example, *born-in(Barack Obama,
+Hawaii)*. This is useful for
   (1) relation extraction tasks where there is limited or no training
 data, and it is easy to extract the information required from such open domain triples;
 and, 
   (2) when speed is essential. The system can process around 100 sentences per second
   per CPU core.
-Relation triples are stored on the `RelationTripleAnnotation` key of a `CoreMap`
-(i.e., sentence).
+The Collection of extracted relation triples are stored under the `RelationTriplesAnnotation` key of a `CoreMap`
+(i.e., sentence). The OpenIE annotator (`openie`) requires the natural
+logic annotation (`natlog`).
 
 In addition to extracting relation triples, the annotator produces 
 a number of sentence fragments corresponding to entailed fragments 
@@ -31,25 +32,30 @@ These are stored on the `EntailedSentencesAnnotation` key of a `CoreMap`
 
 ## Options
 
-* `openie.format`	{reverb, ollie, default}: Change the output format of the program. Default will produce tab separated columns for confidence, the subject, relation, and the object of a relation. ReVerb will output a TSV in the ReVerb format. Ollie will output relations in the default format returned by Ollie.
-* `openie.filelist`	/path/to/filelist:	A path to a file, which contains files to annotate. Each file should be on its own line. If this option is set, only these files are annotated and the files passed via bare arguments are ignored.
-* `openie.threads`	integer:	The number of threads to run on. By default, this is the number of threads on the system.
-* `openie.max_entailments_per_clause`	integer:	The maximum number of entailments to produce for each clause extracted in the sentence. The larger this value is, the slower the system will run, but the more relations it can potentially extract. Setting this below 100 is not recommended; setting it above 1000 is likewise not recommended.
-* `openie.resolve_coref` boolean: If true, run coreference (and consequently NER as a dependency of coreference) and replace pronominal mentions with their canonical mention in the text.
-* `openie.ignore_affinity`	boolean:	Ignore the affinity model for prepositional attachments.
-* `openie.affinity_probability_cap`	double:	The affinity value above which confidence of the extraction is taken as 1.0. Default is 1/3.
-* `openie.triple.strict`	boolean:	If true (the default), extract triples only if they consume the entire fragment. This is useful for ensuring that only logically warranted triples are extracted, but puts more burden on the entailment system to find minimal phrases (see -max_entailments_per_clause).
-* `openie.triple.all_nominals`	boolean:	If true, extract nominal relations always and not only when a named entity tag warrants it. This greatly overproduces such triples, but can be useful in certain situations.
+*All option are specified as Properties. The value of a property is
+ always a String. The type referred to here is how the String will be interpreted/parsed.*
 
-Some additional options are provided to fine-tune the inner workings of the
+The final group of options for specifying models are provided to fine-tune the inner workings of the
 OpenIE system.
 These should be changed only in very rare situations; for example, if you are
 developing extensions to the system itself.
 
-* `openie.splitter.model`	/path/to/model.ser.gz:	You can override the default location of the clause splitting model with this option.
-* `openie.splitter.nomodel`:		Run without a clause splitting model -- that is, split on every clause.
-* `openie.splitter.disable`:		Don't split clauses at all, and only extract relations centered around the root verb.
-* `openie.affinity_model`	/path/to/model_dir:	A custom location to read the affinity models from.
+
+| Option name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `openie.format` | Enum | default | One of {reverb, ollie, default, qa_srl}. Changes the output format of the program. Default will produce tab-separated columns for confidence, the subject, relation, and the object of a relation. ReVerb will output a TSV in the ReVerb format. Ollie will output relations in the default format returned by Ollie. |
+| `openie.filelist` | filepath | null | A path to a file, which contains files to annotate. Each file should be on its own line. If this option is set, only these files are annotated and the files passed via bare arguments are ignored. |
+| `openie.threads` | integer | number of cores | The number of threads to run on. By default, this is the number of cores in the system. |
+| `openie.max_entailments_per_clause` | integer | 1000 | The maximum number of entailments to produce for each clause extracted in the sentence. The larger this value is, the slower the system will run, but the more relations it can potentially extract. Setting this below 100 is not recommended; setting it above 1000 is likewise not recommended. |
+| `openie.resolve_coref` | boolean | false | If true, run coreference (and consequently NER as a dependency of coreference) and replace pronominal mentions with their canonical mention in the text. |
+| `openie.ignore_affinity`  | boolean | false | Whether to ignore the affinity model for prepositional attachments. |
+| `openie.affinity_probability_cap` | double | 1/3 | The affinity value above which confidence of the extraction is taken as 1.0. |
+| `openie.triple.strict` | boolean | true |	If true, extract triples only if they consume the entire fragment. This is useful for ensuring that only logically warranted triples are extracted, but puts more burden on the entailment system to find minimal phrases (see -max\_entailments\_per\_clause). |
+| `openie.triple.all_nominals` | boolean | false | If true, extract nominal relations always and not only when a named entity tag warrants it. This greatly overproduces such triples, but can be useful in certain situations. |
+| `openie.splitter.model` | filepath | |	You can override the default location of the clause splitting model with this option. |
+| `openie.splitter.nomodel` | boolean | false | Run without a clause splitting model -- that is, split on every clause. |
+| `openie.splitter.disable` | boolean | false | Don't split clauses at all, and only extract relations centered around the root verb. |
+| `openie.affinity_models`	| filepath | | A custom directory or classpath folder location to read the affinity models for PP/obj attachments from. |
 
 
 ## Usage
@@ -80,7 +86,8 @@ java -mx1g -cp stanford-corenlp-<version>.jar:stanford-corenlp-<version>-models.
 
 
 ### API
-Relation triples can be accessed through the CoreNLP API through the standard
+
+Relation triples can be accessed through the CoreNLP API using the standard
 annotation pipeline.
 An example class which does this is given below:
 
@@ -95,8 +102,7 @@ import edu.stanford.nlp.util.CoreMap;
 import java.util.Collection;
 import java.util.Properties;
 
-/**
- * A demo illustrating how to call the OpenIE system programmatically.
+/** A demo illustrating how to call the OpenIE system programmatically.
  */
 public class OpenIEDemo {
 
@@ -113,7 +119,8 @@ public class OpenIEDemo {
     // Loop over sentences in the document
     for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
       // Get the OpenIE triples for the sentence
-      Collection<RelationTriple> triples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
+      Collection<RelationTriple> triples =
+	          sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
       // Print the triples
       for (RelationTriple triple : triples) {
         System.out.println(triple.confidence + "\t" +
@@ -136,8 +143,7 @@ An example usage is given below:
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.simple.*;
 
-/**
- * A demo illustrating how to call the OpenIE system programmatically.
+/** A demo illustrating how to call the OpenIE system programmatically.
  */
 public class OpenIEDemo {
 
@@ -161,6 +167,7 @@ public class OpenIEDemo {
 ```
 
 ## More Information
+
 More information can be found on the 
 [Open IE homepage](http://nlp.stanford.edu/software/openie.html).
 
