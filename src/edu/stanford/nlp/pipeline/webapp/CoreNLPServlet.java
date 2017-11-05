@@ -13,8 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.pipeline.AnnotationOutputter;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Nodes;
@@ -22,11 +20,14 @@ import nu.xom.xslt.XSLTransform;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.pipeline.XMLOutputter;
 
+/** @author Gabor Angeli */
 public class CoreNLPServlet extends HttpServlet {
+
   private static final long serialVersionUID = 1L;
 
   private StanfordCoreNLP pipeline;
@@ -37,9 +38,8 @@ public class CoreNLPServlet extends HttpServlet {
 
   private static final int MAXIMUM_QUERY_LENGTH = 4096;
 
-  public void init() 
-    throws ServletException 
-  {
+  @Override
+  public void init() throws ServletException {
     pipeline = new StanfordCoreNLP();
 
     String xslPath = getServletContext().
@@ -54,9 +54,9 @@ public class CoreNLPServlet extends HttpServlet {
     }
   }
 
+  @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException
-  {
+    throws ServletException, IOException {
     if (request.getCharacterEncoding() == null) {
       request.setCharacterEncoding("utf-8");
     }
@@ -69,36 +69,35 @@ public class CoreNLPServlet extends HttpServlet {
       include(request, response);
   }
 
+  @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException
-  {
+    throws ServletException, IOException {
     doGet(request, response);
   }
 
-  public void addResults(HttpServletRequest request, 
-                         HttpServletResponse response) 
-    throws ServletException, IOException
-  {
+  public void addResults(HttpServletRequest request,
+                         HttpServletResponse response)
+    throws ServletException, IOException {
     String input = request.getParameter("input");
     if (input == null) {
       return;
     }
     input = input.trim();
-    if (input.equals("")) {
+    if (input.isEmpty()) {
       return;
     }
 
     PrintWriter out = response.getWriter();
     if (input.length() > MAXIMUM_QUERY_LENGTH) {
-      out.print("<div>This query is too long.  If you want to run very long queries, please download and use our <a href=\"http://nlp.stanford.edu/software/corenlp.shtml\">publicly released distribution</a>.</div>");
+      out.print("<div>This query is too long.  If you want to run very long queries, please download and use our <a href=\"http://nlp.stanford.edu/software/corenlp.html\">publicly released distribution</a>.</div>");
       return;
     }
-    
+
     Annotation annotation = new Annotation(input);
     pipeline.annotate(annotation);
 
     String outputFormat = request.getParameter("outputFormat");
-    if (outputFormat == null || outputFormat.trim().equals("")) {
+    if (outputFormat == null || outputFormat.trim().isEmpty()) {
       outputFormat = this.defaultFormat;
     }
 
@@ -121,9 +120,8 @@ public class CoreNLPServlet extends HttpServlet {
     }
   }
 
-  public void outputVisualise(PrintWriter out, Annotation annotation) 
-    throws ServletException, IOException
-  {
+  public void outputVisualise(PrintWriter out, Annotation annotation)
+    throws ServletException, IOException {
       // Note: A lot of the HTML generation in this method could/should be
       // done at a templating level, but as-of-yet I am not entirely sure how
       // this should be done in jsp. Also, a lot of the HTML is unnecessary
@@ -162,7 +160,7 @@ public class CoreNLPServlet extends HttpServlet {
       // Escape the XML to be embeddable into a Javascript string.
       String escapedXml = xmlOutput.toString().replaceAll("\\r\\n|\\r|\\n", ""
           ).replace("\"", "\\\"");
-      
+
       // Inject the XML results into the HTML to be retrieved by the Javascript.
       out.println("<script type=\"text/javascript\">");
       out.println("// <![CDATA[");
@@ -183,11 +181,11 @@ public class CoreNLPServlet extends HttpServlet {
                   "        '"+ bratLocation + "/static/fonts/Liberation_Sans-Regular.ttf'];");
       out.println("// ]]>");
       out.println("</script>");
-      
+
       // Inject the brat stylesheet (removing this line breaks visualisation).
       out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
                   bratLocation + "/style-vis.css\"/>");
-      
+
       // Include the Javascript libraries necessary to run brat.
       out.println("<script type=\"text/javascript\" src=\"" + bratLocation +
           "/client/lib/head.load.min.js\"></script>");
@@ -201,12 +199,11 @@ public class CoreNLPServlet extends HttpServlet {
       out.println("<br/>");
   }
 
-  public void outputPretty(PrintWriter out, Annotation annotation) 
-    throws ServletException
-  {
+  public void outputPretty(PrintWriter out, Annotation annotation)
+    throws ServletException {
     try {
       Document input = XMLOutputter.annotationToDoc(annotation, pipeline);
-    
+
       Nodes output = corenlpTransformer.transform(input);
       for (int i = 0; i < output.size(); i++) {
         out.print(output.get(i).toXML());
@@ -218,8 +215,8 @@ public class CoreNLPServlet extends HttpServlet {
     }
   }
 
-  public void outputByWriter(Consumer<StringWriter> printer,
-                             PrintWriter out) throws IOException {
+  private static void outputByWriter(Consumer<StringWriter> printer,
+                              PrintWriter out) throws IOException {
     StringWriter output = new StringWriter();
     printer.accept(output);
     output.flush();
@@ -238,7 +235,7 @@ public class CoreNLPServlet extends HttpServlet {
     }
     out.print("</pre></div>");
   }
-   
+
   public void outputXml(PrintWriter out, Annotation annotation) throws IOException {
     outputByWriter(writer -> {
       try {
@@ -268,4 +265,5 @@ public class CoreNLPServlet extends HttpServlet {
       }
     }, out);
   }
+
 }

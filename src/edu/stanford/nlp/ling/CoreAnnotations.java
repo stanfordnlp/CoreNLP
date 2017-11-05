@@ -464,7 +464,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * CoNLL dep parsing - the dependency type
+   * CoNLL dep parsing - the dependency type, such as SBJ or OBJ. This should be unified with CoNLLDepTypeAnnotation.
    */
   public static class CoNLLDepAnnotation implements CoreAnnotation<CoreMap> {
     @Override
@@ -495,7 +495,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * CoNLL dep parsing - the dependency type
+   * CoNLL dep parsing - the dependency type, such as SBJ or OBJ. This should be unified with CoNLLDepAnnotation.
    */
   public static class CoNLLDepTypeAnnotation implements CoreAnnotation<String> {
     @Override
