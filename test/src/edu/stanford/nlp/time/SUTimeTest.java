@@ -5,8 +5,6 @@ import edu.stanford.nlp.util.Pair;
 import org.joda.time.Partial;
 import org.junit.Test;
 
-import java.time.Instant;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -105,15 +103,6 @@ public class SUTimeTest {
       SUTime.RelativeTime rel1 = new SUTime.RelativeTime(SUTime.TIME_REF, SUTime.TemporalOp.THIS, p.first());
       resolveAndCheckRange("This for " + p.first() + " (" + i + ')', rel1, anchorTime, p.second());
     }
-  }
-
-
-  @Test
-  public void parseDateTimeStandardInstantFormat() {
-    assertEquals(
-        Instant.parse("2017-11-02T19:30:00Z").toEpochMilli(),
-        SUTime.parseDateTime("2017-11-02T19:30:00Z", true).getJodaTimeInstant().getMillis());
-
   }
 
 }

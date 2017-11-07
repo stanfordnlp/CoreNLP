@@ -328,7 +328,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(getAndRegister(coreLabel, keysToSerialize, CorefClusterIdAnnotation.class)); }
     if (keySet.contains(NaturalLogicAnnotations.OperatorAnnotation.class)) { builder.setOperator(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.OperatorAnnotation.class))); }
     if (keySet.contains(NaturalLogicAnnotations.PolarityAnnotation.class)) { builder.setPolarity(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityAnnotation.class))); }
-    if (keySet.contains(NaturalLogicAnnotations.PolarityDirectionAnnotation.class)) { builder.setPolarityDir(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityDirectionAnnotation.class)); }
     if (keySet.contains(SpanAnnotation.class)) {
       IntPair span = getAndRegister(coreLabel, keysToSerialize, SpanAnnotation.class);
       builder.setSpan(CoreNLPProtos.Span.newBuilder().setBegin(span.getSource()).setEnd(span.getTarget()).build());
@@ -1227,7 +1226,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasAnswer()) { word.set(AnswerAnnotation.class, proto.getAnswer()); }
     if (proto.hasOperator()) { word.set(NaturalLogicAnnotations.OperatorAnnotation.class, fromProto(proto.getOperator())); }
     if (proto.hasPolarity()) { word.set(NaturalLogicAnnotations.PolarityAnnotation.class, fromProto(proto.getPolarity())); }
-    if (proto.hasPolarityDir()) { word.set(NaturalLogicAnnotations.PolarityDirectionAnnotation.class, proto.getPolarityDir()); }
     if (proto.hasSpan()) { word.set(SpanAnnotation.class, new IntPair(proto.getSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasSentiment()) { word.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     if (proto.hasQuotationIndex()) { word.set(QuotationIndexAnnotation.class, proto.getQuotationIndex()); }

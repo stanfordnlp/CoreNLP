@@ -22,7 +22,6 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.err;
  */
 @SuppressWarnings("UnusedDeclaration")
 public class RelationTriple implements Comparable<RelationTriple>, Iterable<CoreLabel> {
-
   /** The subject (first argument) of this triple */
   public final List<CoreLabel> subject;
 
@@ -143,7 +142,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * This method will additionally strip out punctuation as well.
    */
    public String subjectLemmaGloss() {
-    return StringUtils.join(canonicalSubject.stream().filter(x -> !x.tag().matches("[.?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
+    return StringUtils.join(canonicalSubject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
   }
 
   /** The object of this relation triple, as a String */
@@ -166,7 +165,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * This method will additionally strip out punctuation as well.
    */
   public String objectLemmaGloss() {
-    return StringUtils.join(canonicalObject.stream().filter(x -> !x.tag().matches("[.?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
+    return StringUtils.join(canonicalObject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
   }
 
   /**
@@ -197,7 +196,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     String relationGloss = (
         (prefixBe ? "be " : "")
         + StringUtils.join(relation.stream()
-            .filter(x -> x.tag() == null || (!x.tag().matches("[.?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[.,;'\"?!]"))))
+            .filter(x -> x.tag() == null || (!x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))))
             .map(x -> x.lemma() == null ? x.word() : x.lemma()),
           " ")
           .toLowerCase()
@@ -226,7 +225,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return new DecimalFormat("0.000").format(confidence);
   }
 
-  private static Pair<Integer, Integer> getSpan(List<CoreLabel> tokens, Function<CoreLabel, Integer> toMin, Function<CoreLabel, Integer> toMax) {
+  protected Pair<Integer, Integer> getSpan(List<CoreLabel> tokens, Function<CoreLabel, Integer> toMin, Function<CoreLabel, Integer> toMax) {
     int min = Integer.MAX_VALUE;
     int max = Integer.MIN_VALUE;
     for (CoreLabel token : tokens) {
@@ -244,15 +243,19 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   }
 
   /**
+   * <p>
    *   Get a representative span for the relation expressed by this triple.
+   * </p>
    *
+   * <p>
    *   This is a bit more complicated than the subject and object spans, as the relation
    *   span is occasionally discontinuous.
    *   If this is the case, this method returns the largest contiguous chunk.
    *   If the relation span is empty, return the object span.
+   * </p>
    */
   public Pair<Integer, Integer> relationTokenSpan() {
-    if (relation.isEmpty()) {
+    if (relation.size() == 0) {
       return objectTokenSpan();
     } else if (relation.size() == 1) {
       return Pair.makePair(relation.get(0).index() - 1, relation.get(0).index());
@@ -432,24 +435,21 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
 //    return result;
   }
 
-  /** Print a human-readable description of this relation triple, as a tab-separated line. */
+  /** Print a human-readable description of this relation triple, as a tab-separated line */
   @Override
   public String toString() {
-    return String.valueOf(this.confidence) + '\t' + subjectGloss() + '\t' + relationGloss() + '\t' + objectGloss();
+    return "" + this.confidence + "\t" + subjectGloss() + "\t" + relationGloss() + "\t" + objectGloss();
   }
 
 
-  /** Print in the format expected by Gabriel Stanovsky and Ido Dagan, Creating a Large Benchmark for Open
-   *  Information Extraction, EMNLP 2016. https://gabrielstanovsky.github.io/assets/papers/emnlp16a/paper.pdf ,
-   *  with equivalence classes.
-   */
+  /** Print in the format expected for https://www.cs.bgu.ac.il/~gabriels/emnlp2016.pdf, with equivalence classes. */
   public String toQaSrlString(CoreMap sentence) {
-    String equivalenceClass = subjectHead().index() + "." + relationHead().index() + '.' + objectHead().index();
-    return equivalenceClass + '\t' +
-        subjectGloss().replace('\t', ' ') + '\t' +
-        relationGloss().replace('\t', ' ') + '\t' +
-        objectGloss().replace('\t', ' ') + '\t' +
-        confidence + '\t' +
+    String equivalenceClass = subjectHead().index() + "." + relationHead().index() + "." + objectHead().index();
+    return equivalenceClass + "\t" +
+        subjectGloss().replace('\t', ' ') + "\t" +
+        relationGloss().replace('\t', ' ') + "\t" +
+        objectGloss().replace('\t', ' ') + "\t" +
+        confidence + "\t" +
         StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(x -> x.word().replace('\t', ' ').replace(" ", "")), " ");
   }
 
@@ -468,38 +468,44 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       relationIndex = relation.get(0).index() - 1;
       relationIndexEnd = relation.get(relation.size() - 1).index();
     }
-    if ( ! subject.isEmpty()) {
+    if (!subject.isEmpty()) {
       if (sentIndex < 0) { sentIndex = subject.get(0).sentIndex(); }
       subjIndex = subject.get(0).index() - 1;
       subjIndexEnd = subject.get(subject.size() - 1).index();
     }
-    if ( ! object.isEmpty()) {
+    if (!object.isEmpty()) {
       if (sentIndex < 0) { sentIndex = subject.get(0).sentIndex(); }
       objIndex = object.get(0).index() - 1;
       objIndexEnd = object.get(object.size() - 1).index();
     }
-    return (docid == null ? "no_doc_id" : docid) + '\t' +
-        sentIndex + '\t' +
-        subjectGloss().replace('\t', ' ') + '\t' +
-        relationGloss().replace('\t', ' ') + '\t' +
-        objectGloss().replace('\t', ' ') + '\t' +
-        subjIndex + '\t' +
-        subjIndexEnd+ '\t' +
-        relationIndex + '\t' +
-        relationIndexEnd + '\t' +
-        objIndex + '\t' +
-        objIndexEnd + '\t' +
-        confidenceGloss() + '\t' +
-        StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(x -> x.word().replace('\t', ' ').replace(" ", "")), " ") + '\t' +
-        StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(CoreLabel::tag), " ") + '\t' +
-        subjectLemmaGloss().replace('\t', ' ') + '\t' +
-        relationLemmaGloss().replace('\t', ' ') + '\t' +
+    return (docid == null ? "no_doc_id" : docid) + "\t" +
+        sentIndex + "\t" +
+        subjectGloss().replace('\t', ' ') + "\t" +
+        relationGloss().replace('\t', ' ') + "\t" +
+        objectGloss().replace('\t', ' ') + "\t" +
+        subjIndex + "\t" +
+        subjIndexEnd+ "\t" +
+        relationIndex + "\t" +
+        relationIndexEnd + "\t" +
+        objIndex + "\t" +
+        objIndexEnd + "\t" +
+        confidenceGloss() + "\t" +
+        StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(x -> x.word().replace('\t', ' ').replace(" ", "")), " ") + "\t" +
+        StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(CoreLabel::tag), " ") + "\t" +
+        subjectLemmaGloss().replace('\t', ' ') + "\t" +
+        relationLemmaGloss().replace('\t', ' ') + "\t" +
         objectLemmaGloss().replace('\t', ' ');
   }
 
   @Override
   public int compareTo(RelationTriple o) {
-    return Double.compare(this.confidence, o.confidence);
+    if (this.confidence < o.confidence) {
+      return -1;
+    } else if (this.confidence > o.confidence) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -635,13 +641,21 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     /** {@inheritDoc} */
     @Override
     public String subjectLink() {
-      return subjectLink.orElseGet(super::subjectLink);
+      if (subjectLink.isPresent()) {
+        return subjectLink.get();
+      } else {
+        return super.subjectLink();
+      }
     }
 
     /** {@inheritDoc} */
     @Override
     public String objectLink() {
-      return objectLink.orElseGet(super::objectLink);
+      if (objectLink.isPresent()) {
+        return objectLink.get();
+      } else {
+        return super.objectLink();
+      }
     }
   }
 

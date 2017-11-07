@@ -740,7 +740,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
   /**
    * Displays the output of all annotators in JSON format.
-   *
    * @param annotation Contains the output of all annotators
    * @param w The Writer to send the output to
    * @throws IOException
@@ -754,8 +753,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
   /**
    * Displays the output of many annotators in CoNLL format.
-   * (Only used by CoreNLPServelet.)
-   *
    * @param annotation Contains the output of all annotators
    * @param w The Writer to send the output to
    * @throws IOException
@@ -769,7 +766,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
   /**
    * Displays the output of all annotators in XML format.
-   *
    * @param annotation Contains the output of all annotators
    * @param os The output stream
    * @throws IOException
@@ -1018,7 +1014,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     final String serializerClass = properties.getProperty("serializer", GenericAnnotationSerializer.class.getName());
     final String outputSerializerClass = properties.getProperty("outputSerializer", serializerClass);
     final String outputSerializerName = (serializerClass.equals(outputSerializerClass))? "serializer":"outputSerializer";
-    final String outputFormatOptions = properties.getProperty("outputFormatOptions");
 
     return (Annotation annotation, OutputStream fos) -> {
       try {
@@ -1033,7 +1028,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             break;
           }
           case CONLL: {
-            new CoNLLOutputter(outputFormatOptions).print(annotation, fos, outputOptions);
+            new CoNLLOutputter().print(annotation, fos, outputOptions);
             break;
           }
           case TEXT: {
@@ -1232,9 +1227,9 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
           timing.done(logger, "Annotating file " + file.getAbsoluteFile());
           Throwable ex = finishedAnnotation.get(CoreAnnotations.ExceptionAnnotation.class);
           if (ex == null) {
-            try {
-              //--Output File
-              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+            try{
+            //--Output File
+	            OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
               print.accept(finishedAnnotation, fos);
               fos.close();
             } catch(IOException e) {
