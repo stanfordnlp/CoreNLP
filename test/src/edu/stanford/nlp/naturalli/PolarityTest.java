@@ -42,6 +42,22 @@ public class PolarityTest {
     add( Pair.makePair(Monotonicity.ANTITONE, MonotonicityType.MULTIPLICATIVE));
   }});
 
+
+  @Test
+  public void equals() {
+    assertEquals(multiplicative, multiplicative);
+    assertEquals(multiplicative, new Polarity(new ArrayList<Pair<Monotonicity, MonotonicityType>>() {{
+      add( Pair.makePair(Monotonicity.MONOTONE, MonotonicityType.MULTIPLICATIVE));
+    }}));
+  }
+
+  @SuppressWarnings("AssertEqualsBetweenInconvertibleTypes")
+  @Test
+  public void equalsString() {
+    assertEquals(multiplicative, "up");
+    assertEquals(multiplicative, "upwards");
+  }
+
   @Test
   public void noneProject() {
     assertEquals(NaturalLogicRelation.EQUIVALENT, none.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT));

@@ -288,7 +288,7 @@ public class Document {
   private boolean haveRunKBP = false;
 
   /** The default properties to use for annotating things (e.g., coref for the document level) */
-  private Properties defaultProps = EMPTY_PROPS;
+  private Properties defaultProps;
 
 
   /**
@@ -395,6 +395,7 @@ public class Document {
    * @param text The text of the document.
    */
   public Document(Properties props, String text) {
+    this.defaultProps = props;
     this.impl = CoreNLPProtos.Document.newBuilder().setText(text);
   }
 
@@ -413,12 +414,13 @@ public class Document {
    */
   @SuppressWarnings("Convert2streamapi")
   public Document(Properties props, Annotation ann) {
+    this.defaultProps = props;
     StanfordCoreNLP.getDefaultAnnotatorPool(props, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = new ProtobufAnnotationSerializer(false).toProtoBuilder(ann);
     List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
     this.sentences = new ArrayList<>(sentences.size());
     for (CoreMap sentence : sentences) {
-      this.sentences.add(new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class), defaultProps));
+      this.sentences.add(new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class), this.defaultProps));
     }
   }
 
@@ -435,12 +437,13 @@ public class Document {
    */
   @SuppressWarnings("Convert2streamapi")
   public Document(Properties props, CoreNLPProtos.Document proto) {
+    this.defaultProps = props;
     StanfordCoreNLP.getDefaultAnnotatorPool(props, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = proto.toBuilder();
     if (proto.getSentenceCount() > 0) {
       this.sentences = new ArrayList<>(proto.getSentenceCount());
       for (CoreNLPProtos.Sentence sentence : proto.getSentenceList()) {
-        this.sentences.add(new Sentence(this, sentence.toBuilder(), defaultProps));
+        this.sentences.add(new Sentence(this, sentence.toBuilder(), this.defaultProps));
       }
     }
   }
@@ -946,6 +949,7 @@ public class Document {
     synchronized (serializer) {
       for (int i = 0; i < sentences.size(); ++i) {
         sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, Polarity> pair) -> pair.first().setPolarity(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, String> pair) -> pair.first().setPolarityDir(pair.second()), x -> x.get(NaturalLogicAnnotations.PolarityDirectionAnnotation.class));
         sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, OperatorSpec> pair) -> pair.first().setOperator(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
       }
     }
