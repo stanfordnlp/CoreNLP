@@ -43,19 +43,25 @@ import java.util.stream.Collectors;
  *   "Leveraging Linguistic Structure For Open Domain Information Extraction." Gabor Angeli, Melvin Johnson Premkumar, Christopher Manning. ACL 2015.
  * </pre>
  *
+ * <p>
  * The paper can be found at <a href="http://nlp.stanford.edu/pubs/2015angeli-openie.pdf">http://nlp.stanford.edu/pubs/2015angeli-openie.pdf</a>.
- *
+ * </p>
+
+ * <p>
  * Documentation on the system can be found on
  * <a href="https://nlp.stanford.edu/software/openie.html">the project homepage</a>,
  * or the <a href="http://stanfordnlp.github.io/CoreNLP/openie.html">CoreNLP annotator documentation page</a>.
  * The simplest invocation of the system would be something like:
+ * </p>
  *
  * <pre>
  * java -mx1g -cp stanford-openie.jar:stanford-openie-models.jar edu.stanford.nlp.naturalli.OpenIE
  * </pre>
  *
- * Note that this class serves both as an entry point for the OpenIE system, but also as a CoreNLP annotator
- * which can be plugged into the CoreNLP pipeline (or any other annotation pipeline).
+ * <p>
+ *   Note that this class serves both as an entry point for the OpenIE system, but also as a CoreNLP annotator
+ *   which can be plugged into the CoreNLP pipeline (or any other annotation pipeline).
+ * </p>
  *
  * @see OpenIE#annotate(Annotation)
  * @see OpenIE#main(String[])
@@ -167,14 +173,15 @@ public class OpenIE implements Annotator  {
 
   /**
    * Create a ne OpenIE system, based on the given properties.
-   *
    * @param props The properties to parametrize the system with.
    */
   public OpenIE(Properties props) {
     // Fill the properties
     ArgumentParser.fillOptions(this, props);
     Properties withoutOpenIEPrefix = new Properties();
-    for (String key : props.stringPropertyNames()) {
+    Enumeration<Object> keys = props.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement().toString();
       withoutOpenIEPrefix.setProperty(key.replace("openie.", ""), props.getProperty(key));
     }
     ArgumentParser.fillOptions(this, withoutOpenIEPrefix);
@@ -436,10 +443,13 @@ public class OpenIE implements Annotator  {
   }
 
   /**
+   * <p>
    *   Annotate a single sentence.
-   *
+   * </p>
+   * <p>
    *   This annotator will, in particular, set the {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.EntailedSentencesAnnotation}
    *   and {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.RelationTriplesAnnotation} annotations.
+   * </p>
    */
   @SuppressWarnings("unchecked")
   public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
@@ -496,8 +506,10 @@ public class OpenIE implements Annotator  {
   /**
    * {@inheritDoc}
    *
-   *  This annotator will, in particular, set the {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.EntailedSentencesAnnotation}
-   *  and {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.RelationTriplesAnnotation} annotations.
+   * <p>
+   *   This annotator will, in particular, set the {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.EntailedSentencesAnnotation}
+   *   and {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.RelationTriplesAnnotation} annotations.
+   * </p>
    */
   @Override
   public void annotate(Annotation annotation) {
@@ -618,7 +630,7 @@ public class OpenIE implements Annotator  {
       case REVERB:
         return extraction.toReverbString(docid, sentence);
       case OLLIE:
-        return extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ')';
+        return extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")";
       case DEFAULT:
         return extraction.toString();
       case QA_SRL:
@@ -631,7 +643,6 @@ public class OpenIE implements Annotator  {
 
   /**
    * Process a single file or line of standard in.
-   *
    * @param pipeline The annotation pipeline to run the lines of the input through.
    * @param docid The docid of the document we are extracting.
    * @param document the document to annotate.
@@ -639,7 +650,7 @@ public class OpenIE implements Annotator  {
   @SuppressWarnings("SynchronizeOnNonFinalField")
   private static void processDocument(AnnotationPipeline pipeline, String docid, String document) {
     // Error checks
-    if (document.trim().isEmpty()) {
+    if (document.trim().equals("")) {
       return;
     }
 
@@ -764,7 +775,7 @@ public class OpenIE implements Annotator  {
       // This will prevent a nasty surprise 10 hours into a running job...
       for (String file : filesToProcess) {
         if (!new File(file).exists() || !new File(file).canRead()) {
-          log.error("Cannot read file (or file does not exist: '" + file + '\'');
+          log.error("Cannot read file (or file does not exist: '" + file + "'");
         }
       }
       // Actually process the files.
@@ -795,5 +806,4 @@ public class OpenIE implements Annotator  {
     log.info("DONE processing files. " + exceptionCount.get() + " exceptions encountered.");
     System.exit(exceptionCount.get());
   }
-
 }

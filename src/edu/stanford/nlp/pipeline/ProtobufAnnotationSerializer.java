@@ -1687,7 +1687,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         // get the mention
         Mention mentionToUpdate = map.get(CorefMentionsAnnotation.class).get(mentionInt);
         // add to document level coref mention list
-        ann.get(CorefMentionsAnnotation.class).add(mentionToUpdate);
+        List<Mention> mentions = ann.get(CorefMentionsAnnotation.class);
+        if (mentions == null) {
+          mentions = new ArrayList<>();
+          ann.set(CorefMentionsAnnotation.class, mentions);
+        }
+        mentions.add(mentionToUpdate);
         // store these in hash for more processing later in this method
         idToMention.put(mentionToUpdate.mentionID, mentionToUpdate);
         idToProtoMention.put(mentionToUpdate.mentionID, protoMention);
@@ -2325,7 +2330,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   @SuppressWarnings("UnusedParameters")
   private CoreMap fromProto(CoreNLPProtos.NERMention mention) {
-    CoreMap map = new ArrayCoreMap();
+    CoreMap map = new ArrayCoreMap(10);
     if (mention.hasSentenceIndex()) map.set(SentenceIndexAnnotation.class, mention.getSentenceIndex());
     if (mention.hasTokenStartInSentenceInclusive()) map.set(TokenBeginAnnotation.class, mention.getTokenStartInSentenceInclusive());
     if (mention.hasTokenEndInSentenceExclusive()) map.set(TokenEndAnnotation.class, mention.getTokenEndInSentenceExclusive());

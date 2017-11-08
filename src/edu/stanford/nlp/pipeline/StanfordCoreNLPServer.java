@@ -923,8 +923,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Send response
       try {
-        int tokensRegexTimeOut = (lastPipeline.get() == null) ? 75 : 5;
-        Pair<String, Annotation> response = future.get(tokensRegexTimeOut, TimeUnit.SECONDS);
+        Pair<String, Annotation> response = future.get(5, TimeUnit.SECONDS);
         byte[] content = response.first.getBytes();
         Annotation completedAnnotation = response.second;
         sendAndGetResponse(httpExchange, content);
@@ -1047,8 +1046,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Send response
       try {
-        int semgrexTimeOut = (lastPipeline.get() == null) ? 75 : 5;
-        Pair<String, Annotation> pair = response.get(semgrexTimeOut, TimeUnit.SECONDS);
+        Pair<String, Annotation> pair = response.get(5, TimeUnit.SECONDS);
         Annotation completedAnnotation = pair.second;
         byte[] content = pair.first.getBytes();
         sendAndGetResponse(httpExchange, content);
@@ -1149,8 +1147,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Send response
       try {
-        int tregexTimeOut = (lastPipeline.get() == null) ? 75 : 5 ;
-        Pair<String, Annotation> pair = response.get(tregexTimeOut, TimeUnit.SECONDS);
+        Pair<String, Annotation> pair = response.get(5, TimeUnit.SECONDS);
         Annotation completedAnnotation = pair.second;
         byte[] content = pair.first.getBytes();
         sendAndGetResponse(httpExchange, content);
