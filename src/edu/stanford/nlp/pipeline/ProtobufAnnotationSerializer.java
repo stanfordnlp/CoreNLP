@@ -767,8 +767,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
   /**
    * Create a Section CoreMap protocol buffer from the given Section CoreMap
-   * @param section
-   * @return
+   *
+   * @param section The CoreMap representing the section to serialize to a proto.
+   *
+   * @return The protocol buffer version of the section
    */
   public CoreNLPProtos.Section toProtoSection(CoreMap section) {
     CoreNLPProtos.Section.Builder builder = CoreNLPProtos.Section.newBuilder();
@@ -1115,9 +1117,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
                 .build())
             .collect(Collectors.toList()));
     Optional<SemanticGraph> treeOptional = triple.asDependencyTree();
-    if (treeOptional.isPresent()) {
-      builder.setTree(toProto(treeOptional.get()));
-    }
+    treeOptional.ifPresent(semanticGraph -> builder.setTree(toProto(semanticGraph)));
     return builder.build();
   }
 
@@ -1137,6 +1137,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return proto.build();
   }
 
+
   /**
    * Serialize a Map (from Integers to Strings) to a proto.
    *
@@ -1144,6 +1145,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    *
    * @return A proto representation of the map.
    */
+  @SuppressWarnings("unused")
   public static CoreNLPProtos.MapIntString toMapIntStringProto(Map<Integer,String> map) {
       CoreNLPProtos.MapIntString.Builder proto = CoreNLPProtos.MapIntString.newBuilder();
       for (Map.Entry<Integer, String> entry : map.entrySet()) {
@@ -1331,7 +1333,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Add chinese characters
     if (proto.getCharacterCount() > 0) {
       List<CoreLabel> sentenceCharacters =
-              proto.getCharacterList().stream().map(c -> fromProto(c)).collect(Collectors.toList());
+              proto.getCharacterList().stream().map(this::fromProto).collect(Collectors.toList());
       lossySentence.set(SegmenterCoreAnnotations.CharactersAnnotation.class, sentenceCharacters);
     }
     // Add text -- missing by default as it's populated from the Document
@@ -1484,7 +1486,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // if there are characters, add characters
     if (proto.getCharacterCount() > 0) {
-      List<CoreLabel> docChars = new ArrayList<CoreLabel>();
+      List<CoreLabel> docChars = new ArrayList<>();
       for (CoreNLPProtos.Token c : proto.getCharacterList()) {
         docChars.add(fromProto(c));
       }
@@ -1534,7 +1536,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // add entity mentions
     if (proto.getHasEntityMentionsAnnotation()) {
-      ann.set(CoreAnnotations.MentionsAnnotation.class, new ArrayList<CoreMap>());
+      ann.set(CoreAnnotations.MentionsAnnotation.class, new ArrayList<>());
     }
 
     // Add sentences
@@ -1552,9 +1554,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         map.set(TokensAnnotation.class, tokens.subList(tokenBegin, tokenEnd));
         // Set sentence index + token index + paragraph index
         for (int i = tokenBegin; i < tokenEnd; ++i) {
-          tokens.get(i).setSentIndex(sentIndex);
-          tokens.get(i).setIndex(i - sentence.getTokenOffsetBegin() + 1);
-          if (sentence.hasParagraph()) { tokens.get(i).set(ParagraphAnnotation.class, sentence.getParagraph()); }
+          CoreLabel token = tokens.get(i);
+          if (token != null) {
+            token.setSentIndex(sentIndex);
+            token.setIndex(i - sentence.getTokenOffsetBegin() + 1);
+            if (sentence.hasParagraph()) {
+              token.set(ParagraphAnnotation.class, sentence.getParagraph());
+            }
+          }
         }
         // Set text
         int characterBegin = sentence.getCharacterOffsetBegin();
@@ -1570,7 +1577,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         List<CoreMap> mentions = sentence.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
         // add tokens to each entity mention
         for (CoreMap entityMention : mentions) {
-          List<CoreLabel> entityMentionTokens = new ArrayList<CoreLabel>();
+          List<CoreLabel> entityMentionTokens = new ArrayList<>();
           for (int tokenIndex = entityMention.get(TokenBeginAnnotation.class) ;
                tokenIndex < entityMention.get(TokenEndAnnotation.class) ; tokenIndex++ ) {
             entityMentionTokens.add(tokens.get(tokenIndex));
@@ -1583,7 +1590,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           entityMention.set(CharacterOffsetEndAnnotation.class, emCharOffsetEnd);
           entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
           String entityMentionText =
-              entityMentionTokens.stream().map(token -> token.word()).collect(Collectors.joining(" "));
+              entityMentionTokens.stream().map(CoreLabel::word).collect(Collectors.joining(" "));
           entityMention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
         }
         if (sentence.getHasEntityMentionsAnnotation())
@@ -1624,7 +1631,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // Set document coref mentions list ; this gets populated when sentences build CorefMentions below
     if (proto.getHasCorefMentionAnnotation()) {
-      ann.set(CorefMentionsAnnotation.class, new ArrayList<Mention>());
+      ann.set(CorefMentionsAnnotation.class, new ArrayList<>());
     }
 
     // hashes to access Mentions , later in this method need to add speakerInfo to Mention
@@ -1739,7 +1746,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // set sections if this was an xmlDoc
     if (proto.hasXmlDoc() && proto.getXmlDoc()) {
       // this was an xml doc so set up a list of sections
-      List<CoreMap> listOfSections = new ArrayList<CoreMap>();
+      List<CoreMap> listOfSections = new ArrayList<>();
       ann.set(SectionsAnnotation.class, listOfSections);
       for (CoreNLPProtos.Section section : proto.getSectionsList()) {
         CoreMap sectionCoreMap = fromProto(section, ann.get(SentencesAnnotation.class));
@@ -2365,7 +2372,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     map.set(SentencesAnnotation.class, sentencesList);
     // go through the list of quotes and rebuild the quotes
-    map.set(QuotesAnnotation.class, new ArrayList<CoreMap>());
+    map.set(QuotesAnnotation.class, new ArrayList<>());
     for (CoreNLPProtos.Quote quote : section.getQuotesList()) {
       int quoteCharStart = quote.getBegin();
       int quoteCharEnd = quote.getEnd();
