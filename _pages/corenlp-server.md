@@ -59,7 +59,17 @@ There are three endpoints provided by the server, which we'll describe in more d
 
 ### Annotate with CoreNLP: `/`
 
-This endpoint takes as input a JSON-formatted properties string under the key `properties=<properties>`, and as `POST`data text to annotate. The properties should mirror the properties file passed into the CoreNLP command line, except formatted as a JSON object. For example, the following will tokenize the input text, run part of speech tagging, and output it as JSON to standard out:
+This endpoint takes as input a JSON-formatted properties string under
+the key `properties=<properties>`, and as `POST`data text to
+annotate. The properties should mirror the properties file passed into
+the CoreNLP command line, except formatted as a JSON object. The
+`POST` data should be [percent-encoded](https://en.wikipedia.org/wiki/Percent-encoding) (otherwise known as *URL
+encoded*). In particular, you shoud esapce a % sign as
+`%25`. (Interfaces calling CoreNLP via the web service should do this
+escaping for their users.)
+
+For example, the following command will tokenize the input text, run
+part of speech tagging, and output the result as JSON to standard out:
 
 ```bash
 wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"annotators": "tokenize,ssplit,pos", "outputFormat": "json"}' -O -

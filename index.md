@@ -93,10 +93,17 @@ various human languages on the
 
 ## Programming languages and operating systems
 
-Stanford CoreNLP is written in **Java**; recent releases  require **Java 1.8+**.
+Stanford CoreNLP is written in **Java**; recent releases  require
+**Java 1.8+**. You need to have Java installed to run
+CoreNLP. However, you can interact with CoreNLP via the command-line
+or its web service;
+many people use CoreNLP while writing their own code in Javascript,
+Python, or some other language.
 
-You can use Stanford CoreNLP from the [command-line](cmdline.html), via its Java
-[programmatic API](api.html), via [third party APIs](other-languages.html) for most major modern
+You can use Stanford CoreNLP from the [command-line](cmdline.html),
+via its original Java
+[programmatic API](api.html), via the object-oriented [simple API](https://stanfordnlp.github.io/CoreNLP/simple.html),
+via [third party APIs](other-languages.html) for most major modern
 programming languages, or via a [web service](corenlp-server.html).
 It works on Linux, macOS, and Windows.
 
