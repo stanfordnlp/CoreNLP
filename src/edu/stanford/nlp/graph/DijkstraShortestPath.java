@@ -12,9 +12,8 @@ import edu.stanford.nlp.util.Generics;
 public class DijkstraShortestPath {
   private DijkstraShortestPath() {} // static method only
 
-  public static <V, E> List<V> getShortestPath(Graph<V, E> graph,
-                                               V node1, V node2, 
-                                               boolean directionSensitive) {
+  public static <V, E> List<V> getShortestPath(
+      Graph<V, E> graph, V node1, V node2, boolean directionSensitive) {
     if (node1.equals(node2)) {
       return Collections.singletonList(node2);
     }
@@ -40,15 +39,14 @@ public class DijkstraShortestPath {
 
       Set<V> candidates = ((directionSensitive) ? 
                            graph.getChildren(u) : graph.getNeighbors(u));
-      for (V candidate : candidates) {
-        double alt = distance - 1;
-        // nodes not already present will have a priority of -inf
-        if (alt > unsettledNodes.getPriority(candidate) &&
-            !visited.contains(candidate)) {
-          unsettledNodes.relaxPriority(candidate, alt);
-          previous.put(candidate, u);
-        }
-      }
+      candidates.forEach(
+          candidate -> {
+            double alt = distance - 1;
+            if (alt > unsettledNodes.getPriority(candidate) && !visited.contains(candidate)) {
+              unsettledNodes.relaxPriority(candidate, alt);
+              previous.put(candidate, u);
+            }
+          });
     }
     if (!previous.containsKey(node2))
       return null;
@@ -62,5 +60,4 @@ public class DijkstraShortestPath {
     Collections.reverse(path);
     return path;
   }
-
 }

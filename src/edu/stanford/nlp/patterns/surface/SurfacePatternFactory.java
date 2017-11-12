@@ -123,9 +123,8 @@ public class SurfacePatternFactory extends PatternFactory {
     }
   }
 
-
-  public static Set<SurfacePattern> getContext(List<CoreLabel> sent, int i, Set<CandidatePhrase> stopWords) {
-
+  public static Set<SurfacePattern> getContext(
+      List<CoreLabel> sent, int i, Set<CandidatePhrase> stopWords) {
 
     Set<SurfacePattern> prevpatterns = new HashSet<>();
     Set<SurfacePattern> nextpatterns = new HashSet<>();
@@ -369,11 +368,11 @@ public class SurfacePatternFactory extends PatternFactory {
           nextContextList.add(n);
         }
 
-        for (String n : originalNext) {
-          if (!fw.isEmpty())
-            nextOriginal.add(" FW ");
-          nextOriginal.add(n);
-        }
+        originalNext.forEach(
+            n -> {
+              if (!fw.isEmpty()) nextOriginal.add(" FW ");
+              nextOriginal.add(n);
+            });
 
         if (nextTokens.size() >= minWindow4Pattern) {
           nextContext = nextContextList.toArray(new Token[0]);
@@ -427,8 +426,6 @@ public class SurfacePatternFactory extends PatternFactory {
     //getPatternIndex().finishCommit();
     return CollectionUtils.unionAsSet(prevpatterns, nextpatterns, prevnextpatterns);
   }
-
-
 
   static Triple<Boolean, Token, String> getContextTokenStr(CoreLabel tokenj) {
     Token strgeneric = new Token(PatternType.SURFACE);

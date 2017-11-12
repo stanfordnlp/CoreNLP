@@ -163,18 +163,18 @@ public class MultiWordStringMatcher {
     // Sort by longest string first
     strings.sort(LONGEST_STRING_COMPARATOR);
     StringBuilder sb = new StringBuilder();
-    for (String s:strings) {
-      if (sb.length() > 0) {
-        sb.append("|");
-      }
-      sb.append(getRegex(s));
-    }
+    strings.forEach(
+        s -> {
+          if (sb.length() > 0) {
+            sb.append("|");
+          }
+          sb.append(getRegex(s));
+        });
     String regex = sb.toString();
     return regex;
   }
 
-  public Pattern getPattern(String targetString)
-  {
+  public Pattern getPattern(String targetString) {
     Pattern pattern = targetStringPatternCache.get(targetString);
     if (pattern == null) {
       pattern = createPattern(targetString);

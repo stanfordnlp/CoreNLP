@@ -23,10 +23,11 @@ public class Evaluate extends AbstractEvaluate  {
 
   @Override
   public void populatePredictedLabels(List<Tree> trees) {
-    for (Tree tree : trees) {
-      cag.forwardPropagateTree(tree);
+    trees.forEach(
+        tree -> {
+          cag.forwardPropagateTree(tree);
+        });
     }
-  }
 
   /**
    * Expected arguments are <code> -model model -treebank treebank </code>

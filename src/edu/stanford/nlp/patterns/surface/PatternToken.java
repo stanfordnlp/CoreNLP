@@ -98,8 +98,10 @@ public class PatternToken implements Serializable {
     }
 
     if (notAllowedClasses != null && notAllowedClasses.size() > 0) {
-      for (String na : notAllowedClasses)
-        restrictions.add("!{" + na + ":" + na +"}");
+      notAllowedClasses.forEach(
+          na -> {
+            restrictions.add("!{" + na + ":" + na + "}");
+          });
     }
     str += "[" + StringUtils.join(restrictions, " & ") + "]{1,"
         + numWordsCompound + "}";
@@ -109,7 +111,6 @@ public class PatternToken implements Serializable {
     str = StringUtils.toAscii(str);
     return str;
   }
-
 
   @Override
   public boolean equals(Object b) {

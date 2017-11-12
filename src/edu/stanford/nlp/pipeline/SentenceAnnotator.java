@@ -63,9 +63,10 @@ public abstract class SentenceAnnotator implements Annotator {
               // Note that in order for this to be useful, the underlying job needs to handle Thread.interrupted()
               List<CoreMap> failedSentences = wrapper.joinWithTimeout();
               if (failedSentences != null) {
-                for (CoreMap failed : failedSentences) {
-                  doOneFailedSentence(annotation, failed);
-                }
+                failedSentences.forEach(
+                    failed -> {
+                      doOneFailedSentence(annotation, failed);
+                    });
               }
               // We don't wait for termination here, and perhaps this
               // is a mistake.  If the processor used does not respect
@@ -90,9 +91,10 @@ public abstract class SentenceAnnotator implements Annotator {
           wrapper.poll();
         }
         if (failedSentences != null) {
-          for (CoreMap failed : failedSentences) {
-            doOneFailedSentence(annotation, failed);
-          }
+          failedSentences.forEach(
+              failed -> {
+                doOneFailedSentence(annotation, failed);
+              });
         }
       } else {
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {

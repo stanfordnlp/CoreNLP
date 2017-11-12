@@ -147,15 +147,13 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
       Counter<F> c = new ClassicCounter<>();
       L label  = labelIndex.get(i);
       double[] w =  weights[i];
-      for (F f : featureIndex) {
-        int indexf = featureIndex.indexOf(f);
-        if(w[indexf] != 0.0)
-          c.setCount(f, w[indexf]);
-
-      }
+      featureIndex.forEach(
+          f -> {
+            int indexf = featureIndex.indexOf(f);
+            if (w[indexf] != 0.0) c.setCount(f, w[indexf]);
+          });
       allweights.put(label, c);
     }
     return allweights;
   }
-
 }

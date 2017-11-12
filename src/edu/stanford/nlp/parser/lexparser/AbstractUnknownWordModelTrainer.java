@@ -41,11 +41,11 @@ public abstract class AbstractUnknownWordModelTrainer
 
   @Override
   public final void train(Collection<Tree> trees, double weight) {
-    for (Tree tree : trees) {
-      train(tree, weight);
+    trees.forEach(
+        tree -> {
+          train(tree, weight);
+        });
     }
-  }
-
 
   @Override
   public final void train(Tree tree, double weight) {

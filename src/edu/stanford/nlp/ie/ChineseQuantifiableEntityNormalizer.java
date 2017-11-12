@@ -1,7 +1,6 @@
 package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.ie.regexp.ChineseNumberSequenceClassifier;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -923,13 +922,20 @@ public class ChineseQuantifiableEntityNormalizer {
   public static <E extends CoreMap> String singleEntityToString(List<E> l) {
     String entityType = l.get(0).get(CoreAnnotations.NamedEntityTagAnnotation.class);
     StringBuilder sb = new StringBuilder();
-    for (E w : l) {
-      if(!w.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals(entityType)) {
-        log.error("differing NER tags detected in entity: " + l);
-        throw new Error("Error with entity construction, two tokens had inconsistent NER tags");
-      }
-      sb.append(w.get(CoreAnnotations.TextAnnotation.class));
-    }
+    l.stream()
+        .map(
+            w -> {
+              if (!w.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals(entityType)) {
+                log.error("differing NER tags detected in entity: " + l);
+                throw new Error(
+                    "Error with entity construction, two tokens had inconsistent NER tags");
+              }
+              return w;
+            })
+        .forEach(
+            w -> {
+              sb.append(w.get(CoreAnnotations.TextAnnotation.class));
+            });
     return sb.toString();
   }
 

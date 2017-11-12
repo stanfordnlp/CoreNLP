@@ -180,10 +180,11 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    */
   @SuppressWarnings("Convert2streamapi")
   public void removeAll(Collection<K> keys) {
-    for (K k : keys) {
-      remove(k);
+    keys.forEach(
+        k -> {
+          remove(k);
+        });
     }
-  }
 
   /**
    * Removes the value from the Collection mapped to by this key, leaving the

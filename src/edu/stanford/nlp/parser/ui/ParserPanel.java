@@ -350,9 +350,9 @@ public class ParserPanel extends JPanel  {
   }
 
   /**
-   * Loads a text or html file from a file path or URL.  Treats anything
-   * beginning with <tt>http:\\</tt>,<tt>.htm</tt>, or <tt>.html</tt> as an
-   * html file, and strips all tags from the document
+   * Loads a text or html file from a file path or URL. Treats anything beginning with
+   * <tt>http:\\</tt>,<tt>.htm</tt>, or <tt>.html</tt> as an html file, and strips all tags from the
+   * document
    */
   public void loadFile(String filename) {
     if (filename == null) {
@@ -393,12 +393,13 @@ public class ParserPanel extends JPanel  {
 
     // load the document into the text pane
     StringBuilder docStr = new StringBuilder();
-    for (Word aDoc : doc) {
-      if (docStr.length() > 0) {
-        docStr.append(' ');
-      }
-      docStr.append(aDoc.toString());
-    }
+    doc.forEach(
+        aDoc -> {
+          if (docStr.length() > 0) {
+            docStr.append(' ');
+          }
+          docStr.append(aDoc.toString());
+        });
     textPane.setText(docStr.toString());
     dataFileLabel.setText(urlOrFile);
 
@@ -410,8 +411,6 @@ public class ParserPanel extends JPanel  {
     setStatus("Done");
   }
 
-  // TreebankLanguagePack returns a TokenizerFactory<? extends HasWord>
-  // which isn't close enough in the type system, but is probably okay in practice
   @SuppressWarnings("unchecked")
   private static TokenizerFactory<Word> getTokenizerFactory() {
     return (TokenizerFactory<Word>)tlp.getTokenizerFactory();
@@ -436,10 +435,7 @@ public class ParserPanel extends JPanel  {
     }
   }
 
-  /**
-   * Saves the results of applying the parser to the current text to
-   * the specified filename.
-   */
+  /** Saves the results of applying the parser to the current text to the specified filename. */
   public void saveOutput(String filename) {
     if (filename == null || filename.equals("")) {
       return;
@@ -451,9 +447,10 @@ public class ParserPanel extends JPanel  {
     TokenizerFactory<? extends HasWord> tf = tlp.getTokenizerFactory();
     processor.setTokenizerFactory(tf);
     List<List<HasWord>> sentences = new ArrayList<>();
-    for (List<HasWord> sentence : processor) {
-      sentences.add(sentence);
-    }
+    processor.forEach(
+        sentence -> {
+          sentences.add(sentence);
+        });
 
     JProgressBar progress = new JProgressBar(0, sentences.size());
     JButton cancel = new javax.swing.JButton();

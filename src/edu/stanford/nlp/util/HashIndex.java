@@ -233,19 +233,18 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   private final Semaphore semaphore = new Semaphore(1);
 
   // TODO: delete this when breaking serialization because we can leach off of AbstractCollection
- /**
+  /**
    * Adds every member of Collection to the Index. Does nothing for members already in the Index.
    *
-   * @return true if some item was added to the index and false if no
-   *         item was already in the index or if the index is locked
+   * @return true if some item was added to the index and false if no item was already in the index
+   *     or if the index is locked
    */
- @Override
+  @Override
   public boolean addAll(Collection<? extends E> c) {
     boolean changed = false;
-    for (E element: c) {
-      changed |= add(element);
-      //changed &= add(element);
-    }
+    c.stream()
+        .map(element -> add(element))
+        .reduce(changed, (accumulator, _item) -> accumulator |= _item);
     return changed;
   }
 

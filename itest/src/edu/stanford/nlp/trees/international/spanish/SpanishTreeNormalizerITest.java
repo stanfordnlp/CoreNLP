@@ -73,10 +73,12 @@ public class SpanishTreeNormalizerITest {
   public void testMultiWordNormalization() {
     for (Pair<String, String> testCase : multiWordTestCases) {
       Tree head = readTree(testCase.first());
-      for (Tree t : head) {
-        if (t.isPrePreTerminal())
-          tn.normalizeForMultiWord(t, tf);
-      }
+      head.stream()
+          .filter(t -> t.isPrePreTerminal())
+          .forEach(
+              t -> {
+                tn.normalizeForMultiWord(t, tf);
+              });
 
       Assert.assertEquals(testCase.second(), head.toString());
     }

@@ -115,8 +115,8 @@ public class EvalUtils {
 
   public static class B3Evaluator extends AbstractEvaluator {
     @Override
-    public Pair<Double, Double> getScore(List<List<Integer>> clusters,
-        Map<Integer, List<Integer>> mentionToGold) {
+    public Pair<Double, Double> getScore(
+        List<List<Integer>> clusters, Map<Integer, List<Integer>> mentionToGold) {
       double num = 0;
       int dem = 0;
 
@@ -127,12 +127,13 @@ public class EvalUtils {
 
         Counter<List<Integer>> goldCounts = new ClassicCounter<>();
         double correct = 0;
-        for (int m : c) {
-          List<Integer> goldCluster = mentionToGold.get(m);
-          if (goldCluster != null) {
-            goldCounts.incrementCount(goldCluster);
-          }
-        }
+        c.forEach(
+            m -> {
+              List<Integer> goldCluster = mentionToGold.get(m);
+              if (goldCluster != null) {
+                goldCounts.incrementCount(goldCluster);
+              }
+            });
 
         for (Map.Entry<List<Integer>, Double> e : goldCounts.entrySet()) {
           if (e.getKey().size() != 1) {
@@ -145,7 +146,7 @@ public class EvalUtils {
 
       return new Pair<>(num, (double) dem);
     }
-  }
+    }
 
   public static class MUCEvaluator extends AbstractEvaluator {
     @Override

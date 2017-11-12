@@ -379,14 +379,19 @@ public class ColumnDataClassifier  {
 
   private static List<String[]> makeSVMLightLineInfos(List<String> lines) {
     List<String[]> lineInfos = new ArrayList<>(lines.size());
-    for (String line : lines) {
-      line = line.replaceFirst("#.*$", ""); // remove any trailing comments
-      // in principle, it'd be nice to save the comment, though, for possible use as a displayedColumn - make it column 1??
-      lineInfos.add(line.split("\\s+"));
-    }
+    lines
+        .stream()
+        .map(
+            line -> {
+              line = line.replaceFirst("#.*$", "");
+              return line;
+            })
+        .forEach(
+            line -> {
+              lineInfos.add(line.split("\\s+"));
+            });
     return lineInfos;
   }
-
 
   /** NB: This is meant to do splitting strictly only on tabs, and to thus
    *  work with things that are exactly TSV files.  It shouldn't split on
@@ -395,7 +400,6 @@ public class ColumnDataClassifier  {
    *  words with features like useSplitWords.
    */
   private static final Pattern tab = Pattern.compile("\\t");
-
 
   /** Read a data set from a file and convert it into a Dataset object.
    *  In test phase, returns the {@code List<String[]>} with the data columns for printing purposes.
@@ -898,16 +902,27 @@ public class ColumnDataClassifier  {
 
   private void addAllInterningAndPrefixing(Collection<String> accumulator, Collection<String> addend, String prefix) {
     assert prefix != null;
-    for (String protoFeat : addend) {
-      if ( ! prefix.isEmpty()) {
-        protoFeat = prefix + protoFeat;
-      }
-      if (globalFlags.intern) {
-        protoFeat = protoFeat.intern();
-      }
-      accumulator.add(protoFeat);
+    addend
+        .stream()
+        .map(
+            protoFeat -> {
+              if (!prefix.isEmpty()) {
+                protoFeat = prefix + protoFeat;
+              }
+              return protoFeat;
+            })
+        .map(
+            protoFeat -> {
+              if (globalFlags.intern) {
+                protoFeat = protoFeat.intern();
+              }
+              return protoFeat;
+            })
+        .forEach(
+            protoFeat -> {
+              accumulator.add(protoFeat);
+            });
     }
-  }
 
   /**
    * This method takes care of adding features to the collection-ish object features when
@@ -942,26 +957,26 @@ public class ColumnDataClassifier  {
    * instanceof checks.  Features must be a type of collection or a counter, and value is used
    * iff it is a counter
    */
-    private static <F> void addFeature(Object features, F newFeature, double value) {
-      if (features instanceof Counter<?>) {
-        ErasureUtils.<Counter<F>>uncheckedCast(features).setCount(newFeature, value);
-      } else if(features instanceof Collection<?>) {
-        ErasureUtils.<Collection<F>>uncheckedCast(features).add(newFeature);
-      } else {
-        throw new RuntimeException("addFeature was called with a features object that is neither a counter nor a collection!");
-      }
+  private static <F> void addFeature(Object features, F newFeature, double value) {
+    if (features instanceof Counter<?>) {
+      ErasureUtils.<Counter<F>>uncheckedCast(features).setCount(newFeature, value);
+    } else if(features instanceof Collection<?>) {
+      ErasureUtils.<Collection<F>>uncheckedCast(features).add(newFeature);
+    } else {
+      throw new RuntimeException("addFeature was called with a features object that is neither a counter nor a collection!");
     }
+  }
 
-    /**
-     * Extracts all the features from a certain input column.
-     *
-     * @param cWord The String to extract data from
-     * @param flags Flags specifying which features to extract
-     * @param featuresC Some kind of Collection or Counter to put features into
-     * @param goldAns The goldAnswer for this whole datum or emptyString if none.
-     *                    This is used only for filling in the binned lengths histogram counters
-     */
-    private void makeDatum(String cWord, Flags flags, Object featuresC, String goldAns) {
+  /**
+   * Extracts all the features from a certain input column.
+   *
+   * @param cWord The String to extract data from
+   * @param flags Flags specifying which features to extract
+   * @param featuresC Some kind of Collection or Counter to put features into
+   * @param goldAns The goldAnswer for this whole datum or emptyString if none. This is used only
+   *     for filling in the binned lengths histogram counters
+   */
+  private void makeDatum(String cWord, Flags flags, Object featuresC, String goldAns) {
 
       //logger.info("Making features for " + cWord + " flags " + flags);
       if (flags == null) {
@@ -1141,8 +1156,10 @@ public class ColumnDataClassifier  {
           }
           if (flags.useSplitNGrams || flags.useSplitPrefixSuffixNGrams) {
             Collection<String> featureNames = makeNGramFeatures(bits[i], flags, true, "S#");
-            for(String featureName : featureNames)
-              addFeature(featuresC, featureName, DEFAULT_VALUE);
+            featureNames.forEach(
+              featureName -> {
+                addFeature(featuresC, featureName, DEFAULT_VALUE);
+              });
           }
           if (flags.splitWordShape > edu.stanford.nlp.process.WordShapeClassifier.NOWORDSHAPE) {
             String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(bits[i], flags.splitWordShape);
@@ -1180,14 +1197,16 @@ public class ColumnDataClassifier  {
       }
       if (flags.useNGrams || flags.usePrefixSuffixNGrams) {
         Collection<String> featureNames = makeNGramFeatures(cWord, flags, false, "#");
-        for(String featureName : featureNames)
-          addFeature(featuresC,featureName,DEFAULT_VALUE);
+        featureNames.forEach(
+          featureName -> {
+            addFeature(featuresC, featureName, DEFAULT_VALUE);
+          });
       }
       if (isRealValued(flags)) {
         addFeatureValue(cWord, flags, featuresC);
       }
-       //logger.info("Made featuresC " + featuresC);
-    }  //end makeDatum
+      // logger.info("Made featuresC " + featuresC);
+  }   //end makeDatum
 
   /** Return the tokens using PTB tokenizer.
    *
@@ -1330,10 +1349,11 @@ public class ColumnDataClassifier  {
         }
         cliqueWriter.print(wi[i]);
       }
-      for (String feat : features) {
-        cliqueWriter.print("\t");
-        cliqueWriter.print(feat);
-      }
+      features.forEach(
+          feat -> {
+            cliqueWriter.print("\t");
+            cliqueWriter.print(feat);
+          });
       cliqueWriter.println();
     }
   }
@@ -1346,7 +1366,7 @@ public class ColumnDataClassifier  {
    * @param train training data
    * @return trained classifier
    */
-  private Classifier<String,String> makeClassifierAdaptL1(GeneralDataset<String,String> train) {
+  private Classifier<String, String> makeClassifierAdaptL1(GeneralDataset<String, String> train) {
     assert(globalFlags.useAdaptL1 && globalFlags.limitFeatures > 0);
     Classifier<String, String> lc = null;
     double l1reg = globalFlags.l1reg;

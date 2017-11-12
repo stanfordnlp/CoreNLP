@@ -63,9 +63,9 @@ public class GrammarCompactionTester  {
   private String inputFile = null;
   private boolean toy = false;
 
-  /**
-   */
-  public Map<String,List<List<String>>> extractPaths(String path, int low, int high, boolean annotate) {
+  /** */
+  public Map<String, List<List<String>>> extractPaths(
+      String path, int low, int high, boolean annotate) {
 
     // setup tree transforms
     Treebank trainTreebank = op.tlpParams.memoryTreebank(); // this is a new one
@@ -90,17 +90,23 @@ public class GrammarCompactionTester  {
       hf = op.tlpParams.headFinder();
     }
     TreeTransformer annotator = new TreeAnnotator(hf, op.tlpParams, op);
-    for (Tree tree : trainTreebank) {
-      if (annotate) {
-        tree = annotator.transformTree(tree);
-      }
-      trainTrees.add(tree);
-    }
+    trainTreebank
+        .stream()
+        .map(
+            tree -> {
+              if (annotate) {
+                tree = annotator.transformTree(tree);
+              }
+              return tree;
+            })
+        .forEach(
+            tree -> {
+              trainTrees.add(tree);
+            });
     Extractor<Map<String,List<List<String>>>> pExtractor = new PathExtractor(hf, op);
     Map<String,List<List<String>>> allPaths = pExtractor.extract(trainTrees);
     return allPaths;
   }
-
 
   public static void main(String[] args) {
     new GrammarCompactionTester().runTest(args);
@@ -265,136 +271,136 @@ public class GrammarCompactionTester  {
   }
 
   /*
-  private static void testOneAtATimeMerging() {
+    private static void testOneAtATimeMerging() {
 
-    // use the parser constructor to extract the grammars from the treebank once
-    LexicalizedParser lp = new LexicalizedParser(path, new NumberRangeFileFilter(trainLow, trainHigh, true), tlpParams);
+      // use the parser constructor to extract the grammars from the treebank once
+      LexicalizedParser lp = new LexicalizedParser(path, new NumberRangeFileFilter(trainLow, trainHigh, true), tlpParams);
 
-    ParserData pd = lp.parserData();
-    Pair originalGrammar = new Pair(pd.ug, pd.bg);
+      ParserData pd = lp.parserData();
+      Pair originalGrammar = new Pair(pd.ug, pd.bg);
 
-    // extract a bunch of paths
-    Timing.startTime();
-    System.out.print("Extracting other paths...");
-    allTrainPaths = extractPaths(path, trainLow, trainHigh, true);
-    allTestPaths = extractPaths(path, testLow, testHigh, true);
-    Timing.tick("done");
-
-    List mergePairs = null;
-    if (inputFile != null) {
-      // read merge pairs from file and do them and parse
-      System.out.println("getting pairs from file: " + inputFile);
-      mergePairs = getMergePairsFromFile(inputFile);
-    }
-    // try one merge at a time and parse afterwards
-    Numberer originalNumberer = Numberer.getGlobalNumberer("states");
-    String header = "index\tmergePair\tmergeCost\tparseF1\n";
-    StringUtils.printToFile(outputFile, header, true);
-
-    for (int i = indexRangeLow; i < indexRangeHigh; i++) {
-
+      // extract a bunch of paths
       Timing.startTime();
-      Numberer.getNumberers().put("states", originalNumberer);
-      if (mergePairs != null)
-        System.out.println("passing merge pairs to compactor: " + mergePairs);
-      CategoryMergingGrammarCompactor compactor = new CategoryMergingGrammarCompactor(mergePairs, i);
-      System.out.println("Compacting grammars with index " + i);
-      Pair compactedGrammar = compactor.compactGrammar(originalGrammar, allTrainPaths, allTestPaths);
-      Pair mergePair = null;
-      double mergeCosts = Double.NEGATIVE_INFINITY;
-      List mergeList = compactor.getCompletedMergeList();
-      if (mergeList != null && mergeList.size() > 0) {
-        mergePair = (Pair) mergeList.get(0);
-        mergeCosts = compactor.getActualScores().getCount(mergePair);
+      System.out.print("Extracting other paths...");
+      allTrainPaths = extractPaths(path, trainLow, trainHigh, true);
+      allTestPaths = extractPaths(path, testLow, testHigh, true);
+      Timing.tick("done");
+
+      List mergePairs = null;
+      if (inputFile != null) {
+        // read merge pairs from file and do them and parse
+        System.out.println("getting pairs from file: " + inputFile);
+        mergePairs = getMergePairsFromFile(inputFile);
       }
+      // try one merge at a time and parse afterwards
+      Numberer originalNumberer = Numberer.getGlobalNumberer("states");
+      String header = "index\tmergePair\tmergeCost\tparseF1\n";
+      StringUtils.printToFile(outputFile, header, true);
 
+      for (int i = indexRangeLow; i < indexRangeHigh; i++) {
 
-      ParserData newPd = new ParserData(pd.lex,
-                                        (BinaryGrammar) compactedGrammar.second, (UnaryGrammar) compactedGrammar.first,
-                                        pd.dg, pd.numbs, pd.pt);
-
-      lp = new LexicalizedParser(newPd);
-      Timing.tick("done.");
-
-      Treebank testTreebank = tlpParams.testMemoryTreebank();
-      testTreebank.loadPath(path, new NumberRangeFileFilter(testLow, testHigh, true));
-      System.out.println("Currently " + new Date());
-      double f1 = lp.testOnTreebank(testTreebank);
-      System.out.println("Currently " + new Date());
-
-      String resultString = i + "\t" + mergePair + "\t" + mergeCosts + "\t" + f1 + "\n";
-      StringUtils.printToFile(outputFile, resultString, true);
-    }
-  }
-
-  private static List getMergePairsFromFile(String filename) {
-    List result = new ArrayList();
-    try {
-      String fileString = StringUtils.slurpFile(new File(filename));
-      StringTokenizer st = new StringTokenizer(fileString);
-      while (st.hasMoreTokens()) {
-        String token1 = st.nextToken();
-        if (st.hasMoreTokens()) {
-          String token2 = st.nextToken();
-          UnorderedPair pair = new UnorderedPair(token1, token2);
-          result.add(pair);
+        Timing.startTime();
+        Numberer.getNumberers().put("states", originalNumberer);
+        if (mergePairs != null)
+          System.out.println("passing merge pairs to compactor: " + mergePairs);
+        CategoryMergingGrammarCompactor compactor = new CategoryMergingGrammarCompactor(mergePairs, i);
+        System.out.println("Compacting grammars with index " + i);
+        Pair compactedGrammar = compactor.compactGrammar(originalGrammar, allTrainPaths, allTestPaths);
+        Pair mergePair = null;
+        double mergeCosts = Double.NEGATIVE_INFINITY;
+        List mergeList = compactor.getCompletedMergeList();
+        if (mergeList != null && mergeList.size() > 0) {
+          mergePair = (Pair) mergeList.get(0);
+          mergeCosts = compactor.getActualScores().getCount(mergePair);
         }
+
+
+        ParserData newPd = new ParserData(pd.lex,
+                                          (BinaryGrammar) compactedGrammar.second, (UnaryGrammar) compactedGrammar.first,
+                                          pd.dg, pd.numbs, pd.pt);
+
+        lp = new LexicalizedParser(newPd);
+        Timing.tick("done.");
+
+        Treebank testTreebank = tlpParams.testMemoryTreebank();
+        testTreebank.loadPath(path, new NumberRangeFileFilter(testLow, testHigh, true));
+        System.out.println("Currently " + new Date());
+        double f1 = lp.testOnTreebank(testTreebank);
+        System.out.println("Currently " + new Date());
+
+        String resultString = i + "\t" + mergePair + "\t" + mergeCosts + "\t" + f1 + "\n";
+        StringUtils.printToFile(outputFile, resultString, true);
       }
-    } catch (Exception e) {
-      throw new RuntimeException("couldn't access file: " + filename);
     }
-    return result;
-  }
-*/
+
+    private static List getMergePairsFromFile(String filename) {
+      List result = new ArrayList();
+      try {
+        String fileString = StringUtils.slurpFile(new File(filename));
+        StringTokenizer st = new StringTokenizer(fileString);
+        while (st.hasMoreTokens()) {
+          String token1 = st.nextToken();
+          if (st.hasMoreTokens()) {
+            String token2 = st.nextToken();
+            UnorderedPair pair = new UnorderedPair(token1, token2);
+            result.add(pair);
+          }
+        }
+      } catch (Exception e) {
+        throw new RuntimeException("couldn't access file: " + filename);
+      }
+      return result;
+    }
+  */
   /*
-//    System.out.println(MergeableGraph.areIsomorphic(graphs[0], graphs[1], graphs[0].getStartNode(), graphs[1].getStartNode()));
-//    System.out.println(MergeableGraph.areIsomorphic(graphs[1], graphs[2], graphs[1].getStartNode(), graphs[2].getStartNode()));
-//    System.out.println(MergeableGraph.areIsomorphic(graphs[2], graphs[0], graphs[2].getStartNode(), graphs[0].getStartNode()));
+  //    System.out.println(MergeableGraph.areIsomorphic(graphs[0], graphs[1], graphs[0].getStartNode(), graphs[1].getStartNode()));
+  //    System.out.println(MergeableGraph.areIsomorphic(graphs[1], graphs[2], graphs[1].getStartNode(), graphs[2].getStartNode()));
+  //    System.out.println(MergeableGraph.areIsomorphic(graphs[2], graphs[0], graphs[2].getStartNode(), graphs[0].getStartNode()));
 
-  // now go through the grammars themselves and see if they are equal
-  System.out.println("UR 0 and 1: " + equalsUnary(((UnaryGrammar)grammars[0].first).rules(),((UnaryGrammar)grammars[1].first).rules()));
-  System.out.println("UR 1 and 2: "  + equalsUnary(((UnaryGrammar)grammars[1].first).rules(),((UnaryGrammar)grammars[2].first).rules()));
-  System.out.println("UR 2 and 0: "  + equalsUnary(((UnaryGrammar)grammars[2].first).rules(),((UnaryGrammar)grammars[0].first).rules()));
+    // now go through the grammars themselves and see if they are equal
+    System.out.println("UR 0 and 1: " + equalsUnary(((UnaryGrammar)grammars[0].first).rules(),((UnaryGrammar)grammars[1].first).rules()));
+    System.out.println("UR 1 and 2: "  + equalsUnary(((UnaryGrammar)grammars[1].first).rules(),((UnaryGrammar)grammars[2].first).rules()));
+    System.out.println("UR 2 and 0: "  + equalsUnary(((UnaryGrammar)grammars[2].first).rules(),((UnaryGrammar)grammars[0].first).rules()));
 
-  System.out.println("BR 0 and 1: "  + equalsBinary(((BinaryGrammar)grammars[0].second).rules(),((BinaryGrammar)grammars[1].second).rules()));
-  System.out.println("BR 1 and 2: " + equalsBinary(((BinaryGrammar)grammars[1].second).rules(),((BinaryGrammar)grammars[2].second).rules()));
-  System.out.println("BR 2 and 0: " + equalsBinary(((BinaryGrammar)grammars[2].second).rules(),((BinaryGrammar)grammars[0].second).rules()));
+    System.out.println("BR 0 and 1: "  + equalsBinary(((BinaryGrammar)grammars[0].second).rules(),((BinaryGrammar)grammars[1].second).rules()));
+    System.out.println("BR 1 and 2: " + equalsBinary(((BinaryGrammar)grammars[1].second).rules(),((BinaryGrammar)grammars[2].second).rules()));
+    System.out.println("BR 2 and 0: " + equalsBinary(((BinaryGrammar)grammars[2].second).rules(),((BinaryGrammar)grammars[0].second).rules()));
 
-    System.exit(0);
+      System.exit(0);
 
-  // now go through the grammars we made and see if they are equal!
-  Set[] unaryRules = new Set[3];
-  Set[] binaryRules = new Set[3];
-  for (int i=0; i<grammars.length; i++) {
-    unaryRules[i] = new HashSet();
-    System.out.println(i + " size: " + ((UnaryGrammar)grammars[i].first()).numRules());
-    for (Iterator unRuleI = ((UnaryGrammar)grammars[i].first()).iterator(); unRuleI.hasNext();) {
-      UnaryRule ur = (UnaryRule) unRuleI.next();
-      String parent = (String) stateNumberers[i].object(ur.parent);
-      String child = (String) stateNumberers[i].object(ur.child);
-      unaryRules[i].add(new StringUnaryRule(parent, child, ur.score));
+    // now go through the grammars we made and see if they are equal!
+    Set[] unaryRules = new Set[3];
+    Set[] binaryRules = new Set[3];
+    for (int i=0; i<grammars.length; i++) {
+      unaryRules[i] = new HashSet();
+      System.out.println(i + " size: " + ((UnaryGrammar)grammars[i].first()).numRules());
+      for (Iterator unRuleI = ((UnaryGrammar)grammars[i].first()).iterator(); unRuleI.hasNext();) {
+        UnaryRule ur = (UnaryRule) unRuleI.next();
+        String parent = (String) stateNumberers[i].object(ur.parent);
+        String child = (String) stateNumberers[i].object(ur.child);
+        unaryRules[i].add(new StringUnaryRule(parent, child, ur.score));
+      }
+      binaryRules[i] = new HashSet();
+      System.out.println(i + " size: " + ((BinaryGrammar)grammars[i].second()).numRules());
+      for (Iterator binRuleI = ((BinaryGrammar)grammars[i].second()).iterator(); binRuleI.hasNext();) {
+        BinaryRule br = (BinaryRule) binRuleI.next();
+        String parent = (String) stateNumberers[i].object(br.parent);
+        String leftChild = (String) stateNumberers[i].object(br.leftChild);
+        String rightChild = (String) stateNumberers[i].object(br.rightChild);
+        binaryRules[i].add(new StringBinaryRule(parent, leftChild, rightChild, br.score));
+      }
     }
-    binaryRules[i] = new HashSet();
-    System.out.println(i + " size: " + ((BinaryGrammar)grammars[i].second()).numRules());
-    for (Iterator binRuleI = ((BinaryGrammar)grammars[i].second()).iterator(); binRuleI.hasNext();) {
-      BinaryRule br = (BinaryRule) binRuleI.next();
-      String parent = (String) stateNumberers[i].object(br.parent);
-      String leftChild = (String) stateNumberers[i].object(br.leftChild);
-      String rightChild = (String) stateNumberers[i].object(br.rightChild);
-      binaryRules[i].add(new StringBinaryRule(parent, leftChild, rightChild, br.score));
-    }
+
+    System.out.println("uR 0 and 1: " + equals(unaryRules[0],unaryRules[1]));
+    System.out.println("uR 1 and 2: " + equals(unaryRules[1],unaryRules[2]));
+    System.out.println("uR 2 and 0: " + equals(unaryRules[2],unaryRules[0]));
+
+    System.out.println("bR 0 and 1: " + equals(binaryRules[0],binaryRules[1]));
+    System.out.println("bR 1 and 2: " + equals(binaryRules[1],binaryRules[2]));
+    System.out.println("bR 2 and 0: " + equals(binaryRules[2],binaryRules[0]));
+
   }
-
-  System.out.println("uR 0 and 1: " + equals(unaryRules[0],unaryRules[1]));
-  System.out.println("uR 1 and 2: " + equals(unaryRules[1],unaryRules[2]));
-  System.out.println("uR 2 and 0: " + equals(unaryRules[2],unaryRules[0]));
-
-  System.out.println("bR 0 and 1: " + equals(binaryRules[0],binaryRules[1]));
-  System.out.println("bR 1 and 2: " + equals(binaryRules[1],binaryRules[2]));
-  System.out.println("bR 2 and 0: " + equals(binaryRules[2],binaryRules[0]));
-
-}
-*/
+  */
 
   /*
     public static void testCategoryMergingProblem() {
@@ -442,7 +448,8 @@ public class GrammarCompactionTester  {
     }
   */
 
-  public Pair<UnaryGrammar, BinaryGrammar> translateAndSort(Pair<UnaryGrammar, BinaryGrammar> grammar, Index<String> oldIndex, Index<String> newIndex) {
+  public Pair<UnaryGrammar, BinaryGrammar> translateAndSort(
+      Pair<UnaryGrammar, BinaryGrammar> grammar, Index<String> oldIndex, Index<String> newIndex) {
     System.out.println("oldIndex.size()" + oldIndex.size() + " newIndex.size()" + newIndex.size());
     UnaryGrammar ug = grammar.first;
     List<UnaryRule> unaryRules = new ArrayList<>();
@@ -470,9 +477,10 @@ public class GrammarCompactionTester  {
     Collections.sort(unaryRules);
 
     BinaryGrammar newBG = new BinaryGrammar(newIndex);
-    for (BinaryRule binaryRule : binaryRules) {
-      newBG.addRule(binaryRule);
-    }
+    binaryRules.forEach(
+        binaryRule -> {
+          newBG.addRule(binaryRule);
+        });
     newBG.splitRules();
 
     return Generics.newPair(newUG, newBG);
@@ -499,9 +507,10 @@ public class GrammarCompactionTester  {
       map1.put(o, o);
     }
     Map<BinaryRule, BinaryRule> map2 = Generics.newHashMap();
-    for (BinaryRule o : l2) {
-      map2.put(o, o);
-    }
+    l2.forEach(
+        o -> {
+          map2.put(o, o);
+        });
     boolean isEqual = true;
     for (BinaryRule rule1 : map1.keySet()) {
       BinaryRule rule2 = map2.get(rule1);
@@ -527,9 +536,10 @@ public class GrammarCompactionTester  {
       map1.put(o, o);
     }
     Map<UnaryRule, UnaryRule> map2 = Generics.newHashMap();
-    for (UnaryRule o : l2) {
-      map2.put(o, o);
-    }
+    l2.forEach(
+        o -> {
+          map2.put(o, o);
+        });
     boolean isEqual = true;
     for (UnaryRule rule1 : map1.keySet()) {
       UnaryRule rule2 = map2.get(rule1);
@@ -570,56 +580,54 @@ public class GrammarCompactionTester  {
   }
 
   /*
-  public static void testAutomatonCompaction() {
-    // make our LossyAutomatonCompactor from the parameters passed at command line
-    // now set up the compactor2 constructor args
-    // extract a bunch of paths
-    Timing.startTime();
-    System.out.print("Extracting paths from treebank...");
-    allTrainPaths = extractPaths(path, trainLow, trainHigh, false);
-    allTestPaths = extractPaths(path, testLow, testHigh, false);
-    Timing.tick("done");
+    public static void testAutomatonCompaction() {
+      // make our LossyAutomatonCompactor from the parameters passed at command line
+      // now set up the compactor2 constructor args
+      // extract a bunch of paths
+      Timing.startTime();
+      System.out.print("Extracting paths from treebank...");
+      allTrainPaths = extractPaths(path, trainLow, trainHigh, false);
+      allTestPaths = extractPaths(path, testLow, testHigh, false);
+      Timing.tick("done");
 
-    // for each category, construct an automaton and then compact it
-    for (Iterator catIter = allTrainPaths.keySet().iterator(); catIter.hasNext();) {
-      // construct an automaton from the paths
-      String category = (String) catIter.next();
-      List trainPaths = (List) allTrainPaths.get(category);
-      List testPaths = (List) allTestPaths.get(category);
-      if (testPaths == null) testPaths = new ArrayList();
-      // now make the graph with the training paths (the LossyAutomatonCompactor will reestimate the weights anyway)
-      TransducerGraph graph = TransducerGraph.createGraphFromPaths(trainPaths, 3);
-      System.out.println("Created graph for: " + category);
+      // for each category, construct an automaton and then compact it
+      for (Iterator catIter = allTrainPaths.keySet().iterator(); catIter.hasNext();) {
+        // construct an automaton from the paths
+        String category = (String) catIter.next();
+        List trainPaths = (List) allTrainPaths.get(category);
+        List testPaths = (List) allTestPaths.get(category);
+        if (testPaths == null) testPaths = new ArrayList();
+        // now make the graph with the training paths (the LossyAutomatonCompactor will reestimate the weights anyway)
+        TransducerGraph graph = TransducerGraph.createGraphFromPaths(trainPaths, 3);
+        System.out.println("Created graph for: " + category);
 
-      System.out.println();
-      int numArcs1 = graph.getArcs().size();
+        System.out.println();
+        int numArcs1 = graph.getArcs().size();
 
-      LossyAutomatonCompactor compactor = new LossyAutomatonCompactor(3, // horizonOrder, 1 means that only exactly compatible merges are considered
-								      0, // min nmber of arcs
-								      10000000.0, // maxMergeCost
-								      0.5, // splitParam
-								      false, //  ignoreUnsupportedSuffixes
-                      -1000, // minArcCost
-								      trainPaths,
-								      testPaths,
-								      LossyAutomatonCompactor.DATA_LIKELIHOOD_COST, // costModel
-								      false); // verbose
+        LossyAutomatonCompactor compactor = new LossyAutomatonCompactor(3, // horizonOrder, 1 means that only exactly compatible merges are considered
+  								      0, // min nmber of arcs
+  								      10000000.0, // maxMergeCost
+  								      0.5, // splitParam
+  								      false, //  ignoreUnsupportedSuffixes
+                        -1000, // minArcCost
+  								      trainPaths,
+  								      testPaths,
+  								      LossyAutomatonCompactor.DATA_LIKELIHOOD_COST, // costModel
+  								      false); // verbose
 
-      TransducerGraph result = compactor.compactFA(graph);
-      //do we need this?      result = new TransducerGraph(result, ntsp);  // pull out strings from sets returned by minimizer
-      int numArcs2 = result.getArcs().size();
-      System.out.println("LossyGrammarCompactor compacted "+category+" from " + numArcs1 + " to " + numArcs2 + " arcs");
+        TransducerGraph result = compactor.compactFA(graph);
+        //do we need this?      result = new TransducerGraph(result, ntsp);  // pull out strings from sets returned by minimizer
+        int numArcs2 = result.getArcs().size();
+        System.out.println("LossyGrammarCompactor compacted "+category+" from " + numArcs1 + " to " + numArcs2 + " arcs");
+
+      }
+
 
     }
-
-
-  }
-*/
+  */
   private static <T> int numTokens(List<List<T>> paths) {
     int result = 0;
-    for (List<T> path : paths) {
-      result += path.size();
-    }
+    paths.stream().map(path -> path.size()).reduce(result, Integer::sum);
     return result;
   }
 
@@ -638,9 +646,10 @@ public class GrammarCompactionTester  {
       System.out.println("creating graph for " + key);
       List<List<String>> paths = allTrainPaths.get(key);
       ClassicCounter<List<String>> pathCounter = new ClassicCounter<>();
-      for (List<String> o : paths) {
-        pathCounter.incrementCount(o);
-      }
+      paths.forEach(
+          o -> {
+            pathCounter.incrementCount(o);
+          });
       ClassicCounter<List<String>> newPathCounter = removeLowCountPaths(pathCounter, 2);
       paths.retainAll(newPathCounter.keySet()); // get rid of the low count ones
       TransducerGraph result = TransducerGraph.createGraphFromPaths(newPathCounter, 1000);
@@ -679,7 +688,8 @@ public class GrammarCompactionTester  {
     }
   }
 
-  private static ClassicCounter<List<String>> removeLowCountPaths(ClassicCounter<List<String>> paths, double thresh) {
+  private static ClassicCounter<List<String>> removeLowCountPaths(
+      ClassicCounter<List<String>> paths, double thresh) {
     ClassicCounter<List<String>> result = new ClassicCounter<>();
     int numRetained = 0;
     for (List<String> path : paths.keySet()) {

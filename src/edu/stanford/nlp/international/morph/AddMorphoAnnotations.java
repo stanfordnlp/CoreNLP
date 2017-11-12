@@ -76,7 +76,7 @@ public final class AddMorphoAnnotations  {
       }
       primeNext();
     }
-    
+
     private void primeNext() {
       try {
         if (treeReader != null) {
@@ -86,9 +86,10 @@ public final class AddMorphoAnnotations  {
             } else {
               List<CoreLabel> mLabeledLeaves = tree.taggedLabeledYield();
               nextYield = new ArrayList<>(mLabeledLeaves.size());
-              for (CoreLabel label : mLabeledLeaves) {
-                nextYield.add(label.tag());
-              }
+            mLabeledLeaves.forEach(
+                label -> {
+                  nextYield.add(label.tag());
+                });
             }
         } else {
           String line = fileReader.readLine();
@@ -103,7 +104,7 @@ public final class AddMorphoAnnotations  {
         e.printStackTrace();
       }
     }
-    
+
     @Override
     public boolean hasNext() {
       return nextYield != null;

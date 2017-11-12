@@ -224,9 +224,8 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
   }
 
   /**
-   * transformTree does all language-specific tree
-   * transformations. Any parameterizations should be inside the
-   * specific TreebankLangParserarams class.
+   * transformTree does all language-specific tree transformations. Any parameterizations should be
+   * inside the specific TreebankLangParserarams class.
    */
   @Override
   public Tree transformTree(Tree t, Tree root) {
@@ -332,14 +331,14 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
 //    }
     // put on all the annotations
     StringBuilder catSB = new StringBuilder(cat);
-    for (String annotation : annotations) {
-      catSB.append(annotation);
-    }
+    annotations.forEach(
+        annotation -> {
+          catSB.append(annotation);
+        });
 
     t.setLabel(new CategoryWordTag(catSB.toString(), word, tag));
     return t;
   }
-
 
   private static boolean leftPhrasal(Tree t) {
     while (!t.isLeaf()) {

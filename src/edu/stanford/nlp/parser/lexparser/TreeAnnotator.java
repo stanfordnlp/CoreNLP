@@ -52,18 +52,16 @@ public class TreeAnnotator implements TreeTransformer {
   }
 
   /**
-   * Do the category splitting of the tree passed in.
-   * This is initially called on the root node of a tree, and it recursively
-   * calls itself on children.  A depth first left-to-right traversal is
-   * done whereby a tree node's children are first transformed and then
-   * the parent is transformed.  At the time of calling, the original root
-   * always sits above the current node.  This routine can be assumed to,
-   * and does, change the tree passed in: it destructively modifies tree nodes,
-   * and makes new tree structure when it needs to.
+   * Do the category splitting of the tree passed in. This is initially called on the root node of a
+   * tree, and it recursively calls itself on children. A depth first left-to-right traversal is
+   * done whereby a tree node's children are first transformed and then the parent is transformed.
+   * At the time of calling, the original root always sits above the current node. This routine can
+   * be assumed to, and does, change the tree passed in: it destructively modifies tree nodes, and
+   * makes new tree structure when it needs to.
    *
    * @param t The tree node to subcategorize.
-   * @param root The root of the tree.  It must contain {@code t} or
-   *     this code will throw a NullPointerException.
+   * @param root The root of the tree. It must contain {@code t} or this code will throw a
+   *     NullPointerException.
    * @return The annotated tree.
    */
   private Tree transformTreeHelper(Tree t, Tree root) {
@@ -180,10 +178,10 @@ public class TreeAnnotator implements TreeTransformer {
         leftAnn.add(baseCat + "=l=" + tlpParams.treebankLanguagePack().basicCategory(s));
         //System.out.println("left-annotated test string " + s);
       }
-      for (String s : rightSis) {
-        //s = baseCat+"=r="+tlpParams.treebankLanguagePack().basicCategory(s);
-        rightAnn.add(baseCat + "=r=" + tlpParams.treebankLanguagePack().basicCategory(s));
-      }
+      rightSis.forEach(
+          s -> {
+            rightAnn.add(baseCat + "=r=" + tlpParams.treebankLanguagePack().basicCategory(s));
+          });
       for (Iterator<String> j = rightAnn.iterator(); j.hasNext();) {
         //System.out.println("new rightsis " + (String)j.next()); //debugging
       }
@@ -244,15 +242,14 @@ public class TreeAnnotator implements TreeTransformer {
     return tlpParams.transformTree(t, root);
   }
 
-
   private List<String> listBasicCategories(List<String> l) {
     List<String> l1 = new ArrayList<>();
-    for (String str : l) {
-      l1.add(tlpParams.treebankLanguagePack().basicCategory(str));
-    }
+    l.forEach(
+        str -> {
+          l1.add(tlpParams.treebankLanguagePack().basicCategory(str));
+        });
     return l1;
   }
-
 
   private static boolean rightRec(Tree t, String baseCat) {
     if (//! baseCat.equals("S") &&

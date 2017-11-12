@@ -221,14 +221,14 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   @Override
   public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    for (CoreLabel token : tokens) {
-      // add the background named entity tag to each token if it doesn't have an NER tag.
-      if (token.ner() == null) {
-        token.setNER(this.ner.backgroundSymbol());
-      }
+    tokens
+        .stream()
+        .filter(token -> token.ner() == null)
+        .forEach(
+            token -> {
+              token.setNER(this.ner.backgroundSymbol());
+            });
     }
-  }
-
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {

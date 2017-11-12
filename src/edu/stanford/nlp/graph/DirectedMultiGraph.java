@@ -351,9 +351,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return outgoingEdges.isEmpty();
   }
 
-  /**
-   * Deletes nodes with zero incoming and zero outgoing edges
-   */
+  /** Deletes nodes with zero incoming and zero outgoing edges */
   @Override
   public void removeZeroDegreeNodes() {
     List<V> toDelete = new ArrayList<>();
@@ -362,11 +360,18 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
         toDelete.add(vertex);
       }
     }
-    for (V vertex : toDelete) {
-      outgoingEdges.remove(vertex);
-      incomingEdges.remove(vertex);
+    toDelete
+        .stream()
+        .map(
+            vertex -> {
+              outgoingEdges.remove(vertex);
+              return vertex;
+            })
+        .forEach(
+            vertex -> {
+              incomingEdges.remove(vertex);
+            });
     }
-  }
 
   @Override
   public List<E> getEdges(V source, V dest) {

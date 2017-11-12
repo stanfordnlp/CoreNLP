@@ -35,8 +35,7 @@ public class CollapseSubtree extends SsurgeonEdit {
     this.rootName = rootNodeName;
   }
 
-
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
 
@@ -76,11 +75,11 @@ public class CollapseSubtree extends SsurgeonEdit {
       sg.addEdge(edge.getGovernor(), newNode, edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
 
-    for (IndexedWord node : sortedSubgraphNodes) {
-      sg.removeVertex(node);
+    sortedSubgraphNodes.forEach(
+        node -> {
+          sg.removeVertex(node);
+        });
     }
-
-  }
 
   @Override
   public String toEditString() {

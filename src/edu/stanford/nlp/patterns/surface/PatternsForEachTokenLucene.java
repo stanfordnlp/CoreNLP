@@ -276,46 +276,46 @@ public class PatternsForEachTokenLucene<E extends Pattern> extends PatternsForEa
     return false;
   }
 
-//  private Map<Integer, Set<Integer>> readProtoBuf(byte[] patterns) {
-//      //TODO
-//  }
+  //  private Map<Integer, Set<Integer>> readProtoBuf(byte[] patterns) {
+  //      //TODO
+  //  }
 
-//  @Override
-//  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) {
-//    try {
-//      return IOUtils.readObjectFromFile(dir+"/patternshashindex.ser");
-//    } catch (IOException e) {
-//      throw new RuntimeException(e);
-//    } catch (ClassNotFoundException e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
+  //  @Override
+  //  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) {
+  //    try {
+  //      return IOUtils.readObjectFromFile(dir+"/patternshashindex.ser");
+  //    } catch (IOException e) {
+  //      throw new RuntimeException(e);
+  //    } catch (ClassNotFoundException e) {
+  //      throw new RuntimeException(e);
+  //    }
+  //  }
 
-//  @Override
-//  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) {
-//    try {
-//      if(dir != null)
-//        IOUtils.writeObjectToFile(index, dir+"/patternshashindex.ser");
-//    } catch (IOException e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
-
+  //  @Override
+  //  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) {
+  //    try {
+  //      if(dir != null)
+  //        IOUtils.writeObjectToFile(index, dir+"/patternshashindex.ser");
+  //    } catch (IOException e) {
+  //      throw new RuntimeException(e);
+  //    }
+  //  }
 
   @Override
   public Map<String, Map<Integer, Set<E>>> getPatternsForAllTokens(Collection<String> sentIds) {
     close();
     setIndexReaderSearcher();
     Map<String, Map<Integer, Set<E>>> pats = new HashMap<>();
-    for(String s: sentIds){
-      pats.put(s, getPatternsForAllTokens(s));
-    }
+    sentIds.forEach(
+        s -> {
+          pats.put(s, getPatternsForAllTokens(s));
+        });
     setIndexWriter();
     return pats;
   }
 
   @Override
-  int size(){
+  int size() {
     setIndexReaderSearcher();
     return searcher.getIndexReader().numDocs();
   }

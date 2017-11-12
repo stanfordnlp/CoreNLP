@@ -303,7 +303,6 @@ public class Treebanks  {
     }
   } // end main()
 
-
   private static void printPunct(Treebank treebank, TreebankLanguagePack tlp, PrintWriter pw) {
     if (tlp == null) {
       log.info("The -punct option requires you to specify -tlp");
@@ -311,23 +310,26 @@ public class Treebanks  {
       Predicate<String> punctTagFilter = tlp.punctuationTagAcceptFilter();
       for (Tree t : treebank) {
         List<TaggedWord> tws = t.taggedYield();
-        for (TaggedWord tw : tws) {
-          if (punctTagFilter.test(tw.tag())) {
-            pw.println(tw);
-          }
-        }
+        tws.stream()
+            .filter(tw -> punctTagFilter.test(tw.tag()))
+            .forEach(
+                tw -> {
+                  pw.println(tw);
+                });
       }
     }
   }
 
-
   private static void countTaggings(Treebank tb, final PrintWriter pw) {
     final TwoDimensionalCounter<String,String> wtc = new TwoDimensionalCounter<>();
-    tb.apply(tree -> {
-      List<TaggedWord> tags = tree.taggedYield();
-      for (TaggedWord tag : tags)
-        wtc.incrementCount(tag.word(), tag.tag());
-    });
+    tb.apply(
+        tree -> {
+          List<TaggedWord> tags = tree.taggedYield();
+          tags.forEach(
+              tag -> {
+                wtc.incrementCount(tag.word(), tag.tag());
+              });
+        });
     for (String key : wtc.firstKeySet()) {
       pw.print(key);
       pw.print('\t');
@@ -339,14 +341,11 @@ public class Treebanks  {
     }
   }
 
-
   private static void runTiming(Treebank treebank) {
     System.out.println();
     Timing.startTime();
     int num = 0;
-    for (Tree t : treebank) {
-      num += t.yield().size();
-    }
+    treebank.stream().map(t -> t.yield().size()).reduce(num, Integer::sum);
     Timing.endTime("traversing corpus, counting words with iterator");
     log.info("There were " + num + " words in the treebank.");
 
@@ -367,9 +366,8 @@ public class Treebanks  {
     Timing.endTime("size of corpus");
   }
 
-
-  private static void sentenceLengths(Treebank treebank, String name, String range,
-                                     PrintWriter pw) {
+  private static void sentenceLengths(
+      Treebank treebank, String name, String range, PrintWriter pw) {
     final int maxleng = 150;
     int[] lengthCounts = new int[maxleng+2];
     int numSents = 0;

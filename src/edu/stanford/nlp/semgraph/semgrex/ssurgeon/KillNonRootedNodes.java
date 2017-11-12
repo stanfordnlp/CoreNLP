@@ -15,19 +15,20 @@ import edu.stanford.nlp.semgraph.*;
  *
  */
 public class KillNonRootedNodes extends SsurgeonEdit {
-  public static final String LABEL = "killNonRooted"; 
-  
+  public static final String LABEL = "killNonRooted";
+
   @Override
   public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     List<IndexedWord> nodes = new ArrayList<>(sg.vertexSet());
-    for (IndexedWord node : nodes) {
-      List<IndexedWord> rootPath = sg.getPathToRoot(node);
-      if (rootPath == null) {
-        sg.removeVertex(node);
-      }
+    nodes.forEach(
+        node -> {
+          List<IndexedWord> rootPath = sg.getPathToRoot(node);
+          if (rootPath == null) {
+            sg.removeVertex(node);
+          }
+        });
     }
-  }
-  
+
   @Override
   public String toEditString() {
      StringWriter buf = new StringWriter();

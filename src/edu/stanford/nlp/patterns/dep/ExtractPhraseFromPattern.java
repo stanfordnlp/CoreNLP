@@ -92,22 +92,30 @@ public class ExtractPhraseFromPattern {
     return false;
   }
 
-  public void processSentenceForType(SemanticGraph g,
-      List<SemgrexPattern> typePatterns, List<String> textTokens,
-      Collection<String> typePhrases, Collection<IntPair> typeIndices,
-      Collection<IndexedWord> typeTriggerWords, boolean findSubTrees, Collection<ExtractedPhrase> extractedPhrases, boolean lowercase) {
+  public void processSentenceForType(
+      SemanticGraph g,
+      List<SemgrexPattern> typePatterns,
+      List<String> textTokens,
+      Collection<String> typePhrases,
+      Collection<IntPair> typeIndices,
+      Collection<IndexedWord> typeTriggerWords,
+      boolean findSubTrees,
+      Collection<ExtractedPhrase> extractedPhrases,
+      boolean lowercase) {
 
     for (SemgrexPattern pattern : typePatterns) {
       Collection<IndexedWord> triggerWords = getSemGrexPatternNodes(g,
           textTokens, typePhrases, typeIndices, pattern,
           findSubTrees, extractedPhrases, lowercase, o -> true);
-      for (IndexedWord w : triggerWords) {
-        if (!typeTriggerWords.contains(w))
-          typeTriggerWords.add(w);
-      }
+      triggerWords
+          .stream()
+          .filter(w -> !typeTriggerWords.contains(w))
+          .forEach(
+              w -> {
+                typeTriggerWords.add(w);
+              });
       // System.out.println("the string is " + StringUtils.join(focuss, ";"));
     }
-
   }
 
   /*
@@ -122,10 +130,16 @@ public class ExtractPhraseFromPattern {
    * 
    * I need to clarify what's going on with tokens.
    */
-  public Set<IndexedWord> getSemGrexPatternNodes(SemanticGraph g,
-      List<String> tokens, Collection<String> outputNodes, Collection<IntPair> outputIndices,
-      SemgrexPattern pattern, boolean findSubTrees,
-      Collection<ExtractedPhrase> extractedPhrases, boolean lowercase, Function<CoreLabel, Boolean> acceptWord) {
+  public Set<IndexedWord> getSemGrexPatternNodes(
+      SemanticGraph g,
+      List<String> tokens,
+      Collection<String> outputNodes,
+      Collection<IntPair> outputIndices,
+      SemgrexPattern pattern,
+      boolean findSubTrees,
+      Collection<ExtractedPhrase> extractedPhrases,
+      boolean lowercase,
+      Function<CoreLabel, Boolean> acceptWord) {
 
     Set<IndexedWord> foundWordsParents = new HashSet<>();
     SemgrexMatcher m = pattern.matcher(g, lowercase);
@@ -172,14 +186,20 @@ public class ExtractPhraseFromPattern {
     return foundWordsParents;
   }
 
-  //Here, the index (startIndex, endIndex) seems to be inclusive of the endIndex
-   public void printSubGraph(SemanticGraph g, IndexedWord w,
-                             List<String> additionalCutOffRels,
-                             List<String> textTokens,
-                             Collection<String> listOfOutput, Collection<IntPair> listOfOutputIndices,
-                             List<IndexedWord> seenNodes, List<IndexedWord> doNotAddThese,
-                             boolean findSubTrees, Collection<ExtractedPhrase> extractedPhrases,
-                             SemgrexPattern pattern, Function<CoreLabel, Boolean> acceptWord) {
+  // Here, the index (startIndex, endIndex) seems to be inclusive of the endIndex
+  public void printSubGraph(
+      SemanticGraph g,
+      IndexedWord w,
+      List<String> additionalCutOffRels,
+      List<String> textTokens,
+      Collection<String> listOfOutput,
+      Collection<IntPair> listOfOutputIndices,
+      List<IndexedWord> seenNodes,
+      List<IndexedWord> doNotAddThese,
+      boolean findSubTrees,
+      Collection<ExtractedPhrase> extractedPhrases,
+      SemgrexPattern pattern,
+      Function<CoreLabel, Boolean> acceptWord) {
     try {
       if (seenNodes.contains(w))
         return;
@@ -280,12 +300,25 @@ public class ExtractPhraseFromPattern {
           }
 
           if (findSubTrees == true) {
-            for (IndexedWord word : words)
-              if (!seenNodes.contains(word))
-                printSubGraph(g, word, additionalCutOffRels,
-                    textTokens, listOfOutput,
-                    listOfOutputIndices, seenNodes, doNotAddThese,
-                    findSubTrees, extractedPhrases, pattern, acceptWord);
+            words
+                .stream()
+                .filter(word -> !seenNodes.contains(word))
+                .forEach(
+                    word -> {
+                      printSubGraph(
+                          g,
+                          word,
+                          additionalCutOffRels,
+                          textTokens,
+                          listOfOutput,
+                          listOfOutputIndices,
+                          seenNodes,
+                          doNotAddThese,
+                          findSubTrees,
+                          extractedPhrases,
+                          pattern,
+                          acceptWord);
+                    });
           }
         }
       }
@@ -295,9 +328,15 @@ public class ExtractPhraseFromPattern {
     }
   }
 
-  public static Set<IndexedWord> descendants(SemanticGraph g,
-      IndexedWord vertex, List<String> allCutOffRels,
-      List<IndexedWord> doNotAddThese, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, CollectionValuedMap<Integer, String> feat) throws Exception {
+  public static Set<IndexedWord> descendants(
+      SemanticGraph g,
+      IndexedWord vertex,
+      List<String> allCutOffRels,
+      List<IndexedWord> doNotAddThese,
+      boolean ignoreCommonTags,
+      Function<CoreLabel, Boolean> acceptWord,
+      CollectionValuedMap<Integer, String> feat)
+      throws Exception {
     // Do a depth first search
     Set<IndexedWord> descendantSet = new HashSet<>();
 

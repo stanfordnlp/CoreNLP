@@ -174,9 +174,10 @@ public class XMLUtils {
     List<Node> nodes = getNodes(node, nodePath);
     if (nodes != null) {
       List<String> strs = new ArrayList<>(nodes.size());
-      for (Node n:nodes) {
-        strs.add(n.getTextContent());
-      }
+      nodes.forEach(
+          n -> {
+            strs.add(n.getTextContent());
+          });
       return strs;
     } else {
       return null;

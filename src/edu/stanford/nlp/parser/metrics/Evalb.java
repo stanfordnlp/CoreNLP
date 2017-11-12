@@ -95,11 +95,10 @@ public class Evalb extends AbstractEval  {
 
     protected void checkCrossing(Set<Constituent> s1, Set<Constituent> s2) {
       double c = 0.0;
-      for (Constituent constit : s1) {
-        if (constit.crosses(s2)) {
-          c += 1.0;
-        }
-      }
+      s1.stream()
+          .filter(constit -> constit.crosses(s2))
+          .map(_item -> 1.0)
+          .reduce(c, (accumulator, _item) -> accumulator += _item);
       if (c == 0.0) {
         zeroCB += 1.0;
       }
@@ -264,9 +263,8 @@ public class Evalb extends AbstractEval  {
     pwOut.close();
   }
 
-
-  private static void emitSortedTrees(PriorityQueue<Triple<Double, Tree, Tree>> queue, int worstKTreesToEmit,
-      String filePrefix) {
+  private static void emitSortedTrees(
+      PriorityQueue<Triple<Double, Tree, Tree>> queue, int worstKTreesToEmit, String filePrefix) {
 
     if(queue == null) log.info("Queue was not initialized properly");
 
@@ -300,8 +298,10 @@ public class Evalb extends AbstractEval  {
         Set<Constituent> guessDeps = Generics.newHashSet();
         guessDeps.addAll(trees.third().constituents(cFact));
         guessDeps.removeAll(trees.second().constituents(cFact));
-        for(Constituent c : guessDeps)
-          guessDepPw.print(c.toString() + "  ");
+        guessDeps.forEach(
+            c -> {
+              guessDepPw.print(c.toString() + "  ");
+            });
         guessDepPw.println();
       }
 
@@ -318,7 +318,8 @@ public class Evalb extends AbstractEval  {
     }
   }
 
-  private static void storeTrees(PriorityQueue<Triple<Double, Tree, Tree>> queue, Tree guess, Tree gold, double curF1) {
+  private static void storeTrees(
+      PriorityQueue<Triple<Double, Tree, Tree>> queue, Tree guess, Tree gold, double curF1) {
     if(queue == null) return;
 
     queue.add(new Triple<>(curF1, gold, guess));

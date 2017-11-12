@@ -107,21 +107,12 @@ public class AmbiguityClass {
       return word;
     }
     StringBuilder sb = new StringBuilder();
-    for (Integer sID : sortedIds) {
-      sb.append(':').append(sID.intValue());
-    }
+    sortedIds.forEach(
+        sID -> {
+          sb.append(':').append(sID.intValue());
+        });
     return sb.toString();
-  }
-
-  /*
-  public void print() {
-    //System.out.print(word + " ");
-    for (Integer sortedId : sortedIds) {
-      System.out.print(GlobalHolder.tags.getTag(sortedId.intValue()));
     }
-    System.out.println();
-  }
-  */
 
   @Override
   public int hashCode() {

@@ -101,15 +101,14 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
   } // end class ColumnDocParser
 
-
   @Override
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
-    for (CoreLabel wi : doc) {
-      String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
-      String goldAnswer = wi.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      out.println(wi.word() + "\t" + goldAnswer + "\t" + answer);
-    }
+    doc.forEach(
+        wi -> {
+          String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
+          String goldAnswer = wi.get(CoreAnnotations.GoldAnswerAnnotation.class);
+          out.println(wi.word() + "\t" + goldAnswer + "\t" + answer);
+        });
     out.println();
   }
-
 }

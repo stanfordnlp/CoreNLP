@@ -451,10 +451,8 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   }
 
   /**
-   * Returns a {@code String} representation of this
-   * {@code GrammaticalRelation} and the hierarchy below
-   * it, with one node per line, indented according to
-   * {@code indentLevel}.
+   * Returns a {@code String} representation of this {@code GrammaticalRelation} and the hierarchy
+   * below it, with one node per line, indented according to {@code indentLevel}.
    *
    * @param indentLevel how many levels to indent (0 for root node)
    */
@@ -463,11 +461,12 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       buf.append("  ");
     }
     buf.append(shortName).append(" (").append(longName).append("): ").append(targetPatterns);
-    for (GrammaticalRelation child : children) {
-      buf.append('\n');
-      child.toPrettyString(indentLevel + 1, buf);
+    children.forEach(
+        child -> {
+          buf.append('\n');
+          child.toPrettyString(indentLevel + 1, buf);
+        });
     }
-  }
 
   /** Grammatical relations are equal with other grammatical relations if they
    *  have the same shortName and specific (if present).

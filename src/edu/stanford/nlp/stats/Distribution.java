@@ -113,12 +113,9 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  
     }
     return d;
   }
-  //--- end JM added
+  // --- end JM added
 
-
-  /**
-   * @param s a Collection of keys.
-   */
+  /** @param s a Collection of keys. */
   public static <E> Distribution<E> getUniformDistribution(Collection<E> s) {
     Distribution<E> norm = new Distribution<>();
     norm.counter = new ClassicCounter<>();
@@ -126,9 +123,10 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  
     norm.reservedMass = 0;
     double total = s.size();
     double count = 1.0 / total;
-    for (E key : s) {
-      norm.counter.setCount(key, count);
-    }
+    s.forEach(
+        key -> {
+          norm.counter.setCount(key, count);
+        });
     return norm;
   }
 
@@ -143,9 +141,10 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  
     double total = s.size();
     double prob = 1.0 / total;
     double stdev = prob / 1000.0;
-    for (E key : s) {
-      norm.counter.setCount(key, prob + (r.nextGaussian() * stdev));
-    }
+    s.forEach(
+        key -> {
+          norm.counter.setCount(key, prob + (r.nextGaussian() * stdev));
+        });
     return norm;
   }
 

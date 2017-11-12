@@ -68,10 +68,10 @@ public class UnknownWordPrinter implements Eval {
       pw.printf("UnknownWordPrinter: all words known by DVModel%n");
     } else {
       pw.printf("UnknownWordPrinter: the following words are unknown%n");
-      for (String word : unkWords) {
-        pw.printf("  %s%n", word);
-      }
+      unkWords.forEach(
+          word -> {
+            pw.printf("  %s%n", word);
+          });
     }
-  }
-
+    }
 }

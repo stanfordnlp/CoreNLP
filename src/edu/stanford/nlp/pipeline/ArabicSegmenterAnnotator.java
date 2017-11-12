@@ -3,11 +3,9 @@ package edu.stanford.nlp.pipeline;
 import java.util.*;
 
 import edu.stanford.nlp.international.arabic.process.ArabicSegmenter;
-import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -108,9 +106,10 @@ public class ArabicSegmenterAnnotator implements Annotator  {
     }
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {
-      for (CoreMap sentence : sentences) {
-        doOneSentence(sentence);
-      }
+      sentences.forEach(
+          sentence -> {
+            doOneSentence(sentence);
+          });
     } else {
       doOneSentence(annotation);
     }

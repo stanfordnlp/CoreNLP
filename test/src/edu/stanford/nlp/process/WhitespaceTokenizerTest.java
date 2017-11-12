@@ -18,21 +18,21 @@ public class WhitespaceTokenizerTest extends TestCase {
   };
 
   public static final String[][] RESULTS_NO_EOL = {
-    {"This", "is", "a", "test", ".",
-     "This", "is", "a", "second", "line", "."},
+    {"This", "is", "a", "test", ".", "This", "is", "a", "second", "line", "."},
     {"A", "B", "C"},
     {"A.", "B"},
-    { "皇后", "後世", "and", "(800)\u00A0326-1456" },
+    {"皇后", "後世", "and", "(800)\u00A0326-1456"},
   };
 
   public static final String[][] RESULTS_EOL = {
-    {"This", "is", "a", "test", ".", "\n",
-     "This", "is", "a", "second", "line", "."},
+    {
+      "This", "is", "a", "test", ".", "\n",
+      "This", "is", "a", "second", "line", "."
+    },
     {"A", "\n", "B", "\n", "\n", "C"},
     {"A.", "B"},
-    { "皇后", "後世", "and", "(800)\u00A0326-1456" },
+    {"皇后", "後世", "and", "(800)\u00A0326-1456"},
   };
-
 
   public void runTest(TokenizerFactory<? extends HasWord> factory,
                       String[] testStrings, String[][] resultsStrings) {

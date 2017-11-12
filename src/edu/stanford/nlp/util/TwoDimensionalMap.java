@@ -4,7 +4,6 @@ import java.util.*;
 import java.io.Serializable;
 import java.util.function.Function;
 
-import edu.stanford.nlp.util.MapFactory;
 
 /**
  * @author grenager
@@ -109,14 +108,16 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
   }
 
   /**
-   * Adds all of the entries in the <code>other</code> map, performing
-   * <code>function</code> on them to transform the values
+   * Adds all of the entries in the <code>other</code> map, performing <code>function</code> on them
+   * to transform the values
    */
-  public <V2> void addAll(TwoDimensionalMap<? extends K1, ? extends K2, ? extends V2> other, Function<V2, V> function) {
-    for (TwoDimensionalMap.Entry<? extends K1, ? extends K2, ? extends V2> entry : other) {
-      put(entry.getFirstKey(), entry.getSecondKey(), function.apply(entry.getValue()));
+  public <V2> void addAll(
+      TwoDimensionalMap<? extends K1, ? extends K2, ? extends V2> other, Function<V2, V> function) {
+    other.forEach(
+        entry -> {
+          put(entry.getFirstKey(), entry.getSecondKey(), function.apply(entry.getValue()));
+        });
     }
-  }
 
   public TwoDimensionalMap() {
     this(MapFactory.<K1, Map<K2, V>>hashMapFactory(), MapFactory.<K2, V>hashMapFactory());

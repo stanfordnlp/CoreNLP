@@ -129,14 +129,13 @@ public class Maps {
     return builder.toString();
   }
 
-  /**
-   * Removes keys from the map
-   */
-  public static <K,V> void removeKeys(Map<K,V> map, Collection<K> removekeys){
-    for(K k: removekeys){
-      map.remove(k);
+  /** Removes keys from the map */
+  public static <K, V> void removeKeys(Map<K, V> map, Collection<K> removekeys) {
+    removekeys.forEach(
+        k -> {
+          map.remove(k);
+        });
     }
-  }
 
   /**
    * Adds all of the keys in <code>from</code> to <code>to</code>,
@@ -151,16 +150,20 @@ public class Maps {
 
   /**
    * get all values corresponding to the indices (if they exist in the map)
+   *
    * @param map
    * @param indices
    * @return a submap corresponding to the indices
    */
-  public static<T,V> Map<T, V> getAll(Map<T, V> map, Collection<T> indices){
+  public static <T, V> Map<T, V> getAll(Map<T, V> map, Collection<T> indices) {
     Map<T,V> result = new HashMap<>();
-    for(T i: indices)
-      if(map.containsKey(i)){
-        result.put(i, map.get(i));
-      }
+    indices
+        .stream()
+        .filter(i -> map.containsKey(i))
+        .forEach(
+            i -> {
+              result.put(i, map.get(i));
+            });
     return result;
   }
 
@@ -168,7 +171,12 @@ public class Maps {
    * Pretty print a Counter. This one has more flexibility in formatting, and
    * doesn't sort the keys.
    */
-  public static<T,V> String toString(Map<T, V> map, String preAppend, String postAppend, String keyValSeparator, String itemSeparator){
+  public static <T, V> String toString(
+      Map<T, V> map,
+      String preAppend,
+      String postAppend,
+      String keyValSeparator,
+      String itemSeparator) {
 
     StringBuilder sb = new StringBuilder();
     sb.append(preAppend);

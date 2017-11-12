@@ -146,9 +146,10 @@ public class POSTaggerAnnotator implements Annotator  {
         tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
       }
     } else {
-      for (CoreLabel token : tokens) {
-        token.set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
-      }
+      tokens.forEach(
+          token -> {
+            token.set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
+          });
     }
     return sentence;
   }

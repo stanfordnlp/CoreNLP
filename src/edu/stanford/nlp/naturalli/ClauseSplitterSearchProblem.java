@@ -399,7 +399,13 @@ public class ClauseSplitterSearchProblem  {
    * @param subject The root of the clause to add.
    * @param ignoredEdges The edges to ignore adding when adding this subtree.
    */
-  private static void addSubtree(SemanticGraph toModify, IndexedWord root, String rel, SemanticGraph originalTree, IndexedWord subject, Collection<SemanticGraphEdge> ignoredEdges) {
+  private static void addSubtree(
+      SemanticGraph toModify,
+      IndexedWord root,
+      String rel,
+      SemanticGraph originalTree,
+      IndexedWord subject,
+      Collection<SemanticGraphEdge> ignoredEdges) {
     if (toModify.containsVertex(subject)) {
       return;  // This subtree already exists.
     }
@@ -439,11 +445,23 @@ public class ClauseSplitterSearchProblem  {
     // (add nodes)
     wordsToAdd.forEach(toModify::addVertex);
     // (add edges)
-    for (SemanticGraphEdge edge : edgesToAdd) {
-      assert !toModify.incomingEdgeIterator(edge.getDependent()).hasNext();
-      toModify.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
+    edgesToAdd
+        .stream()
+        .map(
+            edge -> {
+              assert !toModify.incomingEdgeIterator(edge.getDependent()).hasNext();
+              return edge;
+            })
+        .forEach(
+            edge -> {
+              toModify.addEdge(
+                  edge.getGovernor(),
+                  edge.getDependent(),
+                  edge.getRelation(),
+                  edge.getWeight(),
+                  edge.isExtra());
+            });
     }
-  }
 
   /**
    * Strips aux and mark edges when we are splitting into a clause.
@@ -458,12 +476,18 @@ public class ClauseSplitterSearchProblem  {
         toClean.add(edge);
       }
     }
-    for (SemanticGraphEdge edge : toClean) {
-      toModify.removeEdge(edge);
-      toModify.removeVertex(edge.getDependent());
+    toClean
+        .stream()
+        .map(
+            edge -> {
+              toModify.removeEdge(edge);
+              return edge;
+            })
+        .forEach(
+            edge -> {
+              toModify.removeVertex(edge.getDependent());
+            });
     }
-  }
-
 
   /**
    * Create a mock node, to be added to the dependency tree but which is not part of the original sentence.

@@ -69,29 +69,29 @@ public class Util  {
 
   /**
    * Build a dictionary of words collected from a corpus.
-   * <p>
-   * Filters out words with a frequency below the given {@code cutOff}.
    *
-   * @return Words sorted by decreasing frequency, filtered to remove
-   *         any words with a frequency below {@code cutOff}
+   * <p>Filters out words with a frequency below the given {@code cutOff}.
+   *
+   * @return Words sorted by decreasing frequency, filtered to remove any words with a frequency
+   *     below {@code cutOff}
    */
-  public static List<String> generateDict(List<String> str, int cutOff)
-  {
+  public static List<String> generateDict(List<String> str, int cutOff) {
     Counter<String> freq = new IntCounter<>();
     for (String aStr : str)
       freq.incrementCount(aStr);
 
     List<String> keys = Counters.toSortedList(freq, false);
     List<String> dict = new ArrayList<>();
-    for (String word : keys) {
-      if (freq.getCount(word) >= cutOff)
-        dict.add(word);
-    }
+    keys.stream()
+        .filter(word -> freq.getCount(word) >= cutOff)
+        .forEach(
+            word -> {
+              dict.add(word);
+            });
     return dict;
   }
 
-  public static List<String> generateDict(List<String> str)
-  {
+  public static List<String> generateDict(List<String> str) {
     return generateDict(str, 1);
   }
 

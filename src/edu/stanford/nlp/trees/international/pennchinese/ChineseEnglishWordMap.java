@@ -159,12 +159,18 @@ public class ChineseEnglishWordMap implements Serializable  {
 
     Set<String> set = Generics.newHashSet();
 
-    for (String t : trans) {
-      t = normalize(t);
-      if ( ! t.equals("")) {
-        set.add(t);
-      }
-    }
+    trans
+        .stream()
+        .map(
+            t -> {
+              t = normalize(t);
+              return t;
+            })
+        .filter(t -> !t.equals(""))
+        .forEach(
+            t -> {
+              set.add(t);
+            });
     return set;
   }
 
@@ -320,20 +326,18 @@ public class ChineseEnglishWordMap implements Serializable  {
     return map.size();
   }
 
-
   /**
-   * The main method reads (segmented, whitespace delimited) words from a file
-   * and prints them with their English translation(s).
+   * The main method reads (segmented, whitespace delimited) words from a file and prints them with
+   * their English translation(s).
    *
-   * The path and filename of the CEDict Lexicon can be supplied via the
-   * "-dictPath" flag; otherwise the default filename "cedict_ts.u8" in the
-   * current directory is checked.
+   * <p>The path and filename of the CEDict Lexicon can be supplied via the "-dictPath" flag;
+   * otherwise the default filename "cedict_ts.u8" in the current directory is checked.
    *
-   * By default, only the first translation is printed.  If the "-all" flag
-   * is given, all translations are printed.
+   * <p>By default, only the first translation is printed. If the "-all" flag is given, all
+   * translations are printed.
    *
-   * The input and output encoding can be specified using the "-encoding" flag.
-   * Otherwise UTF-8 is assumed.
+   * <p>The input and output encoding can be specified using the "-encoding" flag. Otherwise UTF-8
+   * is assumed.
    */
   public static void main(String[] args) throws IOException {
     Map<String, Integer> flagsToNumArgs = Generics.newHashMap();
@@ -375,9 +379,10 @@ public class ChineseEnglishWordMap implements Serializable  {
           coveredWords++;
           if (allTranslations) {
             List<String> trans = new ArrayList<>(cewm.getAllTranslations(word));
-            for (String s : trans) {
-              pw.print((trans.indexOf(s) > 0 ? "|" : "") + s);
-            }
+            trans.forEach(
+                s -> {
+                  pw.print((trans.indexOf(s) > 0 ? "|" : "") + s);
+                });
           } else {
             pw.print(cewm.getFirstTranslation(word));
           }

@@ -205,17 +205,18 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   private transient MutableInteger tempMInteger = null;
 
   /**
-   * Sets the current count for each of the given keys. This will wipe out
-   * any existing counts for these keys.
-   * <p/>
-   * To add to the counts of a collection of objects instead of replacing them,
-   * use {@link #incrementCounts(Collection,int)}.
+   * Sets the current count for each of the given keys. This will wipe out any existing counts for
+   * these keys.
+   *
+   * <p>To add to the counts of a collection of objects instead of replacing them, use {@link
+   * #incrementCounts(Collection,int)}.
    */
   public void setCounts(Collection<E> keys, int count) {
-    for (E key : keys) {
-      setCount(key, count);
+    keys.forEach(
+        key -> {
+          setCount(key, count);
+        });
     }
-  }
 
   /**
    * Adds the given count to the current count for the given key. If the key
@@ -262,22 +263,23 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   }
 
   /**
-   * Adds the given count to the current counts for each of the given keys.
-   * If any of the keys haven't been seen before, they are assumed to have
-   * count 0, and thus this method will set their counts to the given
-   * amount. Negative increments are equivalent to calling <tt>decrementCounts</tt>.
-   * <p/>
-   * To more conveniently increment the counts of a collection of objects by
-   * 1, use {@link #incrementCounts(Collection)}.
-   * <p/>
-   * To set the counts of a collection of objects to a specific value instead
-   * of incrementing them, use {@link #setCounts(Collection,int)}.
+   * Adds the given count to the current counts for each of the given keys. If any of the keys
+   * haven't been seen before, they are assumed to have count 0, and thus this method will set their
+   * counts to the given amount. Negative increments are equivalent to calling
+   * <tt>decrementCounts</tt>.
+   *
+   * <p>To more conveniently increment the counts of a collection of objects by 1, use {@link
+   * #incrementCounts(Collection)}.
+   *
+   * <p>To set the counts of a collection of objects to a specific value instead of incrementing
+   * them, use {@link #setCounts(Collection,int)}.
    */
   public void incrementCounts(Collection<E> keys, int count) {
-    for (E key : keys) {
-      incrementCount(key, count);
+    keys.forEach(
+        key -> {
+          incrementCount(key, count);
+        });
     }
-  }
 
   /**
    * Adds 1 to the counts for each of the given keys. If any of the keys
@@ -400,14 +402,13 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
     }
   }
 
-  /**
-   * Removes all the given keys from this Counter.
-   */
+  /** Removes all the given keys from this Counter. */
   public void removeAll(Collection<E> c) {
-    for (E key : c) {
-      remove(key);
+    c.forEach(
+        key -> {
+          remove(key);
+        });
     }
-  }
 
   /**
    * Removes all counts from this Counter.

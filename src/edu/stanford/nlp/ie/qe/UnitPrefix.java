@@ -71,10 +71,11 @@ public class UnitPrefix {
   }
 
   public static void registerPrefixes(Env env, List<UnitPrefix> prefixes) {
-    for (UnitPrefix prefix: prefixes) {
-      registerPrefix(env, prefix);
+    prefixes.forEach(
+        prefix -> {
+          registerPrefix(env, prefix);
+        });
     }
-  }
 
   public static void registerPrefix(Env env, UnitPrefix prefix) {
     env.bind(prefix.getName().toUpperCase(), prefix);

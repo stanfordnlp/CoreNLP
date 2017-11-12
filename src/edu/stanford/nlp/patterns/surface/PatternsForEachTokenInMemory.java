@@ -57,31 +57,35 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
     //nothing to do
   }
 
-//  @Override
-//  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException, ClassNotFoundException {
-//    return IOUtils.readObjectFromFile(dir+"/patternshashindex.ser");
-//  }
-//
-//  @Override
-//  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws IOException {
-//    if(dir != null){
-//    writePatternsIfInMemory(dir+"/allpatterns.ser");
-//    IOUtils.writeObjectToFile(index, dir+"/patternshashindex.ser");
-//    }
-//  }
+  //  @Override
+  //  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException,
+  // ClassNotFoundException {
+  //    return IOUtils.readObjectFromFile(dir+"/patternshashindex.ser");
+  //  }
+  //
+  //  @Override
+  //  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws
+  // IOException {
+  //    if(dir != null){
+  //    writePatternsIfInMemory(dir+"/allpatterns.ser");
+  //    IOUtils.writeObjectToFile(index, dir+"/patternshashindex.ser");
+  //    }
+  //  }
 
   @Override
-  public Map<String, Map<Integer, Set<E>>> getPatternsForAllTokens(Collection<String> sampledSentIds) {
+  public Map<String, Map<Integer, Set<E>>> getPatternsForAllTokens(
+      Collection<String> sampledSentIds) {
     Map<String, Map<Integer, Set<E>>> pats = new HashMap<>();
-    for(String s: sampledSentIds){
-      pats.put(s, getPatternsForAllTokens(s));
-    }
+    sampledSentIds.forEach(
+        s -> {
+          pats.put(s, getPatternsForAllTokens(s));
+        });
     return pats;
   }
 
   @Override
   public void close() {
-    //nothing to do
+    // nothing to do
   }
 
   @Override

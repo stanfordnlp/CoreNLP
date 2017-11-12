@@ -88,7 +88,6 @@ public class TestThreadedCRFClassifier {
     test.runThreadedTest(props);
   }
 
-
   void runThreadedTest(Properties props) {
     // TODO: check params
     final String testFile = props.getProperty("testFile");
@@ -166,9 +165,10 @@ public class TestThreadedCRFClassifier {
                                   ("Simultaneous-" + classifierNum +
                                    "-" + repeatNum)));
       }
-      for (CRFThread thread : threads) {
-        thread.start();
-      }
+      threads.forEach(
+          thread -> {
+            thread.start();
+          });
       for (int i = 0; i < threads.size(); ++i) {
         int classifierNum = i % classifiers.size();
         int repeatNum = i / classifiers.size();
@@ -195,5 +195,4 @@ public class TestThreadedCRFClassifier {
     // if no exceptions thrown, great success
     System.out.println("Everything worked!");
   }
-
 }

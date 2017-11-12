@@ -322,13 +322,14 @@ public class SentenceAlgorithms {
   }
 
   /**
-   * Select the most common element of the given type in the given span.
-   * This is useful for, e.g., finding the most likely NER span of a given span, or the most
-   * likely POS tag of a given span.
+   * Select the most common element of the given type in the given span. This is useful for, e.g.,
+   * finding the most likely NER span of a given span, or the most likely POS tag of a given span.
    * Null entries are removed.
    *
-   * @param span The span of the sentence to find the mode element in. This must be entirely contained in the sentence.
-   * @param selector The property of the sentence we are getting the mode of. For example, <code>Sentence::posTags</code>
+   * @param span The span of the sentence to find the mode element in. This must be entirely
+   *     contained in the sentence.
+   * @param selector The property of the sentence we are getting the mode of. For example, <code>
+   *     Sentence::posTags</code>
    * @param <E> The type of the element we are getting.
    * @return The most common element of the given property in the sentence.
    */
@@ -337,13 +338,13 @@ public class SentenceAlgorithms {
       throw new IllegalArgumentException("Span must be entirely contained in the sentence: " + span + " (sentence length=" + sentence.length() + ")");
     }
     Counter<E> candidates = new ClassicCounter<>();
-    for (int i : span) {
-      candidates.incrementCount(selector.apply(sentence).get(i));
-    }
+    span.forEach(
+        i -> {
+          candidates.incrementCount(selector.apply(sentence).get(i));
+        });
     candidates.remove(null);
     return Counters.argmax(candidates);
   }
-
 
   /**
    * Run a proper BFS over a dependency graph, finding the shortest path between two vertices.

@@ -86,15 +86,15 @@ public class Interner<T>  {
   }
 
   /**
-   * Returns a <code>Set</code> such that each element in the returned set
-   * is a unique object e' that .equals the corresponding element e in the
-   * original set.
+   * Returns a <code>Set</code> such that each element in the returned set is a unique object e'
+   * that .equals the corresponding element e in the original set.
    */
   public Set<T> internAll(Set<T> s) {
     Set<T> result = Generics.newHashSet();
-    for (T o : s) {
-      result.add(intern(o));
-    }
+    s.forEach(
+        o -> {
+          result.add(intern(o));
+        });
     return result;
   }
 

@@ -291,10 +291,13 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   }
 
   private static <INN extends CoreMap> void copyAnswerFieldsToNERField(List<INN> l) {
-    for (INN m: l) {
-      m.set(CoreAnnotations.NamedEntityTagAnnotation.class, m.get(CoreAnnotations.AnswerAnnotation.class));
+    l.forEach(
+        m -> {
+          m.set(
+              CoreAnnotations.NamedEntityTagAnnotation.class,
+              m.get(CoreAnnotations.AnswerAnnotation.class));
+        });
     }
-  }
 
   @Override
   public List<CoreLabel> classify(List<CoreLabel> tokens) {
@@ -302,7 +305,8 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   }
 
   @Override
-  public List<CoreLabel> classifyWithGlobalInformation(List<CoreLabel> tokens, final CoreMap document, final CoreMap sentence) {
+  public List<CoreLabel> classifyWithGlobalInformation(
+      List<CoreLabel> tokens, final CoreMap document, final CoreMap sentence) {
     List<CoreLabel> output = super.classify(tokens);
     if (applyNumericClassifiers) {
       try {
@@ -349,22 +353,28 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     }
 
     // Apply RegexNER annotations
-    // cdm 2016: Used to say and do "// skip first token" but I couldn't understand why, so I removed that.
-    for (CoreLabel token : tokens) {
-      // System.out.println(token.toShorterString());
-      if ((token.tag() == null || token.tag().charAt(0) == 'N') && "O".equals(token.ner()) || "MISC".equals(token.ner())) {
-        String target = gazetteMapping.get(token.originalText());
-        if (target != null) {
-          token.setNER(target);
-        }
-      }
-    }
+    // cdm 2016: Used to say and do "// skip first token" but I couldn't understand why, so I
+    // removed that.
+    tokens
+        .stream()
+        .filter(
+            token ->
+                (token.tag() == null || token.tag().charAt(0) == 'N') && "O".equals(token.ner())
+                    || "MISC".equals(token.ner()))
+        .forEach(
+            token -> {
+              String target = gazetteMapping.get(token.originalText());
+              if (target != null) {
+                token.setNER(target);
+              }
+            });
 
     // Return
     return output;
   }
 
-  private void recognizeNumberSequences(List<CoreLabel> words, final CoreMap document, final CoreMap sentence) {
+  private void recognizeNumberSequences(
+      List<CoreLabel> words, final CoreMap document, final CoreMap sentence) {
     // we need to copy here because NumberSequenceClassifier overwrites the AnswerAnnotation
     List<CoreLabel> newWords = NumberSequenceClassifier.copyTokens(words, sentence);
 

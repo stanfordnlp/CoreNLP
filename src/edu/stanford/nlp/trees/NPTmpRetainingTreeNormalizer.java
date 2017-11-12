@@ -195,11 +195,9 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
     return foundNullSubj;
   }
 
-
   /**
-   * Normalize a whole tree -- one can assume that this is the root.
-   * This implementation deletes empty elements (ones with nonterminal
-   * tag label '-NONE-') from the tree.
+   * Normalize a whole tree -- one can assume that this is the root. This implementation deletes
+   * empty elements (ones with nonterminal tag label '-NONE-') from the tree.
    */
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
@@ -467,11 +465,12 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
       tree = tf.newTreeNode("ROOT", Collections.singletonList(tree));
     }
     // repair for the phrasal VB in Switchboard (PTB version 3) that should be a VP
-    for (Tree subtree : tree) {
-      if (subtree.isPhrasal() && "VB".equals(subtree.label().value())) {
-        subtree.setValue("VP");
-      }
-    }
+    tree.stream()
+        .filter(subtree -> subtree.isPhrasal() && "VB".equals(subtree.label().value()))
+        .forEach(
+            subtree -> {
+              subtree.setValue("VP");
+            });
     tree = tree.transform(transformer1);
     if (tree == null) { return null; }
     tree = tree.prune(subtreeFilter, tf);

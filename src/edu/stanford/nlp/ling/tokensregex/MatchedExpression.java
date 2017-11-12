@@ -90,12 +90,19 @@ public class MatchedExpression {
         }
       } else {
         // Only a single object, set all annotationKeys to that obj
-        for (Class key:annotationKeys) {
-          if (key == null) {
-            throw new RuntimeException("Invalid null annotation key");
-          }
-          cm.set(key, obj);
-        }
+        annotationKeys
+            .stream()
+            .map(
+                key -> {
+                  if (key == null) {
+                    throw new RuntimeException("Invalid null annotation key");
+                  }
+                  return key;
+                })
+            .forEach(
+                key -> {
+                  cm.set(key, obj);
+                });
       }
     }
 
@@ -137,14 +144,16 @@ public class MatchedExpression {
           // TODO: Should default result be the matchedExpression, value, object???
           //matchedExpression.annotation.set(resultAnnotationField, matchedExpression);
           Value v = matchedExpression.getValue();
-          for (CoreMap cm:tokens) {
-            setAnnotations(cm, tokensResultAnnotationField, (v != null)? v.get():null);
-          }
+          tokens.forEach(
+              cm -> {
+                setAnnotations(cm, tokensResultAnnotationField, (v != null) ? v.get() : null);
+              });
         }
       }
     }
 
-    public MatchedExpression createMatchedExpression(Interval<Integer> charOffsets, Interval<Integer> tokenOffsets) {
+    public MatchedExpression createMatchedExpression(
+        Interval<Integer> charOffsets, Interval<Integer> tokenOffsets) {
       return new MatchedExpression(charOffsets, tokenOffsets, this, priority, weight);
     }
 

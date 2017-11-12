@@ -50,9 +50,9 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter  {
 		this.verboseInstances = true;
 	}
 
-	@Override
-	public void printResults(PrintWriter pw, List<CoreMap> goldStandard,
-	    List<CoreMap> extractorOutput) {
+  @Override
+  public void printResults(
+      PrintWriter pw, List<CoreMap> goldStandard, List<CoreMap> extractorOutput) {
 		ResultsPrinter.align(goldStandard, extractorOutput);
 
 		Counter<String> correct = new ClassicCounter<>();
@@ -124,14 +124,15 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter  {
 			}
 			
 			if (verboseInstances) {
-				for (EntityMention m : goldEntities) {
-					String label = makeLabel(m);
-					if (!matchedGolds.contains(m.getObjectId())
-					    && (excludedClasses == null || !excludedClasses.contains(label))) {
-					  log.info("FALSE NEGATIVE: " + m.toString());
-	          log.info("In sentence: " + goldText);
-					}
-				}
+        goldEntities.forEach(
+            m -> {
+              String label = makeLabel(m);
+              if (!matchedGolds.contains(m.getObjectId())
+                  && (excludedClasses == null || !excludedClasses.contains(label))) {
+                log.info("FALSE NEGATIVE: " + m.toString());
+                log.info("In sentence: " + goldText);
+              }
+            });
 			}
 		}
 
@@ -164,12 +165,22 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter  {
 		double recall = totalCorrect / totalCount;
 		double f = (totalPredicted > 0 && totalCorrect > 0) ? 2 * precision
 		    * recall / (precision + recall) : 0.0;
-		pw.println("Total\t" + totalCorrect + "\t" + totalPredicted + "\t"
-		    + totalCount + "\t" + FORMATTER.format(100 * precision) + "\t"
-		    + FORMATTER.format(100 * recall) + "\t" + FORMATTER.format(100 * f));		
-	}
+    pw.println(
+        "Total\t"
+            + totalCorrect
+            + "\t"
+            + totalPredicted
+            + "\t"
+            + totalCount
+            + "\t"
+            + FORMATTER.format(100 * precision)
+            + "\t"
+            + FORMATTER.format(100 * recall)
+            + "\t"
+            + FORMATTER.format(100 * f));
+  }
 
-	private String makeLabel(EntityMention m) {
+  private String makeLabel(EntityMention m) {
 		String label = m.getType();
 		if (useSubTypes && m.getSubType() != null)
 			label += "-" + m.getSubType();

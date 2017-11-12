@@ -108,8 +108,8 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
   }
 
   /**
-   * Only works on English, as it is hard coded for using the
-   * Morphology class, which is English-only
+   * Only works on English, as it is hard coded for using the Morphology class, which is
+   * English-only
    */
   public List<CoreLabel> lemmatize(List<? extends HasWord> tokens) {
     List<TaggedWord> tagged;
@@ -122,13 +122,24 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
     }
     Morphology morpha = new Morphology();
     List<CoreLabel> lemmas = Generics.newArrayList();
-    for (TaggedWord token : tagged) {
-      CoreLabel label = new CoreLabel();
-      label.setWord(token.word());
-      label.setTag(token.tag());
-      morpha.stem(label);
-      lemmas.add(label);
-    }
+    tagged
+        .stream()
+        .map(
+            token -> {
+              CoreLabel label = new CoreLabel();
+              label.setWord(token.word());
+              label.setTag(token.tag());
+              return label;
+            })
+        .map(
+            label -> {
+              morpha.stem(label);
+              return label;
+            })
+        .forEach(
+            label -> {
+              lemmas.add(label);
+            });
     return lemmas;
   }
 

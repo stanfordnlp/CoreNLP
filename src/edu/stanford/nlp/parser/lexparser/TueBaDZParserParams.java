@@ -168,7 +168,6 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams  {
     return headFinder();
   }
 
-
   /** Annotates a tree according to options. */
   @Override
   public Tree transformTree(Tree t, Tree root) {
@@ -251,9 +250,10 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams  {
     }
     // put on all the annotations
     StringBuilder catSB = new StringBuilder(cat);
-    for (String annotation : annotations) {
-      catSB.append(annotation);
-    }
+    annotations.forEach(
+        annotation -> {
+          catSB.append(annotation);
+        });
 
     t.setLabel(new CategoryWordTag(catSB.toString(), word, tag));
     return t;

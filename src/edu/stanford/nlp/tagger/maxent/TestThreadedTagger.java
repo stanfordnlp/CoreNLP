@@ -129,8 +129,7 @@ class TestThreadedTagger {
   }
 
   public static void runThreadedTest(Properties props)
-    throws ClassNotFoundException, IOException, InterruptedException
-  {
+      throws ClassNotFoundException, IOException, InterruptedException {
     ArrayList<Properties> configs = new ArrayList<>();
     ArrayList<MaxentTagger> taggers = new ArrayList<>();
     int numThreads = DEFAULT_NUM_THREADS;
@@ -194,9 +193,10 @@ class TestThreadedTagger {
       threads.add(new TaggerThread(taggers.get(0),
                                    "Simultaneous-" + (i + 1)));
     }
-    for (TaggerThread thread : threads) {
-      thread.start();
-    }
+    threads.forEach(
+        thread -> {
+          thread.start();
+        });
     for (TaggerThread thread : threads) {
       thread.join();
       compareResults(thread.getResultsString(),
@@ -235,9 +235,10 @@ class TestThreadedTagger {
         threads.add(new TaggerThread(taggers.get(i),
                                      "DifferentTaggers-" + (i + 1)));
       }
-      for (TaggerThread thread : threads) {
-        thread.start();
-      }
+      threads.forEach(
+          thread -> {
+            thread.start();
+          });
       for (int i = 0; i < taggers.size(); ++i) {
         TaggerThread thread = threads.get(i);
         thread.join();
