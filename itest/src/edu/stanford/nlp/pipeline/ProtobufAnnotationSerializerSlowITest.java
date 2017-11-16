@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.StringUtils;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.*;
@@ -51,11 +51,11 @@ public class ProtobufAnnotationSerializerSlowITest {
   public static final String prideAndPrejudiceFirstSentence =
       "It is a truth universally acknowledged, that a single man in possession  of a good fortune, must be in want of a wife.";
 
-  @Before
-  public void setUp() {
-    Redwood.hideChannelsEverywhere(StanfordCoreNLP.class);
+  @BeforeClass
+  public static void setUp() {
+    // suppress StanfordCoreNLP info messages for this test
+    System.err.close();
   }
-
 
   protected Annotation mkAnnotation() {
     AnnotationPipeline pipeline = new StanfordCoreNLP(new Properties());
