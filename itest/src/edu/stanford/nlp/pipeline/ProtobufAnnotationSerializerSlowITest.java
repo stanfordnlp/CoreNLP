@@ -513,7 +513,7 @@ public class ProtobufAnnotationSerializerSlowITest {
 
       // Create pipeline
       if (!annotators.contains("dcoref") && !annotators.contains("entitymentions")) {  // TODO(gabor) eventually, don't ignore entitymentions!
-        System.err.println(">>TESTING " + StringUtils.join(annotators, ","));
+        //System.err.println(">>TESTING " + StringUtils.join(annotators, ","));
         testAnnotators(StringUtils.join(annotators, ","));
       }
     }
