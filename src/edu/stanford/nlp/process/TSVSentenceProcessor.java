@@ -1,7 +1,6 @@
 package edu.stanford.nlp.process;
 
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.util.TSVUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
