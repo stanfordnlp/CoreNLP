@@ -1,7 +1,7 @@
 Stanford Lexicalized Parser v3.8.0 - 2017-06-09
 -----------------------------------------------
 
-Copyright (c) 2002-2015 The Board of Trustees of The Leland Stanford Junior
+Copyright (c) 2002-2017 The Board of Trustees of The Leland Stanford Junior
 University. All Rights Reserved.
 
 Original core parser code by Dan Klein.  Support code, additional
@@ -14,13 +14,14 @@ Sebastian Schuster, and Jon Gauthier.
 
 This release was prepared by Jason Bolton.
 
-This package contains 4 parsers: a high-accuracy unlexicalized PCFG; a
+This package contains 6 parsers: a high-accuracy unlexicalized PCFG; a
 lexicalized dependency parser; a factored model, where the estimates
 of dependencies and an unlexicalized PCFG are jointly optimized to
-give a lexicalized PCFG treebank parser; and an RNN parser, where
+give a lexicalized PCFG treebank parser; a TreeRNN parser, where
 recursive neural networks trained with semantic word vectors are used
-to score parse trees.  Also included are grammars for various
-languages for use with these parsers.
+to score parse trees; a Shift-Reduce Constituency Parser;
+and a transition-based neural dependency parser.
+Also included are grammars for various languages for use with these parsers.
 
 For more information about the parser API, point a web browser at the
 included javadoc directory (use the browser's Open File command to open
@@ -31,7 +32,7 @@ particularly documentation of the main method.
 
 Secondly, you should also look at the Parser FAQ on the web:
 
-    http://nlp.stanford.edu/software/parser-faq.shtml
+    https://nlp.stanford.edu/software/parser-faq.html
 
 This software requires Java 8 (JDK 1.8.0+).  (You must have installed it
 separately. Check that the command "java -version" works and gives 1.8+.)
@@ -42,7 +43,7 @@ QUICKSTART
 UNIX COMMAND-LINE USAGE
 
 On a Unix system you should be able to parse the English test file with the
-following command:	
+following command:
 
     ./lexparser.sh data/testsent.txt
 
@@ -52,6 +53,18 @@ This uses the PCFG parser, which is quick to load and run, and quite accurate.
 begins; continued parsing is quicker. To use the lexicalized parser, replace
 englishPCFG.ser.gz with englishFactored.ser.gz in the lexparser.sh script
 and use the flag -mx600m to give more memory to java.]
+
+WINDOWS GUI USAGE
+
+On a Windows system, assuming that java is on your PATH, you should be able
+to run a parsing GUI by double-clicking on the lexparser-gui.bat icon,
+or giving the command lexparser-gui in this directory from a command prompt.
+
+Click Load File, Browse, and navigate to and select testsent.txt in
+the top directory of the parser distribution.  Click Load Parser,
+Browse, and select the models jar, also in the top directory of the
+parser distribution.  From the models jar, select englishPCFG.ser.gz.
+Click Parse to parse the first sentence.
 
 NEURAL NETWORK DEPENDENCY PARSER USAGE
 
@@ -70,24 +83,6 @@ a language specific POS tagger.  Here is an example for Chinese:
     -model edu/stanford/nlp/models/parser/nndep/UD_Chinese.gz \
     -tagger.model edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger \
     -textFile data/chinese-onesent-utf8.txt -outFile data/chinese-onesent-utf8.txt.out
-
-The other POS tagger models are included in the models jar.  It should be noted that
-currently the French and Spanish POS taggers are trained with different tag sets than
-the UD tag sets used for the French and Spanish UD parsers.  In future releases this
-issue should be resolved.  The Chinese, English, and German UD parsers are consistent
-with their POS taggers.
-
-WINDOWS GUI USAGE
-
-On a Windows system, assuming that java is on your PATH, you should be able
-to run a parsing GUI by double-clicking on the lexparser-gui.bat icon,
-or giving the command lexparser-gui in this directory from a command prompt.
-
-Click Load File, Browse, and navigate to and select testsent.txt in
-the top directory of the parser distribution.  Click Load Parser,
-Browse, and select the models jar, also in the top directory of the
-parser distribution.  From the models jar, select englishPCFG.ser.gz.
-Click Parse to parse the first sentence.
 
 OTHER USE CASES
 
@@ -133,24 +128,27 @@ You will not be able to run this script (since it uses Stanford-specific file
 paths), but you should be able to see what we did.
 
 Arabic
+
 Trained on parts 1-3 of the Penn Arabic Treebank (ATB) using the
 pre-processing described in (Green and Manning, 2010). The default input
 encoding is UTF-8 Arabic script. You can convert text in Buckwalter encoding to UTF-8
-with the package edu.stanford.nlp.international.arabic.Buckwalter which is included 
+with the package edu.stanford.nlp.international.arabic.Buckwalter which is included
 in stanford-parser.jar.
 
 The parser *requires* segmentation and tokenization of raw text per the ATB standard
-prior to parsing. You can generate this segmentation and tokenization with the Stanford 
+prior to parsing. You can generate this segmentation and tokenization with the Stanford
 Word Segmenter, which is available separately at:
 
-  http://nlp.stanford.edu/software/segmenter.shtml
+  https://nlp.stanford.edu/software/segmenter.html
 
 Chinese
+
 There are Chinese grammars trained just on mainland material from
 Xinhua and more mixed material from the LDC Chinese Treebank. The default
 input encoding is GB18030.
 
 French
+
 Trained on the functionally annotated section of the French Treebank
 (FTB) using the pre-processing described in (Green et al., 2011). For raw text input,
 a tokenizer is enabled by default that produces FTB tokenization. To disable this
@@ -158,8 +156,8 @@ tokenizer, use the "-tokenized" option. To tokenize raw text separately, see
 the usage information in edu.stanford.nlp.international.french.process.FrenchTokenizer.
 
 German
-Trained on the Negra corpus. Details are included in (Rafferty and
-Manning, 2008).
+
+Trained on the Negra corpus. Details are included in (Rafferty and Manning, 2008).
 
 TREEBANK PREPROCESSING
 
@@ -203,12 +201,12 @@ UNIVERSAL DEPENDENCIES vs. STANFORD DEPENDENCIES
 Since v3.5.2 the default dependency representation is the new Universal Dependencies
 representation. Universal Dependencies were developed with the goal of being a
 cross-linguistically valid representation. Note that some constructs such as prepositional
-phrases are now analyzed differently and that the set of relations was updated. Please 
+phrases are now analyzed differently and that the set of relations was updated. Please
 look at the Universal Dependencies documentation for more information:
 
       http://www.universaldependencies.org
 
-The parser also still supports the original Stanford Dependencies representation 
+The parser also still supports the original Stanford Dependencies representation
 as described in the StanfordDependenciesManual.pdf. Use the flag
 
      -originalDependencies
@@ -218,7 +216,7 @@ to obtain original Stanford Dependencies.
 LICENSE
 
 // StanfordLexicalizedParser -- a probabilistic lexicalized NL CFG parser
-// Copyright (c) 2002-2015 The Board of Trustees of
+// Copyright (c) 2002-2017 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -237,51 +235,51 @@ LICENSE
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/downloads/lex-parser.shtml
+//    https://nlp.stanford.edu/downloads/lex-parser.html
 
 
 ---------------------------------
 CHANGES
 ---------------------------------
 
-2017-06-09    3.8.0     Updated for compatibility 
+2017-06-09    3.8.0     Updated for compatibility
 
-2016-10-31    3.7.0     new UD models 
+2016-10-31    3.7.0     new UD models
 
-2015-12-09    3.6.0     Updated for compatibility 
+2015-12-09    3.6.0     Updated for compatibility
 
-2015-04-20    3.5.2     Switch to universal dependencies 
+2015-04-20    3.5.2     Switch to universal dependencies
 
-2015-01-29    3.5.1     Dependency parser improvements; general 
-                        bugfixes 
+2015-01-29    3.5.1     Dependency parser improvements; general
+                        bugfixes
 
-2014-10-26    3.5.0     Upgrade to Java 1.8; add neural-network 
-                        dependency parser 
+2014-10-26    3.5.0     Upgrade to Java 1.8; add neural-network
+                        dependency parser
 
-2014-08-27    3.4.1     Add Spanish models 
+2014-08-27    3.4.1     Add Spanish models
 
-2014-06-16      3.4     Shift-reduce parser 
+2014-06-16      3.4     Shift-reduce parser
 
-2014-01-04    3.3.1     Bugfix release, dependency improvements 
+2014-01-04    3.3.1     Bugfix release, dependency improvements
 
-2013-11-12    3.3.0     Remove the attr dependency, add imperatives to 
-                        English training data 
+2013-11-12    3.3.0     Remove the attr dependency, add imperatives to
+                        English training data
 
-2013-06-19    3.2.0     New RNN model for WSJ and English with 
-                        improved test set accuracy, rel dependency 
-                        removed 
+2013-06-19    3.2.0     New RNN model for WSJ and English with
+                        improved test set accuracy, rel dependency
+                        removed
 
-2013-04-05    2.0.5     Dependency improvements, ctb7 model, -nthreads 
-                        option 
+2013-04-05    2.0.5     Dependency improvements, ctb7 model, -nthreads
+                        option
 
-2012-11-12    2.0.4     Dependency speed improvements; other 
-                        dependency changes 
+2012-11-12    2.0.4     Dependency speed improvements; other
+                        dependency changes
 
-2012-07-09    2.0.3     Minor bug fixes 
+2012-07-09    2.0.3     Minor bug fixes
 
 2012-05-22    2.0.2     Supports adding extra data in non-tree format
 
@@ -289,7 +287,7 @@ CHANGES
 
 2012-01-11    2.0.0     Threadsafe!
 
-2011-09-14    1.6.9     Added some imperatives to the English 
+2011-09-14    1.6.9     Added some imperatives to the English
                         training data; added root dependency.
 
 2011-06-15    1.6.8     Added French parser and leaf ancestor
@@ -301,40 +299,40 @@ CHANGES
 
 2011-04-17    1.6.6     Compatible with tagger, corenlp and tregex.
 
-2010-10-30    1.6.5     Further improvements to English Stanford 
+2010-10-30    1.6.5     Further improvements to English Stanford
                         Dependencies and other minor changes
 
-2010-08-16    1.6.4     More minor bug fixes and improvements to English 
+2010-08-16    1.6.4     More minor bug fixes and improvements to English
                         Stanford Dependencies and question parsing
 
-2010-07-09    1.6.3     Improvements to English Stanford Dependencies and 
+2010-07-09    1.6.3     Improvements to English Stanford Dependencies and
                         question parsing, minor bug fixes
 
-2010-02-25    1.6.2     Improvements to Arabic parser models, 
+2010-02-25    1.6.2     Improvements to Arabic parser models,
                         and to English and Chinese Stanford Dependencies
 
 2008-10-19    1.6.1     Slightly improved Arabic, German and
                         Stanford Dependencies
 
-2007-08-18      1.6     Added Arabic, k-best PCCFG parsing; 
+2007-08-18      1.6     Added Arabic, k-best PCCFG parsing;
                         improved English grammatical relations
 
-2006-05-30    1.5.1     Improved English and Chinese grammatical relations; 
+2006-05-30    1.5.1     Improved English and Chinese grammatical relations;
                         fixed UTF-8 handling
 
-2005-07-20      1.5     Added grammatical relations output; 
+2005-07-20      1.5     Added grammatical relations output;
                         fixed bugs introduced in 1.4
 
-2004-03-24      1.4     Made PCFG faster again (by FSA minimization); 
+2004-03-24      1.4     Made PCFG faster again (by FSA minimization);
                         added German support
 
-2003-09-06      1.3     Made parser over twice as fast; 
+2003-09-06      1.3     Made parser over twice as fast;
                         added tokenization options
 
-2003-07-20      1.2     Halved PCFG memory usage; 
+2003-07-20      1.2     Halved PCFG memory usage;
                         added support for Chinese
 
-2003-03-25      1.1     Improved parsing speed; included GUI, 
+2003-03-25      1.1     Improved parsing speed; included GUI,
                         improved PCFG grammar
 
 2002-12-05      1.0     Initial release

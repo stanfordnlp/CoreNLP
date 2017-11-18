@@ -43,10 +43,10 @@ Revised for the Stanford Parser v.\ 3.7.0 in September 2016
 \maketitle
 
 \color{red}
-Please note that this manual describes the original Stanford 
+Please note that this manual describes the original Stanford
 Dependencies representation. As of version 3.5.2, the default representation
 output by the Stanford Parser and Stanford CoreNLP is the new Universal Dependencies (UD)
-representation, and we no longer maintain the original Stanford Dependencies representation. For a description of the UD 
+representation, and we no longer maintain the original Stanford Dependencies representation. For a description of the UD
 representation, take a look at the Universal Dependencies documentation at \textsf{http:/www.universaldependencies.org} and
 the discussion of the \textit{enhanced} and \textit{enhanced++} UD representations by \citet{schuster2016enhanced}.
 \color{black}
@@ -614,7 +614,7 @@ A temporal modifier (of a VP, NP, or an ADJP is a bare noun phrase constituent t
 A reduced non-finite verbal modifier is a participial or infinitive
 form of a verb heading a phrase (which may have some arguments,
 roughly like a VP). These are used to modify the meaning of an NP or
-another verb. They are not core arguments of a verb 
+another verb. They are not core arguments of a verb
 or full finite relative clauses.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
@@ -632,7 +632,7 @@ An open clausal complement (\emph{xcomp}) of a verb or an adjective is
 a predicative or clausal complement without its own subject. The
 reference of the subject is necessarily determined by an argument
 external to the xcomp (normally by the object of the next higher
-clause, if there is one, or else by the subject of the next higher clause.  
+clause, if there is one, or else by the subject of the next higher clause.
 These complements are always non-finite, and they are complements
 (arguments of the higher verb or adjective) rather than
 adjuncts/modifiers, such as a purpose clause.
@@ -950,7 +950,7 @@ Rooted? & Yes & Yes & Yes & Yes & Yes \\
 Acyclic & Yes & No & No & Yes & Yes \\
 Multigraph & No & No & No & No & Yes \\
 Tree & Yes & No & No & Yes & No \\
-Self-loops? & No & No & No & No & No \\ 
+Self-loops? & No & No & No & No & No \\
 Projective? & No & No & No & No & No \\ \hline
 \end{tabular}
 \caption{Graph-theoretic properties of different versions of SD graphs.}\label{graph-properties}
@@ -1017,7 +1017,7 @@ There are no self-loops in the graphs.
 
 \section{In practice}\label{in_practice}
 
-In practice, two classes can be used to get the typed dependencies of a sentence using the code in the Stanford parser (downloadable at \textsf{http://nlp.stanford.edu/software/lex-parser.shtml}).
+In practice, two classes can be used to get the typed dependencies of a sentence using the code in the Stanford parser (downloadable at \textsf{https://nlp.stanford.edu/software/lex-parser.html}).
 
 \subsubsection*{$\star$ \textbf{edu.stanford.nlp.parser.lexparser.LexicalizedParser}}
 
@@ -1044,7 +1044,7 @@ parser to specify that this has already been done.) The \texttt{penn}
 option will also give you the context-free phrase structure grammar
 representation of the sentences.
 
-\noindent Note that as of version 3.5.2 the default representation is the new Universal Dependencies representation. 
+\noindent Note that as of version 3.5.2 the default representation is the new Universal Dependencies representation.
 Use the \texttt{-originalDependencies} option to obtain original Stanford Dependencies.
 
 \bigskip
@@ -1198,7 +1198,7 @@ Parser, and the Stanford Neural Network Dependency Parser.  If desired, these pa
 Any Penn Treebank constituency parser can be used to produce Stanford
 Dependencies by using our conversion tool to convert the output of other constituency parsers to the Stanford Dependencies representation.  For more information on other parser options, see:
 \begin{quote}
-\url{http://nlp.stanford.edu/software/stanford-dependencies.shtml}
+\url{https://nlp.stanford.edu/software/stanford-dependencies.html}
 \end{quote}
 
 \section{Further references for Stanford Dependencies}\label{refs}
@@ -1225,7 +1225,7 @@ Parser Evaluation Shared Task of the Workshop on Cross-Framework and
 Cross-Domain Parser Evaluation
 (\url{http://lingo.stanford.edu/events/08/pe/}) and is discussed in
 \citep{demarneffe08stanford}. This data is available from the Stanford
-Dependencies page: \url{http://nlp.stanford.edu/software\discretionary{}{}{}/stanford-dependencies.shtml},
+Dependencies page: \url{https://nlp.stanford.edu/software\discretionary{}{}{}/stanford-dependencies.html},
 but the BioInfer corpus is the main source of gold-standard SD data which is currently available.
 In the recent BioNLP 2009 Shared Task, many of the leading teams built their relation extraction systems over the Stanford Dependency representation \citep{kim09overview}.  It was used by the teams that came 1st, 3rd, 4th, and 5th in Task 1, by the team who came first in Task 2, and by the teams who came 1st and 2nd in Task 3. In the BioNLP 2011 shared task, every team used it \citep{BioNLP11}.
 \end{sloppypar}
@@ -1242,7 +1242,7 @@ Dependencies are briefly described in
 \citet{chang-tseng-jurafsky-manning:2009:SSST}. Representations
 based on the Stanford dependency representation have been proposed for
 Finnish \citep{Haverinen2010a,Haverinen2010b}, Thai \citep{Potisuk10},
-Persian \citep{Seraji12}, and French \citep{Maarouf12}. 
+Persian \citep{Seraji12}, and French \citep{Maarouf12}.
 More recently, there has been increasing interest in defining a
 consistent cross-linguistic set of relations in the style of Stanford
 Dependencies
@@ -1251,8 +1251,8 @@ others initially proposed a reformulation as Universal Stanford
 Dependencies \citep{marneffe14universal}. Further refinement with a
 team of collaborators has led to a new synthesis spanning
 tokenization, morphological features, parts of speech, and
-dependencies, known as Universal Dependencies: 
-\url{http://www.universaldependencies.org}.  Since version 3.5.2 
+dependencies, known as Universal Dependencies:
+\url{http://www.universaldependencies.org}.  Since version 3.5.2
 the default representation output by our parser is the Universal Dependencies
 representation.
 

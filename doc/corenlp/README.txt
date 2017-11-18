@@ -8,7 +8,7 @@ DOCUMENTATION
 
 Please look at the URL below for documentation for Stanford CoreNLP:
 
-  http://nlp.stanford.edu/software/corenlp.shtml
+  https://nlp.stanford.edu/software/corenlp.html
 
 LICENSE
 
@@ -42,27 +42,27 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2017-06-09    3.8.0     Web service annotator, discussion forum 
-                        handling, new French and Spanish models 
+2017-06-09    3.8.0     Web service annotator, discussion forum
+                        handling, new French and Spanish models
 
-2016-10-31    3.7.0     KBP Annotator, improved coreference, Arabic 
-                        pipeline 
+2016-10-31    3.7.0     KBP Annotator, improved coreference, Arabic
+                        pipeline
 
-2015-12-09    3.6.0     Improved coreference, OpenIE integration, 
-                        Stanford CoreNLP server 
+2015-12-09    3.6.0     Improved coreference, OpenIE integration,
+                        Stanford CoreNLP server
 
-2015-04-20    3.5.2     Switch to Universal dependencies, add Chinese 
-                        coreference system to CoreNLP 
+2015-04-20    3.5.2     Switch to Universal dependencies, add Chinese
+                        coreference system to CoreNLP
 
-2015-01-29    3.5.1     NER, dependency parser, SPIED improvements; 
-                        general bugfixes 
+2015-01-29    3.5.1     NER, dependency parser, SPIED improvements;
+                        general bugfixes
 
-2014-10-26    3.5.0     Upgrade to Java 1.8; add annotators for 
-                        dependency parsing and relation extraction 
+2014-10-26    3.5.0     Upgrade to Java 1.8; add annotators for
+                        dependency parsing and relation extraction
 
-2014-08-27    3.4.1     Add Spanish models 
+2014-08-27    3.4.1     Add Spanish models
 
-2014-06-16      3.4     Add shift reduce parser 
+2014-06-16      3.4     Add shift reduce parser
 
 2014-01-04    3.3.1     Bugfix release
 

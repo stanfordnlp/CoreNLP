@@ -6,7 +6,7 @@
   <packaging>jar</packaging>
   <name>Stanford CoreNLP</name>
   <description>Stanford CoreNLP provides a set of natural language analysis tools which can take raw English language text input and give the base forms of words, their parts of speech, whether they are names of companies, people, etc., normalize dates, times, and numeric quantities, mark up the structure of sentences in terms of phrases and word dependencies, and indicate which noun phrases refer to the same entities. It provides the foundational building blocks for higher level text understanding applications.</description>
-  <url>http://nlp.stanford.edu/software/corenlp.shtml</url>
+  <url>https://nlp.stanford.edu/software/corenlp.html</url>
   <licenses>
     <license>
       <name>GNU General Public License Version 3</name>
@@ -133,7 +133,7 @@
       <version>0.5</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>com.pholser</groupId>
       <artifactId>junit-quickcheck-generators</artifactId>
