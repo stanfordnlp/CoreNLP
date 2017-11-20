@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.BasicDatum;
@@ -1384,7 +1385,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
     if (constVars.usePhraseEvalEditDistOther) {
       double ed = constVars.getEditDistanceScoresOtherClass(label, word.getPhrase());
-      assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;;
+      assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;
       scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, ed);
     }
 

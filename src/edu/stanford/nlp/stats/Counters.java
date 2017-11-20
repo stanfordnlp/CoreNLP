@@ -69,7 +69,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
 /**
  * Static methods for operating on a {@link Counter}.
- * <p>
+ *
  * All methods that change their arguments change the <i>first</i> argument
  * (only), and have "InPlace" in their name. This class also provides access to
  * Comparators that can be used to sort the keys or entries of this Counter by
@@ -85,7 +85,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 public class Counters  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Counters.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Counters.class);
 
   private static final double LOG_E_2 = Math.log(2.0);
 

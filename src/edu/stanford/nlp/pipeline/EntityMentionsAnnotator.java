@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
-import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
+import java.util.*;
+import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -10,11 +11,8 @@ import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
+
 
 /**
  * Annotator that marks entity mentions in a document.

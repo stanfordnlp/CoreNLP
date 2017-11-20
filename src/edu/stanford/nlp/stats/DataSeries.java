@@ -1,34 +1,34 @@
-package edu.stanford.nlp.stats; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.stats;
 
 
 import edu.stanford.nlp.io.RecordIterator;
 import edu.stanford.nlp.util.Pair;
-import java.util.function.Function;
+import edu.stanford.nlp.util.logging.Redwood;
+
 import java.util.function.IntToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.*;
 import java.io.*;
 
 /**
- * A <code>DataSeries</code> represents a named sequence of <code>double</code>
- * values, and optionally refers to another <code>DataSeries</code> as its
+ * A {@code DataSeries} represents a named sequence of {@code double}
+ * values, and optionally refers to another {@code DataSeries} as its
  * domain.  Originally designed for making graphs and charts, but probably other
  * uses could be found.
  *
- * This file also contains several <code>DataSeries</code> implementations as
+ * This file also contains several {@code DataSeries} implementations as
  * nested static classes:
  *
- * <li> <code>FunctionDataSeries</code>, which computes data series values
+ * <li> {@code FunctionDataSeries}, which computes data series values
  * dynamically, according to a function supplied at construction; </li>
  *
- * <li> <code>ArrayDataSeries</code>, which is backed by an array; </li>
+ * <li> {@code ArrayDataSeries}, which is backed by an array; </li>
  *
- * <li> <code>ListDataSeries</code>, which is backed by a list, and includes
+ * <li> {@code ListDataSeries}, which is backed by a list, and includes
  * static methods for reading a data series from a file or input stream; and
  * </li>
  *
- * <li> <code>AverageDataSeries</code>, which computes data series values
+ * <li> {@code AverageDataSeries}, which computes data series values
  * dynamically as a linear combination of the value of other data series
  * supplied at construction. </li>
  *
@@ -48,7 +48,7 @@ public interface DataSeries  {
   // .......................................................................
 
   public static abstract class AbstractDataSeries implements DataSeries {
-    
+
     private String   name;
     private DataSeries domain;
 
@@ -78,40 +78,41 @@ public interface DataSeries  {
     private ToIntFunction<Object> sizeFn;
     private IntToDoubleFunction function;
 
-    public FunctionDataSeries(String name, 
-                              IntToDoubleFunction function, 
+    public FunctionDataSeries(String name,
+                              IntToDoubleFunction function,
                               ToIntFunction<Object> sizeFn,
-                              DataSeries domain) { 
+                              DataSeries domain) {
       setName(name);
       this.function = function;
       this.sizeFn = sizeFn;
-      setDomain(domain); 
+      setDomain(domain);
     }
 
-    public FunctionDataSeries(String name, 
-                              IntToDoubleFunction function, 
-                              ToIntFunction<Object> sizeFn) { 
-      this(name, function, sizeFn, null); 
+    public FunctionDataSeries(String name,
+                              IntToDoubleFunction function,
+                              ToIntFunction<Object> sizeFn) {
+      this(name, function, sizeFn, null);
     }
 
-    public FunctionDataSeries(String name, 
-                              IntToDoubleFunction function, 
+    public FunctionDataSeries(String name,
+                              IntToDoubleFunction function,
                               int size,
-                              DataSeries domain) { 
-      this(name, function, constantSizeFn(size), domain); 
+                              DataSeries domain) {
+      this(name, function, constantSizeFn(size), domain);
     }
-    
-    public FunctionDataSeries(String name, 
-                              IntToDoubleFunction function, 
-                              int size) { 
+
+    public FunctionDataSeries(String name,
+                              IntToDoubleFunction function,
+                              int size) {
       this(name, function, size, null);
     }
 
-    public double get(int i) { 
+    public double get(int i) {
       if (i < 0 || i >= size()) return i;
-      return function.applyAsDouble(i); 
+      return function.applyAsDouble(i);
     }
 
+    @Override
     public int size() { return sizeFn.applyAsInt(null); }
 
     private static ToIntFunction<Object> constantSizeFn(final int size) {
@@ -127,34 +128,34 @@ public interface DataSeries  {
 
     private double[] data;
 
-    public ArrayDataSeries(String name) { 
+    public ArrayDataSeries(String name) {
       setName(name);
       setData(new double[0]);
     }
 
-    public ArrayDataSeries(String name, double[] data) { 
+    public ArrayDataSeries(String name, double[] data) {
       this(name);
-      setData(data); 
+      setData(data);
     }
 
-    public ArrayDataSeries(String name, double[] data, DataSeries domain) { 
-      this(name, data); 
-      setDomain(domain); 
+    public ArrayDataSeries(String name, double[] data, DataSeries domain) {
+      this(name, data);
+      setDomain(domain);
     }
 
     public double[] data() { return data; }
-    public void setData(double[] data) { 
+    public void setData(double[] data) {
       if (data == null) throw new NullPointerException();
-      this.data = data; 
+      this.data = data;
     }
-    
-    public double get(int i) { 
+
+    public double get(int i) {
       if (i < 0 || i >= data.length) return i;
-      return data[i]; 
+      return data[i];
     }
-    public void set(int i, double x) { 
+    public void set(int i, double x) {
       if (i < 0 || i >= data.length) return; // no-op
-      data[i] = x; 
+      data[i] = x;
     }
 
     public int size() { return data.length; }
@@ -168,39 +169,39 @@ public interface DataSeries  {
 
     private List<Double> data;
 
-    public ListDataSeries(String name) { 
+    public ListDataSeries(String name) {
       setName(name);
       setData(new ArrayList<>());
     }
 
-    public ListDataSeries(String name, List<Double> data) { 
+    public ListDataSeries(String name, List<Double> data) {
       this(name);
-      setData(data); 
+      setData(data);
     }
 
-    public ListDataSeries(String name, List<Double> data, DataSeries domain) { 
-      this(name, data); 
-      setDomain(domain); 
+    public ListDataSeries(String name, List<Double> data, DataSeries domain) {
+      this(name, data);
+      setDomain(domain);
     }
 
-    public ListDataSeries(String name, DataSeries domain) { 
-      this(name); 
-      setDomain(domain); 
+    public ListDataSeries(String name, DataSeries domain) {
+      this(name);
+      setDomain(domain);
     }
 
     public List<Double> data() { return data; }
-    public void setData(List<Double> data) { 
+    public void setData(List<Double> data) {
       if (data == null) throw new NullPointerException();
-      this.data = data; 
+      this.data = data;
     }
 
-    public double get(int i) { 
+    public double get(int i) {
       if (i < 0 || i >= data.size()) return i;
-      return data.get(i); 
+      return data.get(i);
     }
-    public void set(int i, double x) { 
+    public void set(int i, double x) {
       if (i < 0 || i >= data.size()) return; // no-op
-      data.set(i, x); 
+      data.set(i, x);
     }
     public void add(double x) { data.add(new Double(x)); }
 
@@ -211,13 +212,13 @@ public interface DataSeries  {
      * record is skipped.
      */
     public static DataSeries[] readDataSeries(RecordIterator it, boolean useHeaders) {
-      
+
       if (!it.hasNext()) return null;
       List<String> record = it.next();  // read first record
 
       int columns = record.size();
       if (columns < 1) throw new IllegalArgumentException();
-      
+
       ListDataSeries[] serieses = new ListDataSeries[columns];
       for (int col = 0; col < columns; col++) {
         ListDataSeries series = new ListDataSeries("y" + col);
@@ -235,7 +236,7 @@ public interface DataSeries  {
         }
         record = it.next();
       }
-      
+
       while (true) {
         try {
           double[] values = new double[columns];
@@ -271,7 +272,7 @@ public interface DataSeries  {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-      
+
       DataSeries[] serieses = null;
 
       if (args.length > 0) {
@@ -285,7 +286,7 @@ public interface DataSeries  {
         System.out.print(series.name() + ": ");
         System.out.println(((ListDataSeries) series).toListPairDouble());
       }
-      
+
     }
 
     @SuppressWarnings("unused")
@@ -323,7 +324,7 @@ public interface DataSeries  {
       domain();                         // to ensure domains are same
     }
 
-    public String name() { 
+    public String name() {
       StringBuilder name = new StringBuilder();
       name.append("avg(");
       boolean flag = false;
@@ -335,14 +336,14 @@ public interface DataSeries  {
       return name.toString();
     }
 
-    public double get(int i) { 
+    public double get(int i) {
       double y = 0.0;
       for (DataSeries series : components)
         y += series.get(i);
       return y / components.length;
     }
 
-    public int size() { 
+    public int size() {
       int size = Integer.MAX_VALUE;
       for (DataSeries series : components)
         size = Math.min(size, series.size());

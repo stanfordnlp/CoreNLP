@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.ToDoubleFunction;
+
 import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -281,7 +282,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
           }
 
           if (useFreqPhraseExtractedByPat)
-            score = score * scoringFunction.applyAsDouble(new Pair(en.getKey(), word));
+            score = score * scoringFunction.applyAsDouble(new Pair<>(en.getKey(), word));
           if (constVars.sqrtPatScore)
             patterns.incrementCount(en.getKey(), Math.sqrt(score));
           else

@@ -1,9 +1,11 @@
 package edu.stanford.nlp.optimization;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleUnaryOperator;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Pair;

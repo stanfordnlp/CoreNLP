@@ -21,17 +21,17 @@ import java.util.function.Predicate;
  * assume a call to hasNext will precede each call to next.  While this usage
  * is not up to the Java Iterator spec, it should work fine with
  * e.g. the Java enhanced for-loop.
- * 
- * <p>
- * 
+ *
  * Methods in Iterators are merged.
  *
  * @author dramage
  * @author dlwh {@link #flatMap(Iterable, Function)}
  * @author Huy Nguyen (htnguyen@cs.stanford.edu)
- * 
+ *
  */
 public class Iterables {
+
+  private Iterables() { } // static methods
 
   /**
    * Transformed view of the given iterable.  Returns the output

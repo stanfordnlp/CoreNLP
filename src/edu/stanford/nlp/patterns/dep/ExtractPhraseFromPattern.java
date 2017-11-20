@@ -12,8 +12,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
+
 //import org.jdom.Element;
 //import org.jdom.Namespace;
+
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
@@ -113,11 +115,11 @@ public class ExtractPhraseFromPattern {
    * And a bunch of other parameters,
    * run the pattern matcher (get SemgrexMatcher m)
    * Iterate through to get matching words/phrases
-   * 
+   *
    * Next, gets matchedGraphsForPattern.get(pattern),
    * a list of matched (String, semgraph) pairs
    * and adds the new graph and tokens if matched.
-   * 
+   *
    * I need to clarify what's going on with tokens.
    */
   public Set<IndexedWord> getSemGrexPatternNodes(SemanticGraph g,

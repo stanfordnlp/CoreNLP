@@ -3,6 +3,7 @@ package edu.stanford.nlp.ling.tokensregex;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
+
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;

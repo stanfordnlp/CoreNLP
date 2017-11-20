@@ -1,11 +1,9 @@
 package edu.stanford.nlp.classify;
 
+import java.util.function.DoubleUnaryOperator;
+
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
-
-
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -31,7 +29,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFactory<L, F>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NBLinearClassifierFactory.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(NBLinearClassifierFactory.class);
 
   private static final boolean VERBOSE = false;
 
@@ -40,8 +38,6 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
   private static final double epsilon = 1e-30;   // fudge to keep nonzero
   private boolean tuneSigma = false;
   private int folds;
-
-  final static Redwood.RedwoodChannels logger = Redwood.channels(NBLinearClassifierFactory.class);
 
 
   @Override
@@ -52,7 +48,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
   /**
    * Train weights.
    * If tuneSigma is true, the optimal sigma value is found using cross-validation:
-   * the number of folds is determined by the <code>folds</code> variable,
+   * the number of folds is determined by the {@code folds} variable,
    * if there are less training examples than folds,
    * leave-one-out is used.
    */
@@ -61,13 +57,13 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
       tuneSigma(data, labels);
     }
     if (VERBOSE) {
-      logger.info("NB CF: " + data.length + " data items ");
+      log.info("NB CF: " + data.length + " data items ");
       for (int i = 0; i < data.length; i++) {
-        log.info("Datum " + i + ": " + labels[i] + ":");
+        log.info("Datum " + i + ": " + labels[i] + ':');
         for (int j = 0; j < data[i].length; j++) {
           log.info(" " + data[i][j]);
         }
-        logger.info("");
+        log.info("");
       }
     }
     int numFeatures = numFeatures();
@@ -101,7 +97,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
           double p_c = (n_c[c] + epsilon) / (n + numClasses * epsilon);
           double p_c_f = (n_fc[f][c] + sigma) / (n_f[f] + sigma * numClasses);
           if (VERBOSE) {
-            logger.info("Prob ratio(f=" + f + ",c=" + c + ") = " + p_c_f / p_c + " (nc=" + n_c[c] + ", nf=" + n_f[f] + ", nfc=" + n_fc[f][c] + ")");
+            log.info("Prob ratio(f=" + f + ",c=" + c + ") = " + p_c_f / p_c + " (nc=" + n_c[c] + ", nf=" + n_f[f] + ", nfc=" + n_fc[f][c] + ')');
           }
           weights[f][c] = Math.log(p_c_f / p_c);
         }
@@ -163,7 +159,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
       double score = 0.0;
       double sumScore = 0.0;
       int foldSize, nbCV;
-      logger.info("Trying sigma = " + trialSigma);
+      log.info("Trying sigma = " + trialSigma);
       //test if enough training data
       if (data.length >= folds) {
         foldSize = data.length / folds;
@@ -229,7 +225,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
   }
 
   /**
-   * setTuneSigmaCV sets the <code>tuneSigma</code> flag: when turned on,
+   * setTuneSigmaCV sets the {@code tuneSigma} flag: when turned on,
    * the sigma is tuned by cross-validation.
    * If there is less data than the number of folds, leave-one-out is used.
    * The default for tuneSigma is false.

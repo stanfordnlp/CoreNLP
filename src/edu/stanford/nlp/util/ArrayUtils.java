@@ -1,10 +1,10 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -19,7 +19,7 @@ import java.util.function.Predicate;
 public class ArrayUtils  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArrayUtils.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ArrayUtils.class);
 
   /**
    * Should not be instantiated

@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.util.List;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.ToDoubleFunction;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.Datum;
@@ -89,7 +90,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   private Evaluator[] evaluators; // = null;
 
   /** A logger for this class */
-  private final static Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifierFactory.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifierFactory.class);
 
   /** This is the {@code Factory<Minimizer<DiffFunction>>} that we use over and over again. */
   private class QNFactory implements Factory<Minimizer<DiffFunction>> {

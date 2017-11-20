@@ -10,11 +10,11 @@ import java.util.function.DoubleUnaryOperator;
 public interface LineSearcher {
 
   /**
-   * Attempts to find an unconstrained minimum of the objective
-   * <code>function</code> starting at <code>initial</code>, within
-   * <code>functionTolerance</code>.
+   * Attempts to find an unconstrained minimum of the objective {@code function}
+   * starting at {@code initial}, within {@code functionTolerance}.
    *
    * @param function          the objective function
    */
-  double minimize(DoubleUnaryOperator function) ;
+  double minimize(DoubleUnaryOperator function);
+
 }

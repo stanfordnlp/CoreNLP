@@ -14,7 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;

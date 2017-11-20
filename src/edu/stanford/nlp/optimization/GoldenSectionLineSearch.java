@@ -1,13 +1,13 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
+package edu.stanford.nlp.optimization;
+
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.function.DoubleUnaryOperator;
 
 /**
  * A class to do golden section line search.  Should it implement Minimizer?  Prob. not.
@@ -17,7 +17,7 @@ import java.util.Arrays;
 public class GoldenSectionLineSearch implements LineSearcher  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(GoldenSectionLineSearch.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(GoldenSectionLineSearch.class);
 
   private static final double GOLDEN_RATIO = (1.0 + Math.sqrt(5.0)) / 2.0;
   private static final double GOLDEN_SECTION = (GOLDEN_RATIO / (1.0 + GOLDEN_RATIO));
@@ -83,7 +83,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
     double fhigh = function.applyAsDouble(high);
     if (VERBOSE) {
       log.info("Finding min between " + low + " (value: " +
-                flow + ") and " + high + " (value: " + fhigh + ")");
+                flow + ") and " + high + " (value: " + fhigh + ')');
     }
 
     double mid;
@@ -125,7 +125,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
         oldY = bestVal;
         searchRight = mid < low + (high - low)/2.0;
         if (oldY < flow && oldY < fhigh) {
-          if (VERBOSE) log.info("Found a good mid point at (" + mid + ", " + oldY + ")");
+          if (VERBOSE) log.info("Found a good mid point at (" + mid + ", " + oldY + ')');
         } else {
           log.info("Warning: GoldenSectionLineSearch grid search couldn't find slope!!");
           // revert to initial positioning and pray
@@ -137,7 +137,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
 
     memory.put(mid, oldY);
     while (geometric ? (high / low > 1 + tol) : high - low > tol) {
-      if (VERBOSE) log.info("Current low, mid, high: " + nf.format(low) + " " + nf.format(mid) + " " + nf.format(high));
+      if (VERBOSE) log.info("Current low, mid, high: " + nf.format(low) + ' ' + nf.format(mid) + ' ' + nf.format(high));
       double newX = goldenMean(searchRight ? high : low, mid);
       double newY = function.applyAsDouble(newX);
       memory.put(newX, newY);
@@ -158,7 +158,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
   }
 
   /**
-   * dump the <x,y> pairs it computed found
+   * dump the {@code <x,y>} pairs it computed found
    */
   public void dumpMemory() {
     Double[] keys = memory.keySet().toArray(new Double[memory.keySet().size()]);
@@ -176,7 +176,7 @@ public class GoldenSectionLineSearch implements LineSearcher  {
       double x = low + i * inc;
       double y = function.applyAsDouble(x);
       memory.put(x, y);
-      log.info("for point " + x + "\t" + y);
+      log.info("for point " + x + '\t' + y);
     }
     dumpMemory();
   }
