@@ -1,22 +1,29 @@
 package edu.stanford.nlp.classify;
 
-import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
-import edu.stanford.nlp.stats.*;
-import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.ling.Datum;
-import edu.stanford.nlp.ling.RVFDatum;
-import edu.stanford.nlp.optimization.LineSearcher;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import java.util.regex.Pattern;
-
-
+import edu.stanford.nlp.ling.Datum;
+import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
+import edu.stanford.nlp.optimization.LineSearcher;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.stats.MultiClassAccuracyStats;
+import edu.stanford.nlp.stats.Scorer;
+import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.SystemUtils;
+import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**

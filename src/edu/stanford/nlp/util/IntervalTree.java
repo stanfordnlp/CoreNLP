@@ -1,16 +1,20 @@
 package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
-
-import java.util.*;
+import java.util.AbstractCollection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Queue;
+import java.util.Stack;
+import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
-import java.util.function.Predicate;
-import java.util.function.Predicate;
-import java.util.function.Predicate;
-import java.util.function.Predicate;
-import java.util.function.Predicate;
 
 /**
  * An interval tree maintains a tree so that all intervals to the left start

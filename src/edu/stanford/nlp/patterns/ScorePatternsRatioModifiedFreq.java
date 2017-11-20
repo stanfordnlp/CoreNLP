@@ -1,9 +1,10 @@
 package edu.stanford.nlp.patterns;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
+import java.util.Properties;
+import java.util.Set;
 import java.util.function.ToDoubleFunction;
 import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;

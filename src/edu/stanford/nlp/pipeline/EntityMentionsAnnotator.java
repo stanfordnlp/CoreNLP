@@ -1,18 +1,30 @@
 package edu.stanford.nlp.pipeline;
 
+import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.function.Predicate;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.AcronymMatcher;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.ArraySet;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.logging.Redwood;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
 
 /**
  * Annotator that marks entity mentions in a document.

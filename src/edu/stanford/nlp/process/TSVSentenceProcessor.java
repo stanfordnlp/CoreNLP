@@ -1,8 +1,5 @@
 package edu.stanford.nlp.process;
 
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +9,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.IntUnaryOperator;
+
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.util.logging.Redwood;
+
 
 /**
  * An interface for running an action (a callback function) on each line of a TSV file representing

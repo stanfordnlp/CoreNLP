@@ -1,18 +1,13 @@
 package edu.stanford.nlp.optimization;
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.function.DoubleUnaryOperator;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.math.ArrayMath;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Stochastic Gradient Descent To Quasi Newton Minimizer.
