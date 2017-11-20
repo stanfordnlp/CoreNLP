@@ -1,11 +1,7 @@
 package edu.stanford.nlp.ie.crf; 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.function.DoubleUnaryOperator;
+
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
