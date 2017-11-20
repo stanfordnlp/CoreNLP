@@ -7,6 +7,8 @@ import edu.stanford.nlp.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,7 +72,7 @@ public class LabeledChunkIdentifier {
 
   @SuppressWarnings("unchecked")
   public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset, Class textKey, Class labelKey,
-                                          Function<Pair<CoreLabel, CoreLabel>, Boolean> checkTokensCompatible) {
+                                          Predicate<Pair<CoreLabel, CoreLabel>> checkTokensCompatible) {
     return getAnnotatedChunks(tokens, totalTokensOffset, textKey, labelKey, null, null, checkTokensCompatible);
   }
 
@@ -104,7 +106,7 @@ public class LabeledChunkIdentifier {
   public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset,
                                           Class textKey, Class labelKey,
                                           Class tokenChunkKey, Class tokenLabelKey,
-                                          Function<Pair<CoreLabel, CoreLabel>, Boolean> checkTokensCompatible) {
+                                          Predicate<Pair<CoreLabel, CoreLabel>> checkTokensCompatible) {
     List<CoreMap> chunks = new ArrayList();
     LabelTagType prevTagType = null;
     int tokenBegin = -1;
@@ -119,7 +121,7 @@ public class LabeledChunkIdentifier {
           prev = tokens.get(i-1);
         }
         Pair<CoreLabel,CoreLabel> p = Pair.makePair(token, prev);
-        isCompatible = checkTokensCompatible.apply(p);
+        isCompatible = checkTokensCompatible.test(p);
       }
       if (isEndOfChunk(prevTagType, curTagType) || !isCompatible) {
         int tokenEnd = i;

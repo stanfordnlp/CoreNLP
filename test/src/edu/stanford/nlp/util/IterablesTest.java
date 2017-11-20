@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-
+import java.util.function.Predicate;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -53,9 +53,9 @@ public class IterablesTest extends TestCase {
     List<String> values = Arrays.asList("a","HI","tHere","YO");
 
     Iterator<String> iterator = Iterables.filter(values,
-        new Function<String,Boolean>(){
+        new Predicate<String>(){
 
-      public Boolean apply(String in) {
+      public boolean test(String in) {
         return in.equals(in.toUpperCase());
       }
     }).iterator();

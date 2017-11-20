@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Random;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 
 import static org.junit.Assert.*;
@@ -424,10 +425,10 @@ public class ConcatVectorTest {
       return sum;
     }
 
-    public void map(Function<Double, Double> fn) {
+    public void map(DoubleUnaryOperator fn) {
       for (int i = 0; i < values.length; i++) {
         for (int j = 0; j < values[i].length; j++) {
-          values[i][j] = fn.apply(values[i][j]);
+          values[i][j] = fn.applyAsDouble(values[i][j]);
         }
       }
     }

@@ -1,5 +1,7 @@
 package edu.stanford.nlp.optimization;
 
+import java.util.function.DoubleUnaryOperator;
+
 /**
  * The interface for one variable function minimizers.
  *
@@ -14,5 +16,5 @@ public interface LineSearcher {
    *
    * @param function          the objective function
    */
-  double minimize(java.util.function.Function<Double, Double> function) ;
+  double minimize(DoubleUnaryOperator function) ;
 }
