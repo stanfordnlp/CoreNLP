@@ -490,9 +490,7 @@ public class SpanishXMLTreeReader implements TreeReader  {
       Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     for (final File file : fileList) {
-      pool.execute(new Runnable() {
-          public void run() {
-            try {
+      pool.execute(()-> { try {
               Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "ISO-8859-1"));
               TreeReader tr = trf.newTreeReader(file.getPath(), in);
               process(file, tr, posPattern, wordPattern, plainPrint);
@@ -501,9 +499,7 @@ public class SpanishXMLTreeReader implements TreeReader  {
               e.printStackTrace();
             } catch (IOException e) {
               e.printStackTrace();
-            }
-          }
-        });
+            }});
     }
 
     pool.shutdown();

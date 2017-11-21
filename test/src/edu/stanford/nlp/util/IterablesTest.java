@@ -7,18 +7,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * Unit tests for Iterables utility class.
  *
  * @author dramage
  */
-public class IterablesTest extends TestCase {
+public class IterablesTest {
 
+  @Test
   public void testZip() {
     String[] s1 = new String[]{"a", "b", "c"};
     Integer[] s2 = new Integer[]{1, 2, 3, 4};
@@ -34,6 +37,7 @@ public class IterablesTest extends TestCase {
   }
 
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testChain() {
     List<String> s1 = Arrays.asList(new String[]{"hi", "there"});
@@ -42,7 +46,7 @@ public class IterablesTest extends TestCase {
     List<String> s4 = Arrays.asList(new String[]{});
 
     List<String> answer = Arrays.asList(new String[]{"yoo","hi","there","yoo"});
-    List<String> chained = new ArrayList<String>();
+    List<String> chained = new ArrayList<>();
     for (String s : Iterables.chain(s3, s1, s2, s3, s4)) {
       chained.add(s);
     }
@@ -50,73 +54,61 @@ public class IterablesTest extends TestCase {
     assertEquals(answer, chained);
   }
 
+  @Test
   public void testFilter() {
     List<String> values = Arrays.asList("a","HI","tHere","YO");
 
     Iterator<String> iterator = Iterables.filter(values,
-        new Predicate<String>(){
-
-      public boolean test(String in) {
-        return in.equals(in.toUpperCase());
-      }
-    }).iterator();
+            (String in) -> in.equals(in.toUpperCase())).iterator();
 
     assertTrue(iterator.hasNext());
     assertEquals(iterator.next(), "HI");
     assertEquals(iterator.next(), "YO");
-    assertFalse(iterator.hasNext());
+    org.junit.Assert.assertFalse(iterator.hasNext());
   }
 
+  @Test
   public void testTransform() {
     List<Integer> values = Arrays.asList(1,2,3,4);
     List<Integer> squares = Arrays.asList(1,4,9,16);
 
-    Function<Integer,Integer> squarer = new Function<Integer,Integer>() {
-      public Integer apply(Integer in) {
-        return in * in;
-      }
-    };
+    Function<Integer,Integer> squarer = (Integer in)-> in * in;
 
     for (Pair<Integer,Integer> pair : Iterables.zip(Iterables.transform(values, squarer), squares)) {
       assertEquals(pair.first, pair.second);
     }
   }
 
+  @Test
   public void testMerge() {
     List<String> a = Arrays.asList("a","b","d","e");
     List<String> b = Arrays.asList("b","c","d","e");
-    Comparator<String> comparator = new Comparator<String>() {
-      public int compare(String o1, String o2) {
-        return o1.compareTo(o2);
-      }
-    };
+    Comparator<String> comparator = Comparator.naturalOrder();
 
     Iterator<Pair<String,String>> iter = Iterables.merge(a, b, comparator).iterator();
-    assertEquals(iter.next(),new Pair<String,String>("b","b"));
-    assertEquals(iter.next(),new Pair<String,String>("d","d"));
-    assertEquals(iter.next(),new Pair<String,String>("e","e"));
+    assertEquals(iter.next(), new Pair<>("b", "b"));
+    assertEquals(iter.next(), new Pair<>("d", "d"));
+    assertEquals(iter.next(), new Pair<>("e", "e"));
     assertTrue(!iter.hasNext());
   }
 
 
+  @Test
   public void testMerge3() {
     List<String> a = Arrays.asList("a","b","d","e");
     List<String> b = Arrays.asList("b","c","d","e");
     List<String> c = Arrays.asList("a", "b", "c", "e", "f");
 
-    Comparator<String> comparator = new Comparator<String>() {
-      public int compare(String o1, String o2) {
-        return o1.compareTo(o2);
-      }
-    };
+    Comparator<String> comparator = Comparator.naturalOrder();
 
     Iterator<Triple<String,String,String>> iter = Iterables.merge(a, b, c, comparator).iterator();
-    assertEquals(iter.next(),new Triple<String,String,String>("b","b", "b"));
-    assertEquals(iter.next(),new Triple<String,String,String>("e","e", "e"));
-    assertTrue( ! iter.hasNext());
+    assertEquals(iter.next(), new Triple<>("b", "b", "b"));
+    assertEquals(iter.next(), new Triple<>("e", "e", "e"));
+    assertTrue(!iter.hasNext());
   }
 
 
+  @Test
   public void testGroup() {
     String[] input = new String[]{
         "0 ab",
@@ -129,11 +121,7 @@ public class IterablesTest extends TestCase {
         "3 kk"};
     int[] counts = new int[]{3,1,2,2};
 
-    Comparator<String> fieldOne= new Comparator<String>() {
-      public int compare(String o1, String o2) {
-        return o1.split(" ")[0].compareTo(o2.split(" ")[0]);
-      }
-    };
+    Comparator<String> fieldOne = Comparator.comparing(o -> o.split(" ")[0]);
 
     int index = 0;
     int group = 0;
@@ -158,16 +146,17 @@ public class IterablesTest extends TestCase {
     assertEquals("Wrong number of groups", counts.length, group);
   }
 
+  @Test
   public void testSample() {
     // make sure correct number of items is sampled and items are in range
     Iterable<Integer> items = Arrays.asList(5, 4, 3, 2, 1);
     int count = 0;
     for (Integer item: Iterables.sample(items, 5, 2, new Random())) {
       ++count;
-      Assert.assertTrue(item <= 5);
-      Assert.assertTrue(item >= 1);
+      assertTrue(item <= 5);
+      assertTrue(item >= 1);
     }
-    Assert.assertEquals(2, count);
+    assertEquals(2, count);
   }
 
 }

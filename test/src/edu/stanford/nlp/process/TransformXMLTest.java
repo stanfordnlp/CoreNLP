@@ -21,11 +21,7 @@ public class TransformXMLTest extends TestCase {
   private String expectedAnswer2 =
           "<doc> <el arg=\"funny&amp;&apos;&gt;&quot;stuff\"> yo! C&amp;C!yo! C&amp;C! </el> </doc>";
 
-  private Function<String,String> duplicate = new Function<String,String>() {
-    public String apply(String in) {
-      return in + in;
-    }
-  };
+  private Function<String,String> duplicate = (String in)->{ return in + in;};
 
   public void testTransformXML1() {
     TransformXML<String> tx = new TransformXML<>();
