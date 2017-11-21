@@ -133,7 +133,6 @@ public final class CoreNLPProtos {
         internalGetValueMap() {
       return internalValueMap;
     }
-<<<<<<< HEAD
     private static com.google.protobuf.Internal.EnumLiteMap<Language>
         internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<Language>() {
@@ -141,11 +140,6 @@ public final class CoreNLPProtos {
               return Language.valueOf(number);
             }
           };
-=======
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        Language> internalValueMap =
-          (int number)->{ return Language.forNumber(number);};
->>>>>>> (refactor) some opportunities to use Anonymous inner Classes
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
@@ -253,7 +247,6 @@ public final class CoreNLPProtos {
         internalGetValueMap() {
       return internalValueMap;
     }
-<<<<<<< HEAD
     private static com.google.protobuf.Internal.EnumLiteMap<Sentiment>
         internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<Sentiment>() {
@@ -261,11 +254,6 @@ public final class CoreNLPProtos {
               return Sentiment.valueOf(number);
             }
           };
-=======
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        Sentiment> internalValueMap =
-          (int number)->{ return Sentiment.forNumber(number);};
->>>>>>> (refactor) some opportunities to use Anonymous inner Classes
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
@@ -391,7 +379,6 @@ public final class CoreNLPProtos {
         internalGetValueMap() {
       return internalValueMap;
     }
-<<<<<<< HEAD
     private static com.google.protobuf.Internal.EnumLiteMap<NaturalLogicRelation>
         internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<NaturalLogicRelation>() {
@@ -399,11 +386,6 @@ public final class CoreNLPProtos {
               return NaturalLogicRelation.valueOf(number);
             }
           };
-=======
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        NaturalLogicRelation> internalValueMap =
-          (int number)->{ return NaturalLogicRelation.forNumber(number);};
->>>>>>> (refactor) some opportunities to use Anonymous inner Classes
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
