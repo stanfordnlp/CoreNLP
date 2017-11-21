@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.international.spanish; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.spanish;
 
 import java.io.*;
 import java.util.*;
@@ -10,7 +9,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import edu.stanford.nlp.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -29,6 +27,8 @@ import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * A reader for XML format AnCora treebank files.
@@ -76,7 +76,7 @@ public class SpanishXMLTreeReader implements TreeReader  {
    * Read parse trees from a Reader.
    *
    * @param filename
-   * @param in The <code>Reader</code>
+   * @param in The {@code Reader}
    * @param simplifiedTagset If `true`, convert part-of-speech labels to a
    *          simplified version of the EAGLES tagset, where the tags do not
    *          include extensive morphological analysis
@@ -150,11 +150,11 @@ public class SpanishXMLTreeReader implements TreeReader  {
     return t;
   }
 
-  private boolean isWordNode(Element node) {
+  private static boolean isWordNode(Element node) {
     return node.hasAttribute(ATTR_WORD) && !node.hasChildNodes();
   }
 
-  private boolean isEllipticNode(Element node) {
+  private static boolean isEllipticNode(Element node) {
     return node.hasAttribute(ATTR_ELLIPTIC);
   }
 
@@ -272,11 +272,11 @@ public class SpanishXMLTreeReader implements TreeReader  {
     return pos;
   }
 
-  private String getWord(Element node) {
+  private static String getWord(Element node) {
     String word = node.getAttribute(ATTR_WORD);
-    if (word.equals(""))
+    if (word.isEmpty()) {
       return SpanishTreeNormalizer.EMPTY_LEAF_VALUE;
-
+    }
     return word.trim();
   }
 
@@ -301,7 +301,7 @@ public class SpanishXMLTreeReader implements TreeReader  {
         }
       }
 
-      return (kids.size() == 0) ? null : buildConstituentNode(eRoot, kids);
+      return kids.isEmpty() ? null : buildConstituentNode(eRoot, kids);
     }
   }
 
@@ -381,7 +381,7 @@ public class SpanishXMLTreeReader implements TreeReader  {
    * @param pos Regular expression to match word (may be null, in which
    *     case any word is allowed)
    */
-  public static boolean shouldPrintTree(Tree tree, Pattern pos, Pattern word) {
+  private static boolean shouldPrintTree(Tree tree, Pattern pos, Pattern word) {
     for(Tree t : tree) {
       if(t.isPreTerminal()) {
         CoreLabel label = (CoreLabel) t.label();
@@ -405,9 +405,9 @@ public class SpanishXMLTreeReader implements TreeReader  {
 
     StringBuilder sb = new StringBuilder();
     List<Tree> leaves = tree.getLeaves();
-    for (Tree leaf : leaves)
-      sb.append(((CoreLabel) leaf.label()).value()).append(" ");
-
+    for (Tree leaf : leaves) {
+      sb.append(leaf.label().value()).append(' ');
+    }
     return sb.toString();
   }
 
@@ -495,8 +495,6 @@ public class SpanishXMLTreeReader implements TreeReader  {
               TreeReader tr = trf.newTreeReader(file.getPath(), in);
               process(file, tr, posPattern, wordPattern, plainPrint);
               tr.close();
-            } catch (FileNotFoundException e) {
-              e.printStackTrace();
             } catch (IOException e) {
               e.printStackTrace();
             }});
@@ -509,4 +507,5 @@ public class SpanishXMLTreeReader implements TreeReader  {
       throw new RuntimeInterruptedException(e);
     }
   }
+
 }

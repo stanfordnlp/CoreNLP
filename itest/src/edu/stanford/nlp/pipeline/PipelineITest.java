@@ -3,19 +3,19 @@ package edu.stanford.nlp.pipeline;
 import java.util.List;
 
 import org.junit.Assert;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Iterables;
 import edu.stanford.nlp.util.StringUtils;
 
-public class PipelineITest extends TestCase {
+public class PipelineITest {
 
+  @Test
   public void testPipeline() throws Exception {
     // create pipeline
     AnnotationPipeline pipeline = new AnnotationPipeline();
@@ -142,6 +142,7 @@ public class PipelineITest extends TestCase {
   }
 
   private static String join(List<CoreLabel> tokens) {
-    return StringUtils.join(Iterables.transform(tokens, (CoreLabel token)->{ return token.get(CoreAnnotations.TextAnnotation.class);}));
+    return StringUtils.join(Iterables.transform(tokens, (CoreLabel token) -> token.get(CoreAnnotations.TextAnnotation.class)));
   }
+
 }
