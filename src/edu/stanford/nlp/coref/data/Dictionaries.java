@@ -218,9 +218,10 @@ public class Dictionaries  {
   public Counter<String> dictScore = new ClassicCounter<>();
 
   private void setPronouns() {
-    for(String s: animatePronouns){
-      personPronouns.add(s);
-    }
+    animatePronouns.forEach(
+        s -> {
+          personPronouns.add(s);
+        });
 
     allPronouns.addAll(firstPersonPronouns);
     allPronouns.addAll(secondPersonPronouns);
@@ -230,11 +231,6 @@ public class Dictionaries  {
     stopWords.addAll(allPronouns);
   }
 
-  /** The format of each line of this file is
-   *     fullStateName ( TAB  abbrev )*
-   *  The file is cased and checked cased.
-   *  The result is: statesAbbreviation is a hash from each abbrev to the fullStateName.
-   */
   public void loadStateAbbreviation(String statesFile) {
     BufferedReader reader = null;
     try {

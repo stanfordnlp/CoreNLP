@@ -146,12 +146,9 @@ public abstract class Sieve implements Serializable  {
   }
 
   public static boolean hasThat(List<CoreLabel> words) {
-    for(CoreLabel cl : words) {
-      if(cl.word().equalsIgnoreCase("that") && cl.tag().equalsIgnoreCase("IN")) {
-        return true;
-      }
-    }
-    return false;
+    return words
+        .stream()
+        .anyMatch(cl -> cl.word().equalsIgnoreCase("that") && cl.tag().equalsIgnoreCase("IN"));
   }
 
   public static boolean hasToVerb(List<CoreLabel> words) {
