@@ -85,22 +85,24 @@ import edu.stanford.nlp.util.logging.Redwood;
  * input files are expected to
  * be one word per line with the columns indicating things like the word,
  * POS, chunk, and class.
- * <p>
+ *
  * <b>Typical usage</b>
- * <p>For running a trained model with a provided serialized classifier: <p>
- * {@code
- * java -server -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier -loadClassifier
- * conll.ner.gz -textFile samplesentences.txt
- * }<p>
+ *
+ * For running a trained model with a provided serialized classifier:
+ *
+ * {@code java -server -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier -loadClassifier
+ * conll.ner.gz -textFile samplesentences.txt }
+ *
  * When specifying all parameters in a properties file (train, test, or
- * runtime):<p>
- * {@code
- * java -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier -prop propFile
- * }<p>
- * To train and test a model from the command line:<p>
+ * runtime):
+ *
+ * {@code java -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier -prop propFile }
+ *
+ * To train and test a model from the command line:
+ *
  * {@code java -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier
  * -trainFile trainFile -testFile testFile -goodCoNLL &gt; output }
- * <p>
+ *
  * Features are defined by a {@link FeatureFactory}; the
  * {@link FeatureFactory} which is used by default is
  * {@link NERFeatureFactory}, and you should look there for feature templates.
@@ -108,7 +110,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * recommended method) or on the command line.  The features are read into
  * a {@link SeqClassifierFlags} object, which the
  * user need not know much about, unless one wishes to add new features.
- * <p>
+ *
  * CMMClassifier may also be used programmatically.  When creating a new instance, you
  * <i>must</i> specify a properties file.  The other way to get a CMMClassifier is to
  * deserialize one via {@link CMMClassifier#getClassifier(String)}, which returns a
@@ -122,7 +124,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Huy Nguyen
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in types
  */
-
 public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassifier<IN>  {
 
   /** A logger for this class */
@@ -132,12 +133,12 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
   /** The set of empirically legal label sequences (of length (order) at most
    *  {@code flags.maxLeft}).  Used to filter valid class sequences if
-   *  {@code useObuseObservedSequencesOnly} is set.
+   *  {@code useObservedSequencesOnly} is set.
    */
   Set<List<String>> answerArrays;
 
   /** Default place to look in Jar file for classifier. */
-  public static final String DEFAULT_CLASSIFIER = "/classifiers/ner-eng-ie.cmm-3-all2006.ser.gz";
+  public static final String DEFAULT_CLASSIFIER = "classifiers/ner-eng-ie.cmm-3-all2006.ser.gz";
 
   protected CMMClassifier() {
     super(new SeqClassifierFlags());
@@ -1024,10 +1025,11 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
     } catch (Exception e) {
       log.info("Error serializing to " + serializePath);
-      e.printStackTrace();
+      log.err(e);
     }
   }
 
+  @Override
   public void serializeClassifier(ObjectOutputStream oos) {
 
     //log.info("Serializing classifier to " + serializePath + "...");
@@ -1049,7 +1051,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
     } catch (Exception e) {
       //log.info("Error serializing to " + serializePath);
-      e.printStackTrace();
+      log.err(e);
     }
   }
 
@@ -1059,7 +1061,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    * WILL ONLY WORK IF RUN INSIDE A JAR FILE**
    */
   public void loadDefaultClassifier() {
-    loadJarClassifier(DEFAULT_CLASSIFIER, null);
+    loadClassifierNoExceptions(DEFAULT_CLASSIFIER, null);
   }
 
   /**
@@ -1634,7 +1636,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     if (loadPath != null) {
       cmm.loadClassifierNoExceptions(loadPath, props);
     } else if (cmm.flags.loadJarClassifier != null) {
-      cmm.loadJarClassifier(cmm.flags.loadJarClassifier, props);
+      // legacy option support
+      cmm.loadClassifierNoExceptions(cmm.flags.loadJarClassifier, props);
     } else if (cmm.flags.trainFile != null) {
       if (cmm.flags.biasedTrainFile != null) {
         cmm.trainSemiSup();

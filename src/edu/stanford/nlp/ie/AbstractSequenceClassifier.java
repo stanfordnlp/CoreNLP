@@ -89,7 +89,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
 
-  // Thang Sep13: multiple feature factories (NERFeatureFactory, EmbeddingFeatureFactory)
+  /** Support multiple feature factories (NERFeatureFactory, EmbeddingFeatureFactory) - Thang Sep 13, 2013. */
   public List<FeatureFactory<IN>> featureFactories;
 
   protected IN pad;
@@ -1562,38 +1562,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     } catch (Exception e) {
       log.info("Error deserializing " + file.getAbsolutePath());
       throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * This function will load a classifier that is stored inside a jar file (if
-   * it is so stored). The classifier should be specified as its full path
-   * in a jar. If the classifier is not stored in the jar file or this is not run
-   * from inside a jar file, then this function will throw a RuntimeException.
-   *
-   * @param modelName
-   *          The name of the model file. Iff it ends in .gz, then it is assumed
-   *          to be gzip compressed.
-   * @param props
-   *          A Properties object which can override certain properties in the
-   *          serialized file, such as the DocumentReaderAndWriter. You can pass
-   *          in {@code null} to override nothing.
-   */
-  // todo [john bauer 2015]: This method may not be necessary.  Perhaps use the IOUtils equivalents
-  public void loadJarClassifier(String modelName, Properties props) {
-    Timing t = new Timing();
-    try {
-      InputStream is = getClass().getResourceAsStream(modelName);
-      if (modelName.endsWith(".gz")) {
-        is = new GZIPInputStream(is);
-      }
-      is = new BufferedInputStream(is);
-      loadClassifier(is, props);
-      is.close();
-      t.done(log, "Loading CLASSPATH classifier " + modelName);
-    } catch (Exception e) {
-      String msg = "Error loading classifier from jar file (most likely you are not running this code from a jar file or the named classifier is not stored in the jar file)";
-      throw new RuntimeException(msg, e);
     }
   }
 

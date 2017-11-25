@@ -201,9 +201,9 @@ You can specify which model to load with flags, either one on disk:
 
 java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/all.3class.crf.ser.gz 1234
 
-Or if you have put a model inside the jar file:
+Or if you have put a model inside the jar file, as a resource under, say, models:
 
-java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadJarClassifier all.3class.crf.ser.gz 1234
+java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier models/all.3class.crf.ser.gz 1234
 
 
 RUNNING CLASSIFIERS FROM INSIDE A JAR FILE

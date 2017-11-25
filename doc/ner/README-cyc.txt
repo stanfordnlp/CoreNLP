@@ -6,7 +6,7 @@ entity recognition system, including facilities to train models from
 supervised training data and pre-trained models for English.
 
 (c) 2002-2006.  The Board of Trustees of The Leland
-    Stanford Junior University. All Rights Reserved. 
+    Stanford Junior University. All Rights Reserved.
 
 Original CRF code by Jenny Finkel.
 Additional modules, features, internationalization, compaction, and
@@ -14,7 +14,7 @@ support code by Christopher Manning, Christopher Cox, Huy Nguyen and
 Shipra Dingare.
 
 
-LICENSE 
+LICENSE
 
 Please see the file LICENCE.txt
 
@@ -48,7 +48,7 @@ All of the serialized classifiers come in two versions, the second of
 which uses a distributional similarity lexicon to improve performance
 (by about 1.5% F-measure).  These classifiers have additional features
 which make them perform substantially better, but they require rather
-more memory.  
+more memory.
 
 
 QUICKSTART INSTRUCTIONS
@@ -81,9 +81,9 @@ directory with the command:
 java -mx600m edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/ner-eng.8class.better.crf.gz -textFile sample.txt
 
 When run from a jar file, you also have the option of using a serialized
-classifier contained in the jar file.  A default serialized classifier 
+classifier contained in the jar file.  A default serialized classifier
 (ner-eng-ie.crf-3-all2006.ser.gz) is in the jar file and can be used by
-just saying: 
+just saying:
 
 java -mx300m -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier -textFile sample.txt
 
@@ -105,31 +105,31 @@ as from using CRFClassifier.  For more information on API calls, look in
 the enclosed javadoc directory: load index.html in a browser and look
 first at the edu.stanford.nlp.ie.crf package and CRFClassifier class.
 If you wish to train your own NER systems, look also at the
-edu.stanford.nlp.ie package NERFeatureFactory class. 
+edu.stanford.nlp.ie package NERFeatureFactory class.
 
 
 SERVER VERSION
 
 The NER code may also be run as a server listening on a socket:
 
-java -server -mx400m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer 1234
+java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer 1234
 
-You can specify which model to load with flags, either one on disk or one
-inside the jar file:
+You can specify which model to load with flags, either one on disk:
 
-java -server -mx400m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/ner-eng-ie.crf-3-all2006.ser.gz 1234
+java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/all.3class.crf.ser.gz 1234
 
-java -server -mx400m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadJarClassifier ner-eng-ie.crf-3-all2006.ser.gz 1234
+Or if you have put a model inside the jar file, as a resource under, say, models:
+
+java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier models/all.3class.crf.ser.gz 1234
 
 
 RUNNING CLASSIFIERS FROM INSIDE A JAR FILE
 
 The software can run any serialized classifier from within a jar file by
-giving the flag -loadJarClassifier resourceName .  An end user can make
-their own jar files with the desired NER models contained inside.  The
-serialized classifier must be located immediately under classifiers/ in
-the jar file, with the name given.  This allows single jar file
-deployment.
+following the -loadClassifier flag by some resource available within a
+jar file on the CLASSPATH.  An end user can make
+their own jar files with the desired NER models contained inside.
+This allows single jar file deployment.
 
 
 PERFORMANCE GUIDELINES

@@ -156,7 +156,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   /**
    * Name of default serialized classifier resource to look for in a jar file.
    */
-  public static final String DEFAULT_CLASSIFIER = "/edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
+  public static final String DEFAULT_CLASSIFIER = "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
   private static final boolean VERBOSE = false;
 
   /**
@@ -2642,7 +2642,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * WHICH HAS A SERIALIZED CLASSIFIER STORED INSIDE IT.
    */
   public void loadDefaultClassifier() {
-    loadJarClassifier(DEFAULT_CLASSIFIER, null);
+    loadClassifierNoExceptions(DEFAULT_CLASSIFIER);
   }
 
   public void loadTagIndex() {
@@ -2819,7 +2819,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * WHICH HAS A SERIALIZED CLASSIFIER STORED INSIDE IT.
    */
   public void loadDefaultClassifier(Properties props) {
-    loadJarClassifier(DEFAULT_CLASSIFIER, props);
+    loadClassifierNoExceptions(DEFAULT_CLASSIFIER, props);
   }
 
   /**
@@ -2845,20 +2845,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   public static <INN extends CoreMap> CRFClassifier<INN> getDefaultClassifier(Properties props) {
     CRFClassifier<INN> crf = new CRFClassifier<>();
     crf.loadDefaultClassifier(props);
-    return crf;
-  }
-
-  /**
-   * Used to load a classifier stored as a resource inside a jar file. THIS
-   * FUNCTION WILL ONLY WORK IF THE CODE WAS LOADED FROM A JAR FILE WHICH HAS A
-   * SERIALIZED CLASSIFIER STORED INSIDE IT.
-   *
-   * @param resourceName Name of classifier resource inside the jar file.
-   * @return A CRFClassifier stored in the jar file
-   */
-  public static <INN extends CoreMap> CRFClassifier<INN> getJarClassifier(String resourceName, Properties props) {
-    CRFClassifier<INN> crf = new CRFClassifier<>();
-    crf.loadJarClassifier(resourceName, props);
     return crf;
   }
 
@@ -2992,7 +2978,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         throw new RuntimeException("error loading " + loadTextPath, e);
       }
     } else if (crf.flags.loadJarClassifier != null) {
-      crf.loadJarClassifier(crf.flags.loadJarClassifier, props);
+      // legacy option support
+      crf.loadClassifierNoExceptions(crf.flags.loadJarClassifier, props);
     } else if (crf.flags.trainFile != null || crf.flags.trainFileList != null) {
       Timing timing = new Timing();
       // temporarily unlimited size of knownLCWords

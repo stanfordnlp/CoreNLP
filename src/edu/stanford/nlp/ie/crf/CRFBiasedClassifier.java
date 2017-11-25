@@ -90,7 +90,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
     return new CRFDatum<>(features, new CRFLabel(labels), null);
   }
 
-  void addBiasFeature() {
+  private void addBiasFeature() {
     if(!featureIndex.contains(BIAS)) {
       featureIndex.add(BIAS);
       double[][] newWeights = new double[weights.length+1][];
@@ -151,12 +151,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
 
   /** The main method, which is essentially the same as in CRFClassifier. See the class documentation. */
   public static void main(String[] args) throws Exception {
-    log.info("CRFBiasedClassifier invoked at " + new Date()
-            + " with arguments:");
-    for (String arg : args) {
-      log.info(" " + arg);
-    }
-    log.info();
+    StringUtils.logInvocationString(log, args);
 
     Properties props = StringUtils.argsToProperties(args);
     CRFBiasedClassifier<CoreLabel> crf = new CRFBiasedClassifier<>(props);
@@ -166,7 +161,8 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
     if (loadPath != null) {
       crf.loadClassifierNoExceptions(loadPath, props);
     } else if (crf.flags.loadJarClassifier != null) {
-      crf.loadJarClassifier(crf.flags.loadJarClassifier, props);
+      // legacy support of old option
+      crf.loadClassifierNoExceptions(crf.flags.loadJarClassifier, props);
     } else {
       crf.loadDefaultClassifier();
     }
