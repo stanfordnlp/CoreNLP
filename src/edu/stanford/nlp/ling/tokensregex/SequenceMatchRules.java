@@ -15,30 +15,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Rules for matching sequences using regular expressions
- * <p>
+ * Rules for matching sequences using regular expressions.
+ *
  * There are 2 types of rules:
+ *
  * <ol>
  * <li><b>Assignment rules</b> which assign a value to a variable for later use.
  * </li>
  * <li><b>Extraction rules</b> which specifies how regular expression patterns are to be matched against text,
  *   which matched text expressions are to extracted, and what value to assign to the matched expression.</li>
  * </ol>
- * </p>
  *
- * NOTE: {@code #} or {@code //} can be used to indicates one-line comments
  *
- * <p><b>Assignment Rules</b> are used to assign values to variables.
+ * NOTE: {@code #} or {@code //} can be used to indicates one-line comments.
+ *
+ * <b>Assignment Rules</b> are used to assign values to variables.
  *     The basic format is: {@code variable = value}
- * </p>
- * <p>
+ *
  * <em>Variable Names</em>:
  *   <ul>
  *     <li>Variable names should follow the pattern [A-Za-z_][A-Za-z0-9_]*</li>
  *     <li>Variable names for use in regular expressions (to be expanded later) must start with {@code $}</li>
  *   </ul>
- * </p>
- * <p>
+ *
  * <em>Value Types</em>:
  * <table>
  *   <tr><th>Type</th><th>Format</th><th>Example</th><th>Description</th></tr>
@@ -54,8 +53,7 @@ import java.util.regex.Pattern;
  *   <tr><td>{@code LIST}</td><td>{@code ( [item1] , [item2], ... )}</td><td>{@code ("red", "blue", "yellow" )}</td>
  *       <td></td></tr>
  * </table>
- * </p>
- * <p>
+ *
  * Some typical uses and examples for assignment rules include:
  * <ol>
  *  <li>Assignment of value to variables for use in later rules</li>
@@ -84,7 +82,6 @@ import java.util.regex.Pattern;
  *  </li>
  *  <li>Defining options</li>
  * </ol>
- * </p>
  *
  * Predefined values are:
  * <table>
@@ -95,8 +92,7 @@ import java.util.regex.Pattern;
  *   <tr><td>{@code NIL}</td><td>{@code}</td><td>The {@code null} value.</td></tr>
  *   <tr><td>{@code tags}</td><td>{@code Class}</td><td>The annotation key {@link edu.stanford.nlp.ling.tokensregex.types.Tags.TagsAnnotation}.</td></tr>
  * </table>
- * </p>
-
+ *
  * <p><b>Extraction Rules</b> specifies how regular expression patterns are to be matched against text.
  * See {@link CoreMapExpressionExtractor} for more information on the types of the rules, and in what sequence the rules are applied.
  * A basic rule can be specified using the following template:
@@ -119,7 +115,7 @@ import java.util.regex.Pattern;
  *     result: 1
  *   }
  * </pre>
- * </p>
+ *
  * Extraction rule fields (most fields are optional):
  * <table>
  *   <tr><th>Field</th><th>Values</th><th>Example</th><th>Description</th></tr>

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -10,10 +9,11 @@ import edu.stanford.nlp.international.arabic.pipeline.DefaultLexicalMapper;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
 import java.util.function.Function;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
- * This escaper is intended for use on flat input to be parsed by <code>LexicalizedParser</code>.
+ * This escaper is intended for use on flat input to be parsed by {@code LexicalizedParser}.
  * It performs these functions functions:
  * <ul>
  *  <li>Deletes the clitic markers inserted by the IBM segmenter ('#' and '+')
@@ -22,10 +22,10 @@ import java.util.function.Function;
  *  <li>Applies the same orthographic normalization performed by {@link edu.stanford.nlp.trees.international.arabic.ArabicTreeNormalizer}
  *  <li>intern()'s strings
  * </ul>
- * <p>
+ *
  * This class supports both Buckwalter and UTF-8 encoding.
- * <p>
- * IMPORTANT: This class must implement <code>Function<List<HasWord>, List<HasWord>></code>
+ *
+ * IMPORTANT: This class must implement {@code Function<List<HasWord>, List<HasWord>>}
  * in order to run with the parser.
  *
  * @author Christopher Manning
@@ -34,7 +34,7 @@ import java.util.function.Function;
 public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IBMArabicEscaper.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(IBMArabicEscaper.class);
 
   private static final Pattern pEnt = Pattern.compile("\\$[a-z]+_\\((.*?)\\)");
   private boolean warnedEntityEscaping = false;
@@ -70,14 +70,16 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
     String firstStage = stripAnnotationsAndClassing(word);
 
     String secondStage = ATBTreeUtils.escape(firstStage);
-    if(secondStage.length() == 0)
+    if (secondStage.isEmpty()) {
       return firstStage;
-    else if(!firstStage.equals(secondStage))
+    } else if (!firstStage.equals(secondStage)) {
       return secondStage;
+    }
 
     String thirdStage = lexMapper.map(null, secondStage);
-    if(thirdStage.length() == 0)
+    if (thirdStage.isEmpty()) {
       return secondStage;
+    }
     return thirdStage;
 
     //    Matcher mAM = pAM.matcher(w);
@@ -104,7 +106,7 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
 
   /**
    * Removes IBM clitic annotations and classing from a word.
-   * <p>
+   *
    * Note: We do not want to nullify a word, so we only perform these operations
    * on words of length 1 or more.
    *
@@ -140,9 +142,10 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
       }
     }
 
-    //Don't map a word to null
-    if(w.length() == 0)
+    // Don't map a word to null
+    if (w.isEmpty()) {
       return word;
+    }
     return w;
   }
 
@@ -155,6 +158,7 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
    *  @return A copy of the input with each word escaped.
    *  @throws RuntimeException If a word is mapped to null
    */
+  @Override
   public List<HasWord> apply(List<HasWord> sentence) {
     List<HasWord> newSentence = new ArrayList<>(sentence);
 
@@ -177,17 +181,18 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
     String escapedWord = (annotationsAndClassingOnly) ?
         stripAnnotationsAndClassing(w) : escapeString(w);
 
-    if(escapedWord.equals(""))
-      throw new RuntimeException(String.format("Word (%s) mapped to null",w));
+    if (escapedWord.isEmpty()) {
+      throw new RuntimeException(String.format("Word (%s) mapped to null", w));
+    }
 
     return escapedWord.intern();
   }
 
   /** This main method preprocesses one-sentence-per-line input, making the
    *  same changes as the Function.  By default it writes the output to files
-   *  with the same name as the files passed in on the command line but with 
-   *  <code>.sent</code> appended to their names.  If you give the flag 
-   *  <code>-f</code> then output is instead sent to stdout.  Input and output
+   *  with the same name as the files passed in on the command line but with
+   *  {@code .sent} appended to their names.  If you give the flag
+   *  {@code -f} then output is instead sent to stdout.  Input and output
    *  is always in UTF-8.
    *
    *  @param args A list of filenames.  The files must be UTF-8 encoded.
