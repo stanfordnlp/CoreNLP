@@ -301,7 +301,6 @@ public class KBPAnnotator implements Annotator {
         // look for a PERSON kbp mention in TITLE+ (PERSON+)
         TokenSequenceMatcher titlePersonMatcher = titlePersonPattern.matcher(corefMentionTokens);
         if (titlePersonMatcher.find()) {
-          System.err.println("woo hoo!");
           List<CoreMap> overallMatch = titlePersonMatcher.groupNodes(0);
           List<CoreMap> personWithinMatch = titlePersonMatcher.groupNodes(1);
           if (overallMatch.size() == corefMentionTokens.size()) {
@@ -444,7 +443,7 @@ public class KBPAnnotator implements Annotator {
       if (bestKBPMentionForChain != null) {
         for (CoreMap kbpMention : corefChainKBPMentions) {
           if (kbpMention != null) {
-            System.err.println("---");
+            //System.err.println("---");
             // ad hoc filters ; assume acceptable unless a filter blocks it
             boolean acceptableLink = true;
             // block people matches without a token overlap, exempting pronominal to non-pronominal
@@ -458,7 +457,7 @@ public class KBPAnnotator implements Annotator {
                 kbpMentionNERTag.equals("PERSON") && bestKBPMentionForChainNERTag.equals("PERSON")
                 && !kbpIsPronominalMention(kbpMention.get(CoreAnnotations.TokensAnnotation.class).get(0))
                 && !kbpIsPronominalMention(bestKBPMentionForChain.get(CoreAnnotations.TokensAnnotation.class).get(0))) {
-              System.err.println("testing PERSON to PERSON coref link");
+              //System.err.println("testing PERSON to PERSON coref link");
               boolean tokenMatchFound = false;
               for (CoreLabel kbpToken : kbpMention.get(CoreAnnotations.TokensAnnotation.class)) {
                 for (CoreLabel bestKBPToken : bestKBPMentionForChain.get(CoreAnnotations.TokensAnnotation.class)) {
