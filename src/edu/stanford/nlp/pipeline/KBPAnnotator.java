@@ -284,6 +284,8 @@ public class KBPAnnotator implements Annotator {
     // map coref mentions into kbp mentions (possibly null if no corresponding kbp mention)
     List<CoreMap> annSentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
     // create a list of kbp mentions in this coref chain, possibly all null
+    //System.err.println("---");
+    //System.err.println("KBP mentions for coref chain");
     List<CoreMap> kbpMentionsForCorefChain = corefChain.getMentionsInTextualOrder().stream().map((cm) -> {
       CoreMap cmSentence = annSentences.get(cm.sentNum - 1);
       List<CoreLabel> cmSentenceTokens = cmSentence.get(CoreAnnotations.TokensAnnotation.class);
@@ -299,6 +301,7 @@ public class KBPAnnotator implements Annotator {
         // look for a PERSON kbp mention in TITLE+ (PERSON+)
         TokenSequenceMatcher titlePersonMatcher = titlePersonPattern.matcher(corefMentionTokens);
         if (titlePersonMatcher.find()) {
+          System.err.println("woo hoo!");
           List<CoreMap> overallMatch = titlePersonMatcher.groupNodes(0);
           List<CoreMap> personWithinMatch = titlePersonMatcher.groupNodes(1);
           if (overallMatch.size() == corefMentionTokens.size()) {
@@ -309,6 +312,8 @@ public class KBPAnnotator implements Annotator {
           }
         }
       }
+      if (kbpMentionFound != null)
+        System.err.println(kbpMentionFound.get(CoreAnnotations.TextAnnotation.class));
       return kbpMentionFound;
     }).collect(Collectors.toList());
     // map kbp mentions to the lengths of their text
@@ -438,8 +443,42 @@ public class KBPAnnotator implements Annotator {
       CoreMap bestKBPMentionForChain = corefChainKBPMentionsAndBestIndex.second();
       if (bestKBPMentionForChain != null) {
         for (CoreMap kbpMention : corefChainKBPMentions) {
-          if (kbpMention != null)
-            mentionToCanonicalMention.put(kbpMention, bestKBPMentionForChain);
+          if (kbpMention != null) {
+            System.err.println("---");
+            // ad hoc filters ; assume acceptable unless a filter blocks it
+            boolean acceptableLink = true;
+            // block people matches without a token overlap, exempting pronominal to non-pronominal
+            // good: Ashton --> Catherine Ashton
+            // good: she --> Catherine Ashton
+            // bad: Morsi --> Catherine Ashton
+            String kbpMentionNERTag = kbpMention.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+            String bestKBPMentionForChainNERTag =
+                bestKBPMentionForChain.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+            if (kbpMentionNERTag != null && bestKBPMentionForChainNERTag != null &&
+                kbpMentionNERTag.equals("PERSON") && bestKBPMentionForChainNERTag.equals("PERSON")
+                && !kbpIsPronominalMention(kbpMention.get(CoreAnnotations.TokensAnnotation.class).get(0))
+                && !kbpIsPronominalMention(bestKBPMentionForChain.get(CoreAnnotations.TokensAnnotation.class).get(0))) {
+              System.err.println("testing PERSON to PERSON coref link");
+              boolean tokenMatchFound = false;
+              for (CoreLabel kbpToken : kbpMention.get(CoreAnnotations.TokensAnnotation.class)) {
+                for (CoreLabel bestKBPToken : bestKBPMentionForChain.get(CoreAnnotations.TokensAnnotation.class)) {
+                  if (kbpToken.word().toLowerCase().equals(bestKBPToken.word().toLowerCase())) {
+                    tokenMatchFound = true;
+                    break;
+                  }
+                }
+                if (tokenMatchFound)
+                  break;
+              }
+              if (!tokenMatchFound)
+                acceptableLink = false;
+            }
+            // check the coref link passed the filters
+            if (acceptableLink)
+              mentionToCanonicalMention.put(kbpMention, bestKBPMentionForChain);
+            //System.err.println("kbp mention: " + kbpMention.get(CoreAnnotations.TextAnnotation.class));
+            //System.err.println("coref mention: " + bestKBPMentionForChain.get(CoreAnnotations.TextAnnotation.class));
+          }
         }
       }
     }
