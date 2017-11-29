@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.pascal; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.pascal;
 
 import edu.stanford.nlp.ie.QuantifiableEntityNormalizer;
 import edu.stanford.nlp.ling.Word;
@@ -7,6 +6,7 @@ import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -21,11 +21,11 @@ import java.util.regex.Pattern;
  * wild cards - e.g., can represent "21 June" without a year.
  * (Standard ISO8601 only allows removing less precise annotations (e.g.,
  * 200706 rather than 20070621 but not a way to represent 0621 without a year.)
- * <p/>
+ *
  * Format stores date and time separately since the majority of current use
  * cases involve only one of these items.  Standard ISO 8601 instead
  * requires &lt;date&gt;T&lt;time&gt;.
- * <p/>
+ *
  * Ranges are specified within the strings via forward slash.  For example
  * 6 June - 8 June is represented ****0606/****0608.  6 June onward is
  * ****0606/ and until 8 June is /****0608.
@@ -50,7 +50,7 @@ public class ISODateInstance  {
   public static final String MONTH_OF_HALF_YEAR = "07";
   public static final String LAST_MONTH_OF_YEAR = "12";
   /**
-   * String of the format &lt;year&gt;&lt;month&gt;&lt;day&gt;.  Representations
+   * String of the format {@literal <year><month><day>}.  Representations
    * by week are also allowed. If a more general field (such as year)
    * is not specified when a less general one (such as month) is, the characters
    * normally filled by the more general field are replaced by asterisks. For example,
@@ -70,7 +70,6 @@ public class ISODateInstance  {
    * don't want this in most cases.
    */
   public ISODateInstance() {
-
   }
 
   /**
@@ -529,15 +528,15 @@ public class ISODateInstance  {
 
   /* -------------------------- Static Comparison Methods -------------------------- */
   /**
-   * Returns true if date1 is after date2
-   * <p/>
+   * Returns true if date1 is after date2.
+   *
    * Several tricky cases exist, and implementation tries to
    * go with the common sense interpretation:
    * When a year and a month are given for one, but only a month
    * for the other, it is assumed that both have the same year
    * e.g:
    * ****12 is after 200211
-   * <p/>
+   *
    * When a year and a month are given for one but only a year
    * for the other, it is assumed that one of these is after the
    * other only if the years differ, e.g.:
@@ -769,9 +768,9 @@ public class ISODateInstance  {
     }
     //now we've found out that the start date is appropriate, check the end date
     String end = this.getEndDate();
-    if (!end.equals("")) {
+    if (! end.isEmpty()) {
       String endOther = other.getEndDate();
-      if (endOther.equals("")) {
+      if (endOther.isEmpty()) {
         return false;
       } else {
         if (!isAfter(end, endOther)) {
@@ -788,14 +787,14 @@ public class ISODateInstance  {
    * the given dateString.  If this date instance
    * is a range, then returns true only if both
    * start and end dates are after dateString.
-   * <p/>
+   *
    * Several tricky cases exist, and implementation tries to
    * go with the commonsense interpretation:
    * When a year and a month are given for one, but only a month
    * for the other, it is assumed that both have the same year
    * e.g:
    * ****12 is after 200211
-   * <p/>
+   *
    * When a year and a month are given for one but only a year
    * for the other, it is assumed that one of these is after the
    * other only if the years differ, e.g.:
@@ -980,7 +979,7 @@ public class ISODateInstance  {
       extract = m2.group(1);
     } else {
       extract = foundMiscYearPattern(inputDate);
-      if (extract == null || extract.equals("")) {
+      if (StringUtils.isNullOrEmpty(extract)) {
         isoDate = "****";
         return false;
       }
@@ -1160,7 +1159,7 @@ public class ISODateInstance  {
     String dateProperty = props.getProperty("date");
     if (dateProperty != null) {
       ISODateInstance d = new ISODateInstance(dateProperty);
-      System.out.println(dateProperty + " processed as " + d.toString());
+      System.out.println(dateProperty + " processed as " + d);
     }
   }
 

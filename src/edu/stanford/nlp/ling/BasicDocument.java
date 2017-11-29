@@ -1,10 +1,10 @@
-package edu.stanford.nlp.ling; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ling;
 
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.net.URL;
@@ -35,7 +35,7 @@ import java.util.List;
 public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Word, Word>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BasicDocument.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(BasicDocument.class);
 
   /**
    * title of this document (never null).
@@ -185,21 +185,21 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
   /**
    * Calls init(textFile,title,true)
    */
-  public BasicDocument<L> init(File textFile, String title) throws FileNotFoundException, IOException {
+  public BasicDocument<L> init(File textFile, String title) throws IOException {
     return init(textFile, title, true);
   }
 
   /**
    * Calls init(textFile,textFile.getCanonicalPath(),keepOriginalText)
    */
-  public BasicDocument<L> init(File textFile, boolean keepOriginalText) throws FileNotFoundException, IOException {
+  public BasicDocument<L> init(File textFile, boolean keepOriginalText) throws IOException {
     return init(textFile, textFile.getCanonicalPath(), keepOriginalText);
   }
 
   /**
    * Calls init(textFile,textFile.getCanonicalPath(),true)
    */
-  public BasicDocument<L> init(File textFile) throws FileNotFoundException, IOException {
+  public BasicDocument<L> init(File textFile) throws IOException {
     return init(textFile, textFile.getCanonicalPath(), true);
   }
 
@@ -426,7 +426,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * {@link HasWord#word} printed, and other elements are skipped.
    *
    * Subclasses that maintain additional information may which to
-   * override this method.</p>
+   * override this method.
    */
   public String presentableText() {
     StringBuilder sb = new StringBuilder();
