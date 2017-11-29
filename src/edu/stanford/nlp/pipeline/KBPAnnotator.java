@@ -433,9 +433,11 @@ public class KBPAnnotator implements Annotator {
 
     // Create a canonical mention map
     Map<CoreMap,CoreMap> mentionToCanonicalMention = new HashMap<>();
-    Set<Map.Entry<Integer, CorefChain>> corefChains =
-        annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet();
-    if (corefChains == null)
+    // check if there is coref info
+    Set<Map.Entry<Integer, CorefChain>> corefChains;
+    if (annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null)
+      corefChains = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet();
+    else
       corefChains = new HashSet<>();
     for (Map.Entry<Integer, CorefChain> indexCorefChainPair : corefChains) {
       CorefChain corefChain = indexCorefChainPair.getValue();
