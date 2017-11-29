@@ -311,8 +311,8 @@ public class KBPAnnotator implements Annotator {
           }
         }
       }
-      if (kbpMentionFound != null)
-        System.err.println(kbpMentionFound.get(CoreAnnotations.TextAnnotation.class));
+      //if (kbpMentionFound != null)
+        //System.err.println(kbpMentionFound.get(CoreAnnotations.TextAnnotation.class));
       return kbpMentionFound;
     }).collect(Collectors.toList());
     // map kbp mentions to the lengths of their text
