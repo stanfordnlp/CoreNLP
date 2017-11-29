@@ -1331,13 +1331,14 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   }
 
   /**
-   * Convenience wrapper for IOUtils.writeObjectToFile
+   * Convenience wrapper for IOUtils.writeObjectToFile.
    */
-  public static void writeClassifier(LinearClassifier<?, ?> classifier, String writePath) {
+  public static void writeClassifier(LinearClassifier<?, ?> classifier, String serializePath) {
     try {
-      IOUtils.writeObjectToFile(classifier, writePath);
+      IOUtils.writeObjectToFile(classifier, serializePath);
+      logger.info("Serializing classifier to " + serializePath + "... done.");
     } catch (Exception e) {
-      throw new RuntimeException("Serialization failed: "+e.getMessage(), e);
+      throw new RuntimeException("Serialization failed: " + e.getMessage(), e);
     }
   }
 
