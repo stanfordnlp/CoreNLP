@@ -65,7 +65,7 @@ public class SimpleTensor implements Serializable {
   public static SimpleTensor random(int numRows, int numCols, int numSlices, double minValue, double maxValue, java.util.Random rand) {
     SimpleTensor tensor = new SimpleTensor(numRows, numCols, numSlices);
     for (int i = 0; i < numSlices; ++i) {
-      tensor.slices[i] = SimpleMatrix.random64(numRows, numCols, minValue, maxValue, rand);
+      tensor.slices[i] = SimpleMatrix.random(numRows, numCols, minValue, maxValue, rand);
     }
     return tensor;
   }

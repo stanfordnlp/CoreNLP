@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.dvparser;
+package edu.stanford.nlp.parser.dvparser; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.ObjectInputStream;
@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.ejml.simple.SimpleMatrix;
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.DenseMatrix64F;
 
 import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
@@ -65,19 +65,19 @@ public class DVModel implements Serializable  {
   // the seed we used to use was 19580427
   Random rand;
 
-  private static final String UNKNOWN_WORD = "*UNK*";
-  private static final String UNKNOWN_NUMBER = "*NUM*";
-  private static final String UNKNOWN_CAPS = "*CAPS*";
-  private static final String UNKNOWN_CHINESE_YEAR = "*ZH_YEAR*";
-  private static final String UNKNOWN_CHINESE_NUMBER = "*ZH_NUM*";
-  private static final String UNKNOWN_CHINESE_PERCENT = "*ZH_PERCENT*";
+  static final String UNKNOWN_WORD = "*UNK*";
+  static final String UNKNOWN_NUMBER = "*NUM*";
+  static final String UNKNOWN_CAPS = "*CAPS*";
+  static final String UNKNOWN_CHINESE_YEAR = "*ZH_YEAR*";
+  static final String UNKNOWN_CHINESE_NUMBER = "*ZH_NUM*";
+  static final String UNKNOWN_CHINESE_PERCENT = "*ZH_PERCENT*";
 
-  private static final String START_WORD = "*START*";
-  private static final String END_WORD = "*END*";
+  static final String START_WORD = "*START*";
+  static final String END_WORD = "*END*";
 
-  private static final Function<SimpleMatrix, DMatrixRMaj> convertSimpleMatrix = matrix -> matrix.getMatrix();
+  private static final Function<SimpleMatrix, DenseMatrix64F> convertSimpleMatrix = matrix -> matrix.getMatrix();
 
-  private static final Function<DMatrixRMaj, SimpleMatrix> convertDenseMatrix = matrix -> SimpleMatrix.wrap(matrix);
+  private static final Function<DenseMatrix64F, SimpleMatrix> convertDenseMatrix = matrix -> SimpleMatrix.wrap(matrix);
 
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     in.defaultReadObject();
@@ -190,7 +190,7 @@ public class DVModel implements Serializable  {
     SimpleMatrix matrix = new SimpleMatrix(numRows, numCols * 2);
     matrix.insertIntoThis(0, 0, identity.scale(op.trainOptions.scalingForInit * 0.1));
     matrix.insertIntoThis(0, numCols, identity.scale(op.trainOptions.scalingForInit * 0.1));
-    matrix = matrix.plus(SimpleMatrix.random64(numRows,numCols * 2,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand));
+    matrix = matrix.plus(SimpleMatrix.random(numRows,numCols * 2,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand));
     return matrix;
   }
 
@@ -203,13 +203,13 @@ public class DVModel implements Serializable  {
     SimpleMatrix matrix;
     switch (op.trainOptions.transformMatrixType) {
     case DIAGONAL:
-      matrix = SimpleMatrix.random64(numRows,numCols,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand).plus(identity);
+      matrix = SimpleMatrix.random(numRows,numCols,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand).plus(identity);
       break;
     case RANDOM:
-      matrix = SimpleMatrix.random64(numRows,numCols,-1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
+      matrix = SimpleMatrix.random(numRows,numCols,-1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
       break;
     case OFF_DIAGONAL:
-      matrix = SimpleMatrix.random64(numRows,numCols,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand).plus(identity);
+      matrix = SimpleMatrix.random(numRows,numCols,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand).plus(identity);
       for (int i = 0; i < numCols; ++i) {
         int x = rand.nextInt(numCols);
         int y = rand.nextInt(numCols);
@@ -218,7 +218,7 @@ public class DVModel implements Serializable  {
       }
       break;
     case RANDOM_ZEROS:
-      matrix = SimpleMatrix.random64(numRows,numCols,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand).plus(identity);
+      matrix = SimpleMatrix.random(numRows,numCols,-1.0/Math.sqrt((double)numCols * 100.0),1.0/Math.sqrt((double)numCols * 100.0),rand).plus(identity);
       for (int i = 0; i < numCols; ++i) {
         int x = rand.nextInt(numCols);
         int y = rand.nextInt(numCols);
@@ -239,7 +239,7 @@ public class DVModel implements Serializable  {
     ++numUnaryMatrices;
 
     // scoring matrix
-    SimpleMatrix score = SimpleMatrix.random64(1, numCols, -1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
+    SimpleMatrix score = SimpleMatrix.random(1, numCols, -1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
     unaryScore.put(childBasic, score.scale(op.trainOptions.scalingForInit));
 
     SimpleMatrix transform;
@@ -263,7 +263,7 @@ public class DVModel implements Serializable  {
     ++numBinaryMatrices;
 
     // scoring matrix
-    SimpleMatrix score = SimpleMatrix.random64(1, numCols, -1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
+    SimpleMatrix score = SimpleMatrix.random(1, numCols, -1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
     binaryScore.put(leftBasic, rightBasic, score.scale(op.trainOptions.scalingForInit));
 
     SimpleMatrix binary;
@@ -422,21 +422,21 @@ public class DVModel implements Serializable  {
     }
   }
 
-  private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9][-0-9,.:]*");
+  static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9][-0-9,.:]*");
 
-  private static final Pattern CAPS_PATTERN = Pattern.compile("[a-zA-Z]*[A-Z][a-zA-Z]*");
+  static final Pattern CAPS_PATTERN = Pattern.compile("[a-zA-Z]*[A-Z][a-zA-Z]*");
 
-  private static final Pattern CHINESE_YEAR_PATTERN = Pattern.compile("[〇零一二三四五六七八九０１２３４５６７８９]{4}+年");
+  static final Pattern CHINESE_YEAR_PATTERN = Pattern.compile("[〇零一二三四五六七八九０１２３４５６７８９]{4}+年");
 
-  private static final Pattern CHINESE_NUMBER_PATTERN = Pattern.compile("(?:[〇零一二三四五六七八九０１２３４５６７８９十百万千亿]+[点多]?)+");
+  static final Pattern CHINESE_NUMBER_PATTERN = Pattern.compile("(?:[〇０零一二三四五六七八九０１２３４５６７８９十百万千亿]+[点多]?)+");
 
-  private static final Pattern CHINESE_PERCENT_PATTERN = Pattern.compile("百分之[〇零一二三四五六七八九０１２３４５６７８９十点]+");
+  static final Pattern CHINESE_PERCENT_PATTERN = Pattern.compile("百分之[〇０零一二三四五六七八九０１２３４５６７８９十点]+");
 
   /**
    * Some word vectors are trained with DG representing number.
    * We mix all of those into the unknown number vectors.
    */
-  private static final Pattern DG_PATTERN = Pattern.compile(".*DG.*");
+  static final Pattern DG_PATTERN = Pattern.compile(".*DG.*");
 
   public void readWordVectors() {
     SimpleMatrix unknownNumberVector = null;
@@ -576,8 +576,8 @@ public class DVModel implements Serializable  {
     }
 
     if (op.trainOptions.useContextWords) {
-      SimpleMatrix start = SimpleMatrix.random64(op.lexOptions.numHid, 1, -0.5, 0.5, rand);
-      SimpleMatrix end = SimpleMatrix.random64(op.lexOptions.numHid, 1, -0.5, 0.5, rand);
+      SimpleMatrix start = SimpleMatrix.random(op.lexOptions.numHid, 1, -0.5, 0.5, rand);
+      SimpleMatrix end = SimpleMatrix.random(op.lexOptions.numHid, 1, -0.5, 0.5, rand);
       wordVectors.put(START_WORD, start);
       wordVectors.put(END_WORD, end);
     }
@@ -909,5 +909,4 @@ public class DVModel implements Serializable  {
   }
 
   private static final long serialVersionUID = 1;
-
 }

@@ -5,11 +5,11 @@ A compatible JSON library is a component of Java EE (JSR 374).
 
 -----------------------------------------------------------------
 
-ejml-0.32.jar
+ejml-0.23.jar
 
 URL: http://ejml.org/
 
-License: Apache v2.0
+License: Gnu Lesser General Public License v.3 (through v 0.23; version 0.24 forward uses Apache 2.0)
 
 -----------------------------------------------------------------
 
