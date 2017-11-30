@@ -641,6 +641,7 @@ public class PTBTokenizerTest {
     "¯\\_(ツ)_/¯",
     "#hashtag #Azərbaycanca #mûǁae #Čeština #日本語ハッシュタグ #1 #23 #Trump2016 @3 @acl_2016",
           "Sect. 793 of the Penal Code",
+    "Pls. copy the text within this quote to the subject part of your email and explain wrt. the principles.",
   };
 
   private final String[][] mtGold = {
@@ -654,6 +655,8 @@ public class PTBTokenizerTest {
     { "¯\\_-LRB-ツ-RRB-_/¯" },
     { "#hashtag", "#Azərbaycanca", "#mûǁae", "#Čeština", "#日本語ハッシュタグ", "#", "1", "#", "23", "#Trump2016", "@", "3", "@acl_2016" },
           { "Sect.", "793", "of", "the", "Penal", "Code" },
+    { "Pls.", "copy", "the", "text", "within", "this", "quote", "to", "the", "subject", "part", "of", "your", "email",
+            "and", "explain", "wrt.", "the", "principles", "." },
   };
 
   @Test

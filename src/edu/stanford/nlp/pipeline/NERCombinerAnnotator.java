@@ -50,7 +50,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     List<String> models = new ArrayList<>();
     String modelNames = properties.getProperty("ner.model");
     if (modelNames == null) {
-      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
     }
     if ( ! modelNames.isEmpty()) {
       models.addAll(Arrays.asList(modelNames.split(",")));
@@ -91,21 +91,18 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         NERClassifierCombiner.DEFAULT_PASS_DOWN_PROPERTIES);
     if (useSUTime) {
       // Make sure SUTime parameters are included
-      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".", true);
+      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + '.', true);
       PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
     }
     NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
         useSUTime, applyRegexner, combinerProperties, loadPaths);
 
-    int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
-    long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
-    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
+    this.nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
+    this.maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
+    this.maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
 
     VERBOSE = verbose;
     this.ner = nerCombiner;
-    this.maxTime = maxTime;
-    this.nThreads = nThreads;
-    this.maxSentenceLength = maxSentenceLength;
   }
 
 

@@ -1664,5 +1664,5 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     }
 
   } // end static class MatchedStates
-  
+
 }

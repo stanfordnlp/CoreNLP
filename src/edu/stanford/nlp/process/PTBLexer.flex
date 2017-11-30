@@ -779,7 +779,7 @@ ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Esq
  *  If they're followed by an uppercase one, we assume there is also a
  *  sentence boundary.
  */
-ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq|Bldg)\.
+ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq|Bldg|Pls|wrt)\.
 
 /* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
 /* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */

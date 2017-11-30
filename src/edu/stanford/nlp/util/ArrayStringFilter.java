@@ -17,8 +17,8 @@ import java.util.function.Predicate;
  * @author John Bauer
  */
 public class ArrayStringFilter implements Predicate<String>, Serializable {
+
   private final String[] words;
-  private final int length;
   private final Mode mode;
 
   public enum Mode {
@@ -32,15 +32,14 @@ public class ArrayStringFilter implements Predicate<String>, Serializable {
     this.mode = mode;
     this.words = new String[words.length];
     System.arraycopy(words, 0, this.words, 0, words.length);
-    this.length = words.length;
   }
 
   @Override
   public boolean test(String input) {
     switch (mode) {
     case EXACT:
-      for (int i = 0; i < length; ++i) {
-        if (words[i].equals(input)) {
+      for (String word : words) {
+        if (word.equals(input)) {
           return true;
         }
       }
@@ -49,15 +48,15 @@ public class ArrayStringFilter implements Predicate<String>, Serializable {
       if (input == null) {
         return false;
       }
-      for (int i = 0; i < length; ++i) {
-        if (input.startsWith(words[i])) {
+      for (String word : words) {
+        if (input.startsWith(word)) {
           return true;
         }
       }
       return false;
     case CASE_INSENSITIVE:
-      for (int i = 0; i < length; ++i) {
-        if (words[i].equalsIgnoreCase(input)) {
+      for (String word : words) {
+        if (word.equalsIgnoreCase(input)) {
           return true;
         }
       }
@@ -90,7 +89,7 @@ public class ArrayStringFilter implements Predicate<String>, Serializable {
       return false;
     }
     ArrayStringFilter filter = (ArrayStringFilter) other;
-    if (filter.mode != this.mode || filter.length != this.length) {
+    if (filter.mode != this.mode || filter.words.length != this.words.length) {
       return false;
     }
     Set<String> myWords = new HashSet<>(Arrays.asList(this.words));
@@ -98,6 +97,6 @@ public class ArrayStringFilter implements Predicate<String>, Serializable {
     return myWords.equals(otherWords);
   }
 
-  private static final long serialVersionUID = 1;
+  private static final long serialVersionUID = 2;
 
 }
