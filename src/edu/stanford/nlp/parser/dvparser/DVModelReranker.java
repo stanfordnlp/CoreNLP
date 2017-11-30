@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.Generics;
 public class DVModelReranker implements Reranker {
   private final Options op;
   private final DVModel model;
-  
+
   public DVModelReranker(DVModel model) {
     this.op = model.op;
     this.model = model;
@@ -51,7 +51,7 @@ public class DVModelReranker implements Reranker {
       this.scorer = new DVParserCostAndGradient(null, null, model, op);
       this.deepTrees = Generics.newArrayList();
     }
-    
+
     public double score(Tree tree) {
       IdentityHashMap<Tree, SimpleMatrix> nodeVectors = Generics.newIdentityHashMap();
       Tree transformedTree = transformer.transformTree(tree);
@@ -67,7 +67,8 @@ public class DVModelReranker implements Reranker {
     public List<DeepTree> getDeepTrees() {
       return deepTrees;
     }
-  }  
+  }
 
   private static final long serialVersionUID = 7897546308624261207L;
+
 }

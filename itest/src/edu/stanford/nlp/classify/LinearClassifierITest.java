@@ -2,16 +2,18 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.stats.ClassicCounter;
-import junit.framework.Assert;
-import junit.framework.TestCase;
+
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  *
  */
-public class LinearClassifierITest extends TestCase {
+public class LinearClassifierITest {
 
   private static <L, F> RVFDatum<L, F> newDatum(L label,
                                                 F[] features,
@@ -20,7 +22,7 @@ public class LinearClassifierITest extends TestCase {
     for (int i = 0; i < features.length; i++) {
       counter.setCount(features[i], counts[i]);
     }
-    return new RVFDatum<L, F>(counter, label);
+    return new RVFDatum<>(counter, label);
   }
 
   /**
@@ -41,27 +43,29 @@ public class LinearClassifierITest extends TestCase {
     LinearClassifierFactory<String, String> lfc = new LinearClassifierFactory<>();
     LinearClassifier<String, String> lc = lfc.trainClassifier(trainData);
     // Try the obvious (should get train data with 100% acc)
-    Assert.assertEquals(d1.label(), lc.classOf(d1));
-    Assert.assertEquals(d2.label(), lc.classOf(d2));
+    assertEquals(d1.label(), lc.classOf(d1));
+    assertEquals(d2.label(), lc.classOf(d2));
   }
 
+  @Test
   public void testStrBinaryDatums() throws Exception {
     testStrBinaryDatums(-1.0, 0.0, 1.0, 0.0);
     testStrBinaryDatums(1.0, 0.0, -1.0, 0.0);
     testStrBinaryDatums(0.0, 1.0, 0.0, -1.0);
-    testStrBinaryDatums(0.0, -1.0, 0.0, 1.0);    
+    testStrBinaryDatums(0.0, -1.0, 0.0, 1.0);
     testStrBinaryDatums(1.0, 1.0, -1.0, -1.0);
     testStrBinaryDatums(0.0, 1.0, 1.0, 0.0);
     testStrBinaryDatums(1.0, 0.0, 0.0, 1.0);
   }
 
+  @Test
   public void testStrMultiClassDatums() throws Exception {
     RVFDataset<String, String> trainData = new RVFDataset<>();
     List<RVFDatum<String, String>> datums = new ArrayList<>();
     datums.add(newDatum("alpha",
       new String[]{"f1", "f2"},
       new Double[]{1.0, 0.0}));
-    ;
+
     datums.add(newDatum("beta",
       new String[]{"f1", "f2"},
       new Double[]{0.0, 1.0}));
@@ -73,15 +77,17 @@ public class LinearClassifierITest extends TestCase {
     LinearClassifierFactory<String, String> lfc = new LinearClassifierFactory<>();
     LinearClassifier<String, String> lc = lfc.trainClassifier(trainData);
 
-    RVFDatum td1 = newDatum("alpha",
+    RVFDatum<String,String> td1 = newDatum("alpha",
       new String[]{"f1", "f2","f3"},
       new Double[]{2.0, 0.0, 5.5});
 
     // Try the obvious (should get train data with 100% acc)
-    for (RVFDatum<String, String> datum : datums)
-      Assert.assertEquals(datum.label(), lc.classOf(datum));
+    for (RVFDatum<String, String> datum : datums) {
+      assertEquals(datum.label(), lc.classOf(datum));
+    }
 
     // Test data
-    Assert.assertEquals(td1.label(), lc.classOf(td1));
+    assertEquals(td1.label(), lc.classOf(td1));
   }
+
 }

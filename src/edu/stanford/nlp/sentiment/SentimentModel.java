@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sentiment; 
+package edu.stanford.nlp.sentiment;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
@@ -48,7 +48,7 @@ public class SentimentModel implements Serializable  {
   /**
    * Map from vocabulary words to word vectors.
    *
-   * @see #getWordVector(String) 
+   * @see #getWordVector(String)
    */
   public Map<String, SimpleMatrix> wordVectors;
 
@@ -337,7 +337,7 @@ public class SentimentModel implements Serializable  {
   public String toString() {
     StringBuilder output = new StringBuilder();
 
-    if (binaryTransform.size() > 0) {
+    if ( ! binaryTransform.isEmpty()) {
       if (binaryTransform.size() == 1) {
         output.append("Binary transform matrix\n");
       } else {
@@ -351,42 +351,42 @@ public class SentimentModel implements Serializable  {
       }
     }
 
-    if (binaryTensors.size() > 0) {
+    if ( ! binaryTensors.isEmpty()) {
       if (binaryTensors.size() == 1) {
         output.append("Binary transform tensor\n");
       } else {
         output.append("Binary transform tensors\n");
       }
       for (TwoDimensionalMap.Entry<String, String, SimpleTensor> matrix : binaryTensors) {
-        if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
+        if (!matrix.getFirstKey().isEmpty() || !matrix.getSecondKey().isEmpty()) {
           output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
         }
         output.append(matrix.getValue().toString("%.8f"));
       }
     }
 
-    if (binaryClassification.size() > 0) {
+    if ( ! binaryClassification.isEmpty()) {
       if (binaryClassification.size() == 1) {
         output.append("Binary classification matrix\n");
       } else {
         output.append("Binary classification matrices\n");
       }
       for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> matrix : binaryClassification) {
-        if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
+        if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().isEmpty()) {
           output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
         }
         output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
       }
     }
 
-    if (unaryClassification.size() > 0) {
+    if ( ! unaryClassification.isEmpty()) {
       if (unaryClassification.size() == 1) {
         output.append("Unary classification matrix\n");
       } else {
         output.append("Unary classification matrices\n");
       }
       for (Map.Entry<String, SimpleMatrix> matrix : unaryClassification.entrySet()) {
-        if (!matrix.getKey().equals("")) {
+        if (!matrix.getKey().isEmpty()) {
           output.append(matrix.getKey() + ":\n");
         }
         output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
@@ -420,7 +420,7 @@ public class SentimentModel implements Serializable  {
 
   SimpleMatrix randomTransformBlock() {
     double range = 1.0 / (Math.sqrt((double) numHid) * 2.0);
-    return SimpleMatrix.random(numHid,numHid,-range,range,rand).plus(identity);
+    return SimpleMatrix.random64(numHid,numHid,-range,range,rand).plus(identity);
   }
 
   /**
@@ -429,9 +429,9 @@ public class SentimentModel implements Serializable  {
   SimpleMatrix randomClassificationMatrix() {
     SimpleMatrix score = new SimpleMatrix(numClasses, numHid + 1);
     double range = 1.0 / (Math.sqrt((double) numHid));
-    score.insertIntoThis(0, 0, SimpleMatrix.random(numClasses, numHid, -range, range, rand));
+    score.insertIntoThis(0, 0, SimpleMatrix.random64(numClasses, numHid, -range, range, rand));
     // bias column goes from 0 to 1 initially
-    score.insertIntoThis(0, numHid, SimpleMatrix.random(numClasses, 1, 0.0, 1.0, rand));
+    score.insertIntoThis(0, numHid, SimpleMatrix.random64(numClasses, 1, 0.0, 1.0, rand));
     return score.scale(op.trainOptions.scalingForInit);
   }
 
