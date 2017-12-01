@@ -1,7 +1,6 @@
 package edu.stanford.nlp.coref.statistical;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,13 +22,14 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
 /**
  * Does best-first coreference resolution by linking each mention to its highest scoring candidate
  * antecedent if that score is above a threshold. The model is described in
- * <p/>
+ *
  * Kevin Clark and Christopher D. Manning. 2015.
  * <a href="http://nlp.stanford.edu/pubs/clark-manning-acl15-entity.pdf">
  * Entity-Centric Coreference Resolution with Model Stacking</a>.
  * In Association for Computational Linguistics.
- * <p/>
+ *
  * See {@link StatisticalCorefTrainer} for training a new model.
+ *
  * @author Kevin Clark
  */
 public class StatisticalCorefAlgorithm implements CorefAlgorithm {
@@ -104,7 +104,7 @@ public class StatisticalCorefAlgorithm implements CorefAlgorithm {
     }
 
     List<Pair<Integer, Integer>> mentionPairs = new ArrayList<>(pairwiseScores.keySet());
-    Collections.sort(mentionPairs, (p1, p2) -> {
+    mentionPairs.sort((p1, p2) -> {
       double diff = pairwiseScores.getCount(p2) - pairwiseScores.getCount(p1);
       return diff == 0 ? 0 : (int) Math.signum(diff);
     });
@@ -126,4 +126,5 @@ public class StatisticalCorefAlgorithm implements CorefAlgorithm {
       }
     }
   }
+
 }
