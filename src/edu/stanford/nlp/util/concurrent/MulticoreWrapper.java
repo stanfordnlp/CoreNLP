@@ -251,19 +251,16 @@ public class MulticoreWrapper<I,O> {
 
     @Override
     public Integer call() {
+      O result = null;
       try {
-        O result = processor.process(item);
-        QueueItem<O> output = new QueueItem<>(result, itemId);
-        callback.call(output, processorId);
-        return itemId;
-      
-      } catch (Exception e) {
+        result = processor.process(item);
+      } catch (Exception | Error e) {
         e.printStackTrace();
         // Hope that the consumer knows how to handle null!
-        QueueItem<O> output = new QueueItem<>(null, itemId);
-        callback.call(output, processorId);
-        return itemId;
       }
+      QueueItem<O> output = new QueueItem<>(result, itemId);
+      callback.call(output, processorId);
+      return itemId;
     }
   }
 
