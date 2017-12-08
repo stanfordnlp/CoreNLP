@@ -8,6 +8,10 @@ permalink: '/depparse.html'
 
 Provides a fast syntactic dependency parser. We generate three dependency-based outputs, as follows: basic, uncollapsed dependencies, saved in BasicDependenciesAnnotation; enhanced dependencies saved in EnhancedDependenciesAnnotation; and enhanced++ dependencies in EnhancedPlusPlusDependenciesAnnotation. Most users of our parser will prefer the latter representation.
 
+This is a separate annotator for a direct dependency parser. These
+parsers require prior part-of-speech tagging. If you need constituency
+parses then you should look at the `parse` annotator.
+
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
 | depparse | DependencyParseAnnotator | BasicDependenciesAnnotation, EnhancedDependenciesAnnotation, EnhancedPlusPlusDependenciesAnnotation |

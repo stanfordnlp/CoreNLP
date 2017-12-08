@@ -7,25 +7,32 @@ permalink: '/ner.html'
 ## Description
 
 Recognizes named entities (person and company names, etc.) in text.
+Principally, this annotator uses one or more machine learning sequence
+models to label entities, but it may also call specialist rule-based
+components, such as for labeling and interpreting times and dates.
+Numerical entities that require normalization, e.g., dates,
+have their normalized value stored in NormalizedNamedEntityTagAnnotation.
+For more extensive support for rule-based NER, you may also want to
+look at the [RegexNER annotator](regexner.html).
 The set of entities recognized is language-dependent, and the
 recognized set of entities is frequently more limited for other
 languages than what is
 described below for English. As the name “NERClassifierCombiner”
 implies, commonly this annotator will run several named entity
-recognizers and then combine their results.
+recognizers and then combine their results but it can run just a
+single annotator or only rule-based quantity NER.
 
-For English, this annotator recognizes
+For English, by default this annotator recognizes
 named (PERSON, LOCATION, ORGANIZATION, MISC), numerical (MONEY,
 NUMBER, ORDINAL, PERCENT), and temporal (DATE, TIME, DURATION, SET)
-entities. Named entities are recognized using a combination of three
-CRF sequence taggers trained on various corpora, such as CoNLL, ACE and
-MUC. Numerical entities are recognized using a rule-based
-system. Numerical entities that require normalization, e.g., dates,
-have their normalized value stored in NormalizedNamedEntityTagAnnotation.
-
-It is possible to recognize additional or more fine-grained entity
-classes through the use of TokensRegex patterns; see the
-[RegexNER](regexner.html) annotator for more about this.
+entities (12 classes). The supplied [RegexNER](regexner.html) pattern
+files add support for the fine-grained and additional entity classes:
+EMAIL, URL, CITY, STATE\_OR\PROVINCE, COUNTRY, NATIONALITY, RELIGION,
+(job) TITLE, IDEOLOGY, CRIMINAL\_CHARGE, CAUSE\_OF\_DEATH (11 classes)
+for a total of 23 classes. Named entities are recognized using a combination of three
+CRF sequence taggers trained on various corpora, including CoNLL, ACE,
+MUC, and ERE corpora. Numerical entities are recognized using a rule-based
+system. 
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
@@ -35,9 +42,10 @@ classes through the use of TokensRegex patterns; see the
 
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
-| ner.useSUTime | boolean | true | Whether or not to use SUTime. If not processing English, make sure to set this to false. |
 | ner.model | List(String) | null | A comma-separated list of NER model names (or just a single name is okay). If none are specified, a default list of English models is used (3class, 7class, and MISCclass, in that order). The names will be looked for as classpath resources, filenames, or URLs. |
-| ner.applyNumericClassifiers | boolean | true | Whether or not to use numeric classifiers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
+| ner.applyNumericClassifiers | boolean | true | Whether or not to use
+| numeric classifiers, for money, percent, numbers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
+| ner.useSUTime | boolean | true | Whether or not to use SUTime. SUTime at present only supports English; if not processing English, make sure to set this to false. |
 | sutime.markTimeRanges | boolean | false | Tells SUTime whether to mark phrases such as “From January to March” as a range, instead of marking "January" and "March" separately. |
 | sutime.includeRange | boolean | false | If marking time ranges, set the time range in the TIMEX output from SUTime. |
 
@@ -46,7 +54,7 @@ classes through the use of TokensRegex patterns; see the
 StanfordCoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.html), Stanford's temporal expression
 recognizer. SUTime is transparently called from the "ner" annotator,
 so no configuration is necessary. Furthermore, the "cleanxml"
-annotator now extracts the reference date for a given XML document, so
+annotator can extract the reference date for a given XML document, so
 relative dates, e.g., "yesterday", are transparently normalized with
 no configuration necessary.
 

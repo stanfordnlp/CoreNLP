@@ -127,6 +127,8 @@ These are previous generation Python interfaces to Stanford CoreNLP, using a sub
 
 * [Stanford CoreNLP Ruby bindings](https://github.com/louismullie/stanford-core-nlp) by Louis Mullie (see also: [Ruby Gems page](https://rubygems.org/gems/stanford-core-nlp)). (Updated in Feb 2017 to CoreNLP 3.5.0.)
 * The larger [TREAT](https://github.com/louismullie/treat) NLP toolkit by Louis Mullie also makes available Stanford CoreNLP.
+* [corenlp](https://github.com/lengio/corenlp) by Lengio Corp. is another interface to CoreNLP (last updated for CoreNLP 3.4).
+* [stanford-core-nlp](https://bitbucket.org/wsh/stanford-core-nlp) by Will Hayworth is another older interface to CoreNLP (also for CoreNLP 3.4).
 
 ### Scala
 

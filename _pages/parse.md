@@ -8,6 +8,8 @@ permalink: '/parse.html'
 
 Provides full syntactic analysis, minimally a constituency (phrase-structure tree) parse of sentences. If a rule-based conversion from constituency parses to dependency parses is available (this is currently the case for English and Chinese, only), then a dependency representation is also generated using this conversion. The constituent-based output is saved in TreeAnnotation. We generate three dependency-based outputs, as follows: basic dependencies, saved in BasicDependenciesAnnotation; enhanced dependencies saved in EnhancedDependenciesAnnotation; and enhanced++ dependencies in EnhancedPlusPlusDependenciesAnnotation. Most users of our parser will prefer the latter representation. Constituency parsers internally generate binary parse trees, which can also be saved.
 
+If you only need dependency parses, then you can get only dependency parses more quickly (and using less memory) by using the direct dependency parser annotator `depparse`. Note that this is a separate annotator, with different options.
+
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
 | parse | ParserAnnotator | TreeAnnotation, BasicDependenciesAnnotation, EnhancedDependenciesAnnotation, EnhancedPlusPlusDependenciesAnnotation, BinarizedTreeAnnotation, KBestTreesAnnotation |
