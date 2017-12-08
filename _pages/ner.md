@@ -22,12 +22,12 @@ implies, commonly this annotator will run several named entity
 recognizers and then combine their results but it can run just a
 single annotator or only rule-based quantity NER.
 
-For English, by default this annotator recognizes
+For English, by default, this annotator recognizes
 named (PERSON, LOCATION, ORGANIZATION, MISC), numerical (MONEY,
 NUMBER, ORDINAL, PERCENT), and temporal (DATE, TIME, DURATION, SET)
-entities (12 classes). The supplied [RegexNER](regexner.html) pattern
-files add support for the fine-grained and additional entity classes:
-EMAIL, URL, CITY, STATE\_OR\PROVINCE, COUNTRY, NATIONALITY, RELIGION,
+entities (12 classes). Adding the `regexner` annotator and using the supplied [RegexNER](regexner.html) pattern
+files adds support for the fine-grained and additional entity classes
+EMAIL, URL, CITY, STATE\_OR\_PROVINCE, COUNTRY, NATIONALITY, RELIGION,
 (job) TITLE, IDEOLOGY, CRIMINAL\_CHARGE, CAUSE\_OF\_DEATH (11 classes)
 for a total of 23 classes. Named entities are recognized using a combination of three
 CRF sequence taggers trained on various corpora, including CoNLL, ACE,
@@ -43,8 +43,7 @@ system.
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
 | ner.model | List(String) | null | A comma-separated list of NER model names (or just a single name is okay). If none are specified, a default list of English models is used (3class, 7class, and MISCclass, in that order). The names will be looked for as classpath resources, filenames, or URLs. |
-| ner.applyNumericClassifiers | boolean | true | Whether or not to use
-| numeric classifiers, for money, percent, numbers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
+| ner.applyNumericClassifiers | boolean | true | Whether or not to use numeric classifiers, for money, percent, numbers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
 | ner.useSUTime | boolean | true | Whether or not to use SUTime. SUTime at present only supports English; if not processing English, make sure to set this to false. |
 | sutime.markTimeRanges | boolean | false | Tells SUTime whether to mark phrases such as “From January to March” as a range, instead of marking "January" and "March" separately. |
 | sutime.includeRange | boolean | false | If marking time ranges, set the time range in the TIMEX output from SUTime. |
