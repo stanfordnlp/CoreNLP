@@ -1672,7 +1672,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * binarized version of a dependency grammar tree, then it will be
    * flattened back to a dependency grammar tree representation.  Formally,
    * a node will be removed from the tree when: it is not a terminal or
-   * preterminal, and its <code>label()</code is {@code equal()} to
+   * preterminal, and its {@code label()} is {@code equal()} to
    * the {@code label()} of its parent, and all its children will
    * then be promoted to become children of the parent (in the same
    * position in the sequence of daughters.
@@ -1689,10 +1689,11 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * binarized version of a dependency grammar tree, then it will be
    * flattened back to a dependency grammar tree representation.  Formally,
    * a node will be removed from the tree when: it is not a terminal or
-   * preterminal, and its <code>label()</code is {@code equal()} to
+   * preterminal, and its {@code label()} is {@code equal()} to
    * the {@code label()} of its parent, and all its children will
    * then be promoted to become children of the parent (in the same
-   * position in the sequence of daughters. <p>
+   * position in the sequence of daughters.
+   *
    * Note: In the current implementation, the tree structure is mainly
    * duplicated, but the links between preterminals and terminals aren't.
    *
@@ -1725,10 +1726,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * Get the set of all subtrees inside the tree by returning a tree
    * rooted at each node.  These are <i>not</i> copies, but all share
    * structure.  The tree is regarded as a subtree of itself.
-   * <p/>
+   *
    * <i>Note:</i> If you only want to form this Set so that you can
    * iterate over it, it is more efficient to simply use the Tree class's
-   * own <code>iterator() method. This will iterate over the exact same
+   * own {@code iterator()} method. This will iterate over the exact same
    * elements (but perhaps/probably in a different order).
    *
    * @return the {@code Set} of all subtrees in the tree.
@@ -1741,10 +1742,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * Get the list of all subtrees inside the tree by returning a tree
    * rooted at each node.  These are <i>not</i> copies, but all share
    * structure.  The tree is regarded as a subtree of itself.
-   * <p/>
+   *
    * <i>Note:</i> If you only want to form this Collection so that you can
    * iterate over it, it is more efficient to simply use the Tree class's
-   * own <code>iterator() method. This will iterate over the exact same
+   * own {@code iterator()} method. This will iterate over the exact same
    * elements (but perhaps/probably in a different order).
    *
    * @return the {@code List} of all subtrees in the tree.
@@ -1757,10 +1758,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   /**
    * Add the set of all subtrees inside a tree (including the tree itself)
    * to the given {@code Collection}.
-   * <p/>
+   *
    * <i>Note:</i> If you only want to form this Collection so that you can
    * iterate over it, it is more efficient to simply use the Tree class's
-   * own <code>iterator() method. This will iterate over the exact same
+   * own {@code iterator()} method. This will iterate over the exact same
    * elements (but perhaps/probably in a different order).
    *
    * @param n A collection of nodes to which the subtrees will be added.
