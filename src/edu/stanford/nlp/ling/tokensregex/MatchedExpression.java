@@ -291,7 +291,7 @@ public class MatchedExpression {
   public static List<? extends CoreMap> replaceMerged(List<? extends CoreMap> list,
                                                       List<? extends MatchedExpression> matchedExprs) {
     if (matchedExprs == null) return list;
-    Collections.sort(matchedExprs, EXPR_TOKEN_OFFSET_COMPARATOR);
+    matchedExprs.sort(EXPR_TOKEN_OFFSET_COMPARATOR);
     List<CoreMap> merged = new ArrayList<>(list.size());   // Approximate size
     int last = 0;
     for (MatchedExpression expr:matchedExprs) {
@@ -326,7 +326,7 @@ public class MatchedExpression {
         tokenEndToListIndexMap.put(i+1, i+1);
       }
     }
-    Collections.sort(matchedExprs, EXPR_TOKEN_OFFSET_COMPARATOR);
+    matchedExprs.sort(EXPR_TOKEN_OFFSET_COMPARATOR);
     List<CoreMap> merged = new ArrayList<>(list.size());   // Approximate size
     int last = 0;
     for (MatchedExpression expr:matchedExprs) {
@@ -411,12 +411,7 @@ public class MatchedExpression {
               in.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
 
   public static final Function<MatchedExpression, Interval<Integer>> EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
-    new Function<MatchedExpression, Interval<Integer>>() {
-      @Override
-      public Interval<Integer> apply(MatchedExpression in) {
-        return in.tokenOffsets;
-      }
-    };
+          in -> in.tokenOffsets;
 
   public static final Comparator<MatchedExpression> EXPR_PRIORITY_COMPARATOR =
       (e1, e2) -> {
@@ -448,47 +443,36 @@ public class MatchedExpression {
   //    Returns -1 if e1 has value, but e2 doesn't (1 if e2 has value, but e1 doesn't)
   //    Otherwise, both e1 and e2 has value or no value
   public static final Comparator<MatchedExpression> EXPR_LENGTH_COMPARATOR =
-    new Comparator<MatchedExpression>() {
-      @Override
-      public int compare(MatchedExpression e1, MatchedExpression e2) {
-        if (e1.getValue() == null && e2.getValue() != null) {
-          return 1;
-        }
-        if (e1.getValue() != null && e2.getValue() == null) {
-          return -1;
-        }
-        int len1 = e1.tokenOffsets.getEnd() - e1.tokenOffsets.getBegin();
-        int len2 = e2.tokenOffsets.getEnd() - e2.tokenOffsets.getBegin();
-        if (len1 == len2) {
-          return 0;
-        } else {
-          return (len1 > len2)? -1:1;
-        }
-      }
-    };
+          (e1, e2) -> {
+            if (e1.getValue() == null && e2.getValue() != null) {
+              return 1;
+            }
+            if (e1.getValue() != null && e2.getValue() == null) {
+              return -1;
+            }
+            int len1 = e1.tokenOffsets.getEnd() - e1.tokenOffsets.getBegin();
+            int len2 = e2.tokenOffsets.getEnd() - e2.tokenOffsets.getBegin();
+            if (len1 == len2) {
+              return 0;
+            } else {
+              return (len1 > len2)? -1:1;
+            }
+          };
 
   public static final Comparator<MatchedExpression> EXPR_TOKEN_OFFSET_COMPARATOR =
-    new Comparator<MatchedExpression>() {
-      @Override
-      public int compare(MatchedExpression e1, MatchedExpression e2) {
-        return (e1.tokenOffsets.compareTo(e2.tokenOffsets));
-      }
-    };
+          (e1, e2) -> (e1.tokenOffsets.compareTo(e2.tokenOffsets));
 
   public static final Comparator<MatchedExpression> EXPR_TOKEN_OFFSETS_NESTED_FIRST_COMPARATOR =
-    new Comparator<MatchedExpression>() {
-      @Override
-      public int compare(MatchedExpression e1, MatchedExpression e2) {
-        Interval.RelType rel = e1.tokenOffsets.getRelation(e2.tokenOffsets);
-        if (rel.equals(Interval.RelType.CONTAIN)) {
-          return 1;
-        } else if (rel.equals(Interval.RelType.INSIDE)) {
-          return -1;
-        } else {
-          return (e1.tokenOffsets.compareTo(e2.tokenOffsets));
-        }
-      }
-    };
+          (e1, e2) -> {
+            Interval.RelType rel = e1.tokenOffsets.getRelation(e2.tokenOffsets);
+            if (rel.equals(Interval.RelType.CONTAIN)) {
+              return 1;
+            } else if (rel.equals(Interval.RelType.INSIDE)) {
+              return -1;
+            } else {
+              return (e1.tokenOffsets.compareTo(e2.tokenOffsets));
+            }
+          };
 
   // Compares two matched expressions.
   // Use to order matched expressions by:
@@ -504,11 +488,6 @@ public class MatchedExpression {
           Comparators.chain(EXPR_LENGTH_COMPARATOR, EXPR_PRIORITY_COMPARATOR,
                   EXPR_ORDER_COMPARATOR, EXPR_TOKEN_OFFSET_COMPARATOR);
 
-  public static final ToDoubleFunction<MatchedExpression> EXPR_WEIGHT_SCORER = new ToDoubleFunction<MatchedExpression>() {
-    @Override
-    public double applyAsDouble(MatchedExpression in) {
-      return in.weight;
-    }
-  };
+  public static final ToDoubleFunction<MatchedExpression> EXPR_WEIGHT_SCORER = in -> in.weight;
 
 }
