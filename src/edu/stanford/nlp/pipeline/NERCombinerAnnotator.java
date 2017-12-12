@@ -43,7 +43,23 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final long maxTime;
   private final int nThreads;
   private final int maxSentenceLength;
+  private LanguageInfo.HumanLanguage language;
 
+  /** Spanish NER enhancements **/
+  private static final Map<String, String> spanishToEnglishTag = new HashMap<>();
+
+  static {
+    spanishToEnglishTag.put("PERS", "PERSON");
+    spanishToEnglishTag.put("ORG", "ORGANIZATION");
+    spanishToEnglishTag.put("LUG", "LOCATION");
+    spanishToEnglishTag.put("OTROS", "MISC");
+
+  }
+
+  private static final String spanishNumberRegexRules =
+      "edu/stanford/nlp/models/kbp/spanish/kbp_regexner_number_sp.tag";
+
+  private TokensRegexNERAnnotator spanishNumberAnnotator;
 
   public NERCombinerAnnotator(Properties properties) throws IOException {
 
@@ -100,6 +116,18 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this.nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     this.maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
     this.maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
+    this.language =
+        LanguageInfo.getLanguageFromString(PropertiesUtils.getString(properties, "ner.language", "en"));
+    // in case of Spanish, use the Spanish number regexner annotator
+    if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
+      Properties spanishNumberRegexNerProperties = new Properties();
+      spanishNumberRegexNerProperties.put("spanish.number.regexner.mapping", spanishNumberRegexRules);
+      spanishNumberRegexNerProperties.put("spanish.number.regexner.validpospattern",
+          "^(NUM).*");
+      spanishNumberRegexNerProperties.put("spanish.number.regexner.ignorecase", "true");
+      spanishNumberAnnotator = new TokensRegexNERAnnotator("spanish.number.regexner",
+          spanishNumberRegexNerProperties);
+    }
 
     VERBOSE = verbose;
     this.ner = nerCombiner;
@@ -168,6 +196,17 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (VERBOSE) {
       log.info("done.");
     }
+    // if Spanish, run the regexner with Spanish number rules
+    if (LanguageInfo.HumanLanguage.SPANISH.equals(language))
+      spanishNumberAnnotator.annotate(annotation);
+  }
+
+  /** convert Spanish tag content of older models **/
+  public String spanishToEnglishTag(String spanishTag) {
+    if (spanishToEnglishTag.containsKey(spanishTag))
+      return spanishToEnglishTag.get(spanishTag);
+    else
+      return spanishTag;
   }
 
   @Override
@@ -192,6 +231,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         // add the named entity tag to each token
         String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
         String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+        if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
+          neTag = spanishToEnglishTag(neTag);
+          normNeTag = spanishToEnglishTag(normNeTag);
+        }
         tokens.get(i).setNER(neTag);
         if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
         NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
