@@ -43,7 +43,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final long maxTime;
   private final int nThreads;
   private final int maxSentenceLength;
-  private LanguageInfo.HumanLanguage language;
+  private LanguageInfo.HumanLanguage language = LanguageInfo.HumanLanguage.ENGLISH;
 
   /** Spanish NER enhancements **/
   private static final Map<String, String> spanishToEnglishTag = new HashMap<>();
