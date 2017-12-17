@@ -45,6 +45,12 @@ public class EntityMentionsAnnotator implements Annotator {
    */
   private final boolean doAcronyms;
 
+  /**
+   * If true, allow EntityMentions annotator to apply NER tags to tokens.
+   * This is to allow HeidelTime to apply DATE tags for Spanish at the moment.
+   */
+  private boolean addNERTags = false;
+
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
@@ -87,6 +93,9 @@ public class EntityMentionsAnnotator implements Annotator {
       }
     } catch (ClassNotFoundException e) {
       log.error(e.getMessage());
+    }
+    if (PropertiesUtils.getBool(props, name+".addNERTags")) {
+      addNERTags = true;
     }
     chunkIdentifier = new LabeledChunkIdentifier();
     doAcronyms = Boolean.parseBoolean(props.getProperty(name + ".acronyms", props.getProperty("acronyms", "false")));
@@ -243,6 +252,13 @@ public class EntityMentionsAnnotator implements Annotator {
           String type = "DATE";
 
           if (timexTokens.isEmpty()) continue;
+
+          if (addNERTags && timex.timexType().equals("DATE")) {
+            for (CoreLabel token : timexTokens) {
+              token.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DATE");
+              token.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, timex.value());
+            }
+          }
 
           int tokenBegin = timexTokens.get(0).index();
           int tokenEnd = timexTokens.get(timexTokens.size()-1).index();
