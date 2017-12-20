@@ -1,22 +1,13 @@
-package edu.stanford.nlp.kbp.annotate;
+package edu.stanford.nlp.time;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.kbp.common.CoreMapUtils;
-import edu.stanford.nlp.kbp.common.Maybe;
+import edu.stanford.nlp.util.CoreMaybe;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.time.TimeAnnotations;
-import edu.stanford.nlp.time.Timex;
-import edu.stanford.nlp.time.XMLUtils;
 import edu.stanford.nlp.util.*;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,10 +16,6 @@ import java.io.StringWriter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static edu.stanford.nlp.util.logging.Redwood.Util.log;
-import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
 
 
 /**
@@ -104,7 +91,7 @@ public class HeidelTimeKBPAnnotator implements Annotator {
       PrintWriter inputWriter = new PrintWriter(inputFile);
       prepareHeidelTimeInput(inputWriter, document);
       inputWriter.close();
-      Maybe<String> pubDate = getPubDate(document);
+      CoreMaybe<String> pubDate = getPubDate(document);
 
       //--Build Command
       List<String> args = new ArrayList<>(Arrays.asList("java",
@@ -136,7 +123,7 @@ public class HeidelTimeKBPAnnotator implements Annotator {
     }
   }
 
-  private Maybe<String> getPubDate(CoreMap document) {
+  private CoreMaybe<String> getPubDate(CoreMap document) {
     //--Get Date
     //(error checks)
     if (!document.containsKey(CoreAnnotations.CalendarAnnotation.class) && !document.containsKey(CoreAnnotations.DocDateAnnotation.class)) {
@@ -146,15 +133,15 @@ public class HeidelTimeKBPAnnotator implements Annotator {
     Calendar dateCalendar = document.get(CoreAnnotations.CalendarAnnotation.class);
     if (dateCalendar != null) {
       //(case: calendar annotation)
-      return Maybe.Just(String.format("%TF", dateCalendar));
+      return CoreMaybe.Just(String.format("%TF", dateCalendar));
     } else {
       //(case: docdateannotation)
       String s = document.get(CoreAnnotations.DocDateAnnotation.class);
       if (s != null) {
-        return Maybe.Just(s);
+        return CoreMaybe.Just(s);
       }
     }
-    return Maybe.Nothing();
+    return CoreMaybe.Nothing();
   }
 
   private void prepareHeidelTimeInput(PrintWriter stream, CoreMap document) {
