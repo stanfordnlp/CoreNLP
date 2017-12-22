@@ -29,14 +29,14 @@ public class RegexNERAnnotator implements Annotator  {
 
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{
           new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "Mapping file to use."),
-          new PropertiesUtils.Property("ignorecase", "false", "Whether to ignore case or not when matching patterns."),
+          new PropertiesUtils.Property("ignorecase", "true", "Whether to ignore case or not when matching patterns."),
           new PropertiesUtils.Property("validpospattern", "", "Regular expression pattern for matching POS tags."),
           new PropertiesUtils.Property("verbose", "false", ""),
   };
 
   public RegexNERAnnotator(String name, Properties properties) {
     String mapping = properties.getProperty(name + ".mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
-    boolean ignoreCase = Boolean.parseBoolean(properties.getProperty(name + ".ignorecase", "false"));
+    boolean ignoreCase = Boolean.parseBoolean(properties.getProperty(name + ".ignorecase", "true"));
     String validPosPattern = properties.getProperty(name + ".validpospattern", RegexNERSequenceClassifier.DEFAULT_VALID_POS);
     boolean overwriteMyLabels = true;
     boolean verbose = Boolean.parseBoolean(properties.getProperty(name + ".verbose", "false"));
