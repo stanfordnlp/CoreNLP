@@ -15,6 +15,7 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.*;
 import java.text.SimpleDateFormat;
 
 /**
@@ -39,6 +40,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
   private final boolean VERBOSE;
   private boolean usePresentDateForDocDate;
+  private String providedDocDate;
 
   private final long maxTime;
   private final int nThreads;
@@ -95,6 +97,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // option for setting doc date to be the present during each annotation
     usePresentDateForDocDate =
         PropertiesUtils.getBool(properties, "ner." + "usePresentDateForDocDate", false);
+
+    // option for setting doc date from a provided string
+    providedDocDate = PropertiesUtils.getString(properties, "ner." + "providedDocDate", "");
+    Pattern p = Pattern.compile("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
+    Matcher m = p.matcher(providedDocDate);
+    if (!m.matches())
+      providedDocDate = "";
 
     NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
         NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
@@ -188,6 +197,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       String currentDate =
           new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
       annotation.set(CoreAnnotations.DocDateAnnotation.class, currentDate);
+    }
+    // use provided doc date if applicable
+    if (!providedDocDate.equals("")) {
+      annotation.set(CoreAnnotations.DocDateAnnotation.class, providedDocDate);
     }
 
     super.annotate(annotation);
