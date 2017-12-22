@@ -37,9 +37,9 @@ public class TrainCRFClassifierSlowITest extends TestCase {
     CRFClassifier.main(new String[]{"-props",
         "/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training/german-crf-example-test.prop"});
     List<String> germanTrainingResults = IOUtils.linesFromFile("/scr/nlp/data/stanford-corenlp-testing/german-crf.results");
-    String lastLineOfResults = germanTrainingResults.get(germanTrainingResults.size()-3);
-    System.out.println("last line: "+lastLineOfResults.trim());
-    System.out.println("last line: "+expectedGermanPerformanceLine);
+    String lastLineOfResults = germanTrainingResults.get(germanTrainingResults.size()-1);
+    //System.out.println("last line: "+lastLineOfResults.trim());
+    //System.out.println("last line: "+expectedGermanPerformanceLine);
     assertEquals(lastLineOfResults.trim(), expectedGermanPerformanceLine);
   }
 
