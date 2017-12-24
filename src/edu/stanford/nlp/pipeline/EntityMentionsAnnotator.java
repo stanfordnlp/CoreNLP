@@ -228,76 +228,7 @@ public class EntityMentionsAnnotator implements Annotator {
       if (mentions != null) {
         allMentions.addAll(mentions);
       }
-
-      // And finally any Timex annotations (from e.g. HeidelTime).
-      List<CoreMap> timexes = sentence.get(TimeAnnotations.TimexAnnotations.class);
-      if (timexes != null) {
-        List<CoreMap> timexMentions = new ArrayList<>();
-
-        for (CoreMap cmap : timexes) {
-          // Get character information.
-          int charBegin = cmap.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-          int charEnd = cmap.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-          Timex timex = cmap.get(TimeAnnotations.TimexAnnotation.class);
-          List<CoreLabel> timexTokens = cmap.get(CoreAnnotations.TokensAnnotation.class);
-          String type = "DATE";
-
-          if (timexTokens.isEmpty()) continue;
-
-          int tokenBegin = timexTokens.get(0).index();
-          int tokenEnd = timexTokens.get(timexTokens.size()-1).index();
-
-          // Create a mention from this data.
-          CoreMap mention = new ArrayCoreMap();
-          // Text
-          mention.set(CoreAnnotations.TextAnnotation.class, timex.text());
-          // Character offset
-          mention.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, charBegin);
-          mention.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, charEnd);
-          // Tokens
-          mention.set(CoreAnnotations.TokensAnnotation.class, timexTokens);
-          // TokenBegin, End
-          mention.set(CoreAnnotations.TokenBeginAnnotation.class, tokenBegin);
-          mention.set(CoreAnnotations.TokenEndAnnotation.class, tokenEnd);
-          // SentenceIndex
-          mention.set(CoreAnnotations.SentenceIndexAnnotation.class, sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
-          // NamedEntityTag
-          mention.set(CoreAnnotations.NamedEntityTagAnnotation.class, type);
-
-          // Run mention postprocessing.
-          mention.set(nerNormalizedCoreAnnotationClass, timex.value());
-          mention.set(CoreAnnotations.EntityTypeAnnotation.class, type);
-          // set sentence index annotation for mention
-          mention.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
-          mention.set(TimeAnnotations.TimexAnnotation.class, timex);
-
-          Optional<CoreMap> existingMention = overlapsWithMention(mention, timexMentions);
-          if (existingMention.isPresent()) {
-            logf("WARNING: Timex mention %s collides with existing mention %s; skipping.", mention, existingMention.get());
-          } else {
-            timexMentions.add(mention);
-          }
-        }
-
-        if (sentence.get(mentionsCoreAnnotationClass) == null) {
-          sentence.set(mentionsCoreAnnotationClass, new ArrayList<>());
-        } else if ( ! timexMentions.isEmpty()) {
-          // Remove any mentions that overlap with this one.
-          ListIterator<CoreMap> it = sentence.get(mentionsCoreAnnotationClass).listIterator();
-          while (it.hasNext()) {
-            CoreMap mention = it.next();
-
-            Optional<CoreMap> newMention = overlapsWithMention(mention, timexMentions);
-            if (newMention.isPresent()) {
-              logf("WARNING: Mention %s collides with new timex mention %s; removing.", mention, newMention.get());
-              it.remove();
-            }
-          }
-        }
-        sentence.get(mentionsCoreAnnotationClass).addAll(timexMentions);
-        allMentions.addAll(timexMentions);
-      }
-
+      
       sentenceIndex++;
     }
 
