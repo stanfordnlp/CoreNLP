@@ -265,6 +265,12 @@ public class HeidelTimeKBPAnnotator implements Annotator {
         sentence.set(TimeAnnotations.TimexAnnotations.class, new ArrayList<>());
       }
       sentence.get(TimeAnnotations.TimexAnnotations.class).add(timexMap);
+      // update NER for tokens
+      for (CoreLabel token : tokens) {
+        token.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DATE");
+        token.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, node.timex.value());
+        token.set(TimeAnnotations.TimexAnnotation.class, node.timex);
+      }
 
       return timexMap;
     }

@@ -228,7 +228,7 @@ public class EntityMentionsAnnotator implements Annotator {
       if (mentions != null) {
         allMentions.addAll(mentions);
       }
-      
+
       sentenceIndex++;
     }
 
