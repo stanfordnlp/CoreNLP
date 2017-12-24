@@ -90,7 +90,7 @@ import java.util.regex.Pattern;
  * <table>
  *   <tr><th>Field</th><th>Description</th><th>Default</th></tr>
  *   <tr><td>{@code mapping}</td><td>Comma separated list of mapping files to use </td>
- *      <td>{@code edu/stanford/nlp/models/regexner/type_map_clean}</td>
+ *      <td>{@code edu/stanford/nlp/models/kbp/regexner_caseless.tab}</td>
  *   </tr>
  *   <tr><td>{@code mapping.header}</td>
  *       <td>Comma separated list of header fields (or {@code true} if header is specified in the file)</td>
