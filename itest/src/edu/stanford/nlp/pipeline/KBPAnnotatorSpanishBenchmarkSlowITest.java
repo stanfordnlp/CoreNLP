@@ -10,7 +10,7 @@ public class KBPAnnotatorSpanishBenchmarkSlowITest extends KBPAnnotatorBenchmark
     // set the English specific settings
     KBP_DOCS_DIR = "/scr/nlp/data/kbp-benchmark/spanish/kbp-docs-spanish";
     GOLD_RELATIONS_PATH = "/scr/nlp/data/kbp-benchmark/spanish/kbp-gold-relations-spanish.txt";
-    KBP_MINIMUM_SCORE = .1;
+    KBP_MINIMUM_SCORE = .27;
     // load the gold relations from gold relations file
     loadGoldData();
     // set up the pipeline
