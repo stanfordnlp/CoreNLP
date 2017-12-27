@@ -1,0 +1,38 @@
+  ENV.defaults["stage"] = 1
+  ENV.defaults["ruleType"] = "tokens"
+
+  # map month names to numbers
+  MONTH_MAP = {
+      "enero": 1,
+      "febrero": 2,
+      "marzo": 3,
+      "abril": 4,
+      "mayo": 5,
+      "junio": 6,
+      "julio": 7,
+      "agosto": 8,
+      "septiembre": 9,
+      "octubre": 10,
+      "noviembre": 11,
+      "diciembre": 12
+    }
+
+  # dates of the year
+  $MONTH_NAME = "/enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre/";
+
+  { ( /el/ (/[0-9]{1,2}/) /de/ ($MONTH_NAME) /de/ (/[0-9]{4}/)) => IsoDate($3[0].numcompvalue, MONTH_MAP[$2[0].word], $1[0].numcompvalue) }
+
+  # relative times
+  { (/ayer/) => YESTERDAY }
+  { (/hoy/) => TODAY }
+  { (/mañana/) => TOMORROW }
+  { (/esta/ /noche/) => TONIGHT }
+
+  # days of the week
+  { (/lunes/) => MONDAY }
+  { (/martes/) => TUESDAY }
+  { (/miércoles/) => WEDNESDAY }
+  { (/jueves/) => THURSDAY }
+  { (/viernes/) => FRIDAY }
+  { (/sábado/) => SATURDAY }
+  { (/domingo/) => SUNDAY }
