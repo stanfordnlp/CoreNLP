@@ -20,7 +20,7 @@
   # dates of the year
   $MONTH_NAME = "/enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre/";
 
-  { ( /el/ (/[0-9]{1,2}/) /de/ ($MONTH_NAME) /de/ (/[0-9]{4}/)) => IsoDate($3[0].numcompvalue, MONTH_MAP[$2[0].word], $1[0].numcompvalue) }
+  { ((/[0-9]{1,2}/) /de/ ($MONTH_NAME) /de/ (/[0-9]{4}/)) => IsoDate($3[0].numcompvalue, MONTH_MAP[$2[0].word], $1[0].numcompvalue) }
 
   # relative times
   { (/ayer/) => YESTERDAY }
