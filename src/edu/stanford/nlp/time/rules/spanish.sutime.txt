@@ -17,10 +17,29 @@
       "diciembre": 12
     }
 
-  # dates of the year
+  # dates
+
   $MONTH_NAME = "/enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre/";
 
-  { ((/[0-9]{1,2}/) /de/ ($MONTH_NAME) /de/ (/[0-9]{4}/)) => IsoDate($3[0].numcompvalue, MONTH_MAP[$2[0].word], $1[0].numcompvalue) }
+  # full date
+  { (/el/? (/[0-9]{1,2}/) /de/ ($MONTH_NAME) /de/ (/[0-9]{4}/)) => IsoDate($3[0].numcompvalue, MONTH_MAP[$2[0].word], $1[0].numcompvalue) }
+
+  # day and month
+  { (/el/? (/[0-9]{1,2}/) /de/ ($MONTH_NAME)) => IsoDate(NIL, MONTH_MAP[$2[0].word], $1[0].numcompvalue) }
+
+  # month alone
+  { (/enero/) => JANUARY }
+  { (/febrero/) => FEBRUARY }
+  { (/marzo/) => MARCH }
+  { (/abril/) => APRIL }
+  { (/mayo/) => MAY }
+  { (/junio/) => JUNE }
+  { (/julio/) => JULY }
+  { (/agosto/) => AUGUST }
+  { (/septiembre/) => SEPTEMBER }
+  { (/octubre/) => OCTOBER }
+  { (/noviembre/) => NOVEMBER }
+  { (/diciembre/) => DECEMBER }
 
   # relative times
   { (/ayer/) => YESTERDAY }
@@ -29,10 +48,10 @@
   { (/esta/ /noche/) => TONIGHT }
 
   # days of the week
-  { (/lunes/) => MONDAY }
-  { (/martes/) => TUESDAY }
-  { (/miércoles/) => WEDNESDAY }
-  { (/jueves/) => THURSDAY }
-  { (/viernes/) => FRIDAY }
-  { (/sábado/) => SATURDAY }
-  { (/domingo/) => SUNDAY }
+  { (/el|este|hoy/? /lunes/) => MONDAY }
+  { (/el|este|hoy/? /martes/) => TUESDAY }
+  { (/el|este|hoy/? /miércoles/) => WEDNESDAY }
+  { (/el|este|hoy/? /jueves/) => THURSDAY }
+  { (/el|este|hoy/? /viernes/) => FRIDAY }
+  { (/el|este|hoy/? /sábado/) => SATURDAY }
+  { (/el|este|hoy/? /domingo/) => SUNDAY }
