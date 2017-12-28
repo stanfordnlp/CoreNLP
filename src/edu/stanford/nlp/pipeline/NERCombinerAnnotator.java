@@ -64,6 +64,14 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
   private TokensRegexNERAnnotator spanishNumberAnnotator;
 
+  /** fine grained ner **/
+  private boolean applyFineGrained = false;
+  private TokensRegexNERAnnotator fineGrainedNERAnnotator;
+
+  /** entity mentions **/
+  private boolean buildEntityMentions = false;
+  private EntityMentionsAnnotator entityMentionsAnnotator;
+
   public NERCombinerAnnotator(Properties properties) throws IOException {
 
     List<String> models = new ArrayList<>();
@@ -128,6 +136,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this.maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
     this.language =
         LanguageInfo.getLanguageFromString(PropertiesUtils.getString(properties, "ner.language", "en"));
+
     // in case of Spanish, use the Spanish number regexner annotator
     if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
       Properties spanishNumberRegexNerProperties = new Properties();
@@ -137,6 +146,22 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       spanishNumberRegexNerProperties.put("spanish.number.regexner.ignorecase", "true");
       spanishNumberAnnotator = new TokensRegexNERAnnotator("spanish.number.regexner",
           spanishNumberRegexNerProperties);
+    }
+
+    // set up fine grained ner
+    if (this.applyFineGrained) {
+      String fineGrainedPrefix = "ner.fine.regexner";
+      Properties fineGrainedProps =
+          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".");
+      fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
+    }
+
+    // set up entity mentions
+    if (this.buildEntityMentions) {
+      String entityMentionsPrefix = "ner.entitymentions";
+      Properties entityMentionsProps =
+          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".");
+      entityMentionsAnnotator = new EntityMentionsAnnotator("ner.entitymentions", entityMentionsProps);
     }
 
     VERBOSE = verbose;
@@ -213,6 +238,12 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // if Spanish, run the regexner with Spanish number rules
     if (LanguageInfo.HumanLanguage.SPANISH.equals(language))
       spanishNumberAnnotator.annotate(annotation);
+    // if fine grained ner is requested, run that
+    if (this.applyFineGrained)
+      fineGrainedNERAnnotator.annotate(annotation);
+    // if entity mentions should be built, run that
+    if (this.buildEntityMentions)
+      entityMentionsAnnotator.annotate(annotation);
   }
 
   /** convert Spanish tag content of older models **/
@@ -326,7 +357,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   @SuppressWarnings("unchecked")
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return new HashSet<>(Arrays.asList(
+    HashSet<Class<? extends CoreAnnotation>> nerRequirementsSatisfied =
+        new HashSet<>(Arrays.asList(
         CoreAnnotations.NamedEntityTagAnnotation.class,
         CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
         CoreAnnotations.ValueAnnotation.class,
@@ -344,6 +376,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         CoreAnnotations.AnswerAnnotation.class,
         CoreAnnotations.NumericCompositeValueAnnotation.class
     ));
+    if (this.buildEntityMentions)
+      nerRequirementsSatisfied.add(CoreAnnotations.MentionsAnnotation.class);
+    return nerRequirementsSatisfied;
   }
 
 }
