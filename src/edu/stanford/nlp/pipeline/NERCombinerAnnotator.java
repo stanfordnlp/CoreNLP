@@ -1,4 +1,5 @@
 package edu.stanford.nlp.pipeline;
+
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
