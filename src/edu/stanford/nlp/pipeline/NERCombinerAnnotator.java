@@ -40,8 +40,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final NERClassifierCombiner ner;
 
   private final boolean VERBOSE;
-  private boolean usePresentDateForDocDate;
-  private String providedDocDate;
+  private boolean usePresentDateForDocDate = false;
+  private String providedDocDate = "";
 
   private final long maxTime;
   private final int nThreads;
