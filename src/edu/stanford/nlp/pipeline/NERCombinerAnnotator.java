@@ -65,11 +65,11 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private TokensRegexNERAnnotator spanishNumberAnnotator;
 
   /** fine grained ner **/
-  private boolean applyFineGrained = false;
+  private boolean applyFineGrained = true;
   private TokensRegexNERAnnotator fineGrainedNERAnnotator;
 
   /** entity mentions **/
-  private boolean buildEntityMentions = false;
+  private boolean buildEntityMentions = true;
   private EntityMentionsAnnotator entityMentionsAnnotator;
 
   public NERCombinerAnnotator(Properties properties) throws IOException {
