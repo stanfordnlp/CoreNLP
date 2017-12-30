@@ -155,7 +155,7 @@ public class DcorefExactOutputITest {
           break;
         }
       }
-      Assert.assertTrue("Could not find expected coref chain " + mapEntry.getKey() + " " + expectedChain + " in the results", found);
+      Assert.assertTrue("Could not find expected coref chain " + mapEntry.getKey() + ' ' + expectedChain + " in the results", found);
     }
 
     for (Map.Entry<Integer, CorefChain> integerCorefChainEntry : chains.entrySet()) {
