@@ -85,7 +85,6 @@ public class TextOutputter extends AnnotationOutputter {
     // display each sentence in this annotation
     if (sentences != null) {
       for (int i = 0, sz = sentences.size(); i < sz; i ++) {
-        pw.println();
         CoreMap sentence = sentences.get(i);
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
         String sentiment = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
@@ -105,9 +104,6 @@ public class TextOutputter extends AnnotationOutputter {
                 "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag",
                 "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag",
                 "Timex", "TrueCase", "TrueCaseText", "SentimentClass", "WikipediaEntity" };
-
-        pw.println();
-        pw.println("Tokens:");
         for (CoreLabel token: tokens) {
           pw.print(token.toShorterString(tokenAnnotations));
           pw.println();
@@ -116,15 +112,12 @@ public class TextOutputter extends AnnotationOutputter {
         // display the parse tree for this sentence
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
         if (tree != null) {
-          pw.println();
-          pw.println("Constituency parse: ");
           options.constituentTreePrinter.printTree(tree, pw);
         }
 
         // display sentiment tree if they asked for sentiment
         if ( ! StringUtils.isNullOrEmpty(sentiment)) {
-          pw.println();
-          pw.println("Sentiment-annotated binary tree:");
+          pw.println("Sentiment-annotated binary tree");
           Tree sTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
           if (sTree != null) {
             sTree.pennPrint(pw,
@@ -141,22 +134,7 @@ public class TextOutputter extends AnnotationOutputter {
         // printer.  This might be relevant if using CoreNLP for a
         // language which doesn't have dependencies, for example.
         if (sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class) != null) {
-          pw.println();
-          pw.println("Dependency Parse (enhanced plus plus dependencies):");
           pw.print(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class).toList());
-          pw.println();
-        }
-
-        // display the entity mentions
-        List<CoreMap> entityMentions = sentence.get(CoreAnnotations.MentionsAnnotation.class);
-        if (entityMentions != null) {
-          pw.println("Extracted the following NER entity mentions:");
-          for (CoreMap entityMention : entityMentions) {
-            if (entityMention.get(CoreAnnotations.EntityTypeAnnotation.class) != null) {
-              pw.println(entityMention.get(CoreAnnotations.TextAnnotation.class) + "\t"
-                  + entityMention.get(CoreAnnotations.EntityTypeAnnotation.class));
-            }
-          }
           pw.println();
         }
 
@@ -196,6 +174,7 @@ public class TextOutputter extends AnnotationOutputter {
             pw.println(triple);
           }
         }
+
       }
     } else {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);

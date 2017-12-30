@@ -645,13 +645,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     }
   }
 
-  /** annotate the CoreDocument wrapper **/
-  public void annotate(CoreDocument document) {
-    // annotate the underlying Annotation
-    this.annotate(document.annotationDocument);
-    // wrap the sentences and entity mentions post annotation
-    document.wrapAnnotations();
-  }
 
   /** {@inheritDoc} */
   @Override
