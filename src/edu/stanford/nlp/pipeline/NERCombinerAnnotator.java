@@ -149,6 +149,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
 
     // set up fine grained ner
+    this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
     if (this.applyFineGrained) {
       String fineGrainedPrefix = "ner.fine.regexner";
       Properties fineGrainedProps =
@@ -157,6 +158,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
 
     // set up entity mentions
+    this.buildEntityMentions = PropertiesUtils.getBool(properties, "ner.buildEntityMentions", true);
     if (this.buildEntityMentions) {
       String entityMentionsPrefix = "ner.entitymentions";
       Properties entityMentionsProps =
