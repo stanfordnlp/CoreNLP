@@ -149,22 +149,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
 
     // set up fine grained ner
-    this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
-    if (this.applyFineGrained) {
-      String fineGrainedPrefix = "ner.fine.regexner";
-      Properties fineGrainedProps =
-          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".");
-      fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
-    }
+    setUpFineGrainedNER(properties);
 
     // set up entity mentions
-    this.buildEntityMentions = PropertiesUtils.getBool(properties, "ner.buildEntityMentions", true);
-    if (this.buildEntityMentions) {
-      String entityMentionsPrefix = "ner.entitymentions";
-      Properties entityMentionsProps =
-          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".");
-      entityMentionsAnnotator = new EntityMentionsAnnotator("ner.entitymentions", entityMentionsProps);
-    }
+    setUpEntityMentionBuilding(properties);
 
     VERBOSE = verbose;
     this.ner = nerCombiner;
@@ -175,9 +163,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this(true);
   }
 
-  public NERCombinerAnnotator(boolean verbose)
-    throws IOException, ClassNotFoundException
-  {
+  public NERCombinerAnnotator(boolean verbose) throws IOException, ClassNotFoundException {
     this(new NERClassifierCombiner(new Properties()), verbose);
   }
 
@@ -201,6 +187,29 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this.maxTime = maxTime;
     this.nThreads = nThreads;
     this.maxSentenceLength = maxSentenceLength;
+    setUpFineGrainedNER(new Properties());
+    setUpEntityMentionBuilding(new Properties());
+  }
+
+  public void setUpFineGrainedNER(Properties properties) {
+    // set up fine grained ner
+    this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
+    if (this.applyFineGrained) {
+      String fineGrainedPrefix = "ner.fine.regexner";
+      Properties fineGrainedProps =
+          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".");
+      fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
+    }
+  }
+
+  public void setUpEntityMentionBuilding(Properties properties) {
+    this.buildEntityMentions = PropertiesUtils.getBool(properties, "ner.buildEntityMentions", true);
+    if (this.buildEntityMentions) {
+      String entityMentionsPrefix = "ner.entitymentions";
+      Properties entityMentionsProps =
+          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".");
+      entityMentionsAnnotator = new EntityMentionsAnnotator("ner.entitymentions", entityMentionsProps);
+    }
   }
 
 
