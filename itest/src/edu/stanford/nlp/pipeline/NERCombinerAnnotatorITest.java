@@ -42,8 +42,6 @@ public class NERCombinerAnnotatorITest extends TestCase {
         props.setProperty("ner.applyNumericClassifiers", "false");
         props.setProperty("ner.useSUTime", "false");
         props.setProperty("ner.model", NER_3CLASS);
-        props.setProperty("ner.applyFineGrained", "false");
-        props.setProperty("ner.buildEntityMentions", "false");
         NERClassifierCombiner ner = NERClassifierCombiner.createNERClassifierCombiner("ner", props);
         NERCombinerAnnotator threaded4Annotator = new NERCombinerAnnotator(ner, false, 4, -1);
 
@@ -144,16 +142,16 @@ public class NERCombinerAnnotatorITest extends TestCase {
     StringBuilder sb = new StringBuilder();
     sb.append("EU\tNNP\tORGANIZATION\n");
     sb.append("rejects\tVBZ\tO\n");
-    sb.append("German\tNNP\tMISC\n");
+    sb.append("German\tNNP\tNATIONALITY\n");
     sb.append("call\tNN\tO\n");
     sb.append("to\tTO\tO\n");
     sb.append("boycott\tVB\tO\n");
-    sb.append("British\tNNP\tMISC\n");
+    sb.append("British\tNNP\tNATIONALITY\n");
     sb.append("lamb\tNN\tO\n");
     sb.append(".\t.\tO\n");
     sb.append("Peter\tNNP\tPERSON\n");
     sb.append("Blackburn\tNNP\tPERSON\n");
-    sb.append("BRUSSELS\tNNP\tLOCATION\n");
+    sb.append("BRUSSELS\tNNP\tCITY\n");
     sb.append("1996-08-22\tCD\tDATE\n");
     sb.append("It\tPRP\tO\n");
     sb.append("is\tVBZ\tO\n");
