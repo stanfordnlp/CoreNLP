@@ -34,6 +34,8 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
       if (pipeline == null) {  // Hack so we don't load the pipeline fresh for every test
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner");
+        props.setProperty("ner.applyFineGrained", "false");
+        props.setProperty("ner.buildEntityMentions", "false");
         pipeline = new StanfordCoreNLP(props);
         // Basic caseless and cased tokens regex annotators
         caseless = new TokensRegexNERAnnotator(MAPPING, true);
