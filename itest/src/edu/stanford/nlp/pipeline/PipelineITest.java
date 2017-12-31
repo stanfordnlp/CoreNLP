@@ -77,7 +77,7 @@ public class PipelineITest {
     Assert.assertEquals("be", tokens.get(2).get(CoreAnnotations.LemmaAnnotation.class));
     Assert.assertEquals("PERSON", tokens.get(0).get(CoreAnnotations.NamedEntityTagAnnotation.class));
     Assert.assertEquals("PERSON", tokens.get(1).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    Assert.assertEquals("LOCATION", tokens.get(10).get(CoreAnnotations.NamedEntityTagAnnotation.class));
+    Assert.assertEquals("CITY", tokens.get(10).get(CoreAnnotations.NamedEntityTagAnnotation.class));
 
     // get sentences
     List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
@@ -138,7 +138,7 @@ public class PipelineITest {
     Assert.assertEquals(41, (int)tokens2.get(1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
     Assert.assertEquals("VBZ", tokens2.get(1).get(CoreAnnotations.PartOfSpeechAnnotation.class));
     Assert.assertEquals("be", tokens2.get(1).get(CoreAnnotations.LemmaAnnotation.class));
-    Assert.assertEquals("LOCATION", tokens2.get(3).get(CoreAnnotations.NamedEntityTagAnnotation.class));
+    Assert.assertEquals("CITY", tokens2.get(3).get(CoreAnnotations.NamedEntityTagAnnotation.class));
   }
 
   private static String join(List<CoreLabel> tokens) {
