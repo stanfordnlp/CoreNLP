@@ -7,10 +7,12 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.semgraph.*;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,8 +32,13 @@ public class CoreSentence {
   public void wrapEntityMentions() {
     if (this.sentenceCoreMap.get(CoreAnnotations.MentionsAnnotation.class) != null) {
       entityMentions = this.sentenceCoreMap.get(CoreAnnotations.MentionsAnnotation.class).
-          stream().map(coreMapEntityMention -> new CoreEntityMention(coreMapEntityMention)).collect(Collectors.toList());
+          stream().map(coreMapEntityMention -> new CoreEntityMention(this,coreMapEntityMention)).collect(Collectors.toList());
     }
+  }
+
+  /** get the document this sentence is in **/
+  public CoreDocument document() {
+    return document;
   }
 
   /** get the underlying CoreMap if need be **/
@@ -42,6 +49,13 @@ public class CoreSentence {
   /** full text of the sentence **/
   public String text() {
     return sentenceCoreMap.get(CoreAnnotations.TextAnnotation.class);
+  }
+
+  /** char offsets of mention **/
+  public Pair<Integer,Integer> charOffsets() {
+    int beginCharOffset = this.sentenceCoreMap.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+    int endCharOffset = this.sentenceCoreMap.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+    return new Pair<>(beginCharOffset,endCharOffset);
   }
 
   /** list of tokens **/
@@ -69,8 +83,12 @@ public class CoreSentence {
     return sentenceCoreMap.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
   }
 
-  public List<CoreEntityMention> entityMentions() {
-    return this.entityMentions;
+  /** list of entity mentions **/
+  public List<CoreEntityMention> entityMentions() { return this.entityMentions; }
+
+  /** list of KBP relations found **/
+  public List<RelationTriple> kbpRelations() {
+    return sentenceCoreMap.get(CoreAnnotations.KBPTriplesAnnotation.class);
   }
 
 

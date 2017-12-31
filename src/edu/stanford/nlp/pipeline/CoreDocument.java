@@ -1,5 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ling.CoreAnnotations;
 
 import java.util.*;
@@ -35,8 +37,7 @@ public class CoreDocument {
   private void wrapSentences() {
     sentences = this.annotationDocument.get(CoreAnnotations.SentencesAnnotation.class).
         stream().map(coreMapSentence -> new CoreSentence(this, coreMapSentence)).collect(Collectors.toList());
-    for (CoreSentence sentence : sentences)
-      sentence.wrapEntityMentions();
+    sentences.forEach(sentence -> sentence.wrapEntityMentions());
   }
 
   /** build a list of all entity mentions in the document from the sentences **/
@@ -69,8 +70,12 @@ public class CoreDocument {
   }
 
   /** the list of entity mentions in this document **/
-  public List<CoreEntityMention> entityMentions() {
-    return this.entityMentions;
+  public List<CoreEntityMention> entityMentions() { return this.entityMentions; }
+
+  /** coref info **/
+  public Map<Integer, CorefChain> corefChains() {
+    return this.annotationDocument.get(CorefCoreAnnotations.CorefChainAnnotation.class);
   }
+
 
 }
