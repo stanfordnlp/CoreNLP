@@ -13,7 +13,13 @@ import java.util.Properties;
 public class AnnotationOutputterITest extends TestCase {
 
   static StanfordCoreNLP pipeline =
-      new StanfordCoreNLP(new Properties() {{ setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse"); }});
+      new StanfordCoreNLP(new Properties() {
+          {
+              setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse");
+              setProperty("ner.applyFineGrained", "false");
+              setProperty("ner.buildEntityMentions", "false");
+          }
+      });
 
   public void testSimpleSentenceCoNLL() throws IOException {
     Annotation ann = new Annotation("The cat is fat. The dog is lazy.");
