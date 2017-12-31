@@ -71,7 +71,7 @@ public class DcorefExactOutputITest {
     }
   }
 
-  private static Map<Integer, List<ExpectedMention>> loadExpectedResults(String filename) throws IOException {
+  private static Map<Integer, List<ExpectedMention>> loadExpectedResults(String filename) {
     Map<Integer, List<ExpectedMention>> results = Generics.newHashMap();
 
     int id = -1;
@@ -157,7 +157,7 @@ public class DcorefExactOutputITest {
           break;
         }
       }
-      Assert.assertTrue("Could not find expected coref chain " + mapEntry.getKey() + " " + expectedChain + " in the results", found);
+      Assert.assertTrue("Could not find expected coref chain " + mapEntry.getKey() + ' ' + expectedChain + " in the results", found);
     }
 
     for (Map.Entry<Integer, CorefChain> integerCorefChainEntry : chains.entrySet()) {
@@ -183,7 +183,8 @@ public class DcorefExactOutputITest {
   }
 
   /**
-   * If run as a program, writes the expected output of args[0] to args[1]
+   * If run as a program, writes the expected output of args[0] to args[1].
+   * This is useful for updating the desired test results when CoreNLP changes.
    */
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {

@@ -612,8 +612,11 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
     } catch (StreamCorruptedException sce) {
       // suppress error message, on the assumption that we've really got
       // a text grammar, and that'll be tried next
+      log.info("Attempting to load " + serializedFileOrUrl +
+               " as a serialized grammar caused error below, but this may just be because it's a text grammar!");
+      log.info(sce);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error(e);
     }
     return null;
   }
