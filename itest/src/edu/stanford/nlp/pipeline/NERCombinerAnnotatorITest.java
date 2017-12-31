@@ -42,6 +42,8 @@ public class NERCombinerAnnotatorITest extends TestCase {
         props.setProperty("ner.applyNumericClassifiers", "false");
         props.setProperty("ner.useSUTime", "false");
         props.setProperty("ner.model", NER_3CLASS);
+        props.setProperty("ner.applyFineGrained", "false");
+        props.setProperty("ner.buildEntityMentions", "false");
         NERClassifierCombiner ner = NERClassifierCombiner.createNERClassifierCombiner("ner", props);
         NERCombinerAnnotator threaded4Annotator = new NERCombinerAnnotator(ner, false, 4, -1);
 
