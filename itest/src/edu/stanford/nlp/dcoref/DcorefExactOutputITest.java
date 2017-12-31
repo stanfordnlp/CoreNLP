@@ -48,8 +48,6 @@ public class DcorefExactOutputITest {
       if (pipeline == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref");
-        props.setProperty("ner.applyFineGrained", "false");
-        props.setProperty("ner.buildEntityMentions", "false");
         pipeline = new StanfordCoreNLP(props);
       }
     }
@@ -197,8 +195,6 @@ public class DcorefExactOutputITest {
 
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref");
-    props.setProperty("ner.applyFineGrained", "false");
-    props.setProperty("ner.buildEntityMentions", "false");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     // for example
