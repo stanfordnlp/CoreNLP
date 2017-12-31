@@ -63,7 +63,7 @@ public class DefaultPaths {
           "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab;" +
                   "edu/stanford/nlp/models/kbp/regexner_cased.tab";
 
-  public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/kbp/wikidict.tab.gz";
+  public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/kbp/english/wikidict.tab.gz";
 
 
   private DefaultPaths() {
