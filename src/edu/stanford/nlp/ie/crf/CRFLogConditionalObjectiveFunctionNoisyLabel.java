@@ -23,6 +23,7 @@ public class CRFLogConditionalObjectiveFunctionNoisyLabel extends CRFLogConditio
     return new NoisyLabelLinearCliquePotentialFunction(weights, docLabels, errorMatrix);
   }
 
+  @Override
   public void setWeights(double[][] weights) {
     super.setWeights(weights);
   }
