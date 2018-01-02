@@ -182,13 +182,21 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime, int maxSentenceLength) {
+    this(ner, verbose, nThreads, maxTime, maxSentenceLength,true,true);
+  }
+
+  public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime,
+                              int maxSentenceLength, boolean fineGrained, boolean entityMentions) {
     VERBOSE = verbose;
     this.ner = ner;
     this.maxTime = maxTime;
     this.nThreads = nThreads;
     this.maxSentenceLength = maxSentenceLength;
-    setUpFineGrainedNER(new Properties());
-    setUpEntityMentionBuilding(new Properties());
+    Properties nerProperties = new Properties();
+    nerProperties.setProperty("ner.applyFineGrained", Boolean.toString(fineGrained));
+    nerProperties.setProperty("ner.buildEntityMentions", Boolean.toString(entityMentions));
+    setUpFineGrainedNER(nerProperties);
+    setUpEntityMentionBuilding(nerProperties);
   }
 
   public void setUpFineGrainedNER(Properties properties) {
