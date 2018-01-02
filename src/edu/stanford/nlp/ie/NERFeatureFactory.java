@@ -1323,7 +1323,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         }
       }
 
-      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || (flags.useShapeStrings)) {
+      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings) {
         featuresC.add(cShape + "-TYPE");
         if (flags.useTypeSeqs) {
           featuresC.add(pShape + "-PTYPE");
@@ -1465,7 +1465,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         }
       }
 
-      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || (flags.useShapeStrings)) {
+      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings) {
         featuresC.add(cShape + "-TYPE");
       }
 
@@ -1492,7 +1492,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         featuresC.add(pWord + '-' + nWord + "-SWORDS");
       }
 
-      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || (flags.useShapeStrings)) {
+      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings) {
         if (flags.useTypeSeqs) {
           featuresC.add(pShape + "-PTYPE");
           featuresC.add(nShape + "-NTYPE");

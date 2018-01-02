@@ -127,7 +127,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
       fl.set(CoreAnnotations.PositionAnnotation.class, Integer.toString((position++)));
 
       // word shape
-      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) && (!flags.useShapeStrings)) {
+      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) && ! flags.useShapeStrings) {
         // TODO: if we pass in a FeatureFactory, as suggested by an earlier comment,
         // we should use that FeatureFactory's getWord function
         String word = fl.get(CoreAnnotations.TextAnnotation.class);
