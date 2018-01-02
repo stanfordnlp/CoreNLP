@@ -1,6 +1,5 @@
 package edu.stanford.nlp.international.arabic.process;
 
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -43,7 +42,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * Arabic word segmentation model based on conditional random fields (CRF).
  * This is a re-implementation (with extensions) of the model described in
  * (Green and DeNero, 2012).
- * <p>
+ *
  * This package includes a JFlex-based orthographic normalization package
  * that runs on the input prior to processing by the CRF-based segmentation
  * model. The normalization options are configurable, but must be consistent for
@@ -54,7 +53,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<String,String> /* Serializable */  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicSegmenter.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ArabicSegmenter.class);
 
   private static final long serialVersionUID = -4791848633597417788L;
 

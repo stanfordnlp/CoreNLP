@@ -1,5 +1,4 @@
 package edu.stanford.nlp.international.arabic.process; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -24,6 +23,7 @@ import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * A class for converting strings to input suitable for processing by
@@ -35,7 +35,7 @@ import edu.stanford.nlp.util.Pair;
 public class IOBUtils  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IOBUtils.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(IOBUtils.class);
 
   // Training token types.
   private enum TokenType { BeginMarker, EndMarker, BothMarker, NoMarker }
@@ -113,7 +113,7 @@ public class IOBUtils  {
    * @param tokenList
    * @param segMarker
    * @param applyRewriteRules add rewrite labels (for training data)
-   * @param stripRewrites revert training data to old Green & DeNero model (remove
+   * @param stripRewrites revert training data to old Green and DeNero model (remove
    *    rewrite labels but still rewrite to try to preserve raw text)
    */
   public static List<CoreLabel> StringToIOB(List<CoreLabel> tokenList,
@@ -130,7 +130,7 @@ public class IOBUtils  {
    * @param tokenList
    * @param segMarker
    * @param applyRewriteRules add rewrite labels (for training data)
-   * @param stripRewrites revert training data to old Green & DeNero model (remove
+   * @param stripRewrites revert training data to old Green and DeNero model (remove
    *    rewrite labels but still rewrite to try to preserve raw text)
    * @param tf a TokenizerFactory returning ArabicTokenizers (for determining original segment boundaries)
    * @param origText the original string before tokenization (for determining original segment boundaries)
@@ -756,4 +756,5 @@ public class IOBUtils  {
 
     return spans;
   }
+
 }

@@ -1,7 +1,5 @@
 /**
- * <BODY>
- * UI components for i/o operations.
+ * UI components for I/O operations.
  * @author Huy Nguyen (htnguyen@stanford.edu)
- * </BODY>
  */
 package edu.stanford.nlp.io.ui;

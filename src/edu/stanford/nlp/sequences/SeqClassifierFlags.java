@@ -1203,7 +1203,7 @@ public class SeqClassifierFlags implements Serializable  {
           sigma = 5.0;
           // normalize
           normalize = true;
-          normalizeTimex = true;
+          normalizeTimex = true; // this was sort of wrong for German since it lowercases months, but didn't do too much harm
           maxLeft = 2;
           useDisjunctive = true;
           disjunctionWidth = 4; // clearly optimal for CoNLL
