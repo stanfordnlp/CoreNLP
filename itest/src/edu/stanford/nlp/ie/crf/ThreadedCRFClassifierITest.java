@@ -15,12 +15,12 @@ public class ThreadedCRFClassifierITest extends TestCase {
   Properties props;
 
   private static final String german1 =
-    "edu/stanford/nlp/models/ner/german.conll.hgc_175m_600.crf.ser.gz";
+    "edu/stanford/nlp/models/ner/german.conll.germeval2014.hgc_175m_600.crf.ser.gz";
   /** -- We're no longer supporting this one
   private String german2 =
     "/u/nlp/data/ner/goodClassifiers/german.dewac_175m_600.crf.ser.gz";
   */
-  private static final String germanTestFile = "/u/nlp/data/german/ner/2016/deu.utf8.testa";
+  private static final String germanTestFile = "/u/nlp/data/german/ner/2016/deu.io.f15.utf8.testa";
 
   private static final String english1 =
     "/u/nlp/data/ner/goodClassifiers/english.all.3class.nodistsim.crf.ser.gz";
@@ -59,4 +59,3 @@ public class ThreadedCRFClassifierITest extends TestCase {
   }
 
 }
-
