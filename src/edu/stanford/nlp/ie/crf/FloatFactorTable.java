@@ -49,7 +49,7 @@ public class FloatFactorTable  {
     return sb.toString();
   }
 
-  public String toString(Index classIndex) {
+  public String toString(Index<?> classIndex) {
     StringBuilder sb = new StringBuilder("{\n");
     for (int i = 0; i < table.length; i++) {
       sb.append(toString(toArray(i), classIndex));
@@ -74,8 +74,8 @@ public class FloatFactorTable  {
     return sb.toString();
   }
 
-  private String toString(int[] array, Index classIndex) {
-    List l = new ArrayList();
+  private String toString(int[] array, Index<?> classIndex) {
+    List<Object> l = new ArrayList<>();
     for (int anArray : array) {
       l.add(classIndex.get(anArray));
     }

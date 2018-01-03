@@ -394,7 +394,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       NonLinearCliquePotentialFunction cliquePotentialFunction = new NonLinearCliquePotentialFunction(linearWeights, W, U, flags);
 
       // make a clique tree for this document
-      CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex,
+      CRFCliqueTree<String> cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex,
         backgroundSymbol, cliquePotentialFunction, featureVal3DArr);
 
       // compute the log probability of the document given the model with the parameters x
