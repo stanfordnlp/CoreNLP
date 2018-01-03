@@ -282,7 +282,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
 
   @Override
   public boolean isEmpty() {
-    return !iterator().hasNext();
+    return ! iterator().hasNext();
   }
 
   /**
@@ -416,12 +416,14 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
     }
 
     private void setNextObject() {
-
       if (tok != null && tok.hasNext()) {
         nextObject = tok.next();
-        return;
+      } else {
+        setNextObjectHelper();
       }
+    }
 
+    private void setNextObjectHelper() {
       while (true) {
         try {
           if (currReader != null) {
