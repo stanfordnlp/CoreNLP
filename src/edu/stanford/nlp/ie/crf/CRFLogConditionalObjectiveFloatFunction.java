@@ -152,7 +152,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
 
       // ...and each possible labeling for that clique
       for (int k = 0; k < labelIndex.size(); k++) {
-        int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
+        int[] label = labelIndex.get(k).getLabel();
         float weight = 0.0f;
         for (int m = 0; m < data[j].length; m++) {
           //log.info("**"+weights[data[j][m]][k]);
@@ -171,7 +171,6 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
     }
 
     return factorTable;
-
   }
 
 
@@ -227,7 +226,6 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
         log.info(i + ": " + factorTables[i].toProbString());
       }
 
-
     }
 
     return factorTables;
@@ -277,7 +275,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
           Index<CRFLabel> labelIndex = labelIndices.get(j);
           // ...and each possible labeling for that clique
           for (int k = 0; k < labelIndex.size(); k++) {
-            int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
+            int[] label = labelIndex.get(k).getLabel();
 
             // float p = Math.pow(Math.E, factorTables[i].logProbEnd(label));
             float p = (float) Math.exp(factorTables[i].unnormalizedLogProbEnd(label) - z);
@@ -337,8 +335,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
         derivative[i] += k * w / sigmaQu;
       }
     }
-
-
+    
   }
 
   public void calculateWeird1(float[] x) {
