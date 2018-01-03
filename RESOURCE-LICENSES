@@ -1,0 +1,10 @@
+These resources were used in the creation of Stanford CoreNLP:
+
+-----------------------------------------------------------------
+Spanish Billion Word Corpus Embeddings
+
+Notes: These embeddings were used in the training of the Spanish dependency parser.
+
+URL: http://crscardellino.me/SBWCE/
+
+License: Creative Commons Attribution-ShareAlike 4.0 International License
