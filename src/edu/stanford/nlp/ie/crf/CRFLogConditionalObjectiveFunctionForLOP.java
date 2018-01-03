@@ -1,9 +1,9 @@
 package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -17,7 +17,7 @@ import java.util.*;
 public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDiffFunction implements HasCliquePotentialFunction  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFLogConditionalObjectiveFunctionForLOP.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFLogConditionalObjectiveFunctionForLOP.class);
 
   /** label indices - for all possible label sequences - for each feature */
   List<Index<CRFLabel>> labelIndices;

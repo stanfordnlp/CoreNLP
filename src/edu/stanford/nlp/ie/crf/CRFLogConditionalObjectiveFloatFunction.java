@@ -79,6 +79,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
     return domainDimension;
   }
 
+  @Override
   public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
     throw new UnsupportedOperationException("CRFLogConditionalObjectiveFloatFunction is not clique potential compatible yet");
   }

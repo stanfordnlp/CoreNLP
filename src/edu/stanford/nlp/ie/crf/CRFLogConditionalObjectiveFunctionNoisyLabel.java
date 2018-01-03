@@ -39,8 +39,7 @@ public class CRFLogConditionalObjectiveFunctionNoisyLabel extends CRFLogConditio
     CRFCliqueTree<String> cliqueTreeNoisyLabel = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, getFunc(docIndex), featureVal3DArr);
     CRFCliqueTree<String> cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, featureVal3DArr);
 
-    double prob = 0.0;
-    prob = cliqueTreeNoisyLabel.totalMass() - cliqueTree.totalMass();
+    double prob = cliqueTreeNoisyLabel.totalMass() - cliqueTree.totalMass();
 
     documentExpectedCounts(E, docData, featureVal3DArr, cliqueTree);
     documentExpectedCounts(Ehat, docData, featureVal3DArr, cliqueTreeNoisyLabel);

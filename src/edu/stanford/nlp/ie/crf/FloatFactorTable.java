@@ -1,9 +1,9 @@
 package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +18,7 @@ import java.util.List;
 public class FloatFactorTable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FloatFactorTable.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(FloatFactorTable.class);
 
   private final int numClasses;
   private final int windowSize;
@@ -381,4 +381,5 @@ public class FloatFactorTable  {
       }
     }
   }
+
 }
