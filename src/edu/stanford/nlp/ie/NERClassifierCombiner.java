@@ -395,7 +395,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
 
   // write an NERClassifierCombiner to an ObjectOutputStream
 
-  @Override
   public void serializeClassifier(ObjectOutputStream oos) {
     try {
       // first write the ClassifierCombiner part to disk

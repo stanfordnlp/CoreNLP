@@ -821,7 +821,6 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     log.info("done.");
   }
 
-  @Override
   public void serializeClassifier(ObjectOutputStream oos) {}
 
   @Override

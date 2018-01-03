@@ -61,7 +61,7 @@ public class StanfordCoreNLPSlowITest extends TestCase {
     Properties props = new Properties();
     props.setProperty("outputDirectory", dir.getPath());
     props.setProperty("annotators", "tokenize,cleanxml,ssplit,pos,lemma,ner,regexner,parse,depparse,mention," +
-        "entitymentions,coref,natlog,openie,kbp,entitylink");
+        "entitymentions,coref,natlog,openie,kbp,entitylink,sentiment");
     props.setProperty("coref.algorithm", "neural");
     props.setProperty("serializer", "AnnotationSerializer");
 

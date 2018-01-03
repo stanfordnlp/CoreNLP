@@ -62,7 +62,7 @@ import java.util.zip.GZIPInputStream;
  * It is a superclass of our CMM and CRF sequence classifiers, and is even used
  * in the (deterministic) NumberSequenceClassifier. See implementing classes for
  * more information.
- *
+ * <p>
  * An implementation must implement these 5 abstract methods: <br>
  * {@code List<IN> classify(List<IN> document); } <br>
  * {@code List<IN> classifyWithGlobalInformation(List<IN> tokenSequence, final CoreMap document, final CoreMap sentence); } <br>
@@ -84,7 +84,7 @@ import java.util.zip.GZIPInputStream;
 public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements Function<String, String>  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(AbstractSequenceClassifier.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractSequenceClassifier.class);
 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
@@ -766,14 +766,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void train(String filename,
                     DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    // flags.ocrTrain = true;
+    flags.ocrTrain = true;
     train(makeObjectBankFromFile(filename, readerAndWriter), readerAndWriter);
   }
 
   public void train(String baseTrainDir, String trainFiles,
                     DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    // flags.ocrTrain = true;
+    flags.ocrTrain = true;
     train(makeObjectBankFromFiles(baseTrainDir, trainFiles, readerAndWriter),
           readerAndWriter);
   }
@@ -781,7 +781,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void train(String[] trainFileList,
                     DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    // flags.ocrTrain = true;
+    flags.ocrTrain = true;
     train(makeObjectBankFromFiles(trainFileList, readerAndWriter),
           readerAndWriter);
   }
@@ -939,7 +939,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void printProbs(String filename,
                          DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    // flags.ocrTrain = false;
+    flags.ocrTrain = false;
 
     ObjectBank<List<IN>> docs =
       makeObjectBankFromFile(filename, readerAndWriter);

@@ -3,15 +3,13 @@ package edu.stanford.nlp.objectbank;
 import java.io.StringReader;
 import java.util.Iterator;
 
-import org.junit.Assert;
-import org.junit.Test;
+import junit.framework.TestCase;
 
 /**
  * @author Christopher Manning
  */
-public class LineIteratorTest {
+public class LineIteratorTest extends TestCase {
 
-  @Test
   public void testLineIterator() {
     String s = "\n\n@@123\nthis\nis\na\nsentence\n\n@@124\nThis\nis another\n.\n\n@125\nThis is the\tlast\n";
     String[] output = { "", "", "@@123", "this", "is", "a", "sentence", "", "@@124", "This", "is another",
@@ -22,13 +20,13 @@ public class LineIteratorTest {
       for (String out : output) {
         String ans = di.next();
         // System.out.println(ans);
-        Assert.assertEquals("Wrong line", out, ans);
+        assertEquals("Wrong line", out, ans);
       }
       if (di.hasNext()) {
-        Assert.fail("Too many things in iterator: " + di.next());
+        fail("Too many things in iterator: " + di.next());
       }
     } catch (Exception e) {
-      Assert.fail("Probably too few things in iterator: " + e);
+      fail("Probably too few things in iterator: " + e);
     }
   }
 
