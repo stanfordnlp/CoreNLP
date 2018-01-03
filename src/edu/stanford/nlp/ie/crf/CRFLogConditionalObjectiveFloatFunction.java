@@ -335,7 +335,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
         derivative[i] += k * w / sigmaQu;
       }
     }
-    
+
   }
 
   public void calculateWeird1(float[] x) {
