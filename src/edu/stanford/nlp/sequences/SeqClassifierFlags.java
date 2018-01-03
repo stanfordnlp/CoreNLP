@@ -507,7 +507,7 @@ public class SeqClassifierFlags implements Serializable  {
   public boolean useNumberFeature = false;
 
   public int ocrFold = 0;
-  public transient boolean ocrTrain = false;
+  public transient boolean ocrTrain = false; // CDM 2017: Disused. Can delete....
 
   public String classifierType = "MaxEnt";
   public String svmModelFile = null;
@@ -531,6 +531,9 @@ public class SeqClassifierFlags implements Serializable  {
   public boolean usePrediction2 = false;
   public String baseTrainDir = ".";
   public String baseTestDir = ".";
+  /** A regex pattern for files, which will be evaluated within a particular directory.
+   *  If non-null, used over trainFileList and trainFile.
+   */
   public String trainFiles = null;
   public String trainFileList = null;
   public String testFiles = null;

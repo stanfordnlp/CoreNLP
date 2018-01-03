@@ -1,5 +1,4 @@
 package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -13,6 +12,7 @@ import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -23,7 +23,7 @@ import java.util.regex.*;
  * This class provides methods for reading plain text documents and writing out
  * those documents once classified in several different formats.
  * The output formats are named: slashTags, xml, inlineXML, tsv, tabbedEntities.
- * <p>
+ *
  * <i>Implementation note:</i> see
  * itest/src/edu/stanford/nlp/ie/crf/CRFClassifierITest.java for examples and
  * test cases for the output options.
@@ -38,7 +38,7 @@ import java.util.regex.*;
 public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements DocumentReaderAndWriter<IN>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PlainTextDocumentReaderAndWriter.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(PlainTextDocumentReaderAndWriter.class);
 
   private static final long serialVersionUID = -2420535144980273136L;
 
@@ -130,8 +130,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     StringBuilder prepend = new StringBuilder();
 
     /*
-     * This changes SGML tags into whitespace -- it should maybe be moved
-     * elsewhere
+     * This changes SGML tags into whitespace -- it should maybe be moved elsewhere
      */
     while (tokenizer.hasNext()) {
       IN w = tokenizer.next();
@@ -182,7 +181,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
 
   /**
    * Print the classifications for the document to the given Writer. This method
-   * now checks the <code>outputFormat</code> property, and can print in
+   * now checks the {@code outputFormat} property, and can print in
    * slashTags, inlineXML, xml (stand-Off XML), tsv, or a 3-column tabbed format
    * for easy entity retrieval. For both the XML output
    * formats, it preserves spacing, while for the other formats, it prints
