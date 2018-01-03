@@ -507,7 +507,7 @@ public class SeqClassifierFlags implements Serializable  {
   public boolean useNumberFeature = false;
 
   public int ocrFold = 0;
-  public transient boolean ocrTrain = false;
+  public transient boolean ocrTrain = false; // CDM 2017: Disused. Can delete....
 
   public String classifierType = "MaxEnt";
   public String svmModelFile = null;

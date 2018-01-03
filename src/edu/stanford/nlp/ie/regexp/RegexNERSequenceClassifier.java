@@ -364,6 +364,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
   @Override
   public void serializeClassifier(String serializePath) {}
 
+  @Override
   public void serializeClassifier(ObjectOutputStream oos) {}
 
   @Override

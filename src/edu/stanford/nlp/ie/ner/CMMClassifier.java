@@ -138,7 +138,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   Set<List<String>> answerArrays;
 
   /** Default place to look in Jar file for classifier. */
-  public static final String DEFAULT_CLASSIFIER = "classifiers/ner-eng-ie.cmm-3-all2006.ser.gz";
+  public static final String DEFAULT_CLASSIFIER = "edu/stanford/nlp/models/ner/ner-eng-ie.cmm-3-all2006.ser.gz";
 
   protected CMMClassifier() {
     super(new SeqClassifierFlags());
@@ -453,11 +453,10 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       }
     }
 
-//    document.remove(0);
+    // document.remove(0);
 
     if (flags.useReverse) {
       Collections.reverse(document);
-
     }
   } // end testSeq
 
@@ -468,7 +467,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    */
   public void adapt(String filename, Dataset<String, String> trainDataset,
                     DocumentReaderAndWriter<IN> readerWriter) {
-    flags.ocrTrain = false;  // ?? Do we need this? (Pi-Chuan Sat Nov  5 15:42:49 2005)
+    // flags.ocrTrain = false;  // ?? Do we need this? (Pi-Chuan Sat Nov  5 15:42:49 2005)
     ObjectBank<List<IN>> docs =
       makeObjectBankFromFile(filename, readerWriter);
     adapt(docs, trainDataset);

@@ -1414,7 +1414,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    */
   public void printFirstOrderProbs(String filename, DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    flags.ocrTrain = false;
+    // flags.ocrTrain = false;
 
     ObjectBank<List<IN>> docs = makeObjectBankFromFile(filename, readerAndWriter);
     printFirstOrderProbsDocuments(docs);
@@ -1440,7 +1440,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    */
   public void printFactorTable(String filename, DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    flags.ocrTrain = false;
+    // flags.ocrTrain = false;
 
     ObjectBank<List<IN>> docs = makeObjectBankFromFile(filename, readerAndWriter);
     printFactorTableDocuments(docs);
@@ -1463,12 +1463,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * Want to make arbitrary probability queries? Then this is the method for
    * you. Given the filename, it reads it in and breaks it into documents, and
    * then makes a CRFCliqueTree for each document. you can then ask the clique
-   * tree for marginals and conditional probabilities of almost anything you
-   * want.
+   * tree for marginals and conditional probabilities of almost anything you want.
    */
   public List<CRFCliqueTree<String>> getCliqueTrees(String filename, DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    flags.ocrTrain = false;
+    // flags.ocrTrain = false;
 
     List<CRFCliqueTree<String>> cts = new ArrayList<>();
     ObjectBank<List<IN>> docs = makeObjectBankFromFile(filename, readerAndWriter);
