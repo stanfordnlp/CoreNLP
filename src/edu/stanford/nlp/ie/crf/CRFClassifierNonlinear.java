@@ -141,7 +141,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
   }
 
   private double[] trainWeightsUsingNonLinearCRF(AbstractCachingDiffFunction func, Evaluator[] evaluators) {
-    Minimizer minimizer = getMinimizer(0, evaluators);
+    Minimizer<DiffFunction> minimizer = getMinimizer(0, evaluators);
 
     double[] initialWeights;
     if (flags.initialWeights == null) {
