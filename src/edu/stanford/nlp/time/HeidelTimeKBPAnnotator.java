@@ -1,7 +1,6 @@
 package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.util.CoreMaybe;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -91,7 +90,7 @@ public class HeidelTimeKBPAnnotator implements Annotator {
       PrintWriter inputWriter = new PrintWriter(inputFile);
       prepareHeidelTimeInput(inputWriter, document);
       inputWriter.close();
-      CoreMaybe<String> pubDate = getPubDate(document);
+      Optional<String> pubDate = getPubDate(document);
 
       //--Build Command
       List<String> args = new ArrayList<>(Arrays.asList("java",
@@ -99,7 +98,7 @@ public class HeidelTimeKBPAnnotator implements Annotator {
           "-c", this.heideltimePath.getPath() + "/config.props",
           "-l", this.language,
           "-t", "NEWS"));
-      if (pubDate.isDefined()) {
+      if (pubDate.isPresent()) {
         args.add("-dct");
         args.add(pubDate.get());
       }
@@ -123,7 +122,7 @@ public class HeidelTimeKBPAnnotator implements Annotator {
     }
   }
 
-  private CoreMaybe<String> getPubDate(CoreMap document) {
+  private Optional<String> getPubDate(CoreMap document) {
     //--Get Date
     //(error checks)
     if (!document.containsKey(CoreAnnotations.CalendarAnnotation.class) && !document.containsKey(CoreAnnotations.DocDateAnnotation.class)) {
@@ -133,15 +132,15 @@ public class HeidelTimeKBPAnnotator implements Annotator {
     Calendar dateCalendar = document.get(CoreAnnotations.CalendarAnnotation.class);
     if (dateCalendar != null) {
       //(case: calendar annotation)
-      return CoreMaybe.Just(String.format("%TF", dateCalendar));
+      return Optional.of(String.format("%TF", dateCalendar));
     } else {
       //(case: docdateannotation)
       String s = document.get(CoreAnnotations.DocDateAnnotation.class);
       if (s != null) {
-        return CoreMaybe.Just(s);
+        return Optional.of(s);
       }
     }
-    return CoreMaybe.Nothing();
+    return Optional.empty();
   }
 
   private void prepareHeidelTimeInput(PrintWriter stream, CoreMap document) {
