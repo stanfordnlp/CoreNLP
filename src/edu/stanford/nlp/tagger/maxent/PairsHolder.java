@@ -1,4 +1,4 @@
-/**
+/*
  * Title:       StanfordMaxEnt<p>
  * Description: A Maximum Entropy Toolkit<p>
  * Copyright:   The Board of Trustees of The Leland Stanford Junior University
@@ -125,4 +125,5 @@ public class PairsHolder {
     final int p = h.current + position;
     return (p >= h.start && p <= h.end) ? arr.get(p).tag() : "NA";
   }
+
 }
