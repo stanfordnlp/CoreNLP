@@ -54,7 +54,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 public abstract class GrammaticalStructure implements Serializable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(GrammaticalStructure.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(GrammaticalStructure.class);
 
   private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
 
@@ -129,7 +129,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   /**
    * The root Tree node for this GrammaticalStructure.
    */
-  protected final TreeGraphNode root;
+  private final TreeGraphNode root;
 
   /**
    * A map from arbitrary integer indices to nodes.

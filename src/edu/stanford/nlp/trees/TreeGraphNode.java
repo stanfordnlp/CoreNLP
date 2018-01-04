@@ -1,5 +1,4 @@
 package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.StringReader;
 import java.util.List;
@@ -7,31 +6,29 @@ import java.util.List;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * <p>
- * A <code>TreeGraphNode</code> is simply a
- * {@link Tree <code>Tree</code>}
+ * A {@code TreeGraphNode} is simply a {@link Tree {@code Tree}}
  * with some additional functionality.  For example, the
- * <code>parent()</code> method works without searching from the root.
- * Labels are always assumed to be
- * {@link CoreLabel <code>CoreLabel</code>}
+ * {@code parent()} method works without searching from the root.
+ * Labels are always assumed to be {@link CoreLabel {@code CoreLabel}}.
  *
- * <p>This class makes the horrible mistake of changing the semantics of
+ * This class makes the horrible mistake of changing the semantics of
  * equals and hashCode to go back to "==" and System.identityHashCode,
- * despite the semantics of the superclass's equality.</p>
+ * despite the semantics of the superclass's equality.
  *
  * @author Bill MacCartney
  */
 public class TreeGraphNode extends Tree implements HasParent  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TreeGraphNode.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TreeGraphNode.class);
 
   /**
    * Label for this node.
    */
-  protected CoreLabel label;
+  private CoreLabel label;
 
   /**
    * Parent of this node.
@@ -61,7 +58,7 @@ public class TreeGraphNode extends Tree implements HasParent  {
 
 
   /**
-   * Create a new <code>TreeGraphNode</code> with the supplied
+   * Create a new {@code TreeGraphNode} with the supplied
    * label.
    *
    * @param label the label for this node.
@@ -71,11 +68,11 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Create a new <code>TreeGraphNode</code> with the supplied
+   * Create a new {@code TreeGraphNode} with the supplied
    * label and list of child nodes.
    *
    * @param label    the label for this node.
-   * @param children the list of child <code>TreeGraphNode</code>s
+   * @param children the list of child {@code TreeGraphNode}s
    *                 for this node.
    */
   public TreeGraphNode(Label label, List<Tree> children) {
@@ -84,7 +81,7 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Create a new <code>TreeGraphNode</code> having the same tree
+   * Create a new {@code TreeGraphNode} having the same tree
    * structure and label values as an existing tree (but no shared
    * storage).  Operates recursively to construct an entire
    * subtree.
@@ -107,8 +104,8 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Implements equality for <code>TreeGraphNode</code>s.  Unlike
-   * <code>Tree</code>s, <code>TreeGraphNode</code>s should be
+   * Implements equality for {@code TreeGraphNode}s.  Unlike
+   * {@code Tree}s, {@code TreeGraphNode}s should be
    * considered equal only if they are ==.  <i>Implementation note:</i>
    * TODO: This should be changed via introducing a Tree interface with the current Tree and this class implementing it, since what is done here breaks the equals() contract.
    *
@@ -192,8 +189,8 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Sets the children of this <code>TreeGraphNode</code>.  If
-   * given <code>null</code>, this method sets
+   * Sets the children of this {@code TreeGraphNode}.  If
+   * given {@code null}, this method sets
    * the node's children to the canonical zero-length Tree[] array.
    *
    * @param children an array of child trees
@@ -288,17 +285,17 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Uses the specified {@link HeadFinder <code>HeadFinder</code>}
+   * Uses the specified {@link HeadFinder {@code HeadFinder}}
    * to determine the heads for this node and all its descendants,
    * and to store references to the head word node and head tag node
-   * in this node's {@link CoreLabel <code>CoreLabel</code>} and the
-   * <code>CoreLabel</code>s of all its descendants.<p>
+   * in this node's {@link CoreLabel {@code CoreLabel}} and the
+   * {@code CoreLabel}s of all its descendants.<p>
    * <p/>
    * Note that, in contrast to {@link Tree#percolateHeads
-   * <code>Tree.percolateHeads()</code>}, which assumes {@link
+   * {@code Tree.percolateHeads()}}, which assumes {@link
    * edu.stanford.nlp.ling.CategoryWordTag
-   * <code>CategoryWordTag</code>} labels and therefore stores head
-   * words and head tags merely as <code>String</code>s, this
+   * {@code CategoryWordTag}} labels and therefore stores head
+   * words and head tags merely as {@code String}s, this
    * method stores references to the actual nodes.  This mitigates
    * potential problems in sentences which contain the same word
    * more than once.
@@ -333,12 +330,12 @@ public class TreeGraphNode extends Tree implements HasParent  {
 
   /**
    * Return the node containing the head word for this node (or
-   * <code>null</code> if none), as recorded in this node's {@link
-   * CoreLabel <code>CoreLabel</code>}.  (In contrast to {@link
+   * {@code null} if none), as recorded in this node's {@link
+   * CoreLabel {@code CoreLabel}}.  (In contrast to {@link
    * edu.stanford.nlp.ling.CategoryWordTag
-   * <code>CategoryWordTag</code>}, we store head words and head
+   * {@code CategoryWordTag}}, we store head words and head
    * tags as references to nodes, not merely as
-   * <code>String</code>s.)
+   * {@code String}s.)
    *
    * @return the node containing the head word for this node
    */
@@ -349,11 +346,11 @@ public class TreeGraphNode extends Tree implements HasParent  {
   /**
    * Store the node containing the head word for this node by
    * storing it in this node's {@link CoreLabel
-   * <code>CoreLabel</code>}.  (In contrast to {@link
+   * {@code CoreLabel}}.  (In contrast to {@link
    * edu.stanford.nlp.ling.CategoryWordTag
-   * <code>CategoryWordTag</code>}, we store head words and head
+   * {@code CategoryWordTag}}, we store head words and head
    * tags as references to nodes, not merely as
-   * <code>String</code>s.)
+   * {@code String}s.)
    *
    * @param hwn the node containing the head word for this node
    */
@@ -362,13 +359,13 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Safely casts an <code>Object</code> to a
-   * <code>TreeGraphNode</code> if possible, else returns
-   * <code>null</code>.
+   * Safely casts an {@code Object} to a
+   * {@code TreeGraphNode} if possible, else returns
+   * {@code null}.
    *
-   * @param t any <code>Object</code>
-   * @return <code>t</code> if it is a <code>TreeGraphNode</code>;
-   *         <code>null</code> otherwise
+   * @param t any {@code Object}
+   * @return {@code t} if it is a {@code TreeGraphNode};
+   *         {@code null} otherwise
    */
   private static TreeGraphNode safeCast(Object t) {
     if (t == null || !(t instanceof TreeGraphNode)) {
@@ -379,7 +376,7 @@ public class TreeGraphNode extends Tree implements HasParent  {
 
   /**
    * Checks the node's ancestors to find the highest ancestor with the
-   * same <code>headWordNode</code> as this node.
+   * same {@code headWordNode} as this node.
    */
   public TreeGraphNode highestNodeWithSameHead() {
     TreeGraphNode node = this;
@@ -403,14 +400,14 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Returns a <code>TreeFactory</code> that produces
-   * <code>TreeGraphNode</code>s.  The <code>Label</code> of
-   * <code>this</code> is examined, and providing it is not
-   * <code>null</code>, a <code>LabelFactory</code> which will
-   * produce that kind of <code>Label</code> is supplied to the
-   * <code>TreeFactory</code>.  If the <code>Label</code> is
-   * <code>null</code>, a
-   * <code>CoreLabel.factory()</code> will be used.  The factories
+   * Returns a {@code TreeFactory} that produces
+   * {@code TreeGraphNode}s.  The {@code Label} of
+   * {@code this} is examined, and providing it is not
+   * {@code null}, a {@code LabelFactory} which will
+   * produce that kind of {@code Label} is supplied to the
+   * {@code TreeFactory}.  If the {@code Label} is
+   * {@code null}, a
+   * {@code CoreLabel.factory()} will be used.  The factories
    * returned on different calls are different: a new one is
    * allocated each time.
    *
@@ -428,8 +425,8 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Return a <code>TreeFactory</code> that produces trees of type
-   * <code>TreeGraphNode</code>.  The factory returned is always
+   * Return a {@code TreeFactory} that produces trees of type
+   * {@code TreeGraphNode}.  The factory returned is always
    * the same one (a singleton).
    *
    * @return a factory to produce treegraphs
@@ -439,12 +436,12 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Return a <code>TreeFactory</code> that produces trees of type
-   * <code>TreeGraphNode</code>, with the <code>Label</code> made
-   * by the supplied <code>LabelFactory</code>.  The factory
+   * Return a {@code TreeFactory} that produces trees of type
+   * {@code TreeGraphNode}, with the {@code Label} made
+   * by the supplied {@code LabelFactory}.  The factory
    * returned is a different one each time.
    *
-   * @param lf The <code>LabelFactory</code> to use
+   * @param lf The {@code LabelFactory} to use
    * @return a factory to produce treegraphs
    */
   public static TreeFactory factory(LabelFactory lf) {
@@ -452,12 +449,12 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Returns a <code>String</code> representation of this node and
+   * Returns a {@code String} representation of this node and
    * its subtree with one node per line, indented according to
-   * <code>indentLevel</code>.
+   * {@code indentLevel}.
    *
    * @param indentLevel how many levels to indent (0 for root node)
-   * @return <code>String</code> representation of this subtree
+   * @return {@code String} representation of this subtree
    */
   public String toPrettyString(int indentLevel) {
     StringBuilder buf = new StringBuilder("\n");
@@ -477,10 +474,10 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
-   * Returns a <code>String</code> representation of this node and
+   * Returns a {@code String} representation of this node and
    * its subtree as a one-line parenthesized list.
    *
-   * @return <code>String</code> representation of this subtree
+   * @return {@code String} representation of this subtree
    */
   public String toOneLineString() {
     StringBuilder buf = new StringBuilder();
@@ -521,12 +518,11 @@ public class TreeGraphNode extends Tree implements HasParent  {
       tgn.percolateHeads(new SemanticHeadFinder());
       System.out.println(tgn.toPrettyString(0));
     } catch (Exception e) {
-      log.info("Horrible error: " + e);
-      e.printStackTrace();
+      log.error("Horrible error: " + e);
+      log.error(e);
     }
   }
 
-  // Automatically generated by Eclipse
   private static final long serialVersionUID = 5080098143617475328L;
 
 }
