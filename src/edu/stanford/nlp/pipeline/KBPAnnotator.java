@@ -58,7 +58,9 @@ public class KBPAnnotator implements Annotator {
   private boolean VERBOSE = false;
 
   @ArgumentParser.Option(name="kbp.language", gloss="language for kbp")
-  private LanguageInfo.HumanLanguage kbpLanguage = LanguageInfo.getLanguageFromString("en");
+  private String kbpLanguageString = "en";
+
+  private LanguageInfo.HumanLanguage kbpLanguage = LanguageInfo.getLanguageFromString(kbpLanguageString);
 
   /**
    * The extractor implementation.
