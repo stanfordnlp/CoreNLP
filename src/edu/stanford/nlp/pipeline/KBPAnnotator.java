@@ -57,11 +57,8 @@ public class KBPAnnotator implements Annotator {
   @ArgumentParser.Option(name="kbp.verbose", gloss="Print out KBP logging info")
   private boolean VERBOSE = false;
 
-  // @ArgumentParser.Option(name="regexner.cased", gloss="The tokensregexner cased path")
-  // private String regexnerCasedPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASED;
-  //
-  // @ArgumentParser.Option(name="regexner.caseless", gloss="The tokensregexner caseless path")
-  // private String regexnerCaselessPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS;
+  @ArgumentParser.Option(name="kbp.language", gloss="language for kbp")
+  private LanguageInfo.HumanLanguage kbpLanguage = LanguageInfo.getLanguageFromString("en");
 
   /**
    * The extractor implementation.
@@ -72,6 +69,11 @@ public class KBPAnnotator implements Annotator {
    * A serializer to convert to the Simple CoreNLP representation.
    */
   private final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(false);
+
+  /**
+   * A basic rule-based system for Spanish coreference
+   */
+  private KBPBasicSpanishCorefSystem spanishCorefSystem;
 
   /*
    * A TokensRegexNER annotator for the special KBP NER types (case-sensitive).
@@ -148,6 +150,10 @@ public class KBPAnnotator implements Annotator {
     relationNameConversionMap.put("per:member_of", "per:employee_or_member_of");
     relationNameConversionMap.put("per:employee_of", "per:employee_or_member_of");
     relationNameConversionMap.put("per:stateorprovinces_of_residence", "per:statesorprovinces_of_residence");
+
+    // build the Spanish coref system if necessary
+    if (LanguageInfo.HumanLanguage.SPANISH.equals(kbpLanguage))
+      spanishCorefSystem = new KBPBasicSpanishCorefSystem();
   }
 
 
@@ -432,10 +438,15 @@ public class KBPAnnotator implements Annotator {
     }
 
     // Create a canonical mention map
-    Map<CoreMap,CoreMap> mentionToCanonicalMention = new HashMap<>();
+    Map<CoreMap,CoreMap> mentionToCanonicalMention;
+    if (kbpLanguage.equals(LanguageInfo.HumanLanguage.SPANISH))
+      mentionToCanonicalMention = spanishCorefSystem.canonicalMentionMapFromEntityMentons(mentions);
+    else
+      mentionToCanonicalMention = new HashMap<>();
     // check if there is coref info
     Set<Map.Entry<Integer, CorefChain>> corefChains;
-    if (annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null)
+    if (annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null &&
+        !kbpLanguage.equals(LanguageInfo.HumanLanguage.SPANISH))
       corefChains = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet();
     else
       corefChains = new HashSet<>();
@@ -486,19 +497,6 @@ public class KBPAnnotator implements Annotator {
         }
       }
     }
-
-    // Create a canonical mention map
-    //Map<CoreMap, CoreMap> mentionToCanonicalMention = new HashMap<>();
-    /*for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
-      for (CoreMap mention : entry.getValue()) {
-        // (set the NER tag + link to be axiomatically that of the canonical mention)
-        // FOR NOW allow clusters to have inconsistent types, this seems to cause more problems than solve
-        // mention.set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.getKey().get(CoreAnnotations.NamedEntityTagAnnotation.class));
-        // mention.set(CoreAnnotations.WikipediaEntityAnnotation.class, entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class));
-        // (add the mention (note: this must come after we set the NER!)
-        mentionToCanonicalMention.put(mention, entry.getKey());
-      }
-    }*/
 
     // (add missing mentions)
     mentions.stream().filter(mention -> mentionToCanonicalMention.get(mention) == null)

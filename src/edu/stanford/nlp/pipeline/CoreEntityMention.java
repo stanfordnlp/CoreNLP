@@ -6,8 +6,11 @@ package edu.stanford.nlp.pipeline;
  */
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
+
+import java.util.*;
 
 public class CoreEntityMention {
 
@@ -33,6 +36,9 @@ public class CoreEntityMention {
   public String text() {
     return this.entityMentionCoreMap.get(CoreAnnotations.TextAnnotation.class);
   }
+
+  /** the list of tokens for this entity mention **/
+  public List<CoreLabel> tokens() { return this.entityMentionCoreMap.get(CoreAnnotations.TokensAnnotation.class); }
 
   /** char offsets of mention **/
   public Pair<Integer,Integer> charOffsets() {
