@@ -108,10 +108,10 @@ public class GrammaticalStructureConversionUtils {
 
     Map<Integer, Integer> indexToPos = Generics.newHashMap();
     indexToPos.put(0,0); // to deal with the special node "ROOT"
-    List<Tree> gsLeaves = gs.root.getLeaves();
+    List<Tree> gsLeaves = gs.root().getLeaves();
     for (int i = 0; i < gsLeaves.size(); i++) {
       TreeGraphNode leaf = (TreeGraphNode) gsLeaves.get(i);
-      indexToPos.put(leaf.label.index(), i + 1);
+      indexToPos.put(leaf.label().index(), i + 1);
     }
 
     if (conllx) {
