@@ -96,6 +96,9 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-recordDebinarized")) {
       testOptions().recordDebinarized = args[i + 1];
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-decayLearningRate")) {
+      trainOptions().decayLearningRate = Double.parseDouble(args[i + 1]);
+      i += 2;
     }
     return i;
   }

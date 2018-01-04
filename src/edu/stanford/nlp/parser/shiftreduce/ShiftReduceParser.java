@@ -434,9 +434,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       tagger = Tagger.loadModel(op.testOptions.taggerSerializedFile);
       redoTags(binarizedTrees, tagger, nThreads);
       retagTimer.done("Retagging");
-      for (int j = 0; j < 20; j++) {
-        log.info("Tree " + j + " is " + binarizedTrees.get(j));
-      }
     }
 
     Set<String> knownStates = findKnownStates(binarizedTrees);
@@ -469,11 +466,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
   }
 
   @Override
-  public void setOptionFlags(String ... flags) {
+  public void setOptionFlags(String... flags) {
     op.setOptions(flags);
   }
 
-  public static ShiftReduceParser loadModel(String path, String ... extraFlags) {
+  public static ShiftReduceParser loadModel(String path, String... extraFlags) {
     ShiftReduceParser parser = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
             log, "Loading parser from serialized file", path);
     if (extraFlags.length > 0) {

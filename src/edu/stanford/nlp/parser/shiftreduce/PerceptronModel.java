@@ -38,7 +38,7 @@ public class PerceptronModel extends BaseModel  {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(PerceptronModel.class); // Serializable
 
-  private final float learningRate = 1.0f;
+  private float learningRate = 1.0f;
 
   Map<String, Weight> featureWeights;
   final FeatureFactory featureFactory;
@@ -597,7 +597,11 @@ public class PerceptronModel extends BaseModel  {
         // especially if we also get a dev set number for it, but that
         // might be overkill
       }
-    }
+
+      if (iteration % 10 == 0 && op.trainOptions().decayLearningRate > 0.0) {
+        learningRate *= op.trainOptions().decayLearningRate;
+      }
+    } // end for iterations
 
     if (wrapper != null) {
       wrapper.join();

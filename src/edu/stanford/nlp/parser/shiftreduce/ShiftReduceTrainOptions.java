@@ -40,6 +40,9 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   /** Does help, but makes the models much bigger for a miniscule gain */
   public boolean oracleBinaryToShift = false;
 
+  /** If positive, every 10 iterations, multiply the learning rate by this amount. */
+  public double decayLearningRate = 0.0;
+
   // version id randomly chosen by forgetting to set the version id when serializing models
   private static final long serialVersionUID = -8158249539308373819L;
 }
