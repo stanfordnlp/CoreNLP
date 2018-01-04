@@ -434,6 +434,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       tagger = Tagger.loadModel(op.testOptions.taggerSerializedFile);
       redoTags(binarizedTrees, tagger, nThreads);
       retagTimer.done("Retagging");
+      for (int j = 0; j < 20; j++) {
+        log.info("Tree " + j + " is " + binarizedTrees.get(j));
+      }
     }
 
     Set<String> knownStates = findKnownStates(binarizedTrees);
@@ -487,7 +490,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     }
   }
 
-  static final String[] FORCE_TAGS = { "-forceTags" };
+  private static final String[] FORCE_TAGS = { "-forceTags" };
 
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();

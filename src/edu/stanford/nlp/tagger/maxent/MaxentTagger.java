@@ -70,6 +70,7 @@ import java.text.DecimalFormat;
  *
  * You can tag things through the Java API or from the command line.
  * The two English taggers included in this distribution are:
+ *
  * <ul>
  * <li> A bi-directional dependency network tagger in
  *      {@code edu/stanford/nlp/models/pos-tagger/english-left3words/english-bidirectional-distsim.tagger}.
@@ -82,6 +83,7 @@ import java.text.DecimalFormat;
  * </ul>
  *
  * <h3>Using the Java API</h3>
+ *
  * <dl>
  * <dt>
  * A MaxentTagger can be made with a constructor taking as argument the location of parameter files for a trained tagger: </dt>
@@ -107,12 +109,12 @@ import java.text.DecimalFormat;
  * <dt>To tag a string of <i>correctly tokenized</i>, whitespace-separated words and get a string of tagged words back:</dt>
  * <dd> {@code String taggedString = tagger.tagTokenizedString("Here 's a tagged string .")}</dd>
  * </dl>
- * <p>
+ *
  * The {@code tagString} method uses the default tokenizer (PTBTokenizer).
  * If you wish to control tokenization, you may wish to call
  * {@link #tokenizeText(Reader, TokenizerFactory)} and then to call
  * {@code process()} on the result.
- * </p>
+ *
  *
  * <h3>Using the command line</h3>
  *
@@ -144,31 +146,37 @@ import java.text.DecimalFormat;
  * if you pass it in with the "-props" argument. The most important
  * arguments for tagging (besides "model" and "file") are "tokenize"
  * and "tokenizerFactory". See below for more details.
- * <br>
+ *
  * Note that the tagger assumes input has not yet been tokenized and
  * by default tokenizes it using a default English tokenizer.  If your
  * input has already been tokenized, use the flag "-tokenize false".
  *
- * <p> Parameters can be defined using a Properties file
+ * Parameters can be defined using a Properties file
  * (specified on the command-line with {@code -prop} <i>propFile</i>),
  * or directly on the command line (by preceding their name with a minus sign
  * ("-") to turn them into a flag. The following properties are recognized:
- * </p>
+ *
  * <table border="1">
  * <tr><td><b>Property Name</b></td><td><b>Type</b></td><td><b>Default Value</b></td><td><b>Relevant Phase(s)</b></td><td><b>Description</b></td></tr>
  * <tr><td>model</td><td>String</td><td>N/A</td><td>All</td><td>Path and filename where you would like to save the model (training) or where the model should be loaded from (testing, tagging).</td></tr>
  * <tr><td>trainFile</td><td>String</td><td>N/A</td><td>Train</td>
      <td>
        Path to the file holding the training data; specifying this option puts the tagger in training mode.  Only one of 'trainFile','testFile','textFile', and 'dump' may be specified.<br>
-       There are three formats possible.  The first is a text file of tagged data. Each line is considered a separate sentence.  In each sentence, words are separated by whitespace.  Each word must have a tag, which is separated from the token using the specified {@code tagSeparator}.  This format, called TEXT, is the default format.<br />
-       The second format is a file of Penn Treebank formatted tree files.  Trees are loaded one at a time and the tagged words in a tree are used as a training sentence.  To specify this format, preface the filename with "{@code format=TREES,}".  <br />
-       The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set {@code trainFile} to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".  Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.
+       There are three formats possible.  The first is a text file of tagged data. Each line is considered a separate sentence.  In each sentence, words are separated by whitespace.
+       Each word must have a tag, which is separated from the token using the specified {@code tagSeparator}.  This format, called TEXT, is the default format. <br>
+       The second format is a file of Penn Treebank formatted (i.e., s-expression) tree files.  Trees are loaded one at a time and the tagged words in a tree are used as a training sentence.
+       To specify this format, preface the filename with "{@code format=TREES,}".  <br>
+       The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set {@code trainFile} to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".
+       Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.
        <br>
-       A file can be in a different character set encoding than the tagger's default encoding by prefacing the filename with {@code "encoding=ENC"}.
-       You can specify the tagSeparator character in a TEXT file by prefacing the filename with "tagSeparator=c". <br/>
-       Tree files can be fed through TreeTransformers and TreeNormalizers.  To specify a transformer, preface the filename with "treeTransformer=CLASSNAME".  To specify a normalizer, preface the filename with "treeNormalizer=CLASSNAME".
-       You can also filter trees using a Filter&lt;Tree&gt;, which can be specified with "treeFilter=CLASSNAME".  A specific range of trees to be used can be specified with treeRange=X-Y.  Multiple parts of the range can be separated by : as opposed to the normal separator of ,.
-       For example, one could use the argument "-treeRange=25-50:75-100". You can specify a TreeReaderFactory by prefacing the filename with "trf=CLASSNAME". <br>
+       A file can be in a different character set encoding than the tagger's default encoding by prefacing the filename with {@code "encoding=ENC,"}.
+       You can specify the tagSeparator character in a TEXT file by prefacing the filename with "tagSeparator=c,". <br>
+       Tree files can be fed through TreeTransformers and TreeNormalizers.  To specify a transformer, preface the filename with "treeTransformer=CLASSNAME,".
+       To specify a normalizer, preface the filename with "treeNormalizer=CLASSNAME,".
+       You can also filter trees using a {@code Filter<Tree>}, which can be specified with "treeFilter=CLASSNAME,".
+       A specific range of trees to be used can be specified with treeRange=X-Y.  Multiple parts of the range can be separated by : as opposed to the normal separator of ,.
+       For example, one could use the argument "-treeRange=25-50:75-100".
+       You can specify a TreeReaderFactory by prefacing the filename with "trf=CLASSNAME,". Note: If it includes a TreeNormalizer, you want to specify it as the treeNormalizer as well.<br>
        Multiple files can be specified by making a semicolon separated list of files.  Each file can have its own format specifiers as above.<br>
        You will note that none of , ; or = can be in filenames.
      </td>
@@ -208,7 +216,7 @@ import java.text.DecimalFormat;
  * <tr><td>debugPrefix</td><td>String</td><td>N/A</td><td>All</td><td>File (path) prefix for where to write out the debugging information (relevant only if debug=true).</td></tr>
  * <tr><td>nthreads</td><td>int</td><td>1</td><td>Test,Text</td><td>Number of threads to use when processing text.</td></tr>
  * </table>
- * <p/>
+ *
  *
  * @author Kristina Toutanova
  * @author Miler Lee
