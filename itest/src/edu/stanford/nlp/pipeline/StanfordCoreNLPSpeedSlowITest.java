@@ -30,6 +30,7 @@ public class StanfordCoreNLPSpeedSlowITest extends TestCase {
     }
     long endTime = System.currentTimeMillis();
     long duration = endTime - startTime;
+    assert(duration < 390000);
   }
 
 }
