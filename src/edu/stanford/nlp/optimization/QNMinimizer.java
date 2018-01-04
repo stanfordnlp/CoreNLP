@@ -1068,7 +1068,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         sayln("** program by checking the QNMinimizer.wasSuccessful() method.");
         break;
       } catch (OutOfMemoryError oome) {
-        if ( ! qn.s.isEmpty()) {
+        if ( qn.s.size() > 1) {
           qn.s.remove(0);
           qn.y.remove(0);
           qn.rho.remove(0);
