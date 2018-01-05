@@ -206,7 +206,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       String fineGrainedPrefix = "ner.fine.regexner";
       Properties fineGrainedProps =
           PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".");
-      fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
+      fineGrainedNERAnnotator = new TokensRegexNERAnnotator("", fineGrainedProps);
     }
   }
 
