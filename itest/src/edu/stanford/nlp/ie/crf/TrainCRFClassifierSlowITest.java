@@ -1,55 +1,46 @@
 package edu.stanford.nlp.ie.crf;
 
-import java.io.File;
-import java.util.List;
-import java.util.Scanner;
+import junit.framework.TestCase;
 
-import org.junit.Assert;
-import org.junit.Test;
-
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.sequences.SeqClassifierFlags;
+import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.*;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
+import edu.stanford.nlp.util.StringUtils;
+
+import java.io.*;
+import java.nio.file.*;
+import java.util.List;
+import java.util.Properties;
 
 
-public class TrainCRFClassifierSlowITest {
+public class TrainCRFClassifierSlowITest extends TestCase {
 
-  private static final String crfTrainingWorkingDir = "/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training";
+  public static String crfTrainingWorkingDir =
+      "/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training";
 
+  public static String expectedGermanPerformanceLine = "Totals\t0.8416\t0.6760\t0.7497\t3267\t615\t1566";
 
-  @SuppressWarnings("ResultOfMethodCallIgnored")
-  @Test
-  public void testGermanCRFClassifierTraining() throws Exception {
-    StanfordRedwoodConfiguration.apply(PropertiesUtils.asProperties(
-            "log.file", crfTrainingWorkingDir + "/german-crf.results"));
+  
+  public void testCRFClassifierTraining() throws Exception {
+    StanfordRedwoodConfiguration.apply(PropertiesUtils.asProperties("log.file", "/scr/nlp/data/stanford-corenlp-testing/german-crf.results"));
     // delete the model if present
-    File originalModelFile = new File(crfTrainingWorkingDir, "german.hgc_175m_600.crf.ser.gz");
+    String originalModelPath =
+        "/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training/german.hgc_175m_600.crf.ser.gz";
+    File originalModelFile = new File(originalModelPath);
     originalModelFile.delete();
     // train the new model
-    CRFClassifier.main(new String[] {
-            "-props", "edu/stanford/nlp/models/ner/german-2018.hgc_175m_600.prop",
-            "-serializeTo", "/dev/null"
-    });
+    CRFClassifier.main(new String[]{"-props",
+        "/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training/german-crf-example-train.prop"});
     // check for lack of quality drop
-    // CRFClassifier.main(new String[]{"-props",
-    //         "/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training/german-crf-example-test.prop"});
-    List<String> germanTrainingResults = IOUtils.linesFromFile(crfTrainingWorkingDir + "/german-crf.results");
-    String lastLineOfResults = germanTrainingResults.get(germanTrainingResults.size() - 1);
-    //System.err.println("last line: "+lastLineOfResults.trim());
-    Scanner scanner = new Scanner(lastLineOfResults);
-    // ignore word "Totals"
-    scanner.next();
-    double p = scanner.nextDouble();
-    Assert.assertEquals("Precision outside target range", 0.8364, p, 0.001);
-    double r = scanner.nextDouble();
-    Assert.assertEquals("Recall outside target range", 0.6924, r, 0.001);
-    double f1 = scanner.nextDouble();
-    Assert.assertEquals("Precision outside target range", 0.7576, f1, 0.001);
+    CRFClassifier.main(new String[]{"-props",
+        "/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training/german-crf-example-test.prop"});
+    List<String> germanTrainingResults = IOUtils.linesFromFile("/scr/nlp/data/stanford-corenlp-testing/german-crf.results");
+    String lastLineOfResults = germanTrainingResults.get(germanTrainingResults.size()-1);
+    //System.out.println("last line: "+lastLineOfResults.trim());
+    //System.out.println("last line: "+expectedGermanPerformanceLine);
+    assertEquals(lastLineOfResults.trim(), expectedGermanPerformanceLine);
   }
-
-  // Previous results (Totals on CoNLL 2003 testa)
-  // P          R       F1      TP      FP      FN
-  // 0.8404	0.6743	0.7482	3259	619	1574    2016 and 2017
-  // 0.8364	0.6924	0.7576	3334	652	1481    2018
 
 }

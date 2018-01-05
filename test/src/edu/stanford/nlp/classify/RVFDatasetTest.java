@@ -5,21 +5,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.junit.Test;
-
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.CollectionUtils;
+import junit.framework.Assert;
+import junit.framework.TestCase;
 
+public class RVFDatasetTest extends TestCase {
 
-/** @author Steven Bethard */
-public class RVFDatasetTest {
-
-  @Test
   public void testCombiningDatasets() {
     RVFDatum<String, String> datum1 = newRVFDatum(null, "a", "b", "a");
     RVFDatum<String, String> datum2 = newRVFDatum(null, "c", "c", "b");
@@ -34,13 +27,12 @@ public class RVFDatasetTest {
     data.addAll(data1);
     data.addAll(data2);
 
-    Iterator<RVFDatum<String, String>> iterator = data.iterator();
-    assertEquals(datum1, iterator.next());
-    assertEquals(datum2, iterator.next());
-    assertFalse(iterator.hasNext());
+    Iterator<RVFDatum<String, String>> iter = data.iterator();
+    Assert.assertEquals(datum1, iter.next());
+    Assert.assertEquals(datum2, iter.next());
+    Assert.assertFalse(iter.hasNext());
   }
 
-  @Test
   public void testSVMLightIntegerFormat() throws IOException {
     RVFDataset<Boolean, Integer> dataset = new RVFDataset<>();
     dataset.add(newRVFDatum(true, 1, 2, 1, 0));
@@ -53,18 +45,17 @@ public class RVFDatasetTest {
     RVFDataset<Boolean, Integer> newDataset = new RVFDataset<>();
     try {
       newDataset.readSVMLightFormat(tempFile);
-      fail("expected failure with empty indexes");
-    } catch (RuntimeException ignored) {}
+      Assert.fail("expected failure with empty indexes");
+    } catch (RuntimeException e) {}
 
-    newDataset = new RVFDataset<>(
-            dataset.size(), dataset.featureIndex(), dataset.labelIndex());
+    newDataset = new RVFDataset<Boolean, Integer>(
+        dataset.size(), dataset.featureIndex(), dataset.labelIndex());
     newDataset.readSVMLightFormat(tempFile);
-    assertEquals(CollectionUtils.toList(dataset), CollectionUtils.toList(newDataset));
+    Assert.assertEquals(CollectionUtils.toList(dataset), CollectionUtils.toList(newDataset));
   }
 
-  @SafeVarargs
   private static <L, F> RVFDatum<L, F> newRVFDatum(L label, F ... items) {
-    return new RVFDatum<>(Counters.asCounter(Arrays.asList(items)), label);
+    return new RVFDatum<L, F>(Counters.asCounter(Arrays.asList(items)), label);
   }
 
 }

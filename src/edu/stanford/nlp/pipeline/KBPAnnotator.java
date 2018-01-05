@@ -56,12 +56,7 @@ public class KBPAnnotator implements Annotator {
 
   @ArgumentParser.Option(name="kbp.verbose", gloss="Print out KBP logging info")
   private boolean VERBOSE = false;
-
-  @ArgumentParser.Option(name="kbp.language", gloss="language for kbp")
-  private String kbpLanguageString = "en";
-
-  private LanguageInfo.HumanLanguage kbpLanguage = LanguageInfo.getLanguageFromString(kbpLanguageString);
-
+  
   /**
    * The extractor implementation.
    */
@@ -152,6 +147,9 @@ public class KBPAnnotator implements Annotator {
     relationNameConversionMap.put("per:member_of", "per:employee_or_member_of");
     relationNameConversionMap.put("per:employee_of", "per:employee_or_member_of");
     relationNameConversionMap.put("per:stateorprovinces_of_residence", "per:statesorprovinces_of_residence");
+
+    // set up KBP language
+    kbpLanguage = LanguageInfo.getLanguageFromString(props.getProperty("kbp.language", "en"));
 
     // build the Spanish coref system if necessary
     if (LanguageInfo.HumanLanguage.SPANISH.equals(kbpLanguage))
