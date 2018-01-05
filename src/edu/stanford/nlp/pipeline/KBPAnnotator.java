@@ -56,7 +56,8 @@ public class KBPAnnotator implements Annotator {
 
   @ArgumentParser.Option(name="kbp.verbose", gloss="Print out KBP logging info")
   private boolean VERBOSE = false;
-  
+
+  private LanguageInfo.HumanLanguage kbpLanguage;
   /**
    * The extractor implementation.
    */
