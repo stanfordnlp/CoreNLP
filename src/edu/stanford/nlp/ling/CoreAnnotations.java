@@ -98,6 +98,26 @@ public class CoreAnnotations {
   }
 
   /**
+   * The CoreMap key for getting the coarse named entity tag (i.e. LOCATION)
+   */
+  public static class CoarseNamedEntityTagAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
+   * The CoreMap key for getting the fine grained named entity tag (i.e. CITY)
+   */
+  public static class FineGrainedNamedEntityTagAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
    * The CoreMap key for getting the token-level named entity tag (e.g., DATE,
    * PERSON, etc.) from a previous NER tagger. NERFeatureFactory is sensitive to
    * this tag and will turn the annotations from the previous NER tagger into
