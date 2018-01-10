@@ -288,6 +288,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(AfterAnnotation.class)) { builder.setAfter(coreLabel.after()); keysToSerialize.remove(AfterAnnotation.class); }
     if (keySet.contains(OriginalTextAnnotation.class)) { builder.setOriginalText(coreLabel.originalText()); keysToSerialize.remove(OriginalTextAnnotation.class); }
     if (keySet.contains(NamedEntityTagAnnotation.class)) { builder.setNer(coreLabel.ner()); keysToSerialize.remove(NamedEntityTagAnnotation.class); }
+    if (keySet.contains(CoarseNamedEntityTagAnnotation.class)) {
+      builder.setCoarseNER(coreLabel.get(CoarseNamedEntityTagAnnotation.class));
+      keysToSerialize.remove(CoarseNamedEntityTagAnnotation.class); }
+    if (keySet.contains(FineGrainedNamedEntityTagAnnotation.class)) {
+      builder.setFineGrainedNER(coreLabel.get(FineGrainedNamedEntityTagAnnotation.class));
+      keysToSerialize.remove(FineGrainedNamedEntityTagAnnotation.class);
+    }
     if (keySet.contains(CharacterOffsetBeginAnnotation.class)) { builder.setBeginChar(coreLabel.beginPosition()); keysToSerialize.remove(CharacterOffsetBeginAnnotation.class); }
     if (keySet.contains(CharacterOffsetEndAnnotation.class)) { builder.setEndChar(coreLabel.endPosition()); keysToSerialize.remove(CharacterOffsetEndAnnotation.class); }
     if (keySet.contains(LemmaAnnotation.class)) { builder.setLemma(coreLabel.lemma()); keysToSerialize.remove(LemmaAnnotation.class); }
@@ -1213,6 +1220,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasAfter()) { word.setAfter(proto.getAfter()); }
     if (proto.hasOriginalText()) { word.setOriginalText(proto.getOriginalText()); }
     if (proto.hasNer()) { word.setNER(proto.getNer()); }
+    if (proto.hasCoarseNER()) { word.set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, proto.getCoarseNER()); }
+    if (proto.hasFineGrainedNER()) { word.set(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class, proto.getFineGrainedNER()); }
     if (proto.hasLemma()) { word.setLemma(proto.getLemma()); }
     if (proto.hasBeginChar()) { word.setBeginPosition(proto.getBeginChar()); }
     if (proto.hasEndChar()) { word.setEndPosition(proto.getEndChar()); }

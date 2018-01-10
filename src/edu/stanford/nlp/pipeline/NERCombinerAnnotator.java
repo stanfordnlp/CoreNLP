@@ -182,7 +182,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime, int maxSentenceLength) {
-    this(ner, verbose, nThreads, maxTime, maxSentenceLength,true,true);
+    this(ner, verbose, nThreads, maxTime, maxSentenceLength, true, true);
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime,
@@ -258,8 +258,14 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (LanguageInfo.HumanLanguage.SPANISH.equals(language))
       spanishNumberAnnotator.annotate(annotation);
     // if fine grained ner is requested, run that
-    if (this.applyFineGrained)
+    if (this.applyFineGrained) {
       fineGrainedNERAnnotator.annotate(annotation);
+      // set the FineGrainedNamedEntityTagAnnotation.class
+      for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+        String fineGrainedTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+        token.set(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class, fineGrainedTag);
+      }
+    }
     // if entity mentions should be built, run that
     if (this.buildEntityMentions)
       entityMentionsAnnotator.annotate(annotation);
@@ -300,6 +306,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           normNeTag = spanishToEnglishTag(normNeTag);
         }
         tokens.get(i).setNER(neTag);
+        tokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
         if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
         NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
       }
