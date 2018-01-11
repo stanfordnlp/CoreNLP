@@ -22,6 +22,11 @@ public class CoreDocument {
     this.annotationDocument = new Annotation(documentText);
   }
 
+  public CoreDocument(Annotation annotation) {
+    this.annotationDocument = annotation;
+    wrapAnnotations();
+  }
+
   /** complete the wrapping process post annotation by a pipeline **/
   public void wrapAnnotations() {
     // wrap all of the sentences
