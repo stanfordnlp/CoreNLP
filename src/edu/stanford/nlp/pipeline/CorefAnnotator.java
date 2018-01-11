@@ -23,6 +23,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -40,6 +41,9 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   private static final Redwood.RedwoodChannels log = Redwood.channels(CorefAnnotator.class);
 
   private final CorefSystem corefSystem;
+
+  private boolean performMentionDetection ;
+  private CorefMentionAnnotator mentionAnnotator;
 
   private final Properties props;
 
@@ -63,10 +67,36 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       log.error(e);
       throw new RuntimeException(e);
     }
+    // unless custom mention detection is set, just use the default coref mention detector
+    performMentionDetection = !PropertiesUtils.getBool(props, "coref.useCustomMentionDetection", false);
+    if (performMentionDetection)
+      mentionAnnotator = new CorefMentionAnnotator(props);
+  }
+
+  // flip which granularity of ner tag is primary
+  public void setNamedEntityTagGranularity(Annotation annotation, String granularity) {
+    List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
+    Class<? extends CoreAnnotation<String>> sourceNERTagClass;
+    if (granularity.equals("fine"))
+      sourceNERTagClass = CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class;
+    else if (granularity.equals("coarse"))
+      sourceNERTagClass = CoreAnnotations.CoarseNamedEntityTagAnnotation.class;
+    else
+      sourceNERTagClass = CoreAnnotations.NamedEntityTagAnnotation.class;
+    // switch tags
+    for (CoreLabel token : tokens) {
+      if (!token.get(sourceNERTagClass).equals("") && token.get(sourceNERTagClass) != null)
+        token.set(CoreAnnotations.NamedEntityTagAnnotation.class, token.get(sourceNERTagClass));
+    }
   }
 
   @Override
   public void annotate(Annotation annotation){
+    // check if mention detection should be performed by this annotator
+    // temporarily set the primary named entity tag to the coarse tag
+    setNamedEntityTagGranularity(annotation, "coarse");
+    if (performMentionDetection)
+      mentionAnnotator.annotate(annotation);
     try {
       if (!annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
         log.error("this coreference resolution system requires SentencesAnnotation!");
@@ -82,6 +112,9 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      // restore to the fine-grained
+      setNamedEntityTagGranularity(annotation, "fine");
     }
   }
 

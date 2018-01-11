@@ -52,6 +52,9 @@ public class DeterministicCorefAnnotator implements Annotator  {
   private final MentionExtractor mentionExtractor;
   private final SieveCoreferenceSystem corefSystem;
 
+  private boolean performMentionDetection;
+  private CorefMentionAnnotator mentionAnnotator;
+
 
   // for backward compatibility
   private final boolean OLD_FORMAT;
@@ -64,6 +67,10 @@ public class DeterministicCorefAnnotator implements Annotator  {
       mentionExtractor = new MentionExtractor(corefSystem.dictionaries(), corefSystem.semantics());
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
       allowReparsing = PropertiesUtils.getBool(props, Constants.ALLOW_REPARSING_PROP, Constants.ALLOW_REPARSING);
+      // unless custom mention detection is set, just use the default coref mention detector
+      performMentionDetection = !PropertiesUtils.getBool(props, "dcoref.useCustomMentionDetection", false);
+      if (performMentionDetection)
+        mentionAnnotator = new CorefMentionAnnotator(props);
     } catch (Exception e) {
       log.error("cannot create DeterministicCorefAnnotator!");
       log.error(e);
@@ -71,8 +78,29 @@ public class DeterministicCorefAnnotator implements Annotator  {
     }
   }
 
+  // flip which granularity of ner tag is primary
+  public void setNamedEntityTagGranularity(Annotation annotation, String granularity) {
+    List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
+    Class<? extends CoreAnnotation<String>> sourceNERTagClass;
+    if (granularity.equals("fine"))
+      sourceNERTagClass = CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class;
+    else if (granularity.equals("coarse"))
+      sourceNERTagClass = CoreAnnotations.CoarseNamedEntityTagAnnotation.class;
+    else
+      sourceNERTagClass = CoreAnnotations.NamedEntityTagAnnotation.class;
+    // switch tags
+    for (CoreLabel token : tokens) {
+      if (!token.get(sourceNERTagClass).equals("") && token.get(sourceNERTagClass) != null)
+        token.set(CoreAnnotations.NamedEntityTagAnnotation.class, token.get(sourceNERTagClass));
+    }
+  }
+
   @Override
   public void annotate(Annotation annotation) {
+    // temporarily set the primary named entity tag to the coarse tag
+    setNamedEntityTagGranularity(annotation, "coarse");
+    if (performMentionDetection)
+      mentionAnnotator.annotate(annotation);
     try {
       List<Tree> trees = new ArrayList<>();
       List<List<CoreLabel>> sentences = new ArrayList<>();
@@ -140,6 +168,9 @@ public class DeterministicCorefAnnotator implements Annotator  {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      // restore to the fine-grained
+      setNamedEntityTagGranularity(annotation, "fine");
     }
   }
 
