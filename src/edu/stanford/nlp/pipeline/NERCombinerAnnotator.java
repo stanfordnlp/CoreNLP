@@ -205,8 +205,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (this.applyFineGrained) {
       String fineGrainedPrefix = "ner.fine.regexner";
       Properties fineGrainedProps =
-          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".");
-      fineGrainedNERAnnotator = new TokensRegexNERAnnotator("", fineGrainedProps);
+          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".", true);
+      fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
     }
   }
 
@@ -215,8 +215,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (this.buildEntityMentions) {
       String entityMentionsPrefix = "ner.entitymentions";
       Properties entityMentionsProps =
-          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".");
-      entityMentionsAnnotator = new EntityMentionsAnnotator("ner.entitymentions", entityMentionsProps);
+          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".", true);
+      entityMentionsAnnotator = new EntityMentionsAnnotator(entityMentionsPrefix, entityMentionsProps);
     }
   }
 
