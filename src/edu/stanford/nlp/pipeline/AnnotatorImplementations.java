@@ -165,19 +165,19 @@ public class AnnotatorImplementations  {
   /**
    * Annotate for mention (statistical or hybrid)
    */
-  public Annotator mention(Properties properties) {
+  public Annotator corefMention(Properties properties) {
     // TO DO: split up coref and mention properties
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
             true);
     Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
-            Annotator.STANFORD_MENTION + ".",
+            Annotator.STANFORD_COREF_MENTION + ".",
             true);
 
     Properties allPropsForCoref = new Properties();
     allPropsForCoref.putAll(corefProperties);
     allPropsForCoref.putAll(mentionProperties);
-    return new MentionAnnotator(allPropsForCoref);
+    return new CorefMentionAnnotator(allPropsForCoref);
   }
 
   /**
@@ -188,7 +188,7 @@ public class AnnotatorImplementations  {
             Annotator.STANFORD_COREF + ".",
             true);
     Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
-            Annotator.STANFORD_MENTION + ".",
+            Annotator.STANFORD_COREF_MENTION + ".",
             true);
     Properties allPropsForCoref = new Properties();
     allPropsForCoref.putAll(corefProperties);

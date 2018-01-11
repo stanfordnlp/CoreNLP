@@ -406,7 +406,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
     // Tweak the properties, if necessary
     // (set the mention annotator to use dependency trees, if appropriate)
-    if (orderedAnnotators.contains(Annotator.STANFORD_MENTION) && !orderedAnnotators.contains(Annotator.STANFORD_PARSE) &&
+    if ((orderedAnnotators.contains(Annotator.STANFORD_COREF_MENTION) || orderedAnnotators.contains(Annotator.STANFORD_COREF))
+        && !orderedAnnotators.contains(Annotator.STANFORD_PARSE) &&
         !props.containsKey("coref.md.type")) {
       props.setProperty("coref.md.type", "dep");
     }
@@ -549,7 +550,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     pool.put(STANFORD_GENDER, (props, impl) -> impl.gender(props, STANFORD_GENDER));
     pool.put(STANFORD_TRUECASE, (props, impl) -> impl.trueCase(props));
     pool.put(STANFORD_PARSE, (props, impl) -> impl.parse(props));
-    pool.put(STANFORD_MENTION, (props, impl) -> impl.mention(props));
+    pool.put(STANFORD_COREF_MENTION, (props, impl) -> impl.corefMention(props));
     pool.put(STANFORD_DETERMINISTIC_COREF, (props, impl) -> impl.dcoref(props));
     pool.put(STANFORD_COREF, (props, impl) -> impl.coref(props));
     pool.put(STANFORD_RELATION, (props, impl) -> impl.relations(props));

@@ -198,14 +198,14 @@ public class Document {
   };
 
   /**
-   * The default {@link edu.stanford.nlp.pipeline.MentionAnnotator} implementation
+   * The default {@link edu.stanford.nlp.pipeline.CorefMentionAnnotator} implementation
    */
   private static Supplier<Annotator> defaultMention = new Supplier<Annotator>() {
-    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_MENTION,
-        PropertiesUtils.getSignature(STANFORD_MENTION, EMPTY_PROPS));
+    private StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(STANFORD_COREF_MENTION,
+        PropertiesUtils.getSignature(STANFORD_COREF_MENTION, EMPTY_PROPS));
     @Override
     public synchronized Annotator get() {
-      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.mention(EMPTY_PROPS))).get();
+      return StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (x) -> Lazy.of(() -> backend.corefMention(EMPTY_PROPS))).get();
     }
   };
 
@@ -722,7 +722,7 @@ public class Document {
           this.runDepparse(props);
         }
         // Run mention
-        Supplier<Annotator> mention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultMention : getOrCreate(STANFORD_MENTION, props, () -> backend.mention(props));
+        Supplier<Annotator> mention = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultMention : getOrCreate(STANFORD_COREF_MENTION, props, () -> backend.corefMention(props));
         // Run coref
         Supplier<Annotator> coref = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultCoref : getOrCreate(STANFORD_COREF, props, () -> backend.coref(props));
         Annotation ann = asAnnotation(true);

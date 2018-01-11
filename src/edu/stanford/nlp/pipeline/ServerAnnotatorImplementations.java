@@ -151,8 +151,8 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
 
   /** {@inheritDoc} */
   @Override
-  public Annotator mention(Properties properties) {
-    return new SingletonAnnotator(host, port, properties, Annotator.STANFORD_MENTION);
+  public Annotator corefMention(Properties properties) {
+    return new SingletonAnnotator(host, port, properties, Annotator.STANFORD_COREF_MENTION);
   }
 
 
