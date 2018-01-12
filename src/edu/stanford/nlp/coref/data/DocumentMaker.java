@@ -114,7 +114,7 @@ public class DocumentMaker {
     } else {
       pipelineProps.setProperty("annotators", "pos, lemma, ner, " +
               (CorefProperties.useConstituencyParse(props) ? "parse" : "depparse") +
-              (CorefProperties.useGoldMentions(props) ? "" : ", mention"));
+              (CorefProperties.useGoldMentions(props) ? "" : ", coref.mention"));
     }
     return (coreNLP = new StanfordCoreNLP(pipelineProps, false));
   }
