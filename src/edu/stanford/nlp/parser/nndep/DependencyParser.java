@@ -1,5 +1,5 @@
 package edu.stanford.nlp.parser.nndep;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
@@ -27,10 +27,6 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Timing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -405,6 +401,8 @@ public class DependencyParser  {
 
       Writer output = IOUtils.getPrintWriter(modelFile);
 
+      output.write("language=" + language.toString() + "\n");
+      output.write("tlp=" + config.tlp.getClass().getCanonicalName() + "\n");
       output.write("dict=" + knownWords.size() + "\n");
       output.write("pos=" + knownPos.size() + "\n");
       output.write("label=" + knownLabels.size() + "\n");
@@ -459,7 +457,6 @@ public class DependencyParser  {
         else
           output.write(" ");
       }
-
       output.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
@@ -507,6 +504,19 @@ public class DependencyParser  {
     loadModelFile(modelFile, true);
   }
 
+  /** helper to check if the model file is new format or not
+   *
+   * @param firstLine the first line of the model file
+   * @return true if this is a new format model file
+   */
+  private boolean isModelNewFormat(String firstLine) {
+    if (firstLine.substring(0,9).equals("language=")) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   private void loadModelFile(String modelFile, boolean verbose) {
     Timing t = new Timing();
     try {
@@ -515,7 +525,23 @@ public class DependencyParser  {
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
 
+      // first line in newer saved models is language, legacy models don't store this
       s = input.readLine();
+      // check if language was stored
+      if (isModelNewFormat(s)) {
+        // set up language
+        config.language = Config.getLanguage(s.substring(9, s.length() - 1));
+        // set up tlp
+        s = input.readLine();
+        String tlpCanonicalName = s.substring(4, s.length() - 1);
+        try {
+          config.tlp = ReflectionLoading.loadByReflection(tlpCanonicalName);
+          System.err.println("Loaded TreebankLanguagePack: " + tlpCanonicalName);
+        } catch (Exception e) {
+          System.err.println("Error: Failed to load TreebankLanguagePack: " + tlpCanonicalName);
+        }
+        s = input.readLine();
+      }
       int nDict = Integer.parseInt(s.substring(s.indexOf('=') + 1));
       s = input.readLine();
       int nPOS = Integer.parseInt(s.substring(s.indexOf('=') + 1));
@@ -593,6 +619,7 @@ public class DependencyParser  {
           preComputed.add(Integer.parseInt(split));
         }
       }
+
       input.close();
       config.hiddenSize = hSize;
       config.embeddingSize = eSize;
