@@ -161,7 +161,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
         CoreAnnotations.NamedEntityTagAnnotation.class,
-        CorefCoreAnnotations.CorefMentionsAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class
         ));
@@ -169,6 +168,8 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       requirements.add(TreeCoreAnnotations.TreeAnnotation.class);
       requirements.add(CoreAnnotations.CategoryAnnotation.class);
     }
+    if (!performMentionDetection)
+      requirements.add(CorefCoreAnnotations.CorefMentionsAnnotation.class);
     return Collections.unmodifiableSet(requirements);
   }
 
