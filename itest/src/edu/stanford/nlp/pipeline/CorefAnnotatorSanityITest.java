@@ -66,7 +66,7 @@ public class CorefAnnotatorSanityITest extends TestCase {
   public void testStatisticalEnglishSlow() {
     // build pipeline
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,coref");
     props.setProperty("coref.algorithm", "clustering");
     props.setProperty("coref.md.type", "rule");
     pipeline = new StanfordCoreNLP(props);
@@ -84,7 +84,7 @@ public class CorefAnnotatorSanityITest extends TestCase {
   public void testStatisticalEnglishFast() {
     // build pipeline
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse,mention,coref");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse,coref");
     props.setProperty("coref.algorithm", "statistical");
     props.setProperty("coref.md.type", "dependency");
     pipeline = new StanfordCoreNLP(props);
@@ -102,7 +102,7 @@ public class CorefAnnotatorSanityITest extends TestCase {
   public void testNeuralEnglish() {
     // build pipeline
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,coref");
     props.setProperty("coref.algorithm", "neural");
     props.setProperty("coref.md.type", "rule");
     pipeline = new StanfordCoreNLP(props);
