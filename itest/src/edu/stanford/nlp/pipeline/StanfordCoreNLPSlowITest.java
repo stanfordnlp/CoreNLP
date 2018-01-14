@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.*;
 
 /**
  * A slow itest that just runs the pipeline over a whole bunch of
@@ -72,7 +73,7 @@ public class StanfordCoreNLPSlowITest extends TestCase {
     StanfordCoreNLP pipeline = buildPipeline();
     for (File file : getFileList()) {
       try {
-        pipeline.processFiles(Collections.singletonList(file), false);
+        pipeline.processFiles(Collections.singletonList(file), false, Optional.empty());
       } catch (Exception e) {
         // process files one at a time and rethrow exceptions so that
         // we know which file caused the problem
@@ -83,7 +84,7 @@ public class StanfordCoreNLPSlowITest extends TestCase {
 
   public void testParallelism() throws IOException {
     StanfordCoreNLP pipeline = buildPipeline();
-    pipeline.processFiles(getFileList(), Runtime.getRuntime().availableProcessors(), false);
+    pipeline.processFiles(getFileList(), Runtime.getRuntime().availableProcessors(), false, Optional.empty());
   }
 
 }
