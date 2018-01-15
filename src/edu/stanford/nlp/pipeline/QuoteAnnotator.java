@@ -121,15 +121,15 @@ public class QuoteAnnotator implements Annotator  {
    * ASCII characters " and '. If an unclosed quote appears, by default,
    * this quote will not be counted as a quote.
    *
-   *  @param s String that is ignored but allows for creation of the
+   *  @param name String that is ignored but allows for creation of the
    *           QuoteAnnotator via a customAnnotatorClass
    *
    *  @param  props Properties object that contains the customizable properties
    *                 attributes.
    *  @return A QuoteAnnotator.
    */
-  public QuoteAnnotator(String s, Properties props) {
-    this(props, false);
+  public QuoteAnnotator(String name, Properties props) {
+    this(name, props, false);
   }
 
   /** Return a QuoteAnnotator that isolates quotes denoted by the
@@ -141,7 +141,7 @@ public class QuoteAnnotator implements Annotator  {
    *  @return A QuoteAnnotator.
    */
   public QuoteAnnotator(Properties props) {
-    this(props, false);
+    this("quote", props, false);
   }
 
   /** Return a QuoteAnnotator that isolates quotes denoted by the
@@ -153,14 +153,14 @@ public class QuoteAnnotator implements Annotator  {
    *  @param verbose whether or not to output verbose information.
    *  @return A QuoteAnnotator.
    */
-  public QuoteAnnotator(Properties props, boolean verbose) {
-    USE_SINGLE = Boolean.parseBoolean(props.getProperty("singleQuotes", "false"));
-    MAX_LENGTH = Integer.parseInt(props.getProperty("maxLength", "-1"));
-    ASCII_QUOTES = Boolean.parseBoolean(props.getProperty("asciiQuotes", "false"));
-    ALLOW_EMBEDDED_SAME = Boolean.parseBoolean(props.getProperty("allowEmbeddedSame", "false"));
-    SMART_QUOTES = Boolean.parseBoolean(props.getProperty("smartQuotes", "false"));
-    EXTRACT_UNCLOSED = Boolean.parseBoolean(props.getProperty("extractUnclosedQuotes", "false"));
-    ATTRIBUTE_QUOTES = Boolean.parseBoolean(props.getProperty("attributeQuotes", "true"));
+  public QuoteAnnotator(String name, Properties props, boolean verbose) {
+    USE_SINGLE = Boolean.parseBoolean(props.getProperty(name + "." + "singleQuotes", "false"));
+    MAX_LENGTH = Integer.parseInt(props.getProperty(name + "." + "maxLength", "-1"));
+    ASCII_QUOTES = Boolean.parseBoolean(props.getProperty(name + "." + "asciiQuotes", "false"));
+    ALLOW_EMBEDDED_SAME = Boolean.parseBoolean(props.getProperty(name + "." + "allowEmbeddedSame", "false"));
+    SMART_QUOTES = Boolean.parseBoolean(props.getProperty(name + "." + "smartQuotes", "false"));
+    EXTRACT_UNCLOSED = Boolean.parseBoolean(props.getProperty(name + "." + "extractUnclosedQuotes", "false"));
+    ATTRIBUTE_QUOTES = Boolean.parseBoolean(props.getProperty(name + "." + "attributeQuotes", "true"));
 
     VERBOSE = verbose;
     Timing timer = null;
