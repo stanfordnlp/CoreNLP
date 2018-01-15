@@ -12,7 +12,7 @@ import java.util.Properties;
 /**
  * @author Grace Muzny
  */
-public class QuoteAnnotatorTest extends TestCase {
+public class QuoteAnnotatorITest extends TestCase {
 
   private static StanfordCoreNLP pipeline;
   private static StanfordCoreNLP pipelineNoSingleQuotes;
@@ -28,7 +28,7 @@ public class QuoteAnnotatorTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    synchronized(QuoteAnnotatorTest.class) {
+    synchronized(QuoteAnnotatorITest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote1");
