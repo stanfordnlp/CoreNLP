@@ -34,7 +34,7 @@ public class QuoteAnnotatorITest extends TestCase {
         props.setProperty("annotators", "tokenize, ssplit, quote1");
         props.setProperty("customAnnotatorClass.quote1", "edu.stanford.nlp.pipeline.QuoteAnnotator");
         props.setProperty("quote1.attributeQuotes", "false");
-        props.setProperty("singleQuotes", "true");
+        props.setProperty("quote1.singleQuotes", "true");
         pipeline = new StanfordCoreNLP(props);
       }
       if (pipelineNoSingleQuotes == null) {
@@ -49,7 +49,7 @@ public class QuoteAnnotatorITest extends TestCase {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote3");
         props.setProperty("customAnnotatorClass.quote3", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("maxLength", "5");
+        props.setProperty("quote3.maxLength", "5");
         props.setProperty("quote3.attributeQuotes", "false");
         pipelineMaxFive = new StanfordCoreNLP(props);
       }
@@ -58,7 +58,7 @@ public class QuoteAnnotatorITest extends TestCase {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote4");
         props.setProperty("customAnnotatorClass.quote4", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("asciiQuotes", "true");
+        props.setProperty("quote4.asciiQuotes", "true");
         props.setProperty("quote4.attributeQuotes", "false");
         pipelineAsciiQuotes = new StanfordCoreNLP(props);
       }
@@ -66,7 +66,7 @@ public class QuoteAnnotatorITest extends TestCase {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote5");
         props.setProperty("customAnnotatorClass.quote5", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("allowEmbeddedSame", "true");
+        props.setProperty("quote5.allowEmbeddedSame", "true");
         props.setProperty("quote5.attributeQuotes", "false");
         pipelineAllowEmbeddedSame = new StanfordCoreNLP(props);
       }
@@ -74,7 +74,7 @@ public class QuoteAnnotatorITest extends TestCase {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote6");
         props.setProperty("customAnnotatorClass.quote6", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("extractUnclosedQuotes", "true");
+        props.setProperty("quote6.extractUnclosedQuotes", "true");
         props.setProperty("quote6.attributeQuotes", "false");
         pipelineUnclosedQuotes = new StanfordCoreNLP(props);
       }
