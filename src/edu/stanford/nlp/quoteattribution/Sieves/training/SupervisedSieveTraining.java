@@ -370,17 +370,21 @@ public class SupervisedSieveTraining {
             features.setCount("mentionNotInQuote", 1);
         }
 
-        //nearby word syntax types
-        CoreLabel prevWord = tokens.get(mention.begin - 1);
-        CoreLabel nextWord = tokens.get(mention.end + 1);
-
-        features.setCount("prevWordType:" + prevWord.tag(), 1);
-        features.setCount("nextWordType:" + nextWord.tag(), 1);
+        // nearby word syntax types...make sure to check if there are previous or next words
+        // or there will be an array index crash
+        if (mention.begin > 0) {
+          CoreLabel prevWord = tokens.get(mention.begin - 1);
+          features.setCount("prevWordType:" + prevWord.tag(), 1);
+          if (punctuationForFeatures.contains(prevWord.lemma()))
+            features.setCount("prevWordPunct:" + prevWord.lemma(), 1);
+        }
+        if (mention.end+1 < tokens.size()) {
+          CoreLabel nextWord = tokens.get(mention.end + 1);
+          features.setCount("nextWordType:" + nextWord.tag(), 1);
+          if (punctuationForFeatures.contains(nextWord.lemma()))
+            features.setCount("nextWordPunct:" + nextWord.lemma(), 1);
+        }
 //                    features.setCount("prevAndNext:" + prevWord.tag()+ ";" + nextWord.tag(), 1);
-        if (punctuationForFeatures.contains(prevWord.lemma()))
-          features.setCount("prevWordPunct:" + prevWord.lemma(), 1);
-        if (punctuationForFeatures.contains(nextWord.lemma()))
-          features.setCount("nextWordPunct:" + nextWord.lemma(), 1);
 
         //quote paragraph features
         List<CoreMap> quotesInQuoteParagraph = paragraphToQuotes.get(quoteParagraphIdx);
