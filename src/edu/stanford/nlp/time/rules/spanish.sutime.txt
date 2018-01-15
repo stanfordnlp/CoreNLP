@@ -1,3 +1,5 @@
+###############################################################
+
   ENV.defaults["stage"] = 1
   ENV.defaults["ruleType"] = "tokens"
 
@@ -58,3 +60,14 @@
   { (/el|este|hoy/? /viernes/) => FRIDAY }
   { (/el|este|hoy/? /sábado/) => SATURDAY }
   { (/el|este|hoy/? /domingo/) => SUNDAY }
+
+###############################################################
+
+  ENV.defaults["ruleType"] = "tokens"
+  ENV.defaults["priority"] = 0
+  ENV.defaults["locale"] = "en"
+
+  { ruleType: "time", pattern: /yyyy-?MM-?dd-?'T'HH(:?mm(:?ss([.,]S{1,3})?)?)?(Z)?/ }
+  { ruleType: "time", pattern: /yyyy-MM-dd/ }
+
+  { ruleType: "time", pattern: /dd?\\?\/MM?\\?\/(yyyy|yy)/ }
