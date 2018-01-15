@@ -105,7 +105,7 @@ public interface Annotator {
   String STANFORD_NATLOG = "natlog";
   String STANFORD_OPENIE = "openie";
   String STANFORD_QUOTE = "quote";
-  String STANFORD_QUOTE_ATTRIBUTION = "quoteattribution";
+  String STANFORD_QUOTE_ATTRIBUTION = "quote.attribution";
   String STANFORD_UD_FEATURES = "udfeats";
   String STANFORD_LINK = "entitylink";
   String STANFORD_KBP = "kbp";

@@ -93,6 +93,12 @@ public class QuoteAnnotator implements Annotator  {
   // Whether or not to extract unclosed quotes
   public boolean EXTRACT_UNCLOSED = false;
 
+  // Whether or not to perform quote attribution
+  public boolean ATTRIBUTE_QUOTES = true;
+
+  // A quote attribution annotator this annotator may use
+  public QuoteAttributionAnnotator quoteAttributionAnnotator;
+
   //TODO: add directed quote/unicode quote understanding capabilities.
   // will need substantial logic, probably, as quotation mark conventions
   // vary widely.
@@ -154,6 +160,7 @@ public class QuoteAnnotator implements Annotator  {
     ALLOW_EMBEDDED_SAME = Boolean.parseBoolean(props.getProperty("allowEmbeddedSame", "false"));
     SMART_QUOTES = Boolean.parseBoolean(props.getProperty("smartQuotes", "false"));
     EXTRACT_UNCLOSED = Boolean.parseBoolean(props.getProperty("extractUnclosedQuotes", "false"));
+    ATTRIBUTE_QUOTES = Boolean.parseBoolean(props.getProperty("attributeQuotes", "true"));
 
     VERBOSE = verbose;
     Timing timer = null;
@@ -161,6 +168,8 @@ public class QuoteAnnotator implements Annotator  {
       timer = new Timing();
       log.info("Preparing quote annotator...");
     }
+    if (ATTRIBUTE_QUOTES)
+      quoteAttributionAnnotator = new QuoteAttributionAnnotator(props);
 
     if (VERBOSE) {
       timer.stop("done.");
@@ -243,6 +252,9 @@ public class QuoteAnnotator implements Annotator  {
       // add quotes to document
       setAnnotations(annotation, cmQuotes, cmQuotesUnclosed, "Setting quotes.");
     }
+    // if quote attribution is activated, run the quoteAttributionAnnotator
+    if (ATTRIBUTE_QUOTES)
+      quoteAttributionAnnotator.annotate(annotation);
   }
 
   private void setAnnotations(Annotation annotation,
