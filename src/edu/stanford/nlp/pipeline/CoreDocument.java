@@ -2,7 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.data.CorefChain;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +16,7 @@ public class CoreDocument {
 
   protected Annotation annotationDocument;
   private List<CoreEntityMention> entityMentions;
+  private List<CoreQuote> quotes;
   private List<CoreSentence> sentences;
 
   public CoreDocument(String documentText) {
@@ -36,6 +37,9 @@ public class CoreDocument {
     if (sentences.get(0).entityMentions() != null) {
         buildDocumentEntityMentionsList();
     }
+    // if there are quotes, build a document wide list
+    if (this.annotationDocument.get(CoreAnnotations.QuotationsAnnotation.class) != null)
+      buildDocumentQuotesList();
   }
 
   /** create list of CoreSentence's based on the Annotation's sentences **/
@@ -49,6 +53,12 @@ public class CoreDocument {
   private void buildDocumentEntityMentionsList() {
     entityMentions = sentences.stream().flatMap(sentence -> sentence.entityMentions().stream()).
         collect(Collectors.toList());
+  }
+
+  private void buildDocumentQuotesList() {
+      this.quotes =
+          QuoteAnnotator.gatherQuotes(this.annotationDocument).stream().
+              map(coreMapQuote -> new CoreQuote(this, coreMapQuote)).collect(Collectors.toList());
   }
 
   /** provide access to the underlying annotation if needed **/
@@ -69,6 +79,11 @@ public class CoreDocument {
   /** return the full text of the doc **/
   public String text() { return this.annotationDocument.get(CoreAnnotations.TextAnnotation.class); }
 
+  /** return the full token list for this doc **/
+  public List<CoreLabel> tokens() {
+    return this.annotationDocument.get(CoreAnnotations.TokensAnnotation.class);
+  }
+
   /** the list of sentences in this document **/
   public List<CoreSentence> sentences() {
     return this.sentences;
@@ -82,5 +97,9 @@ public class CoreDocument {
     return this.annotationDocument.get(CorefCoreAnnotations.CorefChainAnnotation.class);
   }
 
+  /** quotes **/
+  public List<CoreQuote> quotes() {
+    return this.quotes;
+  }
 
 }
