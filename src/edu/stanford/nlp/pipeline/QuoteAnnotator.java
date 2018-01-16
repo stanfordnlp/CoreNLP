@@ -676,7 +676,27 @@ public class QuoteAnnotator implements Annotator  {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.EMPTY_SET;
+    if (ATTRIBUTE_QUOTES) {
+      return new HashSet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+          CoreAnnotations.PartOfSpeechAnnotation.class,
+          CoreAnnotations.LemmaAnnotation.class,
+          CoreAnnotations.NamedEntityTagAnnotation.class,
+          CoreAnnotations.MentionsAnnotation.class,
+          CoreAnnotations.BeforeAnnotation.class,
+          CoreAnnotations.AfterAnnotation.class,
+          CoreAnnotations.TokenBeginAnnotation.class,
+          CoreAnnotations.TokenEndAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.OriginalTextAnnotation.class
+      ));
+    } else {
+      return Collections.EMPTY_SET;
+    }
   }
 
   @Override
