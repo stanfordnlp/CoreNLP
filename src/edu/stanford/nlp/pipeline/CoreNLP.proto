@@ -118,8 +118,8 @@ message Sentence {
   optional bool            hasEntityMentionsAnnotation         = 65;  // check if there are entity mentions
 
   // quote stuff
-  optional int             chapterIndex                        = 66;
-  optional int             paragraphIndex                      = 67;
+  optional uint32             chapterIndex                     = 66;
+  optional uint32             paragraphIndex                   = 67;
 
   extensions 100 to 255;
 }
