@@ -15,6 +15,7 @@ import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.naturalli.*;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.quoteattribution.ChapterAnnotator;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -540,6 +541,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // add boolean flag if sentence is quoted
     if (keySet.contains(QuotedAnnotation.class)) builder.setSectionQuoted(getAndRegister(sentence, keysToSerialize, QuotedAnnotation.class));
 
+    // add chapter index if there is one
+    if (keySet.contains(ChapterAnnotator.ChapterAnnotation.class)) builder.setChapterIndex(getAndRegister(sentence, keysToSerialize, ChapterAnnotator.ChapterAnnotation.class));
+
+    // add paragraph index info
+    if (keySet.contains(ParagraphIndexAnnotation.class)) builder.setParagraphIndex(getAndRegister(sentence, keysToSerialize, ParagraphIndexAnnotation.class));
     // Return
     return builder;
   }
@@ -1358,6 +1364,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasSectionIndex())
       lossySentence.set(SectionIndexAnnotation.class, proto.getSectionIndex());
 
+    // add quote info
+    if (proto.hasChapterIndex())
+      lossySentence.set(ChapterAnnotator.ChapterAnnotation.class, proto.getChapterIndex());
+    if (proto.hasParagraphIndex())
+      lossySentence.set(ParagraphIndexAnnotation.class, proto.getParagraphIndex());
+
     // Return
     return lossySentence;
   }
@@ -1419,6 +1431,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // add quoted info
     if (proto.hasSectionQuoted())
       sentence.set(QuotedAnnotation.class, proto.getSectionQuoted());
+
+    // add quote info
+    if (proto.hasChapterIndex())
+      sentence.set(ChapterAnnotator.ChapterAnnotation.class, proto.getChapterIndex());
+    if (proto.hasParagraphIndex())
+      sentence.set(ParagraphIndexAnnotation.class, proto.getParagraphIndex());
 
     // Return
     return sentence;
