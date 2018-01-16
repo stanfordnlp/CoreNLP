@@ -291,6 +291,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     testAnnotators("tokenize,quote");
     testAnnotators("tokenize,ssplit,quote");
     testAnnotators("tokenize,ssplit,quote");
+    testAnnotators("tokenize,ssplit,pos,lemma,ner,quote");
   }
 
   @Test
