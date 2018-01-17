@@ -72,7 +72,6 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
           CoreAnnotations.ValueAnnotation.class,
           SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
           SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class
-
       ));
     } catch (Exception e) {
       log.info("Error with building coref mention annotator!");

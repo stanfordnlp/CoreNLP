@@ -161,6 +161,8 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
         CoreAnnotations.NamedEntityTagAnnotation.class,
+        CoreAnnotations.CoarseNamedEntityTagAnnotation.class,
+        CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class
         ));

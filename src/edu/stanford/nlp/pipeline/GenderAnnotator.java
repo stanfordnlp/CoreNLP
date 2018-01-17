@@ -79,8 +79,8 @@ public class GenderAnnotator implements Annotator {
         CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class,
-        CoreAnnotations.MentionsAnnotation.class
+        CoreAnnotations.MentionsAnnotation.class,
+        CoreAnnotations.EntityTypeAnnotation.class
     )));
   }
 

@@ -360,7 +360,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           CoreAnnotations.TokenEndAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.OriginalTextAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class
+          CoreAnnotations.SentenceIndexAnnotation.class,
+          CoreAnnotations.IsNewlineAnnotation.class
       )));
     } else {
       return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
@@ -375,7 +376,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           CoreAnnotations.TokenEndAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.OriginalTextAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class
+          CoreAnnotations.SentenceIndexAnnotation.class,
+          CoreAnnotations.IsNewlineAnnotation.class
       )));
     }
   }
@@ -400,10 +402,14 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         Tags.TagsAnnotation.class,
         CoreAnnotations.NumerizedTokensAnnotation.class,
         CoreAnnotations.AnswerAnnotation.class,
-        CoreAnnotations.NumericCompositeValueAnnotation.class
-    ));
-    if (this.buildEntityMentions)
+        CoreAnnotations.NumericCompositeValueAnnotation.class,
+        CoreAnnotations.CoarseNamedEntityTagAnnotation.class,
+        CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class
+        ));
+    if (this.buildEntityMentions) {
       nerRequirementsSatisfied.add(CoreAnnotations.MentionsAnnotation.class);
+      nerRequirementsSatisfied.add(CoreAnnotations.EntityTypeAnnotation.class);
+    }
     return nerRequirementsSatisfied;
   }
 

@@ -684,15 +684,13 @@ public class QuoteAnnotator implements Annotator  {
           CoreAnnotations.CharacterOffsetBeginAnnotation.class,
           CoreAnnotations.CharacterOffsetEndAnnotation.class,
           CoreAnnotations.PartOfSpeechAnnotation.class,
-          CoreAnnotations.LemmaAnnotation.class,
           CoreAnnotations.NamedEntityTagAnnotation.class,
           CoreAnnotations.MentionsAnnotation.class,
-          CoreAnnotations.BeforeAnnotation.class,
-          CoreAnnotations.AfterAnnotation.class,
-          CoreAnnotations.TokenBeginAnnotation.class,
           CoreAnnotations.TokenEndAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
-          CoreAnnotations.OriginalTextAnnotation.class
+          CoreAnnotations.TokenBeginAnnotation.class,
+          CoreAnnotations.ValueAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class
       ));
     } else {
       return Collections.EMPTY_SET;
@@ -701,7 +699,22 @@ public class QuoteAnnotator implements Annotator  {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.QuotationsAnnotation.class);
+    if (ATTRIBUTE_QUOTES) {
+      return new HashSet<>(Arrays.asList(
+          CoreAnnotations.QuotationsAnnotation.class,
+          CoreAnnotations.QuotationIndexAnnotation.class,
+          QuoteAttributionAnnotator.MentionAnnotation.class,
+          QuoteAttributionAnnotator.MentionBeginAnnotation.class,
+          QuoteAttributionAnnotator.MentionEndAnnotation.class,
+          QuoteAttributionAnnotator.MentionTypeAnnotation.class,
+          QuoteAttributionAnnotator.MentionSieveAnnotation.class,
+          QuoteAttributionAnnotator.SpeakerAnnotation.class,
+          QuoteAttributionAnnotator.SpeakerSieveAnnotation.class,
+          CoreAnnotations.ParagraphIndexAnnotation.class
+      ));
+    } else {
+      return Collections.singleton(CoreAnnotations.QuotationsAnnotation.class);
+    }
   }
 
 
