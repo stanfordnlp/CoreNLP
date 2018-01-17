@@ -32,7 +32,7 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
 public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicDocumentReaderAndWriter.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ArabicDocumentReaderAndWriter.class);
 
   private static final long serialVersionUID = 3667837672769424178L;
 
@@ -55,6 +55,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   private final boolean shouldStripRewrites;
 
   public static class RewrittenArabicAnnotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -129,6 +130,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
     segMarker = hasSegMarkers ? DEFAULT_SEG_MARKER : null;
     factory = LineIterator.getFactory(new SerializableFunction<String, List<CoreLabel>>() {
       private static final long serialVersionUID = 5243251505653686497L;
+      @Override
       public List<CoreLabel> apply(String in) {
         List<CoreLabel> tokenList;
         
@@ -170,7 +172,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
                 lexListRewritten = lexListRaw;
 
               }
-              if (lexListRaw.size() == 0) {
+              if (lexListRaw.isEmpty()) {
                 continue;
               
               } else if (lexListRaw.size() == 1) {
@@ -219,15 +221,18 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   /**
    * Required, but unused.
    */
+  @Override
   public void init(SeqClassifierFlags flags) {}
 
   /**
    * Iterate over an input document.
    */
+  @Override
   public Iterator<List<CoreLabel>> getIterator(Reader r) {
     return factory.getIterator(r);
   }
 
+  @Override
   public void printAnswers(List<CoreLabel> doc, PrintWriter pw) {
     pw.println("Answer\tGoldAnswer\tCharacter");
     for(CoreLabel word : doc) {
