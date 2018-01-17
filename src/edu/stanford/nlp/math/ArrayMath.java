@@ -695,9 +695,9 @@ public class ArrayMath {
    * @return 1-norm of a
    */
   public static double norm_1(double[] a) {
-    double sum = 0;
+    double sum = 0.0;
     for (double anA : a) {
-      sum += (anA < 0 ? -anA : anA);
+      sum += Math.abs(anA);
     }
     return sum;
   }
@@ -709,9 +709,9 @@ public class ArrayMath {
    * @return 1-norm of a
    */
   public static double norm_1(float[] a) {
-    double sum = 0;
+    double sum = 0.0;
     for (float anA : a) {
-      sum += (anA < 0 ? -anA : anA);
+      sum += Math.abs(anA);
     }
     return sum;
   }
@@ -724,7 +724,7 @@ public class ArrayMath {
    * @return Euclidean norm of a
    */
   public static double norm(double[] a) {
-    double squaredSum = 0;
+    double squaredSum = 0.0;
     for (double anA : a) {
       squaredSum += anA * anA;
     }
@@ -738,7 +738,7 @@ public class ArrayMath {
    * @return Euclidean norm of a
    */
   public static double norm(float[] a) {
-    double squaredSum = 0;
+    double squaredSum = 0.0;
     for (float anA : a) {
       squaredSum += anA * anA;
     }
