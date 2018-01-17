@@ -5,25 +5,25 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+
 
 /**
- * Runs charniak parser using command line
+ * Runs the Charniak parser via the command line.
  *
  * @author Angel Chang
  */
 public class CharniakParser {
-  private final static Logger logger = Logger.getLogger(CharniakParser.class.getName());
+
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(CharniakParser.class);
 
   private static final String CHARNIAK_DIR = "/u/nlp/packages/bllip-parser/";
   // note: this is actually the parser+reranker (will use 2 CPUs)
   private static final String CHARNIAK_BIN = "./parse-50best.sh";
-
-  private final CharniakScoredParsesReaderWriter scoredParsesReaderWriter = new CharniakScoredParsesReaderWriter();
 
   private String dir = CHARNIAK_DIR;
   private String parserExecutable = CHARNIAK_BIN;
@@ -55,14 +55,12 @@ public class CharniakParser {
     this.maxSentenceLength = maxSentenceLength;
   }
 
-  public Tree getBestParse(List<? extends HasWord> sentence)
-  {
+  public Tree getBestParse(List<? extends HasWord> sentence) {
     ScoredObject<Tree> scoredParse = getBestScoredParse(sentence);
     return (scoredParse != null)? scoredParse.object():null;
   }
 
-  public ScoredObject<Tree> getBestScoredParse(List<? extends HasWord> sentence)
-  {
+  public ScoredObject<Tree> getBestScoredParse(List<? extends HasWord> sentence) {
     List<ScoredObject<Tree>> kBestParses = getKBestParses(sentence, 1);
     if (kBestParses != null) {
       return kBestParses.get(0);
@@ -70,13 +68,11 @@ public class CharniakParser {
     return null;
   }
 
-  public List<ScoredObject<Tree>> getKBestParses(List<? extends HasWord> sentence, int k)
-  {
+  public List<ScoredObject<Tree>> getKBestParses(List<? extends HasWord> sentence, int k) {
     return getKBestParses(sentence, k, true);
   }
 
-  public List<ScoredObject<Tree>> getKBestParses(List<? extends HasWord> sentence, int k, boolean deleteTempFiles)
-  {
+  public List<ScoredObject<Tree>> getKBestParses(List<? extends HasWord> sentence, int k, boolean deleteTempFiles) {
     try {
       File inFile = File.createTempFile("charniak.", ".in");
       if (deleteTempFiles) inFile.deleteOnExit();
@@ -86,7 +82,7 @@ public class CharniakParser {
       if (deleteTempFiles) errFile.deleteOnExit();
       printSentence(sentence, inFile.getAbsolutePath());
       runCharniak(k, inFile.getAbsolutePath(), outFile.getAbsolutePath(), errFile.getAbsolutePath());
-      Iterable<List<ScoredObject<Tree>>> iter = scoredParsesReaderWriter.readScoredTrees(outFile.getAbsolutePath());
+      Iterable<List<ScoredObject<Tree>>> iter = CharniakScoredParsesReaderWriter.readScoredTrees(outFile.getAbsolutePath());
       if (deleteTempFiles) {
         inFile.delete();
         outFile.delete();
@@ -98,13 +94,12 @@ public class CharniakParser {
     }
   }
 
-  public Iterable<List<ScoredObject<Tree>>> getKBestParses(Iterable<List<? extends HasWord>> sentences, int k)
-  {
+  public Iterable<List<ScoredObject<Tree>>> getKBestParses(Iterable<List<? extends HasWord>> sentences, int k) {
     return getKBestParses(sentences, k, true);
   }
 
-  public Iterable<List<ScoredObject<Tree>>> getKBestParses(Iterable<List<? extends HasWord>> sentences, int k, boolean deleteTempFiles)
-  {
+  public Iterable<List<ScoredObject<Tree>>> getKBestParses(Iterable<List<? extends HasWord>> sentences,
+                                                           int k, boolean deleteTempFiles) {
     try {
       File inFile = File.createTempFile("charniak.", ".in");
       if (deleteTempFiles) inFile.deleteOnExit();
@@ -114,7 +109,7 @@ public class CharniakParser {
       if (deleteTempFiles) errFile.deleteOnExit();
       printSentences(sentences, inFile.getAbsolutePath());
       runCharniak(k, inFile.getAbsolutePath(), outFile.getAbsolutePath(), errFile.getAbsolutePath());
-      Iterable<List<ScoredObject<Tree>>> iter = scoredParsesReaderWriter.readScoredTrees(outFile.getAbsolutePath());
+      Iterable<List<ScoredObject<Tree>>> iter = CharniakScoredParsesReaderWriter.readScoredTrees(outFile.getAbsolutePath());
       if (deleteTempFiles) {
         inFile.delete();
         outFile.delete();
@@ -126,15 +121,13 @@ public class CharniakParser {
     }
   }
 
-  public void printSentence(List<? extends HasWord> sentence, String filename)
-  {
+  public void printSentence(List<? extends HasWord> sentence, String filename) {
     List<List<? extends HasWord>> sentences = new ArrayList<>();
     sentences.add(sentence);
     printSentences(sentences, filename);
   }
 
-  public void printSentences(Iterable<List<? extends HasWord>> sentences, String filename)
-  {
+  public void printSentences(Iterable<List<? extends HasWord>> sentences, String filename) {
     try {
       PrintWriter pw = IOUtils.getPrintWriter(filename);
       for (List<? extends HasWord> sentence:sentences) {
@@ -154,8 +147,7 @@ public class CharniakParser {
     }
   }
 
-  public void runCharniak(int n, String infile, String outfile, String errfile)
-  {
+  public void runCharniak(int n, String infile, String outfile, String errfile) {
     try {
       if (n == 1) n++;  // Charniak does not output score if n = 1?
 
@@ -173,8 +165,5 @@ public class CharniakParser {
       throw new RuntimeException(ex);
     }
   }
-
-
-
 
 }
