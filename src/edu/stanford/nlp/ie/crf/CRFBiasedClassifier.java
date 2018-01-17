@@ -73,11 +73,11 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
         for (FeatureFactory<IN> featureFactory : featureFactories) {
           featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c));
         }
-        if(testTime && i==0)
-          // this feature is only present at test time and only appears
-          // in cliques of size 1 (i.e., cliques with window=0)
-          featuresC.add(BIAS);
       }
+      if(testTime && i==0)
+        // this feature is only present at test time and only appears
+        // in cliques of size 1 (i.e., cliques with window=0)
+        featuresC.add(BIAS);
       features.add(featuresC);
     }
 
