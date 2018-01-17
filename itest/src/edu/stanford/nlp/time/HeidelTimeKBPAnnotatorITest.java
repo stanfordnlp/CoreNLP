@@ -12,16 +12,10 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
 
   public StanfordCoreNLP pipeline;
   public String WORKING_DIR = "/scr/nlp/data/stanford-corenlp-testing/spanish-heideltime";
-  public String GOLD_RESULTS = "Rusia\tCOUNTRY\n" +
-      "Japón\tCOUNTRY\n" +
-      "hoy\tDATE\n" +
-      "rusa\tLOCATION\n" +
-      "Vicente Fox\tPERSON\n" +
-      "el 2 de julio de 1942\tDATE\n" +
-      "Esta semana\tDATE\n" +
-      "ING\tORGANIZATION\n" +
-      "14\tNUMBER\n" +
-      "12\tNUMBER";
+  public Set<String> GOLD_RESULTS = new HashSet<>(
+      Arrays.asList("Rusia\tCOUNTRY", "Japón\tCOUNTRY", "hoy\tDATE","rusa\tLOCATION", "Vicente Fox\tPERSON",
+          "el 2 de julio de 1942\tDATE", "Esta semana\tDATE", "ING\tORGANIZATION",
+          "14\tNUMBER", "12\nNUMBER"));
 
   @Override
   public void setUp() {
@@ -35,10 +29,9 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
     String testFileContents = IOUtils.stringFromFile(WORKING_DIR+"/example-sentences.txt");
     CoreDocument testDocument = new CoreDocument(testFileContents);
     pipeline.annotate(testDocument);
-    String outputResults = "";
+    Set<String> outputResults = new HashSet<>();
     for (CoreEntityMention em : testDocument.entityMentions())
-      outputResults += (em.text()+"\t"+em.entityType()+"\n");
-    outputResults = outputResults.trim();
+      outputResults.add(em.text()+"\t"+em.entityType());
     assertEquals(outputResults,GOLD_RESULTS);
   }
 
