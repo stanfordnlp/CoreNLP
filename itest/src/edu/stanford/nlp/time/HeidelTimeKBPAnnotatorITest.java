@@ -15,7 +15,7 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
   public Set<String> GOLD_RESULTS = new HashSet<>(
       Arrays.asList("Rusia\tCOUNTRY", "Japón\tCOUNTRY", "hoy\tDATE","rusa\tLOCATION", "Vicente Fox\tPERSON",
           "el 2 de julio de 1942\tDATE", "Esta semana\tDATE", "ING\tORGANIZATION",
-          "14\tNUMBER", "12\nNUMBER"));
+          "14\tNUMBER", "12\tNUMBER"));
 
   @Override
   public void setUp() {
