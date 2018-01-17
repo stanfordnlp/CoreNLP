@@ -2091,30 +2091,6 @@ public class ArrayMath {
     return result;
   }
 
-  public static double[][] covariance(double[][] data) {
-    double[] means = new double[data.length];
-    for (int i = 0; i < means.length; i++) {
-      means[i] = mean(data[i]);
-    }
-
-    double[][] covariance = new double[means.length][means.length];
-    for (int i = 0; i < data[0].length; i++) {
-      for (int j = 0; j < means.length; j++) {
-        for (int k = 0; k < means.length; k++) {
-          covariance[j][k] += (means[j]-data[j][i])*(means[k]-data[k][i]);
-        }
-      }
-    }
-
-    for (int i = 0; i < covariance.length; i++) {
-      for (int j = 0; j < covariance[i].length; j++) {
-        covariance[i][j] = Math.sqrt(covariance[i][j])/(data[0].length);
-      }
-    }
-    return covariance;
-  }
-
-
   public static void addMultInto(double[] a, double[] b, double[] c, double d) {
     for (int i=0; i<a.length; i++) {
       a[i] = b[i] + c[i] * d;
