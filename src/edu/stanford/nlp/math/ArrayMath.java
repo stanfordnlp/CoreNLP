@@ -695,9 +695,9 @@ public class ArrayMath {
    * @return 1-norm of a
    */
   public static double norm_1(double[] a) {
-    double sum = 0;
+    double sum = 0.0;
     for (double anA : a) {
-      sum += (anA < 0 ? -anA : anA);
+      sum += Math.abs(anA);
     }
     return sum;
   }
@@ -709,9 +709,9 @@ public class ArrayMath {
    * @return 1-norm of a
    */
   public static double norm_1(float[] a) {
-    double sum = 0;
+    double sum = 0.0;
     for (float anA : a) {
-      sum += (anA < 0 ? -anA : anA);
+      sum += Math.abs(anA);
     }
     return sum;
   }
@@ -724,7 +724,7 @@ public class ArrayMath {
    * @return Euclidean norm of a
    */
   public static double norm(double[] a) {
-    double squaredSum = 0;
+    double squaredSum = 0.0;
     for (double anA : a) {
       squaredSum += anA * anA;
     }
@@ -738,7 +738,7 @@ public class ArrayMath {
    * @return Euclidean norm of a
    */
   public static double norm(float[] a) {
-    double squaredSum = 0;
+    double squaredSum = 0.0;
     for (float anA : a) {
       squaredSum += anA * anA;
     }
@@ -2090,30 +2090,6 @@ public class ArrayMath {
     }
     return result;
   }
-
-  public static double[][] covariance(double[][] data) {
-    double[] means = new double[data.length];
-    for (int i = 0; i < means.length; i++) {
-      means[i] = mean(data[i]);
-    }
-
-    double[][] covariance = new double[means.length][means.length];
-    for (int i = 0; i < data[0].length; i++) {
-      for (int j = 0; j < means.length; j++) {
-        for (int k = 0; k < means.length; k++) {
-          covariance[j][k] += (means[j]-data[j][i])*(means[k]-data[k][i]);
-        }
-      }
-    }
-
-    for (int i = 0; i < covariance.length; i++) {
-      for (int j = 0; j < covariance[i].length; j++) {
-        covariance[i][j] = Math.sqrt(covariance[i][j])/(data[0].length);
-      }
-    }
-    return covariance;
-  }
-
 
   public static void addMultInto(double[] a, double[] b, double[] c, double d) {
     for (int i=0; i<a.length; i++) {

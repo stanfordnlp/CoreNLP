@@ -347,7 +347,7 @@ public class SemanticGraphFactory  {
 
   /**
    * Given a list of edges, attempts to create and return a rooted SemanticGraph.
-   * <p>
+   *
    * TODO: throw Exceptions, or flag warnings on conditions for concern (no root, etc)
    */
   public static SemanticGraph makeFromEdges(Iterable<SemanticGraphEdge> edges) {
@@ -367,7 +367,7 @@ public class SemanticGraphFactory  {
 
   /**
    * Given an iterable set of edges, returns the set of  vertices covered by these edges.
-   * <p>
+   *
    * Note: CDM changed the return of this from a List to a Set in 2011. This seemed more
    * sensible.  Hopefully it doesn't break anything....
    */
