@@ -39,7 +39,9 @@ import java.util.stream.Collectors;
  * An OpenIE system based on valid Natural Logic deletions of a sentence.
  * The system is described in:
  *
- * "Leveraging Linguistic Structure For Open Domain Information Extraction." Gabor Angeli, Melvin Johnson Premkumar, Christopher Manning. ACL 2015.
+ * <pre>
+ *   "Leveraging Linguistic Structure For Open Domain Information Extraction." Gabor Angeli, Melvin Johnson Premkumar, Christopher Manning. ACL 2015.
+ * </pre>
  *
  * The paper can be found at <a href="http://nlp.stanford.edu/pubs/2015angeli-openie.pdf">http://nlp.stanford.edu/pubs/2015angeli-openie.pdf</a>.
  *
@@ -48,7 +50,9 @@ import java.util.stream.Collectors;
  * or the <a href="http://stanfordnlp.github.io/CoreNLP/openie.html">CoreNLP annotator documentation page</a>.
  * The simplest invocation of the system would be something like:
  *
- * {@code java -mx1g -cp stanford-openie.jar:stanford-openie-models.jar edu.stanford.nlp.naturalli.OpenIE }
+ * <pre>
+ * java -mx1g -cp stanford-openie.jar:stanford-openie-models.jar edu.stanford.nlp.naturalli.OpenIE
+ * </pre>
  *
  * Note that this class serves both as an entry point for the OpenIE system, but also as a CoreNLP annotator
  * which can be plugged into the CoreNLP pipeline (or any other annotation pipeline).

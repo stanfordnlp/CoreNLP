@@ -32,7 +32,7 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
     Set<String> outputResults = new HashSet<>();
     for (CoreEntityMention em : testDocument.entityMentions())
       outputResults.add(em.text()+"\t"+em.entityType());
-    assertEquals(outputResults,GOLD_RESULTS);
+    assertEquals(GOLD_RESULTS,outputResults);
   }
 
 }

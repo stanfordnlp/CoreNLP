@@ -563,9 +563,9 @@ public class ConstantsAndVariables implements Serializable {
 //  }
 
 
-  public static class ScorePhraseMeasures implements Comparable {
+  static public class ScorePhraseMeasures implements Comparable {
 
-    String name;
+        String name;
     static int num = 0;
     int numObj;
     static Map<String, ScorePhraseMeasures> createdObjects = new ConcurrentHashMap<>();

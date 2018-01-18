@@ -26,7 +26,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(MalletReaderAndWriter.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(MalletReaderAndWriter.class);
 
   private static final long serialVersionUID = 3806263423691913704L;
 
@@ -34,14 +34,12 @@ public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
   private String[] map = null;
   private IteratorFromReaderFactory factory;
   
-  @Override
-  public void init(SeqClassifierFlags flags) {
+  public void init(SeqClassifierFlags flags) { 
     this.flags = flags;
     this.map = StringUtils.mapStringToArray(flags.map);
     factory = DelimitRegExIterator.getFactory("\n(\\s*\n)+", new MalletDocParser());
   }
   
-  @Override
   public Iterator<List<CoreLabel>> getIterator(Reader r) {
     return factory.getIterator(r);
   }
@@ -49,7 +47,6 @@ public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
   int num = 0;
   private class MalletDocParser implements Serializable, Function<String,List<CoreLabel>> {
     private static final long serialVersionUID = -6211332661459630572L;
-    @Override
     public List<CoreLabel> apply(String doc) {
 
       if (num % 1000 == 0) { log.info("["+num+"]"); }
@@ -75,7 +72,6 @@ public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
     }
   }
   
-  @Override
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
     for (CoreLabel wi : doc) {
       String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
