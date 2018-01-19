@@ -1,5 +1,7 @@
 package edu.stanford.nlp.quoteattribution;
 
+import edu.stanford.nlp.coref.*;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -358,6 +360,13 @@ public class QuoteAttributionUtils {
     return characterList;
   }
 
+  public static boolean isPronominal(String potentialPronoun) {
+    if (potentialPronoun.toLowerCase().equals("he") || potentialPronoun.toLowerCase().equals("she"))
+      return true;
+    else
+      return false;
+  }
+
   public static  Map<Integer,String> setupCoref(String bammanFile,
                                                 Map<String, List<Person>> characterMap,
                                                 Annotation doc ) {
@@ -366,8 +375,22 @@ public class QuoteAttributionUtils {
       Map<Integer, List<CoreLabel>> bammanTokens = BammanCorefReader.readTokenFile(bammanFile, doc);
       Map<Integer,String> pronounCorefMap = mapBammanToCharacterMap(bammanTokens, characterMap);
       return pronounCorefMap;
+    } else {
+      Map<Integer,String> pronounCorefMap = new HashMap<Integer,String>();
+      for (CorefChain cc : doc.get(CorefCoreAnnotations.CorefChainAnnotation.class).values()) {
+        String representativeMention = cc.getRepresentativeMention().mentionSpan;
+        for (CorefChain.CorefMention cm : cc.getMentionsInTextualOrder()) {
+          if (isPronominal(cm.mentionSpan)) {
+            CoreMap cmSentence =
+                doc.get(CoreAnnotations.SentencesAnnotation.class).get(cm.sentNum-1);
+            List<CoreLabel> cmTokens = cmSentence.get(CoreAnnotations.TokensAnnotation.class);
+            int charBegin = cmTokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+            pronounCorefMap.put(charBegin, representativeMention);
+          }
+        }
+      }
+      return pronounCorefMap;
     }
-    return null;
   }
 
   //return map of index of CharacterOffsetBeginAnnotation to name of character.
