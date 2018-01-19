@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.paragraphs.ParagraphAnnotator;
@@ -272,8 +273,8 @@ public class QuoteAttributionAnnotator implements Annotator {
         CoreAnnotations.TokenBeginAnnotation.class,
         CoreAnnotations.TokenEndAnnotation.class,
         CoreAnnotations.IndexAnnotation.class,
-        CoreAnnotations.OriginalTextAnnotation.class
-//      CoreAnnotations.ParagraphIndexAnnotation.class
+        CoreAnnotations.OriginalTextAnnotation.class,
+        CorefCoreAnnotations.CorefChainAnnotation.class
     ));
   }
 

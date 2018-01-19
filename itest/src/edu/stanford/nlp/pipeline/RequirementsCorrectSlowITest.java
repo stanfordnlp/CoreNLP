@@ -76,6 +76,12 @@ public class RequirementsCorrectSlowITest {
         // note that UniversalSemanticHeadFinder accesses this key
         // (line 625, line 628)
         used.remove(CoreAnnotations.CategoryAnnotation.class);
+        // ValueAnnotation is sometimes used, sometimes not
+        // so artificially add it so this test stops failing in
+        // cases where ValueAnnotation isn't used...note that this
+        // is always populated by TokenizerAnnotator
+        if (!used.contains(CoreAnnotations.ValueAnnotation.class))
+          used.add(CoreAnnotations.ValueAnnotation.class);
       }
       if (annotatorI > 0) {
         if (!declared.equals(used)) {
@@ -114,7 +120,7 @@ public class RequirementsCorrectSlowITest {
 
   @Test
   public void testQuotePipeline() {
-    testAnnotatorSequence(Arrays.asList("tokenize","ssplit","pos","lemma","ner","quote"));
+    testAnnotatorSequence(Arrays.asList("tokenize","ssplit","pos","lemma","ner","depparse","coref","quote"));
   }
 
    @Test

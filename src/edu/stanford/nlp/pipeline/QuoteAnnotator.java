@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
 
+
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -8,6 +9,7 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -690,7 +692,8 @@ public class QuoteAnnotator implements Annotator  {
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.TokenBeginAnnotation.class,
           CoreAnnotations.ValueAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class
+          CoreAnnotations.SentenceIndexAnnotation.class,
+          CorefCoreAnnotations.CorefChainAnnotation.class
       ));
     } else {
       return Collections.EMPTY_SET;
