@@ -7,11 +7,10 @@ public class SegmenterCoreAnnotations {
 
   private SegmenterCoreAnnotations() { } // only static members
 
-  public static class CharactersAnnotation 
-    implements CoreAnnotation<List<CoreLabel>> 
-  {
+  public static class CharactersAnnotation implements CoreAnnotation<List<CoreLabel>> {
+    @Override
     public Class<List<CoreLabel>> getType() {
-      return ErasureUtils.<Class<List<CoreLabel>>> uncheckedCast(List.class);
+      return ErasureUtils.uncheckedCast(List.class);
     }
   }
 
@@ -21,4 +20,5 @@ public class SegmenterCoreAnnotations {
       return String.class;
     }
   }
+
 }

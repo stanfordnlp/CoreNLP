@@ -1327,6 +1327,7 @@ public class StringUtils  {
    * @return An array of Strings that s is split into
    */
   public static String[] splitOnCharWithQuoting(String s, char splitChar, char quoteChar, char escapeChar) {
+    // todo [cdm 2018]: rewrite this to use code points so can work with any Unicode characters
     List<String> result = new ArrayList<>();
     int i = 0;
     int length = s.length();
