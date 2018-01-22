@@ -189,7 +189,10 @@ message Token {
 
   // French tokens have parents
   optional string parent          = 61;
-  
+
+  // mention index info
+  optional uint32 corefMentionIndex = 64;
+  optional uint32 entityMentionIndex = 65;
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
@@ -226,6 +229,16 @@ message Quote {
   optional string docid          = 9;
   optional uint32 index          = 10;
   optional string author         = 11;
+  optional string mention        = 12;
+  optional uint32 mentionBegin   = 13;
+  optional uint32 mentionEnd     = 14;
+  optional string mentionType    = 15;
+  optional string mentionSieve   = 16;
+  optional string speaker        = 17;
+  optional string speakerSieve   = 18;
+  optional string canonicalMention = 19;
+  optional uint32 canonicalMentionBegin = 20;
+  optional uint32 canonicalMentionEnd = 21;
 }
 
 //
@@ -471,6 +484,8 @@ message NERMention {
   optional Timex  timex                         = 7;
   optional string wikipediaEntity               = 8;
   optional string gender                        = 9;
+  optional uint32 entityMentionIndex            = 10;
+  optional uint32 canonicalEntityMentionIndex   = 11;
 }
 
 //
