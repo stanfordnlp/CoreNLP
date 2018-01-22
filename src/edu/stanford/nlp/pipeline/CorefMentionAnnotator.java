@@ -1,4 +1,5 @@
 package edu.stanford.nlp.pipeline;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,12 +12,14 @@ import java.util.Set;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.CorefProperties;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.coref.md.CorefMentionFinder;
 import edu.stanford.nlp.coref.md.DependencyCorefMentionFinder;
 import edu.stanford.nlp.coref.md.HybridCorefMentionFinder;
 import edu.stanford.nlp.coref.md.RuleBasedCorefMentionFinder;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -39,9 +42,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Jason Bolton
  */
 
-public class CorefMentionAnnotator extends TextAnnotationCreator implements Annotator  {
+public class CorefMentionAnnotator extends TextAnnotationCreator implements Annotator {
 
-  /** A logger for this class */
+  /**
+   * A logger for this class
+   */
   private static final Redwood.RedwoodChannels log = Redwood.channels(CorefMentionAnnotator.class);
 
   private HeadFinder headFinder;
@@ -61,7 +66,7 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
       headFinder = CorefProperties.getHeadFinder(props);
       //System.out.println("got head finder");
       md = getMentionFinder(props, headFinder);
-      log.info("Using mention detector type: "+mdName);
+      log.info("Using mention detector type: " + mdName);
       mentionAnnotatorRequirements.addAll(Arrays.asList(
           CoreAnnotations.TokensAnnotation.class,
           CoreAnnotations.SentencesAnnotation.class,
@@ -107,12 +112,21 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
       annotation.get(CorefCoreAnnotations.CorefMentionsAnnotation.class).addAll(mentionsForThisSentence);
       // increment to next list of mentions
       currIndex++;
-      // assign latest mentionID
+      // assign latest mentionID, annotate tokens with coref mention info
       for (Mention m : mentionsForThisSentence) {
         m.mentionID = mentionIndex;
+        // go through all the tokens corresponding to this coref mention
+        // annotate them with the index into the document wide coref mention list
+        for (int corefMentionTokenIndex = m.startIndex ; corefMentionTokenIndex < m.endIndex ;
+            corefMentionTokenIndex++) {
+          CoreLabel currToken =
+              sentence.get(CoreAnnotations.TokensAnnotation.class).get(corefMentionTokenIndex);
+          currToken.set(CorefCoreAnnotations.CorefMentionIndexAnnotation.class, mentionIndex);
+        }
         mentionIndex++;
       }
     }
+
   }
 
   private CorefMentionFinder getMentionFinder(Properties props, HeadFinder headFinder)
