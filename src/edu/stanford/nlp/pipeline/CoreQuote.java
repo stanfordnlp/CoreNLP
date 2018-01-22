@@ -19,9 +19,11 @@ public class CoreQuote {
   // optional speaker info...note there may not be an entity mention corresponding to the speaker
   public boolean hasSpeaker;
   private Optional<String> speaker;
+  private Optional<String> canonicalSpeaker;
   private Optional<List<CoreLabel>> speakerTokens;
   private Optional<Pair<Integer,Integer>> speakerCharOffsets;
   private Optional<CoreEntityMention> speakerEntityMention;
+  private Optional<CoreEntityMention> canonicalSpeakerEntityMention;
 
   public CoreQuote(CoreDocument myDocument, CoreMap coreMapQuote) {
     this.document = myDocument;
@@ -35,7 +37,11 @@ public class CoreQuote {
     }
     // set up the speaker info
     this.speaker = this.quoteCoreMap.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null ?
-        Optional.of(this.quoteCoreMap.get(QuoteAttributionAnnotator.SpeakerAnnotation.class)) : Optional.empty() ;
+        Optional.of(this.quoteCoreMap.get(QuoteAttributionAnnotator.SpeakerAnnotation.class)) :
+        Optional.empty() ;
+    this.canonicalSpeaker = this.quoteCoreMap.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null ?
+        Optional.of(this.quoteCoreMap.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class)) :
+        Optional.empty() ;
     Integer firstSpeakerTokenIndex = quoteCoreMap.get(QuoteAttributionAnnotator.MentionBeginAnnotation.class);
     Integer lastSpeakerTokenIndex = quoteCoreMap.get(QuoteAttributionAnnotator.MentionEndAnnotation.class);
     this.speakerTokens = Optional.empty();
@@ -89,6 +95,9 @@ public class CoreQuote {
   public Optional<String> speaker() {
     return this.speaker;
   }
+
+  /** retrieve the text of the canonical speaker **/
+  public Optional<String> canonicalSpeaker() { return this.canonicalSpeaker; }
 
   /** retrieve the tokens of the speaker **/
   public Optional<List<CoreLabel>> speakerTokens() {

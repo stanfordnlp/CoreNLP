@@ -38,7 +38,7 @@ public class CoreDocument {
         buildDocumentEntityMentionsList();
     }
     // if there are quotes, build a document wide list
-    if (this.annotationDocument.get(CoreAnnotations.QuotationsAnnotation.class) != null)
+    if (QuoteAnnotator.gatherQuotes(this.annotationDocument) != null)
       buildDocumentQuotesList();
   }
 
