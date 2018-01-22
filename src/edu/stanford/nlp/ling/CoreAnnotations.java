@@ -1165,6 +1165,24 @@ public class CoreAnnotations {
     }
   }
 
+  /** index into the list of entity mentions in a document **/
+  public static class EntityMentionIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return ErasureUtils.uncheckedCast(Integer.class);
+    }
+  }
+
+  /** index into the list of entity mentions in a document for canonical entity mention
+   *  ...this is primarily for linking entity mentions to their canonical entity mention
+   */
+  public static class CanonicalEntityMentionIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return ErasureUtils.uncheckedCast(Integer.class);
+    }
+  }
+
   public static class EntityTypeAnnotation implements CoreAnnotation<String> {
     @Override
     public Class<String> getType() {

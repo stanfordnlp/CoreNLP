@@ -106,4 +106,14 @@ public class CorefCoreAnnotations {
     }
   }
 
+  /**
+   * index into the document wide list of coref mentions
+   */
+  public static class CorefMentionIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return ErasureUtils.uncheckedCast(Integer.class);
+    }
+  }
+
 }
