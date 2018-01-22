@@ -3,10 +3,9 @@ package edu.stanford.nlp.time;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.util.*;
-
+import java.util.*;
 import junit.framework.TestCase;
 
-import java.util.*;
 
 public class HeidelTimeKBPAnnotatorITest extends TestCase {
 
