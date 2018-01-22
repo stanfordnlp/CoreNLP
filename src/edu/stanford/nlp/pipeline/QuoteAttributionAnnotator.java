@@ -1,8 +1,10 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.*;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.paragraphs.ParagraphAnnotator;
 import edu.stanford.nlp.quoteattribution.ChapterAnnotator;
 import edu.stanford.nlp.quoteattribution.Person;
@@ -99,6 +101,27 @@ public class QuoteAttributionAnnotator implements Annotator {
     public Class<String> getType() { return String.class; }
   }
 
+  public static class CanonicalMentionAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class CanonicalMentionBeginAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+  public static class CanonicalMentionEndAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
   private static Redwood.RedwoodChannels log = Redwood.channels(QuoteAttributionAnnotator.class);
 
   // settings
@@ -114,6 +137,7 @@ public class QuoteAttributionAnnotator implements Annotator {
   public static String MODEL_PATH = "edu/stanford/nlp/models/quoteattribution/quoteattribution_model.ser";
   public static String CHARACTERS_FILE = "";
   public boolean buildCharacterMapPerAnnotation = false;
+  public boolean useCoref = true;
 
   public static final Boolean VERBOSE = true;
 
@@ -156,6 +180,8 @@ public class QuoteAttributionAnnotator implements Annotator {
     } else {
       buildCharacterMapPerAnnotation = true;
     }
+    // use Stanford CoreNLP coref to map mentions to canonical mentions
+    useCoref = PropertiesUtils.getBool(props, "useCoref", useCoref);
     if (VERBOSE) {
       timer.stop("done.");
     }
@@ -214,6 +240,42 @@ public class QuoteAttributionAnnotator implements Annotator {
     for(String sieveName : msSieveList.split(",")) {
       msSieves.get(sieveName).doMentionToSpeaker(preprocessed);
     }
+
+    // see if any speaker's could be matched to a canonical entity mention
+    for (CoreMap quote : QuoteAnnotator.gatherQuotes(annotation)) {
+      Integer firstSpeakerTokenIndex = quote.get(MentionBeginAnnotation.class);
+      if (firstSpeakerTokenIndex != null) {
+        CoreLabel firstSpeakerToken =
+            annotation.get(CoreAnnotations.TokensAnnotation.class).get(firstSpeakerTokenIndex);
+        Integer entityMentionIndex = firstSpeakerToken.get(
+            CoreAnnotations.EntityMentionIndexAnnotation.class);
+        if (entityMentionIndex != null) {
+          // set speaker string
+          CoreMap entityMention =
+              annotation.get(CoreAnnotations.MentionsAnnotation.class).get(entityMentionIndex);
+          Integer canonicalEntityMentionIndex =
+              entityMention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class);
+          if (canonicalEntityMentionIndex != null) {
+            CoreMap canonicalEntityMention =
+                annotation.get(CoreAnnotations.MentionsAnnotation.class).get(canonicalEntityMentionIndex);
+            // add canonical entity mention info to quote
+            quote.set(CanonicalMentionAnnotation.class,
+                canonicalEntityMention.get(CoreAnnotations.TextAnnotation.class));
+            // set first and last tokens of canonical entity mention
+            List<CoreLabel> canonicalEntityMentionTokens =
+                canonicalEntityMention.get(CoreAnnotations.TokensAnnotation.class);
+            CoreLabel canonicalEntityMentionFirstToken =
+                canonicalEntityMentionTokens.get(0);
+            CoreLabel canonicalEntityMentionLastToken =
+                canonicalEntityMentionTokens.get(canonicalEntityMentionTokens.size() - 1);
+            quote.set(CanonicalMentionBeginAnnotation.class,
+                canonicalEntityMentionFirstToken.get(CoreAnnotations.TokenBeginAnnotation.class));
+            quote.set(CanonicalMentionEndAnnotation.class,
+                canonicalEntityMentionLastToken.get(CoreAnnotations.TokenBeginAnnotation.class) + 1);
+          }
+        }
+      }
+    }
   }
 
   private Map<String, QMSieve> getQMMapping(Annotation doc, Map<Integer, String> pronounCorefMap) {
@@ -242,12 +304,17 @@ public class QuoteAttributionAnnotator implements Annotator {
     return map;
   }
 
+
+
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     return new HashSet<>(Arrays.asList(
       MentionAnnotation.class,
       MentionBeginAnnotation.class,
       MentionEndAnnotation.class,
+      CanonicalMentionAnnotation.class,
+      CanonicalMentionBeginAnnotation.class,
+      CanonicalMentionEndAnnotation.class,
       MentionTypeAnnotation.class,
       MentionSieveAnnotation.class,
       SpeakerAnnotation.class,
@@ -258,7 +325,7 @@ public class QuoteAttributionAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return new HashSet<>(Arrays.asList(
+    Set<Class<? extends CoreAnnotation>> quoteAttributionRequirements = new HashSet<>(Arrays.asList(
         CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
@@ -273,9 +340,11 @@ public class QuoteAttributionAnnotator implements Annotator {
         CoreAnnotations.TokenBeginAnnotation.class,
         CoreAnnotations.TokenEndAnnotation.class,
         CoreAnnotations.IndexAnnotation.class,
-        CoreAnnotations.OriginalTextAnnotation.class,
-        CorefCoreAnnotations.CorefChainAnnotation.class
+        CoreAnnotations.OriginalTextAnnotation.class
     ));
+    if (useCoref)
+      quoteAttributionRequirements.add(CorefCoreAnnotations.CorefChainAnnotation.class);
+    return quoteAttributionRequirements;
   }
 
 }
