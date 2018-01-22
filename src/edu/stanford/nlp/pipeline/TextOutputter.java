@@ -254,12 +254,18 @@ public class TextOutputter extends AnnotationOutputter {
       pw.println("Extracted quotes: ");
       List<CoreMap> allQuotes = QuoteAnnotator.gatherQuotes(annotation);
       for (CoreMap quote : allQuotes) {
-        String speaker = quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null ?
-            quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) : "Unknown" ;
+        String speakerString;
+        if (quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null) {
+          speakerString = quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class);
+        } else if (quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null) {
+          speakerString = quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class);
+        } else {
+          speakerString = "Unknown";
+        }
         pw.printf("[QuotationIndexAnnotation=%d, CharacterOffsetBegin=%d, Text=%s, Speaker=%s]%n",
             quote.get(CoreAnnotations.QuotationIndexAnnotation.class),
             quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-            quote.get(CoreAnnotations.TextAnnotation.class), speaker
+            quote.get(CoreAnnotations.TextAnnotation.class), speakerString
             );
 
       }

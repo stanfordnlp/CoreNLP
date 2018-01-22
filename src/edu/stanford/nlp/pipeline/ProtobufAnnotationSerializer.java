@@ -367,6 +367,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // French tokens potentially have ParentAnnotation
     if (keySet.contains(ParentAnnotation.class)) { builder.setParent(getAndRegister(coreLabel, keysToSerialize, ParentAnnotation.class)); }
 
+    // indexes into document wide mention lists
+    if (keySet.contains(EntityMentionIndexAnnotation.class)) {
+      builder.setEntityMentionIndex(getAndRegister(coreLabel, keysToSerialize, EntityMentionIndexAnnotation.class)); }
+    if (keySet.contains(CorefMentionIndexAnnotation.class)) {
+      builder.setEntityMentionIndex(getAndRegister(coreLabel, keysToSerialize, CorefMentionIndexAnnotation.class)); }
+
     // Return
     return builder;
   }
@@ -1184,6 +1190,38 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.get(TokenEndAnnotation.class) != null) { builder.setTokenEnd(quote.get(TokenEndAnnotation.class)); }
     if (quote.get(QuotationIndexAnnotation.class) != null) { builder.setIndex(quote.get(QuotationIndexAnnotation.class)); }
     if (quote.get(AuthorAnnotation.class) != null) { builder.setAuthor(quote.get(AuthorAnnotation.class)); }
+    // quote attribution info
+    if (quote.get(QuoteAttributionAnnotator.MentionAnnotation.class) != null) {
+      builder.setMention(quote.get(QuoteAttributionAnnotator.MentionAnnotation.class));
+    }
+    if (quote.get(QuoteAttributionAnnotator.MentionBeginAnnotation.class) != null) {
+      builder.setMentionBegin(quote.get(QuoteAttributionAnnotator.MentionBeginAnnotation.class));
+    }
+    if (quote.get(QuoteAttributionAnnotator.MentionEndAnnotation.class) != null) {
+      builder.setMentionEnd(quote.get(QuoteAttributionAnnotator.MentionEndAnnotation.class));
+    }
+    if (quote.get(QuoteAttributionAnnotator.MentionTypeAnnotation.class) != null) {
+      builder.setMentionType(quote.get(QuoteAttributionAnnotator.MentionTypeAnnotation.class));
+    }
+    if (quote.get(QuoteAttributionAnnotator.MentionSieveAnnotation.class) != null) {
+      builder.setMentionSieve(quote.get(QuoteAttributionAnnotator.MentionSieveAnnotation.class));
+    }
+    if (quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null) {
+      builder.setSpeaker(quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class));
+    }
+    if (quote.get(QuoteAttributionAnnotator.SpeakerSieveAnnotation.class) != null) {
+      builder.setSpeakerSieve(quote.get(QuoteAttributionAnnotator.SpeakerSieveAnnotation.class));
+    }
+    if (quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null) {
+      builder.setCanonicalMention(quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class));
+    }
+    if (quote.get(QuoteAttributionAnnotator.CanonicalMentionBeginAnnotation.class) != null) {
+      builder.setCanonicalMentionBegin(quote.get(QuoteAttributionAnnotator.CanonicalMentionBeginAnnotation.class));
+    }
+    if (quote.get(QuoteAttributionAnnotator.CanonicalMentionEndAnnotation.class) != null) {
+      builder.setCanonicalMentionEnd(quote.get(QuoteAttributionAnnotator.CanonicalMentionEndAnnotation.class));
+    }
+
     return builder.build();
   }
 
@@ -1201,6 +1239,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (mention.get(TimexAnnotation.class) != null) { builder.setTimex(toProto(mention.get(TimexAnnotation.class))); }
     if (mention.get(WikipediaEntityAnnotation.class) != null) { builder.setWikipediaEntity(mention.get(WikipediaEntityAnnotation.class)); }
     if (mention.get(CoreAnnotations.GenderAnnotation.class) != null) { builder.setGender(mention.get(CoreAnnotations.GenderAnnotation.class)); }
+    if (mention.get(CoreAnnotations.EntityMentionIndexAnnotation.class) != null) { builder.setEntityMentionIndex(mention.get(CoreAnnotations.EntityMentionIndexAnnotation.class)); }
+    if (mention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class) != null) { builder.setEntityMentionIndex(mention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class)); }
     return builder.build();
   }
 
@@ -1285,6 +1325,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // get parents for French tokens
     if (proto.hasParent()) {
       word.set(ParentAnnotation.class, proto.getParent());
+    }
+
+    // mention info
+    if (proto.hasEntityMentionIndex()) {
+      word.set(EntityMentionIndexAnnotation.class, proto.getEntityMentionIndex());
+    }
+    if (proto.hasCorefMentionIndex()) {
+      word.set(CorefMentionIndexAnnotation.class, proto.getCorefMentionIndex());
     }
 
     // Return
@@ -2356,6 +2404,40 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.hasTokenBegin()) { ann.set(TokenBeginAnnotation.class, quote.getTokenBegin()); }
     if (quote.hasTokenEnd()) { ann.set(TokenEndAnnotation.class, quote.getTokenEnd()); }
     if (quote.hasAuthor()) { ann.set(AuthorAnnotation.class, quote.getAuthor()); }
+
+    // quote attribution stuff
+    if (quote.hasMention()) {
+      ann.set(QuoteAttributionAnnotator.MentionAnnotation.class, quote.getMention());
+    }
+
+    if (quote.hasMentionBegin()) {
+      ann.set(QuoteAttributionAnnotator.MentionBeginAnnotation.class, quote.getMentionBegin());
+    }
+    if (quote.hasMentionEnd()) {
+      ann.set(QuoteAttributionAnnotator.MentionEndAnnotation.class, quote.getMentionEnd());
+    }
+    if (quote.hasMentionType()) {
+      ann.set(QuoteAttributionAnnotator.MentionTypeAnnotation.class, quote.getMentionType());
+    }
+    if (quote.hasMentionSieve()) {
+      ann.set(QuoteAttributionAnnotator.MentionSieveAnnotation.class, quote.getMentionSieve());
+    }
+    if (quote.hasSpeaker()) {
+      ann.set(QuoteAttributionAnnotator.SpeakerAnnotation.class, quote.getSpeaker());
+    }
+    if (quote.hasSpeakerSieve()) {
+      ann.set(QuoteAttributionAnnotator.SpeakerSieveAnnotation.class, quote.getSpeakerSieve());
+    }
+    if (quote.hasCanonicalMention()) {
+      ann.set(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class, quote.getCanonicalMention());
+    }
+    if (quote.hasCanonicalMentionBegin()) {
+      ann.set(QuoteAttributionAnnotator.CanonicalMentionBeginAnnotation.class, quote.getCanonicalMentionBegin());
+    }
+    if (quote.hasCanonicalMentionEnd()) {
+      ann.set(QuoteAttributionAnnotator.CanonicalMentionEndAnnotation.class, quote.getCanonicalMentionEnd());
+    }
+
     return ann;
   }
 
@@ -2374,7 +2456,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (mention.hasTimex()) map.set(TimexAnnotation.class, fromProto(mention.getTimex()));
     if (mention.hasWikipediaEntity()) map.set(WikipediaEntityAnnotation.class, mention.getWikipediaEntity());
     if (mention.hasGender()) map.set(CoreAnnotations.GenderAnnotation.class, mention.getGender());
-
+    if (mention.hasEntityMentionIndex())
+      map.set(CoreAnnotations.EntityMentionIndexAnnotation.class, mention.getEntityMentionIndex());
+    if (mention.hasCanonicalEntityMentionIndex())
+      map.set(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class, mention.getCanonicalEntityMentionIndex());
     return map;
   }
 
