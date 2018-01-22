@@ -176,6 +176,7 @@ public class EntityMentionsAnnotator implements Annotator {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
     int sentenceIndex = 0;
+    int mentionIndex = 0;
     for (CoreMap sentence : sentences) {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       Integer annoTokenBegin = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
@@ -192,6 +193,12 @@ public class EntityMentionsAnnotator implements Annotator {
       if (mentions != null) {
         for (CoreMap mention : mentions) {
           List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
+          // go through each token in the mention and mark the entity mention index
+          // in the document wide list
+          for (CoreLabel mentionToken : mentionTokens) {
+            mentionToken.set(CoreAnnotations.EntityMentionIndexAnnotation.class, mentionIndex);
+          }
+          mention.set(CoreAnnotations.EntityMentionIndexAnnotation.class, mentionIndex);
           String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
                   nerNormalizedCoreAnnotationClass, mentionTokens);
           if (name == null) {
@@ -223,6 +230,8 @@ public class EntityMentionsAnnotator implements Annotator {
               }
             }
           }
+          // increment to the next entity mention
+          mentionIndex++;
         }
       }
       if (mentions != null) {
