@@ -67,14 +67,12 @@ import java.util.regex.Pattern;
  *  <li>SentenceEndAnnotation (if the sentence splitter has bee run before the quote annotator)</li>
  * </ul>
  *
- *
- *
  * @author Grace Muzny
  */
 public class QuoteAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(QuoteAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(QuoteAnnotator.class);
 
   private final boolean VERBOSE;
   private final boolean DEBUG = false;
@@ -271,7 +269,7 @@ public class QuoteAnnotator implements Annotator  {
   }
 
   //TODO: update this so that it goes more than 1 layer deep
-  private int countQuotes(List<CoreMap> quotes) {
+  private static int countQuotes(List<CoreMap> quotes) {
     int total = quotes.size();
     for (CoreMap quote : quotes) {
       List<CoreMap> innerQuotes = quote.get(CoreAnnotations.QuotationsAnnotation.class);
@@ -529,7 +527,7 @@ public class QuoteAnnotator implements Annotator  {
         if (!quotesMap.containsKey(quote)) {
           quotesMap.put(quote, new ArrayList<>());
         }
-        quotesMap.get(quote).add(new Pair(start, end));
+        quotesMap.get(quote).add(new Pair<>(start, end));
         start = -1;
         end = -1;
         quote = null;
@@ -570,19 +568,19 @@ public class QuoteAnnotator implements Annotator  {
     // really this test should be whether or not start is mapped to in quotesMap
     if (!isAQuoteMapStarter(start, quotesMap) && start >= 0 && start < text.length() - 3) {
       if (EXTRACT_UNCLOSED) {
-        unclosedQuotes.add(new Pair(start, text.length()));
+        unclosedQuotes.add(new Pair<>(start, text.length()));
       }
       String toPass = text.substring(start + quote.length(), text.length());
       Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> embedded = recursiveQuotes(toPass, offset, null);
       // these are the good quotes
       for (Pair<Integer, Integer> e : embedded.first()) {
-        quotes.add(new Pair(e.first() + start + quote.length(),
+        quotes.add(new Pair<>(e.first() + start + quote.length(),
             e.second() + start + 1));
       }
       if (EXTRACT_UNCLOSED) {
         // these are the unclosed quotes
         for (Pair<Integer, Integer> e : embedded.second()) {
-          unclosedQuotes.add(new Pair(e.first() + start + quote.length(),
+          unclosedQuotes.add(new Pair<>(e.first() + start + quote.length(),
               e.second() + start + 1));
         }
       }
@@ -606,25 +604,25 @@ public class QuoteAnnotator implements Annotator  {
             // don't add offset here because the
             // recursive method already added it
             if (e.second() - e.first() > 2) {
-              quotes.add(new Pair(e.first(), e.second()));
+              quotes.add(new Pair<>(e.first(), e.second()));
             }
           }
           // unclosed quotes
           if (EXTRACT_UNCLOSED) {
             // these are the unclosed quotes
             for (Pair<Integer, Integer> e : embedded.second()) {
-              unclosedQuotes.add(new Pair(e.first(), e.second()));
+              unclosedQuotes.add(new Pair<>(e.first(), e.second()));
             }
           }
         }
-        quotes.add(new Pair(q.first() + offset, q.second() + offset));
+        quotes.add(new Pair<>(q.first() + offset, q.second() + offset));
       }
     }
 
-    return new Pair(quotes, unclosedQuotes);
+    return new Pair<>(quotes, unclosedQuotes);
   }
 
-  private boolean isAQuoteMapStarter(int target, Map<String, List<Pair<Integer, Integer>>> quotesMap) {
+  private static boolean isAQuoteMapStarter(int target, Map<String, List<Pair<Integer, Integer>>> quotesMap) {
     for (String k : quotesMap.keySet()) {
       for (Pair<Integer, Integer> pair : quotesMap.get(k)) {
         if (pair.first() == target) {
