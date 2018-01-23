@@ -156,11 +156,16 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
     List<Mention> documentCorefMentions =
         annotation.get(CorefCoreAnnotations.CorefMentionsAnnotation.class);
     for (CoreMap entityMention : annotation.get(CoreAnnotations.MentionsAnnotation.class)) {
-      Mention cm = documentCorefMentions.get(
-          entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0).get(
-              CorefCoreAnnotations.CorefMentionIndexAnnotation.class));
-      CorefChain cmCorefChain = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).get(
-          cm.corefClusterID);
+      // attempt to get a corresponding coref mention, might be null in some cases (for instance "now")
+      Integer cmIndex = entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0).
+          get(CorefCoreAnnotations.CorefMentionIndexAnnotation.class);
+      Mention cm = null;
+      CorefChain cmCorefChain = null;
+      if (cmIndex != null) {
+        cm = documentCorefMentions.get(cmIndex);
+        cmCorefChain = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).get(
+            cm.corefClusterID);
+      }
       // check for entity mention coref mention match
       if (cm != null && cmCorefChain != null && entityMentionCorefMentionMatch(annotation, entityMention, cm)) {
         // get representative mention
