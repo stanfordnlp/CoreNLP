@@ -117,6 +117,7 @@ message Sentence {
 
   optional bool            hasEntityMentionsAnnotation         = 65;  // check if there are entity mentions
   optional bool            hasKBPTriplesAnnotation             = 68;  // check if there are KBP triples
+  optional bool            hasOpenieTriplesAnnotation          = 69;  // check if there are OpenIE triples
 
   // quote stuff
   optional uint32             chapterIndex                     = 66;
