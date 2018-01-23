@@ -116,6 +116,7 @@ message Sentence {
   optional bool            sectionQuoted                       = 64;  // is this sentence in an xml quote in a post
 
   optional bool            hasEntityMentionsAnnotation         = 65;  // check if there are entity mentions
+  optional bool            hasKBPTriplesAnnotation             = 68;  // check if there are KBP triples
 
   // quote stuff
   optional uint32             chapterIndex                     = 66;
