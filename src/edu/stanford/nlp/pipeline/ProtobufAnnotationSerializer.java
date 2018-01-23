@@ -149,6 +149,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @see ProtobufAnnotationSerializer#ProtobufAnnotationSerializer(boolean)
    */
   public static class LossySerializationException extends RuntimeException {
+    private static final long serialVersionUID = 741506383659886245L;
+
     private LossySerializationException(String msg) { super(msg); }
   }
 
@@ -385,7 +387,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   @SuppressWarnings("unchecked")
   public CoreNLPProtos.Sentence.Builder toProtoBuilder(CoreMap sentence) {
-    return toProtoBuilder(sentence, Collections.EMPTY_SET);
+    return toProtoBuilder(sentence, Collections.emptySet());
   }
 
   /**
@@ -581,7 +583,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   @SuppressWarnings("unchecked")
   public CoreNLPProtos.Document.Builder toProtoBuilder(Annotation doc) {
-    return toProtoBuilder(doc, Collections.EMPTY_SET);
+    return toProtoBuilder(doc, Collections.emptySet());
   }
 
   /**
@@ -706,7 +708,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     Integer sentiment;
     if (parseTree.label() instanceof CoreMap && (sentiment = ((CoreMap) parseTree.label()).get(RNNCoreAnnotations.PredictedClass.class)) != null) {
-      builder.setSentiment(CoreNLPProtos.Sentiment.valueOf(sentiment));
+      builder.setSentiment(CoreNLPProtos.Sentiment.forNumber(sentiment));
     }
     // Return
     return builder.build();
@@ -1082,13 +1084,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   public static CoreNLPProtos.Polarity toProto(Polarity pol) {
     return CoreNLPProtos.Polarity.newBuilder()
-        .setProjectEquivalence(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT).fixedIndex))
-        .setProjectForwardEntailment(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT).fixedIndex))
-        .setProjectReverseEntailment(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT).fixedIndex))
-        .setProjectNegation(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.NEGATION).fixedIndex))
-        .setProjectAlternation(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.ALTERNATION).fixedIndex))
-        .setProjectCover(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.COVER).fixedIndex))
-        .setProjectIndependence(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.INDEPENDENCE).fixedIndex))
+        .setProjectEquivalence(CoreNLPProtos.NaturalLogicRelation.forNumber(pol.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT).fixedIndex))
+        .setProjectForwardEntailment(CoreNLPProtos.NaturalLogicRelation.forNumber(pol.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT).fixedIndex))
+        .setProjectReverseEntailment(CoreNLPProtos.NaturalLogicRelation.forNumber(pol.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT).fixedIndex))
+        .setProjectNegation(CoreNLPProtos.NaturalLogicRelation.forNumber(pol.projectLexicalRelation(NaturalLogicRelation.NEGATION).fixedIndex))
+        .setProjectAlternation(CoreNLPProtos.NaturalLogicRelation.forNumber(pol.projectLexicalRelation(NaturalLogicRelation.ALTERNATION).fixedIndex))
+        .setProjectCover(CoreNLPProtos.NaturalLogicRelation.forNumber(pol.projectLexicalRelation(NaturalLogicRelation.COVER).fixedIndex))
+        .setProjectIndependence(CoreNLPProtos.NaturalLogicRelation.forNumber(pol.projectLexicalRelation(NaturalLogicRelation.INDEPENDENCE).fixedIndex))
         .build();
   }
 
@@ -2542,4 +2544,5 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     return text.toString();
   }
+
 }
