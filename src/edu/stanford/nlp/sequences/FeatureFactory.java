@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sequences;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.io.Serializable;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -45,10 +46,27 @@ public abstract class FeatureFactory<IN> implements Serializable {
   public static final Clique cliqueCnC = Clique.valueOf(new int[] {0, 1});
   public static final Clique cliqueCpCnC = Clique.valueOf(new int[] {-1, 0, 1});
 
+  // Note: there is code that relies on no clique like {+1,+2}.
+  // We use the -leftmost value to group features.
   public static final List<Clique> knownCliques = Arrays.asList(cliqueC, cliqueCpC, cliqueCp2C, cliqueCp3C, cliqueCp4C, cliqueCp5C, cliqueCpCp2C, cliqueCpCp2Cp3C, cliqueCpCp2Cp3Cp4C, cliqueCpCp2Cp3Cp4Cp5C, cliqueCnC, cliqueCpCnC);
 
   public List<Clique> getCliques() {
     return getCliques(flags.maxLeft, flags.maxRight);
+  }
+
+  /**
+   * Process cliques requiring exactly "left" lookbehind and exactly "right" lookahead.
+   *
+   * @param left Left window size
+   * @param right Right window size
+   * @param consumer Clique consumer
+   */
+  public static void eachClique(int left, int right, Consumer<Clique> consumer) {
+    for (Clique c : knownCliques) {
+      if (-c.maxLeft() == left && c.maxRight() == right) {
+        consumer.accept(c);
+      }
+    }
   }
 
   public static List<Clique> getCliques(int maxLeft, int maxRight) {
