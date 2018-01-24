@@ -371,7 +371,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(EntityMentionIndexAnnotation.class)) {
       builder.setEntityMentionIndex(getAndRegister(coreLabel, keysToSerialize, EntityMentionIndexAnnotation.class)); }
     if (keySet.contains(CorefMentionIndexAnnotation.class)) {
-      builder.setEntityMentionIndex(getAndRegister(coreLabel, keysToSerialize, CorefMentionIndexAnnotation.class)); }
+      builder.setCorefMentionIndex(getAndRegister(coreLabel, keysToSerialize, CorefMentionIndexAnnotation.class)); }
 
     // Return
     return builder;
@@ -484,11 +484,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
     }
     if (keySet.contains(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
+      builder.setHasOpenieTriplesAnnotation(true);
       for (RelationTriple triple : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
         builder.addOpenieTriple(toProto(triple));
       }
     }
     if (keySet.contains(KBPTriplesAnnotation.class)) {
+      // mark that this sentence has kbp triples, potentially empty list
+      builder.setHasKBPTriplesAnnotation(true);
+      // store each of the kbp triples
       for (RelationTriple triple : getAndRegister(sentence, keysToSerialize, KBPTriplesAnnotation.class)) {
         builder.addKbpTriple(toProto(triple));
       }
@@ -1240,7 +1244,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (mention.get(WikipediaEntityAnnotation.class) != null) { builder.setWikipediaEntity(mention.get(WikipediaEntityAnnotation.class)); }
     if (mention.get(CoreAnnotations.GenderAnnotation.class) != null) { builder.setGender(mention.get(CoreAnnotations.GenderAnnotation.class)); }
     if (mention.get(CoreAnnotations.EntityMentionIndexAnnotation.class) != null) { builder.setEntityMentionIndex(mention.get(CoreAnnotations.EntityMentionIndexAnnotation.class)); }
-    if (mention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class) != null) { builder.setEntityMentionIndex(mention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class)); }
+    if (mention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class) != null) { builder.setCanonicalEntityMentionIndex(mention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class)); }
     return builder.build();
   }
 
@@ -1664,8 +1668,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           entityMention.set(CharacterOffsetBeginAnnotation.class, emCharOffsetBegin);
           entityMention.set(CharacterOffsetEndAnnotation.class, emCharOffsetEnd);
           entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
-          String entityMentionText =
-              entityMentionTokens.stream().map(CoreLabel::word).collect(Collectors.joining(" "));
+          // set entity mention text based off of character offsets
+          String entityMentionText = ann.get(TextAnnotation.class).substring(emCharOffsetBegin, emCharOffsetEnd);
           entityMention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
         }
         if (sentence.getHasEntityMentionsAnnotation())
@@ -1749,12 +1753,22 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         map.set(NaturalLogicAnnotations.EntailedClausesAnnotation.class, entailedClauses);
       }
       // Set relation triples
+      ArrayList<RelationTriple> triples = new ArrayList<>();
+      if (sentence.getHasOpenieTriplesAnnotation())
+        map.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
       if (sentence.getOpenieTripleCount() > 0) {
-        List<RelationTriple> triples = new ArrayList<>();
         for (CoreNLPProtos.RelationTriple triple : sentence.getOpenieTripleList()) {
           triples.add(fromProto(triple, ann, sentenceIndex));
         }
         map.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
+      }
+      // Set kbp relation triples
+      if (sentence.getHasKBPTriplesAnnotation())
+        map.set(KBPTriplesAnnotation.class, new ArrayList<>());
+      if (sentence.getKbpTripleCount() > 0) {
+        for (CoreNLPProtos.RelationTriple kbpTriple : sentence.getKbpTripleList()) {
+          map.get(KBPTriplesAnnotation.class).add(fromProto(kbpTriple, ann, sentenceIndex));
+        }
       }
       // Redo some light annotation
       if ( map.containsKey(TokensAnnotation.class) &&
@@ -1833,6 +1847,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     List<CoreMap> quotes = proto.getQuoteList().stream().map(quote -> fromProto(quote, tokens)).collect(Collectors.toList());
     if (!quotes.isEmpty()) {
       ann.set(QuotationsAnnotation.class, quotes);
+      // add the tokens to the quote tokens list
+      for (CoreMap quote : quotes) {
+        List<CoreLabel> quoteTokens = new ArrayList<>();
+        for (int quoteTokenIndex = quote.get(CoreAnnotations.TokenBeginAnnotation.class) ;
+             quoteTokenIndex <= quote.get(CoreAnnotations.TokenEndAnnotation.class) ; quoteTokenIndex++) {
+          quoteTokens.add(ann.get(CoreAnnotations.TokensAnnotation.class).get(quoteTokenIndex));
+        }
+      }
     }
 
     // Set NERmention
@@ -2446,7 +2468,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   @SuppressWarnings("UnusedParameters")
   private CoreMap fromProto(CoreNLPProtos.NERMention mention) {
-    CoreMap map = new ArrayCoreMap(10);
+    CoreMap map = new ArrayCoreMap(12);
     if (mention.hasSentenceIndex()) map.set(SentenceIndexAnnotation.class, mention.getSentenceIndex());
     if (mention.hasTokenStartInSentenceInclusive()) map.set(TokenBeginAnnotation.class, mention.getTokenStartInSentenceInclusive());
     if (mention.hasTokenEndInSentenceExclusive()) map.set(TokenEndAnnotation.class, mention.getTokenEndInSentenceExclusive());
