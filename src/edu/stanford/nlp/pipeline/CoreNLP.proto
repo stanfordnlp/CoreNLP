@@ -241,6 +241,7 @@ message Quote {
   optional string canonicalMention = 19;
   optional uint32 canonicalMentionBegin = 20;
   optional uint32 canonicalMentionEnd = 21;
+  optional DependencyGraph attributionDependencyGraph = 22;
 }
 
 //
