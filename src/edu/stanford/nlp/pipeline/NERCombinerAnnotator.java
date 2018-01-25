@@ -216,6 +216,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       String entityMentionsPrefix = "ner.entitymentions";
       Properties entityMentionsProps =
           PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".", true);
+      // pass language info to the entity mention annotator
+      entityMentionsProps.setProperty("ner.entitymentions.language", language.name());
       entityMentionsAnnotator = new EntityMentionsAnnotator(entityMentionsPrefix, entityMentionsProps);
     }
   }
@@ -409,6 +411,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (this.buildEntityMentions) {
       nerRequirementsSatisfied.add(CoreAnnotations.MentionsAnnotation.class);
       nerRequirementsSatisfied.add(CoreAnnotations.EntityTypeAnnotation.class);
+      nerRequirementsSatisfied.add(CoreAnnotations.EntityMentionIndexAnnotation.class);
     }
     return nerRequirementsSatisfied;
   }

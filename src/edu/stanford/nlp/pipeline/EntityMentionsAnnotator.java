@@ -47,6 +47,8 @@ public class EntityMentionsAnnotator implements Annotator {
    */
   private final boolean doAcronyms;
 
+  private LanguageInfo.HumanLanguage entityMentionsLanguage;
+
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
@@ -92,6 +94,8 @@ public class EntityMentionsAnnotator implements Annotator {
     }
     chunkIdentifier = new LabeledChunkIdentifier();
     doAcronyms = Boolean.parseBoolean(props.getProperty(name + ".acronyms", props.getProperty("acronyms", "false")));
+    // set up language info, this is needed for handling creating pronominal mentions
+    entityMentionsLanguage = LanguageInfo.getLanguageFromString(props.getProperty(name+".language", "en"));
   }
 
   private static boolean checkStrings(String s1, String s2) {
@@ -206,6 +210,22 @@ public class EntityMentionsAnnotator implements Annotator {
               annoTokenBegin, null, CoreAnnotations.TextAnnotation.class, null);
           pronoun.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
           pronoun.set(CoreAnnotations.NamedEntityTagAnnotation.class, KBPRelationExtractor.NERTag.PERSON.name);
+          pronoun.set(CoreAnnotations.EntityTypeAnnotation.class, KBPRelationExtractor.NERTag.PERSON.name);
+          // set gender
+          String pronounGender = null;
+          if (pronoun.get(CoreAnnotations.TextAnnotation.class).toLowerCase().equals("she")) {
+            pronounGender = "FEMALE";
+            pronoun.set(CoreAnnotations.GenderAnnotation.class, pronounGender);
+          }
+          else if (pronoun.get(CoreAnnotations.TextAnnotation.class).toLowerCase().equals("he")) {
+            pronounGender = "MALE";
+            pronoun.set(CoreAnnotations.GenderAnnotation.class, pronounGender);
+          }
+          if (pronounGender != null) {
+            for (CoreLabel pronounToken : pronoun.get(CoreAnnotations.TokensAnnotation.class)) {
+              pronounToken.set(CoreAnnotations.GenderAnnotation.class, pronounGender);
+            }
+          }
           sentence.get(CoreAnnotations.MentionsAnnotation.class).add(pronoun);
           pronouns.add(pronoun);
         }
@@ -276,8 +296,9 @@ public class EntityMentionsAnnotator implements Annotator {
     // Post-process with acronyms
     if (doAcronyms) { addAcronyms(annotation); }
 
-    // Post-process add in KBP pronominal mentions
-    annotatePronominalMentions(annotation);
+    // Post-process add in KBP pronominal mentions, (English only for now)
+    if (entityMentionsLanguage.equals(LanguageInfo.HumanLanguage.ENGLISH))
+      annotatePronominalMentions(annotation);
 
     // build document wide entity mentions list
     List<CoreMap> allEntityMentions = new ArrayList<>();
