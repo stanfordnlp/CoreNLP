@@ -691,7 +691,12 @@ public class QuoteAnnotator implements Annotator  {
           CoreAnnotations.TokenBeginAnnotation.class,
           CoreAnnotations.ValueAnnotation.class,
           CoreAnnotations.SentenceIndexAnnotation.class,
-          CorefCoreAnnotations.CorefChainAnnotation.class
+          CorefCoreAnnotations.CorefChainAnnotation.class,
+          CoreAnnotations.MentionsAnnotation.class,
+          CoreAnnotations.EntityMentionIndexAnnotation.class,
+          CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class
+
+
       ));
     } else {
       return Collections.EMPTY_SET;

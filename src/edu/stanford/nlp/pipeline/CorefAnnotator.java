@@ -239,6 +239,8 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
         CoreAnnotations.NamedEntityTagAnnotation.class,
+        CoreAnnotations.MentionsAnnotation.class,
+        CoreAnnotations.EntityMentionIndexAnnotation.class,
         CoreAnnotations.CoarseNamedEntityTagAnnotation.class,
         CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
@@ -255,7 +257,11 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CorefCoreAnnotations.CorefChainAnnotation.class);
+    Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
+        CorefCoreAnnotations.CorefChainAnnotation.class,
+        CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class
+    ));
+    return requirements;
   }
 
 }
