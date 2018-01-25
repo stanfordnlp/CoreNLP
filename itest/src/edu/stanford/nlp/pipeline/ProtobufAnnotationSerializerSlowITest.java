@@ -91,9 +91,8 @@ public class ProtobufAnnotationSerializerSlowITest {
         doc.remove(CoreAnnotations.QuotationsAnnotation.class);
       } else {
         for (CoreMap quote : doc.get(CoreAnnotations.QuotationsAnnotation.class)) {
-          quote.remove(CoreAnnotations.TokensAnnotation.class);
           quote.remove(CoreAnnotations.QuotationsAnnotation.class);
-          quote.remove(CoreAnnotations.QuotationsAnnotation.class);
+          quote.remove(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
         }
       }
     }

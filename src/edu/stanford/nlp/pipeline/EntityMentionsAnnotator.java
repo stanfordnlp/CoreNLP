@@ -3,6 +3,8 @@ package edu.stanford.nlp.pipeline;
 import java.util.*;
 import java.util.function.Predicate;
 
+import edu.stanford.nlp.coref.data.WordLists;
+import edu.stanford.nlp.ie.KBPRelationExtractor;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -170,13 +172,54 @@ public class EntityMentionsAnnotator implements Annotator {
     }).findFirst());
   }
 
+  /**
+   * Returns whether the given token counts as a valid pronominal mention for KBP.
+   * This method (at present) works for either Chinese or English.
+   *
+   * @param word The token to classify.
+   * @return true if this token is a pronoun that KBP should recognize.
+   */
+  private static boolean kbpIsPronominalMention(CoreLabel word) {
+    return WordLists.isKbpPronominalMention(word.word());
+  }
+
+  /**
+   * Annotate all the pronominal mentions in the document.
+   * @param ann The document.
+   * @return The list of pronominal mentions in the document.
+   */
+  private static List<CoreMap> annotatePronominalMentions(Annotation ann) {
+    List<CoreMap> pronouns = new ArrayList<>();
+    List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
+    for (int sentenceIndex = 0; sentenceIndex < sentences.size(); sentenceIndex++) {
+      CoreMap sentence = sentences.get(sentenceIndex);
+      Integer annoTokenBegin = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
+      if (annoTokenBegin == null) {
+        annoTokenBegin = 0;
+      }
+
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      for (int tokenIndex = 0; tokenIndex < tokens.size(); tokenIndex++) {
+        CoreLabel token = tokens.get(tokenIndex);
+        if (kbpIsPronominalMention(token)) {
+          CoreMap pronoun = ChunkAnnotationUtils.getAnnotatedChunk(tokens, tokenIndex, tokenIndex + 1,
+              annoTokenBegin, null, CoreAnnotations.TextAnnotation.class, null);
+          pronoun.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
+          pronoun.set(CoreAnnotations.NamedEntityTagAnnotation.class, KBPRelationExtractor.NERTag.PERSON.name);
+          sentence.get(CoreAnnotations.MentionsAnnotation.class).add(pronoun);
+          pronouns.add(pronoun);
+        }
+      }
+    }
+
+    return pronouns;
+  }
+
   @Override
   public void annotate(Annotation annotation) {
-    List<CoreMap> allMentions = new ArrayList<>();
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
     int sentenceIndex = 0;
-    int mentionIndex = 0;
     for (CoreMap sentence : sentences) {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       Integer annoTokenBegin = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
@@ -193,12 +236,6 @@ public class EntityMentionsAnnotator implements Annotator {
       if (mentions != null) {
         for (CoreMap mention : mentions) {
           List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
-          // go through each token in the mention and mark the entity mention index
-          // in the document wide list
-          for (CoreLabel mentionToken : mentionTokens) {
-            mentionToken.set(CoreAnnotations.EntityMentionIndexAnnotation.class, mentionIndex);
-          }
-          mention.set(CoreAnnotations.EntityMentionIndexAnnotation.class, mentionIndex);
           String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
                   nerNormalizedCoreAnnotationClass, mentionTokens);
           if (name == null) {
@@ -230,29 +267,42 @@ public class EntityMentionsAnnotator implements Annotator {
               }
             }
           }
-          // increment to the next entity mention
-          mentionIndex++;
         }
-      }
-      if (mentions != null) {
-        allMentions.addAll(mentions);
       }
 
       sentenceIndex++;
     }
 
     // Post-process with acronyms
-    if (doAcronyms) {
-      addAcronyms(annotation, allMentions);
-    }
+    if (doAcronyms) { addAcronyms(annotation); }
 
-    annotation.set(mentionsCoreAnnotationClass, allMentions);
+    // Post-process add in KBP pronominal mentions
+    annotatePronominalMentions(annotation);
+
+    // build document wide entity mentions list
+    List<CoreMap> allEntityMentions = new ArrayList<>();
+    int entityMentionIndex = 0;
+    for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+      for (CoreMap entityMention : sentence.get(CoreAnnotations.MentionsAnnotation.class)) {
+        entityMention.set(CoreAnnotations.EntityMentionIndexAnnotation.class, entityMentionIndex);
+        for (CoreLabel entityMentionToken : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {
+          entityMentionToken.set(CoreAnnotations.EntityMentionIndexAnnotation.class, entityMentionIndex);
+        }
+        allEntityMentions.add(entityMention);
+        entityMentionIndex++;
+      }
+    }
+    annotation.set(mentionsCoreAnnotationClass, allEntityMentions);
   }
 
-  private void addAcronyms(Annotation ann, List<CoreMap> mentions) {
+  private void addAcronyms(Annotation ann) {
     // Find all the organizations in a document
+    List<CoreMap> allMentionsSoFar = new ArrayList<CoreMap>();
+    for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+      allMentionsSoFar.addAll(sentence.get(CoreAnnotations.MentionsAnnotation.class));
+    }
     List<List<CoreLabel>> organizations = new ArrayList<>();
-    for (CoreMap mention : mentions) {
+    for (CoreMap mention : allMentionsSoFar) {
       if ("ORGANIZATION".equals(mention.get(nerCoreAnnotationClass))) {
         organizations.add(mention.get(CoreAnnotations.TokensAnnotation.class));
       }
@@ -262,6 +312,7 @@ public class EntityMentionsAnnotator implements Annotator {
 
     // Iterate over tokens...
     for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+      List<CoreMap> sentenceMentions = new ArrayList<CoreMap>();
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       Integer totalTokensOffset = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
       for (int i = 0; i < tokens.size(); ++i) {
@@ -277,8 +328,7 @@ public class EntityMentionsAnnotator implements Annotator {
               CoreMap chunk = ChunkAnnotationUtils.getAnnotatedChunk(tokens,
                   i, i + 1, totalTokensOffset, null, null, null);
               chunk.set(CoreAnnotations.NamedEntityTagAnnotation.class,"ORGANIZATION");
-              mentions.add(chunk);
-
+              sentenceMentions.add(chunk);
             }
           }
         }

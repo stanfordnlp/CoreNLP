@@ -1197,6 +1197,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.get(QuotationIndexAnnotation.class) != null) { builder.setIndex(quote.get(QuotationIndexAnnotation.class)); }
     if (quote.get(AuthorAnnotation.class) != null) { builder.setAuthor(quote.get(AuthorAnnotation.class)); }
     // quote attribution info
+    if (quote.get(EnhancedPlusPlusDependenciesAnnotation.class) !=  null) {
+      builder.setAttributionDependencyGraph(toProto(quote.get(EnhancedPlusPlusDependenciesAnnotation.class)));
+    }
     if (quote.get(QuoteAttributionAnnotator.MentionAnnotation.class) != null) {
       builder.setMention(quote.get(QuoteAttributionAnnotator.MentionAnnotation.class));
     }
@@ -1856,6 +1859,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
              quoteTokenIndex <= quote.get(CoreAnnotations.TokenEndAnnotation.class) ; quoteTokenIndex++) {
           quoteTokens.add(ann.get(CoreAnnotations.TokensAnnotation.class).get(quoteTokenIndex));
         }
+        quote.set(CoreAnnotations.TokensAnnotation.class, quoteTokens);
       }
     }
 
