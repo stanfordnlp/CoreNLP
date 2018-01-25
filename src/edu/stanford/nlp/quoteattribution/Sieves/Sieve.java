@@ -156,7 +156,7 @@ public class Sieve {
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
 
     TokenNode pointer = rootNameNode;
-    for(int index = textRun.first; index <= textRun.second; index++) {
+    for(int index = textRun.first; index <= textRun.second && index < tokens.size(); index++) {
       CoreLabel token = tokens.get(index);
       String tokenText = token.word();
 //      System.out.println(token);
@@ -247,7 +247,7 @@ public class Sieve {
     ArrayList<Integer> pronounList = new ArrayList<>();
 
 
-    for(int i = nonQuoteRun.first; i <= nonQuoteRun.second; i++)
+    for(int i = nonQuoteRun.first; i <= nonQuoteRun.second && i < tokens.size() ; i++)
     {
       if(tokens.get(i).word().equalsIgnoreCase("he") || tokens.get(i).word().equalsIgnoreCase("she"))
         pronounList.add(i);
@@ -334,7 +334,7 @@ public class Sieve {
   public List<Integer> scanForAnimates(Pair<Integer, Integer> span) {
     List<Integer> animateIndices = new ArrayList<>();
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
-    for(int i = span.first; i <= span.second; i++)
+    for(int i = span.first; i <= span.second && i < tokens.size() ; i++)
     {
       CoreLabel token = tokens.get(i);
       if(animacySet.contains(token.word()))
