@@ -1,8 +1,10 @@
 package edu.stanford.nlp.objectbank;
 
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import edu.stanford.nlp.util.AbstractIterator;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,9 +22,6 @@ import java.util.*;
  * @param <T> The type of the objects returned
  */
 public class DelimitRegExIterator<T> extends AbstractIterator<T> {
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(DelimitRegExIterator.class);
-
   private Iterator<String> tokens;
   private final Function<String,T> op;
   private T nextToken; // = null;
@@ -38,28 +37,29 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
     try {
       String line;
       StringBuilder input = new StringBuilder(10000);
-      while ((line = in.readLine()) != null) {
-        input.append(line).append("\n");
+      while ((line = in.readLine()) != null)
+        input.append(line).append('\n');
+      line = input.toString();
+      Matcher m = Pattern.compile(delimiter).matcher(line);
+      ArrayList<String> toks = new ArrayList<>();
+      int prev = 0;
+      while(m.find()) {
+        if (m.start() == 0) // Skip empty first part
+          continue;
+        toks.add(line.substring(prev, m.start()));
+        prev = m.end();
       }
-      String[] split = input.toString() //
-        .replaceAll("^" + delimiter, "") //
-        .replaceAll(delimiter + "$", "") //
-        .trim().split(delimiter);
-
-      tokens = Arrays.asList(split).iterator();
+      if (prev < line.length()) // Except empty last part
+        toks.add(line.substring(prev, line.length()));
+      tokens = toks.iterator();
     } catch (IOException e) {
-      log.err(e);
+      throw new RuntimeException(e);
     }
     setNext();
   }
 
   private void setNext() {
-    if (tokens.hasNext()) {
-      String s = tokens.next();
-      nextToken = parseString(s);
-    } else {
-      nextToken = null;
-    }
+    nextToken = tokens.hasNext() ? parseString(tokens.next()) : null;
   }
 
   protected T parseString(String s) {
