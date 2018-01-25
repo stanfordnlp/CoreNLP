@@ -18,10 +18,13 @@ public class CoreQuote {
   private List<CoreSentence> sentences;
   // optional speaker info...note there may not be an entity mention corresponding to the speaker
   public boolean hasSpeaker;
+  public boolean hasCanonicalSpeaker;
   private Optional<String> speaker;
   private Optional<String> canonicalSpeaker;
   private Optional<List<CoreLabel>> speakerTokens;
+  private Optional<List<CoreLabel>> canonicalSpeakerTokens;
   private Optional<Pair<Integer,Integer>> speakerCharOffsets;
+  private Optional<Pair<Integer,Integer>> canonicalSpeakerCharOffsets;
   private Optional<CoreEntityMention> speakerEntityMention;
   private Optional<CoreEntityMention> canonicalSpeakerEntityMention;
 
@@ -42,6 +45,7 @@ public class CoreQuote {
     this.canonicalSpeaker = this.quoteCoreMap.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null ?
         Optional.of(this.quoteCoreMap.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class)) :
         Optional.empty() ;
+    // set up info for direct speaker mention (example: "He")
     Integer firstSpeakerTokenIndex = quoteCoreMap.get(QuoteAttributionAnnotator.MentionBeginAnnotation.class);
     Integer lastSpeakerTokenIndex = quoteCoreMap.get(QuoteAttributionAnnotator.MentionEndAnnotation.class);
     this.speakerTokens = Optional.empty();
@@ -67,8 +71,35 @@ public class CoreQuote {
         }
       }
     }
+    // set up info for canonical speaker mention (example: "Joe Smith")
+    Integer firstCanonicalSpeakerTokenIndex = quoteCoreMap.get(QuoteAttributionAnnotator.CanonicalMentionBeginAnnotation.class);
+    Integer lastCanonicalSpeakerTokenIndex = quoteCoreMap.get(QuoteAttributionAnnotator.CanonicalMentionEndAnnotation.class);
+    this.canonicalSpeakerTokens = Optional.empty();
+    this.canonicalSpeakerCharOffsets = Optional.empty();
+    this.canonicalSpeakerEntityMention = Optional.empty();
+    if (firstCanonicalSpeakerTokenIndex != null && lastCanonicalSpeakerTokenIndex != null) {
+      this.canonicalSpeakerTokens = Optional.of(new ArrayList<CoreLabel>());
+      for (int canonicalSpeakerTokenIndex = firstCanonicalSpeakerTokenIndex ;
+           canonicalSpeakerTokenIndex <= lastCanonicalSpeakerTokenIndex ; canonicalSpeakerTokenIndex++) {
+        this.canonicalSpeakerTokens.get().add(this.document.tokens().get(canonicalSpeakerTokenIndex));
+      }
+      int canonicalSpeakerCharOffsetBegin =
+          this.canonicalSpeakerTokens.get().get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+      int canonicalSpeakerCharOffsetEnd =
+          this.canonicalSpeakerTokens.get().get(
+              canonicalSpeakerTokens.get().size() - 1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+      this.canonicalSpeakerCharOffsets = Optional.of(new Pair<>(canonicalSpeakerCharOffsetBegin, canonicalSpeakerCharOffsetEnd));
+      for (CoreEntityMention candidateEntityMention : this.document.entityMentions()) {
+        Pair<Integer,Integer> entityMentionOffsets = candidateEntityMention.charOffsets();
+        if (entityMentionOffsets.equals(this.canonicalSpeakerCharOffsets.get())) {
+          this.canonicalSpeakerEntityMention = Optional.of(candidateEntityMention);
+          break;
+        }
+      }
+    }
     // record if there is speaker info
     this.hasSpeaker = this.speaker.isPresent();
+    this.hasCanonicalSpeaker = this.canonicalSpeaker.isPresent();
   }
 
   /** get the underlying CoreMap if need be **/
@@ -114,8 +145,23 @@ public class CoreQuote {
     return this.speakerEntityMention;
   }
 
+  /** retrieve the tokens of the canonical speaker **/
+  public Optional<List<CoreLabel>> canonicalSpeakerTokens() {
+    return this.canonicalSpeakerTokens;
+  }
+
+  /** retrieve the character offsets of the canonical speaker **/
+  public Optional<Pair<Integer,Integer>> canonicalSpeakerCharOffsets() {
+    return this.canonicalSpeakerCharOffsets;
+  }
+
+  /** retrieve the entity mention corresponding to the canonical speaker if there is one **/
+  public Optional<CoreEntityMention> canonicalSpeakerEntityMention() {
+    return this.canonicalSpeakerEntityMention;
+  }
+
   /** char offsets of quote **/
-  public Pair<Integer,Integer> charOffsets() {
+  public Pair<Integer,Integer> quoteCharOffsets() {
     int beginCharOffset = this.quoteCoreMap.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
     int endCharOffset = this.quoteCoreMap.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
     return new Pair<>(beginCharOffset,endCharOffset);
