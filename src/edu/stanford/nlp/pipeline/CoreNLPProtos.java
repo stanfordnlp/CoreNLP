@@ -50920,6 +50920,20 @@ public final class CoreNLPProtos {
      * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
      */
     int getCanonicalEntityMentionIndex();
+
+    /**
+     * <code>optional string entityMentionText = 12;</code>
+     */
+    boolean hasEntityMentionText();
+    /**
+     * <code>optional string entityMentionText = 12;</code>
+     */
+    java.lang.String getEntityMentionText();
+    /**
+     * <code>optional string entityMentionText = 12;</code>
+     */
+    com.google.protobuf.ByteString
+        getEntityMentionTextBytes();
   }
   /**
    * <pre>
@@ -50947,6 +50961,7 @@ public final class CoreNLPProtos {
       gender_ = "";
       entityMentionIndex_ = 0;
       canonicalEntityMentionIndex_ = 0;
+      entityMentionText_ = "";
     }
 
     @java.lang.Override
@@ -51043,6 +51058,12 @@ public final class CoreNLPProtos {
             case 88: {
               bitField0_ |= 0x00000400;
               canonicalEntityMentionIndex_ = input.readUInt32();
+              break;
+            }
+            case 98: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000800;
+              entityMentionText_ = bs;
               break;
             }
           }
@@ -51376,6 +51397,48 @@ public final class CoreNLPProtos {
       return canonicalEntityMentionIndex_;
     }
 
+    public static final int ENTITYMENTIONTEXT_FIELD_NUMBER = 12;
+    private volatile java.lang.Object entityMentionText_;
+    /**
+     * <code>optional string entityMentionText = 12;</code>
+     */
+    public boolean hasEntityMentionText() {
+      return ((bitField0_ & 0x00000800) == 0x00000800);
+    }
+    /**
+     * <code>optional string entityMentionText = 12;</code>
+     */
+    public java.lang.String getEntityMentionText() {
+      java.lang.Object ref = entityMentionText_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          entityMentionText_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string entityMentionText = 12;</code>
+     */
+    public com.google.protobuf.ByteString
+        getEntityMentionTextBytes() {
+      java.lang.Object ref = entityMentionText_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        entityMentionText_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -51433,6 +51496,9 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000400) == 0x00000400)) {
         output.writeUInt32(11, canonicalEntityMentionIndex_);
       }
+      if (((bitField0_ & 0x00000800) == 0x00000800)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, entityMentionText_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -51479,6 +51545,9 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000400) == 0x00000400)) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(11, canonicalEntityMentionIndex_);
+      }
+      if (((bitField0_ & 0x00000800) == 0x00000800)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, entityMentionText_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -51552,6 +51621,11 @@ public final class CoreNLPProtos {
         result = result && (getCanonicalEntityMentionIndex()
             == other.getCanonicalEntityMentionIndex());
       }
+      result = result && (hasEntityMentionText() == other.hasEntityMentionText());
+      if (hasEntityMentionText()) {
+        result = result && getEntityMentionText()
+            .equals(other.getEntityMentionText());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -51606,6 +51680,10 @@ public final class CoreNLPProtos {
       if (hasCanonicalEntityMentionIndex()) {
         hash = (37 * hash) + CANONICALENTITYMENTIONINDEX_FIELD_NUMBER;
         hash = (53 * hash) + getCanonicalEntityMentionIndex();
+      }
+      if (hasEntityMentionText()) {
+        hash = (37 * hash) + ENTITYMENTIONTEXT_FIELD_NUMBER;
+        hash = (53 * hash) + getEntityMentionText().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -51756,6 +51834,8 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000200);
         canonicalEntityMentionIndex_ = 0;
         bitField0_ = (bitField0_ & ~0x00000400);
+        entityMentionText_ = "";
+        bitField0_ = (bitField0_ & ~0x00000800);
         return this;
       }
 
@@ -51828,6 +51908,10 @@ public final class CoreNLPProtos {
           to_bitField0_ |= 0x00000400;
         }
         result.canonicalEntityMentionIndex_ = canonicalEntityMentionIndex_;
+        if (((from_bitField0_ & 0x00000800) == 0x00000800)) {
+          to_bitField0_ |= 0x00000800;
+        }
+        result.entityMentionText_ = entityMentionText_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -51912,6 +51996,11 @@ public final class CoreNLPProtos {
         }
         if (other.hasCanonicalEntityMentionIndex()) {
           setCanonicalEntityMentionIndex(other.getCanonicalEntityMentionIndex());
+        }
+        if (other.hasEntityMentionText()) {
+          bitField0_ |= 0x00000800;
+          entityMentionText_ = other.entityMentionText_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -52604,6 +52693,82 @@ public final class CoreNLPProtos {
       public Builder clearCanonicalEntityMentionIndex() {
         bitField0_ = (bitField0_ & ~0x00000400);
         canonicalEntityMentionIndex_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object entityMentionText_ = "";
+      /**
+       * <code>optional string entityMentionText = 12;</code>
+       */
+      public boolean hasEntityMentionText() {
+        return ((bitField0_ & 0x00000800) == 0x00000800);
+      }
+      /**
+       * <code>optional string entityMentionText = 12;</code>
+       */
+      public java.lang.String getEntityMentionText() {
+        java.lang.Object ref = entityMentionText_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            entityMentionText_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string entityMentionText = 12;</code>
+       */
+      public com.google.protobuf.ByteString
+          getEntityMentionTextBytes() {
+        java.lang.Object ref = entityMentionText_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          entityMentionText_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string entityMentionText = 12;</code>
+       */
+      public Builder setEntityMentionText(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000800;
+        entityMentionText_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string entityMentionText = 12;</code>
+       */
+      public Builder clearEntityMentionText() {
+        bitField0_ = (bitField0_ & ~0x00000800);
+        entityMentionText_ = getDefaultInstance().getEntityMentionText();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string entityMentionText = 12;</code>
+       */
+      public Builder setEntityMentionTextBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000800;
+        entityMentionText_ = value;
         onChanged();
         return this;
       }
@@ -61029,7 +61194,7 @@ public final class CoreNLPProtos {
       "\0162/.edu.stanford.nlp.pipeline.NaturalLog" +
       "icRelation\022L\n\023projectIndependence\030\007 \002(\0162" +
       "/.edu.stanford.nlp.pipeline.NaturalLogic" +
-      "Relation\"\302\002\n\nNERMention\022\025\n\rsentenceIndex",
+      "Relation\"\335\002\n\nNERMention\022\025\n\rsentenceIndex",
       "\030\001 \001(\r\022%\n\035tokenStartInSentenceInclusive\030" +
       "\002 \002(\r\022#\n\033tokenEndInSentenceExclusive\030\003 \002" +
       "(\r\022\013\n\003ner\030\004 \002(\t\022\025\n\rnormalizedNER\030\005 \001(\t\022\022" +
@@ -61037,41 +61202,42 @@ public final class CoreNLPProtos {
       "stanford.nlp.pipeline.Timex\022\027\n\017wikipedia" +
       "Entity\030\010 \001(\t\022\016\n\006gender\030\t \001(\t\022\032\n\022entityMe" +
       "ntionIndex\030\n \001(\r\022#\n\033canonicalEntityMenti" +
-      "onIndex\030\013 \001(\r\"Y\n\020SentenceFragment\022\022\n\ntok" +
-      "enIndex\030\001 \003(\r\022\014\n\004root\030\002 \001(\r\022\024\n\014assumedTr" +
-      "uth\030\003 \001(\010\022\r\n\005score\030\004 \001(\001\":\n\rTokenLocatio",
-      "n\022\025\n\rsentenceIndex\030\001 \001(\r\022\022\n\ntokenIndex\030\002" +
-      " \001(\r\"\232\003\n\016RelationTriple\022\017\n\007subject\030\001 \001(\t" +
-      "\022\020\n\010relation\030\002 \001(\t\022\016\n\006object\030\003 \001(\t\022\022\n\nco" +
-      "nfidence\030\004 \001(\001\022?\n\rsubjectTokens\030\r \003(\0132(." +
-      "edu.stanford.nlp.pipeline.TokenLocation\022" +
-      "@\n\016relationTokens\030\016 \003(\0132(.edu.stanford.n" +
-      "lp.pipeline.TokenLocation\022>\n\014objectToken" +
-      "s\030\017 \003(\0132(.edu.stanford.nlp.pipeline.Toke" +
-      "nLocation\0228\n\004tree\030\010 \001(\0132*.edu.stanford.n" +
-      "lp.pipeline.DependencyGraph\022\016\n\006istmod\030\t ",
-      "\001(\010\022\020\n\010prefixBe\030\n \001(\010\022\020\n\010suffixBe\030\013 \001(\010\022" +
-      "\020\n\010suffixOf\030\014 \001(\010\"-\n\017MapStringString\022\013\n\003" +
-      "key\030\001 \003(\t\022\r\n\005value\030\002 \003(\t\"*\n\014MapIntString" +
-      "\022\013\n\003key\030\001 \003(\r\022\r\n\005value\030\002 \003(\t\"\374\001\n\007Section" +
-      "\022\021\n\tcharBegin\030\001 \002(\r\022\017\n\007charEnd\030\002 \002(\r\022\016\n\006" +
-      "author\030\003 \001(\t\022\027\n\017sentenceIndexes\030\004 \003(\r\022\020\n" +
-      "\010datetime\030\005 \001(\t\0220\n\006quotes\030\006 \003(\0132 .edu.st" +
-      "anford.nlp.pipeline.Quote\022\027\n\017authorCharB" +
-      "egin\030\007 \001(\r\022\025\n\rauthorCharEnd\030\010 \001(\r\0220\n\006xml" +
-      "Tag\030\t \002(\0132 .edu.stanford.nlp.pipeline.To",
-      "ken*\243\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n" +
-      "\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006" +
-      "German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Span" +
-      "ish\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n\020Universal" +
-      "Chinese\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIV" +
-      "E\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rW" +
-      "EAK_POSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024" +
-      "NaturalLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n" +
-      "\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILM" +
-      "ENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005",
-      "COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanfor" +
-      "d.nlp.pipelineB\rCoreNLPProtos"
+      "onIndex\030\013 \001(\r\022\031\n\021entityMentionText\030\014 \001(\t" +
+      "\"Y\n\020SentenceFragment\022\022\n\ntokenIndex\030\001 \003(\r" +
+      "\022\014\n\004root\030\002 \001(\r\022\024\n\014assumedTruth\030\003 \001(\010\022\r\n\005",
+      "score\030\004 \001(\001\":\n\rTokenLocation\022\025\n\rsentence" +
+      "Index\030\001 \001(\r\022\022\n\ntokenIndex\030\002 \001(\r\"\232\003\n\016Rela" +
+      "tionTriple\022\017\n\007subject\030\001 \001(\t\022\020\n\010relation\030" +
+      "\002 \001(\t\022\016\n\006object\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(" +
+      "\001\022?\n\rsubjectTokens\030\r \003(\0132(.edu.stanford." +
+      "nlp.pipeline.TokenLocation\022@\n\016relationTo" +
+      "kens\030\016 \003(\0132(.edu.stanford.nlp.pipeline.T" +
+      "okenLocation\022>\n\014objectTokens\030\017 \003(\0132(.edu" +
+      ".stanford.nlp.pipeline.TokenLocation\0228\n\004" +
+      "tree\030\010 \001(\0132*.edu.stanford.nlp.pipeline.D",
+      "ependencyGraph\022\016\n\006istmod\030\t \001(\010\022\020\n\010prefix" +
+      "Be\030\n \001(\010\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014" +
+      " \001(\010\"-\n\017MapStringString\022\013\n\003key\030\001 \003(\t\022\r\n\005" +
+      "value\030\002 \003(\t\"*\n\014MapIntString\022\013\n\003key\030\001 \003(\r" +
+      "\022\r\n\005value\030\002 \003(\t\"\374\001\n\007Section\022\021\n\tcharBegin" +
+      "\030\001 \002(\r\022\017\n\007charEnd\030\002 \002(\r\022\016\n\006author\030\003 \001(\t\022" +
+      "\027\n\017sentenceIndexes\030\004 \003(\r\022\020\n\010datetime\030\005 \001" +
+      "(\t\0220\n\006quotes\030\006 \003(\0132 .edu.stanford.nlp.pi" +
+      "peline.Quote\022\027\n\017authorCharBegin\030\007 \001(\r\022\025\n" +
+      "\rauthorCharEnd\030\010 \001(\r\0220\n\006xmlTag\030\t \002(\0132 .e",
+      "du.stanford.nlp.pipeline.Token*\243\001\n\010Langu" +
+      "age\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n" +
+      "\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006F" +
+      "rench\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020Univ" +
+      "ersalEnglish\020\t\022\024\n\020UniversalChinese\020\n*h\n\t" +
+      "Sentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_N" +
+      "EGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020" +
+      "\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024NaturalLogicR" +
+      "elation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTA" +
+      "ILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGA",
+      "TION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014IN" +
+      "DEPENDENCE\020\006B*\n\031edu.stanford.nlp.pipelin" +
+      "eB\rCoreNLPProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -61204,7 +61370,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_NERMention_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_NERMention_descriptor,
-        new java.lang.String[] { "SentenceIndex", "TokenStartInSentenceInclusive", "TokenEndInSentenceExclusive", "Ner", "NormalizedNER", "EntityType", "Timex", "WikipediaEntity", "Gender", "EntityMentionIndex", "CanonicalEntityMentionIndex", });
+        new java.lang.String[] { "SentenceIndex", "TokenStartInSentenceInclusive", "TokenEndInSentenceExclusive", "Ner", "NormalizedNER", "EntityType", "Timex", "WikipediaEntity", "Gender", "EntityMentionIndex", "CanonicalEntityMentionIndex", "EntityMentionText", });
     internal_static_edu_stanford_nlp_pipeline_SentenceFragment_descriptor =
       getDescriptor().getMessageTypes().get(17);
     internal_static_edu_stanford_nlp_pipeline_SentenceFragment_fieldAccessorTable = new
