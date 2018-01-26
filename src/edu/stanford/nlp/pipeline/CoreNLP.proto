@@ -193,8 +193,9 @@ message Token {
   optional string parent          = 61;
 
   // mention index info
-  optional uint32 corefMentionIndex = 64;
+  repeated uint32 corefMentionIndex = 64;
   optional uint32 entityMentionIndex = 65;
+  optional bool hasCorefInfo         = 66;
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
