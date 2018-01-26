@@ -139,7 +139,7 @@ public class QuoteAttributionAnnotator implements Annotator {
   public boolean buildCharacterMapPerAnnotation = false;
   public boolean useCoref = true;
 
-  public static final Boolean VERBOSE = true;
+  public Boolean VERBOSE = false;
 
   // fields
   private Set<String> animacyList;
@@ -150,14 +150,17 @@ public class QuoteAttributionAnnotator implements Annotator {
   private String msSieveList;
 
   public QuoteAttributionAnnotator(Properties props) {
+
+    VERBOSE = PropertiesUtils.getBool(props, "verbose", false);
+
     Timing timer = null;
     COREF_PATH = props.getProperty("booknlpCoref", null);
-    if(COREF_PATH == null) {
+    if(COREF_PATH == null && VERBOSE) {
       log.err("Warning: no coreference map!");
     }
     MODEL_PATH = props.getProperty("modelPath", DEFAULT_MODEL_PATH);
     CHARACTERS_FILE = props.getProperty("charactersPath", null);
-    if(CHARACTERS_FILE == null) {
+    if(CHARACTERS_FILE == null && VERBOSE) {
       log.err("Warning: no characters file!");
     }
     qmSieveList = props.getProperty("QMSieves", DEFAULT_QMSIEVES);
