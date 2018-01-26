@@ -489,6 +489,7 @@ message NERMention {
   optional string gender                        = 9;
   optional uint32 entityMentionIndex            = 10;
   optional uint32 canonicalEntityMentionIndex   = 11;
+  optional string entityMentionText             = 12;
 }
 
 //
