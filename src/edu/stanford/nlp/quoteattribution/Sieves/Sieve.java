@@ -263,10 +263,27 @@ public class Sieve {
     return pronounList;
   }
 
-  //for filling in the text of a mention
+  // for filling in the text of a mention
   public String tokenRangeToString(Pair<Integer, Integer> tokenRange) {
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
-    return doc.get(CoreAnnotations.TextAnnotation.class).substring(tokens.get(tokenRange.first).beginPosition(), tokens.get(tokenRange.second).endPosition());
+    // see if the token range matches an entity mention
+    List<CoreMap> entityMentionsInDoc = doc.get(CoreAnnotations.MentionsAnnotation.class);
+    Integer potentialMatchingEntityMentionIndex =
+        tokens.get(tokenRange.first).get(CoreAnnotations.EntityMentionIndexAnnotation.class);
+    CoreMap potentialMatchingEntityMention = null;
+    if (entityMentionsInDoc != null && potentialMatchingEntityMentionIndex != null) {
+      potentialMatchingEntityMention = entityMentionsInDoc.get(potentialMatchingEntityMentionIndex);
+    }
+    // if there is a matching entity mention, return it's text (which has been processed to remove
+    // things like newlines and xml)...if there isn't return the full substring of the document text
+    if (potentialMatchingEntityMention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) == tokens.get(
+        tokenRange.first).beginPosition() && potentialMatchingEntityMention.get(
+            CoreAnnotations.CharacterOffsetEndAnnotation.class) == tokens.get(tokenRange.second).endPosition()) {
+      return potentialMatchingEntityMention.get(CoreAnnotations.TextAnnotation.class);
+    } else {
+      return doc.get(CoreAnnotations.TextAnnotation.class).substring(
+          tokens.get(tokenRange.first).beginPosition(), tokens.get(tokenRange.second).endPosition());
+    }
   }
 
   public String tokenRangeToString(int token_idx) {
