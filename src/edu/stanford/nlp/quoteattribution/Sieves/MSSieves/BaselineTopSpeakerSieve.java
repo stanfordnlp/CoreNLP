@@ -152,6 +152,9 @@ public class BaselineTopSpeakerSieve extends MSSieve {
     for(MentionData mention : closestMentions) {
       double weight = backwardsMentions.contains(mention) ? BACKWARD_WEIGHT : FORWARD_WEIGHT;
       if(mention.type.equals(NAME)) {
+        if (!characterMap.keySet().contains(mention.text)) {
+          continue;
+        }
         Person p = characterMap.get(mention.text).get(0);
         if ((gender == Person.Gender.MALE && p.gender == Person.Gender.MALE) ||
                 (gender == Person.Gender.FEMALE && p.gender == Person.Gender.FEMALE) ||
