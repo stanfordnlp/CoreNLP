@@ -369,7 +369,7 @@ public class Sieve {
     public MentionData(int begin, int end, String text, String type) {
       this.begin = begin;
       this.end = end;
-      this.text = text != null ? text.replace("\n", " ") : null;
+      this.text = text;
       this.type = type;
     }
   }
