@@ -12,7 +12,7 @@ public class ProtobufSerializationSanityITest extends TestCase {
 
   public String sampleText = "Joe Smith works at the post office.  He said, \"I love working there.\"" +
       " Postal worker Joe is good friends with Chris Anderson.  Chris and Joe like to eat lunch together every day." +
-      " On Sunday, January 21st 2018, Chris and Joe Smith decided to get pizza.  Joe said, \"I love pizza.\"" +
+      " On Sunday, January 21st 2018, Chris and Joe Smith decided to get pizza at 3:00pm.  Joe said, \"I love pizza.\"" +
       " Chris Anderson was born in California.";
 
   public StanfordCoreNLP pipeline;
@@ -26,7 +26,7 @@ public class ProtobufSerializationSanityITest extends TestCase {
     //props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref," +
         //"natlog,openie,kbp,entitylink,sentiment,quote");
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref," +
-        "natlog,openie,kbp,sentiment,quote");
+        "natlog,openie,kbp,entitylink,sentiment,quote");
     props.setProperty("coref.removeSingletonClusters", "false");
     pipeline = new StanfordCoreNLP(props);
     serializer = new ProtobufAnnotationSerializer();
