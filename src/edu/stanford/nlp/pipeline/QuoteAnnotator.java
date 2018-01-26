@@ -353,8 +353,10 @@ public class QuoteAnnotator implements Annotator  {
       Annotation quote = makeQuote(text.substring(begin, end), begin, end, quoteTokens,
           tokenOffset, beginSentence, endSentence, docID);
 
-      // add quote in and filter ; right now main filter is quoteTokens.size() != 0
-      if (quoteTokens.size() != 0)
+      // add quote in and filter
+      // filter: quoteTokens.size() != 0
+      // filter: endSentence == -1
+      if (quoteTokens.size() != 0 && endSentence > -1)
         cmQuotes.add(quote);
     }
 
