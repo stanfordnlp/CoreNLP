@@ -1250,6 +1250,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (mention.get(CoreAnnotations.GenderAnnotation.class) != null) { builder.setGender(mention.get(CoreAnnotations.GenderAnnotation.class)); }
     if (mention.get(CoreAnnotations.EntityMentionIndexAnnotation.class) != null) { builder.setEntityMentionIndex(mention.get(CoreAnnotations.EntityMentionIndexAnnotation.class)); }
     if (mention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class) != null) { builder.setCanonicalEntityMentionIndex(mention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class)); }
+    if (mention.get(CoreAnnotations.TextAnnotation.class) != null) { builder.setEntityMentionText(mention.get(CoreAnnotations.TextAnnotation.class)); }
     return builder.build();
   }
 
@@ -1673,9 +1674,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           entityMention.set(CharacterOffsetBeginAnnotation.class, emCharOffsetBegin);
           entityMention.set(CharacterOffsetEndAnnotation.class, emCharOffsetEnd);
           entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
-          // set entity mention text based off of character offsets
-          String entityMentionText = ann.get(TextAnnotation.class).substring(emCharOffsetBegin, emCharOffsetEnd);
-          entityMention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
         }
         if (sentence.getHasEntityMentionsAnnotation())
           map.set(CoreAnnotations.MentionsAnnotation.class, mentions);
@@ -2488,6 +2486,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       map.set(CoreAnnotations.EntityMentionIndexAnnotation.class, mention.getEntityMentionIndex());
     if (mention.hasCanonicalEntityMentionIndex())
       map.set(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class, mention.getCanonicalEntityMentionIndex());
+    if (mention.hasEntityMentionText()) {
+      map.set(CoreAnnotations.TextAnnotation.class, mention.getEntityMentionText());
+    }
     return map;
   }
 

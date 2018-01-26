@@ -379,6 +379,15 @@ public class ProtobufAnnotationSerializerSlowITest {
     }
   }
 
+  public void diffCoreMaps(int i, CoreMap cm1, CoreMap cm2) {
+    if (!cm1.equals(cm2)) {
+      System.out.println("---");
+      System.out.println("entity mention: "+i);
+      System.out.println(cm1.toShorterString());
+      System.out.println(cm2.toShorterString());
+    }
+  }
+
   @Test
   public void testCanWriteReadWriteReadLargeFile() {
     try {
@@ -396,6 +405,12 @@ public class ProtobufAnnotationSerializerSlowITest {
       pair1.second.close();
       Annotation readDoc = pair1.first;
       kis.close();
+
+      for (int i = 0 ; i < doc.get(CoreAnnotations.MentionsAnnotation.class).size() ; i++) {
+        CoreMap cm1 = doc.get(CoreAnnotations.MentionsAnnotation.class).get(i);
+        CoreMap cm2 = readDoc.get(CoreAnnotations.MentionsAnnotation.class).get(i);
+        diffCoreMaps(i,cm1,cm2);
+      }
 
       sameAsRead(doc, readDoc);
 
