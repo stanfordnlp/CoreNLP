@@ -276,8 +276,10 @@ public class Sieve {
     }
     // if there is a matching entity mention, return it's text (which has been processed to remove
     // things like newlines and xml)...if there isn't return the full substring of the document text
-    if (potentialMatchingEntityMention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) == tokens.get(
-        tokenRange.first).beginPosition() && potentialMatchingEntityMention.get(
+    if (potentialMatchingEntityMention != null &&
+        potentialMatchingEntityMention.get(
+            CoreAnnotations.CharacterOffsetBeginAnnotation.class) == tokens.get(tokenRange.first).beginPosition() &&
+        potentialMatchingEntityMention.get(
             CoreAnnotations.CharacterOffsetEndAnnotation.class) == tokens.get(tokenRange.second).endPosition()) {
       return potentialMatchingEntityMention.get(CoreAnnotations.TextAnnotation.class);
     } else {
