@@ -78,7 +78,7 @@ public class RequirementsCorrectSlowITest {
         used.remove(CoreAnnotations.CategoryAnnotation.class);
         // coref mentions creates CorefMentionIndexAnnotation
         // which is used by the main coref annotator
-        used.remove(CorefCoreAnnotations.CorefMentionIndexAnnotation.class);
+        used.remove(CorefCoreAnnotations.CorefMentionIndexesAnnotation.class);
         // ValueAnnotation is sometimes used, sometimes not
         // so artificially add it so this test stops failing in
         // cases where ValueAnnotation isn't used...note that this
