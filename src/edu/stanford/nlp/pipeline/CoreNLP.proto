@@ -61,6 +61,8 @@ message Document {
   repeated Mention         mentionsForCoref                    = 14;
   optional bool hasCorefMentionAnnotation = 15;
   optional bool hasCorefAnnotation = 16;
+  repeated uint32 corefMentionToEntityMentionMappings = 17;
+  repeated uint32 entityMentionToCorefMentionMappings = 18;
 
   extensions 100 to 255;
 }
@@ -195,7 +197,6 @@ message Token {
   // mention index info
   repeated uint32 corefMentionIndex = 64;
   optional uint32 entityMentionIndex = 65;
-  optional bool hasCorefInfo         = 66;
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
