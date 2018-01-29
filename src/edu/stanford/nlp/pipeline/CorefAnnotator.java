@@ -1,5 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import java.util.function.Function;
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -91,48 +93,58 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
     }
   }
 
-  public boolean entityMentionCorefMentionMatch(Annotation ann, CoreMap em, Mention cm) {
-    List<CoreLabel> emTokens = em.get(CoreAnnotations.TokensAnnotation.class);
-    int emTokensSize = emTokens.size();
-    int cmTokensSize = cm.endIndex - cm.startIndex;
-    CoreMap cmSentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(cm.sentNum);
-    List<CoreLabel>
-        cmTokens = cmSentence.get(CoreAnnotations.TokensAnnotation.class).subList(cm.startIndex, cm.endIndex);
-    if (Math.abs(cmTokensSize - emTokensSize) > 1) {
-      return false;
-    } else if (emTokensSize > cmTokensSize) {
-      return false;
-    } else if (cmTokensSize - emTokensSize == 1) {
-      // look for a token mismatch
-      for (int i = 0; i < emTokensSize; i++) {
-        if (emTokens.get(i) != cmTokens.get(i))
-          return false;
-      }
-      // check if last token is 's
-      if (!cmTokens.get(cmTokensSize - 1).word().equals("'s"))
-        return false;
-      // no tokens mismatches and last token is "'s" so return true
-      return true;
-    } else {
-      // look for a token mismatch
-      for (int i = 0; i < emTokensSize; i++) {
-        if (emTokens.get(i) != cmTokens.get(i)) {
-          return false;
+  /** helper method to find the longest entity mention that is coreferent to an entity mention
+   *  after coref has been run...match an entity mention to a coref mention, go through all of
+   *  the coref mentions and find the one with the longest matching entity mention, return
+   *  that entity mention
+   *
+   * @param em  the entity mention of interest
+   * @param ann the annotation, after coreference has been run
+   * @return
+   */
+  public Optional<CoreMap> findBestCoreferentEntityMention(CoreMap em, Annotation ann) {
+    // helper lambda
+    Function<Optional<CoreMap>,Integer> lengthOfOptionalEntityMention =
+        (v) -> v.isPresent() ? v.get().get(CoreAnnotations.TextAnnotation.class).length() : -1 ;
+    // initialize return value as empty Optional
+    Optional<CoreMap> bestCoreferentEntityMention = Optional.empty();
+    // look for matching coref mention
+    int entityMentionIndex = em.get(CoreAnnotations.EntityMentionIndexAnnotation.class);
+    Optional<Integer> matchingCorefMentionIndex =
+        Optional.ofNullable(
+            ann.get(CoreAnnotations.EntityMentionToCorefMentionMappingAnnotation.class).get(entityMentionIndex));
+    Optional<Mention> matchingCorefMention = matchingCorefMentionIndex.isPresent() ?
+        Optional.of(ann.get(CorefCoreAnnotations.CorefMentionsAnnotation.class).get(matchingCorefMentionIndex.get())) :
+        Optional.empty();
+    // if there is a matching coref mention, look at all of the coref mentions in its coref chain
+    if (matchingCorefMention.isPresent()) {
+      Optional<CorefChain> matchingCorefChain =
+          Optional.ofNullable(ann.get(CorefCoreAnnotations.CorefChainAnnotation.class).get(
+              matchingCorefMention.get().corefClusterID));
+      List<CorefMention> corefMentionsInTextualOrder = matchingCorefChain.isPresent() ?
+          matchingCorefChain.get().getMentionsInTextualOrder() : new ArrayList<CorefMention>();
+      for (CorefMention cm : corefMentionsInTextualOrder) {
+        Optional<Integer> candidateCoreferentEntityMentionIndex =
+            Optional.ofNullable(ann.get(CoreAnnotations.CorefMentionToEntityMentionMappingAnnotation.class).get(cm.mentionID));
+        Optional<CoreMap> candidateCoreferentEntityMention = candidateCoreferentEntityMentionIndex.isPresent() ?
+            Optional.ofNullable(ann.get(CoreAnnotations.MentionsAnnotation.class).get(
+                candidateCoreferentEntityMentionIndex.get())) : Optional.empty();
+        if (lengthOfOptionalEntityMention.apply(candidateCoreferentEntityMention) >
+            lengthOfOptionalEntityMention.apply(bestCoreferentEntityMention)) {
+          bestCoreferentEntityMention = candidateCoreferentEntityMention;
         }
       }
-      // no tokens mismatch and em and cm same token length so return true
-      return true;
     }
+    return bestCoreferentEntityMention;
   }
-
 
   @Override
   public void annotate(Annotation annotation){
     // check if mention detection should be performed by this annotator
-    // temporarily set the primary named entity tag to the coarse tag
-    setNamedEntityTagGranularity(annotation, "coarse");
     if (performMentionDetection)
       mentionAnnotator.annotate(annotation);
+    // temporarily set the primary named entity tag to the coarse tag
+    setNamedEntityTagGranularity(annotation, "coarse");
     try {
       if (!annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
         log.error("this coreference resolution system requires SentencesAnnotation!");
@@ -153,45 +165,11 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       setNamedEntityTagGranularity(annotation, "fine");
     }
     // attempt to link ner derived entity mentions to representative entity mentions
-    List<Mention> documentCorefMentions =
-        annotation.get(CorefCoreAnnotations.CorefMentionsAnnotation.class);
     for (CoreMap entityMention : annotation.get(CoreAnnotations.MentionsAnnotation.class)) {
-      // attempt to get a corresponding coref mention, might be null in some cases (for instance "now")
-      Integer cmIndex = entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0).
-          get(CorefCoreAnnotations.CorefMentionIndexAnnotation.class);
-      Mention cm = null;
-      CorefChain cmCorefChain = null;
-      if (cmIndex != null) {
-        cm = documentCorefMentions.get(cmIndex);
-        cmCorefChain = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).get(
-            cm.corefClusterID);
-      }
-      // check for entity mention coref mention match
-      if (cm != null && cmCorefChain != null && entityMentionCorefMentionMatch(annotation, entityMention, cm)) {
-        // get representative mention
-        CorefMention representativeMention = cmCorefChain.getRepresentativeMention();
-        // get first token of representative mention
-        CoreMap representativeMentionSentence =
-            annotation.get(CoreAnnotations.SentencesAnnotation.class).get(representativeMention.sentNum-1);
-        CoreLabel firstTokenOfRepresentativeMention =
-            representativeMentionSentence.get(CoreAnnotations.TokensAnnotation.class).get(
-                representativeMention.startIndex-1);
-        // get potential corresponding entity mention
-        Integer representativeEntityMentionIndex =
-            firstTokenOfRepresentativeMention.get(CoreAnnotations.EntityMentionIndexAnnotation.class);
-        Integer representativeCorefMentionIndex =
-            firstTokenOfRepresentativeMention.get(CorefCoreAnnotations.CorefMentionIndexAnnotation.class);
-        if (representativeEntityMentionIndex != null) {
-          CoreMap representativeEntityMention =
-              annotation.get(CoreAnnotations.MentionsAnnotation.class).get(representativeEntityMentionIndex);
-          Mention representativeCorefMention =
-              annotation.get(CorefCoreAnnotations.CorefMentionsAnnotation.class).get(
-                  representativeCorefMentionIndex);
-          if (entityMentionCorefMentionMatch(annotation, representativeEntityMention, representativeCorefMention)) {
-            entityMention.set(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class,
-                representativeEntityMentionIndex);
-          }
-        }
+      Optional<CoreMap> bestCoreferentEntityMention = findBestCoreferentEntityMention(entityMention, annotation);
+      if (bestCoreferentEntityMention.isPresent()) {
+        entityMention.set(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class,
+            bestCoreferentEntityMention.get().get(CoreAnnotations.EntityMentionIndexAnnotation.class));
       }
     }
   }

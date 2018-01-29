@@ -109,10 +109,10 @@ public class CorefCoreAnnotations {
   /**
    * index into the document wide list of coref mentions
    */
-  public static class CorefMentionIndexAnnotation implements CoreAnnotation<Integer> {
+  public static class CorefMentionIndexesAnnotation implements CoreAnnotation<Set<Integer>> {
     @Override
-    public Class<Integer> getType() {
-      return ErasureUtils.uncheckedCast(Integer.class);
+    public Class<Set<Integer>> getType() {
+      return ErasureUtils.uncheckedCast(Set.class);
     }
   }
 

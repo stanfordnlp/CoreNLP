@@ -372,8 +372,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // indexes into document wide mention lists
     if (keySet.contains(EntityMentionIndexAnnotation.class)) {
       builder.setEntityMentionIndex(getAndRegister(coreLabel, keysToSerialize, EntityMentionIndexAnnotation.class)); }
-    if (keySet.contains(CorefMentionIndexAnnotation.class)) {
-      builder.setCorefMentionIndex(getAndRegister(coreLabel, keysToSerialize, CorefMentionIndexAnnotation.class)); }
+    //if (keySet.contains(CorefMentionIndexAnnotation.class)) {
+      //builder.setCorefMentionIndex(getAndRegister(coreLabel, keysToSerialize, CorefMentionIndexAnnotation.class)); }
 
     // Return
     return builder;
@@ -1341,8 +1341,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasEntityMentionIndex()) {
       word.set(EntityMentionIndexAnnotation.class, proto.getEntityMentionIndex());
     }
-    if (proto.hasCorefMentionIndex()) {
-      word.set(CorefMentionIndexAnnotation.class, proto.getCorefMentionIndex());
+    if (proto.getCorefMentionIndexList().size() != 0) {
+      //word.set(CorefMentionIndexesAnnotation.class, proto.getCorefMentionIndexList());
     }
 
     // Return

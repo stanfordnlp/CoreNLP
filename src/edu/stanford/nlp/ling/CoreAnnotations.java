@@ -1183,6 +1183,26 @@ public class CoreAnnotations {
     }
   }
 
+  /**
+   * mapping from coref mentions to corresponding ner derived entity mentions
+   */
+  public static class CorefMentionToEntityMentionMappingAnnotation implements CoreAnnotation<Map<Integer,Integer>> {
+    @Override
+    public Class<Map<Integer,Integer>> getType() {
+      return ErasureUtils.uncheckedCast(Map.class);
+    }
+  }
+
+  /**
+   * mapping from ner derived entity mentions to coref mentions
+   */
+  public static class EntityMentionToCorefMentionMappingAnnotation implements CoreAnnotation<Map<Integer,Integer>> {
+    @Override
+    public Class<Map<Integer,Integer>> getType() {
+      return ErasureUtils.uncheckedCast(Map.class);
+    }
+  }
+
   public static class EntityTypeAnnotation implements CoreAnnotation<String> {
     @Override
     public Class<String> getType() {

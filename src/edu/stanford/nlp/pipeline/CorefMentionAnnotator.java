@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
+import java.util.HashMap;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.CorefProperties;
-import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.coref.md.CorefMentionFinder;
@@ -84,6 +84,54 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
     }
   }
 
+  /**
+   * Return true if the coref mention synchs with the entity mention
+   * For instance the em "Joe Smith" synchs with "Joe Smith", "Joe Smith's" and "President Joe Smith's"
+   * It does not synch with "Joe Smith's car" or "President Joe"
+   *
+   * @param cm the coref mention
+   * @param em the entity mention
+   * @return true if the coref mention and entity mention synch
+   */
+
+  public static boolean synchCorefMentionEntityMention(Annotation ann, Mention cm, CoreMap em) {
+    int currCMTokenIndex = 0;
+    int tokenOverlapCount = 0;
+    // get cm tokens
+    CoreMap cmSentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(cm.sentNum);
+    List<CoreLabel>
+        cmTokens = cmSentence.get(CoreAnnotations.TokensAnnotation.class).subList(cm.startIndex, cm.endIndex);
+    // if trying to synch with a PERSON entity mention, ignore leading TITLE tokens
+    if (em.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PERSON")) {
+      while (currCMTokenIndex < cmTokens.size() && cmTokens.get(currCMTokenIndex).ner().equals("TITLE")) {
+        currCMTokenIndex++;
+      }
+    }
+    // get em tokens
+    int currEMTokenIndex = 0;
+    List<CoreLabel> emTokens = em.get(CoreAnnotations.TokensAnnotation.class);
+    // search for token mismatch
+    while (currEMTokenIndex < emTokens.size() && currCMTokenIndex < cmTokens.size()) {
+      // if a token mismatch is found, return false
+      if (!(emTokens.get(currEMTokenIndex) == cmTokens.get(currCMTokenIndex))) {
+        return false;
+      }
+      currCMTokenIndex++;
+      currEMTokenIndex++;
+      tokenOverlapCount += 1;
+    }
+    // finally allow for a trailing "'s"
+    if (currCMTokenIndex < cmTokens.size() && cmTokens.get(currCMTokenIndex).word().equals("'s")) {
+      currCMTokenIndex++;
+    }
+    // check that both em and cm tokens have been exhausted, check for token overlap, or return false
+    if (currCMTokenIndex < cmTokens.size() || currEMTokenIndex < emTokens.size() || tokenOverlapCount == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   @Override
   public void annotate(Annotation annotation) {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -103,13 +151,23 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
       corefProperties.setProperty("removeNestedMentions", "true");
     }
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
+    // build list of coref mentions in this document
     annotation.set(CorefCoreAnnotations.CorefMentionsAnnotation.class , new ArrayList<Mention>());
+    // initialize indexes
     int mentionIndex = 0;
     int currIndex = 0;
+    // initialize each token with an empty set of corresponding coref mention id's
+    for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+      token.set(CorefCoreAnnotations.CorefMentionIndexesAnnotation.class, new ArraySet<Integer>());
+    }
     for (CoreMap sentence : sentences) {
       List<Mention> mentionsForThisSentence = mentions.get(currIndex);
       sentence.set(CorefCoreAnnotations.CorefMentionsAnnotation.class, mentionsForThisSentence);
       annotation.get(CorefCoreAnnotations.CorefMentionsAnnotation.class).addAll(mentionsForThisSentence);
+      // set sentNum correctly for each coref mention
+      for (Mention corefMention : mentionsForThisSentence) {
+        corefMention.sentNum = currIndex;
+      }
       // increment to next list of mentions
       currIndex++;
       // assign latest mentionID, annotate tokens with coref mention info
@@ -121,12 +179,36 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
             corefMentionTokenIndex++) {
           CoreLabel currToken =
               sentence.get(CoreAnnotations.TokensAnnotation.class).get(corefMentionTokenIndex);
-          currToken.set(CorefCoreAnnotations.CorefMentionIndexAnnotation.class, mentionIndex);
+          currToken.get(CorefCoreAnnotations.CorefMentionIndexesAnnotation.class).add(mentionIndex);
         }
         mentionIndex++;
       }
     }
 
+    // synch coref mentions to entity mentions
+    HashMap<Integer,Integer> corefMentionToEntityMentionMapping = new HashMap<Integer,Integer>();
+    HashMap<Integer,Integer> entityMentionToCorefMentionMapping = new HashMap<Integer,Integer>();
+    for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+      if (token.get(CoreAnnotations.EntityMentionIndexAnnotation.class) != null) {
+        int tokenEntityMentionIndex = token.get(CoreAnnotations.EntityMentionIndexAnnotation.class);
+        CoreMap tokenEntityMention =
+            annotation.get(CoreAnnotations.MentionsAnnotation.class).get(tokenEntityMentionIndex);
+        for (Integer candidateCorefMentionIndex : token.get(CorefCoreAnnotations.CorefMentionIndexesAnnotation.class)) {
+          Mention candidateTokenCorefMention =
+              annotation.get(CorefCoreAnnotations.CorefMentionsAnnotation.class).get(candidateCorefMentionIndex);
+          if (synchCorefMentionEntityMention(annotation, candidateTokenCorefMention, tokenEntityMention)) {
+            entityMentionToCorefMentionMapping.put(tokenEntityMentionIndex, candidateCorefMentionIndex);
+            corefMentionToEntityMentionMapping.put(candidateCorefMentionIndex, tokenEntityMentionIndex);
+          }
+        }
+      }
+    }
+
+    // store mappings between entity mentions and coref mentions in annotation
+    annotation.set(CoreAnnotations.CorefMentionToEntityMentionMappingAnnotation.class,
+        corefMentionToEntityMentionMapping);
+    annotation.set(CoreAnnotations.EntityMentionToCorefMentionMappingAnnotation.class,
+        entityMentionToCorefMentionMapping);
   }
 
   private CorefMentionFinder getMentionFinder(Properties props, HeadFinder headFinder)
