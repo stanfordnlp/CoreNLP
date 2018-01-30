@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.coref.*;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.*;
@@ -24,8 +25,7 @@ public class ProtobufSerializationSanityITest extends TestCase {
     // set up pipeline and serializer
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref," +
-        "natlog,openie,kbp,entitylink,sentiment,quote");
-    props.setProperty("coref.removeSingletonClusters", "false");
+        "natlog,openie,kbp,sentiment,quote");
     pipeline = new StanfordCoreNLP(props);
     serializer = new ProtobufAnnotationSerializer();
   }
@@ -95,6 +95,33 @@ public class ProtobufSerializationSanityITest extends TestCase {
     }
   }
 
+  public void findCoreMapDifference(CoreMap originalCoreMap, CoreMap readCoreMap) {
+    if (!originalCoreMap.get(CoreAnnotations.TokensAnnotation.class).equals(
+        readCoreMap.get(CoreAnnotations.TokensAnnotation.class)))
+      System.err.println("tokens annotation difference detected!");
+    if (!originalCoreMap.get(CoreAnnotations.TextAnnotation.class).equals(
+        readCoreMap.get(CoreAnnotations.TextAnnotation.class)))
+      System.err.println("text annotation difference detected!");
+    if (!originalCoreMap.get(CorefCoreAnnotations.CorefChainAnnotation.class).equals(
+        readCoreMap.get(CorefCoreAnnotations.CorefChainAnnotation.class)))
+      System.err.println("coref chain annotation difference detected!");
+    if (!originalCoreMap.get(CorefCoreAnnotations.CorefMentionsAnnotation.class).equals(
+        readCoreMap.get(CorefCoreAnnotations.CorefMentionsAnnotation.class)))
+      System.err.println("coref mentions difference detected!");
+    if (!originalCoreMap.get(CoreAnnotations.EntityMentionToCorefMentionMappingAnnotation.class).equals(
+        readCoreMap.get(CoreAnnotations.EntityMentionToCorefMentionMappingAnnotation.class)))
+      System.err.println("entity mention to coref mapping difference detected!");
+    if (!originalCoreMap.get(CoreAnnotations.CorefMentionToEntityMentionMappingAnnotation.class).equals(
+        readCoreMap.get(CoreAnnotations.CorefMentionToEntityMentionMappingAnnotation.class)))
+      System.err.println("coref mention to entity mapping difference detected!");
+    if (!originalCoreMap.get(CoreAnnotations.MentionsAnnotation.class).equals(
+        readCoreMap.get(CoreAnnotations.MentionsAnnotation.class)))
+      System.err.println("mentions annotation difference detected!");
+    if (!originalCoreMap.get(CoreAnnotations.SentencesAnnotation.class).equals(
+        readCoreMap.get(CoreAnnotations.SentencesAnnotation.class)))
+      System.err.println("sentences annotation difference detected!");
+  }
+
   public void testBasicExample() throws ClassNotFoundException, IOException {
     // set up document
     CoreDocument sampleDocument = new CoreDocument(sampleText);
@@ -113,6 +140,7 @@ public class ProtobufSerializationSanityITest extends TestCase {
     compareTokensLists(sampleDocument.annotation(), readAnnotation);
     compareEntityMentionsLists(sampleDocument.annotation(), readAnnotation);
     compareQuotesLists(sampleDocument.annotation(), readAnnotation);
+    findCoreMapDifference(sampleDocument.annotation(), readAnnotation);
     ProtobufAnnotationSerializerSlowITest.sameAsRead(sampleDocument.annotation(), readAnnotation);
   }
 

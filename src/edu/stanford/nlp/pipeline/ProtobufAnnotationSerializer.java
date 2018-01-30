@@ -372,8 +372,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // indexes into document wide mention lists
     if (keySet.contains(EntityMentionIndexAnnotation.class)) {
       builder.setEntityMentionIndex(getAndRegister(coreLabel, keysToSerialize, EntityMentionIndexAnnotation.class)); }
-    //if (keySet.contains(CorefMentionIndexAnnotation.class)) {
-      //builder.setCorefMentionIndex(getAndRegister(coreLabel, keysToSerialize, CorefMentionIndexAnnotation.class)); }
+
+    // coref mentions that contain this token
+    if (keySet.contains(CorefMentionIndexesAnnotation.class)) {
+      for (Integer corefMentionIndex : coreLabel.get(CorefMentionIndexesAnnotation.class)) {
+        builder.addCorefMentionIndex(corefMentionIndex);
+      }
+      keysToSerialize.remove(CorefMentionIndexesAnnotation.class);
+    }
 
     // Return
     return builder;
@@ -669,6 +675,35 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setHasEntityMentionsAnnotation(true);
     } else {
       builder.setHasEntityMentionsAnnotation(false);
+    }
+    // mappings between coref mentions and entity mentions
+    if (doc.containsKey(EntityMentionToCorefMentionMappingAnnotation.class)) {
+      Map<Integer,Integer> entityMentionToCorefMention =
+          doc.get(EntityMentionToCorefMentionMappingAnnotation.class);
+      int numEntityMentions = doc.get(MentionsAnnotation.class).size();
+      for (int entityMentionIndex = 0 ; entityMentionIndex < numEntityMentions; entityMentionIndex++) {
+        if (entityMentionToCorefMention.keySet().contains(entityMentionIndex)) {
+          builder.addEntityMentionToCorefMentionMappings(entityMentionToCorefMention.get(entityMentionIndex));
+        } else {
+          // store a -1 if there is no coref mention corresponding to this entity mention
+          builder.addEntityMentionToCorefMentionMappings(-1);
+        }
+      }
+      keysToSerialize.remove(EntityMentionToCorefMentionMappingAnnotation.class);
+    }
+    if (doc.containsKey(CorefMentionToEntityMentionMappingAnnotation.class)) {
+      Map<Integer,Integer> corefMentionToEntityMention =
+          doc.get(CorefMentionToEntityMentionMappingAnnotation.class);
+      int numCorefMentions = doc.get(CorefMentionsAnnotation.class).size();
+      for (int corefMentionIndex = 0 ; corefMentionIndex < numCorefMentions; corefMentionIndex++) {
+        if (corefMentionToEntityMention.keySet().contains(corefMentionIndex)) {
+          builder.addCorefMentionToEntityMentionMappings(corefMentionToEntityMention.get(corefMentionIndex));
+        } else {
+          // store a -1 if there is no coref mention corresponding to this entity mention
+          builder.addCorefMentionToEntityMentionMappings(-1);
+        }
+      }
+      keysToSerialize.remove(CorefMentionToEntityMentionMappingAnnotation.class);
     }
     // add character info from segmenter
     if (doc.containsKey(SegmenterCoreAnnotations.CharactersAnnotation.class)) {
@@ -1327,7 +1362,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         sectionAnnotations.set(AuthorAnnotation.class, proto.getSectionAuthor());
       word.set(SectionStartAnnotation.class, sectionAnnotations);
     }
-    // handle sectione end info
+    // handle section end info
     if (proto.hasSectionEndLabel()) {
       word.set(SectionEndAnnotation.class, proto.getSectionEndLabel());
     }
@@ -1578,6 +1613,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       ann.set(SegmenterCoreAnnotations.CharactersAnnotation.class, docChars);
     }
 
+    boolean hasCorefInfo = proto.getHasCorefAnnotation();
+
     // Add tokens
     List<CoreLabel> tokens = new ArrayList<>();
     if (proto.getSentenceCount() > 0) {
@@ -1589,7 +1626,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         }
         // Read the sentence
         for (CoreNLPProtos.Token token : sentence.getTokenList()) {
+          // make CoreLabel
           CoreLabel coreLabel = fromProto(token);
+          // if there is coref info, set coref mention indexes info for this token
+          if (hasCorefInfo) {
+            coreLabel.set(CorefMentionIndexesAnnotation.class, new HashSet<Integer>());
+            for (Integer corefMentionIndex : token.getCorefMentionIndexList()) {
+              coreLabel.get(CorefMentionIndexesAnnotation.class).add(corefMentionIndex);
+            }
+          }
           // Set docid
           if (proto.hasDocID()) { coreLabel.setDocID(proto.getDocID()); }
           if (token.hasTokenBeginIndex() && token.hasTokenEndIndex()) {
@@ -1885,6 +1930,34 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       // now the SpeakerInfo for this Mention should be fully restored
       mentionToUpdate.speakerInfo = speakerInfo;
+    }
+
+    // if there is coref info, add mappings from entity mentions and coref mentions
+    if (hasCorefInfo) {
+      // restore the entity mention to coref mention mappings
+      // entity mentions without a corresponding coref mention have -1 in the serialized mapping
+      ann.set(CoreAnnotations.EntityMentionToCorefMentionMappingAnnotation.class,
+          new HashMap<Integer,Integer>());
+      int entityMentionIndex = 0;
+      for (int corefMentionForEntityMentionIndex : proto.getEntityMentionToCorefMentionMappingsList()) {
+        if (corefMentionForEntityMentionIndex != -1) {
+          ann.get(EntityMentionToCorefMentionMappingAnnotation.class).put(
+              entityMentionIndex, corefMentionForEntityMentionIndex);
+        }
+        entityMentionIndex++;
+      }
+      // restore the coref mention to entity mention mappings
+      // entity mentions without a corresponding coref mention have -1 in the serialized mapping
+      ann.set(CoreAnnotations.CorefMentionToEntityMentionMappingAnnotation.class,
+          new HashMap<Integer,Integer>());
+      int corefMentionIndex = 0;
+      for (int entityMentionForCorefMentionIndex : proto.getCorefMentionToEntityMentionMappingsList()) {
+        if (entityMentionForCorefMentionIndex != -1) {
+          ann.get(CorefMentionToEntityMentionMappingAnnotation.class).put(
+              corefMentionIndex, entityMentionForCorefMentionIndex);
+        }
+        corefMentionIndex++;
+      }
     }
 
     // Return
