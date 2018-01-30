@@ -274,7 +274,7 @@ public class QuoteAttributionAnnotator implements Annotator {
             quote.set(CanonicalMentionBeginAnnotation.class,
                 canonicalEntityMentionFirstToken.get(CoreAnnotations.TokenBeginAnnotation.class));
             quote.set(CanonicalMentionEndAnnotation.class,
-                canonicalEntityMentionLastToken.get(CoreAnnotations.TokenBeginAnnotation.class) + 1);
+                canonicalEntityMentionLastToken.get(CoreAnnotations.TokenBeginAnnotation.class));
           }
         }
       }
