@@ -72,6 +72,7 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
           CoreAnnotations.SentencesAnnotation.class,
           CoreAnnotations.PartOfSpeechAnnotation.class,
           CoreAnnotations.NamedEntityTagAnnotation.class,
+          CoreAnnotations.EntityTypeAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.TextAnnotation.class,
           CoreAnnotations.ValueAnnotation.class,

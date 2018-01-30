@@ -76,9 +76,12 @@ public class RequirementsCorrectSlowITest {
         // note that UniversalSemanticHeadFinder accesses this key
         // (line 625, line 628)
         used.remove(CoreAnnotations.CategoryAnnotation.class);
-        // coref mentions creates CorefMentionIndexAnnotation
+        // coref mention detection creates CorefMentionIndexAnnotation,
+        // EntityMentionToCorefMentionMapping and CorefMentionToEntityMentionMapping
         // which is used by the main coref annotator
         used.remove(CorefCoreAnnotations.CorefMentionIndexesAnnotation.class);
+        used.remove(CoreAnnotations.EntityMentionToCorefMentionMappingAnnotation.class);
+        used.remove(CoreAnnotations.CorefMentionToEntityMentionMappingAnnotation.class);
         // ValueAnnotation is sometimes used, sometimes not
         // so artificially add it so this test stops failing in
         // cases where ValueAnnotation isn't used...note that this
