@@ -1,6 +1,4 @@
 package edu.stanford.nlp.parser.nndep;
-import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
@@ -27,6 +25,8 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
+import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,10 +52,14 @@ import static java.util.stream.Collectors.toList;
  * </blockquote>
  *
  * <p>
- * New models can be trained from the command line; see {@link #main}
- * for details on training options. This parser will also output
- * CoNLL-X format predictions; again see {@link #main} for available
- * options.
+ * The parser can also be used from the command line to train models and to parse text.
+ * New models can be trained from the command line; see the {@link #main} method
+ * for details on training options. The parser can parse either plain text files or
+ * CoNLL-X format files and output
+ * CoNLL-X format predictions; again see {@link #main} for available options.
+ * (The options available for things like tokenization and sentence splitting
+ * in this class are not as extensive as and not necessarily consistent with
+ * the options of other classes like {@code LexicalizedParser} and {@code StanfordCoreNLP}.
  *
  * <p>
  * This parser can also be used programmatically. The easiest way to
@@ -70,7 +74,7 @@ import static java.util.stream.Collectors.toList;
 public class DependencyParser  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParser.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(DependencyParser.class);
   public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_UD.gz";
 
   /**
