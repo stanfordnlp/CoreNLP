@@ -16,18 +16,20 @@ import java.util.List;
  * The test is evaluated based on the rightmost natural number found in
  * the filename string.  (It only looks in the final filename, not in other
  * components of the path.)  Number ranges are inclusive.
- * <p/>
+ * <p>
  * This filter can select multiple discontinuous ranges based on a format
  * similar to page selection ranges in various formatting software, such as
  * "34,52-65,67,93-95".  The constructor takes a String of this sort and
- * deconstructs it into a list of ranges.  The accepted syntax is:<p>
+ * deconstructs it into a list of ranges.  The accepted syntax is:
+ * <p>
  * ranges = range <br>
  * ranges = range "," ranges <br>
  * range = integer <br>
- * range = integer "-" integer <p>
+ * range = integer "-" integer
+ * <p>
  * Whitespace will be ignored.  If the filter constructor is passed anything
  * that is not a list of numeric ranges of this sort, including being passed
- * an empty String, then an <code>IllegalArgumentException</code> will be
+ * an empty String, then an {@code IllegalArgumentException} will be
  * thrown.
  *
  * @author Christopher Manning
@@ -70,9 +72,7 @@ public class NumberRangesFileFilter implements FileFilter {
         }
       }
     } catch (Exception e) {
-      IllegalArgumentException iae = new IllegalArgumentException("Constructor argument not valid list of number ranges: " + ranges);
-      iae.initCause(e);
-      throw iae;
+      throw new IllegalArgumentException("Constructor argument not valid list of number ranges: " + ranges, e);
     }
   }
 

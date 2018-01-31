@@ -8,7 +8,7 @@ import edu.stanford.nlp.process.Morphology;
  * lemma and tag.
  * It implements the Label interface; the {@code value()} method for that
  * interface corresponds to the word of the WordLemmaTag.
- * <p/>
+ * <p>
  * The equality relation for WordLemmaTag is defined as identity of
  * word, lemma and tag.
  *

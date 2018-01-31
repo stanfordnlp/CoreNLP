@@ -1,5 +1,4 @@
 package edu.stanford.nlp.international.arabic.process; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,9 +17,10 @@ import edu.stanford.nlp.process.LexedTokenFactory;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * Tokenizer for UTF-8 Arabic. Buckwalter encoding is *not* supported.
+ * Tokenizer for UTF-8 Arabic. Buckwalter encoding is <i>not</i> supported.
  *
  * <p>
  * A single instance of an Arabic Tokenizer is not thread safe, as it
@@ -28,7 +28,6 @@ import edu.stanford.nlp.util.StringUtils;
  * instances can be created safely, though.  A single instance of a
  * ArabicTokenizerFactory is also not thread safe, as it keeps its
  * options in a local variable.
- * </p>
  *
  * <p>
  * TODO(spenceg): Merge in rules from ibm tokenizer (v5).
@@ -36,13 +35,13 @@ import edu.stanford.nlp.util.StringUtils;
  * TODO(spenceg): When running from the command line, the tokenizer does not
  *   produce the correct number of newline-delimited lines for the ATB data
  *   sets.
- * </p>
+ *
  * @author Spence Green
  */
 public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicTokenizer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ArabicTokenizer.class);
 
   // The underlying JFlex lexer
   private final ArabicLexer lexer;
@@ -150,25 +149,24 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * Currently, this tokenizer does not do line splitting. It normalizes non-printing
    * line separators across platforms and prints the system default line splitter
    * to the output.
-   * </p>
+   *
    * <p>
    * The following normalization options are provided:
    * <ul>
-   * <li><code>useUTF8Ellipsis</code> : Replaces sequences of three or more full stops with \u2026</li>
-   * <li><code>normArDigits</code> : Convert Arabic digits to ASCII equivalents</li>
-   * <li><code>normArPunc</code> : Convert Arabic punctuation to ASCII equivalents</li>
-   * <li><code>normAlif</code> : Change all alif forms to bare alif</li>
-   * <li><code>normYa</code> : Map ya to alif maqsura</li>
-   * <li><code>removeDiacritics</code> : Strip all diacritics</li>
-   * <li><code>removeTatweel</code> : Strip tatweel elongation character</li>
-   * <li><code>removeQuranChars</code> : Remove diacritics that appear in the Quran</li>
-   * <li><code>removeProMarker</code> : Remove the ATB null pronoun marker</li>
-   * <li><code>removeSegMarker</code> : Remove the ATB clitic segmentation marker</li>
-   * <li><code>removeMorphMarker</code> : Remove the ATB morpheme boundary markers</li>
-   * <li><code>removeLengthening</code> : Replace all sequences of three or more identical (non-period) characters with one copy</li>
-   * <li><code>atbEscaping</code> : Replace left/right parentheses with ATB escape characters</li>
+   * <li>{@code useUTF8Ellipsis} : Replaces sequences of three or more full stops with \u2026</li>
+   * <li>{@code normArDigits} : Convert Arabic digits to ASCII equivalents</li>
+   * <li>{@code normArPunc} : Convert Arabic punctuation to ASCII equivalents</li>
+   * <li>{@code normAlif} : Change all alif forms to bare alif</li>
+   * <li>{@code normYa} : Map ya to alif maqsura</li>
+   * <li>{@code removeDiacritics} : Strip all diacritics</li>
+   * <li>{@code removeTatweel} : Strip tatweel elongation character</li>
+   * <li>{@code removeQuranChars} : Remove diacritics that appear in the Quran</li>
+   * <li>{@code removeProMarker} : Remove the ATB null pronoun marker</li>
+   * <li>{@code removeSegMarker} : Remove the ATB clitic segmentation marker</li>
+   * <li>{@code removeMorphMarker} : Remove the ATB morpheme boundary markers</li>
+   * <li>{@code removeLengthening} : Replace all sequences of three or more identical (non-period) characters with one copy</li>
+   * <li>{@code atbEscaping} : Replace left/right parentheses with ATB escape characters</li>
    * </ul>
-   * </p>
    *
    * @param args
    */
