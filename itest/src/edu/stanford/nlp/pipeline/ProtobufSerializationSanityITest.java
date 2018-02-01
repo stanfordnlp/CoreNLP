@@ -25,7 +25,7 @@ public class ProtobufSerializationSanityITest extends TestCase {
     // set up pipeline and serializer
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref," +
-        "natlog,openie,kbp,sentiment,quote");
+        "natlog,openie,entitylink,kbp,sentiment,quote");
     pipeline = new StanfordCoreNLP(props);
     serializer = new ProtobufAnnotationSerializer();
   }
