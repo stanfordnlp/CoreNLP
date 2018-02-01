@@ -323,7 +323,7 @@ public class KBPAnnotator implements Annotator {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
     // Create simple document
-    Document doc = new Document(kbpProperties,serializer.toProto(annotation));
+    Document doc = new Document(kbpProperties, serializer.toProto(annotation));
 
     // Get the mentions in the document
     List<CoreMap> mentions = new ArrayList<>();
@@ -398,7 +398,7 @@ public class KBPAnnotator implements Annotator {
     }
 
     // create a mapping of char offset pairs to KBPMention
-    HashMap<Pair<Integer,Integer>, CoreMap> charOffsetToKBPMention = new HashMap<>();
+    HashMap<Pair<Integer, Integer>, CoreMap> charOffsetToKBPMention = new HashMap<>();
     for (CoreMap mention : mentions) {
       int nerMentionCharBegin = mention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
       int nerMentionCharEnd = mention.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
@@ -406,11 +406,22 @@ public class KBPAnnotator implements Annotator {
     }
 
     // Create a canonical mention map
-    Map<CoreMap,CoreMap> mentionToCanonicalMention;
-    if (kbpLanguage.equals(LanguageInfo.HumanLanguage.SPANISH))
+    Map<CoreMap, CoreMap> mentionToCanonicalMention;
+    if (kbpLanguage.equals(LanguageInfo.HumanLanguage.SPANISH)) {
       mentionToCanonicalMention = spanishCorefSystem.canonicalMentionMapFromEntityMentions(mentions);
-    else
+      if (VERBOSE) {
+        log.info("---");
+        log.info("basic spanish coref results");
+        for (CoreMap originalMention : mentionToCanonicalMention.keySet()) {
+          if (!originalMention.equals(mentionToCanonicalMention.get(originalMention))) {
+            log.info("mapped: "+originalMention+" to: "+
+                mentionToCanonicalMention.get(originalMention));
+          }
+        }
+      }
+    } else {
       mentionToCanonicalMention = new HashMap<>();
+    }
     // check if there is coref info
     Set<Map.Entry<Integer, CorefChain>> corefChains;
     if (annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null &&
