@@ -607,7 +607,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    * displayed first and then not shown in the map that is displayed</li>
    * <li>"word": Just the value of HEAD_WORD_KEY in the map</li>
    * </ul>
-   * <p/>
+   * <p>
    * Map is printed in alphabetical order of keys.
    */
   @SuppressWarnings("unchecked")
