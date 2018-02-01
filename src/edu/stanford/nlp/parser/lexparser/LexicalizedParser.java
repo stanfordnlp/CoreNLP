@@ -1077,8 +1077,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * {@code -escaper}, the tokens <i>must</i> all be correctly
    * tokenized tokens of the appropriate treebank for the parser to work
    * well (for instance, if using the Penn English Treebank, you must have
-   * coded "(" as "-LRB-", etc.). (Note: we do not use the backslash escaping
-   * in front of / and * that appeared in Penn Treebank releases through 1999.)</li>
+   * coded "(" as "-LRB-", "3/4" as "3\/4", etc.)</LI>
    * <li>{@code -escaper class} Specify a class of type
    * {@link Function}&lt;List&lt;HasWord&gt;,List&lt;HasWord&gt;&gt; to do
    * customized escaping of tokenized text.  This class will be run over the

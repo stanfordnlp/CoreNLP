@@ -1911,7 +1911,7 @@ public class CoreAnnotations {
   }
 
   /** Annotation indicating whether the numeric phrase the token is part of
-   * represents a NUMBER or ORDINAL (twenty first {@literal =>} ORDINAL ORDINAL).
+   * represents a NUMBER or ORDINAL (twenty first => ORDINAL ORDINAL).
    */
   public static class NumericCompositeValueAnnotation implements CoreAnnotation<Number> {
     @Override
@@ -1921,7 +1921,7 @@ public class CoreAnnotations {
   }
 
   /** Annotation indicating the numeric value of the phrase the token is part of
-   * (twenty first {@literal =>} 21 21 ).
+   * (twenty first => 21 21 ).
    */
   public static class NumericCompositeTypeAnnotation implements CoreAnnotation<String> {
     @Override
