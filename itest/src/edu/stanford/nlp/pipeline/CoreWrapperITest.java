@@ -1,42 +1,83 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.util.Pair;
 import java.util.*;
-import org.junit.Test;
+import junit.framework.TestCase;
 
 
-public class CoreWrapperITest {
+public class CoreWrapperITest extends TestCase {
 
-  @Test
   public void testPipeline() throws Exception {
     // set up pipeline
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse,coref,kbp,quote");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // make a basic document
     CoreDocument exampleDocument =
-        new CoreDocument("Barack Obama was born in Hawaii.  He was elected president in 2008.");
+        new CoreDocument(
+            "Barack Obama was born in Hawaii on August 4, 1961. " +
+                "He was elected president in 2008, defeating Arizona senator John McCain. " +
+                "Obama said, \"My fellow citizens:  I stand here today humbled by the task before us, grateful for the " +
+                "trust you've bestowed, mindful of the sacrifices borne by our ancestors\" to begin his inaugural " +
+                "address.");
     // annotate document
     pipeline.annotate(exampleDocument);
     // examine output
-    System.err.println("---");
-    System.err.println("document: ");
-    System.err.println();
-    System.err.println(exampleDocument.text());
-    System.err.println("---");
-    System.err.println("sentences: ");
-    for (CoreSentence sentence : exampleDocument.sentences()) {
-      System.err.println();
-      System.err.println("sentence text: " + sentence.text());
-      System.err.println("dependency parse: ");
-      System.err.println(sentence.dependencyParse().toList());
-      System.err.println("entity mentions: ");
-      for (CoreEntityMention em : sentence.entityMentions())
-        System.err.println(em.text());
+    // sentences
+    // correct number of sentences
+    assertEquals(3, exampleDocument.sentences().size());
+    CoreSentence firstSentence = exampleDocument.sentences().get(0);
+    CoreSentence secondSentence = exampleDocument.sentences().get(1);
+    int sentenceCount = 0;
+    for (CoreSentence coreSentence : exampleDocument.sentences()) {
+      assertEquals(coreSentence.coreMap(),
+          exampleDocument.annotation().get(CoreAnnotations.SentencesAnnotation.class).get(sentenceCount));
+      sentenceCount++;
     }
-    System.err.println("---");
-    System.err.println("entity mentions: ");
-    for (CoreEntityMention entityMention : exampleDocument.entityMentions()) {
-      System.err.println(entityMention.text());
-    }
+    // sentence has correct text
+    assertEquals("He was elected president in 2008, defeating Arizona senator John McCain.",
+        secondSentence.text());
+    // sentence has correct link to document
+    assertTrue(secondSentence.document() == exampleDocument);
+    // char offsets
+    Pair<Integer,Integer> sentenceTwoOffsets = new Pair<>(51,123);
+    assertEquals(sentenceTwoOffsets, secondSentence.charOffsets());
+    // mention info from sentences
+    assertEquals(6, secondSentence.entityMentions().size());
+    CoreEntityMention arizonaMentionFromSentence = secondSentence.entityMentions().get(2);
+    CoreEntityMention arizonaMentionFromDocument = exampleDocument.entityMentions().get(5);
+    assertEquals("Arizona", arizonaMentionFromSentence.text());
+    assertTrue(arizonaMentionFromSentence == arizonaMentionFromDocument);
+    // kbp relation info from sentences
+    List<RelationTriple> kbpRelationsFromSentenceOne = firstSentence.kbpRelations();
+    String sentenceOneRelationOne = "("+firstSentence.kbpRelations().get(0).subjectGloss()+","+
+        firstSentence.kbpRelations().get(0).relationGloss()+","+
+        firstSentence.kbpRelations().get(0).objectGloss()+")";
+    String goldSentenceOneRelationOne = "(Barack Obama,per:stateorprovince_of_birth,Hawaii)";
+    assertEquals(goldSentenceOneRelationOne, sentenceOneRelationOne);
+    // entity mentions
+    CoreEntityMention firstEntityMention = exampleDocument.entityMentions().get(0);
+    CoreEntityMention fifthEntityMention = exampleDocument.entityMentions().get(4);
+    assertEquals(12, exampleDocument.entityMentions().size());
+    assertEquals("Barack Obama", firstEntityMention.text());
+    assertEquals("Barack Obama was born in Hawaii on August 4, 1961.",
+        firstEntityMention.sentence().text());
+    Pair<Integer,Integer> goldFirstEntityMentionCharOffsets = new Pair<>(0,12);
+    assertEquals(goldFirstEntityMentionCharOffsets, firstEntityMention.charOffsets());
+    assertEquals("PERSON", firstEntityMention.entityType());
+    assertEquals("2008", fifthEntityMention.text());
+    assertEquals("He was elected president in 2008, defeating Arizona senator John McCain.",
+        fifthEntityMention.sentence().text());
+    Pair<Integer,Integer> goldFifthEntityMentionCharOffsets = new Pair<>(79,83);
+    assertEquals(goldFifthEntityMentionCharOffsets, fifthEntityMention.charOffsets());
+    assertEquals("DATE", fifthEntityMention.entityType());
+    // quotes
+    CoreQuote firstQuote = exampleDocument.quotes().get(0);
+    assertEquals("\"My fellow citizens:  I stand here today humbled by the task before us, grateful for the trust " +
+        "you've bestowed, mindful of the sacrifices borne by our ancestors\"", firstQuote.text());
+    assertEquals("Obama", firstQuote.speaker().get());
+    assertEquals("Barack Obama", firstQuote.canonicalSpeaker().get());
   }
 }
