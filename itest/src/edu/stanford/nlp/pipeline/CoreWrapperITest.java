@@ -3,6 +3,10 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.util.Pair;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.*;
 import junit.framework.TestCase;
 
@@ -79,5 +83,21 @@ public class CoreWrapperITest extends TestCase {
         "you've bestowed, mindful of the sacrifices borne by our ancestors\"", firstQuote.text());
     assertEquals("Obama", firstQuote.speaker().get());
     assertEquals("Barack Obama", firstQuote.canonicalSpeaker().get());
+    // serialization
+    // serialize
+    AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+    // write
+    ByteArrayOutputStream ks = new ByteArrayOutputStream();
+    serializer.writeCoreDocument(exampleDocument, ks).close();
+    // read
+    InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+    Pair<Annotation, InputStream> pair = serializer.read(kis);
+    pair.second.close();
+    Annotation readAnnotation = pair.first;
+    kis.close();
+    // check if same
+    CoreDocument readCoreDocument = new CoreDocument(readAnnotation);
+    ProtobufAnnotationSerializerSlowITest.sameAsRead(exampleDocument.annotation(),
+        readCoreDocument.annotation());
   }
 }
