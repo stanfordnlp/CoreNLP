@@ -20,7 +20,7 @@ public class StanfordCoreNLPSpeedSlowITest extends TestCase {
     pipeline = new StanfordCoreNLP(props);
   }
 
-  public void testHeidelTimeKBPAnnotatorITest() {
+  public void testStanfordCoreNLPSpeed() {
     List<String> kbp2016FileList = IOUtils.linesFromFile(WORKING_DIR + "/kbp-2016-files.txt");
     long startTime = System.currentTimeMillis();
     for (String filePath : kbp2016FileList) {
