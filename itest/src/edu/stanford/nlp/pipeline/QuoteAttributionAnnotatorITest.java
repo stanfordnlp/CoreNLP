@@ -31,10 +31,12 @@ public class QuoteAttributionAnnotatorITest extends TestCase {
     CoreQuote quoteTwo = corefDocTwo.quotes().get(0);
     // quote one
     assertEquals("\"I am going to order a pizza.\"", quoteOne.text());
+    assertEquals("He", quoteOne.speaker().get());
     assertEquals("Joe Smith", quoteOne.canonicalSpeaker().get());
     assertEquals(1,corefDocOne.quotes().size());
     // quote two
     assertEquals("\"I'd like to order that item.\"", quoteTwo.text());
+    assertEquals("Chris", quoteTwo.speaker().get());
     assertEquals("Chris Anderson", quoteTwo.canonicalSpeaker().get());
     assertEquals(1,corefDocTwo.quotes().size());
   }
