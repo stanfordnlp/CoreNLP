@@ -200,12 +200,17 @@ public class QuoteAttributionUtils {
   }
   private static CoreMap constructCoreMap(Annotation doc, Pair<Integer, Integer> run) {
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
+    // check if the second part of the run is a *NL* token, adjust accordingly
+    int endTokenIndex = run.second;
+    while (endTokenIndex > 0 && tokens.get(endTokenIndex).get(CoreAnnotations.IsNewlineAnnotation.class)) {
+      endTokenIndex--;
+    }
     // get the sentence text from the first and last character offsets
     int begin = tokens.get(run.first).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-    int end = tokens.get(run.second).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+    int end = tokens.get(endTokenIndex).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
     String sentenceText = doc.get(CoreAnnotations.TextAnnotation.class).substring(begin, end);
 
-    List<CoreLabel> sentenceTokens = tokens.subList(run.first, run.second+1);
+    List<CoreLabel> sentenceTokens = tokens.subList(run.first, endTokenIndex+1);
 
     // create a sentence annotation with text and token offsets
     CoreMap sentence = new Annotation(sentenceText);
