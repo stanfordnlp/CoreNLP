@@ -13,6 +13,25 @@ import edu.stanford.nlp.util.MetaClass;
  * A class which encapsulates configuration settings for Redwood.
  * The class operates on the builder model; that is, you can chain method
  * calls.
+ * <p>
+ * If you wish to turn off Redwood logging messages altogether you can use:
+ * {@code RedwoodConfiguration.current().clear().apply(); }.
+ * <p>
+ * If you need to suppress messages to stderr in a block, you can use:
+ * <pre>{@code
+ * // shut off annoying messages to stderr
+ * RedwoodConfiguration.empty().capture(System.err).apply();
+ * // block of code that does stuff
+ * // enable stderr again
+ * RedwoodConfiguration.current().clear().apply();
+ * }</pre>
+ * <p>
+ * Alternatively, if Redwood is logging via slf4j (this is the default, if slf4j is present on your classpath),
+ * then you can configure logging using the usual slf4j configuration methods. See, for example,
+ * <a href="https://stackoverflow.com/questions/41761099/mute-stanford-corenlp-logging">this StackOverflow
+ * question</a>. For example, you can add a Properties file {@code simplelogger.properties} to your classpath
+ * with the line {@code org.slf4j.simpleLogger.defaultLogLevel=error} and then only ERROR messages will be
+ * printed.
  *
  * @author Gabor Angeli (angeli at cs.stanford)
  */
@@ -99,6 +118,7 @@ public class RedwoodConfiguration  {
   /**
    * Determine where, in the end, console output should go.
    * The default is stdout.
+   *
    * @param method An output, one of: stdout, stderr, or java.util.logging
    * @return this
    */
@@ -390,6 +410,7 @@ public class RedwoodConfiguration  {
     }
     return this;
   }
+
   /**
    * Close tracks when the JVM shuts down.
    * @return this

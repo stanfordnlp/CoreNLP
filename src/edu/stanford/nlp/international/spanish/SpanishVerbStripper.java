@@ -316,19 +316,12 @@ public final class SpanishVerbStripper implements Serializable  {
    * Attempt to separate attached pronouns from the given verb.
    *
    * @param verb Spanish verb
-   * @return Returns a tuple <tt>((originalStem, normalizedStem), pronouns)</tt>,
+   * @return Returns a StrippedVerb struct/tuple <tt>(originalStem, normalizedStem, pronouns)</tt>,
    *         or <tt>null</tt> if no pronouns could be located and separated.
    *         <ul>
-   *           <li>Pair of:
-   *             <ul>
-   *               <li><tt>originalStem</tt>: The verb stem simply split from the
-   *                   following pronouns.</li>
-   *               <li><tt>normalizedStem</tt>: The verb stem normalized to
-   *                   dictionary form, i.e. in the form it would appear with the
-   *                   same conjugation but no pronouns. See
-   *                   {@link #validateVerbPair(Pair<Pair<String, String>, List<String>)}
-   *                   for more details.</li>
-   *             </ul></li>
+               <li><tt>originalStem</tt>: The verb stem simply split from the following pronouns.</li>
+   *           <li><tt>normalizedStem</tt>: The verb stem normalized to dictionary form, i.e. in the
+   *                   form it would appear with the same conjugation but no pronouns.</li>
    *           <li><tt>pronouns</tt>: Pronouns which were attached to the verb.</li>
    *         </ul>
    */

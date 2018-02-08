@@ -226,6 +226,10 @@ public class JSONOutputter extends AnnotationOutputter {
               quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null ?
                   quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) :
                   "Unknown");
+          l2.set("canonicalSpeaker",
+              quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null ?
+                  quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) :
+                  "Unknown");
 
         }));
       }

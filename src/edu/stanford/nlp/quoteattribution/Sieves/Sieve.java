@@ -156,7 +156,7 @@ public class Sieve {
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
 
     TokenNode pointer = rootNameNode;
-    for(int index = textRun.first; index <= textRun.second; index++) {
+    for(int index = textRun.first; index <= textRun.second && index < tokens.size(); index++) {
       CoreLabel token = tokens.get(index);
       String tokenText = token.word();
 //      System.out.println(token);
@@ -247,7 +247,7 @@ public class Sieve {
     ArrayList<Integer> pronounList = new ArrayList<>();
 
 
-    for(int i = nonQuoteRun.first; i <= nonQuoteRun.second; i++)
+    for(int i = nonQuoteRun.first; i <= nonQuoteRun.second && i < tokens.size() ; i++)
     {
       if(tokens.get(i).word().equalsIgnoreCase("he") || tokens.get(i).word().equalsIgnoreCase("she"))
         pronounList.add(i);
@@ -263,10 +263,29 @@ public class Sieve {
     return pronounList;
   }
 
-  //for filling in the text of a mention
+  // for filling in the text of a mention
   public String tokenRangeToString(Pair<Integer, Integer> tokenRange) {
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
-    return doc.get(CoreAnnotations.TextAnnotation.class).substring(tokens.get(tokenRange.first).beginPosition(), tokens.get(tokenRange.second).endPosition());
+    // see if the token range matches an entity mention
+    List<CoreMap> entityMentionsInDoc = doc.get(CoreAnnotations.MentionsAnnotation.class);
+    Integer potentialMatchingEntityMentionIndex =
+        tokens.get(tokenRange.first).get(CoreAnnotations.EntityMentionIndexAnnotation.class);
+    CoreMap potentialMatchingEntityMention = null;
+    if (entityMentionsInDoc != null && potentialMatchingEntityMentionIndex != null) {
+      potentialMatchingEntityMention = entityMentionsInDoc.get(potentialMatchingEntityMentionIndex);
+    }
+    // if there is a matching entity mention, return it's text (which has been processed to remove
+    // things like newlines and xml)...if there isn't return the full substring of the document text
+    if (potentialMatchingEntityMention != null &&
+        potentialMatchingEntityMention.get(
+            CoreAnnotations.CharacterOffsetBeginAnnotation.class) == tokens.get(tokenRange.first).beginPosition() &&
+        potentialMatchingEntityMention.get(
+            CoreAnnotations.CharacterOffsetEndAnnotation.class) == tokens.get(tokenRange.second).endPosition()) {
+      return potentialMatchingEntityMention.get(CoreAnnotations.TextAnnotation.class);
+    } else {
+      return doc.get(CoreAnnotations.TextAnnotation.class).substring(
+          tokens.get(tokenRange.first).beginPosition(), tokens.get(tokenRange.second).endPosition());
+    }
   }
 
   public String tokenRangeToString(int token_idx) {
@@ -334,7 +353,7 @@ public class Sieve {
   public List<Integer> scanForAnimates(Pair<Integer, Integer> span) {
     List<Integer> animateIndices = new ArrayList<>();
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
-    for(int i = span.first; i <= span.second; i++)
+    for(int i = span.first; i <= span.second && i < tokens.size() ; i++)
     {
       CoreLabel token = tokens.get(i);
       if(animacySet.contains(token.word()))

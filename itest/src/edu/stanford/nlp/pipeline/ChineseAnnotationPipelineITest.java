@@ -34,7 +34,7 @@ public class ChineseAnnotationPipelineITest extends TestCase {
                                    "北","京","吗","？"};
     boolean[] expectedSegs = {true, true, false, true, false,
                               true, false, true, true};
-    String[] expectedNer = {"O", "O", "O", "GPE", "O", "O"};
+    String[] expectedNer = {"O", "O", "O", "STATE_OR_PROVINCE", "O", "O"};
 
     assertEquals(expectedCharacters.length, expectedSegs.length);
     assertEquals(expectedWords.length, expectedNer.length);

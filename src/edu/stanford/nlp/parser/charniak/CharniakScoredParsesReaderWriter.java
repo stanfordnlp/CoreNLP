@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -19,33 +18,38 @@ import edu.stanford.nlp.util.AbstractIterator;
 import edu.stanford.nlp.util.IterableIterator;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * Utility routines for printing/reading scored parses for the Charniak Parser
+ * Utility routines for printing/reading scored parses for the Charniak Parser.
  *
  * @author Angel Chang
  */
 public class CharniakScoredParsesReaderWriter {
-  private final static Logger logger = Logger.getLogger(CharniakScoredParsesReaderWriter.class.getName());
 
-  private final static Pattern wsDelimiter = Pattern.compile("\\s+");
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(CharniakScoredParsesReaderWriter.class);
+
+  private static final Pattern wsDelimiter = Pattern.compile("\\s+");
+
+  private CharniakScoredParsesReaderWriter() { } // static methods
 
   /**
    * Reads scored parses from the charniak parser
    *
-   * File format of the scored parses
+   * File format of the scored parses:
+   *
+   * <pre>{@code
    * <# of parses>\t<sentenceid>
    * <score>
    * <parse>
    * <score>
    * <parse>
-   * ...
+   * ... } </pre>
    *
    * @param filename  - File to read parses from
    * @return iterable with list of scored parse trees
    */
-  public Iterable<List<ScoredObject<Tree>>> readScoredTrees(String filename)
-  {
+  public static Iterable<List<ScoredObject<Tree>>> readScoredTrees(String filename) {
     try {
       ScoredParsesIterator iter = new ScoredParsesIterator(filename);
       return new IterableIterator<>(iter);
@@ -61,8 +65,7 @@ public class CharniakScoredParsesReaderWriter {
    * @param br - input reader
    * @return iterable with list of scored parse trees
    */
-  public Iterable<List<ScoredObject<Tree>>> readScoredTrees(String inputDesc, BufferedReader br)
-  {
+  public static Iterable<List<ScoredObject<Tree>>> readScoredTrees(String inputDesc, BufferedReader br) {
     ScoredParsesIterator iter = new ScoredParsesIterator(inputDesc, br);
     return new IterableIterator<>(iter);
   }
@@ -73,17 +76,14 @@ public class CharniakScoredParsesReaderWriter {
    * @param parseStr
    * @return list of scored parse trees
    */
-  public List<ScoredObject<Tree>> stringToParses(String parseStr)
-  {
+  public static List<ScoredObject<Tree>> stringToParses(String parseStr) {
     try {
       BufferedReader br = new BufferedReader(new StringReader(parseStr));
       Iterable<List<ScoredObject<Tree>>> trees = readScoredTrees("", br);
       List<ScoredObject<Tree>> res = null;
-      if (trees != null) {
-        Iterator<List<ScoredObject<Tree>>> iter = trees.iterator();
-        if (iter != null && iter.hasNext()) {
-          res = iter.next();
-        }
+      Iterator<List<ScoredObject<Tree>>> iter = trees.iterator();
+      if (iter != null && iter.hasNext()) {
+        res = iter.next();
       }
       br.close();
       return res;
@@ -95,12 +95,12 @@ public class CharniakScoredParsesReaderWriter {
 
   /**
    * Convert list of scored parse trees to string representing scored parses
-   *   (in the charniak parser output format)
+   * (in the charniak parser output format).
+   *
    * @param parses - list of scored parse trees
    * @return string representing scored parses
    */
-  public String parsesToString(List<ScoredObject<Tree>> parses)
-  {
+  public static String parsesToString(List<ScoredObject<Tree>> parses) {
     if (parses == null) return null;
     StringOutputStream os = new StringOutputStream();
     PrintWriter pw = new PrintWriter(os);
@@ -114,8 +114,7 @@ public class CharniakScoredParsesReaderWriter {
    * @param trees - trees to output
    * @param filename - file to output to
    */
-  public void printScoredTrees(Iterable<List<ScoredObject<Tree>>> trees, String filename)
-  {
+  public static void printScoredTrees(Iterable<List<ScoredObject<Tree>>> trees, String filename) {
     try {
       PrintWriter pw = IOUtils.getPrintWriter(filename);
       int i = 0;
@@ -130,13 +129,13 @@ public class CharniakScoredParsesReaderWriter {
   }
 
   /**
-   * Print scored parse trees for one sentence in format used by charniak parser
+   * Print scored parse trees for one sentence in format used by Charniak parser.
+   *
    * @param pw - printwriter
    * @param id - sentence id
    * @param trees - trees to output
    */
-  public void printScoredTrees(PrintWriter pw, int id, List<ScoredObject<Tree>> trees)
-  {
+  public static void printScoredTrees(PrintWriter pw, int id, List<ScoredObject<Tree>> trees) {
     pw.println(trees.size() + "\t" + id);
     for (ScoredObject<Tree> scoredTree:trees) {
       pw.println(scoredTree.score());
@@ -144,8 +143,7 @@ public class CharniakScoredParsesReaderWriter {
     }
   }
 
-  private static class ScoredParsesIterator extends AbstractIterator<List<ScoredObject<Tree>>>
-  {
+  private static class ScoredParsesIterator extends AbstractIterator<List<ScoredObject<Tree>>> {
     String inputDesc;
     BufferedReader br;
     List<ScoredObject<Tree>> next;
@@ -171,8 +169,7 @@ public class CharniakScoredParsesReaderWriter {
       done = next == null;
     }
 
-    private List<ScoredObject<Tree>> getNext()
-    {
+    private List<ScoredObject<Tree>> getNext() {
       try {
         String line;
         int parsesExpected = 0;
@@ -182,23 +179,23 @@ public class CharniakScoredParsesReaderWriter {
         List<ScoredObject<Tree>> curParses = null;
         while ((line = br.readLine()) != null) {
           line = line.trim();
-          if (line.length() > 0) {
+          if ( ! line.isEmpty()) {
             if (parsesExpected == 0) {
               // Finished processing parses
               String[] fields = wsDelimiter.split(line, 2);
               parsesExpected = Integer.parseInt(fields[0]);
               sentenceId = Integer.parseInt(fields[1]);
               if (expectConsecutiveSentenceIds) {
-               if (sentenceId != lastSentenceId+1) {
+                if (sentenceId != lastSentenceId+1) {
                   if (lastSentenceId < sentenceId) {
                     StringBuilder sb = new StringBuilder("Missing sentences");
                     for (int i = lastSentenceId+1; i < sentenceId; i++) {
-                      sb.append(" ").append(i);
+                      sb.append(' ').append(i);
                     }
                     logger.warning(sb.toString());
                   } else {
                     logger.warning("sentenceIds are not increasing (last="
-                          + lastSentenceId + ", curr=" + sentenceId + ")");
+                            + lastSentenceId + ", curr=" + sentenceId + ")");
                   }
                 }
               }
@@ -228,23 +225,27 @@ public class CharniakScoredParsesReaderWriter {
       return null;
     }
 
+    @Override
     public boolean hasNext()
     {
       return !done;
     }
 
-    public List<ScoredObject<Tree>> next()
-    {
+    @Override
+    public List<ScoredObject<Tree>> next() {
       if (!done) {
         List<ScoredObject<Tree>> cur = next;
         next = getNext();
         processed++;
         if (next == null) {
-          logger.finer("Read " + processed + " trees, from "
+          logger.info("Read " + processed + " trees, from "
                   + inputDesc + " in " + timing.toSecondsString() + " secs");
           done = true;
           if (closeBufferNeeded) {
-            try { br.close();  } catch (IOException ex) {};
+            try { br.close();
+            } catch (IOException ex) {
+              logger.warn(ex);
+            }
           }
         }
         return cur;
@@ -252,6 +253,6 @@ public class CharniakScoredParsesReaderWriter {
         throw new NoSuchElementException("No more elements from " + inputDesc);
       }
     }
-  }
+  } // end static class ScoredParsesIterator
 
 }

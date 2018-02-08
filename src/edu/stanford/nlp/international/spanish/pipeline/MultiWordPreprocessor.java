@@ -1,5 +1,4 @@
 package edu.stanford.nlp.international.spanish.pipeline;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -19,14 +18,15 @@ import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Clean up an AnCora treebank which has been processed to expand multi-word
  * tokens into separate leaves. (This prior splitting task is performed by
- * {@link SpanishTreeNormalizer} through the {@link SpanishXMLTreeReader}
+ * {@link SpanishTreeNormalizer} through the
+ * {@link edu.stanford.nlp.trees.international.spanish.SpanishXMLTreeReader}
  * class).
  *
  * @author Jon Gauthier
@@ -57,7 +57,7 @@ public final class MultiWordPreprocessor  {
    *
    *     (grup.adv (rg cerca) (sp000 de))
    */
-  private static Map<String, String> phrasalCategoryMap = new HashMap<>();
+  private static final Map<String, String> phrasalCategoryMap = new HashMap<>();
   static {
     phrasalCategoryMap.put("ao0000", "grup.a");
     phrasalCategoryMap.put("aq0000", "grup.a");
@@ -102,7 +102,7 @@ public final class MultiWordPreprocessor  {
 
   private static class ManualUWModel {
 
-    private static Map<String, String> posMap = new HashMap<>();
+    private static final Map<String, String> posMap = new HashMap<>();
     static {
       // i.e., "metros cúbicos"
       posMap.put("cúbico", "aq0000");
@@ -596,7 +596,7 @@ public final class MultiWordPreprocessor  {
     return sb.toString();
   }
 
-  private static Map<String, Integer> argOptionDefs;
+  private static final Map<String, Integer> argOptionDefs;
   static {
     argOptionDefs = Generics.newHashMap();
     argOptionDefs.put("help", 0);

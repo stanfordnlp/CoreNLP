@@ -98,6 +98,26 @@ public class CoreAnnotations {
   }
 
   /**
+   * The CoreMap key for getting the coarse named entity tag (i.e. LOCATION)
+   */
+  public static class CoarseNamedEntityTagAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
+   * The CoreMap key for getting the fine grained named entity tag (i.e. CITY)
+   */
+  public static class FineGrainedNamedEntityTagAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
    * The CoreMap key for getting the token-level named entity tag (e.g., DATE,
    * PERSON, etc.) from a previous NER tagger. NERFeatureFactory is sensitive to
    * this tag and will turn the annotations from the previous NER tagger into
@@ -1145,6 +1165,44 @@ public class CoreAnnotations {
     }
   }
 
+  /** index into the list of entity mentions in a document **/
+  public static class EntityMentionIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return ErasureUtils.uncheckedCast(Integer.class);
+    }
+  }
+
+  /** index into the list of entity mentions in a document for canonical entity mention
+   *  ...this is primarily for linking entity mentions to their canonical entity mention
+   */
+  public static class CanonicalEntityMentionIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return ErasureUtils.uncheckedCast(Integer.class);
+    }
+  }
+
+  /**
+   * mapping from coref mentions to corresponding ner derived entity mentions
+   */
+  public static class CorefMentionToEntityMentionMappingAnnotation implements CoreAnnotation<Map<Integer,Integer>> {
+    @Override
+    public Class<Map<Integer,Integer>> getType() {
+      return ErasureUtils.uncheckedCast(Map.class);
+    }
+  }
+
+  /**
+   * mapping from ner derived entity mentions to coref mentions
+   */
+  public static class EntityMentionToCorefMentionMappingAnnotation implements CoreAnnotation<Map<Integer,Integer>> {
+    @Override
+    public Class<Map<Integer,Integer>> getType() {
+      return ErasureUtils.uncheckedCast(Map.class);
+    }
+  }
+
   public static class EntityTypeAnnotation implements CoreAnnotation<String> {
     @Override
     public Class<String> getType() {
@@ -1853,7 +1911,7 @@ public class CoreAnnotations {
   }
 
   /** Annotation indicating whether the numeric phrase the token is part of
-   * represents a NUMBER or ORDINAL (twenty first => ORDINAL ORDINAL).
+   * represents a NUMBER or ORDINAL (twenty first {@literal =>} ORDINAL ORDINAL).
    */
   public static class NumericCompositeValueAnnotation implements CoreAnnotation<Number> {
     @Override
@@ -1863,7 +1921,7 @@ public class CoreAnnotations {
   }
 
   /** Annotation indicating the numeric value of the phrase the token is part of
-   * (twenty first => 21 21 ).
+   * (twenty first {@literal =>} 21 21 ).
    */
   public static class NumericCompositeTypeAnnotation implements CoreAnnotation<String> {
     @Override

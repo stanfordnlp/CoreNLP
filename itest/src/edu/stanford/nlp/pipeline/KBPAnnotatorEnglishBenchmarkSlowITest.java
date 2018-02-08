@@ -20,7 +20,7 @@ public class KBPAnnotatorEnglishBenchmarkSlowITest extends KBPAnnotatorBenchmark
     // set up the pipeline
     Properties props = new Properties();
     props.put("annotators",
-            "tokenize,ssplit,pos,lemma,ner,regexner,parse,mention,entitymentions,coref,kbp");
+            "tokenize,ssplit,pos,lemma,ner,parse,coref,kbp");
     props.put("coref.md.type", "RULE");
     pipeline = new StanfordCoreNLP(props);
   }

@@ -61,6 +61,8 @@ message Document {
   repeated Mention         mentionsForCoref                    = 14;
   optional bool hasCorefMentionAnnotation = 15;
   optional bool hasCorefAnnotation = 16;
+  repeated uint32 corefMentionToEntityMentionMappings = 17;
+  repeated uint32 entityMentionToCorefMentionMappings = 18;
 
   extensions 100 to 255;
 }
@@ -116,6 +118,12 @@ message Sentence {
   optional bool            sectionQuoted                       = 64;  // is this sentence in an xml quote in a post
 
   optional bool            hasEntityMentionsAnnotation         = 65;  // check if there are entity mentions
+  optional bool            hasKBPTriplesAnnotation             = 68;  // check if there are KBP triples
+  optional bool            hasOpenieTriplesAnnotation          = 69;  // check if there are OpenIE triples
+
+  // quote stuff
+  optional uint32             chapterIndex                     = 66;
+  optional uint32             paragraphIndex                   = 67;
 
   extensions 100 to 255;
 }
@@ -133,6 +141,8 @@ message Token {
   optional string after             = 6;    // The whitespace/xml after the token
   optional string originalText      = 7;    // The original text for this token
   optional string ner               = 8;    // The word's NER tag
+  optional string coarseNER         = 62;   // The word's coarse NER tag
+  optional string fineGrainedNER    = 63;   // The word's fine-grained NER tag
   optional string normalizedNER     = 9;    // The word's normalized NER tag
   optional string lemma             = 10;   // The word's lemma
   optional uint32 beginChar         = 11;   // The character offset begin, in the document
@@ -183,7 +193,10 @@ message Token {
 
   // French tokens have parents
   optional string parent          = 61;
-  
+
+  // mention index info
+  repeated uint32 corefMentionIndex = 64;
+  optional uint32 entityMentionIndex = 65;
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
@@ -220,6 +233,17 @@ message Quote {
   optional string docid          = 9;
   optional uint32 index          = 10;
   optional string author         = 11;
+  optional string mention        = 12;
+  optional uint32 mentionBegin   = 13;
+  optional uint32 mentionEnd     = 14;
+  optional string mentionType    = 15;
+  optional string mentionSieve   = 16;
+  optional string speaker        = 17;
+  optional string speakerSieve   = 18;
+  optional string canonicalMention = 19;
+  optional uint32 canonicalMentionBegin = 20;
+  optional uint32 canonicalMentionEnd = 21;
+  optional DependencyGraph attributionDependencyGraph = 22;
 }
 
 //
@@ -465,6 +489,9 @@ message NERMention {
   optional Timex  timex                         = 7;
   optional string wikipediaEntity               = 8;
   optional string gender                        = 9;
+  optional uint32 entityMentionIndex            = 10;
+  optional uint32 canonicalEntityMentionIndex   = 11;
+  optional string entityMentionText             = 12;
 }
 
 //

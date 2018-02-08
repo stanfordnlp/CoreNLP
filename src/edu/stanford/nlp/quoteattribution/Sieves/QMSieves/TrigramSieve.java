@@ -55,7 +55,7 @@ public class TrigramSieve extends QMSieve {
 
 
           //CVQ
-          if (prevToken.tag().startsWith("V")  // verb!
+          if (prevToken.tag() != null && prevToken.tag().startsWith("V")  // verb!
                   && lastNameIndex.second.equals(quoteBeginTokenIndex - 2 - offset)) {
             fillInMention(quote, names.get(names.size() - 1), lastNameIndex.first, lastNameIndex.second, "trigram CVQ", NAME);
             continue;

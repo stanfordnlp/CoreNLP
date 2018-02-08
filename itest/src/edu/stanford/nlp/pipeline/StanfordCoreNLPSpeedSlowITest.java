@@ -5,6 +5,7 @@ import edu.stanford.nlp.util.*;
 
 import junit.framework.TestCase;
 
+import java.io.*;
 import java.util.*;
 
 public class StanfordCoreNLPSpeedSlowITest extends TestCase {
@@ -20,7 +21,7 @@ public class StanfordCoreNLPSpeedSlowITest extends TestCase {
     pipeline = new StanfordCoreNLP(props);
   }
 
-  public void testHeidelTimeKBPAnnotatorITest() {
+  public void testStanfordCoreNLPSpeed() {
     List<String> kbp2016FileList = IOUtils.linesFromFile(WORKING_DIR + "/kbp-2016-files.txt");
     long startTime = System.currentTimeMillis();
     for (String filePath : kbp2016FileList) {
@@ -30,7 +31,22 @@ public class StanfordCoreNLPSpeedSlowITest extends TestCase {
     }
     long endTime = System.currentTimeMillis();
     long duration = endTime - startTime;
-    assert(duration < 390000);
+    System.err.println("run time for single thread test: "+duration);
+    assertTrue(duration < 390000);
+  }
+
+  public void testStanfordCoreNLPSpeedMultiThread() throws IOException {
+    List<File> files = new ArrayList<File>();
+    List<String> kbpFilePaths = IOUtils.linesFromFile(WORKING_DIR+"/kbp-2016-files.txt");
+    for (String filePath : kbpFilePaths) {
+      files.add(new File(filePath));
+    }
+    long startTime = System.currentTimeMillis();
+    pipeline.processFiles(files, 4, false, Optional.empty());
+    long endTime = System.currentTimeMillis();
+    long duration = endTime - startTime;
+    System.err.println("run time for multi-thread test: "+duration);
+    assertTrue(duration < 390000);
   }
 
 }

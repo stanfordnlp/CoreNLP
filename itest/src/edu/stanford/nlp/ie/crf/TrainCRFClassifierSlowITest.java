@@ -42,7 +42,7 @@ public class TrainCRFClassifierSlowITest {
     double p = scanner.nextDouble();
     Assert.assertEquals("Precision outside target range", 0.8364, p, 0.001);
     double r = scanner.nextDouble();
-    Assert.assertEquals("Recall outside target range", 0.6924, r, 0.001);
+    Assert.assertEquals("Recall outside target range", 0.691, r, 0.001);
     double f1 = scanner.nextDouble();
     Assert.assertEquals("Precision outside target range", 0.7576, f1, 0.001);
   }
