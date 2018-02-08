@@ -267,7 +267,7 @@ public class KBPBasicSpanishCorefSystem {
     return canonicalMentionMap;
   }
 
-  public Map<CoreMap,CoreMap> canonicalMentionMapFromEntityMentions(List<CoreMap> entityMentions) {
+  public Map<CoreMap,CoreMap> canonicalMentionMapFromEntityMentons(List<CoreMap> entityMentions) {
     List<List<CoreMap>> entityMentionClusters = clusterEntityMentions(entityMentions);
     return createCanonicalMentionMap(entityMentionClusters);
   }

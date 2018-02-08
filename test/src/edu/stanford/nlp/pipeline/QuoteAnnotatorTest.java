@@ -12,7 +12,7 @@ import java.util.Properties;
 /**
  * @author Grace Muzny
  */
-public class QuoteAnnotatorITest extends TestCase {
+public class QuoteAnnotatorTest extends TestCase {
 
   private static StanfordCoreNLP pipeline;
   private static StanfordCoreNLP pipelineNoSingleQuotes;
@@ -28,20 +28,18 @@ public class QuoteAnnotatorITest extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    synchronized(QuoteAnnotatorITest.class) {
+    synchronized(QuoteAnnotatorTest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote1");
         props.setProperty("customAnnotatorClass.quote1", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("quote1.attributeQuotes", "false");
-        props.setProperty("quote1.singleQuotes", "true");
+        props.setProperty("singleQuotes", "true");
         pipeline = new StanfordCoreNLP(props);
       }
       if (pipelineNoSingleQuotes == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote2");
         props.setProperty("customAnnotatorClass.quote2", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("quote2.attributeQuotes", "false");
         pipelineNoSingleQuotes = new StanfordCoreNLP(props);
       }
 
@@ -49,8 +47,7 @@ public class QuoteAnnotatorITest extends TestCase {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote3");
         props.setProperty("customAnnotatorClass.quote3", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("quote3.maxLength", "5");
-        props.setProperty("quote3.attributeQuotes", "false");
+        props.setProperty("maxLength", "5");
         pipelineMaxFive = new StanfordCoreNLP(props);
       }
 
@@ -58,24 +55,21 @@ public class QuoteAnnotatorITest extends TestCase {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote4");
         props.setProperty("customAnnotatorClass.quote4", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("quote4.asciiQuotes", "true");
-        props.setProperty("quote4.attributeQuotes", "false");
+        props.setProperty("asciiQuotes", "true");
         pipelineAsciiQuotes = new StanfordCoreNLP(props);
       }
       if (pipelineAllowEmbeddedSame == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote5");
         props.setProperty("customAnnotatorClass.quote5", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("quote5.allowEmbeddedSame", "true");
-        props.setProperty("quote5.attributeQuotes", "false");
+        props.setProperty("allowEmbeddedSame", "true");
         pipelineAllowEmbeddedSame = new StanfordCoreNLP(props);
       }
       if(pipelineUnclosedQuotes == null){
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote6");
         props.setProperty("customAnnotatorClass.quote6", "edu.stanford.nlp.pipeline.QuoteAnnotator");
-        props.setProperty("quote6.extractUnclosedQuotes", "true");
-        props.setProperty("quote6.attributeQuotes", "false");
+        props.setProperty("extractUnclosedQuotes", "true");
         pipelineUnclosedQuotes = new StanfordCoreNLP(props);
       }
     }

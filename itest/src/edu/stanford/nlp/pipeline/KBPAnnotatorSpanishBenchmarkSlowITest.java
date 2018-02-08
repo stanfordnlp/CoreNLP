@@ -15,6 +15,8 @@ public class KBPAnnotatorSpanishBenchmarkSlowITest extends KBPAnnotatorBenchmark
     loadGoldData();
     // set up the pipeline
     Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-spanish.properties");
+    props.put("annotators",
+        "tokenize,ssplit,pos,lemma,ner,regexner,entitymentions,depparse,kbp");
     props.put("ner.model", "edu/stanford/nlp/models/ner/spanish.kbp.ancora.distsim.s512.crf.ser.gz");
     pipeline = new StanfordCoreNLP(props);
   }

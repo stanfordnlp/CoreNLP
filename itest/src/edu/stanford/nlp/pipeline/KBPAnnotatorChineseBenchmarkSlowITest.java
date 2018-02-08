@@ -18,7 +18,7 @@ public class KBPAnnotatorChineseBenchmarkSlowITest  extends KBPAnnotatorBenchmar
     // set up the pipeline
     Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-chinese.properties");
     props.put("annotators",
-            "tokenize,ssplit,pos,lemma,ner,parse,coref,kbp");
+            "tokenize,ssplit,pos,lemma,ner,regexner,parse,mention,entitymentions,coref,kbp");
     pipeline = new StanfordCoreNLP(props);
   }
 

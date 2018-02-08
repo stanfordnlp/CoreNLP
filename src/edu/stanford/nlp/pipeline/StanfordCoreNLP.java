@@ -406,8 +406,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
     // Tweak the properties, if necessary
     // (set the mention annotator to use dependency trees, if appropriate)
-    if ((orderedAnnotators.contains(Annotator.STANFORD_COREF_MENTION) || orderedAnnotators.contains(Annotator.STANFORD_COREF))
-        && !orderedAnnotators.contains(Annotator.STANFORD_PARSE) &&
+    if (orderedAnnotators.contains(Annotator.STANFORD_MENTION) && !orderedAnnotators.contains(Annotator.STANFORD_PARSE) &&
         !props.containsKey("coref.md.type")) {
       props.setProperty("coref.md.type", "dep");
     }
@@ -550,7 +549,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     pool.put(STANFORD_GENDER, (props, impl) -> impl.gender(props, STANFORD_GENDER));
     pool.put(STANFORD_TRUECASE, (props, impl) -> impl.trueCase(props));
     pool.put(STANFORD_PARSE, (props, impl) -> impl.parse(props));
-    pool.put(STANFORD_COREF_MENTION, (props, impl) -> impl.corefMention(props));
+    pool.put(STANFORD_MENTION, (props, impl) -> impl.mention(props));
     pool.put(STANFORD_DETERMINISTIC_COREF, (props, impl) -> impl.dcoref(props));
     pool.put(STANFORD_COREF, (props, impl) -> impl.coref(props));
     pool.put(STANFORD_RELATION, (props, impl) -> impl.relations(props));
@@ -1004,10 +1003,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    *
    * @throws IOException
    */
-  public void processFiles(String base, final Collection<File> files, int numThreads, boolean clearPool, Optional<Timing> tim) throws IOException {
+  public void processFiles(String base, final Collection<File> files, int numThreads, boolean clearPool) throws IOException {
     AnnotationOutputter.Options options = AnnotationOutputter.getOptions(this);
     StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
-    processFiles(base, files, numThreads, properties, this::annotate, createOutputter(properties, options), outputFormat, clearPool, Optional.of(this), tim);
+    processFiles(base, files, numThreads, properties, this::annotate, createOutputter(properties, options), outputFormat, clearPool);
   }
 
 
@@ -1071,28 +1070,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     };
   }
 
-  protected static void processFiles(String base, final Collection<File> files, int numThreads,
-                                     Properties properties, BiConsumer<Annotation, Consumer<Annotation>> annotate,
-                                     BiConsumer<Annotation, OutputStream> print,
-                                     OutputFormat outputFormat, boolean clearPool) throws IOException {
-    processFiles(base, files, numThreads, properties, annotate, print, outputFormat, clearPool, Optional.empty(), Optional.empty());
-  }
-
-  /**
-   * Helper method for printing out timing info after an annotation run
-   *
-   * @param pipeline the StanfordCoreNLP pipeline to log timing info for
-   * @param tim the Timing object to log timing info
-   */
-  protected static void logTimingInfo(StanfordCoreNLP pipeline, Timing tim) {
-    logger.info(""); // puts blank line in logging output
-    logger.info(pipeline.timingInformation());
-    logger.info("Pipeline setup: " +
-        Timing.toSecondsString(pipeline.pipelineSetupTime) + " sec.");
-    logger.info("Total time for StanfordCoreNLP pipeline: " +
-        Timing.toSecondsString(pipeline.pipelineSetupTime + tim.report()) + " sec.");
-  }
-
   /**
    * A common method for processing a set of files, used in both {@link StanfordCoreNLP} as well as
    * {@link StanfordCoreNLPClient}.
@@ -1106,17 +1083,13 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * @param print The function used to print a document.
    * @param outputFormat The format used for printing out documents
    * @param clearPool Whether or not to clear the pool when done
-   * @param pipeline the pipeline annotating the objects
-   * @param tim the Timing object for this annotation run
-   *
    *
    * @throws IOException
    */
   protected static void processFiles(String base, final Collection<File> files, int numThreads,
                                      Properties properties, BiConsumer<Annotation, Consumer<Annotation>> annotate,
                                      BiConsumer<Annotation, OutputStream> print,
-                                     OutputFormat outputFormat, boolean clearPool,
-                                     Optional<StanfordCoreNLP> pipeline, Optional<Timing> tim) throws IOException {
+                                     OutputFormat outputFormat, boolean clearPool) throws IOException {
     // List<Runnable> toRun = new LinkedList<>();
 
     // Process properties here
@@ -1280,14 +1253,9 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
               if (totalProcessed.intValue() % 1000 == 0) {
                 logger.info("Processed " + totalProcessed + " documents");
               }
-              // check we've processed or errored on every file, handle tasks to run after last document
-              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size()) {
-                // clear pool if necessary
-                if (clearPool)
-                  GLOBAL_ANNOTATOR_CACHE.clear();
-                // print out timing info
-                if (TIME && pipeline.isPresent() && tim.isPresent())
-                  logTimingInfo(pipeline.get(), tim.get());
+              // check we've processed or errored on every file, if so tell the pool to clear()
+              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size() && clearPool) {
+                GLOBAL_ANNOTATOR_CACHE.clear();
               }
             }
           } else if (continueOnAnnotateError) {
@@ -1296,14 +1264,9 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             logger.err("Error annotating " + file.getAbsoluteFile() + ": " + ex);
             synchronized (totalErrorAnnotating) {
               totalErrorAnnotating.incValue(1);
-              // check we've processed or errored on every file, handle tasks to run after last document
-              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size()) {
-                // clear pool if necessary
-                if (clearPool)
-                  GLOBAL_ANNOTATOR_CACHE.clear();
-                // print out timing info
-                if (TIME && pipeline.isPresent() && tim.isPresent())
-                  logTimingInfo(pipeline.get(), tim.get());
+              // check we've processed or errored on every file, if so tell the pool to clear()
+              if ((totalProcessed.intValue() + totalErrorAnnotating.intValue()) == files.size() && clearPool) {
+                GLOBAL_ANNOTATOR_CACHE.clear();
               }
             }
 
@@ -1319,16 +1282,31 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       } catch (IOException e) {
         throw new RuntimeIOException(e);
       }
-
     }
+
+    /*
+    if (randomize) {
+      log("Randomly shuffling input");
+      Collections.shuffle(toRun);
+    }
+    log("Ready to process: " + toRun.size() + " files, skipped " + totalSkipped + ", total " + nFiles);
+    //--Run Jobs
+    if(numThreads == 1){
+      for(Runnable r : toRun){ r.run(); }
+    } else {
+      Redwood.Util.threadAndRun("StanfordCoreNLP <" + numThreads + " threads>", toRun, numThreads);
+    }
+    log("Processed " + totalProcessed + " documents");
+    log("Skipped " + totalSkipped + " documents, error annotating " + totalErrorAnnotating + " documents");
+    */
   }
 
-  public void processFiles(final Collection<File> files, int numThreads, boolean clearPool, Optional<Timing> tim) throws IOException {
-    processFiles(null, files, numThreads, clearPool, tim);
+  public void processFiles(final Collection<File> files, int numThreads, boolean clearPool) throws IOException {
+    processFiles(null, files, numThreads, clearPool);
   }
 
-  public void processFiles(final Collection<File> files, boolean clearPool, Optional<Timing> tim) throws IOException {
-    processFiles(files, 1, clearPool, tim);
+  public void processFiles(final Collection<File> files, boolean clearPool) throws IOException {
+    processFiles(files, 1, clearPool);
   }
 
   public void run() throws IOException {
@@ -1362,7 +1340,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         fileName = properties.getProperty("textFile");
       }
       Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
-      this.processFiles(null, files, numThreads, clearPool, Optional.of(tim));
+      this.processFiles(null, files, numThreads, clearPool);
     }
 
     //
@@ -1379,7 +1357,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
           files.add(file);
         }
       }
-      this.processFiles(null, files, numThreads, clearPool, Optional.of(tim));
+      this.processFiles(null, files, numThreads, clearPool);
     }
 
     //
@@ -1387,6 +1365,15 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     //
     else {
       shell(this);
+    }
+
+    if (TIME) {
+      logger.info(""); // puts blank line in logging output
+      logger.info(this.timingInformation());
+      logger.info("Pipeline setup: " +
+          Timing.toSecondsString(pipelineSetupTime) + " sec.");
+      logger.info("Total time for StanfordCoreNLP pipeline: " +
+          Timing.toSecondsString(pipelineSetupTime + tim.report()) + " sec.");
     }
 
   }

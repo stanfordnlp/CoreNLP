@@ -144,12 +144,12 @@ public class TextOutputter extends AnnotationOutputter {
           pw.println();
           pw.println("Dependency Parse (enhanced plus plus dependencies):");
           pw.print(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class).toList());
+          pw.println();
         }
 
         // display the entity mentions
         List<CoreMap> entityMentions = sentence.get(CoreAnnotations.MentionsAnnotation.class);
         if (entityMentions != null) {
-          pw.println();
           pw.println("Extracted the following NER entity mentions:");
           for (CoreMap entityMention : entityMentions) {
             if (entityMention.get(CoreAnnotations.EntityTypeAnnotation.class) != null) {
@@ -157,12 +157,12 @@ public class TextOutputter extends AnnotationOutputter {
                   + entityMention.get(CoreAnnotations.EntityTypeAnnotation.class));
             }
           }
+          pw.println();
         }
 
         // display MachineReading entities and relations
         List<EntityMention> entities = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
         if (entities != null) {
-          pw.println();
           pw.println("Extracted the following MachineReading entity mentions:");
           for (EntityMention e : entities) {
             pw.print('\t');
@@ -171,7 +171,6 @@ public class TextOutputter extends AnnotationOutputter {
         }
         List<RelationMention> relations = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
         if (relations != null){
-          pw.println();
           pw.println("Extracted the following MachineReading relation mentions:");
           for (RelationMention r: relations) {
             if (r.printableObject(beam)) {
@@ -183,7 +182,6 @@ public class TextOutputter extends AnnotationOutputter {
         // display OpenIE triples
         Collection<RelationTriple> openieTriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
         if (openieTriples != null && ! openieTriples.isEmpty()) {
-          pw.println();
           pw.println("Extracted the following Open IE triples:");
           for (RelationTriple triple : openieTriples) {
             pw.println(OpenIE.tripleToString(triple, docId, sentence));
@@ -193,7 +191,6 @@ public class TextOutputter extends AnnotationOutputter {
         // display KBP triples
         Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
         if (kbpTriples != null && ! kbpTriples.isEmpty()) {
-          pw.println();
           pw.println("Extracted the following KBP triples:");
           for (RelationTriple triple : kbpTriples) {
             pw.println(triple);
@@ -229,7 +226,6 @@ public class TextOutputter extends AnnotationOutputter {
             continue;
           if (!outputHeading) {
             outputHeading = true;
-            pw.println();
             pw.println("Coreference set:");
           }
           // all offsets start at 1!
@@ -250,24 +246,13 @@ public class TextOutputter extends AnnotationOutputter {
 
     // display quotes if available
     if (annotation.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
-      pw.println();
       pw.println("Extracted quotes: ");
       List<CoreMap> allQuotes = QuoteAnnotator.gatherQuotes(annotation);
       for (CoreMap quote : allQuotes) {
-        String speakerString;
-        if (quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null) {
-          speakerString = quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class);
-        } else if (quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null) {
-          speakerString = quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class);
-        } else {
-          speakerString = "Unknown";
-        }
-        pw.printf("[QuotationIndexAnnotation=%d, CharacterOffsetBegin=%d, Text=%s, Speaker=%s]%n",
+        pw.printf("[QuotationIndexAnnotation=%d, CharacterOffsetBegin=%d, Text=%s]%n",
             quote.get(CoreAnnotations.QuotationIndexAnnotation.class),
             quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-            quote.get(CoreAnnotations.TextAnnotation.class), speakerString
-            );
-
+            quote.get(CoreAnnotations.TextAnnotation.class));
       }
     }
 

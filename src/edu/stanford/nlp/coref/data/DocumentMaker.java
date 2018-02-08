@@ -110,13 +110,11 @@ public class DocumentMaker {
     Properties pipelineProps = new Properties(props);
     if (CorefProperties.conll(props)) {
       pipelineProps.setProperty("annotators", (CorefProperties.getLanguage(props) == Locale.CHINESE ?
-              "lemma, ner" : "lemma") + (CorefProperties.useGoldMentions(props) ? "" : ", coref.mention"));
-      pipelineProps.setProperty("ner.applyFineGrained", "false");
+              "lemma, ner" : "lemma") + (CorefProperties.useGoldMentions(props) ? "" : ", mention"));
     } else {
       pipelineProps.setProperty("annotators", "pos, lemma, ner, " +
               (CorefProperties.useConstituencyParse(props) ? "parse" : "depparse") +
-              (CorefProperties.useGoldMentions(props) ? "" : ", coref.mention"));
-      pipelineProps.setProperty("ner.applyFineGrained", "false");
+              (CorefProperties.useGoldMentions(props) ? "" : ", mention"));
     }
     return (coreNLP = new StanfordCoreNLP(pipelineProps, false));
   }

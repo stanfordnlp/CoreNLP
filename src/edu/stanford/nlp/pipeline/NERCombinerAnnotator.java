@@ -182,7 +182,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime, int maxSentenceLength) {
-    this(ner, verbose, nThreads, maxTime, maxSentenceLength, true, true);
+    this(ner, verbose, nThreads, maxTime, maxSentenceLength,true,true);
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime,
@@ -205,7 +205,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (this.applyFineGrained) {
       String fineGrainedPrefix = "ner.fine.regexner";
       Properties fineGrainedProps =
-          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".", true);
+          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".");
       fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
     }
   }
@@ -215,10 +215,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (this.buildEntityMentions) {
       String entityMentionsPrefix = "ner.entitymentions";
       Properties entityMentionsProps =
-          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".", true);
-      // pass language info to the entity mention annotator
-      entityMentionsProps.setProperty("ner.entitymentions.language", language.name());
-      entityMentionsAnnotator = new EntityMentionsAnnotator(entityMentionsPrefix, entityMentionsProps);
+          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".");
+      entityMentionsAnnotator = new EntityMentionsAnnotator("ner.entitymentions", entityMentionsProps);
     }
   }
 
@@ -260,14 +258,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (LanguageInfo.HumanLanguage.SPANISH.equals(language))
       spanishNumberAnnotator.annotate(annotation);
     // if fine grained ner is requested, run that
-    if (this.applyFineGrained) {
+    if (this.applyFineGrained)
       fineGrainedNERAnnotator.annotate(annotation);
-      // set the FineGrainedNamedEntityTagAnnotation.class
-      for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
-        String fineGrainedTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-        token.set(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class, fineGrainedTag);
-      }
-    }
     // if entity mentions should be built, run that
     if (this.buildEntityMentions)
       entityMentionsAnnotator.annotate(annotation);
@@ -308,7 +300,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           normNeTag = spanishToEnglishTag(normNeTag);
         }
         tokens.get(i).setNER(neTag);
-        tokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
         if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
         NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
       }
@@ -362,8 +353,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           CoreAnnotations.TokenEndAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.OriginalTextAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class,
-          CoreAnnotations.IsNewlineAnnotation.class
+          CoreAnnotations.SentenceIndexAnnotation.class
       )));
     } else {
       return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
@@ -378,8 +368,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           CoreAnnotations.TokenEndAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.OriginalTextAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class,
-          CoreAnnotations.IsNewlineAnnotation.class
+          CoreAnnotations.SentenceIndexAnnotation.class
       )));
     }
   }
@@ -404,15 +393,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         Tags.TagsAnnotation.class,
         CoreAnnotations.NumerizedTokensAnnotation.class,
         CoreAnnotations.AnswerAnnotation.class,
-        CoreAnnotations.NumericCompositeValueAnnotation.class,
-        CoreAnnotations.CoarseNamedEntityTagAnnotation.class,
-        CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class
-        ));
-    if (this.buildEntityMentions) {
+        CoreAnnotations.NumericCompositeValueAnnotation.class
+    ));
+    if (this.buildEntityMentions)
       nerRequirementsSatisfied.add(CoreAnnotations.MentionsAnnotation.class);
-      nerRequirementsSatisfied.add(CoreAnnotations.EntityTypeAnnotation.class);
-      nerRequirementsSatisfied.add(CoreAnnotations.EntityMentionIndexAnnotation.class);
-    }
     return nerRequirementsSatisfied;
   }
 

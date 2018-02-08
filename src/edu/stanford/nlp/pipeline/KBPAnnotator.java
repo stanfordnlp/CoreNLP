@@ -57,7 +57,11 @@ public class KBPAnnotator implements Annotator {
   @ArgumentParser.Option(name="kbp.verbose", gloss="Print out KBP logging info")
   private boolean VERBOSE = false;
 
-  private LanguageInfo.HumanLanguage kbpLanguage;
+  @ArgumentParser.Option(name="kbp.language", gloss="language for kbp")
+  private String kbpLanguageString = "en";
+
+  private LanguageInfo.HumanLanguage kbpLanguage = LanguageInfo.getLanguageFromString(kbpLanguageString);
+
   /**
    * The extractor implementation.
    */
@@ -149,9 +153,6 @@ public class KBPAnnotator implements Annotator {
     relationNameConversionMap.put("per:employee_of", "per:employee_or_member_of");
     relationNameConversionMap.put("per:stateorprovinces_of_residence", "per:statesorprovinces_of_residence");
 
-    // set up KBP language
-    kbpLanguage = LanguageInfo.getLanguageFromString(props.getProperty("kbp.language", "en"));
-
     // build the Spanish coref system if necessary
     if (LanguageInfo.HumanLanguage.SPANISH.equals(kbpLanguage))
       spanishCorefSystem = new KBPBasicSpanishCorefSystem();
@@ -164,6 +165,51 @@ public class KBPAnnotator implements Annotator {
     this(STANFORD_KBP, properties);
 
   }
+
+
+  /**
+   * Returns whether the given token counts as a valid pronominal mention for KBP.
+   * This method (at present) works for either Chinese or English.
+   *
+   * @param word The token to classify.
+   * @return true if this token is a pronoun that KBP should recognize.
+   */
+  private static boolean kbpIsPronominalMention(CoreLabel word) {
+    return WordLists.isKbpPronominalMention(word.word());
+  }
+
+
+  /**
+   * Annotate all the pronominal mentions in the document.
+   * @param ann The document.
+   * @return The list of pronominal mentions in the document.
+   */
+  private static List<CoreMap> annotatePronominalMentions(Annotation ann) {
+    List<CoreMap> pronouns = new ArrayList<>();
+    List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
+    for (int sentenceIndex = 0; sentenceIndex < sentences.size(); sentenceIndex++) {
+      CoreMap sentence = sentences.get(sentenceIndex);
+      Integer annoTokenBegin = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
+      if (annoTokenBegin == null) {
+        annoTokenBegin = 0;
+      }
+
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      for (int tokenIndex = 0; tokenIndex < tokens.size(); tokenIndex++) {
+        CoreLabel token = tokens.get(tokenIndex);
+        if (kbpIsPronominalMention(token)) {
+          CoreMap pronoun = ChunkAnnotationUtils.getAnnotatedChunk(tokens, tokenIndex, tokenIndex + 1,
+              annoTokenBegin, null, CoreAnnotations.TextAnnotation.class, null);
+          pronoun.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
+          sentence.get(CoreAnnotations.MentionsAnnotation.class).add(pronoun);
+          pronouns.add(pronoun);
+        }
+      }
+    }
+
+    return pronouns;
+  }
+
 
   /**
    * Augment the coreferent mention map with acronym matches.
@@ -303,17 +349,6 @@ public class KBPAnnotator implements Annotator {
   }
 
   /**
-   * Returns whether the given token counts as a valid pronominal mention for KBP.
-   * This method (at present) works for either Chinese or English.
-   *
-   * @param word The token to classify.
-   * @return true if this token is a pronoun that KBP should recognize.
-   */
-  private static boolean kbpIsPronominalMention(CoreLabel word) {
-    return WordLists.isKbpPronominalMention(word.word());
-  }
-
-  /**
    * Annotate this document for KBP relations.
    * @param annotation The document to annotate.
    */
@@ -323,13 +358,15 @@ public class KBPAnnotator implements Annotator {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
     // Create simple document
-    Document doc = new Document(kbpProperties, serializer.toProto(annotation));
+    Document doc = new Document(kbpProperties,serializer.toProto(annotation));
 
     // Get the mentions in the document
     List<CoreMap> mentions = new ArrayList<>();
     for (CoreMap sentence : sentences) {
       mentions.addAll(sentence.get(CoreAnnotations.MentionsAnnotation.class));
     }
+    List<CoreMap> pronounMentions = annotatePronominalMentions(annotation);
+    mentions.addAll(pronounMentions);
 
     // Compute coreferent clusters
     // (map an index to a KBP mention)
@@ -339,7 +376,6 @@ public class KBPAnnotator implements Annotator {
         mentionByStartIndex.put(Pair.makePair(token.sentIndex(), token.index()), mention);
       }
     }
-
     // (collect coreferent KBP mentions)
     Map<CoreMap, Set<CoreMap>> mentionsMap = new HashMap<>();  // map from canonical mention -> other mentions
     if (annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null) {
@@ -388,17 +424,15 @@ public class KBPAnnotator implements Annotator {
     // Propagate Entity Link
     for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
       String entityLink = entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class);
-      if (entityLink != null) {
-        for (CoreMap mention : entry.getValue()) {
-          for (CoreLabel token : mention.get(CoreAnnotations.TokensAnnotation.class)) {
-            token.set(CoreAnnotations.WikipediaEntityAnnotation.class, entityLink);
-          }
+      for (CoreMap mention : entry.getValue()) {
+        for (CoreLabel token : mention.get(CoreAnnotations.TokensAnnotation.class)) {
+          token.set(CoreAnnotations.WikipediaEntityAnnotation.class, entityLink);
         }
       }
     }
 
     // create a mapping of char offset pairs to KBPMention
-    HashMap<Pair<Integer, Integer>, CoreMap> charOffsetToKBPMention = new HashMap<>();
+    HashMap<Pair<Integer,Integer>, CoreMap> charOffsetToKBPMention = new HashMap<>();
     for (CoreMap mention : mentions) {
       int nerMentionCharBegin = mention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
       int nerMentionCharEnd = mention.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
@@ -406,22 +440,11 @@ public class KBPAnnotator implements Annotator {
     }
 
     // Create a canonical mention map
-    Map<CoreMap, CoreMap> mentionToCanonicalMention;
-    if (kbpLanguage.equals(LanguageInfo.HumanLanguage.SPANISH)) {
-      mentionToCanonicalMention = spanishCorefSystem.canonicalMentionMapFromEntityMentions(mentions);
-      if (VERBOSE) {
-        log.info("---");
-        log.info("basic spanish coref results");
-        for (CoreMap originalMention : mentionToCanonicalMention.keySet()) {
-          if (!originalMention.equals(mentionToCanonicalMention.get(originalMention))) {
-            log.info("mapped: "+originalMention+" to: "+
-                mentionToCanonicalMention.get(originalMention));
-          }
-        }
-      }
-    } else {
+    Map<CoreMap,CoreMap> mentionToCanonicalMention;
+    if (kbpLanguage.equals(LanguageInfo.HumanLanguage.SPANISH))
+      mentionToCanonicalMention = spanishCorefSystem.canonicalMentionMapFromEntityMentons(mentions);
+    else
       mentionToCanonicalMention = new HashMap<>();
-    }
     // check if there is coref info
     Set<Map.Entry<Integer, CorefChain>> corefChains;
     if (annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null &&

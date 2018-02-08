@@ -942,262 +942,260 @@ public class ColumnDataClassifier  {
    * instanceof checks.  Features must be a type of collection or a counter, and value is used
    * iff it is a counter
    */
-  private static <F> void addFeature(Object features, F newFeature, double value) {
-    if (features instanceof Counter<?>) {
-      ErasureUtils.<Counter<F>>uncheckedCast(features).setCount(newFeature, value);
-    } else if(features instanceof Collection<?>) {
-      ErasureUtils.<Collection<F>>uncheckedCast(features).add(newFeature);
-    } else {
-      throw new RuntimeException("addFeature was called with a features object that is neither a counter nor a collection!");
-    }
-  }
-
-  /**
-   * Extracts all the features from a certain input column.
-   *
-   * @param cWord The String to extract data from
-   * @param flags Flags specifying which features to extract
-   * @param featuresC Some kind of Collection or Counter to put features into
-   * @param goldAns The goldAnswer for this whole datum or emptyString if none.
-   *                    This is used only for filling in the binned lengths histogram counters
-   */
-  private void makeDatum(String cWord, Flags flags, Object featuresC, String goldAns) {
-
-    //logger.info("Making features for " + cWord + " flags " + flags);
-    if (flags == null) {
-      // no features for this column
-      return;
-    }
-    if (flags.filename) {
-      cWord = IOUtils.slurpFileNoExceptions(cWord);
-    }
-    if (flags.lowercase) {
-      cWord = cWord.toLowerCase(Locale.ENGLISH);
+    private static <F> void addFeature(Object features, F newFeature, double value) {
+      if (features instanceof Counter<?>) {
+        ErasureUtils.<Counter<F>>uncheckedCast(features).setCount(newFeature, value);
+      } else if(features instanceof Collection<?>) {
+        ErasureUtils.<Collection<F>>uncheckedCast(features).add(newFeature);
+      } else {
+        throw new RuntimeException("addFeature was called with a features object that is neither a counter nor a collection!");
+      }
     }
 
-    if (flags.useString) {
-      addFeature(featuresC,"S-"+cWord,DEFAULT_VALUE);
-    }
-    if (flags.binnedLengths != null) {
-      int len = cWord.length();
-      String featureName = null;
-      for (int i = 0; i <= flags.binnedLengths.length; i++) {
-        if (i == flags.binnedLengths.length || len <= flags.binnedLengths[i]) {
-          featureName = "Len-" + ((i == 0) ? 0 : (flags.binnedLengths[i - 1] + 1)) + '-' + ((i == flags.binnedLengths.length) ? "Inf" : Integer.toString(flags.binnedLengths[i]));
-          if (flags.binnedLengthsCounter != null) {
-            flags.binnedLengthsCounter.incrementCount(featureName, goldAns);
-          }
-          break;
-        }
+    /**
+     * Extracts all the features from a certain input column.
+     *
+     * @param cWord The String to extract data from
+     * @param flags Flags specifying which features to extract
+     * @param featuresC Some kind of Collection or Counter to put features into
+     * @param goldAns The goldAnswer for this whole datum or emptyString if none.
+     *                    This is used only for filling in the binned lengths histogram counters
+     */
+    private void makeDatum(String cWord, Flags flags, Object featuresC, String goldAns) {
+
+      //logger.info("Making features for " + cWord + " flags " + flags);
+      if (flags == null) {
+        // no features for this column
+        return;
       }
-      addFeature(featuresC,featureName,DEFAULT_VALUE);
-    }
-    if (flags.binnedValues != null) {
-      double val = flags.binnedValuesNaN;
-      try {
-        val = Double.parseDouble(cWord);
-      } catch (NumberFormatException nfe) {
-        // do nothing -- keeps value of flags.binnedValuesNaN
+      if (flags.filename) {
+        cWord = IOUtils.slurpFileNoExceptions(cWord);
       }
-      String featureName = null;
-      for (int i = 0; i <= flags.binnedValues.length; i++) {
-        if (i == flags.binnedValues.length || val <= flags.binnedValues[i]) {
-          featureName = "Val-(" + ((i == 0) ? "-Inf" : Double.toString(flags.binnedValues[i - 1])) + ',' + ((i == flags.binnedValues.length) ? "Inf" : Double.toString(flags.binnedValues[i])) + ']';
-          if (flags.binnedValuesCounter != null) {
-            flags.binnedValuesCounter.incrementCount(featureName, goldAns);
-          }
-          break;
-        }
+      if (flags.lowercase) {
+        cWord = cWord.toLowerCase(Locale.ENGLISH);
       }
-      addFeature(featuresC,featureName,DEFAULT_VALUE);
-    }
-    if (flags.countChars != null) {
-      int[] cnts = new int[flags.countChars.length];
-      for (int i = 0; i < cnts.length; i++) {
-        cnts[i] = 0;
+
+      if (flags.useString) {
+        addFeature(featuresC,"S-"+cWord,DEFAULT_VALUE);
       }
-      for (int i = 0, len = cWord.length(); i < len; i++) {
-        char ch = cWord.charAt(i);
-        for (int j = 0; j < cnts.length; j++) {
-          if (ch == flags.countChars[j]) {
-            cnts[j]++;
-          }
-        }
-      }
-      for (int j = 0; j < cnts.length; j++) {
+      if (flags.binnedLengths != null) {
+        int len = cWord.length();
         String featureName = null;
-        for (int i = 0; i <= flags.countCharsBins.length; i++) {
-          if (i == flags.countCharsBins.length || cnts[j] <= flags.countCharsBins[i]) {
-            featureName = "Char-" + flags.countChars[j] + '-' + ((i == 0) ? 0 : (flags.countCharsBins[i - 1] + 1)) + '-' + ((i == flags.countCharsBins.length) ? "Inf" : Integer.toString(flags.countCharsBins[i]));
+        for (int i = 0; i <= flags.binnedLengths.length; i++) {
+          if (i == flags.binnedLengths.length || len <= flags.binnedLengths[i]) {
+            featureName = "Len-" + ((i == 0) ? 0 : (flags.binnedLengths[i - 1] + 1)) + '-' + ((i == flags.binnedLengths.length) ? "Inf" : Integer.toString(flags.binnedLengths[i]));
+            if (flags.binnedLengthsCounter != null) {
+              flags.binnedLengthsCounter.incrementCount(featureName, goldAns);
+            }
             break;
           }
         }
         addFeature(featuresC,featureName,DEFAULT_VALUE);
       }
-    }
-    if (flags.splitWordsPattern != null || flags.splitWordsTokenizerPattern != null ||
-            flags.splitWordsWithPTBTokenizer) {
-      String[] bits;
-      if (flags.splitWordsTokenizerPattern != null) {
-        bits = regexpTokenize(flags.splitWordsTokenizerPattern, flags.splitWordsIgnorePattern, cWord);
-      } else if (flags.splitWordsPattern != null) {
-        bits = splitTokenize(flags.splitWordsPattern, flags.splitWordsIgnorePattern, cWord);
-      } else { //PTB tokenizer
-        bits = ptbTokenize(cWord);
-      }
-      if (flags.showTokenization) {
-        logger.info("Tokenization: " + Arrays.toString(bits));
-      }
-
-      if (flags.splitWordCount) {
-        addFeature(featuresC, "SWNUM", bits.length);
-      }
-      if (flags.logSplitWordCount) {
-        addFeature(featuresC, "LSWNUM", Math.log(bits.length));
-      }
-      if (flags.binnedSplitWordCounts != null) {
+      if (flags.binnedValues != null) {
+        double val = flags.binnedValuesNaN;
+        try {
+          val = Double.parseDouble(cWord);
+        } catch (NumberFormatException nfe) {
+          // do nothing -- keeps value of flags.binnedValuesNaN
+        }
         String featureName = null;
-        for (int i = 0; i <= flags.binnedSplitWordCounts.length; i++) {
-          if (i == flags.binnedSplitWordCounts.length || bits.length <= flags.binnedSplitWordCounts[i]) {
-            featureName = "SWNUMBIN-" + ((i == 0) ? 0 : (flags.binnedSplitWordCounts[i - 1] + 1)) + '-' + ((i == flags.binnedSplitWordCounts.length) ? "Inf" : Integer.toString(flags.binnedSplitWordCounts[i]));
+        for (int i = 0; i <= flags.binnedValues.length; i++) {
+          if (i == flags.binnedValues.length || val <= flags.binnedValues[i]) {
+            featureName = "Val-(" + ((i == 0) ? "-Inf" : Double.toString(flags.binnedValues[i - 1])) + ',' + ((i == flags.binnedValues.length) ? "Inf" : Double.toString(flags.binnedValues[i])) + ']';
+            if (flags.binnedValuesCounter != null) {
+              flags.binnedValuesCounter.incrementCount(featureName, goldAns);
+            }
             break;
           }
         }
-        addFeature(featuresC, featureName, DEFAULT_VALUE);
+        addFeature(featuresC,featureName,DEFAULT_VALUE);
       }
-      // add features over splitWords
-      for (int i = 0; i < bits.length; i++) {
-        if (flags.useSplitWords) {
-          addFeature(featuresC, "SW-" + bits[i], DEFAULT_VALUE);
+      if (flags.countChars != null) {
+        int[] cnts = new int[flags.countChars.length];
+        for (int i = 0; i < cnts.length; i++) {
+          cnts[i] = 0;
         }
-        if (flags.useLowercaseSplitWords) {
-          addFeature(featuresC, "LSW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
-        }
-        if (flags.useSplitWordPairs) {
-          if (i + 1 < bits.length) {
-            addFeature(featuresC, "SWP-" + bits[i] + '-' + bits[i + 1], DEFAULT_VALUE);
-          }
-        }
-        if (flags.useLowercaseSplitWordPairs) {
-          if (i + 1 < bits.length) {
-            addFeature(featuresC, "LSWP-" + bits[i].toLowerCase() + '-' + bits[i + 1].toLowerCase(), DEFAULT_VALUE);
-          }
-        }
-        if (flags.useAllSplitWordPairs) {
-          for (int j = i + 1; j < bits.length; j++) {
-            // sort lexicographically
-            if (bits[i].compareTo(bits[j]) < 0) {
-              addFeature(featuresC, "ASWP-" + bits[i] + '-' + bits[j], DEFAULT_VALUE);
-            } else {
-              addFeature(featuresC, "ASWP-" + bits[j] + '-' + bits[i], DEFAULT_VALUE);
+        for (int i = 0, len = cWord.length(); i < len; i++) {
+          char ch = cWord.charAt(i);
+          for (int j = 0; j < cnts.length; j++) {
+            if (ch == flags.countChars[j]) {
+              cnts[j]++;
             }
           }
         }
-        if (flags.useAllSplitWordTriples) {
-          for (int j = i + 1; j < bits.length; j++) {
-            for (int k = j + 1; k < bits.length; k++) {
+        for (int j = 0; j < cnts.length; j++) {
+          String featureName = null;
+          for (int i = 0; i <= flags.countCharsBins.length; i++) {
+            if (i == flags.countCharsBins.length || cnts[j] <= flags.countCharsBins[i]) {
+              featureName = "Char-" + flags.countChars[j] + '-' + ((i == 0) ? 0 : (flags.countCharsBins[i - 1] + 1)) + '-' + ((i == flags.countCharsBins.length) ? "Inf" : Integer.toString(flags.countCharsBins[i]));
+              break;
+            }
+          }
+          addFeature(featuresC,featureName,DEFAULT_VALUE);
+        }
+      }
+      if (flags.splitWordsPattern != null || flags.splitWordsTokenizerPattern != null ||
+              flags.splitWordsWithPTBTokenizer) {
+        String[] bits;
+        if (flags.splitWordsTokenizerPattern != null) {
+          bits = regexpTokenize(flags.splitWordsTokenizerPattern, flags.splitWordsIgnorePattern, cWord);
+        } else if (flags.splitWordsPattern != null) {
+          bits = splitTokenize(flags.splitWordsPattern, flags.splitWordsIgnorePattern, cWord);
+        } else { //PTB tokenizer
+          bits = ptbTokenize(cWord);
+        }
+        if (flags.showTokenization) {
+          logger.info("Tokenization: " + Arrays.toString(bits));
+        }
+
+        if (flags.splitWordCount) {
+          addFeature(featuresC, "SWNUM", bits.length);
+        }
+        if (flags.logSplitWordCount) {
+          addFeature(featuresC, "LSWNUM", Math.log(bits.length));
+        }
+        if (flags.binnedSplitWordCounts != null) {
+          String featureName = null;
+          for (int i = 0; i <= flags.binnedSplitWordCounts.length; i++) {
+            if (i == flags.binnedSplitWordCounts.length || bits.length <= flags.binnedSplitWordCounts[i]) {
+              featureName = "SWNUMBIN-" + ((i == 0) ? 0 : (flags.binnedSplitWordCounts[i - 1] + 1)) + '-' + ((i == flags.binnedSplitWordCounts.length) ? "Inf" : Integer.toString(flags.binnedSplitWordCounts[i]));
+              break;
+            }
+          }
+          addFeature(featuresC, featureName, DEFAULT_VALUE);
+        }
+        // add features over splitWords
+        for (int i = 0; i < bits.length; i++) {
+          if (flags.useSplitWords) {
+            addFeature(featuresC, "SW-" + bits[i], DEFAULT_VALUE);
+          }
+          if (flags.useLowercaseSplitWords) {
+            addFeature(featuresC, "LSW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
+          }
+          if (flags.useSplitWordPairs) {
+            if (i + 1 < bits.length) {
+              addFeature(featuresC, "SWP-" + bits[i] + '-' + bits[i + 1], DEFAULT_VALUE);
+            }
+          }
+          if (flags.useLowercaseSplitWordPairs) {
+            if (i + 1 < bits.length) {
+              addFeature(featuresC, "LSWP-" + bits[i].toLowerCase() + '-' + bits[i + 1].toLowerCase(), DEFAULT_VALUE);
+            }
+          }
+          if (flags.useAllSplitWordPairs) {
+            for (int j = i + 1; j < bits.length; j++) {
               // sort lexicographically
-              String[] triple = new String[3];
-              triple[0] = bits[i];
-              triple[1] = bits[j];
-              triple[2] = bits[k];
-              Arrays.sort(triple);
-              addFeature(featuresC, "ASWT-" + triple[0] + '-' + triple[1] + '-' + triple[2], DEFAULT_VALUE);
-            }
-          }
-        }
-        if (flags.useSplitWordNGrams) {
-          StringBuilder sb = new StringBuilder("SW#");
-          for (int j = i; j < i+flags.minWordNGramLeng-1 && j < bits.length; j++) {
-            sb.append('-');
-            sb.append(bits[j]);
-          }
-          int maxIndex = (flags.maxWordNGramLeng > 0)? Math.min(bits.length, i + flags.maxWordNGramLeng): bits.length;
-          for (int j = i + flags.minWordNGramLeng-1; j < maxIndex; j++) {
-            if (flags.wordNGramBoundaryRegexp != null) {
-              if (flags.wordNGramBoundaryPattern.matcher(bits[j]).matches()) {
-                break;
-              }
-            }
-            sb.append('-');
-            sb.append(bits[j]);
-            addFeature(featuresC, sb.toString(), DEFAULT_VALUE);
-          }
-        }
-        // this is equivalent to having boundary tokens in splitWordPairs -- they get a special feature
-        if (flags.useSplitFirstLastWords) {
-          if (i == 0) {
-            addFeature(featuresC,"SFW-" + bits[i], DEFAULT_VALUE);
-          } else if (i == bits.length - 1) {
-            addFeature(featuresC,"SLW-" + bits[i], DEFAULT_VALUE);
-          }
-        }
-        if (flags.useLowercaseSplitFirstLastWords) {
-          if (i == 0) {
-            addFeature(featuresC,"LSFW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
-          } else if (i == bits.length - 1) {
-            addFeature(featuresC,"SLW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
-          }
-        }
-        if (flags.useSplitNGrams || flags.useSplitPrefixSuffixNGrams) {
-          Collection<String> featureNames = makeNGramFeatures(bits[i], flags, true, "S#");
-          for(String featureName : featureNames) {
-            addFeature(featuresC, featureName, DEFAULT_VALUE);
-          }
-        }
-        if (flags.splitWordShape > edu.stanford.nlp.process.WordShapeClassifier.NOWORDSHAPE) {
-          String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(bits[i], flags.splitWordShape);
-          // logger.info("Shaper is " + flags.splitWordShape + " word len " + bits[i].length() + " shape is " + shape);
-          addFeature(featuresC,"SSHAPE-" + shape,DEFAULT_VALUE);
-        }
-      } // for bits
-      if (flags.wordVectors != null) {
-        double[] averages = null;
-        for (String bit : bits) {
-          float[] wv = flags.wordVectors.get(bit);
-          if (wv != null) {
-            if (averages == null) {
-              averages = new double[wv.length];
-              for (int j = 0; j < wv.length; j++) {
-                averages[j] += wv[j];
+              if (bits[i].compareTo(bits[j]) < 0) {
+                addFeature(featuresC, "ASWP-" + bits[i] + '-' + bits[j], DEFAULT_VALUE);
+              } else {
+                addFeature(featuresC, "ASWP-" + bits[j] + '-' + bits[i], DEFAULT_VALUE);
               }
             }
           }
-        }
-        if (averages != null) {
-          for (int j = 0; j < averages.length; j++) {
-            averages[j] /= bits.length;
-            addFeature(featuresC, "SWV-" + j, averages[j]);
+          if (flags.useAllSplitWordTriples) {
+            for (int j = i + 1; j < bits.length; j++) {
+              for (int k = j + 1; k < bits.length; k++) {
+                // sort lexicographically
+                String[] triple = new String[3];
+                triple[0] = bits[i];
+                triple[1] = bits[j];
+                triple[2] = bits[k];
+                Arrays.sort(triple);
+                addFeature(featuresC, "ASWT-" + triple[0] + '-' + triple[1] + '-' + triple[2], DEFAULT_VALUE);
+              }
+            }
           }
+          if (flags.useSplitWordNGrams) {
+            StringBuilder sb = new StringBuilder("SW#");
+            for (int j = i; j < i+flags.minWordNGramLeng-1 && j < bits.length; j++) {
+              sb.append('-');
+              sb.append(bits[j]);
+            }
+            int maxIndex = (flags.maxWordNGramLeng > 0)? Math.min(bits.length, i + flags.maxWordNGramLeng): bits.length;
+            for (int j = i + flags.minWordNGramLeng-1; j < maxIndex; j++) {
+              if (flags.wordNGramBoundaryRegexp != null) {
+                if (flags.wordNGramBoundaryPattern.matcher(bits[j]).matches()) {
+                  break;
+                }
+              }
+              sb.append('-');
+              sb.append(bits[j]);
+              addFeature(featuresC, sb.toString(), DEFAULT_VALUE);
+            }
+          }
+          // this is equivalent to having boundary tokens in splitWordPairs -- they get a special feature
+          if (flags.useSplitFirstLastWords) {
+            if (i == 0) {
+              addFeature(featuresC,"SFW-" + bits[i], DEFAULT_VALUE);
+            } else if (i == bits.length - 1) {
+              addFeature(featuresC,"SLW-" + bits[i], DEFAULT_VALUE);
+            }
+          }
+          if (flags.useLowercaseSplitFirstLastWords) {
+            if (i == 0) {
+              addFeature(featuresC,"LSFW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
+            } else if (i == bits.length - 1) {
+              addFeature(featuresC,"SLW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
+            }
+          }
+          if (flags.useSplitNGrams || flags.useSplitPrefixSuffixNGrams) {
+            Collection<String> featureNames = makeNGramFeatures(bits[i], flags, true, "S#");
+            for(String featureName : featureNames)
+              addFeature(featuresC, featureName, DEFAULT_VALUE);
+          }
+          if (flags.splitWordShape > edu.stanford.nlp.process.WordShapeClassifier.NOWORDSHAPE) {
+            String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(bits[i], flags.splitWordShape);
+            // logger.info("Shaper is " + flags.splitWordShape + " word len " + bits[i].length() + " shape is " + shape);
+            addFeature(featuresC,"SSHAPE-" + shape,DEFAULT_VALUE);
+          }
+        } // for bits
+        if (flags.wordVectors != null) {
+          double[] averages = null;
+          for (String bit : bits) {
+            float[] wv = flags.wordVectors.get(bit);
+            if (wv != null) {
+              if (averages == null) {
+                averages = new double[wv.length];
+                for (int j = 0; j < wv.length; j++) {
+                  averages[j] += wv[j];
+                }
+              }
+            }
+          }
+          if (averages != null) {
+            for (int j = 0; j < averages.length; j++) {
+              averages[j] /= bits.length;
+              addFeature(featuresC, "SWV-" + j, averages[j]);
+            }
           // } else {
           //   logger.info("No word vectors found for words in |" + cWord + '|');
-        }
-      } // end if wordVectors
-    } // end if uses some split words features
+          }
+        } // end if wordVectors
+      } // end if uses some split words features
 
-    if (flags.wordShape > WordShapeClassifier.NOWORDSHAPE) {
-      String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(cWord, flags.wordShape);
-      addFeature(featuresC, "SHAPE-" + shape, DEFAULT_VALUE);
-    }
-    if (flags.useNGrams || flags.usePrefixSuffixNGrams) {
-      Collection<String> featureNames = makeNGramFeatures(cWord, flags, false, "#");
-      for(String featureName : featureNames) {
-        addFeature(featuresC, featureName, DEFAULT_VALUE);
+      if (flags.wordShape > WordShapeClassifier.NOWORDSHAPE) {
+        String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(cWord, flags.wordShape);
+        addFeature(featuresC, "SHAPE-" + shape, DEFAULT_VALUE);
       }
-    }
-    if (isRealValued(flags)) {
-      addFeatureValue(cWord, flags, featuresC);
-    }
-    //logger.info("Made featuresC " + featuresC);
-  } //end makeDatum
+      if (flags.useNGrams || flags.usePrefixSuffixNGrams) {
+        Collection<String> featureNames = makeNGramFeatures(cWord, flags, false, "#");
+        for(String featureName : featureNames)
+          addFeature(featuresC,featureName,DEFAULT_VALUE);
+      }
+      if (isRealValued(flags)) {
+        addFeatureValue(cWord, flags, featuresC);
+      }
+       //logger.info("Made featuresC " + featuresC);
+    }  //end makeDatum
 
   /** Return the tokens using PTB tokenizer.
    *
    *  @param str String to tokenize
    *  @return List of tokens
    */
+  // todo [cdm 2017]: Someday should generalize this to allow use of other tokenizers
   private String[] ptbTokenize(String str) {
-    // todo [cdm 2017]: Someday should generalize this to allow use of other tokenizers
     if (ptbFactory==null) {
       ptbFactory = PTBTokenizer.factory();
     }
