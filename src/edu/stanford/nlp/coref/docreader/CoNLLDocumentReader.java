@@ -17,7 +17,6 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
@@ -89,7 +88,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class CoNLLDocumentReader implements DocReader  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CoNLLDocumentReader.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(CoNLLDocumentReader.class);
 
   private static final int FIELD_LAST = -1;
 
@@ -115,8 +114,6 @@ public class CoNLLDocumentReader implements DocReader  {
   private int curFileIndex;
   private final Options options;
 
-  public static final Logger logger = Logger.getLogger(CoNLLDocumentReader.class.getName());
-
   private static final HeadFinder chineseHeadFinder = new ChineseSemanticHeadFinder();
 
   public CoNLLDocumentReader(String filepath)
@@ -124,8 +121,7 @@ public class CoNLLDocumentReader implements DocReader  {
     this(filepath, new Options());
   }
 
-  public CoNLLDocumentReader(String filepath, Options options)
-  {
+  public CoNLLDocumentReader(String filepath, Options options) {
 //    this.filepath = filepath;
     if (filepath != null && new File(filepath).exists()) {
       this.fileList = getFiles(filepath, options.filePattern);
@@ -142,8 +138,7 @@ public class CoNLLDocumentReader implements DocReader  {
     }
   }
 
-  private static List<File> getFiles(String filepath, Pattern filter)
-  {
+  private static List<File> getFiles(String filepath, Pattern filter) {
     Iterable<File> iter = IOUtils.iterFilesRecursive(new File(filepath), filter);
     List<File> fileList = new ArrayList<>();
     for (File f:iter) {
@@ -161,8 +156,7 @@ public class CoNLLDocumentReader implements DocReader  {
     }
   }
 
-  public CoNLLDocument getNextDocument()
-  {
+  public CoNLLDocument getNextDocument() {
     try {
       if (curFileIndex >= fileList.size()) return null;  // DONE!
       File curFile = fileList.get(curFileIndex);
@@ -295,8 +289,7 @@ public class CoNLLDocumentReader implements DocReader  {
     }
   }
 
-  private static String getField(String[] fields, int pos)
-  {
+  private static String getField(String[] fields, int pos) {
     if (pos == FIELD_LAST) {
       return fields[fields.length - 1];
     } else {
@@ -304,8 +297,7 @@ public class CoNLLDocumentReader implements DocReader  {
     }
   }
 
-  private static String concatField(List<String[]> sentWords, int pos)
-  {
+  private static String concatField(List<String[]> sentWords, int pos) {
     StringBuilder sb = new StringBuilder();
     for (String[] fields:sentWords) {
       if (sb.length() > 0) {
@@ -356,8 +348,7 @@ public class CoNLLDocumentReader implements DocReader  {
 
     private static final Pattern starPattern = Pattern.compile("\\*");
 
-    private static Tree wordsToParse(List<String[]> sentWords)
-    {
+    private static Tree wordsToParse(List<String[]> sentWords) {
       StringBuilder sb = new StringBuilder();
       for (String[] fields:sentWords) {
         if (sb.length() > 0) {
@@ -381,13 +372,11 @@ public class CoNLLDocumentReader implements DocReader  {
     }
 
 
-    private static List<Triple<Integer,Integer,String>> getCorefSpans(List<String[]> sentWords)
-    {
+    private static List<Triple<Integer,Integer,String>> getCorefSpans(List<String[]> sentWords) {
       return getLabelledSpans(sentWords, FIELD_COREF, HYPHEN, true);
     }
 
-    private static List<Triple<Integer,Integer,String>> getNerSpans(List<String[]> sentWords)
-    {
+    private static List<Triple<Integer,Integer,String>> getNerSpans(List<String[]> sentWords) {
       return getLabelledSpans(sentWords, FIELD_NER_TAG, ASTERISK, false);
     }
 
@@ -396,8 +385,7 @@ public class CoNLLDocumentReader implements DocReader  {
     private static final String HYPHEN = "-";
 
     private static List<Triple<Integer,Integer,String>> getLabelledSpans(List<String[]> sentWords, int fieldIndex,
-                                                                         String defaultMarker, boolean checkEndLabel)
-    {
+                                                                         String defaultMarker, boolean checkEndLabel) {
       List<Triple<Integer,Integer,String>> spans = new ArrayList<>();
       Stack<Triple<Integer,Integer, String>> openSpans = new Stack<>();
       boolean removeStar = (ASTERISK.equals(defaultMarker));
@@ -468,8 +456,7 @@ public class CoNLLDocumentReader implements DocReader  {
       return spans;
     }
 
-    private CoreMap wordsToSentence(List<String[]> sentWords)
-    {
+    private CoreMap wordsToSentence(List<String[]> sentWords) {
       String sentText = concatField(sentWords, FIELD_WORD);
       Annotation sentence = new Annotation(sentText);
       Tree tree = wordsToParse(sentWords);
@@ -555,8 +542,7 @@ public class CoNLLDocumentReader implements DocReader  {
       return sentence;
     }
 
-    public static Annotation sentencesToDocument(String documentID, List<CoreMap> sentences)
-    {
+    public static Annotation sentencesToDocument(String documentID, List<CoreMap> sentences) {
       String docText = null;
       Annotation document = new Annotation(docText);
       document.set(CoreAnnotations.DocIDAnnotation.class, documentID);
@@ -600,16 +586,14 @@ public class CoNLLDocumentReader implements DocReader  {
       return document;
     }
 
-    private static Tree getLowestCommonAncestor(Tree root, int startToken, int endToken)
-    {
+    private static Tree getLowestCommonAncestor(Tree root, int startToken, int endToken) {
       Tree leftLeaf = Trees.getLeaf(root, startToken);
       Tree rightLeaf = Trees.getLeaf(root, endToken);
       // todo [cdm 2013]: It might be good to climb certain unaries here, like VP or S under NP, but it's not good to climb all unaries (e.g., NP under FRAG)
       return Trees.getLowestCommonAncestor(leftLeaf, rightLeaf, root);
     }
 
-    private static Tree getTreeNonTerminal(Tree root, int startToken, int endToken, boolean acceptPreTerminals)
-    {
+    private static Tree getTreeNonTerminal(Tree root, int startToken, int endToken, boolean acceptPreTerminals) {
       Tree t = getLowestCommonAncestor(root, startToken, endToken);
       if (t.isLeaf()) {
         t = t.parent(root);
@@ -620,8 +604,7 @@ public class CoNLLDocumentReader implements DocReader  {
       return t;
     }
 
-    public void annotateDocument(CoNLLDocument document)
-    {
+    public void annotateDocument(CoNLLDocument document) {
       List<CoreMap> sentences = new ArrayList<>(document.sentenceWordLists.size());
       for (List<String[]> sentWords:document.sentenceWordLists) {
         sentences.add(wordsToSentence(sentWords));
@@ -749,9 +732,8 @@ public class CoNLLDocumentReader implements DocReader  {
 
   } // end static class DocumentIterator
 
-  public static void usage()
-  {
-    log.info("java edu.stanford.nlp.dcoref.CoNLL2011DocumentReader [-ext <extension to match>] -i <inputpath> -o <outputfile>");
+  public static void usage() {
+    logger.info("java edu.stanford.nlp.dcoref.CoNLL2011DocumentReader [-ext <extension to match>] -i <inputpath> -o <outputfile>");
   }
 
   public static Pair<Integer,Integer> getMention(Integer index, String corefG, List<CoreLabel> sentenceAnno) {
@@ -792,8 +774,7 @@ public class CoNLLDocumentReader implements DocReader  {
     return false;
   }
 
-  public static void writeTabSep(PrintWriter pw, CoreMap sentence, CollectionValuedMap<String,CoreMap> chainmap)
-  {
+  public static void writeTabSep(PrintWriter pw, CoreMap sentence, CollectionValuedMap<String,CoreMap> chainmap) {
     HeadFinder headFinder = new ModCollinsHeadFinder();
 
     List<CoreLabel> sentenceAnno = sentence.get(CoreAnnotations.TokensAnnotation.class);
@@ -877,8 +858,7 @@ public class CoNLLDocumentReader implements DocReader  {
 
   }
 
-  public static class CorpusStats
-  {
+  public static class CorpusStats {
     IntCounter<String> mentionTreeLabelCounter = new IntCounter<>();
     IntCounter<String> mentionTreeNonPretermLabelCounter = new IntCounter<>();
     IntCounter<String> mentionTreePretermNonPretermNoMatchLabelCounter = new IntCounter<>();
@@ -973,14 +953,12 @@ public class CoNLLDocumentReader implements DocReader  {
       }
     }
 
-    private static void appendFrac(StringBuilder sb, String label, int num, int den)
-    {
+    private static void appendFrac(StringBuilder sb, String label, int num, int den) {
       double frac = ((double) num)/ den;
       sb.append(label).append("\t").append(frac).append("\t(").append(num).append("/").append(den).append(")");
     }
 
-    private static <E> void appendIntCountStats(StringBuilder sb, String label, IntCounter<E> counts)
-    {
+    private static <E> void appendIntCountStats(StringBuilder sb, String label, IntCounter<E> counts) {
       sb.append(label).append("\n");
       List<E> sortedKeys = Counters.toSortedList(counts);
       int total = counts.totalIntCount();
@@ -991,8 +969,7 @@ public class CoNLLDocumentReader implements DocReader  {
       }
     }
 
-    public String toString()
-    {
+    public String toString() {
       StringBuilder sb = new StringBuilder();
       appendIntCountStats(sb, "Mention Tree Labels (no preterminals)", mentionTreeNonPretermLabelCounter);
       sb.append("\n");
@@ -1048,28 +1025,28 @@ public class CoNLLDocumentReader implements DocReader  {
       corpusStats.process(doc);
       docCnt++;
       Annotation anno = doc.getAnnotation();
-      if (debug) System.out.println("Document " + docCnt + ": " + anno.get(CoreAnnotations.DocIDAnnotation.class));
+      if (debug) logger.info("Document " + docCnt + ": " + anno.get(CoreAnnotations.DocIDAnnotation.class));
       for (CoreMap sentence:anno.get(CoreAnnotations.SentencesAnnotation.class)) {
-        if (debug) System.out.println("Parse: " + sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
-        if (debug) System.out.println("Sentence Tokens: " + StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class), ","));
+        if (debug) logger.info("Parse: " + sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
+        if (debug) logger.info("Sentence Tokens: " + StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class), ","));
         writeTabSep(fout,sentence,doc.corefChainMap);
         sentCnt++;
         tokenCnt += sentence.get(CoreAnnotations.TokensAnnotation.class).size();
       }
       if (debug) {
         for (CoreMap ner:doc.nerChunks) {
-          System.out.println("NER Chunk: " + ner);
+          logger.info("NER Chunk: " + ner);
         }
         for (String id:doc.corefChainMap.keySet()) {
-          System.out.println("Coref: " + id + " = " + StringUtils.join(doc.corefChainMap.get(id), ";"));
+          logger.info("Coref: " + id + " = " + StringUtils.join(doc.corefChainMap.get(id), ";"));
         }
       }
     }
     fout.close();
-    System.out.println("Total document count: " + docCnt);
-    System.out.println("Total sentence count: " + sentCnt);
-    System.out.println("Total token count: " + tokenCnt);
-    System.out.println(corpusStats);
+    logger.info("Total document count: " + docCnt);
+    logger.info("Total sentence count: " + sentCnt);
+    logger.info("Total token count: " + tokenCnt);
+    logger.info(corpusStats);
   }
 
   @Override
@@ -1092,7 +1069,7 @@ public class CoNLLDocumentReader implements DocReader  {
   }
 
   // store any useful information for later (as features, debug, etc)
-  private Map<String, String> makeDocInfo(CoNLLDocument conllDoc) {
+  private static Map<String, String> makeDocInfo(CoNLLDocument conllDoc) {
     Map<String, String> docInfo = Generics.newHashMap();
     docInfo.put("DOC_ID", conllDoc.documentID);
     docInfo.put("DOC_PART", conllDoc.partNo);
@@ -1161,4 +1138,5 @@ public class CoNLLDocumentReader implements DocReader  {
     }
     return allGoldMentions;
   }
+
 }
