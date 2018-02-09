@@ -708,13 +708,20 @@ public class QuoteAnnotator implements Annotator  {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
+    // set base requirements
+    Set<Class<? extends CoreAnnotation>> baseRequirements =
+        new HashSet<>(Arrays.asList(
+            CoreAnnotations.TextAnnotation.class,
+            CoreAnnotations.TokensAnnotation.class,
+            CoreAnnotations.SentencesAnnotation.class,
+            CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+            CoreAnnotations.CharacterOffsetEndAnnotation.class,
+            CoreAnnotations.IsNewlineAnnotation.class,
+            CoreAnnotations.OriginalTextAnnotation.class
+        ));
+    // add extra quote attribution requirements if necessary
     if (ATTRIBUTE_QUOTES) {
-      return new HashSet<>(Arrays.asList(
-          CoreAnnotations.TextAnnotation.class,
-          CoreAnnotations.TokensAnnotation.class,
-          CoreAnnotations.SentencesAnnotation.class,
-          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+      HashSet<Class<? extends CoreAnnotation>> attributionRequirements = new HashSet<>(Arrays.asList(
           CoreAnnotations.PartOfSpeechAnnotation.class,
           CoreAnnotations.NamedEntityTagAnnotation.class,
           CoreAnnotations.MentionsAnnotation.class,
@@ -727,12 +734,10 @@ public class QuoteAnnotator implements Annotator  {
           CoreAnnotations.MentionsAnnotation.class,
           CoreAnnotations.EntityMentionIndexAnnotation.class,
           CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class
-
-
       ));
-    } else {
-      return Collections.EMPTY_SET;
+      baseRequirements.addAll(attributionRequirements);
     }
+    return baseRequirements;
   }
 
   @Override
