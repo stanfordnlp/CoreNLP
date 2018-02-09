@@ -537,7 +537,7 @@ public class DependencyParser  {
         config.language = Config.getLanguage(s.substring(9, s.length() - 1));
         // set up tlp
         s = input.readLine();
-        String tlpCanonicalName = s.substring(4, s.length() - 1);
+        String tlpCanonicalName = s.substring(4, s.length());
         try {
           config.tlp = ReflectionLoading.loadByReflection(tlpCanonicalName);
           System.err.println("Loaded TreebankLanguagePack: " + tlpCanonicalName);

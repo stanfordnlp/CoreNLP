@@ -250,6 +250,7 @@
   { (/suppertimes?/) => SUPPERTIME }
   { (/daylights?|days?|daytimes?/) => DAYTIME }
   { (/nighttimes?|nights?|overnights?/) => NIGHT }
+  { (/workday|work day|business hours/) => WORKDAY }
 
   # Seasons
   { (/summers?/) => SUMMER }
