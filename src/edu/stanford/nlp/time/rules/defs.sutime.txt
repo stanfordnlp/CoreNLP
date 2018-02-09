@@ -135,7 +135,7 @@
       label: "AF",
       value: InexactTime( TimeRange ( NOON, IsoTime( 18, NONE, NONE) ) )
   }
-  EVENING = {	      
+  EVENING = {
       type: TIME_OF_DAY,
       label: "EV",
       value: InexactTime( TimeRange ( IsoTime( 18, NONE, NONE), IsoTime ( 20, NONE, NONE) ) )
