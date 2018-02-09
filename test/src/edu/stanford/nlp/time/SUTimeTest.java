@@ -90,7 +90,6 @@ public class SUTimeTest {
       Pair.makePair(SUTime.AFTERNOON, "2016-06-19T12:00:00.000/PT6H"),  // TODO: Check this...
       Pair.makePair(SUTime.EVENING, "2016-06-19T18:00:00.000/PT2H"),    // TODO: Check this...
       Pair.makePair(SUTime.NIGHT, "2016-06-19T14:00:00.000/2016-06-20T00:00:00.000"),
-      Pair.makePair(SUTime.PMS, "2016-06-19T12:00:00.000/2016-06-20T00:00:00.000"),
 
       Pair.makePair(SUTime.DAY, "2016-06-19/2016-06-19"),
       Pair.makePair(SUTime.WEEK, "2016-06-13/2016-06-19"),  // TODO: is this right (Sunday is a weird day...)
@@ -103,8 +102,6 @@ public class SUTimeTest {
       Pair.makePair(SUTime.SPRING, "2016-03-01/2016-06"),
       Pair.makePair(SUTime.SUMMER, "2016-06-01/2016-09"),
       Pair.makePair(SUTime.FALL, "2016-09-01/2016-12"),
-
-      Pair.makePair(SUTime.WORKDAY, "2016-06-19T09:00:00.000/PT8H"),
     });
 
     for (int i = 0; i < testPairs.length; i++) {
