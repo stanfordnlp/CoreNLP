@@ -81,10 +81,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     {@code featuresC} code, if both the current and previous class,
  *     then {@code featuresCpC}, etc.</li>
  * </ol>
- * <p> Parameters can be defined using a Properties file
+ * <p>
+ * Parameters can be defined using a Properties file
  * (specified on the command-line with {@code -prop} <i>propFile</i>),
  * or directly on the command line. The following properties are recognized:
- * </p>
+ *
  * <table border="1">
  * <tr><td><b>Property Name</b></td><td><b>Type</b></td><td><b>Default Value</b></td><td><b>Description</b></td></tr>
  * <tr><td> loadClassifier </td><td>String</td><td>n/a</td><td>Path to serialized classifier to load</td></tr>
@@ -1694,21 +1695,27 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
    * Binary feature annotations
    */
   private static class Bin1Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin2Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin3Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin4Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin5Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin6Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
 
