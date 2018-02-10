@@ -195,10 +195,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
     // assemble the sentence annotations
-    // set the initial token offset to the first non-newline token index
     int tokenOffset = 0;
-    while (tokenOffset < tokens.size()-1 && Boolean.TRUE.equals(tokens.get(tokenOffset).isNewline()))
-      tokenOffset++;
     int lineNumber = 0;
     // section annotations to mark sentences with
     CoreMap sectionAnnotations = null;

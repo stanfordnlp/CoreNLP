@@ -513,12 +513,8 @@ public class DependencyParser  {
    * @param firstLine the first line of the model file
    * @return true if this is a new format model file
    */
-  private boolean isModelNewFormat(String firstLine) {
-    if (firstLine.substring(0,9).equals("language=")) {
-      return true;
-    } else {
-      return false;
-    }
+  private static boolean isModelNewFormat(String firstLine) {
+    return firstLine.startsWith("language=");
   }
 
   private void loadModelFile(String modelFile, boolean verbose) {
@@ -537,12 +533,12 @@ public class DependencyParser  {
         config.language = Config.getLanguage(s.substring(9, s.length() - 1));
         // set up tlp
         s = input.readLine();
-        String tlpCanonicalName = s.substring(4, s.length());
+        String tlpCanonicalName = s.substring(4, s.length() - 1);
         try {
           config.tlp = ReflectionLoading.loadByReflection(tlpCanonicalName);
-          System.err.println("Loaded TreebankLanguagePack: " + tlpCanonicalName);
+          log.info("Loaded TreebankLanguagePack: " + tlpCanonicalName);
         } catch (Exception e) {
-          System.err.println("Error: Failed to load TreebankLanguagePack: " + tlpCanonicalName);
+          log.warn("Error: Failed to load TreebankLanguagePack: " + tlpCanonicalName);
         }
         s = input.readLine();
       }
@@ -720,9 +716,8 @@ public class DependencyParser  {
     config.printParameters();
 
     long startTime = System.currentTimeMillis();
-    /**
-     * Track the best UAS performance we've seen.
-     */
+
+    // Track the best UAS performance we've seen.
     double bestUAS = 0;
 
     for (int iter = 0; iter < config.maxIter; ++iter) {
@@ -747,7 +742,7 @@ public class DependencyParser  {
         log.info("UAS: " + uas);
 
         if (config.saveIntermediate && uas > bestUAS) {
-          System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
+          log.info("Exceeds best previous UAS of %f. Saving model file.%n", bestUAS);
 
           bestUAS = uas;
           writeModelFile(modelFile);
@@ -770,8 +765,8 @@ public class DependencyParser  {
       double uas = config.noPunc ? system.getUASnoPunc(devSents, predicted, devTrees) : system.getUAS(devSents, predicted, devTrees);
 
       if (uas > bestUAS) {
-        System.err.printf("Final model UAS: %f%n", uas);
-        System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
+        log.info(String.format("Final model UAS: %f%n", uas));
+        log.info(String.format("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS));
 
         writeModelFile(modelFile);
       }
@@ -1121,7 +1116,7 @@ public class DependencyParser  {
           numOOVWords += 1;
       }
     }
-    System.err.printf("OOV Words: %d / %d = %.2f%%\n", numOOVWords, numWords, numOOVWords * 100.0 / numWords);
+    log.info(String.format("OOV Words: %d / %d = %.2f%%\n", numOOVWords, numWords, numOOVWords * 100.0 / numWords));
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);

@@ -57,18 +57,4 @@ public class CoreEntityMention {
     return this.entityMentionCoreMap.get(CoreAnnotations.WikipediaEntityAnnotation.class);
   }
 
-  /** return the canonical entity mention for this entity mention **/
-  public Optional<CoreEntityMention> canonicalEntityMention() {
-    CoreDocument myDocument = sentence.document();
-    Optional<Integer> canonicalEntityMentionIndex =
-        Optional.ofNullable(coreMap().get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class));
-    return canonicalEntityMentionIndex.isPresent() ?
-        Optional.of(sentence.document().entityMentions().get(canonicalEntityMentionIndex.get())) :
-        Optional.empty();
-  }
-
-  @Override
-  public String toString() {
-    return coreMap().toString();
-  }
 }

@@ -176,41 +176,9 @@ public class QuoteAnnotator implements Annotator  {
     }
   }
 
-  /** helper method for creating version of document text without xml **/
-  public String xmlFreeText(String documentText, Annotation annotation) {
-    int firstTokenCharIndex =
-        annotation.get(CoreAnnotations.TokensAnnotation.class).get(0).get(
-            CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-    // add white space for all text before first token
-    String cleanedText =
-        documentText.substring(0,firstTokenCharIndex).replaceAll("\\S", " ");
-    int tokenIndex = 0;
-    List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    for (CoreLabel token : tokens) {
-      // add the current token's text
-      cleanedText += token.originalText();
-      // add whitespace for non-tokens and xml in between these tokens
-      tokenIndex += 1;
-      if (tokenIndex < tokens.size()) {
-        CoreLabel nextToken = tokens.get(tokenIndex);
-        int inBetweenStart = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-        int inBetweenEnd = nextToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-        String inBetweenTokenText = documentText.substring(inBetweenStart, inBetweenEnd);
-        inBetweenTokenText = inBetweenTokenText.replaceAll("\\S", " ");
-        cleanedText += inBetweenTokenText;
-      }
-    }
-    // add white space for all non-token content after last token
-    cleanedText += documentText.substring(
-        cleanedText.length(), documentText.length()).replaceAll("\\S", " ");
-    return cleanedText;
-  }
-
   @Override
   public void annotate(Annotation annotation) {
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
-    // clear out xml content from text
-    text = xmlFreeText(text, annotation);
 
     // TODO: the following, if you want the quote annotator to get these truly correct
     // Pre-process to make word terminal apostrophes specially encoded (Jones' dog)
@@ -711,20 +679,13 @@ public class QuoteAnnotator implements Annotator  {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    // set base requirements
-    Set<Class<? extends CoreAnnotation>> baseRequirements =
-        new HashSet<>(Arrays.asList(
-            CoreAnnotations.TextAnnotation.class,
-            CoreAnnotations.TokensAnnotation.class,
-            CoreAnnotations.SentencesAnnotation.class,
-            CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-            CoreAnnotations.CharacterOffsetEndAnnotation.class,
-            CoreAnnotations.IsNewlineAnnotation.class,
-            CoreAnnotations.OriginalTextAnnotation.class
-        ));
-    // add extra quote attribution requirements if necessary
     if (ATTRIBUTE_QUOTES) {
-      HashSet<Class<? extends CoreAnnotation>> attributionRequirements = new HashSet<>(Arrays.asList(
+      return new HashSet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
           CoreAnnotations.PartOfSpeechAnnotation.class,
           CoreAnnotations.NamedEntityTagAnnotation.class,
           CoreAnnotations.MentionsAnnotation.class,
@@ -737,10 +698,12 @@ public class QuoteAnnotator implements Annotator  {
           CoreAnnotations.MentionsAnnotation.class,
           CoreAnnotations.EntityMentionIndexAnnotation.class,
           CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class
+
+
       ));
-      baseRequirements.addAll(attributionRequirements);
+    } else {
+      return Collections.EMPTY_SET;
     }
-    return baseRequirements;
   }
 
   @Override
