@@ -218,6 +218,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   public static final String unicodeEllipsisStr = "\u2026";
   public static final String NEWLINE_TOKEN = "*NL*";
   public static final String COMPOUND_ANNOTATION = "comp";
+  public static final String CONTR_ANNOTATION = "contraction";
 
 
   private Object normalizeFractions(final String in) {
@@ -381,6 +382,16 @@ COMPOUND = {WORD}({HYPHEN}{WORD})+
    http://en.wikipedia.org/wiki/Longest_words#French */
 COMPOUND2 = ({CHAR}){3,25}{APOSETCETERA}{WORD}
 
+/* French contractions:
+ *
+ * au => à le
+ * aux => à les
+ * du => de le
+ * des => de les
+ *
+ */
+CONTRACTION = au|aux|du|des
+
 /* URLs, email, and Twitter handles
    Technically, Twitter names should be capped at 15 characters.
    However, then you get into weirdness with what happens to the
@@ -475,6 +486,9 @@ cannot			{ yypushback(3) ; return getNext(); }
                           String txt = asciiQuotes(origTxt);
                           return getNext(asciiDash(txt), origTxt);
                         }
+
+{CONTRACTION}           { final String origTxt = yytext();
+                          return getNext(origTxt, origTxt, CONTR_ANNOTATION);}
 
 {COMPOUND} |
 {COMPOUND2}             { final String origTxt = yytext();
