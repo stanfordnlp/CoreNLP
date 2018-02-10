@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 /**
@@ -8,22 +9,58 @@ import java.util.Optional;
  *
  * @author Gabor Angeli
  */
-public class Pointer<T> {
+public class Pointer<T> implements Serializable {
+  /** The serial version uid to ensure stable serialization. */
+  private static final long serialVersionUID = 1L;
 
-  private Optional<T> impl;
+  /**
+   * The value the pointer is set to, if it is set.
+   */
+  private T impl;
 
+  /**
+   * Create a pointer pointing nowhere.
+   */
   public Pointer() {
-    this.impl = Optional.empty();
+    this.impl = null;
   }
 
-  @SuppressWarnings("UnusedDeclaration")
+  /**
+   * Create a pointer pointing at the given object.
+   *
+   * @param impl The object the pointer is pointing at.
+   */
   public Pointer(T impl) {
-    this.impl = Optional.of(impl);
+    this.impl = impl;
   }
 
-  public Optional<T> dereference() { return impl; }
 
-  public void set(T impl) { this.impl = Optional.of(impl); }
+  /**
+   * Dereference the pointer.
+   * If the pointer is pointing somewhere, the {@linkplain Optional optional} will be set.
+   * Otherwise, the optional will be {@linkplain Optional#empty() empty}.
+   */
+  public Optional<T> dereference() {
+    return Optional.ofNullable(impl);
+  }
 
-  public void set(Optional<T> impl) { this.impl = impl.isPresent() ? impl : this.impl; }
+
+  /**
+   * Set the pointer.
+   *
+   * @param impl The value to set the pointer to. If this is null, the pointer is unset.
+   */
+  public void set(T impl) {
+    this.impl = impl;
+  }
+
+
+  /**
+   * Set the pointer to a possible value.
+   *
+   * @param impl The value to set the pointer to. If this is {@linkplain Optional#empty empty}, the pointer is unset.
+   */
+  public void set(Optional<T> impl) {
+    this.impl = impl.orElse(null);
+  }
 }

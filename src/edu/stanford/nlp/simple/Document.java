@@ -486,10 +486,13 @@ public class Document {
    */
   public CoreNLPProtos.Document serialize() {
     synchronized (impl) {
-      // Serialize sentences
+      // Ensure we have sentences
+      List<Sentence> sentences = sentences();
+      // Ensure we're saving the newest sentences
+      // IMPORTANT NOTE: the clear below must come after we call #sentences()
       this.impl.clearSentence();
-      for (Sentence sent : sentences()) {
-        this.impl.addSentence(sent.serialize());
+      for (Sentence s : sentences) {
+        this.impl.addSentence(s.serialize());
       }
       // Serialize document
       return impl.build();
@@ -671,6 +674,7 @@ public class Document {
           // (sentences)
           List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
           this.sentences = new ArrayList<>(sentences.size());
+          this.impl.clearSentence();
           for (CoreMap sentence : sentences) {
             //Sentence sent = new Sentence(this, sentence);
             Sentence sent = new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class), defaultProps);

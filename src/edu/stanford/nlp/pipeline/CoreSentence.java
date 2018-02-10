@@ -63,6 +63,12 @@ public class CoreSentence {
     return sentenceCoreMap.get(CoreAnnotations.TokensAnnotation.class);
   }
 
+  /** list of pos tags **/
+  public List<String> posTags() { return tokens().stream().map(token -> token.tag()).collect(Collectors.toList()); }
+
+  /** list of ner tags **/
+  public List<String> nerTags() { return tokens().stream().map(token -> token.ner()).collect(Collectors.toList()); }
+
   /** constituency parse **/
   public Tree constituencyParse() {
     return sentenceCoreMap.get(TreeCoreAnnotations.TreeAnnotation.class);
@@ -87,9 +93,12 @@ public class CoreSentence {
   public List<CoreEntityMention> entityMentions() { return this.entityMentions; }
 
   /** list of KBP relations found **/
-  public List<RelationTriple> kbpRelations() {
+  public List<RelationTriple> relations() {
     return sentenceCoreMap.get(CoreAnnotations.KBPTriplesAnnotation.class);
   }
 
-
+  @Override
+  public String toString() {
+    return coreMap().toString();
+  }
 }

@@ -167,4 +167,8 @@ public class CoreQuote {
     return new Pair<>(beginCharOffset,endCharOffset);
   }
 
+  @Override
+  public String toString() {
+    return coreMap().toString();
+  }
 }

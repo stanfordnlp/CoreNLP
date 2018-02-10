@@ -10,19 +10,29 @@ import java.util.*;
 
 public class StanfordCoreNLPSpeedSlowITest extends TestCase {
 
-  public StanfordCoreNLP pipeline;
   public String WORKING_DIR = "/scr/nlp/data/stanford-corenlp-testing/speed-test";
 
   @Override
   public void setUp() {
+
+  }
+
+  public StanfordCoreNLP buildPipeline() throws IOException {
+    File dir = File.createTempFile("StanfordCoreNLPSpeedSlowITest", "");
+    dir.delete();
+    dir.mkdir();
+    dir.deleteOnExit();
+    System.out.println("Temp path: " + dir.getPath());
     Properties props =
         StringUtils.argsToProperties(
             new String[]{"-props", WORKING_DIR+"/test.props"});
-    pipeline = new StanfordCoreNLP(props);
+    props.setProperty("outputDirectory", dir.getPath());
+    return new StanfordCoreNLP(props);
   }
 
-  public void testStanfordCoreNLPSpeed() {
+  public void testStanfordCoreNLPSpeed() throws IOException {
     List<String> kbp2016FileList = IOUtils.linesFromFile(WORKING_DIR + "/kbp-2016-files.txt");
+    StanfordCoreNLP pipeline = buildPipeline();
     long startTime = System.currentTimeMillis();
     for (String filePath : kbp2016FileList) {
       System.err.println("Processing file: "+filePath);
@@ -41,6 +51,7 @@ public class StanfordCoreNLPSpeedSlowITest extends TestCase {
     for (String filePath : kbpFilePaths) {
       files.add(new File(filePath));
     }
+    StanfordCoreNLP pipeline = buildPipeline();
     long startTime = System.currentTimeMillis();
     pipeline.processFiles(files, 4, false, Optional.empty());
     long endTime = System.currentTimeMillis();

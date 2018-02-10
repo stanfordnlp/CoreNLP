@@ -55,10 +55,10 @@ public class CoreWrapperITest extends TestCase {
     assertEquals("Arizona", arizonaMentionFromSentence.text());
     assertTrue(arizonaMentionFromSentence == arizonaMentionFromDocument);
     // kbp relation info from sentences
-    List<RelationTriple> kbpRelationsFromSentenceOne = firstSentence.kbpRelations();
-    String sentenceOneRelationOne = "("+firstSentence.kbpRelations().get(0).subjectGloss()+","+
-        firstSentence.kbpRelations().get(0).relationGloss()+","+
-        firstSentence.kbpRelations().get(0).objectGloss()+")";
+    List<RelationTriple> kbpRelationsFromSentenceOne = firstSentence.relations();
+    String sentenceOneRelationOne = "("+firstSentence.relations().get(0).subjectGloss()+","+
+        firstSentence.relations().get(0).relationGloss()+","+
+        firstSentence.relations().get(0).objectGloss()+")";
     String goldSentenceOneRelationOne = "(Barack Obama,per:stateorprovince_of_birth,Hawaii)";
     assertEquals(goldSentenceOneRelationOne, sentenceOneRelationOne);
     // entity mentions

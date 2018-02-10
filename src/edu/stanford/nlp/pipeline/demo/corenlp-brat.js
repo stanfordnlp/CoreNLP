@@ -989,7 +989,7 @@ $(document).ready(function() {
       url: serverAddress + '?properties=' + encodeURIComponent(
         '{"annotators": "' + annotators() + '", "date": "' + date() + '"}') +
         '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
-      data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
+      data: encodeURIComponent(currentQuery), //jQuery doesn't automatically URI encode strings
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {

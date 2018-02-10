@@ -102,4 +102,9 @@ public class CoreDocument {
     return this.quotes;
   }
 
+  @Override
+  public String toString() {
+    return annotation().toString();
+  }
+
 }
