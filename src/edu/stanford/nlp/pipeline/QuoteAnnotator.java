@@ -182,7 +182,8 @@ public class QuoteAnnotator implements Annotator  {
         annotation.get(CoreAnnotations.TokensAnnotation.class).get(0).get(
             CoreAnnotations.CharacterOffsetBeginAnnotation.class);
     // add white space for all text before first token
-    String cleanedText = String.join("", Collections.nCopies(firstTokenCharIndex, " "));
+    String cleanedText =
+        documentText.substring(0,firstTokenCharIndex).replaceAll("\\S", " ");
     int tokenIndex = 0;
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     for (CoreLabel token : tokens) {
@@ -192,14 +193,16 @@ public class QuoteAnnotator implements Annotator  {
       tokenIndex += 1;
       if (tokenIndex < tokens.size()) {
         CoreLabel nextToken = tokens.get(tokenIndex);
-        int nonTokenContentLength = nextToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) -
-            token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-        cleanedText += String.join("", Collections.nCopies(nonTokenContentLength, " "));
+        int inBetweenStart = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        int inBetweenEnd = nextToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        String inBetweenTokenText = documentText.substring(inBetweenStart, inBetweenEnd);
+        inBetweenTokenText = inBetweenTokenText.replaceAll("\\S", " ");
+        cleanedText += inBetweenTokenText;
       }
     }
     // add white space for all non-token content after last token
-    int lastNonTokenContentLength = documentText.length() - cleanedText.length();
-    cleanedText += String.join("", Collections.nCopies(lastNonTokenContentLength, " "));
+    cleanedText += documentText.substring(
+        cleanedText.length(), documentText.length()).replaceAll("\\S", " ");
     return cleanedText;
   }
 
