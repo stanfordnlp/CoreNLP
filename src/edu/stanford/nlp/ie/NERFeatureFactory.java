@@ -476,12 +476,13 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     Timing timing = new Timing();
     lexicon = Generics.newHashMap();
     boolean terryKoo = "terryKoo".equals(flags.distSimFileFormat);
+    Pattern p = Pattern.compile(terryKoo ? "\\t" : "\\s+");
     for (String line : ObjectBank.getLineIterator(flags.distSimLexicon,
                                                   flags.inputEncoding)) {
       String word;
       String wordClass;
       if (terryKoo) {
-        String[] bits = line.split("\\t");
+        String[] bits = p.split(line);
         word = bits[1];
         wordClass = bits[0];
         if (flags.distSimMaxBits > 0 && wordClass.length() > flags.distSimMaxBits) {
@@ -489,7 +490,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         }
       } else {
         // "alexClark"
-        String[] bits = line.split("\\s+");
+        String[] bits = p.split(line);
         word = bits[0];
         wordClass = bits[1];
       }
