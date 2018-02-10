@@ -521,7 +521,7 @@ public class DependencyParser  {
     Timing t = new Timing();
     try {
 
-      log.info("Loading depparse model file: " + modelFile + " ... ");
+      log.info("Loading depparse model: " + modelFile + " ... ");
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
 
@@ -1123,14 +1123,14 @@ public class DependencyParser  {
 
     double uas = config.noPunc ? result.get("UASnoPunc") : result.get("UAS");
     double las = config.noPunc ? result.get("LASnoPunc") : result.get("LAS");
-    System.err.printf("UAS = %.4f%n", uas);
-    System.err.printf("LAS = %.4f%n", las);
+    log.info(String.format("UAS = %.4f%n", uas));
+    log.info(String.format("LAS = %.4f%n", las));
 
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     double sentspersec = numSentences / (((double) millis) / 1000);
-    System.err.printf("%s parsed %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
-            StringUtils.getShortClassName(this), numWords, numSentences, millis / 1000.0, wordspersec, sentspersec);
+    log.info(String.format("%s parsed %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
+            StringUtils.getShortClassName(this), numWords, numSentences, millis / 1000.0, wordspersec, sentspersec));
 
     if (outFile != null) {
         Util.writeConllFile(outFile, testSents, predicted);
@@ -1153,8 +1153,8 @@ public class DependencyParser  {
       tagged.add(tagger.tagSentence(sentence));
     }
 
-    System.err.printf("Tagging completed in %.2f sec.%n",
-        timer.stop() / 1000.0);
+    log.info(String.format("Tagging completed in %.2f sec.%n",
+        timer.stop() / 1000.0));
 
     timer.start();
 
@@ -1172,8 +1172,8 @@ public class DependencyParser  {
 
     long millis = timer.stop();
     double seconds = millis / 1000.0;
-    System.err.printf("Parsed %d sentences in %.2f seconds (%.2f sents/sec).%n",
-        numSentences, seconds, numSentences / seconds);
+    log.info(String.format("Parsed %d sentences in %.2f seconds (%.2f sents/sec).%n",
+        numSentences, seconds, numSentences / seconds));
   }
 
   /**
@@ -1278,9 +1278,10 @@ public class DependencyParser  {
     DependencyParser parser = new DependencyParser(props);
 
     // Train with CoNLL-X data
-    if (props.containsKey("trainFile"))
+    if (props.containsKey("trainFile")) {
       parser.train(props.getProperty("trainFile"), props.getProperty("devFile"), props.getProperty("model"),
-          props.getProperty("embedFile"), props.getProperty("preModel"));
+              props.getProperty("embedFile"), props.getProperty("preModel"));
+    }
 
     boolean loaded = false;
     // Test with CoNLL-X data
