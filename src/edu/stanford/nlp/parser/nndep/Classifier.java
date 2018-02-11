@@ -1,10 +1,10 @@
 package edu.stanford.nlp.parser.nndep;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,12 +16,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 /**
- * Neural network classifier which powers a transition-based dependency parser.
+ * Neural network classifier which powers a transition-based dependency
+ * parser.
  *
  * This classifier is built to accept distributed-representation
  * inputs, and feeds back errors to these input layers as it learns.
  *
- * <p>
  * In order to train a classifier, instantiate this class using the
  * {@link #Classifier(Config, Dataset, double[][], double[][], double[], double[][], java.util.List)}
  * constructor. (The presence of a non-null dataset signals that we
@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
 public class Classifier  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(Classifier.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(Classifier.class);
   // E: numFeatures x embeddingSize
   // W1: hiddenSize x (embeddingSize x numFeatures)
   // b1: hiddenSize
@@ -485,7 +485,7 @@ public class Classifier  {
     }
 
     double percentagePreComputed = featureIDs.size() / (float) config.numPreComputed;
-    log.info(String.format("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100));
+    System.err.printf("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100);
 
     return featureIDs;
   }
