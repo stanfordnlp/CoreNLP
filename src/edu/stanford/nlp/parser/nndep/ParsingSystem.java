@@ -1,5 +1,4 @@
 package edu.stanford.nlp.parser.nndep;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -7,6 +6,7 @@ import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +24,7 @@ import java.util.Set;
 public abstract class ParsingSystem  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ParsingSystem.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ParsingSystem.class);
 
   /**
    * Defines language-specific settings for this parsing instance.
@@ -235,4 +235,5 @@ public abstract class ParsingSystem  {
     Map<String, Double> result = evaluate(sentences, trees, goldTrees);
     return result == null || !result.containsKey("UASnoPunc") ? -1.0 : result.get("UASnoPunc");
   }
+
 }
