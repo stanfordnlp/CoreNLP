@@ -28,6 +28,9 @@ entries:
         - title: Download / Maven
           url: download.html
 
+        - title: Migration Guide
+          url: migration.html
+
         - title: Command line usage
           url: cmdline.html
 
