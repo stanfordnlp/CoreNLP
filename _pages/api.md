@@ -7,6 +7,7 @@ permalink: '/api.html'
 ## Quickstart (with convenience wrappers)
 
 Below is a quick snippet of code that demonstrates running a full pipeline on some sample text.
+It requires the english and english-kbp models jars which contain essential resources.
 
 It uses new wrapper classes that have been developed for Stanford CoreNLP 3.9.0 to make it
 easier to work with annotations.
