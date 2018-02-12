@@ -1,7 +1,7 @@
 ---
 title: Using the Stanford CoreNLP API 
 keywords: api 
-permalink: '/api.html'
+permalink: '/migration.html'
 ---
 
 ## Quickstart (with convenience wrappers)
