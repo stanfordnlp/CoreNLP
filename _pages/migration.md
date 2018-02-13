@@ -26,3 +26,29 @@ can now be expressed as:
 ```bash
 tokenize,ssplit,pos,lemma,ner,parse,coref,quote
 ```
+
+| Annotator | Sub-annotators |
+| :--- | :--- |
+| ner | regexner,entitymentions |
+| coref | coref.mention |
+| quote | quote.attribution |
+
+You can run the `ner` annotator without the additional annotators with these options
+
+```bash
+ner.applyFineGrained = false
+ner.buildEntityMentions = false
+```
+
+Likewise for `coref` annotation you can shut off the coref mention detection (if you
+want to use a custom coref mention annotator)
+
+```bash
+coref.useCustomMentionDetection = true
+```
+
+And for `quote` annotation, quote attribution can be deactivated with
+
+```bash
+quote.attributeQuotes = false
+```
