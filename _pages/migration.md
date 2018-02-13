@@ -27,6 +27,12 @@ can now be expressed as:
 tokenize,ssplit,pos,lemma,ner,parse,coref,quote
 ```
 
+The `ner`, `coref`, and `quote` annotators will run some of the annotators themselves
+as sub-annotators.  This means for instance that the `ner` annotator will run a combination
+of CRF classifiers (adding ner tags to tokens), then the TokensRegex based `regexner` to produce 
+fine-grained annotations ("LOCATION" -> "COUNTRY"), and then finally it will annotate the full
+entity mentions ("Joe", "Smith" --> "Joe Smith")
+
 | Annotator | Sub-annotators |
 | :--- | :--- |
 | ner | regexner,entitymentions |
