@@ -13,7 +13,7 @@ permalink: '/migration.html'
 | mention | coref.mention |
 | quote_attribution | quote.attribution |
 
-### Several annotators have been enhanced to run other other annotators.
+### Several annotators have been enhanced to run other annotators.
 
 This original annotators list:
 
