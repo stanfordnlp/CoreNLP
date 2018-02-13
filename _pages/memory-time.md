@@ -136,7 +136,7 @@ A better way to lessen memory use is to use a different parser. The shift-reduce
 
 Nevertheless, in general, very long sentences blow out processing time and memory. One thing to be aware of is that CoreNLP currently uses simple, heuristic sentence splitting on sentence terminators like ‘.’ and ‘?’. If you are parsing “noisy” text without explicit sentence breaks – this often happens if you parse things like tables or web pages – you can end up with “sentences” more than 500 words long, which it isn’t even useful to try to parse. You should either clean these up manually or limit the sentence length that annotators try to process.
 
-For 3., you should avoid having documents that are two large. Don’t try to parse a whole novel as one CoreNLP document. Parse each chapter as a separate document.
+For 3., you should avoid having documents that are too large. Don’t try to parse a whole novel as one CoreNLP document. Parse each chapter as a separate document.
 
 ## Where does all the time go?
 
@@ -154,7 +154,7 @@ The POS tagger does support a `pos.maxlen` flag, but this should rarely be neede
 
 ### ner
 
-The rule-based SUTime and tokensregex NER is actually considerably slower than the statistical CRF NER. If you don’t need it, you can turn it off with `-ner.useSUTime false -ner.applyNumericClassifiers false`.
+The rule-based SUTime and tokensregex NER is actually considerably slower than the statistical CRF NER. If you don’t need the rule-based NER, you can turn it off with `-ner.useSUTime false -ner.applyNumericClassifiers false`.
 
 ### parse
 
