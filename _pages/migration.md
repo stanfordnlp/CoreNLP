@@ -31,7 +31,7 @@ The `ner`, `coref`, and `quote` annotators will run some of the annotators thems
 as sub-annotators.  This means for instance that the `ner` annotator will run a combination
 of CRF classifiers (adding ner tags to tokens), then the TokensRegex based `regexner` to produce 
 fine-grained annotations ("LOCATION" -> "COUNTRY"), and then finally it will annotate the full
-entity mentions ("Joe", "Smith" --> "Joe Smith")
+entity mentions ("Joe", "Smith" --> "Joe Smith") with its internal `entitymentions` annotator.
 
 | Annotator | Sub-annotators |
 | :--- | :--- |
