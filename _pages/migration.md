@@ -40,6 +40,16 @@ ner.applyFineGrained = false
 ner.buildEntityMentions = false
 ```
 
+If you wish to set parameters for the `ner` annotator's internal `regexner` annotator
+set `ner.fine.regexner` properties.  For instance:
+
+`ner.fine.regexner.mapping = edu/stanford/nlp/models/kbp/spanish/kbp_regexner_mapping_sp.tag`
+
+Likewise to set the `ner` annotator's internal `entitymentions` annotator, set
+`ner.entitymentions` properties.  For instance:
+
+`ner.entitymentions.acronyms = true`
+
 Likewise for `coref` annotation you can shut off the coref mention detection (if you
 want to use a custom coref mention annotator)
 
