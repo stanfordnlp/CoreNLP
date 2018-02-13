@@ -6,6 +6,13 @@ permalink: '/migration.html'
 
 ## 3.9.0
 
+### Annotator renaming
+
+| Original name | New name |
+| :--- | :--- |
+| mention | coref.mention |
+| quote_attribution | quote.attribution |
+
 ### Several annotators have been enhanced to run other other annotators.
 
 This original annotators list:
