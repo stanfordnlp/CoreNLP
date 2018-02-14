@@ -28,10 +28,10 @@ marking the speaker in a dialog, etc. You can also extract document
 metadata from XML attributes. The cleanxml annotator can be
 placed after tokenize in processing order.
 
-As a simple example, if run with the annotators 
+**Example 1:** If run with the annotators:
 
 ```
-annotators = tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref
+annotators = tokenize, cleanxml, ssplit, pos, lemma, ner, parse, coref
 ```
 
 and given the text
@@ -39,8 +39,19 @@ and given the text
 
 Stanford CoreNLP deletes the XML tags and generates output that is basically the same as for the default
 `input.txt` example. The only difference between this and the original
-output is a change in CharacterOffsets. A much more complex example
-appears below.
+output is a change in CharacterOffsets.
+
+**Example 2:** For some simple text files, the structure is basically
+  just paragraphs contained in `<p>` elements. Then one might use a
+  command like:
+
+```
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators
+tokenize,cleanxml,ssplit,pos,lemma,ner,parse,coref,quote -file
+news-story.txt -outputFormat json -clean.sentenceendingtags p
+```
+
+A much more complex example appears below.
 
 
 ## Options

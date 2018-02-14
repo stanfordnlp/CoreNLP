@@ -16,7 +16,7 @@ Tokenizes the text. This component started as a PTB-style tokenizer, but was ext
 
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
-| tokenize.language | Enum { English, French, German, Spanish, Unspecified, Whitesapce } | Unspecified | Use the appropriate tokenizer for the given language. If the tokenizer is Unspecified, it defaults to using the English PTBTokenizer. |
+| tokenize.language | Enum { English, French, German, Spanish, Unspecified, Whitespace } | Unspecified | Use the appropriate tokenizer for the given language. If the tokenizer is Unspecified, it defaults to using the English PTBTokenizer. |
 | tokenize.class | class name | null | If non-null, use this class as the `Tokenizer`. In general, you can now more easily do this by specifying a language to the TokenizerAnnotator. |
 | tokenize.whitespace | boolean | false | If set to true, separates words only when whitespace is encountered. |
 | tokenize.keepeol | boolean | false | If true, end-of-line tokens are kept and used as sentence boundaries with the WhitespaceTokenizer. |
