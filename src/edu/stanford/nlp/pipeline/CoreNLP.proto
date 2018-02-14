@@ -151,6 +151,7 @@ message Token {
   optional string speaker           = 14;   // The speaker speaking this word
   optional uint32 beginIndex        = 15;   // The begin index of, e.g., a span
   optional uint32 endIndex          = 16;   // The begin index of, e.g., a span
+  optional uint32 tokenIndex        = 66;   // The index of the token in the document wide list
   optional uint32 tokenBeginIndex   = 17;   // The begin index of the token
   optional uint32 tokenEndIndex     = 18;   // The end index of the token
   optional Timex  timexValue        = 19;   // The time this word refers to

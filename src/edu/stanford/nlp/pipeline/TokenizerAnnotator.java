@@ -329,6 +329,13 @@ public class TokenizerAnnotator implements Annotator  {
           token.set(CoreAnnotations.IsNewlineAnnotation.class, false);
       }
 
+      // set token index annotation
+      int tokenIndex = 0;
+      for (CoreLabel token : tokens) {
+        token.set(CoreAnnotations.TokenIndexAnnotation.class, tokenIndex);
+        tokenIndex++;
+      }
+
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
       if (VERBOSE) {
         log.info("done.");
