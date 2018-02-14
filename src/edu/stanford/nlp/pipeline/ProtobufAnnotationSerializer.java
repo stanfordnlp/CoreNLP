@@ -1720,11 +1720,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           entityMention.set(CharacterOffsetEndAnnotation.class, emCharOffsetEnd);
           entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
         }
-        if (sentence.getHasEntityMentionsAnnotation())
+        if (sentence.getHasEntityMentionsAnnotation()) {
           map.set(CoreAnnotations.MentionsAnnotation.class, mentions);
+        }
         // add to document level list of entity mentions
-        for (CoreMap sentenceEM : mentions) {
-          ann.get(CoreAnnotations.MentionsAnnotation.class).add(sentenceEM);
+        List<CoreMap> mentionsOnAnnotation = ann.get(MentionsAnnotation.class);
+        if (mentionsOnAnnotation != null) {
+          for (CoreMap sentenceEM : mentions) {
+            ann.get(CoreAnnotations.MentionsAnnotation.class).add(sentenceEM);
+          }
         }
       }
       // End iteration
