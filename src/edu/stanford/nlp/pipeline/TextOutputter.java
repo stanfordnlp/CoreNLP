@@ -262,7 +262,7 @@ public class TextOutputter extends AnnotationOutputter {
         } else {
           speakerString = "Unknown";
         }
-        pw.printf("[QuotationIndexAnnotation=%d, CharacterOffsetBegin=%d, Text=%s, Speaker=%s]%n",
+        pw.printf("[QuotationIndex=%d, CharacterOffsetBegin=%d, Text=%s, Speaker=%s]%n",
             quote.get(CoreAnnotations.QuotationIndexAnnotation.class),
             quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
             quote.get(CoreAnnotations.TextAnnotation.class), speakerString

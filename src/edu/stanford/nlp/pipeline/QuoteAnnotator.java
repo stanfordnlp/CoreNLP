@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline; 
 
-
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -25,14 +24,17 @@ import java.util.regex.Pattern;
  * depend on the tokenizer, which allows quotes like ''Tis true!' to be
  * correctly identified.
  *
+ * <p>
  * Considers regular ascii ("", '', ``'', and `') as well as "smart" and
  * international quotation marks as follows:
  * “”,‘’, «», ‹›, 「」, 『』, „”, and ‚’.
  *
+ * <p>
  * Note: extracts everything within these pairs as a whole quote segment, which may or may
  * not be the desired behaviour for texts that use different formatting styles than
  * standard english ones.
  *
+ * <p>
  * There are a number of options that can be passed to the quote annotator to
  * customize its' behaviour:
  * <ul>
@@ -126,7 +128,6 @@ public class QuoteAnnotator implements Annotator  {
    *
    *  @param  props Properties object that contains the customizable properties
    *                 attributes.
-   *  @return A QuoteAnnotator.
    */
   public QuoteAnnotator(String name, Properties props) {
     this(name, props, false);
@@ -138,7 +139,6 @@ public class QuoteAnnotator implements Annotator  {
    *
    *  @param  props Properties object that contains the customizable properties
    *                 attributes.
-   *  @return A QuoteAnnotator.
    */
   public QuoteAnnotator(Properties props) {
     this("quote", props, false);
@@ -151,7 +151,6 @@ public class QuoteAnnotator implements Annotator  {
    *  @param props Properties object that contains the customizable properties
    *                 attributes.
    *  @param verbose whether or not to output verbose information.
-   *  @return A QuoteAnnotator.
    */
   public QuoteAnnotator(String name, Properties props, boolean verbose) {
     USE_SINGLE = Boolean.parseBoolean(props.getProperty(name + "." + "singleQuotes", "false"));
@@ -176,8 +175,8 @@ public class QuoteAnnotator implements Annotator  {
     }
   }
 
-  /** helper method for creating version of document text without xml **/
-  public String xmlFreeText(String documentText, Annotation annotation) {
+  /** helper method for creating version of document text without xml. **/
+  public static String xmlFreeText(String documentText, Annotation annotation) {
     int firstTokenCharIndex =
         annotation.get(CoreAnnotations.TokensAnnotation.class).get(0).get(
             CoreAnnotations.CharacterOffsetBeginAnnotation.class);
@@ -351,8 +350,8 @@ public class QuoteAnnotator implements Annotator  {
       // find the tokens for this quote
       List<CoreLabel> quoteTokens = new ArrayList<>();
       int tokenOffset = -1;
-      int currTok = 0;
       if (tokens != null) {
+        int currTok = 0;
         while (currTok < tokens.size() && tokens.get(currTok).beginPosition() < begin) {
           currTok++;
         }
