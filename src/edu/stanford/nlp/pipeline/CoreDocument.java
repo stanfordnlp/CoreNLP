@@ -31,16 +31,15 @@ public class CoreDocument {
   /** complete the wrapping process post annotation by a pipeline **/
   public void wrapAnnotations() {
     // wrap all of the sentences
-    if (this.annotationDocument.get(CoreAnnotations.SentencesAnnotation.class) != null) {
+    if (this.annotationDocument.get(CoreAnnotations.SentencesAnnotation.class) != null)
       wrapSentences();
-      // if there are entity mentions, build a document wide list
-      if (sentences.get(0).entityMentions() != null) {
+    // if there are entity mentions, build a document wide list
+    if (sentences.get(0).entityMentions() != null) {
         buildDocumentEntityMentionsList();
-      }
-      // if there are quotes, build a document wide list
-      if (QuoteAnnotator.gatherQuotes(this.annotationDocument) != null)
-        buildDocumentQuotesList();
     }
+    // if there are quotes, build a document wide list
+    if (QuoteAnnotator.gatherQuotes(this.annotationDocument) != null)
+      buildDocumentQuotesList();
   }
 
   /** create list of CoreSentence's based on the Annotation's sentences **/

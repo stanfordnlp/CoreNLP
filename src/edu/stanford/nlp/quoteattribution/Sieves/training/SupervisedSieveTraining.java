@@ -335,41 +335,39 @@ public class SupervisedSieveTraining {
         }
 
         //2. mention features
-        if (sentenceInMentionParagraph != null) {
-          int mentionParagraphBegin = getParagraphBeginToken(sentenceInMentionParagraph, sentences);
-          int mentionParagraphEnd = getParagraphEndToken(sentenceInMentionParagraph, sentences);
+        int mentionParagraphBegin = getParagraphBeginToken(sentenceInMentionParagraph, sentences);
+        int mentionParagraphEnd = getParagraphEndToken(sentenceInMentionParagraph, sentences);
 
-          if (!(mentionParagraphBegin == quoteParagraphBeginToken && mentionParagraphEnd == quoteParagraphEndToken)) {
-            List<CoreMap> quotesInMentionParagraph = paragraphToQuotes.getOrDefault(mentionParagraphIdx, new ArrayList<>());
-            Pair<ArrayList<String>, ArrayList<Pair<Integer, Integer>>> namesInMentionParagraph = sieve.scanForNames(new Pair<>(mentionParagraphBegin, mentionParagraphEnd));
+        if(!(mentionParagraphBegin == quoteParagraphBeginToken && mentionParagraphEnd == quoteParagraphEndToken)) {
+          List<CoreMap> quotesInMentionParagraph = paragraphToQuotes.getOrDefault(mentionParagraphIdx, new ArrayList<>());
+          Pair<ArrayList<String>, ArrayList<Pair<Integer, Integer>>> namesInMentionParagraph = sieve.scanForNames(new Pair<>(mentionParagraphBegin, mentionParagraphEnd));
 
-            features.setCount("quotesInMentionParagraph", quotesInMentionParagraph.size());
-            features.setCount("wordsInMentionParagraph", mentionParagraphEnd - mentionParagraphBegin + 1);
-            features.setCount("namesInMentionParagraph", namesInMentionParagraph.first.size());
+          features.setCount("quotesInMentionParagraph", quotesInMentionParagraph.size());
+          features.setCount("wordsInMentionParagraph", mentionParagraphEnd - mentionParagraphBegin + 1);
+          features.setCount("namesInMentionParagraph", namesInMentionParagraph.first.size());
 
-            //mention ordering in paragraph it is in
-            for (int i = 0; i < namesInMentionParagraph.second.size(); i++) {
-              if (ExtractQuotesUtil.rangeContains(new Pair<>(mention.begin, mention.end), namesInMentionParagraph.second.get(i)))
-                features.setCount("orderInParagraph", i);
-            }
-
-            //if mention paragraph is all one quote
-
-            if (quotesInMentionParagraph.size() == 1) {
-              CoreMap qInMentionParagraph = quotesInMentionParagraph.get(0);
-              if (qInMentionParagraph.get(CoreAnnotations.TokenBeginAnnotation.class) == mentionParagraphBegin && qInMentionParagraph.get(CoreAnnotations.TokenEndAnnotation.class) - 1 == mentionParagraphEnd) {
-                features.setCount("mentionParagraphIsInConversation", 1);
-              } else {
-                features.setCount("mentionParagraphIsInConversation", -1);
-              }
-            }
-            for (CoreMap quoteIMP : quotesInMentionParagraph) {
-              if (ExtractQuotesUtil.rangeContains(new Pair<>(quoteIMP.get(CoreAnnotations.TokenBeginAnnotation.class), quoteIMP.get(CoreAnnotations.TokenEndAnnotation.class) - 1), new Pair<>(mention.begin, mention.end)))
-                features.setCount("mentionInQuote", 1);
-            }
-            if (features.getCount("mentionInQuote") != 1)
-              features.setCount("mentionNotInQuote", 1);
+          //mention ordering in paragraph it is in
+          for (int i = 0; i < namesInMentionParagraph.second.size(); i++) {
+            if (ExtractQuotesUtil.rangeContains(new Pair<>(mention.begin, mention.end), namesInMentionParagraph.second.get(i)))
+              features.setCount("orderInParagraph", i);
           }
+
+          //if mention paragraph is all one quote
+
+          if (quotesInMentionParagraph.size() == 1) {
+            CoreMap qInMentionParagraph = quotesInMentionParagraph.get(0);
+            if (qInMentionParagraph.get(CoreAnnotations.TokenBeginAnnotation.class) == mentionParagraphBegin && qInMentionParagraph.get(CoreAnnotations.TokenEndAnnotation.class) - 1 == mentionParagraphEnd) {
+              features.setCount("mentionParagraphIsInConversation", 1);
+            } else {
+              features.setCount("mentionParagraphIsInConversation", -1);
+            }
+          }
+          for (CoreMap quoteIMP : quotesInMentionParagraph) {
+            if (ExtractQuotesUtil.rangeContains(new Pair<>(quoteIMP.get(CoreAnnotations.TokenBeginAnnotation.class), quoteIMP.get(CoreAnnotations.TokenEndAnnotation.class) - 1), new Pair<>(mention.begin, mention.end)))
+              features.setCount("mentionInQuote", 1);
+          }
+          if (features.getCount("mentionInQuote") != 1)
+            features.setCount("mentionNotInQuote", 1);
         }
 
         // nearby word syntax types...make sure to check if there are previous or next words

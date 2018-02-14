@@ -76,7 +76,7 @@ public class StanfordCoreNLPServer implements Runnable {
   @ArgumentParser.Option(name="password", gloss="The password component of a username/password basic auth credential")
   protected String password = null;
   @ArgumentParser.Option(name="annotators", gloss="The default annotators to run over a given sentence.")
-  protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,natlog,openie,kbp";
+  protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,regexner,kbp";
   @ArgumentParser.Option(name="preload", gloss="Cache the following annotators on startup")
   protected static String preloadedAnnotators = "";
   @ArgumentParser.Option(name="serverProperties", gloss="Default properties file for server's StanfordCoreNLP instance")
@@ -171,7 +171,7 @@ public class StanfordCoreNLPServer implements Runnable {
     }
     this.defaultProps = PropertiesUtils.asProperties(
         "annotators", defaultAnnotators,  // Run these annotators by default
-        "coref.mention.type", "dep",  // Use dependency trees with coref by default
+        "mention.type", "dep",  // Use dependency trees with coref by default
         "coref.mode", "statistical",  // Use the new coref
         "coref.language", "en",  // We're English by default
         "inputFormat", "text",   // By default, treat the POST data like text
