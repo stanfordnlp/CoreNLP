@@ -330,7 +330,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.CharacterOffsetBeginAnnotation.class,
         CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.IsNewlineAnnotation.class
+        CoreAnnotations.TokenIndexAnnotation.class
     )));
   }
 

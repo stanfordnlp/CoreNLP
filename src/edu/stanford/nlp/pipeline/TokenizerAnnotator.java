@@ -370,7 +370,8 @@ public class TokenizerAnnotator implements Annotator  {
         CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class,
         CoreAnnotations.ValueAnnotation.class,
-        CoreAnnotations.IsNewlineAnnotation.class
+        CoreAnnotations.IsNewlineAnnotation.class,
+        CoreAnnotations.TokenIndexAnnotation.class
     ));
   }
 
