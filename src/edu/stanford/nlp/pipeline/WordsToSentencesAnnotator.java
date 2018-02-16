@@ -196,9 +196,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
     // assemble the sentence annotations
     // set the initial token offset to the first non-newline token index
-    int tokenOffset = 0;
-    while (tokenOffset < tokens.size()-1 && Boolean.TRUE.equals(tokens.get(tokenOffset).isNewline()))
-      tokenOffset++;
     int lineNumber = 0;
     // section annotations to mark sentences with
     CoreMap sectionAnnotations = null;
@@ -229,13 +226,11 @@ public class WordsToSentencesAnnotator implements Annotator  {
       sentence.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, begin);
       sentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, end);
       sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
-      sentence.set(CoreAnnotations.TokenBeginAnnotation.class, tokenOffset);
-      // set tokenOffset to first token after sentence
-      tokenOffset += sentenceTokens.size();
-      sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset);
-      // update tokenOffset to first token of next sentence (if there is a next sentence)
-      while (tokenOffset < tokens.size()-1 && Boolean.TRUE.equals(tokens.get(tokenOffset).isNewline()))
-        tokenOffset++;
+      // get index of first token of sentence and 1 + index of last token of sentence
+      int tokenBeginIndex = sentenceTokens.get(0).get(CoreAnnotations.TokenIndexAnnotation.class);
+      sentence.set(CoreAnnotations.TokenBeginAnnotation.class, tokenBeginIndex);
+      int tokenEndIndex = sentenceTokens.get(last).get(CoreAnnotations.TokenIndexAnnotation.class);
+      sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenEndIndex+1);
       sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
 
       if (countLineNumbers) {
