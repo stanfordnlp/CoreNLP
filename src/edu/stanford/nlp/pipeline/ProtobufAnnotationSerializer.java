@@ -305,7 +305,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(SpeakerAnnotation.class)) { builder.setSpeaker(getAndRegister(coreLabel, keysToSerialize, SpeakerAnnotation.class)); }
     if (keySet.contains(BeginIndexAnnotation.class)) { builder.setBeginIndex(getAndRegister(coreLabel, keysToSerialize, BeginIndexAnnotation.class)); }
     if (keySet.contains(EndIndexAnnotation.class)) { builder.setEndIndex(getAndRegister(coreLabel, keysToSerialize, EndIndexAnnotation.class)); }
-    if (keySet.contains(TokenIndexAnnotation.class)) { builder.setTokenIndex(getAndRegister(coreLabel, keysToSerialize, TokenIndexAnnotation.class)); }
     if (keySet.contains(TokenBeginAnnotation.class)) { builder.setTokenBeginIndex(getAndRegister(coreLabel, keysToSerialize, TokenBeginAnnotation.class)); }
     if (keySet.contains(TokenEndAnnotation.class)) { builder.setTokenEndIndex(getAndRegister(coreLabel, keysToSerialize, TokenEndAnnotation.class)); }
     if (keySet.contains(NormalizedNamedEntityTagAnnotation.class)) { builder.setNormalizedNER(getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class)); }
@@ -605,8 +604,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * </p>
    *
    * @param doc The sentence to save to a protocol buffer
-   * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the
-   *                        proto from this set, as the code tracks annotations to ensure lossless serialization.
+   * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the proto
+   *                        from this set, as the code tracks annotations to ensure lossless serializationA set tracking which keys have been saved. It's important to remove any keys added to the proto*
+   *                        from this set, as the code tracks annotations to ensure lossless serialization.
    */
   protected CoreNLPProtos.Document.Builder toProtoBuilder(Annotation doc, Set<Class<?>> keysToSerialize) {
     CoreNLPProtos.Document.Builder builder = CoreNLPProtos.Document.newBuilder();
@@ -1318,7 +1318,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasEndChar()) { word.setEndPosition(proto.getEndChar()); }
     if (proto.hasSpeaker()) { word.set(SpeakerAnnotation.class, proto.getSpeaker()); }
     if (proto.hasUtterance()) { word.set(UtteranceAnnotation.class, proto.getUtterance()); }
-    if (proto.hasTokenIndex()) { word.set(TokenIndexAnnotation.class, proto.getTokenIndex()); }
     if (proto.hasBeginIndex()) { word.set(BeginIndexAnnotation.class, proto.getBeginIndex()); }
     if (proto.hasEndIndex()) { word.set(EndIndexAnnotation.class, proto.getEndIndex()); }
     if (proto.hasTokenBeginIndex()) { word.set(TokenBeginAnnotation.class, proto.getTokenBeginIndex()); }
@@ -1621,7 +1620,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getSentenceCount() > 0) {
       // Populate the tokens from the sentence
       for (CoreNLPProtos.Sentence sentence : proto.getSentenceList()) {
-        // It's conceivable that the sentences are not contiguous -- pad with newline tokens
+        // It's conceivable that the sentences are not contiguous -- pad this with nulls
         while (sentence.hasTokenOffsetBegin() && tokens.size() < sentence.getTokenOffsetBegin()) {
           tokens.add(null);
         }
