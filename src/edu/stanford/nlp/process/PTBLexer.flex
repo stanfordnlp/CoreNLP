@@ -736,7 +736,7 @@ APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{AP
 APOWORD2 = y{APOS}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
 FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?,;:&`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
-LIKELYURL = ((www\.([^ \t\n\f\r`<>|.!?,\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r`<>|.!?,_:\/$\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r`<>|]+[^ \t\n\f\r`<>|.!?,;:&\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-])?
+LIKELYURL = ((www\.([^ \t\n\f\r`<>|.!?,\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r`<>|.!?,:\/$\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r`<>|]+[^ \t\n\f\r`<>|.!?,;:&\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
 EMAIL = (&lt;|<)?(mailto:)?[a-zA-Z0-9._%+-]+@[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9](&gt;|>)?
@@ -1109,8 +1109,8 @@ RM/{NUM}        { String txt = yytext();
 {TBSPEC2}/{SPACENL}     { return getNext(); }
 {ISO8601DATETIME}       { return getNext(); }
 {DEGREES}               { return getNext(); }
-<YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<])      { return getNext(); }
-<YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<])      { return getNext(); }
+<YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<()])      { return getNext(); }
+<YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<()])      { return getNext(); }
 {WORD}\./{INSENTP}      { String origTok = yytext();
                           String norm = LexerUtils.removeSoftHyphens(origTok);
                           if (DEBUG) { logger.info("Used {WORD} (3) to recognize " + origTok + " as " + norm); }
@@ -1315,7 +1315,7 @@ RM/{NUM}        { String txt = yytext();
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
                 }
-/* These (S)REDAUX (2) and FILENAME (2) cases are needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
+/* These (S)REDAUX (2) cases are needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
 {REDAUX}        { String tok = yytext();
                   if (DEBUG) { logger.info("Used {REDAUX} (2) to recognize " + tok); }
                   return getNext(tok, tok);
@@ -1326,11 +1326,6 @@ RM/{NUM}        { String txt = yytext();
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
                 }
-{FILENAME}      { String tok = yytext();
-                  String norm = handleQuotes(tok, false);
-                            if (DEBUG) { logger.info("Used {FILENAME} (2) to recognize " + tok); }
-                            return getNext(norm, tok);
-                          }
 
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
