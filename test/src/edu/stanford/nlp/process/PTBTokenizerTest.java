@@ -292,6 +292,21 @@ public class PTBTokenizerTest {
     runOnTwoArrays(tokFactory, ptbInputs, ptbGold);
   }
 
+  private final String[] moreInputs = {
+          "Joseph Someone (fl. 2050–75) liked the noble gases, viz. helium, neon, argon, xenon, krypton and radon.",
+  };
+
+  private final String[][] moreGold = {
+          { "Joseph", "Someone", "-LRB-", "fl.", "2050", "--", "75", "-RRB-", "liked", "the", "noble", "gases", ",",
+                  "viz.", "helium", ",", "neon", ",", "argon", ",", "xenon", ",", "krypton", "and", "radon", "." },
+  };
+
+  @Test
+  public void testPTBTokenizerCoreLabel() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory();
+    runOnTwoArrays(tokFactory, moreInputs, moreGold);
+  }
+
 
   private final String[] corpInputs = {
     "So, too, many analysts predict, will Exxon Corp., Chevron Corp. and Amoco Corp.",
