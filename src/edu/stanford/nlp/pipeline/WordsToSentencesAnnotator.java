@@ -325,7 +325,6 @@ public class WordsToSentencesAnnotator implements Annotator  {
           String prevTokenText = prevToken.get(CoreAnnotations.OriginalTextAnnotation.class);
           currToken.set(CoreAnnotations.BeforeAnnotation.class, prevTokenText+currTokenBeforeText);
         }
-        prevToken = currToken;
       } else {
         String newlineText = currToken.get(CoreAnnotations.OriginalTextAnnotation.class);
         // fix after text for last token
@@ -333,8 +332,8 @@ public class WordsToSentencesAnnotator implements Annotator  {
           String prevTokenAfterText = prevToken.get(CoreAnnotations.AfterAnnotation.class);
           prevToken.set(CoreAnnotations.AfterAnnotation.class, prevTokenAfterText + newlineText);
         }
-        prevToken = currToken;
       }
+      prevToken = currToken;
     }
     // set sentence token begin and token end values
     for (CoreMap sentence : sentences) {
