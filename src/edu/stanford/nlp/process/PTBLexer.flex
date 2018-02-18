@@ -775,7 +775,7 @@ ABNUM = tel|est|ext|sq
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
 ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Esq
 /* gen and cf appear elsewhere as ABBREV4 already. */
-ABTAXONOMY = sp|aff
+ABTAXONOMY = spp?|aff
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
  *  If they're followed by an uppercase one, we assume there is also a
