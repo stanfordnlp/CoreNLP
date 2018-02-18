@@ -31,7 +31,8 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
 //  private SeqClassifierFlags flags; // = null;
   //map can be something like "word=0,tag=1,answer=2"
-  private String[] map; // = null;
+  @SuppressWarnings("rawtypes")
+  private Class[] map; // = null;
   private IteratorFromReaderFactory<List<CoreLabel>> factory;
 
 //  public void init(SeqClassifierFlags flags) {
@@ -42,14 +43,14 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
   @Override
   public void init(SeqClassifierFlags flags) {
-    this.map = StringUtils.mapStringToArray(flags.map);
+    this.map = CoreLabel.parseStringKeys(StringUtils.mapStringToArray(flags.map));
     factory = DelimitRegExIterator.getFactory("\n(?:\\s*\n)+", new ColumnDocParser());
   }
 
 
   public void init(String map) {
 //    this.flags = null;
-    this.map = StringUtils.mapStringToArray(map);
+    this.map = CoreLabel.parseStringKeys(StringUtils.mapStringToArray(map));
     factory = DelimitRegExIterator.getFactory("\n(?:\\s*\n)+", new ColumnDocParser());
   }
 
@@ -81,7 +82,10 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
         if (line.trim().isEmpty()) {
           continue;
         }
-        String[] info = whitePattern.split(line);
+        // Optimistic splitting on tabs first. If that doesn't work, use any whitespace (slower, because of regexps).
+        String[] info = line.split("\t");
+        if (info.length == 1)
+          info = whitePattern.split(line);
         // todo: We could speed things up here by having one time only having converted map into an array of CoreLabel keys (Class<? extends CoreAnnotation<?>>) and then instantiating them. Need new constructor.
         CoreLabel wi;
         try {
