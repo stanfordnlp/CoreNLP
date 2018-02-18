@@ -335,6 +335,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
       }
       prevToken = currToken;
     }
+    annotation.set(CoreAnnotations.TokensAnnotation.class, finalTokens);
     // set sentence token begin and token end values
     for (CoreMap sentence : sentences) {
       List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
