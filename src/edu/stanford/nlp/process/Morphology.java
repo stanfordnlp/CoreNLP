@@ -47,7 +47,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * The crucial lexer-accessing portion of all the static methods is synchronized
  * (otherwise, their use tended to be threading bugs waiting to happen).
  * If you want less synchronization, create your own Morphology objects.
- * <br>
+ *
  * @author Kristina Toutanova (kristina@cs.stanford.edu)
  * @author Christopher Manning
  */

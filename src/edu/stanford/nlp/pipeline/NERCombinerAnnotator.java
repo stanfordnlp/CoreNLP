@@ -363,7 +363,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.OriginalTextAnnotation.class,
           CoreAnnotations.SentenceIndexAnnotation.class,
-          CoreAnnotations.IsNewlineAnnotation.class
+          CoreAnnotations.IsNewlineAnnotation.class,
+          CoreAnnotations.TokenIndexAnnotation.class
       )));
     } else {
       return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
@@ -379,7 +380,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.OriginalTextAnnotation.class,
           CoreAnnotations.SentenceIndexAnnotation.class,
-          CoreAnnotations.IsNewlineAnnotation.class
+          CoreAnnotations.IsNewlineAnnotation.class,
+          CoreAnnotations.TokenIndexAnnotation.class
       )));
     }
   }
