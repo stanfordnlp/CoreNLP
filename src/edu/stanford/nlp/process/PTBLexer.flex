@@ -774,7 +774,8 @@ ABNUM = tel|est|ext|sq
    is now caseless.  We don't want to have it recognized for P.  Both
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
 ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Esq
-ABTAXONOMY = sp|aff|gen
+/* gen and cf appear elsewhere as ABBREV4 already. */
+ABTAXONOMY = sp|aff
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
  *  If they're followed by an uppercase one, we assume there is also a
