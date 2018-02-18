@@ -195,6 +195,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
     // assemble the sentence annotations
+    // set the initial token offset to the first non-newline token index
     int lineNumber = 0;
     // section annotations to mark sentences with
     CoreMap sectionAnnotations = null;
@@ -225,6 +226,11 @@ public class WordsToSentencesAnnotator implements Annotator  {
       sentence.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, begin);
       sentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, end);
       sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
+      // get index of first token of sentence and 1 + index of last token of sentence
+      int tokenBeginIndex = sentenceTokens.get(0).get(CoreAnnotations.TokenIndexAnnotation.class);
+      sentence.set(CoreAnnotations.TokenBeginAnnotation.class, tokenBeginIndex);
+      int tokenEndIndex = sentenceTokens.get(last).get(CoreAnnotations.TokenIndexAnnotation.class);
+      sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenEndIndex+1);
       sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
 
       if (countLineNumbers) {
@@ -304,47 +310,13 @@ public class WordsToSentencesAnnotator implements Annotator  {
       // add the sentence to the list
       sentences.add(sentence);
     }
-
-    // after sentence splitting, remove newline tokens, set token and
-    // sentence indexes, and update before and after text appropriately
-    // at end of this annotator, it should be as though newline tokens
-    // were never used
-    // reset token indexes
-    List<CoreLabel> finalTokens = new ArrayList<CoreLabel>();
-    int tokenIndex = 0;
-    CoreLabel prevToken = null;
-    for (CoreLabel currToken : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
-      if (!currToken.isNewline()) {
-        finalTokens.add(currToken);
-        currToken.set(CoreAnnotations.TokenBeginAnnotation.class, tokenIndex);
-        currToken.set(CoreAnnotations.TokenEndAnnotation.class, tokenIndex + 1);
-        tokenIndex++;
-        // fix before text for this token
-        if (prevToken != null && prevToken.isNewline()) {
-          String currTokenBeforeText = currToken.get(CoreAnnotations.BeforeAnnotation.class);
-          String prevTokenText = prevToken.get(CoreAnnotations.OriginalTextAnnotation.class);
-          currToken.set(CoreAnnotations.BeforeAnnotation.class, prevTokenText+currTokenBeforeText);
-        }
-      } else {
-        String newlineText = currToken.get(CoreAnnotations.OriginalTextAnnotation.class);
-        // fix after text for last token
-        if (prevToken != null) {
-          String prevTokenAfterText = prevToken.get(CoreAnnotations.AfterAnnotation.class);
-          prevToken.set(CoreAnnotations.AfterAnnotation.class, prevTokenAfterText + newlineText);
-        }
+    // the condition below is possible if sentenceBoundaryToDiscard is initialized!
+      /*
+      if (tokenOffset != tokens.size()) {
+        throw new RuntimeException(String.format(
+            "expected %d tokens, found %d", tokens.size(), tokenOffset));
       }
-      prevToken = currToken;
-    }
-    annotation.set(CoreAnnotations.TokensAnnotation.class, finalTokens);
-    // set sentence token begin and token end values
-    for (CoreMap sentence : sentences) {
-      List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      int sentenceTokenBegin = sentenceTokens.get(0).get(CoreAnnotations.TokenBeginAnnotation.class);
-      int sentenceTokenEnd = sentenceTokens.get(sentenceTokens.size()-1).get(
-          CoreAnnotations.TokenEndAnnotation.class);
-      sentence.set(CoreAnnotations.TokenBeginAnnotation.class, sentenceTokenBegin);
-      sentence.set(CoreAnnotations.TokenEndAnnotation.class, sentenceTokenEnd);
-    }
+      */
 
     // add the sentences annotations to the document
     annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
@@ -358,7 +330,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.CharacterOffsetBeginAnnotation.class,
         CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.IsNewlineAnnotation.class
+        CoreAnnotations.TokenIndexAnnotation.class
     )));
   }
 

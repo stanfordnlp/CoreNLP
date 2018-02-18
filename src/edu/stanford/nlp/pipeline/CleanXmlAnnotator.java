@@ -351,18 +351,6 @@ public class CleanXmlAnnotator implements Annotator {
     }
   }
 
-  /**
-   * Helper method to set the TokenBeginAnnotation and TokenEndAnnotation of every token.
-   */
-  public void setTokenBeginTokenEnd(List<CoreLabel> tokensList) {
-    int tokenIndex = 0;
-    for (CoreLabel token : tokensList) {
-      token.set(CoreAnnotations.TokenBeginAnnotation.class, tokenIndex);
-      token.set(CoreAnnotations.TokenEndAnnotation.class, tokenIndex+1);
-      tokenIndex++;
-    }
-  }
-
   @Override
   public void annotate(Annotation annotation) {
     if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
@@ -371,10 +359,14 @@ public class CleanXmlAnnotator implements Annotator {
       List<CoreLabel> newTokens = process(annotation, tokens);
       // We assume that if someone is using this annotator, they don't
       // want the old tokens any more and get rid of them
-      // redo the token indexes if xml tokens have been removed
-      setTokenBeginTokenEnd(newTokens);
       annotation.set(CoreAnnotations.TokensAnnotation.class, newTokens);
       if (DEBUG) { log.info("CleanXML: ending tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class)); }
+      // update token index annotation
+      int tokenIndex = 0;
+      for (CoreLabel token : newTokens) {
+        token.set(CoreAnnotations.TokenIndexAnnotation.class, tokenIndex);
+        tokenIndex++;
+      }
     }
   }
 

@@ -294,14 +294,10 @@ public class TokenizerAnnotator implements Annotator  {
     return factory.getTokenizer(r);
   }
 
-  /**
-   * Helper method to set the TokenBeginAnnotation and TokenEndAnnotation of every token.
-   */
-  public void setTokenBeginTokenEnd(List<CoreLabel> tokensList) {
+  public void setTokenIndex(List<CoreLabel> tokens) {
     int tokenIndex = 0;
-    for (CoreLabel token : tokensList) {
-      token.set(CoreAnnotations.TokenBeginAnnotation.class, tokenIndex);
-      token.set(CoreAnnotations.TokenEndAnnotation.class, tokenIndex+1);
+    for (CoreLabel token : tokens) {
+      token.set(CoreAnnotations.TokenIndexAnnotation.class, tokenIndex);
       tokenIndex++;
     }
   }
@@ -319,8 +315,7 @@ public class TokenizerAnnotator implements Annotator  {
     // for Arabic and Chinese use a segmenter instead
     if (useSegmenter) {
       segmenterAnnotator.annotate(annotation);
-      // set indexes into document wide tokens list
-      setTokenBeginTokenEnd(annotation.get(CoreAnnotations.TokensAnnotation.class));
+      setTokenIndex(annotation.get(CoreAnnotations.TokensAnnotation.class));
       return;
     }
 
@@ -343,8 +338,8 @@ public class TokenizerAnnotator implements Annotator  {
           token.set(CoreAnnotations.IsNewlineAnnotation.class, false);
       }
 
-      // set indexes into document wide token list
-      setTokenBeginTokenEnd(tokens);
+      setTokenIndex(tokens);
+
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
       if (VERBOSE) {
         log.info("done.");
@@ -375,7 +370,8 @@ public class TokenizerAnnotator implements Annotator  {
         CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class,
         CoreAnnotations.ValueAnnotation.class,
-        CoreAnnotations.IsNewlineAnnotation.class
+        CoreAnnotations.IsNewlineAnnotation.class,
+        CoreAnnotations.TokenIndexAnnotation.class
     ));
   }
 

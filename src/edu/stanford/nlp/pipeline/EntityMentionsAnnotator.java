@@ -314,6 +314,19 @@ public class EntityMentionsAnnotator implements Annotator {
         entityMentionIndex++;
       }
     }
+
+    // set token begin and end annotations for entity mention
+    for (CoreMap entityMention : allEntityMentions) {
+      List<CoreLabel> entityMentionTokens = entityMention.get(
+          CoreAnnotations.TokensAnnotation.class);
+      int tokenBegin = entityMentionTokens.get(0).get(CoreAnnotations.TokenIndexAnnotation.class);
+      int tokenEnd =
+          entityMentionTokens.get(
+              entityMentionTokens.size()-1).get(CoreAnnotations.TokenIndexAnnotation.class) + 1;
+      entityMention.set(CoreAnnotations.TokenBeginAnnotation.class, tokenBegin);
+      entityMention.set(CoreAnnotations.TokenEndAnnotation.class, tokenEnd);
+    }
+
     annotation.set(mentionsCoreAnnotationClass, allEntityMentions);
   }
 

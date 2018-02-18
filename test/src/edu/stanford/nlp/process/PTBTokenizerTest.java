@@ -337,19 +337,29 @@ public class PTBTokenizerTest {
   }
 
 
+  private static final String[] jeInputs = {
+          "it's",
+          " it's ",
+          "open images/cat.png",
+  };
+
+  private static final List[] jeOutputs = {
+          Arrays.asList(new Word("it"), new Word("'s")),
+          Arrays.asList(new Word("it"), new Word("'s")),
+          Arrays.asList(new Word("open"), new Word("images/cat.png")),
+  };
+
+
+  /** These case check things still work at end of file that would normally have following contexts. */
   @Test
   public void testJacobEisensteinApostropheCase() {
-    StringReader reader = new StringReader("it's");
-    PTBTokenizer<Word> tokenizer = PTBTokenizer.newPTBTokenizer(reader);
-    List<Word> stemmedTokens = tokenizer.tokenize();
-    // for (Word word : stemmedTokens) System.out.print (word+" ");
-    reader = new StringReader(" it's ");
-    tokenizer = PTBTokenizer.newPTBTokenizer(reader);
-    List<Word> stemmedTokens2 = tokenizer.tokenize();
-    // System.out.println ();
-    // for (Word word : stemmedTokens2) System.out.print (word+" ");
-    // System.out.println();
-    assertEquals(stemmedTokens, stemmedTokens2);
+    assertEquals(jeInputs.length, jeOutputs.length);
+    for (int i = 0; i < jeInputs.length; i++) {
+      StringReader reader = new StringReader(jeInputs[i]);
+      PTBTokenizer<Word> tokenizer = PTBTokenizer.newPTBTokenizer(reader);
+      List<Word> tokens = tokenizer.tokenize();
+      assertEquals(jeOutputs[i], tokens);
+    }
   }
 
 

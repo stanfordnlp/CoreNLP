@@ -268,6 +268,14 @@ public class CoreAnnotations {
   }
 
   /**
+   * The index of the token in the document wide list
+   */
+  public static class TokenIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() { return ErasureUtils.uncheckedCast(List.class); }
+  }
+
+  /**
    * The CoreMap key identifying the first token included in an annotation. The
    * token with index 0 is the first token in the document.
    *
