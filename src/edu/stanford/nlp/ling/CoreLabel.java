@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.Generics;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext  {
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory /* , HasContext */  {
 
   private static final long serialVersionUID = 2L;
 
@@ -136,6 +136,20 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     initFromStrings(keys, values);
   }
 
+  /**
+   * This constructor attempts uses preparsed Class keys.
+   * It's mainly useful for reading from a file.
+   *
+   * @param keys Array of key classes
+   * @param values Array of values (as String)
+   */
+  @SuppressWarnings("rawtypes")
+  public CoreLabel(Class[] keys, String[] values) {
+    super(keys.length);
+    //this.map = new ArrayCoreMap();
+    initFromStrings(keys, values);
+  }
+
   /** This is provided as a simple way to make a CoreLabel for a word from a String.
    *  It's often useful in fixup or test code. It sets all three of the Text, OriginalText,
    *  and Value annotations to the given value.
@@ -163,7 +177,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   public static final Map<Class<? extends GenericAnnotation>, String> genericValues = Generics.newHashMap();
 
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void initFromStrings(String[] keys, String[] values) {
     if (keys.length != values.length) {
       throw new UnsupportedOperationException("Argument array lengths differ: " +
@@ -227,6 +241,52 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     }
   }
 
+  @SuppressWarnings("rawtypes")
+  public static Class[] parseStringKeys(String[] keys) {
+    Class[] classes = new Class[keys.length];
+    for (int i = 0; i < keys.length; i++) {
+      String key = keys[i];
+      classes[i] = AnnotationLookup.toCoreKey(key);
+
+      // now work with the key we got above
+      if (classes[i] == null) {
+        throw new UnsupportedOperationException("Unknown key " + key);
+      }
+    }
+    return classes;
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private void initFromStrings(Class[] keys, String[] values) {
+    if (keys.length != values.length) {
+      throw new UnsupportedOperationException("Argument array lengths differ: " +
+              Arrays.toString(keys) + " vs. " + Arrays.toString(values));
+    }
+    for (int i = 0; i < keys.length; i++) {
+      Class coreKeyClass = keys[i];
+      String value = values[i];
+      try {
+        Class<?> valueClass = AnnotationLookup.getValueType(coreKeyClass);
+        if (valueClass.equals(String.class)) {
+          this.set(coreKeyClass, values[i]);
+        } else if (valueClass == Integer.class) {
+          this.set(coreKeyClass, Integer.parseInt(values[i]));
+        } else if (valueClass == Double.class) {
+          this.set(coreKeyClass, Double.parseDouble(values[i]));
+        } else if (valueClass == Long.class) {
+          this.set(coreKeyClass, Long.parseLong(values[i]));
+        } else {
+          throw new RuntimeException("Can't handle " + valueClass);
+        }
+      } catch (Exception e) {
+        // unexpected value type
+        throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: "
+            + "Bad type for " + coreKeyClass.getSimpleName()
+            + ". Value was: " + value
+            + "; expected "+AnnotationLookup.getValueType(coreKeyClass), e);
+      }
+    }
+  }
 
   private static class CoreLabelFactory implements LabelFactory {
 
@@ -729,6 +789,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   }
 
   private static final Comparator<Class<?>> asClassComparator =
-          (o1, o2) -> o1.getName().compareTo(o2.getName());
+          Comparator.comparing(Class::getName);
 
 }

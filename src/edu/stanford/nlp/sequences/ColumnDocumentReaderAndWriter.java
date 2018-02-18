@@ -31,7 +31,8 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
 //  private SeqClassifierFlags flags; // = null;
   //map can be something like "word=0,tag=1,answer=2"
-  private String[] map; // = null;
+  @SuppressWarnings("rawtypes")
+  private Class[] map; // = null;
   private IteratorFromReaderFactory<List<CoreLabel>> factory;
 
 //  public void init(SeqClassifierFlags flags) {
@@ -42,14 +43,13 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
   @Override
   public void init(SeqClassifierFlags flags) {
-    this.map = StringUtils.mapStringToArray(flags.map);
-    factory = DelimitRegExIterator.getFactory("\n(?:\\s*\n)+", new ColumnDocParser());
+    init(flags.map);
   }
 
 
   public void init(String map) {
-//    this.flags = null;
-    this.map = StringUtils.mapStringToArray(map);
+    // this.flags = null;
+    this.map = CoreLabel.parseStringKeys(StringUtils.mapStringToArray(map));
     factory = DelimitRegExIterator.getFactory("\n(?:\\s*\n)+", new ColumnDocParser());
   }
 
@@ -66,7 +66,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
     private static final long serialVersionUID = -6266332661459630572L;
     private final Pattern whitePattern = Pattern.compile("\\s+"); // should this really only do a tab?
 
-    private int lineCount = 0;
+    private int lineCount; // = 0;
 
     @Override
     public List<CoreLabel> apply(String doc) {
@@ -81,8 +81,11 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
         if (line.trim().isEmpty()) {
           continue;
         }
-        String[] info = whitePattern.split(line);
-        // todo: We could speed things up here by having one time only having converted map into an array of CoreLabel keys (Class<? extends CoreAnnotation<?>>) and then instantiating them. Need new constructor.
+        // Optimistic splitting on tabs first. If that doesn't work, use any whitespace (slower, because of regexps).
+        String[] info = line.split("\t");
+        if (info.length == 1) {
+          info = whitePattern.split(line);
+        }
         CoreLabel wi;
         try {
           wi = new CoreLabel(map, info);
@@ -107,7 +110,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
     for (CoreLabel wi : doc) {
       String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
       String goldAnswer = wi.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      out.println(wi.word() + "\t" + goldAnswer + "\t" + answer);
+      out.println(wi.word() + '\t' + goldAnswer + '\t' + answer);
     }
     out.println();
   }
