@@ -361,12 +361,6 @@ public class CleanXmlAnnotator implements Annotator {
       // want the old tokens any more and get rid of them
       annotation.set(CoreAnnotations.TokensAnnotation.class, newTokens);
       if (DEBUG) { log.info("CleanXML: ending tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class)); }
-      // update token index annotation
-      int tokenIndex = 0;
-      for (CoreLabel token : newTokens) {
-        token.set(CoreAnnotations.TokenIndexAnnotation.class, tokenIndex);
-        tokenIndex++;
-      }
     }
   }
 

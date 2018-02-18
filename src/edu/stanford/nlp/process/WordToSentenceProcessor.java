@@ -156,7 +156,9 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     if (o instanceof CoreMap) {
       Boolean forcedEndValue =
               ((CoreMap)o).get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
-      return forcedEndValue != null && forcedEndValue;
+      String originalText = ((CoreMap) o).get(CoreAnnotations.OriginalTextAnnotation.class);
+      return (forcedEndValue != null && forcedEndValue) ||
+          (originalText != null && originalText.equals("\u2029"));
     } else {
       return false;
     }
