@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.Generics;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext  {
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory /* , HasContext */  {
 
   private static final long serialVersionUID = 2L;
 
@@ -248,9 +248,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       String key = keys[i];
       classes[i] = AnnotationLookup.toCoreKey(key);
 
-      //now work with the key we got above
-      if (classes[i] == null)
+      // now work with the key we got above
+      if (classes[i] == null) {
         throw new UnsupportedOperationException("Unknown key " + key);
+      }
     }
     return classes;
   }
@@ -266,13 +267,13 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       String value = values[i];
       try {
         Class<?> valueClass = AnnotationLookup.getValueType(coreKeyClass);
-        if(valueClass.equals(String.class)) {
+        if (valueClass.equals(String.class)) {
           this.set(coreKeyClass, values[i]);
-        } else if(valueClass == Integer.class) {
+        } else if (valueClass == Integer.class) {
           this.set(coreKeyClass, Integer.parseInt(values[i]));
-        } else if(valueClass == Double.class) {
+        } else if (valueClass == Double.class) {
           this.set(coreKeyClass, Double.parseDouble(values[i]));
-        } else if(valueClass == Long.class) {
+        } else if (valueClass == Long.class) {
           this.set(coreKeyClass, Long.parseLong(values[i]));
         } else {
           throw new RuntimeException("Can't handle " + valueClass);
@@ -788,6 +789,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   }
 
   private static final Comparator<Class<?>> asClassComparator =
-          (o1, o2) -> o1.getName().compareTo(o2.getName());
+          Comparator.comparing(Class::getName);
 
 }
