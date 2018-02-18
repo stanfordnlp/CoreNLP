@@ -71,13 +71,13 @@ public class SentenceTest extends TestCase {
 
   /**
    * Serializing a raw sentence shouldn't make it an order of magnitude larger than
-   * the raw text.  At the moment it does, so make sure not 11x larger.
+   * the raw text.
    */
   public void testTokenizedSentenceSize() {
     String text = "one two three four five";
     byte[] sentenceArray = new Sentence(text).serialize().toByteArray();
     byte[] textArray = text.getBytes();
-    assertTrue(sentenceArray.length < textArray.length * 11);
+    assertTrue(sentenceArray.length < textArray.length * 10);
   }
 
 }
