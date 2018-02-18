@@ -329,8 +329,10 @@ public class WordsToSentencesAnnotator implements Annotator  {
       } else {
         String newlineText = currToken.get(CoreAnnotations.OriginalTextAnnotation.class);
         // fix after text for last token
-        String prevTokenAfterText = prevToken.get(CoreAnnotations.AfterAnnotation.class);
-        prevToken.set(CoreAnnotations.AfterAnnotation.class, prevTokenAfterText+newlineText);
+        if (prevToken != null) {
+          String prevTokenAfterText = prevToken.get(CoreAnnotations.AfterAnnotation.class);
+          prevToken.set(CoreAnnotations.AfterAnnotation.class, prevTokenAfterText + newlineText);
+        }
         prevToken = currToken;
       }
     }
