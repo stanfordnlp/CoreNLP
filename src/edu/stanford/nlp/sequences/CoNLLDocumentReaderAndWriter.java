@@ -91,16 +91,16 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
       Collection<String> docs = new ArrayList<>();
       ObjectBank<String> ob = ObjectBank.getLineIterator(r);
       StringBuilder current = new StringBuilder();
-      Matcher matcher = docPattern.matcher("");
       for (String line : ob) {
-        if (matcher.reset(line).lookingAt()) {
+        if (docPattern.matcher(line).lookingAt()) {
           // Start new doc, store old one if non-empty
           if (current.length() > 0) {
             docs.add(current.toString());
-            current.setLength(0);
+            current = new StringBuilder();
           }
         }
-        current.append(line).append('\n');
+        current.append(line);
+        current.append('\n');
       }
       if (current.length() > 0) {
         docs.add(current.toString());
@@ -160,7 +160,7 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
         wi.setWord(bits[1]);
       } else {
         wi.setWord(bits[0]);
-      }
+        }
       wi.set(CoreAnnotations.LemmaAnnotation.class, bits[1]);
       wi.setTag(bits[2]);
       wi.set(CoreAnnotations.ChunkAnnotation.class, bits[3]);
