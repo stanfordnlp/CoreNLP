@@ -77,7 +77,7 @@ public class SentenceTest {
 
   /**
    * Serializing a raw sentence shouldn't make it an order of magnitude larger than
-   * the raw text.  At the moment it does, so make sure not 11x larger.
+   * the raw text.
    */
   @Test
   public void testTokenizedSentenceSize() {
