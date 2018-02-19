@@ -15,9 +15,9 @@ public class TokenBeginEndAnnotationITest extends TestCase {
   public String basicNewlineText =
       "\nJoe Smith went to Hawaii.\n\n\nHis vacation lasted three weeks.  He had a great time.\nHe plans to go again.";
 
-  public String xmlDocPath = "/Users/jebolton/stanford-corenlp-examples/tokenize/ENG_DF_001471_20160410_G00A00PY2.xml";
+  public String xmlDocPath = "/scr/nlp/data/stanford-corenlp-testing/test-docs/ENG_DF_001471_20160410_G00A00PY2.xml";
 
-  public String xmlDocPipelineProps = "/Users/jebolton/stanford-corenlp-examples/tokenize/kbp_2016.properties";
+  public String xmlDocPipelineProps = "/scr/nlp/data/stanford-corenlp-testing/test-props/kbp_2016.properties";
 
   public StanfordCoreNLP pipeline;
 
