@@ -1,15 +1,17 @@
 package edu.stanford.nlp.objectbank;
 
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import edu.stanford.nlp.util.AbstractIterator;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Serializable;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 /**
  * An Iterator that reads the contents of a Reader, delimited by the specified
@@ -20,7 +22,6 @@ import java.util.regex.Matcher;
  * @param <T> The type of the objects returned
  */
 public class DelimitRegExIterator<T> extends AbstractIterator<T> {
-
   private Iterator<String> tokens;
   private final Function<String,T> op;
   private T nextToken; // = null;
@@ -35,32 +36,30 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
     BufferedReader in = new BufferedReader(r);
     try {
       String line;
-      StringBuilder input = new StringBuilder();
-      while ((line = in.readLine()) != null) {
-        input.append(line).append("\n");
-      }
+      StringBuilder input = new StringBuilder(10000);
+      while ((line = in.readLine()) != null)
+        input.append(line).append('\n');
       line = input.toString();
-      Pattern p = Pattern.compile("^"+delimiter);
-      Matcher m = p.matcher(line);
-      line = m.replaceAll("");
-      p = Pattern.compile(delimiter+"$");
-      m = p.matcher(line);
-      line = m.replaceAll("");
-      line = line.trim();
-
-      tokens = Arrays.asList(line.split(delimiter)).iterator();
-    } catch (Exception e) {
+      Matcher m = Pattern.compile(delimiter).matcher(line);
+      ArrayList<String> toks = new ArrayList<>();
+      int prev = 0;
+      while(m.find()) {
+        if (m.start() == 0) // Skip empty first part
+          continue;
+        toks.add(line.substring(prev, m.start()));
+        prev = m.end();
+      }
+      if (prev < line.length()) // Except empty last part
+        toks.add(line.substring(prev, line.length()));
+      tokens = toks.iterator();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
     setNext();
   }
 
   private void setNext() {
-    if (tokens.hasNext()) {
-      String s = tokens.next();
-      nextToken = parseString(s);
-    } else {
-      nextToken = null;
-    }
+    nextToken = tokens.hasNext() ? parseString(tokens.next()) : null;
   }
 
   protected T parseString(String s) {
