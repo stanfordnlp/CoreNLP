@@ -138,7 +138,7 @@ public class TokenBeginEndAnnotationITest extends TestCase {
     assertTrue(!tokenIndexTwoNinetyThree.isNewline());
     CoreLabel tokenIndexFiveFortyTwo = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(542);
     assertEquals("location", tokenIndexFiveFortyTwo.originalText());
-    CoreLabel tokenIndexFiveFiftyFour = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(554);
+    CoreLabel tokenIndexFiveFiftyFour = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(543);
     assertEquals(".", tokenIndexFiveFiftyFour.originalText());
   }
 
