@@ -108,9 +108,7 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
 
   @Override
   public double[] initial() {
-    double[] initial = new double[domainDimension()];
-    // Arrays.fill(initial, 0.0); // You get zero fill of array for free in Java! (Like it or not....)
-    return initial;
+    return new double[domainDimension()]; // initialized with 0s.
   }
 
   public double[] randomInitial() {
