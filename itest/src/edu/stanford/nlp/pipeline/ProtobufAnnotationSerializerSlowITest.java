@@ -74,16 +74,6 @@ public class ProtobufAnnotationSerializerSlowITest {
   @SuppressWarnings({"unchecked", "ConstantConditions"})
   public static void sameAsRead(Annotation doc, Annotation readDoc) {
     // Run the original document through the number normalizer
-    if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-      for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
-        if (sentence.containsKey(CoreAnnotations.TokensAnnotation.class)) {
-          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).containsKey(CoreAnnotations.TokenBeginAnnotation.class);
-          if (hasTokenBeginAnnotation) {
-            sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
-          }
-        }
-      }
-    }
 
     // Update some fields in original document
     if (doc.containsKey(CoreAnnotations.QuotationsAnnotation.class)) {
