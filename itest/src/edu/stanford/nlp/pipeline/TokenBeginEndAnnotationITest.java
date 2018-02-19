@@ -15,9 +15,9 @@ public class TokenBeginEndAnnotationITest extends TestCase {
   public String basicNewlineText =
       "\nJoe Smith went to Hawaii.\n\n\nHis vacation lasted three weeks.  He had a great time.\nHe plans to go again.";
 
-  public String xmlDocPath = "/scr/nlp/data/stanford-corenlp-testing/test-docs/ENG_DF_001471_20160410_G00A00PY2.xml";
+  public String xmlDocPath = "/Users/jebolton/stanford-corenlp-examples/tokenize/ENG_DF_001471_20160410_G00A00PY2.xml";
 
-  public String xmlDocPipelineProps = "/scr/nlp/data/stanford-corenlp-testing/test-props/kbp_2016.properties";
+  public String xmlDocPipelineProps = "/Users/jebolton/stanford-corenlp-examples/tokenize/kbp_2016.properties";
 
   public StanfordCoreNLP pipeline;
 
@@ -96,25 +96,25 @@ public class TokenBeginEndAnnotationITest extends TestCase {
     checkSentenceTokenAlignmentCorrectness(basicNewlineExample);
     // check sentence token boundaries
     CoreMap sentenceOne = basicNewlineExample.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-    assertEquals(1, (int) sentenceOne.get(CoreAnnotations.TokenBeginAnnotation.class));
-    assertEquals(7, (int) sentenceOne.get(CoreAnnotations.TokenEndAnnotation.class));
+    assertEquals(0, (int) sentenceOne.get(CoreAnnotations.TokenBeginAnnotation.class));
+    assertEquals(6, (int) sentenceOne.get(CoreAnnotations.TokenEndAnnotation.class));
     CoreMap sentenceTwo = basicNewlineExample.get(CoreAnnotations.SentencesAnnotation.class).get(1);
-    assertEquals(10, (int) sentenceTwo.get(CoreAnnotations.TokenBeginAnnotation.class));
-    assertEquals(16, (int) sentenceTwo.get(CoreAnnotations.TokenEndAnnotation.class));
+    assertEquals(6, (int) sentenceTwo.get(CoreAnnotations.TokenBeginAnnotation.class));
+    assertEquals(12, (int) sentenceTwo.get(CoreAnnotations.TokenEndAnnotation.class));
     CoreMap sentenceThree = basicNewlineExample.get(CoreAnnotations.SentencesAnnotation.class).get(2);
-    assertEquals(16, (int) sentenceThree.get(CoreAnnotations.TokenBeginAnnotation.class));
-    assertEquals(22, (int) sentenceThree.get(CoreAnnotations.TokenEndAnnotation.class));
+    assertEquals(12, (int) sentenceThree.get(CoreAnnotations.TokenBeginAnnotation.class));
+    assertEquals(18, (int) sentenceThree.get(CoreAnnotations.TokenEndAnnotation.class));
     CoreMap sentenceFour = basicNewlineExample.get(CoreAnnotations.SentencesAnnotation.class).get(3);
-    assertEquals(23, (int) sentenceFour.get(CoreAnnotations.TokenBeginAnnotation.class));
-    assertEquals(29, (int) sentenceFour.get(CoreAnnotations.TokenEndAnnotation.class));
+    assertEquals(18, (int) sentenceFour.get(CoreAnnotations.TokenBeginAnnotation.class));
+    assertEquals(24, (int) sentenceFour.get(CoreAnnotations.TokenEndAnnotation.class));
     // check some tokens
     CoreLabel tokenIndexFour = basicNewlineExample.get(CoreAnnotations.TokensAnnotation.class).get(4);
-    assertEquals("to", tokenIndexFour.originalText());
+    assertEquals("Hawaii", tokenIndexFour.originalText());
     CoreLabel tokenIndexSeven = basicNewlineExample.get(CoreAnnotations.TokensAnnotation.class).get(7);
-    assertEquals("\n", tokenIndexSeven.originalText());
-    assertTrue(tokenIndexSeven.isNewline());
+    assertEquals("vacation", tokenIndexSeven.originalText());
+    assertTrue(!tokenIndexSeven.isNewline());
     CoreLabel tokenIndexFifteen = basicNewlineExample.get(CoreAnnotations.TokensAnnotation.class).get(15);
-    assertEquals(".", tokenIndexFifteen.originalText());
+    assertEquals("great", tokenIndexFifteen.originalText());
   }
 
   public void testXMLDoc() {
@@ -127,19 +127,19 @@ public class TokenBeginEndAnnotationITest extends TestCase {
     System.err.println("finished...");
     // check some tokens
     CoreLabel tokenIndexOne = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(1);
-    assertEquals("Faulty", tokenIndexOne.originalText());
+    assertEquals("iPhone", tokenIndexOne.originalText());
     CoreLabel tokenIndexFour = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(4);
-    assertEquals("\n", tokenIndexFour.originalText());
-    assertTrue(tokenIndexFour.isNewline());
+    assertEquals("Have", tokenIndexFour.originalText());
+    assertTrue(!tokenIndexFour.isNewline());
     CoreLabel tokenIndexNinetySix = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(96);
-    assertEquals("faulty", tokenIndexNinetySix.originalText());
+    assertEquals("so", tokenIndexNinetySix.originalText());
     CoreLabel tokenIndexTwoNinetyThree = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(293);
-    assertEquals("\n", tokenIndexTwoNinetyThree.originalText());
-    assertTrue(tokenIndexTwoNinetyThree.isNewline());
-    CoreLabel tokenIndexFiveEightyOne = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(581);
-    assertEquals("location", tokenIndexFiveEightyOne.originalText());
-    CoreLabel tokenIndexFiveEightyTwo = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(582);
-    assertEquals(".", tokenIndexFiveEightyTwo.originalText());
+    assertEquals("them", tokenIndexTwoNinetyThree.originalText());
+    assertTrue(!tokenIndexTwoNinetyThree.isNewline());
+    CoreLabel tokenIndexFiveFortyTwo = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(542);
+    assertEquals("location", tokenIndexFiveFortyTwo.originalText());
+    CoreLabel tokenIndexFiveFiftyFour = xmlDocAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(554);
+    assertEquals(".", tokenIndexFiveFiftyFour.originalText());
   }
 
 }
