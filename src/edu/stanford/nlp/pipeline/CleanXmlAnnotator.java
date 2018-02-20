@@ -42,7 +42,8 @@ public class CleanXmlAnnotator implements Annotator {
 
   /**
    * This regular expression tells us which tags end a sentence.
-   * For example, {@code <p>} would be a great candidate.
+   * For example, {@code "p"} would be a great candidate.
+   * The pattern should match element names not tags (i.e., you don't include the angle brackets).
    */
   private final Pattern sentenceEndingTagMatcher;
 
