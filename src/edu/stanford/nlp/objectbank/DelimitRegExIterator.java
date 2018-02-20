@@ -1,27 +1,29 @@
 package edu.stanford.nlp.objectbank;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.AbstractIterator;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.Serializable;
-import java.util.*;
 
 /**
  * An Iterator that reads the contents of a Reader, delimited by the specified
- * delimiter, and then be subsequently processed by an Function to produce
+ * delimiter, and then subsequently processed by an Function to produce
  * Objects of type T.
  *
- * @author Jenny Finkel <A HREF="mailto:jrfinkel@stanford.edu>jrfinkel@stanford.edu</A>
+ * @author Jenny Finkel <a href="mailto:jrfinkel@cs.stanford.edu>jrfinkel@cs.stanford.edu</a>
  * @param <T> The type of the objects returned
  */
 public class DelimitRegExIterator<T> extends AbstractIterator<T> {
+
   private Iterator<String> tokens;
   private final Function<String,T> op;
   private T nextToken; // = null;
@@ -37,23 +39,26 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
     try {
       String line;
       StringBuilder input = new StringBuilder(10000);
-      while ((line = in.readLine()) != null)
+      while ((line = in.readLine()) != null) {
         input.append(line).append('\n');
+      }
       line = input.toString();
       Matcher m = Pattern.compile(delimiter).matcher(line);
       ArrayList<String> toks = new ArrayList<>();
       int prev = 0;
-      while(m.find()) {
-        if (m.start() == 0) // Skip empty first part
+      while (m.find()) {
+        if (m.start() == 0) { // Skip empty first part
           continue;
+        }
         toks.add(line.substring(prev, m.start()));
         prev = m.end();
       }
-      if (prev < line.length()) // Except empty last part
+      if (prev < line.length()) { // Except empty last part
         toks.add(line.substring(prev, line.length()));
+      }
       tokens = toks.iterator();
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeIOException(e);
     }
     setNext();
   }
@@ -101,11 +106,12 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
     return new DelimitRegExIteratorFactory<>(delim, op);
   }
 
-  public static class DelimitRegExIteratorFactory<T> implements IteratorFromReaderFactory<T>, Serializable {
+  public static class DelimitRegExIteratorFactory<T> implements IteratorFromReaderFactory<T> /*, Serializable */ {
 
     private static final long serialVersionUID = 6846060575832573082L;
 
     private final String delim;
+    @SuppressWarnings("serial")
     private final Function<String,T> op;
 
     public static DelimitRegExIteratorFactory<String> defaultDelimitRegExIteratorFactory(String delim) {
@@ -117,18 +123,11 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
       this.op = op;
     }
 
+    @Override
     public Iterator<T> getIterator(Reader r) {
       return new DelimitRegExIterator<>(r, delim, op);
     }
 
-  }
-
-  public static void main(String[] args) {
-    String s = "@@123\nthis\nis\na\nsentence\n\n@@124\nThis\nis\nanother\n.\n\n@125\nThis\nis\nthe\nlast\n";
-    DelimitRegExIterator<String> di = DelimitRegExIterator.defaultDelimitRegExIterator(new StringReader(s), "\n\n");
-    while (di.hasNext()) {
-      System.out.println("****\n" + di.next() + "\n****");
-    }
   }
 
 }
