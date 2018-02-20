@@ -2,14 +2,14 @@ package edu.stanford.nlp.objectbank;
 
 import java.util.function.Function;
 import edu.stanford.nlp.util.AbstractIterator;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Serializable;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 /**
  * An Iterator that reads the contents of a Reader, delimited by the specified
@@ -20,6 +20,8 @@ import java.util.regex.Matcher;
  * @param <T> The type of the objects returned
  */
 public class DelimitRegExIterator<T> extends AbstractIterator<T> {
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(DelimitRegExIterator.class);
 
   private Iterator<String> tokens;
   private final Function<String,T> op;
@@ -35,21 +37,18 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
     BufferedReader in = new BufferedReader(r);
     try {
       String line;
-      StringBuilder input = new StringBuilder();
+      StringBuilder input = new StringBuilder(10000);
       while ((line = in.readLine()) != null) {
         input.append(line).append("\n");
       }
-      line = input.toString();
-      Pattern p = Pattern.compile("^"+delimiter);
-      Matcher m = p.matcher(line);
-      line = m.replaceAll("");
-      p = Pattern.compile(delimiter+"$");
-      m = p.matcher(line);
-      line = m.replaceAll("");
-      line = line.trim();
+      String[] split = input.toString() //
+        .replaceAll("^" + delimiter, "") //
+        .replaceAll(delimiter + "$", "") //
+        .trim().split(delimiter);
 
-      tokens = Arrays.asList(line.split(delimiter)).iterator();
-    } catch (Exception e) {
+      tokens = Arrays.asList(split).iterator();
+    } catch (IOException e) {
+      log.err(e);
     }
     setNext();
   }
