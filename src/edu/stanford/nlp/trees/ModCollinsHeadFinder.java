@@ -7,7 +7,7 @@ import edu.stanford.nlp.util.Generics;
  * thesis. This starts with
  * Collins' head finder. As in {@code CollinsHeadFinder}, we've
  * added a head rule for NX.
- *
+ * <p>
  * Changes:
  * <ol>
  * <li>The PRN rule used to just take the leftmost thing, we now have it
@@ -33,7 +33,7 @@ import edu.stanford.nlp.util.Generics;
  * the same role as ADJP.
  * </ol>
  * These rules are suitable for the Penn Treebank.
- * <p/>
+ * <p>
  * A case that you apparently just can't handle well in this framework is
  * (NP (NP ... NP)).  If this is a conjunction, apposition or similar, then
  * the leftmost NP is the head, but if the first is a measure phrase like

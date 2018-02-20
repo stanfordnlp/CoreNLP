@@ -61,7 +61,7 @@ import java.util.zip.GZIPOutputStream;
  * {@code ColumnDocumentReaderAndWriter} training data is 3 column input,
  * with the columns containing a word, its POS, and its gold class, but
  * this can be specified via the {@code map} property.
- * </p><p>
+ * <p>
  * When run on a file with {@code -textFile} or {@code -textFiles},
  * the file is assumed to be plain English text (or perhaps simple HTML/XML),
  * and a reasonable attempt is made at English tokenization by
@@ -69,40 +69,33 @@ import java.util.zip.GZIPOutputStream;
  * the text can be changed with -plainTextDocumentReaderAndWriter.
  * Extra options can be supplied to the tokenizer using the
  * -tokenizerOptions flag.
- * </p><p>
+ * <p>
  * To read from stdin, use the flag -readStdin.  The same
  * reader/writer will be used as for -textFile.
- * </p>
- * <p><b>Typical command-line usage</b></p>
- * <p>For running a trained model with a provided serialized classifier on a
- * text file: </p>
+ * <p>
+ * <b>Typical command-line usage</b>
+ * <p>
+ * For running a trained model with a provided serialized classifier on a
+ * text file:
  * <p>
  * {@code java -mx500m edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier
  * conll.ner.gz -textFile sampleSentences.txt }
- * </p>
  * <p>
  * When specifying all parameters in a properties file (train, test, or
  * runtime):
- * </p>
  * <p>
  * {@code java -mx1g edu.stanford.nlp.ie.crf.CRFClassifier -prop propFile }
- * </p>
  * <p>
- * To train and test a simple NER model from the command line:</p>
+ * To train and test a simple NER model from the command line:
  * <p>
- * {@code java -mx1000m edu.stanford.nlp.ie.crf.CRFClassifier
- * -trainFile trainFile -testFile testFile -macro &gt; output }
- * </p>
+ * {@code java -mx1g edu.stanford.nlp.ie.crf.CRFClassifier -trainFile trainFile -testFile testFile -macro > output }
  * <p>
- * To train with multiple files: </p>
+ * To train with multiple files:
  * <p>
- * {@code java -mx1000m edu.stanford.nlp.ie.crf.CRFClassifier
- * -trainFileList file1,file2,... -testFile testFile -macro &gt; output }
- * </p>
+ * {@code java -mx1g edu.stanford.nlp.ie.crf.CRFClassifier -trainFileList file1,file2,... -testFile testFile -macro > output }
  * <p>
  * To test on multiple files, use the -testFiles option and a comma
  * separated list.
- * </p>
  * <p>
  * Features are defined by a {@link edu.stanford.nlp.sequences.FeatureFactory}.
  * {@link NERFeatureFactory} is used by default, and you should look
@@ -114,7 +107,9 @@ import java.util.zip.GZIPOutputStream;
  * by a Properties file (which is the recommended method) or by flags on the
  * command line. The flags are read into a {@link SeqClassifierFlags} object,
  * which the user need not be concerned with, unless wishing to add new
- * features. </p> CRFClassifier may also be used programmatically. When creating
+ * features.
+ * <p>
+ * CRFClassifier may also be used programmatically. When creating
  * a new instance, you <i>must</i> specify a Properties object. You may then
  * call train methods to train a classifier, or load a classifier. The other way
  * to get a CRFClassifier is to deserialize one via the static

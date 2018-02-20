@@ -23,7 +23,7 @@ import java.io.Serializable;
  * look for the data and how to turn it into Objects, and then use the new
  * ObjectBank in the class.  This will also make it easier to reuse code for
  * reading in the same data.
- *
+ * <p>
  * An ObjectBank is a Collection of Objects.  These objects are taken
  * from input sources and then tokenized and parsed into the desired
  * kind of Object.  An ObjectBank requires a ReaderIteratorFactory and a
@@ -56,7 +56,7 @@ import java.io.Serializable;
  *
  * More complex uses of getLineIterator let you interpret each line of a file
  * as an object of arbitrary type via a transformer Function.
- *
+ * <p>
  * For more general uses with existing classes, you first construct a collection of sources, then a class that
  * will make the objects of interest from instances of those sources, and then set up an ObjectBank that can
  * vend those objects:
@@ -119,17 +119,14 @@ import java.io.Serializable;
  *
  * Now to build the IteratorFromReaderFactory:
  *
- * <pre><code>
- * IteratorFromReaderFactory rtif = new BeginEndTokenizerFactory("<puzzle>", "</puzzle>", new PuzzleParser());
- * </code></pre>
- *
+ * <p>
+ * {@code IteratorFromReaderFactory rtif = new BeginEndTokenizerFactory("<puzzle>", "</puzzle>", new PuzzleParser()); }
+ * <p>
  * Now, to create your ObjectBank you just give it the ReaderIteratorFactory and
  * IteratorFromReaderFactory that you just created:
- *
- * <pre><code>
- * ObjectBank puzzles = new ObjectBank(rif, rtif);
- * </code></pre>
- *
+ * <p>
+ * {@code ObjectBank puzzles = new ObjectBank(rif, rtif); }
+ * <p>
  * Now, if you get a new set of puzzles that are located elsewhere and formatted differently
  * you create a new ObjectBank for reading them in and use that ObjectBank instead with only
  * trivial changes (or possible none at all if the ObjectBank is read in on a constructor)
@@ -137,7 +134,7 @@ import java.io.Serializable;
  * which are  located elsewhere and formatted differently, they already know what they have to do
  * to make your code work for them.
  *
- * @author Jenny Finkel <A HREF="mailto:jrfinkel@cs.stanford.edu>jrfinkel@stanford.edu</A>
+ * @author Jenny Finkel <a href="mailto:jrfinkel@cs.stanford.edu">jrfinkel@stanford.edu</a>
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in types
  */
 

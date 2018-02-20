@@ -10,13 +10,18 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 
 /**
- * Converts a Counter<K> to a {@link CompressedFeatureVector} (i.e., parallel lists of integer
+ * Converts a {@code Counter<K>} to a {@link CompressedFeatureVector} (i.e., parallel lists of integer
  * keys and double values), which takes up much less memory.
+ *
  * @author Kevin Clark
  */
 public class Compressor<K> implements Serializable {
+
   private static final long serialVersionUID = 364548642855692442L;
+
+  @SuppressWarnings("serial")
   private final Map<K, Integer> index;
+  @SuppressWarnings("serial")
   private final Map<Integer, K> inverse;
 
   public Compressor() {
@@ -51,4 +56,5 @@ public class Compressor<K> implements Serializable {
     }
     return c;
   }
+
 }

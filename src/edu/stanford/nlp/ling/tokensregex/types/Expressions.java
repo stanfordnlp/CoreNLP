@@ -54,23 +54,23 @@ import java.util.regex.Pattern;
  *   The following functions are supported:
  * <table>
  *   <tr><th>Function</th><th>Description</th></tr>
- *   <tr><td><code>Annotate(CoreMap, field, value)</td><td>Annotates the CoreMap with specified field=value</td></tr>
- *   <tr><td><code>Aggregate(function, initialValue,...)</td><td>Aggregates values using function (like fold)</td></tr>
- *   <tr><td><code>Split(CoreMap, delimRegex, includeMatched)</td><td>Split one CoreMap into smaller coremaps using the specified delimRegex on the text of the CoreMap.
+ *   <tr><td>{@code Annotate(CoreMap, field, value)}</td><td>Annotates the CoreMap with specified field=value</td></tr>
+ *   <tr><td>{@code Aggregate(function, initialValue,...)}</td><td>Aggregates values using function (like fold)</td></tr>
+ *   <tr><td>{@code Split(CoreMap, delimRegex, includeMatched)}</td><td>Split one CoreMap into smaller coremaps using the specified delimRegex on the text of the CoreMap.
  *     If includeMatched is true, pieces that matches the delimRegex are included in the final list of CoreMaps</td></tr>
  *   <tr><th colspan="2">Tagging functions</th></tr>
- *   <tr><td><code>Tag(CoreMap or List&lt;CoreMap&gt;, tag, value)<br/>VTag(Value,tag,value)</code></td><td>Sets a temporary tag on the CoreMap(s) or Value</td></tr>
- *   <tr><td><code>GetTag(CoreMap or List&lt;CoreMap&gt;, tag)<br/>GetVTag(Value,tag)</code></td><td>Returns the temporary tag on the CoreMap(s) or Value</td></tr>
- *   <tr><td><code>RemoveTag(CoreMap or List&lt;CoreMap&gt;, tag)<br/>RemoveVTag(Value,tag)</code></td><td>Removes the temporary tag on the CoreMap(s) or Value</td></tr>
+ *   <tr><td>{@code Tag(CoreMap or List&lt;CoreMap&gt;, tag, value)<br>VTag(Value,tag,value)}</td><td>Sets a temporary tag on the CoreMap(s) or Value</td></tr>
+ *   <tr><td>{@code GetTag(CoreMap or List&lt;CoreMap&gt;, tag)<br>GetVTag(Value,tag)}</td><td>Returns the temporary tag on the CoreMap(s) or Value</td></tr>
+ *   <tr><td>{@code RemoveTag(CoreMap or List&lt;CoreMap&gt;, tag)<br>RemoveVTag(Value,tag)}</td><td>Removes the temporary tag on the CoreMap(s) or Value</td></tr>
  *   <tr><th colspan="2">Regex functions</th></tr>
- *   <tr><td><code>Match(List&lt;CoreMap&gt;, tokensregex)<br/>Match(String,regex)</code></td><td>Returns whether the tokens or text matched</td></tr>
- *   <tr><td><code>Replace(List&lt;CoreMap&gt;, tokensregex, replacement)<br/>Match(String,regex,replacement)</code></td><td>Replaces the matched tokens or text</td></tr>
+ *   <tr><td>{@code Match(List&lt;CoreMap&gt;, tokensregex)<br>Match(String,regex)}</td><td>Returns whether the tokens or text matched</td></tr>
+ *   <tr><td>{@code Replace(List&lt;CoreMap&gt;, tokensregex, replacement)<br>Match(String,regex,replacement)}</td><td>Replaces the matched tokens or text</td></tr>
  *   <tr><td>{@code CreateRegex(List<String>)}</td><td>Creates one big string regular expression that matches any of the strings in the list</td></tr>
  *   <tr><th colspan="2">Accessor functions</th></tr>
  *   <tr><td>{@code Map(list,function)}</td><td>Returns a new list that is the result of applying the function on every element of the List</td></tr>
  *   <tr><td>{@code Keys(map)}</td><td>Returns list of keys for the given map</td></tr>
- *   <tr><td><code>Set(object or map, fieldname, value)<br/>Set(list,index,value)</code></td><td>Set the field to the specified value</td></tr>
- *   <tr><td><code>Get(object or map, fieldname) or object.fieldname <br/>Get(list,index) or list[index]</code></td><td>Returns the value of the specified field</td></tr>
+ *   <tr><td><{@code Set(object or map, fieldname, value)<br>Set(list,index,value)}</td><td>Set the field to the specified value</td></tr>
+ *   <tr><td>{@code Get(object or map, fieldname) or object.fieldname <br>Get(list,index) or list[index]}</td><td>Returns the value of the specified field</td></tr>
  *   <tr><th colspan="2">String functions</th></tr>
  *   <tr><td>{@code Format(format,arg1,arg2,...)}</td><td>Returns formatted string</td></tr>
  *   <tr><td>{@code Concat(str1,str2,...)}</td><td>Returns strings concatenated together</td></tr>
