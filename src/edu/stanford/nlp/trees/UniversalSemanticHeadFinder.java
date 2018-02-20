@@ -1,5 +1,4 @@
 package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +13,7 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -22,33 +22,35 @@ import edu.stanford.nlp.util.Generics;
  * This version chooses the semantic head verb rather than the verb form
  * for cases with verbs.  And it makes similar themed changes to other
  * categories: e.g., in question phrases, like "Which Brazilian game", the
- * head is made "game" not "Which" as in common PTB head rules.<p/>
- * <p/>
+ * head is made "game" not "Which" as in common PTB head rules.
+ * <p>
  * By default the SemanticHeadFinder uses a treatment of copula where the
  * complement of the copula is taken as the head.  That is, a sentence like
- * "Bill is big" will be analyzed as <p/>
- * <p/>
- * <code>nsubj</code>(big, Bill) <br/>
- * <code>cop</code>(big, is) <p/>
- * <p/>
+ * "Bill is big" will be analyzed as:
+ * <p>
+ * {@code nsubj}(big, Bill) <br>
+ * {@code cop}(big, is)
+ * <p>
  * This analysis is used for questions and declaratives for adjective
  * complements and declarative nominal complements.  However Wh-sentences
  * with nominal complements do not receive this treatment.
  * "Who is the president?" is analyzed with "the president" as nsubj and "who"
- * as "attr" of the copula:<p/><p>
- * <code>nsubj</code>(is, president)<br/>
- * <code>attr</code>(is, Who) <p/>
- * <p/>
+ * as "attr" of the copula:
+ * <p>
+ * {@code nsubj}(is, president)<br>
+ * {@code attr}(is, Who)
+ * <p>
  * (Such nominal copula sentences are complex: arguably, depending on the
  * circumstances, several analyses are possible, with either the overt NP able
  * to be any of the subject, the predicate, or one of two referential entities
  * connected by an equational copula.  These uses aren't differentiated.)
- * <p/>
- * Existential sentences are treated as follows:  <br/>
- * "There is a man" <br/>
- * <code>expl</code>(is, There) <br/>
- * <code>det</code>(man-4, a-3) <br/>
- * <code>nsubj</code>(is-2, man-4)<br/>
+ * <p>
+ * Existential sentences are treated as follows:
+ * <p>
+ * "There is a man" <br>
+ * {@code expl}(is, There) <br>
+ * {@code det}(man-4, a-3) <br>
+ * {@code nsubj}(is-2, man-4)<br>
  *
  * @author John Rappaport
  * @author Marie-Catherine de Marneffe
