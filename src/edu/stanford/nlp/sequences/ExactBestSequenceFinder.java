@@ -70,26 +70,30 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
     }
 
     // Do forward Viterbi algorithm
-    forwardViterbi(linearConstraints, length, leftWindow, rightWindow, tagNum, productSizes, windowScore, score, trace);
+    forwardViterbi(leftWindow, rightWindow, length, linearConstraints, tagNum, productSizes, windowScore, score, trace);
 
     // Project the actual tag sequence
     double bestFinalScore = Double.NEGATIVE_INFINITY;
     int bestCurrentProduct = -1;
-    for (int product = 0; product < productSizes[leftWindow + length - 1]; product++) {
-      if (score[leftWindow + length - 1][product] > bestFinalScore) {
+    int end = leftWindow + length - 1;
+    for (int product = 0, productEnd = productSizes[end]; product < productEnd; product++) {
+      final double s = score[end][product];
+      if (s > bestFinalScore) {
         bestCurrentProduct = product;
-        bestFinalScore = score[leftWindow + length - 1][product];
+        bestFinalScore = s;
       }
     }
     int lastProduct = bestCurrentProduct;
     for (int last = padLength - 1; last >= length - 1 && last >= 0; last--) {
-      tempTags[last] = tags[last][lastProduct % tagNum[last]];
-      lastProduct /= tagNum[last];
+      final int tagNum_last = tagNum[last], tempProduct = lastProduct;
+      lastProduct /= tagNum_last;
+      tempTags[last] = tags[last][tempProduct - lastProduct * tagNum_last];
     }
     for (int pos = leftWindow + length - 2; pos >= leftWindow; pos--) {
-      int bestNextProduct = bestCurrentProduct;
+      final int bestNextProduct = bestCurrentProduct;
+      final int prevPos = pos - leftWindow;
       bestCurrentProduct = trace[pos + 1][bestNextProduct];
-      tempTags[pos - leftWindow] = tags[pos - leftWindow][bestCurrentProduct / (productSizes[pos] / tagNum[pos - leftWindow])];
+      tempTags[prevPos] = tags[prevPos][bestCurrentProduct / (productSizes[pos] / tagNum[prevPos])];
     }
     return new Pair<>(tempTags, bestFinalScore);
   }
@@ -97,16 +101,22 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
   private static int[] initProductSizes(final SequenceModel ts, int[] tagNum, int[] productSizes) {
     final int leftWindow = ts.leftWindow();
     final int rightWindow = ts.rightWindow();
+    final int window = leftWindow + rightWindow;
     final int padLength = productSizes.length;
 
+    // Skip
     int curProduct = 1;
-    for (int i = 0; i < leftWindow + rightWindow; i++) {
+    for (int i = 0; i < window; i++) {
       curProduct *= tagNum[i];
     }
-    for (int pos = leftWindow + rightWindow; pos < padLength; pos++) {
-      if (pos > leftWindow + rightWindow) {
-        curProduct /= tagNum[pos - leftWindow - rightWindow - 1]; // shift off
-      }
+    // First entry
+    if (window < padLength) {
+      curProduct *= tagNum[window]; // shift on
+      productSizes[leftWindow] = curProduct;
+    }
+    // Remaining entries
+    for (int pos = window + 1; pos < padLength; pos++) {
+      curProduct /= tagNum[pos - window - 1]; // shift off
       curProduct *= tagNum[pos]; // shift on
       productSizes[pos - rightWindow] = curProduct;
     }
@@ -135,9 +145,9 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
         int p = product;
         int shift = 1;
         for (int curPos = pos + rightWindow, endCurPos = pos - leftWindow; curPos >= endCurPos; curPos--) {
-          final int tn = tagNum[curPos];
-          tempTags[curPos] = tags[curPos][p % tn];
+          final int tn = tagNum[curPos], oldp = p;
           p /= tn;
+          tempTags[curPos] = tags[curPos][oldp - p * tn];
           if (curPos > pos) {
             shift *= tn;
           }
@@ -164,8 +174,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
     return windowScore;
   }
 
-  private static void forwardViterbi(double[][] linearConstraints, final int length, final int leftWindow, final int rightWindow, int[] tagNum, int[] productSizes, double[][] windowScore, double[][] score, int[][] trace) {
-    int pos = leftWindow, endpos = length + leftWindow;
+  private static int forwardViterbiInitial(int pos, double[][] linearConstraints, int[] tagNum, int[] productSizes, double[][] windowScore, double[][] score, int[][] trace) {
     // initial spot:
     for (int product = 0, products = productSizes[pos]; product < products; product++) {
       // Local copies, to reduce array lookups.
@@ -187,6 +196,12 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
       score_pos[product] = score_product;
       trace_pos[product] = -1;
     }
+    return pos;
+  }
+
+  private static void forwardViterbi(int leftWindow, int rightWindow, int length, double[][] linearConstraints, int[] tagNum, int[] productSizes, double[][] windowScore, double[][] score, int[][] trace) {
+    final int endpos = length + leftWindow;
+    int pos = forwardViterbiInitial(leftWindow, linearConstraints, tagNum, productSizes, windowScore, score, trace);
     // loop over the remaining classification spots
     //log.info();
     for (pos++; pos < endpos; pos++) {
@@ -207,8 +222,8 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
       // loop over window product types
       for (int product = 0; product < products; product++) {
         // loop over possible predecessor types
-        score_pos[product] = Double.NEGATIVE_INFINITY;
-        trace_pos[product] = -1;
+        double score_product = Double.NEGATIVE_INFINITY;
+        int trace_product = -1;
         int sharedProduct = product / tagNumRight;
         final double windowProductScore = windowScore_pos[product];
         for (int newTagNum = 0; newTagNum < tagNumLeft; newTagNum++) {
@@ -225,11 +240,13 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
             predScore += linearConstraints_pos[product % tagNum_pos];
           }
 
-          if (predScore > score_pos[product]) {
-            score_pos[product] = predScore;
-            trace_pos[product] = predProduct;
+          if (predScore > score_product) {
+            score_product = predScore;
+            trace_product = predProduct;
           }
         }
+        score_pos[product] = score_product;
+        trace_pos[product] = trace_product;
       }
     }
   }
