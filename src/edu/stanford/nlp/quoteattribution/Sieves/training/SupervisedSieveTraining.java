@@ -189,8 +189,9 @@ public class SupervisedSieveTraining {
         }
       }
 
-
-      List<Sieve.MentionData> mentionsInPreviousParagraph = eliminateDuplicates(sieve.findClosestMentionsInSpanBackward(new Pair<>(leftValue, rightValue)));
+      List<Sieve.MentionData> mentionsInPreviousParagraph = new ArrayList<Sieve.MentionData>();
+      if (leftValue > -1 && rightValue > -1)
+        mentionsInPreviousParagraph = eliminateDuplicates(sieve.findClosestMentionsInSpanBackward(new Pair<>(leftValue, rightValue)));
 
       //mentions in next paragraph
       leftValue = quoteRun.second + 1;
@@ -208,7 +209,9 @@ public class SupervisedSieveTraining {
         }
       }
 
-      List<Sieve.MentionData> mentionsInNextParagraph = sieve.findClosestMentionsInSpanForward(new Pair<>(leftValue, rightValue));
+      List<Sieve.MentionData> mentionsInNextParagraph = new ArrayList<Sieve.MentionData>();
+      if (leftValue < tokens.size() && rightValue < tokens.size())
+        mentionsInNextParagraph = sieve.findClosestMentionsInSpanForward(new Pair<>(leftValue, rightValue));
 
       List<Sieve.MentionData> candidateMentions = new ArrayList<>();
       candidateMentions.addAll(mentionsInPreviousParagraph);
