@@ -192,11 +192,16 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         skipCharacter = ! (tokenizeNewline && (cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString)));
         // skip solo newlines when using two newlines as sentence break
         // we want to skip the solo newlines to avoid segmenter errors
+        // it's okay to skip leading and trailing newlines
         if (sentenceSplitOnTwoNewlines && cp == '\n') {
-          int prevCodePoint = origText.codePointAt(offset-cpCharCount);
-          int nextCodePoint = origText.codePointAt(offset+cpCharCount);
-          if (!(prevCodePoint=='\n') && !(nextCodePoint=='\n'))
+          if (offset == 0 || offset == origText.length()-1) {
             skipCharacter = true;
+          } else {
+            int prevCodePoint = origText.codePointAt(offset - cpCharCount);
+            int nextCodePoint = origText.codePointAt(offset + cpCharCount);
+            if (!(prevCodePoint == '\n') && !(nextCodePoint == '\n'))
+              skipCharacter = true;
+          }
         }
       }
       if ( ! skipCharacter) {
