@@ -35,10 +35,10 @@ public class FrenchTokenizerAnnotatorITest extends TestCase {
       Arrays.asList("Consacrant", ",", "lui", ",", "l'", "essentiel", "de", "son", "temps", "et", "de", "son",
           "énérgie", "exclusivement", "à", "les", "grands", "chantiers", "économiques", "destinés", "à",
           "procurer", "de", "le", "travail", "à", "les", "jeunes", "générations", "."),
-      Arrays.asList("Plus", ",", "l'", "AQMI", "tente", "de", "nouer", "de", "les", "rapports", "avec", "les",
-          "mouvements", "subversifs", "dans", "le", "delta", "de", "le", "Nigéria", ",", "autant", "qu'", "avec", "de",
-          "les", "sectes", "d'", "inspiration", "religieuse", "à", "le", "nord", "de", "le", "pays", "."),
-      Arrays.asList("Après", "avoir", "examiné", "l'", "état", "de", "les", "relations", "bilatérales", ",", "les",
+      Arrays.asList("Plus", ",", "l'", "AQMI", "tente", "de", "nouer", "des", "rapports", "avec", "les",
+          "mouvements", "subversifs", "dans", "le", "delta", "de", "le", "Nigéria", ",", "autant", "qu'", "avec",
+          "des", "sectes", "d'", "inspiration", "religieuse", "à", "le", "nord", "de", "le", "pays", "."),
+      Arrays.asList("Après", "avoir", "examiné", "l'", "état", "des", "relations", "bilatérales", ",", "les",
           "deux", "chefs", "d'", "Etat", "ont", "réitéré", "leur", "volonté", "d'", "œuvrer", "à", "leur",
           "renforcement", "et", "à", "leur", "diversification", ".")
   );
