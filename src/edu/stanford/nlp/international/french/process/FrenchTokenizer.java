@@ -176,12 +176,6 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         secondOffset = 1;
         secondLength = 2;
         break;
-      case "des":
-        first = "de";
-        second = "les";
-        secondOffset = 2;
-        secondLength = 1;
-        break;
       case "du":
         first = "de";
         second = "le";

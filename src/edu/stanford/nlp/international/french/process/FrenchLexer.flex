@@ -387,10 +387,9 @@ COMPOUND2 = ({CHAR}){3,25}{APOSETCETERA}{WORD}
  * au => à le
  * aux => à les
  * du => de le
- * des => de les
  *
  */
-CONTRACTION = au|aux|du|des
+CONTRACTION = au|aux|du
 
 /* URLs, email, and Twitter handles
    Technically, Twitter names should be capped at 15 characters.
