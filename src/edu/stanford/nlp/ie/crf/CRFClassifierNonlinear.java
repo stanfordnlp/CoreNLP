@@ -147,10 +147,12 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
     if (flags.initialWeights == null) {
       initialWeights = func.initial();
     } else {
-      log.info("Reading initial weights from file " + flags.initialWeights);
-      try (DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
-            flags.initialWeights))))) {
+      try {
+        log.info("Reading initial weights from file " + flags.initialWeights);
+        DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
+            flags.initialWeights))));
         initialWeights = ConvertByteArray.readDoubleArr(dis);
+        dis.close();
       } catch (IOException e) {
         throw new RuntimeException("Could not read from double initial weight file " + flags.initialWeights);
       }

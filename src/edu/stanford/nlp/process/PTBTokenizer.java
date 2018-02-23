@@ -377,19 +377,16 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       writer.close();
     } else {
       for (int j = 0; j < sz; j++) {
-        try (Reader r = IOUtils.readerFromString(inputFileList.get(j), charset)) {
-          BufferedWriter writer;
-          if (outputFileList == null) {
-            writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
-          } else {
-            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
-          }
-          try {
-            numTokens += ptb2Text(r, writer);
-          } finally {
-            writer.close();
-          }
+        Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
+        BufferedWriter writer;
+        if (outputFileList == null) {
+          writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
+        } else {
+          writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
         }
+        numTokens += ptb2Text(r, writer);
+        writer.close();
+        r.close();
       }
     }
     final long duration = System.nanoTime() - start;
@@ -446,12 +443,12 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         out = new BufferedWriter(new OutputStreamWriter(System.out, charset));
       }
       for (int j = 0; j < numFiles; j++) {
-        try (Reader r = IOUtils.readerFromString(inputFileList.get(j), charset)) {
-          if (outputFileList != null) {
-            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
-          }
-          numTokens += tokReader(r, out, parseInsidePattern, options, preserveLines, dump, lowerCase);
+        Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
+        if (outputFileList != null) {
+          out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
         }
+        numTokens += tokReader(r, out, parseInsidePattern, options, preserveLines, dump, lowerCase);
+        r.close();
         if (outputFileList != null) {
           IOUtils.closeIgnoringExceptions(out);
         }

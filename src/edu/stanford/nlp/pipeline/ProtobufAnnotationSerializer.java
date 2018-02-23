@@ -205,13 +205,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   @SuppressWarnings({"UnusedDeclaration", "ThrowFromFinallyBlock"})
   public Annotation readUndelimited(File in) throws IOException {
+    FileInputStream undelimited = new FileInputStream(in);
     CoreNLPProtos.Document doc;
     try (FileInputStream delimited = new FileInputStream(in)) {
       doc = CoreNLPProtos.Document.parseFrom(delimited);
     } catch (Exception e) {
-      try(FileInputStream undelimited = new FileInputStream(in)) {
-        doc = CoreNLPProtos.Document.parseDelimitedFrom(undelimited);
-      }
+      doc = CoreNLPProtos.Document.parseDelimitedFrom(undelimited);
+    } finally {
+      undelimited.close();
     }
     return fromProto(doc);
   }

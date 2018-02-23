@@ -109,10 +109,14 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     } else {
       validPosPattern = null;
     }
-    try (BufferedReader rd = IOUtils.readerFromString(mapping)) {
+    BufferedReader rd = null;
+    try {
+      rd = IOUtils.readerFromString(mapping);
       entries = readEntries(rd, ignoreCase);
     } catch (IOException e) {
       throw new RuntimeIOException("Couldn't read RegexNER from " + mapping, e);
+    } finally {
+      IOUtils.closeIgnoringExceptions(rd);
     }
 
     this.ignoreCase = ignoreCase;

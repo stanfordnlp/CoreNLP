@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline; 
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
 
@@ -34,8 +33,8 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
     try {
       // Load the default properties
       Properties corefProps = new Properties();
-      try (BufferedReader reader = IOUtils.readerFromString("edu/stanford/nlp/hcoref/properties/coref-default-dep.properties")){
-        corefProps.load(reader);
+      try {
+        corefProps.load(IOUtils.readerFromString("edu/stanford/nlp/hcoref/properties/coref-default-dep.properties"));
       } catch (IOException ignored) { }
       // Add passed properties
       Enumeration<Object> keys = props.keys();

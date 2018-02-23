@@ -140,8 +140,9 @@ public class Experiments {
    * ..
    */
   public Experiments(String filename) {
-    try (BufferedReader in = IOUtils.readerFromString(filename)) {
+    try {
       Exception e1 = new Exception("Incorrect data file format");
+      BufferedReader in = IOUtils.readerFromString(filename);
       String head = in.readLine();
       if (!head.equals("<data>")) {
         throw e1;

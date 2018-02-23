@@ -161,6 +161,23 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       xmlEndOffset = m.end();
     }
 
+    // determine leading and trailing newlines
+    int firstNonNewlineOffset = -1;
+    int lastNonNewlineOffset = length;
+    for (int offset = 0, cpCharCount; offset < length; offset += cpCharCount) {
+      int cp = origText.codePointAt(offset);
+      cpCharCount = Character.charCount(cp);
+      String charString = origText.substring(offset, offset + cpCharCount);
+      if (firstNonNewlineOffset == -1 && !(cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString))) {
+        firstNonNewlineOffset = offset;
+      }
+      if (!(cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString)))
+        lastNonNewlineOffset = offset;
+    }
+
+    // keep track of previous offset while looping through characters
+    int prevOffset = -1;
+    // loop through characters
     for (int offset = 0, cpCharCount; offset < length; offset += cpCharCount) {
       int cp = origText.codePointAt(offset);
       cpCharCount = Character.charCount(cp);
@@ -189,20 +206,33 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         seg = true;
         // Don't skip newline characters if we're tokenizing them
         // We always count \n as newline to be consistent with the implementation of ssplit
-        skipCharacter = ! (tokenizeNewline && (cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString)));
-        // skip solo newlines when using two newlines as sentence break
-        // we want to skip the solo newlines to avoid segmenter errors
-        // it's okay to skip leading and trailing newlines
-        if (sentenceSplitOnTwoNewlines && cp == '\n') {
-          if (offset == 0 || offset == origText.length()-1) {
-            skipCharacter = true;
-          } else {
-            int prevCodePoint = origText.codePointAt(offset - cpCharCount);
-            int nextCodePoint = origText.codePointAt(offset + cpCharCount);
-            if (!(prevCodePoint == '\n') && !(nextCodePoint == '\n'))
-              skipCharacter = true;
-          }
+        // check if this is a newline character
+        boolean isNewlineChar = (cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString));
+        // determine if this is a leading or trailing newline at beginning or end of document
+        boolean isLeadingOrTrailingNewline = (offset < firstNonNewlineOffset || offset > lastNonNewlineOffset);
+        // determine if this is an isolated newline in the middle of the document
+        boolean isSingleNewlineInMiddle = false;
+        int nextOffset = offset + cpCharCount;
+        if (isNewlineChar && (prevOffset > -1) && (nextOffset < length)) {
+          int prevCodePoint = origText.codePointAt(prevOffset);
+          int prevCPCharCount = Character.charCount(prevCodePoint);
+          String prevCharString = origText.substring(prevOffset, prevOffset + prevCPCharCount);
+          int nextCodePoint = origText.codePointAt(nextOffset);
+          int nextCPCharCount = Character.charCount(nextCodePoint);
+          String nextCharString =
+              origText.substring(nextOffset, nextOffset + nextCPCharCount);
+          if (!(prevCodePoint == '\n' || prevCodePoint == '\r' || System.lineSeparator().contains(prevCharString))
+              && !(nextCodePoint == '\n' || nextCodePoint == '\r' || System.lineSeparator().contains(nextCharString)))
+            isSingleNewlineInMiddle = true;
         }
+        // don't skip if tokenizing newlines and this is a newline character
+        skipCharacter = !(tokenizeNewline && isNewlineChar);
+        // ...unless leading or trailing newlines (always skip these)
+        if (isLeadingOrTrailingNewline)
+          skipCharacter = true;
+        // ...skip single newlines in the middle of document if splitting on two newlines
+        if (sentenceSplitOnTwoNewlines && isSingleNewlineInMiddle)
+          skipCharacter = true;
       }
       if ( ! skipCharacter) {
         // if this character is a normal character, put it in as a CoreLabel and set seg to false for next word
@@ -230,13 +260,15 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         charTokens.add(wi);
         seg = false;
       }
+      // store this offset as the previous offset as we continue the loop
+      prevOffset = offset;
     } // for loop through charPoints
 
     annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, charTokens);
   }
 
   /** Move the pos pointer to point into sentChars after passing w.
-   *  This is a bit subtle, because there can be multi-char codepoints in sentChars eleements.
+   *  This is a bit subtle, because there can be multi-char codepoints in sentChars elements.
    *
    *  @return The position of the next thing in sentChars to look at
    */
@@ -272,6 +304,9 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       text = text.replaceAll("[\r\n]", "");
       words = segmenter.segmentString(text);
     } else {
+      // remove leading and trailing newlines
+      text = text.replaceAll("^[\\r\\n]+", "");
+      text = text.replaceAll("[\\r\\n]+$", "");
       // if using the sentence split on two newlines option, replace single newlines
       // single newlines should be ignored for segmenting
       if (sentenceSplitOnTwoNewlines) {
