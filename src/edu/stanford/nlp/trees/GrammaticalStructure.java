@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Serializable;
@@ -1054,30 +1055,32 @@ public abstract class GrammaticalStructure implements Serializable  {
    * @throws IOException
    */
   public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName, Map<String, GrammaticalRelation> shortNameToGRel, GrammaticalStructureFromDependenciesFactory factory) throws IOException {
-    LineNumberReader reader = new LineNumberReader(IOUtils.readerFromString(fileName));
-    List<GrammaticalStructure> gsList = new LinkedList<>();
+    try (BufferedReader r = IOUtils.readerFromString(fileName)) {
+      LineNumberReader reader = new LineNumberReader(r);
+      List<GrammaticalStructure> gsList = new LinkedList<>();
 
-    List<List<String>> tokenFields = new ArrayList<>();
+      List<List<String>> tokenFields = new ArrayList<>();
 
-    for (String inline = reader.readLine(); inline != null;
-         inline = reader.readLine()) {
-      if ( ! inline.isEmpty()) {
-        // read in a single sentence token by token
-        List<String> fields = Arrays.asList(inline.split("\t"));
-        if (fields.size() != CoNLLX_FieldCount) {
-          throw new RuntimeException(String.format("Error (line %d): 10 fields expected but %d are present", reader.getLineNumber(), fields.size()));
+      for (String inline = reader.readLine(); inline != null;
+           inline = reader.readLine()) {
+        if (!inline.isEmpty()) {
+          // read in a single sentence token by token
+          List<String> fields = Arrays.asList(inline.split("\t"));
+          if (fields.size() != CoNLLX_FieldCount) {
+            throw new RuntimeException(String.format("Error (line %d): 10 fields expected but %d are present", reader.getLineNumber(), fields.size()));
+          }
+          tokenFields.add(fields);
+        } else {
+          if (tokenFields.isEmpty())
+            continue; // skip excess empty lines
+
+          gsList.add(buildCoNLLXGrammaticalStructure(tokenFields, shortNameToGRel, factory));
+          tokenFields = new ArrayList<>();
         }
-        tokenFields.add(fields);
-      } else {
-        if (tokenFields.isEmpty())
-          continue; // skip excess empty lines
-
-        gsList.add(buildCoNLLXGrammaticalStructure(tokenFields, shortNameToGRel, factory));
-        tokenFields = new ArrayList<>();
       }
-    }
 
-    return gsList;
+      return gsList;
+    }
   }
 
   public static GrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields,

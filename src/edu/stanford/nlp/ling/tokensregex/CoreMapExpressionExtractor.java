@@ -284,13 +284,11 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   public static <M extends MatchedExpression> CoreMapExpressionExtractor<M> createExtractorFromFiles(Env env, List<String> filenames) throws RuntimeException {
     CoreMapExpressionExtractor<M> extractor = new CoreMapExpressionExtractor<>(env);
     for (String filename:filenames) {
-      try {
+      try (BufferedReader br = IOUtils.readerFromString(filename)) {
         if (verbose)
           log.info("Reading TokensRegex rules from " + filename);
-        BufferedReader br = IOUtils.readerFromString(filename);
         TokenSequenceParser parser = new TokenSequenceParser();
         parser.updateExpressionExtractor(extractor, br);
-        IOUtils.closeIgnoringExceptions(br);
       } catch (Exception ex) {
         throw new RuntimeException("Error parsing file: " + filename, ex);
       }

@@ -519,11 +519,10 @@ public class DependencyParser  {
 
   private void loadModelFile(String modelFile, boolean verbose) {
     Timing t = new Timing();
-    try {
+    try (BufferedReader input = IOUtils.readerFromString(modelFile)) {
 
       log.info("Loading depparse model: " + modelFile + " ... ");
       String s;
-      BufferedReader input = IOUtils.readerFromString(modelFile);
 
       // first line in newer saved models is language, legacy models don't store this
       s = input.readLine();
@@ -620,7 +619,6 @@ public class DependencyParser  {
         }
       }
 
-      input.close();
       config.hiddenSize = hSize;
       config.embeddingSize = eSize;
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
@@ -640,9 +638,7 @@ public class DependencyParser  {
 
     double[][] embeddings = null;
     if (embedFile != null) {
-      BufferedReader input = null;
-      try {
-        input = IOUtils.readerFromString(embedFile);
+      try (BufferedReader input = IOUtils.readerFromString(embedFile)) {
         List<String> lines = new ArrayList<>();
         for (String s; (s = input.readLine()) != null; ) {
           lines.add(s);
@@ -666,8 +662,6 @@ public class DependencyParser  {
         }
       } catch (IOException e) {
         throw new RuntimeIOException(e);
-      } finally {
-        IOUtils.closeIgnoringExceptions(input);
       }
       embeddings = Util.scaling(embeddings, 0, 1.0);
     }
@@ -846,10 +840,9 @@ public class DependencyParser  {
     log.info("Found embeddings: " + foundEmbed + " / " + knownWords.size());
 
     if (preModel != null) {
-        try {
+        try (BufferedReader input = IOUtils.readerFromString(preModel)) {
           log.info("Loading pre-trained model file: " + preModel + " ... ");
           String s;
-          BufferedReader input = IOUtils.readerFromString(preModel);
 
           s = input.readLine();
           int nDict = Integer.parseInt(s.substring(s.indexOf('=') + 1));
@@ -927,7 +920,6 @@ public class DependencyParser  {
                   W2[i][j] = Double.parseDouble(splits[i]);
               }
           }
-          input.close();
         } catch (IOException e) {
           throw new RuntimeIOException(e);
         }

@@ -322,12 +322,12 @@ public class Dictionaries  {
     if(filename==null) {
       return ;
     }
-    BufferedReader reader = IOUtils.readerFromString(filename);
-    while(reader.ready()) {
-      if(lowercase) resultSet.add(reader.readLine().toLowerCase());
-      else resultSet.add(reader.readLine());
+    try (BufferedReader reader = IOUtils.readerFromString(filename)) {
+      while(reader.ready()) {
+        if(lowercase) resultSet.add(reader.readLine().toLowerCase());
+        else resultSet.add(reader.readLine());
+      }
     }
-    IOUtils.closeIgnoringExceptions(reader);
   }
 
   private void loadAnimacyLists(String animateWordsFile, String inanimateWordsFile) {
@@ -366,8 +366,7 @@ public class Dictionaries  {
   }
 
   private void loadCountriesLists(String file) {
-    try{
-      BufferedReader reader = IOUtils.readerFromString(file);
+    try (BufferedReader reader = IOUtils.readerFromString(file)) {
       for (String line; (line = reader.readLine()) != null; ) {
         countries.add(line.split("\t")[1].toLowerCase());
       }
@@ -401,9 +400,8 @@ public class Dictionaries  {
    *
    */
   private void loadGenderNumber(String file, String neutralWordsFile) {
-    try {
+    try (BufferedReader reader = IOUtils.readerFromString(file)) {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
-      BufferedReader reader = IOUtils.readerFromString(file);
       String[] split = new String[2];
       String[] countStr = new String[3];
       for (String line; (line = reader.readLine()) != null; ) {
@@ -432,7 +430,6 @@ public class Dictionaries  {
 
         genderNumber.put(tokens, gender);
       }
-      reader.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }

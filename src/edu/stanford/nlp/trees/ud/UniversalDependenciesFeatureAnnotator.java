@@ -58,22 +58,23 @@ public class UniversalDependenciesFeatureAnnotator  {
 
 
   private void loadFeatureMap() throws IOException {
-    Reader r = IOUtils.readerFromString(FEATURE_MAP_FILE);
-    BufferedReader br = new BufferedReader(r);
+    try (Reader r = IOUtils.readerFromString(FEATURE_MAP_FILE)) {
+      BufferedReader br = new BufferedReader(r);
 
-    posFeatureMap = new HashMap<>();
-    wordPosFeatureMap = new HashMap<>();
+      posFeatureMap = new HashMap<>();
+      wordPosFeatureMap = new HashMap<>();
 
-    String line;
-    while ((line = br.readLine()) != null) {
-      String[] parts = line.split("\\s+");
+      String line;
+      while ((line = br.readLine()) != null) {
+        String[] parts = line.split("\\s+");
 
-      if (parts.length < 3) continue;
+        if (parts.length < 3) continue;
 
-      if (parts[0].equals("*")) {
-        posFeatureMap.put(parts[1], CoNLLUUtils.parseFeatures(parts[2]));
-      } else {
-        wordPosFeatureMap.put(parts[0] + '_' + parts[1], CoNLLUUtils.parseFeatures(parts[2]));
+        if (parts[0].equals("*")) {
+          posFeatureMap.put(parts[1], CoNLLUUtils.parseFeatures(parts[2]));
+        } else {
+          wordPosFeatureMap.put(parts[0] + '_' + parts[1], CoNLLUUtils.parseFeatures(parts[2]));
+        }
       }
     }
   }

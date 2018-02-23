@@ -43,57 +43,57 @@ public class NaturalLogicWeights {
 
     String line;
     // Simple PP attachments
-    BufferedReader ppReader = IOUtils.readerFromString(affinityModels + "/pp.tab.gz", "utf8");
-    while ( (line = ppReader.readLine()) != null) {
-      String[] fields = line.split("\t");
-      Pair<String, String> key = Pair.makePair(fields[0].intern(), fields[1].intern());
-      verbPPAffinity.put(key, Double.parseDouble(fields[2]));
+    try (BufferedReader ppReader = IOUtils.readerFromString(affinityModels + "/pp.tab.gz", "utf8")) {
+      while ((line = ppReader.readLine()) != null) {
+        String[] fields = line.split("\t");
+        Pair<String, String> key = Pair.makePair(fields[0].intern(), fields[1].intern());
+        verbPPAffinity.put(key, Double.parseDouble(fields[2]));
+      }
     }
-    ppReader.close();
 
     // Subj PP attachments
-    BufferedReader subjPPReader = IOUtils.readerFromString(affinityModels + "/subj_pp.tab.gz", "utf8");
-    while ( (line = subjPPReader.readLine()) != null) {
-      String[] fields = line.split("\t");
-      Triple<String, String, String> key = Triple.makeTriple(fields[0].intern(), fields[1].intern(), fields[2].intern());
-      verbSubjPPAffinity.put(key, Double.parseDouble(fields[3]));
+    try (BufferedReader subjPPReader = IOUtils.readerFromString(affinityModels + "/subj_pp.tab.gz", "utf8")) {
+      while ((line = subjPPReader.readLine()) != null) {
+        String[] fields = line.split("\t");
+        Triple<String, String, String> key = Triple.makeTriple(fields[0].intern(), fields[1].intern(), fields[2].intern());
+        verbSubjPPAffinity.put(key, Double.parseDouble(fields[3]));
+      }
     }
-    subjPPReader.close();
 
     // Subj Obj PP attachments
-    BufferedReader subjObjPPReader = IOUtils.readerFromString(affinityModels + "/subj_obj_pp.tab.gz", "utf8");
-    while ( (line = subjObjPPReader.readLine()) != null) {
-      String[] fields = line.split("\t");
-      Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
-      verbSubjObjPPAffinity.put(key, Double.parseDouble(fields[4]));
+    try (BufferedReader subjObjPPReader = IOUtils.readerFromString(affinityModels + "/subj_obj_pp.tab.gz", "utf8")) {
+      while ((line = subjObjPPReader.readLine()) != null) {
+        String[] fields = line.split("\t");
+        Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
+        verbSubjObjPPAffinity.put(key, Double.parseDouble(fields[4]));
+      }
     }
-    subjObjPPReader.close();
 
     // Subj PP PP attachments
-    BufferedReader subjPPPPReader = IOUtils.readerFromString(affinityModels + "/subj_pp_pp.tab.gz", "utf8");
-    while ( (line = subjPPPPReader.readLine()) != null) {
-      String[] fields = line.split("\t");
-      Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
-      verbSubjPPPPAffinity.put(key, Double.parseDouble(fields[4]));
+    try (BufferedReader subjPPPPReader = IOUtils.readerFromString(affinityModels + "/subj_pp_pp.tab.gz", "utf8")) {
+      while ((line = subjPPPPReader.readLine()) != null) {
+        String[] fields = line.split("\t");
+        Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
+        verbSubjPPPPAffinity.put(key, Double.parseDouble(fields[4]));
+      }
     }
-    subjPPPPReader.close();
 
     // Subj PP PP attachments
-    BufferedReader subjPPObjReader = IOUtils.readerFromString(affinityModels + "/subj_pp_obj.tab.gz", "utf8");
-    while ( (line = subjPPObjReader.readLine()) != null) {
-      String[] fields = line.split("\t");
-      Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
-      verbSubjPPObjAffinity.put(key, Double.parseDouble(fields[4]));
+    try (BufferedReader subjPPObjReader = IOUtils.readerFromString(affinityModels + "/subj_pp_obj.tab.gz", "utf8")) {
+      while ((line = subjPPObjReader.readLine()) != null) {
+        String[] fields = line.split("\t");
+        Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
+        verbSubjPPObjAffinity.put(key, Double.parseDouble(fields[4]));
+      }
     }
-    subjPPObjReader.close();
 
     // Subj PP PP attachments
-    BufferedReader objReader = IOUtils.readerFromString(affinityModels + "/obj.tab.gz", "utf8");
-    while ( (line = objReader.readLine()) != null) {
-      String[] fields = line.split("\t");
-      verbObjAffinity.put(fields[0], Double.parseDouble(fields[1]));
+    try (BufferedReader objReader = IOUtils.readerFromString(affinityModels + "/obj.tab.gz", "utf8")) {
+      while ((line = objReader.readLine()) != null) {
+        String[] fields = line.split("\t");
+        verbObjAffinity.put(fields[0], Double.parseDouble(fields[1]));
+      }
     }
-    objReader.close();
   }
 
   public double deletionProbability(String edgeType) {

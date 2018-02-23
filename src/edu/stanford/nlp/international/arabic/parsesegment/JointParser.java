@@ -84,19 +84,21 @@ public final class JointParser  {
     //WSGDEBUG -- Some stuff for eclipse debugging
     InputStream inputStream = null;
     try {
-      if(System.getProperty("eclipse") == null)
+      if(System.getProperty("eclipse") == null) {
         inputStream = (SER_INPUT) ? new ObjectInputStream(new GZIPInputStream(System.in)) : System.in;
-      else {
+      } else {
         FileInputStream fileStream = new FileInputStream(new File("debug.2.xml"));
         inputStream = (SER_INPUT) ? new ObjectInputStream(new GZIPInputStream(fileStream)) : fileStream;
       }
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-      System.exit(-1);
-
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(-1);
+    } finally {
+      if (inputStream != null) {
+        try {
+          inputStream.close();
+        } catch (IOException ignored) {}
+      }
     }
 
     if(!trainTreebank.exists())

@@ -139,9 +139,7 @@ public class Util  {
   {
     CoreLabelTokenFactory tf = new CoreLabelTokenFactory(false);
 
-    BufferedReader reader = null;
-    try {
-      reader = IOUtils.readerFromString(inFile);
+    try (BufferedReader reader = IOUtils.readerFromString(inFile)) {
 
       List<CoreLabel> sentenceTokens = new ArrayList<>();
       DependencyTree tree = new DependencyTree();
@@ -183,8 +181,6 @@ public class Util  {
       }
     } catch (IOException e) {
       throw new RuntimeIOException(e);
-    } finally {
-      IOUtils.closeIgnoringExceptions(reader);
     }
   }
 

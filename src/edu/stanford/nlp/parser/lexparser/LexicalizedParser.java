@@ -538,9 +538,8 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   }
 
   protected static LexicalizedParser getParserFromTextFile(String textFileOrUrl, Options op) {
-    try {
+    try (BufferedReader in = IOUtils.readerFromString(textFileOrUrl)) {
       Timing tim = new Timing();
-      BufferedReader in = IOUtils.readerFromString(textFileOrUrl);
       Timing.startTime();
 
       String line = in.readLine();
@@ -584,7 +583,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       DependencyGrammar dg = new MLEDependencyGrammar(op.tlpParams, op.directional, op.distance, op.coarseDistance, op.trainOptions.basicCategoryTagsInDependencyGrammar, op, wordIndex, tagIndex);
       dg.readData(in);
 
-      in.close();
       log.info("Loading parser from text file " + textFileOrUrl + " ... done [" + tim.toSecondsString() + " sec].");
       return new LexicalizedParser(lex, bg, ug, dg, stateIndex, wordIndex, tagIndex, op);
     } catch (IOException e) {

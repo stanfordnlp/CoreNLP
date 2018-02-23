@@ -145,11 +145,9 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
         name = props.getProperty("dump");
       }
       if (name != null) {
-        try {
+        try (DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name))) {
           log.info("Loading default properties from tagger " + name);
-          DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name));
           this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
-          in.close();
         } catch (Exception e) {
           throw new RuntimeIOException("No such trained tagger config file found: " + name);
         }

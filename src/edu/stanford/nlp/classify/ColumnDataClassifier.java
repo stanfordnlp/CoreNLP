@@ -1537,9 +1537,7 @@ public class ColumnDataClassifier  {
   private static Map<String, float[]> loadWordVectors(String filename) {
     Timing timing = new Timing();
     Map<String,float[]> map = new HashMap<>(10000); // presumably they'll load a fair-sized vocab!?
-    BufferedReader br = null;
-    try {
-      br = IOUtils.readerFromString(filename);
+    try (BufferedReader br = IOUtils.readerFromString(filename)) {
       int numDimensions = -1;
       boolean warned = false;
       for (String line; (line = br.readLine()) != null; ) {
@@ -1561,8 +1559,6 @@ public class ColumnDataClassifier  {
       }
     } catch (IOException ioe) {
       throw new RuntimeIOException("Couldn't load word vectors", ioe);
-    } finally {
-      IOUtils.closeIgnoringExceptions(br);
     }
     timing.done("Loading word vectors from " + filename + " ... ");
     return map;
