@@ -153,8 +153,7 @@ public class TrueCaseAnnotator implements Annotator  {
 
   private static Map<String,String> loadMixedCaseMap(String mapFile) {
     Map<String,String> map = Generics.newHashMap();
-    try {
-      BufferedReader br = IOUtils.readerFromString(mapFile);
+    try (BufferedReader br = IOUtils.readerFromString(mapFile)) {
       for (String line : ObjectBank.getLineIterator(br)) {
         line = line.trim();
         String[] els = line.split("\\s+");
@@ -163,7 +162,6 @@ public class TrueCaseAnnotator implements Annotator  {
         }
         map.put(els[0], els[1]);
       }
-      br.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }

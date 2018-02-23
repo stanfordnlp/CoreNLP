@@ -2314,9 +2314,9 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       if (flags.gazettes == null) { flags.gazettes = new ArrayList<>(); }
       List<String> gazettes = flags.gazettes;
       for (String gazetteFile : gazettes) {
-        BufferedReader r = IOUtils.readerFromString(gazetteFile, flags.inputEncoding);
-        readGazette(r);
-        r.close();
+        try (BufferedReader r = IOUtils.readerFromString(gazetteFile, flags.inputEncoding)) {
+          readGazette(r);
+        }
       }
     } catch (IOException e) {
       throw new RuntimeIOException(e);

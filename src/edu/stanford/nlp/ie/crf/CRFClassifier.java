@@ -2325,10 +2325,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       ClassNotFoundException, InstantiationException, IllegalAccessException {
     // log.info("DEBUG: in loadTextClassifier");
     log.info("Loading Text Classifier from " + text);
-    try {
-      BufferedReader br = IOUtils.readerFromString(text);
+    try (BufferedReader br = IOUtils.readerFromString(text)) {
       loadTextClassifier(br);
-      br.close();
     } catch (Exception ex) {
       log.info("Exception in loading text classifier from " + text, ex);
     }
@@ -2710,8 +2708,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     String[] matrixLines = new String[matrixSize];
     String[] subMatrixLines = new String[matrixSize];
-    try {
-      BufferedReader br = IOUtils.readerFromString(fileName);
+    try (BufferedReader br = IOUtils.readerFromString(fileName)) {
       int lineCount = 0;
       for (String line; (line = br.readLine()) != null; ) {
         line = line.trim();
@@ -2782,33 +2779,34 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    */
   private void readEmbeddingsData() throws IOException {
     System.err.printf("Reading embedding files %s and %s.%n", flags.embeddingWords, flags.embeddingVectors);
-    BufferedReader br = IOUtils.readerFromString(flags.embeddingWords);
-
     List<String> wordList = new ArrayList<>();
-    for (String line ; (line = br.readLine()) != null; ) {
-      wordList.add(line.trim());
+    try (BufferedReader br = IOUtils.readerFromString(flags.embeddingWords)) {
+
+      for (String line; (line = br.readLine()) != null; ) {
+        wordList.add(line.trim());
+      }
+      log.info("Found a dictionary of size " + wordList.size());
     }
-    log.info("Found a dictionary of size " + wordList.size());
-    br.close();
 
     embeddings = Generics.newHashMap();
     int count = 0;
     int vectorSize = -1;
     boolean warned = false;
-    br = IOUtils.readerFromString(flags.embeddingVectors);
-    for (String line ; (line = br.readLine()) != null; ) {
-      double[] vector = ArrayUtils.toDoubleArray(line.trim().split(" "));
-      if (vectorSize < 0) {
-        vectorSize = vector.length;
-      } else {
-        if (vectorSize != vector.length && ! warned) {
-          log.info("Inconsistent vector lengths: " + vectorSize + " vs. " + vector.length);
-          warned = true;
+    try (BufferedReader br = IOUtils.readerFromString(flags.embeddingVectors)) {
+      for (String line; (line = br.readLine()) != null; ) {
+        double[] vector = ArrayUtils.toDoubleArray(line.trim().split(" "));
+        if (vectorSize < 0) {
+          vectorSize = vector.length;
+        } else {
+          if (vectorSize != vector.length && !warned) {
+            log.info("Inconsistent vector lengths: " + vectorSize + " vs. " + vector.length);
+            warned = true;
+          }
         }
+        embeddings.put(wordList.get(count++), vector);
       }
-      embeddings.put(wordList.get(count++), vector);
+      log.info("Found " + count + " matching embeddings of dimension " + vectorSize);
     }
-    log.info("Found " + count + " matching embeddings of dimension " + vectorSize);
   }
 
   @Override

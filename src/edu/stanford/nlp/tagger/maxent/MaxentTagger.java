@@ -793,8 +793,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    *  @throws RuntimeIOException if I/O errors or serialization errors
    */
   protected void readModelAndInit(Properties config, String modelFileOrUrl, boolean printLoading) {
-    try {
-      readModelAndInit(config, IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(modelFileOrUrl), printLoading);
+    try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(modelFileOrUrl)) {
+      readModelAndInit(config, is, printLoading);
     } catch (IOException e) {
       throw new RuntimeIOException("Error while loading a tagger model (probably missing model file)", e);
     }

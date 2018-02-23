@@ -6,6 +6,7 @@ import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.Lazy;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
@@ -30,8 +31,8 @@ public class ChineseDocument extends Document {
    * The empty {@link java.util.Properties} object, for use with creating default annotators.
    */
   static final Properties EMPTY_PROPS = new Properties() {{
-    try {
-      load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-chinese.properties"));
+    try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-chinese.properties")){
+      load(is);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }

@@ -510,16 +510,16 @@ public class HTKLatticeReader  {
     this.PRETTYPRINT = prettyPrint;
     this.mergeType = mergeType;
 
-    BufferedReader in = IOUtils.readerFromString(filename);
-    //log.info(-1);
-    readInput(in);
-    //log.info(0);
-    if (PRETTYPRINT) {
-      printWords();
+    try (BufferedReader in = IOUtils.readerFromString(filename)) {
+      //log.info(-1);
+      readInput(in);
+      //log.info(0);
+      if (PRETTYPRINT) {
+        printWords();
+      }
+
+      processLattice();
     }
-
-    processLattice();
-
   }
 
   public List<HTKLatticeReader.LatticeWord> getLatticeWords() {

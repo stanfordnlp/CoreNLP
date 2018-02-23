@@ -364,12 +364,13 @@ public class IOUtils  {
   }
 
   public static int lineCount(String textFileOrUrl) throws IOException {
-    BufferedReader r = readerFromString(textFileOrUrl);
-    int numLines = 0;
-    while (r.readLine() != null) {
-      numLines++;
+    try (BufferedReader r = readerFromString(textFileOrUrl)) {
+      int numLines = 0;
+      while (r.readLine() != null) {
+        numLines++;
+      }
+      return numLines;
     }
-    return numLines;
   }
 
   public static ObjectOutputStream writeStreamFromString(String serializePath)
@@ -1326,9 +1327,8 @@ public class IOUtils  {
    */
   public static String slurpReader(Reader reader) {
     StringBuilder buff = new StringBuilder();
-    try {
+    try (BufferedReader r = new BufferedReader(reader)) {
       char[] chars = new char[SLURP_BUFFER_SIZE];
-      BufferedReader r = new BufferedReader(reader);
       while (true) {
         int amountRead = r.read(chars, 0, SLURP_BUFFER_SIZE);
         if (amountRead < 0) {
@@ -1336,7 +1336,6 @@ public class IOUtils  {
         }
         buff.append(chars, 0, amountRead);
       }
-      r.close();
     } catch (Exception e) {
       throw new RuntimeIOException("slurpReader IO problem", e);
     }

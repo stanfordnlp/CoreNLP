@@ -42,8 +42,7 @@ public enum VerbTense {
    */
   private static final Lazy<Map<String, String[]>> ENGLISH_TENSES = Lazy.of(() -> {
     Map<String, String[]> tenseMap = new HashMap<>();
-    try {
-      BufferedReader reader = IOUtils.readerFromString("edu/stanford/nlp/models/naturalli/conjugations_english.tab");
+    try (BufferedReader reader = IOUtils.readerFromString("edu/stanford/nlp/models/naturalli/conjugations_english.tab")) {
       String line;
       while ( (line = reader.readLine()) != null) {
         String[] fields = StringUtils.splitOnChar(line, '\t');

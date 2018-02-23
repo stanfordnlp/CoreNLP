@@ -231,5 +231,7 @@ public class WordToSentenceProcessorTest extends TestCase {
         "Hello", "World.");
     checkResult(wts, "Hello.\u2029World.",
         "Hello.", "World.");
+    checkResult(wts, "Hello  \u2029World.",
+        "Hello", "World.");
   }
 }

@@ -386,10 +386,9 @@ public class StanfordCoreNLPServer implements Runnable {
     if (language != null && !"default".equals(language)) {
       String languagePropertiesFile = LanguageInfo.getLanguagePropertiesFile(language);
       if (languagePropertiesFile != null) {
-        try {
+        try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(languagePropertiesFile)){
           Properties languageSpecificProperties = new Properties();
-          languageSpecificProperties.load(
-                  IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(languagePropertiesFile));
+          languageSpecificProperties.load(is);
           PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
         } catch (IOException e) {
           err("Failure to load language specific properties: " + languagePropertiesFile + " for " + language);
@@ -618,7 +617,9 @@ public class StanfordCoreNLPServer implements Runnable {
       this(fileOrClasspath, "text/html");
     }
     public FileHandler(String fileOrClasspath, String contentType) throws IOException {
-      this.content = IOUtils.slurpReader(IOUtils.readerFromString(fileOrClasspath, "utf-8"));
+      try (BufferedReader r = IOUtils.readerFromString(fileOrClasspath, "utf-8")) {
+        this.content = IOUtils.slurpReader(r);
+      }
       this.contentType = contentType + "; charset=utf-8";  // always encode in utf-8
     }
     @Override
@@ -1176,10 +1177,10 @@ public class StanfordCoreNLPServer implements Runnable {
 
   private static HttpsServer addSSLContext(HttpsServer server) {
     log("Adding SSL context to server; key=" + StanfordCoreNLPServer.key);
-    try {
+    try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(key)) {
       KeyStore ks = KeyStore.getInstance("JKS");
       if (StanfordCoreNLPServer.key != null && IOUtils.existsInClasspathOrFileSystem(StanfordCoreNLPServer.key)) {
-        ks.load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(key), "corenlp".toCharArray());
+        ks.load(is, "corenlp".toCharArray());
       } else {
         throw new IllegalArgumentException("Could not find SSL keystore at " + StanfordCoreNLPServer.key);
       }
