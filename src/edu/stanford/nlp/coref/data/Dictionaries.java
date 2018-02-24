@@ -1,6 +1,4 @@
 package edu.stanford.nlp.coref.data;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,16 +22,20 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
+
 
 /**
  * Stores various data used for coreference.
  * TODO: get rid of dependence on HybridCorefProperties
+ *
  * @author Heeyoung Lee
  */
 public class Dictionaries  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Dictionaries.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Dictionaries.class);
 
   public enum MentionType {
     PRONOMINAL(1), NOMINAL(3), PROPER(4), LIST(2);
@@ -370,11 +372,11 @@ public class Dictionaries  {
       for (String line; (line = reader.readLine()) != null; ) {
         countries.add(line.split("\t")[1].toLowerCase());
       }
-      reader.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
   }
+
   /**
    * Load Bergsma and Lin (2006) gender and number list.
    * <br>
@@ -395,6 +397,7 @@ public class Dictionaries  {
     }
   }
 */
+
   /**
    * Load Bergsma and Lin (2006) gender and number list.
    *
