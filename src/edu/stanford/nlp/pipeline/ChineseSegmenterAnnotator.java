@@ -161,7 +161,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       xmlEndOffset = m.end();
     }
 
-    // determine leading and trailing newlines
+    // determine boundaries of leading and trailing newlines, carriage returns
     int firstNonNewlineOffset = -1;
     int lastNonNewlineOffset = length;
     for (int offset = 0, cpCharCount; offset < length; offset += cpCharCount) {
@@ -176,7 +176,9 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     }
 
     // keep track of previous offset while looping through characters
-    int prevOffset = -1;
+    LinkedList<Boolean> isNewlineQueue = new LinkedList<>();
+    isNewlineQueue.addAll(Arrays.asList(false));
+
     // loop through characters
     for (int offset = 0, cpCharCount; offset < length; offset += cpCharCount) {
       int cp = origText.codePointAt(offset);
@@ -192,6 +194,20 @@ public class ChineseSegmenterAnnotator implements Annotator  {
           xmlEndOffset = m.end();
         }
       }
+
+      // need to add the first char into the newline queue
+      if (offset == 0)
+        isNewlineQueue.add(cp == '\n');
+
+      // check next char, or add false if no next char
+      int nextOffset = offset + cpCharCount;
+      if (nextOffset < origText.length()) {
+        int nextCodePoint = origText.codePointAt(nextOffset);
+        isNewlineQueue.add(nextCodePoint == '\n');
+      } else {
+        isNewlineQueue.add(false);
+      }
+
       boolean skipCharacter = false;
       boolean isXMLCharacter = false;
       // first two cases are for XML region
@@ -207,26 +223,16 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         // Don't skip newline characters if we're tokenizing them
         // We always count \n as newline to be consistent with the implementation of ssplit
         // check if this is a newline character
-        boolean isNewlineChar = (cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString));
+        boolean prevIsNewline = isNewlineQueue.get(0);
+        boolean currIsNewline = isNewlineQueue.get(1);
+        boolean nextIsNewline = isNewlineQueue.get(2);
         // determine if this is a leading or trailing newline at beginning or end of document
         boolean isLeadingOrTrailingNewline = (offset < firstNonNewlineOffset || offset > lastNonNewlineOffset);
         // determine if this is an isolated newline in the middle of the document
-        boolean isSingleNewlineInMiddle = false;
-        int nextOffset = offset + cpCharCount;
-        if (isNewlineChar && (prevOffset > -1) && (nextOffset < length)) {
-          int prevCodePoint = origText.codePointAt(prevOffset);
-          int prevCPCharCount = Character.charCount(prevCodePoint);
-          String prevCharString = origText.substring(prevOffset, prevOffset + prevCPCharCount);
-          int nextCodePoint = origText.codePointAt(nextOffset);
-          int nextCPCharCount = Character.charCount(nextCodePoint);
-          String nextCharString =
-              origText.substring(nextOffset, nextOffset + nextCPCharCount);
-          if (!(prevCodePoint == '\n' || prevCodePoint == '\r' || System.lineSeparator().contains(prevCharString))
-              && !(nextCodePoint == '\n' || nextCodePoint == '\r' || System.lineSeparator().contains(nextCharString)))
-            isSingleNewlineInMiddle = true;
-        }
+        boolean isSingleNewlineInMiddle =
+            (currIsNewline && (!prevIsNewline && !nextIsNewline));
         // don't skip if tokenizing newlines and this is a newline character
-        skipCharacter = !(tokenizeNewline && isNewlineChar);
+        skipCharacter = !(tokenizeNewline && currIsNewline);
         // ...unless leading or trailing newlines (always skip these)
         if (isLeadingOrTrailingNewline)
           skipCharacter = true;
@@ -260,8 +266,9 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         charTokens.add(wi);
         seg = false;
       }
-      // store this offset as the previous offset as we continue the loop
-      prevOffset = offset;
+      // drop oldest element from isNewline queue
+      isNewlineQueue.poll();
+
     } // for loop through charPoints
 
     annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, charTokens);
@@ -311,7 +318,11 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       // single newlines should be ignored for segmenting
       if (sentenceSplitOnTwoNewlines) {
         text = text.replaceAll("([^\\n])\\r?\\n([^\\r\\n])", "$1$2");
+        // do a second pass to handle corner case of consecutive isolated newlines
+        // x \n x \n x
+        text = text.replaceAll("([^\\n])\\r?\\n([^\\r\\n])", "$1$2");
       }
+
       // Run the segmenter on each line so that we don't get tokens that cross line boundaries
       // Neat trick to keep delimiters from: http://stackoverflow.com/a/2206432
       String[] lines = text.split(String.format("((?<=%1$s)|(?=%1$s))", separator));
