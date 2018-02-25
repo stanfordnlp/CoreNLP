@@ -483,7 +483,8 @@ public abstract class CorefMentionFinder  {
       headPos = m.endIndex - 1;
     }
     if (sent.get(headPos).originalText().equals("自己") && m.endIndex != m.startIndex && headPos > m.startIndex) {
-      headPos--;
+      if (!sent.get(headPos-1).tag().equals("PU"))
+        headPos--;
     }
     m.headIndex = headPos;
     m.headWord = sent.get(headPos);
