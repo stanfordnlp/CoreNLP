@@ -1,27 +1,35 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
  * Copyright:    Copyright (c) Kristina Toutanova<p>
  * Company:      Stanford University<p>
- * @author Kristina Toutanova
- * @version 1.0
  */
 
 package edu.stanford.nlp.maxent;
 
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 
 /**
- * An ArrayList of Feature
+ * An ArrayList of Feature.
+ *
+ * @author Kristina Toutanova
+ * @version 1.0
  */
 public class Features {
+
+  // todo [cdm 2018]: Probably this class can just be removed! Use ArrayList
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Features.class);
+
   private ArrayList<Feature> f = new ArrayList<>();
-  private static int maxValue = 11000000;
+  private static final int maxValue = 11000000;
 
   public Features() {
   }
@@ -67,9 +75,7 @@ public class Features {
 
     Exception e1 = new Exception("Incorrect data file format!");
     Index<IntPair> instanceIndex = domain.createIndex();
-    try {
-
-      BufferedReader in = new BufferedReader(new FileReader(filename));
+    try (BufferedReader in = new BufferedReader(new FileReader(filename))) {
       String s;
       while (true) {
         s = in.readLine();
@@ -135,7 +141,7 @@ public class Features {
       }// for f
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.warn(e);
     }
   }
 
