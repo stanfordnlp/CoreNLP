@@ -240,8 +240,7 @@ public class ArgumentParser  {
       } else //noinspection StatementWithEmptyBody
         if (!isIgnored(entry)) {
         // --Case: Jar
-        try {
-          JarFile jar = new JarFile(f);
+        try (JarFile jar = new JarFile(f)) {
           Enumeration<JarEntry> e = jar.entries();
           while (e.hasMoreElements()) {
             //(for each jar file element)
