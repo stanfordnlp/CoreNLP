@@ -9,8 +9,10 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.TypesafeMap;
 import edu.stanford.nlp.patterns.surface.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import javax.json.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -18,26 +20,25 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
 
 /**
  * Created by sonalg on 3/10/15.
  */
 public class TextAnnotationPatterns {
 
-
-  Map<String, Class<? extends TypesafeMap.Key<String>>> humanLabelClasses = new HashMap<>();
-  Map<String, Class<? extends TypesafeMap.Key<String>>> machineAnswerClasses = new HashMap<>();
+  private Map<String, Class<? extends TypesafeMap.Key<String>>> humanLabelClasses = new HashMap<>();
+  private Map<String, Class<? extends TypesafeMap.Key<String>>> machineAnswerClasses = new HashMap<>();
   Properties props;
-  String outputFile;
+  private String outputFile;
 
   Counter<String> matchedSeedWords;
 
-  Map<String, Set<CandidatePhrase>> seedWords = new HashMap<>();
+  private Map<String, Set<CandidatePhrase>> seedWords = new HashMap<>();
   private String backgroundSymbol ="O";
 
   //Properties testProps = new Properties();
-  Logger logger = Logger.getAnonymousLogger();
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(TextAnnotationPatterns.class);
 
   public TextAnnotationPatterns() throws IOException {
 //    if(testPropertiesFile!= null && new File(testPropertiesFile).exists()){
@@ -322,7 +323,7 @@ public class TextAnnotationPatterns {
         JsonArray tokenArry = obj4label.getJsonArray(sentid);
         for(JsonValue tokenid: tokenArry){
           tokensNum ++;
-          Data.sents.get(sentid).getTokens().get(Integer.valueOf(tokenid.toString())).set(humanLabelClasses.get(label), remove ? backgroundSymbol: label);
+          Data.sents.get(sentid).getTokens().get(Integer.parseInt(tokenid.toString())).set(humanLabelClasses.get(label), remove ? backgroundSymbol: label);
         }
       }
     }
