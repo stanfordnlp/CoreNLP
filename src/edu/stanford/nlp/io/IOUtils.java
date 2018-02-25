@@ -273,17 +273,19 @@ public class IOUtils  {
    * @return The object read from the file.
    */
   public static <T> T readObjectFromFile(File file) throws IOException,
-          ClassNotFoundException {
-    try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-            new GZIPInputStream(new FileInputStream(file))))) {
+      ClassNotFoundException {
+    try {
+      ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
+          new GZIPInputStream(new FileInputStream(file))));
       Object o = ois.readObject();
+      ois.close();
       return ErasureUtils.uncheckedCast(o);
     } catch (java.util.zip.ZipException e) {
-      try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-              new FileInputStream(file)))) {
-        Object o = ois.readObject();
-        return ErasureUtils.uncheckedCast(o);
-      }
+      ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
+          new FileInputStream(file)));
+      Object o = ois.readObject();
+      ois.close();
+      return ErasureUtils.uncheckedCast(o);
     }
   }
 
@@ -305,10 +307,10 @@ public class IOUtils  {
    * @return The object read from the file.
    */
   public static <T> T readObjectFromURLOrClasspathOrFileSystem(String filename) throws IOException, ClassNotFoundException {
-    try (ObjectInputStream ois = new ObjectInputStream(getInputStreamFromURLOrClasspathOrFileSystem(filename))) {
-      Object o = ois.readObject();
-      return ErasureUtils.uncheckedCast(o);
-    }
+    ObjectInputStream ois = new ObjectInputStream(getInputStreamFromURLOrClasspathOrFileSystem(filename));
+    Object o = ois.readObject();
+    ois.close();
+    return ErasureUtils.uncheckedCast(o);
   }
 
   public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(Redwood.RedwoodChannels log, String msg, String path) {
@@ -1211,14 +1213,14 @@ public class IOUtils  {
       logger.err(throwableToStackTrace(e));
       return "";
     }
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding))) {
-      StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-      for (String temp; (temp = br.readLine()) != null; ) {
-        buff.append(temp);
-        buff.append(lineSeparator);
-      }
-      return buff.toString();
+    BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
+    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
+    for (String temp; (temp = br.readLine()) != null; ) {
+      buff.append(temp);
+      buff.append(lineSeparator);
     }
+    br.close();
+    return buff.toString();
   }
 
   public static String getUrlEncoding(URLConnection connection) {
@@ -1240,18 +1242,18 @@ public class IOUtils  {
    * Returns all the text at the given URL.
    */
   public static String slurpURL(URL u) throws IOException {
+    String lineSeparator = System.getProperty("line.separator");
     URLConnection uc = u.openConnection();
     String encoding = getUrlEncoding(uc);
     InputStream is = uc.getInputStream();
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding))) {
-      StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-      String lineSeparator = System.lineSeparator();
-      for (String temp; (temp = br.readLine()) != null; ) {
-        buff.append(temp);
-        buff.append(lineSeparator);
-      }
-      return buff.toString();
+    BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
+    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
+    for (String temp; (temp = br.readLine()) != null; ) {
+      buff.append(temp);
+      buff.append(lineSeparator);
     }
+    br.close();
+    return buff.toString();
   }
 
   /**
@@ -1673,7 +1675,8 @@ public class IOUtils  {
       }
       in.close();
       return sb.toString();
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       logger.err(throwableToStackTrace(e));
       return null;
     }

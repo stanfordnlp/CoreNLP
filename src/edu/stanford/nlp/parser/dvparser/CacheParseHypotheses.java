@@ -200,7 +200,7 @@ public class CacheParseHypotheses  {
     int numThreads = 1;
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-dvKBest")) {
-        dvKBest = Integer.parseInt(args[argIndex + 1]);
+        dvKBest = Integer.valueOf(args[argIndex + 1]);
         argIndex += 2;
         continue;
       }

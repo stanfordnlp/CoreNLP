@@ -93,7 +93,7 @@ public class DcorefExactOutputITest {
       }
 
       if (id == -1) {
-        id = Integer.parseInt(line);
+        id = Integer.valueOf(line);
       } else {
         mentionLines.add(line.trim());
       }

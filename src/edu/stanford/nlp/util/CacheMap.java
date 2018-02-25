@@ -1,5 +1,4 @@
-package edu.stanford.nlp.util;
-
+package edu.stanford.nlp.util; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -13,13 +12,13 @@ import java.util.Map;
  * @author Ari Steinberg (ari.steinberg@stanford.edu)
  */
 
-public class CacheMap<K,V> extends LinkedHashMap<K,V> {
+public class CacheMap<K,V> extends LinkedHashMap<K,V> implements Map<K,V>, Cloneable, Serializable  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(CacheMap.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(CacheMap.class);
 
   private static final long serialVersionUID = 1L;
-  private String backingFile;
+  public String backingFile;
   private int CACHE_ENTRIES;
   private int entriesSinceLastWritten;
   private int frequencyToWrite;
@@ -29,7 +28,6 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
 
   /**
    * Constructor.
-   *
    * @param numEntries is the number of entries you want to store in the
    *                   CacheMap.  This is not the same as the number of
    *                   buckets - that is effected by this and the target
@@ -75,7 +73,8 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
   public static <K,V> CacheMap<K,V> create(int numEntries, float loadFactor,
                                 boolean accessOrder, String file,
                                 boolean useFileParams) {
-    try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+    try {
+      ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
       CacheMap<K, V> c = ErasureUtils.uncheckedCast(ois.readObject());
       log.info("Read cache from " + file + ", contains " + c.size() + " entries.  Backing file is " + c.backingFile);
       if (!useFileParams) {
@@ -117,12 +116,13 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
 
     if (backingFile == null) return; 
 
-    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(backingFile))) {
+    try {
       log.info("Writing cache (size: " + size() + ") to " +
                          backingFile);
+      ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(backingFile));
       oos.writeObject(this);
     } catch (Exception ex) {
-      log.info("Error writing cache to file: " + backingFile + '!');
+      log.info("Error writing cache to file: " + backingFile + "!");
       log.info(ex);
     }
   }
@@ -132,7 +132,11 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
    */
   @Override
   protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
-    return size() > CACHE_ENTRIES;
+    if (size() > CACHE_ENTRIES) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -176,5 +180,4 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
                 ", hit % (using misses): " + ((float)hits)/(hits + misses) +
                 ", hit % (using puts): " + ((float)hits)/(hits + puts));
   }
-
 }

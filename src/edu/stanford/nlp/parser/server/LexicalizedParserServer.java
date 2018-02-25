@@ -318,7 +318,7 @@ public class LexicalizedParserServer  {
       if (arg.equalsIgnoreCase("model")) {
         model = args[i + 1];
       } else if (arg.equalsIgnoreCase("port")) {
-        port = Integer.parseInt(args[i + 1]);
+        port = Integer.valueOf(args[i + 1]);
       } else if (arg.equalsIgnoreCase("tagger")) {
         tagger = args[i + 1];
       } else if (arg.equalsIgnoreCase("help")) {

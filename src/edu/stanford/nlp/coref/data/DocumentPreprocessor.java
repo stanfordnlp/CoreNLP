@@ -563,9 +563,13 @@ public class DocumentPreprocessor  {
     for(Mention m : doc.predictedMentionsByID.values()) {
       String speaker = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
       if(debug) log.info("DD: "+speaker);
-      if (NumberMatchingRegex.isDecimalInteger(speaker)) {
-        int speakerMentionID = Integer.parseInt(speaker);
-        doc.speakerPairs.add(new Pair<>(m.mentionID, speakerMentionID));
+      // if this is not a CoNLL doc, don't treat a number username as a speakerMentionID
+      // conllDoc == null indicates not a CoNLL doc
+      if (doc.conllDoc != null) {
+        if (NumberMatchingRegex.isDecimalInteger(speaker)) {
+          int speakerMentionID = Integer.parseInt(speaker);
+          doc.speakerPairs.add(new Pair<>(m.mentionID, speakerMentionID));
+        }
       }
     }
 

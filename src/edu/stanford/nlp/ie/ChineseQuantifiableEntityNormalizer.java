@@ -1,6 +1,7 @@
 package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.ie.regexp.ChineseNumberSequenceClassifier;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -179,9 +180,6 @@ public class ChineseQuantifiableEntityNormalizer {
 
   private static final String RELATIVE_TIME_PATTERN = "([昨今明])[天晨晚夜早]";
   private static final String BIRTH_DECADE_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "[0零〇5五])后";
-
-
-  private ChineseQuantifiableEntityNormalizer() { } // static methods
 
   /**
    * Identifies contiguous MONEY, TIME, DATE, or PERCENT entities
@@ -711,8 +709,8 @@ public class ChineseQuantifiableEntityNormalizer {
 
   private static String normalizeMonthOrDay(String s, String context) {
     int ctx = -1;
-    if ( ! context.equals("XX"))
-      ctx = Integer.parseInt(context);
+    if (!context.equals("XX"))
+      ctx = Integer.valueOf(context);
 
     if (monthDayModifiers.containsKey(s)) {
       if (ctx >= 0)
@@ -727,11 +725,10 @@ public class ChineseQuantifiableEntityNormalizer {
         return "XX";
       } else {
 
-        if (s.matches(CHINESE_DATE_NUMERALS_PATTERN + "+")) {
+        if (s.matches(CHINESE_DATE_NUMERALS_PATTERN + "+"))
           candidate = prettyNumber(String.format("%f", recurNormalizeLiteralIntegerString(s)));
-        } else {
+        else
           candidate = s;
-        }
       }
 
       if (candidate.length() < 2)
@@ -748,7 +745,7 @@ public class ChineseQuantifiableEntityNormalizer {
   private static String normalizeYear(String s, String contextYear, boolean strict) {
     int ctx = -1;
     if (!contextYear.equals("XXXX"))
-      ctx = Integer.parseInt(contextYear);
+      ctx = Integer.valueOf(contextYear);
 
     if (yearModifiers.containsKey(s)) {
       if (ctx >= 0)
@@ -759,17 +756,15 @@ public class ChineseQuantifiableEntityNormalizer {
       String candidate;
       StringBuilder yearcandidate = new StringBuilder();
       for (int i = 0; i < s.length(); i++) {
-        String t = String.valueOf(s.charAt(i));
+        String t = "" + s.charAt(i);
         if (CHINESE_LITERAL_DECIMAL_PATTERN.matcher(t).matches()) {
-          if (wordsToValues.containsKey(t)) {
+          if (wordsToValues.containsKey(t))
             yearcandidate.append((int) wordsToValues.getCount(t));
-          } else {
+          else
             // something unexpected happened
             return null;
-          }
-        } else {
+        } else
           yearcandidate.append(t);
-        }
       }
 
       candidate = yearcandidate.toString();
@@ -925,7 +920,7 @@ public class ChineseQuantifiableEntityNormalizer {
    * @param <E>
    * @return
    */
-  private static <E extends CoreMap> String singleEntityToString(List<E> l) {
+  public static <E extends CoreMap> String singleEntityToString(List<E> l) {
     String entityType = l.get(0).get(CoreAnnotations.NamedEntityTagAnnotation.class);
     StringBuilder sb = new StringBuilder();
     for (E w : l) {
@@ -938,11 +933,11 @@ public class ChineseQuantifiableEntityNormalizer {
     return sb.toString();
   }
 
-  private static String prettyNumber(String s) {
-    if (s == null) {
+  public static String prettyNumber(String s) {
+    if(s == null) {
       return null;
     }
-    s = ! s.contains(".") ? s : s.replaceAll("0*$", "").replaceAll("\\.$", "");
+    s = s.indexOf(".") < 0 ? s : s.replaceAll("0*$", "").replaceAll("\\.$", "");
     return s;
   }
 
@@ -953,7 +948,7 @@ public class ChineseQuantifiableEntityNormalizer {
    * @param list
    * @param <E>
    */
-  private static <E extends CoreMap> void fixupNerBeforeNormalization(List<E> list) {
+  public static <E extends CoreMap> void fixupNerBeforeNormalization(List<E> list) {
   }
 
 }
