@@ -81,9 +81,6 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static int maxCharLength = 100000;
   @ArgumentParser.Option(name="blacklist", gloss="A file containing subets that should be blacklisted from accessing the server. Each line is a subnet")
   protected static String blacklist = null;
-  @ArgumentParser.Option(name="stanford", gloss="If true, do special options (blacklist, timeout modifications) for public Stanford server")
-  protected boolean stanford = false;
-
 
 
   protected final String shutdownKey;
@@ -352,14 +349,13 @@ public class StanfordCoreNLPServer implements Runnable {
         return lastPipeline.second;
       } else {
         // Do some housekeeping on the global cache
-        for (Iterator<Map.Entry<StanfordCoreNLP.AnnotatorSignature, Lazy<Annotator>>> iter = StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.entrySet().iterator();
-             iter.hasNext(); ) {
-          Map.Entry<StanfordCoreNLP.AnnotatorSignature, Lazy<Annotator>> entry = iter.next();
-          if ( ! entry.getValue().isCache()) {
+        for (Map.Entry<StanfordCoreNLP.AnnotatorSignature, Lazy<Annotator>> entry : new HashSet<>(StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.entrySet())) {
+          if (!entry.getValue().isCache()) {
             error("Entry in global cache is not garbage collectable!");
-            iter.remove();
-          } else if (entry.getValue().isGarbageCollected()) {
-            iter.remove();
+            StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.remove(entry.getKey());
+          }
+          if (entry.getValue().isCache() && entry.getValue().isGarbageCollected()) {
+            StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.remove(entry.getKey());
           }
         }
         // Create a CoreNLP
@@ -557,26 +553,23 @@ public class StanfordCoreNLPServer implements Runnable {
    *
    * @return True if the address is <b>not</b> in any blacklisted subnet. That is, we can accept connections from it.
    */
-  private boolean onBlacklist(Inet4Address addr) {
+  private boolean checkBlacklist(Inet4Address addr) {
     for (Pair<Inet4Address, Integer> subnet : blacklistSubnets) {
       if (netMatch(subnet, addr)) {
-        return true;
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
-  /** @see #onBlacklist(Inet4Address) */
-  private boolean onBlacklist(HttpExchange exchange) {
-    if ( ! stanford) {
-      return false;
-    }
+  /** @see #checkBlacklist(Inet4Address) */
+  private boolean checkBlacklist(HttpExchange exchange) {
     InetAddress addr = exchange.getRemoteAddress().getAddress();
     if (addr instanceof Inet4Address) {
-      return onBlacklist((Inet4Address) addr);
+      return checkBlacklist((Inet4Address) addr);
     } else {
       log("Not checking IPv6 address against blacklist: " + addr);
-      return false;  // TODO(gabor) we should eventually check ipv6 addresses too
+      return true;  // TODO(gabor) we should eventually check ipv6 addresses too
     }
   }
 
@@ -729,7 +722,6 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   } // end static class FileHandler
 
-
   /**
    * The main handler for taking an annotation request, and annotating it.
    */
@@ -797,7 +789,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (!checkBlacklist(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -854,16 +846,24 @@ public class StanfordCoreNLPServer implements Runnable {
           return ann;
         });
         Annotation completedAnnotation;
-        int timeoutMilliseconds;
         try {
-          timeoutMilliseconds = Integer.parseInt(props.getProperty("timeout",
-                                                 Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
-          timeoutMilliseconds = maybeAlterStanfordTimeout(httpExchange, timeoutMilliseconds);
-
+          int timeoutMilliseconds = Integer.parseInt(props.getProperty("timeout",
+                                                     Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
+          // Check for too long a timeout from an unauthorized source
+          if (timeoutMilliseconds > 15000) {
+            // If two conditions:
+            //   (1) The server is running on corenlp.run (i.e., corenlp.stanford.edu)
+            //   (2) The request is not coming from a *.stanford.edu" email address
+            // Then force the timeout to be 15 seconds
+            if ("corenlp.stanford.edu".equals(InetAddress.getLocalHost().getHostName()) &&
+                !httpExchange.getRemoteAddress().getHostName().toLowerCase().endsWith("stanford.edu")) {
+              timeoutMilliseconds = 15000;
+            }
+          }
+          completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
         } catch (NumberFormatException e) {
-          timeoutMilliseconds = StanfordCoreNLPServer.this.timeoutMilliseconds;
+          completedAnnotation = completedAnnotationFuture.get(StanfordCoreNLPServer.this.timeoutMilliseconds, TimeUnit.MILLISECONDS);
         }
-        completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
         completedAnnotationFuture = null;  // No longer any need for the future
 
         // Get output
@@ -907,29 +907,6 @@ public class StanfordCoreNLPServer implements Runnable {
         }
       }
     }
-
-    private int maybeAlterStanfordTimeout(HttpExchange httpExchange, int timeoutMilliseconds) {
-      if ( ! stanford) {
-        return timeoutMilliseconds;
-      }
-      try {
-        // Check for too long a timeout from an unauthorized source
-        if (timeoutMilliseconds > 15000) {
-          // If two conditions:
-          //   (1) The server is running on corenlp.run (i.e., corenlp.stanford.edu)
-          //   (2) The request is not coming from a *.stanford.edu" email address
-          // Then force the timeout to be 15 seconds
-          if ("corenlp.stanford.edu".equals(InetAddress.getLocalHost().getHostName()) &&
-                  ! httpExchange.getRemoteAddress().getHostName().toLowerCase().endsWith("stanford.edu")) {
-            timeoutMilliseconds = 15000;
-          }
-        }
-        return timeoutMilliseconds;
-      } catch (UnknownHostException uhe) {
-        return timeoutMilliseconds;
-      }
-    }
-
   } // end class CoreNLPHandler
 
 
@@ -960,7 +937,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (!checkBlacklist(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1085,7 +1062,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (!checkBlacklist(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1210,7 +1187,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (!checkBlacklist(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
