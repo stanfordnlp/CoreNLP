@@ -24,11 +24,7 @@ import javax.net.ssl.*;
 import java.io.*;
 import java.lang.ref.SoftReference;
 import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.*;
@@ -83,6 +79,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static String serverPropertiesPath = null;
   @ArgumentParser.Option(name="maxCharLength", gloss="Max length string that will be processed (non-positive means no limit)")
   protected static int maxCharLength = 100000;
+  @ArgumentParser.Option(name="blacklist", gloss="A file containing subets that should be blacklisted from accessing the server. Each line is a subnet")
+  protected static String blacklist = null;
 
 
   protected final String shutdownKey;
@@ -104,6 +102,12 @@ public class StanfordCoreNLPServer implements Runnable {
    * An executor to time out CoreNLP execution with.
    */
   private final ExecutorService corenlpExecutor;
+
+
+  /**
+   * A list of blacklisted subnets -- these cannot call the server.
+   */
+  private final List<Pair<Inet4Address, Integer>> blacklistSubnets;
 
 
   /**
@@ -194,10 +198,11 @@ public class StanfordCoreNLPServer implements Runnable {
     // Generate and write a shutdown key, get optional server_id from passed in properties
     // this way if multiple servers running can shut them all down with different ids
     String shutdownKeyFileName;
-    if (props != null && props.getProperty("server_id") != null)
-      shutdownKeyFileName = "corenlp.shutdown."+props.getProperty("server_id");
-    else
+    if (props != null && props.getProperty("server_id") != null) {
+      shutdownKeyFileName = "corenlp.shutdown." + props.getProperty("server_id");
+    } else {
       shutdownKeyFileName = "corenlp.shutdown";
+    }
     String tmpDir = System.getProperty("java.io.tmpdir");
     File tmpFile = new File(tmpDir + File.separator + shutdownKeyFileName);
     tmpFile.deleteOnExit();
@@ -213,6 +218,19 @@ public class StanfordCoreNLPServer implements Runnable {
       this.statusPort = Integer.parseInt(props.getProperty("status_port"));
     } else if (props != null && props.containsKey("port")) {
       this.statusPort = Integer.parseInt(props.getProperty("port"));
+    }
+    // parse blacklist
+    if (blacklist == null) {
+      this.blacklistSubnets = Collections.emptyList();
+    } else {
+      this.blacklistSubnets = new ArrayList<>();
+      for (String subnet : IOUtils.readLines(blacklist)) {
+        try {
+          this.blacklistSubnets.add(parseSubnet(subnet));
+        } catch (IllegalArgumentException e) {
+          warn("Could not parse subnet: " + subnet);
+        }
+      }
     }
   }
 
@@ -470,6 +488,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
    */
   private static void respondUnauthorized(HttpExchange httpExchange) throws IOException {
+    log("Respoding unauthorized to " + httpExchange.getRemoteAddress());
     httpExchange.getResponseHeaders().add("Content-type", "application/javascript");
     byte[] content = "{\"message\": \"Unauthorized API request\"}".getBytes("utf-8");
     httpExchange.sendResponseHeaders(HTTP_UNAUTHORIZED, content.length);
@@ -485,6 +504,75 @@ public class StanfordCoreNLPServer implements Runnable {
     httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
     httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
   }
+
+
+  /**
+   * Adapted from: https://stackoverflow.com/questions/4209760/validate-an-ip-address-with-mask
+   */
+  private static Pair<Inet4Address, Integer> parseSubnet(String subnet) {
+    String[] parts = subnet.split("/");
+    String ip = parts[0];
+    int prefix;
+
+    if (parts.length < 2) {
+      prefix = 0;
+    } else {
+      prefix = Integer.parseInt(parts[1]);
+    }
+    try {
+      return Pair.makePair((Inet4Address) InetAddress.getByName(ip), prefix);
+    } catch (UnknownHostException e) {
+      throw new IllegalArgumentException("Invalid subnet: " + subnet);
+    }
+  }
+
+
+  /**
+   * Adapted from: https://stackoverflow.com/questions/4209760/validate-an-ip-address-with-mask
+   */
+  @SuppressWarnings("PointlessBitwiseExpression")
+  private static boolean netMatch(Pair<Inet4Address, Integer> subnet, Inet4Address addr ){
+    byte[] b = subnet.first.getAddress();
+    int ipInt = ((b[0] & 0xFF) << 24) |
+        ((b[1] & 0xFF) << 16) |
+        ((b[2] & 0xFF) << 8)  |
+        ((b[3] & 0xFF) << 0);
+    byte[] b1 = addr.getAddress();
+    int ipInt1 = ((b1[0] & 0xFF) << 24) |
+        ((b1[1] & 0xFF) << 16) |
+        ((b1[2] & 0xFF) << 8)  |
+        ((b1[3] & 0xFF) << 0);
+    int mask = ~((1 << (32 - subnet.second)) - 1);
+    return (ipInt & mask) == (ipInt1 & mask);
+  }
+
+  /**
+   * Check that the given address is not in the subnet
+   *
+   * @param addr The address to check.
+   *
+   * @return True if the address is <b>not</b> in any blacklisted subnet. That is, we can accept connections from it.
+   */
+  private boolean checkBlacklist(Inet4Address addr) {
+    for (Pair<Inet4Address, Integer> subnet : blacklistSubnets) {
+      if (netMatch(subnet, addr)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** @see #checkBlacklist(Inet4Address) */
+  private boolean checkBlacklist(HttpExchange exchange) {
+    InetAddress addr = exchange.getRemoteAddress().getAddress();
+    if (addr instanceof Inet4Address) {
+      return checkBlacklist((Inet4Address) addr);
+    } else {
+      log("Not checking IPv6 address against blacklist: " + addr);
+      return true;  // TODO(gabor) we should eventually check ipv6 addresses too
+    }
+  }
+
 
   /**
    * A callback object that lets us hook into the result of an annotation request.
@@ -701,6 +789,10 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+      if (!checkBlacklist(httpExchange)) {
+        respondUnauthorized(httpExchange);
+        return;
+      }
       setHttpExchangeResponseHeaders(httpExchange);
 
       // Get sentence.
@@ -845,6 +937,10 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+      if (!checkBlacklist(httpExchange)) {
+        respondUnauthorized(httpExchange);
+        return;
+      }
       setHttpExchangeResponseHeaders(httpExchange);
 
       Properties props = getProperties(httpExchange);
@@ -966,7 +1062,10 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-
+      if (!checkBlacklist(httpExchange)) {
+        respondUnauthorized(httpExchange);
+        return;
+      }
       setHttpExchangeResponseHeaders(httpExchange);
 
       Properties props = getProperties(httpExchange);
@@ -1088,7 +1187,10 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-
+      if (!checkBlacklist(httpExchange)) {
+        respondUnauthorized(httpExchange);
+        return;
+      }
       setHttpExchangeResponseHeaders(httpExchange);
 
       Properties props = getProperties(httpExchange);
