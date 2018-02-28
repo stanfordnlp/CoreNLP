@@ -20,6 +20,9 @@
 \newcommand{\mystretch}{1.1}
 \renewcommand{\baselinestretch}{\mystretch}
 
+\definecolor{cardinal}{cmyk}{0.0,1.0,0.65, 0.34}
+
+
 \def\url#1{\textsf{#1}}
 
 
@@ -36,20 +39,19 @@
 % Revised for the Stanford Parser v.\ 3.3 in December 2013
 %Revised for the Stanford Parser v.\ 3.5.1 in February 2015
 %Revised for the Stanford Parser v.\ 3.5.2 in April 2015
-Revised for the Stanford Parser v.\ 3.7.0 in September 2016
+Revised for the Stanford Parser v.\ 3.7.0+ in September 2016
 }
 
 \begin{document}
 \maketitle
 
-\color{red}
-Please note that this manual describes the original Stanford
+\textcolor{cardinal}{Please note that this manual describes the original Stanford
 Dependencies representation. As of version 3.5.2, the default representation
 output by the Stanford Parser and Stanford CoreNLP is the new Universal Dependencies (UD)
-representation, and we no longer maintain the original Stanford Dependencies representation. For a description of the UD
+representation, and we no longer actively develop the original Stanford Dependencies representation. For a description of the UD
 representation, take a look at the Universal Dependencies documentation at \textsf{http:/www.universaldependencies.org} and
-the discussion of the \textit{enhanced} and \textit{enhanced++} UD representations by \citet{schuster2016enhanced}.
-\color{black}
+the discussion of the \textit{enhanced} and \textit{enhanced++} UD representations by \citet{schuster2016enhanced}.}
+
 \section{Introduction}
 
 The Stanford typed dependencies representation was designed to provide
@@ -1212,7 +1214,7 @@ motivations behind the design of the representation appears in
 \citep{demarneffe08stanford}.
 
 \begin{sloppypar}
-The SD representation has seen considerable use within the biomedical text
+The SD representation first saw considerable use within the biomedical text
 mining community.  It has been used to give a task relevant evaluation
 scheme for parsers \citep{Clegg07,Pyysalo07} and as a representation
 for relation extraction
@@ -1253,8 +1255,8 @@ team of collaborators has led to a new synthesis spanning
 tokenization, morphological features, parts of speech, and
 dependencies, known as Universal Dependencies:
 \url{http://www.universaldependencies.org}.  Since version 3.5.2
-the default representation output by our parser is the Universal Dependencies
-representation.
+the default representation output by the Stanford Parser is the Universal Dependencies
+representation, but SD output is still available.
 
 \section{Recent changes}
 
@@ -1277,9 +1279,9 @@ of the word.)
   became more essential as we expanded our consideration of informal
   text types.
 \item[goeswith] was introduced. It is useful on badly edited text.
-\item[infmod] was remode as a relation. It has been generalized as a
+\item[infmod] was removed as a relation. It has been generalized as a
   case of \emph{vmod}.
-\item[partmod] was remode as a relation. It has been generalized as a
+\item[partmod] was removed as a relation. It has been generalized as a
   case of \emph{vmod}.
 \item[purpcl] was removed as a relation. It is now a particular case
   of an \emph{advcl}.
