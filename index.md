@@ -60,6 +60,13 @@ Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html). 
 To download earlier versions of Stanford CoreNLP or language packs for earlier versions, go to the [history page](history.html).
 
+Stanford CoreNLP 3.9.1 requires Java 8, but also works with Java 9.  If using Java 9, make sure
+to add this Java flag to your command to avoid errors:
+
+```
+--add-modules java.se.ee
+```
+
 The table below has jars for the current release with all the models for each language we support.
 Due to size issues we have divided the English resources into two
 jars.  The English (KBP) models jar contains extra resources needed to
