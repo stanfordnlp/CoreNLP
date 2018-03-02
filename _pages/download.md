@@ -32,6 +32,13 @@ this installed you should first of all install Java 8.  Probably
 [the JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html),
 but [the JRE](http://java.com/) will do if you are only going to be a user.
 
+Stanford CoreNLP 3.9.1 requires Java 8, but also works with Java 9.  If using Java 9, make sure
+to add this Java flag to your command to avoid errors:
+
+```
+--add-modules java.se.ee
+```
+
 **GitHub**: Here is the [Stanford CoreNLP GitHub site](https://github.com/stanfordnlp/CoreNLP).
 
 **Maven**: You can find Stanford CoreNLP on

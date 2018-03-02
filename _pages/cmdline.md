@@ -6,6 +6,13 @@ permalink: '/cmdline.html'
 
 ## Quick start
 
+Note: Stanford CoreNLP 3.9.1 requires Java 8, but works with Java 9 as well.  If using Java 9, make sure
+to add this Java flag to avoid errors:
+
+```
+--add-modules java.se.ee
+```
+
 The minimal command to run Stanford CoreNLP from the command line is:
 
 ```sh
