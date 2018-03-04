@@ -87,9 +87,9 @@ Other choices are now probably best avoided:
 
 These packages use the Stanford CoreNLP server that we've developed over the last couple of years. You should probably use one of them.
 
+* [stanfordcorenlp](https://github.com/Lynten/stanford-corenlp) by Lynten Guo. A Python wrapper to Stanford CoreNLP server, version 3.8.0. Also: [PyPI page](https://pypi.python.org/pypi/stanfordcorenlp/).
 * [pycorenlp, A Python wrapper for Stanford CoreNLP](https://github.com/smilli/py-corenlp) by Smitha Milli that uses the new CoreNLP v3.6+ server. Available on [PyPI](https://pypi.python.org/pypi/pycorenlp/).
 * [corenlp-pywrap](https://github.com/hhsecond/corenlp_pywrap) by Sherin Thomas also uses the new CoreNLP v3.6+ server. Python 3.x (only). Also: [PyPI page](https://pypi.python.org/pypi/corenlp_pywrap).
-* [stanford-corenlp](https://github.com/Lynten/stanford-corenlp) by Lynten. Another Python wrapper to Stanford CoreNLP server, version 3.7.0. Also: [PyPI page](https://pypi.python.org/pypi/stanfordcorenlp/).
 * [Stanford CoreNLP Python Interface](https://github.com/stanfordnlp/python-corenlp): A reference implementation of a Python interface to the Stanford CoreNLP server. By Arun Chaganty.
 [PyPI page](https://pypi.python.org/pypi/stanford-corenlp/).
 * [pynlp](https://github.com/sina-al/pynlp) A (Pythonic) Python wrapper for Stanford CoreNLP by Sina.
