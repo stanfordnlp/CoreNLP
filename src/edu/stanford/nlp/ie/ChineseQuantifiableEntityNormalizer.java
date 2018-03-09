@@ -779,7 +779,7 @@ public class ChineseQuantifiableEntityNormalizer {
 
       if (ctx < 0) {
         // use the current year as reference point for two digit year normalization by default
-        ctx = Integer.valueOf(new SimpleDateFormat("yyyy").format(new Date()));
+        ctx = Integer.parseInt(new SimpleDateFormat("yyyy").format(new Date()));
       }
 
       // note: this is a very crude heuristic for determining actual year from two digit expressions
