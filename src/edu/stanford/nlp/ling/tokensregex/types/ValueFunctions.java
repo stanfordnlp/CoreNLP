@@ -53,7 +53,7 @@ public class ValueFunctions {
         String[] tmp = new String[nargs];
         Arrays.fill(tmp, type);
         return StringUtils.join(tmp, ",");
-      } else return type + "[" + nargs + "]";
+      } else return type + '[' + nargs + ']';
     }
 
     protected static String getTypeName(Class c) {
@@ -634,7 +634,7 @@ public class ValueFunctions {
 
   public static final ValueFunction TOKENS_REPLACE_FUNCTION =
           new TypeCheckedFunction("TOKENS_REPLACE",
-              PARAM_INFO_TOKEN_LIST, PARAM_INFO_TOKEN_REGEX, PARAM_INFO_TOKEN_LIST_REPLACE) {
+                  PARAM_INFO_TOKEN_LIST, PARAM_INFO_TOKEN_REGEX, PARAM_INFO_TOKEN_LIST_REPLACE) {
             // First argument is list of tokens to match
             // Second argument is pattern to match
             // Third argument is replacement tokens
@@ -672,7 +672,7 @@ public class ValueFunctions {
 
   public static final ValueFunction STRING_REPLACE_FUNCTION =
           new TypeCheckedFunction("STRING_REPLACE",
-              PARAM_INFO_STRING, PARAM_INFO_STRING_REGEX, PARAM_INFO_STRING_REPLACE) {
+                  PARAM_INFO_STRING, PARAM_INFO_STRING_REGEX, PARAM_INFO_STRING_REPLACE) {
             // First argument is string to match
             // Second argument is pattern to match
             // Third argument is replacement string
@@ -693,8 +693,8 @@ public class ValueFunctions {
   private static final ParamInfo PARAM_INFO_TOKEN = new ParamInfo("TOKEN", null, CoreMap.class, false);
   public static final ValueFunction TOKEN_STRING_SPLIT_FUNCTION =
           new TypeCheckedFunction("TOKEN_STRING_SPLIT",
-              PARAM_INFO_TOKEN, PARAM_INFO_STRING_REGEX,
-              new ParamInfo("INCLUDE_MATCHED", null, Boolean.class, false)) {
+                  PARAM_INFO_TOKEN, PARAM_INFO_STRING_REGEX,
+                  new ParamInfo("INCLUDE_MATCHED", null, Boolean.class, false)) {
             // First argument is token to split
             // Second argument is pattern to split on
             @Override
@@ -712,6 +712,7 @@ public class ValueFunctions {
   public static boolean isInteger(Number n) {
     return (n instanceof Long || n instanceof Integer || n instanceof Short);
   }
+
   public static final NumericComparator NUMBER_COMPARATOR = new NumericComparator();
 
   public static class NumericComparator implements Comparator<Number> {
@@ -1519,7 +1520,7 @@ public class ValueFunctions {
         return false;
       }
       if (in.get(0) == null ||
-        !(in.get(0).get() instanceof ValueFunction || in.get(0).get() instanceof String)) {
+              !(in.get(0).get() instanceof ValueFunction || in.get(0).get() instanceof String)) {
         return false;
       }
       return true;
@@ -1536,7 +1537,7 @@ public class ValueFunctions {
         res = func.apply(env, args);
       } else if (in.get(0).get() instanceof String) {
         Expressions.FunctionCallExpression func =
-          new Expressions.FunctionCallExpression((String) in.get(0).get(), args);
+                new Expressions.FunctionCallExpression((String) in.get(0).get(), args);
         res = func.evaluate(env);
       } else {
         throw new IllegalArgumentException("Type mismatch on arg0: Cannot apply " + this + " to " + in);
