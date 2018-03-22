@@ -69,7 +69,7 @@ public class CorefExample {
   public static void main(String[] args) throws Exception {
     Annotation document = new Annotation("Barack Obama was born in Hawaii.  He is the president. Obama was elected in 2008.");
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,coref.mention,coref");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(document);
     System.out.println("---");
