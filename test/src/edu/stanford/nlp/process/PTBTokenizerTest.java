@@ -294,11 +294,13 @@ public class PTBTokenizerTest {
 
   private final String[] moreInputs = {
           "Joseph Someone (fl. 2050–75) liked the noble gases, viz. helium, neon, argon, xenon, krypton and radon.",
+          "Sambucus nigra subsp. canadensis and Canis spp. missing",
   };
 
   private final String[][] moreGold = {
           { "Joseph", "Someone", "-LRB-", "fl.", "2050", "--", "75", "-RRB-", "liked", "the", "noble", "gases", ",",
                   "viz.", "helium", ",", "neon", ",", "argon", ",", "xenon", ",", "krypton", "and", "radon", "." },
+          { "Sambucus", "nigra", "subsp.", "canadensis", "and", "Canis", "spp.", "missing" },
   };
 
   @Test
