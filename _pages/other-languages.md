@@ -29,9 +29,9 @@ Okay, Docker isn't a language, but you know what we mean…. Note on running the
 * [corenlp-docker](https://github.com/vzhong/corenlp-docker) And another by vzhong, a Stanford NLP graduate.
 * [jamesbpollack/corenlp-stack](https://hub.docker.com/r/jamesbpollack/corenlp-stack/) by James Pollack.
 
-### Erlang/Elixir
+### Elixir
 
-* [corenlp](https://hex.pm/packages/corenlp) by Robert Bates provides a thin client interface in Erlang to a CoreNLP server. [GitHub](https://github.com/arpieb/corenlp).
+* [corenlp](https://hex.pm/packages/corenlp) by Robert Bates provides a thin client interface in Elixir to a CoreNLP server. [GitHub](https://github.com/arpieb/corenlp).
 
 ### Java
 
@@ -74,7 +74,7 @@ Other choices are now probably best avoided:
 
 ### PHP
 
-* [php-stanford-corenlp-adapter](https://github.com/DennisDeSwart/php-stanford-corenlp-adapter) by Dennis De Swart. Simple connection to Stanford CoreNLP server.
+* [php-stanford-corenlp-adapter](https://github.com/DennisDeSwart/php-stanford-corenlp-adapter) by Dennis De Swart. Well-maintained client connection to Stanford CoreNLP server.
 [PHPclasses](http://www.phpclasses.org/package/10056-PHP-Natural-language-processing-using-Stanford-server.html).
 [Packagist](https://packagist.org/packages/dennis-de-swart/php-stanford-corenlp-adapter).
 * [php-stanford-nlp-datastore](https://github.com/DennisDeSwart/php-stanford-nlp-datastore) by Dennis De Swart. Stores data analyzed by Stanford CoreNLP (words, NER, OpenIE triples, coreference) in an SQLite database, which can then be searched.
