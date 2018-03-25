@@ -660,12 +660,14 @@ public class Classifier  {
     // actually hurt training performance! (See experiments with
     // "smallMap.")
     saved = new double[preMap.size()][config.hiddenSize];
+    final int numTokens = config.numTokens;
+    final int embeddingSize = config.embeddingSize;
 
     for (int x : toPreCompute) {
       int mapX = preMap.get(x);
-      int tok = x / config.numTokens;
-      int pos = x % config.numTokens;
-      matrixMultiplySliceSum(saved[mapX], W1, E[tok], pos * config.embeddingSize);
+      int tok = x / numTokens;
+      int pos = x % numTokens;
+      matrixMultiplySliceSum(saved[mapX], W1, E[tok], pos * embeddingSize);
     }
     log.info("PreComputed " + toPreCompute.size() + ", Elapsed Time: " +
             (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
@@ -681,18 +683,21 @@ public class Classifier  {
    * values of the output layer.
    */
   private double[] computeScores(int[] feature, Map<Integer, Integer> preMap) {
-    double[] hidden = new double[config.hiddenSize];
+    final double[] hidden = new double[config.hiddenSize];
+    final int numTokens = config.numTokens;
+    final int embeddingSize = config.embeddingSize;
+
     int offset = 0;
     for (int j = 0; j < feature.length; j++) {
       int tok = feature[j];
-      int index = tok * config.numTokens + j;
+      int index = tok * numTokens + j;
       Integer idInteger = preMap.get(index);
       if (idInteger != null) {
         ArrayMath.pairwiseAddInPlace(hidden, saved[idInteger]);
       } else {
         matrixMultiplySliceSum(hidden, W1, E[tok], offset);
       }
-      offset += config.embeddingSize;
+      offset += embeddingSize;
     }
     addCubeInPlace(hidden, b1);
     return matrixMultiply(W2, hidden);
