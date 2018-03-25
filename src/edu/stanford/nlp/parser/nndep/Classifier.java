@@ -688,14 +688,18 @@ public class Classifier  {
       int tok = feature[j];
       int index = tok * config.numTokens + j;
 
-      if (preMap.containsKey(index)) {
-        int id = preMap.get(index);
-        for (int i = 0; i < config.hiddenSize; ++i)
+      Integer idInteger = preMap.get(index);
+      if (idInteger != null) {
+        int id = idInteger;
+        for (int i = 0; i < config.hiddenSize; ++i) {
           hidden[i] += saved[id][i];
+        }
       } else {
-        for (int i = 0; i < config.hiddenSize; ++i)
-          for (int k = 0; k < config.embeddingSize; ++k)
+        for (int i = 0; i < config.hiddenSize; ++i) {
+          for (int k = 0; k < config.embeddingSize; ++k) {
             hidden[i] += W1[i][offset + k] * E[tok][k];
+          }
+        }
       }
       offset += config.embeddingSize;
     }
@@ -706,9 +710,11 @@ public class Classifier  {
     }
 
     double[] scores = new double[numLabels];
-    for (int i = 0; i < numLabels; ++i)
-      for (int j = 0; j < config.hiddenSize; ++j)
+    for (int i = 0; i < numLabels; ++i) {
+      for (int j = 0; j < config.hiddenSize; ++j) {
         scores[i] += W2[i][j] * hidden[j];
+      }
+    }
     return scores;
   }
 
