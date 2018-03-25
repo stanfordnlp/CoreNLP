@@ -32,17 +32,11 @@ public abstract class ParsingSystem  {
   private final TreebankLanguagePack tlp;
 
   /**
-   * Dependency label used between root of sentence and ROOT node
+   * Dependency label used between root of sentence and ROOT node.
    */
   protected final String rootLabel;
 
-  protected List<String> labels, transitions;
-
-  /**
-   * Generate all possible transitions which this parsing system can
-   * take for any given configuration.
-   */
-  protected abstract void makeTransitions();
+  protected final List<String> labels, transitions;
 
   /**
    * Determine whether the given transition is legal for this
@@ -95,8 +89,8 @@ public abstract class ParsingSystem  {
   public int numTransitions() {
     return transitions.size();
   }
-  // TODO pass labels as Map<String, GrammaticalRelation>; use
-  // GrammaticalRelation throughout
+
+  // TODO pass labels as Map<String, GrammaticalRelation>; use GrammaticalRelation throughout
 
   /**
    * @param tlp TreebankLanguagePack describing the language being
@@ -104,13 +98,12 @@ public abstract class ParsingSystem  {
    * @param labels A list of possible dependency relation labels, with
    *               the ROOT relation label as the first element
    */
-  public ParsingSystem(TreebankLanguagePack tlp, List<String> labels, boolean verbose) {
+  public ParsingSystem(TreebankLanguagePack tlp, List<String> labels, List<String> transitions, boolean verbose) {
     this.tlp = tlp;
     this.labels = new ArrayList<>(labels);
-
     //NOTE: assume that the first element of labels is rootLabel
     rootLabel = labels.get(0);
-    makeTransitions();
+    this.transitions = transitions;
 
     if (verbose) {
       log.info(Config.SEPARATOR);
@@ -122,9 +115,11 @@ public abstract class ParsingSystem  {
 
   public int getTransitionID(String s) {
     int numTrans = numTransitions();
-    for (int k = 0; k < numTrans; ++k)
-      if (transitions.get(k).equals(s))
+    for (int k = 0; k < numTrans; ++k) {
+      if (transitions.get(k).equals(s)) {
         return k;
+      }
+    }
     return -1;
   }
 

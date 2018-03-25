@@ -20,7 +20,9 @@ import java.util.List;
 public class DependencyParserDemo  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParserDemo.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(DependencyParserDemo.class);
+
+  private DependencyParserDemo() {} // static main method only
 
   public static void main(String[] args) {
     String modelPath = DependencyParser.DEFAULT_MODEL;

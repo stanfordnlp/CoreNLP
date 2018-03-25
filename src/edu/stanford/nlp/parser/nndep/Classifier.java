@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.nndep;
 
+import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -380,10 +381,10 @@ public class Classifier  {
       this.cost += otherCost.getCost();
       this.percentCorrect += otherCost.getPercentCorrect();
 
-      addInPlace(gradW1, otherCost.getGradW1());
-      addInPlace(gradb1, otherCost.getGradb1());
-      addInPlace(gradW2, otherCost.getGradW2());
-      addInPlace(gradE, otherCost.getGradE());
+      ArrayMath.addInPlace(gradW1, otherCost.getGradW1());
+      ArrayMath.pairwiseAddInPlace(gradb1, otherCost.getGradb1());
+      ArrayMath.addInPlace(gradW2, otherCost.getGradW2());
+      ArrayMath.addInPlace(gradE, otherCost.getGradE());
     }
 
     /**
@@ -668,8 +669,8 @@ public class Classifier  {
         for (int k = 0; k < config.embeddingSize; ++k)
           saved[mapX][j] += W1[j][pos * config.embeddingSize + k] * E[tok][k];
     }
-    log.info("PreComputed " + toPreCompute.size() + ", Elapsed Time: " + (System
-        .currentTimeMillis() - startTime) / 1000.0 + " (s)");
+    log.info("PreComputed " + toPreCompute.size() + ", Elapsed Time: " +
+            (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
 
   double[] computeScores(int[] feature) {
@@ -727,26 +728,4 @@ public class Classifier  {
     return E;
   }
 
-  /**
-   * Add the two 2d arrays in place of {@code m1}.
-   *
-   * @throws java.lang.IndexOutOfBoundsException (possibly) If
-   *                                             {@code m1} and {@code m2} are not of the same dimensions
-   */
-  private static void addInPlace(double[][] m1, double[][] m2) {
-    for (int i = 0; i < m1.length; i++)
-      for (int j = 0; j < m1[0].length; j++)
-        m1[i][j] += m2[i][j];
-  }
-
-  /**
-   * Add the two 1d arrays in place of {@code a1}.
-   *
-   * @throws java.lang.IndexOutOfBoundsException (Possibly) if
-   *                                             {@code a1} and {@code a2} are not of the same dimensions
-   */
-  private static void addInPlace(double[] a1, double[] a2) {
-    for (int i = 0; i < a1.length; i++)
-      a1[i] += a2[i];
-  }
 }
