@@ -948,9 +948,12 @@ public class DependencyParser  {
       String optTrans = null;
 
       for (int j = 0; j < numTrans; ++j) {
-        if (scores[j] > optScore && system.canApply(c, system.transitions.get(j))) {
-          optScore = scores[j];
-          optTrans = system.transitions.get(j);
+        if (scores[j] > optScore) {
+          String tr = system.transitions.get(j);
+          if (system.canApply(c, tr)) {
+            optScore = scores[j];
+            optTrans = tr;
+          }
         }
       }
       system.apply(c, optTrans);

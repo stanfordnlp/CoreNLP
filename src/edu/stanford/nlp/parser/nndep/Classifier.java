@@ -665,13 +665,12 @@ public class Classifier  {
       int mapX = preMap.get(x);
       int tok = x / config.numTokens;
       int pos = x % config.numTokens;
-      for (int j = 0; j < config.hiddenSize; ++j)
-        for (int k = 0; k < config.embeddingSize; ++k)
-          saved[mapX][j] += W1[j][pos * config.embeddingSize + k] * E[tok][k];
+      matrixMultiplySliceSum(saved[mapX], W1, E[tok], pos * config.embeddingSize);
     }
     log.info("PreComputed " + toPreCompute.size() + ", Elapsed Time: " +
             (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
+
 
   double[] computeScores(int[] feature) {
     return computeScores(feature, preMap);
@@ -684,39 +683,46 @@ public class Classifier  {
   private double[] computeScores(int[] feature, Map<Integer, Integer> preMap) {
     double[] hidden = new double[config.hiddenSize];
     int offset = 0;
-    for (int j = 0; j < feature.length; ++j) {
+    for (int j = 0; j < feature.length; j++) {
       int tok = feature[j];
       int index = tok * config.numTokens + j;
-
       Integer idInteger = preMap.get(index);
       if (idInteger != null) {
-        int id = idInteger;
-        for (int i = 0; i < config.hiddenSize; ++i) {
-          hidden[i] += saved[id][i];
-        }
+        ArrayMath.pairwiseAddInPlace(hidden, saved[idInteger]);
       } else {
-        for (int i = 0; i < config.hiddenSize; ++i) {
-          for (int k = 0; k < config.embeddingSize; ++k) {
-            hidden[i] += W1[i][offset + k] * E[tok][k];
-          }
-        }
+        matrixMultiplySliceSum(hidden, W1, E[tok], offset);
       }
       offset += config.embeddingSize;
     }
+    addCubeInPlace(hidden, b1);
+    return matrixMultiply(W2, hidden);
+  }
 
-    for (int i = 0; i < config.hiddenSize; ++i) {
-      hidden[i] += b1[i];
-      hidden[i] = hidden[i] * hidden[i] * hidden[i];  // cube nonlinearity
+  // extracting these small methods makes things faster; hotspot likes them
+
+  private static double[] matrixMultiply(double[][] matrix, double[] vector) {
+    double[] result = new double[matrix.length];
+    for (int i = 0; i < matrix.length; i++) {
+      result[i] = ArrayMath.dotProduct(matrix[i], vector);
     }
+    return result;
+  }
 
-    double[] scores = new double[numLabels];
-    for (int i = 0; i < numLabels; ++i) {
-      for (int j = 0; j < config.hiddenSize; ++j) {
-        scores[i] += W2[i][j] * hidden[j];
+  private static void matrixMultiplySliceSum(double[] sum, double[][] matrix, double[] vector, int leftColumnOffset) {
+    for (int i = 0; i < matrix.length; i++) {
+      for (int j = 0; j < vector.length; j++) {
+        sum[i] += matrix[i][leftColumnOffset + j] * vector[j];
       }
     }
-    return scores;
   }
+
+  private static void addCubeInPlace(double[] vector, double [] bias) {
+    for (int i = 0; i < vector.length; i++) {
+      vector[i] += bias[i]; // add bias
+      vector[i] = vector[i] * vector[i] * vector[i];  // cube nonlinearity
+    }
+  }
+
 
   public double[][] getW1() {
     return W1;
