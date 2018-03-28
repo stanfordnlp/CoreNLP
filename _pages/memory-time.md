@@ -14,14 +14,14 @@ How slow and memory intensive CoreNLP is depends on the annotators _you_ choose.
 
 ## CoreNLP doesn’t need much time or space
 
-CoreNLP doesn’t need to use much time or space. It can just tokenize and sentence split text using very little time and space.
+Some uses of CoreNLP don’t need much time or space. It can just tokenize and sentence split text using very little time and space.
 It can do this on the sample text while giving Java just 20MB of memory:
 
 ```bash
 java -mx20m -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file James-Joyce-Ulysses-ch13.txt -outputFormat text
 ```
 
-CoreNLP will probably report a speed around 50,000–100,000 tokens a second for running this command. (That’s actually well under its actual speed for doing just these two operations – the text isn’t long enough for the code to be warmed up, and I/O costs, etc. dominate. Likely its real speed on your computer is well over 200,000 tokens a second in this configuration.)
+CoreNLP will probably report a speed around 50,000–100,000 tokens per second for running this command. (That’s actually well under its actual speed for doing just these two operations – the text isn’t long enough for the code to be warmed up, and I/O costs, etc. dominate. Likely its real speed on your computer is well over 200,000 tokens a second in this configuration.)
 
 So, the first thing to know is that **CoreNLP will be slow and take a lot of memory if and only if you choose annotators and annotation options that are slow and use a lot of memory**.
 
@@ -33,7 +33,7 @@ A whole “document” is represented in memory while processing it. Therefore, 
 
 ## Avoid creating lots of pipelines
 
-If you’re using lots of annotators, CoreNLP can easily spend 10–40 seconds just loading an annotation pipeline. Pipeline loading time can easily dominate actual annotation time. So, if you load a new pipeline frequently, such as for every sentence, then CoreNLP will be _painfully_ slow. You should load an annotation pipleline – what you get when you call `new StanfordCoreNLP(props)` in code – as infrequently as possible. Often, **you can and should just load _one_ pipeline and use it for everything**. You only need to use multiple pipelines if you simultaneously need different configurations, such as working with multiple human languages or doing processing with different options or annotators. 
+If you’re using lots of annotators, CoreNLP can easily spend 10–40 seconds just loading an annotation pipeline. Pipeline loading time can easily dominate actual annotation time. So, if you load a new pipeline frequently, such as for every sentence, then CoreNLP will be _painfully_ slow. You should load an annotation pipleline – what you get when you call `new StanfordCoreNLP(props)` in code – as infrequently as possible. **Usually you can and should just load _one_ pipeline and use it for everything**. You only need to use multiple pipelines if you simultaneously need different configurations, such as working with multiple human languages or doing processing with different options or annotators. 
 
 Beware that some old interfaces to CoreNLP from other programming languages fork a new CoreNLP process every time they are called. Look for a library that either talks to the CoreNLP web service API or directly calls into the Java code and so can avoid creating new annotation pipelines.
 
@@ -93,13 +93,16 @@ and the annotation speed is about 6500 tokens per second – another 5 times fas
 
 There are three big places that memory goes:
 
-1. The large machine learning models (mainly arrays and maps of Strings for features and floats or doubles for parameters) which are stored in memory
-2. Large linguistic analysis data structures in memory.
-3. The annotated document that is stored in memory.
+1. The annotated document that is stored in memory.
+2. Large machine learning models (mainly arrays and maps of Strings for features and floats or doubles for parameters) which are stored in memory
+3. Very large data structures in memory that are used by some NLP algorithms
 
-For 1., the only thing you can do is to either remove annotators that you do not need or to make choices for smaller annotators.  These models are what fills the large models jar. They are even larger when they are uncompressed and represented in memory. Here are some examples.
 
-Currently, the most memory-requiring models in the default pipeline are the neural network for statistical coreference. The shift-reduce constituency parser also has very large models. If you run without them, you can annotate the sample document in 2GB of RAM:
+For 1., you should avoid having documents that are too large. Don’t try to parse a whole novel as one CoreNLP document. Parse each chapter as a separate document. This has already been covered above.
+ 
+For 2., the only thing you can do is to either remove annotators that you do not need or to make choices for smaller annotators.  These models are what fills the large models jar. They are even larger when they are uncompressed and represented in memory. Here are some examples.
+
+Currently, the largest models in the default pipeline are the neural networks for statistical coreference. The shift-reduce constituency parser also has very large models. If you run without them, you can annotate the sample document in 2GB of RAM:
 
 ```bash
 java -mx2g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner,depparse" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
@@ -117,7 +120,7 @@ In the other direction, if you turn off parsing as well, then 1GB of RAM is fine
 java -mx1g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
 ```
 
-For 2., the classic problem case is parsing long sentences with dynamic programmed parsers like the traditional `englishPCFG.ser.gz` constituency parsing. This takes space proportional to the square of the longest sentence length, with a large constant factor. Parsing sentences that are hundreds of words long will take additional gigabytes of memory just for the parser tables. The easiest fix for that is just to not parse super-long sentences. You can do that with a property like: `-parse.maxlen 70`. This can be a fine solution for something like web pages or newswire, where anything over 70 words is likely a table or list or something that isn’t a real sentence. However, it is unappealing for James Joyce: Several of the sentences in Chapter 13 are over 100 words but are well-formed, proper sentences. For example, here is one of the longer sentences in the chapter:
+For 3., the classic problem case is parsing long sentences with dynamic programmed parsers like the traditional `englishPCFG.ser.gz` constituency parsing. This takes space proportional to the square of the longest sentence length, with a large constant factor. Parsing sentences that are hundreds of words long will take additional gigabytes of memory just for the parser data structures. The easiest fix for that is just to not parse super-long sentences. You can do that with a property like: `-parse.maxlen 70`. This can be a fine solution for something like web pages or newswire, where anything over 70 words is likely a table or list or something that isn’t a real sentence. However, it is unappealing for James Joyce: Several of the sentences in Chapter 13 are over 100 words but are well-formed, proper sentences. For example, here is one of the longer sentences in the chapter:
 
 > Her griddlecakes done to a goldenbrown hue and
 > queen Ann’s pudding of delightful creaminess had won golden opinions
@@ -132,17 +135,17 @@ For 2., the classic problem case is parsing long sentences with dynamic programm
 > covers for the chairs and that silver toastrack in Clery’s summer
 > jumble sales like they have in rich houses.
 
-A better way to lessen memory use is to use a different parser. The shift-reduce constitutency parse is much faster, usually more accurate, and uses much less memory for parse structures (though it does have much bigger machine learning models). You can invoke it with `-parse.model edu/stanford/nlp/models/srparser/englishSR.ser.gz`, or as appropriate for the language you are parsing.
+A better way to lessen memory use is to use a different parser. The shift-reduce constituency parse is much faster, usually more accurate, and uses much less memory for parse structures (though it does require loading a much bigger machine learning model). You can invoke it with `-parse.model edu/stanford/nlp/models/srparser/englishSR.ser.gz`, or as appropriate for the language you are parsing.
 
-Nevertheless, in general, very long sentences blow out processing time and memory. One thing to be aware of is that CoreNLP currently uses simple, heuristic sentence splitting on sentence terminators like ‘.’ and ‘?’. If you are parsing “noisy” text without explicit sentence breaks – this often happens if you parse things like tables or web pages – you can end up with “sentences” more than 500 words long, which it isn’t even useful to try to parse. You should either clean these up manually or limit the sentence length that annotators try to process.
+Alternatively, if you do not require constituency parses but can make do with dependency parses (perhaps then using components like coreference algorithms that work with dependency parses), then things are much better again: The neural dependency parser is compact and much faster again than the shift-reduce constituency parser. You invoke it by choosing the annotator `depparse` instead of `parse`.
 
-For 3., you should avoid having documents that are too large. Don’t try to parse a whole novel as one CoreNLP document. Parse each chapter as a separate document.
+Nevertheless, in general, very long sentences blow out processing time and memory. One thing to be aware of is that CoreNLP currently uses simple, heuristic sentence splitting on sentence terminators like ‘.’ and ‘?’. If you are parsing “noisy” text without explicit sentence breaks – this often happens if you parse things like tables or web pages – you can end up with “sentences” more than 500 words long, which it isn’t even useful to try to parse. You should either clean these up in data preprocessing or limit the sentence length that annotators try to process. Several annotators support a maximum sentence length property and will simply skip processing of longer sentence. The most commonly useful of these is `parse.maxlen` but there is also `kbp.maxlen`, `ner.maxlen`, and `pos.maxlen`.
 
 ## Where does all the time go?
 
-The slowest annotators are coreference and parsing. Many coreference methods are especially sensitive to the total document length, since they are quadratic or cubic in the number of mentions in the document. The parsing annotators, particularly dynamic-programming constituency parsing, is especially sensitive to maximum sentence length. Your processing will be much faster if you either leave out these annotators or choose options that make them as fast as possible. In v.3.7.0, the fastest, most memory-efficient models are the default: neural network dependency parsing followed by statistical coreference. In earlier versions, you should choose non-default options to maximize speed and memory efficiency. The most time and memory efficient options are neural network dependency parsing followed by statistical coreference if you only need dependency parses, or shift-reduce constituency parsing followed by deterministic coreference if you do need constituency parses.
+The slowest annotators are coreference and parsing. Many coreference methods are especially sensitive to the total document length, since they are quadratic or cubic in the number of mentions in the document. The parsing annotators, particularly dynamic-programming constituency parsing, is especially sensitive to maximum sentence length. Your processing will be much faster if you either leave out these annotators or choose options that make them as fast as possible. In v.3.7.0, the fastest, most memory-efficient models are the default: neural network dependency parsing followed by statistical coreference. In earlier versions, you should choose non-default options to maximize speed and memory efficiency. Again, the most time and memory efficient options are neural network dependency parsing followed by statistical coreference if you only need dependency parses, or shift-reduce constituency parsing followed by deterministic coreference if you do need constituency parses.
 
-The graph below is for an older version of CoreNLP (v.3.5.0) on an aging computer, but is maybe nevertheless of interest to give some idea of how the speed of the system varies by orders of magnitude depending on the annotations run.
+The graph below is for an older version of CoreNLP (v.3.5.0) on an aging computer, but is maybe nevertheless of interest to give some idea of how the speed of the system varies by orders of magnitude depending on the annotations run. Not the log scale on the y axis.
 
 ![Speed Graph]({{ site.github.url }}/images/StanfordCoreNlpSpeed.png)
 
@@ -150,7 +153,7 @@ The graph below is for an older version of CoreNLP (v.3.5.0) on an aging compute
 
 ### pos
 
-The POS tagger does support a `pos.maxlen` flag, but this should rarely be needed, since the POS tagger uses memory and time linearly with sentence length. The default `english-left3words-distsim.tagger` is much faster than the `english-bidirectional-distsim.tagger`.
+The POS tagger does support a `pos.maxlen` flag, but this should rarely be needed, since the POS tagger uses memory and time linearly with sentence length. The default `english-left3words-distsim.tagger` is *much* faster than the `english-bidirectional-distsim.tagger`. (That is, about 10 times faster.)
 
 ### ner
 

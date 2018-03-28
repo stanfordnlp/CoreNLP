@@ -146,6 +146,9 @@ entries:
         - title: Memory and time optimization
           url: memory-time.html
 
+        - title: Annotator pipelines
+          url: pipelines.html
+
         - title: Online demo (API)
           external_url: http://corenlp.run/
 
