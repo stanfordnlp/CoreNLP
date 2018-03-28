@@ -146,7 +146,7 @@ entries:
         - title: Memory and time optimization
           url: memory-time.html
 
-        - title: Annotator pipelines
+        - title: Annotation pipelines
           url: pipelines.html
 
         - title: Online demo (API)
