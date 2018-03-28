@@ -99,7 +99,7 @@ There are three big places that memory goes:
 
 
 For 1., you should avoid having documents that are too large. Don’t try to parse a whole novel as one CoreNLP document. Parse each chapter as a separate document. This has already been covered above.
- 
+
 For 2., the only thing you can do is to either remove annotators that you do not need or to make choices for smaller annotators.  These models are what fills the large models jar. They are even larger when they are uncompressed and represented in memory. Here are some examples.
 
 Currently, the largest models in the default pipeline are the neural networks for statistical coreference. The shift-reduce constituency parser also has very large models. If you run without them, you can annotate the sample document in 2GB of RAM:
