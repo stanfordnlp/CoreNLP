@@ -782,7 +782,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
           /* If the control verb can't have an object, we also have to reattach. */
           if (root.value() != null && root.tag() != null) {
             String lemma = Morphology.lemmaStatic(root.value(), root.tag());
-            if (lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
+            if (lemma != null && lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
               reattach = true;
             }
           }
