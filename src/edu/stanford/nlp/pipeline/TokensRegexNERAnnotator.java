@@ -257,8 +257,8 @@ public class TokensRegexNERAnnotator implements Annotator  {
     				mappingLine = "header=true, "+ mappingLine;
     				mappings[i] = mappingLine;
     			}
-    			else if (!mappingLine.toLowerCase().matches("header\\s*=\\s*true")){
-    				throw new Error("Error! The annotator header property is set to true, but a different options has been provided for mapping file: " + mappingLine);
+    			else if (!Pattern.compile("header\\s*=\\s*true").matcher(mappingLine.toLowerCase()).find()){
+    				throw new Error("The annotator header property is set to true, but a different option has been provided for mapping file: " + mappingLine);
     			}
     			
     		}
@@ -852,7 +852,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
       return SEMICOLON_DELIMITERS_PATTERN.split(mappingFiles);
     }
   }
-  private static String[] processPerFileOptions(String annotatorName, String[] mappings, List<Boolean> ignoreCaseList, List<Pattern> validPosPatternList, List<String[]> filesHeaderList, boolean ignoreCase, Pattern validPosPattern, String[] headerList, String[] annotationFieldnames, List<Class> annotationFields) {
+  private static String[] processPerFileOptions(String annotatorName, String[] mappings, List<Boolean> ignoreCaseList, List<Pattern> validPosPatternList, List<String[]> headerList, boolean ignoreCase, Pattern validPosPattern, String[] headerFields, String[] annotationFieldnames, List<Class> annotationFields) {
     Integer numMappingFiles = mappings.length;
     for (int index = 0; index < numMappingFiles; index++) {
       boolean ignoreCaseSet = false;
@@ -883,36 +883,36 @@ public class TokensRegexNERAnnotator implements Annotator  {
                 validPosPatternSet = true;
                 break;
               case "header":
-          	  	String headerItems = optionAndValue[1].trim();
-          	  	String[] thisFileheaderList = COMMA_DELIMITERS_PATTERN.split(headerItems);
+          	  	String header = optionAndValue[1].trim();
+          	  	String[] headerItems = header.split("\\s+");
           	  	headerSet = true;
           	  	
-          	  	if (thisFileheaderList.length == 1 && thisFileheaderList[0].equalsIgnoreCase("true")) {
+          	  	if (headerItems.length == 1 && headerItems[0].equalsIgnoreCase("true")) {
           	  		try {
-          	  				BufferedReader br = IOUtils.readerFromString(filePath);
-							String headerLine = br.readLine();
-							IOUtils.closeIgnoringExceptions(br);
-							thisFileheaderList = headerLine.split("\\t");
-						} catch (IOException e) {
-							e.printStackTrace();
+      	  				BufferedReader br = IOUtils.readerFromString(filePath);
+						String headerLine = br.readLine();
+						IOUtils.closeIgnoringExceptions(br);
+						headerItems = headerLine.split("\\t");
+					} catch (IOException e) {
+						e.printStackTrace();
 						}
           	  	}
           	  	            	  	
-          	  	filesHeaderList.add(thisFileheaderList);
+          	  	headerList.add(headerItems);
           	  	
-	        	      for (String field : thisFileheaderList) {
-	        	          if (!predefinedHeaderFields.contains(field) && !Arrays.asList(annotationFieldnames).contains(field)) {
+        	        for (String field : headerItems) {
+        	        		if (!predefinedHeaderFields.contains(field) && !Arrays.asList(annotationFieldnames).contains(field)) {
 	        	              Class fieldClass = EnvLookup.lookupAnnotationKeyWithClassname(null, field);
 	        	              if (fieldClass == null) {
-		            	        throw new RuntimeException( "Not recognized annotation class field \"" + field + "\" in header for mapping file " + allOptions[numOptions -1]);
+        	            	  		throw new RuntimeException( "Not recognized annotation class field \"" + field + "\" in header for mapping file " + allOptions[numOptions -1]);
 	        	              }
 	        	              else {
-	        	            	  annotationFields.add(fieldClass);
-	        	            	  annotationFieldnames = Arrays.copyOf(annotationFieldnames, annotationFieldnames.length + 1);
-	        	            	  annotationFieldnames[annotationFieldnames.length - 1] = field;
+		        	            	annotationFields.add(fieldClass);
+		        	            	annotationFieldnames = Arrays.copyOf(annotationFieldnames, annotationFieldnames.length + 1);
+		        	            	annotationFieldnames[annotationFieldnames.length - 1] = field;
 	        	              }
 	        	          }
-	        	      }
+	        	      	}
 	        	      break;
 	        	      
               default:
@@ -932,7 +932,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
       }
       
       if (!headerSet) {
-  	  	filesHeaderList.add(headerList);
+    	  	headerList.add(headerFields);
       }
     }
     
