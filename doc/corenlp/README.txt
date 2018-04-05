@@ -42,6 +42,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2018-02-27    3.9.1     Bug fixes, minor enhancements 
+
 2018-01-31    3.9.0     Spanish KBP and new dependency parse model, 
                         wrapper API for data, quote attribution 
                         improvements, easier use of coref info, bug 

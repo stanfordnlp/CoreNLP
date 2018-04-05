@@ -32,6 +32,8 @@ LICENSE
 CHANGES
 ------------------------------------
 
+2018-02-27    3.9.1     Updated for compatibility 
+
 2016-10-31    3.7.0     Update for compatibility 
 
 2015-12-09    3.6.0     Update for compatibility 

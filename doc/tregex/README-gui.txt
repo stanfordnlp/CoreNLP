@@ -1,4 +1,4 @@
-Tregex GUI v3.8.0 - 2017-06-09
+Tregex GUI v3.9.1 - 2018-02-27
 ----------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -155,6 +155,8 @@ LICENSE
 ----------------------------
 CHANGES
 ----------------------------
+
+2018-02-27    3.9.1     Updated for compatibility 
 
 2017-06-09    3.8.0     Updated for compatibility 
 
