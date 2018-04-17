@@ -900,7 +900,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     os.println("\t\"outputExtension\" - extension to use for the output file (defaults to \".xml\" for XML, \".ser.gz\" for serialized).  Don't forget the dot!");
     os.println("\t\"outputFormat\" - \"xml\" (usual default), \"text\" (default for REPL or if no XML), \"json\", \"conll\", \"conllu\", \"serialized\", or \"custom\"");
     os.println("\t\"customOutputter\" - specify a class to a custom outputter instead of a pre-defined output format");
-    os.println("\t\"serializer\" - Class of annotation serializer to use when outputFormat is \"serialized\".  By default, uses Java serialization.");
+    os.println("\t\"serializer\" - Class of annotation serializer to use when outputFormat is \"serialized\".  By default, uses ProtobufAnnotationSerializer.");
     os.println("\t\"replaceExtension\" - flag to chop off the last extension before adding outputExtension to file");
     os.println("\t\"noClobber\" - don't automatically override (clobber) output files that already exist");
 		os.println("\t\"threads\" - multithread on this number of threads");
@@ -1023,7 +1023,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     final OutputFormat outputFormat =
         OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
 
-    final String serializerClass = properties.getProperty("serializer", GenericAnnotationSerializer.class.getName());
+    final String serializerClass = properties.getProperty("serializer", ProtobufAnnotationSerializer.class.getName());
     final String outputSerializerClass = properties.getProperty("outputSerializer", serializerClass);
     final String outputSerializerName = (serializerClass.equals(outputSerializerClass))? "serializer":"outputSerializer";
     final String outputFormatOptions = properties.getProperty("outputFormatOptions");
