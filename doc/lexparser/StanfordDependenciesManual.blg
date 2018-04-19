@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: StanfordDependenciesManual.aux
+The style file: plainnat.bst
+Database file #1: StanfordDependenciesManual.bib
+You've used 64 entries,
+            2773 wiz_defined-function locations,
+            935 strings with 18661 characters,
+and the built_in function-call counts, 32658 in all, are:
+= -- 2758
+> -- 2085
+< -- 50
++ -- 704
+- -- 639
+* -- 2487
+:= -- 4854
+add.period$ -- 194
+call.type$ -- 64
+change.case$ -- 402
+chr.to.int$ -- 63
+cite$ -- 128
+duplicate$ -- 1636
+empty$ -- 2732
+format.name$ -- 735
+if$ -- 7026
+int.to.chr$ -- 2
+int.to.str$ -- 1
+missing$ -- 61
+newline$ -- 329
+num.names$ -- 256
+pop$ -- 976
+preamble$ -- 1
+purify$ -- 341
+quote$ -- 0
+skip$ -- 1250
+stack$ -- 0
+substring$ -- 782
+swap$ -- 294
+text.length$ -- 22
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 704
+warning$ -- 0
+while$ -- 258
+width$ -- 0
+write$ -- 824

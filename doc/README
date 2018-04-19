@@ -1,7 +1,7 @@
 This directory contains various forms of documentation.
 
-software: the web pages on our apache installation, eg
-http://nlp.stanford.edu/software/index.shtml
+software: the web pages on our apache httpd installation, ei.e.,
+https://nlp.stanford.edu/software/
 
 releasenotes: the output of running the release scripts to create the
 zips we release

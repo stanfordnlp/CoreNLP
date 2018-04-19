@@ -28,7 +28,18 @@ java -cp "*:." edu.stanford.nlp.classify.ColumnDataClassifier -prop examples/che
 
 This will classify the included test data, cheeseDisease.test, based on the probability that each example is a cheese or a disease, as calculated by a linear classifier trained on cheeseDisease.train.
 
-The cheese2007.prop file demonstrates how features are specified.  The first feature in the file, useClassFeature, indicates that a feature should be used based on class frequency in the training set.  Most other features are calculated on specific columns of data in your tab-delimited text file.  For example, "1.useNGrams=true" indicates that n-gram features should be created for the values in column 1 (numbering begins at 0!).  Note that you must specify, for example, "true" in "1.useNGrams=true"; "1.useNGrams" alone will not cause n-gram features to be created.  N-gram features are character subsequences of the string in the column, for example, "t", "h", "e", "th", "he", "the" from the word "the". You can also specify various other kinds of features such as just using the string value as a categorical feature (1.useString=true) or splitting up a longer string into bag-of-words features (1.splitWordsRegexp=[ ]  1.useSplitWords=true).  The prop file also allows a choice of printing and optimization options, and allows you to specify training and test files (e.g., in cheese2007.prop under the "Training input" comment).  See the javadoc for ColumnDataClassifier within the edu.stanford.nlp.classify package for more information on these and other options.
+The cheese2007.prop file demonstrates how features are specified.  The first feature in the file, useClassFeature,
+indicates that a feature should be used based on class frequency in the training set.  Most other features are
+calculated on specific columns of data in your tab-delimited text file.  For example, "1.useNGrams=true" indicates
+that n-gram features should be created for the values in column 1 (numbering begins at 0!).  Note that you must
+specify, for example, "true" in "1.useNGrams=true"; "1.useNGrams" alone will not cause n-gram features to be created.
+N-gram features are character subsequences of the string in the column, for example, "t", "h", "e", "th", "he",
+"the" from the word "the". You can also specify various other kinds of features such as just using the string value
+as a categorical feature (1.useString=true) or splitting up a longer string into bag-of-words features
+(1.splitWordsRegexp=[ ]  1.useSplitWords=true).  The prop file also allows a choice of printing and optimization
+options, and allows you to specify training and test files (e.g., in cheese2007.prop under the "Training input"
+comment).  See the javadoc for ColumnDataClassifier within the edu.stanford.nlp.classify package for more information
+on these and other options.
 
 Another included dataset is the iris dataset which uses numerical features to separate types of irises.   To specify the use of a real-valued rather than categorical feature, you can use one or more of "realValued", "logTransform", or "logitTransform" for a given column.  "realValued" adds the number in the given column as a feature value, while the transform options perform either a log or a logit transform on the value first.  The format of these feature options is the same as for categorical features; for instance, iris2007.prop shows the use of real valued features such as "2.realValued=true".
 
@@ -60,13 +71,12 @@ LICENSE
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    java-nlp-support@lists.stanford.edu
 //    https://nlp.stanford.edu/software/classifier.html
