@@ -151,6 +151,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
   private final Set<String> myLabels;  // set of labels to always overwrite
   private final Pattern validPosPattern;
   private final List<Pattern> validPosPatternList;
+  private final List<String[]> headerList;
   private final boolean verbose;
 
   private final Map<Entry, Integer> entryToMappingFileNumber;
@@ -247,10 +248,22 @@ public class TokensRegexNERAnnotator implements Annotator  {
     String[] annotationFieldnames = null;
     String[] headerFields = null;
     if (readHeaderFromFile) {
-      // Get header as first line from all files...
-      // TODO: support reading header from file
-      throw new UnsupportedOperationException("Reading header from file not yet supported!!!");
-    } else {
+		annotationFieldnames = new String[0]; 	
+		annotationFields = new ArrayList<>();
+    		//Set the read header property of each file to true
+    		for (int i = 0; i < mappings.length; i++) {
+    			String mappingLine = mappings[i];
+    			if (!mappingLine.contains("header")) {
+    				mappingLine = "header=true, "+ mappingLine;
+    				mappings[i] = mappingLine;
+    			}
+    			else if (!Pattern.compile("header\\s*=\\s*true").matcher(mappingLine.toLowerCase()).find()){
+    				throw new Error("The annotator header property is set to true, but a different option has been provided for mapping file: " + mappingLine);
+    			}
+    			
+    		}
+   		
+    } else	{
       headerFields = COMMA_DELIMITERS_PATTERN.split(headerProp);
       // Take header fields and remove known headers to get annotation field names
       List<String> fieldNames = new ArrayList<>();
@@ -271,6 +284,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
           }
         }
       }
+      
       annotationFieldnames = new String[fieldNames.size()];
       fieldNames.toArray(annotationFieldnames);
       annotationFields = fieldClasses;
@@ -288,9 +302,10 @@ public class TokensRegexNERAnnotator implements Annotator  {
     }
     validPosPatternList = new ArrayList<>();
     ignoreCaseList = new ArrayList<>();
+    headerList = new ArrayList<>();
     entryToMappingFileNumber = new HashMap<>();
-    processPerFileOptions(name, mappings, ignoreCaseList, validPosPatternList, ignoreCase, validPosPattern);
-    entries = Collections.unmodifiableList(readEntries(name, noDefaultOverwriteLabels, ignoreCaseList, entryToMappingFileNumber, verbose, headerFields, annotationFieldnames, mappings));
+    annotationFieldnames = processPerFileOptions(name, mappings, ignoreCaseList, validPosPatternList, headerList, ignoreCase, validPosPattern, headerFields, annotationFieldnames, annotationFields);
+    entries = Collections.unmodifiableList(readEntries(name, noDefaultOverwriteLabels, ignoreCaseList, headerList, entryToMappingFileNumber, verbose, annotationFieldnames, mappings));
     IdentityHashMap<SequencePattern<CoreMap>, Entry> patternToEntry = new IdentityHashMap<>();
     multiPatternMatcher = createPatternMatcher(patternToEntry);
     this.patternToEntry = Collections.unmodifiableMap(patternToEntry);
@@ -572,7 +587,8 @@ public class TokensRegexNERAnnotator implements Annotator  {
    */
   private static List<Entry> readEntries(String annotatorName,
                                          Set<String> noDefaultOverwriteLabels,
-                                         List<Boolean> ignoreCaseList, Map<Entry, Integer> entryToMappingFileNumber, boolean verbose,
+                                         List<Boolean> ignoreCaseList, List<String[]> headerList,
+                                         Map<Entry, Integer> entryToMappingFileNumber, boolean verbose,
                                          String[] headerFields,
                                          String[] annotationFieldnames,
                                          String... mappings) {
@@ -588,7 +604,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
       BufferedReader rd = null;
       try {
         rd = IOUtils.readerFromString(mapping);
-        readEntries(annotatorName, headerFields, annotationFieldnames, entries, seenRegexes, mapping, rd, noDefaultOverwriteLabels, ignoreCaseList.get(mappingFileIndex), mappingFileIndex, entryToMappingFileNumber, verbose);
+        readEntries(annotatorName, headerList.get(mappingFileIndex), annotationFieldnames, entries, seenRegexes, mapping, rd, noDefaultOverwriteLabels, ignoreCaseList.get(mappingFileIndex), mappingFileIndex, entryToMappingFileNumber, verbose);
       } catch (IOException e) {
         throw new RuntimeIOException("Couldn't read TokensRegexNER from " + mapping, e);
       } finally {
@@ -670,6 +686,24 @@ public class TokensRegexNERAnnotator implements Annotator  {
     for (String line; (line = mapping.readLine()) != null; ) {
       lineCount ++;
       String[] split = line.split("\t");
+      
+      if (lineCount == 1) {
+  	  	if (split.length == headerFields.length) {
+  	  		boolean equals = true;
+  	  		for (int i = 0; i < split.length; i ++) {
+  	  			if (!Objects.equals(split[i], headerFields[i])) {
+  	  				equals = false;
+  	  				break;
+  	  			}
+  	  		}
+  	  		if (equals) {
+  	  	  		//This is the header line -> skip
+  	  	  		continue;
+  	  		}	
+  	  	}
+      }
+      
+      
       if (split.length < minLength || split.length > maxLength) {
         String err = "many";
         if (split.length < minLength) {
@@ -818,14 +852,15 @@ public class TokensRegexNERAnnotator implements Annotator  {
       return SEMICOLON_DELIMITERS_PATTERN.split(mappingFiles);
     }
   }
-
-  private static void processPerFileOptions(String annotatorName, String[] mappings, List<Boolean> ignoreCaseList, List<Pattern> validPosPatternList, boolean ignoreCase, Pattern validPosPattern) {
+  private static String[] processPerFileOptions(String annotatorName, String[] mappings, List<Boolean> ignoreCaseList, List<Pattern> validPosPatternList, List<String[]> headerList, boolean ignoreCase, Pattern validPosPattern, String[] headerFields, String[] annotationFieldnames, List<Class> annotationFields) {
     Integer numMappingFiles = mappings.length;
     for (int index = 0; index < numMappingFiles; index++) {
       boolean ignoreCaseSet = false;
       boolean validPosPatternSet = false;
+      boolean headerSet = false;
       String[] allOptions = COMMA_DELIMITERS_PATTERN.split(mappings[index].trim());
       Integer numOptions = allOptions.length;
+      String filePath = allOptions[allOptions.length - 1];
       if (numOptions > 1) { // there are some per file options here
         for (int i = 0; i < numOptions-1; i++) {
           String[] optionAndValue = EQUALS_DELIMITERS_PATTERN.split(allOptions[i].trim());
@@ -847,6 +882,39 @@ public class TokensRegexNERAnnotator implements Annotator  {
                 }
                 validPosPatternSet = true;
                 break;
+              case "header":
+          	  	String header = optionAndValue[1].trim();
+          	  	String[] headerItems = header.split("\\s+");
+          	  	headerSet = true;
+          	  	
+          	  	if (headerItems.length == 1 && headerItems[0].equalsIgnoreCase("true")) {
+          	  		try {
+      	  				BufferedReader br = IOUtils.readerFromString(filePath);
+						String headerLine = br.readLine();
+						IOUtils.closeIgnoringExceptions(br);
+						headerItems = headerLine.split("\\t");
+					} catch (IOException e) {
+						e.printStackTrace();
+						}
+          	  	}
+          	  	            	  	
+          	  	headerList.add(headerItems);
+          	  	
+        	        for (String field : headerItems) {
+        	        		if (!predefinedHeaderFields.contains(field) && !Arrays.asList(annotationFieldnames).contains(field)) {
+	        	              Class fieldClass = EnvLookup.lookupAnnotationKeyWithClassname(null, field);
+	        	              if (fieldClass == null) {
+        	            	  		throw new RuntimeException( "Not recognized annotation class field \"" + field + "\" in header for mapping file " + allOptions[numOptions -1]);
+	        	              }
+	        	              else {
+		        	            	annotationFields.add(fieldClass);
+		        	            	annotationFieldnames = Arrays.copyOf(annotationFieldnames, annotationFieldnames.length + 1);
+		        	            	annotationFieldnames[annotationFieldnames.length - 1] = field;
+	        	              }
+	        	          }
+	        	      	}
+	        	      break;
+	        	      
               default:
                 break;
             }
@@ -862,7 +930,14 @@ public class TokensRegexNERAnnotator implements Annotator  {
       if (!validPosPatternSet) {
         validPosPatternList.add(validPosPattern);
       }
+      
+      if (!headerSet) {
+    	  	headerList.add(headerFields);
+      }
     }
+    
+    return annotationFieldnames;
+
   }
 
   private static boolean atLeastOneValidPosPattern(List<Pattern> validPosPatternList) {
