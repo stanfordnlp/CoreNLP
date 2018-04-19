@@ -564,6 +564,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
     private static final long serialVersionUID = -8859638719818931606L;
 
+    @SuppressWarnings("serial")
     protected final LexedTokenFactory<T> factory;
     protected String options;
 
@@ -709,9 +710,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * standalone to turn a corpus into a one-token-per-line file of tokens.
    * This main method assumes that the input file is in utf-8 encoding,
    * unless an encoding is specified.
-   * <p/>
+   * <p>
    * Usage: {@code java edu.stanford.nlp.process.PTBTokenizer [options] filename+ }
-   * <p/>
+   * <p>
    * Options:
    * <ul>
    * <li> -options options Set various tokenization options
