@@ -1,7 +1,7 @@
 
-JAVANLP_HOME=/juicy/scr5/scr1/mihais/code/javanlp
+JAVANLP_HOME=/u/scr/mihais/code/javanlp
 export CLASSPATH=$JAVANLP_HOME/projects/mt/classes:$JAVANLP_HOME/projects/core/classes:$JAVANLP_HOME/projects/core/lib/fastutil.jar
-DIR=/scr/nlp/data/ACE2005/english_test/bn
+DIR=/u/scr/nlp/data/ACE2005/english_test/bn
 
 for i in `find $DIR -name "*.sgm"`
 do
