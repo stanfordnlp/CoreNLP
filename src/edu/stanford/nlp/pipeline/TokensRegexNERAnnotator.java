@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 
 
 /**
- * <p>
  * TokensRegexNERAnnotator labels tokens with types based on a simple manual mapping from
  * regular expressions to the types of the entities they are meant to describe.
  * The user provides a file formatted as follows:
@@ -32,6 +31,7 @@ import java.util.regex.Pattern;
  * (higher priority is favored) is used to choose between the possible types.
  * When the priority is the same, then longer matches are favored.
  *
+ * <p>
  * This annotator is designed to be used as part of a full
  * NER system to label entities that don't fall into the usual NER categories. It only records the label
  * if the token has not already been NER-annotated, or it has been annotated but the NER-type has been
@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
  * It is also possible to use this annotator to annotate fields other than the
  * {@code NamedEntityTagAnnotation} field by
  * and providing the header
- * </p>
  *
  * <p>
  * The first column regex may follow one of two formats:
@@ -61,13 +60,12 @@ import java.util.regex.Pattern;
  *    already been tokenized.  So, for example, with our usual English tokenization, things like genitives
  *    and commas at the end of words will be separated in the input and matched as a separate token.</li>
  * </ol>
- * </p>
  *
  * <p>
  * This annotator is similar to {@link RegexNERAnnotator} but uses TokensRegex as the underlying library for matching
  * regular expressions.  This allows for more flexibility in the types of expressions matched as well as utilizing
  * any optimization that is included in the TokensRegex library.
- * </p>
+ *
  * <p>
  * Main differences from {@link RegexNERAnnotator}:
  * <ul>
@@ -84,7 +82,7 @@ import java.util.regex.Pattern;
  *   <li>By default, there is no {@code validPosPattern}</li>
  *   <li>By default, both O and MISC is always replaced</li>
  * </ul>
- * </p>
+ *
  * <p>
  *   Configuration:
  * <table>
@@ -122,9 +120,23 @@ import java.util.regex.Pattern;
  *   <tr><td>{@code verbose}</td><td>If true, turns on extra debugging messages.</td>
  *      <td>{@code false}</td></tr>
  * </table>
- * </p>
+ *
+ * <p>
+ * You can specify a different header for each mapping file.
+ * Here is an example of mapping files with header declaration:
+ * <pre>
+ * properties.setProperty("ner.fine.regexner.mapping", "ignorecase=true, header=pattern overwrite priority, file1.tab;" + "ignorecase=true, file2.tab");
+ * </pre>
+ * The header items are whitespace separated and can also be specified for one of the files.
+ * Files MUST be separated with a semi-colon.
+ *
+ * In the same way, it is possible to fetch the header from the first line of a specific file.
+ * <pre>
+ * properties.setProperty("ner.fine.regexner.mapping", "ignorecase=true, header=true, file1.tab;" + "ignorecase=true, header=pattern overwrite priority group, file2.tab");
+ * </pre>
  *
  * @author Angel Chang
+ * @author Alberto Soragna (@alsora) (added per-file headers
  */
 public class TokensRegexNERAnnotator implements Annotator  {
 
@@ -248,22 +260,21 @@ public class TokensRegexNERAnnotator implements Annotator  {
     String[] annotationFieldnames = null;
     String[] headerFields = null;
     if (readHeaderFromFile) {
-		annotationFieldnames = new String[0]; 	
-		annotationFields = new ArrayList<>();
-    		//Set the read header property of each file to true
-    		for (int i = 0; i < mappings.length; i++) {
-    			String mappingLine = mappings[i];
-    			if (!mappingLine.contains("header")) {
-    				mappingLine = "header=true, "+ mappingLine;
-    				mappings[i] = mappingLine;
-    			}
-    			else if (!Pattern.compile("header\\s*=\\s*true").matcher(mappingLine.toLowerCase()).find()){
-    				throw new Error("The annotator header property is set to true, but a different option has been provided for mapping file: " + mappingLine);
-    			}
-    			
-    		}
-   		
-    } else	{
+      annotationFieldnames = new String[0];
+      annotationFields = new ArrayList<>();
+      // Set the read header property of each file to true
+      for (int i = 0; i < mappings.length; i++) {
+        String mappingLine = mappings[i];
+        if (!mappingLine.contains("header")) {
+          mappingLine = "header=true, "+ mappingLine;
+          mappings[i] = mappingLine;
+        } else if (!Pattern.compile("header\\s*=\\s*true").matcher(mappingLine.toLowerCase()).find()){
+          throw new Error("The annotator header property is set to true, but a different option has been provided for mapping file: " + mappingLine);
+        }
+
+      }
+
+    } else {
       headerFields = COMMA_DELIMITERS_PATTERN.split(headerProp);
       // Take header fields and remove known headers to get annotation field names
       List<String> fieldNames = new ArrayList<>();
@@ -686,24 +697,23 @@ public class TokensRegexNERAnnotator implements Annotator  {
     for (String line; (line = mapping.readLine()) != null; ) {
       lineCount ++;
       String[] split = line.split("\t");
-      
+
       if (lineCount == 1) {
-  	  	if (split.length == headerFields.length) {
-  	  		boolean equals = true;
-  	  		for (int i = 0; i < split.length; i ++) {
-  	  			if (!Objects.equals(split[i], headerFields[i])) {
-  	  				equals = false;
-  	  				break;
-  	  			}
-  	  		}
-  	  		if (equals) {
-  	  	  		//This is the header line -> skip
-  	  	  		continue;
-  	  		}	
-  	  	}
+        if (split.length == headerFields.length) {
+          boolean equals = true;
+          for (int i = 0; i < split.length; i ++) {
+            if (!Objects.equals(split[i], headerFields[i])) {
+              equals = false;
+              break;
+            }
+          }
+          if (equals) {
+            //This is the header line -> skip
+            continue;
+          }
+        }
       }
-      
-      
+
       if (split.length < minLength || split.length > maxLength) {
         String err = "many";
         if (split.length < minLength) {
@@ -875,7 +885,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
                 break;
               case "validpospattern":
                 String validPosRegex = optionAndValue[1].trim();
-                if (validPosRegex != null && !validPosRegex.equals("")) {
+                if ( ! StringUtils.isNullOrEmpty(validPosRegex)) {
                   validPosPatternList.add(Pattern.compile(validPosRegex));
                 } else {
                   validPosPatternList.add(validPosPattern);
@@ -883,38 +893,36 @@ public class TokensRegexNERAnnotator implements Annotator  {
                 validPosPatternSet = true;
                 break;
               case "header":
-          	  	String header = optionAndValue[1].trim();
-          	  	String[] headerItems = header.split("\\s+");
-          	  	headerSet = true;
-          	  	
-          	  	if (headerItems.length == 1 && headerItems[0].equalsIgnoreCase("true")) {
-          	  		try {
-      	  				BufferedReader br = IOUtils.readerFromString(filePath);
-						String headerLine = br.readLine();
-						IOUtils.closeIgnoringExceptions(br);
-						headerItems = headerLine.split("\\t");
-					} catch (IOException e) {
-						e.printStackTrace();
-						}
-          	  	}
-          	  	            	  	
-          	  	headerList.add(headerItems);
-          	  	
-        	        for (String field : headerItems) {
-        	        		if (!predefinedHeaderFields.contains(field) && !Arrays.asList(annotationFieldnames).contains(field)) {
-	        	              Class fieldClass = EnvLookup.lookupAnnotationKeyWithClassname(null, field);
-	        	              if (fieldClass == null) {
-        	            	  		throw new RuntimeException( "Not recognized annotation class field \"" + field + "\" in header for mapping file " + allOptions[numOptions -1]);
-	        	              }
-	        	              else {
-		        	            	annotationFields.add(fieldClass);
-		        	            	annotationFieldnames = Arrays.copyOf(annotationFieldnames, annotationFieldnames.length + 1);
-		        	            	annotationFieldnames[annotationFieldnames.length - 1] = field;
-	        	              }
-	        	          }
-	        	      	}
-	        	      break;
-	        	      
+                String header = optionAndValue[1].trim();
+                String[] headerItems = header.split("\\s+");
+                headerSet = true;
+
+                if (headerItems.length == 1 && headerItems[0].equalsIgnoreCase("true")) {
+                  try (BufferedReader br = IOUtils.readerFromString(filePath)) {
+                    String headerLine = br.readLine();
+                    headerItems = headerLine.split("\\t");
+                  } catch (IOException e) {
+                    logger.err(e);
+                  }
+                }
+
+                headerList.add(headerItems);
+
+                for (String field : headerItems) {
+                  if (!predefinedHeaderFields.contains(field) && !Arrays.asList(annotationFieldnames).contains(field)) {
+                    Class fieldClass = EnvLookup.lookupAnnotationKeyWithClassname(null, field);
+                    if (fieldClass == null) {
+                      throw new RuntimeException( "Not recognized annotation class field \"" + field + "\" in header for mapping file " + allOptions[numOptions -1]);
+                    }
+                    else {
+                      annotationFields.add(fieldClass);
+                      annotationFieldnames = Arrays.copyOf(annotationFieldnames, annotationFieldnames.length + 1);
+                      annotationFieldnames[annotationFieldnames.length - 1] = field;
+                    }
+                  }
+                }
+                break;
+
               default:
                 break;
             }
@@ -930,9 +938,9 @@ public class TokensRegexNERAnnotator implements Annotator  {
       if (!validPosPatternSet) {
         validPosPatternList.add(validPosPattern);
       }
-      
+
       if (!headerSet) {
-    	  	headerList.add(headerFields);
+        headerList.add(headerFields);
       }
     }
     
