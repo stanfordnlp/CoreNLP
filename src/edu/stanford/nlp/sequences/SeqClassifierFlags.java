@@ -2632,6 +2632,7 @@ public class SeqClassifierFlags implements Serializable  {
         combinationMode = val;
       } else if (key.equalsIgnoreCase("ner.model")) {
         nerModel = val;
+      } else if (key.equalsIgnoreCase("sutime.language")) {
         // ADD VALUE ABOVE HERE
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         log.info("Unknown property: |" + key + '|');
