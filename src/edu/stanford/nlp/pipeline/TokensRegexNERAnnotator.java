@@ -228,6 +228,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
   private static final Pattern COMMA_DELIMITERS_PATTERN = Pattern.compile("\\s*,\\s*");
   private static final Pattern SEMICOLON_DELIMITERS_PATTERN = Pattern.compile("\\s*;\\s*");
   private static final Pattern EQUALS_DELIMITERS_PATTERN = Pattern.compile("\\s*=\\s*");
+  private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(?:\\.[0-9]+)?");
 
   public TokensRegexNERAnnotator(String name, Properties properties) {
     String prefix = ! StringUtils.isNullOrEmpty(name) ? name + '.': "";
@@ -264,7 +265,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
         if (!mappingLine.contains("header")) {
           mappingLine = "header=true, "+ mappingLine;
           mappings[i] = mappingLine;
-        } else if ( ! Pattern.compile("header\\s*=\\s*true").matcher(mappingLine.toLowerCase()).find()){
+        } else if ( ! Pattern.compile("header\\s*=\\s*true").matcher(mappingLine.toLowerCase()).find()) {
           throw new IllegalStateException("The annotator header property is set to true, but a different option has been provided for mapping file: " + mappingLine);
         }
       }
@@ -297,7 +298,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
     }
 
     String noDefaultOverwriteLabelsProp = properties.getProperty(prefix + "noDefaultOverwriteLabels", "CITY");
-    this.noDefaultOverwriteLabels = Collections.unmodifiableSet(CollectionUtils.asSet(noDefaultOverwriteLabelsProp.split("\\s*,\\s*")));
+    this.noDefaultOverwriteLabels = Collections.unmodifiableSet(CollectionUtils.asSet(COMMA_DELIMITERS_PATTERN.split(noDefaultOverwriteLabelsProp)));
     this.ignoreCase = PropertiesUtils.getBool(properties, prefix + "ignorecase", false);
     this.verbose = PropertiesUtils.getBool(properties, prefix + "verbose", false);
 
@@ -577,14 +578,15 @@ public class TokensRegexNERAnnotator implements Annotator  {
     }
 
     public String getTypeDescription() {
-      return "[" + StringUtils.join(types, ",") + "]";
+      return Arrays.toString(types);
     }
 
     public String toString() {
       return "Entry{" + ((tokensRegex != null) ? tokensRegex: StringUtils.join(regex)) + ' '
-          + StringUtils.join(types) + ' ' + overwritableTypes + ' ' + priority + '}';
+          + StringUtils.join(types) + ' ' + overwritableTypes + " prio:" + priority + '}';
     }
-  }
+  } // end static class Entry
+
 
   /**
    *  Creates a combined list of Entries using the provided mapping files.
@@ -733,7 +735,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
         key = norm;
       }
       String[] types = new String[annotationCols.length];
-      for (int i=0; i < annotationCols.length; i++) {
+      for (int i = 0; i < annotationCols.length; i++) {
         types[i] = split[annotationCols[i]].trim();
       }
 
@@ -741,7 +743,11 @@ public class TokensRegexNERAnnotator implements Annotator  {
       double priority = 0.0;
 
       if (iOverwrite >= 0 && split.length > iOverwrite) {
-        overwritableTypes.addAll(Arrays.asList(split[iOverwrite].trim().split("\\s*,\\s*")));
+        if (NUMBER_PATTERN.matcher(split[iOverwrite].trim()).matches()) {
+          logger.warn("Number in types column for " + Arrays.toString(key) +
+                  " is probably priority: " + split[iOverwrite]);
+        }
+        overwritableTypes.addAll(Arrays.asList(COMMA_DELIMITERS_PATTERN.split(split[iOverwrite].trim())));
       }
       if (iPriority >= 0 && split.length > iPriority) {
         try {
@@ -793,7 +799,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
 
       Entry entry = new Entry(tokensRegex, regexes, types, overwritableTypes, priority, weight, annotateGroup);
 
-      if (seenRegexes.containsKey(key)) {
+      if (seenRegexes.containsKey(Arrays.asList(key))) {
         Entry oldEntry = seenRegexes.get(key);
         if (priority > oldEntry.priority) {
           logger.warn(annotatorName +
