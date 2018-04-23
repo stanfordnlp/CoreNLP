@@ -885,12 +885,13 @@ public class SequenceMatchRules {
     @Override
     public boolean extract(CoreMap cm, List<O> out) {
       env.push(Expressions.VAR_SELF, cm);
-      T field = (T) cm.get(annotationField);
-      boolean res = extractRule.extract(field, out);
-      env.pop(Expressions.VAR_SELF);
-      return res;
+      try {
+        T field = (T) cm.get(annotationField);
+        return extractRule.extract(field, out);
+      } finally {
+        env.pop(Expressions.VAR_SELF);
+      }
     }
-
   }
 
   /**
@@ -1148,11 +1149,17 @@ public class SequenceMatchRules {
 
     @Override
     public O apply(CoreMap cm) {
-      if (env != null) { env.push(Expressions.VAR_SELF, cm); }
-      T field = (T) cm.get(annotationField);
-      O res = func.apply(field);
-      if (env != null) { env.pop(Expressions.VAR_SELF); }
-      return res;
+      if (env != null) {
+        env.push(Expressions.VAR_SELF, cm);
+      }
+      try {
+        T field = (T) cm.get(annotationField);
+        return func.apply(field);
+      }  finally {
+        if (env != null) {
+          env.pop(Expressions.VAR_SELF);
+        }
+      }
     }
   }
 
@@ -1168,10 +1175,16 @@ public class SequenceMatchRules {
 
     @Override
     public O apply(CoreMap cm) {
-      if (env != null) { env.push(Expressions.VAR_SELF, cm); }
-      O res = func.apply(Collections.singletonList(cm));
-      if (env != null) { env.pop(Expressions.VAR_SELF); }
-      return res;
+      if (env != null) {
+        env.push(Expressions.VAR_SELF, cm);
+      }
+      try {
+        return func.apply(Collections.singletonList(cm));
+      } finally {
+        if (env != null) {
+          env.pop(Expressions.VAR_SELF);
+        }
+      }
     }
   }
 }
