@@ -41,6 +41,7 @@
   <property name="compile.optimize"    value="true"/>
   <property name="compile.source"      value="1.8" />
   <property name="compile.target"      value="1.8" />
+  <property name="compile.encoding"      value="utf-8" />
 
 
 
@@ -114,12 +115,12 @@
     <javac srcdir="${src.home}"
           destdir="${build.home}"
             debug="${compile.debug}"
-         encoding="utf-8" 
+         encoding="${compile.encoding}"
       deprecation="${compile.deprecation}"
          optimize="${compile.optimize}"
 	   source="${compile.source}"
            target="${compile.target}"
-includeantruntime="false">
+            includeantruntime="false">
         <classpath refid="compile.classpath"/>
       <compilerarg value="-Xmaxerrs"/>
       <compilerarg value="20"/>
@@ -155,13 +156,13 @@ includeantruntime="false">
                 destdir="${javadoc.home}"
               maxmemory="768m"
                  author="true"
-                 source="1.6"
+                 source="1.8"
                 Overview="${src.home}/edu/stanford/nlp/overview.html"
                 Doctitle="Stanford JavaNLP API Documentation"
              Windowtitle="Stanford JavaNLP API"
            packagenames="*">
-      <bottom><![CDATA[<FONT SIZE=2><A HREF=\"http://nlp.stanford.edu\">Stanford NLP Group</A></FONT>]]></bottom>
-      <link href="http://java.sun.com/j2se/1.6.0/docs/api/"/>
+      <bottom><![CDATA[<font size="2"><a href=\"http://nlp.stanford.edu\">Stanford NLP Group</a></font>]]></bottom>
+      <link href="https://docs.oracle.com/javase/8/docs/api/"/>
     </javadoc>
 
   </target>
