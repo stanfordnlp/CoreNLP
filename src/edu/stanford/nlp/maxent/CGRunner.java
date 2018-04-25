@@ -1,17 +1,17 @@
-/**
+/*
  * Title:       Stanford JavaNLP.
  * Description: A Maximum Entropy Toolkit.
  * Copyright:   Copyright (c) 2002. Kristina Toutanova, Stanford University
  * Company:     Stanford University, All Rights Reserved.
  */
 package edu.stanford.nlp.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 
 import edu.stanford.nlp.maxent.iis.LambdaSolve;
 import edu.stanford.nlp.optimization.*;
 import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * This class will call an optimization method such as Conjugate Gradient or
@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.ReflectionLoading;
 public class CGRunner  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CGRunner.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CGRunner.class);
 
   private static final boolean SAVE_LAMBDAS_REGULARLY = false;
 

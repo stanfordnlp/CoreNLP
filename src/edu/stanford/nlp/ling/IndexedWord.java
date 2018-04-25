@@ -1,11 +1,11 @@
 package edu.stanford.nlp.ling;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Objects;
 import java.util.Set;
 
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.TypesafeMap;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * This class provides a {@link CoreLabel} that uses its

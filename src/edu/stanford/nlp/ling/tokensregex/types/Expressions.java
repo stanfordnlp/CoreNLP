@@ -69,7 +69,7 @@ import java.util.regex.Pattern;
  *   <tr><th colspan="2">Accessor functions</th></tr>
  *   <tr><td>{@code Map(list,function)}</td><td>Returns a new list that is the result of applying the function on every element of the List</td></tr>
  *   <tr><td>{@code Keys(map)}</td><td>Returns list of keys for the given map</td></tr>
- *   <tr><td><{@code Set(object or map, fieldname, value)<br>Set(list,index,value)}</td><td>Set the field to the specified value</td></tr>
+ *   <tr><td><{@code Set(object or map, fieldname, value)}<br>{@code Set(list,index,value)}}</td><td>Set the field to the specified value</td></tr>
  *   <tr><td>{@code Get(object or map, fieldname) or object.fieldname <br>Get(list,index) or list[index]}</td><td>Returns the value of the specified field</td></tr>
  *   <tr><th colspan="2">String functions</th></tr>
  *   <tr><td>{@code Format(format,arg1,arg2,...)}</td><td>Returns formatted string</td></tr>

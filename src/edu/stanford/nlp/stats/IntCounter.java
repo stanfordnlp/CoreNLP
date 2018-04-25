@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 import edu.stanford.nlp.util.*;
-import java.util.function.Predicate;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * but with different methods for easily getting/setting/incrementing counts
  * for objects and computing various functions with the counts.
  * The Counter constructor
- * and <tt>addAll</tt> method can be used to copy another Counter's contents
+ * and {@code addAll} method can be used to copy another Counter's contents
  * over. This class also provides access
  * to Comparators that can be used to sort the keys or entries of this Counter
  * by the counts, in either ascending or descending order.
@@ -142,7 +142,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   /**
    * Returns the current count for the given key, which is 0 if it hasn't
    * been
-   * seen before. This is a convenient version of <code>get</code> that casts
+   * seen before. This is a convenient version of {@code get} that casts
    * and extracts the primitive value.
    */
   public double getCount(Object key) {
@@ -156,7 +156,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   /**
    * Returns the current count for the given key, which is 0 if it hasn't
    * been
-   * seen before. This is a convenient version of <code>get</code> that casts
+   * seen before. This is a convenient version of {@code get} that casts
    * and extracts the primitive value.
    */
   public int getIntCount(Object key) {
@@ -178,7 +178,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   /**
    * Sets the current count for the given key. This will wipe out any existing
    * count for that key.
-   * <p/>
+   * <p>
    * To add to a count instead of replacing it, use
    * {@link #incrementCount(Object,int)}.
    */
@@ -207,7 +207,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   /**
    * Sets the current count for each of the given keys. This will wipe out
    * any existing counts for these keys.
-   * <p/>
+   * <p>
    * To add to the counts of a collection of objects instead of replacing them,
    * use {@link #incrementCounts(Collection,int)}.
    */
@@ -221,11 +221,11 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * Adds the given count to the current count for the given key. If the key
    * hasn't been seen before, it is assumed to have count 0, and thus this
    * method will set its count to the given amount. Negative increments are
-   * equivalent to calling <tt>decrementCount</tt>.
-   * <p/>
+   * equivalent to calling {@code decrementCount}.
+   * <p>
    * To more conveniently increment the count by 1, use
    * {@link #incrementCount(Object)}.
-   * <p/>
+   * <p>
    * To set a count to a specific value instead of incrementing it, use
    * {@link #setCount(Object,int)}.
    */
@@ -249,10 +249,10 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * Adds 1 to the count for the given key. If the key hasn't been seen
    * before, it is assumed to have count 0, and thus this method will set
    * its count to 1.
-   * <p/>
+   * <p>
    * To increment the count by a value other than 1, use
    * {@link #incrementCount(Object,int)}.
-   * <p/>
+   * <p>
    * To set a count to a specific value instead of incrementing it, use
    * {@link #setCount(Object,int)}.
    */
@@ -265,11 +265,11 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * Adds the given count to the current counts for each of the given keys.
    * If any of the keys haven't been seen before, they are assumed to have
    * count 0, and thus this method will set their counts to the given
-   * amount. Negative increments are equivalent to calling <tt>decrementCounts</tt>.
-   * <p/>
+   * amount. Negative increments are equivalent to calling {@code decrementCounts}.
+   * <p>
    * To more conveniently increment the counts of a collection of objects by
    * 1, use {@link #incrementCounts(Collection)}.
-   * <p/>
+   * <p>
    * To set the counts of a collection of objects to a specific value instead
    * of incrementing them, use {@link #setCounts(Collection,int)}.
    */
@@ -283,10 +283,10 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * Adds 1 to the counts for each of the given keys. If any of the keys
    * haven't been seen before, they are assumed to have count 0, and thus
    * this method will set their counts to 1.
-   * <p/>
+   * <p>
    * To increment the counts of a collection of object by a value other
    * than 1, use {@link #incrementCounts(Collection,int)}.
-   * <p/>
+   * <p>
    * To set the counts of a collection of objects  to a specific value instead
    * of incrementing them, use  {@link #setCounts(Collection,int)}.
    */
@@ -298,11 +298,11 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * Subtracts the given count from the current count for the given key.
    * If the key hasn't been seen before, it is assumed to have count 0, and
    * thus this  method will set its count to the negative of the given amount.
-   * Negative increments are equivalent to calling <tt>incrementCount</tt>.
-   * <p/>
-   * To more conviently decrement the count by 1, use
+   * Negative increments are equivalent to calling {@code incrementCount}.
+   * <p>
+   * To more conveniently decrement the count by 1, use
    * {@link #decrementCount(Object)}.
-   * <p/>
+   * <p>
    * To set a count to a specifc value instead of decrementing it, use
    * {@link #setCount(Object,int)}.
    */
@@ -314,10 +314,10 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * Subtracts 1 from the count for the given key. If the key hasn't been
    * seen  before, it is assumed to have count 0, and thus this method will
    * set its count to -1.
-   * <p/>
+   * <p>
    * To decrement the count by a value other than 1, use
    * {@link #decrementCount(Object,int)}.
-   * <p/>
+   * <p>
    * To set a count to a specifc value instead of decrementing it, use
    * {@link #setCount(Object,int)}.
    */
@@ -330,11 +330,11 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * Subtracts the given count from the current counts for each of the given keys.
    * If any of the keys haven't been seen before, they are assumed to have
    * count 0, and thus this method will set their counts to the negative of the given
-   * amount. Negative increments are equivalent to calling <tt>incrementCount</tt>.
-   * <p/>
-   * To more conviniently decrement the counts of a collection of objects by
+   * amount. Negative increments are equivalent to calling {@code incrementCount}.
+   * <p>
+   * To more conveniently decrement the counts of a collection of objects by
    * 1, use {@link #decrementCounts(Collection)}.
-   * <p/>
+   * <p>
    * To set the counts of a collection of objects to a specific value instead
    * of decrementing them, use {@link #setCounts(Collection,int)}.
    */
@@ -346,10 +346,10 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * Subtracts 1 from the counts of each of the given keys. If any of the keys
    * haven't been seen before, they are assumed to have count 0, and thus
    * this method will set their counts to -1.
-   * <p/>
+   * <p>
    * To decrement the counts of a collection of object by a value other
    * than 1, use {@link #decrementCounts(Collection,int)}.
-   * <p/>
+   * <p>
    * To set the counts of a collection of objects  to a specifc value instead
    * of decrementing them, use  {@link #setCounts(Collection,int)}.
    */
@@ -359,7 +359,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
 
   /**
    * Adds the counts in the given Counter to the counts in this Counter.
-   * <p/>
+   * <p>
    * To copy the values from another Counter rather than adding them, use
    */
   public void addAll(IntCounter<E> counter) {
@@ -371,7 +371,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
 
   /**
    * Subtracts the counts in the given Counter from the counts in this Counter.
-   * <p/>
+   * <p>
    * To copy the values from another Counter rather than subtracting them, use
    */
   public void subtractAll(IntCounter<E> counter) {
@@ -562,18 +562,14 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * counts or adding and subtracting Counters, there may be keys left whose
    * count is 0, though normally this is undesirable. This method cleans up
    * the map.
-   * <p/>
+   * <p>
    * Maybe in the future we should try to do this more on-the-fly, though it's
    * not clear whether a distinction should be made between "never seen" (i.e.
    * null count) and "seen with 0 count". Certainly there's no distinction in
    * getCount() but there is in containsKey().
    */
   public void removeZeroCounts() {
-    for (Iterator<E> iter = map.keySet().iterator(); iter.hasNext();) {
-      if (getCount(iter.next()) == 0) {
-        iter.remove();
-      }
-    }
+    map.keySet().removeIf(e -> getCount(e) == 0);
   }
 
   /**

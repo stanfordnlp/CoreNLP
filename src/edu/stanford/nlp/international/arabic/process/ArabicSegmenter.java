@@ -113,7 +113,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   /**
    * Make an Arabic Segmenter.
    *
-   *  @param props Options for how to tokenize. See the main method of {@see ArabicTokenizer} for details
+   *  @param props Options for how to tokenize. See the main method of {@link ArabicTokenizer} for details
    */
   public ArabicSegmenter(Properties props) {
     isTokenized = props.containsKey(optTokenized);
@@ -598,7 +598,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
         }
 
       } catch (IOException e) {
-        e.printStackTrace();
+        log.warn(e);
       }
 
     } else {
@@ -615,7 +615,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
    * load from, and if not tries to run training using the given
    * options.
    *
-   * @param options
+   * @param options Properties to specify segmenter behavior
    * @return the trained or loaded model
    */
   public static ArabicSegmenter getSegmenter(Properties options) {
