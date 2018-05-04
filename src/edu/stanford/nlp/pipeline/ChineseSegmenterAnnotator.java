@@ -425,10 +425,14 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     if (separatorPattern.matcher(tokenText).matches()) {
       // Map to CoreNLP newline token
       tokenText = AbstractTokenizer.NEWLINE_TOKEN;
+      token.set(CoreAnnotations.IsNewlineAnnotation.class, true);
     } else if (doNormalization && normalizeSpace) {
       tokenText = tokenText.replace(' ', '\u00A0'); // change space to non-breaking space
+			token.set(CoreAnnotations.IsNewlineAnnotation.class, false);
+    } else {
+			token.set(CoreAnnotations.IsNewlineAnnotation.class, false);
     }
-
+    
     token.setWord(tokenText);
     token.setValue(tokenText);
     token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, charOffsetBegin);
