@@ -57,6 +57,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected int serverPort = 9000;
   @ArgumentParser.Option(name="status_port", gloss="The port to serve the status check endpoints on. If different from the server port, this will run in a separate thread.")
   protected int statusPort = serverPort;
+  @ArgumentParser.Option(name="uriContext", gloss="The URI context")
+  protected String uriContext = "";
   @ArgumentParser.Option(name="timeout", gloss="The default timeout, in milliseconds")
   protected int timeoutMilliseconds = 15000;
   @ArgumentParser.Option(name="strict", gloss="If true, obey strict HTTP standards (e.g., with encoding)")
@@ -1422,18 +1424,22 @@ public class StanfordCoreNLPServer implements Runnable {
       } else {
         server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
       }
-      withAuth(server.createContext("/", new CoreNLPHandler(defaultProps, authenticator, callback, homepage)), basicAuth);
-      withAuth(server.createContext("/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
-      withAuth(server.createContext("/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
-      withAuth(server.createContext("/tregex", new TregexHandler(authenticator, callback)), basicAuth);
-      withAuth(server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js", "application/javascript")), basicAuth);
-      withAuth(server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css", "text/css")), basicAuth);
-      withAuth(server.createContext("/corenlp-parseviewer.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-parseviewer.js", "application/javascript")), basicAuth);
-      withAuth(server.createContext("/ping", new PingHandler()), Optional.empty());
-      withAuth(server.createContext("/shutdown", new ShutdownHandler()), basicAuth);
+      String contextRoot = uriContext;
+      if (contextRoot.equals("")) {
+        contextRoot = "/";
+      }
+      withAuth(server.createContext(contextRoot, new CoreNLPHandler(defaultProps, authenticator, callback, homepage)), basicAuth);
+      withAuth(server.createContext(uriContext+"/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext(uriContext+"/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext(uriContext+"/tregex", new TregexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext(uriContext+"/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js", "application/javascript")), basicAuth);
+      withAuth(server.createContext(uriContext+"/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css", "text/css")), basicAuth);
+      withAuth(server.createContext(uriContext+"/corenlp-parseviewer.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-parseviewer.js", "application/javascript")), basicAuth);
+      withAuth(server.createContext(uriContext+"/ping", new PingHandler()), Optional.empty());
+      withAuth(server.createContext(uriContext+"/shutdown", new ShutdownHandler()), basicAuth);
       if (this.serverPort == this.statusPort) {
-        withAuth(server.createContext("/live", new LiveHandler()), Optional.empty());
-        withAuth(server.createContext("/ready", new ReadyHandler(live)), Optional.empty());
+        withAuth(server.createContext(uriContext+"/live", new LiveHandler()), Optional.empty());
+        withAuth(server.createContext(uriContext+"/ready", new ReadyHandler(live)), Optional.empty());
 
       }
       server.setExecutor(serverExecutor);
