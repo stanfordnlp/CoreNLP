@@ -211,6 +211,12 @@ pipeline.annotate(document);
 
 If you do not anticipate requiring extensive customization, consider using the [Simple CoreNLP](simple.html) API.
 
+If you want to do funkier things with CoreNLP, such as to use a second
+`StanfordCoreNLP` object to add additional analyses to an existing
+`Annotation` object, then you need to include the property
+`enforceRequirements = false` to avoid complaints about required
+earlier annotators not being present in the pipeline.
+
 ## Interpreting the output
 
 The output of the Annotators is accessed using the data structures CoreMap and CoreLabel. 

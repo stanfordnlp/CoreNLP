@@ -60,12 +60,17 @@ Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html). 
 To download earlier versions of Stanford CoreNLP or language packs for earlier versions, go to the [history page](history.html).
 
-Stanford CoreNLP 3.9.1 requires Java 8, but also works with Java 9.  If using Java 9, make sure
-to add this Java flag to your command to avoid errors:
+_Note:_ Stanford CoreNLP 3.9.1 requires a minimum of Java 8, but also
+works with Java 9 and 10.  However, the SUTime component uses the
+jollyday library which depends on JAXB, a Java EE component which
+started to be removed in Java 9. If using Java 9 or 10, you either
+need to add this Java flag to your command for CoreNLP to run:
 
 ```
 --add-modules java.se.ee
 ```
+
+or you need to add JAXB dependencies (see [this StackOverflow answer](https://stackoverflow.com/questions/48204141/replacements-for-deprecated-jpms-modules-with-java-ee-apis)). This second solution will become mandatory with Java 11. We'll try to update the download package in advance of that….
 
 The table below has jars for the current release with all the models for each language we support.
 Due to size issues we have divided the English resources into two
