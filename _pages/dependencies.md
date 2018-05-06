@@ -12,9 +12,9 @@ permalink: '/dependencies.html'
 | [pos](pos.html) | POSTaggerAnnotator | `tokenize, ssplit` |
 | [lemma](lemma.html) | MorphaAnnotator | `tokenize, ssplit, pos` |
 | [ner](ner.html) | NERClassifierCombiner | `tokenize, ssplit, pos, lemma`  |
-| [regexner](regexner.html) | RegexNERAnnotator | ? |
-| [sentiment](sentiment.html) | SentimentAnnotator | ? |
-| [parse](parse.html) | ParserAnnotator | `tokenize, ssplit` |
+| [regexner](regexner.html) | RegexNERAnnotator | `tokenize, ssplit, pos` |
+| [sentiment](sentiment.html) | SentimentAnnotator | `tokenize, ssplit, pos, parse` |
+| [parse](parse.html) | ParserAnnotator | `tokenize, ssplit, parse` |
 | [depparse](depparse.html) | DependencyParseAnnotator | `tokenize, ssplit, pos` |
 | [dcoref](dcoref.html) | DeterministicCorefAnnotator | `tokenize, ssplit, pos, lemma, ner, parse` |
 | [relation](relation.html) | RelationExtractorAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse` |
