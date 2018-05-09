@@ -79,7 +79,7 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static String serverPropertiesPath = null;
   @ArgumentParser.Option(name="maxCharLength", gloss="Max length string that will be processed (non-positive means no limit)")
   protected static int maxCharLength = 100000;
-  @ArgumentParser.Option(name="blacklist", gloss="A file containing subets that should be blacklisted from accessing the server. Each line is a subnet")
+  @ArgumentParser.Option(name="blacklist", gloss="A file containing subnets that should be blacklisted from accessing the server. Each line is a subnet. They are specified as an IPv4 address followed by a slash followed by how many leading bits to maintain as the subnet mask. E.g., '54.240.225.0/24'.")
   protected static String blacklist = null;
   @ArgumentParser.Option(name="stanford", gloss="If true, do special options (blacklist, timeout modifications) for public Stanford server")
   protected boolean stanford = false;
