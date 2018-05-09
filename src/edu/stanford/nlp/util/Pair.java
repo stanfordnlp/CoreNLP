@@ -12,11 +12,11 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
 /**
  * Pair is a Class for holding mutable pairs of objects.
- *
+ * <p>
  * <i>Implementation note:</i>
- * on a 32-bit JVM uses ~ 8 (this) + 4 (first) + 4 (second) = 16 bytes.
- * on a 64-bit JVM uses ~ 16 (this) + 8 (first) + 8 (second) = 32 bytes.
- *
+ * On a 32-bit JVM uses ~ 8 (this) + 4 (first) + 4 (second) = 16 bytes.
+ * On a 64-bit JVM uses ~ 16 (this) + 8 (first) + 8 (second) = 32 bytes.
+ * <p>
  * Many applications use a lot of Pairs so it's good to keep this
  * number small.
  *
@@ -92,22 +92,6 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
 
   public List<Object> asList() {
     return CollectionUtils.makeList(first, second);
-  }
-
-  /**
-   * Read a string representation of a Pair from a DataStream.
-   * This might not work correctly unless the pair of objects are of type
-   * <code>String</code>.
-   */
-  public static Pair<String, String> readStringPair(DataInputStream in) {
-    Pair<String, String> p = new Pair<>();
-    try {
-      p.first = in.readUTF();
-      p.second = in.readUTF();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return p;
   }
 
   /**

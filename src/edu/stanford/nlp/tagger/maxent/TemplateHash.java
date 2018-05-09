@@ -91,6 +91,7 @@ class ListInstances {
     }
 
   }// end read
+
   */
 
 }
@@ -238,6 +239,21 @@ public class TemplateHash  {
     if (hT.tempHash.containsKey(p)) {
       System.out.println(hT.tempHash.get(p));
     }
+  }
+
+  // Read a string representation of a Pair from a DataStream.
+  // This might not work correctly unless the pair of objects are of type
+  // [@code String}.
+  //
+  public static Pair<String, String> readStringPair(DataInputStream in) {
+    Pair<String, String> p = new Pair<>();
+    try {
+      p.first = in.readUTF();
+      p.second = in.readUTF();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return p;
   }
 
   */
