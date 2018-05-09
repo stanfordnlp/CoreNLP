@@ -1,7 +1,8 @@
 /**
- * <p>A collection of useful general-purpose utility classes. Below is a selection
+ * A collection of useful general-purpose utility classes. Below is a selection
  * of some of the most useful utility classes. Consult the class comments for
- * more details on any of these classes.</p>
+ * more details on any of these classes.
+ * <p>
  * <ul>
  *   <li>{@link edu.stanford.nlp.util.Filters}: Defines general useful {@link java.util.function.Predicate}
  *   and utility functions for dealing with predicates.</li>
@@ -12,7 +13,8 @@
  *   <li>{@link edu.stanford.nlp.util.Timing}: Static class for measuring how long something takes to execute.</li>
  * </ul>
  *
- * <p><b>Other packages with some useful utilies</b></p>
+ * <p>
+ * <b>Other packages with some useful utilities</b>
  * <dl>
  * <dt>{@link edu.stanford.nlp.io}</dt>
  * <dd>Contains some useful classes for traversing file systems to get lists of
