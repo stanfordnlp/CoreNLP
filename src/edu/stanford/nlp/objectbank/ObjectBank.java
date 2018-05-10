@@ -60,13 +60,13 @@ import java.io.Serializable;
  * For more general uses with existing classes, you first construct a collection of sources, then a class that
  * will make the objects of interest from instances of those sources, and then set up an ObjectBank that can
  * vend those objects:
- * <pre><code>
+ * <pre>{@code
  *   ReaderIteratorFactory rif = new ReaderIteratorFactory(Arrays.asList(new String[] { "file1", "file2", "file3" }));
  *   IteratorFromReaderFactory<Mention> corefIFRF = new MUCCorefIteratorFromReaderFactory(true);
  *   for (Mention m : new ObjectBank(rif, corefIFRF)) {
  *     ...
  *   }
- * </code></pre>
+ * }</pre>
  *
  * As an example of the general power of this class, suppose you have
  * a collection of files in the directory /u/nlp/data/gre/questions.  Each file
@@ -92,10 +92,10 @@ import java.io.Serializable;
  * First you need to build a ReaderIteratorFactory which will provide java.io.Readers
  * over all the files in your directory:
  *
- * <pre><code>
+ * <pre>{@code
  *   Collection c = new FileSequentialCollection("/u/nlp/data/gre/questions/", "", false);
  *   ReaderIteratorFactory rif = new ReaderIteratorFactory(c);
- * </code></pre>
+ * }</pre>
  *
  * Next you need to make an IteratorFromReaderFactory which will take the
  * java.io.Readers vended by the ReaderIteratorFactory, split them up into
@@ -105,7 +105,7 @@ import java.io.Serializable;
  * You would also need to write a class which extends Function and whose apply method
  * converts the String between the &lt;puzzle&gt; &lt;/puzzle&gt; tags into Puzzle objects.
  *
- * <pre><code>
+ * <pre>{@code
  * public class PuzzleParser implements Function {
  *   public Object apply (Object o) {
  *     String s = (String)o;
@@ -115,7 +115,7 @@ import java.io.Serializable;
  *     return p;
  *   }
  * }
- * </code></pre>
+ * }</pre>
  *
  * Now to build the IteratorFromReaderFactory:
  *
