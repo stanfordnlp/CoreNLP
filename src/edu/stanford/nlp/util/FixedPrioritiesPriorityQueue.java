@@ -27,6 +27,7 @@ public class FixedPrioritiesPriorityQueue<E>
   private static final long serialVersionUID = 1L;
   private int size;
   private int capacity;
+  @SuppressWarnings("serial")
   private List<E> elements;
   private double[] priorities;
 
@@ -51,6 +52,7 @@ public class FixedPrioritiesPriorityQueue<E>
   /**
    * Returns true if the priority queue is non-empty
    */
+  @Override
   public boolean hasNext() {
     return ! isEmpty();
   }
@@ -59,6 +61,7 @@ public class FixedPrioritiesPriorityQueue<E>
    * Returns the element in the queue with highest priority, and pops it from
    * the queue.
    */
+  @Override
   public E next() throws NoSuchElementException {
     return removeFirst();
   }
@@ -66,6 +69,7 @@ public class FixedPrioritiesPriorityQueue<E>
   /**
    * Not supported -- next() already removes the head of the queue.
    */
+  @Override
   public void remove() {
     throw new UnsupportedOperationException();
   }
@@ -78,6 +82,7 @@ public class FixedPrioritiesPriorityQueue<E>
    * the queue, it will be added an additional time, NOT promoted/demoted.
    *
    */
+  @Override
   public boolean add(E key, double priority) {
     if (size == capacity) {
       grow(2 * capacity + 1);
@@ -92,6 +97,7 @@ public class FixedPrioritiesPriorityQueue<E>
   /**
    * Not supported in this implementation.
    */
+  @Override
   public boolean changePriority(E key, double priority) {
     throw new UnsupportedOperationException();
   }
@@ -100,6 +106,7 @@ public class FixedPrioritiesPriorityQueue<E>
    * Returns the highest-priority element without removing it from the
    * queue.
    */
+  @Override
   public E getFirst() {
     if (size() > 0)
       return elements.get(0);
@@ -110,6 +117,7 @@ public class FixedPrioritiesPriorityQueue<E>
    * Note that this method will be linear (not constant) time in this
    * implementation!  Better not to use it.
    */
+  @Override
   public double getPriority(Object key) {
     for (int i = 0, sz = elements.size(); i < sz; i++) {
       if (elements.get(i).equals(key)) {
@@ -122,6 +130,7 @@ public class FixedPrioritiesPriorityQueue<E>
   /**
    * Gets the priority of the highest-priority element of the queue.
    */
+  @Override
   public double getPriority() {
     // check empty other way around
     if (size() > 0)
@@ -132,6 +141,7 @@ public class FixedPrioritiesPriorityQueue<E>
   /**
    * Not supported in this implementation.
    */
+  @Override
   public boolean relaxPriority(E key, double priority) {
     throw new UnsupportedOperationException();
   }
@@ -139,6 +149,7 @@ public class FixedPrioritiesPriorityQueue<E>
   /**
    * Returns the highest-priority element and removes it from the queue.
    */
+  @Override
   public E removeFirst() throws NoSuchElementException {
     E first = getFirst();
     swap(0, size - 1);
@@ -148,6 +159,7 @@ public class FixedPrioritiesPriorityQueue<E>
     return first;
   }
 
+  @Override
   public List<E> toSortedList() {
     // initialize with size
     List<E> list = new ArrayList<>();
@@ -257,6 +269,7 @@ public class FixedPrioritiesPriorityQueue<E>
   }
 
   /** {@inheritDoc} */
+  @Override
   public String toString(int maxKeysToPrint) {
     return toString(maxKeysToPrint, "%.3f");
   }
@@ -288,7 +301,7 @@ public class FixedPrioritiesPriorityQueue<E>
     if (numKeysPrinted < size()) {
       sb.append("...");
     }
-    sb.append("]");
+    sb.append(']');
     return sb.toString();
   }
 
