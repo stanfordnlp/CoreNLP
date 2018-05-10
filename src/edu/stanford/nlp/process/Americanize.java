@@ -27,20 +27,21 @@ import java.util.regex.Pattern;
  * <i>This list is still quite incomplete, but does some of the
  * most common cases found when running our parser or doing biomedical
  * processing. to expand this list, we should probably look at:</i>
- * <code>http://wordlist.sourceforge.net/</code> or
- * <code>http://home.comcast.net/~helenajole/Harry.html</code>.
+ * {@code http://wordlist.sourceforge.net/} or
+ * {@code http://home.comcast.net/~helenajole/Harry.html}.
  *
  * @author Christopher Manning
  */
 public class Americanize implements Function<HasWord,HasWord>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Americanize.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Americanize.class);
 
   /** Whether to capitalize month and day names. The default is true. */
   private final boolean capitalizeTimex;
 
-  public static final int DONT_CAPITALIZE_TIMEX = 1;
+  @SuppressWarnings("WeakerAccess")
+  public static final int DONT_CAPITALIZE_TIMEX = 0x1;
 
   /** No word shorter in length than this is changed by Americanize */
   private static final int MINIMUM_LENGTH_CHANGED = 4;
@@ -203,9 +204,9 @@ public class Americanize implements Function<HasWord,HasWord>  {
    *  </ul>
    */
   private static final String[] converters = {"anaesthetic", "analogue", "analogues", "analyse", "analysed", "analysing", /* not analyses NNS */
-                                                          "armoured", "cancelled", "cancelling", "candour", "capitalise", "capitalised", "capitalisation", "centre", "chimaeric", "clamour", "coloured", "colouring", "colourful", "defence", "Defence", /* "dialogue", "dialogues", */ "discolour", "discolours", "discoloured", "discolouring", "encyclopaedia", "endeavour", "endeavours", "endeavoured", "endeavouring", "fervour", "favour", "favours", "favoured", "favouring", "favourite", "favourites", "fibre", "fibres", "finalise", "finalised", "finalising", "flavour", "flavours", "flavoured", "flavouring", "glamour", "grey", "harbour", "harbours", "homologue", "homologues", "honour", "honours", "honoured", "honouring", "honourable", "humour", "humours", "humoured", "humouring", "kerb", "labelled", "labelling", "labour", "Labour", "labours", "laboured", "labouring", "leant", "learnt", "localise", "localised", "manoeuvre", "manoeuvres", "maximise", "maximised", "maximising", "meagre", "minimise", "minimised", "minimising", "modernise", "modernised", "modernising", "misdemeanour", "misdemeanours", "neighbour", "neighbours", "neighbourhood", "neighbourhoods", "oestrogen", "oestrogens", "organisation", "organisations", "penalise", "penalised", "popularise", "popularised", "popularises", "popularising", "practise", "practised", "pressurise", "pressurised", "pressurises", "pressurising", "realise", "realised", "realising", "realises", "recognise", "recognised", "recognising", "recognises", "rumoured", "rumouring", "savour", "savours", "savoured", "savouring", "splendour", "splendours", "theatre", "theatres", "titre", "titres", "travelled", "travelling" };
+                                                          "armoured", "cancelled", "cancelling", "capitalise", "capitalised", "capitalisation", "centre", "chimaeric", "coloured", "colouring", "colourful", "defence", "Defence", /* "dialogue", "dialogues", */ "discoloured", "discolouring", "encyclopaedia", "endeavoured", "endeavouring", "favoured", "favouring", "favourite", "favourites", "fibre", "fibres", "finalise", "finalised", "finalising", "flavoured", "flavouring", "grey", "homologue", "homologues", "honoured", "honouring", "honourable", "humoured", "humouring", "kerb", "labelled", "labelling", "Labour", "laboured", "labouring", "leant", "learnt", "localise", "localised", "manoeuvre", "manoeuvres", "maximise", "maximised", "maximising", "meagre", "minimise", "minimised", "minimising", "modernise", "modernised", "modernising", "neighbourhood", "neighbourhoods", "oestrogen", "oestrogens", "organisation", "organisations", "penalise", "penalised", "popularise", "popularised", "popularises", "popularising", "practise", "practised", "pressurise", "pressurised", "pressurises", "pressurising", "realise", "realised", "realising", "realises", "recognise", "recognised", "recognising", "recognises", "rumoured", "rumouring", "savoured", "savouring", "theatre", "theatres", "titre", "titres", "travelled", "travelling" };
 
-  private static final String[] converted = {"anesthetic", "analog", "analogs", "analyze", "analyzed", "analyzing", "armored", "canceled", "canceling", "candor", "capitalize", "capitalized", "capitalization", "center", "chimeric", "clamor", "colored", "coloring", "colorful", "defense", "Defense", /* "dialog", "dialogs", */ "discolor", "discolors", "discolored", "discoloring", "encyclopedia", "endeavor", "endeavors", "endeavored", "endeavoring", "fervor", "favor", "favors", "favored", "favoring", "favorite", "favorites", "fiber", "fibers", "finalize", "finalized", "finalizing", "flavor", "flavors", "flavored", "flavoring", "glamour", "gray", "harbor", "harbors", "homolog", "homologs", "honor", "honors", "honored", "honoring", "honorable", "humor", "humors", "humored", "humoring", "curb", "labeled", "labeling", "labor", "Labor", "labors", "labored", "laboring", "leaned", "learned", "localize", "localized", "maneuver", "maneuvers", "maximize", "maximized", "maximizing", "meager", "minimize", "minimized", "minimizing", "modernize", "modernized", "modernizing", "misdemeanor", "misdemeanors", "neighbor", "neighbors", "neighborhood", "neighborhoods", "estrogen", "estrogens", "organization", "organizations", "penalize", "penalized", "popularize", "popularized", "popularizes", "popularizing", "practice", "practiced", "pressurize", "pressurized", "pressurizes", "pressurizing", "realize", "realized", "realizing", "realizes", "recognize", "recognized", "recognizing", "recognizes", "rumored", "rumoring", "savor", "savors", "savored", "savoring", "splendor", "splendors", "theater", "theaters", "titer", "titers", "traveled", "traveling" };
+  private static final String[] converted = {"anesthetic", "analog", "analogs", "analyze", "analyzed", "analyzing", "armored", "canceled", "canceling", "capitalize", "capitalized", "capitalization", "center", "chimeric", "colored", "coloring", "colorful", "defense", "Defense", /* "dialog", "dialogs", */ "discolored", "discoloring", "encyclopedia", "endeavored", "endeavoring", "favored", "favoring", "favorite", "favorites", "fiber", "fibers", "finalize", "finalized", "finalizing", "flavored", "flavoring", "gray", "homolog", "homologs", "honored", "honoring", "honorable", "humored", "humoring", "curb", "labeled", "labeling", "Labor", "labored", "laboring", "leaned", "learned", "localize", "localized", "maneuver", "maneuvers", "maximize", "maximized", "maximizing", "meager", "minimize", "minimized", "minimizing", "modernize", "modernized", "modernizing", "neighborhood", "neighborhoods", "estrogen", "estrogens", "organization", "organizations", "penalize", "penalized", "popularize", "popularized", "popularizes", "popularizing", "practice", "practiced", "pressurize", "pressurized", "pressurizes", "pressurizing", "realize", "realized", "realizing", "realizes", "recognize", "recognized", "recognizing", "recognizes", "rumored", "rumoring", "savored", "savoring", "theater", "theaters", "titer", "titers", "traveled", "traveling" };
 
   private static final String[] timexConverters = {"january", "february", /* not "march" ! */
                                                                "april", /* Not "may"! */ "june", "july", "august", "september", "october", "november", "december", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
@@ -220,6 +221,7 @@ public class Americanize implements Function<HasWord,HasWord>  {
 
   // static initialization block
   static {
+    //noinspection ConstantConditions
     if (converters.length != converted.length || timexConverters.length != timexConverted.length || pats.length != reps.length || pats.length != excepts.length) {
       throw new RuntimeException("Americanize: Bad initialization data");
     }
@@ -248,19 +250,17 @@ public class Americanize implements Function<HasWord,HasWord>  {
    */
   public static void main(String[] args) throws IOException {
     log.info(new Americanize());
-    log.info();
 
     if (args.length == 0) { // stdin -> stdout:
-      BufferedReader buf = new BufferedReader(new InputStreamReader(System.in));
-      String line;
-      while((line = buf.readLine()) != null) {
-        for(String w : line.split("\\s+")) {
-          System.out.print(Americanize.americanize(w));
-          System.out.print(' ');
+      try (BufferedReader buf = new BufferedReader(new InputStreamReader(System.in))) {
+        for (String line; (line = buf.readLine()) != null; ) {
+          for (String w : line.split("\\s+")) {
+            System.out.print(Americanize.americanize(w));
+            System.out.print(' ');
+          }
+          System.out.println();
         }
-        System.out.println();
       }
-      buf.close();
     }
 
     for (String arg : args) {
