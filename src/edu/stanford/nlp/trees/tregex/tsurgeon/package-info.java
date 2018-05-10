@@ -1,16 +1,16 @@
 /**
- * <p>
  * A package for performing
  * transformations of trees to be used in conjunction with
- * <code>edu.stanford.nlp.trees.tregex</code> by Roger Levy.
+ * {@code edu.stanford.nlp.trees.tregex}.
  * Look at the description below and the class comments for
  * Tsurgeon for more information.
- * </p>
+ *
  * <p>Operations are applied while their pattern match.  You must be careful
  * to ensure that patterns do not continue to match after they have been
  * applied, or else Tsurgeon will go into an infinite loop.
- * </p>
+ *
  * <h3>Description of operations:</h3>
+ *
  * <pre>
  * delete name_1 name_2 ... name_m
  *
@@ -108,19 +108,20 @@
  *   in the tree, so that there is never an accidental clash of
  *   indices across things that are not meant to be coindexed.
  * </pre>
+ *
  * <h3>Comments: </h3>
- * <p>
+ *
  * For all lines after the first line of the file, the
  * character % introduces a comment that extends to the end of the line.
  * All other intended uses of % must be escaped as \% .
- * </p>
+ *
  * <h3>Syntax for trees to be inserted or adjoined:</h3>
- * <p>
+ *
  * A tree to be adjoined in can be specified with LISP-like
  * parenthetical-bracketing tree syntax such as those used for the Penn
  * Treebank.  For example, for the NP "the dog" to be inserted you might
  * use the syntax:
- * </p>
+ * <p>
  * <blockquote>
  * (NP (Det the) (N dog))
  * </blockquote>
@@ -130,27 +131,25 @@
  * ending in the character "@", which marks it as the "foot" node for
  * adjunction.  Final instances of the character "@" in terminal node labels
  * will be removed from the actual label of the tree.
- * </p>
  * <p>
  * For example, if you wanted to adjoin the adverb "breathlessly" into a
  * VP, you might specify the following auxiliary tree:
- * </p>
+ * <p>
  * <blockquote>
  * (VP (Adv breathlessly) VP@ )
  * </blockquote>
  * <p>
  * All other instances of "@" in terminal nodes must be escaped (i.e.,
- * appear as \@); this escaping will be removed by tsurgeon.
- * </p>
+ * appear as \@); this escaping will be removed by Tsurgeon.
  * <p>
  * In addition, any node of a tree can be named (the same way as in
  * tregex), by appending =name to the node label.  That name can be
- * referred to by subsequent tsurgeon operations triggered by the same
+ * referred to by subsequent Tsurgeon operations triggered by the same
  * match.  All other instances of "=" in node labels must be escaped
- * (i.e., appear as \=); this escaping will be removed by tsurgeon.  For
+ * (i.e., appear as \=); this escaping will be removed by Tsurgeon.  For
  * example, if you want to insert an NP trace somewhere and coindex it
  * with a node named "antecedent" you might say
- * </p>
+ * <p>
  * <blockquote>
  * insert (NP (-NONE- *T*=trace)) node-location
  * coindex trace antecedent $
@@ -159,7 +158,6 @@
  * <i>TO DO:</i> Fix the relabel operation to allow any node label without
  * || syntax.  Document adjoinH and adjoinF.  Provide a spliceIn(Above)
  * operation that lets you insert a node above a given node.
- * </p>
  *
  * @author Roger Levy
  * @version 21 July 2005.
