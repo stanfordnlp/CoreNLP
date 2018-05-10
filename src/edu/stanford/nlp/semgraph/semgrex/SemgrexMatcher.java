@@ -1,42 +1,42 @@
 package edu.stanford.nlp.semgraph.semgrex; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.ling.*;
-
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
 /**
- * A <code>SemgrexMatcher</code> can be used to match a {@link SemgrexPattern}
- * against a {@link edu.stanford.nlp.semgraph.SemanticGraph}. <p/>
- *
- * Usage should be the same as {@link java.util.regex.Matcher}. <p/>
+ * A {@code SemgrexMatcher} can be used to match a {@link SemgrexPattern}
+ * against a {@link edu.stanford.nlp.semgraph.SemanticGraph}.
+ * <p>
+ * Usage should be the same as {@link java.util.regex.Matcher}.
  *
  * @author Chloe Kiddon
  */
 public abstract class SemgrexMatcher  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemgrexMatcher.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SemgrexMatcher.class);
 	
-  SemanticGraph sg;
-  Map<String, IndexedWord> namesToNodes;
-  Map<String, String> namesToRelations;
-  VariableStrings variableStrings;
+  final SemanticGraph sg;
+  final Map<String, IndexedWord> namesToNodes;
+  final Map<String, String> namesToRelations;
+  final VariableStrings variableStrings;
 
   IndexedWord node;
 
   // to be used for patterns involving "@"
-  Alignment alignment;
-  SemanticGraph sg_aligned;
-  boolean hyp;
+  final Alignment alignment;
+  final SemanticGraph sg_aligned;
+  final boolean hyp;
 
   // these things are used by "find"
-  Iterator<IndexedWord> findIterator;
-  IndexedWord findCurrent;
+  private Iterator<IndexedWord> findIterator;
+  private IndexedWord findCurrent;
 
-  SemgrexMatcher(SemanticGraph sg, 
+
+  SemgrexMatcher(SemanticGraph sg,
                  Alignment alignment,
                  SemanticGraph sg_aligned,
                  boolean hyp, 
@@ -45,8 +45,8 @@ public abstract class SemgrexMatcher  {
                  Map<String, String> namesToRelations,
                  VariableStrings variableStrings) {
     this.sg = sg;
-    this.alignment = (alignment == null) ? null : alignment;
-    this.sg_aligned = (sg_aligned == null) ? null : sg_aligned;
+    this.alignment = alignment;
+    this.sg_aligned = sg_aligned;
     this.hyp = hyp;
     this.node = node;
     this.namesToNodes = namesToNodes;
@@ -73,7 +73,7 @@ public abstract class SemgrexMatcher  {
 
   /**
    * Resets the matcher to start searching on the given node for matching
-   * subexpressions
+   * subexpressions.
    */
   void resetChildIter(IndexedWord node) {
     this.node = node;
@@ -98,7 +98,7 @@ public abstract class SemgrexMatcher  {
   public abstract boolean matches();
 
   /** Rests the matcher and tests if it matches in the graph when rooted at
-   * <code>node</code>.
+   * {@code node}.
    *
    * @return whether the matcher matches at node
    */
@@ -122,53 +122,60 @@ public abstract class SemgrexMatcher  {
    * This is a weak cache that stores all the trees sorted since the garbage collector last kicked in.
    * The key on this map is the identity hash code (i.e., memory address) of the semantic graph; the
    * value is the sorted list of vertices.
-   *
+   * <p>
    * Note that this optimization will cause strange things to happen if you mutate a semantic graph between
    * calls to Semgrex.
    */
   private static final WeakHashMap<Integer, List<IndexedWord>> topologicalSortCache = new WeakHashMap<>();
 
+  private void setupFindIterator() {
+    try {
+      if (hyp) {
+        synchronized (topologicalSortCache) {
+          List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg));
+          if (topoSort == null || topoSort.size() != sg.size()) {  // size check to mitigate a stale cache
+            topoSort = sg.topologicalSort();
+            topologicalSortCache.put(System.identityHashCode(sg), topoSort);
+          }
+          findIterator = topoSort.iterator();
+        }
+      } else if (sg_aligned == null) {
+        return;
+      } else {
+        synchronized (topologicalSortCache) {
+          List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg_aligned));
+          if (topoSort == null || topoSort.size() != sg_aligned.size()) {  // size check to mitigate a stale cache
+            topoSort = sg_aligned.topologicalSort();
+            topologicalSortCache.put(System.identityHashCode(sg_aligned), topoSort);
+          }
+          findIterator = topoSort.iterator();
+        }
+      }
+    } catch (Exception ex) {
+      if (hyp) {
+        findIterator = sg.vertexSet().iterator();
+      } else if (sg_aligned == null) {
+        return;
+      } else {
+        findIterator = sg_aligned.vertexSet().iterator();
+      }
+    }
+  }
+
   /**
-   * Find the next match of the pattern in the graph
+   * Find the next match of the pattern in the graph.
    *
    * @return whether there is a match somewhere in the graph
    */
   public boolean find() {
     // log.info("hyp: " + hyp);
     if (findIterator == null) {
-      try {
-        if (hyp) {
-          synchronized (topologicalSortCache) {
-            List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg));
-            if (topoSort == null || topoSort.size() != sg.size()) {  // size check to mitigate a stale cache
-              topoSort = sg.topologicalSort();
-              topologicalSortCache.put(System.identityHashCode(sg), topoSort);
-            }
-            findIterator = topoSort.iterator();
-          }
-        } else if (sg_aligned == null) {
-          return false;
-        } else {
-          synchronized (topologicalSortCache) {
-            List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg_aligned));
-            if (topoSort == null || topoSort.size() != sg_aligned.size()) {  // size check to mitigate a stale cache
-              topoSort = sg_aligned.topologicalSort();
-              topologicalSortCache.put(System.identityHashCode(sg_aligned), topoSort);
-            }
-            findIterator = topoSort.iterator();
-          }
-        }
-      } catch (Exception ex) {
-        if (hyp) {
-          findIterator = sg.vertexSet().iterator();
-        } else if (sg_aligned == null) {
-          return false;
-        } else {
-          findIterator = sg_aligned.vertexSet().iterator();
-        }
-      }
+      setupFindIterator();
     }
-  //  System.out.println("first");
+    if (findIterator == null) {
+      return false;
+    }
+    //  System.out.println("first");
     if (findCurrent != null && matches()) {
     //		log.info("find first: " + findCurrent.word());
       return true;
@@ -208,7 +215,7 @@ public abstract class SemgrexMatcher  {
   }
   
   /**
-   * Returns the node labeled with <code>name</code> in the pattern.
+   * Returns the node labeled with {@code name} in the pattern.
    *
    * @param name the name of the node, specified in the pattern.
    * @return node labeled by the name
@@ -238,7 +245,7 @@ public abstract class SemgrexMatcher  {
   }
   
   @Override
-  abstract public String toString();
+  public abstract String toString();
 
   /**
    * Returns the graph associated with this match.
