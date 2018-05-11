@@ -1,7 +1,7 @@
 package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.CallbackFunction;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -13,15 +13,15 @@ import java.util.Arrays;
  * differentiable function (DiffFunction) as input.  Equality
  * constraints are supported; inequality constraints may soon be
  * added.
- * <p/>
+ * <p>
  * The basic way to use the minimizer is with a null constructor, then
  * the simple minimize method:
- * <p/>
- * <p><code>Minimizer cgm = new CGMinimizer();</code>
- * <br><code>DiffFunction df = new SomeDiffFunction();</code>
- * <br><code>double tol = 1e-4;</code>
- * <br><code>double[] initial = getInitialGuess();</code>
- * <br><code>double[] minimum = cgm.minimize(df,tol,initial);</code>
+ * <p>
+ * <p>{@code Minimizer cgm = new CGMinimizer();}
+ * <br>{@code DiffFunction df = new SomeDiffFunction();}
+ * <br>{@code double tol = 1e-4;}
+ * <br>{@code double[] initial = getInitialGuess();}
+ * <br>{@code double[] minimum = cgm.minimize(df,tol,initial);}
  *
  * @author <a href="mailto:klein@cs.stanford.edu">Dan Klein</a>
  * @version 1.0
@@ -30,25 +30,24 @@ import java.util.Arrays;
 public class CGMinimizer implements Minimizer<DiffFunction>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CGMinimizer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CGMinimizer.class);
 
-  private static NumberFormat nf = new DecimalFormat("0.000E0");
+  private static final NumberFormat nf = new DecimalFormat("0.000E0");
 
-  private Function monitor; // = null;
+  private final Function monitor;
   private transient CallbackFunction iterationCallbackFunction;
+  private final boolean silent;
 
   private static final int numToPrint = 5;
   private static final boolean simpleGD = false;
   private static final boolean checkSimpleGDConvergence = true;
   private static final boolean verbose = false;
-  private boolean silent;
-
-  private static final int ITMAX = 2000; // overridden in dbrent(); made bigger
+  private static final int ITMAX = 2000; // a different value is used in dbrent(); made bigger
   private static final double EPS = 1.0e-30;
 
   private static final int resetFrequency = 10;
 
-  static double[] copyArray(double[] a) {
+  private static double[] copyArray(double[] a) {
     return Arrays.copyOf(a, a.length);
   }
 
@@ -405,7 +404,7 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
   }
 
   //public double lastXx = 1.0;
-  double[] lineMinimize(DiffFunction function, double[] initial, double[] direction) {
+  private double[] lineMinimize(DiffFunction function, double[] initial, double[] direction) {
     // make a 1-dim function along the direction line
     // THIS IS A HACK (but it's the NRiC peoples' hack)
     OneDimDiffFunction oneDim = new OneDimDiffFunction(function, initial, direction);
@@ -595,38 +594,53 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
 
   }
 
+  public void setIterationCallbackFunction(CallbackFunction func){
+    this.iterationCallbackFunction = func;
+  }
+
+
   /**
    * Basic constructor, use this.
    */
   public CGMinimizer() {
-    this(true);
+    this(true, null);
   }
 
   /**
-   * Pass in <code>false</code> to get per-iteration progress reports
+   * Pass in {@code false} to get per-iteration progress reports
    * (to stderr).
    *
-   * @param silent a <code>boolean</code> value
+   * @param silent a {@code boolean} value
    */
   public CGMinimizer(boolean silent) {
-    this.silent = silent;
+    this(silent, null);
   }
 
   /**
    * Perform minimization with monitoring.  After each iteration,
-   * monitor.valueAt(x) gets called, with the double array <code>x</code>
-   * being that iteration's ending point.  A return <code>&lt;
-   * tol</code> forces convergence (terminates the CG procedure).
+   * monitor.valueAt(x) gets called, with the double array {@code x}
+   * being that iteration's ending point.  A return {@code < tol}
+   * forces convergence (terminates the CG procedure).
    * Specially for Kristina.
    *
-   * @param monitor a <code>Function</code> value
+   * @param monitor a {@code Function} value
    */
   public CGMinimizer(Function monitor) {
-    this();
+    this(false, monitor);
+  }
+
+  /**
+   * Perform minimization perhaps with monitoring.  After each iteration,
+   * monitor.valueAt(x) gets called, with the double array {@code x}
+   * being that iteration's ending point.  A return {@code < tol}
+   * forces convergence (terminates the CG procedure).
+   *
+   * @param silent Whether to run silently or not
+   * @param monitor A {@code Function} value
+   */
+  private CGMinimizer(boolean silent, Function monitor) {
+    this.silent = silent;
     this.monitor = monitor;
   }
 
-  public void setIterationCallbackFunction(CallbackFunction func){
-    this.iterationCallbackFunction = func;
-  }
 }

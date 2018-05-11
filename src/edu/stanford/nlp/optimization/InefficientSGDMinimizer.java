@@ -4,25 +4,24 @@ import edu.stanford.nlp.util.Pair;
 
 /**
  * Stochastic Gradient Descent Minimizer.
- *
- *
+ * <p>
  * The basic way to use the minimizer is with a null constructor, then
  * the simple minimize method:
- * <p/>
- * <p><code>Minimizer smd = new InefficientSGDMinimizer();</code>
- * <br><code>DiffFunction df = new SomeDiffFunction(); //Note that it must be a incidence of AbstractStochasticCachingDiffFunction</code>
- * <br><code>double tol = 1e-4;</code>
- * <br><code>double[] initial = getInitialGuess();</code>
- * <br><code>int maxIterations = someSafeNumber;
- * <br><code>double[] minimum = qnm.minimize(df,tol,initial,maxIterations);</code>
- * <p/>
+ * <p>
+ * <p>{@code Minimizer smd = new InefficientSGDMinimizer(); }
+ * <br>{@code DiffFunction df = new SomeDiffFunction(); //Note that it must be a incidence of AbstractStochasticCachingDiffFunction }
+ * <br>{@code double tol = 1e-4; }
+ * <br>{@code double[] initial = getInitialGuess(); }
+ * <br>{@code int maxIterations = someSafeNumber; }
+ * <br>{@code double[] minimum = qnm.minimize(df,tol,initial,maxIterations); }
+ * <p>
  * Constructing with a null constructor will use the default values of
  * <p>
- * <br><code>batchSize = 15;</code>
- * <br><code>initialGain = 0.1;</code>
- * <p/>
- * <br> NOTE: This class was previously called SGDMinimizer. SGDMinimizer is now what was StochasticInPlaceMinimizer. New projects should use that class.
- * <p/>
+ * <br>{@code batchSize = 15;}
+ * <br>{@code initialGain = 0.1;}
+ * <p>
+ * <br> NOTE: This class was previously called SGDMinimizer. SGDMinimizer is now what was StochasticInPlaceMinimizer.
+ * New projects should use that class, since it uses the ideas of Bottou's work to provide efficient SGD.
  *
  * @author <a href="mailto:akleeman@stanford.edu">Alex Kleeman</a>
  * @version 1.0
