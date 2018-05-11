@@ -932,7 +932,7 @@ public class Counters  {
    * their respective value or magnitude (by absolute value). If
    * <tt>ascending</tt> is true, smaller magnitudes will be returned first,
    * otherwise higher magnitudes will be returned first.
-   * <p/>
+   * <p>
    * Sample usage:
    *
    * <pre>

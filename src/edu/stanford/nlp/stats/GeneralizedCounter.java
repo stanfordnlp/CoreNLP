@@ -19,10 +19,12 @@ import edu.stanford.nlp.util.MutableDouble;
  * prespecified length.  A depth <i>n</i> GeneralizedCounter can be
  * thought of as a conditionalized count over <i>n</i> classes of
  * objects, in a prespecified order.  Also offers a read-only view as
- * a Counter.  <p> This class is serializable but no guarantees are
+ * a Counter.
+ * <p>
+ * This class is serializable but no guarantees are
  * made about compatibility version to version.
  *
- * <p/>
+ * <p>
  * This is the worst class. Use TwoDimensionalCounter. If you need a third,
  * write ThreeDimensionalCounter, but don't use this.
  *
@@ -385,7 +387,7 @@ public class GeneralizedCounter<K> implements Serializable {
   /* haven't decided about access for this one yet */
   private GeneralizedCounter<K> conditionalizeHelper(K o) {
     if (depth > 1) {
-      GeneralizedCounter<K> next = ErasureUtils.<GeneralizedCounter<K>>uncheckedCast(map.get(o));
+      GeneralizedCounter<K> next = ErasureUtils.uncheckedCast(map.get(o));
       if (next == null) // adds a new GeneralizedCounter if needed
       {
         map.put(o, (next = new GeneralizedCounter<>(depth - 1)));
@@ -460,7 +462,7 @@ public class GeneralizedCounter<K> implements Serializable {
   }
 
   /**
-   * adds to count for the {@link #depth()}-dimensional key <code>l</code>.
+   * Adds to count for the {@link #depth()}-dimensional key {@code l}.
    */
   public void incrementCount(List<K> l, double count) {
     if (l.size() != depth) {
@@ -596,7 +598,7 @@ public class GeneralizedCounter<K> implements Serializable {
 
   /**
    * Returns a read-only synchronous view (not a snapshot) of
-   * <code>this</code> as a {@link ClassicCounter}.  Any calls to
+   * {@code this} as a {@link ClassicCounter}.  Any calls to
    * count-changing or entry-removing operations will result in an
    * {@link UnsupportedOperationException}.  At some point in the
    * future, this view may gain limited writable functionality.
@@ -700,12 +702,12 @@ public class GeneralizedCounter<K> implements Serializable {
 
     @Override
     public String toString() {
-      StringBuffer sb = new StringBuffer("{");
+      StringBuilder sb = new StringBuilder("{");
       for (Iterator<Map.Entry<List<K>, Double>> i = entrySet().iterator(); i.hasNext();) {
         Map.Entry<List<K>, Double> e = i.next();
-        sb.append(e.toString());
+        sb.append(e);
         if (i.hasNext()) {
-          sb.append(",");
+          sb.append(',');
         }
       }
       sb.append("}");
@@ -717,7 +719,7 @@ public class GeneralizedCounter<K> implements Serializable {
 
   /**
    * Returns a read-only synchronous view (not a snapshot) of
-   * <code>this</code> as a {@link ClassicCounter}.  Works only with one-dimensional
+   * {@code this} as a {@link ClassicCounter}.  Works only with one-dimensional
    * GeneralizedCounters.  Exactly like {@link #counterView}, except
    * that {@link #getCount} operates on primitive objects of the counter instead
    * of singleton lists.  Any calls to
