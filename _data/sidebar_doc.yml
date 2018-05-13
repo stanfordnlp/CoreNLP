@@ -143,6 +143,9 @@ entries:
         - title: FAQ 
           url: faq.html
 
+	- title: Tutorials
+          url: tutorials.html
+
         - title: Memory and time optimization
           url: memory-time.html
 
