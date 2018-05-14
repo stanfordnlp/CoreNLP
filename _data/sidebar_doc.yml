@@ -140,7 +140,10 @@ entries:
 
       items:
 
-	- title: Tutorials
+        - title: FAQ
+          url: faq.html
+          
+        - title: Tutorials
           url: tutorials.html
 
         - title: Memory and time optimization
