@@ -35,7 +35,7 @@ java -Xmx12g edu.stanford.nlp.parser.nndep.DependencyParser -trainFile fr-ud-tra
 * There are many places to find word embedding data, in this example Facebook fastText embeddings are being used, they are found [here](https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md)
 * Note that you need a tokenizer for your language that matches the tokenization of the UD training files, you may have to reprocess the files to match the tokenizing you plan to use
 * Likewise, if you use the `-cPOS` setting, you will have to have POS tags that match the UD training data
-
+* The amount of RAM necessary to train the model may vary depending on various factors
 
 ## More information 
 
