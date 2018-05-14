@@ -22,23 +22,37 @@
 #
 SERVER_USER="nlp"
 CORENLP_DIR="/opt/corenlp"
+PROP_FILE="$CORENLP_DIR/server.properties"
+LISTEN_PORT=9000
+JVM_MAX_MEMORY=8g
 
 
 do_start()
 {
   if [ -e "$CORENLP_DIR/corenlp.shutdown" ]; then
     echo "CoreNLP server is already running!"
-    echo "If you are sure this is a mistake, delete the file:"
-    echo "$CORENLP_DIR/corenlp.shutdown"
+    # echo "If you are sure this is a mistake, delete the file:"
+    # echo "$CORENLP_DIR/corenlp.shutdown"
+    echo "Force restarting"
+    do_restart
   else
     export CLASSPATH=""
     for JAR in `find "$CORENLP_DIR" -name "*.jar"`; do
       CLASSPATH="$CLASSPATH:$JAR"
     done
-    nohup su nlp -c "/usr/local/bin/authbind --deep java -Djava.net.preferIPv4Stack=true -Djava.io.tmpdir=/opt/corenlp -cp "$CLASSPATH" -XX:+UseG1GC -XX:MaxGCPauseMillis=500 -XX:+UseStringDeduplication -XX:SoftRefLRUPolicyMSPerMB=100 -mx20g edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 80" \
+    nohup su nlp -c "/usr/local/bin/authbind --deep java -Djava.net.preferIPv4Stack=true -Djava.io.tmpdir="$CORENLP_DIR" -cp "$CLASSPATH" -XX:+UseG1GC -XX:MaxGCPauseMillis=500 -XX:+UseStringDeduplication -XX:SoftRefLRUPolicyMSPerMB=100 -mx$JVM_MAX_MEMORY edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port $LISTEN_PORT -status_port $LISTEN_PORT -props $PROP_FILE" \
       > "$CORENLP_DIR/stdout.log" 2> "$CORENLP_DIR/stderr.log" &
     echo "CoreNLP server started."
-  fi  
+  fi
+}
+
+do_status()
+{
+  if [ -e "$CORENLP_DIR/corenlp.shutdown" ]; then
+    echo "CoreNLP server is running"
+  else
+    echo "CoreNLP server is not running"
+  fi
 }
 
 do_stop() 
@@ -56,15 +70,21 @@ do_restart()
 {
   do_stop
   sleep 3
+  if [ -e "$CORENLP_DIR/corenlp.shutdown" ]; then
+    echo "Graceful stop failed. Force deleting the file:"
+    echo "$CORENLP_DIR/corenlp.shutdown"
+    rm -f "$CORENLP_DIR/corenlp.shutdown"
+  fi
   do_start
 }
 
 case $1 in
 start) do_start
 ;;
+status) do_status
+;;
 stop) do_stop
 ;;
 restart) do_restart
 ;;
 esac
-
