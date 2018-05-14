@@ -23,6 +23,19 @@ parses then you should look at the `parse` annotator.
 | depparse.model | file, classpath, or URL | edu/stanford/nlp/models/parser/nndep/english\_UD.gz | Dependency parsing model to use. There is no need to explicitly set this option, unless you want to use a different parsing model than the default. By default, this is set to the UD parsing model included in the stanford-corenlp-models JAR file. |
 
 
+## Training a model
+
+Here is an example command for training your own model.  In this example we will train a French dependency parser.
+
+```bash
+java -Xmx12g edu.stanford.nlp.parser.nndep.DependencyParser -trainFile fr-ud-train.conllu -devFile fr-ud-dev.conllu -model new-french-UD-model.txt.gz -embedFile wiki.fr.vec -embeddingSize 300 -tlp edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack -cPOS
+```
+
+* UD train/dev/test data for a variety of languages can be found [here](http://universaldependencies.org/)
+* There are many places to find word embedding data, in this example Facebook fastText embeddings are being used, they are found [here](https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md)
+* Note that you need a tokenizer for your language that matches the tokenization of the UD training files, you may have to reprocess the files to match the tokenizing you plan to use
+* Likewise, if you use the `-cPOS` setting, you will have to have POS tags that match the UD training data
+
 
 ## More information 
 
