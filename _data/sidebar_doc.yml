@@ -140,9 +140,6 @@ entries:
 
       items:
 
-        - title: FAQ 
-          url: faq.html
-
 	- title: Tutorials
           url: tutorials.html
 
