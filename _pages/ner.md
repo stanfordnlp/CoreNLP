@@ -90,8 +90,95 @@ for English. You can find details on the
 
 ## Training or retraining new models
 
-CRF models are trained using the main method of
-`CRFClassifier`. The CRF FAQ has [some instructions](https://nlp.stanford.edu/software/crf-faq.html#a).
+The train/dev/test data files should be in the following format:
+
+```
+Joe    PERSON
+Smith  PERSON
+lives  O
+in     O
+California    LOCATION
+.    O
+
+He    O
+used    O
+to    O
+live    O
+in    O
+Oregon    LOCATION
+.    O
+```
+
+In this example, each line is a token, followed by a tab, followed by the NER tag.  A blank line represents a sentence break.
+The model that we release is trained on over a million tokens.  The more training data you have, the more accurate your model should be.
+
+The standard training data sets used for PERSON/LOCATION/ORGANIZATION/MISC must be purchased from the LDC, we do not distribute them.
+
+Here is the command for starting the training process (make sure your CLASSPATH is set up to include all of the Stanford CoreNLP jars):
+
+```bash
+java -Xmx2g edu.stanford.nlp.ie.crf.CRFClassifier -prop ner.model.props
+```
+
+The training process can be customized using a properties file.  Here is an example properties file for training an English model(ner.model.props):
+
+```
+# location of training data
+trainFileList = /path/to/conll.3class.train
+# location of test data
+testFile = /path/to/all.3class.test
+# where to store the saved model
+serializeTo = ner.model.ser.gz
+
+type = crf
+
+wordFunction = edu.stanford.nlp.process.AmericanizeFunction
+
+useDistSim = false
+
+# establish the data file format
+map = word=0,answer=1
+
+saveFeatureIndexToDisk = true
+
+useClassFeature=true
+useWord=true
+useNGrams=true
+noMidNGrams=true
+maxNGramLeng=6
+usePrev=true
+useNext=true
+useLongSequences=true
+useSequences=true
+usePrevSequences=true
+maxLeft=1
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+useOccurrencePatterns=true
+useLastRealWord=true
+useNextRealWord=true
+normalize=true
+wordShape=chris2useLC
+useDisjunctive=true
+disjunctionWidth=5
+
+readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
+
+useObservedSequencesOnly=true
+
+useQN = true
+QNsize = 25
+
+# makes it go faster
+featureDiffThresh=0.05
+
+```
+
+There is more info about training a CRF model [here](https://nlp.stanford.edu/software/crf-faq.html#a).
+
+You can learn more about what the various properties above mean [here](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ie/NERFeatureFactory.html).
+
 SUTime rules can be changed by modifying its included
 TokensRegex rule files. Changing other rule-based components (money,
 etc.) requires changes to the Java source code.
