@@ -47,6 +47,7 @@ system.
 | ner.useSUTime | boolean | true | Whether or not to use SUTime. SUTime at present only supports English; if not processing English, make sure to set this to false. |
 | sutime.markTimeRanges | boolean | false | Tells SUTime whether to mark phrases such as “From January to March” as a range, instead of marking "January" and "March" separately. |
 | sutime.includeRange | boolean | false | If marking time ranges, set the time range in the TIMEX output from SUTime. |
+| maxAdditionalKnownLCWords | int | - | Limit the size of the known lower case words set.  Set this to 0 to prevent ordering issues (i.e. when this is nonzero running on document1 then document2 can have different results than running on document2 then document1 |  
 
 ## SUTime
 
