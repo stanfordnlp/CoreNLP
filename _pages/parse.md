@@ -69,7 +69,7 @@ A separate site documents [Universal Dependencies](http://universaldependencies.
 
 ## Examples
 
-Find all of the `NP` and `VP` constituents in a parse tree
+** Find all of the `NP` and `VP` constituents in a parse tree
 
 ```java
 package edu.stanford.nlp.examples;
