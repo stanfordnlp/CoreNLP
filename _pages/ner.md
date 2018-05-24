@@ -108,6 +108,7 @@ live    O
 in    O
 Oregon    LOCATION
 .    O
+
 ```
 
 In this example, each line is a token, followed by a tab, followed by the NER tag.  A blank line represents a sentence break.
