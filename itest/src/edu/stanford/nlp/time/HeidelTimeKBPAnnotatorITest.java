@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 public class HeidelTimeKBPAnnotatorITest extends TestCase {
 
   public StanfordCoreNLP pipeline;
-  public String WORKING_DIR = "/scr/nlp/data/stanford-corenlp-testing/spanish-heideltime";
+  public String WORKING_DIR = "/u/scr/nlp/data/stanford-corenlp-testing/spanish-heideltime";
   public Set<String> GOLD_RESULTS = new HashSet<>(
       Arrays.asList("Rusia\tCOUNTRY", "Japón\tCOUNTRY", "hoy\tDATE","rusa\tLOCATION", "Vicente Fox\tPERSON",
           "el 2 de julio de 1942\tDATE", "Esta semana\tDATE", "ING\tORGANIZATION",
