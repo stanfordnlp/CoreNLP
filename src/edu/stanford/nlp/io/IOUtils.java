@@ -2012,7 +2012,7 @@ public class IOUtils  {
     add("/u/nlp"); add("/u/nlp/");
     add("/u/nlp/data"); add("/u/nlp/data/");
     add("/scr"); add("/scr/");
-    add("/scr/nlp/data"); add("/scr/nlp/data/");
+    add("/u/scr/nlp/data"); add("/u/scr/nlp/data/");
   }};
 
   /**
