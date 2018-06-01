@@ -28,7 +28,7 @@ public class TrainCRFClassifierSlowITest {
     // train the new model
     CRFClassifier.main(new String[] {
             "-props", "edu/stanford/nlp/models/ner/german-2018.hgc_175m_600.prop",
-            "-serializeTo", "/dev/null"
+            "-serializeTo", crfTrainingWorkingDir+"/german.hgc_175m_600.crf.ser.gz"
     });
     // check for lack of quality drop
     // CRFClassifier.main(new String[]{"-props",
