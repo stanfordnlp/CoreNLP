@@ -175,6 +175,113 @@
     </junit>
   </target>
 
+  <target name="itest-many-docs" depends="classpath"
+          description="Run StanfordCoreNLP on a large volume of documents.">
+    <echo message="${ant.project.name}" />
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+      <classpath refid="classpath"/>
+      <classpath path="${build.path}"/>
+      <classpath path="${data.path}"/>
+      <classpath path="${source.path}"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes">
+        <fileset dir="${itests.path}">
+          <include name="**/*StanfordCoreNLPSlowITest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+  
+  <target name="itest-coreference" depends="classpath"
+          description="Coreference related slow itests.">
+    <echo message="${ant.project.name}" />
+    <junit fork="yes" maxmemory="7g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+      <classpath refid="classpath"/>
+      <classpath path="${build.path}"/>
+      <classpath path="${data.path}"/>
+      <classpath path="${source.path}"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes">
+        <fileset dir="${itests.path}">
+          <include name="**/*Coref*SlowITest.java"/>
+          <include name="**/DcorefBenchmarkSlowITest.java"/>
+          <include name="**/DcorefSlowITest.java"/>
+          <include name="**/ChineseCorefBenchmarkSlowITest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+  
+  <target name="itest-protobuf" depends="classpath"
+          description="Protocol buffer related slow itests.">
+    <echo message="${ant.project.name}" />
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+      <classpath refid="classpath"/>
+      <classpath path="${build.path}"/>
+      <classpath path="${data.path}"/>
+      <classpath path="${source.path}"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes">
+        <fileset dir="${itests.path}">
+          <include name="**/*Protobuf*SlowITest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+  
+  <target name="itest-kbp" depends="classpath"
+          description="KBP related slow itests.">
+    <echo message="${ant.project.name}" />
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+      <classpath refid="classpath"/>
+      <classpath path="${build.path}"/>
+      <classpath path="${data.path}"/>
+      <classpath path="${source.path}"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes">
+        <fileset dir="${itests.path}">
+          <include name="**/*KBP*SlowITest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+  
+  <target name="itest-ner" depends="classpath"
+          description="NER related slow itests">
+    <echo message="${ant.project.name}" />
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+      <classpath refid="classpath"/>
+      <classpath path="${build.path}"/>
+      <classpath path="${data.path}"/>
+      <classpath path="${source.path}"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes">
+        <fileset dir="${itests.path}">
+          <include name="**/NERBenchmarkSlowITest.java"/>
+          <include name="**/TrainCRFClassifierSlowITest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+  
+  <target name="itest-misc" depends="classpath"
+          description="NER related slow itests">
+    <echo message="${ant.project.name}" />
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+      <classpath refid="classpath"/>
+      <classpath path="${build.path}"/>
+      <classpath path="${data.path}"/>
+      <classpath path="${source.path}"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes">
+        <fileset dir="${itests.path}">
+          <include name="**/RequirementsCorrectSlowITest.java"/>
+          <include name="**/ThreadedParserSlowITest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
   <target name="slowitest" depends="classpath,compile"
           description="Run really slow integration tests">
     <echo message="${ant.project.name}" />
