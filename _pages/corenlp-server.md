@@ -253,7 +253,7 @@ If you start the server with `-server_id SERVER_NAME` it will store the shutdown
 You can restrict access to the server by requiring a username and password.
 
 ```bash
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer -serverProperties custom.properties -port 9000 -timeout 15000 -username myUsername -password myPassword
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000 -username myUsername -password myPassword
 ```
 
 Here is an example of making a request to the server, supplying a username and password.
