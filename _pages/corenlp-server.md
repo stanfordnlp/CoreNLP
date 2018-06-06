@@ -248,6 +248,20 @@ wget "localhost:9000/shutdown?key=`cat /tmp/corenlp.shutdown`" -O -
 
 If you start the server with `-server_id SERVER_NAME` it will store the shutdown key in a file called `corenlp.shutdown.SERVER_NAME`.
 
+### Adding Username/Password Authentication
+
+You can restrict access to the server by requiring a username and password.
+
+```bash
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer -serverProperties custom.properties -port 9000 -timeout 15000 -username myUsername -password myPassword
+```
+
+Here is an example of making a request to the server, supplying a username and password.
+
+```bash
+wget --user myUsername --password myPassword --post-data 'The quick brown fox jumped over the lazy dog.' 'localhost:9000/?properties={"outputFormat":"json"}' -O -
+```
+
 ### Command line flags
 
 The server can take a number of command-line flags, documented below:
