@@ -16,8 +16,6 @@ Please note that this new API has not been tested as much as the classic API.  B
 is the documentation for the classic pipeline API.
 
 ```java
-package edu.stanford.nlp.examples;
-
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.ie.util.*;
