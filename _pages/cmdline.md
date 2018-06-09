@@ -6,8 +6,8 @@ permalink: '/cmdline.html'
 
 ## Quick start
 
-Note: Stanford CoreNLP 3.9.1 requires Java 8, but works with Java 9 as well.  If using Java 9, make sure
-to add this Java flag to avoid errors:
+Note: Stanford CoreNLP 3.9.1 requires Java 8, but works with Java 9/10 as well.  If using Java 9/10, you need to
+add this Java flag to avoid errors:
 
 ```
 --add-modules java.se.ee
