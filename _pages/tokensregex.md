@@ -126,7 +126,7 @@ all of those tokens as a COMPLETE_JOB_TITLE.
 
 In the third and final phase, we will filter out the COMPLETE_JOB_TITLE "deputy vice president."
 
-The following rules file "multi_step_ner.rules" implements this multi-step pipeline.
+The following rules file `multi_step_ner.rules` implements this multi-step pipeline.
 
 ```bash
 # make all patterns case-insensitive in the rules file
@@ -164,7 +164,7 @@ You can run this for yourself with this command:
 java -Xmx4g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit -rulesFiles multi_step_ner.rules -inputText multi_step_ner.txt
 ```
 
-If you run it on this example file "multi_step_ner.txt"
+If you run it on this example file `multi_step_ner.txt`
 
 ```bash
 He is the vice president.
