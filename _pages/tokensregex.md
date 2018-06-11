@@ -81,8 +81,6 @@ public class TokensRegexDemo {
     // set to case insensitive
     env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-    //System.out.println(0x02 | 64);
-    //System.out.println(2 | 64);
 
     // build the CoreMapExpressionExtractor
     CoreMapExpressionExtractor
