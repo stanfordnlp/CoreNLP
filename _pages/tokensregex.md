@@ -142,6 +142,8 @@ $JOB_TITLE_BASES = "/president|secretary|general/"
 $JOB_TITLE_MODIFIERS = "/vice|assistant|deputy/"
 
 # first phase identifies components of job titles
+# a TokensRegex pipeline can run various stages
+# to specify a particular stage, set ENV.defaults["stage"] to the stage number
 ENV.defaults["stage"] = 1
 
 # tokens match phase
