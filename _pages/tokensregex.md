@@ -111,3 +111,123 @@ public class TokensRegexDemo {
 
 }
 ```
+
+## Example 1: Multi-Step NER
+
+A good way to understand TokensRegex pipelines is to look at a specific example.  In this section we will
+go through building a pipeline that performs multi-step named entity recognition.
+
+In the first phase, we will identify basic components of a job title.  The two we will identify
+are JOB_TITLE_BASE (e.g. "president") and JOB_TITLE_MODIFIER (e.g. "vice").
+
+In the second phase, we will build on named entity tags that were applied in the first phase.
+Every time we see a sequence of JOB_TITLE_MODIFIER's ending in a JOB_TITLE_BASE we will mark
+all of those tokens as a COMPLETE_JOB_TITLE.
+
+In the third and final phase, we will filter out the COMPLETE_JOB_TITLE "deputy vice president."
+
+The following rules file "multi_step_ner.rules" implements this multi-step pipeline.
+
+```bash
+# make all patterns case-insensitive in the rules file
+# ENV.defaultStringMatchFlags = 66
+# ENV.defaultStringPatternFlags = 66
+
+# these Java classes will be used by the rules
+ner = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NamedEntityTagAnnotation" }
+tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
+
+# variables for complex regexes
+$JOB_TITLE_BASES = "/president|secretary|general/"
+$JOB_TITLE_MODIFIERS = "/vice|assistant|deputy/"
+
+# first phase identifies components of job titles
+ENV.defaults["stage"] = 1
+
+# tokens match phase
+{ ruleType: "tokens", pattern: ($JOB_TITLE_MODIFIERS), action: Annotate($0, ner, "JOB_TITLE_MODIFIER") }
+{ ruleType: "tokens", pattern: ($JOB_TITLE_BASES), action: Annotate($0, ner, "JOB_TITLE_BASE") }
+
+# second phase identifies complete job titles from components found in first phase
+ENV.defaults["stage"] = 2
+{ ruleType: "tokens", pattern: ([{ner: "JOB_TITLE_MODIFIER"}]+ [{ner: "JOB_TITLE_BASE"}]),
+  over: tokens, action: Annotate($0, ner, "COMPLETE_JOB_TITLE"), result: "FOUND_COMPLETE_JOB_TITLE"}
+
+# third phase is a filter phase, and it removes matched expressions that the filter matches
+ENV.defaults["stage"] = 3
+{ ruleType: "filter", pattern: (/deputy/ /vice/ /president/) } 
+```
+
+You can run this for yourself with this command:
+
+```bash
+java -Xmx4g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit -rulesFiles multi_step_ner.rules -inputText multi_step_ner.txt
+```
+
+If you run it on this example file "multi_step_ner.txt"
+
+```bash
+He is the vice president.
+He is the assistant vice president.
+He is the deputy vice president.
+He is the president.
+He is the President.
+```
+
+You should get this output:
+
+```bash
+---
+sentence number: 0
+sentence text: He is the vice president.
+He	null
+is	null
+the	null
+vice	COMPLETE_JOB_TITLE
+president	COMPLETE_JOB_TITLE
+.	null
+matched expression: vice president
+matched expression value: STRING(FOUND_COMPLETE_JOB_TITLE)
+matched expression char offsets: (10,24)
+matched expression tokens:[vice-4, president-5]
+---
+sentence number: 1
+sentence text: He is the assistant vice president.
+He	null
+is	null
+the	null
+assistant	COMPLETE_JOB_TITLE
+vice	COMPLETE_JOB_TITLE
+president	COMPLETE_JOB_TITLE
+.	null
+matched expression: assistant vice president
+matched expression value: STRING(FOUND_COMPLETE_JOB_TITLE)
+matched expression char offsets: (36,60)
+matched expression tokens:[assistant-4, vice-5, president-6]
+---
+sentence number: 2
+sentence text: He is the deputy vice president.
+He	null
+is	null
+the	null
+deputy	COMPLETE_JOB_TITLE
+vice	COMPLETE_JOB_TITLE
+president	COMPLETE_JOB_TITLE
+.	null
+---
+sentence number: 3
+sentence text: He is the president.
+He	null
+is	null
+the	null
+president	JOB_TITLE_BASE
+.	null
+---
+sentence number: 4
+sentence text: He is the President.
+He	null
+is	null
+the	null
+President	JOB_TITLE_BASE
+.	null
+```
