@@ -112,7 +112,152 @@ public class TokensRegexDemo {
 }
 ```
 
-## Example 1: Multi-Step NER
+## Example 1: Basic NER
+
+With this pipeline we will explore performing simple named entity recognition with TokensRegex.
+
+Let’s imagine that we want to identify company names.  For our simple example, we will assume
+we are interested in any string of capitalized tokens that ends with a company ending token.
+
+We will define the company ending tokens to be “Corp” or “Inc” (and optionally containing a “.”).
+
+To show more functionality, we will also add the constraint that the non-ending tokens in the pattern
+have to have the part of speech tag “NNP”.
+
+Here is the rules file that implements this TokensRegex pipeline `basic_ner.rules`:
+
+```bash
+# make all patterns case-sensitive
+ENV.defaultStringMatchFlags = 0
+ENV.defaultStringPatternFlags = 0
+
+# these Java classes will be used by the rules
+ner = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NamedEntityTagAnnotation" }
+tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
+
+# define some regexes over tokens
+$COMPANY_BEGINNING = "/[A-Z][A-Za-z]+/"
+$COMPANY_ENDING = "/(Corp|Inc)\.?/"
+
+# rule for recognizing company names
+{ ruleType: "tokens", pattern: ([{word:$COMPANY_BEGINNING} & {tag:"NNP"}]+ [{word:$COMPANY_ENDING}]), action: Annotate($0, ner, "COMPANY"), result: "COMPANY" }
+```
+
+Now let’s walk through this rules file.
+
+The first section influence the environment of the pipeline.  Since our Java code sets the rules to
+be case-insensitive, we will set them to case-sensitive in our rules file for this TokensRegex pipeline.
+By setting those two flags to 0, the rules will be case-sensitive.
+
+In the next section we bind certain variables to Java classes used as annotation keys.  Here we
+bind “ner” and “tokens” to the corresponding annotation keys.
+
+In the third section we bind some variables to larger regexes.  This would be especially useful if
+the regexes were especially large, though they are small in our simple example.  Note that these
+are regexes that match the full text of a token.  So $COMPANY_BEGINING will match all 
+tokens that start with a capital letter and only contain letters (e.g. “Apple”).  $COMPANY_ENDING will
+match the tokens “Corp”, “Inc”, “Corp.”, and “Inc.”  By setting these variables to regexes, we don’t
+have to write out the full regex again every time we want to use it.
+
+Finally in the fourth section we define the rule for the token pattern we wish to match.  The “ruleType”
+of the rule is “tokens”, meaning we want to find patterns over sequences of tokens.  
+
+The “pattern” of the rule defines the actual pattern we want to see in the tokens.  In this case we say we want to
+see a number of $COMPANY_BEGINNING’s that have the “NNP” part of speech tag.  Then we want
+to end with one token that matches the $COMPANY_ENDING pattern.  
+
+If the pattern is matched,the “action” part of the rule will be executed.  In the most typical case, this means we want to annotate all of the tokens in the matched pattern in some manner.  This is done with the Annotate() function.
+In this rule, we state we want to annotate all of the matched tokens in the pattern (indicated by the group $0 in 
+the token pattern), we want to set their “CoreAnnotation.NamedEntityTagAnnotation.class” value 
+(indicted by “ner”), to the value “COMPANY”.  This is where the actual CoreLabel’s are being altered by
+having their CoreAnnotations.NamedEntityTagAnnotation.class field changed.
+
+Finally we may want to produced a MatchedExpression for this to operate on in our Java code, and we
+may want to set the value fo that MatchedExpression to something.  So we have the rule return a “result”
+when it fires, and we say the result is “COMPANY”.  The value of the MatchedExpression will be set to
+“COMPANY” as a result.
+
+If you run this TokensRegex pipeline on this file `basic_ner.txt`:
+
+```bash
+She has worked at Miller Corp. for 5 years.
+There will be a big announcement by Apple Inc today at 5:00pm.
+He works for apple inc in cupertino.
+```
+
+And run this Java command:
+
+```bash
+java -Xmx2g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos -rulesFiles basic_ner.rules -inputText basic_ner.txt
+```
+
+Note: in this command we are only running tokenize,ssplit,pos,lemma, so the CoreLabels will have
+“null” for the NER token unless our rules find patterns in the input sentences. Also remember that
+Java code specifies to create sentences based on newlines, so the input file is interpreted as one-sentence-per-line.
+
+You should see this output:
+
+```bash
+---
+sentence number: 0
+sentence text: She has worked at Miller Corp. for 5 years.
+She		PRP	null
+has		VBZ	null
+worked		VBN	null
+at		IN	null
+Miller		NNP	COMPANY
+Corp.		NNP	COMPANY
+for		IN	null
+5		CD	null
+years		NNS	null
+.		.	null
+
+matched expression: Miller Corp.
+matched expression value: STRING(COMPANY)
+matched expression char offsets: (18,30)
+matched expression tokens:[Miller-5, Corp.-6]
+---
+sentence number: 1
+sentence text: There will be a big announcement by Apple Inc today at 5:00pm.
+There		EX	null
+will		MD	null
+be		VB	null
+a		DT	null
+big		JJ	null
+announcement		NN	null
+by		IN	null
+Apple		NNP	COMPANY
+Inc		NNP	COMPANY
+today		NN	null
+at		IN	null
+5:00		CD	null
+pm		NN	null
+.		.	null
+
+matched expression: Apple Inc
+matched expression value: STRING(COMPANY)
+matched expression char offsets: (80,89)
+matched expression tokens:[Apple-8, Inc-9]
+---
+sentence number: 2
+sentence text: He works for apple inc in cupertino.
+He		PRP	null
+works		VBZ	null
+for		IN	null
+apple		NN	null
+inc		NN	null
+in		IN	null
+cupertino		NN	null
+.		.	null
+```
+
+In the output the tokens for each sentence will be printed out, and information about each
+found matched expression for each sentence will be printed out.
+
+Note that “apple inc” is not being matched, meaning we have successfully set the rules to be
+case sensitive.
+
+## Example 2: Multi-Step NER
 
 A good way to understand TokensRegex pipelines is to look at a specific example.  In this section we will
 go through building a pipeline that performs multi-step named entity recognition.
@@ -233,3 +378,4 @@ the	null
 President	JOB_TITLE_BASE
 .	null
 ```
+
