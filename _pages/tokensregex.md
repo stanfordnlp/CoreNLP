@@ -197,7 +197,7 @@ Java code specifies to create sentences based on newlines, so the input file is 
 
 You should see this output:
 
-```bash
+```
 ---
 sentence number: 0
 sentence text: She has worked at Miller Corp. for 5 years.
