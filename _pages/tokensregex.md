@@ -145,7 +145,7 @@ $COMPANY_ENDING = "/(Corp|Inc)\.?/"
 
 Now let’s walk through this rules file.
 
-The first section influence the environment of the pipeline.  Since our Java code sets the rules to
+The first section influences the environment of the pipeline.  Since our Java code sets the rules to
 be case-insensitive, we will set them to case-sensitive in our rules file for this TokensRegex pipeline.
 By setting those two flags to 0, the rules will be case-sensitive.
 
