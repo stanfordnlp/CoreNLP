@@ -15,7 +15,6 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
 
@@ -24,10 +23,11 @@ import edu.stanford.nlp.util.Pair;
  *
  * @author Sebastian Schuster
  */
-public class CoNLLUDocumentReader implements
-    IteratorFromReaderFactory<SemanticGraph> {
+public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticGraph> {
 
   private static final String COMMENT_POS = "<COMMENT>";
+
+  private static final long serialVersionUID = -7340310509954331983L;
 
   private IteratorFromReaderFactory<SemanticGraph> ifrf;
 
@@ -42,9 +42,9 @@ public class CoNLLUDocumentReader implements
   }
 
 
-  private static final Comparator<IndexedWord> byIndex = (i1, i2) -> i1.compareTo(i2);
+  private static final Comparator<IndexedWord> byIndex = Comparator.naturalOrder();
 
-  /* Comparator for putting multiword tokens before regular tokens.  */
+  /** Comparator for putting multiword tokens before regular tokens.  */
   private static final Comparator<IndexedWord> byType = (i1, i2) ->
           i1.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class) ? -1 :
                   i2.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class) ? 1 : 0;
@@ -53,8 +53,10 @@ public class CoNLLUDocumentReader implements
 
     private int lineNumberCounter = 0;
 
-    private Pair<IndexedWord, GrammaticalRelation> getGovAndReln(int govIdx, int copyCount, IndexedWord word, String relationName,
-                                                                 List<IndexedWord> sortedTokens) {
+    private static Pair<IndexedWord, GrammaticalRelation> getGovAndReln(int govIdx,
+                                                                        int copyCount,
+                                                                        IndexedWord word, String relationName,
+                                                                        List<IndexedWord> sortedTokens) {
       IndexedWord gov;
       GrammaticalRelation reln;
       if (relationName.equals("root")) {
@@ -66,17 +68,17 @@ public class CoNLLUDocumentReader implements
         gov = new IndexedWord(word.docID(), word.sentIndex(), 0);
         gov.setValue("ROOT");
       } else {
-        gov = this.getToken(sortedTokens, govIdx, copyCount);
+        gov = SentenceProcessor.getToken(sortedTokens, govIdx, copyCount);
       }
       return Generics.newPair(gov, reln);
     }
 
-    private IndexedWord getToken(List<IndexedWord> sortedTokens, int index) {
-      return this.getToken(sortedTokens, index, 0);
+    private static IndexedWord getToken(List<IndexedWord> sortedTokens, int index) {
+      return SentenceProcessor.getToken(sortedTokens, index, 0);
     }
 
 
-    private IndexedWord getToken(List<IndexedWord> sortedTokens, int index, int copyCount) {
+    private static IndexedWord getToken(List<IndexedWord> sortedTokens, int index, int copyCount) {
 
 
       int tokenLength = sortedTokens.size();
@@ -90,6 +92,7 @@ public class CoNLLUDocumentReader implements
     }
 
 
+    @Override
     public SemanticGraph apply(String line) {
       if (line == null) return null;
 
@@ -112,20 +115,18 @@ public class CoNLLUDocumentReader implements
 
       wordList.stream().filter(w -> w.tag() == null || ! w.tag().equals(COMMENT_POS))
               .sorted(byIndex.thenComparing(byType))
-              .forEach(w -> sorted.add(w));
+              .forEach(sorted::add);
 
       List<IndexedWord> sortedTokens = new ArrayList<>(wordList.size());
       sorted.stream()
               .filter(w -> !w.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class))
               .filter(w -> w.copyCount() == 0)
-              .forEach(w -> sortedTokens.add(w));
+              .forEach(sortedTokens::add);
 
       sorted.stream()
           .filter(w -> !w.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class))
           .filter(w -> w.copyCount() != 0)
           .forEach(w -> sortedTokens.add(sortedTokens.get(w.index() - 1).makeSoftCopy(w.copyCount())));
-
-
 
       /* Construct a semantic graph. */
       List<TypedDependency> deps = new ArrayList<>(sorted.size());
@@ -192,15 +193,16 @@ public class CoNLLUDocumentReader implements
 
       SemanticGraph sg = new SemanticGraph(deps);
 
-      comments.forEach(c -> sg.addComment(c));
+      comments.forEach(sg::addComment);
 
       return sg;
     }
   }
 
   private static class WordProcessor implements Function<String,IndexedWord> {
-    public IndexedWord apply(String line) {
 
+    @Override
+    public IndexedWord apply(String line) {
 
       IndexedWord word = new IndexedWord();
       if (line.startsWith("#")) {
@@ -208,7 +210,6 @@ public class CoNLLUDocumentReader implements
         word.setTag(COMMENT_POS);
         return word;
       }
-
 
       String[] bits = line.split("\\s+");
 
@@ -259,7 +260,9 @@ public class CoNLLUDocumentReader implements
         word.set(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class, extraDeps);
       }
 
-    return word;
+      return word;
     }
-  }
+
+  } // end static class WordProcessor
+
 }
