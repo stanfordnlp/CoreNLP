@@ -179,7 +179,7 @@ when it fires, and we say the result is “COMPANY”.  The value of the Matched
 
 If you run this TokensRegex pipeline on this file `basic_ner.txt`:
 
-```bash
+```
 She has worked at Miller Corp. for 5 years.
 There will be a big announcement by Apple Inc today at 5:00pm.
 He works for apple inc in cupertino.
