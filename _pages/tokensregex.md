@@ -323,7 +323,7 @@ He is the President.
 
 You should get this output:
 
-```bash
+```
 ---
 sentence number: 0
 sentence text: He is the vice president.
