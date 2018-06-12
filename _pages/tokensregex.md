@@ -168,8 +168,8 @@ to end with one token that matches the $COMPANY_ENDING pattern.
 
 If the pattern is matched,the “action” part of the rule will be executed.  In the most typical case, this means we want to annotate all of the tokens in the matched pattern in some manner.  This is done with the Annotate() function.
 In this rule, we state we want to annotate all of the matched tokens in the pattern (indicated by the group $0 in 
-the token pattern), we want to set their “CoreAnnotation.NamedEntityTagAnnotation.class” value 
-(indicted by “ner”), to the value “COMPANY”.  This is where the actual CoreLabel’s are being altered by
+the token pattern), and that we want to set their “CoreAnnotation.NamedEntityTagAnnotation.class” value 
+(indicated by “ner”), to the value “COMPANY”.  This is where the actual CoreLabel’s are being altered by
 having their CoreAnnotations.NamedEntityTagAnnotation.class field changed.
 
 Finally we may want to produced a MatchedExpression for this to operate on in our Java code, and we
