@@ -140,7 +140,7 @@ $COMPANY_BEGINNING = "/[A-Z][A-Za-z]+/"
 $COMPANY_ENDING = "/(Corp|Inc)\.?/"
 
 # rule for recognizing company names
-{ ruleType: "tokens", pattern: ([{word:$COMPANY_BEGINNING} & {tag:"NNP"}]+ [{word:$COMPANY_ENDING}]), action: Annotate($0, ner, "COMPANY"), result: "COMPANY" }
+{ ruleType: "tokens", pattern: ([{word:$COMPANY_BEGINNING} & {tag:"NNP"}]+ [{word:$COMPANY_ENDING}]), action: Annotate($0, ner, "COMPANY"), result: "COMPANY_RESULT" }
 ```
 
 Now let’s walk through this rules file.
@@ -175,7 +175,7 @@ having their CoreAnnotations.NamedEntityTagAnnotation.class field changed.
 Finally we may want to produced a MatchedExpression for this to operate on in our Java code, and we
 may want to set the value fo that MatchedExpression to something.  So we have the rule return a “result”
 when it fires, and we say the result is “COMPANY”.  The value of the MatchedExpression will be set to
-“COMPANY” as a result.
+“COMPANY_RESULT” as a result.
 
 If you run this TokensRegex pipeline on this file `basic_ner.txt`:
 
