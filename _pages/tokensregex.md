@@ -213,7 +213,7 @@ years		NNS	null
 .		.	null
 
 matched expression: Miller Corp.
-matched expression value: STRING(COMPANY)
+matched expression value: STRING(COMPANY_RESULT)
 matched expression char offsets: (18,30)
 matched expression tokens:[Miller-5, Corp.-6]
 ---
@@ -235,7 +235,7 @@ pm		NN	null
 .		.	null
 
 matched expression: Apple Inc
-matched expression value: STRING(COMPANY)
+matched expression value: STRING(COMPANY_RESULT)
 matched expression char offsets: (80,89)
 matched expression tokens:[Apple-8, Inc-9]
 ---
