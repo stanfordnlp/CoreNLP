@@ -191,8 +191,8 @@ And run this Java command:
 java -Xmx2g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos -rulesFiles basic_ner.rules -inputText basic_ner.txt
 ```
 
-Note: in this command we are only running tokenize,ssplit,pos,lemma, so the CoreLabels will have
-“null” for the NER token unless our rules find patterns in the input sentences. Also remember that
+*Note*: in this command we are only running tokenize,ssplit,pos so the CoreLabels will have
+“null” for the NER token unless our rules find patterns in the input sentences. Also remember that the
 Java code specifies to create sentences based on newlines, so the input file is interpreted as one-sentence-per-line.
 
 You should see this output:
