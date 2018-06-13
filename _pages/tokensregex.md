@@ -400,6 +400,8 @@ Here is the rules file `basic_quote_extraction.rules`
 
 ```
 # example rule matching over text instead of tokens
+# this is a Java regular expression that matches a quotation mark followed by characters ending with a quotation mark
+# it returns a value of the String "QUOTE" to the MatchedExpression
 { text: /".*"/ => "QUOTE" }
 ```
 
