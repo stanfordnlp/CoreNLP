@@ -307,7 +307,7 @@ ENV.defaults["stage"] = 3
 You can run this for yourself with this command:
 
 ```bash
-java -Xmx4g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit -rulesFiles multi_step_ner.rules -inputText multi_step_ner.txt
+java -Xmx2g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos,lemma,ner -rulesFiles multi_step_ner.rules -inputText multi_step_ner.txt
 ```
 
 If you run it on this example file `multi_step_ner.txt`
@@ -326,12 +326,13 @@ You should get this output:
 ---
 sentence number: 0
 sentence text: He is the vice president.
-He	null
-is	null
-the	null
-vice	COMPLETE_JOB_TITLE
-president	COMPLETE_JOB_TITLE
-.	null
+He		PRP	O
+is		VBZ	O
+the		DT	O
+vice		NN	COMPLETE_JOB_TITLE
+president		NN	COMPLETE_JOB_TITLE
+.		.	O
+
 matched expression: vice president
 matched expression value: STRING(FOUND_COMPLETE_JOB_TITLE)
 matched expression char offsets: (10,24)
@@ -339,13 +340,14 @@ matched expression tokens:[vice-4, president-5]
 ---
 sentence number: 1
 sentence text: He is the assistant vice president.
-He	null
-is	null
-the	null
-assistant	COMPLETE_JOB_TITLE
-vice	COMPLETE_JOB_TITLE
-president	COMPLETE_JOB_TITLE
-.	null
+He		PRP	O
+is		VBZ	O
+the		DT	O
+assistant		JJ	COMPLETE_JOB_TITLE
+vice		NN	COMPLETE_JOB_TITLE
+president		NN	COMPLETE_JOB_TITLE
+.		.	O
+
 matched expression: assistant vice president
 matched expression value: STRING(FOUND_COMPLETE_JOB_TITLE)
 matched expression char offsets: (36,60)
@@ -353,28 +355,30 @@ matched expression tokens:[assistant-4, vice-5, president-6]
 ---
 sentence number: 2
 sentence text: He is the deputy vice president.
-He	null
-is	null
-the	null
-deputy	COMPLETE_JOB_TITLE
-vice	COMPLETE_JOB_TITLE
-president	COMPLETE_JOB_TITLE
-.	null
+He		PRP	O
+is		VBZ	O
+the		DT	O
+deputy		NN	COMPLETE_JOB_TITLE
+vice		NN	COMPLETE_JOB_TITLE
+president		NN	COMPLETE_JOB_TITLE
+.		.	O
 ---
 sentence number: 3
 sentence text: He is the president.
-He	null
-is	null
-the	null
-president	JOB_TITLE_BASE
-.	null
+He		PRP	O
+is		VBZ	O
+the		DT	O
+president		NN	JOB_TITLE_BASE
+.		.	O
 ---
 sentence number: 4
 sentence text: He is the President.
-He	null
-is	null
-the	null
-President	JOB_TITLE_BASE
-.	null
+He		PRP	O
+is		VBZ	O
+the		DT	O
+President		NNP	JOB_TITLE_BASE
+.		.	O
 ```
 
+Note that the sentence containing "deputy vice president" does have those tokens tagged as COMPLETE_JOB_TITLE's,
+but that no matched expression is found for "deputy vice president" because of the filter.
