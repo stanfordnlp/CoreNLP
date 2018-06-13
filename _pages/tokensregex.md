@@ -172,7 +172,7 @@ the token pattern), and that we want to set their “CoreAnnotation.NamedEntityT
 (indicated by “ner”), to the value “COMPANY”.  This is where the actual CoreLabel’s are being altered by
 having their CoreAnnotations.NamedEntityTagAnnotation.class field changed.
 
-Finally we may want to produced a MatchedExpression for this to operate on in our Java code, and we
+Finally we may want to produce a MatchedExpression for this to operate on in our Java code, and we
 may want to set the value fo that MatchedExpression to something.  So we have the rule return a “result”
 when it fires, and we say the result is “COMPANY”.  The value of the MatchedExpression will be set to
 “COMPANY_RESULT” as a result.
