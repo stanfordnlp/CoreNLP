@@ -301,7 +301,10 @@ ENV.defaults["stage"] = 2
 
 # third phase is a filter phase, and it removes matched expressions that the filter matches
 ENV.defaults["stage"] = 3
-{ ruleType: "filter", pattern: ([{word:"deputy"}] [{word:"vice"}] [{word:"president"}]) } 
+# clean up component named entity tags from stage 1
+{ ruleType: "tokens", pattern: ([{ner:"JOB_TITLE_MODIFIER"} | {ner:"JOB_TITLE_BASE"}]+), action: Annotate($0, ner, "O") }
+# filter out the matched expression "deputy vice president"
+{ ruleType: "filter", pattern: ([{word:"deputy"}] [{word:"vice"}] [{word:"president"}]) }
 ```
 
 You can run this for yourself with this command:
@@ -368,7 +371,7 @@ sentence text: He is the president.
 He		PRP	O
 is		VBZ	O
 the		DT	O
-president		NN	JOB_TITLE_BASE
+president		NN	O
 .		.	O
 ---
 sentence number: 4
@@ -376,9 +379,11 @@ sentence text: He is the President.
 He		PRP	O
 is		VBZ	O
 the		DT	O
-President		NNP	JOB_TITLE_BASE
+President		NNP	O
 .		.	O
 ```
 
 Note that the sentence containing "deputy vice president" does have those tokens tagged as COMPLETE_JOB_TITLE's,
-but that no matched expression is found for "deputy vice president" because of the filter.
+but that no matched expression is found for "deputy vice president" because of the filter.  Note that the last
+two sentences have no named entity tags because we added a cleanup rule at the end.  If we didn't have that cleanup
+rule "president" and "President" would've been tagged with "JOB_TITLE_BASE".
