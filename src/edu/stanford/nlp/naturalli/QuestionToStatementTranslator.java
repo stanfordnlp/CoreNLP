@@ -336,6 +336,45 @@ public class QuestionToStatementTranslator {
   }
 
   /**
+   * The pattern for "what NN will (I|NN) ..." sentences.
+   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processWhNNIs(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
+   */
+  private final TokenSequencePattern triggerWhNNWill = TokenSequencePattern.compile(
+      "[{lemma:/what|which/; tag:/W.*/}] " +
+          "(?$answer_type [!{lemma:be} & !{pos:\"PRP$\"} & !{pos:MD}]+) " +
+          "(?$will [{pos:MD}]) " +
+          "(?$subj [{pos:/NN.?.?/} | {pos:PRP}]+) " +
+          "(?$statement_body [!{pos:IN}]+) " +
+          "(?$pp_prefix [{pos:IN}]*) " +
+          "(?$pp [{pos:IN}]) " +
+          "(?$pp_body []*) " +
+          "(?$punct [word:/[?\\.!]/])");
+
+  /**
+   * Process sentences matching the "what NN is ..." pattern.
+   *
+   * @param matcher The matcher that matched the pattern.
+   *
+   * @return The converted statement.
+   *
+   * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#triggerWhNNIs
+   */
+  private List<CoreLabel> processWhNNWill(TokenSequenceMatcher matcher) {
+    List<CoreLabel> sentence = (List<CoreLabel>) matcher.groupNodes("$subj");
+    sentence.addAll((Collection<CoreLabel>) matcher.groupNodes("$will"));
+    sentence.addAll((Collection<CoreLabel>) matcher.groupNodes("$statement_body"));
+    Collection<CoreLabel> answerType = (Collection<CoreLabel>) matcher.groupNodes("$answer_type");
+    for (CoreLabel lbl : answerType) {
+      lbl.set(UnknownTokenMarker.class, true);
+    }
+    sentence.addAll((Collection<CoreLabel>) matcher.groupNodes("$pp_prefix"));
+    sentence.addAll(answerType);
+    sentence.addAll((Collection<CoreLabel>) matcher.groupNodes("$pp"));
+    sentence.addAll((Collection<CoreLabel>) matcher.groupNodes("$pp_body"));
+    return sentence;
+  }
+
+  /**
    * The pattern for "what/which NN is ..." sentences.
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processWhNNIs(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
    */
@@ -388,9 +427,8 @@ public class QuestionToStatementTranslator {
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#triggerWhNNHave
    */
   private List<CoreLabel> processWhNNHaveIs(TokenSequenceMatcher matcher) {
-    List<CoreLabel> sentence = new ArrayList<>();
     // Add prefix
-    sentence.addAll((Collection<CoreLabel>) matcher.groupNodes("$pre_verb"));
+    List<CoreLabel> sentence = new ArrayList<>((Collection<CoreLabel>) matcher.groupNodes("$pre_verb"));
 
     // Add have/do
     List<CoreLabel> have = (List<CoreLabel>) matcher.groupNodes("$have");
@@ -1235,6 +1273,8 @@ public class QuestionToStatementTranslator {
     TokenSequenceMatcher matcher;
     if ((matcher = triggerWhatIsThere.matcher(question)).matches()) {  // must come before triggerWhatIs
       return postProcess(question, processWhatIsThere(matcher));
+    } else if ((matcher = triggerWhNNWill.matcher(question)).matches()) {  // must come before triggerWhNNIs
+      return postProcess(question, processWhNNWill(matcher));
     } else if ((matcher = triggerWhNNIs.matcher(question)).matches()) {  // must come before triggerWhatIs
       return postProcess(question, processWhNNIs(matcher));
     } else if ((matcher = triggerWhNNHave.matcher(question)).matches()) {  // must come before triggerWhatHave

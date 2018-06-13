@@ -719,4 +719,16 @@ public class QuestionToStatementTranslatorITest {
         "where/WRB did/VBD tesla/NNP work/NN before/IN striking/VBG out/RP on/IN his/PRP$ own/JJ ?",  // POS error on work/NN
         "Tesla worked before striking out on his own at Location");
   }
+
+
+  @Test
+  public void whatNNWillI() {
+    checkFormatted(
+        "what/WRB language/NN will/MD I/PRP be/VB able/JJ to/TO speak/VB if/IN I/PRP purchase/VBP these/DT socks/NNS ?/.",
+        "You will be able to speak language if you purchase these socks");
+    checkFormatted(
+        "what/WRB topic/NN would/MD you/PRP like/VB to/TO talk/VB about/IN on/IN Thursday/NNP ?/.",
+        "I would like to talk about topic on Thursday");
+
+  }
 }
