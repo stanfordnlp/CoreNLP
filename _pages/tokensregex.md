@@ -399,9 +399,6 @@ useful if you wanted to find quoted text and then work on the tokens of the quot
 Here is the rules file `basic_quote_extraction.rules`
 
 ```
-# these Java classes will be used by the rules
-tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
-
 # example rule matching over text instead of tokens
 { text: /".*"/ => "QUOTE" }
 ```
