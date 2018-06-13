@@ -96,7 +96,7 @@ public class TokensRegexDemo {
       List<MatchedExpression> matchedExpressions = extractor.extractExpressions(sentence);
       // print out the results of the rules actions
       for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-        System.out.println(token.word() + "\t" + token.ner());
+        System.out.println(token.word() + "\t" + token.tag() + "\t" + token.ner());
       }
       // print out the matched expressions
       for (MatchedExpression me : matchedExpressions) {
