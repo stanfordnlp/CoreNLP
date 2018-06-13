@@ -388,7 +388,7 @@ but that no matched expression is found for "deputy vice president" because of t
 two sentences have no named entity tags because we added a cleanup rule at the end.  If we didn't have that cleanup
 rule "president" and "President" would've been tagged with "JOB_TITLE_BASE".
 
-## Example 3: Extract Quotes
+## Example 3: Extract Quotes (Find A Pattern In A String Instead Of Over Tokens)
 
 In this example we will show how to find patterns in a String rather than over a sequence of tokens.  The
 pattern we will look for is a beginning quotation mark, any number of characters, and an ending quotation mark.
