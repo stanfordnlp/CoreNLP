@@ -296,12 +296,12 @@ ENV.defaults["stage"] = 1
 
 # second phase identifies complete job titles from components found in first phase
 ENV.defaults["stage"] = 2
-{ ruleType: "tokens", pattern: ([{ner: "JOB_TITLE_MODIFIER"}]+ [{ner: "JOB_TITLE_BASE"}]),
+{ ruleType: "tokens", pattern: ([{ner: "JOB_TITLE_MODIFIER"}]+ [{ner: "JOB_TITLE_BASE"}]), 
   action: Annotate($0, ner, "COMPLETE_JOB_TITLE"), result: "FOUND_COMPLETE_JOB_TITLE"}
 
 # third phase is a filter phase, and it removes matched expressions that the filter matches
 ENV.defaults["stage"] = 3
-{ ruleType: "filter", pattern: (/deputy/ /vice/ /president/) } 
+{ ruleType: "filter", pattern: ([{word:"deputy"}] [{word:"vice"}] [{word:"president"}]) } 
 ```
 
 You can run this for yourself with this command:
