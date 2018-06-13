@@ -387,3 +387,60 @@ Note that the sentence containing "deputy vice president" does have those tokens
 but that no matched expression is found for "deputy vice president" because of the filter.  Note that the last
 two sentences have no named entity tags because we added a cleanup rule at the end.  If we didn't have that cleanup
 rule "president" and "President" would've been tagged with "JOB_TITLE_BASE".
+
+## Example 3: Extract Quotes
+
+In this example we will show how to find patterns in a String rather than over a sequence of tokens.  The
+pattern we will look for is a beginning quotation mark, any number of characters, and an ending quotation mark.
+
+If the pattern is found, we will get a MatchedExpression which will contain a list of tokens.  This could be
+useful if you wanted to find quoted text and then work on the tokens of the quote.
+
+Here is the rules file `basic_quote_extraction.rules`
+
+```
+# these Java classes will be used by the rules
+tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
+
+# example rule matching over text instead of tokens
+{ text: /".*"/ => "QUOTE" }
+```
+
+If you run this command:
+
+```bash
+java -Xmx2g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos,lemma,ner -rulesFiles basic_quote_extraction.rules -inputText basic_quote_extraction.txt
+```
+
+on this file `basic_quote_extraction.txt`
+
+```
+John said, "I thought the pizza was great!"
+```
+
+you should get this output:
+
+```
+---
+sentence number: 0
+sentence text: John said, "I thought the pizza was great!"
+John		NNP	PERSON
+said		VBD	O
+,		,	O
+``		``	O
+I		PRP	O
+thought		VBD	O
+the		DT	O
+pizza		NN	O
+was		VBD	O
+great		JJ	O
+!		.	O
+''		''	O
+
+matched expression: "I thought the pizza was great!"
+matched expression value: STRING(QUOTE)
+matched expression char offsets: (11,43)
+matched expression tokens:[``-4, I-5, thought-6, the-7, pizza-8, was-9, great-10, !-11, ''-12]
+```
+
+The pattern finds a quote, and it returns a MatchedExpression with the values shown in the output.
