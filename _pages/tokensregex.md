@@ -292,7 +292,7 @@ ENV.defaults["stage"] = 1
 
 # tokens match phase
 { ruleType: "tokens", pattern: ([{word:$JOB_TITLE_MODIFIERS}]+), action: Annotate($0, ner, "JOB_TITLE_MODIFIER") }
-{ ruleType: "tokens", pattern: ($JOB_TITLE_BASES), action: Annotate($0, ner, "JOB_TITLE_BASE") }
+{ ruleType: "tokens", pattern: ([{word:$JOB_TITLE_BASES}]), action: Annotate($0, ner, "JOB_TITLE_BASE") }
 
 # second phase identifies complete job titles from components found in first phase
 ENV.defaults["stage"] = 2
