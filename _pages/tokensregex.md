@@ -173,7 +173,7 @@ the token pattern), and that we want to set their “CoreAnnotation.NamedEntityT
 having their CoreAnnotations.NamedEntityTagAnnotation.class field changed.
 
 Finally we may want to produce a MatchedExpression for this to operate on in our Java code, and we
-may want to set the value fo that MatchedExpression to something.  So we have the rule return a “result”
+may want to set the value of that MatchedExpression to something.  So we have the rule return a “result”
 when it fires, and we say the result is “COMPANY”.  The value of the MatchedExpression will be set to
 “COMPANY_RESULT” as a result.
 
