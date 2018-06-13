@@ -259,8 +259,7 @@ case sensitive.
 
 ## Example 2: Multi-Step NER
 
-A good way to understand TokensRegex pipelines is to look at a specific example.  In this section we will
-go through building a pipeline that performs multi-step named entity recognition.
+In this section we will go through building a pipeline that performs multi-step named entity recognition.
 
 In the first phase, we will identify basic components of a job title.  The two we will identify
 are JOB_TITLE_BASE (e.g. "president") and JOB_TITLE_MODIFIER (e.g. "vice").
