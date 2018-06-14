@@ -459,9 +459,6 @@ main relation info in the value field, and access to the provenance of the relat
 Here is the rules file `basic_relation.rules`
 
 ```
-# these Java classes will be used by the rules
-tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
-
 # rules for finding employment relations
 { ruleType: "tokens", pattern: (([{ner:"PERSON"}]+) /works/ /for/ ([{ner:"ORGANIZATION"}]+)), 
   result: Concat("(", $$1.text, ",", "works_for", ",", $$2.text, ")") } 
