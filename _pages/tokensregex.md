@@ -443,3 +443,79 @@ matched expression tokens:[``-4, I-5, thought-6, the-7, pizza-8, was-9, great-10
 ```
 
 The pattern finds a quote, and it returns a MatchedExpression with the values shown in the output.
+
+## Example 4: Basic Relation Extraction
+
+In this example we will implement some basic relation extraction.
+
+What we will state is that we have found evidence of a "works for" relation when we see
+"works for" or "is employed at|by" in between a PERSON and an ORGANIZATION.
+
+When such a pattern is detected in the text, the resulting MatchedExpression in the Java
+code will be given a tuple value containing the relation info.  Note that the overall
+MatchedExpression will have the text and tokens list, so you would have both the
+main relation info in the value field, and access to the provenance of the relation. 
+
+Here is the rules file `basic_relation.rules`
+
+```
+# these Java classes will be used by the rules
+tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
+
+# rules for finding employment relations
+{ ruleType: "tokens", pattern: (([{ner:"PERSON"}]+) /works/ /for/ ([{ner:"ORGANIZATION"}]+)), 
+  result: Concat("(", $$1.text, ",", "works_for", ",", $$2.text, ")") } 
+
+{ ruleType: "tokens", pattern: (([{ner:"PERSON"}]+) /is/ /employed/ /at|by/ ([{ner:"ORGANIZATION"}]+)), 
+  result: Concat("(", $$1.text, ",", "works_for", ",", $$2.text, ")") } 
+```
+
+If you run this command:
+
+```bash
+java -Xmx4g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos,lemma,ner -rulesFiles basic_relation.rules -inputText basic_relation.txt
+```
+
+on this example text `basic_relation.txt`
+
+```
+Joe Smith works for Google.
+Jane Smith is employed by Apple.
+```
+
+you should get this output:
+
+```
+---
+sentence number: 0
+sentence text: Joe Smith works for Google.
+Joe		NNP	PERSON
+Smith		NNP	PERSON
+works		VBZ	O
+for		IN	O
+Google		NNP	ORGANIZATION
+.		.	O
+
+matched expression: Joe Smith works for Google
+matched expression value: STRING((Joe Smith,works_for,Google))
+matched expression char offsets: (0,26)
+matched expression tokens:[Joe-1, Smith-2, works-3, for-4, Google-5]
+---
+sentence number: 1
+sentence text: Jane Smith is employed by Apple.
+Jane		NNP	PERSON
+Smith		NNP	PERSON
+is		VBZ	O
+employed		VBN	O
+by		IN	O
+Apple		NNP	ORGANIZATION
+.		.	O
+
+matched expression: Jane Smith is employed by Apple
+matched expression value: STRING((Jane Smith,works_for,Apple))
+matched expression char offsets: (28,59)
+matched expression tokens:[Jane-1, Smith-2, is-3, employed-4, by-5, Apple-6]
+```
+
+The MatchedExpression has the full text and tokens with the supporting evidence for the relation, and
+it has a value tuple containing the core relation info.
