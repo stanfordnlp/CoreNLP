@@ -19,6 +19,36 @@ Note: extracts everything within these pairs as a whole quote segment, which may
 | --- | --- | --- |
 | quote | QuoteAnnotator | QuotationsAnnotation, CharacterOffsetBeginAnnotation, CharacterOffsetEndAnnotation, QuotationIndexAnnotation, QuotationsAnnotation (if embedded quotes), TokensAnnotation (if tokenize present), TokenBeginAnnotation (if tokenize present), TokenEndAnnotation (if tokenize present), SentenceBeginAnnotation (if ssplit present), SentenceEndAnnotation (if ssplit present) | 
 
+## Quote Attribution
+
+As of version 3.9.1 of Stanford CoreNLP, the QuoteAnnotator will also try to attribute the quotes by default.
+
+This can be deactivated by setting the `quote.attributeQuotes` property to `false.`
+
+## Sample Command Line
+
+If you run this command:
+
+```bash
+java -Xmx10g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,depparse,coref,quote -file quote-example.txt -outputFormat text
+```
+
+On this text `quote-example.txt`:
+
+```
+In the summer Joe Smith decided to go on vacation.  He said, "I'm going to Hawaii."  That July, vacationer Joe went to Hawaii.
+```
+
+You should get this output for the quote in the text:
+
+```
+Extracted quotes: 
+[QuotationIndex=0, CharacterOffsetBegin=61, Text="I'm going to Hawaii.", Speaker=Joe Smith]
+```
+
+If you didn't want to run quote attribution, you would add `-quote.attributeQuotes false` to your command.
+
+
 ## Options
 
 * quote.singleQuotes: "true" or "false", indicating whether or not to consider ' tokens (single quotes) to be quotation marks (default=false).
