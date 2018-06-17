@@ -1414,6 +1414,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     Properties props = new Properties();
     if (args.length > 0) {
       props = StringUtils.argsToProperties(args);
+      // handle new fileList by making sure filelist is also set
+      if (props.containsKey("fileList")) {
+        props.setProperty("filelist", props.getProperty("fileList"));
+      }
       boolean hasH = props.containsKey("h");
       boolean hasHelp = props.containsKey("help");
       if (hasH || hasHelp) {
