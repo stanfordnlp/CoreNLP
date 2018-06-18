@@ -143,7 +143,66 @@ public class TokensRegexDemo {
   }
 
 }
+
+## TokensRegex Pipeline Overview
+
+As you work through the examples, it is helpful to understand the high level design of a TokensRegex pipeline.
+The pipeline is specified in a set of rules files, that are evaluated with respect to an environment.  The
+environment can be initialized in Java code, and altered in the rules files.
+
+Generally assignments are made at the top, which set up variables to be used in the TokensRegex pipeline.
+
+Then the rules are specified.  A TokensRegex pipeline can be split into stages (as many as you'd like).  Each
+stage runs until completion, and then the next stage runs.  The Multi-Step NER example below illustrates this.
+
+There are four types of extraction rule: text, token, composite, and filter.
+
+* text - find patterns in a String
+* tokens - find patterns in a list of tokens
+* composite - recursive rules
+* filter - filter out matched expressions that match a pattern
+
+The Basic NER example shows token rules, the Extract Quotes example shows a text rule, the Process Math Expressions example
+shows a composite rule, and the Multi-Step NER example shows a filter rule.
+
+In the pipeline all of the text/token rules are run, then the composite rules are run over and over again
+until no changes occur, and finally the filter rules are run.
+
+Later in this documentation there will be a section focusing on each of the rule types to better explain the format.
+
+## Tokens Rules
+
+The most common type of rule is the "tokens" rule.  This rule type searches for patterns over a list of tokens.
+
+Here is a simple example (Note: it is assumed that tokenize, ssplit, pos, and lemma have been run before the TokensRegex pipeline in this example)
+
 ```
+{ ruleType: "tokens", pattern: ([{word:"I"}] [{word:"/like|love/"} & {tag:"VBP"}] ([{word:"pizza"}])), action: Annotate($1, ner, "FOOD"), result: "PIZZA" }
+
+```
+
+Let's walk through this rule.  The "ruleType" field specify that this is a "tokens" rule which will try to find patterns in a list of tokens.
+
+The "pattern" field specifies the pattern to search for in the list of tokens.  Here is a description of the pattern in this example:
+
+* `[{word:"I"}]` represents exact matching a token with text "I".
+* `[{word:"/like|love/"} & {tag:"VBP"}]` represents matching a token with text "like" or "love" AND that has the part of speech tag "VBP". 
+* `[{word:"pizza"}] represents exact matching a token with text "pizza".
+
+This pattern will match "I like pizza" or "I love pizza" (assuming like and love have the proper part of speech tag).
+
+The "action" field specifies an action to take.  The (Expressions Javadoc)[https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/types/Expressions.html]
+shows more info about the kinds of actions there are.  The most common one is Annotate().  In this example we specify to annotate the word "pizza" with the NER tag
+"FOOD".  (Note: make sure that "ner" is tied to CoreAnnotations.NamedEntityTagAnnotation.class which is shown below).
+
+Finally the "result" is the value that the MatchedExpression will have.  Here we just make it the String "PIZZA".
+
+## Tokens Rules Patterns
+
+There are a lot of ways to match patterns in token sequences.  Below is a helpful cheat sheet
+
+* [{word:"pizza"}] - exact matches the word "pizza" (example: "pizza")
+* [{word:"/[A-Za-z]/"}]+ - matches any number of capitalized words in a row that only contain letters (examples: "Joe Smith", "Some Capitalized Words In A Row") 
 
 ## Example 1: Basic NER
 
