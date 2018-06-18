@@ -203,7 +203,7 @@ Finally the "result" is the value that the MatchedExpression will have.  Here we
 There are a lot of ways to match patterns in token sequences.  Below is a helpful cheat sheet
 
 * `[{word:"pizza"}]` - exact matches the word "pizza" (example: "pizza")
-* `[{word:"/[A-Za-z]+/"}]+` - matches any number of capitalized words in a row that only contain letters (examples: "Joe Smith", "Some Capitalized Words In A Row") 
+* `[{word:/[A-Z][A-Za-z]+/}]+` - matches any number of capitalized words in a row that only contain letters (examples: "Joe Smith", "Some Capitalized Words In A Row") 
 
 ## Example 1: Basic NER
 
