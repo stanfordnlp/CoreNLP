@@ -204,6 +204,7 @@ There are a lot of ways to match patterns in token sequences.  Below is a helpfu
 
 * `[{word:"pizza"}]` - exact matches the word "pizza" (example: "pizza")
 * `[{word:/[A-Z][A-Za-z]+/}]+` - matches any number of capitalized words in a row that only contain letters (examples: "Joe Smith", "Some Capitalized Words In A Row") 
+* `[{word:/[A-Z][A-Za-z]+/} & {tag:"NNP"}]+` - same as above, but only matches if the tokens have the part of speech tag "NNP"
 
 ## Example 1: Basic NER
 
