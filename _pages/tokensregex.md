@@ -187,14 +187,18 @@ Let's walk through this rule.  The "ruleType" field specify that this is a "toke
 The "pattern" field specifies the pattern to search for in the list of tokens.  Here is a description of the pattern in this example:
 
 * `[{word:"I"}]` represents exact matching a token with text "I".
-* `[{word:"/like|love/"} & {tag:"VBP"}]` represents matching a token with text "like" or "love" AND that has the part of speech tag "VBP". 
+* `[{word:/like|love/} & {tag:"VBP"}]` represents matching a token with text "like" or "love" AND that has the part of speech tag "VBP". 
 * `[{word:"pizza"}]` represents exact matching a token with text "pizza".
 
 This pattern will match "I like pizza" or "I love pizza" (assuming like and love have the proper part of speech tag).
 
+Note there are parenthesis around the pizza token.  This specifies a group.  In this example, the whole match is group $0, and the
+match on "pizza" is group $1.  We can use the group numbers to specify lists of tokens to alter in the action part of the rule.
+
 The "action" field specifies an action to take.  The (Expressions Javadoc)[https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/types/Expressions.html]
 shows more info about the kinds of actions there are.  The most common one is Annotate().  In this example we specify to annotate the word "pizza" with the NER tag
-"FOOD".  (Note: make sure that "ner" is tied to CoreAnnotations.NamedEntityTagAnnotation.class which is shown below).
+"FOOD".  (Note: make sure that "ner" is tied to CoreAnnotations.NamedEntityTagAnnotation.class which is shown below).  The Annotate() call says to annotate
+all tokens in group match $1 with named entity tag "FOOD".
 
 Finally the "result" is the value that the MatchedExpression will have.  Here we just make it the String "PIZZA".
 
