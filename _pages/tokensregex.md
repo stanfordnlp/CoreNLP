@@ -11,6 +11,15 @@ TokensRegex is a complex and powerful library for identifying and acting on patt
 To fully utilize TokensRegex, you should review the high level overview and then work through
 the specific examples below.
 
+## Other Resources
+
+In addition to the info on this page, there are some other great resources to check out with very useful information:
+
+[Original slides](https://nlp.stanford.edu/software/tokensregex/TokensRegexOverview.pdf/)
+[Original TokensRegex site](https://nlp.stanford.edu/software/tokensregex.html)
+[SequenceMatchRules Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/SequenceMatchRules.html)
+[Expressions Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/types/Expressions.html)
+
 ## High Level Overview
 
 With TokensRegex, you can build a rule based system for searching for patterns and performing
