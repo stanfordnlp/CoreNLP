@@ -547,13 +547,13 @@ This example demonstrates the composite rule type, it will run on a math equatio
 The rule should match (among other things) two numbers separated by an operator, and assign that expression
 the value of executing the operation on the operands.  "(", expression, ")" will be matched to be the same
 expression and have the same value as the enclosed expression (this is to process parenthesis).  Every time
-a pattern is matched, all of the tokens in the pattern match will be replaced with an aggregate token 
+a pattern is matched, all of the tokens in the pattern match will be replaced with an "aggregate token" 
 representing the whole matched pattern.
 
 For instance if you process `(5 + 5) + 5` it will run the composite rules and end up calculating 15. 
 
 The composite rules are run over and over again until nothing changes.  Matched expressions are replaced with
-an "aggregate token" which represents the whole matched expression.
+an aggregate token which represents the whole matched expression.
 
 To illustrate this, let's examine what happens to this example sentence.  We will represent an aggregate token
 with aggregate_token[string, value]
