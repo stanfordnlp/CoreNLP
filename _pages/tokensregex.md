@@ -540,3 +540,103 @@ matched expression tokens:[Jane-1, Smith-2, is-3, employed-4, by-5, Apple-6]
 
 The MatchedExpression has the full text and tokens with the supporting evidence for the relation, and
 it has a value tuple containing the core relation info.
+
+## Example 5: Process Math Expressions (Composite Rules)
+
+This example demonstrates the composite rule type, it will run on a math equation and calculate the value of it.
+
+For instance if you process `(5 + 5) + 5` it will run the composite rules and end up calculating 15. 
+
+The composite rules are run over and over again until nothing changes.  Matched expressions are replaced with
+an "aggregate token" which represents the whole matched expression.
+
+To illustrate this, let's examine what happens to this example sentence.  We will represent an aggregate token
+with aggregate_token[string, value]
+
+```
+# initial
+(5 + 5) + 5
+# first run of composite rules, after first rule
+(aggregate_token[5 + 5, 10]) + 5
+# first run of composite rules, after second rule
+aggregate_token[(aggregate_token[5 + 5]), 10] + 5
+# second run of composite rules, after first rule
+aggregate_token[aggregate_token[(aggregate_token[5 + 5])] + 5, 15]
+# second run of composite rules, after second rule
+aggregate_token[aggregate_token[(aggregate_token[5 + 5])] + 5, 15]
+# third run of composite rules, after first rule
+aggregate_token[aggregate_token[(aggregate_token[5 + 5])] + 5, 15]
+# third run of composite rules, after second rule
+aggregate_token[aggregate_token[(aggregate_token[5 + 5])] + 5, 15]
+# no change detected, so the composite phase ends
+```
+
+Here is the rules file that implements this `math_expression.rules`
+
+```
+orig = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$OriginalTextAnnotation" }
+numtokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NumerizedTokensAnnotation" }
+numcomptype = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NumericCompositeTypeAnnotation" }
+numcompvalue = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NumericCompositeValueAnnotation" }
+
+mytokens = { type: "CLASS", value: "edu.stanford.nlp.examples.TokensRegexDemo$MyTokensAnnotation" }
+type = { type: "CLASS", value: "edu.stanford.nlp.examples.TokensRegexDemo$MyTypeAnnotation" }
+value = { type: "CLASS", value: "edu.stanford.nlp.examples.TokensRegexDemo$MyValueAnnotation" }
+
+ENV.defaultResultAnnotationKey = ( type, value )
+ENV.defaultNestedResultsAnnotationKey = mytokens
+ENV.defaults["stage.limitIters"] = 0
+
+// Numbers
+{ ruleType: "tokens", pattern: ( [ numcomptype:"NUMBER" ] ), result: ( "EXPR", $0[0].numcompvalue ) }
+
+// Operators
+{ pattern: ( "+" ),            result: ( "OP", "Add" ),      priority: 1}
+{ pattern: ( /plus/ ),         result: ( "OP", "Add" ),      priority: 1}
+{ pattern: ( "-" ),            result: ( "OP", "Subtract" ), priority: 1}
+{ pattern: ( /minus/ ),        result: ( "OP", "Subtract" ), priority: 1}
+{ pattern: ( "*" ),            result: ( "OP", "Multiply" ), priority: 2}
+{ pattern: ( /times/ ),        result: ( "OP", "Multiply" ), priority: 2}
+{ pattern: ( "/" ),            result: ( "OP", "Divide" ),   priority: 2}
+{ pattern: ( /divided/ /by/ ), result: ( "OP", "Divide" ),   priority: 2}
+{ pattern: ( "^" ),            result: ( "OP", "Pow" ),      priority: 3}
+
+$OP = ( [ type:"OP" ] )
+$EXPR = ( [ type:"EXPR" ] )
+
+{ ruleType: "composite", pattern: ( ($EXPR) ($OP) ($EXPR) ), result: ("EXPR", Call($2[0].value, $1[0].value, $3[0].value)) }
+
+{ ruleType: "composite", pattern: ( [orig:"("] ($EXPR) [orig:")"] ), result: ("EXPR", $1[0].value) }
+```
+
+If you run on this example sentence: `math_expression.txt`
+
+```
+(5 + 5) + 5
+```
+
+With this command:
+
+```bash
+java -Xmx2g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos,lemma,ner -rulesFiles math_expressions.rules -inputText math_expressions.txt 
+```
+
+You should get this output:
+
+```
+---
+sentence number: 0
+sentence text: (5 + 5) + 5
+-LRB-		-LRB-	O
+5		CD	NUMBER
++		CC	O
+5		CD	NUMBER
+-RRB-		-RRB-	O
++		CC	O
+5		CD	NUMBER
+
+matched expression: -LRB-5 + 5-RRB- + 5
+matched expression value: LIST([STRING(EXPR), NUMBER(15)])
+matched expression char offsets: (0,11)
+matched expression tokens:[-LRB--1, 5-2, +-3, 5-4, -RRB--5, +-6, 5-7]
+```
