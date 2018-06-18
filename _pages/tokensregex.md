@@ -559,21 +559,31 @@ To illustrate this, let's examine what happens to this example sentence.  We wil
 with aggregate_token[string, value]
 
 ```
-# initial
+# initial 
+# (7 tokens) ["(", "5", "+", "5", ")", "+", "5"]
 (5 + 5) + 5
-# first run of composite rules, after first rule
+# first run of composite rules, after first rule 
+# "5 + 5" is matched and replaced with aggregate_token["5 + 5", 10]
+# (5 tokens) ["(", aggregrate_token["5 + 5", 10], ")", "+", "5"]
 (aggregate_token["5 + 5", 10]) + 5
 # first run of composite rules, after second rule
-aggregate_token["(aggregate_token[5 + 5])", 10] + 5
+# "(aggregate_token["5 + 5", 10])" is matched, given value of 10 which is same as internal expression
+# (3 tokens) [aggregate_token["(aggregate_token["5 + 5", 10])", 10], "+", "5"]
+aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5
 # second run of composite rules, after first rule
-aggregate_token[aggregate_token["(aggregate_token[5 + 5])] + 5", 15]
+# aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5 is matched, given value of 15
+# (1 token) [aggregate_token["aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5", 15]]
+aggregate_token["aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5", 15]
 # second run of composite rules, after second rule
-aggregate_token[aggregate_token["(aggregate_token[5 + 5])] + 5", 15]
+# (1 token) [aggregate_token["aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5", 15]]
+aggregate_token["aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5", 15]
 # third run of composite rules, after first rule
-aggregate_token[aggregate_token["(aggregate_token[5 + 5])] + 5", 15]
+# (1 token) [aggregate_token["aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5", 15]]
+aggregate_token["aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5", 15]
 # third run of composite rules, after second rule
-aggregate_token[aggregate_token["(aggregate_token[5 + 5])] + 5", 15]
-# no change detected, so the composite phase ends
+# (1 token) [aggregate_token["aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5", 15]]
+aggregate_token["aggregate_token["(aggregate_token["5 + 5", 10])", 10] + 5", 15]
+# no change detected after third run of all composite rules, so the composite phase ends
 ```
 
 Here is the rules file that implements this `math_expression.rules`
