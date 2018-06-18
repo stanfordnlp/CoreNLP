@@ -178,7 +178,7 @@ The most common type of rule is the "tokens" rule.  This rule type searches for 
 Here is a simple example (Note: it is assumed that tokenize, ssplit, pos, and lemma have been run before the TokensRegex pipeline in this example)
 
 ```
-{ ruleType: "tokens", pattern: ([{word:"I"}] [{word:"/like|love/"} & {tag:"VBP"}] ([{word:"pizza"}])), action: Annotate($1, ner, "FOOD"), result: "PIZZA" }
+{ ruleType: "tokens", pattern: ([{word:"I"}] [{word:/like|love/} & {tag:"VBP"}] ([{word:"pizza"}])), action: Annotate($1, ner, "FOOD"), result: "PIZZA" }
 
 ```
 
