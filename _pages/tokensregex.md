@@ -50,6 +50,30 @@ import java.util.regex.*;
 
 public class TokensRegexDemo {
 
+  // My custom tokens
+  public static class MyTokensAnnotation implements CoreAnnotation<List<? extends CoreMap>> {
+    @Override
+    public Class<List<? extends CoreMap>> getType() {
+      return ErasureUtils.<Class<List<? extends CoreMap>>> uncheckedCast(List.class);
+    }
+  }
+
+  // My custom type
+  public static class MyTypeAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return ErasureUtils.<Class<String>> uncheckedCast(String.class);
+    }
+  }
+
+  // My custom value
+  public static class MyValueAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return ErasureUtils.<Class<String>> uncheckedCast(String.class);
+    }
+  }
+
   public static void main(String[] args) {
 
     // load settings from the command line
