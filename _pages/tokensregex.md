@@ -544,6 +544,11 @@ it has a value tuple containing the core relation info.
 ## Example 5: Process Math Expressions (Composite Rules)
 
 This example demonstrates the composite rule type, it will run on a math equation and calculate the value of it.
+The rule should match (among other things) two numbers separated by an operator, and assign that expression
+the value of executing the operation on the operands.  "(", expression, ")" will be matched to be the same
+expression and have the same value as the enclosed expression (this is to process parenthesis).  Every time
+a pattern is matched, all of the tokens in the pattern match will be replaced with an aggregate token 
+representing the whole matched pattern.
 
 For instance if you process `(5 + 5) + 5` it will run the composite rules and end up calculating 15. 
 
@@ -557,17 +562,17 @@ with aggregate_token[string, value]
 # initial
 (5 + 5) + 5
 # first run of composite rules, after first rule
-(aggregate_token[5 + 5, 10]) + 5
+(aggregate_token["5 + 5", 10]) + 5
 # first run of composite rules, after second rule
-aggregate_token[(aggregate_token[5 + 5]), 10] + 5
+aggregate_token["(aggregate_token[5 + 5])", 10] + 5
 # second run of composite rules, after first rule
-aggregate_token[aggregate_token[(aggregate_token[5 + 5])] + 5, 15]
+aggregate_token[aggregate_token["(aggregate_token[5 + 5])] + 5", 15]
 # second run of composite rules, after second rule
-aggregate_token[aggregate_token[(aggregate_token[5 + 5])] + 5, 15]
+aggregate_token[aggregate_token["(aggregate_token[5 + 5])] + 5", 15]
 # third run of composite rules, after first rule
-aggregate_token[aggregate_token[(aggregate_token[5 + 5])] + 5, 15]
+aggregate_token[aggregate_token["(aggregate_token[5 + 5])] + 5", 15]
 # third run of composite rules, after second rule
-aggregate_token[aggregate_token[(aggregate_token[5 + 5])] + 5, 15]
+aggregate_token[aggregate_token["(aggregate_token[5 + 5])] + 5", 15]
 # no change detected, so the composite phase ends
 ```
 
