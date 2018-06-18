@@ -195,7 +195,7 @@ This pattern will match "I like pizza" or "I love pizza" (assuming like and love
 Note there are parenthesis around the pizza token.  This specifies a group.  In this example, the whole match is group $0, and the
 match on "pizza" is group $1.  We can use the group numbers to specify lists of tokens to alter in the action part of the rule.
 
-The "action" field specifies an action to take.  The (Expressions Javadoc)[https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/types/Expressions.html]
+The "action" field specifies an action to take.  The [Expressions Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/types/Expressions.html)
 shows more info about the kinds of actions there are.  The most common one is Annotate().  In this example we specify to annotate the word "pizza" with the NER tag
 "FOOD".  (Note: make sure that "ner" is tied to CoreAnnotations.NamedEntityTagAnnotation.class which is shown below).  The Annotate() call says to annotate
 all tokens in group match $1 with named entity tag "FOOD".
