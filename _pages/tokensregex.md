@@ -15,10 +15,10 @@ the specific examples below.
 
 In addition to the info on this page, there are some other great resources to check out with very useful information:
 
-[Original slides](https://nlp.stanford.edu/software/tokensregex/TokensRegexOverview.pdf/)
-[Original TokensRegex site](https://nlp.stanford.edu/software/tokensregex.html)
-[SequenceMatchRules Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/SequenceMatchRules.html)
-[Expressions Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/types/Expressions.html)
+* [Original slides](https://nlp.stanford.edu/software/tokensregex/TokensRegexOverview.pdf/)
+* [Original TokensRegex site](https://nlp.stanford.edu/software/tokensregex.html)
+* [SequenceMatchRules Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/SequenceMatchRules.html)
+* [Expressions Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/tokensregex/types/Expressions.html)
 
 ## High Level Overview
 
