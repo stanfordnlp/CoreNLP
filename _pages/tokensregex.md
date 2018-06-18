@@ -188,7 +188,7 @@ The "pattern" field specifies the pattern to search for in the list of tokens.  
 
 * `[{word:"I"}]` represents exact matching a token with text "I".
 * `[{word:"/like|love/"} & {tag:"VBP"}]` represents matching a token with text "like" or "love" AND that has the part of speech tag "VBP". 
-* `[{word:"pizza"}] represents exact matching a token with text "pizza".
+* `[{word:"pizza"}]` represents exact matching a token with text "pizza".
 
 This pattern will match "I like pizza" or "I love pizza" (assuming like and love have the proper part of speech tag).
 
@@ -202,8 +202,8 @@ Finally the "result" is the value that the MatchedExpression will have.  Here we
 
 There are a lot of ways to match patterns in token sequences.  Below is a helpful cheat sheet
 
-* [{word:"pizza"}] - exact matches the word "pizza" (example: "pizza")
-* [{word:"/[A-Za-z]/"}]+ - matches any number of capitalized words in a row that only contain letters (examples: "Joe Smith", "Some Capitalized Words In A Row") 
+* `[{word:"pizza"}]` - exact matches the word "pizza" (example: "pizza")
+* `[{word:"/[A-Za-z]+/"}]+` - matches any number of capitalized words in a row that only contain letters (examples: "Joe Smith", "Some Capitalized Words In A Row") 
 
 ## Example 1: Basic NER
 
