@@ -259,6 +259,12 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // if Spanish, run the regexner with Spanish number rules
     if (LanguageInfo.HumanLanguage.SPANISH.equals(language))
       spanishNumberAnnotator.annotate(annotation);
+    // perform safety clean up
+    // MONEY and NUMBER ner tagged items should not have Timex values
+    for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+      if (token.ner().equals("MONEY") || token.ner().equals("NUMBER"))
+        token.remove(TimeAnnotations.TimexAnnotation.class);
+    }
     // if fine grained ner is requested, run that
     if (this.applyFineGrained) {
       fineGrainedNERAnnotator.annotate(annotation);
