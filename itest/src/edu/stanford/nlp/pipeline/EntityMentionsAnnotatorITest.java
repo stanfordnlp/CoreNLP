@@ -131,6 +131,19 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     compareMentions("testNumbers", expectedMentions, mentions);
   }
 
+  public void testPercent() {
+    Annotation doc = createDocument("12% 13%");
+    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+
+    annotator.annotate(doc);
+    List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
+    String[] expectedMentions = {
+        "[Text=12% CharacterOffsetBegin=0 CharacterOffsetEnd=3 Tokens=[12-1, %-2] TokenBegin=0 TokenEnd=2 NamedEntityTag=PERCENT NormalizedNamedEntityTag=%12.0 EntityType=PERCENT SentenceIndex=0 EntityMentionIndex=0 CanonicalEntityMentionIndex=0]",
+        "[Text=13% CharacterOffsetBegin=4 CharacterOffsetEnd=7 Tokens=[13-3, %-4] TokenBegin=2 TokenEnd=4 NamedEntityTag=PERCENT NormalizedNamedEntityTag=%13.0 EntityType=PERCENT SentenceIndex=0 EntityMentionIndex=1 CanonicalEntityMentionIndex=1]"
+    };
+    compareMentions("testPercent", expectedMentions, mentions);
+  }
+
   public void testNewsText() {
     Annotation doc = createDocument("Duke of Cambridge, Prince William, unveiled a new China Center in the University of Oxford Monday.\n" +
         "Covering an area nearly 5,500 square meters, the new Dickson Poon University of Oxford China Center in St Hugh's College cost about 21 million pounds.\n" +
