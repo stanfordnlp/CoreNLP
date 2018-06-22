@@ -1295,10 +1295,14 @@ public class QuantifiableEntityNormalizer  {
   }
 
   public static <E extends CoreMap> boolean isCompatible(String tag, E prev, E cur) {
-    if ("NUMBER".equals(tag) || "ORDINAL".equals(tag)) {
+    if ("NUMBER".equals(tag) || "ORDINAL".equals(tag) || "PERCENT".equals(tag)) {
       // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
       Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
       Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+
+      // Special case for % sign
+      if ("PERCENT".equals(tag) && n1 == null) return true;
+
       boolean compatible = checkNumbers(n1,n2);
       if (!compatible) return false;
     }
