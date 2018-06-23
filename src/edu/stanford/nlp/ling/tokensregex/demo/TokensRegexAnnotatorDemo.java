@@ -14,8 +14,12 @@ import edu.stanford.nlp.util.CoreMap;
 
 /**
  * Demo illustrating how to use TokensRegexAnnotator.
+ * Usage:
+ * java edu.stanford.nlp.ling.tokensregex.demo.TokensRegexAnnotatorDemo rulesFile [inputFile [outputFile]]
  */
 public class TokensRegexAnnotatorDemo {
+
+  private TokensRegexAnnotatorDemo() { } // static main method
 
   public static void main(String[] args) throws IOException {
     PrintWriter out;
@@ -47,17 +51,18 @@ public class TokensRegexAnnotatorDemo {
     pipeline.annotate(annotation);
 
     // An Annotation is a Map and you can get and use the various analyses individually.
-    out.println();
     // The toString() method on an Annotation just prints the text of the Annotation
     // But you can see what is in it with other methods like toShorterString()
+    out.println();
     out.println("The top level annotation");
     out.println(annotation.toShorterString());
 
+    out.println();
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     for (CoreMap sentence : sentences) {
       // NOTE: Depending on what tokensregex rules are specified, there are other annotations
       //       that are of interest other than just the tokens and what we print out here
-      for (CoreLabel token:sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+      for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
         // Print out words, lemma, ne, and normalized ne
         String word = token.get(CoreAnnotations.TextAnnotation.class);
         String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);

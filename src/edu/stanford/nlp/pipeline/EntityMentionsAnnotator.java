@@ -13,8 +13,6 @@ import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import static edu.stanford.nlp.util.logging.Redwood.Util.logf;
-
 
 /**
  * Annotator that marks entity mentions in a document.
@@ -98,23 +96,7 @@ public class EntityMentionsAnnotator implements Annotator {
     entityMentionsLanguage = LanguageInfo.getLanguageFromString(props.getProperty(name+".language", "en"));
   }
 
-  private static boolean checkStrings(String s1, String s2) {
-    if (s1 == null || s2 == null) {
-      return Objects.equals(s1, s2);
-    } else {
-      return s1.equals(s2);
-    }
-  }
-
-  private static boolean checkNumbers(Number n1, Number n2) {
-    if (n1 == null || n2 == null) {
-      return Objects.equals(n1, n2);
-    } else {
-      return n1.equals(n2);
-    }
-  }
-
-  private List<CoreLabel> tokensForCharacters(List<CoreLabel> tokens, int charBegin, int charEnd) {
+  private static List<CoreLabel> tokensForCharacters(List<CoreLabel> tokens, int charBegin, int charEnd) {
     assert charBegin >= 0;
     List<CoreLabel> segment = Generics.newArrayList();
     for(CoreLabel token: tokens) {
@@ -139,7 +121,7 @@ public class EntityMentionsAnnotator implements Annotator {
     // Get NormalizedNamedEntityTag and say two entities are incompatible if they are different
     String v1 = cur.get(nerNormalizedCoreAnnotationClass);
     String v2 = prev.get(nerNormalizedCoreAnnotationClass);
-    if ( ! checkStrings(v1,v2)) return false;
+    if ( ! Objects.equals(v1, v2)) return false;
 
     // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
     String nerTag = cur.get(nerCoreAnnotationClass);
@@ -147,7 +129,7 @@ public class EntityMentionsAnnotator implements Annotator {
       // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
       Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
       Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-      if ( ! checkNumbers(n1,n2)) return false;
+      if ( ! Objects.equals(n1, n2)) return false;
     }
 
     // Check timex...
@@ -156,7 +138,7 @@ public class EntityMentionsAnnotator implements Annotator {
       Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
       String tid1 = (timex1 != null)? timex1.tid():null;
       String tid2 = (timex2 != null)? timex2.tid():null;
-      if ( ! checkStrings(tid1,tid2)) return false;
+      if ( ! Objects.equals(tid1, tid2)) return false;
     }
 
     return true;
@@ -319,7 +301,7 @@ public class EntityMentionsAnnotator implements Annotator {
 
   private void addAcronyms(Annotation ann) {
     // Find all the organizations in a document
-    List<CoreMap> allMentionsSoFar = new ArrayList<CoreMap>();
+    List<CoreMap> allMentionsSoFar = new ArrayList<>();
     for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
       allMentionsSoFar.addAll(sentence.get(CoreAnnotations.MentionsAnnotation.class));
     }

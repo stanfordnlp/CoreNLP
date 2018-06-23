@@ -93,6 +93,7 @@ public class PTBTokenizerTest {
       "the 9-to-11:45 a.m. weekday shift",
       "Brighton Rd. Pacifica",
       "Walls keeping water out of the bowl-shaped city have been breached, and emergency teams are using helicopters to drop 1,350kg (3,000lb) sandbags and concrete barriers into the gaps.",
+          "i got (89.2%) in my exams",
   };
 
   private final String[][] ptbGold = {
@@ -182,6 +183,7 @@ public class PTBTokenizerTest {
       { "Walls", "keeping", "water", "out", "of", "the", "bowl-shaped", "city", "have", "been", "breached", ",", "and",
               "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
               "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
+          { "i", "got", "-LRB-", "89.2", "%", "-RRB-", "in", "my", "exams" },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -284,6 +286,8 @@ public class PTBTokenizerTest {
       { "Walls", "keeping", "water", "out", "of", "the", "bowl", "-", "shaped", "city", "have", "been", "breached", ",", "and",
               "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
               "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
+          { "i", "got", "-LRB-", "89.2", "%", "-RRB-", "in", "my", "exams" },
+
   };
 
   @Test

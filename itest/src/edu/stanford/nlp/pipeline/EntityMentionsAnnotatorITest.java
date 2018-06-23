@@ -3,7 +3,10 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
-import junit.framework.TestCase;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Properties;
@@ -13,11 +16,12 @@ import java.util.Properties;
  *
  * @author Angel Chang
  */
-public class EntityMentionsAnnotatorITest extends TestCase {
+public class EntityMentionsAnnotatorITest {
+
   static AnnotationPipeline pipeline = null;
   protected static final String ENTITY_MENTIONS_ANNOTATOR_NAME = "entitymentions";
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     synchronized(EntityMentionsAnnotatorITest.class) {
       if (pipeline == null) {
@@ -31,19 +35,16 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     }
   }
 
-  protected static Properties getDefaultProperties()
-  {
+  protected static Properties getDefaultProperties() {
     Properties props = new Properties();
     return props;
   }
 
-  protected EntityMentionsAnnotator getMentionsAnnotator()
-  {
+  private static EntityMentionsAnnotator getMentionsAnnotator() {
     return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, getDefaultProperties());
   }
 
-  protected static EntityMentionsAnnotator getMentionsAnnotator(Properties props)
-  {
+  protected static EntityMentionsAnnotator getMentionsAnnotator(Properties props) {
     return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, props);
   }
 
@@ -57,20 +58,21 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     if (expectedMentions == null) {
       for (int i = 0; i < mentions.size(); i++) {
         String actual = mentions.get(i).toShorterString();
-        System.out.println(prefix + ": Got mention." + i + " " + actual);
+        System.out.println(prefix + ": Got mention." + i + ' ' + actual);
       }
-      assertTrue(prefix + ": No expected mentions provided", false);
+      Assert.fail(prefix + ": No expected mentions provided");
     }
     int minMatchable = Math.min(expectedMentions.length, mentions.size());
     for (int i = 0; i < minMatchable; i++) {
       String expected = expectedMentions[i];
       String actual = mentions.get(i).toShorterString();
-      assertEquals(prefix + ".mention." + i, expected, actual);
+      Assert.assertEquals(prefix + ".mention." + i, expected, actual);
     }
-    assertEquals(prefix + ".length", mentions.size(), expectedMentions.length);
+    Assert.assertEquals(prefix + ".length", mentions.size(), expectedMentions.length);
   }
 
   // Actual tests
+  @Test
   public void testBasicMentions() {
     Annotation doc = createDocument("I was at Stanford University Albert Peacock");
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
@@ -87,6 +89,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     compareMentions("testBasicMentions", expectedMentions, mentions);
   }
 
+  @Test
   public void testDates() {
     Annotation doc = createDocument("July 3rd July 4th are two different dates");
     EntityMentionsAnnotator annotator = getMentionsAnnotator();
@@ -101,6 +104,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     compareMentions("testDates", expectedMentions, mentions);
   }
 
+  @Test
   public void testDates2() {
     Annotation doc = createDocument("July 3rd July 3rd are two mentions of the same date");
     EntityMentionsAnnotator annotator = getMentionsAnnotator();
@@ -115,6 +119,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     compareMentions("testDates2", expectedMentions, mentions);
   }
 
+  @Test
   public void testNumbers() {
     Annotation doc = createDocument("one two three four five");
     EntityMentionsAnnotator annotator = getMentionsAnnotator();
@@ -131,6 +136,21 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     compareMentions("testNumbers", expectedMentions, mentions);
   }
 
+  @Test
+  public void testPercent() {
+    Annotation doc = createDocument("12% 13%");
+    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+
+    annotator.annotate(doc);
+    List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
+    String[] expectedMentions = {
+        "[Text=12% CharacterOffsetBegin=0 CharacterOffsetEnd=3 Tokens=[12-1, %-2] TokenBegin=0 TokenEnd=2 NamedEntityTag=PERCENT NormalizedNamedEntityTag=%12.0 EntityType=PERCENT SentenceIndex=0 EntityMentionIndex=0 CanonicalEntityMentionIndex=0]",
+        "[Text=13% CharacterOffsetBegin=4 CharacterOffsetEnd=7 Tokens=[13-3, %-4] TokenBegin=2 TokenEnd=4 NamedEntityTag=PERCENT NormalizedNamedEntityTag=%13.0 EntityType=PERCENT SentenceIndex=0 EntityMentionIndex=1 CanonicalEntityMentionIndex=1]"
+    };
+    compareMentions("testPercent", expectedMentions, mentions);
+  }
+
+  @Test
   public void testNewsText() {
     Annotation doc = createDocument("Duke of Cambridge, Prince William, unveiled a new China Center in the University of Oxford Monday.\n" +
         "Covering an area nearly 5,500 square meters, the new Dickson Poon University of Oxford China Center in St Hugh's College cost about 21 million pounds.\n" +
@@ -167,4 +187,5 @@ public class EntityMentionsAnnotatorITest extends TestCase {
         
     compareMentions("testNewsText", expectedMentions, mentions);
   }
+
 }
