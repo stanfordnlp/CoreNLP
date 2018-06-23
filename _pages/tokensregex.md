@@ -207,9 +207,17 @@ Finally the "result" is the value that the MatchedExpression will have.  Here we
 There are a lot of ways to match patterns in token sequences.  Below is a helpful cheat sheet
 
 * `[{word:"pizza"}]` - exact matches the word "pizza" (example: "pizza")
+* `[{word:"works"}] [{word:"for"}] [{word:"the"}]` - exact matches "works for the" (example: "works for the")
+* `/works/ /for/ /the/` - exact matches "works for the" (example: "works for the")
+* `[{word:"works"}] [{word:"for"}] [{word:/the|a/}] - matches "works for the" or "works for a" (example: "works for a")
 * `[{word:/[A-Z][A-Za-z]+/}]+` - matches any number of capitalized words in a row that only contain letters (examples: "Joe Smith", "Some Capitalized Words In A Row") 
 * `[{word:/[A-Z][A-Za-z]+/} & {tag:"NNP"}]+` - same as above, but only matches if the tokens have the part of speech tag "NNP"
 * `[{ner:"PERSON"}]+` - matches any number of tokens in a row with the "PERSON" named entity tag
+* `[{ner:"LOCATION"} | {ner: "ORGANIZATION"}]+` - matches any number of tokens in a row that have either LOCATION or ORGANIZATION as their ner tag
+* `[{ner:"PERSON"} & {tag:"NNP"}]+` - matches any number of tokens in a row that have the PERSON ner tag and the NNP part-of-speech tag
+* `[{ner:"PERSON"}]+ /works/ /at/` - matches any number of tokens with PERSON ner, followed by "works at"
+* `[{word::IS_NUM}]` - matches a token parseable as a number (example: "3")...note this doesn't mean "three" or "1,000,000"
+* `[ !{ tag:/VB.*/ } ]` - any token that is not a verb
 
 ## Example 1: Basic NER
 
