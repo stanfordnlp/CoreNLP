@@ -217,7 +217,8 @@ There are a lot of ways to match patterns in token sequences.  Below is a helpfu
 * `[{ner:"PERSON"} & {tag:"NNP"}]+` - matches any number of tokens in a row that have the PERSON ner tag and the NNP part-of-speech tag
 * `[{ner:"PERSON"}]+ /works/ /at/` - matches any number of tokens with PERSON ner, followed by "works at"
 * `[{word::IS_NUM}]` - matches a token parseable as a number (example: "3")...note this doesn't mean "three" or "1,000,000"
-* `[ !{ tag:/VB.*/ } ]` - any token that is not a verb
+* `[!{tag:/VB.*/}]` - any token that is not a verb
+* `/from/ /\\d\\d?:\\d\\d/ /to/ /\\d\\d?:\\d\\d/` - matches expressions like "from 8:00 to 10:00"
 
 ## Example 1: Basic NER
 
