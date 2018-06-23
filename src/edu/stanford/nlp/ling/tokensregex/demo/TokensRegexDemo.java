@@ -17,11 +17,6 @@ import java.util.List;
 
 /**
  * Demo illustrating how to use CoreMapExtractor.
- * Usage:
- * java edu.stanford.nlp.ling.tokensregex.demo.TokensRegexDemo rulesFile [inputFile [outputFile]]
- * <p>
- * This is a good example to fun to s
- * </p>
  */
 public class TokensRegexDemo {
 

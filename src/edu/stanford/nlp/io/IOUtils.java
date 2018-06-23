@@ -810,7 +810,6 @@ public class IOUtils  {
           throw new UnsupportedOperationException();
         }
 
-        // todo [cdm 2018]: Probably should remove this but in current implementation reader is internal and can only close by getting to eof.
         protected void finalize() throws Throwable {
           super.finalize();
           if (readerOpen) {

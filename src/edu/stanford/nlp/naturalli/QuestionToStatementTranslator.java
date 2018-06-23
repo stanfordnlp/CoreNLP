@@ -631,8 +631,7 @@ public class QuestionToStatementTranslator {
       "[{lemma:where; tag:/W.*/}] " +
           "(?$be [ {lemma:/be/} ]) " +
           "(?$initial_verb [tag:/[VJ].*/] )? " +
-          "(?$subject [{tag:/NN.?.?/}]+ ((in|at|of) [{tag:/NN.?.?/}]+)* )? " +
-          "(?$statement_body []*?)? " +
+          "(?$statement_body []+?) " +
           "(?$ignored [lemma:locate] [tag:IN] [word:a]? [word:map]? )? " +
           "(?$final_verb [tag:/[VJ].*/] )? " +
           "(?$at [tag:IN] )? " +
@@ -649,23 +648,12 @@ public class QuestionToStatementTranslator {
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#triggerWhereIs
    */
   private List<CoreLabel> processWhereIs(TokenSequenceMatcher matcher) {
-    List<CoreLabel> sentence = new ArrayList<>();
-
-    // The subject of the sentence
-    List<CoreLabel> subject = (List<CoreLabel>) matcher.groupNodes("$subject");
-    if (subject != null) {
-      sentence.addAll(subject);
-    }
+    // Grab the prefix of the sentence
+    List<CoreLabel> sentence = (List<CoreLabel>) matcher.groupNodes("$statement_body");
 
     // Add the "is" part
     List<CoreLabel> be = (List<CoreLabel>) matcher.groupNodes("$be");
     sentence.addAll(be);
-
-    // The extra body of the sentence
-    List<CoreLabel> body = (List<CoreLabel>) matcher.groupNodes("$statement_body");
-    if (body != null) {
-      sentence.addAll(body);
-    }
 
     // Add the optional final verb
     List<CoreLabel> verb = (List<CoreLabel>) matcher.groupNodes("$final_verb");
