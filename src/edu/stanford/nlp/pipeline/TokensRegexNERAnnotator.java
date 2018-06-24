@@ -257,13 +257,13 @@ public class TokensRegexNERAnnotator implements Annotator  {
     String[] annotationFieldnames = null;
     String[] headerFields = null;
     if (readHeaderFromFile) {
-      annotationFieldnames = new String[0];
+      annotationFieldnames = StringUtils.EMPTY_STRING_ARRAY;
       annotationFields = new ArrayList<>();
       // Set the read header property of each file to true
       for (int i = 0; i < mappings.length; i++) {
         String mappingLine = mappings[i];
-        if (!mappingLine.contains("header")) {
-          mappingLine = "header=true, "+ mappingLine;
+        if ( ! mappingLine.contains("header")) {
+          mappingLine = "header=true, " + mappingLine;
           mappings[i] = mappingLine;
         } else if ( ! Pattern.compile("header\\s*=\\s*true").matcher(mappingLine.toLowerCase()).find()) {
           throw new IllegalStateException("The annotator header property is set to true, but a different option has been provided for mapping file: " + mappingLine);
@@ -710,12 +710,18 @@ public class TokensRegexNERAnnotator implements Annotator  {
 
       if (split.length < minLength || split.length > maxLength) {
         String err = "many";
+        String expect = "<= " + maxLength;
+        String extra = "";
         if (split.length < minLength) {
           err = "few";
+          expect = ">= " + minLength;
+          if (split.length == 1) {
+            extra = "Maybe the problem is that you are using spaces not tabs? ";
+          }
         }
         throw new IllegalArgumentException("TokensRegexNERAnnotator " + annotatorName +
                 " ERROR: Line " + lineCount + " of provided mapping file has too " + err +
-                " tab-separated columns. Line: " + line);
+                " tab-separated columns (" + split.length + " expecting " + expect + "). " + extra + "Line: " + line);
       }
       String regex = split[iPattern].trim();
       String tokensRegex = null;
@@ -803,7 +809,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
         Entry oldEntry = seenRegexes.get(key);
         if (priority > oldEntry.priority) {
           logger.warn(annotatorName +
-                  ": Replace duplicate entry (higher priority): old=" + oldEntry + ", new=" + entry);
+                  ": Replacing duplicate entry (higher priority): old=" + oldEntry + ", new=" + entry);
         } else {
           String oldTypeDesc = oldEntry.getTypeDescription();
           String newTypeDesc = entry.getTypeDescription();
