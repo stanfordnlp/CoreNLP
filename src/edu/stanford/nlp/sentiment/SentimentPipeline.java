@@ -320,6 +320,7 @@ public class SentimentPipeline  {
     } else {
       pipelineProps.setProperty("annotators", "parse, sentiment");
       pipelineProps.setProperty("parse.binaryTrees", "true");
+      pipelineProps.setProperty("parse.buildgraphs", "false"); 
       pipelineProps.setProperty("enforceRequirements", "false");
       tokenizerProps = new Properties();
       tokenizerProps.setProperty("annotators", "tokenize, ssplit");
