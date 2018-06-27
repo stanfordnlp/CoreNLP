@@ -4,6 +4,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 
+import edu.stanford.nlp.util.PropertiesUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,18 +19,18 @@ import java.util.Properties;
  */
 public class EntityMentionsAnnotatorITest {
 
-  static AnnotationPipeline pipeline = null;
-  protected static final String ENTITY_MENTIONS_ANNOTATOR_NAME = "entitymentions";
+  private static AnnotationPipeline pipeline; // = null;
+  private static final String ENTITY_MENTIONS_ANNOTATOR_NAME = "entitymentions";
 
   @Before
   public void setUp() throws Exception {
     synchronized(EntityMentionsAnnotatorITest.class) {
       if (pipeline == null) {
-        Properties props = new Properties();
-        // TODO: remove need for ner and just have the mentions annotator
-        props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner");
-        props.setProperty("ner.applyFineGrained", "false");
-        props.setProperty("ner.buildEntityMentions", "false");
+        Properties props = PropertiesUtils.asProperties(
+                // TODO: remove need for ner and just have the mentions annotator
+                "annotators", "tokenize, ssplit, pos, lemma, ner",
+                "ner.applyFineGrained", "false",
+                "ner.buildEntityMentions", "false");
         pipeline = new StanfordCoreNLP(props);
       }
     }
@@ -41,10 +42,10 @@ public class EntityMentionsAnnotatorITest {
   }
 
   private static EntityMentionsAnnotator getMentionsAnnotator() {
-    return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, getDefaultProperties());
+    return getMentionsAnnotator(getDefaultProperties());
   }
 
-  protected static EntityMentionsAnnotator getMentionsAnnotator(Properties props) {
+  private static EntityMentionsAnnotator getMentionsAnnotator(Properties props) {
     return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, props);
   }
 
@@ -54,11 +55,11 @@ public class EntityMentionsAnnotatorITest {
     return annotation;
   }
 
-  protected static void compareMentions(String prefix, String[] expectedMentions, List<CoreMap> mentions) {
+  private static void compareMentions(String prefix, String[] expectedMentions, List<CoreMap> mentions) {
     if (expectedMentions == null) {
       for (int i = 0; i < mentions.size(); i++) {
         String actual = mentions.get(i).toShorterString();
-        System.out.println(prefix + ": Got mention." + i + ' ' + actual);
+        System.err.println(prefix + ": Got mention." + i + ' ' + actual);
       }
       Assert.fail(prefix + ": No expected mentions provided");
     }
