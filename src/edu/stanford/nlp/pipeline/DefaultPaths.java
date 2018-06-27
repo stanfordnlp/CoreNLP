@@ -56,8 +56,8 @@ public class DefaultPaths {
   public static final String DEFAULT_KBP_CLASSIFIER = "edu/stanford/nlp/models/kbp/tac-re-lr.ser.gz";
   public static final String DEFAULT_KBP_REGEXNER_CASED = "edu/stanford/nlp/models/kbp/regexner_cased.tab";
   public static final String DEFAULT_KBP_REGEXNER_CASELESS = "edu/stanford/nlp/models/kbp/regexner_caseless.tab";
-  public static final String DEFAULT_KBP_SEMGREX_DIR = "edu/stanford/nlp/models/kbp/english/semgrex";
-  public static final String DEFAULT_KBP_TOKENSREGEX_DIR = "edu/stanford/nlp/models/kbp/english/tokensregex";
+  public static final String DEFAULT_KBP_SEMGREX_DIR = "edu/stanford/nlp/models/kbp/semgrex";
+  public static final String DEFAULT_KBP_TOKENSREGEX_DIR = "edu/stanford/nlp/models/kbp/tokensregex";
 
   public static final String DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS =
           "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab;" +

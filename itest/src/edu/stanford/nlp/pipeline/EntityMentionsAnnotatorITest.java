@@ -68,7 +68,7 @@ public class EntityMentionsAnnotatorITest {
       String actual = mentions.get(i).toShorterString();
       Assert.assertEquals(prefix + ".mention." + i, expected, actual);
     }
-    Assert.assertEquals(prefix + ".length", mentions.size(), expectedMentions.length);
+    Assert.assertEquals(prefix + ".length", expectedMentions.length, mentions.size());
   }
 
   // Actual tests
