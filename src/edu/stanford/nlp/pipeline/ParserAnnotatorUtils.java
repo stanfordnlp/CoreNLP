@@ -1,5 +1,4 @@
 package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.List;
 
@@ -13,13 +12,14 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /** @author David McClosky */
 public class ParserAnnotatorUtils  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ParserAnnotatorUtils.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ParserAnnotatorUtils.class);
 
   private ParserAnnotatorUtils() {} // static methods
 
@@ -90,7 +90,7 @@ public class ParserAnnotatorUtils  {
    * Set the tags of the original tokens and the leaves if they
    * aren't already set.
    */
-  public static void setMissingTags(CoreMap sentence, Tree tree) {
+  private static void setMissingTags(CoreMap sentence, Tree tree) {
     List<TaggedWord> taggedWords = null;
     List<Label> leaves = null;
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);

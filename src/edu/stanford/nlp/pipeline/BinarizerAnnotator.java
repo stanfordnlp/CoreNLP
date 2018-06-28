@@ -19,7 +19,7 @@ import edu.stanford.nlp.util.ReflectionLoading;
 /**
  * This annotator takes unbinarized trees (from the parser annotator
  * or elsewhere) and binarizes them in the attachment.
- * <br>
+ * <p>
  * Note that this functionality is also built in to the
  * ParserAnnotator.  However, this can be used in situations where the
  * trees come from somewhere other than the parser.  Conversely, the
