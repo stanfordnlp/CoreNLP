@@ -60,7 +60,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   private static final String spanishNumberRegexRules =
-      "edu/stanford/nlp/models/kbp/spanish/kbp_regexner_number_sp.tag";
+      "edu/stanford/nlp/models/kbp/spanish//gazetteers/kbp_regexner_number_sp.tag";
 
   private TokensRegexNERAnnotator spanishNumberAnnotator;
 
