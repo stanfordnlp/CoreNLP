@@ -50,7 +50,7 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
     // Create extractors
     for (RelationType rel : RelationType.values()) {
       String relFileNameComponent = rel.canonicalName.replaceAll(":", "_");
-      String filename = semgrexdir + File.separator + rel.canonicalName.replace("/", "SLASH") + ".rules";
+      String filename = semgrexdir + File.separator + relFileNameComponent.replace("/", "SLASH") + ".rules";
       if (IOUtils.existsInClasspathOrFileSystem(filename)) {
 
         List<SemgrexPattern> rulesforrel = SemgrexBatchParser.compileStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename));
