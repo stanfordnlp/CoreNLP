@@ -64,7 +64,8 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
       logger.log("Creating TokensRegexExtractor");
     // Create extractors
     for (RelationType rel : RelationType.values()) {
-      String path = tokensregexDir + File.separator + rel.canonicalName.replaceAll("/", "SLASH") + ".rules";
+      String relFileNameComponent = rel.canonicalName.replaceAll(":", "_");
+      String path = tokensregexDir + File.separator + relFileNameComponent.replaceAll("/", "SLASH") + ".rules";
       if (IOUtils.existsInClasspathOrFileSystem(path)) {
         List<String> listFiles = new ArrayList<>();
         listFiles.add(tokensregexDir + File.separator + "defs.rules");
