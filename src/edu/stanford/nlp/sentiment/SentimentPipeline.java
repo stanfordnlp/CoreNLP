@@ -1,5 +1,4 @@
 package edu.stanford.nlp.sentiment; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,13 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import edu.stanford.nlp.ling.SentenceUtils;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -27,20 +26,21 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * A wrapper class which creates a suitable pipeline for the sentiment
  * model and processes raw text.
- *
+ * <p>
  * The main program has the following options: <br>
- * <code>-parserModel</code> Which parser model to use, defaults to englishPCFG.ser.gz <br>
- * <code>-sentimentModel</code> Which sentiment model to use, defaults to sentiment.ser.gz <br>
- * <code>-file</code> Which file to process. <br>
- * <code>-fileList</code> A comma separated list of files to process. <br>
- * <code>-stdin</code> Read one line at a time from stdin. <br>
- * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  probabilities: Output the scores for different labels for each node. Defaults to printing just the root. <br>
- * <code>-filterUnknown</code> Remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
- * <code>-help</code> Print out help <br>
+ * {@code -parserModel} Which parser model to use, defaults to englishPCFG.ser.gz <br>
+ * {@code -sentimentModel} Which sentiment model to use, defaults to sentiment.ser.gz <br>
+ * {@code -file} Which file to process. <br>
+ * {@code -fileList} A comma separated list of files to process. <br>
+ * {@code -stdin} Read one line at a time from stdin. <br>
+ * {@code -output} pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  probabilities: Output the scores for different labels for each node. Defaults to printing just the root. <br>
+ * {@code -filterUnknown} Remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
+ * {@code -help} Print out help <br>
  *
  * @author John Bauer
  */
@@ -66,7 +66,7 @@ public class SentimentPipeline  {
    * value of the sentiment prediction.  Makes it easy to print out
    * with Tree.toString()
    */
-  static void setSentimentLabels(Tree tree) {
+  private static void setSentimentLabels(Tree tree) {
     if (tree.isLeaf()) {
       return;
     }
@@ -87,7 +87,7 @@ public class SentimentPipeline  {
    * Sets the labels on the tree to be the indices of the nodes.
    * Starts counting at the root and does a postorder traversal.
    */
-  static int setIndexLabels(Tree tree, int index) {
+  private static int setIndexLabels(Tree tree, int index) {
     if (tree.isLeaf()) {
       return index;
     }
@@ -104,12 +104,12 @@ public class SentimentPipeline  {
    * Outputs the vectors from the tree.  Counts the tree nodes the
    * same as setIndexLabels.
    */
-  static int outputTreeVectors(PrintStream out, Tree tree, int index) {
+  private static int outputTreeVectors(PrintStream out, Tree tree, int index) {
     if (tree.isLeaf()) {
       return index;
     }
 
-    out.print("  " + index + ":");
+    out.print("  " + index + ':');
     SimpleMatrix vector = RNNCoreAnnotations.getNodeVector(tree);
     for (int i = 0; i < vector.getNumElements(); ++i) {
       out.print("  " + NF.format(vector.get(i)));
@@ -126,12 +126,12 @@ public class SentimentPipeline  {
    * Outputs the scores from the tree.  Counts the tree nodes the
    * same as setIndexLabels.
    */
-  static int outputTreeScores(PrintStream out, Tree tree, int index) {
+  private static int outputTreeScores(PrintStream out, Tree tree, int index) {
     if (tree.isLeaf()) {
       return index;
     }
 
-    out.print("  " + index + ":");
+    out.print("  " + index + ':');
     SimpleMatrix vector = RNNCoreAnnotations.getPredictions(tree);
     for (int i = 0; i < vector.getNumElements(); ++i) {
       out.print("  " + NF.format(vector.get(i)));
@@ -145,9 +145,9 @@ public class SentimentPipeline  {
   }
 
   /**
-   * Outputs a tree using the output style requested
+   * Outputs a tree using the output style requested.
    */
-  static void outputTree(PrintStream out, CoreMap sentence, List<Output> outputFormats) {
+  private static void outputTree(PrintStream out, CoreMap sentence, List<Output> outputFormats) {
     Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
     for (Output output : outputFormats) {
       switch (output) {
@@ -181,9 +181,9 @@ public class SentimentPipeline  {
     }
   }
 
-  static final String DEFAULT_TLPP_CLASS = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
+  private static final String DEFAULT_TLPP_CLASS = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
 
-  static void help() {
+  private static void help() {
     log.info("Known command line arguments:");
     log.info("  -sentimentModel <model>: Which model to use");
     log.info("  -parserModel <model>: Which parser to use");
@@ -219,12 +219,9 @@ public class SentimentPipeline  {
         trees = SentimentUtils.readTreesWithGoldLabels(filename);
         trees = SentimentUtils.filterUnknownRoots(trees);
       } else {
-        trees = Generics.newArrayList();
         MemoryTreebank treebank = new MemoryTreebank("utf-8");
         treebank.loadPath(filename, null);
-        for (Tree tree : treebank) {
-          trees.add(tree);
-        }
+        trees = new ArrayList<>(treebank);
       }
 
       List<Annotation> annotations = Generics.newArrayList();
@@ -320,6 +317,7 @@ public class SentimentPipeline  {
     } else {
       pipelineProps.setProperty("annotators", "parse, sentiment");
       pipelineProps.setProperty("parse.binaryTrees", "true");
+      pipelineProps.setProperty("parse.buildgraphs", "false");
       pipelineProps.setProperty("enforceRequirements", "false");
       tokenizerProps = new Properties();
       tokenizerProps.setProperty("annotators", "tokenize, ssplit");
