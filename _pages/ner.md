@@ -185,6 +185,40 @@ SUTime rules can be changed by modifying its included
 TokensRegex rule files. Changing other rule-based components (money,
 etc.) requires changes to the Java source code.
 
+## Adding A Rules-Based Layer
+
+By default the `ner` annotator will run a set of fine-grained rules for finding types such as `CAUSE_OF_DEATH, CITY, COUNTRY, CRIMINAL_CHARGE, EMAIL, IDEOLOGY, NATIONALITY, RELIGION, STATE_OR_PROVINCE, TITLE, URL`.  This is new in 3.9.1.  The rules for these can be found in `edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab` and `edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab`.
+
+If you do not want to run these fine-grained rules, add `-ner.applyFineGrained false` to your command (or set that property accordingly if using the Java API).
+
+If you want to add custom rules that will run along with the fine-grained rules, use the `-ner.extraTokensRegexNERMappings` option.  This option is currently only available with the GitHub version, but should be included in version 3.9.2.
+
+As an example, suppose you wanted to customize to detect sports teams.  Here would be an example rules file `sports_teams.rules`.
+
+```java
+Boston Red Sox       SPORTS_TEAM     ORGANIZATION,MISC       1
+Denver Broncos       SPORTS_TEAM     ORGANIZATION,MISC       1
+Detroit Red Wings    SPORTS_TEAM     ORGANIZATION,MISC       1
+Los Angeles Lakers   SPORTS_TEAM     ORGANIZATION,MISC       1
+```
+
+If any of those token sequences were detected and flagged as O, ORGANIZATION or MISC, they would be re-tagged as SPORTS_TEAM.
+
+Here is an example command adding these custom rules to the baseline `ner` system.
+
+```bash
+java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.extraTokensRegexNERMappings sports_teams.rules -file example.txt -outputFormat text
+```
+
+For more control, you can directly set the `ner.fine.regexner.mapping` option.  Here is what that is set to by default (with additional settings to just the rules files):
+
+```java
+ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab;edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab
+```
+
+The `ignorecase` option says to make all of the rules case-insensitive.  The `validpospattern` option sets a part of speech tag pattern that must also be
+matched for any of the rules to fire.  Then the actual rules file is specified.  So the format should be `option1,option2,rule_file`.
+
 ## More information 
 
 For more details on the CRF tagger see [this page](http://nlp.stanford.edu/software/CRF-NER.html).
