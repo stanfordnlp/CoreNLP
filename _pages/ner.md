@@ -216,8 +216,10 @@ For more control, you can directly set the `ner.fine.regexner.mapping` option.  
 ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab;edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab
 ```
 
+You can specify multiple rules files and options for each rule file.  So the format would be something like `rule_file_1_option1,rule_file_1_option2,rule_file_1;rule_file_2_option1,rule_file_2`.
+
 The `ignorecase` option says to make all of the rules case-insensitive.  The `validpospattern` option sets a part of speech tag pattern that must also be
-matched for any of the rules to fire.  Then the actual rules file is specified.  So the format should be `option1,option2,rule_file`.
+matched for any of the rules to fire.  Then the actual rules file is specified.  The second rules file has no options specified in this example.
 
 ## More information 
 
