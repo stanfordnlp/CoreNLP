@@ -202,10 +202,20 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   public void setUpFineGrainedNER(Properties properties) {
     // set up fine grained ner
     this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
+    String tokensRegexNERMappings = properties.getProperty("ner.extraTokensRegexNERMappings", "");
     if (this.applyFineGrained) {
       String fineGrainedPrefix = "ner.fine.regexner";
       Properties fineGrainedProps =
           PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".", true);
+      // explicity set fine grained ner default here
+      if (!fineGrainedProps.containsKey("ner.fine.regexner.mapping"))
+        fineGrainedProps.put("ner.fine.regexner.mapping", DefaultPaths.DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS);
+      // if extra rules have been added, use those as well
+      if (!tokensRegexNERMappings.equals("")) {
+        String fullTokensRegexNERMapping = fineGrainedProps.getProperty(fineGrainedPrefix+".mapping");
+        fullTokensRegexNERMapping += (";" + tokensRegexNERMappings);
+        fineGrainedProps.put("ner.fine.regexner.mapping", fullTokensRegexNERMapping);
+      }
       fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
     }
   }
