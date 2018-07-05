@@ -1289,6 +1289,13 @@ RM/{NUM}        { String txt = yytext();
                           if (DEBUG) { logger.info("Used {THINGA} (2) to recognize " + origTxt + " as " + tok); }
                           return getNext(tok, origTxt);
                         }
+/* Special case so as to prefer treating ''' as a single followed by a double quote (happens in newswire) */
+'/''[^']        { String tok = yytext();
+                  String norm = handleQuotes(tok, false);
+                  if (DEBUG) { logger.info("Used {'/''} to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + false); }
+                  return getNext(norm, tok);
+                }
 /* This QUOTES must proceed (S)REDAUX (2) so it by preference matches straight quote before word.
    Trying to collapse the first two cases seemed to break things (?!?). */
 {QUOTES}/[:letter:]{NOT_SPACENL_ONE_CHAR}
