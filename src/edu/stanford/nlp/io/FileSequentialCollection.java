@@ -72,9 +72,7 @@ public class FileSequentialCollection extends AbstractCollection<File>  {
    * modifiable, this is
    * largely useless (except if you want an empty one).
    */
-  public FileSequentialCollection() {
-    this(null);
-  }
+  public FileSequentialCollection() { this((Collection<?>) null); }
 
 
   /**
@@ -170,6 +168,7 @@ public class FileSequentialCollection extends AbstractCollection<File>  {
     this(Collections.singletonList(filename), filt);
   }
 
+  public FileSequentialCollection(String filename) { this(filename,  null); }
 
   /**
    * Creates a {@code FileSequentialCollection} from the passed in
