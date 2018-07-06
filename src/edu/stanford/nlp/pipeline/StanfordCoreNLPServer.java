@@ -63,7 +63,7 @@ public class StanfordCoreNLPServer implements Runnable {
   protected int timeoutMilliseconds = 15000;
   @ArgumentParser.Option(name="strict", gloss="If true, obey strict HTTP standards (e.g., with encoding)")
   protected boolean strict = false;
-  @ArgumentParser.Option(name="quiet", gloss="If true, don't print to stdout")
+  @ArgumentParser.Option(name="quiet", gloss="If true, don't print to stdout and don't log every API POST")
   protected boolean quiet = false;
   @ArgumentParser.Option(name="ssl", gloss="If true, start the server with an [insecure!] SSL connection")
   protected boolean ssl = false;
@@ -494,7 +494,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
    */
   private static void respondUnauthorized(HttpExchange httpExchange) throws IOException {
-    log("Respoding unauthorized to " + httpExchange.getRemoteAddress());
+    log("Responding unauthorized to " + httpExchange.getRemoteAddress());
     httpExchange.getResponseHeaders().add("Content-type", "application/javascript");
     byte[] content = "{\"message\": \"Unauthorized API request\"}".getBytes("utf-8");
     httpExchange.sendResponseHeaders(HTTP_UNAUTHORIZED, content.length);
@@ -829,11 +829,13 @@ public class StanfordCoreNLPServer implements Runnable {
             respondUnauthorized(httpExchange);
             return;
           }
-          log("[" + httpExchange.getRemoteAddress() + "] API call w/annotators " + props.getProperty("annotators", "<unknown>"));
+          if ( ! quiet) {
+            log("[" + httpExchange.getRemoteAddress() + "] API call w/annotators " + props.getProperty("annotators", "<unknown>"));
+          }
           ann = getDocument(props, httpExchange);
           of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase());
           String text = ann.get(CoreAnnotations.TextAnnotation.class).replace('\n', ' ');
-          if (!quiet) {
+          if ( ! quiet) {
             System.out.println(text);
           }
           if (maxCharLength > 0 && text.length() > maxCharLength) {
@@ -1425,7 +1427,7 @@ public class StanfordCoreNLPServer implements Runnable {
         server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
       }
       String contextRoot = uriContext;
-      if (contextRoot.equals("")) {
+      if (contextRoot.isEmpty()) {
         contextRoot = "/";
       }
       withAuth(server.createContext(contextRoot, new CoreNLPHandler(defaultProps, authenticator, callback, homepage)), basicAuth);
