@@ -778,24 +778,25 @@ ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Esq
 ABTAXONOMY = (s(ub)?)?spp?|aff|fl|viz
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
- *  If they're followed by an uppercase one, we assume there is also a
- *  sentence boundary.
+ * If they're followed by an uppercase one, we assume there is also a
+ * sentence boundary.
+ * Notes: many misspell etc. ect.; kr. is some other currency
  */
-ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|{ABTAXONOMY}|etc|al|seq|Bldg|Pls|wrt)\.
+ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|{ABTAXONOMY}|etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|tb?sp|kr)\.
 
 /* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
 /* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
 /* ACRO Is a bad case -- can go either way! */
 ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
-/* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
-ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
-ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave
+/* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. St[ae] does Saint, Santa, suite, etc. */
+ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
+ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|Pl
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
- *  We assume they aren't used sentence finally. Ph is in there for Ph. D
+ *  We assume they aren't used sentence finally. Ph is in there for Ph. D  Sc for B.Sc.
  */
-ABBREV4 = {ABTITLE}|vs|[v]|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
+ABBREV4 = {ABTITLE}|vs|[v]|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|Sc|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
@@ -811,7 +812,7 @@ ACRONYM = ({ACRO})\.
  */
 /* Maybe also "op." for "op. cit." but also get a photo op. Rs. for Rupees */
 /* Pt for part needs to be case sensitive (vs. country code for Portugal). */
-ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|paras?|bldg|prop|pp|op|approx|[P][t]|rs)\.
+ABBREV3 = (ca|figs?|prop|nos?|sect?s?|arts?|paras?|bldg|prop|pp|op|approx|[P][t]|rs|Apt|Rt)\.
 /* Case for south/north before a few places. */
 ABBREVSN = So\.|No\.
 
