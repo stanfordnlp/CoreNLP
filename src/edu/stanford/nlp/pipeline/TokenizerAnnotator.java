@@ -297,7 +297,7 @@ public class TokenizerAnnotator implements Annotator  {
   /**
    * Helper method to set the TokenBeginAnnotation and TokenEndAnnotation of every token.
    */
-  public void setTokenBeginTokenEnd(List<CoreLabel> tokensList) {
+  private static void setTokenBeginTokenEnd(List<CoreLabel> tokensList) {
     int tokenIndex = 0;
     for (CoreLabel token : tokensList) {
       token.set(CoreAnnotations.TokenBeginAnnotation.class, tokenIndex);
@@ -309,7 +309,7 @@ public class TokenizerAnnotator implements Annotator  {
   /**
    * set isNewline()
    */
-  public void setNewlineStatus(List<CoreLabel> tokensList) {
+  private static void setNewlineStatus(List<CoreLabel> tokensList) {
     // label newlines
     for (CoreLabel token : tokensList) {
       if (token.word().equals(AbstractTokenizer.NEWLINE_TOKEN) && (token.endPosition() - token.beginPosition() == 1))
