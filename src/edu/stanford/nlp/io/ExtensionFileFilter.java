@@ -20,7 +20,7 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter impl
    * will pass all files (passing an empty String does not have the same
    * effect -- this would look for file names ending in a period).
    *
-   * @param ext     File extension (not including period) or null for any
+   * @param ext     File extension (need not include period) or passing null means accepting all files
    * @param recurse go into folders
    */
   public ExtensionFileFilter(String ext, boolean recurse) {
@@ -48,6 +48,7 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter impl
    * @param file The file
    * @return true if the file is acceptable
    */
+  @SuppressWarnings("SimplifiableIfStatement")
   @Override
   public boolean accept(File file) {
     if (file.isDirectory()) {
@@ -69,7 +70,7 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter impl
   @Override
   public String getDescription() {
     String ucExt = extension.substring(1).toUpperCase();
-    return (ucExt + " Files (*" + extension + ')');
+    return ucExt + " Files (*" + extension + ')';
   }
 
 }
