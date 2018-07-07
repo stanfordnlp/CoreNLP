@@ -488,7 +488,7 @@ public class TTags {
   @Override
   public String toString() {
     StringBuilder s = new StringBuilder();
-    s.append(index.toString());
+    s.append(index);
     s.append(' ');
     if (openFixed) {
       s.append(" OPEN:").append(getOpenTags());
