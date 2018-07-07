@@ -623,6 +623,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 %}
 
+
 /* Todo: Really SGML shouldn't be here at all, it's kind of legacy.
    But we continue to tokenize some simple standard forms of concrete
    SGML syntax, since it tends to give robustness.                    */
@@ -775,14 +776,14 @@ ABNUM = tel|est|ext|sq
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
 ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Esq
 /* ss?p and aff are for bio taxonomy; also gen and cf but appear elsewhere as ABBREV4 already; fl for flourished */
-ABTAXONOMY = (s(ub)?)?spp?|aff|fl|viz
+ABTAXONOMY = (s(ub)?)?spp?|aff|[f][l]
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
  * If they're followed by an uppercase one, we assume there is also a
  * sentence boundary.
  * Notes: many misspell etc. ect.; kr. is some other currency
  */
-ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|{ABTAXONOMY}|etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|tb?sp|kr)\.
+ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|{ABTAXONOMY}|etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr)\.
 
 /* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
 /* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
@@ -791,12 +792,12 @@ ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K
 ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 /* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. St[ae] does Saint, Santa, suite, etc. */
 ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
-ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|Pl
+ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally. Ph is in there for Ph. D  Sc for B.Sc.
  */
-ABBREV4 = {ABTITLE}|vs|[v]|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|Sc|{ACRO}|{ABCOMP2}
+ABBREV4 = {ABTITLE}|vs|[v]|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|[S][c]|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
@@ -1291,12 +1292,12 @@ RM/{NUM}        { String txt = yytext();
                           return getNext(tok, origTxt);
                         }
 /* Special case so as to prefer treating ''' as a single followed by a double quote (happens in newswire) */
-'/''[^']        { String tok = yytext();
-                  String norm = handleQuotes(tok, false);
-                  if (DEBUG) { logger.info("Used {'/''} to recognize " + tok + " as " + norm +
+'/''[^'\p{Alpha}]       { String tok = yytext();
+                          String norm = handleQuotes(tok, false);
+                          if (DEBUG) { logger.info("Used {'/''} to recognize " + tok + " as " + norm +
                                            "; probablyLeft=" + false); }
-                  return getNext(norm, tok);
-                }
+                          return getNext(norm, tok);
+                        }
 /* This QUOTES must proceed (S)REDAUX (2) so it by preference matches straight quote before word.
    Trying to collapse the first two cases seemed to break things (?!?). */
 {QUOTES}/[:letter:]{NOT_SPACENL_ONE_CHAR}
