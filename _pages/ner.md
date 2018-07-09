@@ -116,7 +116,12 @@ as part of it's entire tagging process.
 
 *NOTE:* applying these rules will significantly slow down the tagging process.
 
-The tags set by this phase include: `CAUSE_OF_DEATH, CITY, COUNTRY, CRIMINAL_CHARGE, EMAIL, IDEOLOGY, NATIONALITY, RELIGION, STATE_OR_PROVINCE, TITLE, URL`
+The tags set by this phase include: 
+
+```
+CAUSE_OF_DEATH, CITY, COUNTRY, CRIMINAL_CHARGE, EMAIL, 
+IDEOLOGY, NATIONALITY, RELIGION, STATE_OR_PROVINCE, TITLE, URL
+```
 
 If you do not want to run the fine-grained rules, set `ner.applyFineGrained` to `false`.
 
