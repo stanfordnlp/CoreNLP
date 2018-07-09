@@ -49,6 +49,19 @@ system.
 | sutime.includeRange | boolean | false | If marking time ranges, set the time range in the TIMEX output from SUTime. |
 | maxAdditionalKnownLCWords | int | - | Limit the size of the known lower case words set.  Set this to 0 to prevent ordering issues (i.e. when this is nonzero running on document1 then document2 can have different results than running on document2 then document1 |  
 
+## NER Pipeline Overview
+
+The full named entity recognition pipeline has become fairly complex and involves
+a set of distinct phases integrating statistical and rule based approaches.  Here
+is a breakdown of those distinct phases.
+
+1. Statistical Model
+
+During this phase a series of trained CRF's will be run on each sentence.  These
+CRF's are trained on large tagged data sets.  They evaluate the entire sequence
+and pick the optimal tag sequence.
+
+
 ## SUTime
 
 StanfordCoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.html), Stanford's temporal expression
