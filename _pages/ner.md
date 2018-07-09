@@ -216,19 +216,19 @@ this phase to not be run at all.
 ### Entity Mention Detection
 
 After all of the previous steps have been run, entity detection will be run to combine the tagged tokens into entities.
-The entity mention detection will be based off of the tagging scheme.  This is accomplished with a `EntityMentionsAnnotator`
+The entity mention detection will be based off of the tagging scheme.  This is accomplished with an `EntityMentionsAnnotator`
 sub-annotator.
 
 If a basic tagging scheme (example: PERSON, ORGANIZATION, LOCATION) is used, all contiguous sequences of tokens with the same tag will be marked as an entity.
 
-If a more advanced tagging scheme (such as BIO with tags like B-PERSON and I-PERSON) sequences with the same tag
+If a more advanced tagging scheme (such as BIO with tags like B-PERSON and I-PERSON) is used, sequences with the same tag
 split by a B-tag will be turned into multiple entities.
 
 All of our models and rule files use a basic tagging scheme, but you could create your own models and rules that use BIO.
 
 For instance `(Joe PERSON) (Smith PERSON) (Jane PERSON) (Smith PERSON)` will create the entity `Joe Smith Jane Smith`.
 
-On the other hand `(Joe B-PERSON) (Smith I-PERSON) (Jane B-PERSON) (Smith I-PERSON) will create two entities: `Joe Smith` and `Jane Smith`.
+On the other hand `(Joe B-PERSON) (Smith I-PERSON) (Jane B-PERSON) (Smith I-PERSON)` will create two entities: `Joe Smith` and `Jane Smith`.
 
 You can deactivate this with `ner.buildEntityMentions` being set to `false`.
 
