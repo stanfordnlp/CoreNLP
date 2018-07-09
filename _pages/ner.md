@@ -55,7 +55,7 @@ The full named entity recognition pipeline has become fairly complex and involve
 a set of distinct phases integrating statistical and rule based approaches.  Here
 is a breakdown of those distinct phases.
 
-1. Statistical Model
+### Statistical Model
 
 During this phase a series of trained CRF's will be run on each sentence.  These
 CRF's are trained on large tagged data sets.  They evaluate the entire sequence
