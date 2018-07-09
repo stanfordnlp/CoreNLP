@@ -139,14 +139,18 @@ Each space delimited entry represents a regex to match a token.
 
 The rule (remember these are tab-delimited columns):
 
-`Los Angeles    CITY    LOCATION,MISC    1.0`
+```
+Los Angeles	CITY	LOCATION,MISC	1.0
+```
 
 means to match the token "Los" followed by the token "Angeles", and label them both as CITY,
 provided they have a current NER tag of O, LOCATION, or MISC.
 
 The rule:
 
-`Bachelor of (Arts|Science)    DEGREE    MISC    1.0`
+```
+Bachelor of (Arts|Science)	DEGREE	MISC	1.0
+```
 
 means to match the token "Bachelor", then the token "of", and finally either the token "Arts" or "Science".
 
