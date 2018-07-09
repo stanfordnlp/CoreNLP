@@ -55,6 +55,8 @@ The full named entity recognition pipeline has become fairly complex and involve
 a set of distinct phases integrating statistical and rule based approaches.  Here
 is a breakdown of those distinct phases.
 
+The main class that runs this process is `edu.stanford.nlp.pipeline.NERCombinerAnnotator`
+
 ### Statistical Model
 
 During this phase a series of trained CRF's will be run on each sentence.  These
@@ -85,6 +87,20 @@ model's ORGANIZATION tags will be applied.  If it is set to `HIGH_RECALL`, the 7
 and 4-class models' ORGANIZATION tags will also be applied.
 
 If you do not want to run any statistical models, set `ner.model` to the empty string.
+
+### Numeric Sequences and SUTime
+
+Next a series of rule based systems are run to recognize and tag numeric sequences and time related sequences.
+
+This phase runs by default, but can be deactivated by setting `ner.applyNumericClassifiers` to `false`.
+
+This produces tags such as `NUMBER, ORDINAL, MONEY, DATE, and TIME`
+
+The class that runs this phase is `edu.stanford.nlp.ie.regexp.NumberSequenceClassifier`
+
+SUTime (described in more detail below) is also used by default.  You can deactivate this
+by setting `ner.useSUTime` to `false`.
+
 
 ## SUTime
 
