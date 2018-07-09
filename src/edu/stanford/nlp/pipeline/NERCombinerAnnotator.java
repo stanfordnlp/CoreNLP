@@ -222,8 +222,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   public void setUpAdditionalRulesNER(Properties properties) {
-    this.applyAdditionalRules = PropertiesUtils.getBool(properties,
-        "ner.additional.regexner.mapping", false);
+    this.applyAdditionalRules =
+        (!properties.getProperty("ner.additional.regexner.mapping","").equals(""));
     if (this.applyAdditionalRules) {
       String additionalRulesPrefix = "ner.additional.regexner";
       Properties additionalRulesProps =
