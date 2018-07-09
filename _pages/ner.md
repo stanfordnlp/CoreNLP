@@ -80,8 +80,8 @@ property.
 * NORMAL - any given tag can only be applied by one model (the first model that applies a tag)
 * HIGH_RECALL - all models can apply all tags
 
-So for example, if teh `ner.combinationMode` is set to `NORMAL`, only the 3-class
-model's ORGANIZATION tags will be applied.  If it isset to `HIGH_RECALL`, the 7-class
+So for example, if the `ner.combinationMode` is set to `NORMAL`, only the 3-class
+model's ORGANIZATION tags will be applied.  If it is set to `HIGH_RECALL`, the 7-class
 and 4-class models' ORGANIZATION tags will also be applied.
 
 If you do not want to run any statistical models, set `ner.model` to the empty string.
