@@ -207,7 +207,7 @@ the same manner.  This is for the case when users want to run their own rules af
 
 For instance, suppose you want to match sports teams after the previous NER steps have been run.
 
-Your rules file might look like this (/path/to/sports_teams.rules)
+Your rules file might look like this `/path/to/sports_teams.rules`
 
 ```java
 Boston Red Sox       SPORTS_TEAM     ORGANIZATION,MISC       1
