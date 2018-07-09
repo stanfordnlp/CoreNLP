@@ -272,6 +272,7 @@ java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,sspli
 
 ```bash
 # run fine-grained NER with two custom rules files
+# the first rules file caseless.rules should be case-insensitive, the second rules file uses default options
 java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.fine.regexner.mapping "ignorecase=true,caseless.rules;cased.rules" -file example.txt -outputFormat text
 ```
 
