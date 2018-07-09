@@ -72,7 +72,7 @@ edu/stanford/nlp/models/ner/english.muc.7class.distsim.crf.ser.gz
 edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz
 ```
 
-Tags written by one model cannot be overwritten by subsequent models in the series.
+Tags written by one model *cannot* be overwritten by subsequent models in the series.
 
 There are two options for how the models are combined.  These are selected with the `ner.combinationMode`
 property.
