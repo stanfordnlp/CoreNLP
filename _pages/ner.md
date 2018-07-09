@@ -61,6 +61,30 @@ During this phase a series of trained CRF's will be run on each sentence.  These
 CRF's are trained on large tagged data sets.  They evaluate the entire sequence
 and pick the optimal tag sequence.
 
+These are the default models that are run:
+
+```
+# tags: LOCATION, ORGANIZATION, PERSON
+edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz
+# tags: DATE, LOCATION, MONEY, ORGANIZATION, PERCENT, PERSON, TIME
+edu/stanford/nlp/models/ner/english.muc.7class.distsim.crf.ser.gz
+# LOCATION, MISC, ORGANIZATION, PERSON
+3.) edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz
+```
+
+Tags written by one model cannot be overwritten by subsequent models in the series.
+
+There are two options for how the models are combined.  These are selected with the `ner.combinationMode`
+property.
+
+* NORMAL - any given tag can only be applied by one model (the first model that applies a tag)
+* HIGH_RECALL - all models can apply all tags
+
+So for example, if teh `ner.combinationMode` is set to `NORMAL`, only the 3-class
+model's ORGANIZATION tags will be applied.  If it isset to `HIGH_RECALL`, the 7-class
+and 4-class models' ORGANIZATION tags will also be applied.
+
+If you do not want to run any statistical models, set `ner.model` to the empty string.
 
 ## SUTime
 
