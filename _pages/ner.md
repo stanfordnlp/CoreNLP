@@ -110,13 +110,40 @@ that this be used.  You can set this up with a tab-delimited file specified with
 ### Fine Grained NER
 
 At this point, a series of rules used for the KBP 2017 competition will be run to create more fine-grained
-NER tags.  These rules are applied using a TokensRegexNERAnnotator sub-annotator.
+NER tags.  These rules are applied using a TokensRegexNERAnnotator sub-annotator.  That is the main
+`NERCombinerAnnotator` builds a `TokensRegexNERAnnotator` as a sub-annotator and runs it on all sentences
+as part of it's entire tagging process.
 
 *NOTE:* applying these rules will significantly slow down the tagging process.
 
 The tags set by this phase include: `CAUSE_OF_DEATH, CITY, COUNTRY, CRIMINAL_CHARGE, EMAIL, IDEOLOGY, NATIONALITY, RELIGION, STATE_OR_PROVINCE, TITLE, URL`
 
 If you do not want to run the fine-grained rules, set `ner.applyFineGrained` to `false`.
+
+### RegexNER Rules Format
+
+There is a more detailed write up about RegexNER [here](https://nlp.stanford.edu/software/regexner.html)
+
+The format is a series of tab-delimited columns.
+
+The first column is the tokens pattern, the second column is the NER tag to apply, the third is the types
+of NER tags that can be overwritten, and the fourth is a priority used for tie-breaking if two rules
+match a sequence.
+
+Each space delimited entry represents a regex to match a token.
+
+The rule (remember these are tab-delimited columns):
+
+`Los Angeles    CITY    LOCATION,MISC    1.0`
+
+means to match the token "Los" followed by the token "Angeles", and label them both as CITY,
+provided they have a current NER tag of O, LOCATION, or MISC.
+
+The rule:
+
+`Bachelor of (Arts|Science)    DEGREE    MISC    1.0`
+
+means to match the token "Bachelor", then the token "of", and finally either the token "Arts" or "Science".
 
 ### Customizing The Fine-Grained NER
 
@@ -161,6 +188,51 @@ If you want to set global settings that will apply for all rules files, remember
 and `ner.fine.regexner.validpospattern`.  If you are setting options for a specific rules file with the
 `ner.fine.regexner.mapping` option, follow the pattern from above.
 
+### Additional TokensRegexNER Rules
+
+After the fine-grained rules are run, there is also an option for a user to specify additional rules they would like
+to have run after the fine-grained NER phase.
+
+This second `TokensRegexNERAnnotator` sub-annotator has the name `ner.additional.regexner` and is customized in
+the same manner.  This is for the case when users want to run their own rules after the standard rules we provide.
+
+For instance, suppose you want to match sports teams after the previous NER steps have been run.
+
+Your rules file might look like this (/path/to/sports_teams.rules)
+
+```java
+Boston Red Sox       SPORTS_TEAM     ORGANIZATION,MISC       1
+Denver Broncos       SPORTS_TEAM     ORGANIZATION,MISC       1
+Detroit Red Wings    SPORTS_TEAM     ORGANIZATION,MISC       1
+Los Angeles Lakers   SPORTS_TEAM     ORGANIZATION,MISC       1
+```
+
+You could integrate this into the entire NER process by setting `ner.additional.regexner.mapping` to
+`/path/to/sports_teams.rules`
+
+By default no additional rules are run, so leaving `ner.additional.regexner.mapping` blank will cause
+this phase to not be run at all.
+
+### Entity Mention Detection
+
+After all of the previous steps have been run, entity detection will be run to combine the tagged tokens into entities.
+The entity mention detection will be based off of the tagging scheme.  This is accomplished with a `EntityMentionsAnnotator`
+sub-annotator.
+
+If a basic tagging scheme (example: PERSON, ORGANIZATION, LOCATION) is used, all contiguous sequences of tokens with the same tag will be marked as an entity.
+
+If a more advanced tagging scheme (such as BIO with tags like B-PERSON and I-PERSON) sequences with the same tag
+split by a B-tag will be turned into multiple entities.
+
+All of our models and rule files use a basic tagging scheme, but you could create your own models and rules that use BIO.
+
+For instance `(Joe PERSON) (Smith PERSON) (Jane PERSON) (Smith PERSON)` will create the entity `Joe Smith Jane Smith`.
+
+On the other hand `(Joe B-PERSON) (Smith I-PERSON) (Jane B-PERSON) (Smith I-PERSON) will create two entities: `Joe Smith` and `Jane Smith`.
+
+You can deactivate this with `ner.buildEntityMentions` being set to `false`.
+
+At this point the NER process will be finished, having tagged tokens with NER tags and created entities.
 
 ## SUTime
 
@@ -297,42 +369,6 @@ You can learn more about what the various properties above mean [here](https://n
 SUTime rules can be changed by modifying its included
 TokensRegex rule files. Changing other rule-based components (money,
 etc.) requires changes to the Java source code.
-
-## Adding A Rules-Based Layer
-
-By default the `ner` annotator will run a set of fine-grained rules for finding types such as `CAUSE_OF_DEATH, CITY, COUNTRY, CRIMINAL_CHARGE, EMAIL, IDEOLOGY, NATIONALITY, RELIGION, STATE_OR_PROVINCE, TITLE, URL`.  This is new in 3.9.1.  The rules for these can be found in `edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab` and `edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab`.
-
-If you do not want to run these fine-grained rules, add `-ner.applyFineGrained false` to your command (or set that property accordingly if using the Java API).
-
-If you want to add custom rules that will run along with the fine-grained rules, use the `-ner.extraTokensRegexNERMappings` option.  This option is currently only available with the GitHub version, but should be included in version 3.9.2.
-
-As an example, suppose you wanted to customize to detect sports teams.  Here would be an example rules file `sports_teams.rules`.
-
-```java
-Boston Red Sox       SPORTS_TEAM     ORGANIZATION,MISC       1
-Denver Broncos       SPORTS_TEAM     ORGANIZATION,MISC       1
-Detroit Red Wings    SPORTS_TEAM     ORGANIZATION,MISC       1
-Los Angeles Lakers   SPORTS_TEAM     ORGANIZATION,MISC       1
-```
-
-If any of those token sequences were detected and flagged as O, ORGANIZATION or MISC, they would be re-tagged as SPORTS_TEAM.
-
-Here is an example command adding these custom rules to the baseline `ner` system.
-
-```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.extraTokensRegexNERMappings sports_teams.rules -file example.txt -outputFormat text
-```
-
-For more control, you can directly set the `ner.fine.regexner.mapping` option.  Here is what that is set to by default (with additional settings to just the rules files):
-
-```java
-ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab;edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab
-```
-
-You can specify multiple rules files and options for each rule file.  So the format would be something like `rule_file_1_option1,rule_file_1_option2,rule_file_1;rule_file_2_option1,rule_file_2`, if you wanted to specify 2 rules, where the first rule had 2 options, and the second rule had 1 option.
-
-The `ignorecase` option says to make all of the rules case-insensitive.  The `validpospattern` option sets a part of speech tag pattern that must also be
-matched for any of the rules to fire.  Then the actual rules file is specified.  The second rules file has no options specified in this example.
 
 ## More information 
 
