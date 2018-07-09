@@ -69,7 +69,7 @@ edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz
 # tags: DATE, LOCATION, MONEY, ORGANIZATION, PERCENT, PERSON, TIME
 edu/stanford/nlp/models/ner/english.muc.7class.distsim.crf.ser.gz
 # LOCATION, MISC, ORGANIZATION, PERSON
-3.) edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz
+edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz
 ```
 
 Tags written by one model cannot be overwritten by subsequent models in the series.
