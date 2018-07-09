@@ -57,7 +57,7 @@ is a breakdown of those distinct phases.
 
 The main class that runs this process is `edu.stanford.nlp.pipeline.NERCombinerAnnotator`
 
-### Statistical Model
+### Statistical Models
 
 During this phase a series of trained CRF's will be run on each sentence.  These
 CRF's are trained on large tagged data sets.  They evaluate the entire sequence
