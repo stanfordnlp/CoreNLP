@@ -243,6 +243,48 @@ You can deactivate this with `ner.buildEntityMentions` being set to `false`.
 
 At this point the NER process will be finished, having tagged tokens with NER tags and created entities.
 
+## Command Line Examples
+
+```bash
+# run default NER
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -file example.txt -outputFormat text
+```
+
+```bash
+# shut off numeric classifiers
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.applyNumericClassifiers false -file example.txt -outputFormat text
+```
+
+```bash
+# shut off SUTime
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.useSUTime false -file example.txt -outputFormat text
+```
+
+```bash
+# shut off fine grained NER
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.applyFineGrained false -file example.txt -outputFormat text
+```
+
+```bash
+# run fine-grained NER with a custom rules file
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.fine.regexner.mapping custom.rules -file example.txt -outputFormat text
+```
+
+```bash
+# run fine-grained NER with two custom rules files
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.fine.regexner.mapping "ignorecase=true,caseless.rules;cased.rules" -file example.txt -outputFormat text
+```
+
+```bash
+# add additional rules to run after fine-grained NER
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.additional.regexner.mapping additional.rules -file example.txt -outputFormat text
+```
+
+```bash
+# don't build entity mentions
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.buildEntityMentions false -file example.txt -outputFormat text
+``` 
+
 ## SUTime
 
 StanfordCoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.html), Stanford's temporal expression
