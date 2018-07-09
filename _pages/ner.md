@@ -79,8 +79,8 @@ Tags written by one model *cannot* be overwritten by subsequent models in the se
 There are two options for how the models are combined.  These are selected with the `ner.combinationMode`
 property.
 
-* NORMAL - any given tag can only be applied by one model (the first model that applies a tag)
-* HIGH_RECALL - all models can apply all tags
+* *NORMAL* - any given tag can only be applied by one model (the first model that applies a tag)
+* *HIGH_RECALL* - all models can apply all tags
 
 So for example, if the `ner.combinationMode` is set to `NORMAL`, only the 3-class
 model's ORGANIZATION tags will be applied.  If it is set to `HIGH_RECALL`, the 7-class
@@ -100,6 +100,66 @@ The class that runs this phase is `edu.stanford.nlp.ie.regexp.NumberSequenceClas
 
 SUTime (described in more detail below) is also used by default.  You can deactivate this
 by setting `ner.useSUTime` to `false`.
+
+### Legacy Gazetteer Lookup
+
+Historically there has been a final step which looks up tokens in a Gazetteer and maps them accordingly.
+This does not run by default.  It remains in the pipeline for legacy purposes, but it is not recommended
+that this be used.  You can set this up with a tab-delimited file specified with the `ner.regex` property.
+
+### Fine Grained NER
+
+At this point, a series of rules used for the KBP 2017 competition will be run to create more fine-grained
+NER tags.  These rules are applied using a TokensRegexNERAnnotator sub-annotator.
+
+*NOTE:* applying these rules will significantly slow down the tagging process.
+
+The tags set by this phase include: `CAUSE_OF_DEATH, CITY, COUNTRY, CRIMINAL_CHARGE, EMAIL, IDEOLOGY, NATIONALITY, RELIGION, STATE_OR_PROVINCE, TITLE, URL`
+
+If you do not want to run the fine-grained rules, set `ner.applyFineGrained` to `false`.
+
+### Customizing The Fine-Grained NER
+
+Here is a breakdown of how to customize the fine-grained NER.  The overall `ner` annotator creates a sub-annotator
+called `ner.fine.regexner` which is an instance of a `TokensRegexNERAnnotator`.  
+
+The `ner.fine.regexner.mapping` property allows one to specify a set of rules files and additional properties for each rules file.
+
+The format is as follows:
+1. For each rules file there is a comma delimited list of options, ending in the path of the rules file
+2. Each entry for a rules file is separated by a `;`
+
+As an example, this is the default `ner.fine.regexner.mapping` setting:
+
+```
+ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab;edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab
+```
+
+The two rules files are:
+
+```
+edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab
+edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab
+```
+
+The options for `edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab` are:
+
+`ignorecase=true,validpospattern=^(NN|JJ).*`
+
+while there are no options set for `edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab` in this example.
+
+Here is a description of some common options for the `TokensRegexNERAnnotator` sub-annotator used by `ner`
+
+You can find more details on the page for the `TokensRegexNERAnnotator` located [here](https://stanfordnlp.github.io/CoreNLP/regexner.html)
+
+| Option name | Type | Default | Description |
+| --- | --- | --- | --- |
+| ignorecase | boolean | false | make patterns case-insensitive or not? |
+| validpospattern | regex | null | part of speech tag pattern that has to be matched |
+
+If you want to set global settings that will apply for all rules files, remember to use `ner.fine.regexner.ignorecase` 
+and `ner.fine.regexner.validpospattern`.  If you are setting options for a specific rules file with the
+`ner.fine.regexner.mapping` option, follow the pattern from above.
 
 
 ## SUTime
