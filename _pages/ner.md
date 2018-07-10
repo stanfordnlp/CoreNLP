@@ -315,6 +315,9 @@ public class NERPipelineDemo {
     //props.setProperty("ner.additional.regexner.mapping", "example.rules");
     //props.setProperty("ner.additional.regexner.ignorecase", "true");
 
+    // add 2 additional rules files ; set the first one to be case-insensitive
+    //props.setProperty("ner.additional.regexner.mapping", "ignorecase=true,example_one.rules;example_two.rules");
+
     // set up pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // make an example document
