@@ -202,6 +202,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     Properties nerProperties = new Properties();
     nerProperties.setProperty("ner.applyFineGrained", Boolean.toString(fineGrained));
     nerProperties.setProperty("ner.buildEntityMentions", Boolean.toString(entityMentions));
+    setUpAdditionalRulesNER(nerProperties);
     setUpFineGrainedNER(nerProperties);
     setUpEntityMentionBuilding(nerProperties);
   }
