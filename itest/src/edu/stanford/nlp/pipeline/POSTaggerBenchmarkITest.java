@@ -76,8 +76,12 @@ public class POSTaggerBenchmarkITest extends TestCase {
       double currSentenceAccuracy = result.get("correctTokens")/((double) result.get("numSentenceTokens"));
       sentenceAccuraciesTotals += currSentenceAccuracy;
     }
-    System.out.println("token accuracy: "+((double) totalCorrectTokens)/((double) totalTokens));
-    System.out.println("avg. sentence accuracy: "+(sentenceAccuraciesTotals / ((double) numSentences)));
+    double tokenAccuracy = ((double) totalCorrectTokens)/((double) totalTokens);
+    double avgSentenceAccuracy = (sentenceAccuraciesTotals / ((double) numSentences));
+    System.err.println("token accuracy: "+tokenAccuracy);
+    assert(tokenAccuracy >= .968);
+    System.err.println("avg. sentence accuracy: "+avgSentenceAccuracy);
+    assert(avgSentenceAccuracy >= .966);
   }
 
 }
