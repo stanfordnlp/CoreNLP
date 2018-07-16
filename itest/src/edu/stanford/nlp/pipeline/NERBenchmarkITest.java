@@ -73,6 +73,7 @@ public class NERBenchmarkITest extends TestCase {
     String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/conll.4class.testa";
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("ner.applyFineGrained", "false");
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
     runNERTest(englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath);
   }
