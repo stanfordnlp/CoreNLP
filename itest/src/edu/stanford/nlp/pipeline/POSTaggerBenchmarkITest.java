@@ -65,8 +65,8 @@ public class POSTaggerBenchmarkITest extends TestCase {
     String englishPOSTestPath = "/u/nlp/data/pos-tagger/english/test-wsj-22-24";
     List<String> sentences = readInPOSData(englishPOSTestPath);
     double ENGLISH_TOKEN_ACCURACY = .968;
-    double ENGLISH_AVG_SENTENCE_ACCURACY = .966;
-    runPOSTest(sentences, englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_AVG_SENTENCE_ACCURACY, "English");
+    double ENGLISH_SENTENCE_ACCURACY = .5;
+    runPOSTest(sentences, englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_SENTENCE_ACCURACY, "English");
   }
 
   public void testGermanPOSModelAccuracy() {
@@ -77,9 +77,9 @@ public class POSTaggerBenchmarkITest extends TestCase {
     StanfordCoreNLP germanPipeline = new StanfordCoreNLP(props);
     String germanPOSTestPath = "/u/nlp/data/GermanACL08/negra/negra-corpus.test.utf8";
     List<String> sentences = readInPOSData(germanPOSTestPath);
-    double GERMAN_TOKEN_ACCURACY = .50;
-    double GERMAN_AVG_SENTENCE_ACCURACY = .50;
-    runPOSTest(sentences, germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_AVG_SENTENCE_ACCURACY, "German");
+    double GERMAN_TOKEN_ACCURACY = .934;
+    double GERMAN_SENTENCE_ACCURACY = .5;
+    runPOSTest(sentences, germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_SENTENCE_ACCURACY, "German");
   }
 
   public void runPOSTest(List<String> sentences, StanfordCoreNLP pipeline,
@@ -87,7 +87,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     int totalTokens = 0;
     int totalCorrectTokens = 0;
     int numSentences = 0;
-    double sentenceAccuraciesTotals = 0.0;
+    int correctSentences = 0;
     for (String sentence : sentences) {
       numSentences += 1;
       List<CoreLabel> inputSentenceTokens = entryToTokensList(sentence);
@@ -95,16 +95,17 @@ public class POSTaggerBenchmarkITest extends TestCase {
       totalTokens += result.get("numSentenceTokens");
       totalCorrectTokens += result.get("correctTokens");
       double currSentenceAccuracy = result.get("correctTokens")/((double) result.get("numSentenceTokens"));
-      sentenceAccuraciesTotals += currSentenceAccuracy;
+      if (currSentenceAccuracy == 1.0)
+        correctSentences += 1;
     }
     double tokenAccuracy = ((double) totalCorrectTokens)/((double) totalTokens);
-    double avgSentenceAccuracy = (sentenceAccuraciesTotals / ((double) numSentences));
+    double sentenceAccuracy = ((double) correctSentences / ((double) numSentences));
     System.err.println("---");
     System.err.println(language);
     System.err.println("token accuracy: "+tokenAccuracy);
     assertTrue(tokenAccuracy >= tokenAccuracyThreshold);
-    System.err.println("avg. sentence accuracy: "+avgSentenceAccuracy);
-    assertTrue(avgSentenceAccuracy >= avgSentenceAccuracyThreshold);
+    System.err.println("sentence accuracy: "+sentenceAccuracy);
+    assertTrue(sentenceAccuracy >= avgSentenceAccuracyThreshold);
   }
 
 }
