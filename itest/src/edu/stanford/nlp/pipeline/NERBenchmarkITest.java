@@ -22,9 +22,11 @@ public class NERBenchmarkITest extends TestCase {
     for (String conllLine : conllLines) {
       if (conllLine.equals("")) {
         // remove the extra " "
-        currDoc = currDoc.substring(0,currDoc.length()-1);
-        Pair<String, List<String>> docPair = new Pair<>(currDoc, currNERTagList);
-        returnList.add(docPair);
+        if (currDoc.length() > 0) {
+          currDoc = currDoc.substring(0, currDoc.length() - 1);
+          Pair<String, List<String>> docPair = new Pair<>(currDoc, currNERTagList);
+          returnList.add(docPair);
+        }
       } else {
         currDoc += (conllLine.split("\t")[0] + " ");
         currNERTagList.add(conllLine.split("\t")[1]);
