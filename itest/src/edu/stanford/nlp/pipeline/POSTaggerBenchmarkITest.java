@@ -72,6 +72,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
   public void testGermanPOSModelAccuracy() {
     // set up pipeline
     Properties props = StringUtils.argsToProperties("-args", "StanfordCoreNLP-german.properties");
+    props.setProperty("annotators", "tokenize,ssplit,pos");
     props.setProperty("tokenize.whitespace", "true");
     StanfordCoreNLP germanPipeline = new StanfordCoreNLP(props);
     String germanPOSTestPath = "/u/nlp/data/GermanACL08/negra/negra-corpus.test.utf8";
