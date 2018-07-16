@@ -75,6 +75,8 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
     props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
     runNERTest(englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath);
   }
@@ -82,7 +84,7 @@ public class NERBenchmarkITest extends TestCase {
   public void runNERTest(StanfordCoreNLP pipeline, String workingDir, String goldFilePath) throws IOException {
     List<Pair<String, List<String>>> conllDocs = loadCoNLLDocs(goldFilePath);
     List<Annotation> conllAnnotations = createPipelineAnnotations(conllDocs, pipeline);
-    writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"conllEvalInput.txt");
+    writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"/conllEvalInput.txt");
   }
 
 
