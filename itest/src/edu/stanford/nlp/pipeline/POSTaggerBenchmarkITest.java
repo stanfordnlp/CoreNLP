@@ -65,7 +65,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     String englishPOSTestPath = "/u/nlp/data/pos-tagger/english/test-wsj-22-24";
     List<String> sentences = readInPOSData(englishPOSTestPath);
     double ENGLISH_TOKEN_ACCURACY = .968;
-    double ENGLISH_SENTENCE_ACCURACY = .5;
+    double ENGLISH_SENTENCE_ACCURACY = .516;
     runPOSTest(sentences, englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_SENTENCE_ACCURACY, "English");
   }
 
@@ -78,7 +78,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     String germanPOSTestPath = "/u/nlp/data/GermanACL08/negra/negra-corpus.test.utf8";
     List<String> sentences = readInPOSData(germanPOSTestPath);
     double GERMAN_TOKEN_ACCURACY = .934;
-    double GERMAN_SENTENCE_ACCURACY = .5;
+    double GERMAN_SENTENCE_ACCURACY = .511;
     runPOSTest(sentences, germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_SENTENCE_ACCURACY, "German");
   }
 
