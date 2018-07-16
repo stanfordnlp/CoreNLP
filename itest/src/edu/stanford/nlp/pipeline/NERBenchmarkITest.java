@@ -70,7 +70,7 @@ public class NERBenchmarkITest extends TestCase {
   }
 
   public void testEnglishNEROnCoNLLTest() throws IOException {
-    String conllTestPath = "/u/nlp/data/ner/column_data/conll.4class.testa";
+    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/conll.4class.testa";
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
