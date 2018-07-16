@@ -7,6 +7,7 @@ import java.util.stream.*;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.util.*;
 
 public class POSTaggerBenchmarkITest extends TestCase {
 
@@ -65,11 +66,23 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(englishPOSTestPath);
     double ENGLISH_TOKEN_ACCURACY = .968;
     double ENGLISH_AVG_SENTENCE_ACCURACY = .966;
-    runPOSTest(sentences, englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_AVG_SENTENCE_ACCURACY);
+    runPOSTest(sentences, englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_AVG_SENTENCE_ACCURACY, "English");
+  }
+
+  public void testGermanPOSModelAccuracy() {
+    // set up pipeline
+    Properties props = StringUtils.argsToProperties("-args", "StanfordCoreNLP-german.properties");
+    props.setProperty("tokenize.whitespace", "true");
+    StanfordCoreNLP germanPipeline = new StanfordCoreNLP(props);
+    String germanPOSTestPath = "/u/nlp/data/GermanACL08/negra/negra-corpus.test.utf8";
+    List<String> sentences = readInPOSData(germanPOSTestPath);
+    double GERMAN_TOKEN_ACCURACY = .50;
+    double GERMAN_AVG_SENTENCE_ACCURACY = .50;
+    runPOSTest(sentences, germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_AVG_SENTENCE_ACCURACY, "German");
   }
 
   public void runPOSTest(List<String> sentences, StanfordCoreNLP pipeline,
-                         double tokenAccuracyThreshold, double avgSentenceAccuracyThreshold) {
+                         double tokenAccuracyThreshold, double avgSentenceAccuracyThreshold, String language) {
     int totalTokens = 0;
     int totalCorrectTokens = 0;
     int numSentences = 0;
@@ -85,6 +98,8 @@ public class POSTaggerBenchmarkITest extends TestCase {
     }
     double tokenAccuracy = ((double) totalCorrectTokens)/((double) totalTokens);
     double avgSentenceAccuracy = (sentenceAccuraciesTotals / ((double) numSentences));
+    System.err.println("---");
+    System.err.println(language);
     System.err.println("token accuracy: "+tokenAccuracy);
     assertTrue(tokenAccuracy >= tokenAccuracyThreshold);
     System.err.println("avg. sentence accuracy: "+avgSentenceAccuracy);
