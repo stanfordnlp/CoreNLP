@@ -63,7 +63,9 @@ public class POSTaggerBenchmarkITest extends TestCase {
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
     String englishPOSTestPath = "/u/nlp/data/pos-tagger/english/test-wsj-22-24";
     List<String> sentences = readInPOSData(englishPOSTestPath);
-    runPOSTest(sentences, englishPipeline, .968, .966);
+    double ENGLISH_TOKEN_ACCURACY = .968;
+    double ENGLISH_AVG_SENTENCE_ACCURACY = .966;
+    runPOSTest(sentences, englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_AVG_SENTENCE_ACCURACY);
   }
 
   public void runPOSTest(List<String> sentences, StanfordCoreNLP pipeline,
@@ -84,9 +86,9 @@ public class POSTaggerBenchmarkITest extends TestCase {
     double tokenAccuracy = ((double) totalCorrectTokens)/((double) totalTokens);
     double avgSentenceAccuracy = (sentenceAccuraciesTotals / ((double) numSentences));
     System.err.println("token accuracy: "+tokenAccuracy);
-    assert(tokenAccuracy >= tokenAccuracyThreshold);
+    assertTrue(tokenAccuracy >= tokenAccuracyThreshold);
     System.err.println("avg. sentence accuracy: "+avgSentenceAccuracy);
-    assert(avgSentenceAccuracy >= avgSentenceAccuracyThreshold);
+    assertTrue(avgSentenceAccuracy >= avgSentenceAccuracyThreshold);
   }
 
 }
