@@ -74,6 +74,7 @@ public class NERBenchmarkITest extends TestCase {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz");
     props.setProperty("ner.applyFineGrained", "false");
     props.setProperty("ner.useSUTime", "false");
     props.setProperty("ner.applyNumericClassifiers", "false");
