@@ -121,7 +121,7 @@ public class NERBenchmarkITest extends TestCase {
     List<Pair<String, List<String>>> conllDocs = loadCoNLLDocs(goldFilePath);
     List<Annotation> conllAnnotations = createPipelineAnnotations(conllDocs, pipeline);
     writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"/conllEvalInput.txt");
-    String conllEvalScriptResults = runEvalScript(workingDir+"/conllEvalInput");
+    String conllEvalScriptResults = runEvalScript(workingDir+"/conllEvalInput.txt");
     parseResults(conllEvalScriptResults);
   }
 
