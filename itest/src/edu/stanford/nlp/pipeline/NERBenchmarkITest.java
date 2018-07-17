@@ -71,8 +71,30 @@ public class NERBenchmarkITest extends TestCase {
     IOUtils.writeStringToFile(perlScriptInput, filePath, "UTF-8");
   }
 
+  /**
+   * Run conlleval perl script on given input file
+   * @param resultsFile
+   * @return String with output of running perl eval script
+   */
+  public String runEvalScript(String resultsFile) throws IOException{
+    String result = null;
+    String cmd = "blah" + " " + resultsFile;
+    String evalCmd = "/u/nlp/data/ner/conll/conlleval -r < "+resultsFile;
+    Process p = Runtime.getRuntime().exec(cmd);
+    BufferedReader in =
+        new BufferedReader(new InputStreamReader(p.getInputStream()));
+    String inputLine;
+    while ((inputLine = in.readLine()) != null) {
+      System.out.println(inputLine);
+      result += inputLine + "\n";
+    }
+    in.close();
+    System.err.println(result);
+    return result;
+  }
+
   public void testEnglishNEROnCoNLLTest() throws IOException {
-    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/conll.4class.testa";
+    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/conll.4class.testb";
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
@@ -88,9 +110,8 @@ public class NERBenchmarkITest extends TestCase {
     List<Pair<String, List<String>>> conllDocs = loadCoNLLDocs(goldFilePath);
     List<Annotation> conllAnnotations = createPipelineAnnotations(conllDocs, pipeline);
     writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"/conllEvalInput.txt");
+    runEvalScript(workingDir+"/conllEvalInput");
   }
-
-
-
+  
 
 }
