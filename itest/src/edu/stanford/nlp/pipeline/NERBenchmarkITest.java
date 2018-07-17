@@ -78,9 +78,8 @@ public class NERBenchmarkITest extends TestCase {
    */
   public String runEvalScript(String resultsFile) throws IOException{
     String result = null;
-    String cmd = "blah" + " " + resultsFile;
     String evalCmd = "/u/nlp/data/ner/conll/conlleval -r < "+resultsFile;
-    Process p = Runtime.getRuntime().exec(cmd);
+    Process p = Runtime.getRuntime().exec(evalCmd);
     BufferedReader in =
         new BufferedReader(new InputStreamReader(p.getInputStream()));
     String inputLine;
@@ -112,6 +111,6 @@ public class NERBenchmarkITest extends TestCase {
     writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"/conllEvalInput.txt");
     runEvalScript(workingDir+"/conllEvalInput");
   }
-  
+
 
 }
