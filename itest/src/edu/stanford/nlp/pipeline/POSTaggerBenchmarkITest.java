@@ -69,6 +69,19 @@ public class POSTaggerBenchmarkITest extends TestCase {
     runPOSTest(sentences, englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_SENTENCE_ACCURACY, "English");
   }
 
+  public void testFrenchUDPOSModelAccuracy() {
+    // set up pipeline
+    Properties props = StringUtils.argsToProperties("-args", "StanfordCoreNLP-french.properties");
+    props.setProperty("annotators", "tokenize,ssplit,pos");
+    props.setProperty("tokenize.whitespace", "true");
+    StanfordCoreNLP frenchPipeline = new StanfordCoreNLP(props);
+    String frenchPOSTestPath = "/u/nlp/data/pos-tagger/french/fr-pos-ud-test.sentence_per_line";
+    List<String> sentences = readInPOSData(frenchPOSTestPath);
+    double FRENCH_UD_TOKEN_ACCURACY = .941;
+    double FRENCH_UD_SENTENCE_ACCURACY = .375;
+    runPOSTest(sentences, frenchPipeline, FRENCH_UD_TOKEN_ACCURACY, FRENCH_UD_SENTENCE_ACCURACY, "FrenchUD");
+  }
+
   public void testGermanPOSModelAccuracy() {
     // set up pipeline
     Properties props = StringUtils.argsToProperties("-args", "StanfordCoreNLP-german.properties");
