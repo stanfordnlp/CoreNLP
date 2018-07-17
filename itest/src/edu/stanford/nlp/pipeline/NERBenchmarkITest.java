@@ -4,6 +4,8 @@ import junit.framework.TestCase;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.io.IOUtils;
@@ -12,6 +14,8 @@ import edu.stanford.nlp.util.*;
 public class NERBenchmarkITest extends TestCase {
 
   String NER_BENCHMARK_WORKING_DIR = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir";
+
+  private static final Pattern FB1_Pattern = Pattern.compile("FB1:  (\\d+\\.\\d+)");
 
   public List<Pair<String, List<String>>> loadCoNLLDocs(String filePath) {
     List<Pair<String, List<String>>> returnList = new ArrayList<Pair<String, List<String>>>();
@@ -86,6 +90,20 @@ public class NERBenchmarkITest extends TestCase {
     return result;
   }
 
+  public double parseResults(String conllEvalScriptResults) {
+    String[] resultLines = conllEvalScriptResults.split("\n");
+    for (String resultLine : resultLines) {
+      Matcher m = FB1_Pattern.matcher(resultLine);
+      // Should parse the F1 after "FB1:"
+      if (m.find()) {
+        String f1 = m.group(1);
+        System.err.println("parsed F1 equals: "+ Double.parseDouble(f1));
+        break;
+      }
+    }
+    return 0.0;
+  }
+
   public void testEnglishNEROnCoNLLTest() throws IOException {
     String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/conll.4class.testb";
     Properties props = new Properties();
@@ -104,6 +122,7 @@ public class NERBenchmarkITest extends TestCase {
     List<Annotation> conllAnnotations = createPipelineAnnotations(conllDocs, pipeline);
     writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"/conllEvalInput.txt");
     String conllEvalScriptResults = runEvalScript(workingDir+"/conllEvalInput");
+    parseResults(conllEvalScriptResults);
   }
 
 
