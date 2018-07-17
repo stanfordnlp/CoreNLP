@@ -27,6 +27,8 @@ public class NERBenchmarkITest extends TestCase {
           Pair<String, List<String>> docPair = new Pair<>(currDoc, currNERTagList);
           returnList.add(docPair);
         }
+        currDoc = "";
+        currNERTagList = new ArrayList<>();
       } else {
         currDoc += (conllLine.split("\t")[0] + " ");
         currNERTagList.add(conllLine.split("\t")[1]);
