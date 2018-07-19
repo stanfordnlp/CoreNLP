@@ -28,7 +28,7 @@ For English, we distribute CoreNLP with two files containing a default list of r
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
-| regexner | RegexNERAnnotator | NamedEntityTagAnnotation |
+| regexner | TokensRegexNERAnnotator | NamedEntityTagAnnotation |
 
 ## Options
 
