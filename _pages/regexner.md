@@ -15,7 +15,7 @@ just want to modify settings for the `ner` annotator to integrate your own rules
 `regexner` annotator.  For instance, the `ner` annotator handles building entity mentions from named entity tags, so you would
 want your custom rules to be run by the `ner` annotator.
 
-This documentation remains as a detailed description of how a TokensRegexNERAnnotator works.
+This documentation remains as a detailed description of how a `TokensRegexNERAnnotator` works.
 
 ## Description
 
