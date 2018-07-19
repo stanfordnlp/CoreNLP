@@ -1,5 +1,5 @@
 ---
-title: RegexNERAnnotator 
+title: TokensRegexNERAnnotator 
 keywords: regexner
 permalink: '/regexner.html'
 ---
