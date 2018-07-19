@@ -4,6 +4,19 @@ keywords: regexner
 permalink: '/regexner.html'
 ---
 
+## NERCombinerAnnotator
+
+Some annotators are actually more commonly used as sub-annotators.  That is one annotator runs another as a sub-component.
+
+In the current version of Stanford CoreNLP a TokensRegexNERAnnotator is run as a sub-annotator of a comprehensive named entity
+recognition process by the NERCombinerAnnotator.  It is advised to review how the overall `ner` annotator works by reviewing
+the documentation for the [NERCombinerAnnotator](https://stanfordnlp.github.io/CoreNLP/ner.html).  In most cases you will probably
+just want to modify settings for the `ner` annotator to integrate your own rules into a pipeline rather than build a separate
+`regexner` annotator.  For instance, the `ner` annotator handles building entity mentions from named entity tags, so you would
+want your custom rules to be run by the `ner` annotator.
+
+This documentation remains as a detailed description of how a TokensRegexNERAnnotator works.
+
 ## Description
 
 RegexNER Implements a simple, rule-based NER system over token sequences using an extension of Java regular expressions. The original goal of this Annotator was to provide a simple framework to incorporate named entities and named entity labels that are not annotated in traditional NER corpora, and hence not recoginized by our statistical NER classifiers. However, you can also use this annotator to simply do rule-based NER. Here is [a simple example](http://nlp.stanford.edu/software/regexner/) of how to use RegexNER. RegexNER is implemented using TokensRegex. For more complex applications, you might consider using [TokensRegex](http://nlp.stanford.edu/software/tokensregex.html) directly.
