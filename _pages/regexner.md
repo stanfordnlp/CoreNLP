@@ -4,7 +4,7 @@ keywords: regexner
 permalink: '/regexner.html'
 ---
 
-## NERCombinerAnnotator
+## NERCombinerAnnotator Runs TokensRegexNERAnnotator As A Sub-Annotator
 
 Some annotators are actually more commonly used as sub-annotators.  That is one annotator runs another as a sub-component.
 
