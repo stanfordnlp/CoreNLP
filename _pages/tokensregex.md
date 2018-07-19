@@ -192,8 +192,7 @@ public class TokensRegexAnnotatorDemo {
     // build pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // annotate
-    Annotation ann = new Annotation("" +
-        "There will be a big announcement by Apple Inc today at 5:00pm.  " +
+    Annotation ann = new Annotation("There will be a big announcement by Apple Inc today at 5:00pm.  " +
         "She has worked at Miller Corp. for 5 years.");
     pipeline.annotate(ann);
     // show results
