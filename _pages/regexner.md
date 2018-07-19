@@ -8,7 +8,7 @@ permalink: '/regexner.html'
 
 Some annotators are actually more commonly used as sub-annotators.  That is one annotator runs another as a sub-component.
 
-In the current version of Stanford CoreNLP a TokensRegexNERAnnotator is run as a sub-annotator of a comprehensive named entity
+In the current version of Stanford CoreNLP a `TokensRegexNERAnnotator` is run as a sub-annotator of a comprehensive named entity
 recognition process by the NERCombinerAnnotator.  It is advised to review how the overall `ner` annotator works by reviewing
 the documentation for the [NERCombinerAnnotator](https://stanfordnlp.github.io/CoreNLP/ner.html).  In most cases you will probably
 just want to modify settings for the `ner` annotator to integrate your own rules into a pipeline rather than build a separate
