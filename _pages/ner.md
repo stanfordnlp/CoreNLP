@@ -114,6 +114,9 @@ NER tags.  These rules are applied using a TokensRegexNERAnnotator sub-annotator
 `NERCombinerAnnotator` builds a `TokensRegexNERAnnotator` as a sub-annotator and runs it on all sentences
 as part of it's entire tagging process.
 
+The `TokensRegexNERAnnotator` runs TokensRegex rules.  You can review all of the settings for a TokensRegexNERAnnotator
+[here](https://stanfordnlp.github.io/CoreNLP/regexner.html).
+
 *NOTE:* applying these rules will significantly slow down the tagging process.
 
 The tags set by this phase include: 
