@@ -17,6 +17,24 @@ public class NERBenchmarkITest extends TestCase {
 
   private static final Pattern FB1_Pattern = Pattern.compile("FB1:  (\\d+\\.\\d+)");
 
+  /** handle Spanish NER **/
+  private static final Map<String, String> spanishToEnglishTag = new HashMap<>();
+
+  static {
+    spanishToEnglishTag.put("PERS", "PERSON");
+    spanishToEnglishTag.put("ORG", "ORGANIZATION");
+    spanishToEnglishTag.put("LUG", "LOCATION");
+    spanishToEnglishTag.put("OTROS", "MISC");
+  }
+
+  /** convert Spanish tag content of older models **/
+  public String spanishToEnglishTag(String spanishTag) {
+    if (spanishToEnglishTag.containsKey(spanishTag))
+      return spanishToEnglishTag.get(spanishTag);
+    else
+      return spanishTag;
+  }
+
   public List<Pair<String, List<String>>> loadCoNLLDocs(String filePath) {
     List<Pair<String, List<String>>> returnList = new ArrayList<Pair<String, List<String>>>();
     String currDoc = "";
@@ -65,7 +83,8 @@ public class NERBenchmarkITest extends TestCase {
       for (int tokenNum = 0 ;
            tokenNum < currAnnotationTokens.size() ; tokenNum++) {
         String perlScriptLine = currAnnotationTokens.get(tokenNum).word()
-            + "\t" + currCoNLLDoc.second().get(tokenNum) + "\t" + currAnnotationTokens.get(tokenNum).ner();
+            + "\t" + spanishToEnglishTag(currCoNLLDoc.second().get(tokenNum)) + "\t" +
+            currAnnotationTokens.get(tokenNum).ner();
         perlScriptInput += (perlScriptLine + "\n");
       }
       perlScriptInput += "\n";
@@ -212,6 +231,34 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP germanPipeline = new StanfordCoreNLP(props);
     runNERTest("German CoNLL Test 4 Class ", germanPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        79.43);
+  }
+
+  public void testSpanishNEROnConLLDev() throws IOException {
+    String conllTestPath =
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ancora.ner.dev.4class.tsv";
+    Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-spanish.properties");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
+    StanfordCoreNLP spanishPipeline = new StanfordCoreNLP(props);
+    runNERTest("Spanish Ancora Dev 4 Class ", spanishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        82.48);
+  }
+
+  public void testSpanishNEROnConLLTest() throws IOException {
+    String conllTestPath =
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ancora.ner.test.4class.tsv";
+    Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-spanish.properties");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
+    StanfordCoreNLP spanishPipeline = new StanfordCoreNLP(props);
+    runNERTest("Spanish Ancora Test 4 Class ", spanishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
         79.43);
   }
 
