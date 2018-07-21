@@ -116,7 +116,7 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP chinesePipeline = new StanfordCoreNLP(props);
     runNERTest("Chinese OntoNotes Dev 7 Class ", chinesePipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
-        82.48);
+        78.98);
   }
 
   public void testChineseNEROnOntoNotesTest() throws IOException {
@@ -130,7 +130,7 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP chinesePipeline = new StanfordCoreNLP(props);
     runNERTest("Chinese OntoNotes Test 7 Class ", chinesePipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
-        82.48);
+        80.00);
   }
 
   public void testEnglishNEROnCoNLLDev() throws IOException {
