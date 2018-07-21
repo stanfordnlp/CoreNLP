@@ -92,16 +92,17 @@ public class NERBenchmarkITest extends TestCase {
 
   public double parseResults(String conllEvalScriptResults) {
     String[] resultLines = conllEvalScriptResults.split("\n");
+    double foundF1Score = 0.0;
     for (String resultLine : resultLines) {
       Matcher m = FB1_Pattern.matcher(resultLine);
       // Should parse the F1 after "FB1:"
       if (m.find()) {
         String f1 = m.group(1);
-        System.err.println("parsed F1 equals: "+ Double.parseDouble(f1));
+        foundF1Score = Double.parseDouble(f1);
         break;
       }
     }
-    return 0.0;
+    return foundF1Score;
   }
 
   public void testEnglishNEROnCoNLLTest() throws IOException {
@@ -114,15 +115,19 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.useSUTime", "false");
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
-    runNERTest(englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath);
+    runNERTest("CoNLL 2003 English Test", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        90.3);
   }
 
-  public void runNERTest(StanfordCoreNLP pipeline, String workingDir, String goldFilePath) throws IOException {
+  public void runNERTest(String testName, StanfordCoreNLP pipeline, String workingDir, String goldFilePath,
+                         double f1Threshold) throws IOException {
     List<Pair<String, List<String>>> conllDocs = loadCoNLLDocs(goldFilePath);
     List<Annotation> conllAnnotations = createPipelineAnnotations(conllDocs, pipeline);
     writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"/conllEvalInput.txt");
     String conllEvalScriptResults = runEvalScript(workingDir+"/conllEvalInput.txt");
-    parseResults(conllEvalScriptResults);
+    double modelScore = parseResults(conllEvalScriptResults);
+    assertTrue(String.format(testName+" failed: should have found F1 of at least %.2f but found %.2f",
+        f1Threshold, modelScore), (modelScore >= f1Threshold));
   }
 
 

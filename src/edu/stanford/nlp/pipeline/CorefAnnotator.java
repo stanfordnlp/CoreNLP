@@ -27,7 +27,6 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -46,7 +45,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
 
   private final CorefSystem corefSystem;
 
-  private boolean performMentionDetection;
+  private boolean performMentionDetection ;
   private CorefMentionAnnotator mentionAnnotator;
 
   private final Properties props;
@@ -78,7 +77,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   }
 
   // flip which granularity of ner tag is primary
-  private static void setNamedEntityTagGranularity(Annotation annotation, String granularity) {
+  public void setNamedEntityTagGranularity(Annotation annotation, String granularity) {
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     Class<? extends CoreAnnotation<String>> sourceNERTagClass;
     if (granularity.equals("fine"))
@@ -89,9 +88,8 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       sourceNERTagClass = CoreAnnotations.NamedEntityTagAnnotation.class;
     // switch tags
     for (CoreLabel token : tokens) {
-      if ( ! StringUtils.isNullOrEmpty(token.get(sourceNERTagClass)) ) {
+      if (token.get(sourceNERTagClass) != null && !token.get(sourceNERTagClass).equals(""))
         token.set(CoreAnnotations.NamedEntityTagAnnotation.class, token.get(sourceNERTagClass));
-      }
     }
   }
 
@@ -104,7 +102,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
    * @param ann the annotation, after coreference has been run
    * @return
    */
-  private static Optional<CoreMap> findBestCoreferentEntityMention(CoreMap em, Annotation ann) {
+  public Optional<CoreMap> findBestCoreferentEntityMention(CoreMap em, Annotation ann) {
     // helper lambda
     Function<Optional<CoreMap>,Integer> lengthOfOptionalEntityMention =
         (v) -> v.isPresent() ? v.get().get(CoreAnnotations.TextAnnotation.class).length() : -1 ;
@@ -184,7 +182,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       List<CorefMention> s = c.getMentionsInTextualOrder();
       for (CorefMention m1 : s) {
         for (CorefMention m2 : s) {
-          if (comparator.compare(m1, m2) > 0) {
+          if (comparator.compare(m1, m2)==1) {
             links.add(new Pair<>(m1.position, m2.position));
           }
         }
