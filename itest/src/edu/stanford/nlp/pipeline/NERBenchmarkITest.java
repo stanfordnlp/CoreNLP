@@ -105,6 +105,20 @@ public class NERBenchmarkITest extends TestCase {
     return foundF1Score;
   }
 
+  public void testEnglishNEROnCoNLLDev() throws IOException {
+    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/conll.4class.testa";
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz");
+    props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
+    StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
+    runNERTest("CoNLL 2003 English Dev", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        94.00);
+  }
+
   public void testEnglishNEROnCoNLLTest() throws IOException {
     String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/conll.4class.testb";
     Properties props = new Properties();
@@ -132,6 +146,5 @@ public class NERBenchmarkITest extends TestCase {
         f1Threshold, modelScore), (modelScore >= f1Threshold));
     System.err.println("Current F1 score for "+testName+" is: "+modelScore);
   }
-
-
+  
 }
