@@ -116,7 +116,7 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
     runNERTest("CoNLL 2003 English Test", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
-        90.3);
+        90.24);
   }
 
   public void runNERTest(String testName, StanfordCoreNLP pipeline, String workingDir, String goldFilePath,
@@ -126,7 +126,7 @@ public class NERBenchmarkITest extends TestCase {
     writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"/conllEvalInput.txt");
     String conllEvalScriptResults = runEvalScript(workingDir+"/conllEvalInput.txt");
     double modelScore = parseResults(conllEvalScriptResults);
-    assertTrue(String.format(testName+" failed: should have found F1 of at least %.2f but found %.2f",
+    assertTrue(String.format(testName+" failed: should have found F1 of at least %.2f but found F1 of %.2f",
         f1Threshold, modelScore), (modelScore >= f1Threshold));
   }
 
