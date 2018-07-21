@@ -107,7 +107,7 @@ public class NERBenchmarkITest extends TestCase {
 
   public void testChineseNEROnOntoNotesDev() throws IOException {
     String conllTestPath =
-        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-6class.dev";
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-7class.dev";
     Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-chinese.properties");
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
@@ -115,13 +115,13 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.useSUTime", "false");
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP chinesePipeline = new StanfordCoreNLP(props);
-    runNERTest("Chinese OntoNotes Dev 6 Class ", chinesePipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+    runNERTest("Chinese OntoNotes Dev 7 Class ", chinesePipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
         82.48);
   }
 
   public void testChineseNEROnOntoNotesTest() throws IOException {
     String conllTestPath =
-        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-6class.test";
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-7class.test";
     Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-chinese.properties");
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
@@ -129,7 +129,7 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.useSUTime", "false");
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP chinesePipeline = new StanfordCoreNLP(props);
-    runNERTest("Chinese OntoNotes Test 6 Class ", chinesePipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+    runNERTest("Chinese OntoNotes Test 7 Class ", chinesePipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
         82.48);
   }
 
