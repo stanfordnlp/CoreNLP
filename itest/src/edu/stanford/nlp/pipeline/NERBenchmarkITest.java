@@ -143,8 +143,8 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.useSUTime", "false");
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
-    runNERTest("OntoNotes English Dev", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
-        99.00);
+    runNERTest("OntoNotes English Dev 3 Class", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        89.93);
   }
 
   public void testEnglishNEROnOntoNotesTest() throws IOException {
@@ -157,8 +157,8 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.useSUTime", "false");
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
-    runNERTest("OntoNotes English Test", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
-        99.00);
+    runNERTest("OntoNotes English Test 3 Class", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        90.77);
   }
 
 
