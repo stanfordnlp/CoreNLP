@@ -94,7 +94,7 @@ public class TokenizerAnnotator implements Annotator  {
     public static TokenizerType getTokenizerType(Properties props) {
       String tokClass = props.getProperty("tokenize.class", null);
       boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
-      String language = props.getProperty("tokenize.language", "en");
+      String language = props.getProperty("tokenize.language", null);
 
       if(whitespace) {
         return Whitespace;
