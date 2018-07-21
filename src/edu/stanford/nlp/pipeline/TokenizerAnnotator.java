@@ -194,9 +194,11 @@ public class TokenizerAnnotator implements Annotator  {
     if (props == null) {
       props = new Properties();
     }
-    // check if segmenting must be done
+    // check if segmenting must be done (Chinese or Arabic and not tokenizing on whitespace)
+    boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
     if (props.getProperty("tokenize.language") != null &&
-            LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))) {
+            LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))
+        && !whitespace) {
       useSegmenter = true;
       if (LanguageInfo.getLanguageFromString(
               props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC)
