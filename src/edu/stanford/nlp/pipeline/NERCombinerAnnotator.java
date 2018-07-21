@@ -68,6 +68,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private boolean applyFineGrained = true;
   private TokensRegexNERAnnotator fineGrainedNERAnnotator;
 
+  /** additional rules ner - add your own additional regexner rules after fine grained phase **/
+  private boolean applyAdditionalRules = true;
+  private TokensRegexNERAnnotator additionalRulesNERAnnotator;
+
   /** entity mentions **/
   private boolean buildEntityMentions = true;
   private EntityMentionsAnnotator entityMentionsAnnotator;
@@ -151,6 +155,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // set up fine grained ner
     setUpFineGrainedNER(properties);
 
+    // set up additional rules ner
+    setUpAdditionalRulesNER(properties);
+
     // set up entity mentions
     setUpEntityMentionBuilding(properties);
 
@@ -195,6 +202,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     Properties nerProperties = new Properties();
     nerProperties.setProperty("ner.applyFineGrained", Boolean.toString(fineGrained));
     nerProperties.setProperty("ner.buildEntityMentions", Boolean.toString(entityMentions));
+    setUpAdditionalRulesNER(nerProperties);
     setUpFineGrainedNER(nerProperties);
     setUpEntityMentionBuilding(nerProperties);
   }
@@ -202,7 +210,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   public void setUpFineGrainedNER(Properties properties) {
     // set up fine grained ner
     this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
-    String tokensRegexNERMappings = properties.getProperty("ner.extraTokensRegexNERMappings", "");
     if (this.applyFineGrained) {
       String fineGrainedPrefix = "ner.fine.regexner";
       Properties fineGrainedProps =
@@ -210,13 +217,20 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       // explicity set fine grained ner default here
       if (!fineGrainedProps.containsKey("ner.fine.regexner.mapping"))
         fineGrainedProps.put("ner.fine.regexner.mapping", DefaultPaths.DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS);
-      // if extra rules have been added, use those as well
-      if (!tokensRegexNERMappings.equals("")) {
-        String fullTokensRegexNERMapping = fineGrainedProps.getProperty(fineGrainedPrefix+".mapping");
-        fullTokensRegexNERMapping += (";" + tokensRegexNERMappings);
-        fineGrainedProps.put("ner.fine.regexner.mapping", fullTokensRegexNERMapping);
-      }
+      // build the fine grained ner TokensRegexNERAnnotator
       fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
+    }
+  }
+
+  public void setUpAdditionalRulesNER(Properties properties) {
+    this.applyAdditionalRules =
+        (!properties.getProperty("ner.additional.regexner.mapping","").equals(""));
+    if (this.applyAdditionalRules) {
+      String additionalRulesPrefix = "ner.additional.regexner";
+      Properties additionalRulesProps =
+          PropertiesUtils.extractPrefixedProperties(properties, additionalRulesPrefix+".", true);
+      // build the additional rules ner TokensRegexNERAnnotator
+      additionalRulesNERAnnotator = new TokensRegexNERAnnotator(additionalRulesPrefix, additionalRulesProps);
     }
   }
 
@@ -276,8 +290,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         token.remove(TimeAnnotations.TimexAnnotation.class);
     }
     // if fine grained ner is requested, run that
-    if (this.applyFineGrained) {
-      fineGrainedNERAnnotator.annotate(annotation);
+    if (this.applyFineGrained || this.applyAdditionalRules) {
+      // run the fine grained NER
+      if (this.applyFineGrained)
+        fineGrainedNERAnnotator.annotate(annotation);
+      // run the custom rules specified
+      if (this.applyAdditionalRules)
+        additionalRulesNERAnnotator.annotate(annotation);
       // set the FineGrainedNamedEntityTagAnnotation.class
       for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
         String fineGrainedTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
