@@ -116,7 +116,7 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
     runNERTest("CoNLL 2003 English Dev", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
-        94.00);
+        94.01);
   }
 
   public void testEnglishNEROnCoNLLTest() throws IOException {
@@ -133,18 +133,50 @@ public class NERBenchmarkITest extends TestCase {
         90.24);
   }
 
+  public void testEnglishNEROnOntoNotesDev() throws IOException {
+    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes.3class.dev";
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
+    props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
+    StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
+    runNERTest("OntoNotes English Dev", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        99.00);
+  }
+
+  public void testEnglishNEROnOntoNotesTest() throws IOException {
+    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes.3class.test";
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
+    props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
+    StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
+    runNERTest("OntoNotes English Test", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        99.00);
+  }
+
+
   public void runNERTest(String testName, StanfordCoreNLP pipeline, String workingDir, String goldFilePath,
                          double f1Threshold) throws IOException {
+    // load gold data
     List<Pair<String, List<String>>> conllDocs = loadCoNLLDocs(goldFilePath);
     List<Annotation> conllAnnotations = createPipelineAnnotations(conllDocs, pipeline);
+    // annotate and prepare perl eval script input data
     writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"/conllEvalInput.txt");
     System.err.println("---");
     System.err.println("running perl eval script for "+testName);
+    // get results
     String conllEvalScriptResults = runEvalScript(workingDir+"/conllEvalInput.txt");
     double modelScore = parseResults(conllEvalScriptResults);
     assertTrue(String.format(testName+" failed: should have found F1 of at least %.2f but found F1 of %.2f",
         f1Threshold, modelScore), (modelScore >= f1Threshold));
     System.err.println("Current F1 score for "+testName+" is: "+modelScore);
   }
-  
+
 }
