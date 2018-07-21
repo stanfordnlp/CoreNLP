@@ -11,18 +11,16 @@ import edu.stanford.nlp.util.*;
 
 public class POSTaggerBenchmarkITest extends TestCase {
 
-  String TAG_DELIMITER = "_";
-
   public List<String> readInPOSData(String testDataFilePath) {
     List<String> sentences = IOUtils.linesFromFile(testDataFilePath);
     return sentences;
   }
 
-  public List<CoreLabel> entryToTokensList(String entryLine) {
+  public List<CoreLabel> entryToTokensList(String entryLine, String tagDelimiter) {
     String[] tokensAndTags = entryLine.split(" ");
     List<CoreLabel> tokensFromGold = new ArrayList<CoreLabel>();
     for (String tokenAndTag : tokensAndTags) {
-      String[] tokenAndTagSplit = tokenAndTag.split(TAG_DELIMITER);
+      String[] tokenAndTagSplit = tokenAndTag.split(tagDelimiter);
       CoreLabel cl = new CoreLabel();
       cl.setWord(tokenAndTagSplit[0]);
       cl.setTag(tokenAndTagSplit[1]);
@@ -66,7 +64,20 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(englishPOSTestPath);
     double ENGLISH_TOKEN_ACCURACY = .968;
     double ENGLISH_SENTENCE_ACCURACY = .516;
-    runPOSTest(sentences, englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_SENTENCE_ACCURACY, "English");
+    runPOSTest(sentences, "_", englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_SENTENCE_ACCURACY, "English");
+  }
+
+  public void testChinesePOSModelAccuracy() {
+    // set up pipeline
+    Properties props = StringUtils.argsToProperties("-args", "StanfordCoreNLP-chinese.properties");
+    props.setProperty("annotators", "tokenize,ssplit,pos");
+    props.setProperty("tokenize.whitespace", "true");
+    StanfordCoreNLP chinesePipeline = new StanfordCoreNLP(props);
+    String chinesePOSTestPath = "/u/nlp/data/pos-tagger/chinese/ctb7.test";
+    List<String> sentences = readInPOSData(chinesePOSTestPath);
+    double FRENCH_UD_TOKEN_ACCURACY = .941;
+    double FRENCH_UD_SENTENCE_ACCURACY = .375;
+    runPOSTest(sentences, "#", chinesePipeline, FRENCH_UD_TOKEN_ACCURACY, FRENCH_UD_SENTENCE_ACCURACY, "FrenchUD");
   }
 
   public void testFrenchUDPOSModelAccuracy() {
@@ -79,7 +90,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(frenchPOSTestPath);
     double FRENCH_UD_TOKEN_ACCURACY = .941;
     double FRENCH_UD_SENTENCE_ACCURACY = .375;
-    runPOSTest(sentences, frenchPipeline, FRENCH_UD_TOKEN_ACCURACY, FRENCH_UD_SENTENCE_ACCURACY, "FrenchUD");
+    runPOSTest(sentences, "_", frenchPipeline, FRENCH_UD_TOKEN_ACCURACY, FRENCH_UD_SENTENCE_ACCURACY, "FrenchUD");
   }
 
   public void testGermanPOSModelAccuracy() {
@@ -92,7 +103,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(germanPOSTestPath);
     double GERMAN_TOKEN_ACCURACY = .934;
     double GERMAN_SENTENCE_ACCURACY = .511;
-    runPOSTest(sentences, germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_SENTENCE_ACCURACY, "German");
+    runPOSTest(sentences, "_", germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_SENTENCE_ACCURACY, "German");
   }
 
   public void testSpanishUDPOSModelAccuracy() {
@@ -105,10 +116,10 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(spanishPOSTestPath);
     double SPANISH_UD_TOKEN_ACCURACY = .5;
     double SPANISH_UD_SENTENCE_ACCURACY = .3;
-    runPOSTest(sentences, spanishPipeline, SPANISH_UD_TOKEN_ACCURACY, SPANISH_UD_SENTENCE_ACCURACY, "SpanishUD");
+    runPOSTest(sentences, "_", spanishPipeline, SPANISH_UD_TOKEN_ACCURACY, SPANISH_UD_SENTENCE_ACCURACY, "SpanishUD");
   }
 
-  public void runPOSTest(List<String> sentences, StanfordCoreNLP pipeline,
+  public void runPOSTest(List<String> sentences, String tagDelimiter, StanfordCoreNLP pipeline,
                          double tokenAccuracyThreshold, double avgSentenceAccuracyThreshold, String language) {
     int totalTokens = 0;
     int totalCorrectTokens = 0;
@@ -116,7 +127,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     int correctSentences = 0;
     for (String sentence : sentences) {
       numSentences += 1;
-      List<CoreLabel> inputSentenceTokens = entryToTokensList(sentence);
+      List<CoreLabel> inputSentenceTokens = entryToTokensList(sentence, tagDelimiter);
       HashMap<String,Integer> result = sentenceResult(pipeline, inputSentenceTokens);
       totalTokens += result.get("numSentenceTokens");
       totalCorrectTokens += result.get("correctTokens");
