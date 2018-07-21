@@ -64,7 +64,8 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(englishPOSTestPath);
     double ENGLISH_TOKEN_ACCURACY = .968;
     double ENGLISH_SENTENCE_ACCURACY = .516;
-    runPOSTest(sentences, "_", englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_SENTENCE_ACCURACY, "English");
+    runPOSTest(sentences, "_", englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_SENTENCE_ACCURACY,
+        "English");
   }
 
   public void testChinesePOSModelAccuracy() {
@@ -75,9 +76,10 @@ public class POSTaggerBenchmarkITest extends TestCase {
     StanfordCoreNLP chinesePipeline = new StanfordCoreNLP(props);
     String chinesePOSTestPath = "/u/nlp/data/pos-tagger/chinese/ctb7.test";
     List<String> sentences = readInPOSData(chinesePOSTestPath);
-    double FRENCH_UD_TOKEN_ACCURACY = .941;
-    double FRENCH_UD_SENTENCE_ACCURACY = .375;
-    runPOSTest(sentences, "#", chinesePipeline, FRENCH_UD_TOKEN_ACCURACY, FRENCH_UD_SENTENCE_ACCURACY, "FrenchUD");
+    double CHINESE_TOKEN_ACCURACY = .974;
+    double CHINESE_SENTENCE_ACCURACY = .577;
+    runPOSTest(sentences, "#", chinesePipeline, CHINESE_TOKEN_ACCURACY, CHINESE_SENTENCE_ACCURACY,
+        "Chinese");
   }
 
   public void testFrenchUDPOSModelAccuracy() {
@@ -90,7 +92,8 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(frenchPOSTestPath);
     double FRENCH_UD_TOKEN_ACCURACY = .941;
     double FRENCH_UD_SENTENCE_ACCURACY = .375;
-    runPOSTest(sentences, "_", frenchPipeline, FRENCH_UD_TOKEN_ACCURACY, FRENCH_UD_SENTENCE_ACCURACY, "FrenchUD");
+    runPOSTest(sentences, "_", frenchPipeline, FRENCH_UD_TOKEN_ACCURACY, FRENCH_UD_SENTENCE_ACCURACY,
+        "FrenchUD");
   }
 
   public void testGermanPOSModelAccuracy() {
@@ -103,7 +106,8 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(germanPOSTestPath);
     double GERMAN_TOKEN_ACCURACY = .934;
     double GERMAN_SENTENCE_ACCURACY = .511;
-    runPOSTest(sentences, "_", germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_SENTENCE_ACCURACY, "German");
+    runPOSTest(sentences, "_", germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_SENTENCE_ACCURACY,
+        "German");
   }
 
   public void testSpanishUDPOSModelAccuracy() {
@@ -116,7 +120,8 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(spanishPOSTestPath);
     double SPANISH_UD_TOKEN_ACCURACY = .5;
     double SPANISH_UD_SENTENCE_ACCURACY = .3;
-    runPOSTest(sentences, "_", spanishPipeline, SPANISH_UD_TOKEN_ACCURACY, SPANISH_UD_SENTENCE_ACCURACY, "SpanishUD");
+    runPOSTest(sentences, "_", spanishPipeline, SPANISH_UD_TOKEN_ACCURACY, SPANISH_UD_SENTENCE_ACCURACY,
+        "SpanishUD");
   }
 
   public void runPOSTest(List<String> sentences, String tagDelimiter, StanfordCoreNLP pipeline,
