@@ -124,10 +124,13 @@ public class NERBenchmarkITest extends TestCase {
     List<Pair<String, List<String>>> conllDocs = loadCoNLLDocs(goldFilePath);
     List<Annotation> conllAnnotations = createPipelineAnnotations(conllDocs, pipeline);
     writePerlScriptInputToPath(conllAnnotations, conllDocs, workingDir+"/conllEvalInput.txt");
+    System.err.println("---");
+    System.err.println("running perl eval script for "+testName);
     String conllEvalScriptResults = runEvalScript(workingDir+"/conllEvalInput.txt");
     double modelScore = parseResults(conllEvalScriptResults);
     assertTrue(String.format(testName+" failed: should have found F1 of at least %.2f but found F1 of %.2f",
         f1Threshold, modelScore), (modelScore >= f1Threshold));
+    System.err.println("Current F1 score for "+testName+" is: "+modelScore);
   }
 
 
