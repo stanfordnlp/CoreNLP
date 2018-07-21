@@ -100,12 +100,12 @@ public class POSTaggerBenchmarkITest extends TestCase {
     Properties props = StringUtils.argsToProperties("-args", "StanfordCoreNLP-spanish.properties");
     props.setProperty("annotators", "tokenize,ssplit,pos");
     props.setProperty("tokenize.whitespace", "true");
-    StanfordCoreNLP frenchPipeline = new StanfordCoreNLP(props);
-    String frenchPOSTestPath = "/u/nlp/data/pos-tagger/spanish/spanish-ud-ancora-test.sentence_per_line";
-    List<String> sentences = readInPOSData(frenchPOSTestPath);
+    StanfordCoreNLP spanishPipeline = new StanfordCoreNLP(props);
+    String spanishPOSTestPath = "/u/nlp/data/pos-tagger/spanish/spanish-ud-ancora-test.sentence_per_line";
+    List<String> sentences = readInPOSData(spanishPOSTestPath);
     double SPANISH_UD_TOKEN_ACCURACY = .5;
     double SPANISH_UD_SENTENCE_ACCURACY = .3;
-    runPOSTest(sentences, frenchPipeline, SPANISH_UD_TOKEN_ACCURACY, SPANISH_UD_SENTENCE_ACCURACY, "SpanishUD");
+    runPOSTest(sentences, spanishPipeline, SPANISH_UD_TOKEN_ACCURACY, SPANISH_UD_SENTENCE_ACCURACY, "SpanishUD");
   }
 
   public void runPOSTest(List<String> sentences, StanfordCoreNLP pipeline,
