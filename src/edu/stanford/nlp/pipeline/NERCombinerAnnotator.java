@@ -56,7 +56,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     spanishToEnglishTag.put("ORG", "ORGANIZATION");
     spanishToEnglishTag.put("LUG", "LOCATION");
     spanishToEnglishTag.put("OTROS", "MISC");
-
   }
 
   private static final String spanishNumberRegexRules =
@@ -71,6 +70,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   /** additional rules ner - add your own additional regexner rules after fine grained phase **/
   private boolean applyAdditionalRules = true;
   private TokensRegexNERAnnotator additionalRulesNERAnnotator;
+
+  /** run tokensregex rules before the entity building phase **/
+  private boolean applyTokensRegexRules = false;
+  private TokensRegexAnnotator tokensRegexAnnotator;
 
   /** entity mentions **/
   private boolean buildEntityMentions = true;
@@ -158,6 +161,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // set up additional rules ner
     setUpAdditionalRulesNER(properties);
 
+    // set up tokens regex rules
+    setUpTokensRegexRules(properties);
+
     // set up entity mentions
     setUpEntityMentionBuilding(properties);
 
@@ -234,6 +240,18 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
   }
 
+  public void setUpTokensRegexRules(Properties properties) {
+    this.applyTokensRegexRules =
+        (!properties.getProperty("ner.additional.tokensregex.rules","").equals(""));
+    if (this.applyTokensRegexRules) {
+      String tokensRegexRulesPrefix = "ner.additional.tokensregex";
+      Properties tokensRegexRulesProps =
+          PropertiesUtils.extractPrefixedProperties(properties, tokensRegexRulesPrefix+".", true);
+      // build the additional rules ner TokensRegexNERAnnotator
+      tokensRegexAnnotator = new TokensRegexAnnotator(tokensRegexRulesPrefix, tokensRegexRulesProps);
+    }
+  }
+
   public void setUpEntityMentionBuilding(Properties properties) {
     this.buildEntityMentions = PropertiesUtils.getBool(properties, "ner.buildEntityMentions", true);
     if (this.buildEntityMentions) {
@@ -297,6 +315,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       // run the custom rules specified
       if (this.applyAdditionalRules)
         additionalRulesNERAnnotator.annotate(annotation);
+      // run tokens regex
+      if (this.applyTokensRegexRules)
+        tokensRegexAnnotator.annotate(annotation);
       // set the FineGrainedNamedEntityTagAnnotation.class
       for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
         String fineGrainedTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
