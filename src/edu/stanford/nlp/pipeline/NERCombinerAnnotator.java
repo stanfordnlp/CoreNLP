@@ -213,6 +213,11 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     setUpEntityMentionBuilding(nerProperties);
   }
 
+  /**
+   * Set up the fine-grained TokensRegexNERAnnotator sub-annotator
+   *
+   * @param properties Properties for the TokensRegexNER sub-annotator
+   */
   public void setUpFineGrainedNER(Properties properties) {
     // set up fine grained ner
     this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
@@ -228,6 +233,11 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
   }
 
+  /**
+   * Set up the additional TokensRegexNERAnnotator sub-annotator
+   *
+   * @param properties Properties for the TokensRegexNER sub-annotator
+   */
   public void setUpAdditionalRulesNER(Properties properties) {
     this.applyAdditionalRules =
         (!properties.getProperty("ner.additional.regexner.mapping","").equals(""));
@@ -240,6 +250,11 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
   }
 
+  /**
+   * Set up the TokensRegexAnnotator sub-annotator
+   *
+   * @param properties Properties for the TokensRegex sub-annotator
+   */
   public void setUpTokensRegexRules(Properties properties) {
     this.applyTokensRegexRules =
         (!properties.getProperty("ner.additional.tokensregex.rules","").equals(""));
@@ -252,6 +267,11 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
   }
 
+  /**
+   * Set up the additional EntityMentionsAnnotator sub-annotator
+   *
+   * @param properties Properties for the EntityMentionsAnnotator sub-annotator
+   */
   public void setUpEntityMentionBuilding(Properties properties) {
     this.buildEntityMentions = PropertiesUtils.getBool(properties, "ner.buildEntityMentions", true);
     if (this.buildEntityMentions) {
