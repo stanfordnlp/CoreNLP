@@ -56,7 +56,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator  {
     String modelPath = PropertiesUtils.getString(properties, "model", DependencyParser.DEFAULT_MODEL);
     parser = DependencyParser.loadFromModelFile(modelPath, properties);
 
-    nThreads = PropertiesUtils.getInt(properties, "testThreads", DEFAULT_NTHREADS);
+    nThreads = PropertiesUtils.getInt(properties, "nthreads", DEFAULT_NTHREADS);
     maxTime = PropertiesUtils.getLong(properties, "sentenceTimeout", DEFAULT_MAXTIME);
     extraDependencies = MetaClass.cast(properties.getProperty("extradependencies", "NONE"), GrammaticalStructure.Extras.class);
   }
