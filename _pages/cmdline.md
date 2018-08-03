@@ -7,7 +7,7 @@ permalink: '/cmdline.html'
 ## Quick start
 
 Note: Stanford CoreNLP 3.9.1 requires Java 8, but works with Java 9/10 as well.  If using Java 9/10, you need to
-add this Java flag to avoid errors:
+add this Java flag to avoid errors (CoreNLP uses the JAXB module that was deleted from the default libraries for Java 9+):
 
 ```
 --add-modules java.se.ee
@@ -16,16 +16,16 @@ add this Java flag to avoid errors:
 The minimal command to run Stanford CoreNLP from the command line is:
 
 ```sh
-java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -file input.txt
 ```
 
-If this command is run from the distribution directory, it processes the included [sample file](files/input.txt) `input.txt`. We use a wildcard `"*"` after `-cp` to load all jar files in the current directory &ndash; it needs to be in quotes. This command writes the output to an XML [file](files/input.txt.xml.txt) named `input.txt.out` in the same directory.
+If this command is run from the distribution directory, it processes the included [sample file](files/input.txt) `input.txt`. We use a wildcard `"*"` after `-cp` to load all jar files in the current directory &ndash; it needs to be in quotes. This command writes the output to an XML [file](files/input.txt.xml.txt) named `input.txt.xml` in the same directory.
 
 ###  Notes
 
 * Processing a short text like this is very inefficient. It takes a minute to load everything before processing begins. You should batch your processing.
-* Stanford CoreNLP requires Java version 8 or higher.
-* Specifying memory: `-Xmx2g` specifies the amount of RAM that Java will make available for CoreNLP. On a 64-bit machine, Stanford CoreNLP typically requires 2GB to run (and it may need up to 6GB, depending on the annotators used and the size of the document to parse). On a 32 bit machine (in 2016, this is most commonly a 32-bit Windows machine), you cannot allocate 2GB of RAM; probably you should try with `-Xmx1800m` or maybe with just `-Xmx1500m`, but this amount of memory is a bit marginal. You probably can't run some annotators, such as the statistical `coref`. Providing your machine has lots of memory, in most cases Java will now start with a large memory allocation and you shouldn't need to specify this flag manually.
+* Current releases of Stanford CoreNLP require Java version 8 or higher.
+* Specifying memory: adding, e.g., `-Xmx2g` before the `-cp` flag specifies the amount of RAM that Java will make available for CoreNLP. On a 64-bit machine, Stanford CoreNLP typically requires 2GB to run (and it may need up to 6GB, depending on the annotators used and the size of the document to parse). On a 32 bit machine (in 2016, this is most commonly a 32-bit Windows machine), you cannot allocate 2GB of RAM; probably you should try with `-Xmx1800m` or maybe with just `-Xmx1500m`, but this amount of memory is a bit marginal. You probably can't run some annotators, such as the statistical `coref`. Providing your machine has lots of memory, in most cases Java will now start with a large memory allocation and you shouldn't need to specify this flag manually.
 * Stanford CoreNLP includes an interactive shell for analyzing sentences. If you do not specify any properties that load input files, you will be placed in the interactive shell. Type `q` to exit.
 
 ## Classpath
@@ -36,7 +36,7 @@ Your command line has to load the code, libraries, and model jars that CoreNLP u
 java -cp "/Users/me/corenlp/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -file inputFile
 ```
 
-Alternatively, you can add this path to your CLASSPATH environment variable, so these libraries are always available.  
+Alternatively, you can [add this path to your CLASSPATH environment variable](https://en.wikipedia.org/wiki/Classpath_(Java%29), so these libraries are always available.
 
 The "*" (which must be enclosed in quotes) says to add all JAR files in the given directory to the classpath. 
 You can also individually specify the needed jar files. Use the following sort of command line, adjusting the JAR file date extensions `VV` to your downloaded release.
@@ -49,7 +49,7 @@ The command above works for Mac OS X or Linux. For Windows, the colons (:) separ
 
 ## Configuring CoreNLP: Properties
 
-Before using Stanford CoreNLP, it is usual to create a configuration file (a Java Properties file). Minimally, this file should contain the "annotators" property, which contains a comma-separated list of Annotators to use. For example, the setting below enables: tokenization, sentence splitting (required by most Annotators), POS tagging, lemmatization, NER, syntactic parsing, and coreference resolution.
+Before using Stanford CoreNLP, it is usual to create a configuration file (a Java Properties file). Minimally, this file should contain the "annotators" property, which contains a comma-separated list of Annotators to use. For example, the setting below enables: tokenization, sentence splitting (required by most Annotators), POS tagging, lemmatization, NER, (constituency) parsing, and (rule-based) coreference resolution.
 
 > annotators = tokenize, ssplit, pos, lemma, ner, parse, dcoref
 
@@ -61,7 +61,7 @@ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -props sampleProps
 
 This results in the output file [input.txt.output](files/input.txt.output) given the same input file `input.txt`.
 
-However, if you just want to specify a few properties, you can instead place them on the command line, as in the first example, where annotators were specified in the command.
+However, if you just want to specify a few properties, you can instead place them on the command line. For example, we can specify annotators and the output format with:
 
 ```sh
 java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file input.txt -outputFormat conll -outputFormatOptions word
@@ -69,9 +69,9 @@ java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,sspl
 
 The `-props` parameter is optional. By default, Stanford CoreNLP will search for StanfordCoreNLP.properties in your classpath and use the defaults included in the distribution.
 
-The `-annotators` argument is also optional. If you leave it out, the code uses a built in properties file, which enables the following annotators: tokenization and sentence splitting, POS tagging, lemmatization, NER, parsing, and coreference resolution (that is, what we used in these examples).
+The `-annotators` argument is also optional. If you leave it out, the code uses a built in properties file, which enables the following annotators: tokenization and sentence splitting, POS tagging, lemmatization, NER, dependency parsing, and statistical coreference resolution: `annotators = tokenize, ssplit, pos, lemma, ner, depparse, coref`.
 
-If you have a lot of text but all you want to do is to, say, get part-of-speech (POS) tags, then you should definitely specify an annotators list, as above, since you can then omit later annotators which invoke much more expensive processing that you don't need. For example, you might give the command:
+If you have a lot of text but all you want to do is to, say, get part-of-speech (POS) tags, then you should **definitely** specify an annotators list, as above, since you can then omit later annotators which invoke much more expensive processing that you don't need. For example, you might give the command:
 
 ```sh
 java -cp "*" -Xmx500m edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos -file wikipedia.txt -outputFormat conll
@@ -118,7 +118,7 @@ To process one file, use the `-file` option followed by a filename.  To process 
 java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP [ -props myprops.props ] -fileList filelist.txt
 ```
 
-where the `-fileList` parameter points to a file whose content lists all files to be processed (one per line).
+where the `-fileList` parameter points to a file which lists all files to be processed (one per line).
 
 If you do not specify any properties that load input files (and do not specify any input or output redirections), then you will be placed in the [interactive shell](repl.html). Type `q` to exit.
 
@@ -128,11 +128,13 @@ If you do not specify an option that loads input files and you redirect either i
 
 ### Common input options
 
-If your input files have XML tags in them, you may wish to use the `cleanxml` annotator to preprocess it.
+If your input files have XML tags in them, you may wish to add the `cleanxml` annotator to preprocess it. Place it immediately after `tokenize`.
 
 If your input is already tokenzed and one sentence per line, then you should use the flags: `-tokenize.whitespace -ssplit.eolonly`.
 
 Fine point: Stanford CoreNLP treats [Unicode end of line markers](https://www.unicode.org/standard/reports/tr13/tr13-5.html) (LS U+2028 and PS U+2029) as line ends, whereas conventional Unix utilities do not. If these characters are present and you are using CoreNLP in a Unix line-oriented processing pipeline, you may need to remap these characters to '\n' or ' ' at the start of your processing pipeline.
+
+You can find other input processing options in the documentation of the [tokenize](tokenize.html), [cleanxml](cleanxml.html), and [ssplit](ssplit.html) annotators.
 
 ### Inputting serialized files
 
@@ -141,7 +143,7 @@ If (and only if) the input filename ends with ".ser.gz" then CoreNLP will interp
 
 ## Output
 
-For each input file, Stanford CoreNLP generates one output file, with a name that adds an extra extension to the input filename. (If reading input from stdin, then it will send input to stdout.) The output may contain the output of all annotations that were done, or just a subset of them. For the first example under Quick Start above, with `input.txt` containing the text below:
+For each input file, Stanford CoreNLP generates one output file, with a name that adds an extra extension to the input filename. (If reading input from stdin, then it will send output to stdout.) The output may contain the output of all annotations that were done, or just a subset of them. For the first example under Quick Start above, with `input.txt` containing the text below:
 
 > Stanford University is located in California. It is a great university.
 
@@ -154,14 +156,14 @@ Note that this XML output can use the `CoreNLP-to-HTML.xsl` stylesheet file, whi
 The following properties are associated with output :
 
 * `-outputDirectory` : By default, output files are written to the current directory. You may specify an alternate output directory with the flag `-outputDirectory`. 
-* `-outputExtension` : Output filenames are the same as input filenames but with `-outputExtension` added to them (`.xml` by default). 
+* `-outputExtension` : Output filenames are the same as input filenames but with `-outputExtension` added to them (the default depends on the `outputFormat`). 
 * `-noClobber` : By default, files are overwritten (clobbered). Pass `-noClobber` to avoid this behavior. 
 * `-replaceExtension` : If you'd rather replace the extension with the `-outputExtension`, pass the `-replaceExtension` flag. This will result in filenames like `input.xml` instead of `input.txt.xml` (when given `input.txt` as an input file).
 * `-outputFormat` : Different methods for outputting results.  Can be:
   * "text": An ad hoc human-readable text format. Tokens, s-expression parse trees, relation(head, dep) dependencies. Output file extension is `.out`. This is the default output format only if the XMLOutputter is unavailable.
   * "xml": An XML format with accompanying XSLT stylesheet, which allows web browser rendering. Output file extension is `.xml`.  This is the default output format, unless the XMLOutputter is unavailable.
   * "json": JSON. Output file extension is `.json`. ’Nuf said.
-  * "conll": A tab-separated values (TSV) format. Output extension is `.conll`. This output format usually only gives a partial view of an `Annotation` and doesn't correspond to any particular CoNLL format. By default, the columns written are: `idx`, `word`, `lemma`, `pos`, `ner`, `headidx`, `deprel`. You can customize which fields are written with the `outputFormatOptions` property. Its value is a comma-separated list of output key names, where the names are ones understood by `AnnotationLookup.KeyLookup`. Available names include the seven used in the default output and others such as `shape`, `speaker`. You can for instance write out just tokenized text, with one token per line and a blank line between sentences by using `-outputFormatOptions word`.
+  * "conll": A tab-separated values (TSV) format. Output extension is `.conll`. This output format usually only gives a partial view of an `Annotation` and doesn't correspond to any particular CoNLL format. By default, the columns written are: `idx`, `word`, `lemma`, `pos`, `ner`, `headidx`, `deprel`. You can customize which fields are written with the `outputFormatOptions` property. Its value is a comma-separated list of output key names, where the names are ones understood by `AnnotationLookup.KeyLookup`. Available names include the seven used in the default output and others such as `shape`, `speaker`. For instance, you can write out just tokenized text, with one token per line and a blank line between sentences by using `-outputFormatOptions word`.
   * "conllu": [CoNLL-U](https://universaldependencies.github.io/docs/format.html) output format, another tab-separated values (TSV) format, with particular extended features.  Output extension is `.conllu`. This representation may give only a partial view of an `Annotation`.
   * "serialized": Produces some serialized version of each `Annotation`. May or may not be lossy. What you actually get depends on the `outputSerializer` property, which you should also set. The default is the `GenericAnnotationSerializer`, which uses the built-in Java object serialization and writes a file with extension `.ser.gz`.
 
@@ -174,7 +176,7 @@ The value of the `outputSerializer` property is the name of a class which extend
 `edu.stanford.nlp.kbp.common.KBPProtobufAnnotationSerializer`,
 `edu.stanford.nlp.kbp.slotfilling.ir.index.KryoAnnotationSerializer`. If unspecified the value of the `serializer` property will be tried instead. If it is also not defined, the default is to use `edu.stanford.nlp.pipeline.GenericAnnotationSerializer`.
 
-The `ProtobufAnnotationSerializer` uses the Java methods writeDelimitedTo() and parseDelimitedFrom(), which allow sending several length-prefixed messages in one stream. Unfortunately, Google has declined to implement these methods for Python or C++. You can get information from Stack Overflow and other places on how to roll your own version for C++ or Python. Probably the best place is [here](http://stackoverflow.com/questions/2340730/are-there-c-equivalents-for-the-protocol-buffers-delimited-i-o-functions-in-ja/) but there are many other sources of information including: [here](http://stackoverflow.com/questions/8269452/google-protocol-buffers-parsedelimitedfrom-and-writedelimitedto-for-c), [here](https://github.com/google/protobuf/pull/710),  [here](http://stackoverflow.com/questions/11484700/python-example-for-reading-multiple-protobuf-messages-from-a-stream), and [here](http://eli.thegreenplace.net/2011/08/02/length-prefix-framing-for-protocol-buffers).
+The `ProtobufAnnotationSerializer` is a non-lossy annotation serialization. It uses the Java methods writeDelimitedTo() and parseDelimitedFrom(), which allow sending several length-prefixed messages in one stream. Unfortunately, Google has declined to implement these methods for Python or C++. You can get information from Stack Overflow and other places on how to roll your own version for C++ or Python. Probably the best place is [here](http://stackoverflow.com/questions/2340730/are-there-c-equivalents-for-the-protocol-buffers-delimited-i-o-functions-in-ja/) but there are many other sources of information including: [here](http://stackoverflow.com/questions/8269452/google-protocol-buffers-parsedelimitedfrom-and-writedelimitedto-for-c), [here](https://github.com/google/protobuf/pull/710),  [here](http://stackoverflow.com/questions/11484700/python-example-for-reading-multiple-protobuf-messages-from-a-stream), and [here](http://eli.thegreenplace.net/2011/08/02/length-prefix-framing-for-protocol-buffers).
 [This Stack Overflow question](http://stackoverflow.com/questions/39433279/read-protobuf-serialization-of-stanfordnlp-output-in-python/40964310) explicitly addresses the issue for CoreNLP.
 
 ### A note on numbering
