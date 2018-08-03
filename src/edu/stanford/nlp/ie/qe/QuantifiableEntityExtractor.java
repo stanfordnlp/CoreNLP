@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 /**
  * Extracts quantifiable entities using rules.
+ * The rules can be found in: {@code src/edu/stanford/nlp/ie/qe/rules/}
  *
  * @author Angel Chang
  */
