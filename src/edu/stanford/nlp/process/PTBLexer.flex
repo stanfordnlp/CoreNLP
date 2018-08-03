@@ -155,7 +155,7 @@ import edu.stanford.nlp.util.logging.Redwood;
       } else if ("ptb3Escaping".equals(key)) {
         normalizeSpace = val;
         normalizeAmpersandEntity = val;
-        normalizeCurrency = val;
+        // normalizeCurrency = val; // [cdm 2018]: We no longer do this as a default ptb3escaping
         normalizeFractions = val;
         normalizeParentheses = val;
         normalizeOtherBrackets = val;
@@ -268,7 +268,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean americanize = false;
   private boolean normalizeSpace = true;
   private boolean normalizeAmpersandEntity = true;
-  private boolean normalizeCurrency = true;
+  private boolean normalizeCurrency = false; // only $ and # in Penn Treebank 3 data, but we now allow other currency
   private boolean normalizeFractions = true;
   private boolean normalizeParentheses = true;
   private boolean normalizeOtherBrackets = true;
@@ -328,32 +328,6 @@ import edu.stanford.nlp.util.logging.Redwood;
   private static final Pattern LEFT_PAREN_PATTERN = Pattern.compile("\\(");
   private static final Pattern RIGHT_PAREN_PATTERN = Pattern.compile("\\)");
 
-  private static final Pattern ONE_FOURTH_PATTERN = Pattern.compile("\u00BC");
-  private static final Pattern ONE_HALF_PATTERN = Pattern.compile("\u00BD");
-  private static final Pattern THREE_FOURTHS_PATTERN = Pattern.compile("\u00BE");
-  private static final Pattern ONE_THIRD_PATTERN = Pattern.compile("\u2153");
-  private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
-
-
-  private String normalizeFractions(final String in) {
-    String out = in;
-    if (normalizeFractions) {
-      if (escapeForwardSlashAsterisk) {
-        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1\\\\/4");
-        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1\\\\/2");
-        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3\\\\/4");
-        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1\\\\/3");
-        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2\\\\/3");
-     } else {
-        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1/4");
-        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1/2");
-        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3/4");
-        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1/3");
-        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2/3");
-      }
-    }
-    return out;
-  }
 
   /* -- upto (2017) -- */
 
@@ -1036,7 +1010,7 @@ RM/{NUM}        { String txt = yytext();
                   return getNext(txt, yytext());
                 }
 {FRAC2}         { String txt = yytext();
-                  String norm = normalizeFractions(yytext());
+                  String norm = LexerUtils.normalizeFractions(normalizeFractions, escapeForwardSlashAsterisk, yytext());
                   if (DEBUG) { logger.info("Used {FRAC2} to recognize " + txt + " as " + norm +
                                        "; normalizeFractions=" + normalizeFractions +
                                        ", escapeForwardSlashAsterisk=" + escapeForwardSlashAsterisk); }
@@ -1072,7 +1046,7 @@ RM/{NUM}        { String txt = yytext();
 {DOLSIGN}               { return getNext(); }
 {DOLSIGN2}              { if (normalizeCurrency) {
                             return getNext(LexerUtils.normalizeCurrency(yytext()), yytext());
-                        } else {
+                          } else {
                             return getNext(LexerUtils.minimallyNormalizeCurrency(yytext()), yytext());
                           }
                         }

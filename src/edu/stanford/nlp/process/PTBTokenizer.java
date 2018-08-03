@@ -101,11 +101,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     spaces in tokens. Default is true.
  * <li>normalizeAmpersandEntity: Whether to map the XML {@code &amp;} to an
  *      ampersand. Default is true.
- * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
- *     to turn common currency characters into $, #, or "cents", reflecting
- *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
- *     Default is false. (Note: The default was true through CoreNLP v3.8.0, but we're
- *     gradually inching our way towards the modern world!)
  * <li>normalizeFractions: Whether to map certain common composed
  *     fraction characters to spelled out letter forms like "1/2".
  *     Default is true.
@@ -135,7 +130,14 @@ import edu.stanford.nlp.util.logging.Redwood;
  *                        "gon na".  Default is true.
  * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
  *     of / and * as the old PTB3 WSJ does for some reason (something to do
- *     with Lisp readers??). Default is true.
+ *     with Lisp readers??). Default is false. This flag is no longer set
+ *     by ptb3Escaping.
+ * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
+ *     to turn common currency characters into $, #, or "cents", reflecting
+ *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
+ *     Default is false. (Note: The default was true through CoreNLP v3.8.0, but we're
+ *     gradually inching our way towards the modern world!) This flag is no longer set
+ *     by ptb3Escaping.
  * <li>untokenizable: What to do with untokenizable characters (ones not
  *     known to the tokenizer).  Six options combining whether to log a
  *     warning for none, the first, or all, and whether to delete them or
