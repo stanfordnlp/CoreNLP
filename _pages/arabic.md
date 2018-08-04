@@ -21,7 +21,7 @@ It is from the beginning of [the Arabic Wikipedia page on Yousef Al-Qaradawi](ht
 If you have a terminal window and have cd'ed to the root directory of your CoreNLP download and you have also downloaded the Arabic models jar and you have made the above file arabic.txt, then the following command should work to tokenize the Arabic text:
 
 ```
-java -cp "$CLASSPATH:*" edu.stanford.nlp.pipeline.StanfordCoreNLP -properties StanfordCoreNLP-arabic.properties -annotators tokenize,ssplit -file arabic.txt -outputFormat CoNLL -outputFormatOptions word
+java -cp "$CLASSPATH:*" edu.stanford.nlp.pipeline.StanfordCoreNLP -properties StanfordCoreNLP-arabic.properties -annotators tokenize,ssplit -file arabic.txt -outputFormat CoNLL -output.columns word
 ```
 
 The output will appear in the file `arabic.txt.conll`.

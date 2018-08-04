@@ -64,7 +64,7 @@ This results in the output file [input.txt.output](files/input.txt.output) given
 However, if you just want to specify a few properties, you can instead place them on the command line. For example, we can specify annotators and the output format with:
 
 ```sh
-java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file input.txt -outputFormat conll -outputFormatOptions word
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file input.txt -outputFormat conll -output.columns word
 ```
 
 The `-props` parameter is optional. By default, Stanford CoreNLP will search for StanfordCoreNLP.properties in your classpath and use the defaults included in the distribution.
@@ -163,9 +163,22 @@ The following properties are associated with output :
   * "text": An ad hoc human-readable text format. Tokens, s-expression parse trees, relation(head, dep) dependencies. Output file extension is `.out`. This is the default output format only if the XMLOutputter is unavailable.
   * "xml": An XML format with accompanying XSLT stylesheet, which allows web browser rendering. Output file extension is `.xml`.  This is the default output format, unless the XMLOutputter is unavailable.
   * "json": JSON. Output file extension is `.json`. ’Nuf said.
-  * "conll": A tab-separated values (TSV) format. Output extension is `.conll`. This output format usually only gives a partial view of an `Annotation` and doesn't correspond to any particular CoNLL format. By default, the columns written are: `idx`, `word`, `lemma`, `pos`, `ner`, `headidx`, `deprel`. You can customize which fields are written with the `outputFormatOptions` property. Its value is a comma-separated list of output key names, where the names are ones understood by `AnnotationLookup.KeyLookup`. Available names include the seven used in the default output and others such as `shape`, `speaker`. For instance, you can write out just tokenized text, with one token per line and a blank line between sentences by using `-outputFormatOptions word`.
+  * "conll": A tab-separated values (TSV) format. Output extension is `.conll`. This output format usually only gives a partial view of an `Annotation` and doesn't correspond to any particular CoNLL format. By default, the columns written are: `idx`, `word`, `lemma`, `pos`, `ner`, `headidx`, `deprel`. You can customize which fields are written with the `output.columns` property. Its value is a comma-separated list of output key names, where the names are ones understood by `AnnotationLookup.KeyLookup`. Available names include the seven used in the default output and others such as `shape`, `speaker`. For instance, you can write out just tokenized text, with one token per line and a blank line between sentences by using `-output.columns word`.
   * "conllu": [CoNLL-U](https://universaldependencies.github.io/docs/format.html) output format, another tab-separated values (TSV) format, with particular extended features.  Output extension is `.conllu`. This representation may give only a partial view of an `Annotation`.
   * "serialized": Produces some serialized version of each `Annotation`. May or may not be lossy. What you actually get depends on the `outputSerializer` property, which you should also set. The default is the `GenericAnnotationSerializer`, which uses the built-in Java object serialization and writes a file with extension `.ser.gz`.
+
+Other more obscure output options are:
+
+* `output.includeText` : Boolean. Whether to include text of document in document annotations.
+* `output.prettyPrint` : Boolean. Whether to pretty print certain annotations (more friendly to humans; less space efficient.
+* `output.constituencyTree` : String. Style of constituency tree printing to be used. One known to `TreePrint`.
+* `output.dependencyTree` : String. Style of dependency tree printing to be used. One known to `TreePrint`.
+* `output.coreferenceContextSize` : int. Whether to print some conext around a coreference mention.
+* `output.printSingletonEntities` : Boolean. Whether to print singleton entity mentions in coreference output.
+* `output.relationsBeam` : double. Whether to filter relations extracted by goodness score.
+* `output.columns` : String. Which columns to print in `conll` output. A list of names like: `idx,word,pos,ner`.
+
+
 
 ### Output serializer
 
