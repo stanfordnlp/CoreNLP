@@ -45,7 +45,7 @@ system.
 | ner.model | List(String) | null | A comma-separated list of NER model names (or just a single name is okay). If none are specified, a default list of English models is used (3class, 7class, and MISCclass, in that order). The names will be looked for as classpath resources, filenames, or URLs. |
 | ner.applyNumericClassifiers | boolean | true | Whether or not to use numeric classifiers, for money, percent, numbers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
 | ner.useSUTime | boolean | true | Whether or not to use SUTime. SUTime at present only supports English; if not processing English, make sure to set this to false. |
-| ner.providedDocDate | String | - | Use the provided date in yy-mm-dd format as the doc date. |
+| ner.providedDocDate | String | - | Use the provided date in yyyy-mm-dd format as the doc date. |
 | ner.usePresentDateForDocDate | boolean | false | Use the present date for the doc date. |
 | sutime.markTimeRanges | boolean | false | Tells SUTime whether to mark phrases such as “From January to March” as a range, instead of marking "January" and "March" separately. |
 | sutime.includeRange | boolean | false | If marking time ranges, set the time range in the TIMEX output from SUTime. |
@@ -380,7 +380,7 @@ annotator will overwrite the `DocDateAnnotation` if
 Recently some options have been added to `ner` to allow for specifying
 document date at the command line.  The `ner.usePresentDateForDocDate` option
 will give documents the current date as the doc date.  The `ner.providedDocDate`
-option will use the provided date for doc date.  The date format should be `yy-mm-dd`.
+option will use the provided date for doc date.  The date format should be `yyyy-mm-dd`.
 
 ## Caseless models
 
