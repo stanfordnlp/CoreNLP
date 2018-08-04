@@ -83,7 +83,7 @@ public class XMLOutputter extends AnnotationOutputter  {
    * Converts the given annotation to an XML document using options taken from the StanfordCoreNLP pipeline
    */
   public static Document annotationToDoc(Annotation annotation, StanfordCoreNLP pipeline) {
-    Options options = getOptions(pipeline);
+    Options options = getOptions(pipeline.getProperties());
     return annotationToDoc(annotation, options);
   }
 
@@ -146,7 +146,7 @@ public class XMLOutputter extends AnnotationOutputter  {
         if(tree != null) {
           // add the constituent tree for this sentence
           Element parseInfo = new Element("parse", NAMESPACE_URI);
-          addConstituentTreeInfo(parseInfo, tree, options.constituentTreePrinter);
+          addConstituentTreeInfo(parseInfo, tree, options.constituencyTreePrinter);
           sentElem.appendChild(parseInfo);
         }
 
@@ -199,13 +199,13 @@ public class XMLOutputter extends AnnotationOutputter  {
         // add the MR entities and relations
         List<EntityMention> entities = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
         List<RelationMention> relations = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-        if (entities != null && ! entities.isEmpty()){
+        if (entities != null && ! entities.isEmpty()) {
           Element mrElem = new Element("MachineReading", NAMESPACE_URI);
           Element entElem = new Element("entities", NAMESPACE_URI);
           addEntities(entities, entElem, NAMESPACE_URI);
           mrElem.appendChild(entElem);
 
-          if(relations != null){
+          if (relations != null) {
             Element relElem = new Element("relations", NAMESPACE_URI);
             addRelations(relations, relElem, NAMESPACE_URI, options.relationsBeam);
             mrElem.appendChild(relElem);
@@ -341,7 +341,7 @@ public class XMLOutputter extends AnnotationOutputter  {
   /**
    * Generates the XML content for MachineReading relations.
    */
-  private static void addRelations(List<RelationMention> relations, Element top, String curNS, double beam){
+  private static void addRelations(List<RelationMention> relations, Element top, String curNS, double beam) {
     for (RelationMention r: relations){
       if (r.printableObject(beam)) {
         Element re = toXML(r, curNS);
@@ -354,8 +354,7 @@ public class XMLOutputter extends AnnotationOutputter  {
    * Generates the XML content for the coreference chain object.
    */
   private static boolean addCorefGraphInfo
-    (Options options, Element corefInfo, List<CoreMap> sentences, Map<Integer, CorefChain> corefChains, String curNS)
-  {
+    (Options options, Element corefInfo, List<CoreMap> sentences, Map<Integer, CorefChain> corefChains, String curNS) {
     boolean foundCoref = false;
     for (CorefChain chain : corefChains.values()) {
       if (!options.printSingletons && chain.getMentionsInTextualOrder().size() <= 1)

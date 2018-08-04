@@ -577,35 +577,27 @@ public class Document {
       f.apply(this.sentence(0));
     }
     try {
-      AnnotationOutputter.Options options = new AnnotationOutputter.Options();
-      options.pretty = false;
+      AnnotationOutputter.Options options = new AnnotationOutputter.Options(false);
       return new JSONOutputter().print(this.asAnnotation(), options);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
   }
 
-  /**
-   * <p>
-   *  Write this annotation as an XML string.
+  /** Write this annotation as an XML string.
    *  Optionally, you can also specify a number of operations to call on the document before
    *  dumping it to XML.
    *  This allows the user to ensure that certain annotations have been computed before the document
    *  is dumped.
    *  For example:
-   * </p>
+   *  <p>
+   *  {@code String xml = new Document("Lucy in the sky with diamonds").xml(Document::parse, Document::ner); }
+   *  <p>
+   *  will create a XML dump of the document, ensuring that at least the parse tree and ner tags are populated.
    *
-   * <pre>{@code
-   *   String xml = new Document("Lucy in the sky with diamonds").xml(Document::parse, Document::ner);
-   * }</pre>
-   *
-   * <p>
-   *   will create a XML dump of the document, ensuring that at least the parse tree and ner tags are populated.
-   * </p>
-   *
-   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
-   *                  to XML.
-   * @return The XML String for this document.
+   *  @param functions The (possibly empty) list of annotations to populate on the document before dumping it
+   *                   to XML.
+   *  @return The XML String for this document.
    */
   @SafeVarargs
   public final String xml(Function<Sentence, Object>... functions) {
@@ -634,8 +626,7 @@ public class Document {
       f.apply(this.sentence(0));
     }
     try {
-      AnnotationOutputter.Options options = new AnnotationOutputter.Options();
-      options.pretty = false;
+      AnnotationOutputter.Options options = new AnnotationOutputter.Options(false);
       return new XMLOutputter().print(this.asAnnotation(false), options);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
