@@ -378,7 +378,7 @@ annotator will overwrite the `DocDateAnnotation` if
 "datetime" or "date" are specified in the document.
 
 Recently some options have been added to `ner` to allow for specifying
-document date at the command line.  The `ner.usePresentDateForDocDate` option
+document date with properties.  The `ner.usePresentDateForDocDate` option
 will give documents the current date as the doc date.  The `ner.providedDocDate`
 option will use the provided date for doc date.  The date format should be `yyyy-mm-dd`.
 
