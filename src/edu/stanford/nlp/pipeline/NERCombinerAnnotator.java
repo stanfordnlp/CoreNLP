@@ -298,7 +298,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    */
   public void setUpDocDateAnnotator(Properties properties) throws IOException {
     for (String property : properties.stringPropertyNames()) {
-      if (property.substring(0,11).equals("ner.docdate")) {
+      if (property.length() >= 11 && property.substring(0,11).equals("ner.docdate")) {
         setDocDate = true;
         docDateAnnotator = new DocDateAnnotator("ner.docdate", properties);
         break;
