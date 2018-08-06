@@ -40,6 +40,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final NERClassifierCombiner ner;
 
   private final boolean VERBOSE;
+  private boolean setDocDate = false;
   private boolean usePresentDateForDocDate = false;
   private String providedDocDate = "";
 
@@ -78,6 +79,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   /** entity mentions **/
   private boolean buildEntityMentions = true;
   private EntityMentionsAnnotator entityMentionsAnnotator;
+
+  /** doc date finding **/
+  private DocDateAnnotator docDateAnnotator;
 
   public NERCombinerAnnotator(Properties properties) throws IOException {
 
@@ -166,6 +170,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
     // set up entity mentions
     setUpEntityMentionBuilding(properties);
+
+    // set up doc date finding if specified
+    setUpDocDateAnnotator(properties);
 
     VERBOSE = verbose;
     this.ner = nerCombiner;
@@ -284,6 +291,20 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
   }
 
+  /**
+   * Set up the additional DocDateAnnotator sub-annotator
+   *
+   * @param properties Properties for the DocDateAnnotator sub-annotator
+   */
+  public void setUpDocDateAnnotator(Properties properties) throws IOException {
+    for (String property : properties.stringPropertyNames()) {
+      if (property.substring(0,11).equals("ner.docdate")) {
+        setDocDate = true;
+        docDateAnnotator = new DocDateAnnotator("ner.docdate", properties);
+        break;
+      }
+    }
+  }
 
   @Override
   protected int nThreads() {
@@ -301,6 +322,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       log.info("Adding NER Combiner annotation ... ");
     }
 
+    // set the doc date if using a doc date annotator
+    if (setDocDate)
+      docDateAnnotator.annotate(annotation);
+
     // if ner.usePresentDateForDocDate is set, use the present date as the doc date
     if (usePresentDateForDocDate) {
       String currentDate =
@@ -311,6 +336,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (!providedDocDate.equals("")) {
       annotation.set(CoreAnnotations.DocDateAnnotation.class, providedDocDate);
     }
+
+    System.err.println("docDate: "+annotation.get(CoreAnnotations.DocDateAnnotation.class));
 
     super.annotate(annotation);
     this.ner.finalizeAnnotation(annotation);
