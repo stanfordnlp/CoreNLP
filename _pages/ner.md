@@ -8,7 +8,7 @@ permalink: '/ner.html'
 available on GitHub.  Some of the features discussed here will not work with
 Stanford CoreNLP 3.9.1.  Stanford CoreNLP 3.9.2 should be coming out very soon
 and will include these changes.  You can always build a jar with the latest code
-by going [here](https://github.com/stanfordnlp/CoreNLP).
+by following instruction found [here](https://github.com/stanfordnlp/CoreNLP).
 
 ## Description
 
