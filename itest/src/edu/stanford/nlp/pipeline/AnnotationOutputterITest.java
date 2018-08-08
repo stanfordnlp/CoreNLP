@@ -1,9 +1,10 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.util.PropertiesUtils;
+
 import junit.framework.TestCase;
 
 import java.io.IOException;
-import java.util.Properties;
 
 /**
  * Tests for the various annotation outputters which require the models to be loaded.
@@ -12,14 +13,12 @@ import java.util.Properties;
  */
 public class AnnotationOutputterITest extends TestCase {
 
-  static StanfordCoreNLP pipeline =
-      new StanfordCoreNLP(new Properties() {
-          {
-              setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse");
-              setProperty("ner.applyFineGrained", "false");
-              setProperty("ner.buildEntityMentions", "false");
-          }
-      });
+  private static final StanfordCoreNLP pipeline =
+      new StanfordCoreNLP(PropertiesUtils.asProperties(
+              "annotators", "tokenize, ssplit, pos, lemma, ner, parse",
+              "ner.applyFineGrained", "false",
+              "ner.buildEntityMentions", "false"
+      ));
 
   public void testSimpleSentenceCoNLL() throws IOException {
     Annotation ann = new Annotation("The cat is fat. The dog is lazy.");
@@ -31,13 +30,13 @@ public class AnnotationOutputterITest extends TestCase {
             "3\tis\tbe\tVBZ\tO\t4\tcop\n" +
             "4\tfat\tfat\tJJ\tO\t0\tROOT\n" +
             "5\t.\t.\t.\tO\t4\tpunct\n" +
-            "\n" +
+            '\n' +
             "1\tThe\tthe\tDT\tO\t2\tdet\n" +
             "2\tdog\tdog\tNN\tO\t4\tnsubj\n" +
             "3\tis\tbe\tVBZ\tO\t4\tcop\n" +
             "4\tlazy\tlazy\tJJ\tO\t0\tROOT\n" +
             "5\t.\t.\t.\tO\t4\tpunct\n" +
-            "\n";
+            '\n';
     assertEquals(expected, actual);
   }
 
@@ -127,7 +126,7 @@ public class AnnotationOutputterITest extends TestCase {
             "      ]\n" +
             "    }\n" +
             "  ]\n" +
-            "}";
+            "}\n";
     assertEquals(expected, actual);
   }
 }
