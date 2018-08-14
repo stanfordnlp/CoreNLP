@@ -1068,7 +1068,7 @@ RM/{NUM}        { String txt = yytext();
 <YyNotTokenizePerLine>{ABBREVSN}/{SPACENL}+(Africa|Korea|Cal) { return getNext(); }
 <YyTokenizePerLine>{ABBREVSN}/{SPACE}+(Africa|Korea|Cal) { return getNext(); }
 /* Special case to get pty. ltd. or pty limited. Also added "Co." since someone complained, but usually a comma after it. */
-(pt[eyEY]|co)\./{SPACE}(ltd|lim)  { return getNext(); }
+(pty|pte|pvt|co)\./{SPACE}(ltd|lim|llc)  { return getNext(); }
 <YyNotTokenizePerLine>{ABBREV1}/{SENTEND1}     {
                           return processAbbrev1();
                         }
