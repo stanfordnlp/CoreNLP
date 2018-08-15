@@ -194,7 +194,10 @@ The `ProtobufAnnotationSerializer` is a non-lossy annotation serialization. It u
 
 ### A note on numbering
 
-In all output formats (and in our code), we number sentences and character offsets from 0 and we number tokens from 1. We realize that this is inconsistent! However, it seemed to be the best thing to do. Numbering character offsets from 0 is the only good choice, given how the Java String class and most modern programming languages, which followed Dijkstra's arguments for indexing from 0, work. Numbering tokens from 1 not only corresponds to the human-natural convention (“the first word of the sentence”) but most importantly is consistent with common NLP standards, such as the CoNLL and [CoNLL-U](http://universaldependencies.org/format.html) formats, which number tokens starting from 1.
+In all output formats (and in our code), we number sentences and character offsets from 0 and we number tokens from 1. We realize that this is inconsistent! However, it seemed to be the best thing to do. Numbering character offsets from 0 is the only good choice, given how the Java String class and most modern programming languages work, following <a href="https://www.cs.utexas.edu/users/EWD/ewd08xx/EWD831.PDF">Dijkstra's arguments</a> for indexing from 0 (which were influential at the time if not necessarily so water-tight). Numbering tokens from 1 not only corresponds to the human-natural convention (“the first word of the sentence”) but most importantly is consistent with common NLP standards, such as the CoNLL formats used from <a href="http://www.aclweb.org/anthology/W06-2920">CoNLL-X</a> through
+<a href="">CoNLL 2009</a>, etc., and  in
+[CoNLL-U](http://universaldependencies.org/format.html), which number tokens starting from 1.
+For sentences, we could then choose to be consistent with either but not both of the above. We went with 0-indexing.
 
 
 ## Character encoding
