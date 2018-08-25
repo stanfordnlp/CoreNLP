@@ -20,10 +20,11 @@ import java.util.List;
  * Usage:
  * java edu.stanford.nlp.ling.tokensregex.demo.TokensRegexDemo rulesFile [inputFile [outputFile]]
  * <p>
- * This is a good example to fun to s
- * </p>
+ * This is a good example to run to show things.
  */
 public class TokensRegexDemo {
+
+  private TokensRegexDemo() { } // only static main
 
   public static void main(String[] args) throws IOException {
     String rules;
