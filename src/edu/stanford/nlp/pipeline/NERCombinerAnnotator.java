@@ -151,10 +151,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // in case of Spanish, use the Spanish number regexner annotator
     if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
       Properties spanishNumberRegexNerProperties = new Properties();
-      spanishNumberRegexNerProperties.put("spanish.number.regexner.mapping", spanishNumberRegexRules);
-      spanishNumberRegexNerProperties.put("spanish.number.regexner.validpospattern",
-          "^(NUM).*");
-      spanishNumberRegexNerProperties.put("spanish.number.regexner.ignorecase", "true");
+      spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.mapping", spanishNumberRegexRules);
+      spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.validpospattern", "^(NUM).*");
+      spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.ignorecase", "true");
       spanishNumberAnnotator = new TokensRegexNERAnnotator("spanish.number.regexner",
           spanishNumberRegexNerProperties);
     }
@@ -188,8 +187,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   public NERCombinerAnnotator(boolean verbose, String... classifiers)
-    throws IOException, ClassNotFoundException
-  {
+    throws IOException, ClassNotFoundException {
     this(new NERClassifierCombiner(classifiers), verbose);
   }
 
@@ -234,7 +232,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".", true);
       // explicity set fine grained ner default here
       if (!fineGrainedProps.containsKey("ner.fine.regexner.mapping"))
-        fineGrainedProps.put("ner.fine.regexner.mapping", DefaultPaths.DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS);
+        fineGrainedProps.setProperty("ner.fine.regexner.mapping", DefaultPaths.DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS);
       // build the fine grained ner TokensRegexNERAnnotator
       fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
     }
@@ -375,11 +373,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   /** convert Spanish tag content of older models **/
-  public String spanishToEnglishTag(String spanishTag) {
-    if (spanishToEnglishTag.containsKey(spanishTag))
-      return spanishToEnglishTag.get(spanishTag);
-    else
-      return spanishTag;
+  public static String spanishToEnglishTag(String spanishTag) {
+    return spanishToEnglishTag.getOrDefault(spanishTag, spanishTag);
   }
 
   @Override
