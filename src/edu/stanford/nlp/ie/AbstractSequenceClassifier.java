@@ -962,7 +962,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   /**
    * Takes a {@link List} of documents and prints the likelihood of each
-   * possible label at each point.
+   * possible label at each point. Also prints probability calibration information over document collection.
    *
    * @param documents A {@link List} of {@link List} of something that extends
    *          {@link CoreMap}.

@@ -1339,7 +1339,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * the likelihood of each possible label at each point.
    *
    * @param document A {@link List} of something that extends CoreMap.
-   * @return If verboseMode is set, a Pair of Counters recording classification decisions, else null.
+   * @return If verboseMode is set, a Triple of Counters recording classification decisions, else null.
    */
   @Override
   public Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
@@ -1398,6 +1398,22 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } else {
       return null;
     }
+  }
+
+  public List<Counter<String>> zeroOrderProbabilities(List<IN> document) {
+    List<Counter<String>> ret = new ArrayList<>();
+    Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(document);
+    CRFCliqueTree<String> cliqueTree = getCliqueTree(p);
+    for (int i = 0; i < cliqueTree.length(); i++) {
+      Counter<String> ctr = new ClassicCounter<>();
+      for (String label : classIndex) {
+        int index = classIndex.indexOf(label);
+        double prob = cliqueTree.prob(i, index);
+        ctr.setCount(label, prob);
+      }
+      ret.add(ctr);
+    }
+    return ret;
   }
 
   /**
@@ -1481,17 +1497,21 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         flags.backgroundSymbol, getCliquePotentialFunctionForTest(), featureVal);
   }
 
+  // This method should stay public
+  @SuppressWarnings("WeakerAccess")
   public CRFCliqueTree<String> getCliqueTree(List<IN> document) {
     Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(document);
     return getCliqueTree(p);
   }
 
+  // This method should stay public
   /**
    * Takes a {@link List} of something that extends {@link CoreMap} and prints
    * the factor table at each point.
    *
    * @param document A {@link List} of something that extends {@link CoreMap}.
    */
+  @SuppressWarnings("WeakerAccess")
   public void printFactorTableDocument(List<IN> document) {
 
     CRFCliqueTree<String> cliqueTree = getCliqueTree(document);
