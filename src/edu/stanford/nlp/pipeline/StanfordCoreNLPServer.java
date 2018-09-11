@@ -872,7 +872,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        AnnotationOutputter.Options options = AnnotationOutputter.getOptions(pipeline.getProperties());
+        AnnotationOutputter.Options options = AnnotationOutputter.getOptions(pipeline);
         StanfordCoreNLP.createOutputter(props, options).accept(completedAnnotation, os);
         os.close();
         byte[] response = os.toByteArray();

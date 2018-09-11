@@ -2,6 +2,7 @@ package edu.stanford.nlp.ie.machinereading.structure;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +17,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * Represents any object that can be extracted: entity, relation, event.
+ * Represents any object that can be extracted - entity, relation, event
  * 
  * @author Andrey Gusev
  * @author Mihai
@@ -112,24 +113,29 @@ public class ExtractionObject implements Serializable {
   
   @Override
   public boolean equals(Object other) {
-    if (! (other instanceof ExtractionObject)) return false;
+    if(! (other instanceof ExtractionObject)) return false;
     ExtractionObject o = (ExtractionObject) other;
     return o.objectId.equals(objectId) && o.sentence.get(CoreAnnotations.TextAnnotation.class).equals(sentence.get(CoreAnnotations.TextAnnotation.class));
   }
 
   static class CompByExtent implements Comparator<ExtractionObject> {
-    @Override
     public int compare(ExtractionObject o1, ExtractionObject o2) {
-      if (o1.getExtentTokenStart() < o2.getExtentTokenStart()){
+      if(o1.getExtentTokenStart() < o2.getExtentTokenStart()){
         return -1;
-      } else if (o1.getExtentTokenStart() > o2.getExtentTokenStart()){
+      } else if(o1.getExtentTokenStart() > o2.getExtentTokenStart()){
         return 1;
-      } else return Integer.compare(o1.getExtentTokenEnd(), o2.getExtentTokenEnd());
+      } else if(o1.getExtentTokenEnd() < o2.getExtentTokenEnd()) {
+        return -1;
+      } else if(o1.getExtentTokenEnd() > o2.getExtentTokenEnd()) {
+        return 1;
+      } else {
+        return 0;
+      }
     }
   }
   
   public static void sortByExtent(List<ExtractionObject> objects) {
-    objects.sort(new CompByExtent());
+    Collections.sort(objects, new CompByExtent());
   }
   
   /**
@@ -168,7 +174,7 @@ public class ExtractionObject implements Serializable {
     StringBuilder sb = new StringBuilder();
     if(tokens != null && extentTokenSpan != null){
       for(int i = extentTokenSpan.start(); i < extentTokenSpan.end(); i ++){
-        if(i > extentTokenSpan.start()) sb.append(' ');
+        if(i > extentTokenSpan.start()) sb.append(" ");
         sb.append(tokens.get(i).word());
       }
     }
@@ -195,7 +201,7 @@ public class ExtractionObject implements Serializable {
     String [] types = new String[uniqueTypes.size()];
     uniqueTypes.toArray(types);
     Arrays.sort(types);
-    StringBuilder os = new StringBuilder();
+    StringBuffer os = new StringBuffer();
     for(int i = 0; i < types.length; i ++){
       if(i > 0) os.append(TYPE_SEP);
       os.append(types[i]);
@@ -218,15 +224,15 @@ public class ExtractionObject implements Serializable {
   }
   String probsToString() {
     List<Pair<String, Double>> sorted = Counters.toDescendingMagnitudeSortedListWithCounts(typeProbabilities);
-    StringBuilder os = new StringBuilder();
-    os.append('{');
+    StringBuffer os = new StringBuffer();
+    os.append("{");
     boolean first = true;
     for(Pair<String, Double> lv: sorted) {
       if(! first) os.append("; ");
       os.append(lv.first + ", " + lv.second);
       first = false;
     }
-    os.append('}');
+    os.append("}");
     return os.toString();
   }
   
@@ -255,5 +261,4 @@ public class ExtractionObject implements Serializable {
 
     return false;
   }
-
 }

@@ -37,6 +37,9 @@ tagger, along with some caseless versions, and we provide models for
 some other languages. The tagger can be retrained on other languages
 based on POS-annotated training text.
 
+If you really want to use this software under Java 1.4, look into RetroWeaver:
+
+  http://retroweaver.sourceforge.net/
 
 
 QUICKSTART

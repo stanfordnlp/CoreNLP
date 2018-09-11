@@ -299,20 +299,12 @@ public class PTBTokenizerTest {
   private final String[] moreInputs = {
           "Joseph Someone (fl. 2050–75) liked the noble gases, viz. helium, neon, argon, xenon, krypton and radon.",
           "Sambucus nigra subsp. canadensis and Canis spp. missing",
-          "Jim Jackon & Co. LLC replied.",
-          "Xanadu Pvt. Ltd. replied.",
-          " \u2010 - ___ ",
-          "whenever one goes 'tisk tisk' at something"
   };
 
   private final String[][] moreGold = {
           { "Joseph", "Someone", "-LRB-", "fl.", "2050", "--", "75", "-RRB-", "liked", "the", "noble", "gases", ",",
                   "viz.", "helium", ",", "neon", ",", "argon", ",", "xenon", ",", "krypton", "and", "radon", "." },
           { "Sambucus", "nigra", "subsp.", "canadensis", "and", "Canis", "spp.", "missing" },
-          { "Jim", "Jackon", "&", "Co.", "LLC", "replied", "." },
-          { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
-          { "\u2010", "-", "___" },
-          { "whenever", "one", "goes", "`", "tisk", "tisk", "'", "at", "something" },
   };
 
   @Test
@@ -336,8 +328,6 @@ public class PTBTokenizerTest {
 
   @Test
   public void testCorp() {
-    assertEquals(2, corpInputs.length);
-    assertEquals(2, corpGold.length);
     // We test a 2x2 design: {strict, regular} x {no following context, following context}
     for (int sent = 0; sent < 4; sent++) {
       PTBTokenizer<CoreLabel> ptbTokenizer = new PTBTokenizer<>(new StringReader(corpInputs[sent / 2]),

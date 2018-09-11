@@ -14,6 +14,7 @@ import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
@@ -41,10 +42,10 @@ public class TextOutputter extends AnnotationOutputter {
   }
 
   /**
-   * The meat of the outputter.
+   * The meat of the outputter
    */
-  private static void print(Annotation annotation, PrintWriter pw, Options options) {
-    double beam = options.relationsBeam;
+  private static void print(Annotation annotation, PrintWriter pw, Options options) throws IOException {
+    double beam = options.beamPrintingOption;
 
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
@@ -117,7 +118,7 @@ public class TextOutputter extends AnnotationOutputter {
         if (tree != null) {
           pw.println();
           pw.println("Constituency parse: ");
-          options.constituencyTreePrinter.printTree(tree, pw);
+          options.constituentTreePrinter.printTree(tree, pw);
         }
 
         // display sentiment tree if they asked for sentiment
@@ -152,7 +153,7 @@ public class TextOutputter extends AnnotationOutputter {
           pw.println("Extracted the following NER entity mentions:");
           for (CoreMap entityMention : entityMentions) {
             if (entityMention.get(CoreAnnotations.EntityTypeAnnotation.class) != null) {
-              pw.println(entityMention.get(CoreAnnotations.TextAnnotation.class) + '\t'
+              pw.println(entityMention.get(CoreAnnotations.TextAnnotation.class) + "\t"
                   + entityMention.get(CoreAnnotations.EntityTypeAnnotation.class));
             }
           }
@@ -280,9 +281,13 @@ public class TextOutputter extends AnnotationOutputter {
 
   /** Static helper */
   public static void prettyPrint(Annotation annotation, PrintWriter pw, StanfordCoreNLP pipeline) {
-    TextOutputter.print(annotation, pw, getOptions(pipeline.getProperties()));
-    // already flushed
-    // don't close, might not want to close underlying stream
+    try {
+      TextOutputter.print(annotation, pw, getOptions(pipeline));
+      // already flushed
+      // don't close, might not want to close underlying stream
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
   }
 
 }

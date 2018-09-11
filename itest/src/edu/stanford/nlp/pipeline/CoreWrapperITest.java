@@ -44,7 +44,7 @@ public class CoreWrapperITest extends TestCase {
     assertEquals("He was elected president in 2008, defeating Arizona senator John McCain.",
         secondSentence.text());
     // sentence has correct link to document
-    assertSame(secondSentence.document(), exampleDocument);
+    assertTrue(secondSentence.document() == exampleDocument);
     // char offsets
     Pair<Integer,Integer> sentenceTwoOffsets = new Pair<>(51,123);
     assertEquals(sentenceTwoOffsets, secondSentence.charOffsets());
@@ -53,12 +53,12 @@ public class CoreWrapperITest extends TestCase {
     CoreEntityMention arizonaMentionFromSentence = secondSentence.entityMentions().get(2);
     CoreEntityMention arizonaMentionFromDocument = exampleDocument.entityMentions().get(5);
     assertEquals("Arizona", arizonaMentionFromSentence.text());
-    assertSame(arizonaMentionFromSentence, arizonaMentionFromDocument);
+    assertTrue(arizonaMentionFromSentence == arizonaMentionFromDocument);
     // kbp relation info from sentences
     List<RelationTriple> kbpRelationsFromSentenceOne = firstSentence.relations();
-    String sentenceOneRelationOne = '(' +kbpRelationsFromSentenceOne.get(0).subjectGloss()+ ',' +
-            kbpRelationsFromSentenceOne.get(0).relationGloss()+ ',' +
-            kbpRelationsFromSentenceOne.get(0).objectGloss()+ ')';
+    String sentenceOneRelationOne = "("+firstSentence.relations().get(0).subjectGloss()+","+
+        firstSentence.relations().get(0).relationGloss()+","+
+        firstSentence.relations().get(0).objectGloss()+")";
     String goldSentenceOneRelationOne = "(Barack Obama,per:stateorprovince_of_birth,Hawaii)";
     assertEquals(goldSentenceOneRelationOne, sentenceOneRelationOne);
     // entity mentions
@@ -100,5 +100,4 @@ public class CoreWrapperITest extends TestCase {
     ProtobufAnnotationSerializerSlowITest.sameAsRead(exampleDocument.annotation(),
         readCoreDocument.annotation());
   }
-
 }

@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -77,9 +78,24 @@ public class CoNLLOutputter extends AnnotationOutputter {
 
   private static final String NULL_PLACEHOLDER = "_";
 
+  private static final String DEFAULT_KEYS = "idx,word,lemma,pos,ner,headidx,deprel";
+  private final List<Class<? extends CoreAnnotation<?>>> keysToPrint;
 
-  public CoNLLOutputter() {}
+  public CoNLLOutputter() {
+    this(null);
+  }
 
+  public CoNLLOutputter(String keys) {
+    if (keys == null) {
+      keys = DEFAULT_KEYS;
+    }
+    String[] keyArray = keys.split(" *, *");
+    List<Class<? extends CoreAnnotation<?>>> keyList = new ArrayList<>();
+    for (String key : keyArray) {
+      keyList.add(AnnotationLookup.toCoreKey(key));
+    }
+    keysToPrint = keyList;
+  }
 
   private static String orNeg(int in) {
     if (in < 0) {
@@ -100,8 +116,9 @@ public class CoNLLOutputter extends AnnotationOutputter {
   /**
    * Produce a line of the CoNLL output.
    */
-  private static String line(int index, CoreLabel token, int head, String deprel, Options options) {
-    List<Class<? extends CoreAnnotation<?>>> keysToPrint = options.keysToPrint;
+  private String line(int index,
+                      CoreLabel token,
+                      int head, String deprel) {
     ArrayList<String> fields = new ArrayList<>(keysToPrint.size());
 
     for (Class<? extends CoreAnnotation<?>> keyClass : keysToPrint) {
@@ -131,11 +148,7 @@ public class CoNLLOutputter extends AnnotationOutputter {
     }
     */
 
-    if (options.pretty) {
-      return StringUtils.join(fields, "\t");
-    } else {
-      return StringUtils.join(fields, "/");
-    }
+    return StringUtils.join(fields, "\t");
   }
 
   /** Print an Annotation to an output stream.
@@ -179,12 +192,8 @@ public class CoNLLOutputter extends AnnotationOutputter {
             }
 
             // Write the token
-            writer.print(line(i + 1, tokens.get(i), head, deprel, options));
-            if (options.pretty) {
-              writer.println();
-            } else if (i < tokens.size() - 1) {
-              writer.print(' ');
-            }
+            writer.print(line(i + 1, tokens.get(i), head, deprel));
+            writer.println();
           }
         }
         writer.println(); // extra blank line at end of sentence

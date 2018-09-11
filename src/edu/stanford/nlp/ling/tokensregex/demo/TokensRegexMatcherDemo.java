@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex.demo;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,14 +21,14 @@ public class TokensRegexMatcherDemo {
 
   private TokensRegexMatcherDemo() {} // static main only
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(
             PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner"));
     Annotation annotation = new Annotation("Casey is 21. Sally Atkinson's age is 30.");
     pipeline.annotate(annotation);
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
-    List<TokenSequencePattern> tokenSequencePatterns = new ArrayList<>();
+    List<TokenSequencePattern> tokenSequencePatterns = new ArrayList<TokenSequencePattern>();
     String[] patterns = {  "(?$who [ ner: PERSON]+ ) /is/ (?$age [ pos: CD ] )",
             "(?$who [ ner: PERSON]+ ) /'s/ /age/ /is/ (?$age [ pos: CD ] )" };
     for (String line : patterns) {

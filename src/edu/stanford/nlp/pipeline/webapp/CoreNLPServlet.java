@@ -215,7 +215,8 @@ public class CoreNLPServlet extends HttpServlet {
     }
   }
 
-  private static void outputByWriter(Consumer<StringWriter> printer, PrintWriter out) {
+  private static void outputByWriter(Consumer<StringWriter> printer,
+                              PrintWriter out) throws IOException {
     StringWriter output = new StringWriter();
     printer.accept(output);
     output.flush();

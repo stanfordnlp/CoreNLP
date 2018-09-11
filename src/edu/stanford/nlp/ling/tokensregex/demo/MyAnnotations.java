@@ -7,17 +7,16 @@ import edu.stanford.nlp.util.ErasureUtils;
 import java.util.List;
 
 /**
- * Example annotations.
+ * Example annotations
  *
  * @author Angel Chang
  */
 public class MyAnnotations {
-
   // My custom tokens
   public static class MyTokensAnnotation implements CoreAnnotation<List<? extends CoreMap>> {
     @Override
     public Class<List<? extends CoreMap>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
+      return ErasureUtils.<Class<List<? extends CoreMap>>> uncheckedCast(List.class);
     }
   }
 
@@ -25,7 +24,7 @@ public class MyAnnotations {
   public static class MyTypeAnnotation implements CoreAnnotation<String> {
     @Override
     public Class<String> getType() {
-      return ErasureUtils.uncheckedCast(String.class);
+      return ErasureUtils.<Class<String>> uncheckedCast(String.class);
     }
   }
 
@@ -33,8 +32,7 @@ public class MyAnnotations {
   public static class MyValueAnnotation implements CoreAnnotation<String> {
     @Override
     public Class<String> getType() {
-      return ErasureUtils.uncheckedCast(String.class);
+      return ErasureUtils.<Class<String>> uncheckedCast(String.class);
     }
   }
-
 }
