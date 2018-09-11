@@ -1,5 +1,4 @@
 package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.ListeningSequenceModel;
@@ -7,6 +6,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.GeneralizedCounter;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +22,7 @@ import java.util.List;
 public class CRFCliqueTree<E> implements ListeningSequenceModel  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFCliqueTree.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFCliqueTree.class);
 
   private final FactorTable[] factorTables;
   private final double z; // norm constant
