@@ -2,11 +2,13 @@ package edu.stanford.nlp.ie;
 
 import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreUtilities;
-import junit.framework.TestCase;
 
 
 /** These tests focus on whether the new framework delivers results that
@@ -14,7 +16,7 @@ import junit.framework.TestCase;
  *
  *  @author Christopher Manning
  */
-public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
+public class NumberSequenceClassifierExpectedOutputITest {
 
   private NumberSequenceClassifier nscOld = new NumberSequenceClassifier(false);
   private NumberSequenceClassifier nscNew = new NumberSequenceClassifier(true);
@@ -44,6 +46,7 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
           "NUMBER",
   };
 
+  @Test
   public void testCurrencyOld() {
     assert w1.length == t1.length;
     assert w1.length == i1.length;
@@ -51,10 +54,11 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
     for (int i = 0; i < w1.length; i++) {
       List<CoreLabel> cl = CoreUtilities.toCoreLabelList(w1[i], t1[i]);
       cl = nscOld.classify(cl);
-      assertEquals("Failed on " + w1[i][i1[i]], a1[i], cl.get(i1[i]).get(CoreAnnotations.AnswerAnnotation.class));
+      Assert.assertEquals("Failed on " + w1[i][i1[i]], a1[i], cl.get(i1[i]).get(CoreAnnotations.AnswerAnnotation.class));
     }
   }
 
+  @Test
   public void testCurrencyNew() {
     assert w1.length == t1.length;
     assert w1.length == i1.length;
@@ -62,7 +66,7 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
     for (int i = 0; i < w1.length; i++) {
       List<CoreLabel> cl = CoreUtilities.toCoreLabelList(w1[i], t1[i]);
       cl = nscNew.classify(cl);
-      assertEquals("Failed on " + w1[i][i1[i]], a1[i], cl.get(i1[i]).get(CoreAnnotations.AnswerAnnotation.class));
+      Assert.assertEquals("Failed on " + w1[i][i1[i]], a1[i], cl.get(i1[i]).get(CoreAnnotations.AnswerAnnotation.class));
     }
   }
 
@@ -167,6 +171,7 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
           "DATE",
   };
 
+  @Test
   public void testCdOld() {
     assert w2.length == t2.length;
     assert w2.length == i2.length;
@@ -174,11 +179,12 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
     for (int i = 0; i < w2.length; i++) {
       List<CoreLabel> cl = CoreUtilities.toCoreLabelList(w2[i], t2[i]);
       cl = nscOld.classify(cl);
-      assertEquals("Failed on " + w2[i][i2[i]], a2[i], cl.get(i2[i]).get(CoreAnnotations.AnswerAnnotation.class));
+      Assert.assertEquals("Failed on " + w2[i][i2[i]], a2[i], cl.get(i2[i]).get(CoreAnnotations.AnswerAnnotation.class));
     }
   }
 
 
+  @Test
   public void testCdNew() {
     assert w2.length == t2.length;
     assert w2.length == i2.length;
@@ -187,7 +193,7 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
       List<CoreLabel> cl = CoreUtilities.toCoreLabelList(w2[i], t2[i]);
       //System.err.println("CHECKING: " + cl);
       cl = nscNew.classify(cl);
-      assertEquals("Failed on " + w2[i][i2[i]], a2[i], cl.get(i2[i]).get(CoreAnnotations.AnswerAnnotation.class));
+      Assert.assertEquals("Failed on " + w2[i][i2[i]], a2[i], cl.get(i2[i]).get(CoreAnnotations.AnswerAnnotation.class));
     }
   }
 

@@ -1,5 +1,4 @@
 package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
@@ -9,6 +8,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -26,7 +26,7 @@ import java.util.*;
 public class NumberAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NumberAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(NumberAnnotator.class);
 
   private final AbstractSequenceClassifier<CoreLabel> nsc;
 
@@ -34,7 +34,7 @@ public class NumberAnnotator implements Annotator  {
   private static final String DEFAULT_BACKGROUND_SYMBOL = "O";
   private final String BACKGROUND_SYMBOL;
 
-  public static final String BACKGROUND_SYMBOL_PROPERTY = "background";
+  private static final String BACKGROUND_SYMBOL_PROPERTY = "background";
 
   public NumberAnnotator() {
     this(DEFAULT_BACKGROUND_SYMBOL, true, NumberSequenceClassifier.USE_SUTIME_DEFAULT);
@@ -55,7 +55,7 @@ public class NumberAnnotator implements Annotator  {
   }
 
   public NumberAnnotator(String name, Properties props) {
-    String property = name + "." + BACKGROUND_SYMBOL_PROPERTY;
+    String property = name + '.' + BACKGROUND_SYMBOL_PROPERTY;
     BACKGROUND_SYMBOL = props.getProperty(property, DEFAULT_BACKGROUND_SYMBOL);
     boolean useSUTime = PropertiesUtils.getBool(props,
         NumberSequenceClassifier.USE_SUTIME_PROPERTY,
@@ -127,4 +127,5 @@ public class NumberAnnotator implements Annotator  {
     // labels will be very disappointed, so we do not claim to produce NER
     return Collections.singleton(CoreAnnotations.NumerizedTokensAnnotation.class);
   }
+
 }
