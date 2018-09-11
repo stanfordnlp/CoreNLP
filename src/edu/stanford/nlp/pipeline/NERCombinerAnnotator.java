@@ -336,9 +336,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (!providedDocDate.equals("")) {
       annotation.set(CoreAnnotations.DocDateAnnotation.class, providedDocDate);
     }
-
-    System.err.println("docDate: "+annotation.get(CoreAnnotations.DocDateAnnotation.class));
-
+    
     super.annotate(annotation);
     this.ner.finalizeAnnotation(annotation);
 

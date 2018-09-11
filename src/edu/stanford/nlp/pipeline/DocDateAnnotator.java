@@ -7,7 +7,7 @@ import edu.stanford.nlp.util.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 
 public class DocDateAnnotator implements Annotator {
@@ -74,7 +74,9 @@ public class DocDateAnnotator implements Annotator {
     } else if (usePresentDate) {
       annotation.set(CoreAnnotations.DocDateAnnotation.class, currentDate());
     } else if (useRegex) {
-      String foundDateText = fileDocDatePattern.matcher(docID).group(1);
+      Matcher m = fileDocDatePattern.matcher(docID);
+      m.matches();
+      String foundDateText = m.group(1);
       if (DATE_NO_HYPHENS_PATTERN.matcher(foundDateText).find() && foundDateText.length() == 8)
         foundDateText = addHyphensToDate(foundDateText);
       annotation.set(CoreAnnotations.DocDateAnnotation.class, foundDateText);
