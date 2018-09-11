@@ -34,9 +34,9 @@ public class CoNLLOutputterTest extends TestCase {
     Annotation ann = new Annotation("CoNLL is neat. Better than XML.");
     String outputKeys = "word,pos";
     StanfordCoreNLP pipeline = new StanfordCoreNLP(PropertiesUtils.asProperties("annotators", "tokenize, ssplit",
-            "outputFormatOptions", outputKeys));
+            "output.columns", outputKeys));
     pipeline.annotate(ann);
-    String actual = new CoNLLOutputter(outputKeys).print(ann);
+    String actual = new CoNLLOutputter().print(ann, pipeline);
     String expected = "CoNLL\t_\n" +
         "is\t_\n" +
         "neat\t_\n" +

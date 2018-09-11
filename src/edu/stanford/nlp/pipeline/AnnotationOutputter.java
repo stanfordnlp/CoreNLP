@@ -1,16 +1,22 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ling.AnnotationLookup;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.trees.TreePrint;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * An interface for outputting CoreNLP Annotations to different output
  * formats.
- * These are intended to be for more or less human consumption (or for transferring
- * to other applications) -- that is, there output is not intended to be read back into
+ * These are intended to be for more or less for human consumption (or for transferring
+ * to other applications) -- that is, their output is not intended to be read back into
  * CoreNLP losslessly.
  *
  * For lossless (or near lossless) serialization,
@@ -24,26 +30,85 @@ import java.io.OutputStream;
  */
 public abstract class AnnotationOutputter {
 
-  static final TreePrint DEFAULT_CONSTITUENT_TREE_PRINTER = new TreePrint("penn");
+  static final TreePrint DEFAULT_CONSTITUENCY_TREE_PRINTER = new TreePrint("penn");
+
+  private static final TreePrint DEFAULT_DEPENDENCY_TREE_PRINTER = new TreePrint("typedDependenciesCollapsed");
+
+  private static final String DEFAULT_KEYS = "idx,word,lemma,pos,ner,headidx,deprel";
+
   private static final Options DEFAULT_OPTIONS = new Options(); // IMPORTANT: must come after DEFAULT_CONSTITUENCY_TREE_PRINTER
 
-  public static class Options {
-    /** Should the document text be included as part of the XML output */
-    public boolean includeText = false;
-    /** Should a small window of context be provided with each coreference mention */
-    public int coreferenceContextSize = 0;
-    /** The output encoding to use */
-    public String encoding = "UTF-8";
-    /** How to print a constituent tree */
-    public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
-    /** If false, will print only non-singleton entities*/
-    public boolean printSingletons = false;
-    /** If false, try to compress whitespace as much as possible. This is particularly useful for sending over the wire. */
-    public boolean pretty = true;
 
-    public double relationsBeam = 0.0;
-    public double beamPrintingOption = 0.0;
-  }
+  public static class Options {
+
+    /** Should the document text be included as part of the XML output */
+    public final boolean includeText;
+    /** The output encoding to use */
+    public final String encoding;
+    /** If false, try to compress whitespace as much as possible to minimize the size of the output. This is
+     *  particularly useful for sending over the wire. If true, the outputters should pretty-print the output.
+     */
+    public final boolean pretty;
+    /** How to print a constituency tree for display. */
+    public final TreePrint constituencyTreePrinter;
+    /** How to print a dependency tree by default for display. */
+    public final TreePrint dependencyTreePrinter;
+    /** Should a small window of context be provided with each coreference mention */
+    public final int coreferenceContextSize;
+    /** If false, will print only non-singleton entities */
+    public final boolean printSingletons;
+    /** Provides a beam score cutoff on whether relations are printed
+     *  (in XMLOutputter and TextOutputter from edu.stanford.nlp.ie.machinereading.structure.RelationMention).
+     */
+    public final double relationsBeam;
+    /** Columns to print in CoNLL output. */
+    public final List<Class<? extends CoreAnnotation<?>>> keysToPrint;
+
+
+    public Options() {
+      // this creates the default options object
+      this(true);
+    }
+
+    public Options(boolean pretty) {
+      includeText = false;
+      encoding = "UTF-8";
+      this.pretty = pretty;
+      constituencyTreePrinter = DEFAULT_CONSTITUENCY_TREE_PRINTER;
+      dependencyTreePrinter = DEFAULT_DEPENDENCY_TREE_PRINTER;
+      coreferenceContextSize = 0;
+      printSingletons = false;
+      relationsBeam = 0.0;
+      keysToPrint = getKeysToPrint(DEFAULT_KEYS);
+    }
+
+    public Options(Properties properties) {
+      includeText = PropertiesUtils.getBool(properties, "output.includeText", false);
+      encoding = properties.getProperty("encoding", "UTF-8");
+      pretty = PropertiesUtils.getBool(properties, "output.prettyPrint", true);
+      String constituencyTreeStyle = properties.getProperty("output.constituencyTree", "penn");
+      constituencyTreePrinter = new TreePrint(constituencyTreeStyle);
+      String dependencyTreeStyle = properties.getProperty("output.dependencyTree", "typedDependenciesCollapsed");
+      dependencyTreePrinter = new TreePrint(dependencyTreeStyle);
+      coreferenceContextSize = PropertiesUtils.getInt(properties,"output.coreferenceContextSize", 0);
+      printSingletons = PropertiesUtils.getBool(properties, "output.printSingletonEntities", false);
+      relationsBeam = PropertiesUtils.getDouble(properties, "output.relation.beam", 0.0);
+      keysToPrint = getKeysToPrint(properties.getProperty("output.columns", DEFAULT_KEYS));
+    }
+
+    private static List<Class<? extends CoreAnnotation<?>>> getKeysToPrint(String columns) {
+      if (columns == null) {
+        columns = DEFAULT_KEYS;
+      }
+      String[] keyArray = columns.split(" *, *");
+      List<Class<? extends CoreAnnotation<?>>> keyList = new ArrayList<>();
+      for (String key : keyArray) {
+        keyList.add(AnnotationLookup.toCoreKey(key));
+      }
+      return keyList;
+    }
+
+  } // end static class Options
 
 
   public abstract void print(Annotation doc, OutputStream target, Options options) throws IOException;
@@ -53,7 +118,7 @@ public abstract class AnnotationOutputter {
   }
 
   public void print(Annotation annotation, OutputStream os, StanfordCoreNLP pipeline) throws IOException {
-    print(annotation, os, getOptions(pipeline));
+    print(annotation, os, getOptions(pipeline.getProperties()));
   }
 
   public String print(Annotation ann, Options options) throws IOException {
@@ -68,23 +133,15 @@ public abstract class AnnotationOutputter {
   }
 
   public String print(Annotation ann, StanfordCoreNLP pipeline) throws IOException {
-    return print(ann, getOptions(pipeline));
+    return print(ann, getOptions(pipeline.getProperties()));
   }
 
 
   /**
    * Populates options from StanfordCoreNLP pipeline.
    */
-  public static Options getOptions(StanfordCoreNLP pipeline) {
-    Options options = new Options();
-    options.relationsBeam = pipeline.getBeamPrintingOption();
-    options.constituentTreePrinter = pipeline.getConstituentTreePrinter();
-    options.encoding = pipeline.getEncoding();
-    options.printSingletons = pipeline.getPrintSingletons();
-    options.beamPrintingOption = pipeline.getBeamPrintingOption();
-    options.pretty = pipeline.getPrettyPrint();
-    options.includeText = pipeline.getIncludeText();
-    return options;
+  public static Options getOptions(Properties properties) {
+    return new Options(properties);
   }
 
 }
