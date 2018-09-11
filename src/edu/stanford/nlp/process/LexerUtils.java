@@ -17,6 +17,35 @@ public class LexerUtils {
   private static final Pattern GENERIC_CURRENCY_PATTERN = Pattern.compile("[\u0080\u00A4\u20A0\u20AC\u20B9]");
   private static final Pattern CP1252_EURO_PATTERN = Pattern.compile("\u0080");
 
+  private static final Pattern ONE_FOURTH_PATTERN = Pattern.compile("\u00BC");
+  private static final Pattern ONE_HALF_PATTERN = Pattern.compile("\u00BD");
+  private static final Pattern THREE_FOURTHS_PATTERN = Pattern.compile("\u00BE");
+  private static final Pattern ONE_THIRD_PATTERN = Pattern.compile("\u2153");
+  private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
+
+
+  /** Change precomposed fraction characters to spelled out letter forms. */
+  public static String normalizeFractions(boolean normalizeFractions, boolean escapeForwardSlashAsterisk, final String in) {
+    String out = in;
+    if (normalizeFractions) {
+      if (escapeForwardSlashAsterisk) {
+        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1\\\\/4");
+        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1\\\\/2");
+        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3\\\\/4");
+        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1\\\\/3");
+        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2\\\\/3");
+      } else {
+        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1/4");
+        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1/2");
+        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3/4");
+        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1/3");
+        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2/3");
+      }
+    }
+    return out;
+  }
+
+
   public static String normalizeCurrency(String in) {
     String s1 = in;
     s1 = CENTS_PATTERN.matcher(s1).replaceAll("cents");
@@ -87,6 +116,8 @@ public class LexerUtils {
   public static String normalizeAmp(final String in) {
     return AMP_PATTERN.matcher(in).replaceAll("&");
   }
+
+
 
 
 }
