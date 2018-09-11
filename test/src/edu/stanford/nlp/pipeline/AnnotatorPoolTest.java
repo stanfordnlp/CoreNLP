@@ -4,19 +4,22 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.util.Lazy;
-import junit.framework.TestCase;
-import org.junit.Assert;
 
 /**
  * Makes sure that the pool creates new Annotators when the signature properties change
  */
-public class AnnotatorPoolTest extends TestCase {
+public class AnnotatorPoolTest {
 
   static class SampleAnnotatorFactory extends Lazy<Annotator> {
-    private static final long serialVersionUID = 1L;
+
+    @SuppressWarnings("unused")
     public SampleAnnotatorFactory(Properties props) {}
+
     @Override
     protected Annotator compute() {
       return new Annotator() {
@@ -43,11 +46,13 @@ public class AnnotatorPoolTest extends TestCase {
     public boolean isCache() {
       return false;
     }
-  }
+
+  } // end static class SampleAnnotatorFactory
 
 
 
-  public void testSignature() throws Exception {
+  @Test
+  public void testSignature() {
     Properties props = new Properties();
     props.setProperty("sample.prop", "v1");
     AnnotatorPool pool = new AnnotatorPool();
@@ -57,13 +62,13 @@ public class AnnotatorPoolTest extends TestCase {
     pool.register("sample", props, new SampleAnnotatorFactory(props));
     Annotator a2 = pool.get("sample");
     System.out.println("Second annotator: " + a2);
-    Assert.assertTrue(a1 == a2);
+    Assert.assertSame(a1, a2);
 
     props.setProperty("sample.prop", "v2");
     pool.register("sample", props, new SampleAnnotatorFactory(props));
     Annotator a3 = pool.get("sample");
     System.out.println("Third annotator: " + a3);
-    Assert.assertTrue(a1 != a3);
+    Assert.assertNotSame(a1, a3);
   }
 
 

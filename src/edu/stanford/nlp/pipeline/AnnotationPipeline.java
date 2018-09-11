@@ -224,7 +224,8 @@ public class AnnotationPipeline implements Annotator {
   }
 
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  @SuppressWarnings("RedundantThrows")
+  public static void main(String[] args) throws IOException {
     Timing tim = new Timing();
     AnnotationPipeline ap = new AnnotationPipeline();
     final boolean verbose = false;
