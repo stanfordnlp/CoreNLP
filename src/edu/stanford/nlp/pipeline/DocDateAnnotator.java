@@ -7,19 +7,26 @@ import edu.stanford.nlp.util.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 
 public class DocDateAnnotator implements Annotator {
 
   // property names
   public static String DOC_DATE_FIXED_PROPERTY = "useFixedDate";
-  public static String DOC_DATE_MAPPING_FILE_PROPERTY = "mappingFile";
+  public static String DOC_DATE_MAPPING_FILE_PROPERTY = "useMappingFile";
   public static String DOC_DATE_PRESENT_PROPERTY = "usePresent";
+  public static String DOC_DATE_REGEX_PROPERTY = "useRegex";
+
+  // helpful regexes
+  public static Pattern DATE_PROPER_FORMAT = Pattern.compile("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
+  public static Pattern DATE_NO_HYPHENS_PATTERN = Pattern.compile("[0-9]{8}");
 
   // settings
   public boolean useFixedDate = false;
   public boolean useMappingFile = false;
   public boolean usePresentDate = false;
+  public boolean useRegex = false;
 
   // fixed date user could provide
   public String fixedDate;
@@ -27,12 +34,17 @@ public class DocDateAnnotator implements Annotator {
   // mapping from doc id to doc date
   public HashMap<String, String> docIDToDocDate;
 
+  // regex
+  public Pattern fileDocDatePattern;
+
   public DocDateAnnotator(String name, Properties props) throws IOException {
     // if a mapping file is specified, build the hash map
     useFixedDate = props.containsKey(name+"."+DOC_DATE_FIXED_PROPERTY);
     useMappingFile = props.containsKey(name+"."+DOC_DATE_MAPPING_FILE_PROPERTY);
     usePresentDate = PropertiesUtils.getBool(props, name+"."+DOC_DATE_PRESENT_PROPERTY, false);
+    useRegex = props.containsKey(name+"."+DOC_DATE_REGEX_PROPERTY);
     if (useMappingFile) {
+      // if using mapping file, load the doc dates
       String mappingFilePath = props.getProperty(name + "." + DOC_DATE_MAPPING_FILE_PROPERTY);
       docIDToDocDate = new HashMap<String,String>();
       List<String> mappingEntries =
@@ -42,7 +54,10 @@ public class DocDateAnnotator implements Annotator {
         docIDToDocDate.put(keyAndValue[0], keyAndValue[1]);
       }
     } else if (useFixedDate) {
+      // if using fixed date, set that date
       fixedDate = props.getProperty(name+"."+DOC_DATE_FIXED_PROPERTY);
+    } else if (useRegex) {
+      fileDocDatePattern = Pattern.compile(props.getProperty(name+"."+DOC_DATE_REGEX_PROPERTY));
     }
   }
 
@@ -58,12 +73,25 @@ public class DocDateAnnotator implements Annotator {
       annotation.set(CoreAnnotations.DocDateAnnotation.class, fixedDate);
     } else if (usePresentDate) {
       annotation.set(CoreAnnotations.DocDateAnnotation.class, currentDate());
+    } else if (useRegex) {
+      String foundDateText = fileDocDatePattern.matcher(docID).group(1);
+      if (DATE_NO_HYPHENS_PATTERN.matcher(foundDateText).find() && foundDateText.length() == 8)
+        foundDateText = addHyphensToDate(foundDateText);
+      annotation.set(CoreAnnotations.DocDateAnnotation.class, foundDateText);
     }
   }
 
   /** helper for return current date **/
   public String currentDate() {
     return new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+  }
+
+  /** helper to add hyphens **/
+  private static String addHyphensToDate(String compactDateString) {
+    String yyyy = compactDateString.substring(0,4);
+    String mm = compactDateString.substring(4,6);
+    String dd = compactDateString.substring(6,8);
+    return yyyy + '-' + mm + '-' + dd;
   }
 
   @Override
