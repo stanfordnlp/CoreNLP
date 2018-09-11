@@ -1,11 +1,13 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
-import junit.framework.TestCase;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Properties;
 import java.util.function.Consumer;
 
 /**
@@ -13,7 +15,7 @@ import java.util.function.Consumer;
  *
  * @author Gabor Angeli
  */
-public class JSONOutputterTest extends TestCase {
+public class JSONOutputterTest {
 
 
   // -----
@@ -23,17 +25,18 @@ public class JSONOutputterTest extends TestCase {
   private static String indent(String in) { return in.replace("\t", JSONOutputter.INDENT_CHAR); }
 
   private static void testEscape(String input, String expected) {
-    assertEquals(1, input.length());  // make sure I'm escaping right
-    assertEquals(2, expected.length());  // make sure I'm escaping right
-    assertEquals(expected, StringUtils.escapeJsonString(input));
+    Assert.assertEquals(1, input.length());  // make sure I'm escaping right
+    Assert.assertEquals(2, expected.length());  // make sure I'm escaping right
+    Assert.assertEquals(expected, StringUtils.escapeJsonString(input));
   }
 
   private static void testNoEscape(String input, String expected) {
-    assertEquals(1, input.length());  // make sure I'm escaping right
-    assertEquals(1, expected.length());  // make sure I'm escaping right
-    assertEquals(expected, StringUtils.escapeJsonString(input));
+    Assert.assertEquals(1, input.length());  // make sure I'm escaping right
+    Assert.assertEquals(1, expected.length());  // make sure I'm escaping right
+    Assert.assertEquals(expected, StringUtils.escapeJsonString(input));
   }
 
+  @Test
   public void testSanitizeJSONString() {
     testEscape("\b", "\\b");
     testEscape("\f", "\\f");
@@ -41,51 +44,58 @@ public class JSONOutputterTest extends TestCase {
     testEscape("\r", "\\r");
     testEscape("\t", "\\t");
     testNoEscape("'", "'");
+    testNoEscape("/", "/");
+    testNoEscape("-", "-");
     testEscape("\"", "\\\"");
     testEscape("\\", "\\\\");
-    assertEquals("\\\\b", StringUtils.escapeJsonString("\\b"));
+    Assert.assertEquals("\\\\b", StringUtils.escapeJsonString("\\b"));
   }
 
+  @Test
   public void testSimpleJSON() {
-    assertEquals(indent("{\n\t\"foo\": \"bar\"\n}"),
-        JSONOutputter.JSONWriter.objectToJSON( (JSONOutputter.Writer writer) -> writer.set("foo", "bar")));
-    assertEquals(indent("{\n\t\"foo\": \"bar\",\n\t\"baz\": \"hazzah\"\n}"),
-        JSONOutputter.JSONWriter.objectToJSON( (JSONOutputter.Writer writer) -> {
-          writer.set("foo", "bar");
-          writer.set("baz", "hazzah");
-        }));
+    Assert.assertEquals(indent("{\n\t\"foo\": \"bar\"\n}"),
+            JSONOutputter.JSONWriter.objectToJSON((JSONOutputter.Writer writer) -> writer.set("foo", "bar")));
+    Assert.assertEquals(indent("{\n\t\"foo\": \"bar\",\n\t\"baz\": \"hazzah\"\n}"),
+            JSONOutputter.JSONWriter.objectToJSON((JSONOutputter.Writer writer) -> {
+              writer.set("foo", "bar");
+              writer.set("baz", "hazzah");
+            }));
   }
 
+  @Test
   public void testCollectionJSON() {
-    assertEquals(indent("{\n\t\"foo\": [\n\t\t\"bar\",\n\t\t\"baz\"\n\t]\n}"),
-        JSONOutputter.JSONWriter.objectToJSON( (JSONOutputter.Writer writer) -> writer.set("foo", Arrays.asList("bar", "baz"))));
+    Assert.assertEquals(indent("{\n\t\"foo\": [\n\t\t\"bar\",\n\t\t\"baz\"\n\t]\n}"),
+            JSONOutputter.JSONWriter.objectToJSON((JSONOutputter.Writer writer) -> writer.set("foo", Arrays.asList("bar", "baz"))));
 
   }
 
+  @Test
   public void testNestedJSON() {
-    assertEquals(indent("{\n\t\"foo\": {\n\t\t\"bar\": \"baz\"\n\t}\n}"),
-        JSONOutputter.JSONWriter.objectToJSON((JSONOutputter.Writer writer) -> writer.set("foo", (Consumer<JSONOutputter.Writer>) writer1 -> writer1.set("bar", "baz"))));
+    Assert.assertEquals(indent("{\n\t\"foo\": {\n\t\t\"bar\": \"baz\"\n\t}\n}"),
+            JSONOutputter.JSONWriter.objectToJSON((JSONOutputter.Writer writer) -> writer.set("foo", (Consumer<JSONOutputter.Writer>) writer1 -> writer1.set("bar", "baz"))));
   }
 
+  @Test
   public void testComplexJSON() {
-    assertEquals(indent("{\n\t\"1.1\": {\n\t\t\"2.1\": [\n\t\t\t\"a\",\n\t\t\t\"b\",\n\t\t\t{\n\t\t\t\t\"3.1\": \"v3.1\"\n\t\t\t}\n\t\t],\n\t\t\"2.2\": \"v2.2\"\n\t}\n}"),
-        JSONOutputter.JSONWriter.objectToJSON((JSONOutputter.Writer l1) -> l1.set("1.1", (Consumer<JSONOutputter.Writer>) l2 -> {
-          l2.set("2.1", Arrays.asList(
-                  "a",
-                  "b",
-                  (Consumer<JSONOutputter.Writer>) l3 -> l3.set("3.1", "v3.1")
-          ));
-          l2.set("2.2", "v2.2");
-        })));
+    Assert.assertEquals(indent("{\n\t\"1.1\": {\n\t\t\"2.1\": [\n\t\t\t\"a\",\n\t\t\t\"b\",\n\t\t\t{\n\t\t\t\t\"3.1\": \"v3.1\"\n\t\t\t}\n\t\t],\n\t\t\"2.2\": \"v2.2\"\n\t}\n}"),
+            JSONOutputter.JSONWriter.objectToJSON((JSONOutputter.Writer l1) -> l1.set("1.1", (Consumer<JSONOutputter.Writer>) l2 -> {
+              l2.set("2.1", Arrays.asList(
+                      "a",
+                      "b",
+                      (Consumer<JSONOutputter.Writer>) l3 -> l3.set("3.1", "v3.1")
+              ));
+              l2.set("2.2", "v2.2");
+            })));
   }
 
   // -----
   // BEGIN TESTS FOR ANNOTATION WRITING
   // -----
 
+  @Test
   public void testSimpleDocument() throws IOException {
     Annotation ann = new Annotation("JSON is neat. Better than XML.");
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties() {{ setProperty("annotators", "tokenize, ssplit"); }});
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(PropertiesUtils.asProperties("annotators", "tokenize, ssplit"));
     pipeline.annotate(ann);
     String actual = new JSONOutputter().print(ann);
     String expected = indent(
@@ -174,9 +184,9 @@ public class JSONOutputterTest extends TestCase {
         "\t\t\t]\n" +
         "\t\t}\n" +
         "\t]\n" +
-        "}");
+        "}\n");
 
-    assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
 }
