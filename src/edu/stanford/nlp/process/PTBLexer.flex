@@ -49,7 +49,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  Although they shouldn't really be there, it also interprets certain of the
  *  characters between U+0080 and U+009F as Windows CP1252 characters, since many
  *  LDC corpora actually mix CP1252 content into supposedly utf-8 text.
- *
+ *  <p>
  *  <i>Fine points:</i> Output normalized tokens should not contain spaces,
  *  providing the normalizeSpace option is true.  The space will be turned
  *  into a non-breaking space (U+00A0). Otherwise, they can appear in
@@ -64,7 +64,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  invertible tokenizer, with which you can still access the original
  *  character sequence and the non-token whitespace around it in a CoreLabel.
  *  And you can ask for newlines to be tokenized.
- *
+ *  <p>
  *  <i>Character entities:</i> For legacy reasons, this file will parse and interpret
  *  some simple SGML/XML/HTML tags and character entities.  For modern formats
  *  like XML, you are better off doing XML parsing, and then running the
@@ -77,7 +77,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  output of decoding had things that look like character entities.  In general,
  *  handled symbols are changed to ASCII/Unicode forms, but handled accented
  *  letters are just left as character entities in words.
- *
+ *  <p>
  *  <i>Character support:</i> PTBLexer works for a broad range of common Unicode
  *  characters. It recognizes all characters that are classed as letter (alphabetic)
  *  or digit in Unicode.
@@ -85,7 +85,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  excluding most control characters except the ones very standardly found in
  *  plain text documents. Finally, a fair range of other characters, such as many
  *  symbols commonly found in English Unicode text and emoji are also recognized.
- *
+ *  <p>
  *  <i>Implementation note:</i> The scanner is caseless, but note, if adding
  *  or changing regexps, that caseless does not extend inside character
  *  classes.  From the manual: "The %caseless option does not change the
@@ -93,7 +93,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  matches the character a and not A, too."  Note that some character
  *  classes deliberately don't have both cases, so the scanner's
  *  operation isn't completely case-independent, though it mostly is.
- *
+ *  <p>
  *  <i>Implementation note:</i> This Java class is automatically generated
  *  from PTBLexer.flex using jflex.  DO NOT EDIT THE JAVA SOURCE.  This file
  *  has now been updated for JFlex 1.6.1+.
@@ -494,22 +494,6 @@ import edu.stanford.nlp.util.logging.Redwood;
     }
   }
 
-  /** This quotes a character with a backslash, but doesn't do it
-   *  if the character is already preceded by a backslash.
-   */
-  private static String delimit(String s, char c) {
-    int i = s.indexOf(c);
-    while (i != -1) {
-      if (i == 0 || s.charAt(i - 1) != '\\') {
-        s = s.substring(0, i) + '\\' + s.substring(i);
-        i = s.indexOf(c, i + 2);
-      } else {
-        i = s.indexOf(c, i + 1);
-      }
-    }
-    return s;
-  }
-
   private int indexOfSpace(String txt) {
     for (int i = 0, len = txt.length(); i < len; i++) {
       char ch = txt.charAt(i);
@@ -863,22 +847,23 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 %%
 
 {PROG_LANGS}      { String tok = yytext();
-                    if (DEBUG) { logger.info("Used {PROG_LANGS} to recognize " + tok + " as " + tok); }
+                    if (DEBUG) { logger.info("Used {PROG_LANGS} to recognize " + tok); }
                     return getNext(tok, tok);
                   }
 {ASSIMILATIONS3}  { if (splitAssimilations) {
                       yypushback(3);
                     }
                     String tok = yytext();
-                    if (DEBUG) { logger.info("Used {ASSIMILATIONS3} to recognize " + tok + " as " + tok +
-                            "; splitAssimilations=" + splitAssimilations); }
+                    if (DEBUG) { logger.info("Used {ASSIMILATIONS3} to recognize " + tok +
+                             "; splitAssimilations=" + splitAssimilations); }
                     return getNext(tok, tok);
                   }
-{ASSIMILATIONS2}  { if (splitAssimilations) {
+{ASSIMILATIONS2}/[^\p{Alpha}]
+                  { if (splitAssimilations) {
                       yypushback(2);
                     }
                     String tok = yytext();
-                    if (DEBUG) { logger.info("Used {ASSIMILATIONS3} to recognize " + tok + " as " + tok +
+                    if (DEBUG) { logger.info("Used {ASSIMILATIONS2} to recognize " + tok + " as " + tok +
                             "; splitAssimilations=" + splitAssimilations); }
                     return getNext(tok, tok);
                   }
@@ -928,11 +913,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {SWORD} to recognize " + origTxt + " as " + tok); }
                           return getNext(tok, origTxt);
                         }
-{DIGIT}+/{SEP_SUFFIX}
-                { String txt = yytext();
-                  if (DEBUG) { logger.info("Used {DIGIT}/{SEP_SUFFIX} to recognize " + txt); }
-                  return getNext(txt, txt);
-                }
+{DIGIT}+/{SEP_SUFFIX}   { String txt = yytext();
+                          if (DEBUG) { logger.info("Used {DIGIT}/{SEP_SUFFIX} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
 {WORD}                  { final String origTxt = yytext();
                           String tok = LexerUtils.removeSoftHyphens(origTxt);
                           if (americanize) {
@@ -947,12 +931,15 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
-{APOWORD2}/[:letter:]   { return getNext(); }
+{APOWORD2}/[:letter:]   { String txt = yytext();
+                          if (DEBUG) { logger.info("Used {APOWORD2} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
 {FULLURL}               { String txt = yytext();
                           String norm = txt;
                           if (escapeForwardSlashAsterisk) {
-                            norm = delimit(norm, '/');
-                            norm = delimit(norm, '*');
+                            norm = LexerUtils.escapeChar(norm, '/');
+                            norm = LexerUtils.escapeChar(norm, '*');
                           }
                           if (DEBUG) { logger.info("Used {FULLURL} to recognize " + txt + " as " + norm); }
                           return getNext(norm, txt);
@@ -960,13 +947,16 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 {LIKELYURL}/[^\p{Alpha}]  { String txt = yytext();
                             String norm = txt;
                             if (escapeForwardSlashAsterisk) {
-                              norm = delimit(norm, '/');
-                              norm = delimit(norm, '*');
+                              norm = LexerUtils.escapeChar(norm, '/');
+                              norm = LexerUtils.escapeChar(norm, '*');
                             }
                             if (DEBUG) { logger.info("Used {LIKELYURL} to recognize " + txt + " as " + norm); }
                             return getNext(norm, txt);
                           }
-{EMAIL}                 { return getNext(); }
+{EMAIL}                 { String tok = yytext();
+                          if (DEBUG) { logger.info("Used {EMAIL} to recognize " + tok); }
+                          return getNext(tok, tok);
+                        }
 {TWITTER}               { return getNext(); }
 {REDAUX}/[^\p{Alpha}]   { String tok = yytext();
                           String norm = handleQuotes(tok, false);
@@ -982,7 +972,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                         }
 {DATE}                  { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
-                            txt = delimit(txt, '/');
+                            txt = LexerUtils.escapeChar(txt, '/');
                           }
                           return getNext(txt, yytext());
                          }
@@ -1004,7 +994,7 @@ RM/{NUM}        { String txt = yytext();
                     }
                   }
                   if (escapeForwardSlashAsterisk) {
-                    txt = delimit(txt, '/');
+                    txt = LexerUtils.escapeChar(txt, '/');
                   }
                   if (normalizeSpace) {
                     txt = txt.replace(' ', '\u00A0'); // change space to non-breaking space
@@ -1031,7 +1021,7 @@ RM/{NUM}        { String txt = yytext();
 {SWEARING}      { String txt = yytext();
                   String normTok = txt;
                   if (escapeForwardSlashAsterisk) {
-                    normTok = delimit(normTok, '*');
+                    normTok = LexerUtils.escapeChar(normTok, '*');
                   }
                   if (DEBUG) { logger.info("Used {SWEARING} to recognize " + txt + " as " + normTok); }
                   return getNext(normTok, txt);
@@ -1040,7 +1030,7 @@ RM/{NUM}        { String txt = yytext();
 <YyNotTokenizePerLine>{BANGMAGAZINES}/{SPACENL}magazine   { return getNext(); }
 <YyTokenizePerLine>{BANGMAGAZINES}/{SPACE}magazine   { return getNext(); }
 {THING3}                { if (escapeForwardSlashAsterisk) {
-                            return getNext(delimit(yytext(), '/'), yytext());
+                            return getNext(LexerUtils.escapeChar(yytext(), '/'), yytext());
                           } else {
                             return getNext();
                           }
@@ -1122,8 +1112,6 @@ RM/{NUM}        { String txt = yytext();
 \x7F                    { if (invertible) {
                             prevWordAfter.append(yytext());
                         } }
-{LESSTHAN}              { return getNext("<", yytext()); }
-{GREATERTHAN}           { return getNext(">", yytext()); }
 {SMILEY}/[^\p{Alpha}\p{Digit}] { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
@@ -1140,7 +1128,12 @@ RM/{NUM}        { String txt = yytext();
                   }
                   return getNext(txt, origText);
                 }
-{EMOJI}		{ return getNext(); }
+{EMOJI}         { String txt = yytext();
+                  if (DEBUG) { logger.info("Used {EMOJI} to recognize " + txt); }
+                  return getNext(txt, txt);
+                }
+{LESSTHAN}      { return getNext("<", yytext()); }
+{GREATERTHAN}   { return getNext(">", yytext()); }
 \{              { if (normalizeOtherBrackets) {
                     return getNext(openbrace, yytext()); }
                   else {
@@ -1198,7 +1191,7 @@ RM/{NUM}        { String txt = yytext();
 {LDOTS}|{SPACEDLDOTS}         { return handleEllipsis(yytext()); }
 {FNMARKS}       { return getNext(); }
 {ASTS}          { if (escapeForwardSlashAsterisk) {
-                    return getNext(delimit(yytext(), '*'), yytext()); }
+                    return getNext(LexerUtils.escapeChar(yytext(), '*'), yytext()); }
                   else {
                     return getNext();
                   }
@@ -1208,7 +1201,7 @@ RM/{NUM}        { String txt = yytext();
 [.¡¿\u037E\u0589\u061F\u06D4\u0700-\u0702\u07FA\u3002]  { return getNext(); }
 =+              { return getNext(); }
 \/              { if (escapeForwardSlashAsterisk) {
-                    return getNext(delimit(yytext(), '/'), yytext()); }
+                    return getNext(LexerUtils.escapeChar(yytext(), '/'), yytext()); }
                   else {
                     return getNext();
                   }
@@ -1221,9 +1214,12 @@ RM/{NUM}        { String txt = yytext();
 {HTHINGEXCEPTIONPREFIXED}\./{INSENTP}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
 {HTHINGEXCEPTIONSUFFIXED}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
 {HTHINGEXCEPTIONSUFFIXED}\./{INSENTP}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHING}        { breakByHyphens(yytext());
-                  if (DEBUG) { logger.info("Used {HTHING} to recognize " + yytext() + " as " + LexerUtils.removeSoftHyphens(yytext())); }
-                  return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext()); }
+{HTHING}        { String tok = yytext();
+                  breakByHyphens(tok);
+                  tok = yytext();
+                  String norm = LexerUtils.removeSoftHyphens(tok);
+                  if (DEBUG) { logger.info("Used {HTHING} to recognize " + tok + " as " + norm); }
+                  return getNext(norm, tok); }
 {HTHING}\./{INSENTP}
                 { String tok = yytext();
                   breakByHyphens(tok);
