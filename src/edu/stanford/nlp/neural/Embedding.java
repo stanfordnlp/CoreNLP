@@ -16,7 +16,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * @author Minh-Thang Luong <lmthang@stanford.edu>
+ * @author Minh-Thang Luong {@code <lmthang@stanford.edu>}
  * @author John Bauer
  * @author Richard Socher
  * @author Kevin Clark

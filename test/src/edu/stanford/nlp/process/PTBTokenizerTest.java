@@ -301,6 +301,7 @@ public class PTBTokenizerTest {
           "Sambucus nigra subsp. canadensis and Canis spp. missing",
           "Jim Jackon & Co. LLC replied.",
           "Xanadu Pvt. Ltd. replied.",
+          " \u2010 ",
   };
 
   private final String[][] moreGold = {
@@ -309,6 +310,7 @@ public class PTBTokenizerTest {
           { "Sambucus", "nigra", "subsp.", "canadensis", "and", "Canis", "spp.", "missing" },
           { "Jim", "Jackon", "&", "Co.", "LLC", "replied", "." },
           { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
+          { "\u2010" },
   };
 
   @Test
