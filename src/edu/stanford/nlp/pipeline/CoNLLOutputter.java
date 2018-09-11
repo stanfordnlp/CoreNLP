@@ -131,7 +131,11 @@ public class CoNLLOutputter extends AnnotationOutputter {
     }
     */
 
-    return StringUtils.join(fields, "\t");
+    if (options.pretty) {
+      return StringUtils.join(fields, "\t");
+    } else {
+      return StringUtils.join(fields, "/");
+    }
   }
 
   /** Print an Annotation to an output stream.
@@ -176,7 +180,11 @@ public class CoNLLOutputter extends AnnotationOutputter {
 
             // Write the token
             writer.print(line(i + 1, tokens.get(i), head, deprel, options));
-            writer.println();
+            if (options.pretty) {
+              writer.println();
+            } else if (i < tokens.size() - 1) {
+              writer.print(' ');
+            }
           }
         }
         writer.println(); // extra blank line at end of sentence
