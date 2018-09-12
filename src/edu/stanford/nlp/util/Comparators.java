@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+// todo [cdm 2018]: Maybe much of this can now be replaced by java.util.Comparator class methods?
 
 // Originally from edu.stanford.nlp.natlog.util
 public class Comparators {

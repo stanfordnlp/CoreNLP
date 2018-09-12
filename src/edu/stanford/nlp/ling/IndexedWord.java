@@ -34,7 +34,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IndexedWord.class);
+  private static final  Redwood.RedwoodChannels log = Redwood.channels(IndexedWord.class);
 
   private static final long serialVersionUID = 3739633991145239829L;
 
@@ -47,9 +47,10 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
 
   private int copyCount; // = 0;
 
-  private int numCopies = 0;
+  private int numCopies; // = 0;
 
-  private IndexedWord original = null;
+  /** Stores the original IndexedWord when you make copy nodes. */
+  private IndexedWord original; // = null;
 
   /**
    * Useful for specifying a fine-grained position when butchering parse trees.
@@ -112,13 +113,18 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     label.set(CoreAnnotations.IndexAnnotation.class, index);
   }
 
-  public IndexedWord makeCopy(int count) {
+  private IndexedWord makeCopy(int count) {
     CoreLabel labelCopy = new CoreLabel(label);
     IndexedWord copy = new IndexedWord(labelCopy);
     copy.setCopyCount(count);
     return copy;
   }
 
+  /** This copies the whole IndexedWord, incrementing a copy count.
+   *  We've subsequently decided that it is better to use soft copies, where the IndexedWord is copied,
+   *  but the backing CoreLabel is kept the same. See {@link #makeSoftCopy()}.
+   */
+  @SuppressWarnings("unused")
   public IndexedWord makeCopy() {
     return makeCopy(++numCopies);
   }
@@ -143,7 +149,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   }
 
   /**
-   * TODO: get rid of this.  Only used in two places in RTE (in rewriter code)
+   * Return the CoreLabel behind this IndexedWord
    */
   public CoreLabel backingLabel() { return label; }
 
@@ -360,6 +366,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     }
   }
 
+  @SuppressWarnings("RedundantIfStatement")
   public boolean isCopy(IndexedWord otherWord) {
     Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
     Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
@@ -392,6 +399,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
    * validly represented by token position.
    * All IndexedWords that lack these fields will be regarded as equal.
    */
+  @SuppressWarnings("RedundantIfStatement")
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -429,7 +437,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   }
 
 
-  private int cachedHashCode = 0;
+  private int cachedHashCode; // = 0;
   /**
    * This hashCode uses only the docID, sentenceIndex, and index.
    * See compareTo for more info.
@@ -461,9 +469,8 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   }
 
   /**
-   * NOTE: This compareTo is based on and made to be compatible with the one
-   * from IndexedFeatureLabel.  You <em>must</em> have a DocIDAnnotation,
-   * SentenceIndexAnnotation, and IndexAnnotation for this to make sense and
+   * NOTE: For this compareTo, you <em>must</em> have a DocIDAnnotation,
+   * SentenceIndexAnnotation, and IndexAnnotation for it to make sense and
    * be guaranteed to work properly. Currently, it won't error out and will
    * try to return something sensible if these are not defined, but that really
    * isn't proper usage!
@@ -503,23 +510,28 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     int docComp = docID.compareTo(w.getString(CoreAnnotations.DocIDAnnotation.class));
     if (docComp != 0) return docComp;
 
-    int sentComp = sentIndex() - w.sentIndex();
+    int sentComp = Integer.compare(sentIndex(), w.sentIndex());
     if (sentComp != 0) return sentComp;
 
-    int indexComp = index() - w.index();
+    int indexComp = Integer.compare(index(), w.index());
     if (indexComp != 0) return indexComp;
 
-    return copyCount() - w.copyCount();
+    return Integer.compare(copyCount(), w.copyCount());
   }
 
   /**
-   * Returns the value-tag of this label.
+   * Returns the value-tag of this label. Doesn't represent copy nodes specially.
    */
   @Override
   public String toString() {
     return toString(CoreLabel.OutputFormat.VALUE_TAG);
   }
 
+  /** Allows choices of how to format Label.
+   *
+   * @param format An instance of the OutputFormat enum (the same as for a CoreLabel)
+   * @return A String representation of the label, including marking copy nodes with primes (')
+   */
   public String toString(CoreLabel.OutputFormat format) {
     return label.toString(format) + toPrimes();
   }
