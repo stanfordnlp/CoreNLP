@@ -11,6 +11,7 @@ import edu.stanford.nlp.ling.tokensregex.types.Tags;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.TimeExpression;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 
@@ -367,9 +368,19 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         token.set(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class, fineGrainedTag);
       }
     }
+
+    // set confidence for anything not already set to n.e. tag, -1.0
+    for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+      if (token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class) == null) {
+        Pair<String,Double> labelProbPair = new Pair<>(token.ner(), -1.0);
+        token.set(CoreAnnotations.NamedEntityTagProbAnnotation.class, labelProbPair);
+      }
+    }
+
     // if entity mentions should be built, run that
     if (this.buildEntityMentions)
       entityMentionsAnnotator.annotate(annotation);
+
   }
 
   /** convert Spanish tag content of older models **/
@@ -399,11 +410,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         // add the named entity tag to each token
         String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
         String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+        Pair<String,Double> neTagProb = output.get(i).get(CoreAnnotations.NamedEntityTagProbAnnotation.class);
         if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
           neTag = spanishToEnglishTag(neTag);
           normNeTag = spanishToEnglishTag(normNeTag);
         }
         tokens.get(i).setNER(neTag);
+        tokens.get(i).set(CoreAnnotations.NamedEntityTagProbAnnotation.class, neTagProb);
         tokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
         if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
         NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));

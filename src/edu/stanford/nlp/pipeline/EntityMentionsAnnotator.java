@@ -296,6 +296,21 @@ public class EntityMentionsAnnotator implements Annotator {
         entityMentionIndex++;
       }
     }
+
+    // set the entity mention confidence
+    for (CoreMap entityMention : allEntityMentions) {
+      double minTokenProb = 1.1;
+      String labelProbIsFor = "";
+      for (CoreLabel token : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {
+        if (token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).second() < minTokenProb) {
+          labelProbIsFor = token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).first();
+          minTokenProb = token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).second();
+        }
+      }
+      Pair<String,Double> labelProbPair = new Pair<String,Double>(labelProbIsFor, minTokenProb);
+      entityMention.set(CoreAnnotations.NamedEntityTagProbAnnotation.class, labelProbPair);
+    }
+
     annotation.set(mentionsCoreAnnotationClass, allEntityMentions);
   }
 

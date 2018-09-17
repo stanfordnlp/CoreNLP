@@ -79,6 +79,14 @@ public class TestSequenceModel implements SequenceModel {
   }
 
   /**
+   * Get the probability of label with labelIndex for the token at position
+   * @return
+   */
+  public double labelProb(int position, int labelIndex) {
+    return cliqueTree.prob(position, labelIndex);
+  }
+
+  /**
    * Return the score of the proposed tags for position given.
    * @param tags is an array indicating the assignment of labels to score.
    * @param pos is the position to return a score for.
