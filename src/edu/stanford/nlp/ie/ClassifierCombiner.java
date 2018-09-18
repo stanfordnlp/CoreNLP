@@ -397,7 +397,9 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       String mainAnswer = wMain.get(CoreAnnotations.AnswerAnnotation.class);
       INN wAux = auxIterator.next();
       String auxAnswer = wAux.get(CoreAnnotations.AnswerAnnotation.class);
-      double auxAnswerProb = wAux.get(CoreAnnotations.AnswerProbAnnotation.class);
+      Double auxAnswerProb = wAux.get(CoreAnnotations.AnswerProbAnnotation.class);
+      if (auxAnswerProb == null)
+        auxAnswerProb = -1.0;
       boolean insideMainTag = !mainAnswer.equals(background);
 
       /* if the auxiliary classifier gave it one of the labels unique to
