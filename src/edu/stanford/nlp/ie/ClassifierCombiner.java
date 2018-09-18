@@ -388,7 +388,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     boolean insideAuxTag = false;
     boolean auxTagValid = true;
     String prevAnswer = background;
-    double prevAnswerProb = -1.0;
+    Double prevAnswerProb = null;
     Collection<INN> constituents = new ArrayList<>();
 
     Iterator<INN> auxIterator = auxDocument.listIterator();
@@ -398,8 +398,6 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       INN wAux = auxIterator.next();
       String auxAnswer = wAux.get(CoreAnnotations.AnswerAnnotation.class);
       Double auxAnswerProb = wAux.get(CoreAnnotations.AnswerProbAnnotation.class);
-      if (auxAnswerProb == null)
-        auxAnswerProb = -1.0;
       boolean insideMainTag = !mainAnswer.equals(background);
 
       /* if the auxiliary classifier gave it one of the labels unique to
@@ -409,7 +407,8 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           if (auxTagValid){
             for (INN wi : constituents) {
               wi.set(CoreAnnotations.AnswerAnnotation.class, prevAnswer);
-              wi.set(CoreAnnotations.AnswerProbAnnotation.class, prevAnswerProb);
+              if (prevAnswerProb != null)
+                wi.set(CoreAnnotations.AnswerProbAnnotation.class, prevAnswerProb);
             }
           }
           auxTagValid = true;
@@ -425,7 +424,8 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           if (auxTagValid){
             for (INN wi : constituents) {
               wi.set(CoreAnnotations.AnswerAnnotation.class, prevAnswer);
-              wi.set(CoreAnnotations.AnswerProbAnnotation.class, prevAnswerProb);
+              if (prevAnswerProb != null)
+                wi.set(CoreAnnotations.AnswerProbAnnotation.class, prevAnswerProb);
             }
           }
           constituents = new ArrayList<>();
@@ -433,14 +433,15 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
         insideAuxTag=false;
         auxTagValid = true;
         prevAnswer = background;
-        prevAnswerProb = -1.0;
+        prevAnswerProb = null;
       }
     }
     // deal with a sequence final auxLabel
     if (auxTagValid){
       for (INN wi : constituents) {
         wi.set(CoreAnnotations.AnswerAnnotation.class, prevAnswer);
-        wi.set(CoreAnnotations.AnswerProbAnnotation.class, prevAnswerProb);
+        if (prevAnswerProb != null)
+          wi.set(CoreAnnotations.AnswerProbAnnotation.class, prevAnswerProb);
       }
     }
   }
