@@ -518,6 +518,9 @@ public class CRFClassifierITest {
         }
       } else {
         List<CoreLabel> best = crf.classify(input);
+        for (CoreLabel bestToken : best) {
+          bestToken.remove(CoreAnnotations.AnswerProbAnnotation.class);
+        }
         Assert.assertEquals(best, beam.get(0).first());
       }
       lastAnswer = beam2;
