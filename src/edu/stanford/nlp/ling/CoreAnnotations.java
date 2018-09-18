@@ -92,10 +92,10 @@ public class CoreAnnotations {
   /**
    * Label and probability pair representing the coarse grained label and probability
    */
-  public static class NamedEntityTagProbAnnotation implements CoreAnnotation<Pair<String,Double>> {
+  public static class NamedEntityTagProbAnnotation implements CoreAnnotation<HashMap<String,Double>> {
     @Override
-    public Class<Pair<String,Double>> getType() {
-      return ErasureUtils.uncheckedCast(Pair.class);
+    public Class<HashMap<String,Double>> getType() {
+      return ErasureUtils.uncheckedCast(HashMap.class);
     }
   }
 

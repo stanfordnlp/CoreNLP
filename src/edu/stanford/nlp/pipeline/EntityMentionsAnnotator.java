@@ -302,13 +302,15 @@ public class EntityMentionsAnnotator implements Annotator {
       double minTokenProb = 1.1;
       String labelProbIsFor = "";
       for (CoreLabel token : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {
-        if (token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).second() < minTokenProb) {
-          labelProbIsFor = token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).first();
-          minTokenProb = token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).second();
+        String coarseNERLabel = entityMention.get(CoreAnnotations.CoarseNamedEntityTagAnnotation.class);
+        if (token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).get(coarseNERLabel) < minTokenProb) {
+          labelProbIsFor = coarseNERLabel;
+          minTokenProb = token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).get(coarseNERLabel) ;
         }
       }
-      Pair<String,Double> labelProbPair = new Pair<String,Double>(labelProbIsFor, minTokenProb);
-      entityMention.set(CoreAnnotations.NamedEntityTagProbAnnotation.class, labelProbPair);
+      HashMap<String,Double> labelProbMap = new HashMap<>();
+      labelProbMap.put(labelProbIsFor, minTokenProb);
+      entityMention.set(CoreAnnotations.NamedEntityTagProbAnnotation.class, labelProbMap);
     }
 
     annotation.set(mentionsCoreAnnotationClass, allEntityMentions);
