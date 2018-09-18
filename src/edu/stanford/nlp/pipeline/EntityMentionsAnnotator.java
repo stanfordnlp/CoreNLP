@@ -299,18 +299,27 @@ public class EntityMentionsAnnotator implements Annotator {
 
     // set the entity mention confidence
     for (CoreMap entityMention : allEntityMentions) {
-      double minTokenProb = 1.1;
-      String labelProbIsFor = "";
+      Set<String> labelsWithProbs =
+          entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0).get(
+              CoreAnnotations.NamedEntityTagProbAnnotation.class).keySet();
+      HashMap<String,Double> entityLabelProbVals = new HashMap<>();
+      for (String labelWithProb : labelsWithProbs) {
+        entityLabelProbVals.put(labelWithProb, 1.1);
+      }
       for (CoreLabel token : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {
-        String coarseNERLabel = entityMention.get(CoreAnnotations.CoarseNamedEntityTagAnnotation.class);
-        if (token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).get(coarseNERLabel) < minTokenProb) {
-          labelProbIsFor = coarseNERLabel;
-          minTokenProb = token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class).get(coarseNERLabel) ;
+        HashMap<String,Double> labelProbsForToken =
+            token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class);
+        for (String label : labelProbsForToken.keySet()) {
+          if (labelProbsForToken.get(label) < entityLabelProbVals.get(label))
+            entityLabelProbVals.put(label, labelProbsForToken.get(label));
+          }
+        }
+      for (String label : entityLabelProbVals.keySet()) {
+        if (entityLabelProbVals.get(label) >= 1.1) {
+          entityLabelProbVals.put(label, -1.0);
         }
       }
-      HashMap<String,Double> labelProbMap = new HashMap<>();
-      labelProbMap.put(labelProbIsFor, minTokenProb);
-      entityMention.set(CoreAnnotations.NamedEntityTagProbAnnotation.class, labelProbMap);
+      entityMention.set(CoreAnnotations.NamedEntityTagProbAnnotation.class, entityLabelProbVals);
     }
 
     annotation.set(mentionsCoreAnnotationClass, allEntityMentions);
