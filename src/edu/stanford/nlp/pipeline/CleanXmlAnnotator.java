@@ -532,7 +532,9 @@ public class CleanXmlAnnotator implements Annotator {
     String quoteAuthor = null;
     int quoteStartCharOffset = -1;
 
-    annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<>());
+    // check if annotation is null for case where just processing a list of tokens
+    if (annotation != null)
+      annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<>());
 
     boolean markSingleSentence = false;
 
@@ -752,8 +754,9 @@ public class CleanXmlAnnotator implements Annotator {
             currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class, dateString);
             // add the quotes list
             currSectionCoreMap.set(CoreAnnotations.QuotesAnnotation.class, sectionQuotes);
-            // add this to the list of sections
-            annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
+            // add this to the list of sections, if there is an annotation
+            if (annotation != null)
+              annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
             // finish processing section
             savedTokensForSection.clear();
             sectionStartTag = null;
