@@ -371,10 +371,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
     // set confidence for anything not already set to n.e. tag, -1.0
     for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
-      if (token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class) == null) {
-        HashMap<String,Double> labelToProb = new HashMap<>();
-        labelToProb.put(token.ner(), -1.0);
-        token.set(CoreAnnotations.NamedEntityTagProbAnnotation.class, labelToProb);
+      if (token.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class) == null) {
+        Map<String,Double> labelToProb = Collections.singletonMap(token.ner(), -1.0);
+        token.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, labelToProb);
       }
     }
 
@@ -411,13 +410,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         // add the named entity tag to each token
         String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
         String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-        HashMap<String,Double> neTagProbMap = output.get(i).get(CoreAnnotations.NamedEntityTagProbAnnotation.class);
+        Map<String,Double> neTagProbMap = output.get(i).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
         if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
           neTag = spanishToEnglishTag(neTag);
           normNeTag = spanishToEnglishTag(normNeTag);
         }
         tokens.get(i).setNER(neTag);
-        tokens.get(i).set(CoreAnnotations.NamedEntityTagProbAnnotation.class, neTagProbMap);
+        tokens.get(i).set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, neTagProbMap);
         tokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
         if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
         NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));

@@ -221,7 +221,7 @@ public class EntityMentionsAnnotator implements Annotator {
     // get a list of labels that have probability values from the first token
     Set<String> labelsWithProbs =
         entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0).get(
-            CoreAnnotations.NamedEntityTagProbAnnotation.class).keySet();
+            CoreAnnotations.NamedEntityTagProbsAnnotation.class).keySet();
     // build the label values hash map for the entity mention
     HashMap<String,Double> entityLabelProbVals = new HashMap<>();
     // initialize to 1.1
@@ -230,8 +230,8 @@ public class EntityMentionsAnnotator implements Annotator {
     }
     // go through each token, see if you can find a smaller prob value for that label
     for (CoreLabel token : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {
-      HashMap<String,Double> labelProbsForToken =
-          token.get(CoreAnnotations.NamedEntityTagProbAnnotation.class);
+      Map<String,Double> labelProbsForToken =
+          token.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
       for (String label : labelProbsForToken.keySet()) {
         if (labelProbsForToken.get(label) < entityLabelProbVals.get(label))
           entityLabelProbVals.put(label, labelProbsForToken.get(label));
@@ -331,7 +331,7 @@ public class EntityMentionsAnnotator implements Annotator {
     for (CoreMap entityMention : allEntityMentions) {
       HashMap<String,Double> entityMentionLabelProbVals =
           determineEntityMentionConfidences(entityMention);
-      entityMention.set(CoreAnnotations.NamedEntityTagProbAnnotation.class, entityMentionLabelProbVals);
+      entityMention.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, entityMentionLabelProbVals);
     }
 
     annotation.set(mentionsCoreAnnotationClass, allEntityMentions);

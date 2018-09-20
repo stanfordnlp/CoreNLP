@@ -290,10 +290,10 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   private static <INN extends CoreMap> void copyAnswerFieldsToNERField(List<INN> l) {
     for (INN m: l) {
       m.set(CoreAnnotations.NamedEntityTagAnnotation.class, m.get(CoreAnnotations.AnswerAnnotation.class));
-      HashMap<String,Double> labelToProb = new HashMap<String,Double>();
-      labelToProb.put(
-          m.get(CoreAnnotations.NamedEntityTagAnnotation.class), m.get(CoreAnnotations.AnswerProbAnnotation.class));
-      m.set(CoreAnnotations.NamedEntityTagProbAnnotation.class, labelToProb);
+      Map<String,Double> labelToProb =
+          Collections.singletonMap(m.get(CoreAnnotations.NamedEntityTagAnnotation.class),
+              m.get(CoreAnnotations.AnswerProbAnnotation.class));
+      m.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, labelToProb);
     }
   }
 
