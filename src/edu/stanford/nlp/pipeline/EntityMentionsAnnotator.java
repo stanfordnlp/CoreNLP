@@ -233,7 +233,7 @@ public class EntityMentionsAnnotator implements Annotator {
       Map<String,Double> labelProbsForToken =
           token.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
       for (String label : labelProbsForToken.keySet()) {
-        if (labelProbsForToken.get(label) < entityLabelProbVals.get(label))
+        if (entityLabelProbVals.containsKey(label) && labelProbsForToken.get(label) < entityLabelProbVals.get(label))
           entityLabelProbVals.put(label, labelProbsForToken.get(label));
       }
     }
