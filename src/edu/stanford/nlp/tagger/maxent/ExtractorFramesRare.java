@@ -375,7 +375,7 @@ public class ExtractorFramesRare {
       }
     }
 
-    return extrs.toArray(new Extractor[extrs.size()]);
+    return extrs.toArray(Extractor.EMPTY_EXTRACTOR_ARRAY);
   }
 
 
@@ -547,7 +547,7 @@ class RareExtractor extends Extractor {
   }
 
   static boolean startsUpperCase(String s) {
-    if (s == null || s.length() == 0) {
+    if (s == null || s.isEmpty()) {
       return false;
     }
     char ch = s.charAt(0);
@@ -721,8 +721,6 @@ class CaselessCompanyNameDetector extends RareExtractor {
 
   @Override
   String extract(History h, PairsHolder pH) {
-    String s = pH.getWord(h, 0);
-
     for (int i = 0; i <= CompanyNameDetector.COMPANY_NAME_WINDOW; i++) {
       String s1 = pH.getWord(h, i);
       if (companyNameEnd(s1)) {
@@ -1245,7 +1243,7 @@ class ExtractorWordPref extends RareExtractor {
 
   @Override
   public String toString() {
-    return StringUtils.getShortClassName(this) + "(len" + num + ",w" + position + ")";
+    return StringUtils.getShortClassName(this) + "(len" + num + ",w" + position + ')';
   }
 
   @Override public boolean isLocal() { return (position == 0); }
@@ -1349,7 +1347,7 @@ class CtbPreDetector extends RareExtractor {
   String extract(History h, PairsHolder pH) {
     String s = TestSentence.toNice(pH.getWord(h, position));
 
-    if (!s.equals("") && CtbDict.getTagPre(t1, s.substring(0, 1)).equals("1"))
+    if ( ! s.isEmpty() && CtbDict.getTagPre(t1, s.substring(0, 1)).equals("1"))
       return "1:"+t1;
     return "0:"+t1;
   }
@@ -1380,7 +1378,7 @@ class CtbSufDetector extends RareExtractor {
   String extract(History h, PairsHolder pH) {
     String s=TestSentence.toNice(pH.getWord(h, position));
 
-    if(!s.equals("") && CtbDict.getTagSuf(t1, s.substring(s.length()-1, s.length())).equals("1"))
+    if(!s.isEmpty() && CtbDict.getTagSuf(t1, s.substring(s.length()-1)).equals("1"))
       return "1:"+t1;
     return "0:"+t1;
   }
@@ -1490,6 +1488,9 @@ class CTBunkDictDetector extends RareExtractor {
 
 
 abstract class CWordBooleanExtractor extends RareExtractor {
+
+  private static final long serialVersionUID = 4972499976788741554L;
+
   @Override
   String extract(History h, PairsHolder pH) {
     String cword = pH.getWord(h, 0);
@@ -1500,6 +1501,7 @@ abstract class CWordBooleanExtractor extends RareExtractor {
 
   @Override public boolean isLocal() { return true; }
   @Override public boolean isDynamic() { return false; }
+
 }
 
 
