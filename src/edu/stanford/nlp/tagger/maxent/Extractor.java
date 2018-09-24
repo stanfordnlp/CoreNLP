@@ -1,14 +1,15 @@
-/*
+/**
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Stanford University<p>
+ * Copyright:    Copyright (c) Kristina Toutanova<p>
+ * Company:      Stanford University<p>
  */
 
 package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 
-// import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -51,8 +52,8 @@ import java.io.Serializable;
  */
 public class Extractor implements Serializable  {
 
-  // /** A logger for this class */
-  // private static final Redwood.RedwoodChannels log = Redwood.channels(Extractor.class);
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Extractor.class);
 
   private static final long serialVersionUID = -4694133872973560083L;
 
@@ -65,7 +66,6 @@ public class Extractor implements Serializable  {
     this(Integer.MAX_VALUE, false);
   }
 
-  public static final Extractor[] EMPTY_EXTRACTOR_ARRAY = new Extractor[0];
 
   /**
    * This constructor creates an extractor which extracts either the tag or
