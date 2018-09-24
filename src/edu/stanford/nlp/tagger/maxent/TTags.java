@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * This class holds the POS tags, assigns them unique ids, and knows which tags
  * are open versus closed class.
- * <p/>
+ * <p>
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
  * Company:      Stanford University<p>
@@ -27,7 +27,7 @@ public class TTags {
 
   private Index<String> index = new HashIndex<>();
   private final Set<String> closed = Generics.newHashSet();
-  private Set<String> openTags = null; /* cache */
+  private Set<String> openTags; // = null; /* cache */
   private final boolean isEnglish; // for speed
   private static final boolean doDeterministicTagExpansion = true;
 
@@ -353,7 +353,7 @@ public class TTags {
       read(in);
       in.close();
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeIOException(e);
     }
   }
 
@@ -369,7 +369,7 @@ public class TTags {
         if (inClosed) closed.add(tag);
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeIOException(e);
     }
   }
 

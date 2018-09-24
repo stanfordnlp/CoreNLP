@@ -29,7 +29,7 @@ public class UniversalDependenciesConverter {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(UniversalDependenciesConverter.class);
 
-  private static String NER_COMBINER_NAME = "edu.stanford.nlp.ie.NERClassifierCombiner";
+  private static final String NER_COMBINER_NAME = "edu.stanford.nlp.ie.NERClassifierCombiner";
 
   private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
 
@@ -220,7 +220,7 @@ public class UniversalDependenciesConverter {
       }
     } else {
       System.err.println("No input file specified!");
-      System.err.println("");
+      System.err.println();
       System.err.printf("Usage: java %s [-treeFile trees.tree | -conlluFile deptrees.conllu]"
                       + " [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
               UniversalDependenciesConverter.class.getCanonicalName());
