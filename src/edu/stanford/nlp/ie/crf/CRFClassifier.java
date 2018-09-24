@@ -1932,7 +1932,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         throw new RuntimeException("gradient check failed");
       }
     }
-    return minimizer.minimize(func, flags.tolerance, initialWeights);
+    return minimizer.minimize(func, flags.tolerance, initialWeights, flags.maxIterations);
   }
 
   public Minimizer<DiffFunction> getMinimizer() {
