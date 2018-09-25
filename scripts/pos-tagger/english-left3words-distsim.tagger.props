@@ -1,8 +1,8 @@
-## tagger training invoked at Tue Feb 25 04:12:25 PST 2014 with arguments:
+## tagger training invoked at Sun Sep 23 19:24:37 PST 2018 with arguments:
                    model = english-left3words-distsim.tagger
                     arch = left3words,naacl2003unknowns,wordshapes(-1,1),distsim(/u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters,-1,1),distsimconjunction(/u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters,-1,1)
             wordFunction = edu.stanford.nlp.process.AmericanizeFunction
-               trainFile = /u/nlp/data/pos-tagger/english/train-wsj-0-18;/u/nlp/data/pos-tagger/english/train-extra-english;/u/nlp/data/pos-tagger/english/train-tech-english
+               trainFile = /u/nlp/data/pos-tagger/english/train-wsj-0-18;/u/nlp/data/pos-tagger/english/train-extra-english;/u/nlp/data/pos-tagger/english/train-tech-english;/u/nlp/data/pos-tagger/english/train-currency
          closedClassTags = 
  closedClassTagThreshold = 40
  curWordMinFeatureThresh = 2
