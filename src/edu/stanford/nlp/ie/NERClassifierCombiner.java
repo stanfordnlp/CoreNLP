@@ -348,19 +348,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       // AnswerAnnotation -> NERAnnotation
       copyAnswerFieldsToNERField(output);
     }
-
-    // Apply RegexNER annotations
-    // cdm 2016: Used to say and do "// skip first token" but I couldn't understand why, so I removed that.
-    for (CoreLabel token : tokens) {
-      // System.out.println(token.toShorterString());
-      if ((token.tag() == null || token.tag().charAt(0) == 'N') && "O".equals(token.ner()) || "MISC".equals(token.ner())) {
-        String target = gazetteMapping.get(token.originalText());
-        if (target != null) {
-          token.setNER(target);
-        }
-      }
-    }
-
+    
     // Return
     return output;
   }
