@@ -266,7 +266,8 @@ java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,sspli
 
 ```bash
 # shut off numeric classifiers
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.applyNumericClassifiers false -file example.txt -outputFormat text
+# note that in this case ner no longer requires pos or lemma
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,ner -ner.applyNumericClassifiers false -file example.txt -outputFormat text
 ```
 
 ```bash
@@ -356,7 +357,7 @@ public class NERPipelineDemo {
 
 ## SUTime
 
-StanfordCoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.html), Stanford's temporal expression
+Stanford CoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.html), Stanford's temporal expression
 recognizer. SUTime is transparently called from the "ner" annotator,
 so no configuration is necessary. Furthermore, the "cleanxml"
 annotator can extract the reference date for a given XML document, so
@@ -367,11 +368,9 @@ SUTime supports the same annotations as before, i.e.,
 NamedEntityTagAnnotation is set with the label of the numeric entity (DATE,
 TIME, DURATION, MONEY, PERCENT, or NUMBER) and
 NormalizedNamedEntityTagAnnotation is set to the value of the normalized
-temporal expression. Note that NormalizedNamedEntityTagAnnotation now
-follows the TIMEX3 standard, rather than Stanford's internal representation,
-e.g., "2010-01-01" for the string "January 1, 2010", rather than "20100101".
+temporal expression.
 
-Also, SUTime now sets the TimexAnnotation key to an
+Also, SUTime sets the TimexAnnotation key to an
 edu.stanford.nlp.time.Timex object, which contains the complete list of
 TIMEX3 fields for the corresponding expressions, such as "val", "alt_val",
 "type", "tid". This might be useful to developers interested in recovering
@@ -393,7 +392,7 @@ option will use the provided date for doc date.  The date format should be `yyyy
 
 ## Caseless models
 
-It is possible to run StanfordCoreNLP with NER
+It is possible to run Stanford CoreNLP with NER
 models that ignore capitalization. We have trained models like this
 for English. You can find details on the
 [Caseless models](caseless.html) page.
