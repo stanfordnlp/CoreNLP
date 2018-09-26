@@ -240,7 +240,7 @@ After all of the previous steps have been run, entity detection will be run to c
 The entity mention detection will be based off of the tagging scheme.  This is accomplished with an `EntityMentionsAnnotator`
 sub-annotator.
 
-If a basic tagging scheme (example: PERSON, ORGANIZATION, LOCATION) is used, all contiguous sequences of tokens with the same tag will be marked as an entity.
+If a basic IO tagging scheme (example: PERSON, ORGANIZATION, LOCATION) is used, all contiguous sequences of tokens with the same tag will be marked as an entity.
 
 If a more advanced tagging scheme (such as BIO with tags like B-PERSON and I-PERSON) is used, sequences with the same tag
 split by a B-tag will be turned into multiple entities.
