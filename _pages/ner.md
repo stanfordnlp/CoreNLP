@@ -48,9 +48,11 @@ system.
 
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
-| ner.combinationMode | String | NORMAL | when set to NORMAL each tag can only be applied by the first CRF classifier that applies that tag ; when set to HIGH_RECALL all CRF classifiers can apply all of their tags |
 | ner.model | List(String) | null | A comma-separated list of NER model names (or just a single name is okay). If none are specified, a default list of English models is used (3class, 7class, and MISCclass, in that order). The names will be looked for as classpath resources, filenames, or URLs. |
 | ner.applyNumericClassifiers | boolean | true | Whether or not to use numeric classifiers, for money, percent, numbers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
+| ner.applyFineGrained | boolean | true | whether or not to apply fine-grained NER tags (e.g. LOCATION --> CITY) ; this will slow down performance |
+| ner.buildEntityMentions | boolean | true | whether or not to build entity mentions from token NER tags |
+| ner.combinationMode | String | NORMAL | when set to NORMAL each tag can only be applied by the first CRF classifier that applies that tag ; when set to HIGH_RECALL all CRF classifiers can apply all of their tags |
 | ner.useSUTime | boolean | true | Whether or not to use SUTime. SUTime at present only supports English; if not processing English, make sure to set this to false. |
 | ner.providedDocDate | String | - | Use the provided date in yyyy-mm-dd format as the doc date. |
 | ner.usePresentDateForDocDate | boolean | false | Use the present date for the doc date. |
