@@ -68,6 +68,22 @@ public class POSTaggerBenchmarkITest extends TestCase {
         "English");
   }
 
+  public void testEnglishBiDirectionalPOSModelAccuracy() {
+    // set up pipeline
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("pos.model",
+        "edu/stanford/nlp/models/pos-tagger/english-bidirectional/english-bidirectional-distsim.tagger");
+    StanfordCoreNLP englishBiDirectionalPipeline = new StanfordCoreNLP(props);
+    String englishPOSTestPath = "/u/nlp/data/pos-tagger/english/test-wsj-22-24";
+    List<String> sentences = readInPOSData(englishPOSTestPath);
+    double ENGLISH_BIDIRECTIONAL_TOKEN_ACCURACY = .900;
+    double ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY = .500;
+    runPOSTest(sentences, "_", englishBiDirectionalPipeline, 
+        ENGLISH_BIDIRECTIONAL_TOKEN_ACCURACY, ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY, "English");
+  }
+
   public void testChinesePOSModelAccuracy() {
     // set up pipeline
     Properties props = StringUtils.argsToProperties("-args", "StanfordCoreNLP-chinese.properties");
