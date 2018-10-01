@@ -98,8 +98,8 @@ public class POSTaggerBenchmarkITest extends TestCase {
     StanfordCoreNLP englishBiDirectionalPipeline = new StanfordCoreNLP(props);
     String englishPOSTestPath = "/u/nlp/data/pos-tagger/english/test-wsj-22-24";
     List<String> sentences = readInPOSData(englishPOSTestPath);
-    double ENGLISH_CASELESS_TOKEN_ACCURACY = .900;
-    double ENGLISH_CASELESS_SENTENCE_ACCURACY = .500;
+    double ENGLISH_CASELESS_TOKEN_ACCURACY = .958;
+    double ENGLISH_CASELESS_SENTENCE_ACCURACY = .462;
     runPOSTest(sentences, "_", englishBiDirectionalPipeline,
         ENGLISH_CASELESS_TOKEN_ACCURACY, ENGLISH_CASELESS_SENTENCE_ACCURACY,
         "English Caseless", true);
