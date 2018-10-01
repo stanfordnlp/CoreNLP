@@ -80,8 +80,9 @@ public class POSTaggerBenchmarkITest extends TestCase {
     List<String> sentences = readInPOSData(englishPOSTestPath);
     double ENGLISH_BIDIRECTIONAL_TOKEN_ACCURACY = .900;
     double ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY = .500;
-    runPOSTest(sentences, "_", englishBiDirectionalPipeline, 
-        ENGLISH_BIDIRECTIONAL_TOKEN_ACCURACY, ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY, "English");
+    runPOSTest(sentences, "_", englishBiDirectionalPipeline,
+        ENGLISH_BIDIRECTIONAL_TOKEN_ACCURACY, ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY,
+        "English BiDirectional");
   }
 
   public void testChinesePOSModelAccuracy() {
