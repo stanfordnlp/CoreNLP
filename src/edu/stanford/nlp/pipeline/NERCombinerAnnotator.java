@@ -105,10 +105,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
 
-    boolean applyRegexner =
+    /*boolean applyRegexner =
         PropertiesUtils.getBool(properties,
             NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
-            NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);
+            NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);*/
 
     boolean useSUTime =
         PropertiesUtils.getBool(properties,
@@ -141,7 +141,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
     }
     NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
-        useSUTime, applyRegexner, combinerProperties, loadPaths);
+        useSUTime, combinerProperties, loadPaths);
 
     this.nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     this.maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
