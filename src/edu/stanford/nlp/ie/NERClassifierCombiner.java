@@ -34,8 +34,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   public static final boolean APPLY_NUMERIC_CLASSIFIERS_DEFAULT = true;
   public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY = "ner.applyNumericClassifiers";
   private static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
-  //public static final String APPLY_GAZETTE_PROPERTY = "ner.regex";
-  //public static final boolean APPLY_GAZETTE_DEFAULT = false;
 
   private final Language nerLanguage;
   public static final Language NER_LANGUAGE_DEFAULT = Language.ENGLISH;
@@ -71,11 +69,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   // todo [cdm 2015]: Could avoid constructing this if applyNumericClassifiers is false
   private final AbstractSequenceClassifier<CoreLabel> nsc;
 
-  /**
-   * A mapping from single words to the NER tag that they should be.
-   */
-  //private final Map<String, String> gazetteMapping;
-
   public NERClassifierCombiner(Properties props)
     throws IOException
   {
@@ -84,11 +77,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     nerLanguage = Language.fromString(PropertiesUtils.getString(props, NER_LANGUAGE_PROPERTY, null), NER_LANGUAGE_DEFAULT);
     useSUTime = PropertiesUtils.getBool(props, NumberSequenceClassifier.USE_SUTIME_PROPERTY, NumberSequenceClassifier.USE_SUTIME_DEFAULT);
     nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
-    /*if (PropertiesUtils.getBool(props, NERClassifierCombiner.APPLY_GAZETTE_PROPERTY, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT) ) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }*/
   }
 
   public NERClassifierCombiner(String... loadPaths)
@@ -107,11 +95,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
     this.nsc = new NumberSequenceClassifier(useSUTime);
-    /*if (augmentRegexNER) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }*/
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
@@ -132,11 +115,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     } else {
       this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
     }
-    /*if (augmentRegexNER) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }*/
   }
 
   @SafeVarargs
@@ -157,11 +135,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
     this.nsc = new NumberSequenceClassifier(useSUTime);
-    /*if (augmentRegexNER) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }*/
   }
 
   // constructor which builds an NERClassifierCombiner from an ObjectInputStream
@@ -184,11 +157,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     this.nerLanguage = NER_LANGUAGE_DEFAULT;
     // build the nsc, note that initProps should be set by ClassifierCombiner
     this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
-    /*if (PropertiesUtils.getBool(props, NERClassifierCombiner.APPLY_GAZETTE_PROPERTY, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT) ) {
-      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
-    } else {
-      this.gazetteMapping = Collections.emptyMap();
-    }*/
   }
 
   public static final Set<String> DEFAULT_PASS_DOWN_PROPERTIES =
@@ -248,11 +216,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
               PropertiesUtils.getBool(properties,
                       prefix + NumberSequenceClassifier.USE_SUTIME_PROPERTY_BASE,
                       NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-      /*boolean applyRegexner =
-          PropertiesUtils.getBool(properties,
-              NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
-              NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);
-              */
+
       Properties combinerProperties;
       if (passDownProperties != null) {
         combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
