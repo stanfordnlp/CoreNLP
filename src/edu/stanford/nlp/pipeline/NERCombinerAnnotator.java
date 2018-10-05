@@ -42,8 +42,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
   private final boolean VERBOSE;
   private boolean setDocDate = false;
-  private boolean usePresentDateForDocDate = false;
-  private String providedDocDate = "";
 
   private final long maxTime;
   private final int nThreads;
@@ -104,22 +102,11 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         PropertiesUtils.getBool(properties,
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-    
+
     boolean useSUTime =
         PropertiesUtils.getBool(properties,
             NumberSequenceClassifier.USE_SUTIME_PROPERTY,
             NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-
-    // option for setting doc date to be the present during each annotation
-    usePresentDateForDocDate =
-        PropertiesUtils.getBool(properties, "ner." + "usePresentDateForDocDate", false);
-
-    // option for setting doc date from a provided string
-    providedDocDate = PropertiesUtils.getString(properties, "ner." + "providedDocDate", "");
-    Pattern p = Pattern.compile("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
-    Matcher m = p.matcher(providedDocDate);
-    if (!m.matches())
-      providedDocDate = "";
 
     NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
         NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
@@ -319,17 +306,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // set the doc date if using a doc date annotator
     if (setDocDate)
       docDateAnnotator.annotate(annotation);
-
-    // if ner.usePresentDateForDocDate is set, use the present date as the doc date
-    if (usePresentDateForDocDate) {
-      String currentDate =
-          new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
-      annotation.set(CoreAnnotations.DocDateAnnotation.class, currentDate);
-    }
-    // use provided doc date if applicable
-    if (!providedDocDate.equals("")) {
-      annotation.set(CoreAnnotations.DocDateAnnotation.class, providedDocDate);
-    }
     
     super.annotate(annotation);
     this.ner.finalizeAnnotation(annotation);
