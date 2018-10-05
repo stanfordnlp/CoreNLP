@@ -104,12 +104,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         PropertiesUtils.getBool(properties,
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-
-    /*boolean applyRegexner =
-        PropertiesUtils.getBool(properties,
-            NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
-            NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);*/
-
+    
     boolean useSUTime =
         PropertiesUtils.getBool(properties,
             NumberSequenceClassifier.USE_SUTIME_PROPERTY,
