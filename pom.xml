@@ -193,14 +193,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
-        <configuration>
-            <release>8</release>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 </project>
