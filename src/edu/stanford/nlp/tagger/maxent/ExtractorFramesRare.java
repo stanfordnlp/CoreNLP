@@ -721,6 +721,8 @@ class CaselessCompanyNameDetector extends RareExtractor {
 
   @Override
   String extract(History h, PairsHolder pH) {
+    String s = pH.getWord(h, 0);
+
     for (int i = 0; i <= CompanyNameDetector.COMPANY_NAME_WINDOW; i++) {
       String s1 = pH.getWord(h, i);
       if (companyNameEnd(s1)) {
