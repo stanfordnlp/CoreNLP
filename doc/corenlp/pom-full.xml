@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.stanford.nlp</groupId>
   <artifactId>stanford-corenlp</artifactId>
-  <version>3.9.1</version>
+  <version>3.9.2</version>
   <packaging>jar</packaging>
   <name>Stanford CoreNLP</name>
   <description>Stanford CoreNLP provides a set of natural language analysis tools which can take raw English language text input and give the base forms of words, their parts of speech, whether they are names of companies, people, etc., normalize dates, times, and numeric quantities, mark up the structure of sentences in terms of phrases and word dependencies, and indicate which noun phrases refer to the same entities. It provides the foundational building blocks for higher level text understanding applications.</description>
@@ -14,8 +14,8 @@
     </license>
   </licenses>
   <scm>
-    <url>https://nlp.stanford.edu/software/stanford-corenlp-full-2018-02-27.zip</url>
-    <connection>https://nlp.stanford.edu/software/stanford-corenlp-full-2018-02-27.zip</connection>
+    <url>https://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip</url>
+    <connection>https://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip</connection>
   </scm>
   <developers>
     <developer>
@@ -133,12 +133,36 @@
       <version>0.5</version>
       <scope>test</scope>
     </dependency>
-
+    
     <dependency>
       <groupId>com.pholser</groupId>
       <artifactId>junit-quickcheck-generators</artifactId>
       <version>0.5</version>
       <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>javax.activation-api</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.4.0-b180830.0359</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-core</artifactId>
+      <version>2.3.0.1</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+      <version>2.4.0-b180830.0438</version>
     </dependency>
 
   </dependencies>
@@ -160,7 +184,7 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>${project.basedir}/stanford-corenlp-3.9.1-models.jar</file>
+                  <file>${project.basedir}/stanford-corenlp-3.9.2-models.jar</file>
                   <type>jar</type>
                   <classifier>models</classifier>
                 </artifact>
