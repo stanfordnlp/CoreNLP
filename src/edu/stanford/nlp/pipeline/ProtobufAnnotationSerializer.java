@@ -297,6 +297,19 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setFineGrainedNER(coreLabel.get(FineGrainedNamedEntityTagAnnotation.class));
       keysToSerialize.remove(FineGrainedNamedEntityTagAnnotation.class);
     }
+    if (keySet.contains(NamedEntityTagProbsAnnotation.class)) {
+      // in case of empty label prob list, add string "empty"
+      // this is to differentiate between null and an empty hash map
+      if (coreLabel.get(NamedEntityTagProbsAnnotation.class).keySet().size() == 0) {
+        builder.addNerLabelProbs("empty");
+      } else {
+        for (String labelWithProb : coreLabel.get(NamedEntityTagProbsAnnotation.class).keySet()) {
+          Double labelProb = coreLabel.get(NamedEntityTagProbsAnnotation.class).get(labelWithProb);
+          builder.addNerLabelProbs(labelWithProb+"="+labelProb);
+        }
+      }
+      keysToSerialize.remove(NamedEntityTagProbsAnnotation.class);
+    }
     if (keySet.contains(CharacterOffsetBeginAnnotation.class)) { builder.setBeginChar(coreLabel.beginPosition()); keysToSerialize.remove(CharacterOffsetBeginAnnotation.class); }
     if (keySet.contains(CharacterOffsetEndAnnotation.class)) { builder.setEndChar(coreLabel.endPosition()); keysToSerialize.remove(CharacterOffsetEndAnnotation.class); }
     if (keySet.contains(LemmaAnnotation.class)) { builder.setLemma(coreLabel.lemma()); keysToSerialize.remove(LemmaAnnotation.class); }
@@ -1375,8 +1388,19 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasEntityMentionIndex()) {
       word.set(EntityMentionIndexAnnotation.class, proto.getEntityMentionIndex());
     }
-    if (proto.getCorefMentionIndexList().size() != 0) {
-      //word.set(CorefMentionIndexesAnnotation.class, proto.getCorefMentionIndexList());
+
+    // ner label probs
+    if (proto.getNerLabelProbsList().size() != 0) {
+      HashMap<String,Double> nerLabelProbs = new HashMap<>();
+      // check that the list isn't just the string "empty" indicating empty list
+      if (!proto.getNerLabelProbsList().get(0).equals("empty")) {
+        for (String nerLabelProb : proto.getNerLabelProbsList()) {
+          String[] labelAndProb = nerLabelProb.split("=");
+          Double labelProbDouble = Double.parseDouble(labelAndProb[1]);
+          nerLabelProbs.put(labelAndProb[0], labelProbDouble);
+        }
+      }
+      word.set(NamedEntityTagProbsAnnotation.class, nerLabelProbs);
     }
 
     // Return
@@ -1718,6 +1742,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           entityMention.set(CharacterOffsetBeginAnnotation.class, emCharOffsetBegin);
           entityMention.set(CharacterOffsetEndAnnotation.class, emCharOffsetEnd);
           entityMention.set(CoreAnnotations.TokensAnnotation.class, entityMentionTokens);
+          // set entity mention label prob vals
+          HashMap<String,Double> nerLabelConfidences =
+              EntityMentionsAnnotator.determineEntityMentionConfidences(entityMention);
+          entityMention.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, nerLabelConfidences);
         }
         if (sentence.getHasEntityMentionsAnnotation()) {
           map.set(CoreAnnotations.MentionsAnnotation.class, mentions);

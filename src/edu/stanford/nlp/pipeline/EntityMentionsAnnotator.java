@@ -217,6 +217,36 @@ public class EntityMentionsAnnotator implements Annotator {
     return pronouns;
   }
 
+  public static HashMap<String,Double> determineEntityMentionConfidences(CoreMap entityMention) {
+    // get a list of labels that have probability values from the first token
+    Set<String> labelsWithProbs =
+        entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0).get(
+            CoreAnnotations.NamedEntityTagProbsAnnotation.class).keySet();
+    // build the label values hash map for the entity mention
+    HashMap<String,Double> entityLabelProbVals = new HashMap<>();
+    // initialize to 1.1
+    for (String labelWithProb : labelsWithProbs) {
+      entityLabelProbVals.put(labelWithProb, 1.1);
+    }
+    // go through each token, see if you can find a smaller prob value for that label
+    for (CoreLabel token : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {
+      Map<String,Double> labelProbsForToken =
+          token.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
+      for (String label : labelProbsForToken.keySet()) {
+        if (entityLabelProbVals.containsKey(label) && labelProbsForToken.get(label) < entityLabelProbVals.get(label))
+          entityLabelProbVals.put(label, labelProbsForToken.get(label));
+      }
+    }
+    // if anything is still at 1.1, set it to -1.0
+    for (String label : entityLabelProbVals.keySet()) {
+      if (entityLabelProbVals.get(label) >= 1.1) {
+        entityLabelProbVals.put(label, -1.0);
+      }
+    }
+    // return the hash map of label probs
+    return entityLabelProbVals;
+  }
+
   @Override
   public void annotate(Annotation annotation) {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -296,6 +326,14 @@ public class EntityMentionsAnnotator implements Annotator {
         entityMentionIndex++;
       }
     }
+
+    // set the entity mention confidence
+    for (CoreMap entityMention : allEntityMentions) {
+      HashMap<String,Double> entityMentionLabelProbVals =
+          determineEntityMentionConfidences(entityMention);
+      entityMention.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, entityMentionLabelProbVals);
+    }
+
     annotation.set(mentionsCoreAnnotationClass, allEntityMentions);
   }
 

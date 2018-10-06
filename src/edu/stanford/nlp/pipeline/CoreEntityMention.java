@@ -52,6 +52,11 @@ public class CoreEntityMention {
     return this.entityMentionCoreMap.get(CoreAnnotations.EntityTypeAnnotation.class);
   }
 
+  /** return a map of labels to confidences **/
+  public Map<String, Double> entityTypeConfidences() {
+    return this.entityMentionCoreMap.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
+  }
+
   /** return the entity this entity mention is linked to **/
   public String entity() {
     return this.entityMentionCoreMap.get(CoreAnnotations.WikipediaEntityAnnotation.class);

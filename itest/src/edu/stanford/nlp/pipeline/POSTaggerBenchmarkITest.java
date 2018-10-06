@@ -16,13 +16,16 @@ public class POSTaggerBenchmarkITest extends TestCase {
     return sentences;
   }
 
-  public List<CoreLabel> entryToTokensList(String entryLine, String tagDelimiter) {
+  public List<CoreLabel> entryToTokensList(String entryLine, String tagDelimiter, boolean caseless) {
     String[] tokensAndTags = entryLine.split(" ");
     List<CoreLabel> tokensFromGold = new ArrayList<CoreLabel>();
     for (String tokenAndTag : tokensAndTags) {
       String[] tokenAndTagSplit = tokenAndTag.split(tagDelimiter);
       CoreLabel cl = new CoreLabel();
-      cl.setWord(tokenAndTagSplit[0]);
+      String finalWord = tokenAndTagSplit[0];
+      if (caseless)
+        finalWord = finalWord.toLowerCase();
+      cl.setWord(finalWord);
       cl.setTag(tokenAndTagSplit[1]);
       tokensFromGold.add(cl);
     }
@@ -65,7 +68,41 @@ public class POSTaggerBenchmarkITest extends TestCase {
     double ENGLISH_TOKEN_ACCURACY = .968;
     double ENGLISH_SENTENCE_ACCURACY = .516;
     runPOSTest(sentences, "_", englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_SENTENCE_ACCURACY,
-        "English");
+        "English", false);
+  }
+
+  public void testEnglishBiDirectionalPOSModelAccuracy() {
+    // set up pipeline
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("pos.model",
+        "edu/stanford/nlp/models/pos-tagger/english-bidirectional/english-bidirectional-distsim.tagger");
+    StanfordCoreNLP englishBiDirectionalPipeline = new StanfordCoreNLP(props);
+    String englishPOSTestPath = "/u/nlp/data/pos-tagger/english/test-wsj-22-24";
+    List<String> sentences = readInPOSData(englishPOSTestPath);
+    double ENGLISH_BIDIRECTIONAL_TOKEN_ACCURACY = .972;
+    double ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY = .564;
+    runPOSTest(sentences, "_", englishBiDirectionalPipeline,
+        ENGLISH_BIDIRECTIONAL_TOKEN_ACCURACY, ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY,
+        "English BiDirectional", false);
+  }
+
+  public void testEnglishCaselessPOSModelAccuracy() {
+    // set up pipeline
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("pos.model",
+        "edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger");
+    StanfordCoreNLP englishBiDirectionalPipeline = new StanfordCoreNLP(props);
+    String englishPOSTestPath = "/u/nlp/data/pos-tagger/english/test-wsj-22-24";
+    List<String> sentences = readInPOSData(englishPOSTestPath);
+    double ENGLISH_CASELESS_TOKEN_ACCURACY = .958;
+    double ENGLISH_CASELESS_SENTENCE_ACCURACY = .462;
+    runPOSTest(sentences, "_", englishBiDirectionalPipeline,
+        ENGLISH_CASELESS_TOKEN_ACCURACY, ENGLISH_CASELESS_SENTENCE_ACCURACY,
+        "English Caseless", true);
   }
 
   public void testChinesePOSModelAccuracy() {
@@ -79,7 +116,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     double CHINESE_TOKEN_ACCURACY = .974;
     double CHINESE_SENTENCE_ACCURACY = .577;
     runPOSTest(sentences, "#", chinesePipeline, CHINESE_TOKEN_ACCURACY, CHINESE_SENTENCE_ACCURACY,
-        "Chinese");
+        "Chinese", false);
   }
 
   public void testFrenchUDPOSModelAccuracy() {
@@ -93,7 +130,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     double FRENCH_UD_TOKEN_ACCURACY = .941;
     double FRENCH_UD_SENTENCE_ACCURACY = .375;
     runPOSTest(sentences, "_", frenchPipeline, FRENCH_UD_TOKEN_ACCURACY, FRENCH_UD_SENTENCE_ACCURACY,
-        "FrenchUD");
+        "FrenchUD", false);
   }
 
   public void testGermanPOSModelAccuracy() {
@@ -107,7 +144,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     double GERMAN_TOKEN_ACCURACY = .934;
     double GERMAN_SENTENCE_ACCURACY = .511;
     runPOSTest(sentences, "_", germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_SENTENCE_ACCURACY,
-        "German");
+        "German", false);
   }
 
   public void testSpanishUDPOSModelAccuracy() {
@@ -121,18 +158,19 @@ public class POSTaggerBenchmarkITest extends TestCase {
     double SPANISH_UD_TOKEN_ACCURACY = .5;
     double SPANISH_UD_SENTENCE_ACCURACY = .3;
     runPOSTest(sentences, "_", spanishPipeline, SPANISH_UD_TOKEN_ACCURACY, SPANISH_UD_SENTENCE_ACCURACY,
-        "SpanishUD");
+        "SpanishUD", false);
   }
 
   public void runPOSTest(List<String> sentences, String tagDelimiter, StanfordCoreNLP pipeline,
-                         double tokenAccuracyThreshold, double avgSentenceAccuracyThreshold, String language) {
+                         double tokenAccuracyThreshold, double avgSentenceAccuracyThreshold,
+                         String language, boolean caseless) {
     int totalTokens = 0;
     int totalCorrectTokens = 0;
     int numSentences = 0;
     int correctSentences = 0;
     for (String sentence : sentences) {
       numSentences += 1;
-      List<CoreLabel> inputSentenceTokens = entryToTokensList(sentence, tagDelimiter);
+      List<CoreLabel> inputSentenceTokens = entryToTokensList(sentence, tagDelimiter, caseless);
       HashMap<String,Integer> result = sentenceResult(pipeline, inputSentenceTokens);
       totalTokens += result.get("numSentenceTokens");
       totalCorrectTokens += result.get("correctTokens");

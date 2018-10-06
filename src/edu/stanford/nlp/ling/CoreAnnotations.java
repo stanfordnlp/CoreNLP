@@ -90,6 +90,16 @@ public class CoreAnnotations {
   }
 
   /**
+   * Label and probability pair representing the coarse grained label and probability
+   */
+  public static class NamedEntityTagProbsAnnotation implements CoreAnnotation<Map<String,Double>> {
+    @Override
+    public Class<Map<String,Double>> getType() {
+      return ErasureUtils.uncheckedCast(Map.class);
+    }
+  }
+
+  /**
    * The CoreMap key for getting the coarse named entity tag (i.e. LOCATION)
    */
   public static class CoarseNamedEntityTagAnnotation implements CoreAnnotation<String> {
@@ -733,6 +743,16 @@ public class CoreAnnotations {
     @Override
     public Class<String> getType() {
       return String.class;
+    }
+  }
+
+  /**
+   * The matching probability for the AnswerAnnotation
+   */
+  public static class AnswerProbAnnotation implements CoreAnnotation<Double> {
+    @Override
+    public Class<Double> getType() {
+      return Double.class;
     }
   }
 

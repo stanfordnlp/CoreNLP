@@ -37,7 +37,7 @@ public class ShiftReduceParserITest extends TestCase {
     englishTagger.tagCoreLabels(sentence);
     Tree result = englishParser.apply(sentence);
     // pretty much need to make the test rely on the parser being consistent
-    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina) (NNPS Reapers))) (. .)))", result.toString());
+    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina) (NNP Reapers))) (. .)))", result.toString());
 
     ParserConstraint constraint = new ParserConstraint(2, 4, ".*");
     List<ParserConstraint> constraints = Collections.singletonList(constraint);
@@ -45,7 +45,7 @@ public class ShiftReduceParserITest extends TestCase {
     pq.setConstraints(constraints);
     assertTrue(pq.parse(sentence));
     result = pq.getBestParse();
-    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina) (NNPS Reapers))) (. .)))", result.toString());
+    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina) (NNP Reapers))) (. .)))", result.toString());
 
     constraint = new ParserConstraint(2, 4, "NP");
     constraints = Collections.singletonList(constraint);
@@ -53,7 +53,7 @@ public class ShiftReduceParserITest extends TestCase {
     pq.setConstraints(constraints);
     assertTrue(pq.parse(sentence));
     result = pq.getBestParse();
-    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina) (NNPS Reapers))) (. .)))", result.toString());
+    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina) (NNP Reapers))) (. .)))", result.toString());
 
     constraint = new ParserConstraint(2, 4, "ADJP");
     constraints = Collections.singletonList(constraint);
@@ -61,7 +61,7 @@ public class ShiftReduceParserITest extends TestCase {
     pq.setConstraints(constraints);
     assertTrue(pq.parse(sentence));
     result = pq.getBestParse();
-    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (ADJP (NP (NNP Carolina) (NNPS Reapers)))) (. .)))", result.toString());
+    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (ADJP (NP (NNP Carolina) (NNP Reapers)))) (. .)))", result.toString());
 
     constraint = new ParserConstraint(1, 3, "VP");
     constraints = Collections.singletonList(constraint);
@@ -70,6 +70,6 @@ public class ShiftReduceParserITest extends TestCase {
     assertTrue(pq.parse(sentence));
     result = pq.getBestParse();
     System.out.println(result.toString());
-    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina))) (NNPS Reapers) (. .)))", result.toString());
+    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina))) (NP (NNP Reapers)) (. .)))", result.toString());
   }
 }

@@ -66,21 +66,28 @@ public class DocDateAnnotator implements Annotator {
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
     if (docID == null)
       docID = "";
+    String foundDocDate;
     if (useMappingFile) {
-      String docDate = docIDToDocDate.get(docID);
-      annotation.set(CoreAnnotations.DocDateAnnotation.class, docDate);
+      foundDocDate = docIDToDocDate.get(docID);
+      if (foundDocDate == null)
+        foundDocDate = "";
     } else if (useFixedDate) {
-      annotation.set(CoreAnnotations.DocDateAnnotation.class, fixedDate);
+      foundDocDate = fixedDate;
     } else if (usePresentDate) {
-      annotation.set(CoreAnnotations.DocDateAnnotation.class, currentDate());
+      foundDocDate = currentDate();
     } else if (useRegex) {
       Matcher m = fileDocDatePattern.matcher(docID);
       m.matches();
-      String foundDateText = m.group(1);
-      if (DATE_NO_HYPHENS_PATTERN.matcher(foundDateText).find() && foundDateText.length() == 8)
-        foundDateText = addHyphensToDate(foundDateText);
-      annotation.set(CoreAnnotations.DocDateAnnotation.class, foundDateText);
+      foundDocDate = m.group(1);
+      if (DATE_NO_HYPHENS_PATTERN.matcher(foundDocDate).find() && foundDocDate.length() == 8)
+        foundDocDate = addHyphensToDate(foundDocDate);
+    } else {
+      foundDocDate = "";
     }
+    // check date has proper format
+    Matcher properDateFormat = DATE_PROPER_FORMAT.matcher(foundDocDate);
+    if (properDateFormat.matches())
+      annotation.set(CoreAnnotations.DocDateAnnotation.class, foundDocDate);
   }
 
   /** helper for return current date **/

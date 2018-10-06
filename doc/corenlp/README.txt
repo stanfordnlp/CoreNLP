@@ -41,6 +41,13 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2018-10-05    3.9.2     improved NER pipeline and entity mention 
+                        confidences; support for Java 11; new POS 
+                        models for English; 4 methods for setting 
+                        document dates; tokenizer improvements; 
+                        CoreNLP runs as filter from stdin to stdout; 
+                        bug fixes 
+
 2018-02-27    3.9.1     Bug fixes, minor enhancements 
 
 2018-01-31    3.9.0     Spanish KBP and new dependency parse model, 

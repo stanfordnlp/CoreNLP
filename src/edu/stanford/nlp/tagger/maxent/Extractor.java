@@ -51,7 +51,8 @@ import java.io.Serializable;
  */
 public class Extractor implements Serializable  {
 
-  /** A logger for this class */
+
+  // /** A logger for this class */
   // private static final Redwood.RedwoodChannels log = Redwood.channels(Extractor.class);
 
   private static final long serialVersionUID = -4694133872973560083L;

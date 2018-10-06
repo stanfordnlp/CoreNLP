@@ -1254,6 +1254,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       IN wi = document.get(j);
       String guess = classIndex.get(bestSequence[j + windowSize - 1]);
       wi.set(CoreAnnotations.AnswerAnnotation.class, guess);
+      int index = classIndex.indexOf(guess);
+      double guessProb = ((TestSequenceModel) model).labelProb(j, index);
+      wi.set(CoreAnnotations.AnswerProbAnnotation.class, guessProb);
     }
     if (flags.useReverse) {
       Collections.reverse(document);
