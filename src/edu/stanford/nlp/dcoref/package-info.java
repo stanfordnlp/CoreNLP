@@ -1,17 +1,21 @@
 /**
  * <h1>Multi-pass Sieve Coreference Resolution System</h1>
+ *
  * <a href="#authors">[authors]</a>
  * <a href="#current">[current results]</a>
  * <a href="#changes">[changes]</a>
  * <a href="#usage">[usage]</a>
  * <p>
  * This system implements the multi-pass sieve coreference resolution system of Raghunathan et al. at EMNLP 2010.
+ * (This is an older coreference system; you might also want to look at the systems in the {@code coref} package.)
  * <p>
- * Note that the current code in this package does not implement mention detection. All results reported here use gold mentions (just as in the paper).
- * However, the DeterministicCorefAnnotator in StanfordCoreNLP implements a simple mention detection component, so this code can be used to perform coreference resolution on raw text.
+ * Note that all the results reported here use gold mentions (just as in the paper).
+ * However, the DeterministicCorefAnnotator in StanfordCoreNLP implements a simple mention detection component,
+ * so this code can be used to perform coreference resolution on raw text.
  * <p>
  * Note that this code is already different from the system reported in the paper.
  * After the EMNLP paper, two additional sieves were included. The current code gives slightly better scores than those in the paper.
+ *
  * <h2><a name="authors">Authors</a></h2>
  * <ul>
  * <li>Karthik Raghunathan
@@ -23,6 +27,7 @@
  * <li>Dan Jurafsky
  * <li>Christopher Manning
  * </ul>
+ *
  * <h2><a name="current">Current Results</a></h2>
  * <pre>
  * ----------------------------------------------------------------------------
