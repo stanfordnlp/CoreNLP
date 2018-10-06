@@ -306,7 +306,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // set the doc date if using a doc date annotator
     if (setDocDate)
       docDateAnnotator.annotate(annotation);
-    
+
     super.annotate(annotation);
     this.ner.finalizeAnnotation(annotation);
 
