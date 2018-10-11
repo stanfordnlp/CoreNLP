@@ -44,7 +44,7 @@ At present [the current released version of the code](https://stanfordnlp.github
 
 ### Useful resources
 
-You can find releases of Stanford CoreNLP on [Maven Central](https://search.maven.org/#artifactdetails%7Cedu.stanford.nlp%7Cstanford-corenlp%7C3.7.0%7Cjar).
+You can find releases of Stanford CoreNLP on [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/3.9.2/jar).
 
 You can find more explanation and documentation on [the Stanford CoreNLP homepage](http://stanfordnlp.github.io/CoreNLP/).
 
