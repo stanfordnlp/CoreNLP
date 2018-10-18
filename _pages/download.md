@@ -66,6 +66,24 @@ Chinese, German, or Spanish, also add this inside `dependencies` to your `pom.xm
 
 Replace "models-chinese" with one or more of "models-english", "models-english-kbp", "models-arabic", "models-french", "models-german" or "models-spanish" for resources for other languages!
 
+There is an example Maven project using Stanford CoreNLP available with the GitHub release.
+
+It can be found in the `examples/sample-maven-project` directory.
+
+You can build the project with this command:
+
+```
+mvn compile
+```
+
+And you can run a demo with a command like this:
+
+```
+export MAVEN_OPTS="-Xmx14000m"
+mvn exec:java -Dexec.mainClass="edu.stanford.nlp.StanfordCoreNLPEnglishTestApp"
+```
+
+
 ## Steps to setup from the official release
 
 This example goes over how to set up CoreNLP from the latest official release. This example will take you through downloading the package, and running a simple command-line invocation of CoreNLP.
