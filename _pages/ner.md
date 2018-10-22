@@ -50,6 +50,9 @@ system.
 | --- | --- | --- | --- |
 | ner.model | List(String) | null | A comma-separated list of NER model names (or just a single name is okay). If none are specified, a default list of English models is used (3class, 7class, and MISCclass, in that order). The names will be looked for as classpath resources, filenames, or URLs. |
 | ner.applyNumericClassifiers | boolean | true | Whether or not to use numeric classifiers, for money, percent, numbers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
+| ner.applyFineGrained | boolean | true | whether or not to apply fine-grained NER tags (e.g. LOCATION --> CITY) ; this will slow down performance |
+| ner.buildEntityMentions | boolean | true | whether or not to build entity mentions from token NER tags |
+| ner.combinationMode | String | NORMAL | when set to NORMAL each tag can only be applied by the first CRF classifier that applies that tag ; when set to HIGH_RECALL all CRF classifiers can apply all of their tags |
 | ner.useSUTime | boolean | true | Whether or not to use SUTime. SUTime at present only supports English; if not processing English, make sure to set this to false. |
 | ner.providedDocDate | String | - | Use the provided date in yyyy-mm-dd format as the doc date. |
 | ner.usePresentDateForDocDate | boolean | false | Use the present date for the doc date. |
@@ -239,7 +242,7 @@ After all of the previous steps have been run, entity detection will be run to c
 The entity mention detection will be based off of the tagging scheme.  This is accomplished with an `EntityMentionsAnnotator`
 sub-annotator.
 
-If a basic tagging scheme (example: PERSON, ORGANIZATION, LOCATION) is used, all contiguous sequences of tokens with the same tag will be marked as an entity.
+If a basic IO tagging scheme (example: PERSON, ORGANIZATION, LOCATION) is used, all contiguous sequences of tokens with the same tag will be marked as an entity.
 
 If a more advanced tagging scheme (such as BIO with tags like B-PERSON and I-PERSON) is used, sequences with the same tag
 split by a B-tag will be turned into multiple entities.
@@ -263,7 +266,8 @@ java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,sspli
 
 ```bash
 # shut off numeric classifiers
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.applyNumericClassifiers false -file example.txt -outputFormat text
+# note that in this case ner no longer requires pos or lemma
+java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,ner -ner.applyNumericClassifiers false -file example.txt -outputFormat text
 ```
 
 ```bash
@@ -353,7 +357,7 @@ public class NERPipelineDemo {
 
 ## SUTime
 
-StanfordCoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.html), Stanford's temporal expression
+Stanford CoreNLP includes [SUTime](http://nlp.stanford.edu/software/sutime.html), Stanford's temporal expression
 recognizer. SUTime is transparently called from the "ner" annotator,
 so no configuration is necessary. Furthermore, the "cleanxml"
 annotator can extract the reference date for a given XML document, so
@@ -364,11 +368,9 @@ SUTime supports the same annotations as before, i.e.,
 NamedEntityTagAnnotation is set with the label of the numeric entity (DATE,
 TIME, DURATION, MONEY, PERCENT, or NUMBER) and
 NormalizedNamedEntityTagAnnotation is set to the value of the normalized
-temporal expression. Note that NormalizedNamedEntityTagAnnotation now
-follows the TIMEX3 standard, rather than Stanford's internal representation,
-e.g., "2010-01-01" for the string "January 1, 2010", rather than "20100101".
+temporal expression.
 
-Also, SUTime now sets the TimexAnnotation key to an
+Also, SUTime sets the TimexAnnotation key to an
 edu.stanford.nlp.time.Timex object, which contains the complete list of
 TIMEX3 fields for the corresponding expressions, such as "val", "alt_val",
 "type", "tid". This might be useful to developers interested in recovering
@@ -390,7 +392,7 @@ option will use the provided date for doc date.  The date format should be `yyyy
 
 ## Caseless models
 
-It is possible to run StanfordCoreNLP with NER
+It is possible to run Stanford CoreNLP with NER
 models that ignore capitalization. We have trained models like this
 for English. You can find details on the
 [Caseless models](caseless.html) page.

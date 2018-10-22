@@ -53,24 +53,12 @@ higher-level and domain-specific text understanding applications.
 Stanford CoreNLP can be downloaded via the link below. This will download a large (~500 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks), (3) the libraries required to run CoreNLP, and (4)&nbsp;documentation / source code for the project. Unzip this file, open the folder that results and you're ready to use it.
 
 
-<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2018-02-27.zip">Download CoreNLP 3.9.1 </a> </div>
+<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip">Download CoreNLP 3.9.2 </a> </div>
 
 Alternatively, Stanford CoreNLP is [available on **Maven Central**](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
 Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html). 
 To download earlier versions of Stanford CoreNLP or language packs for earlier versions, go to the [history page](history.html).
-
-_Note:_ Stanford CoreNLP 3.9.1 requires a minimum of Java 8, but also
-works with Java 9 and 10.  However, the SUTime component uses the
-jollyday library which depends on JAXB, a Java EE component which
-started to be removed in Java 9. If using Java 9 or 10, you either
-need to add this Java flag to your command for CoreNLP to run:
-
-```
---add-modules java.se.ee
-```
-
-or you need to add JAXB dependencies (see [this StackOverflow answer](https://stackoverflow.com/questions/48204141/replacements-for-deprecated-jpms-modules-with-java-ee-apis)). This second solution will become mandatory with Java 11. We'll try to update the download package in advance of that….
 
 The table below has jars for the current release with all the models for each language we support.
 Due to size issues we have divided the English resources into two
@@ -79,13 +67,13 @@ run relation extraction and entity linking.
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2018-02-27-models.jar) | 3.9.1 |
+| Arabic  | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2018-10-05-models.jar) | 3.9.2 |
 
 ## Human languages supported
 

@@ -8,7 +8,7 @@ permalink: '/download.html'
 
 Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. This is everything for getting going on English!  Unzip this file, open the folder that results and you're ready to use it.
 
-<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2018-02-27.zip">Download CoreNLP 3.9.1 </a> </div>
+<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip">Download CoreNLP 3.9.2 </a> </div>
 
 **Other languages:** For working with another (human) language, you need additional model files. We have model files for several other languages. And we have more
 model files for English, including for dealing with uncased English (that is, English which is not conventionally capitalized, whether texting or telegrams).
@@ -16,28 +16,17 @@ You can find the latest models in the table below.  Versions for earlier release
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2018-02-27-models.jar) | 3.9.1 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2018-02-27-models.jar) | 3.9.1 |
+| Arabic | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2018-10-05-models.jar) | 3.9.2 |
 
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
 Previous releases can be found on [the release history page](history.html).
 
-**Java:** Stanford CoreNLP now requires Java 8. If you do not have
-this installed you should first of all install Java 8.  Probably
-[the JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html),
-but [the JRE](http://java.com/) will do if you are only going to be a user.
-
-Stanford CoreNLP 3.9.1 requires Java 8, but also works with Java 9.  If using Java 9, make sure
-to add this Java flag to your command to avoid errors:
-
-```
---add-modules java.se.ee
-```
 
 **GitHub**: Here is the [Stanford CoreNLP GitHub site](https://github.com/stanfordnlp/CoreNLP).
 
@@ -52,12 +41,12 @@ parts beyond the tokenizer and sentence splitter) and so you need to specify bot
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.9.1</version>
+    <version>3.9.2</version>
 </dependency>
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.9.1</version>
+    <version>3.9.2</version>
     <classifier>models</classifier>
 </dependency>
 </dependencies>
@@ -70,12 +59,30 @@ Chinese, German, or Spanish, also add this inside `dependencies` to your `pom.xm
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.9.1</version>
+    <version>3.9.2</version>
     <classifier>models-chinese</classifier>
 </dependency>
 ```
 
 Replace "models-chinese" with one or more of "models-english", "models-english-kbp", "models-arabic", "models-french", "models-german" or "models-spanish" for resources for other languages!
+
+There is an example Maven project using Stanford CoreNLP available with the GitHub release.
+
+It can be found in the `examples/sample-maven-project` directory.
+
+You can build the project with this command:
+
+```
+mvn compile
+```
+
+And you can run a demo with a command like this:
+
+```
+export MAVEN_OPTS="-Xmx14000m"
+mvn exec:java -Dexec.mainClass="edu.stanford.nlp.StanfordCoreNLPEnglishTestApp"
+```
+
 
 ## Steps to setup from the official release
 
@@ -92,19 +99,19 @@ This example goes over how to set up CoreNLP from the latest official release. T
 
 1. Download the CoreNLP zip file at: http://stanfordnlp.github.io/CoreNLP/index.html#download:
 ```
-wget http://nlp.stanford.edu/software/stanford-corenlp-full-2018-01-31.zip
+wget http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
 ```
 Or using curl (what you get by default on macOS):
 ```
-curl -O http://nlp.stanford.edu/software/stanford-corenlp-full-2018-01-31.zip
+curl -O http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
 ```
 1. Unzip the release:
 ```
-unzip stanford-corenlp-full-2018-01-31.zip
+unzip stanford-corenlp-full-2018-10-05.zip
 ```
 1. Enter the newly unzipped directory:
 ```
-cd stanford-corenlp-full-2018-01-31
+cd stanford-corenlp-full-2018-10-05
 ```
 1. Set up your classpath. If you're using an IDE, you should set the
    classpath in your IDE. If you are using bash or a bash-like shell,
