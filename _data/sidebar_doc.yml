@@ -110,7 +110,10 @@ entries:
         - title: CleanXML Annotator
           url: cleanxml.html
 
-        - title: True case Annotator
+        - title: TokensRegex
+        - url: tokensregex.html
+
+        - title: Truecase Annotator
           url: truecase.html
 
         - title: Entity Mentions Annotator 
@@ -126,9 +129,6 @@ entries:
     - title: Additional tools 
 
       items:
-
-        - title: TokensRegex
-          url: tokensregex.html
 
         - title: Bootstrapped surface patterns
           url: patterns.html
