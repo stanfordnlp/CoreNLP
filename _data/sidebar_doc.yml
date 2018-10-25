@@ -111,7 +111,7 @@ entries:
           url: cleanxml.html
 
         - title: TokensRegex
-        - url: tokensregex.html
+          url: tokensregex.html
 
         - title: Truecase Annotator
           url: truecase.html
