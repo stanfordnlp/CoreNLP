@@ -90,7 +90,7 @@ public class DeterministicCorefAnnotator implements Annotator  {
       sourceNERTagClass = CoreAnnotations.NamedEntityTagAnnotation.class;
     // switch tags
     for (CoreLabel token : tokens) {
-      if (!token.get(sourceNERTagClass).equals("") && token.get(sourceNERTagClass) != null)
+      if (!"".equals(token.get(sourceNERTagClass)) && token.get(sourceNERTagClass) != null)
         token.set(CoreAnnotations.NamedEntityTagAnnotation.class, token.get(sourceNERTagClass));
     }
   }
