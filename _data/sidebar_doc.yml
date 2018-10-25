@@ -130,7 +130,7 @@ entries:
       items:
 
        - title: Model Zoo
-       - url: model-zoo.html
+         url: model-zoo.html
 
     - title: Additional tools 
 
