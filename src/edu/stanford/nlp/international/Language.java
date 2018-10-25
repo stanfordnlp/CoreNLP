@@ -19,6 +19,7 @@ public enum Language {
   German(           new NegraPennTreebankParserParams()),
   French(           new FrenchTreebankParserParams()),
   Hebrew(           new HebrewTreebankParserParams()),
+  Russian(          treebankForLanguage("Russian")),
   Spanish(          new SpanishTreebankParserParams()),
   UniversalChinese( new ChineseTreebankParserParams()),
   UniversalEnglish( new EnglishTreebankParserParams()),
@@ -30,6 +31,16 @@ public enum Language {
 
   Language(TreebankLangParserParams params) {
     this.params = params;
+  }
+
+  public static TreebankLangParserParams treebankForLanguage(String languageName) {
+    try {
+      Class clazz = Class.forName(languageName+"TreebankParserParams");
+      return (TreebankLangParserParams) clazz.newInstance();
+    } catch (ClassNotFoundException | NoClassDefFoundError | java.lang.InstantiationException |
+        java.lang.IllegalAccessException ex) {
+      return null;
+    }
   }
 
   /**
