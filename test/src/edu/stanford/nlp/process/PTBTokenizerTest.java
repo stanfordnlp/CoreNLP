@@ -302,9 +302,7 @@ public class PTBTokenizerTest {
           "Jim Jackon & Co. LLC replied.",
           "Xanadu Pvt. Ltd. replied.",
           " \u2010 - ___ ",
-          "whenever one goes 'tisk tisk' at something",
-          "She hates Alex.",
-          "An offering of 10 million common shares, via Alex. Brown &amp; Sons.",
+          "whenever one goes 'tisk tisk' at something"
   };
 
   private final String[][] moreGold = {
@@ -315,8 +313,6 @@ public class PTBTokenizerTest {
           { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
           { "\u2010", "-", "___" },
           { "whenever", "one", "goes", "`", "tisk", "tisk", "'", "at", "something" },
-          { "She", "hates", "Alex", "."},
-          { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},
   };
 
   @Test
