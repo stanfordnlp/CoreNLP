@@ -249,7 +249,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 
   /** Turn on to find out how things were tokenized. */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels logger = Redwood.channels(PTBLexer.class);
@@ -756,11 +756,10 @@ ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally. Ph is in there for Ph. D  Sc for B.Sc.
  */
-ABBREV4 = {ABTITLE}|vs|[v]|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|[S][c]|{ACRO}|{ABCOMP2}
+ABBREV4 = {ABTITLE}|vs|[v]|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|[S][c]|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
-/* in the WSJ Alex. is generally an abbreviation for Alex. Brown, brokers! */
 /* Added Wm. for William and Jos. for Joseph */
 /* In tables: Mkt. for market Div. for division of company, Chg., Yr.: year */
 
@@ -873,6 +872,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (normalizeSpace) {
                             txt = SINGLE_SPACE_PATTERN.matcher(txt).replaceAll("\u00A0"); // change to non-breaking space
                           }
+                          if (DEBUG) { logger.info("Used {SGML1} to recognize " + origTxt + " as " + txt); }
                           return getNext(txt, origTxt);
                         }
 <YyTokenizePerLine>{SGML2}
@@ -881,6 +881,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (normalizeSpace) {
                             txt = txt.replace(' ', '\u00A0'); // change space to non-breaking space
                           }
+                          if (DEBUG) { logger.info("Used {SGML2} to recognize " + origTxt + " as " + txt); }
                           return getNext(txt, origTxt);
                         }
 {SPMDASH}               { if (ptb3Dashes) {
@@ -970,12 +971,16 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
-{DATE}                  { String txt = yytext();
+{DATE}                  { String origTxt = yytext();
+                          String txt;
                           if (escapeForwardSlashAsterisk) {
-                            txt = LexerUtils.escapeChar(txt, '/');
+                            txt = LexerUtils.escapeChar(origTxt, '/');
+                          } else {
+                            txt = origTxt;
                           }
-                          return getNext(txt, yytext());
-                         }
+                          if (DEBUG) { logger.info("Used {DATE} to recognize " + origTxt + " as " + txt); }
+                          return getNext(txt, origTxt);
+                        }
 /* Malaysian currency */
 RM/{NUM}        { String txt = yytext();
                   return getNext(txt, txt);
@@ -1073,8 +1078,24 @@ RM/{NUM}        { String txt = yytext();
                           // since the last one matches two things, even newlines (if not tokenize per line)
                           return processAbbrev1();
                         }
-{ABBREV2}               { return getNext(); }
-{ABBREV4}/{SPACE}       { return getNext(); }
+{ABBREV2}               { String tok = yytext();
+                          if (DEBUG) { logger.info("Used {ABBREV2} to recognize " + tok); }
+                          return getNext(tok, tok);
+                        }
+/* Last millenium (in the WSJ) "Alex." is generally an abbreviation for Alex. Brown, brokers! Recognize just this case. */
+<YyNotTokenizePerLine>Alex\./{SPACENL}Brown   { String tok = yytext();
+                                                if (DEBUG) { logger.info("Used {ALEX} to recognize " + tok); }
+                                                return getNext(tok, tok);
+                                              }
+
+<YyTokenizePerLine>Alex\./{SPACE}Brown        { String tok = yytext();
+                                                if (DEBUG) { logger.info("Used {ALEX} (2) to recognize " + tok); }
+                                                return getNext(tok, tok);
+                                              }
+{ABBREV4}/{SPACE}       { String tok = yytext();
+                          if (DEBUG) { logger.info("Used {ABBREV4} to recognize " + tok); }
+                          return getNext(tok, tok);
+                        }
 {ACRO}/{SPACENL}        { return getNext(); }
 {TBSPEC2}/{SPACENL}     { return getNext(); }
 {ISO8601DATETIME}       { return getNext(); }
@@ -1118,9 +1139,10 @@ RM/{NUM}        { String txt = yytext();
                     txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
                     txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
                   }
+                  if (DEBUG) { logger.info("Used {SMILEY} to recognize " + origText + " as " + txt); }
                   return getNext(txt, origText);
                 }
-{ASIANSMILEY}        { String txt = yytext();
+{ASIANSMILEY}   { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
                     txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
