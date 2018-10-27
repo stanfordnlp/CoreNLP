@@ -2,7 +2,6 @@ package edu.stanford.nlp.time;
 
 import java.util.*;
 
-import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -33,7 +32,7 @@ public class Options {
   boolean searchForDocDate = false;
   // language for SUTime
   public String language = "english";
-  public static HashMap<String,String> languageToRulesFiles = new HashMap<String,String>();
+  public static final HashMap<String,String> languageToRulesFiles = new HashMap<>();
   // TODO: Add default country for holidays and default time format
   // would want a per document default as well
   String grammarFilename = null;
@@ -58,16 +57,10 @@ public class Options {
 
   boolean verbose = false;
 
-  static {
 
-  }
+  public Options() { }
 
-  public Options()
-  {
-  }
-
-  public Options(String name, Properties props)
-  {
+  public Options(String name, Properties props) {
     includeRange = PropertiesUtils.getBool(props, name + ".includeRange",
         includeRange);
     markTimeRanges = PropertiesUtils.getBool(props, name + ".markTimeRanges",
@@ -113,9 +106,9 @@ public class Options {
         int bi = i+1;
         String binderPrefix = name + ".binder." + bi;
         try {
-          Class binderClass = Class.forName(binderClasses[i]);
-          binderPrefix = binderPrefix + ".";
-          binders[i] = (Env.Binder) binderClass.newInstance();
+          Class<Env.Binder> binderClass = (Class<Env.Binder>) Class.forName(binderClasses[i]);
+          binderPrefix = binderPrefix + '.';
+          binders[i] = binderClass.getDeclaredConstructor().newInstance();
           binders[i].init(binderPrefix, props);
         } catch (Exception ex) {
           throw new RuntimeException("Error initializing binder " + bi, ex);
