@@ -1,5 +1,4 @@
 package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -9,13 +8,14 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasIndex;
-import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
- * A <code>MemoryTreebank</code> object stores a corpus of examples with
- * given tree structures in memory (as a <code>List</code>).
+ * A {@code MemoryTreebank} object stores a corpus of examples with
+ * given tree structures in memory (as a {@code List}).
  *
  * @author Christopher Manning
  * @version 2004/09/01
@@ -23,14 +23,14 @@ import edu.stanford.nlp.objectbank.ObjectBank;
 public final class MemoryTreebank extends Treebank implements FileProcessor, List<Tree>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MemoryTreebank.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(MemoryTreebank.class);
 
   private static final boolean PRINT_FILENAMES = false;
 
-  /** THIS IS AT PRESENT DELETED, UNLESS PROBLEMS RECUR.
+  /* THIS IS AT PRESENT DELETED, UNLESS PROBLEMS RECUR.
    * If this is true, the system will retry opening files a few times
    * before concluding that there is really a problem. This seems to
-   * be necessary with NFS on Linux boxes -- at least the DB ones.
+   * be necessary with NFS on Linux boxes -- at least the DB ones in the early 2000s.
    */
   //  private static final boolean BROKEN_NFS = true;
 
@@ -42,12 +42,12 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
 
   /**
    * Create a new tree bank.
-   * The trees are made with a <code>LabeledScoredTreeReaderFactory</code>.
-   * <p/>
+   * The trees are made with a {@code LabeledScoredTreeReaderFactory}.
+   * <p>
    * <i>Compatibility note: Until Sep 2004, this used to create a Treebank
    * with a SimpleTreeReaderFactory, but this was changed as the old
    * default wasn't very useful, especially to naive users. This one now
-   * uses a LabledScoredTreeReaderFactory with a no-op TreeNormalizer.</i>
+   * uses a LabeledScoredTreeReaderFactory with a no-op TreeNormalizer.</i>
    */
   public MemoryTreebank() {
     this(new LabeledScoredTreeReaderFactory(new TreeNormalizer()));
@@ -55,7 +55,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
 
   /**
    * Create a new tree bank, using a specific TreeNormalizer.
-   * The trees are made with a <code>LabeledScoredTreeReaderFactory</code>.
+   * The trees are made with a {@code LabeledScoredTreeReaderFactory}.
    * <p/>
    * <i>Compatibility note: Until Sep 2004, this used to create a Treebank
    * with a SimpleTreeReaderFactory, but this was changed as the old
@@ -78,7 +78,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    * Create a new tree bank.
    *
    * @param trf the factory class to be called to create a new
-   *            <code>TreeReader</code>
+   *            {@code TreeReader}
    */
   public MemoryTreebank(TreeReaderFactory trf) {
     super(trf);
@@ -90,7 +90,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    * Create a new tree bank.
    *
    * @param trf      the factory class to be called to create a new
-   *                 <code>TreeReader</code>
+   *                 {@code TreeReader}
    * @param encoding the encoding to use for file access.
    */
   public MemoryTreebank(TreeReaderFactory trf, String encoding) {
@@ -104,7 +104,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    *
    * @param trees    The trees to put in the Treebank.
    * @param trf      the factory class to be called to create a new
-   *                 <code>TreeReader</code>
+   *                 {@code TreeReader}
    * @param encoding the encoding to use for file access.
    */
   public MemoryTreebank(List<Tree> trees, TreeReaderFactory trf, String encoding) {
@@ -128,7 +128,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    *
    * @param initialCapacity The initial size of the underlying Collection
    * @param trf             the factory class to be called to create a new
-   *                        <code>TreeReader</code>
+   *                        {@code TreeReader}
    */
   public MemoryTreebank(int initialCapacity, TreeReaderFactory trf) {
     super(initialCapacity, trf);
@@ -137,7 +137,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
 
 
   /**
-   * Empty a <code>Treebank</code>.
+   * Empty a {@code Treebank}.
    */
   @Override
   public void clear() {
@@ -162,7 +162,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
     srlMap = null;
   }
 
-  private Map<String,CollectionValuedMap<Integer,String>> srlMap = null;
+  private Map<String,CollectionValuedMap<Integer,String>> srlMap; // = null;
 
   private void readSRLFile(String srlFile) {
     srlMap = Generics.newHashMap();
@@ -184,10 +184,11 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    * Load a collection of parse trees from the file of given name.
    * Each tree may optionally be encased in parens to allow for Penn
    * Treebank style trees.
-   * This methods implements the <code>FileProcessor</code> interface.
+   * This methods implements the {@code FileProcessor} interface.
    *
    * @param file file to load a tree from
    */
+  @Override
   public void processFile(File file) {
     TreeReader tr = null;
 
@@ -236,7 +237,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
 //              Tree t = pt.deepCopy();
               String[] bits = srl.split("\\s+");
               int verbIndex = Integer.parseInt(bits[0]);
-              String lemma = bits[2].split("\\.")[0];
+//              String lemma = bits[2].split("\\.")[0];
 //              Tree verb = Trees.getTerminal(t, verbIndex);
               Tree verb = Trees.getTerminal(pt, verbIndex);
 //              ((CoreLabel)verb.label()).set(SRLIDAnnotation.class, SRL_ID.REL);
@@ -244,7 +245,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
               for (int i = 4; i < bits.length; i++) {
                 String arg = bits[i];
                 String[] bits1;
-                if (arg.indexOf("ARGM") >= 0) {
+                if (arg.contains("ARGM")) {
                   bits1 = arg.split("-");
                 } else {
                   bits1 = arg.split("-");
@@ -328,7 +329,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    * @param r The reader to read trees from.  (If you want it buffered,
    *    you should already have buffered it!)
    * @param id An ID for where these files come from (arbitrary, but
-   *    something like a filename.  Can be <code>null</code> for none.
+   *    something like a filename.  Can be {@code null} for none.
    */
   public void load(Reader r, String id) {
     try {
@@ -354,13 +355,14 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
 
   /**
    * Get a tree by index from the Treebank.
-   * This operation isn't in the <code>Treebank</code> feature set, and
-   * so is only available with a <code>MemoryTreebank</code>, but is
-   * useful in allowing the latter to be used as a <code>List</code>.
+   * This operation isn't in the {@code Treebank} feature set, and
+   * so is only available with a {@code MemoryTreebank}, but is
+   * useful in allowing the latter to be used as a {@code List}.
    *
    * @param i The integer (counting from 0) index of the tree
    * @return A tree
    */
+  @Override
   public Tree get(int i) {
     return parseTrees.get(i);
   }
@@ -398,7 +400,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
   /**
    * Returns the size of the Treebank.
    * Provides a more efficient implementation than the one for a
-   * generic <code>Treebank</code>
+   * generic {@code Treebank}
    *
    * @return the number of trees in the Treebank
    */
@@ -410,6 +412,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
 
   // Extra stuff to implement List interface
 
+  @Override
   public void add(int index, Tree element) {
     parseTrees.add(index, element);
   }
@@ -420,34 +423,42 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
   }
 
 
+  @Override
   public boolean addAll(int index, Collection<? extends Tree> c) {
     return parseTrees.addAll(index, c);
   }
 
+  @Override
   public int indexOf(Object o) {
     return parseTrees.indexOf(o);
   }
 
+  @Override
   public int lastIndexOf(Object o) {
     return parseTrees.lastIndexOf(o);
   }
 
+  @Override
   public Tree remove(int index) {
     return parseTrees.remove(index);
   }
 
+  @Override
   public Tree set(int index, Tree element) {
     return parseTrees.set(index, element);
   }
 
+  @Override
   public ListIterator<Tree> listIterator() {
     return parseTrees.listIterator();
   }
 
+  @Override
   public ListIterator<Tree> listIterator(int index) {
     return parseTrees.listIterator(index);
   }
 
+  @Override
   public List<Tree> subList(int fromIndex, int toIndex) {
     return parseTrees.subList(fromIndex, toIndex);
   }
@@ -471,14 +482,15 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
 
   /**
    * Loads treebank grammar from first argument and prints it.
-   * Just a demonstration of functionality. <br>
-   * <code>usage: java MemoryTreebank treebankFilesPath</code>
+   * Just a demonstration of functionality.
+   * <p>
+   * {@code usage: java MemoryTreebank treebankFilesPath}
    *
    * @param args array of command-line arguments
    */
   public static void main(String[] args) {
     Timing.startTime();
-    Treebank treebank = new MemoryTreebank(in -> new PennTreeReader(in));
+    Treebank treebank = new MemoryTreebank(PennTreeReader::new);
     treebank.loadPath(args[0]);
     Timing.endTime();
     System.out.println(treebank);
