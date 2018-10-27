@@ -54,11 +54,11 @@ Details on how to use it are available on the [shift reduce parser](http://nlp.s
 
 ## PoS tagging
 
-All of our parsers make use of parts of speech. Some of the models (e.g., neural dependency parser and shift-reduce parser) require an external PoS tagger; you must specify the `pos` annotator. Other parsers, such as the PCFG and Factored parsers can either do their own PoS tagging or use an external PoS tagger as a preprocessor. If you want to use a parser as a preprocessor, make sure you do *not* include `pos` in the list of annotators and position the annotator `parse` prior to any other annotator that requires part-of-speech information (such as `lemma`):
+All of our parsers make use of parts of speech. Some of the models (e.g., neural dependency parser and shift-reduce parser) require an external PoS tagger; you must specify the `pos` annotator. Other parsers, such as the PCFG and Factored parsers can either do their own PoS tagging or use an external PoS tagger as a preprocessor. If you want to use a parser as the PoS tagger, make sure you do *not* include `pos` in the list of annotators and position the annotator `parse` prior to any other annotator that requires part-of-speech information (such as `lemma`):
 ```
 -annotators tokenize,ssplit,parse,lemma,ner
 ```
-In general: these parsers are good POS taggers; they are not quite as accurate as the supplied maxent POS tagger in terms of overall token accuracy; however, they often do better in more “grammar-based” decision making, where broader syntactic context is useful, such as for distinguishing finite and non-finite verb forms.
+In general: these parsers are good PoS taggers; they are not quite as accurate as the supplied maxent PoS tagger in terms of overall token accuracy; however, they often do better in more “grammar-based” decision making, where broader syntactic context is useful, such as for distinguishing finite and non-finite verb forms.
 
 ## More information 
 
