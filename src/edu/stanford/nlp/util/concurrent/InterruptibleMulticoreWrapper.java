@@ -28,7 +28,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
   @Override
   protected Integer getProcessor() {
     try {
-      return (timeout < 0) ? idleProcessors.take() : idleProcessors.poll(timeout, TimeUnit.MILLISECONDS);
+      return (timeout <= 0) ? idleProcessors.take() : idleProcessors.poll(timeout, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       throw new RuntimeInterruptedException(e);
     }
