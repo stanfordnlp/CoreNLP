@@ -6,6 +6,7 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.StringOutputStream;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
@@ -75,6 +76,7 @@ public class JSONOutputter extends AnnotationOutputter {
           l2.set("id", sentence.get(CoreAnnotations.SentenceIDAnnotation.class));
           l2.set("index", sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
           l2.set("line", sentence.get(CoreAnnotations.LineNumberAnnotation.class));
+          l2.set("paragraph", sentence.get(CoreAnnotations.ParagraphIndexAnnotation.class));
           // (constituency tree)
           StringWriter treeStrWriter = new StringWriter();
           TreePrint treePrinter = options.constituencyTreePrinter;
