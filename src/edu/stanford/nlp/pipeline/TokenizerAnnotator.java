@@ -121,7 +121,10 @@ public class TokenizerAnnotator implements Annotator  {
   } // end enum TokenizerType
 
 
+  @SuppressWarnings("WeakerAccess")
   public static final String EOL_PROPERTY = "tokenize.keepeol";
+  @SuppressWarnings("WeakerAccess")
+  public static final String KEEP_NL_OPTION = "tokenizeNLs,";
 
   private final boolean VERBOSE;
   private final TokenizerFactory<CoreLabel> factory;
@@ -156,7 +159,7 @@ public class TokenizerAnnotator implements Annotator  {
       }
     }
     if (keepNewline) {
-      extraOptions = "tokenizeNLs,";
+      extraOptions = KEEP_NL_OPTION;
     }
     return extraOptions;
   }
@@ -267,7 +270,7 @@ public class TokenizerAnnotator implements Annotator  {
 
     case Whitespace:
       boolean eolIsSignificant = Boolean.valueOf(props.getProperty(EOL_PROPERTY, "false"));
-      eolIsSignificant = eolIsSignificant || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+      eolIsSignificant = eolIsSignificant || KEEP_NL_OPTION.equals(computeExtraOptions(props));
       factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<>(new CoreLabelTokenFactory(), eolIsSignificant);
       break;
 
