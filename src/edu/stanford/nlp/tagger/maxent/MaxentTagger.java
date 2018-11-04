@@ -361,8 +361,9 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   private LambdaSolveTagger prob;
-  // For each extractor index, we have a map from possible extracted
-  // features to an array which maps from tag number to feature weight index in the lambdas array.
+
+  // For each extractor index (List index), we have a Map from possible extracted
+  // feature values to an array which maps from tag number to feature weight index in the lambdas array.
   List<Map<String, int[]>> fAssociations = Generics.newArrayList();
   //PairsHolder pairs = new PairsHolder();
   Extractors extractors;
@@ -522,8 +523,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       // log.info("occurringTagsOnly: "+occurringTagsOnly);
       // log.info("possibleTagsOnly: "+possibleTagsOnly);
 
-      if(config.getDefaultScore() >= 0)
-        defaultScore = config.getDefaultScore();
+      defaultScore = config.getDefaultScore();
     }
 
     // just in case, reset the defaultScores array so it will be
@@ -880,7 +880,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       for (int i = 0; i < extractors.size() + extractorsRare.size(); ++i) {
         fAssociations.add(Generics.<String, int[]>newHashMap());
       }
-      if (VERBOSE) log.info("Reading %d feature keys...%n",sizeAssoc);
+      if (VERBOSE) log.info("Reading %d feature keys...%n", sizeAssoc);
       PrintFile pfVP = null;
       if (VERBOSE) {
         pfVP = new PrintFile("pairs.txt");
@@ -911,7 +911,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       }
       if (VERBOSE) {
         for (int k = 0; k < numFA.length; k++) {
-          log.info("Number of features of kind " + k + ' ' + numFA[k]);
+          log.info("Number of features of kind " + k + ' ' + (k < extractors.size() ? extractors.get(k): extractorsRare.get(k - extractors.size())) +": " + numFA[k]);
         }
       }
       prob = new LambdaSolveTagger(rf);
@@ -927,7 +927,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
 
-  protected void dumpModel(PrintStream out) {
+  private void dumpModel(PrintStream out) {
     out.println("Features: template featureValue tag: lambda");
     NumberFormat nf = new DecimalFormat(" 0.000000;-0.000000");
     for (int i = 0; i < fAssociations.size(); ++i) {
