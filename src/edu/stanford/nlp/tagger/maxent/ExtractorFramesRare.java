@@ -372,6 +372,14 @@ public class ExtractorFramesRare {
         extrs.add(new ExtractorDistsimConjunction(path, lWindow, rWindow));
       } else if (arg.equalsIgnoreCase("lctagfeatures")) {
         extrs.addAll(Arrays.asList(lcTagFeatures(ttags)));
+      } else if (arg.startsWith("rareExtractor(")) {
+        String className = Extractor.getParenthesizedArg(arg, 1);
+        try {
+          Extractor e = (Extractor) Class.forName(className).getDeclaredConstructor().newInstance();
+          extrs.add(e);
+        } catch (Exception e) {
+          throw new RuntimeException("Couldn't create POS tagger extractor class " + className, e);
+        }
       }
     }
 

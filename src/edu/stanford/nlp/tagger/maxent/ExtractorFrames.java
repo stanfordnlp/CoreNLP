@@ -117,7 +117,7 @@ import java.util.*;
 public class ExtractorFrames  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ExtractorFrames.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ExtractorFrames.class);
 
   // all features are implicitly conjoined with the current tag
   static final Extractor cWord = new Extractor(0, false);
@@ -147,6 +147,7 @@ public class ExtractorFrames  {
   }
 
 
+  @SuppressWarnings("StatementWithEmptyBody")
   protected static Extractor[] getExtractorFrames(String arch) {
     // handle some traditional macro options
     // left3words: a simple trigram CMM tagger (similar to the baseline EMNLP 2000 tagger)
@@ -222,13 +223,12 @@ public class ExtractorFrames  {
         // appears not to help (Dec 2009). But they can now be added with tags().
 
         for (int idx = leftOrder ; idx <= rightOrder; idx++) {
-          if (idx == 0) {
-            // do nothing
-          } else if (idx == -1 || idx == 1) {
+          if (idx == -1 || idx == 1) {
             extrs.add(new Extractor(idx, true));
-          } else {
+          } else if (idx != 0) {
             extrs.add(new ExtractorContinuousTagConjunction(idx));
           }
+          // do nothing if idx = 0. You can't use the  tag to infer itself!
         }
       } else if (arg.startsWith("wordTag(")) {
         // sequence feature of a word and a tag: wordTag(-1,1)
@@ -279,6 +279,14 @@ public class ExtractorFrames  {
       } else if (arg.equalsIgnoreCase("spanishauxiliaries")) {
         extrs.add(new ExtractorSpanishAuxiliaryTag());
         extrs.add(new ExtractorSpanishSemiauxiliaryTag());
+      } else if (arg.startsWith("extractor(")) {
+        String className = Extractor.getParenthesizedArg(arg, 1);
+        try {
+          Extractor e = (Extractor) Class.forName(className).getDeclaredConstructor().newInstance();
+          extrs.add(e);
+        } catch (Exception e) {
+          throw new RuntimeException("Couldn't create POS tagger extractor class " + className, e);
+        }
       } else if (arg.equalsIgnoreCase("naacl2003unknowns") ||
                  arg.equalsIgnoreCase("lnaacl2003unknowns") ||
                  arg.equalsIgnoreCase("caselessnaacl2003unknowns") ||
@@ -295,6 +303,7 @@ public class ExtractorFrames  {
                  arg.startsWith("distsim(") ||
                  arg.startsWith("distsimconjunction(") ||
                  arg.equalsIgnoreCase("lctagfeatures") ||
+                 arg.startsWith("rareExtractor(") ||
                  arg.startsWith("unicodeshapes(") ||
                  arg.startsWith("chinesedictionaryfeatures(") ||
                  arg.startsWith("unicodeshapeconjunction(")) {
@@ -303,7 +312,7 @@ public class ExtractorFrames  {
         log.info("Unrecognized ExtractorFrames identifier (ignored): " + arg);
       }
     } // end for
-    return extrs.toArray(new Extractor[extrs.size()]);
+    return extrs.toArray(Extractor.EMPTY_EXTRACTOR_ARRAY);
   }
 
 
@@ -555,6 +564,11 @@ public class ExtractorFrames  {
         }
       }
       return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+      return "ExtractorContinuousTagConjunction(" + (position < 0 ? position + " ... -1": "1 ... " + position) + ')';
     }
 
   }
