@@ -1,10 +1,9 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
+ * Copyright:    Copyright (c) The Board of Trustees of Leland Stanford Junior University<p>
  * Company:      Stanford University<p>
  */
-
 
 package edu.stanford.nlp.tagger.maxent;
 

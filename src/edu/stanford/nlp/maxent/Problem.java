@@ -1,4 +1,4 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
  * Copyright:    Copyright (c) Trustees of Leland Stanford University
@@ -18,6 +18,8 @@ import edu.stanford.nlp.io.PrintFile;
  * @version 1.0
  */
 public class Problem {
+
+  // todo [cdm 2018]: This class can probably just be written out of existence.
 
   public int exSize;
   public int fSize;

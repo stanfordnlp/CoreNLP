@@ -1,10 +1,10 @@
 package edu.stanford.nlp.maxent.iis; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.maxent.*;
 import edu.stanford.nlp.util.MutableDouble;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.NumberFormat;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.io.ObjectOutputStream;
 public class LambdaSolve  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(LambdaSolve.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(LambdaSolve.class);
 
   /**
    * These are the model parameters that have to be learned.
@@ -33,7 +33,7 @@ public class LambdaSolve  {
   public double[] lambda;
 
   /** Only allocated and used in the IIS optimization routines. */
-  protected boolean[] lambda_converged;
+  private boolean[] lambda_converged;
 
   /** Only used in the IIS optimization routines. Convergence threshold / allowed "newtonErr" */
   protected double eps;
