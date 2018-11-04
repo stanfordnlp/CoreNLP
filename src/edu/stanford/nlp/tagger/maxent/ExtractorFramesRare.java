@@ -330,7 +330,7 @@ public class ExtractorFramesRare {
       //     extrs.add(new ExtractorCWordSuff(i));
       //     extrs.add(new ExtractorCWordPref(i));
       //   }
-      } else if (arg.equalsIgnoreCase("motleyUnknown")) {  // This is naacl2003unknown minus prefix and suffix features.
+      } else if (arg.equalsIgnoreCase("motleyUnknown")) {  // This is naacl2003unknown minus prefix and suffix features, and a few more.
         extrs.addAll(Arrays.asList(eFrames_motley_naacl2003));
       } else if (arg.startsWith("suffix(")) {
         int max = Extractor.getParenthesizedNum(arg, 1);
@@ -591,6 +591,18 @@ class RareExtractor extends Extractor {
     }
     for (int i = 0, len = s.length(); i < len; i++) {
       if (Character.isLetter(s.charAt(i))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  protected static boolean containsAlphanumeric(String s) {
+    if (s == null) {
+      return false;
+    }
+    for (int i = 0, len = s.length(); i < len; i++) {
+      if (Character.isLetter(s.charAt(i)) || Character.isDigit(s.charAt(i))) {
         return true;
       }
     }
@@ -953,6 +965,7 @@ class ExtractorCapLCSeen extends RareExtractor {
 
 }
 
+// todo [cdm 2018]: It should be possible to turn these next three extractors into localContext extractors, since only use of tags is to detect start of sentence!
 
 /**
  * "1" if not first word of sentence and _some_ letter is uppercase
@@ -1296,6 +1309,27 @@ class ExtractorsConjunction extends RareExtractor {
 
 
 }
+
+class ExtractorNonAlphanumeric extends RareExtractor {
+
+  public ExtractorNonAlphanumeric() { }
+
+  @Override
+  String extract(History h, PairsHolder pH) {
+    String s = pH.getWord(h, 0);
+    if (containsAlphanumeric(s)) {
+      return "0";
+    }
+    return "1";
+  }
+
+  @Override public boolean isLocal() { return true; }
+  @Override public boolean isDynamic() { return false; }
+
+  private static final long serialVersionUID = 1L;
+
+}
+
 
 
 class PluralAcronymDetector extends RareExtractor {
