@@ -16,7 +16,8 @@ permalink: '/dependencies.html'
 | [sentiment](sentiment.html) | SentimentAnnotator | `tokenize, ssplit, pos, parse` |
 | [parse](parse.html) | ParserAnnotator | `tokenize, ssplit, parse` |
 | [depparse](depparse.html) | DependencyParseAnnotator | `tokenize, ssplit, pos` |
-| [dcoref](dcoref.html) | DeterministicCorefAnnotator | `tokenize, ssplit, pos, lemma, ner, parse` |
+| [dcoref](coref.html) | DeterministicCorefAnnotator | `tokenize, ssplit, pos, lemma, ner, parse` |
+| [coref](coref.html) | CorefAnnotator | `tokenize, ssplit, pos, lemma, ner, parse` (Can also use `depparse`) |
 | [relation](relation.html) | RelationExtractorAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse` |
 | [natlog](natlog.html) | NaturalLogicAnnotator | `tokenize, ssplit, pos, lemma, depparse` (Can also use `parse`) |
 | [quote](quote.html) | QuoteAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse, coref` |
