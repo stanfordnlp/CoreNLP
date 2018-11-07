@@ -20,7 +20,7 @@ public class CorefProperties {
 
   //---------- Coreference Algorithms ----------
 
-  public enum CorefAlgorithmType {CLUSTERING, STATISTICAL, NEURAL, FASTNEURAL, HYBRID}
+  public enum CorefAlgorithmType {CLUSTERING, STATISTICAL, NEURAL, FASTNEURAL, HYBRID, CUSTOM}
 
   public static CorefAlgorithmType algorithm(Properties props) {
     String type = PropertiesUtils.getString(props, "coref.algorithm",

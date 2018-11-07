@@ -10,6 +10,7 @@ import edu.stanford.nlp.coref.hybrid.HybridCorefSystem;
 import edu.stanford.nlp.coref.neural.NeuralCorefAlgorithm;
 import edu.stanford.nlp.coref.statistical.ClusteringCorefAlgorithm;
 import edu.stanford.nlp.coref.statistical.StatisticalCorefAlgorithm;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * A CorefAlgorithms make coreference decisions on the provided {@link Document} after
@@ -31,6 +32,18 @@ public interface CorefAlgorithm {
       return new NeuralCorefAlgorithm(props, dictionaries);
     } else if (algorithm == CorefAlgorithmType.FASTNEURAL) {
       return new FastNeuralCorefAlgorithm(props, dictionaries);
+    } else if (algorithm == CorefAlgorithmType.CUSTOM) {
+      String classname = PropertiesUtils.getString(props, "coref.algorithm.class", null);
+      try {
+        if (classname != null) {
+          Class clazz = Class.forName(classname);
+          return (CorefAlgorithm) clazz.getConstructor(Properties.class, Dictionaries.class).newInstance(props, dictionaries);
+        } else {
+          throw new RuntimeException("Please specify coref.algorithm.class");
+        }
+      } catch (Exception e) {
+        throw new RuntimeException("Error creating custom coref system", e);
+      }
     } else {
       try {
         return new HybridCorefSystem(props, dictionaries);
