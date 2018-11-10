@@ -261,44 +261,44 @@ At this point the NER process will be finished, having tagged tokens with NER ta
 
 ```bash
 # run default NER
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -file example.txt -outputFormat text
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -file example.txt -outputFormat text
 ```
 
 ```bash
 # shut off numeric classifiers
 # note that in this case ner no longer requires pos or lemma
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,ner -ner.applyNumericClassifiers false -file example.txt -outputFormat text
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,ner -ner.applyNumericClassifiers false -file example.txt -outputFormat text
 ```
 
 ```bash
 # shut off SUTime
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.useSUTime false -file example.txt -outputFormat text
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.useSUTime false -file example.txt -outputFormat text
 ```
 
 ```bash
 # shut off fine grained NER
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.applyFineGrained false -file example.txt -outputFormat text
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.applyFineGrained false -file example.txt -outputFormat text
 ```
 
 ```bash
 # run fine-grained NER with a custom rules file
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.fine.regexner.mapping custom.rules -file example.txt -outputFormat text
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.fine.regexner.mapping custom.rules -file example.txt -outputFormat text
 ```
 
 ```bash
 # run fine-grained NER with two custom rules files
 # the first rules file caseless.rules should be case-insensitive, the second rules file uses default options
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.fine.regexner.mapping "ignorecase=true,caseless.rules;cased.rules" -file example.txt -outputFormat text
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.fine.regexner.mapping "ignorecase=true,caseless.rules;cased.rules" -file example.txt -outputFormat text
 ```
 
 ```bash
 # add additional rules to run after fine-grained NER
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.additional.regexner.mapping additional.rules -file example.txt -outputFormat text
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.additional.regexner.mapping additional.rules -file example.txt -outputFormat text
 ```
 
 ```bash
 # don't build entity mentions
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.buildEntityMentions false -file example.txt -outputFormat text
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.buildEntityMentions false -file example.txt -outputFormat text
 ``` 
 
 ## Java API Example
@@ -427,7 +427,7 @@ The standard training data sets used for PERSON/LOCATION/ORGANIZATION/MISC must 
 Here is the command for starting the training process (make sure your CLASSPATH is set up to include all of the Stanford CoreNLP jars):
 
 ```bash
-java -Xmx2g edu.stanford.nlp.ie.crf.CRFClassifier -prop ner.model.props
+java -Xmx2g -cp "*" edu.stanford.nlp.ie.crf.CRFClassifier -prop ner.model.props
 ```
 
 The training process can be customized using a properties file.  Here is an example properties file for training an English model(ner.model.props):
