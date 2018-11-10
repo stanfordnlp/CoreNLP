@@ -112,12 +112,6 @@ The class that runs this phase is `edu.stanford.nlp.ie.regexp.NumberSequenceClas
 SUTime (described in more detail below) is also used by default.  You can deactivate this
 by setting `ner.useSUTime` to `false`.
 
-### Legacy Gazetteer Lookup
-
-Historically there has been a final step which looks up tokens in a Gazetteer and maps them accordingly.
-This does not run by default.  It remains in the pipeline for legacy purposes, but it is not recommended
-that this be used.  You can set this up with a tab-delimited file specified with the `ner.regex` property.
-
 ### Fine Grained NER
 
 At this point, a series of rules used for the KBP 2017 competition will be run to create more fine-grained
@@ -236,6 +230,19 @@ You could integrate this into the entire NER process by setting `ner.additional.
 By default no additional rules are run, so leaving `ner.additional.regexner.mapping` blank will cause
 this phase to not be run at all.
 
+### Additional TokensRegex Rules
+
+If you want to run a series of TokensRegex rules before entity building, you can also specify a set
+of TokensRegex rules.  A `TokensRegexAnnotator` sub-annotator will be called.  It has the name `ner.additional.tokensregex`.
+
+Example command:
+
+```bash
+java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.additional.tokensregex.rules example.rules -file example.txt -outputFormat text
+```
+
+You can learn more about TokensRegex rules [here](https://stanfordnlp.github.io/CoreNLP/tokensregex.html)
+
 ### Entity Mention Detection
 
 After all of the previous steps have been run, entity detection will be run to combine the tagged tokens into entities.
@@ -294,6 +301,11 @@ java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokeni
 ```bash
 # add additional rules to run after fine-grained NER
 java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.additional.regexner.mapping additional.rules -file example.txt -outputFormat text
+```
+
+```bash
+# run tokens regex rules
+java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.additional.tokensregex.rules example.rules -file example.txt -outputFormat text
 ```
 
 ```bash
