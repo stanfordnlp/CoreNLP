@@ -1,5 +1,4 @@
 package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -13,18 +12,22 @@ import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
-
+/** Correct some of the errors in the LDC99T42 Penn Treebank 3.
+ *  You can use this class from {@link edu.stanford.nlp.trees.Treebanks} via a command like: <p>
+ *  {@code java edu.stanford.nlp.trees.Treebanks -pennPrint LDC99T42-Treebank3/parsed/mrg/wsj 200-2199 > train-fixed}
+ */
 public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EnglishPTBTreebankCorrector.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(EnglishPTBTreebankCorrector.class);
 
   private static final boolean DEBUG = false;
 
-  // "ai" is from "ai n't"; occasionally there is a bare "s" from "is"
+  // "ai" is from "ai n't"; occasionally there is a bare "s" from "is", etc.
   private static final String BE =
-    "/^(?i:am|is|are|was|were|be|being|been|'s|'m|'re|s|ai)$/";
+    "/^(?i:am|is|are|was|were|be|being|been|'s|'m|'re|s|ai|r|m|`s|art|ar|wase)$/";
 
   private static final String DO =
     "/^(?i:do|did|does|doing|done)$/";
@@ -36,7 +39,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
    *  maybe should reparse them?
    */
   private static final String BE_HAVE_GET =
-    "/^(?i:has|have|had|having|am|is|are|was|were|be|being|been|'s|'ve|'d|'m|'re|s|ai|get|gets|getting|got|gotten)$/";
+    "/^(?i:i:am|is|are|was|were|be|being|been|'s|'m|'re|s|ai|r|m|`s|art|ar|wase|has|have|had|having|'s|'ve|'d|s|get|gets|getting|got|gotten)$/";
 
   private static final String MODAL_WORD =
     "/^(?i:should|would|wo|could|may|might|ca|can|dare|will|'ll|must|shall|sha|'d)$/";
@@ -92,7 +95,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
         }
       } // while not at end of file
     } catch (IOException ioe) {
-      ioe.printStackTrace();
+      log.warn(ioe);
     }
   }
 
@@ -145,6 +148,11 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     "move bad >1 home\n" +
             '\n') +
 
+    // secs 0, 13, 20 bad parses!
+    ("@NP < (@NP=dest <: JJ) < NN=bad < @PP\n" +
+    "move bad >-1 dest\n" +
+           '\n') +
+
     // sec 22 bad parse!
     ("@NP < (@NP=gone < (NN < authority)) < (@PP=bad < (TO < to) < (NP=vp < (NN=newv < block) < (NNS=newnp < mergers)))\n" +
     "excise gone gone\n" +
@@ -155,7 +163,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
             '\n') +
 
     // Fix some cases of 'as well as' not made into a CONJP unit
-    // There are a few other wierd cases that should also be reviewed with the tregex
+    // There are a few other weird cases that should also be reviewed with the tregex
     // well|Well|WELL , as|AS|As . as|AS|As !>(__ > @CONJP)
     // but note that there are also non-CONJP uses as adverbial form of 'as good as'
     // This bleeds retagging of 'well' inside NP below
@@ -232,6 +240,15 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     "relabel bad DT\n" +
             '\n') +
 
+    ("@NP <: (JJ=bad < /^(UV-B|sterling|then-president|secretary-general|static|gold|cyclosporine|sales)$/)\n" +
+    "relabel bad NN\n" +
+            '\n') +
+
+    // "Major could be ambiguous but is former British leader in WSJ. Ditto for Sharp
+    ("@NP <: (JJ=bad < /^(Hungary|Major|Sharp|National)$/)\n" +
+    "relabel bad NNP\n" +
+            '\n') +
+
     ("@NP < (JJ=bad < the)\n" +
     "relabel bad DT\n" +
             '\n') +
@@ -285,6 +302,14 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     ("@NP < (JJ=bad < /^(?:ours)$/)\n" +
     "relabel bad PRP\n" +
             '\n') +
+
+    ("@NP <: (JJ=bad < /^(?i:mine|yours|hers|ours|theirs)$/)\n" +
+    "relabel bad PRP\n" +
+            '\n') +
+
+    ("@NP < (JJ=bad < /^(?:ours)$/)\n" +
+             "relabel bad PRP\n" +
+             '\n') +
 
     // don't regard aluminum as an adjective (color)
     // all uses of plastic are also for the noun, not adjectivally for things showing plasticity
@@ -1184,7 +1209,6 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
 
     // Under INTJ
 
-
     ("@INTJ < (RB=bad < well|WELL|Well)\n" +
     "relabel bad UH\n" +
             '\n') +
@@ -1690,7 +1714,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
             '\n') +
 
     // "well" that should be interjection, but done as (ADVP (RB well))
-    ("well|Well|WELL [ , /^[:,]$/ | !, __ ] . /^[:,]$/ > (RB > ADVP)\n" +
+    ("well|Well|WELL [ , /^[:,]$/ | !, __ ] . /^[:,]$/ > (RB=bad > ADVP=badder)\n" +
     "relabel bad UH\n" +
     "relabel badder INTJ\n" +
     '\n') +

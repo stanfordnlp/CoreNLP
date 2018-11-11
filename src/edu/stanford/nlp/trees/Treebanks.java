@@ -45,12 +45,15 @@ public class Treebanks  {
   /**
    * Loads treebank and prints it.
    * All files below the designated {@code filePath} within the given
-   * number range if any are loaded.  You can normalize the trees or not
-   * (English-specific) and print trees one per line up to a certain length
-   * (for EVALB).
+   * number range if any are loaded.<p>
+   * By default, this class works over raw trees.
+   * You can normalize the trees as we usually do in an English-specific way by using either of the flags:
+   * {@code -normalize} or {@code -trf edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory}.
+   * You can normalize for different treebanks by loading an appropriate TreeReaderFactory.
+   * You can print trees one per line up to a certain length (for EVALB) and many other things.
    * <p>
    * Usage: {@code
-   * java edu.stanford.nlp.trees.Treebanks [-maxLength n|-normalize|-treeReaderFactory class] filePath [numberRanges]
+   * java edu.stanford.nlp.trees.Treebanks [-maxLength n|-normalized|-treeReaderFactory class] filePath [numberRanges]
    * }
    *
    * @param args Array of command-line arguments
