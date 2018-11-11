@@ -1344,7 +1344,7 @@ RM/{NUM}        { String txt = yytext();
                   }
                 }
 {NEWLINE}       { if (tokenizeNLs) {
-                      return getNext(AbstractTokenizer.NEWLINE_TOKEN, yytext()); // for tokenizing newliens
+                      return getNext(AbstractTokenizer.NEWLINE_TOKEN, yytext()); // for tokenizing newlines
                   } else if (invertible) {
                     // System.err.println("Appending newline: |" + yytext() + "|");
                     prevWordAfter.append(yytext());

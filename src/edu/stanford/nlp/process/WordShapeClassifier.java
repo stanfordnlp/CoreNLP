@@ -528,7 +528,7 @@ public class WordShapeClassifier  {
       return '$';
     } else if (type == Character.MATH_SYMBOL) {
       return '+';
-    } else if (type == Character.OTHER_SYMBOL || c == '|') {
+    } else if (type == Character.OTHER_SYMBOL || c == '|' || type == Character.MODIFIER_SYMBOL) {
       return '|';
     } else if (type == Character.START_PUNCTUATION) {
       return '(';
@@ -943,9 +943,9 @@ public class WordShapeClassifier  {
 
 
   /**
-   * Usage: <code>java edu.stanford.nlp.process.WordShapeClassifier
-   * [-wordShape name] string+ </code><br>
-   * where <code>name</code> is an argument to <code>lookupShaper</code>.
+   * Usage: {@code java edu.stanford.nlp.process.WordShapeClassifier
+   * [-wordShape name] string+ }<br>
+   * where {@code name} is an argument to {@code lookupShaper}.
    * Known names have patterns along the lines of: dan[12](bio)?(UseLC)?,
    * jenny1(useLC)?, chris[1234](useLC)?, cluster1.
    * If you don't specify a word shape function, you get chris1.
