@@ -292,7 +292,8 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     "relabel bad NNP\n" +
             '\n') +
 
-    ("@NP < (JJ=bad <1 Sharp) !<2 __\n" +
+            // WSJ treats 'Department' as NNP, except in a couple of standalone cases in 00, 01 which seeem to be mistakes
+    ("@NP < (NN=bad < Department)\n" +
     "relabel bad NNP\n" +
             '\n') +
 
