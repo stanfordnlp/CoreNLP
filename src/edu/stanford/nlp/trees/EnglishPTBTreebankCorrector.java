@@ -236,6 +236,11 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     "relabel bad NNPS\n" +
             '\n') +
 
+    // Parks for Korean name plural or national Parks but not elsewhere ("Rosa Parks", etc.)
+    ("@NP < (NNP|NNS=bad < Parks) [ < (DT < The|the) | < (NNP|JJ < National) ]\n" +
+    "relabel bad NNPS\n" +
+            '\n') +
+
     ("@NP < (CD=bad < the)\n" +
     "relabel bad DT\n" +
             '\n') +
@@ -1722,7 +1727,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     // last minute; check more carefully
 
     (
-     ("NNP=bad < Securities|Manufacturers|Enterprises|Securities|Resources|Corporations|Sports|Merchants|Industries|Holdings|Brothers|Airlines|Systems|Motors|Industries|Parks|Communications|Facilities|Technologies|Sons|Publications|Products|Nations|Monopolies|Mergers|Machines|INDUSTRIES|Giants|Firearms|Associates|ASSOCIATES\n" +
+     ("NNP=bad < Securities|Manufacturers|Enterprises|Securities|Resources|Corporations|Sports|Merchants|Industries|Holdings|Brothers|Airlines|Systems|Motors|Industries|Communications|Facilities|Technologies|Sons|Publications|Products|Nations|Monopolies|Mergers|Machines|INDUSTRIES|Giants|Firearms|Associates|ASSOCIATES\n" +
       "relabel bad NNPS\n" +
              '\n') +
 
