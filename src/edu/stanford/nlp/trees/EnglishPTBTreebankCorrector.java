@@ -676,8 +676,8 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     "relabel bad NP\n" +
             '\n') +
 
-    // How much always has 'much' as a JJ
-    ("/^WH/ < (WRB < /^(?i:how)$/) < (__=bad < (much !> JJ))\n" +
+    // How much can have "much" as RB or JJ depending on environment. JJ if under WHADJP or WHNP
+    ("@WHADJP|WHNP|NP < (WRB < /^(?i:how)$/) < (__=bad < (much !> JJ))\n" +
     "relabel bad JJ\n" +
             '\n') +
 
@@ -1560,6 +1560,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     "relabel bad WHNP\n" +
             '\n') +
 
+    // this time the "much" is outside the WHADVP, but should we relabel as a WHADJP like the rule one above?
     ("@WHNP < (@WHADVP=bad < (WRB < /^(?i:how)$/)) < (JJ < much)\n" +
     "excise bad bad\n" +
             '\n') +
