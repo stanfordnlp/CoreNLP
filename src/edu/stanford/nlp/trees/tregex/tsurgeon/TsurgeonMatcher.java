@@ -6,21 +6,21 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 
 /**
- * An object factored out to keep the state of a <code>Tsurgeon</code>
- * operation separate from the <code>TsurgeonPattern</code> objects.
+ * An object factored out to keep the state of a {@code Tsurgeon}
+ * operation separate from the {@code TsurgeonPattern} objects.
  * This makes it easier to reset state between invocations and makes
  * it easier to use in a threadsafe manner.
  * <br>
  * TODO: it would be nice to go through all the patterns and make sure
- * they update <code>newNodeNames</code> or look for appropriate nodes
- * in <code>newNodeNames</code> when possible.
+ * they update {@code newNodeNames} or look for appropriate nodes
+ * in {@code newNodeNames} when possible.
  * <br>
- * It would also be nicer if the call to <code>matcher()</code> took
- * the tree &amp; tregex instead of <code>evaluate()</code>, but that
+ * It would also be nicer if the call to {@code matcher()} took
+ * the tree &amp; tregex instead of {@code evaluate()}, but that
  * is a little more complicated because of the way the
- * <code>TsurgeonMatcher</code> is used in <code>Tsurgeon</code>.
+ * {@code TsurgeonMatcher} is used in {@code Tsurgeon}.
  * Basically, you would need to move that code from
- * <code>Tsurgeon</code> to <code>TsurgeonMatcher</code>.
+ * {@code Tsurgeon} to {@code TsurgeonMatcher}.
  *
  * @author John Bauer
  */
