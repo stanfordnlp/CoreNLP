@@ -24,7 +24,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 public class TestClassifier  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TestClassifier.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TestClassifier.class);
 
   private final TaggedFileRecord fileRecord;
   private int numRight;
@@ -36,16 +36,15 @@ public class TestClassifier  {
 
   private ConfusionMatrix<String> confusionMatrix;
 
-  // TODO: only one boolean here instead of 4?  They all use the same
-  // debug status
+  // TODO: only one boolean here instead of 4? They all use the same debug status.
   private boolean writeUnknDict;
   private boolean writeWords;
   private boolean writeTopWords;
   private boolean writeConfusionMatrix;
 
-  MaxentTagger maxentTagger;
+  private MaxentTagger maxentTagger;
   TaggerConfig config;
-  String saveRoot;
+  private String saveRoot;
 
   public TestClassifier(MaxentTagger maxentTagger) throws IOException {
     this(maxentTagger, maxentTagger.config.getFile());
@@ -67,7 +66,7 @@ public class TestClassifier  {
 
     if (writeConfusionMatrix) {
       PrintFile pf = new PrintFile(saveRoot + ".confusion");
-      pf.print(confusionMatrix.toString());
+      pf.print(confusionMatrix);
       pf.close();
     }
   }
@@ -104,9 +103,7 @@ public class TestClassifier  {
    * TODO: Add the ability to have a second transformer to transform output back; possibly combine this method
    * with method below
    */
-  private void test()
-    throws IOException
-  {
+  private void test() throws IOException {
     numSentences = 0;
     confusionMatrix = new ConfusionMatrix<>();
 
@@ -114,9 +111,9 @@ public class TestClassifier  {
     PrintFile pf1 = null;
     PrintFile pf3 = null;
 
-    if(writeWords) pf = new PrintFile(saveRoot + ".words");
-    if(writeUnknDict) pf1 = new PrintFile(saveRoot + ".un.dict");
-    if(writeTopWords) pf3 = new PrintFile(saveRoot + ".words.top");
+    if (writeWords) pf = new PrintFile(saveRoot + ".words");
+    if (writeUnknDict) pf1 = new PrintFile(saveRoot + ".un.dict");
+    if (writeTopWords) pf3 = new PrintFile(saveRoot + ".words.top");
 
     boolean verboseResults = config.getVerboseResults();
 
@@ -141,9 +138,9 @@ public class TestClassifier  {
       }
     }
 
-    if(pf != null) pf.close();
-    if(pf1 != null) pf1.close();
-    if(pf3 != null) pf3.close();
+    if (pf != null) pf.close();
+    if (pf1 != null) pf1.close();
+    if (pf3 != null) pf3.close();
   }
 
 
