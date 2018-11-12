@@ -1737,9 +1737,10 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
       "relabel bad JJ\n" +
              '\n') +
 
-     ("@NP < (VBG=bad < operating|Operating $++ /^NN/)\n" +
-      "relabel bad NN\n" +
-             '\n') +
+             // maybe too radical. omit for now and consider effects
+      // ("@NP < (VBG=bad < operating|Operating $++ /^NN/)\n" +
+      //  "relabel bad NN\n" +
+      //        '\n') +
 
      ("@NP <- (DT=bad < half)\n" +
       "relabel bad NN\n" +
