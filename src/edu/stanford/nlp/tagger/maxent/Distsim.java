@@ -66,7 +66,7 @@ public class Distsim implements Serializable {
       lexicon.put(w, bits[1]);
     }
 
-    unk = lexicon.getOrDefault("<unk>", "NULL");
+    unk = lexicon.getOrDefault("<unk>", "null");
   }
 
   public static Distsim initLexicon(String path) {

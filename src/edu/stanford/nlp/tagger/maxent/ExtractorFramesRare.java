@@ -1023,7 +1023,7 @@ class ExtractorStartSentenceCap extends RareExtractor {
   @Override
   String extract(History h, PairsHolder pH) {
     String prevTag = pH.getTag(h, -1);
-    if(prevTag == null) { return zeroSt; }
+    if (prevTag == null) { return zeroSt; }
     if (!prevTag.equals(naTag)) {
       return zeroSt;
     }
@@ -1318,6 +1318,9 @@ class ExtractorsConjunction extends RareExtractor {
 
 }
 
+
+/** This class is loaded by reflection in some POS taggers. */
+@SuppressWarnings("unused")
 class ExtractorNonAlphanumeric extends RareExtractor {
 
   public ExtractorNonAlphanumeric() { }
@@ -1337,7 +1340,6 @@ class ExtractorNonAlphanumeric extends RareExtractor {
   private static final long serialVersionUID = 1L;
 
 }
-
 
 
 class PluralAcronymDetector extends RareExtractor {
