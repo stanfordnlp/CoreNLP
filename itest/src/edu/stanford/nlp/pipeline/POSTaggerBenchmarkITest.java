@@ -82,7 +82,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     String englishPOSTestPath = "/u/nlp/data/pos-tagger/english/test-wsj-22-24";
     List<String> sentences = readInPOSData(englishPOSTestPath);
     double ENGLISH_BIDIRECTIONAL_TOKEN_ACCURACY = .972;
-    double ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY = .564;
+    double ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY = .563;
     runPOSTest(sentences, "_", englishBiDirectionalPipeline,
         ENGLISH_BIDIRECTIONAL_TOKEN_ACCURACY, ENGLISH_BIDIRECTIONAL_SENTENCE_ACCURACY,
         "English BiDirectional", false);
