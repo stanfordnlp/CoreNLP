@@ -49,6 +49,7 @@ public class CorefScorer {
       for(String line : lines) {
         if(line.startsWith("Identification of Mentions")) {
           Redwood.log(line);
+          logger.info(line);
           return;
         }
       }
@@ -61,6 +62,7 @@ public class CorefScorer {
         }
       }
       Redwood.log(sb.toString());
+      logger.info(sb.toString());
     }
   }
 
@@ -76,10 +78,11 @@ public class CorefScorer {
     return finalScore;
   }
 
-  public static void printFinalConllScore(String summary) {
+  public static void printFinalConllScore(String summary, Logger logger) {
     double finalScore = getFinalConllScore(summary);
     Redwood.log(
             "Final conll score ((muc+bcub+ceafe)/3) = " + (new DecimalFormat("#.##")).format(finalScore));
+    logger.info("Final conll score ((muc+bcub+ceafe)/3) = " + (new DecimalFormat("#.##")).format(finalScore));
   }
 
   public static double getFinalConllScoreFromOutputDir(String corefOutputDir, String scorerPath) {

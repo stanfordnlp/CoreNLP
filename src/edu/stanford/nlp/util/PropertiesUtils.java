@@ -235,6 +235,18 @@ public class PropertiesUtils {
   }
 
   /**
+   * Get the value of a property as a path to a directory.  If the key is not present, returns defaultValue.
+   * If the path doesn't terminate with '/', append '/' to the string.
+   */
+  public static String getDirPath(Properties props, String key, String defaultValue) {
+    String returnPath = props.getProperty(key, defaultValue);
+    if (returnPath != null && ! returnPath.endsWith("/")) {
+      returnPath += "/";
+    }
+    return returnPath;
+  }
+
+  /**
    * Get the value of a property.  If the key is not present, returns defaultValue.
    * This is just equivalent to props.getProperty(key, defaultValue).
    */

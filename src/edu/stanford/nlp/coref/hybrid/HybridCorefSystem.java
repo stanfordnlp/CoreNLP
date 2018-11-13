@@ -190,7 +190,7 @@ public class HybridCorefSystem implements CorefAlgorithm {
 
       summary = CorefScorer.getEvalSummary(CorefProperties.getScorerPath(props), goldOutput, afterCorefOutput);
       CorefScorer.printScoreSummary(summary, logger, true);
-      CorefScorer.printFinalConllScore(summary);
+      CorefScorer.printFinalConllScore(summary, logger);
     }
   }
 

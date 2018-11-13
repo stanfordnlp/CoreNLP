@@ -1,11 +1,16 @@
 package edu.stanford.nlp.coref;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.CorefCluster;
@@ -15,6 +20,7 @@ import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.NewlineLogFormatter;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -69,15 +75,35 @@ public class CorefSystem {
     ann.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
   }
 
+  public void initLogger(Logger logger, String logFileName) {
+      try {
+          FileHandler fh = new FileHandler(logFileName, false);
+          logger.addHandler(fh);
+          logger.setLevel(Level.FINE);
+          fh.setFormatter(new NewlineLogFormatter());
+      } catch (SecurityException | IOException e) {
+          throw new RuntimeException("Cannot initialize logger!", e);
+      }
+  }
+
   public void runOnConll(Properties props) throws Exception {
-    String baseName = CorefProperties.conllOutputPath(props) +
-        Calendar.getInstance().getTime().toString().replaceAll("\\s", "-").replaceAll(":", "-");
+    File f = new File(CorefProperties.conllOutputPath(props));
+    if (! f.exists()) {
+      f.mkdirs();
+    }
+    String timestamp = Calendar.getInstance().getTime().toString().replaceAll("\\s", "-").replaceAll(":", "-");
+    String baseName = CorefProperties.conllOutputPath(props) + timestamp;
     String goldOutput = baseName + ".gold.txt";
     String beforeCorefOutput = baseName + ".predicted.txt";
     String afterCorefOutput = baseName + ".coref.predicted.txt";
     PrintWriter writerGold = new PrintWriter(new FileOutputStream(goldOutput));
     PrintWriter writerBeforeCoref = new PrintWriter(new FileOutputStream(beforeCorefOutput));
     PrintWriter writerAfterCoref = new PrintWriter(new FileOutputStream(afterCorefOutput));
+
+    Logger logger = Logger.getLogger(CorefSystem.class.getName());
+    initLogger(logger,baseName + ".log");
+    logger.info(timestamp);
+    logger.info(props.toString());
 
     (new CorefDocumentProcessor() {
       @Override
@@ -94,7 +120,14 @@ public class CorefSystem {
         if (verbose) {
           CorefUtils.printHumanReadableCoref(document);
         }
-        writerAfterCoref.print(CorefPrinter.printConllOutput(document, false, true));
+        if (document.filterMentionSet != null) {
+          Map<Integer,CorefCluster> filteredClusters = document.corefClusters
+                  .values().stream().filter(x -> CorefUtils.filterClustersWithMentionSpans(x, document.filterMentionSet) )
+                  .collect(Collectors.toMap(x -> x.clusterID, x -> x));
+          writerAfterCoref.print(CorefPrinter.printConllOutput(document, false, true, filteredClusters));
+        } else {
+          writerAfterCoref.print(CorefPrinter.printConllOutput(document, false, true));
+        }
       }
 
       @Override
@@ -106,14 +139,20 @@ public class CorefSystem {
       }
     }).run(docMaker);
 
-    Logger logger = Logger.getLogger(CorefSystem.class.getName());
     String summary = CorefScorer.getEvalSummary(CorefProperties.getScorerPath(props),
         goldOutput, beforeCorefOutput);
+
+    logger.info("Before Coref");
     CorefScorer.printScoreSummary(summary, logger, false);
+    CorefScorer.printScoreSummary(summary, logger, true);
+    CorefScorer.printFinalConllScore(summary, logger);
+
     summary = CorefScorer.getEvalSummary(CorefProperties.getScorerPath(props), goldOutput,
         afterCorefOutput);
+    logger.info("After Coref");
+    CorefScorer.printScoreSummary(summary, logger, false);
     CorefScorer.printScoreSummary(summary, logger, true);
-    CorefScorer.printFinalConllScore(summary);
+    CorefScorer.printFinalConllScore(summary, logger);
 
     writerGold.close();
     writerBeforeCoref.close();

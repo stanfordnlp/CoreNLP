@@ -815,9 +815,16 @@ public class CorefRules {
         return true;
       } else if (m.person != Person.UNKNOWN && ant.person != Person.UNKNOWN) {
         return false;
-      } else if (((m.person == Person.I || m.person == Person.YOU) && (dict.determiners.contains(ant.spanToString()))) ||
-              ((ant.person == Person.I || ant.person == Person.YOU) && (dict.determiners.contains(m.spanToString())))) {
+      } else if (((m.person == Person.I || m.person == Person.YOU) && (dict.determiners.contains(ant.spanToString().toLowerCase()))) ||
+              ((ant.person == Person.I || ant.person == Person.YOU) && (dict.determiners.contains(m.spanToString().toLowerCase())))) {
         return false;
+      }
+    }
+    if(sameSpeaker) {
+      if(!ant.isPronominal()) {
+        if(m.person==Person.I || m.person==Person.WE || m.person==Person.YOU) return false;
+      } else if(!m.isPronominal()) {
+        if(ant.person==Person.I || ant.person==Person.WE || ant.person==Person.YOU) return false;
       }
     }
     boolean differentSpeaker = entityDifferentSpeaker(document, m, ant);
@@ -1039,6 +1046,5 @@ public class CorefRules {
      context2.addAll(m2.getContext());
      return Sets.intersects(context1, context2);
    }
-
 
 }

@@ -1,11 +1,23 @@
 package edu.stanford.nlp.coref;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Set;
+import java.util.function.Predicate;
 
+import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.coref.data.CorefCluster;
+import edu.stanford.nlp.coref.data.Mention;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinder;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
@@ -183,4 +195,16 @@ public class CorefProperties {
     }
   }
 
+  public static Predicate<Pair<CorefChain.CorefMention, List<CoreLabel>>> getCorefMentionFilter(Properties props) {
+    String filterCorefChain = props.getProperty("coref.evaluate.filter");
+    if (filterCorefChain != null) {
+        if ("filterCustomerAbstractPronouns".equals(filterCorefChain)) {
+            return CorefUtils.filterCustomerAbstractPronouns;
+        } else {
+            throw new RuntimeException("Cannot create coref.evaluate.filter " + filterCorefChain);
+        }
+    } else {
+        return null;
+    }
+  }
 }
