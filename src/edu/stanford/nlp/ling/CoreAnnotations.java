@@ -2023,6 +2023,16 @@ public class CoreAnnotations {
   }
 
   /**
+   * used to store speaker type information for coref
+   */
+  public static class SpeakerTypeAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
    * used in dcoref.
    * to store paragraph information.
    */

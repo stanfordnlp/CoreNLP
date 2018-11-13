@@ -77,6 +77,8 @@ public class JSONOutputter extends AnnotationOutputter {
           l2.set("index", sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
           l2.set("line", sentence.get(CoreAnnotations.LineNumberAnnotation.class));
           l2.set("paragraph", sentence.get(CoreAnnotations.ParagraphIndexAnnotation.class));
+          l2.set("speaker", sentence.get(CoreAnnotations.SpeakerAnnotation.class));
+          l2.set("speakerType", sentence.get(CoreAnnotations.SpeakerTypeAnnotation.class));
           // (constituency tree)
           StringWriter treeStrWriter = new StringWriter();
           TreePrint treePrinter = options.constituencyTreePrinter;
