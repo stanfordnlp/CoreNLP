@@ -93,8 +93,8 @@ public class TestClassifier  {
       log.info("Sentence number: " + numSentences + "; length " + (testS.size-1) +
                          "; correct: " + testS.numRight + "; wrong: " + testS.numWrong +
                          "; unknown wrong: " + testS.numWrongUnknown);
-      log.info("  Total tags correct: " + numRight + "; wrong: " + numWrong +
-                         "; unknown wrong: " + numWrongUnknown);
+      // log.info("  Total tags correct: " + numRight + "; wrong: " + numWrong +
+      //                    "; unknown wrong: " + numWrongUnknown);
     }
   }
 
