@@ -33,7 +33,7 @@ public class PatternsForEachTokenLucene<E extends Pattern> extends PatternsForEa
 
   static Analyzer analyzer = new KeywordAnalyzer();
 
-  static IndexWriterConfig iwc=new IndexWriterConfig(Version.LUCENE_42, analyzer);
+  static IndexWriterConfig iwc=new IndexWriterConfig(analyzer);
   static DirectoryReader reader = null;
   static IndexSearcher searcher;
 
@@ -77,7 +77,7 @@ public class PatternsForEachTokenLucene<E extends Pattern> extends PatternsForEa
 
   public void checkClean(){
     try {
-      dir = FSDirectory.open(indexDir);
+      dir = FSDirectory.open(indexDir.toPath());
     CheckIndex checkIndex = new CheckIndex(dir);
     CheckIndex.Status status = checkIndex.checkIndex();
     assert (status.clean) : "index is not clean";
@@ -98,7 +98,7 @@ public class PatternsForEachTokenLucene<E extends Pattern> extends PatternsForEa
 
   static synchronized void setIndexReaderSearcher() {
     try{
-    FSDirectory index = NIOFSDirectory.open(indexDir);
+    FSDirectory index = NIOFSDirectory.open(indexDir.toPath());
     if(reader == null){
       reader = DirectoryReader.open(index);
       searcher = new IndexSearcher(reader);
@@ -166,7 +166,7 @@ public class PatternsForEachTokenLucene<E extends Pattern> extends PatternsForEa
   static synchronized void setIndexWriter()  {
     try{
     if(!openIndexWriter.get()){
-      dir = FSDirectory.open(indexDir);
+      dir = FSDirectory.open(indexDir.toPath());
       Redwood.log(Redwood.DBG, "Updating lucene index at " + indexDir);
       indexWriter = new IndexWriter(dir, iwc);
       openIndexWriter.set(true);

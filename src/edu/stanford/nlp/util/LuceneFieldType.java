@@ -1,6 +1,7 @@
 package edu.stanford.nlp.util;
 
 import org.apache.lucene.document.FieldType;
+import org.apache.lucene.index.IndexOptions;
 
 /** An easy way to access types of fields instead of setting variables up every time.
  * Copied from KBPFieldType written by Angel.
@@ -24,34 +25,34 @@ public class LuceneFieldType {
   public static final FieldType NOT_INDEXED = new FieldType();
 
   static {
-    ANALYZED_NOT_STORED.setIndexed(true);
+    ANALYZED_NOT_STORED.setIndexOptions(IndexOptions.DOCS);
     ANALYZED_NOT_STORED.setTokenized(true);
     ANALYZED_NOT_STORED.setStored(false);
     ANALYZED_NOT_STORED.setStoreTermVectors(true);
     ANALYZED_NOT_STORED.setStoreTermVectorPositions(true);
     ANALYZED_NOT_STORED.freeze();
 
-    ANALYZED.setIndexed(true);
+    ANALYZED.setIndexOptions(IndexOptions.DOCS);
     ANALYZED.setTokenized(true);
     ANALYZED.setStored(true);
     ANALYZED.setStoreTermVectors(true);
     ANALYZED.setStoreTermVectorPositions(true);
     ANALYZED.freeze();
 
-    ANALYZED_NO_POSITION.setIndexed(true);
+    ANALYZED_NO_POSITION.setIndexOptions(IndexOptions.DOCS);
     ANALYZED_NO_POSITION.setTokenized(true);
     ANALYZED_NO_POSITION.setStoreTermVectors(true);
     ANALYZED_NO_POSITION.setStoreTermVectorPositions(false);
     ANALYZED_NO_POSITION.freeze();
 
-    NOT_ANALYZED.setIndexed(true);
+    NOT_ANALYZED.setIndexOptions(IndexOptions.DOCS);
     NOT_ANALYZED.setTokenized(false);
     NOT_ANALYZED.setStored(true);
     NOT_ANALYZED.setStoreTermVectors(false);
     NOT_ANALYZED.setStoreTermVectorPositions(false);
     NOT_ANALYZED.freeze();
 
-    NOT_INDEXED.setIndexed(false);
+    NOT_INDEXED.setIndexOptions(IndexOptions.NONE);
     NOT_INDEXED.setTokenized(false);
     NOT_INDEXED.setStored(true);
     NOT_INDEXED.setStoreTermVectors(false);
