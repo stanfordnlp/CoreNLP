@@ -1,0 +1,69 @@
+!jsparrow.config
+
+# rules in this section will be executed, if no profile has been specified as selectedProfile or via maven.
+# to deactivate rules, they could be commented with the #-sign
+rules:
+  - TryWithResource
+  - MultiCatch
+  - FunctionalInterface
+  - CollectionRemoveAll
+  - ImmutableStaticFinalCollections
+  - DiamondOperator
+  - OverrideAnnotation
+  - SerialVersionUID
+  - RearrangeClassMembers
+  - BracketsToControl
+  - MultiVariableDeclarationLine
+  - EnumsWithoutEquals
+  - ReImplementingInterface
+  - PutIfAbsent
+  - DateDeprecated
+  - RemoveDoubleNegationRule
+  - OptionalIfPresent
+  - GuardCondition
+  - RemoveExplicitCallToSuper
+  - RemoveEmptyStatement
+  - RemoveUnnecessaryThrows
+  - RemoveNewStringConstructor
+  - InefficientConstructor
+  - PrimitiveBoxedForString
+  - StringFormatLineSeparator
+  - IndexOfToContains
+  - RemoveToStringOnString
+  - StringUtils
+  - StringLiteralEqualityCheck
+  - StringConcatToPlus
+  - UseIsEmptyOnCollections
+  - ArithmethicAssignment
+  - StringBufferToBuilder
+  - PrimitiveObjectUseEquals
+  - WhileToForEach
+  - ForToForEach
+  - EnhancedForLoopToStreamForEach
+  - LambdaForEachIfWrapperToFilter
+  - StatementLambdaToExpression
+  - LambdaForEachCollect
+  - LambdaForEachMap
+  - FlatMapInsteadOfNestedLoops
+  - EnhancedForLoopToStreamAnyMatch
+  - EnhancedForLoopToStreamFindFirst
+  - EnhancedForLoopToStreamSum
+  - StringBuildingLoop
+  - LambdaToMethodReference
+  - UseStringBuilderAppend
+  - CodeFormatter
+  - StandardLogger
+  - FieldRenaming
+
+
+# define modules, classes and packages that you don't want to apply refactoring to
+# excluded modules could only be defined on parent project and those modules are then entirely ignored
+# if modul project has it's own yaml file, it overrides entire configuration from parent project yaml configuration if module wasn't excluded in parent yaml
+excludes:
+    excludeModules:
+      - releng
+      - features
+    excludePackages:
+      - removeMeAfterNPEFix
+    excludeClasses:
+      - eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPage.java
