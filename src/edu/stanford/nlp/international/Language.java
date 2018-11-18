@@ -83,7 +83,7 @@ public enum Language {
 
   public static TreebankLangParserParams treebankForLanguage(String languageName) {
     try {
-      Class clazz = Class.forName(languageName+"TreebankParserParams");
+      Class clazz = Class.forName("edu.stanford.nlp.parser.lexparser."+languageName+"TreebankParserParams");
       return (TreebankLangParserParams) clazz.newInstance();
     } catch (ClassNotFoundException | NoClassDefFoundError | java.lang.InstantiationException |
         java.lang.IllegalAccessException ex) {
