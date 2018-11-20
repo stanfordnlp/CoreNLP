@@ -109,7 +109,7 @@ These packages are miscellaneous utilities or other frameworks that use Stanford
 * [PyStanfordDependencies , a Python interface for converting Penn Treebank trees to Stanford Dependencies](https://github.com/dmcc/PyStanfordDependencies) by David McClosky (see also: [PyPI page](https://pypi.python.org/pypi/PyStanfordDependencies)). Last we checked, it is at Stanford CoreNLP v3.5.2 and can do Universal and Stanford dependencies (though it's currently missing Universal POS tags and features).
 * [corenlp-xml](https://github.com/relwell/corenlp-xml-lib), a library for handling interactions with CoreNLP's XML output by Robert Elwell. Available on [PyPI](https://pypi.python.org/pypi/corenlp-xml). [Documentation](http://corenlp-xml-library.readthedocs.io/en/latest/#).
 * [corpkit](https://www.github.com/interrogator/corpkit), a sophisticated corpus linguistics toolkit with GUI by Daniel McDonald. Interfaces with CoreNLP v3.6.0 to parse documents, and uses Tregex/[CoreNLP XML](https://github.com/relwell/corenlp-xml-lib) to find patterns in corpora. Available on [PyPI](https://pypi.python.org/pypi/corpkit). A [graphical interface](http://interrogator.github.io/corpkit/) is also available.
-* [corenlp-xml-reader](https://github.com/enewe101/corenlp-xml-reader) by Edward Newell on GitHub and there it's a [PyPI package](https://pypi.python.org/pypi/corenlp-xml-reader/0.0.7)
+* [corenlp-xml-reader](https://github.com/enewe101/corenlp-xml-reader) by Edward Newell on GitHub and there it's a [PyPI package](https://pypi.python.org/pypi/corenlp-xml-reader/0.0.7). He also has [corenlpy](https://pypi.org/project/corenlpy/), which runs Java in a subprocess – [github](https://github.com/enewe101/corenlpy)
 
 #### Older Python packages
 

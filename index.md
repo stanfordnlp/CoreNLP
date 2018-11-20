@@ -109,9 +109,13 @@ It works on Linux, macOS, and Windows.
 
 ## License
 
-Stanford CoreNLP is licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl.html)
-(v3 or later; in general Stanford NLP
-code is GPL v2+, but CoreNLP uses several Apache-licensed libraries, and so the composite is v3+).
+The full Stanford CoreNLP is licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl.html)
+v3 or later. More precisely, all the Stanford NLP
+code is GPL v2+, but CoreNLP uses some Apache-licensed libraries,
+and so our understanding is that the the composite is correctly
+licensed as v3+. You can run almost all of CoreNLP under GPL v2; you
+simply need to omit the time-related libraries, and then you lose the
+functionality of SUTime.
 Note that the license is the <i>full</i> GPL,
 which allows many free uses, but not its use in 
 [proprietary software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem) 
