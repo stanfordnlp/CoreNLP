@@ -4,12 +4,6 @@ keywords: ner
 permalink: '/ner.html'
 ---
 
-**WARNING** This documentation is for the current version of Stanford CoreNLP
-available on GitHub.  Some of the features discussed here will not work with
-Stanford CoreNLP 3.9.1.  Stanford CoreNLP 3.9.2 should be coming out very soon
-and will include these changes.  You can always build a jar with the latest code
-by following instruction found [here](https://github.com/stanfordnlp/CoreNLP).
-
 ## Description
 
 Recognizes named entities (person and company names, etc.) in text.
