@@ -26,6 +26,7 @@ public class AnnotationIterator extends AbstractIterator<Annotation> implements 
     JSONAnnotationReader jsonReader = new JSONAnnotationReader();
     String format;
     int docCnt = 0;
+    int limit = 0;
 
     public AnnotationIterator(String filename) throws IOException {
         this.filename = filename;
@@ -43,6 +44,11 @@ public class AnnotationIterator extends AbstractIterator<Annotation> implements 
             throw new IOException("Unsupported file format: " + filename);
         }
         nextDoc = readNextDocument();
+    }
+
+    public AnnotationIterator(String filename, int limit) throws IOException {
+        this(filename);
+        this.limit = limit;
     }
 
     @Override
@@ -66,6 +72,9 @@ public class AnnotationIterator extends AbstractIterator<Annotation> implements 
 
     public Annotation readNextDocument() {
         if (br == null && input == null) {
+            return null;
+        }
+        if (limit > 0 && docCnt >= limit) {
             return null;
         }
         try {
