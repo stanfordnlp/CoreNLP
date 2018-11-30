@@ -52,7 +52,10 @@ public class DocumentMaker {
       return null;
     }
     if ("corenlp".equalsIgnoreCase(props.getProperty("coref.reader"))) {
-      return new CoreNLPDocumentReader(corpusPath);
+      CoreNLPDocumentReader.Options options = new CoreNLPDocumentReader.Options();
+      options.filterCorefMentions = CorefProperties.getCorefMentionFilter(props);
+      options.lang = CorefProperties.getLanguage(props);
+      return new CoreNLPDocumentReader(corpusPath, options);
     } else {
       CoNLLDocumentReader.Options options = new CoNLLDocumentReader.Options();
       if (!PropertiesUtils.getBool(props, "coref.printConLLLoadingMessage", true))

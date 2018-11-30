@@ -68,6 +68,10 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, "coref.removeSingletonClusters", true);
   }
 
+  public static boolean removeXmlMentions(Properties props) {
+    return PropertiesUtils.getBool(props, "coref.removeXmlMentions", false);
+  }
+
   // ---------- Heuristic Mention Filtering ----------
 
   public static int maxMentionDistance(Properties props) {
