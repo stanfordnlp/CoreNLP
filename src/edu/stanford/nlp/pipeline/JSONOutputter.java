@@ -195,6 +195,7 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("ner", token.ner());
               l3.set("normalizedNER", token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
               l3.set("speaker", token.get(CoreAnnotations.SpeakerAnnotation.class));
+              l3.set("speakerType", token.get(CoreAnnotations.SpeakerTypeAnnotation.class));
               l3.set("truecase", token.get(CoreAnnotations.TrueCaseAnnotation.class));
               l3.set("truecaseText", token.get(CoreAnnotations.TrueCaseTextAnnotation.class));
               l3.set("before", token.get(CoreAnnotations.BeforeAnnotation.class));
