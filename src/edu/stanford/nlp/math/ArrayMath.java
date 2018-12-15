@@ -1966,6 +1966,12 @@ public class ArrayMath {
   }
 
   public static String toString(double[][] counts, int cellSize, Object[] rowLabels, Object[] colLabels, NumberFormat nf, boolean printTotals) {
+    return toString(counts, cellSize, rowLabels, colLabels, cellSize, nf, printTotals, printTotals, "");
+  }
+
+  public static String toString(double[][] counts, int cellSize, Object[] rowLabels, Object[] colLabels,
+                                int rowLabelSize, NumberFormat nf, boolean printRowTotals, boolean printColumnTotals,
+                                Object topLeft) {
     if (counts==null) return null;
     // first compute row totals and column totals
     double[] rowTotals = new double[counts.length];
@@ -1981,7 +1987,7 @@ public class ArrayMath {
     StringBuilder result = new StringBuilder();
     // column labels
     if (colLabels != null) {
-      result.append(StringUtils.padLeft("", cellSize));
+      result.append(StringUtils.padOrTrim(topLeft, rowLabelSize));
       for (int j = 0; j < counts[0].length; j++) {
         String s = colLabels[j].toString();
         if (s.length() > cellSize - 1) {
@@ -1990,7 +1996,7 @@ public class ArrayMath {
         s = StringUtils.padLeft(s, cellSize);
         result.append(s);
       }
-      if (printTotals) {
+      if (printRowTotals) {
         result.append(StringUtils.padLeftOrTrim("Total", cellSize));
       }
       result.append('\n');
@@ -1999,7 +2005,7 @@ public class ArrayMath {
       // row label
       if (rowLabels != null) {
         String s = rowLabels[i].toString();
-        s = StringUtils.padOrTrim(s, cellSize); // left align this guy only
+        s = StringUtils.padOrTrim(s, rowLabelSize); // left align this guy only
         result.append(s);
       }
       // value
@@ -2007,18 +2013,20 @@ public class ArrayMath {
         result.append(StringUtils.padLeft(nf.format(counts[i][j]), cellSize));
       }
       // the row total
-      if (printTotals) {
+      if (printRowTotals) {
         result.append(StringUtils.padLeft(nf.format(rowTotals[i]), cellSize));
       }
       result.append('\n');
     }
     // the col totals
-    if (printTotals) {
-      result.append(StringUtils.pad("Total", cellSize));
+    if (printColumnTotals) {
+      result.append(StringUtils.pad("Total", rowLabelSize));
       for (double colTotal : colTotals) {
         result.append(StringUtils.padLeft(nf.format(colTotal), cellSize));
       }
-      result.append(StringUtils.padLeft(nf.format(total), cellSize));
+      if (printRowTotals) {
+        result.append(StringUtils.padLeft(nf.format(total), cellSize));
+      }
     }
     return result.toString();
   }
