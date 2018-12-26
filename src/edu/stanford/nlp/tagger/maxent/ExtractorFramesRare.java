@@ -597,10 +597,7 @@ class RareExtractor extends Extractor {
   private static final Pattern numericPattern = Pattern.compile("[0-9,./-]+");
 
   protected static boolean allNumeric(String s) {
-    if (s == null) {
-      return false;
-    }
-    return numericPattern.matcher(s).matches();
+    return s != null && numericPattern.matcher(s).matches();
   }
 
   protected static boolean containsLetter(String s) {
@@ -1363,7 +1360,7 @@ class ExtractorNumeric extends RareExtractor {
   @Override
   String extract(History h, PairsHolder pH) {
     String s = pH.getWord(h, 0);
-    if (allNumeric(s)) {
+    if (containsNumber(s) && allNumeric(s)) {
       return "1";
     } else {
       return "0";
