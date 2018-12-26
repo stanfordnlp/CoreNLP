@@ -33,6 +33,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 
 /**
@@ -593,6 +594,15 @@ class RareExtractor extends Extractor {
     return false;
   }
 
+  private static final Pattern numericPattern = Pattern.compile("[0-9,./-]+");
+
+  protected static boolean allNumeric(String s) {
+    if (s == null) {
+      return false;
+    }
+    return numericPattern.matcher(s).matches();
+  }
+
   protected static boolean containsLetter(String s) {
     if (s == null) {
       return false;
@@ -931,7 +941,7 @@ class ExtractorCapDistLC extends RareExtractor {
 class ExtractorCapLCSeen extends RareExtractor {
 
   final String tag;
-  int cutoff = 1;
+  private int cutoff = 1;
   private final Extractor cCapDist = new ExtractorCapDistLC();
 
   private transient Dictionary dict;
@@ -976,7 +986,7 @@ class ExtractorCapLCSeen extends RareExtractor {
 // todo [cdm 2018]: It should be possible to turn these next three extractors into localContext extractors, since only use of tags is to detect start of sentence!
 
 /**
- * "1" if not first word of sentence and _some_ letter is uppercase
+ * "1" if not first word of sentence and _some_ letter is uppercase; else "0"
  */
 class ExtractorMidSentenceCap extends RareExtractor {
 
@@ -986,9 +996,9 @@ class ExtractorMidSentenceCap extends RareExtractor {
   @Override
   String extract(History h, PairsHolder pH) {
     String prevTag = pH.getTag(h, -1);
-    if(prevTag == null) { return "0"; }
-    if (prevTag.equals(naTag)) {
-      return "0";
+    // System.err.printf("ExtractorMidSentenceCap: h.start=%d, h.current=%d, prevTag=%s.%n", h.start, h.current, prevTag);
+    if (prevTag == null || ! prevTag.equals(naTag)) {
+      return zeroSt;
     }
     String s = pH.getWord(h, 0);
     if (containsUpperCase(s)) {
@@ -1010,6 +1020,8 @@ class ExtractorMidSentenceCap extends RareExtractor {
  */
 class ExtractorStartSentenceCap extends RareExtractor {
 
+  // todo [cdm 2018]: Can we just rewrite this as history.current = history.start and make it local context?
+
   private transient Dictionary dict;
 
   public ExtractorStartSentenceCap() {
@@ -1023,8 +1035,8 @@ class ExtractorStartSentenceCap extends RareExtractor {
   @Override
   String extract(History h, PairsHolder pH) {
     String prevTag = pH.getTag(h, -1);
-    if (prevTag == null) { return zeroSt; }
-    if (!prevTag.equals(naTag)) {
+    // System.err.printf("ExtractorStartSentenceCap: h.start=%d, h.current=%d, prevTag=%s.%n", h.start, h.current, prevTag);
+    if (prevTag == null || ! prevTag.equals(naTag)) {
       return zeroSt;
     }
     String s = pH.getWord(h, 0);
@@ -1065,8 +1077,8 @@ class ExtractorMidSentenceCapC extends RareExtractor {
   @Override
   String extract(History h, PairsHolder pH) {
     String prevTag = pH.getTag(h, -1);
-    if (prevTag == null) { return zeroSt; }
-    if (prevTag.equals(naTag)) {
+    // System.err.printf("ExtractorMidSentenceCapC: h.start=%d, h.current=%d, prevTag=%s.%n", h.start, h.current, prevTag);
+    if (prevTag == null || prevTag.equals(naTag)) {
       return zeroSt;
     }
     String s = pH.getWord(h, 0);
@@ -1342,6 +1354,30 @@ class ExtractorNonAlphanumeric extends RareExtractor {
 }
 
 
+/** This class is loaded by reflection in some POS taggers. */
+@SuppressWarnings("unused")
+class ExtractorNumeric extends RareExtractor {
+
+  public ExtractorNumeric() { }
+
+  @Override
+  String extract(History h, PairsHolder pH) {
+    String s = pH.getWord(h, 0);
+    if (allNumeric(s)) {
+      return "1";
+    } else {
+      return "0";
+    }
+  }
+
+  @Override public boolean isLocal() { return true; }
+  @Override public boolean isDynamic() { return false; }
+
+  private static final long serialVersionUID = 1L;
+
+}
+
+
 class PluralAcronymDetector extends RareExtractor {
 
   public PluralAcronymDetector() {
@@ -1377,6 +1413,8 @@ class PluralAcronymDetector extends RareExtractor {
 
 }
 
+
+/* -- Extractor classes for Chinese -- */
 
 class CtbPreDetector extends RareExtractor {
 

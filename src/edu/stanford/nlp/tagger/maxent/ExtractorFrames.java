@@ -568,7 +568,7 @@ public class ExtractorFrames  {
 
     @Override
     public String toString() {
-      return "ExtractorContinuousTagConjunction(" + (position < 0 ? position + " ... -1": "1 ... " + position) + ')';
+      return "ExtractorContinuousTagConj(" + (position < 0 ? position + " ... -1": "1 ... " + position) + ')';
     }
 
   }
