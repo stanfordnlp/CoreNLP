@@ -578,7 +578,8 @@ public abstract class TregexPattern implements Serializable  {
    * in which the node is encountered in a depth-first search starting with 1 at top node in the
    * sentence tree.
    *
-   * <li> {@code -extract <tree-file>} extracts the subtree s:n specified by <tt>code</tt> from the specified <tt>tree-file</tt>.  Overrides all other behavior of tregex.  Can't specify multiple encodings etc. yet.
+   * <li> {@code -extract <tree-file>} extracts the subtree s:n specified by <tt>code</tt> from the specified <tt>tree-file</tt>.
+   *     Overrides all other behavior of tregex.  Can't specify multiple encodings etc. yet.
    * <li> {@code -extractFile <code-file> <tree-file>} extracts every subtree specified by the subtree codes in
    *     {@code code-file}, which must appear exactly one per line, from the specified {@code tree-file}.
    *     Overrides all other behavior of tregex. Can't specify multiple encodings etc. yet.
@@ -794,8 +795,8 @@ public abstract class TregexPattern implements Serializable  {
     TreeReaderFactory trf = new TRegexTreeReaderFactory();
     if (treeReaderFactoryClassName != null) {
       try {
-        trf = (TreeReaderFactory) Class.forName(treeReaderFactoryClassName).newInstance();
-      } catch(Exception e) {
+        trf = (TreeReaderFactory) Class.forName(treeReaderFactoryClassName).getDeclaredConstructor().newInstance();
+      } catch (Exception e) {
         throw new RuntimeException("Error occurred while constructing TreeReaderFactory: " + e);
       }
     }
@@ -920,9 +921,7 @@ public abstract class TregexPattern implements Serializable  {
 
     public TRegexTreeReaderFactory() {
       this(new TreeNormalizer() {
-        /**
-         *
-         */
+
         private static final long serialVersionUID = -2998972954089638189L;
 
         @Override
