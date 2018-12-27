@@ -600,6 +600,12 @@ class RareExtractor extends Extractor {
     return s != null && numericPattern.matcher(s).matches();
   }
 
+  private static final Pattern symbolsPattern = Pattern.compile("[^A-Za-z0-9]+");
+
+  protected static boolean allSymbols(String s) {
+    return s != null && symbolsPattern.matcher(s).matches();
+  }
+
   protected static boolean containsLetter(String s) {
     if (s == null) {
       return false;
@@ -1251,16 +1257,17 @@ class ExtractorWordSuff extends RareExtractor {
 class ExtractorWordPref extends RareExtractor {
 
   // todo [cdm 2013]: position field in this class could be deleted and use super's position. But will break
-  private final int num, position;
+  private final int num;
+  private final int position;
 
   ExtractorWordPref(int num, int position) {
+    super(position);
     this.num = num;
     this.position = position;
   }
 
   @Override
   String extract(History h, PairsHolder pH) {
-    // String word = TestSentence.toNice(pH.getWord(h, 0));
     String word = pH.getWord(h, position);
     if (word.length() < num) {
       return "######";
@@ -1278,6 +1285,7 @@ class ExtractorWordPref extends RareExtractor {
 
   @Override public boolean isLocal() { return (position == 0); }
   @Override public boolean isDynamic() { return false; }
+
 } // end class ExtractorWordPref
 
 
@@ -1286,7 +1294,7 @@ class ExtractorsConjunction extends RareExtractor {
   private final Extractor extractor1;
   private final Extractor extractor2;
 
-  volatile boolean isLocal, isDynamic;
+  private volatile boolean isLocal, isDynamic;
 
   ExtractorsConjunction(Extractor e1, Extractor e2) {
     extractor1 = e1;
@@ -1324,8 +1332,7 @@ class ExtractorsConjunction extends RareExtractor {
     return StringUtils.getShortClassName(this) + '(' + extractor1 + ',' + extractor2 + ')';
   }
 
-
-}
+} // end class ExtractorsConjunction
 
 
 /** This class is loaded by reflection in some POS taggers. */
@@ -1361,6 +1368,30 @@ class ExtractorNumeric extends RareExtractor {
   String extract(History h, PairsHolder pH) {
     String s = pH.getWord(h, 0);
     if (containsNumber(s) && allNumeric(s)) {
+      return "1";
+    } else {
+      return "0";
+    }
+  }
+
+  @Override public boolean isLocal() { return true; }
+  @Override public boolean isDynamic() { return false; }
+
+  private static final long serialVersionUID = 1L;
+
+}
+
+
+/** This class is loaded by reflection in some POS taggers. */
+@SuppressWarnings("unused")
+class ExtractorSymbols extends RareExtractor {
+
+  public ExtractorSymbols() { }
+
+  @Override
+  String extract(History h, PairsHolder pH) {
+    String s = pH.getWord(h, 0);
+    if (allSymbols(s)) {
       return "1";
     } else {
       return "0";
