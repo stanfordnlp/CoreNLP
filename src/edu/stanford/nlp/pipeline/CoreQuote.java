@@ -39,12 +39,8 @@ public class CoreQuote {
       this.sentences.add(this.document.sentences().get(currSentIndex));
     }
     // set up the speaker info
-    this.speaker = this.quoteCoreMap.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null ?
-        Optional.of(this.quoteCoreMap.get(QuoteAttributionAnnotator.SpeakerAnnotation.class)) :
-        Optional.empty() ;
-    this.canonicalSpeaker = this.quoteCoreMap.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null ?
-        Optional.of(this.quoteCoreMap.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class)) :
-        Optional.empty() ;
+    this.speaker = Optional.ofNullable(this.quoteCoreMap.get(QuoteAttributionAnnotator.SpeakerAnnotation.class));
+    this.canonicalSpeaker = Optional.ofNullable(this.quoteCoreMap.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class));
     // set up info for direct speaker mention (example: "He")
     Integer firstSpeakerTokenIndex = quoteCoreMap.get(QuoteAttributionAnnotator.MentionBeginAnnotation.class);
     Integer lastSpeakerTokenIndex = quoteCoreMap.get(QuoteAttributionAnnotator.MentionEndAnnotation.class);
