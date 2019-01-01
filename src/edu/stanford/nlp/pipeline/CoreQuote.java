@@ -9,6 +9,7 @@ import java.util.*;
 /**
  * Wrapper around a CoreMap representing a quote.  Adds some helpful methods.
  *
+ * @author Jason Bolton
  */
 
 public class CoreQuote {
@@ -32,7 +33,7 @@ public class CoreQuote {
     this.document = myDocument;
     this.quoteCoreMap = coreMapQuote;
     // attach sentences to the quote
-    this.sentences = new ArrayList<CoreSentence>();
+    this.sentences = new ArrayList<>();
     int firstSentenceIndex = this.quoteCoreMap.get(CoreAnnotations.SentenceBeginAnnotation.class);
     int lastSentenceIndex = this.quoteCoreMap.get(CoreAnnotations.SentenceEndAnnotation.class);
     for (int currSentIndex = firstSentenceIndex ; currSentIndex <= lastSentenceIndex ; currSentIndex++) {
@@ -74,7 +75,7 @@ public class CoreQuote {
     this.canonicalSpeakerCharOffsets = Optional.empty();
     this.canonicalSpeakerEntityMention = Optional.empty();
     if (firstCanonicalSpeakerTokenIndex != null && lastCanonicalSpeakerTokenIndex != null) {
-      this.canonicalSpeakerTokens = Optional.of(new ArrayList<CoreLabel>());
+      this.canonicalSpeakerTokens = Optional.of(new ArrayList<>());
       for (int canonicalSpeakerTokenIndex = firstCanonicalSpeakerTokenIndex ;
            canonicalSpeakerTokenIndex <= lastCanonicalSpeakerTokenIndex ; canonicalSpeakerTokenIndex++) {
         this.canonicalSpeakerTokens.get().add(this.document.tokens().get(canonicalSpeakerTokenIndex));
