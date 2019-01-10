@@ -262,8 +262,14 @@ public class AnnotatorImplementations  {
    * Annotate quotes and extract them like sentences
    */
   public Annotator quote(Properties properties) {
-    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_QUOTE + '.');
+	Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+	    Annotator.STANFORD_QUOTE + '.');
+	Properties depparseProperties = PropertiesUtils.extractPrefixedProperties(properties,
+	    Annotator.STANFORD_DEPENDENCIES + '.');
+	for (String key: depparseProperties.stringPropertyNames())  {
+	    relevantProperties.setProperty("attribution." + Annotator.STANFORD_DEPENDENCIES + '.' + key, 
+		depparseProperties.getProperty(key));
+		}
     return new QuoteAnnotator(relevantProperties);
   }
 
