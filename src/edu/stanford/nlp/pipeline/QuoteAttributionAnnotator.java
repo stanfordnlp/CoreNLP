@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.paragraphs.ParagraphAnnotator;
+import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.quoteattribution.ChapterAnnotator;
 import edu.stanford.nlp.quoteattribution.Person;
 import edu.stanford.nlp.quoteattribution.QuoteAttributionUtils;
@@ -148,6 +149,7 @@ public class QuoteAttributionAnnotator implements Annotator {
   private Map<String, List<Person>> characterMap;
   private String qmSieveList;
   private String msSieveList;
+  private DependencyParser parser;
 
   public QuoteAttributionAnnotator(Properties props) {
 
@@ -185,6 +187,15 @@ public class QuoteAttributionAnnotator implements Annotator {
     }
     // use Stanford CoreNLP coref to map mentions to canonical mentions
     useCoref = PropertiesUtils.getBool(props, "useCoref", useCoref);
+    
+    // setup dependency parser 
+    String DEPENDENCY_PARSER_MODEL = props.getProperty("depparse.model", 
+        DependencyParser.DEFAULT_MODEL);
+    Properties depparseProperties = PropertiesUtils.extractPrefixedProperties(props,
+        Annotator.STANFORD_DEPENDENCIES + '.');
+	parser = DependencyParser.loadFromModelFile(DEPENDENCY_PARSER_MODEL, 
+        depparseProperties);
+    
     if (VERBOSE) {
       timer.stop("done.");
     }
@@ -227,9 +238,9 @@ public class QuoteAttributionAnnotator implements Annotator {
     //annotate chapter numbers in sentences. Useful for denoting chapter boundaries
     new ChapterAnnotator().annotate(annotation);
     // to incorporate sentences across paragraphs
-    QuoteAttributionUtils.addEnhancedSentences(annotation);
+    QuoteAttributionUtils.addEnhancedSentences(annotation, parser);
     //annotate depparse of quote-removed sentences
-    QuoteAttributionUtils.annotateForDependencyParse(annotation);
+    QuoteAttributionUtils.annotateForDependencyParse(annotation, parser);
     Annotation preprocessed = annotation;
 
     // 2. Quote->Mention annotation
