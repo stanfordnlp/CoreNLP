@@ -104,12 +104,6 @@
             includeantruntime="false">
       <compilerarg value="-Xmaxerrs"/>
       <compilerarg value="20"/>
-      <classpath>
-        <fileset dir="${basedir}/lib">
-          <include name="*.jar"/>
-          <exclude name="javanlp*"/>
-        </fileset>
-      </classpath>
       <!-- <compilerarg value="-Xlint"/> -->
     </javac>
 
@@ -175,10 +169,6 @@
       <tag name="ordered" scope="all" description="Ordered" />
       <!-- Depends on lib and classes folders -->
       <classpath>
-        <fileset dir="${basedir}/lib">
-          <include name="*.jar"/>
-          <exclude name="javanlp*"/>
-        </fileset>
         <pathelement path="${build.home}" />
       </classpath>
       <bottom><![CDATA[<font size="2"><a href="https://nlp.stanford.edu" target="_top">Stanford NLP Group</a></font>]]></bottom>

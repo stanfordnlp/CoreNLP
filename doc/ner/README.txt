@@ -1,4 +1,4 @@
-Stanford NER - v3.9.1 - 2018-02-27
+Stanford NER - v3.9.2 - 2018-10-16
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -232,6 +232,8 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
+
+2018-10-16    3.9.2     Update for compatibility 
 
 2018-02-27    3.9.1     KBP ner models for Chinese and Spanish 
 
