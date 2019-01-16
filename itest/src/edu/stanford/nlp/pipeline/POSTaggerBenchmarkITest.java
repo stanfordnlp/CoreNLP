@@ -66,7 +66,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     String englishPOSTestPath = "/u/nlp/data/pos-tagger/english/test-wsj-22-24";
     List<String> sentences = readInPOSData(englishPOSTestPath);
     double ENGLISH_TOKEN_ACCURACY = .968;
-    double ENGLISH_SENTENCE_ACCURACY = .516;
+    double ENGLISH_SENTENCE_ACCURACY = .515;
     runPOSTest(sentences, "_", englishPipeline, ENGLISH_TOKEN_ACCURACY, ENGLISH_SENTENCE_ACCURACY,
         "English", false);
   }
@@ -127,7 +127,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     StanfordCoreNLP frenchPipeline = new StanfordCoreNLP(props);
     String frenchPOSTestPath = "/u/nlp/data/pos-tagger/french/fr-pos-ud-test.sentence_per_line";
     List<String> sentences = readInPOSData(frenchPOSTestPath);
-    double FRENCH_UD_TOKEN_ACCURACY = .941;
+    double FRENCH_UD_TOKEN_ACCURACY = .940;
     double FRENCH_UD_SENTENCE_ACCURACY = .375;
     runPOSTest(sentences, "_", frenchPipeline, FRENCH_UD_TOKEN_ACCURACY, FRENCH_UD_SENTENCE_ACCURACY,
         "FrenchUD", false);
@@ -141,7 +141,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     StanfordCoreNLP germanPipeline = new StanfordCoreNLP(props);
     String germanPOSTestPath = "/u/nlp/data/GermanACL08/negra/negra-corpus.test.utf8";
     List<String> sentences = readInPOSData(germanPOSTestPath);
-    double GERMAN_TOKEN_ACCURACY = .934;
+    double GERMAN_TOKEN_ACCURACY = .932;
     double GERMAN_SENTENCE_ACCURACY = .511;
     runPOSTest(sentences, "_", germanPipeline, GERMAN_TOKEN_ACCURACY, GERMAN_SENTENCE_ACCURACY,
         "German", false);
