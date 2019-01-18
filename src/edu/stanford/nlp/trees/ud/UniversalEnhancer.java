@@ -98,9 +98,9 @@ public class UniversalEnhancer {
             }
 
 
-            //if (embeddings != null) {
+            if (embeddings != null) {
                 UniversalGappingEnhancer.addEnhancements(enhanced, embeddings);
-            //}
+            }
             UniversalGrammaticalStructure.addRef(enhanced, relativePronounPattern);
             UniversalGrammaticalStructure.collapseReferent(enhanced);
             UniversalGrammaticalStructure.propagateConjuncts(enhanced);

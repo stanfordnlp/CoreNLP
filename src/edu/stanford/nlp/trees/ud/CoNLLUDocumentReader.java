@@ -68,7 +68,10 @@ public class CoNLLUDocumentReader implements
 
     private int lineNumberCounter = 0;
 
-    private static Pair<IndexedWord, GrammaticalRelation> getGovAndReln(double govPseudoIndex, IndexedWord word, String relationName, List<IndexedWord> sortedTokens) {
+    private Pair<IndexedWord, GrammaticalRelation> getGovAndReln(double govPseudoIndex,
+                                                                        IndexedWord word,
+                                                                        String relationName,
+                                                                        List<IndexedWord> sortedTokens) {
       IndexedWord gov;
       GrammaticalRelation reln;
       if (relationName.equals("root")) {
@@ -80,24 +83,22 @@ public class CoNLLUDocumentReader implements
         gov = new IndexedWord(word.docID(), word.sentIndex(), 0);
         gov.setValue("ROOT");
       } else {
-        gov = SentenceProcessor.getToken(sortedTokens, govPseudoIndex);
+        gov = this.getToken(sortedTokens, govPseudoIndex);
       }
       return Generics.newPair(gov, reln);
     }
 
-    private static IndexedWord getToken(List<IndexedWord> sortedTokens, int index) {
-      return SentenceProcessor.getToken(sortedTokens, (double) index);
+    private IndexedWord getToken(List<IndexedWord> sortedTokens, int index) {
+      return this.getToken(sortedTokens, (double) index);
     }
 
 
-    private static IndexedWord getToken(List<IndexedWord> sortedTokens, double pseudoIndex) {
-      return SentenceProcessor.getToken(sortedTokens, index, 0);
+    private IndexedWord getToken(List<IndexedWord> sortedTokens, double pseudoIndex) {
+      return this.getToken(sortedTokens, pseudoIndex, 0);
     }
 
 
-    private static IndexedWord getToken(List<IndexedWord> sortedTokens, int index, int copyCount) {
-
-
+    private static IndexedWord getToken(List<IndexedWord> sortedTokens, double pseudoIndex, int copyCount) {
       int tokenLength = sortedTokens.size();
       for (int i = Math.max((int) pseudoIndex - 1, 0) ; i < tokenLength; i++) {
         IndexedWord token = sortedTokens.get(i);
