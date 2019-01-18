@@ -187,7 +187,8 @@ public class UniversalDependenciesFeatureAnnotator  {
     if (parent != null) {
       SemanticGraphEdge edge = sg.getEdge(parent, word);
       if (edge != null) {
-        if (UniversalEnglishGrammaticalRelations.OBJECT.isAncestor(edge.getRelation())) {
+        if (edge.getRelation().equals(UniversalEnglishGrammaticalRelations.DIRECT_OBJECT) ||
+            edge.getRelation().equals(UniversalEnglishGrammaticalRelations.INDIRECT_OBJECT)) {
           /* "you" is an object. */
           return "Acc";
         } else if (UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER.isAncestor(edge.getRelation())

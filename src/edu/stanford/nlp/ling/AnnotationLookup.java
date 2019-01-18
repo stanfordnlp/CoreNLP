@@ -89,7 +89,8 @@ public class AnnotationLookup {
 
     // Also have "pos" for PartOfTag (POS is also the TAG_KEY - "tag", but "pos" makes more sense)
     // Still keep "tag" for POS tag so we don't break anything
-    POS_TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "pos");
+    POS_TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "pos"),
+    CPOS_TAG_KEY(CoreAnnotations.CoarseTagAnnotation.class, "cpos");
 
 
     private final Class<? extends CoreAnnotation<?>> coreKey; // todo [cdm 2016]: Make this private if can sort out typing

@@ -16,26 +16,26 @@ import java.util.Iterator;
 public class CoNLLUDocumentReaderWriterTest extends TestCase {
 
     private static String MULTIWORD_TEST_INPUT =
-            "1     I         I      PRON    PRP   Case=Nom|Number=Sing|Person=1     2   nsubj   2:nsubj   _\n" +
+            ("1     I         I      PRON    PRP   Case=Nom|Number=Sing|Person=1     2   nsubj   2:nsubj   _\n" +
             "2-3   haven't   _      _       _     _                                 _   _   _   _\n" +
             "2     have      have   VERB    VBP    Number=Sing|Person=1|Tense=Pres   0   root   0:root   _\n" +
             "3     not       not    PART    RB    Negative=Neg                      2   advmod   2:advmod   _\n" +
             "4     a         a      DET     DT    Definite=Ind|PronType=Art         5   det   5:det   _\n" +
             "5     clue      clue   NOUN    NN    Number=Sing                       2   obj   2:obj   _\n" +
-            "6     .         .      PUNCT   .     _                                 2   punct   2:punct  _\n\n";
+            "6     .         .      PUNCT   .     _                                 2   punct   2:punct  _\n\n").replaceAll("[ ]+", "\t");;
 
     private static String COMMENT_TEST_INPUT =
             "#comment line 1\n" +
             "#comment line 2\n" +
-            "1     I         I      PRON    PRP   Case=Nom|Number=Sing|Person=1     2   nsubj   2:nsubj   _\n" +
+           ("1     I         I      PRON    PRP   Case=Nom|Number=Sing|Person=1     2   nsubj   2:nsubj   _\n" +
             "2     have      have   VERB    VBP    Number=Sing|Person=1|Tense=Pres   0   root   0:root   _\n" +
             "3     not       not    PART    RB    Negative=Neg                      2   advmod   2:advmod   _\n" +
             "4     a         a      DET     DT    Definite=Ind|PronType=Art         5   det   5:det   _\n" +
             "5     clue      clue   NOUN    NN    Number=Sing                       2   obj   2:obj   _\n" +
-            "6     .         .      PUNCT   .     _                                 2   punct   2:punct   _\n\n";
+            "6     .         .      PUNCT   .     _                                 2   punct   2:punct   _\n\n").replaceAll("[ ]+", "\t");;
 
     private static String EXTRA_DEPS_TEST_INPUT =
-            "1     They       They       PRON    PRP    _    2   nsubj   2:nsubj|4:nsubj         _\n" +
+            ("1     They       They       PRON    PRP    _    2   nsubj   2:nsubj|4:nsubj         _\n" +
             "2     buy        buy        VERB    VBP    _    0   root    0:root               _\n" +
             "3     and        and        CONJ    CC     _    2   cc      2:cc               _\n" +
             "4     sell       sell       VERB    VBP    _    5   conj    5:conj               _\n" +
@@ -44,10 +44,10 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
             "7     newspapers newspaper  NOUN    NNS    _    5   conj    2:obj|4:obj|5:conj   _\n" +
             "8     and        and        CONJ    CC     _    5   cc      5:cc               _\n" +
             "9     magazines  magazine   NOUN    NNS    _    5   conj    2:obj|4:obj|5:conj   _\n" +
-            "10    .          .          PUNCT   .      _    2   punct   2:punct               _\n\n";
+            "10    .          .          PUNCT   .      _    2   punct   2:punct               _\n\n").replaceAll("[ ]+", "\t");;
 
     private static String EXTRA_DEPS_TEST_EMPTY_NODEINPUT =
-            "1     They       They       PRON    PRP    _    2   nsubj   2:nsubj|2.1:nsubj|2.2:nsubj         _\n" +
+            ("1     They       They       PRON    PRP    _    2   nsubj   2:nsubj|2.1:nsubj|2.2:nsubj         _\n" +
             "2     buy        buy        VERB    VBP    _    0   root    0:root               _\n" +
             "2.1     buy        buy        VERB    VBP    _    _   _    2:conj:and               _\n" +
             "2.2     buy        buy        VERB    VBP    _    _   _    2:conj:and               _\n" +
@@ -56,12 +56,13 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
             "5     newspapers newspaper  NOUN    NNS    _    3   conj    2.1:obj|3:conj   _\n" +
             "6     and        and        CONJ    CC     _    3   cc      3:cc               _\n" +
             "7     magazines  magazine   NOUN    NNS    _    3   conj    2.2:obj|3:conj   _\n" +
-            "8    .          .          PUNCT   .      _    2   punct   2:punct               _\n\n";
+            "8    .          .          PUNCT   .      _    2   punct   2:punct               _\n\n").replaceAll("[ ]+", "\t");
 
 
 
     public void testMultiWords() {
         CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
+
         Reader stringReader = new StringReader(MULTIWORD_TEST_INPUT);
         Iterator<Pair<SemanticGraph, SemanticGraph>> it = reader.getIterator(stringReader);
 

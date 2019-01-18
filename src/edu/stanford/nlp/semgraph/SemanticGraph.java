@@ -1998,6 +1998,22 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
+   * Given a semantic graph, and the short name of a target relation, returns a list of all
+   * relations (edges) matching.
+   *
+   */
+  public List<SemanticGraphEdge> findAllRelns(String tgtRelationShortname) {
+    ArrayList<SemanticGraphEdge> relns = new ArrayList<>();
+    for (SemanticGraphEdge edge : edgeIterable()) {
+      GrammaticalRelation edgeRelation = edge.getRelation();
+      if ((edgeRelation != null) && (edgeRelation.getShortName().equals(tgtRelationShortname))) {
+        relns.add(edge);
+      }
+    }
+    return relns;
+  }
+
+  /**
    * Delete all duplicate edges.
    *
    */
@@ -2057,6 +2073,31 @@ public class SemanticGraph implements Serializable  {
       }
     }
     return Pair.makePair(min, max);
+  }
+
+
+  /**
+   * Returns the yield of a node, i.e., all descendents of the node.
+   *
+   * @param word The word acting as the root of the constituent we are finding.
+   */
+  public List<IndexedWord> yield(IndexedWord word) {
+    List<IndexedWord> yield = new LinkedList<>();
+    Stack<IndexedWord> fringe = new Stack<>();
+    fringe.push(word);
+    while ( ! fringe.isEmpty()) {
+      IndexedWord parent = fringe.pop();
+      yield.add(parent);
+      for (SemanticGraphEdge edge : outgoingEdgeIterable(parent)) {
+        if (!edge.isExtra()) {
+          fringe.push(edge.getDependent());
+        }
+      }
+    }
+
+    Collections.sort(yield);
+
+    return yield;
   }
 
   /**

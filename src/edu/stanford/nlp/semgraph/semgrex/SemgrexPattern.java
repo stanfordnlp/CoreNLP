@@ -1,4 +1,5 @@
 package edu.stanford.nlp.semgraph.semgrex;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -229,6 +230,20 @@ public abstract class SemgrexPattern implements Serializable  {
    */
   public SemgrexMatcher matcher(SemanticGraph sg) {
     return matcher(sg, sg.getFirstRoot(), Generics.<String, IndexedWord>newHashMap(), Generics.<String, String>newHashMap(),
+        new VariableStrings(), false);
+  }
+
+  /**
+   * Get a {@link SemgrexMatcher} for this pattern in this graph.
+   *
+   * @param sg
+   *          the SemanticGraph to match on
+   * @param root
+   *         the IndexedWord from which to start the search
+   * @return a SemgrexMatcher
+   */
+  public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord root) {
+    return matcher(sg, root, Generics.<String, IndexedWord>newHashMap(), Generics.<String, String>newHashMap(),
         new VariableStrings(), false);
   }
 
@@ -464,10 +479,10 @@ public abstract class SemgrexPattern implements Serializable  {
       CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
       for (String conlluFile : argsMap.get(CONLLU_FILE)) {
         log.info("Loading file " + conlluFile);
-        Iterator<SemanticGraph> it = reader.getIterator(IOUtils.readerFromString(conlluFile));
+        Iterator<Pair<SemanticGraph,SemanticGraph>> it = reader.getIterator(IOUtils.readerFromString(conlluFile));
 
         while (it.hasNext()) {
-          SemanticGraph graph = it.next();
+          SemanticGraph graph = it.next().first;
           graphs.add(graph);
         }
       }

@@ -502,7 +502,7 @@ public class RelationTripleSegmenterTest extends TestCase {
         "1\tHun\t2\tcompound\tNNP\tPERSON\n" +
         "2\tSen\t3\tnsubj\tNNP\tPERSON\n" +
         "3\tplayed\t0\troot\tVBD\tO\n" +
-        "4\tgolf\t3\tdobj\tNN\tO\n" +
+        "4\tgolf\t3\tobj\tNN\tO\n" +
         "5\twith\t6\tcase\tIN\tO\n" +
         "6\tShinawatra\t3\tnmod:with\tNNP\tPERSON\n"
     );
@@ -513,7 +513,7 @@ public class RelationTripleSegmenterTest extends TestCase {
         "1\tHun\t2\tcompound\tNNP\tPERSON\n" +
         "2\tSen\t3\tnsubj\tNNP\tPERSON\n" +
         "3\tplayed\t0\troot\tVBD\tO\n" +
-        "4\tgolf\t3\tdobj\tNN\tO\n" +
+        "4\tgolf\t3\tobj\tNN\tO\n" +
         "5\tShinawatra\t3\tnmod:with\tNNP\tPERSON\n" +
         "6\tCambodia\t3\tdobj\tNNP\tLOCATION\n"
     );
