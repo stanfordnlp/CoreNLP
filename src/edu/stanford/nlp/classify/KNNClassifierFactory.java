@@ -1,18 +1,20 @@
 package edu.stanford.nlp.classify;
 
 import java.util.*;
+
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.CollectionValuedMap;
 
 /**
- * This constructs trained <code>KNNClassifier</code> objects, given
+ * This constructs trained {@code KNNClassifier} objects, given
  * sets of RVFDatums, or Counters (dimensions are identified by the keys).
  */
 public class KNNClassifierFactory<K, V> {
-  private int k = 0;
-  private boolean weightedVotes = false;
-  private boolean l2NormalizeVectors = false;
+
+  private int k; // = 0;
+  private boolean weightedVotes; // = false;
+  private boolean l2NormalizeVectors; // = false;
 
   /**
    * Creates a new factory that generates K-NN classifiers with the given k-value, and
@@ -85,6 +87,5 @@ public class KNNClassifierFactory<K, V> {
     classifier.addInstances(instances);
     return classifier;
   }
-
 
 }

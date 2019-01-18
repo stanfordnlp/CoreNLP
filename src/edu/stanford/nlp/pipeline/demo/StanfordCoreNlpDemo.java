@@ -11,12 +11,15 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 
 /** This class demonstrates building and using a Stanford CoreNLP pipeline. */
 public class StanfordCoreNlpDemo {
+
+  private StanfordCoreNlpDemo() { } // static meain metho
 
   /** Usage: java -cp "*" StanfordCoreNlpDemo [inputFile [outputTextFile [outputXmlFile]]] */
   public static void main(String[] args) throws IOException {
@@ -99,6 +102,32 @@ public class StanfordCoreNlpDemo {
       SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
       out.println(graph.toString(SemanticGraph.OutputFormat.LIST));
 
+      // Print out dependency structure around one word
+      // This give some idea of how to navigate the dependency structure in a SemanticGraph
+      IndexedWord node = graph.getNodeByIndexSafe(5);
+      // The below way also works
+      // IndexedWord node = new IndexedWord(sentences.get(0).get(CoreAnnotations.TokensAnnotation.class).get(5 - 1));
+      out.println("Printing dependencies around \"" + node.word() + "\" index " + node.index());
+      List<SemanticGraphEdge> edgeList = graph.getIncomingEdgesSorted(node);
+      if (! edgeList.isEmpty()) {
+        assert edgeList.size() == 1;
+        int head = edgeList.get(0).getGovernor().index();
+        String headWord = edgeList.get(0).getGovernor().word();
+        String deprel = edgeList.get(0).getRelation().toString();
+        out.println("Parent is word \"" + headWord + "\" index " + head + " via " + deprel);
+      } else  {
+        out.println("Parent is ROOT via root");
+      }
+      edgeList = graph.outgoingEdgeList(node);
+      for (SemanticGraphEdge edge : edgeList) {
+        String depWord = edge.getDependent().word();
+        int depIdx = edgeList.get(0).getDependent().index();
+        String deprel = edge.getRelation().toString();
+        out.println("Child is \"" + depWord + "\" (" + depIdx + ") via " + deprel);
+      }
+      out.println();
+
+
       // Access coreference. In the coreference link graph,
       // each chain stores a set of mentions that co-refer with each other,
       // along with a method for getting the most representative mention.
@@ -114,7 +143,7 @@ public class StanfordCoreNlpDemo {
           List<CoreLabel> tokens = sentences.get(m.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class);
           // We subtract two for end: one for 0-based indexing, and one because we want last token of mention not one following.
           out.println("  " + m + ", i.e., 0-based character offsets [" + tokens.get(m.startIndex - 1).beginPosition() +
-                  ", " + tokens.get(m.endIndex - 2).endPosition() + ")");
+                  ", " + tokens.get(m.endIndex - 2).endPosition() + ')');
         }
       }
       out.println();

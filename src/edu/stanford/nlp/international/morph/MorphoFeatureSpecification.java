@@ -32,7 +32,8 @@ public abstract class MorphoFeatureSpecification implements Serializable {
   
   // WSGDEBUG --
   //   Added NNUM and NGEN for nominals in Arabic
-  public static enum MorphoFeatureType {TENSE,DEF,ASP,MOOD,NNUM,NUM, NGEN, GEN,CASE,PER,POSS,VOICE,OTHER,PROP};
+  public static enum MorphoFeatureType {TENSE,DEF,ASP,MOOD,NNUM,NUM, NGEN, GEN,CASE,PER,POSS,VOICE,OTHER,PROP, ANIMACY,
+    TRANSITIVITY, VERBFORM, VARIANT, DEGREE, GENDER };
   
   protected final Set<MorphoFeatureType> activeFeatures;
   

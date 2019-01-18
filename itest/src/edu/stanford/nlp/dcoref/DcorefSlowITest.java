@@ -29,19 +29,19 @@ public class DcorefSlowITest extends TestCase {
     pw.println("dcoref.maxdist = -1");
     pw.println("dcoref.replicate.conll = true");
     pw.println("dcoref.conll.scorer = " + scorer);
-    pw.println("dcoref.conll2011 = /scr/nlp/data/conll-2011/v2/data/dev/data/english/annotations");
+    pw.println("dcoref.conll2011 = /u/scr/nlp/data/conll-2011/v2/data/dev/data/english/annotations");
     pw.println("dcoref.logFile = "+workDir + File.separator + "log.txt");
     pw.close();
   }
 
   public void testDcorefCoNLLResultV4() throws Exception {
-    double finalScore = runDcoref("/scr/nlp/data/conll-2011/scorer/v4/scorer.pl");
+    double finalScore = runDcoref("/u/scr/nlp/data/conll-2011/scorer/v4/scorer.pl");
     System.out.printf("Final Score (CoNLL 2011, scorer v4): (MUC+B^3+ceafe)/3 = %.2f%n", finalScore);
     assertEquals(59.3, finalScore, 0.3); // 2016-07: 59.45
   }
 
   public void testDcorefCoNLLResultV801() throws Exception {
-    double finalScore = runDcoref("/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl");
+    double finalScore = runDcoref("/u/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl");
     System.out.printf("Final Score (CoNLL 2011, scorer v8): (MUC+B^3+ceafe)/3 = %.2f%n", finalScore);
     assertEquals(54.0, finalScore, 0.3); // 2016-07: 54.13
   }

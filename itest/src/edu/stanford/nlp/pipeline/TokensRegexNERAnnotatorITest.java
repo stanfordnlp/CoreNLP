@@ -5,7 +5,10 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
-import junit.framework.TestCase;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -17,7 +20,7 @@ import java.util.Properties;
  *
  * @author Angel Chang
  */
-public class TokensRegexNERAnnotatorITest extends TestCase {
+public class TokensRegexNERAnnotatorITest {
 
   private static final String REGEX_ANNOTATOR_NAME = "tokensregexner";
   private static final String MAPPING = "/u/nlp/data/TAC-KBP2010/sentence_extraction/itest_map";
@@ -27,9 +30,8 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   private static Annotator cased;
   private static Annotator annotator;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     synchronized(TokensRegexNERAnnotatorITest.class) {
       if (pipeline == null) {  // Hack so we don't load the pipeline fresh for every test
         Properties props = new Properties();
@@ -46,15 +48,15 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   }
 
   // Helper methods
-  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props) {
+  private static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props) {
     return new TokensRegexNERAnnotator(REGEX_ANNOTATOR_NAME, props);
   }
 
-  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(String[][] patterns, boolean ignoreCase) throws Exception {
+  private static TokensRegexNERAnnotator getTokensRegexNerAnnotator(String[][] patterns, boolean ignoreCase) throws Exception {
     return getTokensRegexNerAnnotator(new Properties(), patterns, ignoreCase);
   }
 
-  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props, String[][] patterns, boolean ignoreCase)
+  private static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props, String[][] patterns, boolean ignoreCase)
           throws Exception {
     File tempFile = File.createTempFile("tokensregexnertest.patterns", "txt");
     tempFile.deleteOnExit();
@@ -78,18 +80,18 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
    * Helper method, checks that each token is tagged with the expected NER type.
    */
   private static void checkNerTags(List<CoreLabel> tokens, String... tags) {
-    assertEquals(tags.length, tokens.size());
+    Assert.assertEquals(tags.length, tokens.size());
     for (int i = 0; i < tags.length; ++i) {
-      assertEquals("Mismatch for token tag NER " + i + ' ' + tokens.get(i),
-                   tags[i], tokens.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class));
+      Assert.assertEquals("Mismatch for token tag NER " + i + ' ' + tokens.get(i),
+              tags[i], tokens.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class));
     }
   }
 
   private static void checkTags(List<CoreLabel> tokens, Class key, String... tags) {
-    assertEquals(tags.length, tokens.size());
+    Assert.assertEquals(tags.length, tokens.size());
     for (int i = 0; i < tags.length; ++i) {
-      assertEquals("Mismatch for token tag " + key + ' ' + i + ' ' + tokens.get(i),
-        tags[i], tokens.get(i).get(key));
+      Assert.assertEquals("Mismatch for token tag " + key + ' ' + i + ' ' + tokens.get(i),
+              tags[i], tokens.get(i).get(key));
     }
   }
 
@@ -97,13 +99,14 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
    * Helper method, re-annotate each token with specified tag
    */
   private static void reannotate(List<CoreLabel> tokens, Class key, String ... tags) {
-    assertEquals(tags.length, tokens.size());
+    Assert.assertEquals(tags.length, tokens.size());
     for (int i = 0; i < tags.length; ++i) {
       tokens.get(i).set(key, tags[i]);
     }
   }
 
   // Tests for TokensRegex syntax
+  @Test
   public void testTokensRegexSyntax() throws Exception {
     String[][] regexes =
       new String[][]{
@@ -145,6 +148,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   }
 
   // Tests for TokensRegex syntax with match group
+  @Test
   public void testTokensRegexMatchGroup() throws Exception {
     String[][] regexes =
       new String[][]{
@@ -163,6 +167,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   }
 
   // Tests for TokensRegexNer annotator annotating other fields
+  @Test
   public void testTokensRegexNormalizedAnnotate() throws Exception {
     Properties props = new Properties();
     props.setProperty(REGEX_ANNOTATOR_NAME + ".mapping.header", "pattern,ner,normalized,overwrite,priority,group");
@@ -193,6 +198,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   }
 
   // Tests for TokensRegexNer annotator annotating other fields with custom key mapping
+  @Test
   public void testTokensRegexCustomAnnotate() throws Exception {
 
     Properties props = new Properties();
@@ -214,7 +220,8 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   }
 
   // Basic tests from RegexNERAnnotatorITest
-  public void testBasicMatching() throws Exception {
+  @Test
+  public void testBasicMatching() {
     String str = "President Barack Obama lives in Chicago , Illinois , " +
     "and is a practicing Christian .";
     Annotation document = createDocument(str);
@@ -233,7 +240,8 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
    * should be overwritten.  Native American Church will overwrite ORGANIZATION with
    * RELIGION.
    */
-  public void testOverwrite() throws Exception {
+  @Test
+  public void testOverwrite() {
     String str = "I like Ontario Bank and Ontario Lake , and I like the Native American Church , too .";
     Annotation document = createDocument(str);
     annotator.annotate(document);
@@ -248,7 +256,8 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
    * In the mapping file, Christianity is assigned a higher priority than Early Christianity,
    * and so Early should not be marked as RELIGION.
    */
-  public void testPriority() throws Exception {
+  @Test
+  public void testPriority() {
     String str = "Christianity is of higher regex priority than Early Christianity . ";
     Annotation document = createDocument(str);
     annotator.annotate(document);
@@ -263,13 +272,14 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
    * and continue, and if we don't get any exceptions, we throw an
    * exception of our own.
    */
-  public void testEmptyAnnotation() throws Exception {
+  @Test
+  public void testEmptyAnnotation() {
     try {
       annotator.annotate(new Annotation(""));
     } catch(RuntimeException e) {
       return;
     }
-    fail("Never expected to get this far... the annotator should have thrown an exception by now");
+    Assert.fail("Never expected to get this far... the annotator should have thrown an exception by now");
   }
 
 }

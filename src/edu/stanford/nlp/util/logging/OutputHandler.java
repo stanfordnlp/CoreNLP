@@ -233,7 +233,7 @@ public abstract class OutputHandler extends LogRecordHandler {
       b.append(tab);
     }
     //(write content)
-    b.append(content.toString());
+    b.append(content);
   }
 
   private void updateTracks(int untilDepth){
@@ -247,12 +247,12 @@ public abstract class OutputHandler extends LogRecordHandler {
         b.append("{\n");
       }
       //(write margin)
-      for(int i=0; i<leftMargin; i++){
-        b.append(" ");
+      for (int i=0; i<leftMargin; i++) {
+        b.append(' ');
       }
       //(write name)
       writeContent(signal.depth,signal.content,b);
-      if(signal.content.toString().length() > 0){ b.append(" "); }
+      if ( ! signal.content.toString().isEmpty()) { b.append(' '); }
       //(print)
       print(null, this.style(new StringBuilder(), b.toString(), trackColor, trackStyle).toString() );
       this.missingOpenBracket = true;  //only set to false if actually updated track state
@@ -278,12 +278,12 @@ public abstract class OutputHandler extends LogRecordHandler {
       lines.add(record.content.toString());
       StackTraceElement[] trace = exception.getStackTrace();
       StackTraceElement topTraceElement = trace.length > 0 ? trace[0] : null;
-      for(StackTraceElement e : exception.getStackTrace()){
-        lines.add(tab + e.toString());
+      for (StackTraceElement e : exception.getStackTrace()) {
+        lines.add(tab + e);
       }
       //(causes)
-      while(exception.getCause() != null){
-        System.out.println("TOP ELEMENT: " + topTraceElement);
+      while (exception.getCause() != null) {
+        // System.out.println("TOP ELEMENT: " + topTraceElement);
         //((variables))
         exception = exception.getCause();
         trace = exception.getStackTrace();
@@ -291,7 +291,7 @@ public abstract class OutputHandler extends LogRecordHandler {
         for(int i=0; i<trace.length; i++){
           //((add trace element))
           StackTraceElement e = trace[i];
-          lines.add(tab + e.toString());
+          lines.add(tab + e);
           //((don't print redundant elements))
           if(topTraceElement != null &&
               e.getClassName().equals(topTraceElement.getClassName()) &&
@@ -346,7 +346,8 @@ public abstract class OutputHandler extends LogRecordHandler {
     //--Write Channels
     if(leftMargin > 2) {	//don't print if not enough space
       //((print channels)
-      b.append("["); cursorPos += 1;
+      b.append('[');
+      cursorPos += 1;
       Object lastChan = null;
       boolean wasAnyChannelPrinted = false;
       for(int i=0; i<printableChannels.size(); i++) {
@@ -358,8 +359,8 @@ public abstract class OutputHandler extends LogRecordHandler {
         if(toPrint.length() > leftMargin-1){ toPrint = toPrint.substring(0,leftMargin-2); }
         if(cursorPos+toPrint.length() >= leftMargin){
           //(case: doesn't fit)
-          while(cursorPos < leftMargin){ b.append(" "); cursorPos += 1; }
-          if(contentLinesPrinted < content.length){
+          while (cursorPos < leftMargin) { b.append(' '); cursorPos += 1; }
+          if (contentLinesPrinted < content.length) {
             writeContent(record.depth, style(new StringBuilder(),content[contentLinesPrinted],color,style).toString(), b);
             contentLinesPrinted += 1;
           }
@@ -373,7 +374,7 @@ public abstract class OutputHandler extends LogRecordHandler {
         cursorPos += toPrint.length();
       }
       if (wasAnyChannelPrinted) {
-        b.append("]");
+        b.append(']');
         cursorPos += 1;
       } else {
         b.setLength(b.length() - 1);  // remove leading "["
@@ -382,15 +383,15 @@ public abstract class OutputHandler extends LogRecordHandler {
     }
     //--Content
     //(write content)
-    while(contentLinesPrinted < content.length) {
-      while(cursorPos < leftMargin){ b.append(" "); cursorPos += 1; }
+    while (contentLinesPrinted < content.length) {
+      while (cursorPos < leftMargin) { b.append(' '); cursorPos += 1; }
       writeContent(record.depth, style(new StringBuilder(),content[contentLinesPrinted],color,style).toString(), b);
       contentLinesPrinted += 1;
-      if(contentLinesPrinted < content.length){ b.append("\n"); cursorPos = 0; }
+      if(contentLinesPrinted < content.length){ b.append('\n'); cursorPos = 0; }
     }
     //(print)
     if (b.length() == 0 || b.charAt(b.length() - 1) != '\n') {
-      b.append("\n");
+      b.append('\n');
     }
     print(record.channels(), b.toString());
     //--Continue
@@ -473,10 +474,12 @@ public abstract class OutputHandler extends LogRecordHandler {
    * the end, of a track
    */
   private static class TrackInfo {
+
     public final long beginTime;
     public final String name;
-    protected int numElementsPrinted = 0;
-    private TrackInfo(String name, long timestamp){
+    protected int numElementsPrinted; // = 0;
+
+    private TrackInfo(String name, long timestamp) {
       this.name = name;
       this.beginTime = timestamp;
     }

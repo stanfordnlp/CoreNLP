@@ -143,6 +143,7 @@ message Token {
   optional string ner               = 8;    // The word's NER tag
   optional string coarseNER         = 62;   // The word's coarse NER tag
   optional string fineGrainedNER    = 63;   // The word's fine-grained NER tag
+  repeated string nerLabelProbs     = 66;   // listing of probs
   optional string normalizedNER     = 9;    // The word's normalized NER tag
   optional string lemma             = 10;   // The word's lemma
   optional uint32 beginChar         = 11;   // The character offset begin, in the document

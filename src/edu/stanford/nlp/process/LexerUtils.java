@@ -17,11 +17,42 @@ public class LexerUtils {
   private static final Pattern GENERIC_CURRENCY_PATTERN = Pattern.compile("[\u0080\u00A4\u20A0\u20AC\u20B9]");
   private static final Pattern CP1252_EURO_PATTERN = Pattern.compile("\u0080");
 
+  private static final Pattern ONE_FOURTH_PATTERN = Pattern.compile("\u00BC");
+  private static final Pattern ONE_HALF_PATTERN = Pattern.compile("\u00BD");
+  private static final Pattern THREE_FOURTHS_PATTERN = Pattern.compile("\u00BE");
+  private static final Pattern ONE_THIRD_PATTERN = Pattern.compile("\u2153");
+  private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
+
+
+  /** Change precomposed fraction characters to spelled out letter forms. */
+  public static String normalizeFractions(boolean normalizeFractions, boolean escapeForwardSlashAsterisk, final String in) {
+    String out = in;
+    if (normalizeFractions) {
+      if (escapeForwardSlashAsterisk) {
+        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1\\\\/4");
+        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1\\\\/2");
+        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3\\\\/4");
+        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1\\\\/3");
+        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2\\\\/3");
+      } else {
+        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1/4");
+        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1/2");
+        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3/4");
+        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1/3");
+        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2/3");
+      }
+    }
+    return out;
+  }
+
+
+  @SuppressWarnings("unused")
   public static String normalizeCurrency(String in) {
     String s1 = in;
     s1 = CENTS_PATTERN.matcher(s1).replaceAll("cents");
     s1 = POUND_PATTERN.matcher(s1).replaceAll("#");  // historically used for pound in PTB3
     s1 = GENERIC_CURRENCY_PATTERN.matcher(s1).replaceAll("\\$");  // Euro (ECU, generic currency)  -- no good translation!
+    s1 = CP1252_EURO_PATTERN.matcher(s1).replaceAll("\u20AC");
     return s1;
   }
 
@@ -88,5 +119,20 @@ public class LexerUtils {
     return AMP_PATTERN.matcher(in).replaceAll("&");
   }
 
+  /** This quotes a character with a backslash, but doesn't do it
+   *  if the character is already preceded by a backslash.
+   */
+  public static String escapeChar(String s, char c) {
+    int i = s.indexOf(c);
+    while (i != -1) {
+      if (i == 0 || s.charAt(i - 1) != '\\') {
+        s = s.substring(0, i) + '\\' + s.substring(i);
+        i = s.indexOf(c, i + 2);
+      } else {
+        i = s.indexOf(c, i + 1);
+      }
+    }
+    return s;
+  }
 
 }

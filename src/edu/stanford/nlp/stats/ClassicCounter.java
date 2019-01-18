@@ -51,15 +51,15 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * The Counter constructor
  * and <tt>addAll</tt> method can be used to copy another Counter's contents
  * over.
- * <p/>
+ * <p>
  * <i>Implementation notes:</i>
  * You shouldn't casually add further methods to
  * this interface. Rather, they should be added to the {@link Counters} class.
  * Note that this class stores a
- * <code>totalCount</code> field as well as the map.  This makes certain
+ * {@code totalCount} field as well as the map.  This makes certain
  * operations much more efficient, but means that any methods that change the
- * map must also update <code>totalCount</code> appropriately. If you use the
- * <code>setCount</code> method, then you cannot go wrong.
+ * map must also update {@code totalCount} appropriately. If you use the
+ * {@code setCount} method, then you cannot go wrong.
  * This class is not threadsafe: If multiple threads are accessing the same
  * counter, then access should be synchronized externally to this class.
  *
@@ -92,11 +92,11 @@ public class ClassicCounter<E> implements Serializable, Counter<E>, Iterable<E> 
    * Constructs a new (empty) Counter backed by a HashMap.
    */
   public ClassicCounter() {
-    this(MapFactory.<E,MutableDouble>hashMapFactory());
+    this(MapFactory.hashMapFactory());
   }
 
   public ClassicCounter(int initialCapacity) {
-    this(MapFactory.<E,MutableDouble>hashMapFactory(), initialCapacity);
+    this(MapFactory.hashMapFactory(), initialCapacity);
   }
 
   /**

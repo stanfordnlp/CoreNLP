@@ -139,7 +139,7 @@ public class ArrayMath {
   // OPERATIONS WITH SCALAR - DESTRUCTIVE
 
   /**
-   * Increases the values in this array by b. Does it in place.
+   * Increases the values in the first array a by b. Does it in place.
    *
    * @param a The array
    * @param b The amount by which to increase each item
@@ -283,15 +283,21 @@ public class ArrayMath {
 
   public static void pairwiseAddInPlace(float[] to, float[] from) {
     if (to.length != from.length) {
-      throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
+      throw new IllegalArgumentException("to length:" + to.length + " from length:" + from.length);
     }
     for (int i = 0; i < to.length; i++) {
       to[i] = to[i] + from[i];
     }
   }
+
+  /**
+   * Add the two 1d arrays in place of {@code to}.
+   *
+   * @throws java.lang.IllegalArgumentException If {@code to} and {@code from} are not of the same dimensions
+   */
   public static void pairwiseAddInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
-      throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
+      throw new IllegalArgumentException("to length:" + to.length + " from length:" + from.length);
     }
     for (int i = 0; i < to.length; i++) {
       to[i] = to[i] + from[i];
@@ -300,7 +306,7 @@ public class ArrayMath {
 
   public static void pairwiseAddInPlace(double[] to, int[] from) {
     if (to.length != from.length) {
-      throw new RuntimeException();
+      throw new IllegalArgumentException();
     }
     for (int i = 0; i < to.length; i++) {
       to[i] = to[i] + from[i];
@@ -309,12 +315,27 @@ public class ArrayMath {
 
   public static void pairwiseAddInPlace(double[] to, short[] from) {
     if (to.length != from.length) {
-      throw new RuntimeException();
+      throw new IllegalArgumentException();
     }
     for (int i = 0; i < to.length; i++) {
       to[i] = to[i] + from[i];
     }
   }
+
+  /**
+   * Add the two 2d arrays and write the answer in place of {@code m1}.
+   *
+   * @throws IllegalArgumentException If {@code m1} and {@code m2} are not of the same dimensions
+   */
+  public static void addInPlace(double[][] m1, double[][] m2) {
+    if (m1.length != m2.length) {
+      throw new IllegalArgumentException();
+    }
+    for (int i = 0; i < m1.length; i++) {
+      pairwiseAddInPlace(m1[i], m2[i]);
+    }
+  }
+
 
   public static void pairwiseSubtractInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
@@ -1945,6 +1966,12 @@ public class ArrayMath {
   }
 
   public static String toString(double[][] counts, int cellSize, Object[] rowLabels, Object[] colLabels, NumberFormat nf, boolean printTotals) {
+    return toString(counts, cellSize, rowLabels, colLabels, cellSize, nf, printTotals, printTotals, "");
+  }
+
+  public static String toString(double[][] counts, int cellSize, Object[] rowLabels, Object[] colLabels,
+                                int rowLabelSize, NumberFormat nf, boolean printRowTotals, boolean printColumnTotals,
+                                Object topLeft) {
     if (counts==null) return null;
     // first compute row totals and column totals
     double[] rowTotals = new double[counts.length];
@@ -1960,7 +1987,7 @@ public class ArrayMath {
     StringBuilder result = new StringBuilder();
     // column labels
     if (colLabels != null) {
-      result.append(StringUtils.padLeft("", cellSize));
+      result.append(StringUtils.padOrTrim(topLeft, rowLabelSize));
       for (int j = 0; j < counts[0].length; j++) {
         String s = colLabels[j].toString();
         if (s.length() > cellSize - 1) {
@@ -1969,7 +1996,7 @@ public class ArrayMath {
         s = StringUtils.padLeft(s, cellSize);
         result.append(s);
       }
-      if (printTotals) {
+      if (printRowTotals) {
         result.append(StringUtils.padLeftOrTrim("Total", cellSize));
       }
       result.append('\n');
@@ -1978,7 +2005,7 @@ public class ArrayMath {
       // row label
       if (rowLabels != null) {
         String s = rowLabels[i].toString();
-        s = StringUtils.padOrTrim(s, cellSize); // left align this guy only
+        s = StringUtils.padOrTrim(s, rowLabelSize); // left align this guy only
         result.append(s);
       }
       // value
@@ -1986,18 +2013,20 @@ public class ArrayMath {
         result.append(StringUtils.padLeft(nf.format(counts[i][j]), cellSize));
       }
       // the row total
-      if (printTotals) {
+      if (printRowTotals) {
         result.append(StringUtils.padLeft(nf.format(rowTotals[i]), cellSize));
       }
       result.append('\n');
     }
     // the col totals
-    if (printTotals) {
-      result.append(StringUtils.pad("Total", cellSize));
+    if (printColumnTotals) {
+      result.append(StringUtils.pad("Total", rowLabelSize));
       for (double colTotal : colTotals) {
         result.append(StringUtils.padLeft(nf.format(colTotal), cellSize));
       }
-      result.append(StringUtils.padLeft(nf.format(total), cellSize));
+      if (printRowTotals) {
+        result.append(StringUtils.padLeft(nf.format(total), cellSize));
+      }
     }
     return result.toString();
   }

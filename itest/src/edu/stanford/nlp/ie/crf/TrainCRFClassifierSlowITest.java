@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
 public class TrainCRFClassifierSlowITest {
 
-  private static final String crfTrainingWorkingDir = "/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training";
+  private static final String crfTrainingWorkingDir = "/u/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training";
 
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -28,7 +28,7 @@ public class TrainCRFClassifierSlowITest {
     // train the new model
     CRFClassifier.main(new String[] {
             "-props", "edu/stanford/nlp/models/ner/german-2018.hgc_175m_600.prop",
-            "-serializeTo", "/dev/null"
+            "-serializeTo", crfTrainingWorkingDir+"/german.hgc_175m_600.crf.ser.gz"
     });
     // check for lack of quality drop
     // CRFClassifier.main(new String[]{"-props",
@@ -42,7 +42,7 @@ public class TrainCRFClassifierSlowITest {
     double p = scanner.nextDouble();
     Assert.assertEquals("Precision outside target range", 0.8364, p, 0.001);
     double r = scanner.nextDouble();
-    Assert.assertEquals("Recall outside target range", 0.691, r, 0.001);
+    Assert.assertEquals("Recall outside target range", 0.6924, r, 0.001);
     double f1 = scanner.nextDouble();
     Assert.assertEquals("Precision outside target range", 0.7576, f1, 0.001);
   }

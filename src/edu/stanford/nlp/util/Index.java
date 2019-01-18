@@ -9,14 +9,14 @@ import java.util.List;
 /**
  * A collection that maps between a vocabulary of type E and a
  * continuous non-negative integer index series beginning (inclusively) at 0.
- *
- * <p>Often one uses a List to associate a unique index with each Object
+ * <p>
+ * Often one uses a List to associate a unique index with each Object
  * (e.g. controlled vocabulary, feature map, etc.). Index offers constant-time
- * performance for both <code>index -&gt; Object</code> ({@link #get(int)}) and <code>
- * Object -&gt; index</code> ({@link #indexOf(Object)}) as well as for {@link #contains(Object)}.
+ * performance for both {@code index -> Object} ({@link #get(int)}) and {@code
+ * Object -> index} ({@link #indexOf(Object)}) as well as for {@link #contains(Object)}.
  * Otherwise it behaves like a normal list. Index also
  * supports {@link #lock()} and {@link #unlock()} to ensure that it's
- * only modified when desired.</p>
+ * only modified when desired.
  *
  * @author Daniel Cer
  *
@@ -28,14 +28,14 @@ public interface Index<E> extends Iterable<E>, Serializable {
    * Returns the number of indexed objects.
    * @return the number of indexed objects.
    */
-  public abstract int size();
+  int size();
 
   /**
    * Gets the object whose index is the integer argument.
    * @param i the integer index to be queried for the corresponding argument
    * @return the object whose index is the integer argument.
    */
-  public abstract E get(int i);
+  E get(int i);
 
   /**
    * Returns the integer index of the Object in the Index or -1 if the Object
@@ -44,7 +44,7 @@ public interface Index<E> extends Iterable<E>, Serializable {
    * @param o The Object whose index is desired.
    * @return The index of the Object argument. Returns -1 if the object is not in the index.
    */
-  public abstract int indexOf(E o);
+  int indexOf(E o);
 
   /**
    * Takes an Object and returns the integer index of the Object.
@@ -57,7 +57,7 @@ public interface Index<E> extends Iterable<E>, Serializable {
    * @return the index of the Object argument. Normally a non-negative integer.
    *     Returns -1 if the object is not in the index and the Index is locked.
    */
-  public abstract int addToIndex(E o);
+  int addToIndex(E o);
 
   /**
    * Takes an Object and returns the integer index of the Object,
@@ -73,7 +73,7 @@ public interface Index<E> extends Iterable<E>, Serializable {
    * @deprecated You should use either the addToIndex(E) or indexOf(E) methods instead
    */
   @Deprecated
-  public abstract int indexOf(E o, boolean add);
+  int indexOf(E o, boolean add);
 
 
   // mg2009. Methods below were temporarily added when IndexInterface was renamed
@@ -86,7 +86,7 @@ public interface Index<E> extends Iterable<E>, Serializable {
    *
    * @return a complete {@link List} of indexed objects
    */
-  public List<E> objectsList();
+  List<E> objectsList();
 
   /**
    * Looks up the objects corresponding to an array of indices, and returns them in a {@link Collection}.
@@ -94,25 +94,25 @@ public interface Index<E> extends Iterable<E>, Serializable {
    * @param indices An array of indices
    * @return a {@link Collection} of the objects corresponding to the indices argument.
    */
-  public Collection<E> objects(int[] indices);
+  Collection<E> objects(int[] indices);
 
   /**
    * Queries the Index for whether it's locked or not.
    * @return whether or not the Index is locked
    */
-  public boolean isLocked();
+  boolean isLocked();
 
   /**
    * Locks the Index.  A locked index cannot have new elements added to it (calls to {@link #add} will
-   * leave the Index unchanged and return <code>false</code>).
+   * leave the Index unchanged and return {@code false}).
    */
-  public void lock();
+  void lock();
 
   /**
    * Unlocks the Index.  A locked index cannot have new elements added to it (calls to {@link #add} will
-   * leave the Index unchanged and return <code>false</code>).
-   * */
-  public void unlock();
+   * leave the Index unchanged and return {@code false}).
+   */
+  void unlock();
 
   /**
    * Save the contents of this index into string form, as part of a larger
@@ -121,24 +121,24 @@ public interface Index<E> extends Iterable<E>, Serializable {
    * @param out Writer to save to.
    * @throws IOException Exception thrown if cannot save.
    */
-  public void saveToWriter(Writer out) throws IOException;
+  void saveToWriter(Writer out) throws IOException;
 
   /**
    * Save the contents of this index into a file.
    *
    * @param s File name.
    */
-  public void saveToFilename(String s);
+  void saveToFilename(String s);
 
 
   // Subset of the Collection interface.  These come from old uses of HashIndex. Avoid using these.
 
-  public boolean contains(Object o);   // cdm: keep this, it seems reasonable
+  boolean contains(Object o);   // cdm: keep this, it seems reasonable
 
-  public boolean add(E e);  // cdm: Many, many uses; could be replaced with indexOf, but why bother?
+  boolean add(E e);  // cdm: Many, many uses; could be replaced with indexOf, but why bother?
 
-  public boolean addAll(Collection<? extends E> c);  // okay to have.
+  boolean addAll(Collection<? extends E> c);  // okay to have.
 
-  public void clear();  // cdm: barely used.
+  void clear();  // cdm: barely used.
 
 }

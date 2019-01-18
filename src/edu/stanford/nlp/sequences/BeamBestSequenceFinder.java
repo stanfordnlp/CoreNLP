@@ -1,12 +1,11 @@
 package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Beam;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.Scored;
 import edu.stanford.nlp.util.ScoredComparator;
+import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -19,7 +18,7 @@ import java.util.NoSuchElementException;
 public class BeamBestSequenceFinder implements BestSequenceFinder  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BeamBestSequenceFinder.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(BeamBestSequenceFinder.class);
 
   // todo [CDM 2013]: AFAICS, this class doesn't actually work correctly AND gives nondeterministic answers. See the commented out test in BestSequenceFinderTest
 
@@ -34,6 +33,7 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
 
     private double score = 0.0;
 
+    @Override
     public double score() {
       return score;
     }
@@ -101,10 +101,11 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
   } // end class TagSeq
 
 
-  private int beamSize;
-  private boolean exhaustiveStart;
-  private boolean recenter = true;
+  private final int beamSize;
+  private final boolean exhaustiveStart;
+  private final boolean recenter;
 
+  @Override
   public int[] bestSequence(SequenceModel ts) {
     return bestSequence(ts, (1024 * 128));
   }
@@ -123,7 +124,7 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
       tagNum[pos] = tags[pos].length;
     }
 
-    Beam newBeam = new Beam(beamSize, ScoredComparator.ASCENDING_COMPARATOR);
+    Beam<TagSeq> newBeam = new Beam<>(beamSize, ScoredComparator.ASCENDING_COMPARATOR);
     TagSeq initSeq = new TagSeq();
     newBeam.add(initSeq);
     for (int pos = 0; pos < padLength; pos++) {
@@ -133,19 +134,18 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
       //System.out.println("scoring word " + pos + " / " + (leftWindow + length) + ", tagNum = " + tagNum[pos] + "...");
       //System.out.flush();
 
-      Beam oldBeam = newBeam;
+      Beam<TagSeq> oldBeam = newBeam;
       if (pos < leftWindow + rightWindow && exhaustiveStart) {
-        newBeam = new Beam(100000, ScoredComparator.ASCENDING_COMPARATOR);
+        newBeam = new Beam<>(100000, ScoredComparator.ASCENDING_COMPARATOR);
       } else {
-        newBeam = new Beam(beamSize, ScoredComparator.ASCENDING_COMPARATOR);
+        newBeam = new Beam<>(beamSize, ScoredComparator.ASCENDING_COMPARATOR);
       }
       // each hypothesis gets extended and beamed
-      for (Object anOldBeam : oldBeam) {
+      for (TagSeq tagSeq : oldBeam) {
         if (Thread.interrupted()) {  // Allow interrupting
           throw new RuntimeInterruptedException();
         }
         // System.out.print("#"); System.out.flush();
-        TagSeq tagSeq = (TagSeq) anOldBeam;
         for (int nextTagNum = 0; nextTagNum < tagNum[pos]; nextTagNum++) {
           TagSeq nextSeq = tagSeq.tclone();
 
@@ -177,7 +177,7 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
       }
     }
     try {
-      TagSeq bestSeq = (TagSeq) newBeam.iterator().next();
+      TagSeq bestSeq = newBeam.iterator().next();
       int[] seq = bestSeq.tags();
       return seq;
     } catch (NoSuchElementException e) {

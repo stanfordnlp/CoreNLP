@@ -1,5 +1,4 @@
 package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,6 +8,7 @@ import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Helper class to perform a context-sensitive mapping of POS
@@ -20,13 +20,14 @@ import edu.stanford.nlp.util.Pair;
 public class UniversalPOSMapper  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(UniversalPOSMapper.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(UniversalPOSMapper.class);
 
+  @SuppressWarnings("WeakerAccess")
   public static final String DEFAULT_TSURGEON_FILE = "edu/stanford/nlp/models/upos/ENUniversalPOS.tsurgeon";
 
-  private static boolean loaded = false;
+  private static boolean loaded; // = false;
 
-  private static List<Pair<TregexPattern, TsurgeonPattern>> operations = null;
+  private static List<Pair<TregexPattern, TsurgeonPattern>> operations; // = null;
 
   private UniversalPOSMapper() {} // static methods
 
@@ -35,19 +36,17 @@ public class UniversalPOSMapper  {
   }
 
   public static void load(String filename) {
-    loaded = true;
-
     try {
       operations = Tsurgeon.getOperationsFromFile(filename, "UTF-8", new TregexPatternCompiler());
     } catch (IOException e) {
-      System.err.printf("%s: Warning - could not load Tsurgeon file from %s.%n",
-          UniversalPOSMapper.class.getSimpleName(), filename);
+      log.error(String.format("%s: Warning - could not load Tsurgeon file from %s.%n",
+          UniversalPOSMapper.class.getSimpleName(), filename));
     }
-
+    loaded = true;
   }
 
   public static Tree mapTree(Tree t) {
-    if (!loaded) {
+    if ( ! loaded) {
       load();
     }
 

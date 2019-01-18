@@ -103,7 +103,7 @@ public abstract class SentenceAnnotator implements Annotator {
         }
       }
     } else {
-      throw new RuntimeException("unable to find sentences in: " + annotation);
+      throw new IllegalArgumentException("unable to find sentences in: " + annotation);
     }
   }
 

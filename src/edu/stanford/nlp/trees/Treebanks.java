@@ -1,21 +1,20 @@
 package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
+import java.util.function.Predicate;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
-import java.util.function.Predicate;
-
 import edu.stanford.nlp.ling.SentenceUtils;
-import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /** This is just a main method and other static methods for
@@ -29,7 +28,7 @@ import edu.stanford.nlp.util.ReflectionLoading;
 public class Treebanks  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Treebanks.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Treebanks.class);
 
   private Treebanks() {} // static methods
 
@@ -45,14 +44,17 @@ public class Treebanks  {
 
   /**
    * Loads treebank and prints it.
-   * All files below the designated <code>filePath</code> within the given
-   * number range if any are loaded.  You can normalize the trees or not
-   * (English-specific) and print trees one per line up to a certain length
-   * (for EVALB).
+   * All files below the designated {@code filePath} within the given
+   * number range if any are loaded.<p>
+   * By default, this class works over raw trees.
+   * You can normalize the trees as we usually do in an English-specific way by using either of the flags:
+   * {@code -normalize} or {@code -trf edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory}.
+   * You can normalize for different treebanks by loading an appropriate TreeReaderFactory.
+   * You can print trees one per line up to a certain length (for EVALB) and many other things.
    * <p>
-   * Usage: <code>
-   * java edu.stanford.nlp.trees.Treebanks [-maxLength n|-normalize|-treeReaderFactory class] filePath [numberRanges]
-   * </code>
+   * Usage: {@code
+   * java edu.stanford.nlp.trees.Treebanks [-maxLength n|-normalized|-treeReaderFactory class] filePath [numberRanges]
+   * }
    *
    * @param args Array of command-line arguments
    * @throws java.io.IOException If there is a treebank file access problem
@@ -104,7 +106,7 @@ public class Treebanks  {
         i += 1;
       } else if (args[i].equalsIgnoreCase("-tlp")) {
         try {
-          final Object o = Class.forName(args[i+1]).newInstance();
+          final Object o = Class.forName(args[i+1]).getDeclaredConstructor().newInstance();
           tlp = (TreebankLanguagePack) o;
           trf = tlp.treeReaderFactory();
         } catch (Exception e) {
@@ -114,7 +116,7 @@ public class Treebanks  {
         i += 2;
       } else if (args[i].equals("-treeReaderFactory") || args[i].equals("-trf")) {
         try {
-          final Object o = Class.forName(args[i+1]).newInstance();
+          final Object o = Class.forName(args[i+1]).getDeclaredConstructor().newInstance();
           trf = (TreeReaderFactory) o;
         } catch (Exception e) {
           log.info("Couldn't instantiate as TreeReaderFactory: " + args[i+1]);
@@ -351,7 +353,7 @@ public class Treebanks  {
     log.info("There were " + num + " words in the treebank.");
 
     treebank.apply(new TreeVisitor() {
-        int num = 0;
+        int num; // = 0;
         @Override
         public void visitTree(final Tree t) {
           num += t.yield().size();
@@ -430,8 +432,5 @@ public class Treebanks  {
     System.out.println("Longest sentence is of length: " + longestSeen);
     pw.println(longSent);
   }
-
-
-
 
 }

@@ -12,8 +12,20 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
+
   private final long timeout;
 
+  /** Create an interruptible thread pool for multithreaded processing.
+   *
+   * @param numThreads If less than or equal to 0, then automatically determine the number
+   *                    of threads. Otherwise, the size of the underlying threadpool.
+   * @param processor The processor (factory) for what will be run on data.
+   * @param orderResults If true, return results in the order submitted. Otherwise, return results
+   *                        as they become available.
+   *  @param timeout If {@code timeout} is a positive number, the threadpool attempts to allow jobs to run
+   *                 for only this many milliseconds, but it depends on threads being Interruptible to succeed.
+   *                 If zero or negative, thread runtime is unlimited.
+   */
   public InterruptibleMulticoreWrapper(int numThreads, ThreadsafeProcessor<I,O> processor, boolean orderResults, long timeout) {
     super(numThreads, processor, orderResults);
 
@@ -28,7 +40,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
   @Override
   protected Integer getProcessor() {
     try {
-      return (timeout < 0) ? idleProcessors.take() : idleProcessors.poll(timeout, TimeUnit.MILLISECONDS);
+      return (timeout <= 0) ? idleProcessors.take() : idleProcessors.poll(timeout, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       throw new RuntimeInterruptedException(e);
     }
@@ -36,21 +48,21 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
 
   /**
    * Shuts down the thread pool, returns when finished.
-   * <br>
-   * If <code>timeout</code> was set, then <code>join</code> waits at
-   * most <code>timeout</code> milliseconds for threads to finish.  If
+   * <p>
+   * If {@code timeout} is positive, then {@code join} waits at
+   * most {@code timeout} milliseconds for threads to finish.  If
    * any fail to finish in that time, the threadpool is shutdownNow.
-   * After that, <code>join</code> continues to wait for the
+   * After that, {@code join} continues to wait for the
    * interrupted threads to finish, so if job do not obey
    * interruptions, they can continue indefinitely regardless of the
    * timeout.
    *
    * @return a list of jobs which had never been started if
-   * <code>timeout</code> was reached, or an empty list if that did not
+   * {@code timeout} was reached, or an empty list if that did not
    * happen.
    */
   public List<I> joinWithTimeout() {
-    if (timeout < 0) {
+    if (timeout <= 0) {
       join();
       return new ArrayList<>();
     }
@@ -132,8 +144,8 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
         throw new AssertionError("Should have gotten a CallableJob");
       }
       @SuppressWarnings("unchecked")
-      CallableJob<I, O> callable = (CallableJob<I, O>) c;
-      item = callable.item;
+      CallableJob<I, O> myCallable = (CallableJob<I, O>) c;
+      item = myCallable.item;
     }
   }
 
@@ -147,17 +159,21 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
    * provide a new task for a Runnable.
    */
   private static class FixedNamedThreadPoolExecutor<I, O> extends ThreadPoolExecutor {
+
     FixedNamedThreadPoolExecutor(int nThreads) {
       super(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     }
 
+    @Override
     protected <V> RunnableFuture<V> newTaskFor(Callable<V> c) {
       return new NamedTask<I, O, V>(c);
     }
     
+    @Override
     protected <V> RunnableFuture<V> newTaskFor(Runnable r, V v) {
       throw new UnsupportedOperationException();
     }
+
   }
 
 }

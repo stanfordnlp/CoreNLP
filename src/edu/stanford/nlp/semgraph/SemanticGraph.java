@@ -58,7 +58,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 public class SemanticGraph implements Serializable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemanticGraph.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SemanticGraph.class);
 
   public static final boolean addSRLArcs = false;
 

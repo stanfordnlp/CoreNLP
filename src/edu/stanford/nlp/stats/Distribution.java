@@ -1,11 +1,11 @@
 package edu.stanford.nlp.stats; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Immutable class for representing normalized, smoothed discrete distributions
@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.Generics;
  * items, so queries for the probability of unseen items will return a small
  * positive amount.  Normalization is L1 normalization:
  * {@link #totalCount} should always return 1.
- * <p/>
+ * <p>
  * A Counter passed into a constructor is copied. This class is Serializable.
  *
  * @author Galen Andrew (galand@cs.stanford.edu), Sebastian Pado
@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.Generics;
 public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Distribution.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Distribution.class);
 
   private static final long serialVersionUID = 6707148234288637809L;
 
@@ -78,9 +78,8 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  
   }
 
   /**
-   * Returns the current count for the given key, which is 0 if it hasn't
-   * been
-   * seen before. This is a convenient version of <code>get</code> that casts
+   * Returns the current count for the given key, which is 0 if it hasn't been
+   * seen before. This is a convenient version of {@code get} that casts
    * and extracts the primitive value.
    *
    * @param key The key to look up.
@@ -533,7 +532,7 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  
    * weighted by weight.  Essentially adds "pseudo-counts" for each Object
    * in prior equal to that Object's mass in prior times weight,
    * then normalizes.
-   * <p/>
+   * <p>
    * WARNING: If unseen item is encountered in c, total may not be 1.
    * NOTE: This will not work if prior is a DynamicDistribution
    * to fix this, you could add a CounterView to Distribution and use that

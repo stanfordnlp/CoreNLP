@@ -796,21 +796,24 @@ public class QuantifiableEntityNormalizer  {
 
     // get multipliers like "billion"
     boolean foundMultiplier = false;
-    for (String moneyTag : moneyMultipliers.keySet()) {
+    for (Map.Entry<String, Double> stringDoubleEntry : moneyMultipliers.entrySet()) {
+      String moneyTag = stringDoubleEntry.getKey();
       if (s.contains(moneyTag)) {
         // if (DEBUG) {err.println("Quantifiable: Found "+ moneyTag);}
         //special case check: m can mean either meters or million - if nextWord is high or long, we assume meters - this is a huge and bad hack!!!
-        if(moneyTag.equals("m") && (nextWord.equals("high") || nextWord.equals("long") )) continue;
+        if (moneyTag.equals("m") && (nextWord.equals("high") || nextWord.equals("long") )) continue;
         s = s.replaceAll(moneyTag, "");
-        multiplier *= moneyMultipliers.get(moneyTag);
+        multiplier *= stringDoubleEntry.getValue();
         foundMultiplier = true;
       }
     }
-    for (String moneyTag : moneyMultipliers2.keySet()) {
+
+    for (Map.Entry<String, Integer> stringIntegerEntry : moneyMultipliers2.entrySet()) {
+      String moneyTag = stringIntegerEntry.getKey();
       Matcher m = Pattern.compile(moneyTag).matcher(s);
       if (m.find()) {
         // if(DEBUG){err.println("Quantifiable: Found "+ moneyTag);}
-        multiplier *= moneyMultipliers2.get(moneyTag);
+        multiplier *= stringIntegerEntry.getValue();
         foundMultiplier = true;
         int start = m.start(1);
         int end = m.end(1);
@@ -819,13 +822,14 @@ public class QuantifiableEntityNormalizer  {
         // err.println("; Result is " + s);
       }
     }
-    if(!foundMultiplier) {
+
+    if (!foundMultiplier) {
       EditDistance ed = new EditDistance();
-      for (String moneyTag : moneyMultipliers.keySet()) {
-        if(isOneSubstitutionMatch(origSSplit[origSSplit.length - 1],
-                                  moneyTag, ed)) {
+      for (Map.Entry<String, Double> stringDoubleEntry : moneyMultipliers.entrySet()) {
+        String moneyTag = stringDoubleEntry.getKey();
+        if(isOneSubstitutionMatch(origSSplit[origSSplit.length - 1], moneyTag, ed)) {
           s = s.replaceAll(moneyTag, "");
-          multiplier *= moneyMultipliers.get(moneyTag);
+          multiplier *= stringDoubleEntry.getValue();
         }
       }
     }
@@ -1278,28 +1282,16 @@ public class QuantifiableEntityNormalizer  {
     addNormalizedQuantitiesToEntities(l, concatenate, false);
   }
 
-  private static boolean checkStrings(String s1, String s2) {
-    if (s1 == null || s2 == null) {
-      return s1 == s2;
-    } else {
-      return s1.equals(s2);
-    }
-  }
-
-  private static boolean checkNumbers(Number n1, Number n2) {
-    if (n1 == null || n2 == null) {
-      return n1 == n2;
-    } else {
-      return n1.equals(n2);
-    }
-  }
-
   public static <E extends CoreMap> boolean isCompatible(String tag, E prev, E cur) {
-    if ("NUMBER".equals(tag) || "ORDINAL".equals(tag)) {
+    if ("NUMBER".equals(tag) || "ORDINAL".equals(tag) || "PERCENT".equals(tag)) {
       // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
       Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
       Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-      boolean compatible = checkNumbers(n1,n2);
+
+      // Special case for % sign
+      if ("PERCENT".equals(tag) && n1 == null) return true;
+
+      boolean compatible = Objects.equals(n1, n2);
       if (!compatible) return false;
     }
 
@@ -1309,7 +1301,7 @@ public class QuantifiableEntityNormalizer  {
       Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
       String tid1 = (timex1 != null)? timex1.tid():null;
       String tid2 = (timex2 != null)? timex2.tid():null;
-      boolean compatible = checkStrings(tid1,tid2);
+      boolean compatible = Objects.equals(tid1, tid2);
       if (!compatible) return false;
     }
 

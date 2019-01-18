@@ -810,6 +810,7 @@ public class IOUtils  {
           throw new UnsupportedOperationException();
         }
 
+        // todo [cdm 2018]: Probably should remove this but in current implementation reader is internal and can only close by getting to eof.
         protected void finalize() throws Throwable {
           super.finalize();
           if (readerOpen) {
@@ -2012,7 +2013,7 @@ public class IOUtils  {
     add("/u/nlp"); add("/u/nlp/");
     add("/u/nlp/data"); add("/u/nlp/data/");
     add("/scr"); add("/scr/");
-    add("/scr/nlp/data"); add("/scr/nlp/data/");
+    add("/u/scr/nlp/data"); add("/u/scr/nlp/data/");
   }};
 
   /**

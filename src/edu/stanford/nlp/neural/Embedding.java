@@ -1,7 +1,5 @@
-/**
- *
- */
 package edu.stanford.nlp.neural;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,15 +16,16 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * @author Minh-Thang Luong <lmthang@stanford.edu>
+ * @author Minh-Thang Luong {@code <lmthang@stanford.edu>}
  * @author John Bauer
  * @author Richard Socher
  * @author Kevin Clark
  */
 public class Embedding implements Serializable  {
+
   private static final long serialVersionUID = 4925779982530239054L;
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Embedding.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Embedding.class);
   private Map<String, SimpleMatrix> wordVectors;
   private int embeddingSize;
 
@@ -82,7 +81,7 @@ public class Embedding implements Serializable  {
    * This method reads a file of raw word vectors, with a given expected size, and returns a map of word to vector.
    * <br>
    * The file should be in the format <br>
-   * <code>WORD X1 X2 X3 ...</code> <br>
+   * {@code WORD X1 X2 X3 ...} <br>
    * If vectors in the file are smaller than expectedSize, an
    * exception is thrown.  If vectors are larger, the vectors are
    * truncated and a warning is printed.
@@ -140,9 +139,9 @@ public class Embedding implements Serializable  {
   /**
    * This method takes as input two files: wordFile (one word per line) and a raw word vector file
    * with a given expected size, and returns a map of word to vector.
-   * <br>
+   * <p>
    * The word vector file should be in the format <br>
-   * <code>X1 X2 X3 ...</code> <br>
+   * {@code X1 X2 X3 ...} <br>
    * If vectors in the file are smaller than expectedSize, an
    * exception is thrown.  If vectors are larger, the vectors are
    * truncated and a warning is printed.
@@ -205,7 +204,8 @@ public class Embedding implements Serializable  {
     IOUtils.writeObjectToFile(wordVectors, filename);
   }
 
-  /*** Getters & Setters ***/
+  /* -- Getters and Setters -- */
+
   public int size(){
     return wordVectors.size();
   }
@@ -270,7 +270,7 @@ public class Embedding implements Serializable  {
       if (wordVectors.containsKey("<unk>")) { unkStr = "<unk>"; }
 
       // set UNKNOWN_WORD
-      if (!unkStr.equals("")){
+      if ( ! unkStr.isEmpty()){
         wordVectors.put(UNKNOWN_WORD, wordVectors.get(unkStr));
       } else {
         throw new RuntimeException("! wordVectors used to initialize Embedding doesn't contain any recognized form of " + UNKNOWN_WORD);
@@ -279,4 +279,5 @@ public class Embedding implements Serializable  {
 
     return wordVectors.get(UNKNOWN_WORD).getNumElements();
   }
+
 }

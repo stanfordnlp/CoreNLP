@@ -535,6 +535,11 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   }
 
   /**
+   * Return the map of confidences
+   */
+  public Map<String,Double> nerConfidence() { return get(CoreAnnotations.NamedEntityTagProbsAnnotation.class); }
+
+  /**
    * {@inheritDoc}
    */
   @Override

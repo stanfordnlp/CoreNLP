@@ -1,4 +1,4 @@
-Tsurgeon v3.8.0 - 2017-06-09
+Tsurgeon v3.9.2 - 2018-10-16
 ----------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -6,8 +6,8 @@ The Leland Stanford Junior University. All Rights Reserved.
 
 Original core Tregex code by Roger Levy and Galen Andrew.
 Original core Tsurgeon code by Roger Levy.
-GUI by Anna Rafferty
-Support code, additional features, etc. by Chris Manning
+GUI by Anna Rafferty.
+Support code, additional features, etc. by Chris Manning.
 This release prepared by John Bauer.
 
 This package contains Tregex and Tsurgeon.
@@ -20,10 +20,8 @@ TregexPattern, TregexMatcher and TregexPatternCompiler classes.
 As of version 1.2, the Tsurgeon tree-transformation utility is bundled
 together with Tregex.  See the file README.tsurgeon for details.
 
-Java version 1.8 is required to use Tregex.  If you really want to use
-Tregex under an earlier version of Java, look into RetroWeaver:
+Java version 1.8+ is required to use the current version of Tregex.
 
-  http://retroweaver.sourceforge.net/
   
 TSURGEON
 ----------------------------------------------
@@ -75,7 +73,7 @@ Note the need for blank lines: The code crashes if they are not present as separ
 (although the blank line at the end of the file can be omitted).
 The script file can include comment lines, either whole comment lines or
 trailing comments introduced by %, which extend to the end of line.  A needed percent
-mark in partterns or operations can be escaped by a preceding backslash.
+mark in patterns or operations can be escaped by a preceding backslash.
 
 -----------------------------------------
 TSURGEON SYNTAX
@@ -515,15 +513,14 @@ LICENSE
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ along with this program.  If not, see http://www.gnu.org/licenses/ .
 
  For more information, bug reports, fixes, contact:
     Christopher Manning
-    Dept of Computer Science, Gates 1A
-    Stanford CA 94305-9010
+    Dept of Computer Science, Gates 2A
+    Stanford CA 94305-9020
     USA
     parser-support@lists.stanford.edu
-    http://www-nlp.stanford.edu/software/tregex.shtml
+    http://nlp.stanford.edu/software/tregex.html
 
 

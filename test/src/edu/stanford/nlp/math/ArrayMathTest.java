@@ -285,4 +285,17 @@ public class ArrayMathTest {
     Assert.assertEquals(1.0, ArrayMath.jensenShannonDivergence(c, d), 1e-5);
   }
 
+  @Test
+  public void test2dAdd() {
+    double[][] d6 = new double[][]{{0.26, 0.87, -1.26}, {0.17, 3.21, -1.8}};
+    double[][] d7 = new double[][]{{0.26, 0.07, -1.26}, {0.17, -3.21, -1.8}};
+    double[][] d8 = new double[][]{{0.52, 0.94, -2.52}, {0.34, 0.0, -3.6}};
+    ArrayMath.addInPlace(d6, d7);
+    for (int i = 0; i < d8.length; i++) {
+      for (int j = 0; j < d8[i].length; j++) {
+        Assert.assertEquals(d6[i][j], d8[i][j], 1e-5);
+      }
+    }
+  }
+
 }

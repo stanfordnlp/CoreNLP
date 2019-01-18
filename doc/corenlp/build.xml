@@ -14,7 +14,9 @@
 
   <property name="build.home"    value="${basedir}/classes"/>
   <property name="build.tests"    value="${basedir}/classes"/>
+  <property name="docs.home"     value="${basedir}/docs"/>
   <property name="src.home"      value="${basedir}/src"/>
+  <property name="javadoc.home"  value="${basedir}/javadoc"/>
 
 
 <!--  ==================== Compilation Control Options ==================== -->
@@ -38,10 +40,10 @@
 
   <property name="compile.debug"       value="true"/>
   <property name="compile.deprecation" value="false"/>
-  <property name="compile.encoding"    value="utf-8" />
   <property name="compile.optimize"    value="true"/>
   <property name="compile.source"      value="1.8" />
   <property name="compile.target"      value="1.8" />
+  <property name="compile.encoding"    value="utf-8" />
 
 
 
@@ -94,11 +96,12 @@
     <javac srcdir="${src.home}"
           destdir="${build.home}"
             debug="${compile.debug}"
-      deprecation="${compile.deprecation}"
          encoding="${compile.encoding}" 
+      deprecation="${compile.deprecation}"
          optimize="${compile.optimize}"
 	   source="${compile.source}"
-           target="${compile.target}">
+           target="${compile.target}"
+            includeantruntime="false">
       <compilerarg value="-Xmaxerrs"/>
       <compilerarg value="20"/>
       <classpath>
@@ -109,6 +112,60 @@
       </classpath>
       <!-- <compilerarg value="-Xlint"/> -->
     </javac>
+
+    <!-- Copy application resources -->
+<!--
+    <copy  todir="${build.home}/WEB-INF/classes">
+      <fileset dir="${src.home}" excludes="**/*.java"/>
+    </copy>
+-->
+
+  </target>
+
+
+<!-- ==================== Javadoc Target ================================== -->
+
+<!--
+
+  The "javadoc" target creates Javadoc API documentation for the Java
+  classes included in your application.  Normally, this is only required
+  when preparing a distribution release, but is available as a separate
+  target in case the developer wants to create Javadocs independently.
+
+-->
+
+  <target name="javadoc" depends="compile"
+   description="Create Javadoc API documentation">
+
+    <mkdir          dir="${javadoc.home}"/>
+    <javadoc sourcepath="${src.home}"
+                destdir="${javadoc.home}"
+              maxmemory="1g"
+                 author="true"
+                 source="${compile.source}"
+                overview="${src.home}/edu/stanford/nlp/overview.html"
+                doctitle="Stanford JavaNLP API Documentation"
+             windowtitle="Stanford JavaNLP API"
+             encoding="${compile.encoding}"
+	     docencoding="${compile.encoding}"
+	     charset="${compile.encoding}"
+            packagenames="*">
+      <!-- Allow @generated, @modifiable and @ordered tags -->
+      <tag name="generated" scope="all" description="Generated" />
+      <tag name="modifiable" scope="all" description="Modifiable" />
+      <tag name="ordered" scope="all" description="Ordered" />
+      <!-- Depends on lib and classes folders -->
+      <classpath>
+        <fileset dir="${basedir}">
+          <include name="*.jar"/>
+          <exclude name="stanford-corenlp*"/>
+        </fileset>
+        <pathelement path="${build.home}" />
+      </classpath>
+      <bottom><![CDATA[<font size="2"><a href="https://nlp.stanford.edu" target="_top">Stanford NLP Group</a></font>]]></bottom>
+      <link href="https://docs.oracle.com/javase/8/docs/api/"/>
+    </javadoc>
+
   </target>
 
 

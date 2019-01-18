@@ -837,7 +837,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
       log.info("Before feature count thresholding, numFeatures = " + numFeatures);
       for (int i = 0; i < windowSize; i++) {
-        for(Iterator<Map.Entry<String, Integer>> it = featureCountIndices[i].entrySet().iterator(); it.hasNext(); ) {
+        for (Iterator<Map.Entry<String, Integer>> it = featureCountIndices[i].entrySet().iterator(); it.hasNext(); ) {
           Map.Entry<String, Integer> entry = it.next();
           if(entry.getValue() < flags.featureCountThresh) {
             it.remove();
@@ -1254,6 +1254,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       IN wi = document.get(j);
       String guess = classIndex.get(bestSequence[j + windowSize - 1]);
       wi.set(CoreAnnotations.AnswerAnnotation.class, guess);
+      int index = classIndex.indexOf(guess);
+      double guessProb = ((TestSequenceModel) model).labelProb(j, index);
+      wi.set(CoreAnnotations.AnswerProbAnnotation.class, guessProb);
     }
     if (flags.useReverse) {
       Collections.reverse(document);
@@ -1339,7 +1342,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * the likelihood of each possible label at each point.
    *
    * @param document A {@link List} of something that extends CoreMap.
-   * @return If verboseMode is set, a Pair of Counters recording classification decisions, else null.
+   * @return If verboseMode is set, a Triple of Counters recording classification decisions, else null.
    */
   @Override
   public Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
@@ -1398,6 +1401,22 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } else {
       return null;
     }
+  }
+
+  public List<Counter<String>> zeroOrderProbabilities(List<IN> document) {
+    List<Counter<String>> ret = new ArrayList<>();
+    Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(document);
+    CRFCliqueTree<String> cliqueTree = getCliqueTree(p);
+    for (int i = 0; i < cliqueTree.length(); i++) {
+      Counter<String> ctr = new ClassicCounter<>();
+      for (String label : classIndex) {
+        int index = classIndex.indexOf(label);
+        double prob = cliqueTree.prob(i, index);
+        ctr.setCount(label, prob);
+      }
+      ret.add(ctr);
+    }
+    return ret;
   }
 
   /**
@@ -1481,17 +1500,21 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         flags.backgroundSymbol, getCliquePotentialFunctionForTest(), featureVal);
   }
 
+  // This method should stay public
+  @SuppressWarnings("WeakerAccess")
   public CRFCliqueTree<String> getCliqueTree(List<IN> document) {
     Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(document);
     return getCliqueTree(p);
   }
 
+  // This method should stay public
   /**
    * Takes a {@link List} of something that extends {@link CoreMap} and prints
    * the factor table at each point.
    *
    * @param document A {@link List} of something that extends {@link CoreMap}.
    */
+  @SuppressWarnings("WeakerAccess")
   public void printFactorTableDocument(List<IN> document) {
 
     CRFCliqueTree<String> cliqueTree = getCliqueTree(document);
@@ -1639,14 +1662,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           CRFClassifierEvaluator<IN> crfEvaluator = new CRFClassifierEvaluator<>("Test set (" + flags.testFile + ")",
                   this);
           ObjectBank<List<IN>> testObjBank = makeObjectBankFromFile(flags.testFile, readerAndWriter);
-          List<List<IN>> testDocs = new ArrayList<>();
-          for (List<IN> doc : testObjBank) {
-            testDocs.add(doc);
-          }
+          List<List<IN>> testDocs = new ArrayList<>(testObjBank);
           List<Triple<int[][][], int[], double[][][]>> testDataAndLabels = documentsToDataAndLabelsList(testDocs);
           crfEvaluator.setTestData(testDocs, testDataAndLabels);
-          if (flags.evalCmd.length() > 0)
+          if ( ! flags.evalCmd.isEmpty()) {
             crfEvaluator.setEvalCmd(flags.evalCmd);
+          }
           evaluatorList.add(crfEvaluator);
         }
         if (flags.testFiles != null) {
@@ -1656,8 +1677,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
             ObjectBank<List<IN>> testObjBank = makeObjectBankFromFile(testFile, readerAndWriter);
             List<Triple<int[][][], int[], double[][][]>> testDataAndLabels = documentsToDataAndLabelsList(testObjBank);
             crfEvaluator.setTestData(testObjBank, testDataAndLabels);
-            if (flags.evalCmd.length() > 0)
+            if ( ! flags.evalCmd.isEmpty()) {
               crfEvaluator.setEvalCmd(flags.evalCmd);
+            }
             evaluatorList.add(crfEvaluator);
           }
         }
@@ -2125,7 +2147,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     try {
       result = IOUtils.readObjectFromURLOrClasspathOrFileSystem(filename);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.warn(e);
       result = Collections.emptyList();
     }
     log.info("Loading processed data from serialized file ... done. Got " + result.size() + " datums.");
@@ -2674,8 +2696,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    */
    static double[][] parseMatrix(String[] lines, Index<String> tagIndex, int matrixSize, boolean smooth, boolean useLogProb) {
     double[][] matrix = new double[matrixSize][matrixSize];
-    for (int i = 0; i < matrix.length; i++)
+    for (int i = 0; i < matrix.length; i++) {
       matrix[i] = new double[matrixSize];
+    }
     for (String line: lines) {
       String[] parts = line.split("\t");
       for (String part: parts) {
@@ -2748,7 +2771,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       Index<CRFLabel> l = this.labelIndices.get(0);
       p.println(feature + "\t\t");
       for (CRFLabel label : l) {
-        p.print(label.toString(classIndex) + ":" + v[l.indexOf(label)] + "\t");
+        p.print(label.toString(classIndex) + ':' + v[l.indexOf(label)] + '\t');
       }
       p.println();
 
@@ -2775,7 +2798,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   /** Read real-valued vector embeddings for (lowercased) word tokens.
    *  A lexicon is contained in the file flags.embeddingWords.
    *  The word vectors are then in the same order in the file flags.embeddingVectors.
-   * @throws IOException
+   *
+   *  @throws IOException If embedding vectors canot be loaded
    */
   private void readEmbeddingsData() throws IOException {
     System.err.printf("Reading embedding files %s and %s.%n", flags.embeddingWords, flags.embeddingVectors);
@@ -2789,10 +2813,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     embeddings = Generics.newHashMap();
-    int count = 0;
-    int vectorSize = -1;
-    boolean warned = false;
     try (BufferedReader br = IOUtils.readerFromString(flags.embeddingVectors)) {
+      int count = 0;
+      int vectorSize = -1;
+      boolean warned = false;
       for (String line; (line = br.readLine()) != null; ) {
         double[] vector = ArrayUtils.toDoubleArray(line.trim().split(" "));
         if (vectorSize < 0) {
@@ -2854,16 +2878,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   /**
    * Loads a CRF classifier from a filepath, and returns it.
    *
-   * @param file
-   *          File to load classifier from
+   * @param file File to load classifier from
    * @return The CRF classifier
    *
-   * @throws IOException
-   *           If there are problems accessing the input stream
-   * @throws ClassCastException
-   *           If there are problems interpreting the serialized data
-   * @throws ClassNotFoundException
-   *           If there are problems interpreting the serialized data
+   * @throws IOException If there are problems accessing the input stream
+   * @throws ClassCastException If there are problems interpreting the serialized data
+   * @throws ClassNotFoundException If there are problems interpreting the serialized data
    */
   public static <INN extends CoreMap> CRFClassifier<INN> getClassifier(File file) throws IOException, ClassCastException,
       ClassNotFoundException {

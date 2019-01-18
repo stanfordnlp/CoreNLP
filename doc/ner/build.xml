@@ -1,5 +1,7 @@
 <!-- build.xml file for ant for JavaNLP -->
 
+<!-- Before using this, unjar the sources' jar file into the src/ directory! -->
+
 <!-- A "project" describes a set of targets that may be requested
      when Ant is executed.  The "default" attribute defines the
      target which is executed if no specific target is requested,
@@ -41,6 +43,7 @@
   <property name="compile.optimize"    value="true"/>
   <property name="compile.source"      value="1.8" />
   <property name="compile.target"      value="1.8" />
+  <property name="compile.encoding"      value="utf-8" />
 
 
 
@@ -55,7 +58,7 @@
 -->
 
   <target name="all" depends="clean,compile"
-    description="Clean build and dist directories, then compile"/>
+   description="Clean build and dist directories, then compile"/>
 
 
 
@@ -73,27 +76,6 @@
   </target>
 
 
-<!-- ==================== Classpath Targets ==================================== -->
-
-<!--
-
-  Sets the classpath for this project properly. We now always use the
-  lib dir within javanlp.
-
--->
-
-  <target name="classpath" description="Sets the classpath">
-      <path id="compile.classpath">
-        <fileset dir="${basedir}/lib">
-          <include name="*.jar"/>
-          <exclude name="javanlp*"/>
-        </fileset>
-      </path>
-  </target>
-
-
-
-
 
 <!-- ==================== Compile Target ================================== -->
 
@@ -106,7 +88,7 @@
 
 -->
 
-  <target name="compile" depends="prepare,classpath"
+  <target name="compile" depends="prepare"
    description="Compile Java sources">
 
     <!-- Compile Java classes as necessary -->
@@ -114,15 +96,20 @@
     <javac srcdir="${src.home}"
           destdir="${build.home}"
             debug="${compile.debug}"
-         encoding="utf-8"
+         encoding="${compile.encoding}"
       deprecation="${compile.deprecation}"
-includeantruntime="false"
          optimize="${compile.optimize}"
 	   source="${compile.source}"
-           target="${compile.target}">
-        <classpath refid="compile.classpath"/>
+           target="${compile.target}"
+            includeantruntime="false">
       <compilerarg value="-Xmaxerrs"/>
       <compilerarg value="20"/>
+      <classpath>
+        <fileset dir="${basedir}/lib">
+          <include name="*.jar"/>
+          <exclude name="javanlp*"/>
+        </fileset>
+      </classpath>
       <!-- <compilerarg value="-Xlint"/> -->
     </javac>
 
@@ -148,25 +135,37 @@ includeantruntime="false"
 -->
 
   <target name="javadoc" depends="compile"
-    description="Create Javadoc API documentation">
+   description="Create Javadoc API documentation">
+
     <mkdir          dir="${javadoc.home}"/>
     <javadoc sourcepath="${src.home}"
                 destdir="${javadoc.home}"
-              maxmemory="768m"
+              maxmemory="1g"
                  author="true"
                  source="${compile.source}"
-               Overview="${src.home}/edu/stanford/nlp/overview.html"
-               Doctitle="Stanford JavaNLP API Documentation"
-            Windowtitle="Stanford JavaNLP API"
-           packagenames="*">
-      <bottom><![CDATA[<FONT SIZE=2><A HREF=\"http://nlp.stanford.edu\">Stanford NLP Group</A></FONT>]]></bottom>
-      <link href="https://docs.oracle.com/javase/8/docs/api/"/>
+                overview="${src.home}/edu/stanford/nlp/overview.html"
+                doctitle="Stanford JavaNLP API Documentation"
+             windowtitle="Stanford JavaNLP API"
+             encoding="${compile.encoding}"
+	     docencoding="${compile.encoding}"
+	     charset="${compile.encoding}"
+            packagenames="*">
+      <!-- Allow @generated, @modifiable and @ordered tags -->
+      <tag name="generated" scope="all" description="Generated" />
+      <tag name="modifiable" scope="all" description="Modifiable" />
+      <tag name="ordered" scope="all" description="Ordered" />
+      <!-- Depends on lib and classes folders -->
       <classpath>
         <fileset dir="${basedir}/lib">
           <include name="*.jar"/>
+          <exclude name="javanlp*"/>
         </fileset>
+        <pathelement path="${build.home}" />
       </classpath>
+      <bottom><![CDATA[<font size="2"><a href="https://nlp.stanford.edu" target="_top">Stanford NLP Group</a></font>]]></bottom>
+      <link href="https://docs.oracle.com/javase/8/docs/api/"/>
     </javadoc>
+
   </target>
 
 

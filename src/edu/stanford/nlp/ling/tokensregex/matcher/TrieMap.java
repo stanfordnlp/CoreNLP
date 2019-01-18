@@ -1,21 +1,20 @@
 package edu.stanford.nlp.ling.tokensregex.matcher;
 
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Map that takes a iterable as key, and maps it to an value.
+ * Map that takes an Iterable as key, and maps it to an value.
  *
  * This implementation is not particularly memory efficient, but will have relatively
  * fast lookup times for sequences where there are many possible keys (e.g. sequences over Strings).
- * Can be used for fairly efficient look up of sequence by prefix.
+ * Can be used for fairly efficient look up of a sequence by prefix.
  *
  * @author Angel Chang
  *
- * @param <K> Key of the elements of the trie
+ * @param <K> Type of the key elements Iterable of the trie
  * @param <V> The value
  *
  */

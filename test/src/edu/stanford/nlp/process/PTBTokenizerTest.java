@@ -93,6 +93,7 @@ public class PTBTokenizerTest {
       "the 9-to-11:45 a.m. weekday shift",
       "Brighton Rd. Pacifica",
       "Walls keeping water out of the bowl-shaped city have been breached, and emergency teams are using helicopters to drop 1,350kg (3,000lb) sandbags and concrete barriers into the gaps.",
+          "i got (89.2%) in my exams",
   };
 
   private final String[][] ptbGold = {
@@ -182,6 +183,7 @@ public class PTBTokenizerTest {
       { "Walls", "keeping", "water", "out", "of", "the", "bowl-shaped", "city", "have", "been", "breached", ",", "and",
               "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
               "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
+          { "i", "got", "-LRB-", "89.2", "%", "-RRB-", "in", "my", "exams" },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -284,6 +286,8 @@ public class PTBTokenizerTest {
       { "Walls", "keeping", "water", "out", "of", "the", "bowl", "-", "shaped", "city", "have", "been", "breached", ",", "and",
               "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
               "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
+          { "i", "got", "-LRB-", "89.2", "%", "-RRB-", "in", "my", "exams" },
+
   };
 
   @Test
@@ -294,11 +298,25 @@ public class PTBTokenizerTest {
 
   private final String[] moreInputs = {
           "Joseph Someone (fl. 2050–75) liked the noble gases, viz. helium, neon, argon, xenon, krypton and radon.",
+          "Sambucus nigra subsp. canadensis and Canis spp. missing",
+          "Jim Jackon & Co. LLC replied.",
+          "Xanadu Pvt. Ltd. replied.",
+          " \u2010 - ___ ",
+          "whenever one goes 'tisk tisk' at something",
+          "She hates Alex.",
+          "An offering of 10 million common shares, via Alex. Brown &amp; Sons.",
   };
 
   private final String[][] moreGold = {
           { "Joseph", "Someone", "-LRB-", "fl.", "2050", "--", "75", "-RRB-", "liked", "the", "noble", "gases", ",",
                   "viz.", "helium", ",", "neon", ",", "argon", ",", "xenon", ",", "krypton", "and", "radon", "." },
+          { "Sambucus", "nigra", "subsp.", "canadensis", "and", "Canis", "spp.", "missing" },
+          { "Jim", "Jackon", "&", "Co.", "LLC", "replied", "." },
+          { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
+          { "\u2010", "-", "___" },
+          { "whenever", "one", "goes", "`", "tisk", "tisk", "'", "at", "something" },
+          { "She", "hates", "Alex", "."},
+          { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},
   };
 
   @Test
@@ -322,6 +340,8 @@ public class PTBTokenizerTest {
 
   @Test
   public void testCorp() {
+    assertEquals(2, corpInputs.length);
+    assertEquals(2, corpGold.length);
     // We test a 2x2 design: {strict, regular} x {no following context, following context}
     for (int sent = 0; sent < 4; sent++) {
       PTBTokenizer<CoreLabel> ptbTokenizer = new PTBTokenizer<>(new StringReader(corpInputs[sent / 2]),

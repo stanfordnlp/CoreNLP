@@ -8,27 +8,29 @@ import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
+import java.lang.reflect.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import java.lang.reflect.*;
 
 /**
- *
  * Command-line utility to:
  *
- * a) convert constituency trees to basic English UD trees
- * b) convert basic dependency trees to enhanced and enhanced++ UD graphs
- *
+ * a) convert constituency trees to basic English UD trees;
+ * b) convert basic dependency trees to enhanced and enhanced++ UD graphs.
  *
  * @author Sebastian Schuster
  */
 public class UniversalDependenciesConverter {
 
-  private static String NER_COMBINER_NAME = "edu.stanford.nlp.ie.NERClassifierCombiner";
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(UniversalDependenciesConverter.class);
+
+  private static final String NER_COMBINER_NAME = "edu.stanford.nlp.ie.NERClassifierCombiner";
 
   private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
 
@@ -36,7 +38,6 @@ public class UniversalDependenciesConverter {
 
 
   private static GrammaticalStructure semanticGraphToGrammaticalStructure(SemanticGraph sg) {
-
     /* sg.typedDependency() generates an ArrayList */
     List<TypedDependency> deps = (List<TypedDependency>) sg.typedDependencies();
 
@@ -50,7 +51,6 @@ public class UniversalDependenciesConverter {
 
   /**
    * Converts basic UD tree to enhanced UD graph.
-   *
    */
   private static SemanticGraph convertBasicToEnhanced(SemanticGraph sg) {
     GrammaticalStructure gs = semanticGraphToGrammaticalStructure(sg);
@@ -59,7 +59,6 @@ public class UniversalDependenciesConverter {
 
   /**
    * Converts basic UD tree to enhanced++ UD graph.
-   *
    */
   private static SemanticGraph convertBasicToEnhancedPlusPlus(SemanticGraph sg) {
     GrammaticalStructure gs = semanticGraphToGrammaticalStructure(sg);
@@ -108,7 +107,7 @@ public class UniversalDependenciesConverter {
       return this.currentTree;
     }
 
-  }
+  } // end static class TreeToSemanticGraphIterator
 
 
   private static Morphology MORPH = new Morphology();
@@ -122,7 +121,7 @@ public class UniversalDependenciesConverter {
   }
 
   private static void addLemmata(Tree tree) {
-    tree.yield().forEach(l-> {
+    tree.yield().forEach(l -> {
       CoreLabel w = (CoreLabel) l;
       if(w.lemma() == null) {
         w.setLemma(MORPH.lemma(w.word(), w.tag()));
@@ -131,79 +130,75 @@ public class UniversalDependenciesConverter {
   }
 
   /** variables for accessing NERClassifierCombiner via reflection **/
-  private static Object NER_TAGGER = null;
-  private static Method NER_CLASSIFY_METHOD = null;
+  private static Object NER_TAGGER; // = null;
+  private static Method NER_CLASSIFY_METHOD; // = null;
 
-  /** check for presence of NERClassifierCombiner **/
-  private static boolean isNERClassifierCombinerPresent() {
-    try {
-      Class clazz = Class.forName(NER_COMBINER_NAME);
-    } catch (Exception ex) {
-      System.err.println(
-          "Warning: edu.stanford.nlp.ie.NERClassifierCombiner not found - not applying NER tags!");
-      return false;
-    }
-    return true;
-  }
-
-  /** try to set up the NER tagger **/
+  /** Try to set up the NER tagger. **/
+  @SuppressWarnings("unchecked")
   private static void setupNERTagger() {
+    Class NER_TAGGER_CLASS;
     try {
-      Class NER_TAGGER_CLASS = Class.forName(NER_COMBINER_NAME);
-      Method createMethod =
-          NER_TAGGER_CLASS.getDeclaredMethod("createNERClassifierCombiner",
-              new Class[]{String.class, Properties.class});
-      NER_TAGGER = createMethod.invoke(null, null, new Properties());
-      NER_CLASSIFY_METHOD = NER_TAGGER_CLASS.getDeclaredMethod("classify", new Class[]{List.class});
+      NER_TAGGER_CLASS = Class.forName(NER_COMBINER_NAME);
     } catch (Exception ex) {
-      System.err.println("Error setting up NERClassifierCombiner!  Not applying NER tags!");
+      log.warn(  NER_COMBINER_NAME + " not found - not applying NER tags!");
+      return;
+    }
+    try {
+      Method createMethod = NER_TAGGER_CLASS.getDeclaredMethod("createNERClassifierCombiner",
+                  String.class, Properties.class);
+      NER_TAGGER = createMethod.invoke(null, null, new Properties());
+      NER_CLASSIFY_METHOD = NER_TAGGER_CLASS.getDeclaredMethod("classify", List.class);
+    } catch (Exception ex) {
+      log.warn("Error setting up " + NER_COMBINER_NAME + "! Not applying NER tags!");
     }
   }
 
-  /** add NER tags to a semantic graph **/
+  /** Add NER tags to a semantic graph. **/
   private static void addNERTags(SemanticGraph sg) {
-    if (isNERClassifierCombinerPresent()) {
+    // set up tagger if necessary
+    if (NER_TAGGER == null || NER_CLASSIFY_METHOD == null) {
+      setupNERTagger();
+    }
+    if (NER_TAGGER != null && NER_CLASSIFY_METHOD != null) {
+      // we have everything successfully setup and so can act.
       try {
-        // set up tagger if necessary
-        if (NER_TAGGER == null || NER_CLASSIFY_METHOD == null)
-          setupNERTagger();
         // classify
         List<CoreLabel> labels =
             sg.vertexListSorted().stream().map(IndexedWord::backingLabel).collect(Collectors.toList());
         NER_CLASSIFY_METHOD.invoke(NER_TAGGER, labels);
       } catch (Exception ex) {
-        System.err.println("Error running NERClassifierCombiner on SemanticGraph!  Not applying NER tags!");
+        log.warn("Error running " + NER_COMBINER_NAME + " on SemanticGraph!  Not applying NER tags!");
       }
     }
   }
 
-  /** add NER tags to a tree **/
+  /** Add NER tags to a tree. **/
   private static void addNERTags(Tree tree) {
-    if (isNERClassifierCombinerPresent()) {
+    // set up tagger if necessary
+    if (NER_TAGGER == null || NER_CLASSIFY_METHOD == null) {
+      setupNERTagger();
+    }
+    if (NER_TAGGER != null && NER_CLASSIFY_METHOD != null) {
+      // we have everything successfully setup and so can act.
       try {
-        // set up tagger if necessary
-        if (NER_TAGGER == null || NER_CLASSIFY_METHOD == null)
-          setupNERTagger();
         // classify
         List<CoreLabel> labels = tree.yield().stream().map(w -> (CoreLabel) w).collect(Collectors.toList());
         NER_CLASSIFY_METHOD.invoke(NER_TAGGER, labels);
       } catch (Exception ex) {
-        System.err.println("Error running NERClassifierCombiner on Tree!  Not applying NER tags!");
+        log.warn("Error running " + NER_COMBINER_NAME + " on Tree!  Not applying NER tags!");
       }
     }
   }
 
   /**
-   *
    * Converts a constituency tree to the English basic, enhanced, or
    * enhanced++ Universal dependencies representation, or an English basic
    * Universal dependencies tree to the enhanced or enhanced++ representation.
-   *
+   * <p>
    * Command-line options:<br>
    * {@code -treeFile}: File with PTB-formatted constituency trees<br>
    * {@code -conlluFile}: File with basic dependency trees in CoNLL-U format<br>
    * {@code -outputRepresentation}: "basic" (default), "enhanced", or "enhanced++"
-   *
    */
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
@@ -228,7 +223,7 @@ public class UniversalDependenciesConverter {
       }
     } else {
       System.err.println("No input file specified!");
-      System.err.println("");
+      System.err.println();
       System.err.printf("Usage: java %s [-treeFile trees.tree | -conlluFile deptrees.conllu]"
                       + " [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
               UniversalDependenciesConverter.class.getCanonicalName());

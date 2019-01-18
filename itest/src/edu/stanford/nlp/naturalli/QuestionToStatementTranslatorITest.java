@@ -383,31 +383,37 @@ public class QuestionToStatementTranslatorITest {
   @Test
   public void parseWhereIs() {
     check(
-        "where/WRB is/VBD jack/NNP daniels/NNP factory/NN ?",
+        "where/WRB is/VBD Bank/NNP of/IN America/NNP in/IN Texas/NNP ?/.",
+        "Bank of America in Texas is at location");
+    check(
+        "where/WRB was/VBD Tesla/NNP employed/VBN for/IN a/DT short/JJ time/NN ?/.",
+        "Tesla was employed for a short time at location");
+    check(
+        "where/WRB is/VBZ jack/NNP daniels/NNP factory/NN ?",
         "jack daniels factory is at location");
     check(
-        "where/WRB is/VBD rome/NNP italy/VB located/VBD on/IN a/DT map/NN ?",
+        "where/WRB is/VBZ rome/NNP italy/NNP located/VBN on/IN a/DT map/NN ?",
         "rome italy is at location");
     check(
-        "where/WRB is/VBD jefferson/NNP davis/VB buried/VBD ?",
+        "where/WRB is/VBZ jefferson/NNP davis/NNP buried/VBD ?",
         "jefferson davis is buried at location");
     check(
-        "where/WRB is/VBD american/NNP express/NNP located/JJ ?",
+        "where/WRB is/VBZ american/NNP express/NNP located/JJ ?",
         "american express is located at location");
     check(
-        "where/WRB is/VBD tom/NNP cruise/NNP from/IN ?",
+        "where/WRB is/VBZ tom/NNP cruise/NNP from/IN ?",
         "tom cruise is from location");
     check(
-        "where/WRB is/VBD atlanta/NNP texas/NNP located/VBN ?",
+        "where/WRB is/VBZ atlanta/NNP texas/NNP located/VBN ?",
         "atlanta texas is located at location");
     check(
-        "where/WRB is/VBD belgium/NNP at/IN ?",
+        "where/WRB is/VBZ belgium/NNP at/IN ?",
         "belgium is at location");
     check(
-        "where/WRB is/VBD made/VB kia/NNP car/NN ?",
+        "where/WRB is/VBZ made/VB kia/NNP car/NN ?",
         "kia car is made at location");
     check(
-        "where/WRB is/VBD greyhound/NNP station/NNP in/IN washington/NNP dc/NNP ?",
+        "where/WRB is/VBZ greyhound/NNP station/NNP in/IN washington/NNP dc/NNP ?",
         "greyhound station in washington dc is at location");
   }
 
@@ -718,5 +724,17 @@ public class QuestionToStatementTranslatorITest {
     checkFormatted(
         "where/WRB did/VBD tesla/NNP work/NN before/IN striking/VBG out/RP on/IN his/PRP$ own/JJ ?",  // POS error on work/NN
         "Tesla worked before striking out on his own at Location");
+  }
+
+
+  @Test
+  public void whatNNWillI() {
+    checkFormatted(
+        "what/WRB language/NN will/MD I/PRP be/VB able/JJ to/TO speak/VB if/IN I/PRP purchase/VBP these/DT socks/NNS ?/.",
+        "You will be able to speak language if you purchase these socks");
+    checkFormatted(
+        "what/WRB topic/NN would/MD you/PRP like/VB to/TO talk/VB about/IN on/IN Thursday/NNP ?/.",
+        "I would like to talk about topic on Thursday");
+
   }
 }

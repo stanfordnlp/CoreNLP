@@ -144,20 +144,27 @@ import edu.stanford.nlp.util.logging.Redwood;
       } else if ("escapeForwardSlashAsterisk".equals(key)) {
         escapeForwardSlashAsterisk = val;
       } else if ("untokenizable".equals(key)) {
-        if (value.equals("noneDelete")) {
-          untokenizable = UntokenizableOptions.NONE_DELETE;
-        } else if (value.equals("firstDelete")) {
-          untokenizable = UntokenizableOptions.FIRST_DELETE;
-        } else if (value.equals("allDelete")) {
-          untokenizable = UntokenizableOptions.ALL_DELETE;
-        } else if (value.equals("noneKeep")) {
-          untokenizable = UntokenizableOptions.NONE_KEEP;
-        } else if (value.equals("firstKeep")) {
-         untokenizable = UntokenizableOptions.FIRST_KEEP;
-        } else if (value.equals("allKeep")) {
-          untokenizable = UntokenizableOptions.ALL_KEEP;
-        } else {
-          throw new IllegalArgumentException("SpanishLexer: Invalid option value in constructor: " + key + ": " + value);
+        switch (value) {
+          case "noneDelete":
+            untokenizable = UntokenizableOptions.NONE_DELETE;
+            break;
+          case "firstDelete":
+            untokenizable = UntokenizableOptions.FIRST_DELETE;
+            break;
+          case "allDelete":
+            untokenizable = UntokenizableOptions.ALL_DELETE;
+            break;
+          case "noneKeep":
+            untokenizable = UntokenizableOptions.NONE_KEEP;
+            break;
+          case "firstKeep":
+            untokenizable = UntokenizableOptions.FIRST_KEEP;
+            break;
+          case "allKeep":
+            untokenizable = UntokenizableOptions.ALL_KEEP;
+            break;
+          default:
+            throw new IllegalArgumentException("SpanishLexer: Invalid option value in constructor: " + key + ": " + value);
         }
       } else if ("strictTreebank3".equals(key)) {
         strictTreebank3 = val;
@@ -331,22 +338,6 @@ import edu.stanford.nlp.util.logging.Redwood;
     } else {
       return getNext(tok, tok);
     }
-  }
-
-  /** This quotes a character with a backslash, but doesn't do it
-   *  if the character is already preceded by a backslash.
-   */
-  private static String delimit(String s, char c) {
-    int i = s.indexOf(c);
-    while (i != -1) {
-      if (i == 0 || s.charAt(i - 1) != '\\') {
-        s = s.substring(0, i) + '\\' + s.substring(i);
-        i = s.indexOf(c, i + 2);
-      } else {
-        i = s.indexOf(c, i + 1);
-      }
-    }
-    return s;
   }
 
   private static String convertToEl(String l) {
@@ -573,6 +564,23 @@ DBLQUOT = \"|&quot;
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
 
+/* Slightly generous but generally reasonable emoji parsing */
+/* These are human emoji that can have a zwj gender (as well as skin color) */
+EMOJI_GENDERED = [\u26F9\u{01F3C3}-\u{01F3C4}\u{01F3CA}-\u{01F3CC}\u{01F466}-\u{01F469}\u{01F46E}-\u{01F46F}\u{01F471}\u{01F473}\u{01F477}\u{01F481}-\u{01F482}\u{01F486}-\u{01F487}\u{01F575}\u{01F645}-\u{01F647}\u{01F64B}\u{01F64D}-\u{01F64E}\u{01F6A3}\u{01F6B4}-\u{01F6B6}\u{01F926}\u{01F937}-\u{01F939}\u{01F93C}-\u{01F93E}\u{01F9D6}-\u{01F9DF}]
+/* Emoji follower is variation selector (emoji/non-emoji rendering) or Fitzpatrick skin tone */
+EMOJI_FOLLOW = [\uFE0E\uFE0F\u{01F3FB}-\u{01F3FF}]
+/* Just things followed by the keycap surrounding char - note that if not separated by space beforehand, may be mistokenized */
+EMOJI_KEYCAPS = [\u0023\u002A\u0030-\u0039]\uFE0F?\u20E3
+/* Two geographic characters as a flag or GB regions as flags */
+EMOJI_FLAG = [\u{01F1E6}-\u{01F1FF}]{2,2}|\u{01F3F4}\u{0E0067}\u{0E0062}[\u{0E0061}-\u{0E007A}]+\u{0E007F}
+/* Rainbow flag etc. */
+EMOJI_MISC = [\u{01F3F3}\u{01F441}][\uFE0E\uFE0F]?\u200D[\u{01F308}\u{01F5E8}][\uFE0E\uFE0F]?|{EMOJI_KEYCAPS}
+/* Things that have an emoji presentation form */
+EMOJI_PRESENTATION = [\u00A9\u00AE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9-\u21AA\u231A-\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA-\u25AB\u25B6\u25C0\u25FB-\u27BF\u2934-\u2935\u2B05-\u2B07\u2B1B-\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299\u{01F000}-\u{01F9FF}]
+/* Human modifier is something that appears after a zero-width joiner (zwj) U+200D */
+HUMAN_MODIFIER = [\u2640\u2642\u2695-\u2696\u2708\u2764\u{01F33E}\u{01F373}\u{01F393}\u{01F3A4}\u{01F3A8}\u{01F3EB}\u{01F3ED}\u{01F468}-\u{01F469}\u{01F48B}\u{01F4BB}-\u{01F4BC}\u{01F527}\u{01F52C}\u{01F680}\u{01F692}][\uFE0E\uFE0F]?
+/* flag | emoji optionally with follower | precomposed gendered/family consisting of human followed by one or more of zero width joiner then another human/profession | Misc */
+EMOJI = {EMOJI_FLAG}|{EMOJI_PRESENTATION}{EMOJI_FOLLOW}?|{EMOJI_GENDERED}{EMOJI_FOLLOW}?(\u200D([\u{01F466}-\u{01F469}]{EMOJI_FOLLOW}?|{HUMAN_MODIFIER})){1,3}|{EMOJI_MISC}
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
 MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2023\u2030-\u2038\u203B\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3012\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
@@ -624,8 +632,8 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 {FULLURL} |
 {LIKELYURL}		{ String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
-                            txt = delimit(txt, '/');
-                            txt = delimit(txt, '*');
+                            txt = LexerUtils.escapeChar(txt, '/');
+                            txt = LexerUtils.escapeChar(txt, '*');
                           }
                           return getNext(txt, yytext()); }
 {EMAIL}	|
@@ -633,7 +641,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 
 {DATE}			{ String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
-                            txt = delimit(txt, '/');
+                            txt = LexerUtils.escapeChar(txt, '/');
                           }
                           return getNext(txt, yytext());
                          }
@@ -702,6 +710,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                   }
                   return getNext(txt, origText);
                 }
+{EMOJI}         { String txt = yytext();
+                  if (DEBUG) { LOGGER.info("Used {EMOJI} to recognize " + txt); }
+                  return getNext(txt, txt);
+                }
 {OPBRAC}	{ if (normalizeOtherBrackets) {
                     return getNext(openparen, yytext()); }
                   else {
@@ -748,7 +760,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 {LDOTS}		{ return handleEllipsis(yytext()); }
 {FNMARKS}	{ return getNext(); }
 {ASTS}		{ if (escapeForwardSlashAsterisk) {
-                    return getNext(delimit(yytext(), '*'), yytext()); }
+                    return getNext(LexerUtils.escapeChar(yytext(), '*'), yytext()); }
                   else {
                     return getNext();
                   }
@@ -758,7 +770,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 [.¡¿\u037E\u0589\u061F\u06D4\u0700-\u0702\u07FA\u3002]	{ return getNext(); }
 =		{ return getNext(); }
 \/		{ if (escapeForwardSlashAsterisk) {
-                    return getNext(delimit(yytext(), '/'), yytext()); }
+                    return getNext(LexerUtils.escapeChar(yytext(), '/'), yytext()); }
                   else {
                     return getNext();
                   }

@@ -22,7 +22,7 @@ public class DefaultPaths {
   public static final String DEFAULT_NER_MUC_MODEL = "edu/stanford/nlp/models/ner/english.muc.7class.distsim.crf.ser.gz";
   public static final String DEFAULT_NER_GAZETTE_MAPPING = "edu/stanford/nlp/models/ner/regexner.patterns";
 
-  public static final String DEFAULT_REGEXNER_RULES = "edu/stanford/nlp/models/kbp/regexner_caseless.tab";
+  public static final String DEFAULT_REGEXNER_RULES = "edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab";
   public static final String DEFAULT_GENDER_FIRST_NAMES = "edu/stanford/nlp/models/gender/first_name_map_small";
 
   public static final String DEFAULT_TRUECASE_MODEL = "edu/stanford/nlp/models/truecase/truecasing.fast.caseless.qn.ser.gz";
@@ -53,15 +53,15 @@ public class DefaultPaths {
   public static final String DEFAULT_NATURALLI_AFFINITIES = "edu/stanford/nlp/models/naturalli/affinities";  // If you change this key, also change bin/mkopenie.sh
   public static final String DEFAULT_OPENIE_CLAUSE_SEARCHER = "edu/stanford/nlp/models/naturalli/clauseSearcherModel.ser.gz";  // If you change this key, also change bin/mkopenie.sh
 
-  public static final String DEFAULT_KBP_CLASSIFIER = "edu/stanford/nlp/models/kbp/tac-re-lr.ser.gz";
-  public static final String DEFAULT_KBP_REGEXNER_CASED = "edu/stanford/nlp/models/kbp/regexner_cased.tab";
-  public static final String DEFAULT_KBP_REGEXNER_CASELESS = "edu/stanford/nlp/models/kbp/regexner_caseless.tab";
-  public static final String DEFAULT_KBP_SEMGREX_DIR = "edu/stanford/nlp/models/kbp/semgrex";
-  public static final String DEFAULT_KBP_TOKENSREGEX_DIR = "edu/stanford/nlp/models/kbp/tokensregex";
+  public static final String DEFAULT_KBP_CLASSIFIER = "edu/stanford/nlp/models/kbp/english/tac-re-lr.ser.gz";
+  public static final String DEFAULT_KBP_REGEXNER_CASED = "edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab";
+  public static final String DEFAULT_KBP_REGEXNER_CASELESS = "edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab";
+  public static final String DEFAULT_KBP_SEMGREX_DIR = "edu/stanford/nlp/models/kbp/english/semgrex";
+  public static final String DEFAULT_KBP_TOKENSREGEX_DIR = "edu/stanford/nlp/models/kbp/english/tokensregex";
 
   public static final String DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS =
-          "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab;" +
-                  "edu/stanford/nlp/models/kbp/regexner_cased.tab";
+          "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab;" +
+                  "edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab";
 
   public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/kbp/english/wikidict.tab.gz";
 

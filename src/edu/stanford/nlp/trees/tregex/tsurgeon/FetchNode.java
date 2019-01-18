@@ -1,10 +1,10 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Map;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * @author Roger Levy (rog@stanford.edu)
@@ -12,7 +12,7 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 public class FetchNode extends TsurgeonPattern  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FetchNode.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(FetchNode.class);
 
   public FetchNode(String nodeName) {
     super(nodeName, TsurgeonPattern.EMPTY_TSURGEON_PATTERN_ARRAY);
@@ -24,7 +24,9 @@ public class FetchNode extends TsurgeonPattern  {
     return new Matcher(newNodeNames, coindexer);
   }
 
+
   private class Matcher extends TsurgeonMatcher {
+
     public Matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
       super(FetchNode.this, newNodeNames, coindexer);
     }
@@ -36,10 +38,12 @@ public class FetchNode extends TsurgeonPattern  {
         result = tregex.getNode(label);
       }
       if (result == null) {
-        log.info("Warning -- null node fetched by Tsurgeon operation for node: " + this +
+        log.warn("Null node fetched by Tsurgeon operation for node: " + label +
                            " (either no node labeled this, or the labeled node didn't match anything)");
       }
       return result;
     }
-  }
+
+  } // end class Matcher
+
 }

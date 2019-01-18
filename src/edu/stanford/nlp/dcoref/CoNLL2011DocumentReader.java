@@ -22,11 +22,11 @@ import java.util.regex.Pattern;
 /**
  * Read _conll file format from CoNLL2011.  See http://conll.bbn.com/index.php/data.html.
  *
- * CoNLL2011 files are in /scr/nlp/data/conll-2011/v0/data/
+ * CoNLL2011 files are in /u/scr/nlp/data/conll-2011/v0/data/
  *    dev
  *    train
  * Contains *_auto_conll files (auto generated) and _gold_conll (hand labelled), default reads _gold_conll
- * There is also /scr/nlp/data/conll-2011/v0/conll.trial which has *.conll files (parse has _ at end)
+ * There is also /u/scr/nlp/data/conll-2011/v0/conll.trial which has *.conll files (parse has _ at end)
  *
  * Column 	Type 	Description
  * 1   	Document ID 	This is a variation on the document filename

@@ -915,7 +915,7 @@ public class Options implements Serializable  {
      * RS: file for Turian's word vectors
      * The default value is an example of size 25 word vectors on the nlp machines
      */
-    public static final String DEFAULT_WORD_VECTOR_FILE = "/scr/nlp/deeplearning/datasets/turian/embeddings-scaled.EMBEDDING_SIZE=25.txt";
+    public static final String DEFAULT_WORD_VECTOR_FILE = "/u/scr/nlp/deeplearning/datasets/turian/embeddings-scaled.EMBEDDING_SIZE=25.txt";
     public String wordVectorFile = DEFAULT_WORD_VECTOR_FILE;
     /**
      * Number of hidden units in the word vectors.  As setting of 0

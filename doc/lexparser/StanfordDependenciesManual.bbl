@@ -1,0 +1,449 @@
+\begin{thebibliography}{64}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Abbott et~al.(2011)Abbott, Walker, Anand, Fox~Tree, Bowmani, and
+  King]{Abbott11}
+Rob Abbott, Marilyn Walker, Pranav Anand, Jean~E. Fox~Tree, Robeson Bowmani,
+  and Joseph King.
+\newblock How can you say such things?!?: Recognizing disagreement in informal
+  political argument.
+\newblock In \emph{Proceedings of the Workshop on Languages in Social Media},
+  LSM '11, pages 2--11, 2011.
+
+\bibitem[Adams et~al.(2007)Adams, Nicolae, Nicolae, and
+  Harabagiu]{adams-EtAl:2007:WTEP}
+Rod Adams, Gabriel Nicolae, Cristina Nicolae, and Sanda Harabagiu.
+\newblock Textual entailment through extended lexical overlap and
+  lexico-semantic matching.
+\newblock In \emph{Proceedings of the ACL-PASCAL Workshop on Textual Entailment
+  and Paraphrasing}, pages 119--124, Prague, June 2007.
+
+\bibitem[Airola et~al.(2008)Airola, Pyysalo, Bj{\"o}rne, Pahikkala, Ginter, and
+  Salakoski]{Pyysalo08}
+Antti Airola, Sampo Pyysalo, Jari Bj{\"o}rne, Tapio Pahikkala, Filip Ginter,
+  and Tapio Salakoski.
+\newblock A graph kernel for protein-protein interaction extraction.
+\newblock In \emph{Proceedings of BioNLP 2008: Current Trends in Biomedical
+  Natural Language Processing (ACL08)}, 2008.
+
+\bibitem[Banko et~al.(2007)Banko, Cafarella, Soderland, Broadhead, and
+  Etzioni]{Banko07}
+Michele Banko, Michael~J. Cafarella, Stephen Soderland, Matt Broadhead, and
+  Oren Etzioni.
+\newblock Open information extraction from the web.
+\newblock In \emph{Proceedings of the 20th International Joint Conference on
+  Artificial Intelligence (IJCAI 2007)}, 2007.
+
+\bibitem[Bj\"{o}rne and Salakoski(2011)]{Bjorne2011}
+Jari Bj\"{o}rne and Tapio Salakoski.
+\newblock Generalizing biomedical event extraction.
+\newblock In \emph{Proceedings of the BioNLP Shared Task 2011 Workshop}, BioNLP
+  Shared Task '11, pages 183--191, 2011.
+
+\bibitem[Bj{\"o}rne et~al.(2008)Bj{\"o}rne, Pyysalo, Ginter, and
+  Salakoski]{bjorne08how}
+Jari Bj{\"o}rne, Sampo Pyysalo, Filip Ginter, and Tapio Salakoski.
+\newblock How complex are complex protein-protein interactions?
+\newblock In \emph{3rd International Symposium on Semantic Mining in
+  Biomedecine}, 2008.
+
+\bibitem[Blake(2007)]{blake:2007:WTEP}
+Catherine Blake.
+\newblock The role of sentence structure in recognizing textual entailment.
+\newblock In \emph{Proceedings of the ACL-PASCAL Workshop on Textual Entailment
+  and Paraphrasing}, pages 101--106, Prague, June 2007.
+
+\bibitem[Chambers(2011)]{Chambers11}
+Nathanael Chambers.
+\newblock \emph{Inducing Event Schemas and their Participants from Unlabeled
+  Text}.
+\newblock PhD thesis, Department of Computer Science, Stanford University,
+  2011.
+
+\bibitem[Chambers et~al.(2007)Chambers, Cer, Grenager, Hall, Kiddon,
+  MacCartney, de~Marneffe, Ramage, Yeh, and Manning]{chambers-EtAl:2007:WTEP}
+Nathanael Chambers, Daniel Cer, Trond Grenager, David Hall, Chloe Kiddon, Bill
+  MacCartney, Marie-Catherine de~Marneffe, Daniel Ramage, Eric Yeh, and
+  Christopher~D. Manning.
+\newblock Learning alignments and leveraging natural logic.
+\newblock In \emph{Proceedings of the ACL-PASCAL Workshop on Textual Entailment
+  and Paraphrasing}, pages 165--170, Prague, June 2007.
+
+\bibitem[Chang et~al.(2009)Chang, Tseng, Jurafsky, and
+  Manning]{chang-tseng-jurafsky-manning:2009:SSST}
+Pi-Chuan Chang, Huihsin Tseng, Dan Jurafsky, and Christopher~D. Manning.
+\newblock Discriminative reordering with {C}hinese grammatical relations
+  features.
+\newblock In \emph{Proceedings of the Third Workshop on Syntax and Structure in
+  Statistical Translation}, Boulder, Colorado, June 2009.
+\newblock URL \url{pubs/ssst09-chang.pdf}.
+
+\bibitem[Chaumartin(2007)]{chaumartin07knowledge}
+François-Régis Chaumartin.
+\newblock {UPAR7}: A knowledge-based system for headline sentiment tagging.
+\newblock In \emph{Proceedings of the 4th International Workshop on Semantic
+  Evaluations (SemEval-2007)}, pages 422--425, 2007.
+
+\bibitem[Chen and Eugenio(2012)]{Chen12}
+Lin Chen and Barbara~Di Eugenio.
+\newblock Co-reference via pointing and haptics in multi-modal dialogues.
+\newblock In \emph{Conference of the North American Chapter of the Association
+  for Computational Linguistics: Human Language Technologies}, 2012.
+
+\bibitem[Clegg(2008)]{Clegg08}
+Andrew~B. Clegg.
+\newblock \emph{Computational-Linguistic Approaches to Biological Text Mining}.
+\newblock PhD thesis, School of Crystallography, Birkbeck, University of
+  London, 2008.
+
+\bibitem[Clegg and Shepherd(2007)]{Clegg07}
+Andrew~B. Clegg and Adrian~J. Shepherd.
+\newblock Benchmarking natural-language parsers for biological applications
+  using dependency graphs.
+\newblock \emph{BMC Bioinformatics}, 8:24, 2007.
+
+\bibitem[{de Marneffe} and Manning(2008)]{demarneffe08stanford}
+Marie-Catherine {de Marneffe} and Christopher~D. Manning.
+\newblock The {S}tanford typed dependencies representation.
+\newblock In \emph{COLING Workshop on Cross-framework and Cross-domain Parser
+  Evaluation}, 2008.
+
+\bibitem[{de Marneffe} et~al.(2006){de Marneffe}, MacCartney, and
+  Manning]{demarneffe06generating}
+Marie-Catherine {de Marneffe}, Bill MacCartney, and Christopher~D. Manning.
+\newblock Generating typed dependency parses from phrase structure parses.
+\newblock In \emph{5th International Conference on Language Resources and
+  Evaluation (LREC 2006)}, 2006.
+
+\bibitem[de~Marneffe et~al.(2014)de~Marneffe, Dozat, Silveira, Haverinen,
+  Ginter, Nivre, and Manning]{marneffe14universal}
+Marie-Catherine de~Marneffe, Timothy Dozat, Natalia Silveira, Katri Haverinen,
+  Filip Ginter, Joakim Nivre, and Christopher~D. Manning.
+\newblock Universal stanford dependencies: A cross-linguistic typology.
+\newblock In \emph{Proceedings of the Ninth International Conference on
+  Language Resources and Evaluation (LREC-2014)}, 2014.
+
+\bibitem[{El Maarouf} and Villaneau(2012)]{Maarouf12}
+Isma\"{i}l {El Maarouf} and Jeanne Villaneau.
+\newblock A {F}rench fairy tale corpus syntactically and semantically
+  annotated.
+\newblock In \emph{Proceedings of the Eight International Conference on
+  Language Resources and Evaluation}, 2012.
+
+\bibitem[Erkan et~al.(2007)Erkan, Ozgur, and Radev]{Erkan07}
+Gunes Erkan, Arzucan Ozgur, and Dragomir~R. Radev.
+\newblock Semi-supervised classification for extracting protein interaction
+  sentences using dependency parsing.
+\newblock In \emph{Proceedings of the 2007 Joint Conference on Empirical
+  Methods in Natural Language Processing and Computational Natural Language
+  Learning (EMNLP-CoNLL)}, 2007.
+
+\bibitem[Fundel et~al.(2007)Fundel, K{\"u}ffner, and Zimmer]{Fundel07}
+Katrin Fundel, Robert K{\"u}ffner, and Ralf Zimmer.
+\newblock Rel{E}x -- relation extraction using dependency parse trees.
+\newblock \emph{Bioinformatics}, 23, 2007.
+
+\bibitem[Garten(2010)]{Yarten10}
+Yael Garten.
+\newblock \emph{Text mining of the scientific literature to identify
+  pharmacogenomic interactions}.
+\newblock PhD thesis, Department of Biomedical Informatics, Stanford
+  University, 2010.
+
+\bibitem[Genzel(2010)]{genzel10automatically}
+Dmitriy Genzel.
+\newblock Automatically learning source-side reordering rules for large scale
+  machine translation.
+\newblock In \emph{COLING-2010}, 2010.
+
+\bibitem[Giles and Wren(2008)]{giles08large}
+Cory~B. Giles and Jonathan~D. Wren.
+\newblock Large-scale directional relationship extraction and resolution.
+\newblock \emph{BMC Bioinformatics}, 9\penalty0 (Suppl 9):\penalty0 S11, 2008.
+
+\bibitem[Glinos(2010)]{Glinos2010}
+Demetrios~G. Glinos.
+\newblock System description for {SAIC} entry at {RTE}-6.
+\newblock In \emph{Proceedings of the Text Analysis Conference (TAC)}, 2010.
+
+\bibitem[Greenwood and Stevenson(2007)]{Greenwood07}
+Mark~A. Greenwood and Mark Stevenson.
+\newblock A semi-supervised approach to learning relevant protein-protein
+  interaction articles.
+\newblock In \emph{Proceedings of the Second BioCreAtIvE Challenge Workshop,
+  Madrid, Spain}, 2007.
+
+\bibitem[Haghighi and Klein(2010)]{Haghighi10}
+Aria Haghighi and Dan Klein.
+\newblock An entity-level approach to information extraction.
+\newblock In \emph{Proceedings of the ACL 2010 Conference Short Papers},
+  ACLShort '10, pages 291--295, 2010.
+
+\bibitem[Harmeling(2007)]{harmeling:2007:WTEP}
+Stefan Harmeling.
+\newblock An extensible probabilistic transformation-based approach to the
+  third recognizing textual entailment challenge.
+\newblock In \emph{Proceedings of the ACL-PASCAL Workshop on Textual Entailment
+  and Paraphrasing}, pages 137--142, Prague, June 2007.
+
+\bibitem[Hassan et~al.(2010)Hassan, Qazvinian, and Radev]{Hassan10}
+Ahmed Hassan, Vahed Qazvinian, and Dragomir Radev.
+\newblock What's with the attitude?: identifying sentences with attitude in
+  online discussions.
+\newblock In \emph{Proceedings of the 2010 Conference on Empirical Methods in
+  Natural Language Processing}, EMNLP '10, pages 1245--1255, 2010.
+
+\bibitem[Haverinen et~al.(2010{\natexlab{a}})Haverinen, Ginter, Viljanen,
+  Laippala, and Salakoski]{Haverinen2010a}
+Katri Haverinen, Filip Ginter, Timo Viljanen, Veronika Laippala, and Tapio
+  Salakoski.
+\newblock Dependency-based propbanking of clinical {F}innish.
+\newblock In \emph{Proceedings of the Fourth Linguistic Annotation Workshop},
+  LAW IV '10, pages 137--141, 2010{\natexlab{a}}.
+
+\bibitem[Haverinen et~al.(2010{\natexlab{b}})Haverinen, Viljanen, Laippala,
+  Kohonen, Ginter, and Salakoski]{Haverinen2010b}
+Katri Haverinen, Timo Viljanen, Veronika Laippala, Samuel Kohonen, Filip
+  Ginter, and Tapio Salakoski.
+\newblock Treebanking {F}innish.
+\newblock In \emph{Proceedings of the Ninth International Workshop on Treebanks
+  and Linguistic Theories (TLT)}, 2010{\natexlab{b}}.
+
+\bibitem[Joshi et~al.(2010)Joshi, Das, Gimpel, and Smith]{Joshi2010}
+Mahesh Joshi, Dipanjan Das, Kevin Gimpel, and Noah~A. Smith.
+\newblock Movie reviews and revenues: an experiment in text regression.
+\newblock In \emph{Human Language Technologies: The 2010 Annual Conference of
+  the North American Chapter of the Association for Computational Linguistics},
+  HLT '10, pages 293--296, 2010.
+
+\bibitem[Kessler(2008)]{kessler08icwsm}
+Jason~S. Kessler.
+\newblock Polling the blogosphere: a rule-based approach to belief
+  classification.
+\newblock In \emph{International Conference on Weblogs and Social Media}, 2008.
+
+\bibitem[Kim et~al.(2009)Kim, Ohta, Pyysalo, Kano, and Tsujii]{kim09overview}
+Jin-Dong Kim, Tomoko Ohta, Sampo Pyysalo, Yoshinobu Kano, and Jun'ichi Tsujii.
+\newblock Overview of bionlp'09 shared task on event extraction.
+\newblock In \emph{Proceedings of the BioNLP 2009 Workshop Companion Volume for
+  Shared Task}, pages 1--9, 2009.
+
+\bibitem[Kim et~al.(2011)Kim, Pyysalo, Ohta, Bossy, Nguyen, and
+  Tsujii]{BioNLP11}
+Jin-Dong Kim, Sampo Pyysalo, Tomoko Ohta, Robert Bossy, Ngan Nguyen, and
+  Jun'ichi Tsujii.
+\newblock Overview of bionlp shared task 2011.
+\newblock In \emph{Proceedings of the BioNLP Shared Task 2011 Workshop}, 2011.
+
+\bibitem[Kl\"{u}wer et~al.(2010)Kl\"{u}wer, Uszkoreit, and Xu]{Kluwer10}
+Tina Kl\"{u}wer, Hans Uszkoreit, and Feiyu Xu.
+\newblock Using syntactic and semantic based relations for dialogue act
+  recognition.
+\newblock In \emph{Proceedings of the 23rd International Conference on
+  Computational Linguistics}, COLING '10, pages 570--578, 2010.
+
+\bibitem[Kouylekov et~al.(2010)Kouylekov, Mehdad, Negri, and
+  Cabrio]{Kouylekov2010}
+Milen Kouylekov, Yashar Mehdad, Matteo Negri, and Elena Cabrio.
+\newblock {FBK} participation in {RTE}-6: Main and {KBP} validation task.
+\newblock In \emph{Proceedings of the Text Analysis Conference (TAC)}, 2010.
+
+\bibitem[Landeghem et~al.(2012)Landeghem, Bj\"{o}rne, Abeel, Baets, Salakoski,
+  and de~Peer]{Landeghem12}
+Sofie~Van Landeghem, Jari Bj\"{o}rne, Thomas Abeel, Bernard~De Baets, Tapio
+  Salakoski, and Yves~Van de~Peer.
+\newblock Semantically linking molecular entities in literature through entity
+  relationships.
+\newblock \emph{BMC Bioinformatics}, 13, 2012.
+
+\bibitem[Lau et~al.(2012)Lau, Cook, McCarthy, Newman, and Baldwin]{Lau12}
+Jey~Han Lau, Paul Cook, Diana McCarthy, David Newman, and Timothy Baldwin.
+\newblock Word sense induction for novel sense detection.
+\newblock In \emph{Proceedings of the 13th Conference of the European Chapter
+  of the Association for Computational Linguistics}, 2012.
+
+\bibitem[Malakasiotis(2009)]{Malakasiotis09}
+Prodromos Malakasiotis.
+\newblock {AUEB} at {TAC} 2009.
+\newblock In \emph{Proceedings of the Text Analysis Conference (TAC)}, 2009.
+
+\bibitem[McClosky and Manning(2012)]{McClosky12}
+David McClosky and Christopher~D. Manning.
+\newblock Learning constraints for consistent timeline extraction.
+\newblock In \emph{Proceedings of the 2012 Joint Conference on Empirical
+  Methods in Natural Language Processing and Computational Natural Language
+  Learning}, 2012.
+
+\bibitem[McDonald et~al.(2013)McDonald, Nivre, Quirmbach-Brundage, Goldberg,
+  Das, Ganchev, Hall, Petrov, Zhang, T\"{a}ckstr\"{o}m, Bedini,
+  Bertomeu~Castell\'{o}, and Lee]{mcdonald-EtAl:2013:Short}
+Ryan McDonald, Joakim Nivre, Yvonne Quirmbach-Brundage, Yoav Goldberg, Dipanjan
+  Das, Kuzman Ganchev, Keith Hall, Slav Petrov, Hao Zhang, Oscar
+  T\"{a}ckstr\"{o}m, Claudia Bedini, N\'{u}ria Bertomeu~Castell\'{o}, and
+  Jungmee Lee.
+\newblock Universal dependency annotation for multilingual parsing.
+\newblock In \emph{Proceedings of the 51st Annual Meeting of the Association
+  for Computational Linguistics (Volume 2: Short Papers)}, pages 92--97, 2013.
+
+\bibitem[Meena and Prabhakar(2007)]{Meena07sentiment}
+Arun Meena and T.~V. Prabhakar.
+\newblock Sentence level sentiment analysis in the presence of conjuncts using
+  linguistic analysis.
+\newblock In \emph{Advances in Information Retrieval}, volume 4425 of
+  \emph{Lecture Notes in Computer Science}. Springer, 2007.
+
+\bibitem[Mehdad et~al.(2009)Mehdad, Negri, Cabrio, Kouylekov, and
+  Magnini]{Mehdad09}
+Yashar Mehdad, Matteo Negri, Elena Cabrio, Milen Kouylekov, and Bernardo
+  Magnini.
+\newblock Using lexical resources in a distance-based approach to {RTE}.
+\newblock In \emph{Proceedings of the Text Analysis Conference (TAC)}, 2009.
+
+\bibitem[{\"O}zg{\"u}r et~al.(2008){\"O}zg{\"u}r, Vu, Erkan, and
+  Radev]{ozgur08identifying}
+Arzucan {\"O}zg{\"u}r, Thuy Vu, G{\"u}nes Erkan, and Dragomir~R. Radev.
+\newblock Identifying gene-disease associations using centrality on a
+  literature mined gene-interaction network.
+\newblock \emph{Bioinformatics}, 24\penalty0 (13):\penalty0 i277--i285, 2008.
+
+\bibitem[Pakray et~al.(2011)Pakray, Neogi, Bhaskar, Poria, Bandyopadhyay, and
+  Gelbukh]{Pakray2011a}
+Partha Pakray, Snehasis Neogi, Pinaki Bhaskar, Soujanya Poria, Sivaji
+  Bandyopadhyay, and Alexander Gelbukh.
+\newblock A textual entailment system using anaphora resolution.
+\newblock In \emph{Proceedings of the Text Analysis Conference (TAC)}, 2011.
+
+\bibitem[Petrov and McDonald(2012)]{Petrov12}
+Slav Petrov and Ryan McDonald.
+\newblock Overview of the 2012 shared task on parsing the web.
+\newblock In \emph{First Workshop on Syntactic Analysis of Non-Canonical
+  Language}, 2012.
+
+\bibitem[Poon and Domingos(2009)]{poon09unsupervised}
+Hoifung Poon and Pedro Domingos.
+\newblock Unsupervised semantic parsing.
+\newblock In \emph{Proceedings of the 2009 Conference on Empirical Methods in
+  Natural Language Processing (EMNLP 2009)}, pages 1--10, 2009.
+
+\bibitem[Potisuk(2010)]{Potisuk10}
+Siripong Potisuk.
+\newblock Typed dependency relations for syntactic analysis of {T}hai
+  sentences.
+\newblock In \emph{Proceedings of PACLIC 24 Pacific Asia Conference on
+  Language, Information and Computation}, 2010.
+
+\bibitem[Pyysalo et~al.(2007)Pyysalo, Ginter, Haverinen, Heimonen, Salakoski,
+  and Laippala]{Pyysalo07}
+Sampo Pyysalo, Filip Ginter, Katri Haverinen, Juho Heimonen, Tapio Salakoski,
+  and Veronika Laippala.
+\newblock On the unification of syntactic annotations under the {S}tanford
+  dependency scheme: A case study on {B}io{I}nfer and {GENIA}.
+\newblock In \emph{Proceedings of BioNLP 2007: Biological, translational, and
+  clinical language processing (ACL07)}, 2007.
+
+\bibitem[Pyysalo et~al.(2011)Pyysalo, Ohta, and Tsujii]{Pyysalo11}
+Sampo Pyysalo, Tomoko Ohta, and Jun’ichi Tsujii.
+\newblock An analysis of gene/protein associations at {P}ub{M}ed scale.
+\newblock \emph{Journal of Biomedical Semantics}, 2, 2011.
+
+\bibitem[Ramakrishnan et~al.(2008)Ramakrishnan, Mendes, Wang, and
+  Sheth]{ramakrishnan08discovery}
+Cartic Ramakrishnan, Pablo~N. Mendes, Shaojun Wang, and Amit~P. Sheth.
+\newblock Unsupervised discovery of compound entities for relationship
+  extraction.
+\newblock In \emph{16th International Conference on Knowledge Engineering:
+  Practice and Patterns (EKAW 2008)}, pages 146--155, 2008.
+
+\bibitem[Schuster and Manning(2016)]{schuster2016enhanced}
+Sebastian Schuster and Christopher~D. Manning.
+\newblock Enhanced {E}nglish {U}niversal {D}ependencies: An improved
+  representation for natural language understanding tasks.
+\newblock In \emph{Proceedings of the Tenth International Conference on
+  Language Resources and Evaluation (LREC 2016)}, 2016.
+
+\bibitem[Seraji et~al.(2012)Seraji, Megyesi, and Nivre]{Seraji12}
+Mojgan Seraji, Be\'ata Megyesi, and Joakim Nivre.
+\newblock A basic language resource kit for {P}ersian.
+\newblock In \emph{Proceedings of the Eight International Conference on
+  Language Resources and Evaluation}, 2012.
+
+\bibitem[Shivhare et~al.(2010)Shivhare, Nath, and Jain]{Shivare2010}
+Himanshu Shivhare, Parul Nath, and Anusha Jain.
+\newblock Semi cognitive approach to {RTE}-6 - using {F}rame{N}et for semantic
+  clustering.
+\newblock In \emph{Proceedings of the Text Analysis Conference (TAC)}, 2010.
+
+\bibitem[Sing and Bandyopadhyay(2010)]{singh10statistical}
+Thoudam~Doren Sing and Sivaji Bandyopadhyay.
+\newblock Statistical machine translation of {E}nglish -- {M}anipuri using
+  morpho-syntactic and semantic information.
+\newblock In \emph{Proceedings of the Association for Machine Translation in
+  the Americas (AMTA 2010)}, 2010.
+
+\bibitem[Tsarfaty(2013)]{tsarfaty:2013:Short}
+Reut Tsarfaty.
+\newblock A unified morpho-syntactic scheme of stanford dependencies.
+\newblock In \emph{Proceedings of the 51st Annual Meeting of the Association
+  for Computational Linguistics (Volume 2: Short Papers)}, pages 578--584,
+  2013.
+
+\bibitem[Urbain et~al.(2007)Urbain, Goharian, and Frieder]{Urbain07}
+Jay Urbain, Nazli Goharian, and Ophir Frieder.
+\newblock {IIT} {TREC} 2007 genomics track: Using concept-based semantics in
+  context for genomics literature passage retrieval.
+\newblock In \emph{The Sixteenth Text REtrieval Conference (TREC 2007)
+  Proceedings}, 2007.
+
+\bibitem[Wang and Neumann(2007)]{wang-neumann:2007:WTEP}
+Rui Wang and G\"{u}nter Neumann.
+\newblock Recognizing textual entailment using sentence similarity based on
+  dependency tree skeletons.
+\newblock In \emph{Proceedings of the ACL-PASCAL Workshop on Textual Entailment
+  and Paraphrasing}, pages 36--41, Prague, June 2007.
+
+\bibitem[Wu and Weld(2010)]{Wu2010}
+Fei Wu and Daniel~S. Weld.
+\newblock Open information extraction using {W}ikipedia.
+\newblock In \emph{Proceedings of the 48th Annual Meeting of the Association
+  for Computational Linguistics}, ACL '10, 2010.
+
+\bibitem[Xu et~al.(2009)Xu, Kang, Ringgaard, and Och]{xu09using}
+Peng Xu, Jaeho Kang, Michael Ringgaard, and Franz Och.
+\newblock Using a dependency parser to improve {SMT} for subject-object-verb
+  languages.
+\newblock In \emph{NAACL 2009: Proceedings of Human Language Technologies, The
+  2009 Annual Conference of the North American Chapter of the Association for
+  Computational Linguistics}, pages 245--253, 2009.
+
+\bibitem[Zhuang et~al.(2006)Zhuang, Jing, yan Zhu, and Zhang]{Zhuang06cikm}
+Li~Zhuang, Feng Jing, Xiao yan Zhu, and Lei Zhang.
+\newblock Movie review mining and summarization.
+\newblock In \emph{Proc. ACM Conference on Information and Knowledge Management
+  (CIKM)}, pages 43--50, 2006.
+
+\bibitem[Zouaq et~al.(2006)Zouaq, Nkambou, and Frasson]{Zouaq06tai}
+Amal Zouaq, Roger Nkambou, and Claude Frasson.
+\newblock The knowledge puzzle: An integrated approach of intelligent tutoring
+  systems and knowledge management.
+\newblock In \emph{Proceedings of the 18th IEEE International Conference on
+  Tools with Artificial Intelligence (ICTAI 2006)}, pages 575--582, 2006.
+
+\bibitem[Zouaq et~al.(2007)Zouaq, Nkambou, and Frasson]{Zouaq07tel}
+Amal Zouaq, Roger Nkambou, and Claude Frasson.
+\newblock Building domain ontologies from text for educational purposes.
+\newblock In \emph{Proceedings of the Second European Conference on Technology
+  Enhanced Learning: Creating new learning experiences on a global scale},
+  2007.
+
+\bibitem[Zouaq et~al.(2010)Zouaq, Gagnon, and Ozell]{Zouaq10}
+Amal Zouaq, Michel Gagnon, and Beno\^{i}t Ozell.
+\newblock Semantic analysis using dependency-based grammars and upper-level
+  ontologies.
+\newblock \emph{International Journal of Computational Linguistics and
+  Applications}, 1\penalty0 (1-2), 2010.
+
+\end{thebibliography}

@@ -75,7 +75,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
     @Override
     public String toString() {
-      return protocol + "://" + host + ":" + port;
+      return protocol + "://" + host + ':' + port;
     }
   }
 
@@ -483,7 +483,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
       URLConnection connection = serverURL.openConnection();
       // 1.1 Set authentication
       if (apiKey != null && apiSecret != null) {
-        String userpass = apiKey + ":" + apiSecret;
+        String userpass = apiKey + ':' + apiSecret;
         String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
         connection.setRequestProperty("Authorization", basicAuth);
       }
@@ -533,7 +533,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
       HttpURLConnection connection = (HttpURLConnection) serverURL.openConnection();
       // 1.1 Set authentication
       if (apiKey != null && apiSecret != null) {
-        String userpass = apiKey + ":" + apiSecret;
+        String userpass = apiKey + ':' + apiSecret;
         String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
         connection.setRequestProperty("Authorization", basicAuth);
       }
@@ -687,9 +687,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    *
    * @param args List of required properties
    * @throws java.io.IOException If IO problem
-   * @throws ClassNotFoundException If class loading problem
    */
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String[] args) throws IOException {
     //
     // process the arguments
     //

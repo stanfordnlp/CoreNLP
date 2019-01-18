@@ -94,7 +94,7 @@ public class TokenizerAnnotator implements Annotator  {
     public static TokenizerType getTokenizerType(Properties props) {
       String tokClass = props.getProperty("tokenize.class", null);
       boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
-      String language = props.getProperty("tokenize.language", null);
+      String language = props.getProperty("tokenize.language", "en");
 
       if(whitespace) {
         return Whitespace;
@@ -121,7 +121,10 @@ public class TokenizerAnnotator implements Annotator  {
   } // end enum TokenizerType
 
 
+  @SuppressWarnings("WeakerAccess")
   public static final String EOL_PROPERTY = "tokenize.keepeol";
+  @SuppressWarnings("WeakerAccess")
+  public static final String KEEP_NL_OPTION = "tokenizeNLs,";
 
   private final boolean VERBOSE;
   private final TokenizerFactory<CoreLabel> factory;
@@ -156,7 +159,7 @@ public class TokenizerAnnotator implements Annotator  {
       }
     }
     if (keepNewline) {
-      extraOptions = "tokenizeNLs,";
+      extraOptions = KEEP_NL_OPTION;
     }
     return extraOptions;
   }
@@ -194,9 +197,11 @@ public class TokenizerAnnotator implements Annotator  {
     if (props == null) {
       props = new Properties();
     }
-    // check if segmenting must be done
+    // check if segmenting must be done (Chinese or Arabic and not tokenizing on whitespace)
+    boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
     if (props.getProperty("tokenize.language") != null &&
-            LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))) {
+            LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))
+        && !whitespace) {
       useSegmenter = true;
       if (LanguageInfo.getLanguageFromString(
               props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC)
@@ -265,7 +270,7 @@ public class TokenizerAnnotator implements Annotator  {
 
     case Whitespace:
       boolean eolIsSignificant = Boolean.valueOf(props.getProperty(EOL_PROPERTY, "false"));
-      eolIsSignificant = eolIsSignificant || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+      eolIsSignificant = eolIsSignificant || KEEP_NL_OPTION.equals(computeExtraOptions(props));
       factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<>(new CoreLabelTokenFactory(), eolIsSignificant);
       break;
 
@@ -297,7 +302,7 @@ public class TokenizerAnnotator implements Annotator  {
   /**
    * Helper method to set the TokenBeginAnnotation and TokenEndAnnotation of every token.
    */
-  public void setTokenBeginTokenEnd(List<CoreLabel> tokensList) {
+  private static void setTokenBeginTokenEnd(List<CoreLabel> tokensList) {
     int tokenIndex = 0;
     for (CoreLabel token : tokensList) {
       token.set(CoreAnnotations.TokenBeginAnnotation.class, tokenIndex);
@@ -309,7 +314,7 @@ public class TokenizerAnnotator implements Annotator  {
   /**
    * set isNewline()
    */
-  public void setNewlineStatus(List<CoreLabel> tokensList) {
+  private static void setNewlineStatus(List<CoreLabel> tokensList) {
     // label newlines
     for (CoreLabel token : tokensList) {
       if (token.word().equals(AbstractTokenizer.NEWLINE_TOKEN) && (token.endPosition() - token.beginPosition() == 1))

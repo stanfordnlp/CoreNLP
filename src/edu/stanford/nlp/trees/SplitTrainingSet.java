@@ -8,32 +8,30 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
-import edu.stanford.nlp.util.logging.Redwood;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Given a list of trees, splits the trees into three separate files.
- * <br> 
+ * <p>
  * The program uses a random seed to divide the trees.  If the input
  * dataset is later extended, the same seed can be used and trees
  * which did not change position in the data set will be put in the
  * same division.
- * <br>
+ * <p>
  * Example command line:
- * <code>java edu.stanford.nlp.trees.SplitTrainingSet -input foo.mrg -output bar.mrg -seed 1000</code>
+ * {@code java edu.stanford.nlp.trees.SplitTrainingSet -input foo.mrg -output bar.mrg -seed 1000 }
  */
 public class SplitTrainingSet {
-  private static Redwood.RedwoodChannels logger = Redwood.channels(SplitTrainingSet.class);
+
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(SplitTrainingSet.class);
 
   @ArgumentParser.Option(name="input", gloss="The file to use as input.", required=true)
-  private static String INPUT = null;
+  private static String INPUT; // = null;
 
   @ArgumentParser.Option(name="output", gloss="Where to send the splits.", required=true)
-  private static String OUTPUT = null;
+  private static String OUTPUT; // = null;
 
   @ArgumentParser.Option(name="split_names", gloss="Divisions to use for the output")
   private static String[] SPLIT_NAMES = { "train", "dev", "test" };
@@ -42,9 +40,12 @@ public class SplitTrainingSet {
   private static Double[] SPLIT_WEIGHTS = { 0.7, 0.15, 0.15 };
 
   @ArgumentParser.Option(name="seed", gloss="Random seed to use")
-  private static long SEED = 0L;
+  private static long SEED; // = 0L;
 
-  public static int weightedIndex(List<Double> weights, Random random) {
+  private SplitTrainingSet() { } // only static methods
+
+
+  private static int weightedIndex(List<Double> weights, Random random) {
     double offset = random.nextDouble();
     int index = 0;
     for (Double weight : weights) {
@@ -57,6 +58,7 @@ public class SplitTrainingSet {
     return weights.size() - 1;
   }
 
+  @SuppressWarnings("unused")
   public static void main(String[] args) throws IOException {
     // Parse the arguments
     Properties props = StringUtils.argsToProperties(args);
@@ -96,7 +98,7 @@ public class SplitTrainingSet {
       splits.add(new ArrayList<>());
     }
 
-    Treebank treebank = new MemoryTreebank(in -> new PennTreeReader(in));
+    Treebank treebank = new MemoryTreebank(PennTreeReader::new);
     treebank.loadPath(INPUT);
 
     logger.info("Splitting " + treebank.size() + " trees");
@@ -106,7 +108,7 @@ public class SplitTrainingSet {
     }
 
     for (int i = 0; i < splits.size(); ++i) {
-      String filename = OUTPUT + "." + SPLIT_NAMES[i];
+      String filename = OUTPUT + '.' + SPLIT_NAMES[i];
       List<Tree> split = splits.get(i);
       logger.info("Writing " + split.size() + " trees to " + filename);
       FileWriter fout = new FileWriter(filename);
@@ -119,4 +121,5 @@ public class SplitTrainingSet {
       fout.close();
     }
   }
+
 }

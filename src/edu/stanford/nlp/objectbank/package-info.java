@@ -1,5 +1,4 @@
 /**
- * <BODY>
  * The ObjectBank class is designed to make it easy to change the format/source
  * of data read in by other classes and to standardize how data is read in javaNLP
  * classes.  This should make reuse of existing code (by non-authors of the code)
@@ -7,7 +6,7 @@
  * look for the data and how to turn it into Objects, and then use the new
  * ObjectBank in the class.  This will also make it easier to reuse code for
  * reading in the same data.
- *
+ * <p>
  * An ObjectBank is a Collection of Objects.  These objects are taken
  * from input sources and then tokenized and parsed into the desired
  * kind of Object.  An ObjectBank requires a  ReaderIteratorFactory and an
@@ -19,9 +18,9 @@
  * java.util.Reader into an  Iterator over Objects.  The  IteratorFromReaderFactory
  * splits the contents of the  java.util.Reader into Strings and then parses them
  * into appropriate Objects.
- *
+ * <p>
  * Example Usage:
- *
+ * <p>
  * You have a collection of files in the directory /u/nlp/data/gre/questions.  Each file
  * contains several Puzzle documents which look like:
  * <pre>
@@ -44,12 +43,12 @@
  *
  * First you need to build a  ReaderIteratorFactory which will provide  java.io.Readers
  * over all the files in your directory:
- *
+ * <p>
  * </pre>
  * Collection c = new FileSequentialCollection("/u/nlp/data/gre/questions/", "", false);
  * ReaderIteratorFactory rif = new ReaderIteratorFactory(c);
  * </pre>
- *
+ * <p>
  * Next you need to make a  IteratorFromReaderFactory which will take the  java.io.Readers
  * vended by the  ReaderIteratorFactory, split them up into documents (Strings) and
  * then convert the Strings into Objects.  In this case we want to keep everything
@@ -65,8 +64,6 @@
  * Puzzle p = new Puzzle(...);
  * ...
  * return p;
- *
- *
  * </pre>
  *
  * Now to build the  IteratorFromReaderFactory:
@@ -84,10 +81,9 @@
  *
  * Now, if you get a new set of puzzles that are located elsewhere and formatted differently
  * you create a new  ObjectBank for reading them in and use that  ObjectBank instead with only
- * trivival changes (or possible none at all if the ObjectBank is read in on a constructor)
+ * trivial changes (or possible none at all if the ObjectBank is read in on a constructor)
  * to your code.  Or even better, if someone else wants to use your code to evaluate their puzzles,
  * which are  located elsewhere and formatted differently, they already know what they have to do
  * to make your code work for them.
- * </BODY>
  */
 package edu.stanford.nlp.objectbank;

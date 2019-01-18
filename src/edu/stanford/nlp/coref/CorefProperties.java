@@ -112,7 +112,7 @@ public class CorefProperties {
 
   public static final String OUTPUT_PATH_PROP = "coref.conllOutputPath";
   public static String conllOutputPath(Properties props) {
-    String returnPath = props.getProperty("coref.conllOutputPath", "/scr/nlp/coref/logs/");
+    String returnPath = props.getProperty("coref.conllOutputPath", "/u/scr/nlp/coref/logs/");
     if ( ! returnPath.endsWith("/")) {
       returnPath += "/";
     }
@@ -127,7 +127,7 @@ public class CorefProperties {
   }
 
   private static String getDataPath(Properties props) {
-    String returnPath = props.getProperty("coref.data", "/scr/nlp/data/conll-2012/");
+    String returnPath = props.getProperty("coref.data", "/u/scr/nlp/data/conll-2012/");
     if ( ! returnPath.endsWith("/")) {
       returnPath += "/";
     }
@@ -155,7 +155,7 @@ public class CorefProperties {
   }
 
   public static String getScorerPath(Properties props) {
-    return props.getProperty("coref.scorer", "/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl");
+    return props.getProperty("coref.scorer", "/u/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl");
   }
 
   public static Locale getLanguage(Properties props) {

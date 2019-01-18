@@ -34,8 +34,8 @@ public class WhitespaceTokenizerTest extends TestCase {
   };
 
 
-  public void runTest(TokenizerFactory<? extends HasWord> factory,
-                      String[] testStrings, String[][] resultsStrings) {
+  private static void runTest(TokenizerFactory<? extends HasWord> factory,
+                              String[] testStrings, String[][] resultsStrings) {
     for (int i = 0; i < testStrings.length; ++i) {
       Tokenizer<? extends HasWord> tokenizer =
         factory.getTokenizer(new StringReader(testStrings[i]));
@@ -52,7 +52,7 @@ public class WhitespaceTokenizerTest extends TestCase {
     runTest(WhitespaceTokenizer.factory(true), TEST, RESULTS_EOL);
   }
 
-  public void testCLTokenizer() {
+  public void testCoreLabelTokenizer() {
     LexedTokenFactory<CoreLabel> factory = new CoreLabelTokenFactory();
     runTest(new WhitespaceTokenizer.WhitespaceTokenizerFactory<CoreLabel>
               (factory, false),

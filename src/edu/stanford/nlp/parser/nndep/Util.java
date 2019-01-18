@@ -110,7 +110,7 @@ public class Util  {
    *
    * @return Shared random generator object
    */
-  static Random getRandom(long seed) {
+  private static Random getRandom(long seed) {
     random = new Random(seed);
     log.info(String.format("Random generator initialized with seed %d%n", seed));
 

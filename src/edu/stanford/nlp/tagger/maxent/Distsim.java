@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
  * Keeps track of a distributional similarity mapping, i.e., a map from
  * word to class.  Returns strings to save time, since that is how the
  * results are used in the tagger.
+ * <p>
+ * <i>Implementation note: This class largely overlaps DistSimClassifier. Unify?</i>
  */
 public class Distsim implements Serializable {
 
@@ -64,11 +66,7 @@ public class Distsim implements Serializable {
       lexicon.put(w, bits[1]);
     }
 
-    if (lexicon.containsKey("<unk>")) {
-      unk = lexicon.get("<unk>");
-    } else {
-      unk = "null";
-    }
+    unk = lexicon.getOrDefault("<unk>", "null");
   }
 
   public static Distsim initLexicon(String path) {
@@ -92,12 +90,15 @@ public class Distsim implements Serializable {
    * returned ("null" if no other unknown word was specified).
    */
   public String getMapping(String word) {
-    String distSim = lexicon.get(word.toLowerCase());
+    if ( ! casedDistSim) {
+      word = word.toLowerCase();
+    }
+    String distSim = lexicon.get(word);
 
     if (distSim == null && mapdigits) {
       Matcher matcher = digits.matcher(word);
       if (matcher.find()) {
-        distSim = lexicon.get(matcher.replaceAll("0"));
+        distSim = lexicon.get(matcher.replaceAll("9"));
       }
     }
 

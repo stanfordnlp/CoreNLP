@@ -1,5 +1,5 @@
 // NERGUI -- a GUI for a probabilistic (CRF) sequence model for NER.
-// Copyright (c) 2002-2008 The Board of Trustees of
+// Copyright (c) 2002-2008, 2018 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
 public class NERGUI  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NERGUI.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(NERGUI.class);
 
   private AbstractSequenceClassifier<CoreLabel> classifier;
 
@@ -65,14 +65,14 @@ public class NERGUI  {
   private MutableAttributeSet defaultAttrSet = new SimpleAttributeSet();
   private ActionListener actor = new ActionPerformer();
   private File loadedFile;
-  private String taggedContents = null;
-  private String htmlContents = null;
+  private String taggedContents; // = null;
+  private String htmlContents; // = null;
 
-  private JMenuItem saveUntagged = null;
-  private JMenuItem saveTaggedAs = null;
+  private JMenuItem saveUntagged; // = null;
+  private JMenuItem saveTaggedAs; // = null;
 
-  private JButton extractButton = null;
-  private JMenuItem extract = null;
+  private JButton extractButton; // = null;
+  private JMenuItem extract; // = null;
 
   private void createAndShowGUI() {
     //Make sure we have nice window decorations.
@@ -99,6 +99,8 @@ public class NERGUI  {
 
   private JMenuBar addMenuBar() {
     JMenuBar menubar = new JMenuBar();
+    int shortcutMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    int shiftShortcutMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | InputEvent.SHIFT_DOWN_MASK;
 
     JMenu fileMenu = new JMenu("File");
     menubar.add(fileMenu);
@@ -115,13 +117,13 @@ public class NERGUI  {
 
     JMenuItem openFile = new JMenuItem("Open File");
     openFile.setMnemonic('O');
-    openFile.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, InputEvent.CTRL_MASK));
+    openFile.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, shortcutMask));
     openFile.addActionListener(actor);
     fileMenu.add(openFile);
 
     JMenuItem loadURL = new JMenuItem("Load URL");
     loadURL.setMnemonic('L');
-    loadURL.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, InputEvent.CTRL_MASK));
+    loadURL.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, shortcutMask));
     loadURL.addActionListener(actor);
     fileMenu.add(loadURL);
 
@@ -129,31 +131,34 @@ public class NERGUI  {
 
     saveUntagged = new JMenuItem("Save Untagged File");
     saveUntagged.setMnemonic('S');
-    saveUntagged.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, InputEvent.CTRL_MASK));
+    saveUntagged.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, shortcutMask));
     saveUntagged.addActionListener(actor);
     saveUntagged.setEnabled(false);
     fileMenu.add(saveUntagged);
 
     JMenuItem saveUntaggedAs = new JMenuItem("Save Untagged File As ...");
     saveUntaggedAs.setMnemonic('U');
-    saveUntaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, InputEvent.CTRL_MASK));
+    saveUntaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, shiftShortcutMask));
     saveUntaggedAs.addActionListener(actor);
     fileMenu.add(saveUntaggedAs);
 
     saveTaggedAs = new JMenuItem("Save Tagged File As ...");
     saveTaggedAs.setMnemonic('T');
-    saveTaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, InputEvent.CTRL_MASK));
+    saveTaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, shortcutMask));
     saveTaggedAs.addActionListener(actor);
     saveTaggedAs.setEnabled(false);
     fileMenu.add(saveTaggedAs);
 
-    fileMenu.add(new JSeparator());
+    if ( ! isMacOSX()) {
+      // don't need if on Mac, since it has its own Quit on application menu!
+      fileMenu.add(new JSeparator());
 
-    JMenuItem exit = new JMenuItem("Exit");
-    exit.setMnemonic('x');
-    exit.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, InputEvent.CTRL_MASK));
-    exit.addActionListener(actor);
-    fileMenu.add(exit);
+      JMenuItem exit = new JMenuItem("Exit");
+      exit.setMnemonic('x');
+      exit.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, shortcutMask));
+      exit.addActionListener(actor);
+      fileMenu.add(exit);
+    }
 
 
     /*
@@ -162,25 +167,25 @@ public class NERGUI  {
 
     JMenuItem cut = new JMenuItem("Cut");
     cut.setMnemonic('X');
-    cut.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_X, InputEvent.CTRL_MASK));
+    cut.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_X, shortcutMask));
     cut.addActionListener(actor);
     editMenu.add(cut);
 
     JMenuItem copy = new JMenuItem("Copy");
     copy.setMnemonic('C');
-    copy.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, InputEvent.CTRL_MASK));
+    copy.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, shortcutMask));
     copy.addActionListener(actor);
     editMenu.add(copy);
 
     JMenuItem paste = new JMenuItem("Paste");
     paste.setMnemonic('V');
-    paste.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_V, InputEvent.CTRL_MASK));
+    paste.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_V, shortcutMask));
     paste.addActionListener(actor);
     editMenu.add(paste);
 
     JMenuItem clear = new JMenuItem("Clear");
     clear.setMnemonic('C');
-    clear.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, InputEvent.CTRL_MASK));
+    // clear.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, shortcutMask)); // used for load CRF
     clear.addActionListener(actor);
     editMenu.add(clear);
 
@@ -189,21 +194,27 @@ public class NERGUI  {
      * CLASSIFIER MENU
      */
 
-    JMenuItem loadCRF = new JMenuItem("Load CRF From File");
+    JMenuItem loadCRF = new JMenuItem("Load CRF from File");
     loadCRF.setMnemonic('R');
-    loadCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, InputEvent.CTRL_MASK));
+    loadCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, shortcutMask));
     loadCRF.addActionListener(actor);
     classifierMenu.add(loadCRF);
 
+    JMenuItem loadResourceCRF = new JMenuItem("Load CRF from Classpath");
+    // loadCRF.setMnemonic('R');
+    // loadCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, shortcutMask));
+    loadResourceCRF.addActionListener(actor);
+    classifierMenu.add(loadResourceCRF);
+
     JMenuItem loadDefaultCRF = new JMenuItem("Load Default CRF");
     loadDefaultCRF.setMnemonic('L');
-    loadDefaultCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, InputEvent.CTRL_MASK));
+    loadDefaultCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, shortcutMask));
     loadDefaultCRF.addActionListener(actor);
     classifierMenu.add(loadDefaultCRF);
 
     extract = new JMenuItem("Run NER");
     extract.setMnemonic('N');
-    extract.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, InputEvent.CTRL_MASK));
+    extract.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, shortcutMask));
     extract.addActionListener(actor);
     classifierMenu.add(extract);
 
@@ -264,15 +275,23 @@ public class NERGUI  {
         case "Paste":
           pasteDocument();
           break;
-        case "Load CRF From File": {
+        case "Load CRF from File": {
           File file = getFile(true);
           if (file != null) {
             loadClassifier(file);
           }
           break;
         }
+        case "Load CRF from Classpath": {
+          String text = JOptionPane.showInputDialog(frame, "Enter a classpath resource for an NER classifier");
+          if (text != null) {
+            // User didn't click cancel
+            loadClassifier(text);
+          }
+          break;
+        }
         case "Load Default CRF":
-          loadClassifier(null);
+          loadClassifier((File) null);
           break;
         case "Run NER":
           extract();
@@ -312,7 +331,7 @@ public class NERGUI  {
     return file;
   }
 
-  public void saveUntaggedContents(File file) {
+  private void saveUntaggedContents(File file) {
     try {
       String contents;
       if (editorPane.getContentType().equals("text/html")) {
@@ -329,16 +348,15 @@ public class NERGUI  {
     }
   }
 
-  public static void saveFile(File file, String contents) {
+  private static void saveFile(File file, String contents) {
     StringUtils.printToFile(file, contents);
   }
 
   public String getURL() {
-    String url = JOptionPane.showInputDialog(frame, "URL: ", "Load URL", JOptionPane.QUESTION_MESSAGE);
-    return url;
+    return JOptionPane.showInputDialog(frame, "URL: ", "Load URL", JOptionPane.QUESTION_MESSAGE);
   }
 
-  public boolean checkFile(File file) {
+  private boolean checkFile(File file) {
     if (file.isFile()) {
       fileChooser.setCurrentDirectory(file.getParentFile());
       return true;
@@ -349,12 +367,12 @@ public class NERGUI  {
     }
   }
 
-  public void displayError(String title, String message) {
+  private void displayError(String title, String message) {
     JOptionPane.showMessageDialog(frame, message, title, JOptionPane.ERROR_MESSAGE);
   }
 
   /** Load a classifier from a file or the default.
-   *  The default is specified by passing in <code>null</code>.
+   *  The default is specified by passing in {@code null}.
    */
   public void loadClassifier(File file) {
     try {
@@ -365,8 +383,7 @@ public class NERGUI  {
         classifier = CRFClassifier.getDefaultClassifier();
       }
     } catch (Throwable e) {
-      // we catch Throwable, since we'd also like to be able to get an
-      // OutOfMemoryError
+      // we catch Throwable, since we'd also like to be able to get an OutOfMemoryError
       String message;
       if (file != null) {
         message = "Error loading CRF: " + file.getAbsolutePath();
@@ -377,7 +394,42 @@ public class NERGUI  {
       String title = "CRF Load Error";
       String msg = e.toString();
       if (msg != null) {
-        message += "\n" + msg;
+        message += '\n' + msg;
+      }
+      displayError(title, message);
+      return;
+    }
+    removeTags();
+    buildTagPanel();
+    // buildExtractButton();
+    extractButton.setEnabled(true);
+    extract.setEnabled(true);
+  }
+
+  /** Load a classifier from a file or the default.
+   *  The default is specified by passing in {@code null}.
+   */
+  public void loadClassifier(String resource) {
+    try {
+      if (resource != null) {
+        classifier = CRFClassifier.getClassifier(resource);
+      } else {
+        // default classifier in jar
+        classifier = CRFClassifier.getDefaultClassifier();
+      }
+    } catch (Throwable e) {
+      // we catch Throwable, since we'd also like to be able to get an OutOfMemoryError
+      String message;
+      if (resource != null) {
+        message = "Error loading classpath CRF: " + resource;
+      } else {
+        message = "Error loading default CRF";
+      }
+      log.info(message);
+      String title = "CRF Load Error";
+      String msg = e.toString();
+      if (msg != null) {
+        message += '\n' + msg;
       }
       displayError(title, message);
       return;
@@ -395,13 +447,13 @@ public class NERGUI  {
     saveUntagged.setEnabled(true);
   }
 
-  public void openURL(String url) {
+  private void openURL(String url) {
     try {
       editorPane.setPage(url);
     } catch (Exception e) {
-      log.info("Error loading |" + url + "|");
-      e.printStackTrace();
-      displayError("Error Loading URL " + url, "Message: " + e.toString());
+      log.info("Error loading |" + url + '|');
+      log.warn(e);
+      displayError("Error Loading URL " + url, "Message: " + e);
       return;
     }
     loadedFile = null;
@@ -455,7 +507,7 @@ public class NERGUI  {
       try {
         text = doc.getText(0, doc.getLength());
       } catch (Exception e) {
-        e.printStackTrace();
+        log.err(e);
       }
       String labeledText = classifier.classifyWithInlineXML(text);
       taggedContents = labeledText;
@@ -488,7 +540,7 @@ public class NERGUI  {
             String entity = finalText.substring(start, end);
             doc.setCharacterAttributes(start, entity.length(), attSet, false);
           } catch (Exception ex) {
-            ex.printStackTrace();
+            log.err(ex);
             System.exit(-1);
           }
           log.info(tag+": "+ finalText.substring(start, end));
@@ -521,16 +573,22 @@ public class NERGUI  {
       Matcher m = startPattern.matcher(finalText);
       while (m.find()) {
         String tag = m.group(1);
-        String color = colorToHTML(tagToColorMap.get(tag));
-        String newTag = "<span style=\"background-color: "+color+"; color: white\">";
-        finalText = m.replaceFirst(newTag);
-        int start = m.start()+newTag.length();
-        Matcher m1 = endPattern.matcher(finalText);
-        m1.find(m.end());
-        String entity = finalText.substring(start, m1.start());
-        log.info(tag+": "+ entity);
-        finalText = m1.replaceFirst("</span>");
-        m = startPattern.matcher(finalText);
+        Color col = tagToColorMap.get(tag);
+        if (col != null) {
+          String color = colorToHTML(col);
+          String newTag = "<span style=\"background-color: " + color + "; color: white\">";
+          finalText = m.replaceFirst(newTag);
+          int start = m.start() + newTag.length();
+          Matcher m1 = endPattern.matcher(finalText);
+          if (m1.find(m.end())) {
+            String entity = finalText.substring(start, m1.start());
+            log.info(tag + ": " + entity);
+          } else {
+            log.warn("Failed to find end for " + tag);
+          }
+          finalText = m1.replaceFirst("</span>");
+          m = startPattern.matcher(finalText);
+        }
       }
       // System.out.println(finalText);
       editorPane.setText(finalText);
@@ -550,7 +608,7 @@ public class NERGUI  {
     return attr;
   }
 
-  public void clearDocument() {
+  private void clearDocument() {
     editorPane.setContentType("text/rtf");
     Document doc = new DefaultStyledDocument();
     editorPane.setDocument(doc);
@@ -574,19 +632,18 @@ public class NERGUI  {
     taggedContents = null;
     htmlContents = null;
     loadedFile = null;
-
   }
 
-  public void cutDocument() {
+  private void cutDocument() {
     editorPane.cut();
     saveTaggedAs.setEnabled(false);
   }
 
-  public void copyDocument() {
+  private void copyDocument() {
     editorPane.copy();
   }
 
-  public void pasteDocument() {
+  private void pasteDocument() {
     editorPane.paste();
     saveTaggedAs.setEnabled(false);
   }
@@ -627,17 +684,17 @@ public class NERGUI  {
 
   public static String colorToHTML(Color color) {
     String r = Integer.toHexString(color.getRed());
-    if (r.length() == 0) { r = "00"; }
+    if (r.isEmpty()) { r = "00"; }
     else if (r.length() == 1) { r = "0" + r; }
     else if (r.length() > 2) { throw new IllegalArgumentException("invalid hex color for red"+r); }
 
     String g = Integer.toHexString(color.getGreen());
-    if (g.length() == 0) { g = "00"; }
+    if (g.isEmpty()) { g = "00"; }
     else if (g.length() == 1) { g = "0" + g; }
     else if (g.length() > 2) { throw new IllegalArgumentException("invalid hex color for green"+g); }
 
     String b = Integer.toHexString(color.getBlue());
-    if (b.length() == 0) { b = "00"; }
+    if (b.isEmpty()) { b = "00"; }
     else if (b.length() == 1) { b = "0" + b; }
     else if (b.length() > 2) { throw new IllegalArgumentException("invalid hex color for blue"+b); }
 
@@ -768,7 +825,7 @@ public class NERGUI  {
 //                                     Color.DARK_GRAY};
 
 
-  public static Color[] getNColors(int n) {
+  private static Color[] getNColors(int n) {
     Color[] colors = new Color[n];
     if (n <= basicColors.length) {
       System.arraycopy(basicColors, 0, colors, 0, n);
@@ -787,7 +844,7 @@ public class NERGUI  {
     return colors;
   }
 
-  public static boolean isMacOSX() {
+  private static boolean isMacOSX() {
     return System.getProperty("os.name").toLowerCase().startsWith("mac os x");
   }
 

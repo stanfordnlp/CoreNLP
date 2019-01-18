@@ -785,7 +785,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       IndexedWord dobj = matcher.getNode("obj");
 
       /* Check if the object is a WH-word. */
-      if (wh.tag().startsWith("W")) {
+      if (wh.tag() != null && wh.tag().startsWith("W")) {
         boolean reattach = false;
         /* If the control verb already has an object, then
            we have to reattach the WH-word to the verb in the embedded clause. */
@@ -793,9 +793,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
           reattach = true;
         } else {
           /* If the control verb can't have an object, we also have to reattach. */
-          String lemma = Morphology.lemmaStatic(root.value(), root.tag());
-          if (lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
-            reattach = true;
+          if (root.value() != null && root.tag() != null) {
+            String lemma = Morphology.lemmaStatic(root.value(), root.tag());
+            if (lemma != null && lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
+              reattach = true;
+            }
           }
         }
 

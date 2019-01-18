@@ -15,7 +15,7 @@ public interface ValueFunction {
   /**
    * Checks if the arguments are valid.
    *
-   * @param in
+   * @param in The input arguments
    * @return true if the arguments are valid (false otherwise)
    */
   boolean checkArgs(List<Value> in);
@@ -24,8 +24,8 @@ public interface ValueFunction {
    * Applies the function to the list values using the environment as context
    * and returns the evaluated value.
    *
-   * @param env the environment to use
-   * @param in the input arguments
+   * @param env The environment to use
+   * @param in The input arguments
    * @return Value indicating the value of the function
    */
   Value apply(Env env, List<Value> in);

@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Represents an alignment between a text and a hypothesis as a map from
  * hypothesis words to text words, along with a real-valued score and
- * (optionally) a justification string. <p/>
+ * (optionally) a justification string.
  *
  * @author Bill MacCartney
  */
@@ -120,7 +120,7 @@ public class Alignment {
    *   (iii) the only alignment that exists that doesn't have a node in
    *         txtGraph is an alignment to NO_WORD
    *
-   * wcmac: What is this for?  Looks like nothing is using this?
+   * TODO[wcmac]: What is this for?  Looks like nothing is using this?
    */
   Alignment patchedAlignment(SemanticGraph hypGraph, SemanticGraph txtGraph) {
     Map<IndexedWord, IndexedWord> patchedMap = Generics.newHashMap();
@@ -138,7 +138,7 @@ public class Alignment {
 
   /**
    * Constructs and returns a new Alignment from the given hypothesis
-   * <code>SemanticGraph</code> to the given text (passage) SemanticGraph, using
+   * {@code SemanticGraph} to the given text (passage) SemanticGraph, using
    * the given array of indexes.  The i'th node of the array should contain the
    * index of the node in the text (passage) SemanticGraph to which the i'th
    * node in the hypothesis SemanticGraph is aligned, or -1 if it is aligned to

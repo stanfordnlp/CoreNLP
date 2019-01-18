@@ -1,7 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.util.logging.Redwood;
-
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -13,11 +11,11 @@ import edu.stanford.nlp.time.TimeExpression;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.*;
-import java.text.SimpleDateFormat;
+
 
 /**
  * This class will add NER information to an Annotation using a combination of NER models.
@@ -40,8 +38,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final NERClassifierCombiner ner;
 
   private final boolean VERBOSE;
-  private boolean usePresentDateForDocDate = false;
-  private String providedDocDate = "";
+  private boolean setDocDate = false;
 
   private final long maxTime;
   private final int nThreads;
@@ -56,11 +53,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     spanishToEnglishTag.put("ORG", "ORGANIZATION");
     spanishToEnglishTag.put("LUG", "LOCATION");
     spanishToEnglishTag.put("OTROS", "MISC");
-
   }
 
   private static final String spanishNumberRegexRules =
-      "edu/stanford/nlp/models/kbp/spanish/kbp_regexner_number_sp.tag";
+      "edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_number_sp.tag";
 
   private TokensRegexNERAnnotator spanishNumberAnnotator;
 
@@ -68,9 +64,20 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private boolean applyFineGrained = true;
   private TokensRegexNERAnnotator fineGrainedNERAnnotator;
 
+  /** additional rules ner - add your own additional regexner rules after fine grained phase **/
+  private boolean applyAdditionalRules = true;
+  private TokensRegexNERAnnotator additionalRulesNERAnnotator;
+
+  /** run tokensregex rules before the entity building phase **/
+  private boolean applyTokensRegexRules = false;
+  private TokensRegexAnnotator tokensRegexAnnotator;
+
   /** entity mentions **/
   private boolean buildEntityMentions = true;
   private EntityMentionsAnnotator entityMentionsAnnotator;
+
+  /** doc date finding **/
+  private DocDateAnnotator docDateAnnotator;
 
   public NERCombinerAnnotator(Properties properties) throws IOException {
 
@@ -93,26 +100,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
 
-    boolean applyRegexner =
-        PropertiesUtils.getBool(properties,
-            NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
-            NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);
-
     boolean useSUTime =
         PropertiesUtils.getBool(properties,
             NumberSequenceClassifier.USE_SUTIME_PROPERTY,
             NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-
-    // option for setting doc date to be the present during each annotation
-    usePresentDateForDocDate =
-        PropertiesUtils.getBool(properties, "ner." + "usePresentDateForDocDate", false);
-
-    // option for setting doc date from a provided string
-    providedDocDate = PropertiesUtils.getString(properties, "ner." + "providedDocDate", "");
-    Pattern p = Pattern.compile("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
-    Matcher m = p.matcher(providedDocDate);
-    if (!m.matches())
-      providedDocDate = "";
 
     NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
         NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
@@ -129,7 +120,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
     }
     NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
-        useSUTime, applyRegexner, combinerProperties, loadPaths);
+        useSUTime, combinerProperties, loadPaths);
 
     this.nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     this.maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
@@ -140,10 +131,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // in case of Spanish, use the Spanish number regexner annotator
     if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
       Properties spanishNumberRegexNerProperties = new Properties();
-      spanishNumberRegexNerProperties.put("spanish.number.regexner.mapping", spanishNumberRegexRules);
-      spanishNumberRegexNerProperties.put("spanish.number.regexner.validpospattern",
-          "^(NUM).*");
-      spanishNumberRegexNerProperties.put("spanish.number.regexner.ignorecase", "true");
+      spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.mapping", spanishNumberRegexRules);
+      spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.validpospattern", "^(NUM).*");
+      spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.ignorecase", "true");
       spanishNumberAnnotator = new TokensRegexNERAnnotator("spanish.number.regexner",
           spanishNumberRegexNerProperties);
     }
@@ -151,8 +141,17 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // set up fine grained ner
     setUpFineGrainedNER(properties);
 
+    // set up additional rules ner
+    setUpAdditionalRulesNER(properties);
+
+    // set up tokens regex rules
+    setUpTokensRegexRules(properties);
+
     // set up entity mentions
     setUpEntityMentionBuilding(properties);
+
+    // set up doc date finding if specified
+    setUpDocDateAnnotator(properties);
 
     VERBOSE = verbose;
     this.ner = nerCombiner;
@@ -168,8 +167,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   public NERCombinerAnnotator(boolean verbose, String... classifiers)
-    throws IOException, ClassNotFoundException
-  {
+    throws IOException, ClassNotFoundException {
     this(new NERClassifierCombiner(classifiers), verbose);
   }
 
@@ -195,10 +193,16 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     Properties nerProperties = new Properties();
     nerProperties.setProperty("ner.applyFineGrained", Boolean.toString(fineGrained));
     nerProperties.setProperty("ner.buildEntityMentions", Boolean.toString(entityMentions));
+    setUpAdditionalRulesNER(nerProperties);
     setUpFineGrainedNER(nerProperties);
     setUpEntityMentionBuilding(nerProperties);
   }
 
+  /**
+   * Set up the fine-grained TokensRegexNERAnnotator sub-annotator
+   *
+   * @param properties Properties for the TokensRegexNER sub-annotator
+   */
   public void setUpFineGrainedNER(Properties properties) {
     // set up fine grained ner
     this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
@@ -206,10 +210,53 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       String fineGrainedPrefix = "ner.fine.regexner";
       Properties fineGrainedProps =
           PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".", true);
+      // explicity set fine grained ner default here
+      if (!fineGrainedProps.containsKey("ner.fine.regexner.mapping"))
+        fineGrainedProps.setProperty("ner.fine.regexner.mapping", DefaultPaths.DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS);
+      // build the fine grained ner TokensRegexNERAnnotator
       fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
     }
   }
 
+  /**
+   * Set up the additional TokensRegexNERAnnotator sub-annotator
+   *
+   * @param properties Properties for the TokensRegexNER sub-annotator
+   */
+  public void setUpAdditionalRulesNER(Properties properties) {
+    this.applyAdditionalRules =
+        (!properties.getProperty("ner.additional.regexner.mapping","").equals(""));
+    if (this.applyAdditionalRules) {
+      String additionalRulesPrefix = "ner.additional.regexner";
+      Properties additionalRulesProps =
+          PropertiesUtils.extractPrefixedProperties(properties, additionalRulesPrefix+".", true);
+      // build the additional rules ner TokensRegexNERAnnotator
+      additionalRulesNERAnnotator = new TokensRegexNERAnnotator(additionalRulesPrefix, additionalRulesProps);
+    }
+  }
+
+  /**
+   * Set up the TokensRegexAnnotator sub-annotator
+   *
+   * @param properties Properties for the TokensRegex sub-annotator
+   */
+  public void setUpTokensRegexRules(Properties properties) {
+    this.applyTokensRegexRules =
+        (!properties.getProperty("ner.additional.tokensregex.rules","").equals(""));
+    if (this.applyTokensRegexRules) {
+      String tokensRegexRulesPrefix = "ner.additional.tokensregex";
+      Properties tokensRegexRulesProps =
+          PropertiesUtils.extractPrefixedProperties(properties, tokensRegexRulesPrefix+".", true);
+      // build the additional rules ner TokensRegexNERAnnotator
+      tokensRegexAnnotator = new TokensRegexAnnotator(tokensRegexRulesPrefix, tokensRegexRulesProps);
+    }
+  }
+
+  /**
+   * Set up the additional EntityMentionsAnnotator sub-annotator
+   *
+   * @param properties Properties for the EntityMentionsAnnotator sub-annotator
+   */
   public void setUpEntityMentionBuilding(Properties properties) {
     this.buildEntityMentions = PropertiesUtils.getBool(properties, "ner.buildEntityMentions", true);
     if (this.buildEntityMentions) {
@@ -222,6 +269,20 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
   }
 
+  /**
+   * Set up the additional DocDateAnnotator sub-annotator
+   *
+   * @param properties Properties for the DocDateAnnotator sub-annotator
+   */
+  private void setUpDocDateAnnotator(Properties properties) throws IOException {
+    for (String property : properties.stringPropertyNames()) {
+      if (property.length() >= 11 && property.substring(0,11).equals("ner.docdate")) {
+        setDocDate = true;
+        docDateAnnotator = new DocDateAnnotator("ner.docdate", properties);
+        break;
+      }
+    }
+  }
 
   @Override
   protected int nThreads() {
@@ -239,16 +300,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       log.info("Adding NER Combiner annotation ... ");
     }
 
-    // if ner.usePresentDateForDocDate is set, use the present date as the doc date
-    if (usePresentDateForDocDate) {
-      String currentDate =
-          new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
-      annotation.set(CoreAnnotations.DocDateAnnotation.class, currentDate);
-    }
-    // use provided doc date if applicable
-    if (!providedDocDate.equals("")) {
-      annotation.set(CoreAnnotations.DocDateAnnotation.class, providedDocDate);
-    }
+    // set the doc date if using a doc date annotator
+    if (setDocDate)
+      docDateAnnotator.annotate(annotation);
 
     super.annotate(annotation);
     this.ner.finalizeAnnotation(annotation);
@@ -259,26 +313,47 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // if Spanish, run the regexner with Spanish number rules
     if (LanguageInfo.HumanLanguage.SPANISH.equals(language))
       spanishNumberAnnotator.annotate(annotation);
+    // perform safety clean up
+    // MONEY and NUMBER ner tagged items should not have Timex values
+    for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+      if (token.ner().equals("MONEY") || token.ner().equals("NUMBER"))
+        token.remove(TimeAnnotations.TimexAnnotation.class);
+    }
     // if fine grained ner is requested, run that
-    if (this.applyFineGrained) {
-      fineGrainedNERAnnotator.annotate(annotation);
+    if (this.applyFineGrained || this.applyAdditionalRules) {
+      // run the fine grained NER
+      if (this.applyFineGrained)
+        fineGrainedNERAnnotator.annotate(annotation);
+      // run the custom rules specified
+      if (this.applyAdditionalRules)
+        additionalRulesNERAnnotator.annotate(annotation);
+      // run tokens regex
+      if (this.applyTokensRegexRules)
+        tokensRegexAnnotator.annotate(annotation);
       // set the FineGrainedNamedEntityTagAnnotation.class
       for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
         String fineGrainedTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
         token.set(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class, fineGrainedTag);
       }
     }
+
+    // set confidence for anything not already set to n.e. tag, -1.0
+    for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+      if (token.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class) == null) {
+        Map<String,Double> labelToProb = Collections.singletonMap(token.ner(), -1.0);
+        token.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, labelToProb);
+      }
+    }
+
     // if entity mentions should be built, run that
     if (this.buildEntityMentions)
       entityMentionsAnnotator.annotate(annotation);
+
   }
 
   /** convert Spanish tag content of older models **/
-  public String spanishToEnglishTag(String spanishTag) {
-    if (spanishToEnglishTag.containsKey(spanishTag))
-      return spanishToEnglishTag.get(spanishTag);
-    else
-      return spanishTag;
+  private static String spanishToEnglishTag(String spanishTag) {
+    return spanishToEnglishTag.getOrDefault(spanishTag, spanishTag);
   }
 
   @Override
@@ -303,11 +378,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         // add the named entity tag to each token
         String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
         String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+        Map<String,Double> neTagProbMap = output.get(i).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
         if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
           neTag = spanishToEnglishTag(neTag);
           normNeTag = spanishToEnglishTag(normNeTag);
         }
         tokens.get(i).setNER(neTag);
+        tokens.get(i).set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, neTagProbMap);
         tokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
         if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
         NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));

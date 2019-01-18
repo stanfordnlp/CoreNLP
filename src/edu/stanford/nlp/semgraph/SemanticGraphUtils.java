@@ -1,8 +1,5 @@
 package edu.stanford.nlp.semgraph;
-import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
-import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.LabeledWord;
@@ -10,10 +7,14 @@ import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.StringWriter;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 
@@ -33,7 +34,7 @@ import java.util.regex.Pattern;
 public class SemanticGraphUtils  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemanticGraphUtils.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SemanticGraphUtils.class);
 
   private SemanticGraphUtils() {}
 
@@ -248,7 +249,7 @@ public class SemanticGraphUtils  {
     }
     // Do a depth first search
     Set<IndexedWord> descendantSet = Generics.newHashSet();
-    tabuDescendantsHelper(sg, vertex, descendantSet, tabu, null, null);
+    tabuDescendantsHelper(sg, vertex, descendantSet, tabu, null, (Predicate<IndexedWord>) null);
     return descendantSet;
   }
 
@@ -264,7 +265,7 @@ public class SemanticGraphUtils  {
     }
     // Do a depth first search
     Set<IndexedWord> descendantSet = Generics.newHashSet();
-    tabuDescendantsHelper(sg, vertex, descendantSet, tabu, tabuRelns, null);
+    tabuDescendantsHelper(sg, vertex, descendantSet, tabu, tabuRelns, (Predicate<IndexedWord>) null);
     return descendantSet;
   }
 
@@ -275,24 +276,36 @@ public class SemanticGraphUtils  {
     }
     // Do a depth first search
     Set<IndexedWord> descendantSet = Generics.newHashSet();
-    tabuDescendantsHelper(sg, vertex, descendantSet, Generics.<IndexedWord>newHashSet(), tabuRelns, null);
+    tabuDescendantsHelper(sg, vertex, descendantSet, Generics.newHashSet(), tabuRelns, (Predicate<IndexedWord>) null);
     return descendantSet;
   }
 
   public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
-      Collection<GrammaticalRelation> tabuRelns, IndexedWordUnaryPred tabuTest) {
+      Collection<GrammaticalRelation> tabuRelns, Predicate<IndexedWord> tabuTest) {
     if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
     Set<IndexedWord> descendantSet = Generics.newHashSet();
-    tabuDescendantsHelper(sg, vertex, descendantSet, Generics.<IndexedWord>newHashSet(), tabuRelns, tabuTest);
+    tabuDescendantsHelper(sg, vertex, descendantSet, Generics.newHashSet(), tabuRelns, tabuTest);
     return descendantSet;
   }
 
   public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
-      Collection<IndexedWord> tabuNodes, Collection<GrammaticalRelation> tabuRelns, IndexedWordUnaryPred tabuTest) {
+      Collection<IndexedWord> tabuNodes, Collection<GrammaticalRelation> tabuRelns, Predicate<IndexedWord> tabuTest) {
     if (!sg.containsVertex(vertex)) {
+      throw new IllegalArgumentException();
+    }
+    // Do a depth first search
+    Set<IndexedWord> descendantSet = Generics.newHashSet();
+    tabuDescendantsHelper(sg, vertex, descendantSet, tabuNodes, tabuRelns, tabuTest);
+    return descendantSet;
+  }
+
+  public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
+                                                             Collection<IndexedWord> tabuNodes, Collection<GrammaticalRelation> tabuRelns,
+                                                             BiPredicate<IndexedWord,SemanticGraph> tabuTest) {
+    if ( ! sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -304,13 +317,40 @@ public class SemanticGraphUtils  {
 
 
   /**
-   * Performs a cull for the descendents of the given node in the
+   * Performs a cull for the descendants of the given node in the
    * graph, subject to the tabu nodes to avoid, relations to avoid
    * crawling over, and child nodes to avoid traversing to based upon
    * a predicate test.
    */
   private static void tabuDescendantsHelper(SemanticGraph sg, IndexedWord curr, Set<IndexedWord> descendantSet, Collection<IndexedWord> tabu,
-      Collection<GrammaticalRelation> relnsToAvoid, IndexedWordUnaryPred tabuTest) {
+      Collection<GrammaticalRelation> relnsToAvoid, Predicate<IndexedWord> tabuTest) {
+    if (tabu.contains(curr))
+      return;
+    if (descendantSet.contains(curr)) {
+      return;
+    }
+
+    descendantSet.add(curr);
+    for (IndexedWord child : sg.getChildren(curr)) {
+      for (SemanticGraphEdge edge : sg.getAllEdges(curr, child)) {
+        if (relnsToAvoid != null && relnsToAvoid.contains(edge.getRelation()))
+          continue;
+        if (tabuTest != null && tabuTest.test(edge.getDependent()))
+          continue;
+        tabuDescendantsHelper(sg, child, descendantSet, tabu, relnsToAvoid,
+                              tabuTest);
+      }
+    }
+  }
+
+  /**
+   * Performs a cull for the descendants of the given node in the
+   * graph, subject to the tabu nodes to avoid, relations to avoid
+   * crawling over, and child nodes to avoid traversing to based upon
+   * a predicate test.
+   */
+  private static void tabuDescendantsHelper(SemanticGraph sg, IndexedWord curr, Set<IndexedWord> descendantSet, Collection<IndexedWord> tabu,
+                                            Collection<GrammaticalRelation> relnsToAvoid, BiPredicate<IndexedWord,SemanticGraph> tabuTest) {
     if (tabu.contains(curr))
       return;
     if (descendantSet.contains(curr)) {
@@ -325,7 +365,7 @@ public class SemanticGraphUtils  {
         if (tabuTest != null && tabuTest.test(edge.getDependent(), sg))
           continue;
         tabuDescendantsHelper(sg, child, descendantSet, tabu, relnsToAvoid,
-                              tabuTest);
+                tabuTest);
       }
     }
   }
@@ -427,17 +467,16 @@ public class SemanticGraphUtils  {
 
 
   /**
-   * Given a graph, ensures all edges are EnglishGrammaticalRelations
-   * NOTE: this is English specific
+   * Given a graph, ensures all edges are EnglishGrammaticalRelations.
+   * NOTE: this is English specific.
    * NOTE: currently EnglishGrammaticalRelations does not link collapsed prep string forms
    * back to their object forms, for its valueOf relation.  This may need to be repaired if
    * generated edges indeed do have collapsed preps as strings.
    */
-  public static void enRepairEdges(SemanticGraph sg, boolean verbose) {
+  private static void enRepairEdges(SemanticGraph sg, boolean verbose) {
     for (SemanticGraphEdge edge : sg.edgeIterable()) {
       if (edge.getRelation().isFromString()) {
-        GrammaticalRelation newReln =
-          EnglishGrammaticalRelations.valueOf(edge.getRelation().toString());
+        GrammaticalRelation newReln = EnglishGrammaticalRelations.valueOf(edge.getRelation().toString());
         if (newReln != null) {
           IndexedWord gov = edge.getGovernor();
           IndexedWord dep = edge.getDependent();
@@ -447,7 +486,7 @@ public class SemanticGraphUtils  {
           sg.addEdge(gov, dep, newReln, weight, isExtra);
         } else {
           if (verbose)
-            log.info("Warning, could not find matching GrammaticalRelation for reln="+edge.getRelation());
+            log.info("Warning, could not find matching GrammaticalRelation for reln=" + edge.getRelation());
         }
       }
     }
@@ -517,8 +556,9 @@ public class SemanticGraphUtils  {
   }
 
   /**
-   * GIven an iterable set of distinct vertices, creates a new mapping that maps the
+   * Given an iterable set of distinct vertices, creates a new mapping that maps the
    * original vertices to a set of "generic" versions.  Used for generalizing tokens in discovered rules.
+   *
    * @param verts Vertices to anonymize
    * @param prefix Prefix to assign to this anonymization
    */
@@ -785,7 +825,7 @@ public class SemanticGraphUtils  {
    * @throws Exception
    */
   public static String semgrexFromGraph(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
-     Map<IndexedWord, String> nodeNameMap, Function<IndexedWord, String> wordTransformation) throws Exception {
+     Map<IndexedWord, String> nodeNameMap, Function<IndexedWord, String> wordTransformation) {
     IndexedWord patternRoot = sg.getFirstRoot();
     StringWriter buf = new StringWriter();
     Set<IndexedWord> tabu = Generics.newHashSet();
@@ -864,9 +904,9 @@ public class SemanticGraphUtils  {
 
     tabu.add(vertice);
 
-    Iterable<SemanticGraphEdge> edgeIter = null;
+    Iterable<SemanticGraphEdge> edgeIter; // = null;
     if(!orderedNodes){
-     edgeIter = sg.outgoingEdgeIterable(vertice);
+      edgeIter = sg.outgoingEdgeIterable(vertice);
     } else{
       edgeIter = CollectionUtils.sorted(sg.outgoingEdgeList(vertice), (arg0, arg1) ->
         (arg0.getRelation().toString().compareTo(arg1.getRelation().toString())));
@@ -911,7 +951,7 @@ public class SemanticGraphUtils  {
   /** Same as semgrexFromGraph except the node traversal is ordered by sorting
    */
   public static String semgrexFromGraphOrderedNodes(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
-      Map<IndexedWord, String> nodeNameMap, Function<IndexedWord, String> wordTransformation) throws Exception {
+            Map<IndexedWord, String> nodeNameMap, Function<IndexedWord, String> wordTransformation) {
     IndexedWord patternRoot = sg.getFirstRoot();
     StringWriter buf = new StringWriter();
     Set<IndexedWord> tabu = Generics.newHashSet();
@@ -931,19 +971,18 @@ public class SemanticGraphUtils  {
    */
   public static String sanitizeForSemgrexName(String text) {
     text = text.replaceAll("\\.", "_DOT_");
-    text = text.replaceAll("\\,", "_COMMA_");
+    text = text.replaceAll(",", "_COMMA_");
     text = text.replaceAll("\\\\", "_BSLASH_");
-    text = text.replaceAll("\\/", "_BSLASH_");
+    text = text.replaceAll("/", "_BSLASH_");
     text = text.replaceAll("\\?", "_QUES_");
-    text = text.replaceAll("\\!", "_BANG_");
+    text = text.replaceAll("!", "_BANG_");
     text = text.replaceAll("\\$", "_DOL_");
-    text = text.replaceAll("\\!", "_BANG_");
-    text = text.replaceAll("\\&", "_AMP_");
-    text = text.replaceAll("\\:", "_COL_");
-    text = text.replaceAll("\\;", "_SCOL_");
-    text = text.replaceAll("\\#", "_PND_");
-    text = text.replaceAll("\\@", "_AND_");
-    text = text.replaceAll("\\%", "_PER_");
+    text = text.replaceAll("&", "_AMP_");
+    text = text.replaceAll(":", "_COL_");
+    text = text.replaceAll(";", "_SCOL_");
+    text = text.replaceAll("#", "_PND_");
+    text = text.replaceAll("@", "_AND_");
+    text = text.replaceAll("%", "_PER_");
     text = text.replaceAll("\\(","_LRB_");
     text = text.replaceAll("\\)", "_RRB_");
     return text;
@@ -1114,7 +1153,7 @@ public class SemanticGraphUtils  {
     Tree root;
 
     public String toString() {
-      return lex+" -> "+treeNode.toString()+", #="+treeNode.nodeNumber(root);
+      return lex + " -> " + treeNode + ", #=" + treeNode.nodeNumber(root);
     }
 
     private TreeNodeProxy(Tree intree, String lex, Tree root) {

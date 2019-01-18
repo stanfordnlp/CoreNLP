@@ -57,11 +57,13 @@ public class StanfordCoreNLPServer implements Runnable {
   protected int serverPort = 9000;
   @ArgumentParser.Option(name="status_port", gloss="The port to serve the status check endpoints on. If different from the server port, this will run in a separate thread.")
   protected int statusPort = serverPort;
+  @ArgumentParser.Option(name="uriContext", gloss="The URI context")
+  protected String uriContext = "";
   @ArgumentParser.Option(name="timeout", gloss="The default timeout, in milliseconds")
   protected int timeoutMilliseconds = 15000;
   @ArgumentParser.Option(name="strict", gloss="If true, obey strict HTTP standards (e.g., with encoding)")
   protected boolean strict = false;
-  @ArgumentParser.Option(name="quiet", gloss="If true, don't print to stdout")
+  @ArgumentParser.Option(name="quiet", gloss="If true, don't print to stdout and don't log every API POST")
   protected boolean quiet = false;
   @ArgumentParser.Option(name="ssl", gloss="If true, start the server with an [insecure!] SSL connection")
   protected boolean ssl = false;
@@ -79,7 +81,7 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static String serverPropertiesPath = null;
   @ArgumentParser.Option(name="maxCharLength", gloss="Max length string that will be processed (non-positive means no limit)")
   protected static int maxCharLength = 100000;
-  @ArgumentParser.Option(name="blacklist", gloss="A file containing subets that should be blacklisted from accessing the server. Each line is a subnet")
+  @ArgumentParser.Option(name="blacklist", gloss="A file containing subnets that should be blacklisted from accessing the server. Each line is a subnet. They are specified as an IPv4 address followed by a slash followed by how many leading bits to maintain as the subnet mask. E.g., '54.240.225.0/24'.")
   protected static String blacklist = null;
   @ArgumentParser.Option(name="stanford", gloss="If true, do special options (blacklist, timeout modifications) for public Stanford server")
   protected boolean stanford = false;
@@ -492,7 +494,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
    */
   private static void respondUnauthorized(HttpExchange httpExchange) throws IOException {
-    log("Respoding unauthorized to " + httpExchange.getRemoteAddress());
+    log("Responding unauthorized to " + httpExchange.getRemoteAddress());
     httpExchange.getResponseHeaders().add("Content-type", "application/javascript");
     byte[] content = "{\"message\": \"Unauthorized API request\"}".getBytes("utf-8");
     httpExchange.sendResponseHeaders(HTTP_UNAUTHORIZED, content.length);
@@ -827,11 +829,13 @@ public class StanfordCoreNLPServer implements Runnable {
             respondUnauthorized(httpExchange);
             return;
           }
-          log("[" + httpExchange.getRemoteAddress() + "] API call w/annotators " + props.getProperty("annotators", "<unknown>"));
+          if ( ! quiet) {
+            log("[" + httpExchange.getRemoteAddress() + "] API call w/annotators " + props.getProperty("annotators", "<unknown>"));
+          }
           ann = getDocument(props, httpExchange);
           of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase());
           String text = ann.get(CoreAnnotations.TextAnnotation.class).replace('\n', ' ');
-          if (!quiet) {
+          if ( ! quiet) {
             System.out.println(text);
           }
           if (maxCharLength > 0 && text.length() > maxCharLength) {
@@ -868,7 +872,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        AnnotationOutputter.Options options = AnnotationOutputter.getOptions(pipeline);
+        AnnotationOutputter.Options options = AnnotationOutputter.getOptions(pipeline.getProperties());
         StanfordCoreNLP.createOutputter(props, options).accept(completedAnnotation, os);
         os.close();
         byte[] response = os.toByteArray();
@@ -1422,18 +1426,22 @@ public class StanfordCoreNLPServer implements Runnable {
       } else {
         server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
       }
-      withAuth(server.createContext("/", new CoreNLPHandler(defaultProps, authenticator, callback, homepage)), basicAuth);
-      withAuth(server.createContext("/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
-      withAuth(server.createContext("/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
-      withAuth(server.createContext("/tregex", new TregexHandler(authenticator, callback)), basicAuth);
-      withAuth(server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js", "application/javascript")), basicAuth);
-      withAuth(server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css", "text/css")), basicAuth);
-      withAuth(server.createContext("/corenlp-parseviewer.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-parseviewer.js", "application/javascript")), basicAuth);
-      withAuth(server.createContext("/ping", new PingHandler()), Optional.empty());
-      withAuth(server.createContext("/shutdown", new ShutdownHandler()), basicAuth);
+      String contextRoot = uriContext;
+      if (contextRoot.isEmpty()) {
+        contextRoot = "/";
+      }
+      withAuth(server.createContext(contextRoot, new CoreNLPHandler(defaultProps, authenticator, callback, homepage)), basicAuth);
+      withAuth(server.createContext(uriContext+"/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext(uriContext+"/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext(uriContext+"/tregex", new TregexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext(uriContext+"/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js", "application/javascript")), basicAuth);
+      withAuth(server.createContext(uriContext+"/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css", "text/css")), basicAuth);
+      withAuth(server.createContext(uriContext+"/corenlp-parseviewer.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-parseviewer.js", "application/javascript")), basicAuth);
+      withAuth(server.createContext(uriContext+"/ping", new PingHandler()), Optional.empty());
+      withAuth(server.createContext(uriContext+"/shutdown", new ShutdownHandler()), basicAuth);
       if (this.serverPort == this.statusPort) {
-        withAuth(server.createContext("/live", new LiveHandler()), Optional.empty());
-        withAuth(server.createContext("/ready", new ReadyHandler(live)), Optional.empty());
+        withAuth(server.createContext(uriContext+"/live", new LiveHandler()), Optional.empty());
+        withAuth(server.createContext(uriContext+"/ready", new ReadyHandler(live)), Optional.empty());
 
       }
       server.setExecutor(serverExecutor);

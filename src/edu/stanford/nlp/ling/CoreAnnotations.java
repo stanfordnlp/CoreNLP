@@ -10,15 +10,12 @@ import java.util.Map;
 import java.util.SortedSet;
 
 /**
- * <p>
  * Set of common annotations for {@link CoreMap}s. The classes
  * defined here are typesafe keys for getting and setting annotation
  * values. These classes need not be instantiated outside of this
  * class. e.g {@link TextAnnotation}.class serves as the key and a
  * {@code String} serves as the value containing the
  * corresponding word.
- * </p>
- *
  * <p>
  * New types of {@link CoreAnnotation} can be defined anywhere that is
  * convenient in the source tree - they are just classes. This file exists to
@@ -27,14 +24,11 @@ import java.util.SortedSet;
  * they may often be reused throughout the code. This architecture allows for
  * flexibility, but in many ways it should be considered as equivalent to an
  * enum in which everything should be defined
- * </p>
- *
  * <p>
  * The getType method required by CoreAnnotation must return the same class type
  * as its value type parameter. It feels like one should be able to get away
  * without that method, but because Java erases the generic type signature, that
  * info disappears at runtime. See {@link ValueAnnotation} for an example.
- * </p>
  *
  * @author dramage
  * @author rafferty
@@ -59,11 +53,9 @@ public class CoreAnnotations {
 
 
   /**
-   * The CoreMap key for getting the lemma (morphological stem) of a token.
+   * The CoreMap key for getting the lemma (morphological stem, lexeme form) of a token.
    *
    * This key is typically set on token annotations.
-   *
-   * TODO: merge with StemAnnotation?
    */
   public static class LemmaAnnotation implements CoreAnnotation<String> {
     @Override
@@ -94,6 +86,16 @@ public class CoreAnnotations {
     @Override
     public Class<String> getType() {
       return String.class;
+    }
+  }
+
+  /**
+   * Label and probability pair representing the coarse grained label and probability
+   */
+  public static class NamedEntityTagProbsAnnotation implements CoreAnnotation<Map<String,Double>> {
+    @Override
+    public Class<Map<String,Double>> getType() {
+      return ErasureUtils.uncheckedCast(Map.class);
     }
   }
 
@@ -745,6 +747,16 @@ public class CoreAnnotations {
   }
 
   /**
+   * The matching probability for the AnswerAnnotation
+   */
+  public static class AnswerProbAnnotation implements CoreAnnotation<Double> {
+    @Override
+    public Class<Double> getType() {
+      return Double.class;
+    }
+  }
+
+  /**
    * The standard key for the answer which is a String
    */
   public static class PresetAnswerAnnotation implements CoreAnnotation<String> {
@@ -805,7 +817,8 @@ public class CoreAnnotations {
   }
 
   /**
-   * Morphological stem of the word this label represents
+   * Stem of the word this label represents. (This means the output of an IR-style stemmer,
+   * such as the Porter stemmer, not a lemma.
    */
   public static class StemAnnotation implements CoreAnnotation<String> {
     @Override
@@ -1194,7 +1207,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * mapping from ner derived entity mentions to coref mentions
+   * Mapping from NER-derived entity mentions to coref mentions.
    */
   public static class EntityMentionToCorefMentionMappingAnnotation implements CoreAnnotation<Map<Integer,Integer>> {
     @Override

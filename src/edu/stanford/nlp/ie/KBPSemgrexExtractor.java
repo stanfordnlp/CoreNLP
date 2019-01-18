@@ -29,7 +29,7 @@ import java.util.*;
 public class KBPSemgrexExtractor implements KBPRelationExtractor {
   protected final Redwood.RedwoodChannels logger = Redwood.channels(KBPSemgrexExtractor.class);
 
-  @ArgumentParser.Option(name="dir", gloss="The tokensregex directory")
+  @ArgumentParser.Option(name="dir", gloss="The semgrex directory")
   public static String DIR = DefaultPaths.DEFAULT_KBP_SEMGREX_DIR;
 
   @ArgumentParser.Option(name="test", gloss="The dataset to test on")
@@ -49,7 +49,8 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
       logger.log("Creating SemgrexRegexExtractor");
     // Create extractors
     for (RelationType rel : RelationType.values()) {
-      String filename = semgrexdir + File.separator + rel.canonicalName.replace("/", "SLASH") + ".rules";
+      String relFileNameComponent = rel.canonicalName.replaceAll(":", "_");
+      String filename = semgrexdir + File.separator + relFileNameComponent.replace("/", "SLASH") + ".rules";
       if (IOUtils.existsInClasspathOrFileSystem(filename)) {
 
         List<SemgrexPattern> rulesforrel = SemgrexBatchParser.compileStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename));

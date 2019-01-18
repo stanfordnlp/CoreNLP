@@ -54,6 +54,8 @@ public class RequirementsCorrectSlowITest {
       // this is created by ner but not a part of requirementsSatisfied
       if (annotatorName.equals("ner")) {
         used.remove(CoreAnnotations.GoldAnswerAnnotation.class);
+        used.remove(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
+        used.remove(CoreAnnotations.AnswerProbAnnotation.class);
       }
       // these are created by quote but used by quote.attribution
       // causing an error

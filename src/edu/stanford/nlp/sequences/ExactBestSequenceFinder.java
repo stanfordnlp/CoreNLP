@@ -1,8 +1,8 @@
 package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 
@@ -17,7 +17,7 @@ import java.util.Arrays;
 public class ExactBestSequenceFinder implements BestSequenceFinder  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ExactBestSequenceFinder.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ExactBestSequenceFinder.class);
 
   private static final boolean DEBUG = false;
 
@@ -89,9 +89,6 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
       if (DEBUG) { log.info("windowScore[" + pos + "] has size (productSizes[pos]) " + windowScore[pos].length); }
 
       for (int product = 0; product < productSizes[pos]; product++) {
-        if (Thread.interrupted()) {  // Allow interrupting
-          throw new RuntimeInterruptedException();
-        }
         int p = product;
         int shift = 1;
         for (int curPos = pos + rightWindow; curPos >= pos - leftWindow; curPos--) {
@@ -123,9 +120,6 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
     double[][] score = new double[padLength][];
     int[][] trace = new int[padLength][];
     for (int pos = 0; pos < padLength; pos++) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       score[pos] = new double[productSizes[pos]];
       trace[pos] = new int[productSizes[pos]];
     }

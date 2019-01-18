@@ -14,10 +14,11 @@ import java.util.List;
  * @author Danqi Chen
  */
 public class ArcStandard extends ParsingSystem {
+
   private boolean singleRoot = true;
 
   public ArcStandard(TreebankLanguagePack tlp, List<String> labels, boolean verbose) {
-    super(tlp, labels, verbose);
+    super(tlp, labels, makeTransitions(labels), verbose);
   }
 
   @Override
@@ -25,17 +26,24 @@ public class ArcStandard extends ParsingSystem {
     return (c.getStackSize() == 1 && c.getBufferSize() == 0);
   }
 
-  @Override
-  public void makeTransitions() {
-    transitions = new ArrayList<>();
+  /**
+   * Generate all possible transitions which this parsing system can
+   * take for any given configuration.
+   *
+   * @return A List of the transitions
+   */
+  private static List<String> makeTransitions(List<String> labels) {
+    List<String> moves = new ArrayList<>();
 
     // TODO store these as objects!
-    for (String label : labels)
-      transitions.add("L(" + label + ")");
-    for (String label : labels)
-      transitions.add("R(" + label + ")");
-
-    transitions.add("S");
+    for (String label : labels) {
+      moves.add("L(" + label + ')');
+    }
+    for (String label : labels) {
+      moves.add("R(" + label + ')');
+    }
+    moves.add("S");
+    return moves;
   }
 
   @Override
@@ -98,16 +106,17 @@ public class ArcStandard extends ParsingSystem {
   public String getOracle(Configuration c, DependencyTree dTree) {
     int w1 = c.getStack(1);
     int w2 = c.getStack(0);
-    if (w1 > 0 && dTree.getHead(w1) == w2)
-      return "L(" + dTree.getLabel(w1) + ")";
-    else if (w1 >= 0 && dTree.getHead(w2) == w1 && !c.hasOtherChild(w2, dTree))
-      return "R(" + dTree.getLabel(w2) + ")";
-    else
+    if (w1 > 0 && dTree.getHead(w1) == w2) {
+      return "L(" + dTree.getLabel(w1) + ')';
+    } else if (w1 >= 0 && dTree.getHead(w2) == w1 && !c.hasOtherChild(w2, dTree)) {
+      return "R(" + dTree.getLabel(w2) + ')';
+    } else {
       return "S";
+    }
   }
 
-  // NOTE: unused. need to check the correctness again.
-  public boolean canReach(Configuration c, DependencyTree dTree) {
+  // NOTE: need to check the correctness again.
+  private static boolean canReach(Configuration c, DependencyTree dTree) {
     int n = c.getSentenceSize();
     for (int i = 1; i <= n; ++i)
       if (c.getHead(i) != Config.NONEXIST && c.getHead(i) != dTree.getHead(i))
@@ -132,7 +141,7 @@ public class ArcStandard extends ParsingSystem {
     int nRight = 1;
     rightL[nRight] = leftL[1];
     for (int i = 0; i < c.getBufferSize(); ++i) {
-      boolean inList = false;
+      // boolean inList = false;
       int x = c.buffer.get(i);
       if (!inBuffer[dTree.getHead(x)] || depInList[x]) {
         rightL[++nRight] = x;
@@ -173,4 +182,5 @@ public class ArcStandard extends ParsingSystem {
     apply(ct, t);
     return canReach(ct, dTree);
   }
+
 }

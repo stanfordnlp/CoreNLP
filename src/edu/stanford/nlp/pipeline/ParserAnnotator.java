@@ -136,8 +136,8 @@ public class ParserAnnotator extends SentenceAnnotator  {
 
 
     String buildGraphsProperty = annotatorName + ".buildgraphs";
-    if (!this.parser.getTLPParams().supportsBasicDependencies()) {
-      if (props.getProperty(buildGraphsProperty) != null && PropertiesUtils.getBool(props, buildGraphsProperty)) {
+    if ( ! this.parser.getTLPParams().supportsBasicDependencies()) {
+      if (PropertiesUtils.getBool(props, buildGraphsProperty)) {
         log.info("WARNING: " + buildGraphsProperty + " set to true, but " + this.parser.getTLPParams().getClass() + " does not support dependencies");
       }
       this.BUILD_GRAPHS = false;
@@ -189,7 +189,7 @@ public class ParserAnnotator extends SentenceAnnotator  {
     os.append(annotatorName + ".keepPunct:" +
       props.getProperty(annotatorName + ".keepPunct", "true"));
     os.append(annotatorName + ".extradependencies:" +
-        props.getProperty(annotatorName + ".extradependences", "NONE").toLowerCase());
+        props.getProperty(annotatorName + ".extradependencies", "NONE").toLowerCase());
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
     boolean saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
     os.append(annotatorName + ".binaryTrees:" + saveBinaryTrees);

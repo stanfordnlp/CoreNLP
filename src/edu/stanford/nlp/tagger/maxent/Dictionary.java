@@ -1,15 +1,16 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
+ * Author:       Kristina Toutanova<p>
+ * Copyright:    Copyright (c) The Board of Trustees of Leland Stanford Junior University<p>
  * Company:      Stanford University<p>
  */
 package edu.stanford.nlp.tagger.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.DataInputStream;
@@ -25,7 +26,7 @@ import java.util.Map;
 public class Dictionary  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Dictionary.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Dictionary.class);
 
   private final Map<String,TagCount> dict = Generics.newHashMap();
   private final Map<Integer,CountWrapper> partTakingVerbs = Generics.newHashMap();
@@ -36,9 +37,9 @@ public class Dictionary  {
   }
 
   void fillWordTagCounts(Map<String, IntCounter<String>> wordTagCounts) {
-    for (String word : wordTagCounts.keySet()) {
-      TagCount count = new TagCount(wordTagCounts.get(word));
-      dict.put(word, count);
+    for (Map.Entry<String, IntCounter<String>> wordTagCount : wordTagCounts.entrySet()) {
+      TagCount count = new TagCount(wordTagCount.getValue());
+      dict.put(wordTagCount.getKey(), count);
     }
   }
 

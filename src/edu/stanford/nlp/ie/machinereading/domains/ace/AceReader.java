@@ -493,7 +493,7 @@ public class AceReader extends GenericDataSetReader  {
     Properties props = StringUtils.argsToProperties(args);
     AceReader r = new AceReader(new StanfordCoreNLP(props, false), false);
     r.setLoggerLevel(Level.INFO);
-    r.parse("/scr/nlp/data/ACE2005/");
+    r.parse("/u/scr/nlp/data/ACE2005/");
     // Annotation a = r.parse("/user/mengqiu/scr/twitter/nlp/corpus_prep/standalone/ar/data");
     // BasicEntityExtractor.saveCoNLLFiles("/tmp/conll", a, false, false);
     log.info("done");

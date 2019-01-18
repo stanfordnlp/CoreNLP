@@ -1,10 +1,11 @@
 package edu.stanford.nlp.ie;
 
-import junit.framework.TestCase;
-
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -13,7 +14,8 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
-public class NumberSequenceClassifierITest extends TestCase {
+public class NumberSequenceClassifierITest {
+
   public static final boolean VERBOSE = true;
 
   private static StanfordCoreNLP makeNumericPipeline() {
@@ -31,10 +33,10 @@ public class NumberSequenceClassifierITest extends TestCase {
     Annotation doc = new Annotation(text);
     pipe.annotate(doc);
 
-    assertTrue(doc.get(CoreAnnotations.SentencesAnnotation.class) != null);
-    assertTrue(doc.get(CoreAnnotations.SentencesAnnotation.class).size() > 0);
+    Assert.assertNotNull(doc.get(CoreAnnotations.SentencesAnnotation.class));
+    Assert.assertFalse(doc.get(CoreAnnotations.SentencesAnnotation.class).isEmpty());
     CoreMap sent = doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-    assertTrue(sent.get(CoreAnnotations.TokensAnnotation.class) != null);
+    Assert.assertNotNull(sent.get(CoreAnnotations.TokensAnnotation.class));
     List<CoreLabel> tokens = sent.get(CoreAnnotations.TokensAnnotation.class);
     if (VERBOSE) {
       for(CoreLabel token: tokens) {
@@ -47,31 +49,31 @@ public class NumberSequenceClassifierITest extends TestCase {
     }
 
     // check NER labels
-    assertTrue(tokens.size() == labels.length);
+    Assert.assertEquals(tokens.size(), labels.length);
     for (int i = 0; i < labels.length; i ++) {
       if(labels[i] == null){
-        assertTrue(tokens.get(i).ner() == null);
+        Assert.assertNull(tokens.get(i).ner());
       } else {
         Pattern p = Pattern.compile(labels[i]);
         System.err.println("COMPARING NER " + labels[i] + " with " + tokens.get(i).ner());
         System.err.flush();
-        assertTrue("NER should not be null for token " + tokens.get(i) + " in sentence " + tokens, tokens.get(i).ner() != null);
-        assertTrue(tokens.get(i).ner() + " does not match " + p + " for token " + tokens.get(i) + " in sentence " + tokens, p.matcher(tokens.get(i).ner()).matches());
+        Assert.assertNotNull("NER should not be null for token " + tokens.get(i) + " in sentence " + tokens, tokens.get(i).ner());
+        Assert.assertTrue(tokens.get(i).ner() + " does not match " + p + " for token " + tokens.get(i) + " in sentence " + tokens, p.matcher(tokens.get(i).ner()).matches());
       }
     }
 
     // check normalized values, if gold is given
-    if(normed != null){
-      assertTrue(tokens.size() == normed.length);
+    if (normed != null) {
+      Assert.assertEquals(tokens.size(), normed.length);
       for(int i = 0; i < normed.length; i ++){
         if(normed[i] == null){
-          assertTrue(tokens.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) == null);
+          Assert.assertNull(tokens.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
         } else {
           Pattern p = Pattern.compile(normed[i]);
           String n = tokens.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-          String message = "COMPARING NORMED \"" + normed[i] + "\" with \"" + n + "\"";
-          assertTrue(message + "; latter should not be null", n != null);
-          assertTrue(message + "; latter should match", p.matcher(n).matches());
+          String message = "COMPARING NORMED \"" + normed[i] + "\" with \"" + n + '"';
+          Assert.assertNotNull(message + "; latter should not be null", n);
+          Assert.assertTrue(message + "; latter should match", p.matcher(n).matches());
         }
       }
     }
@@ -79,7 +81,7 @@ public class NumberSequenceClassifierITest extends TestCase {
 
   private static void run(String header, String [] texts, String [][] answers, String [][] normed) {
     StanfordCoreNLP pipe = makeNumericPipeline();
-    for(int i = 0; i < texts.length; i ++) {
+    for (int i = 0; i < texts.length; i ++) {
       if(VERBOSE) {
         System.out.println("Running test " + header + " for text: " + texts[i]);
       }
@@ -112,7 +114,7 @@ public class NumberSequenceClassifierITest extends TestCase {
     "It cost $ 57.60",
     "It cost $8 thousand",
     "It cost $42,33",
-//    "It cost ₩1500",  // TODO: Add won symbol to PTBTokenizer
+    "It cost ₩1500",  // TODO: Add won symbol to PTBTokenizer
   };
 
   private static final String [][] moneyAnswers = {
@@ -137,7 +139,7 @@ public class NumberSequenceClassifierITest extends TestCase {
     { null, null, "MONEY", "MONEY" },
     { null, null, "MONEY", "MONEY", "MONEY" },
     { null, null, "MONEY", "MONEY" },
-//    { null, null, "MONEY", "MONEY" },
+    { null, null, "MONEY", "MONEY" },
   };
 
   private static final String [][] moneyNormed = {
@@ -153,7 +155,7 @@ public class NumberSequenceClassifierITest extends TestCase {
     { null, null, "\u00A31500.0", "\u00A31500.0" },
     { null, null, "\u00A31500.0", "\u00A31500.0" },
     { null, null, "\u00A30.5", "\u00A30.5" },
-    { null, null, "\\$0.5", "\\$0.5" },     // TODO: Fix PTBTokenizer to really normalize it to Euro €
+    { null, null, "€0.5", "€0.5" },
     { null, null, "\\$1500.0", "\\$1500.0" },
     { null, null, "\\$1500.0", "\\$1500.0" },
     { null, null, "\\$1500.0", "\\$1500.0" },
@@ -162,9 +164,10 @@ public class NumberSequenceClassifierITest extends TestCase {
     { null, null, "\\$57.6", "\\$57.6" },
     { null, null, "\\$8000.0", "\\$8000.0", "\\$8000.0" },
     { null, null, "\\$4233.0", "\\$4233.0" },
-//    { null, null, "₩4233.0", "₩4233.0" },
+    { null, null, "₩1500.0", "₩1500.0" },
   };
 
+  @Test
   public void testMoney() {
     run("MONEY", moneyStrings, moneyAnswers, moneyNormed);
   }
@@ -190,6 +193,7 @@ public class NumberSequenceClassifierITest extends TestCase {
     { null, null, null, "0.0", null },
     { null, null, null, "1000.0", null },
   };
+  @Test
   public void testOrdinal() {
     run("ORDINAL", ordinalStrings, ordinalAnswers, ordinalNormed);
   }
@@ -248,6 +252,7 @@ public class NumberSequenceClassifierITest extends TestCase {
     { "THIS P1Y OFFSET P+1Y" , "THIS P1Y OFFSET P+1Y" },
     { "2008-06-06" , "2008-06-06", "2008-06-06", null, "2008-06-07" , "2008-06-07", "2008-06-07" },
   };
+  @Test
   public void testDate() {
     run("DATE", dateStrings, dateAnswers, dateNormed);
   }
@@ -285,6 +290,7 @@ public class NumberSequenceClassifierITest extends TestCase {
     { null, null, null, null, "867.0 - 5309.0" },
     { "801.0", null, "123.0", null }
   };
+  @Test
   public void testNumber() {
     run("NUMBER", numberStrings, numberAnswers, numberNormed);
   }
@@ -304,6 +310,7 @@ public class NumberSequenceClassifierITest extends TestCase {
     { "T12:29", "T12:29" },
     { "T00:39", "T00:39" },
   };
+  @Test
   public void testTime() {
     run("TIME", timeStrings, timeAnswers, timeNormed);
   }
@@ -323,6 +330,7 @@ public class NumberSequenceClassifierITest extends TestCase {
           { null, null, null, "P7Y", "P7Y", "P7Y", "P7Y" },
           { null, null, "P1M", "P1M" },
   };
+  @Test
   public void testDuration() {
     run("DURATION", durationStrings, durationAnswers, durationNormed);
   }

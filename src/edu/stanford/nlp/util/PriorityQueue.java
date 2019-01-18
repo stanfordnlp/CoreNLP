@@ -6,30 +6,31 @@ import java.util.Set;
 /**
  * A Set that also represents an ordering of its elements, and responds
  * quickly to {@code add()}, {@code changePriority()},
- * {@code removeFirst()}, and {@code getFirst()} method calls. <p/>
- *
+ * {@code removeFirst()}, and {@code getFirst()} method calls.
+ * <p>
  * There are several important differences between this interface and
- * the JDK {@link java.util.PriorityQueue}: <p/>
+ * the JDK {@link java.util.PriorityQueue}:
+ * <p>
  * <ol>
- * <li> This interface uses explicitly-assigned <code>double</code> values
+ * <li> This interface uses explicitly-assigned {@code double} values
  * as priorities for queue elements, while
- * <code>java.util.PriorityQueue</code> uses either the elements'
+ * {@code java.util.PriorityQueue} uses either the elements'
  * <i>natural order</i> (see {@link java.lang.Comparable}) or a {@link
  * java.util.Comparator}.</li>
  *
- * <li> In this interface, larger <code>double</code>s represent higher
- * priorities; in <code>java.util.PriorityQueue</code>, <i>lesser</i>
+ * <li> In this interface, larger {@code double}s represent higher
+ * priorities; in {@code java.util.PriorityQueue}, <i>lesser</i>
  * elements (with respect to the specified ordering) have higher
  * priorities.</li>
  *
  * <li> This interface enables you to <i>change</i> the priority of an
  * element <i>after</i> it has entered the queue.  With
- * <code>java.util.PriorityQueue</code>, that's not possible.</li>
+ * {@code java.util.PriorityQueue}, that's not possible.</li>
  *
  * <li> However, there is a price to pay for this flexibility.  The primary
  * implementation of this interface, {@link
  * edu.stanford.nlp.util.BinaryHeapPriorityQueue}, is roughly 2x slower
- * than <code>java.util.PriorityQueue</code> in informal benchmark
+ * than {@code java.util.PriorityQueue} in informal benchmark
  * testing.</li>
  *
  * <li> So, there's another implementation of this interface,
@@ -40,7 +41,8 @@ import java.util.Set;
  * </ol>
  * <p>
  * On the other hand, this interface and {@link java.util.PriorityQueue}
- * also have some characteristics in common: <p/>
+ * also have some characteristics in common:
+ * <p>
  * <ol>
  * <li> Both make no guarantee about the order in which elements with equal
  * priority are returned from the queue.  This does <i>not</i> mean that
@@ -100,7 +102,7 @@ public interface PriorityQueue<E> extends Set<E> {
    * a lower priority, but that wasn't the historical behavior, and it seemed like
    * we'd need to do a lot of archeology before changing the behavior.
    *
-   * @return <tt>true</tt> if this set did not already contain the specified
+   * @return {@code true} if this set did not already contain the specified
    *         element.
    */
   public boolean add(E key, double priority);
@@ -109,7 +111,7 @@ public interface PriorityQueue<E> extends Set<E> {
   /**
    * Changes a priority, either up or down, adding the key it if it wasn't there already.
    *
-   * @param key an <code>E</code> value
+   * @param key an {@code E} value
    * @return whether the priority actually changed.
    */
   public boolean changePriority(E key, double priority);

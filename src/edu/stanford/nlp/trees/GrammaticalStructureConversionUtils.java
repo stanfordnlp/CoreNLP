@@ -493,7 +493,6 @@ public class GrammaticalStructureConversionUtils {
   /**
    * Given sentences or trees, output the typed dependencies.
    * <p>
-
    * By default, the method outputs the collapsed typed dependencies with
    * processing of conjuncts. The input can be given as plain text (one sentence
    * by line) using the option -sentFile, or as trees using the option
@@ -542,10 +541,10 @@ public class GrammaticalStructureConversionUtils {
    * which get collapsed into the grammatical relations and are not part of the
    * sentence per se anymore will be annotated with "erased" as grammatical relation
    * and attached to the fake "ROOT" node with index 0.
-   * <p/><p>
+   * <p>
    * There is also an option to retain dependencies involving punctuation:
    * {@code -keepPunct}
-   * </p><p>
+   * <p>
    * The {@code -extraSep} option used with -nonCollapsed will print the basic
    * dependencies first, then a separator ======, and then the extra
    * dependencies that do not preserve the tree structure. The -test option is
@@ -554,11 +553,11 @@ public class GrammaticalStructureConversionUtils {
    * connectivity of the collapsed dependencies. If the collapsed dependencies
    * list doesn't constitute a connected graph, it prints the possible offending
    * nodes (one of them is the real root of the graph).
-   * </p><p>
+   * <p>
    * Using the -conllxFile, you can pass a file containing Stanford dependencies
    * in the CoNLL format (e.g., the basic dependencies), and obtain another
    * representation using one of the representation options.
-   * </p><p>
+   * <p>
    * Usage: <br>
    * <code>java edu.stanford.nlp.trees.GrammaticalStructure [-treeFile FILE | -sentFile FILE | -conllxFile FILE | -filter] <br>
    * [-collapsed -basic -CCprocessed -test -generateOriginalDependencies]</code>
@@ -570,8 +569,6 @@ public class GrammaticalStructureConversionUtils {
 
     /* Use a tree normalizer that removes all empty nodes.
        This prevents wrong indexing of the nodes in the dependency relations. */
-
-
 
     Iterable<GrammaticalStructure> gsBank = null;
     Properties props = StringUtils.argsToProperties(args);

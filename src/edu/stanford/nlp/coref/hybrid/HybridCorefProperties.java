@@ -276,7 +276,7 @@ public class HybridCorefProperties {
     return PropertiesUtils.getBool(props, USE_SEMANTICS_PROP, false);
   }
   public static String getPathSerializedWordVectors(Properties props) {
-    return PropertiesUtils.getString(props, WORD2VEC_SERIALIZED_PROP, "/scr/nlp/data/coref/wordvectors/en/vector.ser.gz");
+    return PropertiesUtils.getString(props, WORD2VEC_SERIALIZED_PROP, "/u/scr/nlp/data/coref/wordvectors/en/vector.ser.gz");
   }
   public static String getCurrentSieveForTrain(Properties props) {
     return PropertiesUtils.getString(props, CURRENT_SIEVE_FOR_TRAIN_PROP, null);
