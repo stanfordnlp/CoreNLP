@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * models and is where any sort of general processing, like the IOB mapping
  * stuff and wordshape stuff, should go.
  * It checks the SeqClassifierFlags to decide what to do.
- * <p>
+ *
  * TODO: We should rearchitect this so that the FeatureFactory-specific
  * stuff is done by a callback to the relevant FeatureFactory.
  *
@@ -42,21 +42,21 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
 
   @Override
   public Iterator<List<IN>> iterator() {
-    Iterator<List<IN>> iter = new WrappedIterator(wrapped.iterator());
-    return iter;
+    return new WrappedIterator(wrapped.iterator());
   }
 
+
   private class WrappedIterator extends AbstractIterator<List<IN>> {
-    Iterator<List<IN>> wrappedIter;
-    Iterator<List<IN>> spilloverIter;
+
+    private final Iterator<List<IN>> wrappedIter;
+    private Iterator<List<IN>> spilloverIter;
 
     public WrappedIterator(Iterator<List<IN>> wrappedIter) {
       this.wrappedIter = wrappedIter;
     }
 
-    @Override
-    public boolean hasNext() {
-      while ((spilloverIter == null || !spilloverIter.hasNext()) &&
+    private void primeNextHelper() {
+      while ((spilloverIter == null || ! spilloverIter.hasNext()) &&
              wrappedIter.hasNext()) {
         List<IN> doc = wrappedIter.next();
         List<List<IN>> docs = new ArrayList<>();
@@ -64,27 +64,22 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         fixDocLengths(docs);
         spilloverIter = docs.iterator();
       }
-      return wrappedIter.hasNext() ||
-        (spilloverIter != null && spilloverIter.hasNext());
+    }
+
+    @Override
+    public boolean hasNext() {
+      primeNextHelper();
+      return wrappedIter.hasNext() || (spilloverIter != null && spilloverIter.hasNext());
     }
 
     @Override
     public List<IN> next() {
-      // this while loop now is redundant because it should
-      // have already been done in "hasNext".
-      // I'm keeping it so that the diff is minimal.
-      // -pichuan
-      while (spilloverIter == null || !spilloverIter.hasNext()) {
-        List<IN> doc = wrappedIter.next();
-        List<List<IN>> docs = new ArrayList<>();
-        docs.add(doc);
-        fixDocLengths(docs);
-        spilloverIter = docs.iterator();
-      }
-
+      primeNextHelper();
       return processDocument(spilloverIter.next());
     }
-  }
+
+  } // end class WrappedIterator
+
 
   public List<IN> processDocument(List<IN> doc) {
     if (flags.mergeTags) { mergeTags(doc); }
@@ -103,7 +98,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   }
 
 
-  private final Pattern monthDayPattern = Pattern.compile("Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|February|March|April|May|June|July|August|September|October|November|December", Pattern.CASE_INSENSITIVE);
+  private static final Pattern monthDayPattern = Pattern.compile("Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|February|March|April|May|June|July|August|September|October|November|December", Pattern.CASE_INSENSITIVE);
 
   private String fix(String word) {
     if (flags.normalizeTerms || flags.normalizeTimex) {
@@ -122,12 +117,11 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   private void doBasicStuff(List<IN> doc) {
     int position = 0;
     for (IN fl : doc) {
-
       // position in document
       fl.set(CoreAnnotations.PositionAnnotation.class, Integer.toString((position++)));
 
       // word shape
-      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) && (!flags.useShapeStrings)) {
+      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) && ! flags.useShapeStrings) {
         // TODO: if we pass in a FeatureFactory, as suggested by an earlier comment,
         // we should use that FeatureFactory's getWord function
         String word = fl.get(CoreAnnotations.TextAnnotation.class);
@@ -142,8 +136,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         fl.set(CoreAnnotations.ShapeAnnotation.class, s);
       }
 
-      // normalizing and interning
-      // was the following; should presumably now be
+      // normalizing and interning was the following; should presumably now be:
       // if ("CTBSegDocumentReader".equalsIgnoreCase(flags.documentReader)) {
       if ("edu.stanford.nlp.wordseg.Sighan2005DocumentReaderAndWriter".equalsIgnoreCase(flags.readerAndWriter)) {
         // for Chinese segmentation, "word" is no use and ignore goldAnswer for memory efficiency.
@@ -151,7 +144,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
       } else {
         fl.set(CoreAnnotations.TextAnnotation.class, intern(fix(fl.get(CoreAnnotations.TextAnnotation.class))));
         // only override GoldAnswer if not set - so that a DocumentReaderAndWriter can set it right in the first place.
-        if (fl.get(CoreAnnotations.AnswerAnnotation.class) == null) {
+        if (fl.get(CoreAnnotations.GoldAnswerAnnotation.class) == null) {
           fl.set(CoreAnnotations.GoldAnswerAnnotation.class, fl.get(CoreAnnotations.AnswerAnnotation.class));
         }
       }
@@ -177,7 +170,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     List<List<IN>> newDocuments = new ArrayList<>();
     for (List<IN> document : docs) {
       if (maxDocSize <= 0 || document.size() <= maxDocSize) {
-        if (flags.keepEmptySentences || !document.isEmpty()) {
+        if (flags.keepEmptySentences || ! document.isEmpty()) {
           newDocuments.add(document);
         }
         continue;
@@ -189,14 +182,14 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
       List<IN> newDocument = new ArrayList<>();
       for (List<IN> sentence : sentences) {
         if (newDocument.size() + sentence.size() > maxDocSize) {
-          if (!newDocument.isEmpty()) {
+          if ( ! newDocument.isEmpty()) {
             newDocuments.add(newDocument);
           }
           newDocument = new ArrayList<>();
         }
         newDocument.addAll(sentence);
       }
-      if (flags.keepEmptySentences || !newDocument.isEmpty()) {
+      if (flags.keepEmptySentences || ! newDocument.isEmpty()) {
         newDocuments.add(newDocument);
       }
     }
@@ -209,7 +202,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     String lastTag = "";
     for (IN wi : doc) {
       String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
-      if (!flags.backgroundSymbol.equals(answer) && answer != null) {
+      if ( ! flags.backgroundSymbol.equals(answer) && answer != null) {
         int index = answer.indexOf('-');
         String prefix;
         String label;
@@ -221,8 +214,8 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
           label = answer.substring(index+1);
         }
 
-        if (!prefix.equals("B")) {
-          if (!label.equals(lastTag)) {
+        if ( ! prefix.equals("B")) {
+          if ( ! label.equals(lastTag)) {
             wi.set(CoreAnnotations.AnswerAnnotation.class, "B-" + label);
           } else {
             wi.set(CoreAnnotations.AnswerAnnotation.class, "I-" + label);
@@ -256,8 +249,12 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     }
   }
 
+  // This class inherits ObjectBank's implementation of the two toArray() methods.
+  // These are implemented in terms of iterator(), and hence they will correctly use the WrappedIterator.
+  // Forwarding these methods to the wrapped ObjectBank would be wrong, as then wrapper processing doesn't happen.
 
-  // all the other the crap from ObjectBank
+
+  // all the other crap from ObjectBank
   @Override
   public boolean add(List<IN> o) { return wrapped.add(o); }
   @Override
@@ -266,22 +263,21 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   public void clear() { wrapped.clear(); }
   @Override
   public void clearMemory() { wrapped.clearMemory(); }
-  public boolean contains(List<IN> o) { return wrapped.contains(o); }
+  @Override
+  public boolean contains(Object o) { return wrapped.contains(o); }
   @Override
   public boolean containsAll(Collection<?> c) { return wrapped.containsAll(c); }
   @Override
   public boolean isEmpty() { return wrapped.isEmpty(); }
   @Override
   public void keepInMemory(boolean keep) { wrapped.keepInMemory(keep); }
-  public boolean remove(List<IN> o) { return wrapped.remove(o); }
+  @Override
+  public boolean remove(Object o) { return wrapped.remove(o); }
   @Override
   public boolean removeAll(Collection<?> c) { return wrapped.removeAll(c); }
   @Override
   public boolean retainAll(Collection<?> c) { return wrapped.retainAll(c); }
   @Override
   public int size() { return wrapped.size(); }
-  @Override
-  public Object[] toArray() { return wrapped.toArray(); }
-  public List<IN>[] toArray(List<IN>[] o) { return wrapped.toArray(o); }
 
 } // end class ObjectBankWrapper

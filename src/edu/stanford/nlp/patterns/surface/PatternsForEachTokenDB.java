@@ -107,9 +107,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
       conn.commit();
       pstmt.close();
       conn.close();
-    }catch(SQLException e){
-      throw new RuntimeException(e);
-    } catch (IOException e) {
+    } catch (SQLException | IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -132,9 +130,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
 
     pstmt.close();
       conn.close();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
+    } catch (SQLException | IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -321,11 +317,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
       }
       conn.close();
       return patsToken;
-  }catch(SQLException e){
-    throw new RuntimeException(e);
-  } catch (ClassNotFoundException e) {
-    throw new RuntimeException(e);
-  } catch (IOException e) {
+  } catch (SQLException | ClassNotFoundException | IOException e) {
     throw new RuntimeException(e);
   }
   }
@@ -375,7 +367,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
           Statement stmt2 = conn.createStatement();
           String query = "SELECT '"+tableName+"_index'::regclass";
           stmt2.execute(query);
-        }catch (SQLException e){
+        } catch (SQLException e){
           doesnotexist = true;
         }
 
@@ -527,11 +519,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
       }
       conn.close();
       return pats;
-    }catch(SQLException e){
-      throw new RuntimeException(e);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
+    } catch(SQLException | ClassNotFoundException | IOException e) {
       throw new RuntimeException(e);
     }
   }

@@ -1,11 +1,11 @@
-package edu.stanford.nlp.trees.international.arabic; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.arabic;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.function.Predicate;
 
 import edu.stanford.nlp.international.arabic.pipeline.DefaultLexicalMapper;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
@@ -17,8 +17,8 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import java.util.function.Predicate;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Normalizes both terminals and non-terminals in Penn Arabic Treebank (ATB)
@@ -43,7 +43,7 @@ import edu.stanford.nlp.util.Pair;
 public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicTreeNormalizer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ArabicTreeNormalizer.class);
 
   private final boolean retainNPTmp;
   private final boolean retainNPSbj;
@@ -56,10 +56,11 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
   private final TregexPattern npSbjPattern;
   private final String rootLabel;
 
+  @SuppressWarnings("serial")
   private final Mapper lexMapper = new DefaultLexicalMapper();
 
   public ArabicTreeNormalizer(boolean retainNPTmp, boolean markPRDverb, boolean changeNoLabels,
-      boolean retainNPSbj, boolean retainPPClr) {
+                              boolean retainNPSbj, boolean retainPPClr) {
     super(new ArabicTreebankLanguagePack());
     this.retainNPTmp = retainNPTmp;
     this.retainNPSbj = retainNPSbj;
@@ -80,7 +81,7 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
   }
 
   public ArabicTreeNormalizer(boolean retainNPTmp, boolean markPRDverb,
-      boolean changeNoLabels) {
+                              boolean changeNoLabels) {
     this(retainNPTmp, markPRDverb, changeNoLabels, false, false);
   }
 
@@ -128,37 +129,37 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
         //specified by HasContext.
         if(t.value().contains(MorphoFeatureSpecification.MORPHO_MARK)) {
           String[] toks = t.value().split(MorphoFeatureSpecification.MORPHO_MARK);
-          if(toks.length != 2)
-            System.err.printf("%s: Word contains malformed morph annotation: %s%n",this.getClass().getName(),t.value());
-
-          else if(t.label() instanceof CoreLabel) {
-            ((CoreLabel) t.label()).setValue(toks[0].trim().intern());
-            ((CoreLabel) t.label()).setWord(toks[0].trim().intern());
+          if (toks.length != 2) {
+            log.err(String.format("%s: Word contains malformed morph annotation: %s", this.getClass().getName(), t.value()));
+          } else if (t.label() instanceof CoreLabel) {
+            CoreLabel cl = (CoreLabel) t.label();
+            cl.setValue(toks[0].trim().intern());
+            cl.setWord(toks[0].trim().intern());
 
             Pair<String,String> lemmaMorph = MorphoFeatureSpecification.splitMorphString(toks[0], toks[1]);
             String lemma = lemmaMorph.first();
             String morphAnalysis = lemmaMorph.second();
             if (lemma.equals(toks[0])) {
-              ((CoreLabel) t.label()).setOriginalText(toks[1].trim().intern());
+              cl.setOriginalText(toks[1].trim().intern());
             } else {
-              // TODO(speneg): Does this help?
+              // TODO(spenceg): Does this help?
               String newLemma = lexMapper.map(null, lemma);
-              if (newLemma == null || newLemma.trim().length() == 0) {
+              if (newLemma == null || newLemma.trim().isEmpty()) {
                 newLemma = lemma;
               }
               String newMorphAnalysis = newLemma + MorphoFeatureSpecification.LEMMA_MARK + morphAnalysis;
-              ((CoreLabel) t.label()).setOriginalText(newMorphAnalysis.intern());
+              cl.setOriginalText(newMorphAnalysis.intern());
             }
 
           } else {
-            System.err.printf("%s: Cannot store morph analysis in non-CoreLabel: %s%n",this.getClass().getName(),t.label().getClass().getName());
+            log.error(String.format("%s: Cannot store morph analysis in non-CoreLabel: %s",this.getClass().getName(),t.label().getClass().getName()));
           }
         }
 
       } else if (t.isPreTerminal()) {
 
-        if (t.value() == null || t.value().equals("")) {
-          System.err.printf("%s: missing tag for\n%s\n",this.getClass().getName(),t.pennString());
+        if (t.value() == null || t.value().isEmpty()) {
+          log.warn(String.format("%s: missing tag for %s",this.getClass().getName(),t.pennString()));
         } else if(t.label() instanceof HasTag) {
           ((HasTag) t.label()).setTag(t.value());
         }
@@ -171,7 +172,7 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
         for (int j = 0; j < nk; j++) {
           Tree child = t.getChild(j);
           if (child.isLeaf()) {
-            System.err.printf("%s: Splicing in DUMMYTAG for%n%s%n",this.getClass().getName(),t.toString());
+            log.warn(String.format("%s: Splicing in DUMMYTAG for %s",this.getClass().getName(),t.toString()));
             newKids.add(tf.newTreeNode("DUMMYTAG", Collections.singletonList(child)));
 
           } else {
@@ -180,7 +181,7 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
         }
         t.setChildren(newKids);
       }
-    }//Every node in the tree has now been processed
+    } //Every node in the tree has now been processed
 
     //
     // Additional processing for specific phrasal annotations
@@ -213,21 +214,23 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
       // The whole tree is a bare tag: bad!
       String val = tree.label().value();
       if (val.equals("CC") || val.startsWith("PUNC") || val.equals("CONJ")) {
-        System.err.printf("%s: Bare tagged word being wrapped in FRAG\n%s\n",this.getClass().getName(),tree.pennString());
+        log.warn(String.format("%s: Bare tagged word being wrapped in FRAG %s", this.getClass().getName(),tree.pennString()));
         tree = tf.newTreeNode("FRAG", Collections.singletonList(tree));
       } else {
-        System.err.printf("%s: Bare tagged word\n%s\n",this.getClass().getName(),tree.pennString());
+        log.warn(String.format("%s: Bare tagged word %s", this.getClass().getName(), tree.pennString()));
       }
     }
 
     //Add start symbol so that the root has only one sub-state. Escape any enclosing brackets.
     //If the "tree" consists entirely of enclosing brackets e.g. ((())) then this method
     //will return null. In this case, readers e.g. PennTreeReader will try to read the next tree.
-    while(tree != null && (tree.value() == null || tree.value().equals("")) && tree.numChildren() <= 1)
+    while (tree != null && (tree.value() == null || tree.value().isEmpty()) && tree.numChildren() <= 1) {
       tree = tree.firstChild();
+    }
 
-    if(tree != null && !tree.value().equals(rootLabel))
+    if (tree != null && !tree.value().equals(rootLabel)) {
       tree = tf.newTreeNode(rootLabel, Collections.singletonList(tree));
+    }
 
     return tree;
   }
@@ -240,19 +243,22 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
 
     private static final long serialVersionUID = 7417844982953945964L;
 
+    @SuppressWarnings("RedundantIfStatement")
+    @Override
     public boolean test(Tree t) {
       // Pronoun deletions
-      if(t.isPreTerminal() && (t.value().equals("PRON_1S") || t.value().equals("PRP")) &&
-          (t.firstChild().value().equals("nullp") || t.firstChild().value().equals("نللة") || t.firstChild().value().equals("-~a")))
+      if (t.isPreTerminal() && (t.value().equals("PRON_1S") || t.value().equals("PRP")) &&
+              (t.firstChild().value().equals("nullp") || t.firstChild().value().equals("نللة") || t.firstChild().value().equals("-~a"))) {
         return false;
 
-      // Traces
-      else if(t.isPreTerminal() && t.value() != null && t.value().equals("-NONE-"))
+        // Traces
+      } else if (t.isPreTerminal() && t.value() != null && t.value().equals("-NONE-")) {
         return false;
-
+      }
       return true;
     }
   }
 
   private static final long serialVersionUID = -1592231121068698494L;
+
 }

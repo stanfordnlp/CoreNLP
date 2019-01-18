@@ -51,8 +51,7 @@ public class CorpusDictionary {
 
     logger.info("Loading " + (normalize ? "normalized" : "unnormalized") + " dictionary from " + filename);
 
-    try {
-      InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename);
+    try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename)) {
       BufferedReader wordDetectorReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
       int i = 0;
       for (String wordDetectorLine; (wordDetectorLine = wordDetectorReader.readLine()) != null; ) {
@@ -77,7 +76,6 @@ public class CorpusDictionary {
           word.add(wordDetectorLine);
         }
       }
-      is.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }

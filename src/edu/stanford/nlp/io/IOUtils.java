@@ -191,7 +191,7 @@ public class IOUtils  {
   }
 
   /**
-   * Writes a string to a temporary file
+   * Writes a string to a temporary file.
    *
    * @param contents The string to write
    * @param path The file path
@@ -208,6 +208,7 @@ public class IOUtils  {
       writer = new BufferedOutputStream(new FileOutputStream(tmp));
     }
     writer.write(contents.getBytes(encoding));
+    writer.close();
     return tmp;
   }
 
@@ -272,19 +273,17 @@ public class IOUtils  {
    * @return The object read from the file.
    */
   public static <T> T readObjectFromFile(File file) throws IOException,
-      ClassNotFoundException {
-    try {
-      ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-          new GZIPInputStream(new FileInputStream(file))));
+          ClassNotFoundException {
+    try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
+            new GZIPInputStream(new FileInputStream(file))))) {
       Object o = ois.readObject();
-      ois.close();
       return ErasureUtils.uncheckedCast(o);
     } catch (java.util.zip.ZipException e) {
-      ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-          new FileInputStream(file)));
-      Object o = ois.readObject();
-      ois.close();
-      return ErasureUtils.uncheckedCast(o);
+      try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
+              new FileInputStream(file)))) {
+        Object o = ois.readObject();
+        return ErasureUtils.uncheckedCast(o);
+      }
     }
   }
 
@@ -306,10 +305,10 @@ public class IOUtils  {
    * @return The object read from the file.
    */
   public static <T> T readObjectFromURLOrClasspathOrFileSystem(String filename) throws IOException, ClassNotFoundException {
-    ObjectInputStream ois = new ObjectInputStream(getInputStreamFromURLOrClasspathOrFileSystem(filename));
-    Object o = ois.readObject();
-    ois.close();
-    return ErasureUtils.uncheckedCast(o);
+    try (ObjectInputStream ois = new ObjectInputStream(getInputStreamFromURLOrClasspathOrFileSystem(filename))) {
+      Object o = ois.readObject();
+      return ErasureUtils.uncheckedCast(o);
+    }
   }
 
   public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(Redwood.RedwoodChannels log, String msg, String path) {
@@ -363,12 +362,13 @@ public class IOUtils  {
   }
 
   public static int lineCount(String textFileOrUrl) throws IOException {
-    BufferedReader r = readerFromString(textFileOrUrl);
-    int numLines = 0;
-    while (r.readLine() != null) {
-      numLines++;
+    try (BufferedReader r = readerFromString(textFileOrUrl)) {
+      int numLines = 0;
+      while (r.readLine() != null) {
+        numLines++;
+      }
+      return numLines;
     }
-    return numLines;
   }
 
   public static ObjectOutputStream writeStreamFromString(String serializePath)
@@ -759,6 +759,7 @@ public class IOUtils  {
 
         protected final BufferedReader reader = this.getReader();
         protected String line = this.getLine();
+        private boolean readerOpen = true;
 
         @Override
         public boolean hasNext() {
@@ -779,6 +780,7 @@ public class IOUtils  {
           try {
             String result = this.reader.readLine();
             if (result == null) {
+              readerOpen = false;
               this.reader.close();
             }
             return result;
@@ -806,6 +808,14 @@ public class IOUtils  {
         @Override
         public void remove() {
           throw new UnsupportedOperationException();
+        }
+
+        protected void finalize() throws Throwable {
+          super.finalize();
+          if (readerOpen) {
+            logger.warn("Forgot to close FileIterable -- closing from finalize()");
+            reader.close();
+          }
         }
       };
     }
@@ -1201,14 +1211,14 @@ public class IOUtils  {
       logger.err(throwableToStackTrace(e));
       return "";
     }
-    BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
-    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null; ) {
-      buff.append(temp);
-      buff.append(lineSeparator);
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding))) {
+      StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
+      for (String temp; (temp = br.readLine()) != null; ) {
+        buff.append(temp);
+        buff.append(lineSeparator);
+      }
+      return buff.toString();
     }
-    br.close();
-    return buff.toString();
   }
 
   public static String getUrlEncoding(URLConnection connection) {
@@ -1230,18 +1240,18 @@ public class IOUtils  {
    * Returns all the text at the given URL.
    */
   public static String slurpURL(URL u) throws IOException {
-    String lineSeparator = System.getProperty("line.separator");
     URLConnection uc = u.openConnection();
     String encoding = getUrlEncoding(uc);
     InputStream is = uc.getInputStream();
-    BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
-    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null; ) {
-      buff.append(temp);
-      buff.append(lineSeparator);
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding))) {
+      StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
+      String lineSeparator = System.lineSeparator();
+      for (String temp; (temp = br.readLine()) != null; ) {
+        buff.append(temp);
+        buff.append(lineSeparator);
+      }
+      return buff.toString();
     }
-    br.close();
-    return buff.toString();
   }
 
   /**
@@ -1315,9 +1325,8 @@ public class IOUtils  {
    */
   public static String slurpReader(Reader reader) {
     StringBuilder buff = new StringBuilder();
-    try {
+    try (BufferedReader r = new BufferedReader(reader)) {
       char[] chars = new char[SLURP_BUFFER_SIZE];
-      BufferedReader r = new BufferedReader(reader);
       while (true) {
         int amountRead = r.read(chars, 0, SLURP_BUFFER_SIZE);
         if (amountRead < 0) {
@@ -1325,7 +1334,6 @@ public class IOUtils  {
         }
         buff.append(chars, 0, amountRead);
       }
-      r.close();
     } catch (Exception e) {
       throw new RuntimeIOException("slurpReader IO problem", e);
     }
@@ -1665,8 +1673,7 @@ public class IOUtils  {
       }
       in.close();
       return sb.toString();
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       logger.err(throwableToStackTrace(e));
       return null;
     }

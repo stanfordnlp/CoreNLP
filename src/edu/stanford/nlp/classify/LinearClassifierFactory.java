@@ -14,23 +14,22 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
-//    http://www-nlp.stanford.edu/software/classifier.shtml
+//    https://nlp.stanford.edu/software/classifier.html
 
 package edu.stanford.nlp.classify;
 
 import java.io.BufferedReader;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.ToDoubleFunction;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -91,7 +90,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   private Evaluator[] evaluators; // = null;
 
   /** A logger for this class */
-  private final static Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifierFactory.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifierFactory.class);
 
   /** This is the {@code Factory<Minimizer<DiffFunction>>} that we use over and over again. */
   private class QNFactory implements Factory<Minimizer<DiffFunction>> {
@@ -761,7 +760,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
           return score;
         };
 
-    Function<Double,Double> negativeScorer =
+    DoubleUnaryOperator negativeScorer =
         sigmaToTry -> {
           //sigma = sigmaToTry;
           setSigma(sigmaToTry);
@@ -829,7 +828,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     return ArrayUtils.flatten(trainWeights(trainSet,negativeScorer.weights,true)); // make sure it's actually the interim weights from best sigma
   }
 
-  class NegativeScorer implements Function<Double, Double> {
+  class NegativeScorer implements DoubleUnaryOperator {
     public double[] weights; // = null;
     GeneralDataset<L, F> trainSet;
     GeneralDataset<L, F> devSet;
@@ -845,7 +844,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     }
 
     @Override
-    public Double apply(Double sigmaToTry) {
+    public double applyAsDouble(double sigmaToTry) {
       double[][] weights2D;
       setSigma(sigmaToTry);
 

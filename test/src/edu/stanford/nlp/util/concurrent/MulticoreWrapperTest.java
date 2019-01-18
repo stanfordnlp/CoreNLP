@@ -2,7 +2,9 @@ package edu.stanford.nlp.util.concurrent;
 
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test of MulticoreWrapper.
@@ -10,16 +12,18 @@ import junit.framework.TestCase;
  * @author Spence Green
  *
  */
-public class MulticoreWrapperTest extends TestCase {
+public class MulticoreWrapperTest {
 
   private MulticoreWrapper<Integer,Integer> wrapper;
   private int nThreads;
   
+  @Before
   public void setUp() {
     // Automagically detect the number of cores
     nThreads = -1;
   }
 
+  @Test
   public void testSynchronization() {
     wrapper = new MulticoreWrapper<Integer,Integer>(nThreads, new DelayedIdentityFunction());
     int lastReturned = 0;
@@ -30,7 +34,7 @@ public class MulticoreWrapperTest extends TestCase {
       while(wrapper.peek()) {
         int result = wrapper.poll();
         System.err.printf("Result: %d%n", result);
-        assertEquals(result,lastReturned++);
+        Assert.assertEquals(result, lastReturned++);
       }
     }
     
@@ -38,10 +42,11 @@ public class MulticoreWrapperTest extends TestCase {
     while(wrapper.peek()) {
       int result = wrapper.poll();
       System.err.printf("Result2: %d%n", result);
-      assertEquals(result,lastReturned++);        
+      Assert.assertEquals(result, lastReturned++);
     }
   }
 
+  @Test
   public void testUnsynchronized() {
     wrapper = new MulticoreWrapper<Integer,Integer>(nThreads, new DelayedIdentityFunction(), false);
     int nReturned = 0;
@@ -62,7 +67,7 @@ public class MulticoreWrapperTest extends TestCase {
       System.err.printf("Result2: %d%n", result);
       nReturned++;        
     }
-    assertEquals(nItems, nReturned);
+    Assert.assertEquals(nItems, nReturned);
   }
   
   /**

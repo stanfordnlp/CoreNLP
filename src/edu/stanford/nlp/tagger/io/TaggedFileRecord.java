@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 /** Parses and specifies all the details for how to read some POS tagging data.
- *  The options for this class are documented in MaxentTagger.
+ *  The options for this class are documented in MaxentTagger, unlder the trainFile property.
  *
  *  @author John Bauer
  */

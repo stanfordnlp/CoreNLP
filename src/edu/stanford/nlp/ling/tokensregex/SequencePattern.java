@@ -15,14 +15,12 @@ import java.util.function.Function;
  * <p>
  * Similar to Java's {@link java.util.regex.Pattern} except it is for sequences over arbitrary types T instead
  *  of just characters.
- * </p>
  *
  * <p> A regular expression must first be compiled into
  * an instance of this class.  The resulting pattern can then be used to create
  * a {@link SequenceMatcher} object that can match arbitrary sequences of type T
  * against the regular expression.  All of the state involved in performing a match
  * resides in the matcher, so many matchers can share the same pattern.
- * </p>
  *
  * <p>
  * To support sequence matching on a new type T, the following is needed:
@@ -44,18 +42,16 @@ import java.util.function.Function;
  *   SequenceMatcher m = p.getMatcher(tokens);
  *   while (m.find()) ....
  * </code></pre>
- * </p>
  *
  *
  * <p>
  * To support a new type {@code T}:
  * <ol>
  * <li> For a type {@code T} to be matchable, it has to have a corresponding <code>NodePattern<T></code> that indicates
- *    whether a node is matched or not  (see <code>CoreMapNodePattern</code> for example)</li>
+ *    whether a node is matched or not  (see {@code CoreMapNodePattern} for example)</li>
  * <li> To compile a string into corresponding pattern, will need to create a parser
- *    (see inner class <code>Parser</code>, <code>TokenSequencePattern</code> and <code>TokenSequenceParser.jj</code>)</li>
+ *    (see inner class {@code Parser}, {@code TokenSequencePattern} and {@code TokenSequenceParser.jj})</li>
  * </ol>
- * </p>
  *
  * <p>
  * SequencePattern supports the following standard regex features:
@@ -65,7 +61,6 @@ import java.util.function.Function;
  *  <li>Groups  (capturing  / noncapturing )  </li>
  *  <li>Quantifiers (greedy / nongreedy) </li>
  * </ul>
- * </p>
  *
  * <p>
  * SequencePattern also supports the following less standard features:
@@ -82,9 +77,7 @@ import java.util.function.Function;
  * <li> Conjunctions - conjunctions of sequence patterns (works for some cases)</li>
  * </ol>
  *
- * </p>
  * <p>Note that this and the inherited classes do not implement any custom equals and hashCode functions.
- * </p>
  *
  * @author Angel Chang
  * @see SequenceMatcher
@@ -1027,7 +1020,7 @@ public class SequencePattern<T> implements Serializable {
       for (Map.Entry<Pair<Class, Boolean>, Pair<Collection<PatternExpr>, Set<String>>> entry : stringPatterns.entrySet()) {
         Pair<Collection<PatternExpr>, Set<String>> saved = entry.getValue();
         Set<String> set = saved.second;
-        int flags = (entry.getKey().second)? NodePattern.CASE_INSENSITIVE:0;
+        int flags = (entry.getKey().second)? (NodePattern.CASE_INSENSITIVE | NodePattern.UNICODE_CASE):0;
         if (set.size() > OPTIMIZE_MIN_SIZE) {
           PatternExpr optimized = new NodePatternExpr(
                   new CoreMapNodePattern(entry.getKey().first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, flags)));

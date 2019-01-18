@@ -17,6 +17,8 @@ public class ArgumentParserTest {
   public static class StaticClass {
     @ArgumentParser.Option(name="option.static")
     public static int staticOption = -1;
+
+    private StaticClass() { }
   }
 
   public static class NonstaticClass {
@@ -40,7 +42,7 @@ public class ArgumentParserTest {
   @Test
   public void testFillStaticField() {
     assertEquals(-1, StaticClass.staticOption);
-    ArgumentParser.fillOptions(StaticClass.class, new String[]{"-option.static", "42"});
+    ArgumentParser.fillOptions(StaticClass.class, "-option.static", "42");
     assertEquals(42, StaticClass.staticOption);
   }
 
@@ -57,7 +59,7 @@ public class ArgumentParserTest {
   public void fillNonstaticField() {
     NonstaticClass x = new NonstaticClass();
     assertEquals(-1, x.staticOption);
-    ArgumentParser.fillOptions(x, new String[]{"-option.nonstatic", "42"});
+    ArgumentParser.fillOptions(x, "-option.nonstatic", "42");
     assertEquals(42, x.staticOption);
   }
 
@@ -76,7 +78,7 @@ public class ArgumentParserTest {
     MixedClass x = new MixedClass();
     assertEquals(-1, MixedClass.staticOption);
     assertEquals(-1, x.nonstaticOption);
-    ArgumentParser.fillOptions(x, new String[]{"-option.nonstatic", "42", "-option.static", "43"});
+    ArgumentParser.fillOptions(x, "-option.nonstatic", "42", "-option.static", "43");
     assertEquals(43, MixedClass.staticOption);
     assertEquals(42, x.nonstaticOption);
   }
@@ -86,8 +88,20 @@ public class ArgumentParserTest {
     MixedClass x = new MixedClass();
     assertEquals(-1, MixedClass.staticOption);
     assertEquals(-1, x.nonstaticOption);
-    ArgumentParser.fillOptions(MixedClass.class, new String[]{"-option.nonstatic", "42", "-option.static", "43"});
+    ArgumentParser.fillOptions(MixedClass.class, "-option.nonstatic", "42", "-option.static", "43");
     assertEquals(43, MixedClass.staticOption);
     assertEquals(-1, x.nonstaticOption);
   }
+
+  /** Check that command-line arguments override properties. */
+  @Test
+  public void checkOptionsOverrideProperties() {
+    NonstaticClass x = new NonstaticClass();
+    assertEquals(-1, x.staticOption);
+    Properties props = new Properties();
+    props.setProperty("option.nonstatic", "78");
+    ArgumentParser.fillOptions(x, props, "-option.nonstatic", "42");
+    assertEquals(42, x.staticOption);
+  }
+
 }

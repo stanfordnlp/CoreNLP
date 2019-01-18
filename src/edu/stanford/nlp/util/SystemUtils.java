@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.*;
 
@@ -12,7 +13,9 @@ import java.io.*;
  * @author Steven Bethard ({@link #run})
  */
 public class SystemUtils {
-  
+
+  private SystemUtils() { } // static methods
+
   /**
    * Runtime exception thrown by execute.
    */
@@ -56,9 +59,7 @@ public class SystemUtils {
         String msg = "process %s exited with value %d";
         throw new ProcessException(String.format(msg, builder.command(), result));
       }
-    } catch (InterruptedException e) {
-      throw new ProcessException(e);
-    } catch (IOException e) {
+    } catch (InterruptedException | IOException e) {
       throw new ProcessException(e);
     }
   }
@@ -74,7 +75,7 @@ public class SystemUtils {
    * @param errorWriter  Where to write error output. If null, System.err is used.
    */
   private static void consume(Process process, Writer outputWriter, Writer errorWriter)
-  throws IOException, InterruptedException {
+          throws InterruptedException {
     if (outputWriter == null) {
       outputWriter = new OutputStreamWriter(System.out);
     }
@@ -151,18 +152,18 @@ public class SystemUtils {
       outWriterThread.start();
     }
 
-    public void flush() throws IOException
-    {
+    @Override
+    public void flush() throws IOException {
       process.getOutputStream().flush();
     }
 
-    public void write(int b) throws IOException
-    {
+    @Override
+    public void write(int b) throws IOException {
       process.getOutputStream().write(b);
     }
 
-    public void close() throws IOException
-    {
+    @Override
+    public void close() throws IOException {
       process.getOutputStream().close();
       try {
         errWriterThread.join();
@@ -172,32 +173,44 @@ public class SystemUtils {
         throw new ProcessException(e);
       }
     }
-  }
+
+  } // end static class StaticOutputStream
 
   /**
    * Runs the shell command which is specified, along with its arguments, in the
-   * given <code>String</code> array.  If there is any regular output or error
-   * output, it is appended to the given <code>StringBuilder</code>s.
+   * given {@code String} array.  If there is any regular output or error
+   * output, it is appended to the given {@code StringBuilder}s.
    */
   public static void runShellCommand(String[] cmd,
                                      StringBuilder outputLines,
                                      StringBuilder errorLines)
-    throws IOException {
-    Process p = Runtime.getRuntime().exec(cmd);
+          throws IOException {
+    runShellCommand(cmd, null, outputLines, errorLines);
+  }
+
+  /**
+   * Runs the shell command which is specified, along with its arguments, in the
+   * given {@code String} array.  If there is any regular output or error
+   * output, it is appended to the given {@code StringBuilder}s.
+   */
+  public static void runShellCommand(String[] cmd,
+                                     File dir,
+                                     StringBuilder outputLines,
+                                     StringBuilder errorLines)
+          throws IOException {
+    Process p = Runtime.getRuntime().exec(cmd, null, dir);
     if (outputLines != null) {
-      BufferedReader in =
-        new BufferedReader(new InputStreamReader(p.getInputStream()));
-      String line;
-      while ((line = in.readLine()) != null) {
-        outputLines.append(line);
+      try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+        for (String line; (line = in.readLine()) != null; ) {
+          outputLines.append(line).append("\n");
+        }
       }
     }
     if (errorLines != null) {
-      BufferedReader err =
-        new BufferedReader(new InputStreamReader(p.getErrorStream()));
-      String line;
-      while ((line = err.readLine()) != null) {
-        errorLines.append(line);
+      try (BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+        for (String line; (line = err.readLine()) != null; ) {
+          errorLines.append(line).append("\n");
+        }
       }
     }
   }
@@ -205,60 +218,59 @@ public class SystemUtils {
 
   /**
    * Runs the shell command which is specified, along with its arguments, in the
-   * given <code>String</code>.  If there is any regular output or error output,
-   * it is appended to the given <code>StringBuilder</code>s.
+   * given {@code String}.  If there is any regular output or error output,
+   * it is appended to the given {@code StringBuilder}s.
    */
   public static void runShellCommand(String cmd,
                                      StringBuilder outputLines,
                                      StringBuilder errorLines)
-    throws IOException {
+          throws IOException {
     runShellCommand(new String[] {cmd}, outputLines, errorLines);
   }
 
 
   /**
    * Runs the shell command which is specified, along with its arguments, in the
-   * given <code>String</code> array.  If there is any regular output, it is
-   * appended to the given <code>StringBuilder</code>.  If there is any error
+   * given {@code String} array.  If there is any regular output, it is
+   * appended to the given {@code StringBuilder}.  If there is any error
    * output, it is swallowed (!).
    */
   public static void runShellCommand(String[] cmd,
                                      StringBuilder outputLines)
-    throws IOException {
+          throws IOException {
     runShellCommand(cmd, outputLines, null);
   }
 
 
   /**
    * Runs the shell command which is specified, along with its arguments, in the
-   * given <code>String</code>.  If there is any regular output, it is appended
-   * to the given <code>StringBuilder</code>.  If there is any error output, it
+   * given {@code String}.  If there is any regular output, it is appended
+   * to the given {@code StringBuilder}.  If there is any error output, it
    * is swallowed (!).
    */
   public static void runShellCommand(String cmd,
                                      StringBuilder outputLines)
-    throws IOException {
+          throws IOException {
     runShellCommand(new String[] {cmd}, outputLines, null);
   }
 
 
   /**
    * Runs the shell command which is specified, along with its arguments, in the
-   * given <code>String</code> array.  If there is any output, it is swallowed
-   * (!).
+   * given {@code String} array.  If there is any output, it is swallowed (!).
    */
   public static void runShellCommand(String[] cmd)
-    throws IOException {
+          throws IOException {
     runShellCommand(cmd, null, null);
   }
 
 
   /**
    * Runs the shell command which is specified, along with its arguments, in the
-   * given <code>String</code>.  If there is any output, it is swallowed (!).
+   * given {@code String}.  If there is any output, it is swallowed (!).
    */
   public static void runShellCommand(String cmd)
-    throws IOException {
+          throws IOException {
     runShellCommand(new String[] {cmd}, null, null);
   }
 
@@ -299,6 +311,35 @@ public class SystemUtils {
     return (int) ((total - free) / mb);
   }
 
+  /**
+   * Returns the string value of the stack trace for the given Throwable.
+   */
+  public static String getStackTraceString(Throwable t) {
+    ByteArrayOutputStream bs = new ByteArrayOutputStream();
+    t.printStackTrace(new PrintStream(bs));
+    return bs.toString();
+  }
+
+  // ----------------------------------------------------------------------------
+
+  /**
+   * Returns a String representing the current date and time in the given
+   * format.
+   *
+   * @see <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html">SimpleDateFormat</a>
+   */
+  public static String getTimestampString(String fmt) {
+    return (new SimpleDateFormat(fmt)).format(new Date());
+  }
+
+  /**
+   * Returns a String representing the current date and time in the format
+   * "20071022-140522".
+   */
+  public static String getTimestampString() {
+    return getTimestampString("yyyyMMdd-HHmmss");
+  }
+
 
   public static void main(String[] args) throws Exception {
     StringBuilder out = new StringBuilder();
@@ -316,6 +357,5 @@ public class SystemUtils {
     System.gc();
     System.out.println("The memory in use is " + getMemoryInUse() + "MB");
   }
-
 
 }

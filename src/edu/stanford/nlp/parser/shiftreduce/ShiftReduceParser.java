@@ -13,19 +13,17 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation,
-// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/srparser.shtml
+//    https://nlp.stanford.edu/software/srparser.html
 
 package edu.stanford.nlp.parser.shiftreduce;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileFilter;
 import java.io.IOException;
@@ -74,12 +72,13 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
  * A shift-reduce constituency parser.
  * Overview and description available at
- * http://nlp.stanford.edu/software/srparser.shtml
+ * import edu.stanford.nlp.util.logging.Redwood;
  *
  * @author John Bauer
  */
@@ -467,11 +466,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
   }
 
   @Override
-  public void setOptionFlags(String ... flags) {
+  public void setOptionFlags(String... flags) {
     op.setOptions(flags);
   }
 
-  public static ShiftReduceParser loadModel(String path, String ... extraFlags) {
+  public static ShiftReduceParser loadModel(String path, String... extraFlags) {
     ShiftReduceParser parser = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
             log, "Loading parser from serialized file", path);
     if (extraFlags.length > 0) {
@@ -488,7 +487,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     }
   }
 
-  static final String[] FORCE_TAGS = { "-forceTags" };
+  private static final String[] FORCE_TAGS = { "-forceTags" };
 
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();

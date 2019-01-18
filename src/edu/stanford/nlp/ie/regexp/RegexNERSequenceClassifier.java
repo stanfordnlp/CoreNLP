@@ -109,14 +109,10 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     } else {
       validPosPattern = null;
     }
-    BufferedReader rd = null;
-    try {
-      rd = IOUtils.readerFromString(mapping);
+    try (BufferedReader rd = IOUtils.readerFromString(mapping)) {
       entries = readEntries(rd, ignoreCase);
     } catch (IOException e) {
       throw new RuntimeIOException("Couldn't read RegexNER from " + mapping, e);
-    } finally {
-      IOUtils.closeIgnoringExceptions(rd);
     }
 
     this.ignoreCase = ignoreCase;
@@ -290,7 +286,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
 
       try {
         for (String str : regexes) {
-          if(ignoreCase) tokens.add(Pattern.compile(str, Pattern.CASE_INSENSITIVE));
+          if(ignoreCase) tokens.add(Pattern.compile(str, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE));
           else tokens.add(Pattern.compile(str));
         }
       } catch (PatternSyntaxException e) {
@@ -364,6 +360,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
   @Override
   public void serializeClassifier(String serializePath) {}
 
+  @Override
   public void serializeClassifier(ObjectOutputStream oos) {}
 
   @Override

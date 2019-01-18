@@ -14,17 +14,16 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
-//    http://www-nlp.stanford.edu/software/classifier.shtml
+//    https://nlp.stanford.edu/software/classifier.html
 
 package edu.stanford.nlp.classify;
 
@@ -64,7 +63,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
   private Set<L> labels;
   private final Integer zero = Integer.valueOf(0);
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(NaiveBayesClassifier.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(NaiveBayesClassifier.class);
 
   public Collection<L> labels() {
     return labels;
@@ -170,6 +169,5 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
       priorZero.setCount(label, score);
     }
   }
-
 
 }

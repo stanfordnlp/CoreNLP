@@ -189,8 +189,9 @@ public class SupervisedSieveTraining {
         }
       }
 
-
-      List<Sieve.MentionData> mentionsInPreviousParagraph = eliminateDuplicates(sieve.findClosestMentionsInSpanBackward(new Pair<>(leftValue, rightValue)));
+      List<Sieve.MentionData> mentionsInPreviousParagraph = new ArrayList<Sieve.MentionData>();
+      if (leftValue > -1 && rightValue > -1)
+        mentionsInPreviousParagraph = eliminateDuplicates(sieve.findClosestMentionsInSpanBackward(new Pair<>(leftValue, rightValue)));
 
       //mentions in next paragraph
       leftValue = quoteRun.second + 1;
@@ -208,7 +209,9 @@ public class SupervisedSieveTraining {
         }
       }
 
-      List<Sieve.MentionData> mentionsInNextParagraph = sieve.findClosestMentionsInSpanForward(new Pair<>(leftValue, rightValue));
+      List<Sieve.MentionData> mentionsInNextParagraph = new ArrayList<Sieve.MentionData>();
+      if (leftValue < tokens.size() && rightValue < tokens.size())
+        mentionsInNextParagraph = sieve.findClosestMentionsInSpanForward(new Pair<>(leftValue, rightValue));
 
       List<Sieve.MentionData> candidateMentions = new ArrayList<>();
       candidateMentions.addAll(mentionsInPreviousParagraph);
@@ -335,52 +338,58 @@ public class SupervisedSieveTraining {
         }
 
         //2. mention features
-        int mentionParagraphBegin = getParagraphBeginToken(sentenceInMentionParagraph, sentences);
-        int mentionParagraphEnd = getParagraphEndToken(sentenceInMentionParagraph, sentences);
+        if (sentenceInMentionParagraph != null) {
+          int mentionParagraphBegin = getParagraphBeginToken(sentenceInMentionParagraph, sentences);
+          int mentionParagraphEnd = getParagraphEndToken(sentenceInMentionParagraph, sentences);
 
-        if(!(mentionParagraphBegin == quoteParagraphBeginToken && mentionParagraphEnd == quoteParagraphEndToken)) {
-          List<CoreMap> quotesInMentionParagraph = paragraphToQuotes.getOrDefault(mentionParagraphIdx, new ArrayList<>());
-          Pair<ArrayList<String>, ArrayList<Pair<Integer, Integer>>> namesInMentionParagraph = sieve.scanForNames(new Pair<>(mentionParagraphBegin, mentionParagraphEnd));
+          if (!(mentionParagraphBegin == quoteParagraphBeginToken && mentionParagraphEnd == quoteParagraphEndToken)) {
+            List<CoreMap> quotesInMentionParagraph = paragraphToQuotes.getOrDefault(mentionParagraphIdx, new ArrayList<>());
+            Pair<ArrayList<String>, ArrayList<Pair<Integer, Integer>>> namesInMentionParagraph = sieve.scanForNames(new Pair<>(mentionParagraphBegin, mentionParagraphEnd));
 
-          features.setCount("quotesInMentionParagraph", quotesInMentionParagraph.size());
-          features.setCount("wordsInMentionParagraph", mentionParagraphEnd - mentionParagraphBegin + 1);
-          features.setCount("namesInMentionParagraph", namesInMentionParagraph.first.size());
+            features.setCount("quotesInMentionParagraph", quotesInMentionParagraph.size());
+            features.setCount("wordsInMentionParagraph", mentionParagraphEnd - mentionParagraphBegin + 1);
+            features.setCount("namesInMentionParagraph", namesInMentionParagraph.first.size());
 
-          //mention ordering in paragraph it is in
-          for (int i = 0; i < namesInMentionParagraph.second.size(); i++) {
-            if (ExtractQuotesUtil.rangeContains(new Pair<>(mention.begin, mention.end), namesInMentionParagraph.second.get(i)))
-              features.setCount("orderInParagraph", i);
-          }
-
-          //if mention paragraph is all one quote
-
-          if (quotesInMentionParagraph.size() == 1) {
-            CoreMap qInMentionParagraph = quotesInMentionParagraph.get(0);
-            if (qInMentionParagraph.get(CoreAnnotations.TokenBeginAnnotation.class) == mentionParagraphBegin && qInMentionParagraph.get(CoreAnnotations.TokenEndAnnotation.class) - 1 == mentionParagraphEnd) {
-              features.setCount("mentionParagraphIsInConversation", 1);
-            } else {
-              features.setCount("mentionParagraphIsInConversation", -1);
+            //mention ordering in paragraph it is in
+            for (int i = 0; i < namesInMentionParagraph.second.size(); i++) {
+              if (ExtractQuotesUtil.rangeContains(new Pair<>(mention.begin, mention.end), namesInMentionParagraph.second.get(i)))
+                features.setCount("orderInParagraph", i);
             }
+
+            //if mention paragraph is all one quote
+
+            if (quotesInMentionParagraph.size() == 1) {
+              CoreMap qInMentionParagraph = quotesInMentionParagraph.get(0);
+              if (qInMentionParagraph.get(CoreAnnotations.TokenBeginAnnotation.class) == mentionParagraphBegin && qInMentionParagraph.get(CoreAnnotations.TokenEndAnnotation.class) - 1 == mentionParagraphEnd) {
+                features.setCount("mentionParagraphIsInConversation", 1);
+              } else {
+                features.setCount("mentionParagraphIsInConversation", -1);
+              }
+            }
+            for (CoreMap quoteIMP : quotesInMentionParagraph) {
+              if (ExtractQuotesUtil.rangeContains(new Pair<>(quoteIMP.get(CoreAnnotations.TokenBeginAnnotation.class), quoteIMP.get(CoreAnnotations.TokenEndAnnotation.class) - 1), new Pair<>(mention.begin, mention.end)))
+                features.setCount("mentionInQuote", 1);
+            }
+            if (features.getCount("mentionInQuote") != 1)
+              features.setCount("mentionNotInQuote", 1);
           }
-          for (CoreMap quoteIMP : quotesInMentionParagraph) {
-            if (ExtractQuotesUtil.rangeContains(new Pair<>(quoteIMP.get(CoreAnnotations.TokenBeginAnnotation.class), quoteIMP.get(CoreAnnotations.TokenEndAnnotation.class) - 1), new Pair<>(mention.begin, mention.end)))
-              features.setCount("mentionInQuote", 1);
-          }
-          if (features.getCount("mentionInQuote") != 1)
-            features.setCount("mentionNotInQuote", 1);
         }
 
-        //nearby word syntax types
-        CoreLabel prevWord = tokens.get(mention.begin - 1);
-        CoreLabel nextWord = tokens.get(mention.end + 1);
-
-        features.setCount("prevWordType:" + prevWord.tag(), 1);
-        features.setCount("nextWordType:" + nextWord.tag(), 1);
+        // nearby word syntax types...make sure to check if there are previous or next words
+        // or there will be an array index crash
+        if (mention.begin > 0) {
+          CoreLabel prevWord = tokens.get(mention.begin - 1);
+          features.setCount("prevWordType:" + prevWord.tag(), 1);
+          if (punctuationForFeatures.contains(prevWord.lemma()))
+            features.setCount("prevWordPunct:" + prevWord.lemma(), 1);
+        }
+        if (mention.end+1 < tokens.size()) {
+          CoreLabel nextWord = tokens.get(mention.end + 1);
+          features.setCount("nextWordType:" + nextWord.tag(), 1);
+          if (punctuationForFeatures.contains(nextWord.lemma()))
+            features.setCount("nextWordPunct:" + nextWord.lemma(), 1);
+        }
 //                    features.setCount("prevAndNext:" + prevWord.tag()+ ";" + nextWord.tag(), 1);
-        if (punctuationForFeatures.contains(prevWord.lemma()))
-          features.setCount("prevWordPunct:" + prevWord.lemma(), 1);
-        if (punctuationForFeatures.contains(nextWord.lemma()))
-          features.setCount("nextWordPunct:" + nextWord.lemma(), 1);
 
         //quote paragraph features
         List<CoreMap> quotesInQuoteParagraph = paragraphToQuotes.get(quoteParagraphIdx);
@@ -414,48 +423,58 @@ public class SupervisedSieveTraining {
         //Vocative detection
         if (mention.type.equals("name")) {
           List<Person> pList = sd.characterMap.get(sieve.tokenRangeToString(new Pair<>(mention.begin, mention.end)));
-          Person p;
+          Person p = null;
           if (pList != null)
             p = pList.get(0);
-          else
-            p = sd.characterMap.get(sieve.scanForNames(new Pair<>(mention.begin, mention.end)).first.get(0)).get(0);
-
-          for (String name : namesData.first) {
-            if (p.aliases.contains(name))
-              features.setCount("nameInQuote", 1);
+          else {
+            Pair<ArrayList<String>, ArrayList<Pair<Integer,Integer>>> scanForNamesResultPair
+                = sieve.scanForNames(new Pair<>(mention.begin, mention.end));
+            if (scanForNamesResultPair.first.size() != 0) {
+              String scanForNamesResultString = scanForNamesResultPair.first.get(0);
+              if (scanForNamesResultString != null && sd.characterMap.containsKey(scanForNamesResultString)) {
+                p = sd.characterMap.get(scanForNamesResultString).get(0);
+              }
+            }
           }
 
-          if (quoteParagraphIdx > 0) {
+          if (p != null) {
+            for (String name : namesData.first) {
+              if (p.aliases.contains(name))
+                features.setCount("nameInQuote", 1);
+            }
+
+            if (quoteParagraphIdx > 0) {
 //            Paragraph prevParagraph = paragraphs.get(ex.paragraph_idx - 1);
-            List<CoreMap> quotesInPrevParagraph = paragraphToQuotes.getOrDefault(quoteParagraphIdx - 1, new ArrayList<>());
-            List<Pair<Integer, Integer>> exclusionList = new ArrayList<>();
-            for (CoreMap quoteIPP : quotesInPrevParagraph) {
-              Pair<Integer, Integer> quoteRange = new Pair<>(quoteIPP.get(CoreAnnotations.TokenBeginAnnotation.class), quoteIPP.get(CoreAnnotations.TokenEndAnnotation.class));
-              exclusionList.add(quoteRange);
-              for (String name : sieve.scanForNames(quoteRange).first) {
-                if (p.aliases.contains(name))
-                  features.setCount("nameInPrevParagraphQuote", 1);
+              List<CoreMap> quotesInPrevParagraph = paragraphToQuotes.getOrDefault(quoteParagraphIdx - 1, new ArrayList<>());
+              List<Pair<Integer, Integer>> exclusionList = new ArrayList<>();
+              for (CoreMap quoteIPP : quotesInPrevParagraph) {
+                Pair<Integer, Integer> quoteRange = new Pair<>(quoteIPP.get(CoreAnnotations.TokenBeginAnnotation.class), quoteIPP.get(CoreAnnotations.TokenEndAnnotation.class));
+                exclusionList.add(quoteRange);
+                for (String name : sieve.scanForNames(quoteRange).first) {
+                  if (p.aliases.contains(name))
+                    features.setCount("nameInPrevParagraphQuote", 1);
+                }
               }
-            }
 
-            int sentenceIdx = quoteFirstSentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
+              int sentenceIdx = quoteFirstSentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
 
-            CoreMap sentenceInPrevParagraph = null;
-            for(int i = sentenceIdx - 1; i >= 0; i--) {
-              CoreMap currSentence = sentences.get(i);
-              if(currSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class) == quoteParagraphIdx - 1) {
-                sentenceInPrevParagraph = currSentence;
-                break;
+              CoreMap sentenceInPrevParagraph = null;
+              for (int i = sentenceIdx - 1; i >= 0; i--) {
+                CoreMap currSentence = sentences.get(i);
+                if (currSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class) == quoteParagraphIdx - 1) {
+                  sentenceInPrevParagraph = currSentence;
+                  break;
+                }
               }
-            }
 
-            int prevParagraphBegin = getParagraphBeginToken(sentenceInPrevParagraph, sentences);
-            int prevParagraphEnd = getParagraphEndToken(sentenceInPrevParagraph, sentences);
-            List<Pair<Integer, Integer>> prevParagraphNonQuoteRuns = getRangeExclusion(new Pair<>(prevParagraphBegin, prevParagraphEnd), exclusionList);
-            for (Pair<Integer, Integer> nonQuoteRange : prevParagraphNonQuoteRuns) {
-              for (String name : sieve.scanForNames(nonQuoteRange).first) {
-                if (p.aliases.contains(name))
-                  features.setCount("nameInPrevParagraphNonQuote", 1);
+              int prevParagraphBegin = getParagraphBeginToken(sentenceInPrevParagraph, sentences);
+              int prevParagraphEnd = getParagraphEndToken(sentenceInPrevParagraph, sentences);
+              List<Pair<Integer, Integer>> prevParagraphNonQuoteRuns = getRangeExclusion(new Pair<>(prevParagraphBegin, prevParagraphEnd), exclusionList);
+              for (Pair<Integer, Integer> nonQuoteRange : prevParagraphNonQuoteRuns) {
+                for (String name : sieve.scanForNames(nonQuoteRange).first) {
+                  if (p.aliases.contains(name))
+                    features.setCount("nameInPrevParagraphNonQuote", 1);
+                }
               }
             }
           }

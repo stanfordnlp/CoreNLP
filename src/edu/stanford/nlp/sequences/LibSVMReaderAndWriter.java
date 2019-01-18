@@ -23,26 +23,26 @@ import java.util.function.Function;
 public class LibSVMReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(LibSVMReaderAndWriter.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(LibSVMReaderAndWriter.class);
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = -7997837004847909059L;
   private SeqClassifierFlags flags = null;
-  private IteratorFromReaderFactory factory;
+  private IteratorFromReaderFactory<List<CoreLabel>> factory;
   
-  public void init(SeqClassifierFlags flags) { 
+  @Override
+  public void init(SeqClassifierFlags flags) {
     this.flags = flags;
     factory = DelimitRegExIterator.getFactory("\n(\\s*\n)+", new ColumnDocParser());
   }
   
+  @Override
   public Iterator<List<CoreLabel>> getIterator(Reader r) {
     return factory.getIterator(r);
   }
 
   int num = 0;
   private class ColumnDocParser implements Function<String,List<CoreLabel>> {
+    @Override
     public List<CoreLabel> apply(String doc) {
 
       if (num % 1000 == 0) { log.info("["+num+"]"); }
@@ -71,6 +71,7 @@ public class LibSVMReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
     }
   }
   
+  @Override
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
     for (CoreLabel wi : doc) {
       String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);

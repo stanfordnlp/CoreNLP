@@ -645,8 +645,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       double[] newS, newY;
       double sy, yy, sg;
 
-      // allocate arrays for new s,y pairs (or replace if the list is already
-      // full)
+      // allocate arrays for new s,y pairs (or replace if the list is already full)
       if (mem > 0 && s.size() == mem || s.size() == maxMem) {
         newS = s.remove(0);
         newY = y.remove(0);
@@ -1068,7 +1067,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         sayln("** program by checking the QNMinimizer.wasSuccessful() method.");
         break;
       } catch (OutOfMemoryError oome) {
-        if ( ! qn.s.isEmpty()) {
+        if ( qn.s.size() > 1) {
           qn.s.remove(0);
           qn.y.remove(0);
           qn.rho.remove(0);
@@ -1085,8 +1084,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       double evalScore = (useEvalImprovement ? doEvaluation(rec.getBest()) : doEvaluation(x));
       sayln("final evalScore is: " + evalScore);
     }
-
-
 
     //
     // Announce the reason minimization has terminated.
@@ -1330,8 +1327,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
   /*
    * lineSearchBacktrack is the original line search used for the first version
-   * of QNMinimizer. It only satisfies sufficient descent not the Wolfe
-   * conditions.
+   * of QNMinimizer. It only satisfies sufficient descent not the Wolfe conditions.
    */
   private double[] lineSearchBacktrack(Function func, double[] dir, double[] x,
       double[] newX, double[] grad, double lastValue, StringBuilder sb)
@@ -1553,10 +1549,10 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
    *
    */
   private int getStep(
-        /* double[] x, double[] dir, double[] newX, double f0,
-        double g0, // None of these were used */
-        double[] newPt, double[] bestPt, double[] endPt,
-        double stpMin, double stpMax, StringBuilder sb) throws MaxEvaluationsExceeded {
+          /* double[] x, double[] dir, double[] newX, double f0,
+          double g0, // None of these were used */
+          double[] newPt, double[] bestPt, double[] endPt,
+          double stpMin, double stpMax, StringBuilder sb) throws MaxEvaluationsExceeded {
 
     // Should check for input errors.
     int info; // = 0; always set in the if below
@@ -1648,8 +1644,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       theta = 3 * (bestPt[f] - newPt[f]) / (newPt[a] - bestPt[a]) + bestPt[g]
           + newPt[g];
       s = Math.max(Math.max(theta, bestPt[g]), newPt[g]);
-      gamma = s
-          * Math.sqrt(Math.max(0.0, (theta / s) * (theta / s) - (bestPt[g] / s)
+      gamma = s * Math.sqrt(Math.max(0.0, (theta / s) * (theta / s) - (bestPt[g] / s)
               * (newPt[g] / s)));
       if (newPt[a] < bestPt[a]) {
         gamma = -gamma;

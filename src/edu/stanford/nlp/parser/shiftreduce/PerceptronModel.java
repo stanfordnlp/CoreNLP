@@ -1,5 +1,4 @@
 package edu.stanford.nlp.parser.shiftreduce;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -31,11 +30,16 @@ import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
+import edu.stanford.nlp.util.logging.Redwood;
+
 
 public class PerceptronModel extends BaseModel  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PerceptronModel.class); // Serializable
+  private static final Redwood.RedwoodChannels log = Redwood.channels(PerceptronModel.class); // Serializable
+
+  private float learningRate = 1.0f;
+
   Map<String, Weight> featureWeights;
   final FeatureFactory featureFactory;
 
@@ -90,7 +94,7 @@ public class PerceptronModel extends BaseModel  {
     averageModels(models);
   }
 
-  public void  averageModels(Collection<PerceptronModel> models) {
+  public void averageModels(Collection<PerceptronModel> models) {
     if (models.isEmpty()) {
       throw new IllegalArgumentException("Cannot average empty models");
     }
@@ -123,7 +127,7 @@ public class PerceptronModel extends BaseModel  {
    * For each feature, remove all transitions with score of 0.
    * Any feature with no transitions left is then removed
    */
-  void condenseFeatures() {
+  private void condenseFeatures() {
     Iterator<String> featureIt = featureWeights.keySet().iterator();
     while (featureIt.hasNext()) {
       String feature = featureIt.next();
@@ -135,7 +139,7 @@ public class PerceptronModel extends BaseModel  {
     }
   }
 
-  void filterFeatures(Set<String> keep) {
+  private void filterFeatures(Set<String> keep) {
     Iterator<String> featureIt = featureWeights.keySet().iterator();
     while (featureIt.hasNext()) {
       if (!keep.contains(featureIt.next())) {
@@ -165,7 +169,7 @@ public class PerceptronModel extends BaseModel  {
     log.info("Number of transitions: " + transitionIndex.size());
   }
 
-  /** Reconstruct that tag set that was used to train the model by decoding some of the features.
+  /** Reconstruct the tag set that was used to train the model by decoding some of the features.
    *  This is slow and brittle but should work!  Only if "-" is not in the tag set....
    */
   @Override
@@ -281,7 +285,7 @@ public class PerceptronModel extends BaseModel  {
               // only possible when the parser has gone off the rails?
               continue;
             }
-            updates.add(new Update(features, transitionNum, -1, 1.0f));
+            updates.add(new Update(features, transitionNum, -1, learningRate));
           }
         } else {
           numWrong++;
@@ -293,7 +297,7 @@ public class PerceptronModel extends BaseModel  {
             // CompoundUnaryTransition which only exists because the
             // parser is wrong.  Do we want to add those transitions?
           }
-          updates.add(new Update(features, transitionNum, predictedNum, 1.0f));
+          updates.add(new Update(features, transitionNum, predictedNum, learningRate));
         }
         state = predicted.apply(state);
       }
@@ -306,7 +310,7 @@ public class PerceptronModel extends BaseModel  {
       PriorityQueue<State> agenda = new PriorityQueue<>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State goldState = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       agenda.add(goldState);
-      int transitionCount = 0;
+      // int transitionCount = 0;
       while (transitions.size() > 0) {
         Transition goldTransition = transitions.get(0);
         Transition highestScoringTransitionFromGoldState = null;
@@ -355,8 +359,8 @@ public class PerceptronModel extends BaseModel  {
           ++numWrong;
           List<String> goldFeatures = featureFactory.featurize(goldState);
           int lastTransition = transitionIndex.indexOf(highestScoringState.transitions.peek());
-          updates.add(new Update(featureFactory.featurize(highestCurrentState), -1, lastTransition, 1.0f));
-          updates.add(new Update(goldFeatures, transitionIndex.indexOf(goldTransition), -1, 1.0f));
+          updates.add(new Update(featureFactory.featurize(highestCurrentState), -1, lastTransition, learningRate));
+          updates.add(new Update(goldFeatures, transitionIndex.indexOf(goldTransition), -1, learningRate));
 
           if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM) {
             // If the correct state has fallen off the agenda, break
@@ -406,7 +410,7 @@ public class PerceptronModel extends BaseModel  {
         } else {
           numWrong++;
           // TODO: allow weighted features, weighted training, etc
-          updates.add(new Update(features, transitionNum, predictedNum, 1.0f));
+          updates.add(new Update(features, transitionNum, predictedNum, learningRate));
           switch (op.trainOptions().trainingMethod) {
           case EARLY_TERMINATION:
             keepGoing = false;
@@ -444,10 +448,12 @@ public class PerceptronModel extends BaseModel  {
       this.oracle = oracle;
     }
 
+    @Override
     public Pair<Integer, Integer> process(Integer index) {
       return trainTree(index, binarizedTrees, transitionLists, updates, oracle);
     }
 
+    @Override
     public TrainTreeProcessor newInstance() {
       // already threadsafe
       return this;
@@ -458,7 +464,7 @@ public class PerceptronModel extends BaseModel  {
    * Trains a batch of trees and returns the following: a list of
    * Update objects, the number of transitions correct, and the number
    * of transitions wrong.
-   * <br>
+   *
    * If the model is trained with multiple threads, it is expected
    * that a valid MulticoreWrapper is passed in which does the
    * processing.  In that case, the processing is done on all of the
@@ -591,7 +597,11 @@ public class PerceptronModel extends BaseModel  {
         // especially if we also get a dev set number for it, but that
         // might be overkill
       }
-    }
+
+      if (iteration % 10 == 0 && op.trainOptions().decayLearningRate > 0.0) {
+        learningRate *= op.trainOptions().decayLearningRate;
+      }
+    } // end for iterations
 
     if (wrapper != null) {
       wrapper.join();
@@ -642,6 +652,7 @@ public class PerceptronModel extends BaseModel  {
    * a dev set.  If op.retrainAfterCutoff is set, will rerun training
    * after the first time through on a limited set of features.
    */
+  @Override
   public void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads) {
     if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0) {
       String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
@@ -656,6 +667,6 @@ public class PerceptronModel extends BaseModel  {
     }
   }
 
-
   private static final long serialVersionUID = 1;
+
 }

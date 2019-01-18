@@ -54,7 +54,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -67,7 +69,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
 /**
  * Static methods for operating on a {@link Counter}.
- * <p>
+ *
  * All methods that change their arguments change the <i>first</i> argument
  * (only), and have "InPlace" in their name. This class also provides access to
  * Comparators that can be used to sort the keys or entries of this Counter by
@@ -83,7 +85,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 public class Counters  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Counters.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Counters.class);
 
   private static final double LOG_E_2 = Math.log(2.0);
 
@@ -1967,17 +1969,18 @@ public class Counters  {
    */
   public static ClassicCounter<String> deserializeStringCounter(String filename) throws IOException {
     String[] fields = new String[4];
-    BufferedReader reader = IOUtils.readerFromString(filename);
-    String line;
-    ClassicCounter<String> counts = new ClassicCounter<>(1000000);
-    while ( (line = reader.readLine()) != null) {
-      StringUtils.splitOnChar(fields, line, '\t');
-      long mantissa = SloppyMath.parseInt(fields[2]);
-      int exponent = (int) SloppyMath.parseInt(fields[3]);
-      double value = SloppyMath.parseDouble(fields[1].equals("-"), mantissa, exponent);
-      counts.setCount(fields[0], value);
+    try (BufferedReader reader = IOUtils.readerFromString(filename)) {
+      String line;
+      ClassicCounter<String> counts = new ClassicCounter<>(1000000);
+      while ((line = reader.readLine()) != null) {
+        StringUtils.splitOnChar(fields, line, '\t');
+        long mantissa = SloppyMath.parseInt(fields[2]);
+        int exponent = (int) SloppyMath.parseInt(fields[3]);
+        double value = SloppyMath.parseDouble(fields[1].equals("-"), mantissa, exponent);
+        counts.setCount(fields[0], value);
+      }
+      return counts;
     }
-    return counts;
   }
 
 
@@ -3082,9 +3085,9 @@ public class Counters  {
     return fscores;
   }
 
-  public static <E> void transformValuesInPlace(Counter<E> counter, Function<Double, Double> func){
+  public static <E> void transformValuesInPlace(Counter<E> counter, DoubleUnaryOperator func){
     for(E key: counter.keySet()){
-      counter.setCount(key, func.apply(counter.getCount(key)));
+      counter.setCount(key, func.applyAsDouble(counter.getCount(key)));
     }
   }
 
@@ -3096,10 +3099,10 @@ public class Counters  {
   }
 
 
-  public static<E> void retainKeys(Counter<E> counter, Function<E, Boolean> retainFunction) {
+  public static<E> void retainKeys(Counter<E> counter, Predicate<E> retainFunction) {
     Set<E> remove = new HashSet<>();
     for(Entry<E, Double> en: counter.entrySet()){
-      if(!retainFunction.apply(en.getKey())){
+      if(!retainFunction.test(en.getKey())){
         remove.add(en.getKey());
       }
     }

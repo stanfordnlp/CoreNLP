@@ -2,8 +2,9 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.stats.ClassicCounter;
-import junit.framework.Assert;
-import junit.framework.TestCase;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  *
  */
-public class LinearClassifierITest extends TestCase {
+public class LinearClassifierITest {
 
   private static <L, F> RVFDatum<L, F> newDatum(L label,
                                                 F[] features,
@@ -20,7 +21,7 @@ public class LinearClassifierITest extends TestCase {
     for (int i = 0; i < features.length; i++) {
       counter.setCount(features[i], counts[i]);
     }
-    return new RVFDatum<L, F>(counter, label);
+    return new RVFDatum<>(counter, label);
   }
 
   /**
@@ -45,16 +46,18 @@ public class LinearClassifierITest extends TestCase {
     Assert.assertEquals(d2.label(), lc.classOf(d2));
   }
 
+  @Test
   public void testStrBinaryDatums() throws Exception {
     testStrBinaryDatums(-1.0, 0.0, 1.0, 0.0);
     testStrBinaryDatums(1.0, 0.0, -1.0, 0.0);
     testStrBinaryDatums(0.0, 1.0, 0.0, -1.0);
-    testStrBinaryDatums(0.0, -1.0, 0.0, 1.0);    
+    testStrBinaryDatums(0.0, -1.0, 0.0, 1.0);
     testStrBinaryDatums(1.0, 1.0, -1.0, -1.0);
     testStrBinaryDatums(0.0, 1.0, 1.0, 0.0);
     testStrBinaryDatums(1.0, 0.0, 0.0, 1.0);
   }
 
+  @Test
   public void testStrMultiClassDatums() throws Exception {
     RVFDataset<String, String> trainData = new RVFDataset<>();
     List<RVFDatum<String, String>> datums = new ArrayList<>();
@@ -84,4 +87,5 @@ public class LinearClassifierITest extends TestCase {
     // Test data
     Assert.assertEquals(td1.label(), lc.classOf(td1));
   }
+
 }

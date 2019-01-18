@@ -17,6 +17,7 @@ public abstract class NodePattern<T> implements Serializable{
   // Flags for string annotations
   public static final int CASE_INSENSITIVE = 0x02;
   public static final int NORMALIZE = 0x04;
+  public static final int UNICODE_CASE = 0x40;
 
   /**
    * Returns true if the input node matches this pattern

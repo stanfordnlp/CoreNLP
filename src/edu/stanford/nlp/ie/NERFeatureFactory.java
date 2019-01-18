@@ -14,17 +14,16 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
-//    http://nlp.stanford.edu/downloads/crf-classifier.shtml
+//    https://nlp.stanford.edu/software/CRF-NER.html
 
 package edu.stanford.nlp.ie;
 
@@ -82,10 +81,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     {@code featuresC} code, if both the current and previous class,
  *     then {@code featuresCpC}, etc.</li>
  * </ol>
- * <p> Parameters can be defined using a Properties file
+ * <p>
+ * Parameters can be defined using a Properties file
  * (specified on the command-line with {@code -prop} <i>propFile</i>),
  * or directly on the command line. The following properties are recognized:
- * </p>
+ *
  * <table border="1">
  * <tr><td><b>Property Name</b></td><td><b>Type</b></td><td><b>Default Value</b></td><td><b>Description</b></td></tr>
  * <tr><td> loadClassifier </td><td>String</td><td>n/a</td><td>Path to serialized classifier to load</td></tr>
@@ -477,12 +477,13 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     Timing timing = new Timing();
     lexicon = Generics.newHashMap();
     boolean terryKoo = "terryKoo".equals(flags.distSimFileFormat);
+    Pattern p = Pattern.compile(terryKoo ? "\\t" : "\\s+");
     for (String line : ObjectBank.getLineIterator(flags.distSimLexicon,
                                                   flags.inputEncoding)) {
       String word;
       String wordClass;
       if (terryKoo) {
-        String[] bits = line.split("\\t");
+        String[] bits = p.split(line);
         word = bits[1];
         wordClass = bits[0];
         if (flags.distSimMaxBits > 0 && wordClass.length() > flags.distSimMaxBits) {
@@ -490,7 +491,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         }
       } else {
         // "alexClark"
-        String[] bits = line.split("\\s+");
+        String[] bits = p.split(line);
         word = bits[0];
         wordClass = bits[1];
       }
@@ -1324,7 +1325,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         }
       }
 
-      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || (flags.useShapeStrings)) {
+      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings) {
         featuresC.add(cShape + "-TYPE");
         if (flags.useTypeSeqs) {
           featuresC.add(pShape + "-PTYPE");
@@ -1466,7 +1467,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         }
       }
 
-      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || (flags.useShapeStrings)) {
+      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings) {
         featuresC.add(cShape + "-TYPE");
       }
 
@@ -1493,7 +1494,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         featuresC.add(pWord + '-' + nWord + "-SWORDS");
       }
 
-      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || (flags.useShapeStrings)) {
+      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings) {
         if (flags.useTypeSeqs) {
           featuresC.add(pShape + "-PTYPE");
           featuresC.add(nShape + "-NTYPE");
@@ -1694,21 +1695,27 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
    * Binary feature annotations
    */
   private static class Bin1Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin2Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin3Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin4Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin5Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
   private static class Bin6Annotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {  return String.class; } }
 
 
@@ -2293,7 +2300,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     return l;
   }
 
-  String intern(String s) {
+  private String intern(String s) {
     if (flags.intern) {
       return s.intern();
     } else {
@@ -2301,15 +2308,15 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     }
   }
 
-  public void initGazette() {
+  private void initGazette() {
     try {
       // read in gazettes
       if (flags.gazettes == null) { flags.gazettes = new ArrayList<>(); }
       List<String> gazettes = flags.gazettes;
       for (String gazetteFile : gazettes) {
-        BufferedReader r = IOUtils.readerFromString(gazetteFile, flags.inputEncoding);
-        readGazette(r);
-        r.close();
+        try (BufferedReader r = IOUtils.readerFromString(gazetteFile, flags.inputEncoding)) {
+          readGazette(r);
+        }
       }
     } catch (IOException e) {
       throw new RuntimeIOException(e);

@@ -184,9 +184,7 @@ public class ParsedGigawordReader implements Iterable<Annotation>  {
       Builder parser = new Builder();
       StringReader in = new StringReader(xml);
       docElem = parser.build(in).getRootElement();
-    } catch (ParsingException e) {
-      throw new RuntimeException(String.format("error:\n%s\ninput:\n%s", e, xml));
-    } catch(IOException e) {
+    } catch (ParsingException | IOException e) {
       throw new RuntimeException(String.format("error:\n%s\ninput:\n%s", e, xml));
     }
 

@@ -92,6 +92,7 @@ public class PTBTokenizerTest {
       "a 1908 Model K Stanley with 1:01-minute time",
       "the 9-to-11:45 a.m. weekday shift",
       "Brighton Rd. Pacifica",
+      "Walls keeping water out of the bowl-shaped city have been breached, and emergency teams are using helicopters to drop 1,350kg (3,000lb) sandbags and concrete barriers into the gaps.",
   };
 
   private final String[][] ptbGold = {
@@ -116,7 +117,7 @@ public class PTBTokenizerTest {
       // Unclear if 37%-owned is right or wrong under old PTB....  Maybe should be 37 %-owned even though sort of crazy
       { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  ":-LRB-", ".",
           "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
-      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
+      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84", "km", "-RRB-", ".",
           "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
       { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
       { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
@@ -178,6 +179,9 @@ public class PTBTokenizerTest {
       { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
       { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
       { "Brighton", "Rd.", "Pacifica"},
+      { "Walls", "keeping", "water", "out", "of", "the", "bowl-shaped", "city", "have", "been", "breached", ",", "and",
+              "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
+              "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -202,7 +206,7 @@ public class PTBTokenizerTest {
       // Unclear if 37%-owned is right or wrong under old PTB....  Maybe should be 37 %-owned even though sort of crazy
       { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  ":-LRB-", ".",
           "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
-      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
+      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84", "km", "-RRB-", ".",
           "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
       { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
       { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
@@ -277,12 +281,30 @@ public class PTBTokenizerTest {
       { "a", "1908", "Model", "K", "Stanley", "with", "1:01-minute", "time" },
       { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
       { "Brighton", "Rd.", "Pacifica"},
+      { "Walls", "keeping", "water", "out", "of", "the", "bowl", "-", "shaped", "city", "have", "been", "breached", ",", "and",
+              "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
+              "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
   };
 
   @Test
   public void testPTBTokenizerWord() {
     TokenizerFactory<Word> tokFactory = PTBTokenizer.factory();
     runOnTwoArrays(tokFactory, ptbInputs, ptbGold);
+  }
+
+  private final String[] moreInputs = {
+          "Joseph Someone (fl. 2050–75) liked the noble gases, viz. helium, neon, argon, xenon, krypton and radon.",
+  };
+
+  private final String[][] moreGold = {
+          { "Joseph", "Someone", "-LRB-", "fl.", "2050", "--", "75", "-RRB-", "liked", "the", "noble", "gases", ",",
+                  "viz.", "helium", ",", "neon", ",", "argon", ",", "xenon", ",", "krypton", "and", "radon", "." },
+  };
+
+  @Test
+  public void testPTBTokenizerCoreLabel() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory();
+    runOnTwoArrays(tokFactory, moreInputs, moreGold);
   }
 
 
@@ -330,19 +352,29 @@ public class PTBTokenizerTest {
   }
 
 
+  private static final String[] jeInputs = {
+          "it's",
+          " it's ",
+          // "open images/cat.png", // Dunno how to get this case without bad consequence. Can't detect eof in pattern....
+  };
+
+  private static final List[] jeOutputs = {
+          Arrays.asList(new Word("it"), new Word("'s")),
+          Arrays.asList(new Word("it"), new Word("'s")),
+          // Arrays.asList(new Word("open"), new Word("images/cat.png")),
+  };
+
+
+  /** These case check things still work at end of file that would normally have following contexts. */
   @Test
   public void testJacobEisensteinApostropheCase() {
-    StringReader reader = new StringReader("it's");
-    PTBTokenizer<Word> tokenizer = PTBTokenizer.newPTBTokenizer(reader);
-    List<Word> stemmedTokens = tokenizer.tokenize();
-    // for (Word word : stemmedTokens) System.out.print (word+" ");
-    reader = new StringReader(" it's ");
-    tokenizer = PTBTokenizer.newPTBTokenizer(reader);
-    List<Word> stemmedTokens2 = tokenizer.tokenize();
-    // System.out.println ();
-    // for (Word word : stemmedTokens2) System.out.print (word+" ");
-    // System.out.println();
-    assertEquals(stemmedTokens, stemmedTokens2);
+    assertEquals(jeInputs.length, jeOutputs.length);
+    for (int i = 0; i < jeInputs.length; i++) {
+      StringReader reader = new StringReader(jeInputs[i]);
+      PTBTokenizer<Word> tokenizer = PTBTokenizer.newPTBTokenizer(reader);
+      List<Word> tokens = tokenizer.tokenize();
+      assertEquals(jeOutputs[i], tokens);
+    }
   }
 
 
@@ -551,6 +583,28 @@ public class PTBTokenizerTest {
     }
   }
 
+  private static <T extends CoreLabel> void runOnTwoArraysWithOffsets(TokenizerFactory<T> tokFactory, String[] inputs, String[][] desired) {
+    assertEquals("Test data arrays don't match in length", inputs.length, desired.length);
+    for (int sent = 0; sent < inputs.length; sent++) {
+      // System.err.println("Testing " + inputs[sent]);
+      Tokenizer<T> tok = tokFactory.getTokenizer(new StringReader(inputs[sent]));
+      for (int i = 0; tok.hasNext() || i < desired[sent].length; i++) {
+        if ( ! tok.hasNext()) {
+          fail("PTBTokenizer generated too few tokens for sentence " + sent + "! Missing " + desired[sent][i]);
+        }
+        T w = tok.next();
+        if (i >= desired[sent].length) {
+          fail("PTBTokenizer generated too many tokens for sentence " + sent + "! Added " + w.value());
+        } else {
+          assertEquals("PTBTokenizer got wrong token", desired[sent][i], w.value());
+          assertEquals("PTBTokenizer charOffsets wrong for " + desired[sent][i], desired[sent][i].length(),
+                    w.endPosition() - w.beginPosition());
+        }
+      }
+    }
+  }
+
+
   /** The appending has to run one behind so as to make sure that the after annotation has been filled in!
    *  Just placing the appendTextFrom() after reading tok.next() in the loop does not work.
    */
@@ -609,8 +663,10 @@ public class PTBTokenizerTest {
     "1202-03-04 5:32:56 2004-03-04T18:32:56",
     "20°C is 68°F because 0℃ is 32℉",
     "a.jpg a-b.jpg a.b.jpg a-b.jpg a_b.jpg a-b-c.jpg 0-1-2.jpg a-b/c-d_e.jpg a-b/c-9a9_9a.jpg\n",
+    "¯\\_(ツ)_/¯",
     "#hashtag #Azərbaycanca #mûǁae #Čeština #日本語ハッシュタグ #1 #23 #Trump2016 @3 @acl_2016",
           "Sect. 793 of the Penal Code",
+    "Pls. copy the text within this quote to the subject part of your email and explain wrt. the principles.",
   };
 
   private final String[][] mtGold = {
@@ -621,8 +677,11 @@ public class PTBTokenizerTest {
     { "1202-03-04", "5:32:56", "2004-03-04T18:32:56" },
     { "20", "°C", "is", "68", "°F", "because", "0", "℃", "is", "32", "℉" },
     { "a.jpg", "a-b.jpg", "a.b.jpg", "a-b.jpg", "a_b.jpg", "a-b-c.jpg", "0-1-2.jpg", "a-b/c-d_e.jpg", "a-b/c-9a9_9a.jpg"},
+    { "¯\\_-LRB-ツ-RRB-_/¯" },
     { "#hashtag", "#Azərbaycanca", "#mûǁae", "#Čeština", "#日本語ハッシュタグ", "#", "1", "#", "23", "#Trump2016", "@", "3", "@acl_2016" },
           { "Sect.", "793", "of", "the", "Penal", "Code" },
+    { "Pls.", "copy", "the", "text", "within", "this", "quote", "to", "the", "subject", "part", "of", "your", "email",
+            "and", "explain", "wrt.", "the", "principles", "." },
   };
 
   @Test
@@ -642,7 +701,7 @@ public class PTBTokenizerTest {
           "\u00AE\u203C\u2198\u231A\u2328\u23F0\u2620\u26BD\u2705\u2757",
           // Choosing emoji vs. text presentation.
           "⚠⚠️⚠︎❤️❤",
-          "¯\\_(ツ)_/¯"
+          "\uD83D\uDC69\u200D⚖\uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4"
   };
 
   private final String[][] emojiGold = {
@@ -651,14 +710,63 @@ public class PTBTokenizerTest {
           { "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67", "\uD83E\uDDC0" },
           { "\u00AE", "\u203C", "\u2198", "\u231A", "\u2328", "\u23F0", "\u2620", "\u26BD", "\u2705", "\u2757" },
           { "⚠", "⚠️", "⚠︎", "❤️", "❤"},
-          { "¯\\_-LRB-ツ-RRB-_/¯" },
+          { "\uD83D\uDC69\u200D⚖", "\uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4" }
   };
 
   @Test
   public void testEmoji() {
     TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
-    runOnTwoArrays(tokFactory, emojiInputs, emojiGold);
+    runOnTwoArraysWithOffsets(tokFactory, emojiInputs, emojiGold);
     runAgainstOrig(tokFactory, emojiInputs);
+    assertEquals(1, "\uD83D\uDCF7".codePointCount(0, 2));
+    assertEquals(2, "❤️".codePointCount(0, 2));
+  }
+
+
+  private final String[] tweetInputs = {
+          "Happy #StarWars week! Ever wonder what was going on with Uncle Owen's dad? Check out .@WHMPodcast's rant on Ep2 https://t.co/9iJMMkAokT",
+          "RT @BiIlionaires: #TheForceAwakens inspired vehicles are a big hit in LA.",
+          "“@people: A woman built the perfect #StarWars costume for her dog https://t.co/VJRQwNZB0t https://t.co/nmNROB7diR”@guacomole123",
+          "I would like to get a 13\" MB Air with an i7@1,7GHz",
+          "So you have audio track 1 @145bpm and global project tempo is now 145bpm",
+          "I know that the inside of the mall opens @5am.",
+          "I have ordered Bose Headfones worth 300USD. Not 156bpmt. FCPX MP4 playback choppy on 5k iMac",
+          "RT @Suns: What happens when you combine @50cent, #StarWars and introductions at an @NBA game? This.",
+          "RT @ShirleyHoman481: '#StarWars' Premiere Street Closures Are “Bigger Than the Oscars\": Four blocks of Hollywood Blvd. -- from Highland… ht…",
+          "In 2009, Wiesel criticized the Vatican for lifting the excommunication of controversial bishop Richard Williamson, a member of the Society of Saint Pius X.",
+          "RM460.35 million",
+  };
+
+  private final String[][] tweetGold = {
+          { "Happy", "#StarWars", "week", "!", "Ever", "wonder", "what", "was", "going", "on", "with", "Uncle",
+                  "Owen", "'s", "dad", "?", "Check", "out", ".@WHMPodcast", "'s", "rant", "on", "Ep2",
+                  "https://t.co/9iJMMkAokT" },
+          { "RT", "@BiIlionaires", ":", "#TheForceAwakens", "inspired", "vehicles", "are", "a", "big", "hit", "in", "LA", "." },
+          { "``", "@people", ":", "A", "woman", "built", "the", "perfect", "#StarWars", "costume", "for", "her", "dog",
+                  "https://t.co/VJRQwNZB0t", "https://t.co/nmNROB7diR", "''", "@guacomole123" },
+          { "I", "would", "like", "to", "get", "a", "13", "''", "MB", "Air", "with", "an", "i7", "@", "1,7", "GHz" },
+          { "So", "you", "have", "audio", "track", "1", "@", "145", "bpm", "and", "global", "project", "tempo", "is",
+                  "now", "145", "bpm" },
+          { "I", "know", "that", "the", "inside", "of", "the", "mall", "opens", "@", "5", "am", "." },
+          { "I", "have", "ordered", "Bose", "Headfones", "worth", "300", "USD", ".", "Not", "156bpmt", ".",
+            "FCPX", "MP4", "playback", "choppy", "on", "5k", "iMac" },
+          { "RT", "@Suns", ":", "What", "happens", "when", "you", "combine", "@50cent", ",", "#StarWars", "and",
+                  "introductions", "at", "an", "@NBA", "game", "?", "This", "." },
+          { "RT", "@ShirleyHoman481", ":", "'", "#StarWars", "'", "Premiere", "Street", "Closures", "Are", "``",
+                  "Bigger", "Than", "the", "Oscars", "''", ":", "Four", "blocks", "of", "Hollywood", "Blvd.", "--",
+                  "from", "Highland", "...", "ht", "..." },
+          // Should really be "Saint Pius X ." but unclear how to achieve.
+          { "In", "2009", ",", "Wiesel", "criticized", "the", "Vatican", "for", "lifting", "the", "excommunication",
+                  "of", "controversial", "bishop", "Richard", "Williamson", ",", "a", "member", "of", "the",
+                  "Society", "of", "Saint", "Pius", "X." },
+          { "RM", "460.35", "million" },
+  };
+
+  @Test
+  public void testTweets() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
+    runOnTwoArrays(tokFactory, tweetInputs, tweetGold);
+    runAgainstOrig(tokFactory, tweetInputs);
   }
 
   private final String[] hyphenInputs = {

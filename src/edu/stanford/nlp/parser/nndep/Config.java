@@ -245,6 +245,17 @@ public class Config {
                ? getLanguage(props.getProperty("language"))
                : language;
     tlp = language.params.treebankLanguagePack();
+
+    // if a tlp was specified go with that
+    String tlpCanonicalName = props.getProperty("tlp");
+    if (tlpCanonicalName != null) {
+      try {
+        tlp = ReflectionLoading.loadByReflection(tlpCanonicalName);
+        System.err.println("Loaded TreebankLanguagePack: "+tlpCanonicalName);
+      } catch (Exception e) {
+        System.err.println("Error: Failed to load TreebankLanguagePack: "+tlpCanonicalName);
+      }
+    }
   }
 
   /**
@@ -254,7 +265,7 @@ public class Config {
    * @return A {@link edu.stanford.nlp.international.Language}
    *         or {@code null} if no instance matches the given string.
    */
-  private static Language getLanguage(String languageStr) {
+  public static Language getLanguage(String languageStr) {
     for (Language l : Language.values()) {
       if (l.name().equalsIgnoreCase(languageStr))
         return l;

@@ -1,0 +1,7 @@
+###############################################################
+
+  ENV.defaults["ruleType"] = "tokens"
+  ENV.defaults["priority"] = 0
+  ENV.defaults["locale"] = "en"
+
+  { ruleType: "time", pattern: /dd?\\?\/MM?\\?\/(yyyy|yy)/ }

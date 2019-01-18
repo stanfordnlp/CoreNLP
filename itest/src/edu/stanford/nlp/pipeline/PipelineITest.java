@@ -3,19 +3,19 @@ package edu.stanford.nlp.pipeline;
 import java.util.List;
 
 import org.junit.Assert;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Iterables;
 import edu.stanford.nlp.util.StringUtils;
 
-public class PipelineITest extends TestCase {
+public class PipelineITest {
 
+  @Test
   public void testPipeline() throws Exception {
     // create pipeline
     AnnotationPipeline pipeline = new AnnotationPipeline();
@@ -77,7 +77,7 @@ public class PipelineITest extends TestCase {
     Assert.assertEquals("be", tokens.get(2).get(CoreAnnotations.LemmaAnnotation.class));
     Assert.assertEquals("PERSON", tokens.get(0).get(CoreAnnotations.NamedEntityTagAnnotation.class));
     Assert.assertEquals("PERSON", tokens.get(1).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    Assert.assertEquals("LOCATION", tokens.get(10).get(CoreAnnotations.NamedEntityTagAnnotation.class));
+    Assert.assertEquals("CITY", tokens.get(10).get(CoreAnnotations.NamedEntityTagAnnotation.class));
 
     // get sentences
     List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
@@ -138,14 +138,11 @@ public class PipelineITest extends TestCase {
     Assert.assertEquals(41, (int)tokens2.get(1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
     Assert.assertEquals("VBZ", tokens2.get(1).get(CoreAnnotations.PartOfSpeechAnnotation.class));
     Assert.assertEquals("be", tokens2.get(1).get(CoreAnnotations.LemmaAnnotation.class));
-    Assert.assertEquals("LOCATION", tokens2.get(3).get(CoreAnnotations.NamedEntityTagAnnotation.class));
+    Assert.assertEquals("CITY", tokens2.get(3).get(CoreAnnotations.NamedEntityTagAnnotation.class));
   }
 
   private static String join(List<CoreLabel> tokens) {
-    return StringUtils.join(Iterables.transform(tokens, new Function<CoreLabel, String>() {
-      public String apply(CoreLabel token) {
-        return token.get(CoreAnnotations.TextAnnotation.class);
-      }
-    }));
+    return StringUtils.join(Iterables.transform(tokens, (CoreLabel token) -> token.get(CoreAnnotations.TextAnnotation.class)));
   }
+
 }

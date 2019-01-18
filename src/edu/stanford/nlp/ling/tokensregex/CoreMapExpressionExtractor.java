@@ -20,13 +20,14 @@ import java.util.function.Predicate;
 
 
 /**
- * <p>Represents a list of assignment and extraction rules over sequence patterns.
+ * Represents a list of assignment and extraction rules over sequence patterns.
  *    See {@link SequenceMatchRules} for the syntax of rules.
- * </p>
  *
- * <p>Assignment rules are used to assign a value to a variable for later use in
- * extraction rules or for expansions in patterns.</p>
- * <p>Extraction rules are used to extract text/tokens matching regular expressions.
+ * <p>
+ * Assignment rules are used to assign a value to a variable for later use in
+ * extraction rules or for expansions in patterns.
+ * <p>
+ * Extraction rules are used to extract text/tokens matching regular expressions.
  * Extraction rules are grouped into stages, with each stage consisting of the following:
  * <ol>
  *   <li>Matching of rules over <b>text</b> and <b>tokens</b>.  These rules are applied directly on the <b>text</b> and <b>tokens</b> fields of the {@code CoreMap}.</li>
@@ -35,7 +36,6 @@ import java.util.function.Predicate;
  *   <li><b>Filtering</b> of an invalid expression.  In the final phase, a final filtering stage filters out invalid expressions.</li>
  * </ol>
  * The different stages are numbered and are applied in numeric order.
- * </p>
  *
  * @author Angel Chang
  * @see SequenceMatchRules
@@ -284,13 +284,11 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   public static <M extends MatchedExpression> CoreMapExpressionExtractor<M> createExtractorFromFiles(Env env, List<String> filenames) throws RuntimeException {
     CoreMapExpressionExtractor<M> extractor = new CoreMapExpressionExtractor<>(env);
     for (String filename:filenames) {
-      try {
+      try (BufferedReader br = IOUtils.readerFromString(filename)) {
         if (verbose)
           log.info("Reading TokensRegex rules from " + filename);
-        BufferedReader br = IOUtils.readerFromString(filename);
         TokenSequenceParser parser = new TokenSequenceParser();
         parser.updateExpressionExtractor(extractor, br);
-        IOUtils.closeIgnoringExceptions(br);
       } catch (Exception ex) {
         throw new RuntimeException("Error parsing file: " + filename, ex);
       }

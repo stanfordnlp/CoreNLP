@@ -10,9 +10,11 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -49,6 +51,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   private final AbstractSequenceClassifier<?> segmenter;
   private final boolean VERBOSE;
   private final boolean tokenizeNewline;
+  private final boolean sentenceSplitOnTwoNewlines;
   private final boolean normalizeSpace;
 
   public ChineseSegmenterAnnotator() {
@@ -104,6 +107,10 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     // If newlines are treated as sentence split, we need to retain them in tokenization for ssplit to make use of them
     tokenizeNewline = (!props.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, "never").equals("never"))
             || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+
+    // record whether or not sentence splitting on two newlines ; if so, need to remove single newlines
+    sentenceSplitOnTwoNewlines =
+        props.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, "never").equals("two");
   }
 
   @Override
@@ -137,7 +144,8 @@ public class ChineseSegmenterAnnotator implements Annotator  {
    *  correctly and not splitting on whitespace in the same types of XML places that are recognized by
    *  English PTBTokenizer.
    *
-   *  @param annotation The annotation to process
+   *  @param annotation The annotation to process. The result of processing is stored under the
+   *                    {@code SegmenterCoreAnnotations.CharactersAnnotation.class} key
    */
   private void splitCharacters(CoreMap annotation) {
     String origText = annotation.get(CoreAnnotations.TextAnnotation.class);
@@ -153,6 +161,25 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       xmlEndOffset = m.end();
     }
 
+    // determine boundaries of leading and trailing newlines, carriage returns
+    int firstNonNewlineOffset = -1;
+    int lastNonNewlineOffset = length;
+    for (int offset = 0, cpCharCount; offset < length; offset += cpCharCount) {
+      int cp = origText.codePointAt(offset);
+      cpCharCount = Character.charCount(cp);
+      String charString = origText.substring(offset, offset + cpCharCount);
+      if (firstNonNewlineOffset == -1 && !(cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString))) {
+        firstNonNewlineOffset = offset;
+      }
+      if (!(cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString)))
+        lastNonNewlineOffset = offset;
+    }
+
+    // keep track of previous offset while looping through characters
+    LinkedList<Boolean> isNewlineQueue = new LinkedList<>();
+    isNewlineQueue.addAll(Arrays.asList(false));
+
+    // loop through characters
     for (int offset = 0, cpCharCount; offset < length; offset += cpCharCount) {
       int cp = origText.codePointAt(offset);
       cpCharCount = Character.charCount(cp);
@@ -167,6 +194,20 @@ public class ChineseSegmenterAnnotator implements Annotator  {
           xmlEndOffset = m.end();
         }
       }
+
+      // need to add the first char into the newline queue
+      if (offset == 0)
+        isNewlineQueue.add(cp == '\n');
+
+      // check next char, or add false if no next char
+      int nextOffset = offset + cpCharCount;
+      if (nextOffset < origText.length()) {
+        int nextCodePoint = origText.codePointAt(nextOffset);
+        isNewlineQueue.add(nextCodePoint == '\n');
+      } else {
+        isNewlineQueue.add(false);
+      }
+
       boolean skipCharacter = false;
       boolean isXMLCharacter = false;
       // first two cases are for XML region
@@ -181,7 +222,23 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         seg = true;
         // Don't skip newline characters if we're tokenizing them
         // We always count \n as newline to be consistent with the implementation of ssplit
-        skipCharacter = ! (tokenizeNewline && (cp == '\n' || cp == '\r' || System.lineSeparator().contains(charString)));
+        // check if this is a newline character
+        boolean prevIsNewline = isNewlineQueue.get(0);
+        boolean currIsNewline = isNewlineQueue.get(1);
+        boolean nextIsNewline = isNewlineQueue.get(2);
+        // determine if this is a leading or trailing newline at beginning or end of document
+        boolean isLeadingOrTrailingNewline = (offset < firstNonNewlineOffset || offset > lastNonNewlineOffset);
+        // determine if this is an isolated newline in the middle of the document
+        boolean isSingleNewlineInMiddle =
+            (currIsNewline && (!prevIsNewline && !nextIsNewline));
+        // don't skip if tokenizing newlines and this is a newline character
+        skipCharacter = !(tokenizeNewline && currIsNewline);
+        // ...unless leading or trailing newlines (always skip these)
+        if (isLeadingOrTrailingNewline)
+          skipCharacter = true;
+        // ...skip single newlines in the middle of document if splitting on two newlines
+        if (sentenceSplitOnTwoNewlines && isSingleNewlineInMiddle)
+          skipCharacter = true;
       }
       if ( ! skipCharacter) {
         // if this character is a normal character, put it in as a CoreLabel and set seg to false for next word
@@ -209,9 +266,26 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         charTokens.add(wi);
         seg = false;
       }
+      // drop oldest element from isNewline queue
+      isNewlineQueue.poll();
+
     } // for loop through charPoints
 
     annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, charTokens);
+  }
+
+  /** Move the pos pointer to point into sentChars after passing w.
+   *  This is a bit subtle, because there can be multi-char codepoints in sentChars elements.
+   *
+   *  @return The position of the next thing in sentChars to look at
+   */
+  private static int advancePos(List<CoreLabel> sentChars, int pos, String w) {
+    StringBuilder sb = new StringBuilder();
+    while ( ! w.equals(sb.toString())) {
+      sb.append(sentChars.get(pos).get(CoreAnnotations.ChineseCharAnnotation.class));
+      pos++;
+    }
+    return pos;
   }
 
   private void runSegmentation(CoreMap annotation) {
@@ -223,6 +297,10 @@ public class ChineseSegmenterAnnotator implements Annotator  {
 
     String text = annotation.get(CoreAnnotations.TextAnnotation.class); // the original text String
     List<CoreLabel> sentChars = annotation.get(SegmenterCoreAnnotations.CharactersAnnotation.class); // the way it was divided by splitCharacters
+    if (VERBOSE) {
+      log.info("sentChars (length " + sentChars.size() + ") is " +
+              SentenceUtils.listToString(sentChars, StringUtils.EMPTY_STRING_ARRAY));
+    }
     List<CoreLabel> tokens = new ArrayList<>();
     annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
@@ -233,6 +311,18 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       text = text.replaceAll("[\r\n]", "");
       words = segmenter.segmentString(text);
     } else {
+      // remove leading and trailing newlines
+      text = text.replaceAll("^[\\r\\n]+", "");
+      text = text.replaceAll("[\\r\\n]+$", "");
+      // if using the sentence split on two newlines option, replace single newlines
+      // single newlines should be ignored for segmenting
+      if (sentenceSplitOnTwoNewlines) {
+        text = text.replaceAll("([^\\n])\\r?\\n([^\\r\\n])", "$1$2");
+        // do a second pass to handle corner case of consecutive isolated newlines
+        // x \n x \n x
+        text = text.replaceAll("([^\\n])\\r?\\n([^\\r\\n])", "$1$2");
+      }
+
       // Run the segmenter on each line so that we don't get tokens that cross line boundaries
       // Neat trick to keep delimiters from: http://stackoverflow.com/a/2206432
       String[] lines = text.split(String.format("((?<=%1$s)|(?=%1$s))", separator));
@@ -248,18 +338,21 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       }
     }
     if (VERBOSE) {
-      log.info(text + "\n--->\n" + words);
+      log.info(text + "\n--->\n" + words + " (length " + words.size() + ')');
     }
 
-    // Go through everything again and make the final tokens list
+    // Go through everything again and make the final tokens list; for loop is over segmented words
     int pos = 0; // This is used to index sentChars, the output from splitCharacters
     StringBuilder xmlBuffer = new StringBuilder();
     int xmlBegin = -1;
     for (String w : words) {
       CoreLabel fl = sentChars.get(pos);
+      String xmlCharAnnotation = fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class);
+      if (VERBOSE) {
+        log.info("Working on word " + w + ", sentChar " + fl.toShorterString() + " (sentChars index " + pos + ')');
+      }
 
-      if (fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")
-        || fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("beginning")) {
+      if ("0".equals(xmlCharAnnotation) || "beginning".equals(xmlCharAnnotation)) {
         // Beginnings of plain text and other XML tags are good places to end an XML tag
         if (xmlBuffer.length() > 0) {
           // Form the XML token
@@ -274,8 +367,8 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         }
       }
 
-      if ( ! fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("0")) {
-        // found an XML character
+      if ( ! "0".equals(xmlCharAnnotation)) {
+        // found an XML character; fl changes inside this loop!
         while (fl.get(SegmenterCoreAnnotations.XMLCharAnnotation.class).equals("whitespace")) {
           // Print whitespaces into the XML buffer and move on until the next non-whitespace character is found
           // and we're in sync with segmenter output again
@@ -285,28 +378,30 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         }
 
         xmlBuffer.append(w);
-        pos += w.length();
+        pos = advancePos(sentChars, pos, w);
         if (xmlBegin < 0) {
           xmlBegin = fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
         }
         continue;
       }
 
+      // remember that fl may be more than one char long (non-BMP chars like emoji), so use advancePos()
       fl.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
       if (w.isEmpty()) {
         if (VERBOSE) { log.warn("Encountered an empty word. Shouldn't happen?"); }
         continue; // [cdm 2016:] surely this shouldn't happen!
       }
       int begin = fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-      pos += w.length();
+      pos = advancePos(sentChars, pos, w);
       if (pos - 1 >= sentChars.size()) {
-        log.error("on word " + w + " at position " + (pos - w.length()) + " trying to get at position " + (pos - 1));
+        log.error("Error: on word " + w + " at position " + (pos - w.length()) + " trying to get at position " + (pos - 1));
         log.error("last element of sentChars is " + sentChars.get(sentChars.size() - 1));
+      } else {
+        fl = sentChars.get(pos - 1);
+        int end = fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        tokens.add(makeXmlToken(w, false, begin, end));
       }
-      fl = sentChars.get(pos - 1);
-      int end = fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-      tokens.add(makeXmlToken(w, false, begin, end));
-    }
+    } // end for (go through everything again)
 
     if (xmlBuffer.length() > 0) {
       // Form the last XML token, if any

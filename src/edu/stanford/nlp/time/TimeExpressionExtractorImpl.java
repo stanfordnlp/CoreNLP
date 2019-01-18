@@ -53,6 +53,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       options.grammarFilename = Options.DEFAULT_GRAMMAR_FILES;
       logger.warning("Time rules file is not specified: using default rules at " + options.grammarFilename);
     }
+    logger.info("Using following SUTime rules: "+options.grammarFilename);
     timexPatterns = new GenericTimeExpressionPatterns(options);
     this.expressionExtractor = timexPatterns.createExtractor();
   }

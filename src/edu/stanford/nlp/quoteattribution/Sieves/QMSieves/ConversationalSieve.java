@@ -56,10 +56,19 @@ public class ConversationalSieve extends QMSieve {
         }
       }
       if(tokenEndIdx < tokens.size() - 1) {
-        CoreLabel nextToken = tokens.get(tokenEndIdx + 1);
-        CoreMap nextSentence = sentences.get(nextToken.get(CoreAnnotations.SentenceIndexAnnotation.class));
-        if(nextSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class).equals(currQuoteBeginSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class))) {
-          isAloneInParagraph = false;
+        // if the next token is *NL*, it won't be in a sentence (if newlines have been tokenized)
+        // so advance to the next non *NL* toke
+        CoreLabel currToken = tokens.get(tokenEndIdx + 1);
+        while (currToken.isNewline() && tokenEndIdx + 1 < tokens.size() - 1) {
+          tokenEndIdx++;
+          currToken = tokens.get(tokenEndIdx + 1);
+        }
+        if (!currToken.isNewline()) {
+
+          CoreMap nextSentence = sentences.get(currToken.get(CoreAnnotations.SentenceIndexAnnotation.class));
+          if (nextSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class).equals(currQuoteBeginSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class))) {
+            isAloneInParagraph = false;
+          }
         }
       }
       if(twoPrevQuote.get(QuoteAttributionAnnotator.MentionAnnotation.class) == null

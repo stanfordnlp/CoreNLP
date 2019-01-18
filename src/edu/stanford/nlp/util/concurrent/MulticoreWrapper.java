@@ -1,6 +1,7 @@
 package edu.stanford.nlp.util.concurrent;
 
 import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,8 +33,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class MulticoreWrapper<I,O> {
 
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(MulticoreWrapper.class);
+
   final int nThreads;
-  int submittedItemCounter = 0;
+  private int submittedItemCounter = 0;
   // Which id was the last id returned.  Only meaningful in the case
   // of a queue where output order matters.
   private int returnedItemCounter = -1;
@@ -130,7 +134,7 @@ public class MulticoreWrapper<I,O> {
   public synchronized void put(I item) throws RejectedExecutionException {
     Integer procId = getProcessor();
     if (procId == null) {
-      throw new RejectedExecutionException("Couldn't submit item to threadpool: " + item.toString());
+      throw new RejectedExecutionException("Couldn't submit item to threadpool: " + item);
     }
     final int itemId = submittedItemCounter++;
     CallableJob<I,O> job = new CallableJob<>(item, itemId, processorList.get(procId), procId, callback);
@@ -251,19 +255,16 @@ public class MulticoreWrapper<I,O> {
 
     @Override
     public Integer call() {
+      O result = null;
       try {
-        O result = processor.process(item);
-        QueueItem<O> output = new QueueItem<>(result, itemId);
-        callback.call(output, processorId);
-        return itemId;
-      
-      } catch (Exception e) {
-        e.printStackTrace();
+        result = processor.process(item);
+      } catch (Exception | Error e) {
+        log.warn(e);
         // Hope that the consumer knows how to handle null!
-        QueueItem<O> output = new QueueItem<>(null, itemId);
-        callback.call(output, processorId);
-        return itemId;
       }
+      QueueItem<O> output = new QueueItem<>(result, itemId);
+      callback.call(output, processorId);
+      return itemId;
     }
   }
 
@@ -285,7 +286,7 @@ public class MulticoreWrapper<I,O> {
 
     @Override
     public int compareTo(QueueItem<O> other) {
-      return this.id - other.id;
+      return Integer.compare(this.id, other.id);
     }
 
     @SuppressWarnings("unchecked")
@@ -299,5 +300,6 @@ public class MulticoreWrapper<I,O> {
     public int hashCode() {
       return id;
     }
-  }
+  } // end static class QueueItem
+
 }

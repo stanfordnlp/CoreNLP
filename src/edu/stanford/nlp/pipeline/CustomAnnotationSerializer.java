@@ -67,7 +67,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer  {
       if(bits.length < 3) throw new RuntimeException("ERROR: Invalid dependency node line: " + line);
       String docId = bits[0];
       if(docId.equals("-")) docId = "";
-      int sentIndex = Integer.valueOf(bits[1]);
+      int sentIndex = Integer.parseInt(bits[1]);
       for(int i = 2; i < bits.length; i ++){
         String bit = bits[i];
         String[] bbits = bit.split("-");
@@ -76,12 +76,12 @@ public class CustomAnnotationSerializer extends AnnotationSerializer  {
         if(bbits.length > 3){
           throw new RuntimeException("ERROR: Invalid format for dependency graph: " + line);
         } else if(bbits.length == 2){
-          copyAnnotation = Integer.valueOf(bbits[1]);
+          copyAnnotation = Integer.parseInt(bbits[1]);
         } else if(bbits.length == 3){
-          copyAnnotation = Integer.valueOf(bbits[1]);
+          copyAnnotation = Integer.parseInt(bbits[1]);
           isRoot = bbits[2].equals("R");
         }
-        int index = Integer.valueOf(bbits[0]);
+        int index = Integer.parseInt(bbits[0]);
         graph.nodes.add(new IntermediateNode(docId, sentIndex, index, copyAnnotation, isRoot));
       }
     }
@@ -96,11 +96,11 @@ public class CustomAnnotationSerializer extends AnnotationSerializer  {
           throw new RuntimeException("ERROR: Invalid format for dependency graph: " + line);
         }
         String dep = bbits[0];
-        int source = Integer.valueOf(bbits[1]);
-        int target = Integer.valueOf(bbits[2]);
-        boolean isExtra = (bbits.length == 4) ? Boolean.valueOf(bbits[3]) : false;
-        int sourceCopy = (bbits.length > 4) ? Integer.valueOf(bbits[4]) : 0;
-        int targetCopy = (bbits.length > 5) ? Integer.valueOf(bbits[5]) : 0;
+        int source = Integer.parseInt(bbits[1]);
+        int target = Integer.parseInt(bbits[2]);
+        boolean isExtra = (bbits.length == 4) ? Boolean.parseBoolean(bbits[3]) : false;
+        int sourceCopy = (bbits.length > 4) ? Integer.parseInt(bbits[4]) : 0;
+        int targetCopy = (bbits.length > 5) ? Integer.parseInt(bbits[5]) : 0;
         graph.edges.add(new IntermediateEdge(dep, source, sourceCopy, target, targetCopy, isExtra));
       }
     }
@@ -270,7 +270,8 @@ public class CustomAnnotationSerializer extends AnnotationSerializer  {
   }
 
   /**
-   * Loads the CorefChain objects from the serialized buffer
+   * Loads the CorefChain objects from the serialized buffer.
+   *
    * @param reader the buffer
    * @return A map from cluster id to clusters
    * @throws IOException
@@ -278,14 +279,14 @@ public class CustomAnnotationSerializer extends AnnotationSerializer  {
   private static Map<Integer, CorefChain> loadCorefChains(BufferedReader reader) throws IOException {
     String line = reader.readLine().trim();
     if (line.isEmpty()) return null;
-    int clusterCount = Integer.valueOf(line);
+    int clusterCount = Integer.parseInt(line);
     Map<Integer, CorefChain> chains = Generics.newHashMap();
     // read each cluster
     for(int c = 0; c < clusterCount; c ++) {
       line = reader.readLine().trim();
       String [] bits = line.split("\\s");
-      int cid = Integer.valueOf(bits[0]);
-      int mentionCount = Integer.valueOf(bits[1]);
+      int cid = Integer.parseInt(bits[0]);
+      int mentionCount = Integer.parseInt(bits[1]);
       Map<IntPair, Set<CorefChain.CorefMention>> mentionMap =
               Generics.newHashMap();
       CorefChain.CorefMention representative = null;
@@ -294,24 +295,24 @@ public class CustomAnnotationSerializer extends AnnotationSerializer  {
         line = reader.readLine();
         bits = line.split("\\s");
         IntPair key = new IntPair(
-                Integer.valueOf(bits[0]),
-                Integer.valueOf(bits[1]));
+                Integer.parseInt(bits[0]),
+                Integer.parseInt(bits[1]));
         boolean rep = bits[2].equals("1");
 
         Dictionaries.MentionType mentionType = parseMentionType(bits[3]);
         Dictionaries.Number number = parseNumber(bits[4]);
         Dictionaries.Gender gender = parseGender(bits[5]);
         Dictionaries.Animacy animacy = parseAnimacy(bits[6]);
-        int startIndex = Integer.valueOf(bits[7]);
-        int endIndex = Integer.valueOf(bits[8]);
-        int headIndex = Integer.valueOf(bits[9]);
-        int clusterID = Integer.valueOf(bits[10]);
-        int mentionID = Integer.valueOf(bits[11]);
-        int sentNum = Integer.valueOf(bits[12]);
-        int posLen = Integer.valueOf(bits[13]);
+        int startIndex = Integer.parseInt(bits[7]);
+        int endIndex = Integer.parseInt(bits[8]);
+        int headIndex = Integer.parseInt(bits[9]);
+        int clusterID = Integer.parseInt(bits[10]);
+        int mentionID = Integer.parseInt(bits[11]);
+        int sentNum = Integer.parseInt(bits[12]);
+        int posLen = Integer.parseInt(bits[13]);
         int [] posElems = new int[posLen];
         for(int i = 0; i < posLen; i ++) {
-          posElems[i] = Integer.valueOf(bits[14 + i]);
+          posElems[i] = Integer.parseInt(bits[14 + i]);
         }
         IntTuple position = new IntTuple(posElems);
         String span = unescapeSpace(bits[14 + posLen]);

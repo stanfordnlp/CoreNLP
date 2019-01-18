@@ -24,7 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf; 
+package edu.stanford.nlp.ie.crf;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -44,14 +44,14 @@ import java.util.zip.GZIPInputStream;
 public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierNonlinear.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierNonlinear.class);
 
   /** Parameter weights of the classifier. */
-  double[][] linearWeights;
-  double[][] inputLayerWeights4Edge;
-  double[][] outputLayerWeights4Edge;
-  double[][] inputLayerWeights;
-  double[][] outputLayerWeights;
+  private double[][] linearWeights;
+  private double[][] inputLayerWeights4Edge;
+  private double[][] outputLayerWeights4Edge;
+  private double[][] inputLayerWeights;
+  private double[][] outputLayerWeights;
 
   protected CRFClassifierNonlinear() {
     super(new SeqClassifierFlags());
@@ -141,16 +141,15 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
   }
 
   private double[] trainWeightsUsingNonLinearCRF(AbstractCachingDiffFunction func, Evaluator[] evaluators) {
-    Minimizer minimizer = getMinimizer(0, evaluators);
+    Minimizer<DiffFunction> minimizer = getMinimizer(0, evaluators);
 
     double[] initialWeights;
     if (flags.initialWeights == null) {
       initialWeights = func.initial();
     } else {
-      try {
-        log.info("Reading initial weights from file " + flags.initialWeights);
-        DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
-            flags.initialWeights))));
+      log.info("Reading initial weights from file " + flags.initialWeights);
+      try (DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
+            flags.initialWeights))))) {
         initialWeights = ConvertByteArray.readDoubleArr(dis);
       } catch (IOException e) {
         throw new RuntimeException("Could not read from double initial weight file " + flags.initialWeights);

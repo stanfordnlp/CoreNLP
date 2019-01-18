@@ -49,9 +49,9 @@ public class StanfordCoreNLPTest {
 
   @Test
   public void testPrereqAnnotatorsCorefBeforeOpenIE() {
-    assertEquals("tokenize,ssplit,pos,lemma,depparse,natlog,ner,mention,coref,openie",
+    assertEquals("tokenize,ssplit,pos,lemma,depparse,natlog,ner,coref,openie",
         StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"openie", "coref"}, new Properties()));
-    assertEquals("tokenize,ssplit,pos,lemma,ner,depparse,natlog,mention,coref,openie",
+    assertEquals("tokenize,ssplit,pos,lemma,ner,depparse,natlog,coref,openie",
         StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"coref", "openie"}, new Properties()));
   }
 
@@ -59,7 +59,7 @@ public class StanfordCoreNLPTest {
   @Test
   public void testPrereqAnnotatorsCoref() {
     Properties props = new Properties();
-    assertEquals("tokenize,ssplit,pos,lemma,ner,depparse,mention,coref",
+    assertEquals("tokenize,ssplit,pos,lemma,ner,depparse,coref",
         StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"coref"}, props));
     assertEquals("dep", props.getProperty("coref.md.type", ""));
   }
@@ -68,7 +68,7 @@ public class StanfordCoreNLPTest {
   @Test
   public void testPrereqAnnotatorsCorefWithParse() {
     Properties props = new Properties();
-    assertEquals("tokenize,ssplit,pos,lemma,ner,parse,mention,coref",
+    assertEquals("tokenize,ssplit,pos,lemma,ner,parse,coref",
         StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"parse","coref"}, props));
     assertEquals("__empty__", props.getProperty("coref.md.type", "__empty__"));
   }

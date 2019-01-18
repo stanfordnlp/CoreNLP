@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Utilities for helping out with Iterables as Collections is to Collection.
@@ -20,17 +21,17 @@ import java.util.function.Function;
  * assume a call to hasNext will precede each call to next.  While this usage
  * is not up to the Java Iterator spec, it should work fine with
  * e.g. the Java enhanced for-loop.
- * 
- * <p>
- * 
+ *
  * Methods in Iterators are merged.
  *
  * @author dramage
  * @author dlwh {@link #flatMap(Iterable, Function)}
  * @author Huy Nguyen (htnguyen@cs.stanford.edu)
- * 
+ *
  */
 public class Iterables {
+
+  private Iterables() { } // static methods
 
   /**
    * Transformed view of the given iterable.  Returns the output
@@ -40,9 +41,7 @@ public class Iterables {
   public static <K,V> Iterable<V> transform(
       final Iterable<K> iterable, final Function<? super K,? extends V> function) {
 
-    return new Iterable<V>() {
-      public Iterator<V> iterator() {
-        return new Iterator<V>() {
+    return ()-> { return new Iterator<V>() {
           Iterator<K> inner = iterable.iterator();
 
           public boolean hasNext() {
@@ -56,9 +55,7 @@ public class Iterables {
           public void remove() {
             inner.remove();
           }
-        };
-      }
-    };
+        };};
   }
 
   /**
@@ -66,7 +63,7 @@ public class Iterables {
    * from the iterable for which the given Function returns true.
    */
   public static <T> Iterable<T> filter(
-      final Iterable<T> iterable, final Function<T,Boolean> accept) {
+      final Iterable<T> iterable, final Predicate<T> accept) {
 
     return new Iterable<T>() {
       public Iterator<T> iterator() {
@@ -99,7 +96,7 @@ public class Iterables {
 
             while (inner.hasNext()) {
               T next = inner.next();
-              if (accept.apply(next)) {
+              if (accept.test(next)) {
                 this.next = next;
                 this.queued = true;
                 return;
@@ -121,9 +118,7 @@ public class Iterables {
   public static <T> Iterable<T> cast(
       final Iterable<?> iterable, final Class<? extends T> type) {
 
-    return new Iterable<T>() {
-      public Iterator<T> iterator() {
-        return new Iterator<T>() {
+    return ()-> { return new Iterator<T>() {
           Iterator<?> inner = iterable.iterator();
 
           public boolean hasNext() {
@@ -137,9 +132,7 @@ public class Iterables {
           public void remove() {
             inner.remove();
           }
-        };
-      }
-    };
+        };};
   }
 
   /**
@@ -304,11 +297,7 @@ public class Iterables {
   public static <T1, T2> Iterable<Pair<T1,T2>> zip(
       final Iterable<T1> iter1, final Iterable<T2> iter2) {
 
-    return new Iterable<Pair<T1,T2>>() {
-      public Iterator<Pair<T1, T2>> iterator() {
-        return zip(iter1.iterator(), iter2.iterator());
-      }
-    };
+    return ()-> { return zip(iter1.iterator(), iter2.iterator());};
   }
 
   /**
@@ -622,9 +611,9 @@ public class Iterables {
     final Set<Integer> indexSet = Generics.newHashSet(indexes.subList(0, k));
 
     // filter down to only the items at the selected indexes
-    return Iterables.filter(items, new Function<T, Boolean>() {
+    return Iterables.filter(items, new Predicate<T>() {
       private int index = -1;
-      public Boolean apply(T item) {
+      public boolean test(T item) {
         ++this.index;
         return indexSet.contains(this.index);
       }

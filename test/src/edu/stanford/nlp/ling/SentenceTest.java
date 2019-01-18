@@ -1,7 +1,10 @@
 package edu.stanford.nlp.ling;
 
 import edu.stanford.nlp.simple.Sentence;
-import junit.framework.TestCase;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,19 +15,20 @@ import java.util.List;
  *
  *  @author John Bauer
  */
-public class SentenceTest extends TestCase {
+public class SentenceTest {
 
-  private String[] words = {"This", "is", "a", "test", "."};
-  private String[] tags = {"A", "B", "C", "D", "E"};
-  private String expectedValueOnly = "This is a test .";
-  private String expectedTagged = "This_A is_B a_C test_D ._E";
-  private String separator = "_";
+  private static final String[] words = {"This", "is", "a", "test", "."};
+  private static final String[] tags = {"A", "B", "C", "D", "E"};
+  private static final String expectedValueOnly = "This is a test .";
+  private static final String expectedTagged = "This_A is_B a_C test_D ._E";
+  private static final String separator = "_";
 
-  @Override
+  @Before
   public void setUp() {
-    assertEquals(words.length, tags.length);
+    Assert.assertEquals(words.length, tags.length);
   }
 
+  @Test
   public void testCoreLabelListToString() {
     List<CoreLabel> clWords = new ArrayList<>();
     List<CoreLabel> clValues = new ArrayList<>();
@@ -50,34 +54,40 @@ public class SentenceTest extends TestCase {
       clValueTags.add(cl);
     }
 
-    assertEquals(expectedValueOnly, SentenceUtils.listToString(clWords, true));
-    assertEquals(expectedValueOnly, SentenceUtils.listToString(clValues, true));
+    Assert.assertEquals(expectedValueOnly, SentenceUtils.listToString(clWords, true));
+    Assert.assertEquals(expectedValueOnly, SentenceUtils.listToString(clValues, true));
 
-    assertEquals(expectedTagged,
-                 SentenceUtils.listToString(clWordTags, false, separator));
-    assertEquals(expectedTagged,
-                 SentenceUtils.listToString(clValueTags, false, separator));
+    Assert.assertEquals(expectedTagged,
+            SentenceUtils.listToString(clWordTags, false, separator));
+    Assert.assertEquals(expectedTagged,
+            SentenceUtils.listToString(clValueTags, false, separator));
   }
 
+  @SuppressWarnings("Convert2streamapi")
+  @Test
   public void testTaggedWordListToString() {
     List<TaggedWord> tagged = new ArrayList<>();
     for (int i = 0; i < words.length; ++i) {
       tagged.add(new TaggedWord(words[i], tags[i]));
     }
-    assertEquals(expectedValueOnly, SentenceUtils.listToString(tagged, true));
-    assertEquals(expectedTagged,
-                 SentenceUtils.listToString(tagged, false, separator));
+    Assert.assertEquals(expectedValueOnly, SentenceUtils.listToString(tagged, true));
+    Assert.assertEquals(expectedTagged,
+            SentenceUtils.listToString(tagged, false, separator));
   }
 
   /**
    * Serializing a raw sentence shouldn't make it an order of magnitude larger than
    * the raw text.
    */
+  @Test
   public void testTokenizedSentenceSize() {
     String text = "one two three four five";
     byte[] sentenceArray = new Sentence(text).serialize().toByteArray();
     byte[] textArray = text.getBytes();
-    assertTrue(sentenceArray.length < textArray.length * 10);
+    Assert.assertTrue(
+            String.format("Sentence size (%d bytes) shouldn't be more than %d times bigger than text size (%d bytes)",
+                    sentenceArray.length, 11, textArray.length),
+            sentenceArray.length < textArray.length * 11);
   }
 
 }

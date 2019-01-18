@@ -6,7 +6,7 @@ import edu.stanford.nlp.util.ArrayUtils;
 
 /**
  * Stores one row of the sparse matrix which makes up the multiclass perceptron.
- * <br>
+ *
  * Uses a lot of bit fiddling to get the desired results.  What we
  * want is a row of scores representing transitions where each score
  * is the score for that transition (for the feature using this Weight
@@ -15,7 +15,7 @@ import edu.stanford.nlp.util.ArrayUtils;
  * score.  However, we can then further condense that by bit packing
  * the index and score into one long.  This cuts down on object
  * creation and makes it faster to read/write the models.
- * <br>
+ *
  * Thankfully, all of the unpleasant bit fiddling can be hidden away
  * in this one class.
  *
@@ -53,7 +53,7 @@ public class Weight implements Serializable {
     return Float.intBitsToFloat((int) (pack & 0xFFFFFFFF));
   }
 
-  private long pack(int index, float score) {
+  private static long pack(int index, float score) {
     long pack = ((long) (Float.floatToIntBits(score))) & 0x00000000FFFFFFFFL;
     pack = pack | (((long) index) << 32);
     return pack;
@@ -142,7 +142,8 @@ public class Weight implements Serializable {
     packed = newPacked;
   }
 
-  long[] packed;
+  private long[] packed;
 
   private static final long serialVersionUID = 1;
+
 }

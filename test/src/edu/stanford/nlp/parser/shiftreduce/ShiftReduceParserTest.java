@@ -74,7 +74,7 @@ public class ShiftReduceParserTest extends TestCase {
     Tree tree = convertTree(commaTreeString);
     List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
     List<String> expectedTransitions = Arrays.asList(new String[] { "Shift", "Shift", "Shift", "Shift", "RightBinary(@ADJP)", "RightBinary(ADJP)", "Shift", "RightBinary(@NP)", "RightBinary(NP)", "CompoundUnary*([ROOT, FRAG])", "Finalize", "Idle" });
-    assertEquals(expectedTransitions, CollectionUtils.transformAsList(transitions, new Function<Transition, String>() { public String apply(Transition t) { return t.toString(); } }));
+    assertEquals(expectedTransitions, CollectionUtils.transformAsList(transitions, (Transition t)->{ return t.toString();}));
 
     String expectedSeparators = "[{2=,}]";
 

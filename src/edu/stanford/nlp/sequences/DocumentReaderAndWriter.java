@@ -5,24 +5,21 @@ import edu.stanford.nlp.util.CoreMap;
 
 import java.util.List;
 import java.io.PrintWriter;
-import java.io.Serializable;
+
 
 /**
- * This interface is used for reading data and writing
- * output into and out of sequence classifiers.
- * If you subclass this interface, all of the other
- * mechanisms necessary for getting your data into a
- * sequence classifier will be taken care of
- * for you.  Subclasses <b>MUST</b> have an empty constructor so
- * they can be instantiated by reflection, and
- * there is a promise that the init method will
- * be called immediately after construction.
+ * This interface is used for reading data and writing output into and out of sequence
+ * classifiers. If you subclass this interface, all of the other mechanisms necessary
+ * for getting your data into a sequence classifier will be taken care of for you.
+ * Subclasses <b>MUST</b> have an empty constructor so they can be instantiated by
+ * reflection, and there is a promise that the init method will be called
+ * immediately after construction.
  *
  * @author Jenny Finkel
  */
 
 public interface DocumentReaderAndWriter<IN extends CoreMap>
-        extends IteratorFromReaderFactory<List<IN>>, Serializable {
+        extends /* Serializable, */ IteratorFromReaderFactory<List<IN>> {
 
   /**
    * This will be called immediately after construction.  It's easier having

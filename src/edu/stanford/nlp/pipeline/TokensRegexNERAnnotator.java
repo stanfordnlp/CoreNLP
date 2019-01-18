@@ -90,7 +90,7 @@ import java.util.regex.Pattern;
  * <table>
  *   <tr><th>Field</th><th>Description</th><th>Default</th></tr>
  *   <tr><td>{@code mapping}</td><td>Comma separated list of mapping files to use </td>
- *      <td>{@code edu/stanford/nlp/models/regexner/type_map_clean}</td>
+ *      <td>{@code edu/stanford/nlp/models/kbp/regexner_caseless.tab}</td>
  *   </tr>
  *   <tr><td>{@code mapping.header}</td>
  *       <td>Comma separated list of header fields (or {@code true} if header is specified in the file)</td>
@@ -129,8 +129,8 @@ import java.util.regex.Pattern;
 public class TokensRegexNERAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TokensRegexNERAnnotator.class);
-  protected static final Redwood.RedwoodChannels logger = Redwood.channels("TokenRegexNER");
+  protected static final Redwood.RedwoodChannels logger = Redwood.channels(TokensRegexNERAnnotator.class);
+
   protected static final String PATTERN_FIELD = "pattern";
   protected static final String OVERWRITE_FIELD = "overwrite";
   protected static final String PRIORITY_FIELD = "priority";
@@ -308,7 +308,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (verbose) {
-      log.info("Adding TokensRegexNER annotations ... ");
+      logger.info("Adding TokensRegexNER annotations ... ");
     }
 
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -327,7 +327,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
     }
 
     if (verbose)
-      log.info("done.");
+      logger.info("done.");
   }
 
   private MultiPatternMatcher<CoreMap> createPatternMatcher(Map<SequencePattern<CoreMap>, Entry> patternToEntry) {
@@ -338,8 +338,8 @@ public class TokensRegexNERAnnotator implements Annotator  {
       TokenSequencePattern pattern;
 
       Boolean ignoreCaseEntry = ignoreCaseList.get(entryToMappingFileNumber.get(entry));
-      int patternFlags = ignoreCaseEntry? Pattern.CASE_INSENSITIVE:0;
-      int stringMatchFlags = ignoreCaseEntry? NodePattern.CASE_INSENSITIVE:0;
+      int patternFlags = ignoreCaseEntry? Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE:0;
+      int stringMatchFlags = ignoreCaseEntry? (NodePattern.CASE_INSENSITIVE | NodePattern.UNICODE_CASE):0;
       Env env = TokenSequencePattern.getNewEnv();
       env.setDefaultStringPatternFlags(patternFlags);
       env.setDefaultStringMatchFlags(stringMatchFlags);
@@ -385,7 +385,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
       String str = m.group(g);
       if (commonWords.contains(str)) {
         if (verbose) {
-          log.info("Not annotating (common word) '" + str + "': " +
+          logger.info("Not annotating (common word) '" + str + "': " +
               StringUtils.joinFields(m.groupNodes(g), CoreAnnotations.NamedEntityTagAnnotation.class)
               + " with " + entry.getTypeDescription() + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
         }
@@ -406,7 +406,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
         }
       } else {
         if (verbose) {
-          log.info("Not annotating  '" + m.group(g) + "': " +
+          logger.info("Not annotating  '" + m.group(g) + "': " +
                   StringUtils.joinFields(m.groupNodes(g), CoreAnnotations.NamedEntityTagAnnotation.class)
                   + " with " + entry.getTypeDescription() + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
         }

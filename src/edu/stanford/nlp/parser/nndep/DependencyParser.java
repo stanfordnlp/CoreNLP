@@ -1,6 +1,4 @@
 package edu.stanford.nlp.parser.nndep;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
@@ -27,10 +25,8 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,10 +52,14 @@ import static java.util.stream.Collectors.toList;
  * </blockquote>
  *
  * <p>
- * New models can be trained from the command line; see {@link #main}
- * for details on training options. This parser will also output
- * CoNLL-X format predictions; again see {@link #main} for available
- * options.
+ * The parser can also be used from the command line to train models and to parse text.
+ * New models can be trained from the command line; see the {@link #main} method
+ * for details on training options. The parser can parse either plain text files or
+ * CoNLL-X format files and output
+ * CoNLL-X format predictions; again see {@link #main} for available options.
+ * (The options available for things like tokenization and sentence splitting
+ * in this class are not as extensive as and not necessarily consistent with
+ * the options of other classes like {@code LexicalizedParser} and {@code StanfordCoreNLP}.
  *
  * <p>
  * This parser can also be used programmatically. The easiest way to
@@ -74,7 +74,7 @@ import static java.util.stream.Collectors.toList;
 public class DependencyParser  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParser.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(DependencyParser.class);
   public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_UD.gz";
 
   /**
@@ -405,6 +405,8 @@ public class DependencyParser  {
 
       Writer output = IOUtils.getPrintWriter(modelFile);
 
+      output.write("language=" + language.toString() + "\n");
+      output.write("tlp=" + config.tlp.getClass().getCanonicalName() + "\n");
       output.write("dict=" + knownWords.size() + "\n");
       output.write("pos=" + knownPos.size() + "\n");
       output.write("label=" + knownLabels.size() + "\n");
@@ -459,7 +461,6 @@ public class DependencyParser  {
         else
           output.write(" ");
       }
-
       output.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
@@ -507,15 +508,39 @@ public class DependencyParser  {
     loadModelFile(modelFile, true);
   }
 
+  /** helper to check if the model file is new format or not
+   *
+   * @param firstLine the first line of the model file
+   * @return true if this is a new format model file
+   */
+  private static boolean isModelNewFormat(String firstLine) {
+    return firstLine.startsWith("language=");
+  }
+
   private void loadModelFile(String modelFile, boolean verbose) {
     Timing t = new Timing();
-    try {
+    try (BufferedReader input = IOUtils.readerFromString(modelFile)) {
 
-      log.info("Loading depparse model file: " + modelFile + " ... ");
+      log.info("Loading depparse model: " + modelFile + " ... ");
       String s;
-      BufferedReader input = IOUtils.readerFromString(modelFile);
 
+      // first line in newer saved models is language, legacy models don't store this
       s = input.readLine();
+      // check if language was stored
+      if (isModelNewFormat(s)) {
+        // set up language
+        config.language = Config.getLanguage(s.substring(9, s.length() - 1));
+        // set up tlp
+        s = input.readLine();
+        String tlpCanonicalName = s.substring(4, s.length());
+        try {
+          config.tlp = ReflectionLoading.loadByReflection(tlpCanonicalName);
+          log.info("Loaded TreebankLanguagePack: " + tlpCanonicalName);
+        } catch (Exception e) {
+          log.warn("Error: Failed to load TreebankLanguagePack: " + tlpCanonicalName);
+        }
+        s = input.readLine();
+      }
       int nDict = Integer.parseInt(s.substring(s.indexOf('=') + 1));
       s = input.readLine();
       int nPOS = Integer.parseInt(s.substring(s.indexOf('=') + 1));
@@ -593,7 +618,7 @@ public class DependencyParser  {
           preComputed.add(Integer.parseInt(split));
         }
       }
-      input.close();
+
       config.hiddenSize = hSize;
       config.embeddingSize = eSize;
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
@@ -613,9 +638,7 @@ public class DependencyParser  {
 
     double[][] embeddings = null;
     if (embedFile != null) {
-      BufferedReader input = null;
-      try {
-        input = IOUtils.readerFromString(embedFile);
+      try (BufferedReader input = IOUtils.readerFromString(embedFile)) {
         List<String> lines = new ArrayList<>();
         for (String s; (s = input.readLine()) != null; ) {
           lines.add(s);
@@ -639,8 +662,6 @@ public class DependencyParser  {
         }
       } catch (IOException e) {
         throw new RuntimeIOException(e);
-      } finally {
-        IOUtils.closeIgnoringExceptions(input);
       }
       embeddings = Util.scaling(embeddings, 0, 1.0);
     }
@@ -689,9 +710,8 @@ public class DependencyParser  {
     config.printParameters();
 
     long startTime = System.currentTimeMillis();
-    /**
-     * Track the best UAS performance we've seen.
-     */
+
+    // Track the best UAS performance we've seen.
     double bestUAS = 0;
 
     for (int iter = 0; iter < config.maxIter; ++iter) {
@@ -716,7 +736,7 @@ public class DependencyParser  {
         log.info("UAS: " + uas);
 
         if (config.saveIntermediate && uas > bestUAS) {
-          System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
+          log.info("Exceeds best previous UAS of %f. Saving model file.%n", bestUAS);
 
           bestUAS = uas;
           writeModelFile(modelFile);
@@ -739,8 +759,8 @@ public class DependencyParser  {
       double uas = config.noPunc ? system.getUASnoPunc(devSents, predicted, devTrees) : system.getUAS(devSents, predicted, devTrees);
 
       if (uas > bestUAS) {
-        System.err.printf("Final model UAS: %f%n", uas);
-        System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
+        log.info(String.format("Final model UAS: %f%n", uas));
+        log.info(String.format("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS));
 
         writeModelFile(modelFile);
       }
@@ -820,10 +840,9 @@ public class DependencyParser  {
     log.info("Found embeddings: " + foundEmbed + " / " + knownWords.size());
 
     if (preModel != null) {
-        try {
+        try (BufferedReader input = IOUtils.readerFromString(preModel)) {
           log.info("Loading pre-trained model file: " + preModel + " ... ");
           String s;
-          BufferedReader input = IOUtils.readerFromString(preModel);
 
           s = input.readLine();
           int nDict = Integer.parseInt(s.substring(s.indexOf('=') + 1));
@@ -901,7 +920,6 @@ public class DependencyParser  {
                   W2[i][j] = Double.parseDouble(splits[i]);
               }
           }
-          input.close();
         } catch (IOException e) {
           throw new RuntimeIOException(e);
         }
@@ -1090,21 +1108,21 @@ public class DependencyParser  {
           numOOVWords += 1;
       }
     }
-    System.err.printf("OOV Words: %d / %d = %.2f%%\n", numOOVWords, numWords, numOOVWords * 100.0 / numWords);
+    log.info(String.format("OOV Words: %d / %d = %.2f%%\n", numOOVWords, numWords, numOOVWords * 100.0 / numWords));
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
 
     double uas = config.noPunc ? result.get("UASnoPunc") : result.get("UAS");
     double las = config.noPunc ? result.get("LASnoPunc") : result.get("LAS");
-    System.err.printf("UAS = %.4f%n", uas);
-    System.err.printf("LAS = %.4f%n", las);
+    log.info(String.format("UAS = %.4f%n", uas));
+    log.info(String.format("LAS = %.4f%n", las));
 
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     double sentspersec = numSentences / (((double) millis) / 1000);
-    System.err.printf("%s parsed %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
-            StringUtils.getShortClassName(this), numWords, numSentences, millis / 1000.0, wordspersec, sentspersec);
+    log.info(String.format("%s parsed %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
+            StringUtils.getShortClassName(this), numWords, numSentences, millis / 1000.0, wordspersec, sentspersec));
 
     if (outFile != null) {
         Util.writeConllFile(outFile, testSents, predicted);
@@ -1127,8 +1145,8 @@ public class DependencyParser  {
       tagged.add(tagger.tagSentence(sentence));
     }
 
-    System.err.printf("Tagging completed in %.2f sec.%n",
-        timer.stop() / 1000.0);
+    log.info(String.format("Tagging completed in %.2f sec.%n",
+        timer.stop() / 1000.0));
 
     timer.start();
 
@@ -1146,8 +1164,8 @@ public class DependencyParser  {
 
     long millis = timer.stop();
     double seconds = millis / 1000.0;
-    System.err.printf("Parsed %d sentences in %.2f seconds (%.2f sents/sec).%n",
-        numSentences, seconds, numSentences / seconds);
+    log.info(String.format("Parsed %d sentences in %.2f seconds (%.2f sents/sec).%n",
+        numSentences, seconds, numSentences / seconds));
   }
 
   /**
@@ -1252,9 +1270,10 @@ public class DependencyParser  {
     DependencyParser parser = new DependencyParser(props);
 
     // Train with CoNLL-X data
-    if (props.containsKey("trainFile"))
+    if (props.containsKey("trainFile")) {
       parser.train(props.getProperty("trainFile"), props.getProperty("devFile"), props.getProperty("model"),
-          props.getProperty("embedFile"), props.getProperty("preModel"));
+              props.getProperty("embedFile"), props.getProperty("preModel"));
+    }
 
     boolean loaded = false;
     // Test with CoNLL-X data

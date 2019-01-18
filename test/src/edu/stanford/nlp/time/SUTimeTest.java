@@ -3,7 +3,13 @@ package edu.stanford.nlp.time;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Pair;
 import org.joda.time.Partial;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
 
@@ -103,6 +109,27 @@ public class SUTimeTest {
       SUTime.RelativeTime rel1 = new SUTime.RelativeTime(SUTime.TIME_REF, SUTime.TemporalOp.THIS, p.first());
       resolveAndCheckRange("This for " + p.first() + " (" + i + ')', rel1, anchorTime, p.second());
     }
+  }
+
+
+  @Test
+  public void parseDateTimeStandardInstantFormat() {
+    assertEquals(
+        Instant.parse("2017-11-02T19:30:00Z").toEpochMilli(),
+        SUTime.parseDateTime("2017-11-02T19:30:00Z", true).getJodaTimeInstant().getMillis());
+
+  }
+
+
+  @Ignore
+  @Test
+  public void parseDateTimeStandardLocalDateTimeFormat() {
+    LocalDateTime expected = LocalDateTime.parse("2017-11-02T15:30");
+    SUTime.Time actual = SUTime.parseDateTime("2017-11-02T15:30", true);
+    assertEquals(
+        expected.toInstant(ZoneId.systemDefault().getRules().getOffset(expected.toInstant(ZoneOffset.UTC))).toEpochMilli(),
+        actual.getJodaTimeInstant().getMillis());
+
   }
 
 }

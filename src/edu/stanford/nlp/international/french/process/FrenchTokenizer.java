@@ -1,5 +1,4 @@
 package edu.stanford.nlp.international.french.process; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,6 +26,7 @@ import edu.stanford.nlp.process.WordTokenFactory;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Tokenizer for raw French text. This tokenization scheme is a derivative
@@ -36,31 +36,32 @@ import edu.stanford.nlp.util.StringUtils;
  * The tokenizer implicitly inserts segmentation markers by not normalizing
  * the apostrophe and hyphen. Detokenization can thus be performed by right-concatenating
  * apostrophes and left-concatenating hyphens.
- * </p>
+ *
  * <p>
  * A single instance of an French Tokenizer is not thread safe, as it
  * uses a non-threadsafe JFlex object to do the processing.  Multiple
  * instances can be created safely, though.  A single instance of a
  * FrenchTokenizerFactory is also not thread safe, as it keeps its
  * options in a local variable.
- * </p>
  *
  * @author Spence Green
  */
 public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FrenchTokenizer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(FrenchTokenizer.class);
 
   // The underlying JFlex lexer
   private final FrenchLexer lexer;
 
   // Internal fields compound splitting
   private final boolean splitCompounds;
+  private final boolean splitContractions;
   private List<CoreLabel> compoundBuffer;
 
   // Produces the tokenization for parsing used by Green, de Marneffe, and Manning (2011)
-  public static final String FTB_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitCompounds=true";
+  public static final String FTB_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false," +
+      "splitContractions=true,splitCompounds=true";
 
   /**
    * Constructor.
@@ -70,10 +71,12 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * @param lexerProperties
    * @param splitCompounds
    */
-  public FrenchTokenizer(Reader r, LexedTokenFactory<T> tf, Properties lexerProperties, boolean splitCompounds) {
+  public FrenchTokenizer(Reader r, LexedTokenFactory<T> tf, Properties lexerProperties,
+                         boolean splitCompounds, boolean splitContractions) {
     lexer = new FrenchLexer(r, tf, lexerProperties);
     this.splitCompounds = splitCompounds;
-    if (splitCompounds) compoundBuffer = Generics.newLinkedList();
+    this.splitContractions = splitContractions;
+    if (splitCompounds || splitContractions) compoundBuffer = Generics.newLinkedList();
   }
 
   @Override
@@ -85,7 +88,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       // some tokens can be obliterated. In this case, keep iterating
       // until we see a non-zero length token.
       do {
-        nextToken = (splitCompounds && compoundBuffer.size() > 0) ?
+        nextToken = ((splitContractions || splitCompounds) && compoundBuffer.size() > 0) ?
             (T) compoundBuffer.remove(0) :
               (T) lexer.next();
       } while (nextToken != null && nextToken.word().length() == 0);
@@ -98,6 +101,14 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         }
       }
 
+      // Check for contractions to split
+      if (splitContractions && nextToken instanceof CoreLabel) {
+        CoreLabel cl = (CoreLabel) nextToken;
+        if (cl.containsKey(ParentAnnotation.class) && cl.get(ParentAnnotation.class).equals(FrenchLexer.CONTR_ANNOTATION)) {
+          nextToken = (T) processContraction(cl);
+        }
+      }
+
       return nextToken;
 
     } catch (IOException e) {
@@ -105,12 +116,27 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     }
   }
 
+  /** Copies the CoreLabel cl with the new word part */
+  private static CoreLabel copyCoreLabel(CoreLabel cl, String part, int beginPosition, int endPosition) {
+    CoreLabel newLabel = new CoreLabel(cl);
+    newLabel.setWord(part);
+    newLabel.setValue(part);
+    newLabel.setBeginPosition(beginPosition);
+    newLabel.setEndPosition(endPosition);
+    newLabel.set(OriginalTextAnnotation.class, part);
+    return newLabel;
+  }
+
+  private static CoreLabel copyCoreLabel(CoreLabel cl, String part, int beginPosition) {
+    return copyCoreLabel(cl, part, beginPosition, beginPosition + part.length());
+  }
+
   /**
    * Splits a compound marked by the lexer.
    */
   private CoreLabel processCompound(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
-    String[] parts = cl.word().replaceAll("\\-", " - ").split("\\s+");
+    String[] parts = cl.word().replaceAll("-", " - ").split("\\s+");
     for (String part : parts) {
       CoreLabel newLabel = new CoreLabel(cl);
       newLabel.setWord(part);
@@ -120,6 +146,52 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     }
     return compoundBuffer.remove(0);
   }
+
+  /**
+   * Splits a contraction marked by the lexer.
+   *
+   * au => a + u =&gt; à + le
+   * aux => a + ux =&gt; à + les
+   * des => de + s =&gt; de + les
+   * du => d + u =&gt; de + le
+   */
+  private CoreLabel processContraction(CoreLabel cl) {
+    cl.remove(ParentAnnotation.class);
+    String word = cl.word();
+    String first;
+    String second;
+    int secondOffset = 0, secondLength = 0;
+
+    String lowered = word.toLowerCase();
+    switch (lowered) {
+      case "au":
+        first = "à";
+        second = "le";
+        secondOffset = 1;
+        secondLength = 1;
+        break;
+      case "aux":
+        first = "à";
+        second = "les";
+        secondOffset = 1;
+        secondLength = 2;
+        break;
+      case "du":
+        first = "de";
+        second = "le";
+        secondOffset = 1;
+        secondLength = 1;
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid contraction provided to processContraction");
+    }
+
+    int secondStart = cl.beginPosition() + secondOffset;
+    int secondEnd = secondStart + secondLength;
+    compoundBuffer.add(copyCoreLabel(cl, second, secondStart, secondEnd));
+    return copyCoreLabel(cl, first, cl.beginPosition(), secondStart);
+  }
+
 
   /**
    * A factory for French tokenizer instances.
@@ -135,6 +207,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     protected final LexedTokenFactory<T> factory;
     protected Properties lexerProperties = new Properties();
     protected boolean splitCompoundOption = false;
+    protected boolean splitContractionOption = true;
 
     public static TokenizerFactory<CoreLabel> newTokenizerFactory() {
       return new FrenchTokenizerFactory<>(new CoreLabelTokenFactory());
@@ -167,7 +240,8 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
     @Override
     public Tokenizer<T> getTokenizer(Reader r) {
-      return new FrenchTokenizer<>(r, factory, lexerProperties, splitCompoundOption);
+      return new FrenchTokenizer<>(r, factory, lexerProperties,
+          splitCompoundOption, splitContractionOption);
     }
 
     /**
@@ -257,11 +331,12 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   /**
    * A fast, rule-based tokenizer for Modern Standard French.
    * Performs punctuation splitting and light tokenization by default.
+   *
    * <p>
    * Currently, this tokenizer does not do line splitting. It assumes that the input
    * file is delimited by the system line separator. The output will be equivalently
    * delimited.
-   * </p>
+
    *
    * @param args
    */
@@ -278,7 +353,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     String orthoOptions = options.getProperty("options", "");
     // When called from this main method, split on newline. No options for
     // more granular sentence splitting.
-    orthoOptions = orthoOptions.length() == 0 ? "tokenizeNLs" : orthoOptions + ",tokenizeNLs";
+    orthoOptions = orthoOptions.isEmpty() ? "tokenizeNLs" : orthoOptions + ",tokenizeNLs";
     tf.setOptions(orthoOptions);
 
     // Other options
@@ -307,7 +382,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         }
       }
     } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
+      log.error(e);
     }
     long elapsedTime = System.nanoTime() - startTime;
     double linesPerSec = (double) nLines / (elapsedTime / 1e9);

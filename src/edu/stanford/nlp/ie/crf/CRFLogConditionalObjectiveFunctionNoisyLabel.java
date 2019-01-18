@@ -23,6 +23,7 @@ public class CRFLogConditionalObjectiveFunctionNoisyLabel extends CRFLogConditio
     return new NoisyLabelLinearCliquePotentialFunction(weights, docLabels, errorMatrix);
   }
 
+  @Override
   public void setWeights(double[][] weights) {
     super.setWeights(weights);
   }
@@ -35,11 +36,10 @@ public class CRFLogConditionalObjectiveFunctionNoisyLabel extends CRFLogConditio
       featureVal3DArr = featureVal[docIndex];
     }
     // make a clique tree for this document
-    CRFCliqueTree cliqueTreeNoisyLabel = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, getFunc(docIndex), featureVal3DArr);
-    CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, featureVal3DArr);
+    CRFCliqueTree<String> cliqueTreeNoisyLabel = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, getFunc(docIndex), featureVal3DArr);
+    CRFCliqueTree<String> cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, featureVal3DArr);
 
-    double prob = 0.0;
-    prob = cliqueTreeNoisyLabel.totalMass() - cliqueTree.totalMass();
+    double prob = cliqueTreeNoisyLabel.totalMass() - cliqueTree.totalMass();
 
     documentExpectedCounts(E, docData, featureVal3DArr, cliqueTree);
     documentExpectedCounts(Ehat, docData, featureVal3DArr, cliqueTreeNoisyLabel);

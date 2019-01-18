@@ -1,12 +1,13 @@
-package edu.stanford.nlp.loglinear.model; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.loglinear.model;
 
 import edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
+
 
 /**
  * Created on 12/7/14.
@@ -28,9 +29,9 @@ public class ConcatVector  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(ConcatVector.class);
-  double[][] pointers;
-  boolean[] sparse;
-  boolean[] copyOnWrite;
+  private double[][] pointers;
+  private boolean[] sparse;
+  private boolean[] copyOnWrite;
 
   /**
    * Constructor that initializes space for this concat vector. Don't worry, it can resize individual elements as
@@ -352,7 +353,7 @@ public class ConcatVector  {
    *
    * @param fn the function to apply to every element of every component.
    */
-  public void mapInPlace(Function<Double, Double> fn) {
+  public void mapInPlace(DoubleUnaryOperator fn) {
     for (int i = 0; i < pointers.length; i++) {
       if (pointers[i] == null) continue;
 
@@ -362,10 +363,10 @@ public class ConcatVector  {
       }
 
       if (sparse[i]) {
-        pointers[i][1] = fn.apply(pointers[i][1]);
+        pointers[i][1] = fn.applyAsDouble(pointers[i][1]);
       } else {
         for (int j = 0; j < pointers[i].length; j++) {
-          pointers[i][j] = fn.apply(pointers[i][j]);
+          pointers[i][j] = fn.applyAsDouble(pointers[i][j]);
         }
       }
     }
@@ -586,7 +587,7 @@ public class ConcatVector  {
     copyOnWrite = copyOnWriteBuf;
   }
 
-  static boolean loadedNative = false;
+  private static boolean loadedNative = false;
 
   // Right now I'm not loading the native library even if it's available, since the dot product "speedup" is actually
   // 10x slower. First need to diagnose if a speedup is possible by going through the JNI, which is unlikely.
@@ -610,4 +611,5 @@ public class ConcatVector  {
    */
   private ConcatVector() {
   }
+
 }

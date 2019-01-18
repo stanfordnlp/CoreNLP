@@ -43,6 +43,37 @@ public abstract class AnnotationSerializer {
    */
   public abstract Pair<Annotation, InputStream> read(InputStream is) throws IOException, ClassNotFoundException, ClassCastException;
 
+  /**
+   * Append a CoreDocument to this output stream.
+   *
+   * @param document The CoreDocument to serialize (its internal annotation is serialized)
+   * @param os The output stream to serialize to
+   * @return The output stream which should be closed
+   * @throws IOException
+   */
+  public OutputStream writeCoreDocument(CoreDocument document, OutputStream os) throws IOException {
+    Annotation wrappedAnnotation = document.annotation();
+    return write(wrappedAnnotation, os);
+  }
+
+  /**
+   * Read in a CoreDocument from this input stream.
+   *
+   * @param is The input stream to read a CoreDocument's annotation from
+   * @return A pair with the CoreDocument and the input stream
+   * @throws IOException
+   * @throws ClassNotFoundException
+   * @throws ClassCastException
+   */
+
+  public Pair<CoreDocument, InputStream> readCoreDocument(InputStream is)
+      throws IOException, ClassNotFoundException, ClassCastException {
+    Pair<Annotation, InputStream> readPair = read(is);
+    CoreDocument readCoreDocument = new CoreDocument(readPair.first());
+    return new Pair<CoreDocument, InputStream>(readCoreDocument, is);
+  }
+
+
   public static class IntermediateNode {
     String docId;
     int sentIndex;

@@ -29,8 +29,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
   protected float epsilon;
 
   List<Index<CRFLabel>> labelIndices;
-  Index classIndex;
-  Index featureIndex;
+  Index<String> classIndex;
   float[][] Ehat; // empirical counts of all the features [feature][class]
   int window;
   int numClasses;
@@ -43,20 +42,19 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
 
   public static boolean VERBOSE = false;
 
-  CRFLogConditionalObjectiveFloatFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol) {
-    this(data, labels, featureIndex, window, classIndex, labelIndices, map, QUADRATIC_PRIOR, backgroundSymbol);
+  CRFLogConditionalObjectiveFloatFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol) {
+    this(data, labels, window, classIndex, labelIndices, map, QUADRATIC_PRIOR, backgroundSymbol);
   }
 
-  CRFLogConditionalObjectiveFloatFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol, double sigma) {
-    this(data, labels, featureIndex, window, classIndex, labelIndices, map, QUADRATIC_PRIOR, backgroundSymbol, sigma);
+  CRFLogConditionalObjectiveFloatFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol, double sigma) {
+    this(data, labels, window, classIndex, labelIndices, map, QUADRATIC_PRIOR, backgroundSymbol, sigma);
   }
 
-  CRFLogConditionalObjectiveFloatFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, List<Index<CRFLabel>> labelIndices, int[] map, int prior, String backgroundSymbol) {
-    this(data, labels, featureIndex, window, classIndex, labelIndices, map, prior, backgroundSymbol, 1.0f);
+  CRFLogConditionalObjectiveFloatFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, int prior, String backgroundSymbol) {
+    this(data, labels, window, classIndex, labelIndices, map, prior, backgroundSymbol, 1.0f);
   }
 
-  CRFLogConditionalObjectiveFloatFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, List<Index<CRFLabel>> labelIndices, int[] map, int prior, String backgroundSymbol, double sigma) {
-    this.featureIndex = featureIndex;
+  CRFLogConditionalObjectiveFloatFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, int prior, String backgroundSymbol, double sigma) {
     this.window = window;
     this.classIndex = classIndex;
     this.numClasses = classIndex.size();
@@ -81,6 +79,7 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
     return domainDimension;
   }
 
+  @Override
   public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
     throw new UnsupportedOperationException("CRFLogConditionalObjectiveFloatFunction is not clique potential compatible yet");
   }
@@ -108,11 +107,11 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
 
   public float[][] empty2D() {
     float[][] d = new float[map.length][];
-    int index = 0;
+    // int index = 0;
     for (int i = 0; i < map.length; i++) {
       d[i] = new float[labelIndices.get(map[i]).size()];
       // Arrays.fill(d[i], 0);  // not needed; Java arrays zero initialized
-      index += labelIndices.get(map[i]).size();
+      // index += labelIndices.get(map[i]).size();
     }
     return d;
   }
@@ -148,12 +147,12 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
     FloatFactorTable factorTable = null;
 
     for (int j = 0; j < labelIndices.size(); j++) {
-      Index labelIndex = labelIndices.get(j);
+      Index<CRFLabel> labelIndex = labelIndices.get(j);
       FloatFactorTable ft = new FloatFactorTable(numClasses, j + 1);
 
       // ...and each possible labeling for that clique
       for (int k = 0; k < labelIndex.size(); k++) {
-        int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
+        int[] label = labelIndex.get(k).getLabel();
         float weight = 0.0f;
         for (int m = 0; m < data[j].length; m++) {
           //log.info("**"+weights[data[j][m]][k]);
@@ -172,7 +171,6 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
     }
 
     return factorTable;
-
   }
 
 
@@ -228,7 +226,6 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
         log.info(i + ": " + factorTables[i].toProbString());
       }
 
-
     }
 
     return factorTables;
@@ -275,10 +272,10 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
       for (int i = 0; i < data[m].length; i++) {
         // go through each clique...
         for (int j = 0; j < data[m][i].length; j++) {
-          Index labelIndex = labelIndices.get(j);
+          Index<CRFLabel> labelIndex = labelIndices.get(j);
           // ...and each possible labeling for that clique
           for (int k = 0; k < labelIndex.size(); k++) {
-            int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
+            int[] label = labelIndex.get(k).getLabel();
 
             // float p = Math.pow(Math.E, factorTables[i].logProbEnd(label));
             float p = (float) Math.exp(factorTables[i].unnormalizedLogProbEnd(label) - z);
@@ -338,7 +335,6 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
         derivative[i] += k * w / sigmaQu;
       }
     }
-
 
   }
 
@@ -422,11 +418,11 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
 
         // go through each clique...
         for (int j = 0; j < data[d][e].length; j++) {
-          Index labelIndex = labelIndices.get(j);
+          Index<CRFLabel> labelIndex = labelIndices.get(j);
 
           // ...and each possible labeling for that clique
           for (int k = 0; k < labelIndex.size(); k++) {
-            int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
+            //int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
 
             // float p = Math.pow(Math.E, factorTables[i].logProbEnd(label));
             float p = probs[j][k];

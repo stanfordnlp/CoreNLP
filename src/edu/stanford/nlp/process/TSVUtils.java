@@ -1,4 +1,4 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.process;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -8,6 +8,8 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
 
 import javax.json.*;
 import java.io.StringReader;

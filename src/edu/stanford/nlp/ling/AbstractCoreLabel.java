@@ -16,8 +16,8 @@ public interface AbstractCoreLabel extends AbstractToken, Label, TypesafeMap {
    * @return "" if the key is not in the map or has the value {@code null}
    *     and the String value of the key otherwise
    */
-  public <KEY extends Key<String>> String getString(Class<KEY> key);
+  <KEY extends Key<String>> String getString(Class<KEY> key);
 
-  public <KEY extends Key<String>> String getString(Class<KEY> key, String def);
+  <KEY extends Key<String>> String getString(Class<KEY> key, String def);
 
 }

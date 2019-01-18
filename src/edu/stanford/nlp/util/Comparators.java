@@ -6,16 +6,16 @@ import java.util.Iterator;
 import java.util.List;
 
 
-  // Originally from edu.stanford.nlp.natlog.util
+// Originally from edu.stanford.nlp.natlog.util
 public class Comparators {
 
   private Comparators() {} // class of static methods
 
   /**
    * Returns a new {@code Comparator} which is the result of chaining the
-   * given {@code Comparator}s.  If the first <code>Comparator</code>
+   * given {@code Comparator}s.  If the first {@code Comparator}
    * considers two objects unequal, its result is returned; otherwise, the
-   * result of the second <code>Comparator</code> is returned.  Facilitates
+   * result of the second {@code Comparator} is returned.  Facilitates
    * sorting on primary and secondary keys.
    */
   public static <T> Comparator<T> chain(final Comparator<? super T> c1,
@@ -27,8 +27,8 @@ public class Comparators {
   }
 
   /**
-   * Returns a new <code>Comparator</code> which is the result of chaining the
-   * given <code>Comparator</code>s.  Facilitates sorting on multiple keys.
+   * Returns a new {@code Comparator} which is the result of chaining the
+   * given {@code Comparator}s.  Facilitates sorting on multiple keys.
    */
   public static <T> Comparator<T> chain(final List<Comparator<? super T>> c) {
     return (o1, o2) -> {
@@ -42,13 +42,13 @@ public class Comparators {
   }
 
   @SafeVarargs
-  public static <T> Comparator<T> chain(Comparator<? super T>... c) {
+  public static <T> Comparator<T> chain(Comparator<T>... c) {
     return chain(Arrays.asList(c));
   }
 
   /**
-   * Returns a new <code>Comparator</code> which is the reverse of the
-   * given <code>Comparator</code>.
+   * Returns a new {@code Comparator} which is the reverse of the
+   * given {@code Comparator}.
    */
   public static <T> Comparator<T> reverse(final Comparator<? super T> c) {
     return (o1, o2) -> -c.compare(o1, o2);
@@ -92,34 +92,28 @@ public class Comparators {
         int c = list1.get(i).compareTo(list2.get(i));
         if (c != 0) return c;
       }
-      if (size1 < size2) return -1;
-      if (size1 > size2) return 1;
-      return 0;
+      return Integer.compare(size1, size2);
     }
 
     public static <C extends Comparable> Comparator<List<C>> getListComparator() {
-      return (list1, list2) -> compareLists(list1, list2);
+      return Comparators::compareLists;
     }
 
     /**
-     * A <code>Comparator</code> that compares objects by comparing their
-     * <code>String</code> representations, as determined by invoking
-     * <code>toString()</code> on the objects in question.
+     * A {@code Comparator} that compares objects by comparing their
+     * {@code String} representations, as determined by invoking
+     * {@code toString()} on the objects in question.
      */
     public static Comparator getStringRepresentationComparator() {
-      return new Comparator() {
-          public int compare(Object o1, Object o2) {
-            return o1.toString().compareTo(o2.toString());
-          }
-        };
+      return Comparator.comparing(Object::toString);
     }
 
     public static Comparator<boolean[]> getBooleanArrayComparator() {
-      return (a1, a2) -> ArrayUtils.compareBooleanArrays(a1, a2);
+      return ArrayUtils::compareBooleanArrays;
     }
 
     public static <C extends Comparable> Comparator<C[]> getArrayComparator() {
-      return (a1, a2) -> ArrayUtils.compareArrays(a1, a2);
+      return ArrayUtils::compareArrays;
     }
 
   }

@@ -1,4 +1,5 @@
 package edu.stanford.nlp.pipeline;
+
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
@@ -15,6 +16,7 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.*;
 import java.text.SimpleDateFormat;
 
 /**
@@ -38,19 +40,44 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final NERClassifierCombiner ner;
 
   private final boolean VERBOSE;
-  private boolean usePresentDateForDocDate;
+  private boolean usePresentDateForDocDate = false;
+  private String providedDocDate = "";
 
   private final long maxTime;
   private final int nThreads;
   private final int maxSentenceLength;
+  private LanguageInfo.HumanLanguage language = LanguageInfo.HumanLanguage.ENGLISH;
 
+  /** Spanish NER enhancements **/
+  private static final Map<String, String> spanishToEnglishTag = new HashMap<>();
+
+  static {
+    spanishToEnglishTag.put("PERS", "PERSON");
+    spanishToEnglishTag.put("ORG", "ORGANIZATION");
+    spanishToEnglishTag.put("LUG", "LOCATION");
+    spanishToEnglishTag.put("OTROS", "MISC");
+
+  }
+
+  private static final String spanishNumberRegexRules =
+      "edu/stanford/nlp/models/kbp/spanish/kbp_regexner_number_sp.tag";
+
+  private TokensRegexNERAnnotator spanishNumberAnnotator;
+
+  /** fine grained ner **/
+  private boolean applyFineGrained = true;
+  private TokensRegexNERAnnotator fineGrainedNERAnnotator;
+
+  /** entity mentions **/
+  private boolean buildEntityMentions = true;
+  private EntityMentionsAnnotator entityMentionsAnnotator;
 
   public NERCombinerAnnotator(Properties properties) throws IOException {
 
     List<String> models = new ArrayList<>();
     String modelNames = properties.getProperty("ner.model");
     if (modelNames == null) {
-      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
     }
     if ( ! modelNames.isEmpty()) {
       models.addAll(Arrays.asList(modelNames.split(",")));
@@ -80,6 +107,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     usePresentDateForDocDate =
         PropertiesUtils.getBool(properties, "ner." + "usePresentDateForDocDate", false);
 
+    // option for setting doc date from a provided string
+    providedDocDate = PropertiesUtils.getString(properties, "ner." + "providedDocDate", "");
+    Pattern p = Pattern.compile("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
+    Matcher m = p.matcher(providedDocDate);
+    if (!m.matches())
+      providedDocDate = "";
+
     NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
         NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
 
@@ -91,21 +125,37 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         NERClassifierCombiner.DEFAULT_PASS_DOWN_PROPERTIES);
     if (useSUTime) {
       // Make sure SUTime parameters are included
-      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".", true);
+      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + '.', true);
       PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
     }
     NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
         useSUTime, applyRegexner, combinerProperties, loadPaths);
 
-    int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
-    long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
-    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
+    this.nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
+    this.maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
+    this.maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
+    this.language =
+        LanguageInfo.getLanguageFromString(PropertiesUtils.getString(properties, "ner.language", "en"));
+
+    // in case of Spanish, use the Spanish number regexner annotator
+    if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
+      Properties spanishNumberRegexNerProperties = new Properties();
+      spanishNumberRegexNerProperties.put("spanish.number.regexner.mapping", spanishNumberRegexRules);
+      spanishNumberRegexNerProperties.put("spanish.number.regexner.validpospattern",
+          "^(NUM).*");
+      spanishNumberRegexNerProperties.put("spanish.number.regexner.ignorecase", "true");
+      spanishNumberAnnotator = new TokensRegexNERAnnotator("spanish.number.regexner",
+          spanishNumberRegexNerProperties);
+    }
+
+    // set up fine grained ner
+    setUpFineGrainedNER(properties);
+
+    // set up entity mentions
+    setUpEntityMentionBuilding(properties);
 
     VERBOSE = verbose;
     this.ner = nerCombiner;
-    this.maxTime = maxTime;
-    this.nThreads = nThreads;
-    this.maxSentenceLength = maxSentenceLength;
   }
 
 
@@ -113,9 +163,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this(true);
   }
 
-  public NERCombinerAnnotator(boolean verbose)
-    throws IOException, ClassNotFoundException
-  {
+  public NERCombinerAnnotator(boolean verbose) throws IOException, ClassNotFoundException {
     this(new NERClassifierCombiner(new Properties()), verbose);
   }
 
@@ -134,11 +182,44 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime, int maxSentenceLength) {
+    this(ner, verbose, nThreads, maxTime, maxSentenceLength, true, true);
+  }
+
+  public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime,
+                              int maxSentenceLength, boolean fineGrained, boolean entityMentions) {
     VERBOSE = verbose;
     this.ner = ner;
     this.maxTime = maxTime;
     this.nThreads = nThreads;
     this.maxSentenceLength = maxSentenceLength;
+    Properties nerProperties = new Properties();
+    nerProperties.setProperty("ner.applyFineGrained", Boolean.toString(fineGrained));
+    nerProperties.setProperty("ner.buildEntityMentions", Boolean.toString(entityMentions));
+    setUpFineGrainedNER(nerProperties);
+    setUpEntityMentionBuilding(nerProperties);
+  }
+
+  public void setUpFineGrainedNER(Properties properties) {
+    // set up fine grained ner
+    this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
+    if (this.applyFineGrained) {
+      String fineGrainedPrefix = "ner.fine.regexner";
+      Properties fineGrainedProps =
+          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".", true);
+      fineGrainedNERAnnotator = new TokensRegexNERAnnotator(fineGrainedPrefix, fineGrainedProps);
+    }
+  }
+
+  public void setUpEntityMentionBuilding(Properties properties) {
+    this.buildEntityMentions = PropertiesUtils.getBool(properties, "ner.buildEntityMentions", true);
+    if (this.buildEntityMentions) {
+      String entityMentionsPrefix = "ner.entitymentions";
+      Properties entityMentionsProps =
+          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".", true);
+      // pass language info to the entity mention annotator
+      entityMentionsProps.setProperty("ner.entitymentions.language", language.name());
+      entityMentionsAnnotator = new EntityMentionsAnnotator(entityMentionsPrefix, entityMentionsProps);
+    }
   }
 
 
@@ -164,6 +245,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
       annotation.set(CoreAnnotations.DocDateAnnotation.class, currentDate);
     }
+    // use provided doc date if applicable
+    if (!providedDocDate.equals("")) {
+      annotation.set(CoreAnnotations.DocDateAnnotation.class, providedDocDate);
+    }
 
     super.annotate(annotation);
     this.ner.finalizeAnnotation(annotation);
@@ -171,6 +256,29 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (VERBOSE) {
       log.info("done.");
     }
+    // if Spanish, run the regexner with Spanish number rules
+    if (LanguageInfo.HumanLanguage.SPANISH.equals(language))
+      spanishNumberAnnotator.annotate(annotation);
+    // if fine grained ner is requested, run that
+    if (this.applyFineGrained) {
+      fineGrainedNERAnnotator.annotate(annotation);
+      // set the FineGrainedNamedEntityTagAnnotation.class
+      for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+        String fineGrainedTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+        token.set(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class, fineGrainedTag);
+      }
+    }
+    // if entity mentions should be built, run that
+    if (this.buildEntityMentions)
+      entityMentionsAnnotator.annotate(annotation);
+  }
+
+  /** convert Spanish tag content of older models **/
+  public String spanishToEnglishTag(String spanishTag) {
+    if (spanishToEnglishTag.containsKey(spanishTag))
+      return spanishToEnglishTag.get(spanishTag);
+    else
+      return spanishTag;
   }
 
   @Override
@@ -195,7 +303,12 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         // add the named entity tag to each token
         String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
         String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+        if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
+          neTag = spanishToEnglishTag(neTag);
+          normNeTag = spanishToEnglishTag(normNeTag);
+        }
         tokens.get(i).setNER(neTag);
+        tokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
         if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
         NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
       }
@@ -249,7 +362,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           CoreAnnotations.TokenEndAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.OriginalTextAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class
+          CoreAnnotations.SentenceIndexAnnotation.class,
+          CoreAnnotations.IsNewlineAnnotation.class
       )));
     } else {
       return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
@@ -264,7 +378,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           CoreAnnotations.TokenEndAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.OriginalTextAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class
+          CoreAnnotations.SentenceIndexAnnotation.class,
+          CoreAnnotations.IsNewlineAnnotation.class
       )));
     }
   }
@@ -272,7 +387,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   @SuppressWarnings("unchecked")
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return new HashSet<>(Arrays.asList(
+    HashSet<Class<? extends CoreAnnotation>> nerRequirementsSatisfied =
+        new HashSet<>(Arrays.asList(
         CoreAnnotations.NamedEntityTagAnnotation.class,
         CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
         CoreAnnotations.ValueAnnotation.class,
@@ -288,8 +404,16 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         Tags.TagsAnnotation.class,
         CoreAnnotations.NumerizedTokensAnnotation.class,
         CoreAnnotations.AnswerAnnotation.class,
-        CoreAnnotations.NumericCompositeValueAnnotation.class
-    ));
+        CoreAnnotations.NumericCompositeValueAnnotation.class,
+        CoreAnnotations.CoarseNamedEntityTagAnnotation.class,
+        CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class
+        ));
+    if (this.buildEntityMentions) {
+      nerRequirementsSatisfied.add(CoreAnnotations.MentionsAnnotation.class);
+      nerRequirementsSatisfied.add(CoreAnnotations.EntityTypeAnnotation.class);
+      nerRequirementsSatisfied.add(CoreAnnotations.EntityMentionIndexAnnotation.class);
+    }
+    return nerRequirementsSatisfied;
   }
 
 }

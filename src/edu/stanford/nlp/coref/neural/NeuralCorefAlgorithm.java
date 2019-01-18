@@ -20,18 +20,20 @@ import edu.stanford.nlp.util.logging.Redwood;
 import org.ejml.simple.SimpleMatrix;
 
 /**
- * Neural mention-ranking coreference model as described in
- * <p/>
+ * Neural mention-ranking coreference model. As described in:
+ *
  * Kevin Clark and Christopher D. Manning. 2016.
  * <a href="http://nlp.stanford.edu/pubs/clark2016deep.pdf">
  * Deep Reinforcement Learning for Mention-Ranking Coreference Models</a>.
  * In Empirical Methods on Natural Language Processing.
- * <p/>
+ *
  * Training code is implemented in python and is available at
  * <a href="https://github.com/clarkkev/deep-coref">https://github.com/clarkkev/deep-coref</a>.
+ *
  * @author Kevin Clark
  */
 public class NeuralCorefAlgorithm implements CorefAlgorithm {
+
   private static Redwood.RedwoodChannels log = Redwood.channels(NeuralCorefAlgorithm.class);
 
   private final double greedyness;
@@ -61,11 +63,7 @@ public class NeuralCorefAlgorithm implements CorefAlgorithm {
     List<Mention> sortedMentions = CorefUtils.getSortedMentions(document);
     Map<Integer, List<Mention>> mentionsByHeadIndex = new HashMap<>();
     for (Mention m : sortedMentions) {
-      List<Mention> withIndex = mentionsByHeadIndex.get(m.headIndex);
-      if (withIndex == null) {
-        withIndex = new ArrayList<>();
-        mentionsByHeadIndex.put(m.headIndex, withIndex);
-      }
+      List<Mention> withIndex = mentionsByHeadIndex.computeIfAbsent(m.headIndex, k -> new ArrayList<>());
       withIndex.add(m);
     }
 
@@ -103,4 +101,5 @@ public class NeuralCorefAlgorithm implements CorefAlgorithm {
       }
     }
   }
+
 }

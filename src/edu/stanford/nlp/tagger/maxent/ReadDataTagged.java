@@ -1,4 +1,4 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
  * Copyright:    Copyright (c) Trustees of Leland Stanford Junior University<p>
@@ -32,7 +32,7 @@ import edu.stanford.nlp.util.Generics;
 public class ReadDataTagged  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ReadDataTagged.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ReadDataTagged.class);
 
   private final ArrayList<DataWordTag> v = new ArrayList<>();
   private int numElements = 0;
@@ -41,13 +41,10 @@ public class ReadDataTagged  {
   private final PairsHolder pairs;
   private final MaxentTagger maxentTagger;
 
-  //TODO: make a class DataHolder that holds the dict, tags, pairs, etc, for tagger
-  // and pass it around
+  //TODO: make a class DataHolder that holds the dict, tags, pairs, etc, for tagger and pass it around
 
   protected ReadDataTagged(TaggerConfig config, MaxentTagger maxentTagger,
-                           PairsHolder pairs)
-    throws IOException
-  {
+                           PairsHolder pairs) {
     this.maxentTagger = maxentTagger;
     this.pairs = pairs;
     List<TaggedFileRecord> fileRecords = TaggedFileRecord.createRecords(config, config.getFile());

@@ -22,7 +22,7 @@ public class DefaultPaths {
   public static final String DEFAULT_NER_MUC_MODEL = "edu/stanford/nlp/models/ner/english.muc.7class.distsim.crf.ser.gz";
   public static final String DEFAULT_NER_GAZETTE_MAPPING = "edu/stanford/nlp/models/ner/regexner.patterns";
 
-  public static final String DEFAULT_REGEXNER_RULES = "edu/stanford/nlp/models/regexner/type_map_clean";
+  public static final String DEFAULT_REGEXNER_RULES = "edu/stanford/nlp/models/kbp/regexner_caseless.tab";
   public static final String DEFAULT_GENDER_FIRST_NAMES = "edu/stanford/nlp/models/gender/first_name_map_small";
 
   public static final String DEFAULT_TRUECASE_MODEL = "edu/stanford/nlp/models/truecase/truecasing.fast.caseless.qn.ser.gz";
@@ -63,7 +63,7 @@ public class DefaultPaths {
           "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab;" +
                   "edu/stanford/nlp/models/kbp/regexner_cased.tab";
 
-  public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/kbp/wikidict.tab.gz";
+  public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/kbp/english/wikidict.tab.gz";
 
 
   private DefaultPaths() {

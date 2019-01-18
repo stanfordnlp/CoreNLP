@@ -39,9 +39,9 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class ScorePhrases<E extends Pattern>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ScorePhrases.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ScorePhrases.class);
 
-  Map<String, Boolean> writtenInJustification = new HashMap<>();
+  private Map<String, Boolean> writtenInJustification = new HashMap<>();
 
   ConstantsAndVariables constVars = null;
 
@@ -181,7 +181,7 @@ public class ScorePhrases<E extends Pattern>  {
     return words;
   }
 
-  void runParallelApplyPats(Map<String, DataInstance> sents, String label, E pattern, TwoDimensionalCounter<CandidatePhrase, E> wordsandLemmaPatExtracted,
+  private void runParallelApplyPats(Map<String, DataInstance> sents, String label, E pattern, TwoDimensionalCounter<CandidatePhrase, E> wordsandLemmaPatExtracted,
                             CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat, Set<CandidatePhrase> alreadyLabeledWords) {
 
     Redwood.log(Redwood.DBG, "Applying pattern " + pattern + " to a total of " + sents.size() + " sentences ");
@@ -208,15 +208,16 @@ public class ScorePhrases<E extends Pattern>  {
         TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), patternStr);
         surfacePatternsLearnedThisIterConverted.put(pat, pattern);
       }catch(Exception e){
-        log.info("Error applying patterrn " + patternStr + ". Probably an ill formed pattern (can be because of special symbols in label names). Contact the software developer.");
+        log.info("Error applying pattern " + patternStr + ". Probably an ill formed pattern (can be because of special symbols in label names). Contact the software developer.");
         throw e;
       }
-    }else if(constVars.patternType.equals(PatternFactory.PatternType.DEP)){
+    } else if(constVars.patternType.equals(PatternFactory.PatternType.DEP)) {
       depPatternsLearnedThisIterConverted = new HashMap<>();
       SemgrexPattern pat = SemgrexPattern.compile(pattern.toString(notAllowedClasses), new edu.stanford.nlp.semgraph.semgrex.Env(constVars.env.get(label).getVariables()));
       depPatternsLearnedThisIterConverted.put(pat, pattern);
-    } else
-    throw new UnsupportedOperationException();
+    } else {
+      throw new UnsupportedOperationException();
+    }
 
     //Apply the patterns and extract candidate phrases
     int num;
@@ -273,9 +274,10 @@ public class ScorePhrases<E extends Pattern>  {
     }
     executor.shutdown();
   }
-/*
+
+  /*
   void runParallelApplyPats(Map<String, List<CoreLabel>> sents, Set<String> sentIds, String label, Counter<E> patternsLearnedThisIter,  TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
-                            CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws InterruptedException, ExecutionException{
+                            CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws InterruptedException, ExecutionException {
     List<String> keyset = new ArrayList<String>(sentIds);
     List<String> notAllowedClasses = new ArrayList<String>();
 
@@ -300,7 +302,7 @@ public class ScorePhrases<E extends Pattern>  {
 
       Callable<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>> task = null;
       Map<TokenSequencePattern, Integer> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , Integer>();
-      for(Integer pindex : patternsLearnedThisIter.keySet()){
+      for (Integer pindex : patternsLearnedThisIter.keySet()){
         SurfacePattern p = constVars.getPatternIndex().get(pindex);
         TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), p.toString(notAllowedClasses));
         patternsLearnedThisIterConverted.put(pat, pindex);
@@ -330,7 +332,7 @@ public class ScorePhrases<E extends Pattern>  {
     }
     executor.shutdown();
   }
-*/
+  */
 
   protected Map<E, Map<String, DataInstance>> getSentences(Map<E, Set<String>> sentids) {
     try{

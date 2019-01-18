@@ -1,5 +1,4 @@
 package edu.stanford.nlp.naturalli;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.international.Language;
@@ -13,6 +12,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
 import edu.stanford.nlp.naturalli.ClauseSplitter.ClauseClassifierLabel;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -23,16 +23,14 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * <p>
  *   A search problem for finding clauses in a sentence.
- * </p>
  *
  * <p>
  *   For usage at test time, load a model from
  *   {@link ClauseSplitter#load(String)}, and then take the top clauses of a given tree
  *   with {@link ClauseSplitterSearchProblem#topClauses(double, int)}, yielding a list of
  *   {@link edu.stanford.nlp.naturalli.SentenceFragment}s.
- * </p>
+ * <p>
  * <pre>
  *   {@code
  *     ClauseSearcher searcher = ClauseSearcher.factory("/model/path/");
@@ -42,14 +40,13 @@ import java.util.stream.Stream;
  *
  * <p>
  *   For training, see {@link ClauseSplitter#train(Stream, File, File)}.
- * </p>
  *
  * @author Gabor Angeli
  */
 public class ClauseSplitterSearchProblem  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ClauseSplitterSearchProblem.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ClauseSplitterSearchProblem.class);
 
   /**
    * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
@@ -265,8 +262,8 @@ public class ClauseSplitterSearchProblem  {
    * @see ClauseSplitter#load(String)
    */
   protected ClauseSplitterSearchProblem(SemanticGraph tree, boolean assumedTruth,
-                                        Optional<Classifier<ClauseSplitter.ClauseClassifierLabel, String>> isClauseClassifier,
-                                        Optional<Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>> featurizer
+                                        Optional<Classifier<ClauseSplitter.ClauseClassifierLabel,String>> isClauseClassifier,
+                                        Optional<Function<Triple<ClauseSplitterSearchProblem.State,ClauseSplitterSearchProblem.Action,ClauseSplitterSearchProblem.State>,Counter<String>>> featurizer
   ) {
     this.tree = new SemanticGraph(tree);
     this.assumedTruth = assumedTruth;
@@ -527,7 +524,7 @@ public class ClauseSplitterSearchProblem  {
       search(candidateFragments,
           new LinearClassifier<>(new ClassicCounter<>()),
           HARD_SPLITS,
-          this.featurizer.isPresent() ? this.featurizer.get() : DEFAULT_FEATURIZER,
+          this.featurizer.orElse(DEFAULT_FEATURIZER),
           1000);
     } else {
       if (!(isClauseClassifier.get() instanceof LinearClassifier)) {
@@ -813,7 +810,7 @@ public class ClauseSplitterSearchProblem  {
           lastState.thunk.andThen(x -> {
             // Add the extra edges back in, if they don't break the tree-ness of the extraction
             for (IndexedWord newTreeRoot : x.getRoots()) {
-              if (newTreeRoot != null) {  // what a strange thing to have happen...
+              if (newTreeRoot != null && extraEdgesByGovernor.containsKey(newTreeRoot)) {  // what a strange thing to have happen...
                 for (SemanticGraphEdge extraEdge : extraEdgesByGovernor.get(newTreeRoot)) {
                   assert Util.isTree(x);
                   //noinspection unchecked
@@ -829,7 +826,7 @@ public class ClauseSplitterSearchProblem  {
         }
       }
 
-      // Find relevant auxilliary terms
+      // Find relevant auxiliary terms
       SemanticGraphEdge subjOrNull = null;
       SemanticGraphEdge objOrNull = null;
       for (SemanticGraphEdge auxEdge : tree.outgoingEdgeIterable(rootWord)) {
@@ -856,7 +853,7 @@ public class ClauseSplitterSearchProblem  {
         String outgoingEdgeRelation = outgoingEdge.getRelation().toString();
         List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdgeRelation);
         if (forcedArcOrder == null && outgoingEdgeRelation.contains(":")) {
-          forcedArcOrder = hardCodedSplits.get(outgoingEdgeRelation.substring(0, outgoingEdgeRelation.indexOf(":")) + ":*");
+          forcedArcOrder = hardCodedSplits.get(outgoingEdgeRelation.substring(0, outgoingEdgeRelation.indexOf(':')) + ":*");
         }
         boolean doneForcedArc = false;
         // For each action...
@@ -921,7 +918,7 @@ public class ClauseSplitterSearchProblem  {
    * The default featurizer to use during training.
    */
   public static final Featurizer DEFAULT_FEATURIZER = new Featurizer() {
-    private static final long serialVersionUID = 4145523451314579506l;
+    private static final long serialVersionUID = 4145523451314579506L;
     @Override
     public boolean isSimpleSplit(Counter<String> feats) {
       for (String key : feats.keySet()) {
@@ -942,7 +939,7 @@ public class ClauseSplitterSearchProblem  {
       String edgeRelTaken = to.edge == null ? "root" : to.edge.getRelation().toString();
       String edgeRelShort = to.edge == null ?  "root"  : to.edge.getRelation().getShortName();
       if (edgeRelShort.contains("_")) {
-        edgeRelShort = edgeRelShort.substring(0, edgeRelShort.indexOf("_"));
+        edgeRelShort = edgeRelShort.substring(0, edgeRelShort.indexOf('_'));
       }
 
       // -- Featurize --
@@ -966,7 +963,7 @@ public class ClauseSplitterSearchProblem  {
         feats.incrementCount(signature + "&not_root");
         String lastRelShort = from.edge.getRelation().getShortName();
         if (lastRelShort.contains("_")) {
-          lastRelShort = lastRelShort.substring(0, lastRelShort.indexOf("_"));
+          lastRelShort = lastRelShort.substring(0, lastRelShort.indexOf('_'));
         }
         feats.incrementCount(signature + "&last_edge:" + lastRelShort);
       }

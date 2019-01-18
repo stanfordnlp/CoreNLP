@@ -1,20 +1,26 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.process;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Sentence;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Iterables;
+import edu.stanford.nlp.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import static edu.stanford.nlp.util.TSVUtils.unescapeSQL;
+import static edu.stanford.nlp.process.TSVUtils.unescapeSQL;
 
 /**
  * Reads sentences from a TSV, provided a list of fields to populate.
+ *
+ * @author Arun Chaganty
  */
 public class TSVSentenceIterator implements Iterator<Sentence> {
 

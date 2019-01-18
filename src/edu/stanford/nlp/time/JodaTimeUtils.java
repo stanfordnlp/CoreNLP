@@ -7,7 +7,9 @@ import org.joda.time.field.OffsetDateTimeField;
 import org.joda.time.field.RemainderDateTimeField;
 import org.joda.time.field.ScaledDurationField;
 
+import java.time.ZoneId;
 import java.util.Set;
+import java.util.TimeZone;
 
 import static org.joda.time.DateTimeFieldType.*;
 import static org.joda.time.DurationFieldType.*;
@@ -25,7 +27,7 @@ public class JodaTimeUtils {
   private JodaTimeUtils() {} // static methods only
 
   // Standard ISO fields
-  protected static final Chronology isoUTCChronology = ISOChronology.getInstanceUTC();
+  protected static final ZoneId UTC = ZoneId.of("UTC");
   protected static final DateTimeFieldType[] standardISOFields = {
           DateTimeFieldType.year(),
           DateTimeFieldType.monthOfYear(),
@@ -680,6 +682,12 @@ public class JodaTimeUtils {
 
   public static Instant getInstant(Partial p)
   {
+    return getInstant(p, UTC);
+  }
+
+
+  public static Instant getInstant(Partial p, ZoneId timezone)
+  {
     if (p == null) return null;
     int year = p.isSupported(DateTimeFieldType.year())? p.get(DateTimeFieldType.year()):0;
     if (!p.isSupported(DateTimeFieldType.year())) {
@@ -703,7 +711,15 @@ public class JodaTimeUtils {
     int moh = p.isSupported(DateTimeFieldType.minuteOfHour())? p.get(DateTimeFieldType.minuteOfHour()):0;
     int som = p.isSupported(DateTimeFieldType.secondOfMinute())? p.get(DateTimeFieldType.secondOfMinute()):0;
     int msos = p.isSupported(DateTimeFieldType.millisOfSecond())? p.get(DateTimeFieldType.millisOfSecond()):0;
-    return new DateTime(year, moy, dom, hod, moh, som, msos, isoUTCChronology).toInstant();
+    return new DateTime(year, moy, dom, hod, moh, som, msos, fromTimezone(timezone)).toInstant();
+  }
+
+  private static ISOChronology fromTimezone(ZoneId timezone) {
+    if (timezone == UTC) {
+      return ISOChronology.getInstanceUTC();
+    } else {
+      return ISOChronology.getInstance(DateTimeZone.forTimeZone(TimeZone.getTimeZone(timezone)));  // <-- Jesus Christ, Java...
+    }
   }
 
   public static Partial getPartial(Instant t, Partial p)

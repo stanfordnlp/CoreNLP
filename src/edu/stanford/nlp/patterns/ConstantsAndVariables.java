@@ -563,9 +563,9 @@ public class ConstantsAndVariables implements Serializable {
 //  }
 
 
-  static public class ScorePhraseMeasures implements Comparable {
+  public static class ScorePhraseMeasures implements Comparable {
 
-        String name;
+    String name;
     static int num = 0;
     int numObj;
     static Map<String, ScorePhraseMeasures> createdObjects = new ConcurrentHashMap<>();
@@ -983,8 +983,8 @@ public class ConstantsAndVariables implements Serializable {
       env.get(label).bind("$STOPWORD", stopStr);
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
       if (matchLowerCaseContext){
-        env.get(label).setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
-        env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+        env.get(label).setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE | NodePattern.UNICODE_CASE);
+        env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
       }
       env.get(label).bind("OTHERSEM",
           PatternsAnnotations.OtherSemanticLabel.class);

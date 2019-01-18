@@ -79,7 +79,7 @@ public class AnnotationLookup {
     STACKED_NER_KEY(CoreAnnotations.StackedNamedEntityTagAnnotation.class, "stackedNer"),
 
     // Thang Sep13: for Genia NER
-    HEAD_KEY(CoreAnnotations.HeadWordStringAnnotation.class, "head"),
+    HEADWORD_KEY(CoreAnnotations.HeadWordStringAnnotation.class, "headword"),
     GOVERNOR_KEY(CoreAnnotations.GovernorAnnotation.class, "governor"),
     GAZ_KEY(CoreAnnotations.GazAnnotation.class, "gaz"),
     ABBR_KEY(CoreAnnotations.AbbrAnnotation.class, "abbr"),
@@ -90,10 +90,12 @@ public class AnnotationLookup {
     // Also have "pos" for PartOfTag (POS is also the TAG_KEY - "tag", but "pos" makes more sense)
     // Still keep "tag" for POS tag so we don't break anything
     POS_TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "pos"),
-    CPOS_TAG_KEY(CoreAnnotations.CoarseTagAnnotation.class, "cpos");
+    CPOS_TAG_KEY(CoreAnnotations.CoarseTagAnnotation.class, "cpos"),
+    DEPREL_KEY(CoreAnnotations.CoNLLDepTypeAnnotation.class, "deprel"),
+    HEADIDX_KEY(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, "headidx");
 
 
-    private final Class<? extends CoreAnnotation<?>> coreKey; // todo [cdm 2016]: Make this private if can sort out typing
+    private final Class<? extends CoreAnnotation<?>> coreKey;
     private final String oldKey;
 
     <T> KeyLookup(Class<? extends CoreAnnotation<T>> coreKey, String oldKey) {
@@ -121,20 +123,6 @@ public class AnnotationLookup {
 
   } // end enum KeyLookup
 
-
-  /*
-   * Returns a CoreAnnotation class key for the given old-style FeatureLabel
-   * key if one exists; null otherwise.
-   */
-  // no longer needed, simply return the Class object directly
-//  public static KeyLookup getCoreKey(String oldKey) {
-//    for (KeyLookup lookup : KeyLookup.values()) {
-//      if (lookup.oldKey.equals(oldKey)) {
-//        return lookup;
-//      }
-//    }
-//    return null;
-//  }
 
   /**
    * Returns a CoreAnnotation class key for the given string

@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.AnnotationLookup;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -18,10 +20,13 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 
+
 /**
- * <p>Write a subset of our CoreNLP output in CoNLL format.</p>
+ * Write a subset of our CoreNLP output in CoNLL format.
+ * The output can be customized to write any set of keys available with names as defined by AnnotationLookup,
+ * and in addition these specials: ID (token index in sentence, numbering from 1).
  *
- * <p>The fields currently output are:</p>
+ * The default fields currently output are:
  *
  * <table>
  *   <tr>
@@ -31,38 +36,38 @@ import edu.stanford.nlp.util.StringUtils;
  *   </tr>
  *   <tr>
  *     <td>1</td>
- *     <td>ID</td>
+ *     <td>ID (idx)</td>
  *     <td>Token Counter, starting at 1 for each new sentence.</td>
  *   </tr>
  *   <tr>
  *     <td>2</td>
- *     <td>FORM</td>
+ *     <td>FORM (word)</td>
  *     <td>Word form or punctuation symbol.</td>
  *   </tr>
  *   <tr>
  *     <td>3</td>
- *     <td>LEMMA</td>
+ *     <td>LEMMA (lemma)</td>
  *     <td>Lemma of word form, or an underscore if not available.</td>
  *   </tr>
  *   <tr>
  *     <td>4</td>
- *     <td>POSTAG</td>
+ *     <td>POSTAG (pos)</td>
  *     <td>Fine-grained part-of-speech tag, or underscore if not available.</td>
  *   </tr>
  *   <tr>
  *     <td>5</td>
- *     <td>NER</td>
+ *     <td>NER (ner)</td>
  *     <td>Named Entity tag, or underscore if not available.</td>
  *   </tr>
  *   <tr>
  *     <td>6</td>
- *     <td>HEAD</td>
+ *     <td>HEAD (headidx)</td>
  *     <td>Head of the current token, which is either a value of ID or zero ('0').
  *         This is underscore if not available.</td>
  *   </tr>
  *   <tr>
  *     <td>7</td>
- *     <td>DEPREL</td>
+ *     <td>DEPREL (deprel)</td>
  *     <td>Dependency relation to the HEAD, or underscore if not available.</td>
  *   </tr>
  * </table>
@@ -73,24 +78,62 @@ public class CoNLLOutputter extends AnnotationOutputter {
 
   private static final String NULL_PLACEHOLDER = "_";
 
-  public CoNLLOutputter() { }
+  private static final String DEFAULT_KEYS = "idx,word,lemma,pos,ner,headidx,deprel";
+  private final List<Class<? extends CoreAnnotation<?>>> keysToPrint;
 
-  private static String orNull(String in) {
+  public CoNLLOutputter() {
+    this(null);
+  }
+
+  public CoNLLOutputter(String keys) {
+    if (keys == null) {
+      keys = DEFAULT_KEYS;
+    }
+    String[] keyArray = keys.split(" *, *");
+    List<Class<? extends CoreAnnotation<?>>> keyList = new ArrayList<>();
+    for (String key : keyArray) {
+      keyList.add(AnnotationLookup.toCoreKey(key));
+    }
+    keysToPrint = keyList;
+  }
+
+  private static String orNeg(int in) {
+    if (in < 0) {
+      return NULL_PLACEHOLDER;
+    } else {
+      return Integer.toString(in);
+    }
+  }
+
+  private static String orNull(Object in) {
     if (in == null) {
       return NULL_PLACEHOLDER;
     } else {
-      return in;
+      return in.toString();
     }
   }
 
   /**
    * Produce a line of the CoNLL output.
    */
-  private static String line(int index,
+  private String line(int index,
                       CoreLabel token,
                       int head, String deprel) {
-    ArrayList<String> fields = new ArrayList<>(16);
+    ArrayList<String> fields = new ArrayList<>(keysToPrint.size());
 
+    for (Class<? extends CoreAnnotation<?>> keyClass : keysToPrint) {
+      if (keyClass.equals(CoreAnnotations.IndexAnnotation.class)) {
+        fields.add(orNull(index));
+      } else if (keyClass.equals(CoreAnnotations.CoNLLDepTypeAnnotation.class)) {
+        fields.add(orNull(deprel));
+      } else if (keyClass.equals(CoreAnnotations.CoNLLDepParentIndexAnnotation.class)) {
+        fields.add(orNeg(head));
+      } else {
+        fields.add(orNull(token.get((Class) keyClass)));
+      }
+    }
+
+    /*
     fields.add(Integer.toString(index)); // 1
     fields.add(orNull(token.word()));    // 2
     fields.add(orNull(token.lemma()));   // 3
@@ -103,10 +146,19 @@ public class CoNLLOutputter extends AnnotationOutputter {
       fields.add(NULL_PLACEHOLDER);
       fields.add(NULL_PLACEHOLDER);
     }
+    */
 
     return StringUtils.join(fields, "\t");
   }
 
+  /** Print an Annotation to an output stream.
+   *  The target OutputStream is assumed to already by buffered.
+   *
+   *  @param doc
+   *  @param target
+   *  @param options
+   *  @throws IOException
+   */
   @Override
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
     PrintWriter writer = new PrintWriter(IOUtils.encodedOutputStreamWriter(target, options.encoding));
@@ -119,11 +171,6 @@ public class CoNLLOutputter extends AnnotationOutputter {
           SemanticGraph depTree = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
           for (int i = 0; i < tokens.size(); ++i) {
             // ^^ end nonsense to get tokens ^^
-
-            // Newline if applicable
-            if (i > 0) {
-              writer.println();
-            }
 
             // Try to get the incoming dependency edge
             int head = -1;
@@ -146,10 +193,10 @@ public class CoNLLOutputter extends AnnotationOutputter {
 
             // Write the token
             writer.print(line(i + 1, tokens.get(i), head, deprel));
+            writer.println();
           }
         }
-        writer.println();
-        writer.println();
+        writer.println(); // extra blank line at end of sentence
       }
     }
     writer.flush();

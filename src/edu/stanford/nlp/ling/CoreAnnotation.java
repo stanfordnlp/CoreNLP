@@ -8,12 +8,11 @@ import edu.stanford.nlp.util.TypesafeMap;
  * parameterized by the type of the value associated with the annotation.
  * Subclasses of this class are the keys in the {@link CoreMap}, so they are
  * instantiated only by utility methods in {@link CoreAnnotations}.
- * 
+ *
  * @author dramage
  * @author rafferty
  */
-public interface CoreAnnotation<V>
-  extends TypesafeMap.Key<V> {
+public interface CoreAnnotation<V> extends TypesafeMap.Key<V> {
 
   /**
    * Returns the type associated with this annotation.  This method must
@@ -21,5 +20,6 @@ public interface CoreAnnotation<V>
    * one should be able to get away without this method, but because Java
    * erases the generic type signature, that info disappears at runtime.
    */
-  public Class<V> getType();
+  Class<V> getType();
+
 }

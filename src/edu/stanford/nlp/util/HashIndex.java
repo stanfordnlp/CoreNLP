@@ -373,7 +373,6 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
         }
         index.add(line.substring(start + 1));
       }
-      br.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     } finally {

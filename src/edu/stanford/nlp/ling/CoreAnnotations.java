@@ -98,6 +98,26 @@ public class CoreAnnotations {
   }
 
   /**
+   * The CoreMap key for getting the coarse named entity tag (i.e. LOCATION)
+   */
+  public static class CoarseNamedEntityTagAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
+   * The CoreMap key for getting the fine grained named entity tag (i.e. CITY)
+   */
+  public static class FineGrainedNamedEntityTagAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
    * The CoreMap key for getting the token-level named entity tag (e.g., DATE,
    * PERSON, etc.) from a previous NER tagger. NERFeatureFactory is sensitive to
    * this tag and will turn the annotations from the previous NER tagger into
@@ -464,7 +484,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * CoNLL dep parsing - the dependency type
+   * CoNLL dep parsing - the dependency type, such as SBJ or OBJ. This should be unified with CoNLLDepTypeAnnotation.
    */
   public static class CoNLLDepAnnotation implements CoreAnnotation<CoreMap> {
     @Override
@@ -495,7 +515,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * CoNLL dep parsing - the dependency type
+   * CoNLL dep parsing - the dependency type, such as SBJ or OBJ. This should be unified with CoNLLDepAnnotation.
    */
   public static class CoNLLDepTypeAnnotation implements CoreAnnotation<String> {
     @Override
@@ -888,9 +908,14 @@ public class CoreAnnotations {
   }
 
   /**
-   * The CoreMap key identifying the offset of the first character of an
-   * annotation. The character with index 0 is the first character in the
+   * The CoreMap key identifying the offset of the first char of an
+   * annotation. The char with index 0 is the first char in the
    * document.
+   *
+   * Note that these are currently measured in terms of UTF-16 char offsets, not codepoints,
+   * so that when non-BMP Unicode characters are present, such a character will add 2 to
+   * the position. On the other hand, these values will work with String#substring() and
+   * you can then calculate the number of codepoints in a substring.
    *
    * This key should be set for any annotation that represents a span of text.
    */
@@ -905,6 +930,11 @@ public class CoreAnnotations {
    * The CoreMap key identifying the offset of the last character after the end
    * of an annotation. The character with index 0 is the first character in the
    * document.
+   *
+   * Note that these are currently measured in terms of UTF-16 char offsets, not codepoints,
+   * so that when non-BMP Unicode characters are present, such a character will add 2 to
+   * the position. On the other hand, these values will work with String#substring() and
+   * you can then calculate the number of codepoints in a substring.
    *
    * This key should be set for any annotation that represents a span of text.
    */
@@ -1132,6 +1162,44 @@ public class CoreAnnotations {
     @Override
     public Class<List<CoreMap>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
+    }
+  }
+
+  /** index into the list of entity mentions in a document **/
+  public static class EntityMentionIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return ErasureUtils.uncheckedCast(Integer.class);
+    }
+  }
+
+  /** index into the list of entity mentions in a document for canonical entity mention
+   *  ...this is primarily for linking entity mentions to their canonical entity mention
+   */
+  public static class CanonicalEntityMentionIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return ErasureUtils.uncheckedCast(Integer.class);
+    }
+  }
+
+  /**
+   * mapping from coref mentions to corresponding ner derived entity mentions
+   */
+  public static class CorefMentionToEntityMentionMappingAnnotation implements CoreAnnotation<Map<Integer,Integer>> {
+    @Override
+    public Class<Map<Integer,Integer>> getType() {
+      return ErasureUtils.uncheckedCast(Map.class);
+    }
+  }
+
+  /**
+   * mapping from ner derived entity mentions to coref mentions
+   */
+  public static class EntityMentionToCorefMentionMappingAnnotation implements CoreAnnotation<Map<Integer,Integer>> {
+    @Override
+    public Class<Map<Integer,Integer>> getType() {
+      return ErasureUtils.uncheckedCast(Map.class);
     }
   }
 
@@ -1843,7 +1911,7 @@ public class CoreAnnotations {
   }
 
   /** Annotation indicating whether the numeric phrase the token is part of
-   * represents a NUMBER or ORDINAL (twenty first => ORDINAL ORDINAL).
+   * represents a NUMBER or ORDINAL (twenty first {@literal =>} ORDINAL ORDINAL).
    */
   public static class NumericCompositeValueAnnotation implements CoreAnnotation<Number> {
     @Override
@@ -1853,7 +1921,7 @@ public class CoreAnnotations {
   }
 
   /** Annotation indicating the numeric value of the phrase the token is part of
-   * (twenty first => 21 21 ).
+   * (twenty first {@literal =>} 21 21 ).
    */
   public static class NumericCompositeTypeAnnotation implements CoreAnnotation<String> {
     @Override
@@ -2039,5 +2107,29 @@ public class CoreAnnotations {
       return String.class;
     }
   }
+
+  /**
+   * The CoreMap key identifying an entity mention's potential gender.
+   *
+   * This is attached to {@link CoreMap}s.
+   */
+  public static class GenderAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
+   * The CoreLabel key identifying whether a token is a newline or not
+   *
+   * This is attached to {@link CoreLabel}s.
+   */
+  public static class IsNewlineAnnotation implements CoreAnnotation<Boolean> {
+    @Override
+    public Class<Boolean> getType() {return Boolean.class;}
+  }
+
+
 
 }

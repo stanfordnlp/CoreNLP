@@ -48,10 +48,10 @@
  * <p>
  * We have been splitting up the parser into public classes, but some of
  * the internals are still contained in the file
- * <code>FactoredParser.java</code>.
+ * {@code FactoredParser.java}.
  * </p>
  * <p>
- * The class <code>LexicalizedParser</code> provides an interface for
+ * The class {@code LexicalizedParser} provides an interface for
  * either
  * training a parser from a treebank, or parsing text using a saved
  * parser.  It can be called programmatically, or the commandline main()
@@ -80,7 +80,7 @@
  * <h3>End user usage</h3>
  * <h4>Requirements</h4>
  * <p>You need Java 1.6+ installed on your system, and
- * <code>java</code> in your PATH where commands are looked for.</p>
+ * {@code java} in your PATH where commands are looked for.</p>
  * <p>
  * You need a machine with a fair amount of memory.  Required memory
  * depends on the choice of parser, the size of the grammar, and
@@ -104,34 +104,35 @@
  * stanford-parser-$VERSION-models.jar file in the distributed version,
  * and can be accessed from there by having this jar file on your
  * CLASSPATH and specifying them via a classpath entry such as:
- * <code>edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz</code>.
+ * {@code edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz}.
  * (Stanford NLP people can also find the grammars in the directory
- * <code>/u/nlp/data/lexparser</code>.)  Other available grammars include
- * <code>englishFactored.ser.gz</code> for English, and
- * <code>chineseFactored.ser.gz</code> for Chinese.
+ * {@code /u/nlp/data/lexparser}.)  Other available grammars include
+ * {@code englishFactored.ser.gz} for English, and
+ * {@code chineseFactored.ser.gz} for Chinese.
  * </p>
  * <p>
  * You need the parser code and grammars
  * accessible.  This can be done by having the supplied jar files on
  * your CLASSPATH.  The examples below assume you are in the parser
  * distribution home directory. From there you can set up the classpath with the
- * command-line argument <code> -cp "*"</code> (or perhaps <code> -cp "*;"</code>
+ * command-line argument {@code -cp "*"} (or perhaps {@code -cp "*;"}
  * on certain versions of Windows).
- * Then if you have some sentences in <code>testsent.txt</code> (as plain
+ * Then if you have some sentences in {@code testsent.txt} (as plain
  * text), the following commands should work.
  * </p>
  * <h4>Command-line parsing usage</h4>
  * <p>Parsing a local text file:</p>
  * <blockquote>
- * <code>java -mx100m -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser
+ * {@code java -mx100m -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser
  * edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz testsent.txt
- * </code>
+ * }
  * </blockquote>
  * <p>Parsing a document over the web:</p>
  * <blockquote>
- * <code>java -mx100m -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser
- * -maxLength 40 edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz http://nlp.stanford.edu/software/lex-parser.shtml</code></blockquote>
- * <p>Note the <code>-maxLength</code> flag: this will set a maximum length
+ * {@code java -mx100m -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser
+ * -maxLength 40 edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz https://nlp.stanford.edu/software/lex-parser.html}
+ * </blockquote>
+ * <p>Note the {@code -maxLength} flag: this will set a maximum length
  * sentence to parse.  If you do not set one, the parser will try to parse
  * sentences up to any length, but will usually run out of memory when
  * trying to do this.  This is important with web pages with text that may
@@ -142,25 +143,25 @@
  * adequately on most complex commercial script-driven pages.  If you
  * want to handle these, you'll need to provide your own preprocessor,
  * and then to call the parser on its output.</p>
- * <p>The parser will send parse trees to <code>stdout</code> and other
- * information on what it is doing to <code>stderr</code>, so one commonly
- * wants to direct just <code>stdout</code> to an output file, in the
+ * <p>The parser will send parse trees to {@code stdout} and other
+ * information on what it is doing to {@code stderr}, so one commonly
+ * wants to direct just {@code stdout} to an output file, in the
  * standard way.</p>
  * <h4>Other languages: Chinese</h4>
  * <p>Parsing a Chinese sentence (in the default input encoding for
  * Chinese of GB18030
  * - note you'll need the right fonts to see the output correctly):</p>
- * <blockquote><code>
+ * <blockquote>{@code
  * java -mx100m -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser -tLPP
  * edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams
  * edu/stanford/nlp/models/lexparser/chinesePCFG.ser.gz chinese-onesent
- * </code></blockquote>
+ * }</blockquote>
  * <p>or for Unicode (UTF-8) format files:</p>
- * <blockquote><code>
+ * <blockquote>{@code
  * java -mx100m -cp "*"edu.stanford.nlp.parser.lexparser.LexicalizedParser -tLPP
  * edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams
  * -encoding UTF-8 edu/stanford/nlp/models/lexparser/chinesePCFG.ser.gz chinese-onesent-utf
- * </code></blockquote>
+ * }</blockquote>
  * <p>
  * For Chinese, the package includes two simple word segmenters.  One is a
  * lexicon-based maximum match segmenter, and the other uses the parser to
@@ -170,11 +171,11 @@
  * preprocessing step.  The supplied grammars assume that
  * Chinese input has already been word-segmented according to Penn
  * Chinese Treebank conventions.  Choosing
- * Chinese with <code>-tLPP
- * edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams</code>
+ * Chinese with {@code -tLPP
+ * edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams}
  * makes space-separated words the default tokenization.
  * To do word segmentation within the parser, give one of the options
- * <code>-segmentMarkov</code> or <code>-segmentMaxMatch</code>.
+ * {@code -segmentMarkov} or {@code -segmentMaxMatch}.
  * </p>
  * <h4>Other languages</h4>
  * <p>
@@ -184,33 +185,33 @@
  * <p>The program has many options.  The most useful end-user option is
  * <code>-maxLength&nbsp<em>n</em></code> which determines the maximum
  * length sentence that the parser will parser.  Longer sentences are
- * skipped, with a message printed to <code>stderr</code>.</p>
+ * skipped, with a message printed to {@code stderr}.</p>
  * <h5>Input formatting and tokenization options</h5>
  * <p>The parser supports many different input formats: tokenized/not,
  * sentences/not, and tagged/not.</p>
  * <p>The input may be
  * tokenized or not, and users may supply their own tokenizers. The input
  * is by default assumed to not be tokenized; if the
- * input is tokenized, supply the option <code>-tokenized</code>. If the
+ * input is tokenized, supply the option {@code -tokenized}. If the
  * input is not tokenized, you may supply the name of a tokenizer class
- * with <code>-tokenizer tokenizerClassName</code>; otherwise the default
- * tokenizer (<code>edu.stanford.nlp.processor.PTBTokenizer</code>) is
+ * with {@code -tokenizer tokenizerClassName}; otherwise the default
+ * tokenizer ({@code edu.stanford.nlp.processor.PTBTokenizer}) is
  * used.  This tokenizer should perform well over typical plain
  * newswire-style text.
  * <p>The
  * input may have already been split into sentences or not. The input is by
  * default assumed
  * to be not split; if sentences are split, supply the option
- * <code>-sentences delimitingToken</code>, where the delimiting token
+ * {@code -sentences delimitingToken}, where the delimiting token
  * may be any string.  As a special case, if the delimiting token
- * is <code>"newline"</code> the parser will assume that each line of the
+ * is {@code "newline"} the parser will assume that each line of the
  * file is a sentence.</p>
  * <p>Simple XML can also be parsed.  The main method does not incorporate an XML
  * parser, but one can fake certain simple cases with the
- * <code>-parseInside regex</code> which will only parse the tokens inside
- * elements matched by the regular expression <code>regex</code>.  These
+ * {@code -parseInside regex} which will only parse the tokens inside
+ * elements matched by the regular expression {@code regex}.  These
  * elements are assumed to be pure CDATA.
- * If you use <code>-parseInside s</code>, then the parser will accept
+ * If you use {@code -parseInside s}, then the parser will accept
  * input in which sentences are marked XML-style with
  * &lt;s&gt;&nbsp;...&nbsp;&lt;/s&gt; (the same format as the input to
  * Eugene Charniak's parser).
@@ -218,18 +219,18 @@
  * <p>Finally, the input may be tagged or not. If it is tagged, the program
  * assumes that words and tags are separated by a non-whitespace
  * separating character such as '/' or '_'. You give the option
- * <code>-tagSeparator tagSeparator</code> to specify tagged text with a
+ * {@code -tagSeparator tagSeparator} to specify tagged text with a
  * tag separator. You also need to tell the parser to use a different
  * tokenizer, using the flags
- * <code>-tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer
- * -tokenizerMethod newCoreLabelTokenizerFactory</code>
+ * {@code -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer
+ * -tokenizerMethod newCoreLabelTokenizerFactory}
  * </p>
  * <p>You can see examples of many of these options in the
- * <code>test</code> directory. As an example, you can parse the example file with partial POS-tagging
+ * {@code test} directory. As an example, you can parse the example file with partial POS-tagging
  * with this command:</p>
- * <blockquote><code>
+ * <blockquote>{@code
  * java edu.stanford.nlp.parser.lexparser.LexicalizedParser -maxLength 20 -sentences newline -tokenized -tagSeparator / -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer -tokenizerMethod newCoreLabelTokenizerFactory englishPCFG.ser.gz pos-sentences.txt
- * </code></blockquote>
+ * }</blockquote>
  * <p>There are some restrictions on the interpretation of POS-tagged input:</p>
  * <ul>
  * <li>The tagset must match the parser POS set.  If you are using our
@@ -245,7 +246,7 @@
  * 	have a verbal tagging.
  * </ul>
  * <p>
- * For the examples in <code>pos-sentences.txt</code>:</p>
+ * For the examples in {@code pos-sentences.txt}:</p>
  * <ol>
  * <li> This sentence is parsed correctly with no tags given.
  * <li> So it is also parsed correctly telling the parser <em>butter</em> is a verb.
@@ -264,17 +265,17 @@
  * </p>
  * <h5>Output formatting options</h5>
  * <p>You can set how sentences are printed out by using the
- * <code>-outputFormat format</code> option.  The native and default format is as
+ * {@code -outputFormat format} option.  The native and default format is as
  * trees are formatted in the Penn Treebank, but there are a number of
  * other useful options:
  * </p>
  * <ul>
- * <li><code>penn</code> The default.</li>
- * <li><code>oneline</code> Printed out on one line.</li>
- * <li><code>wordsAndTags</code> Use the parser as a POS tagger.</li>
- * <li><code>latexTree</code> Help write your LaTeX papers (for use with
- * Avery Andrews' <code>trees.sty</code> package.</li>
- * <li><code>typedDependenciesCollapsed</code> Write sentences in a typed
+ * <li>{@code penn} The default.</li>
+ * <li>{@code oneline} Printed out on one line.</li>
+ * <li>{@code wordsAndTags} Use the parser as a POS tagger.</li>
+ * <li>{@code latexTree} Help write your LaTeX papers (for use with
+ * Avery Andrews' {@code trees.sty} package.</li>
+ * <li>{@code typedDependenciesCollapsed} Write sentences in a typed
  * dependency format that represents sentences via grammatical relations
  * between words.  Suitable for representing text as a semantic network.</li>
  * </ul>
@@ -284,12 +285,12 @@
  * information on available output formats and options.
  * </p>
  * <h4>Programmatic usage</h4>
- * <p><code>LexicalizedParser</code> can be easily called
+ * <p>{@code LexicalizedParser} can be easily called
  * within a larger
  * application.  It implements a couple of useful interfaces that
  * provide for simple use:
- * <code>edu.stanford.nlp.parser.ViterbiParser</code>
- * and <code>edu.stanford.nlp.process.Function</code>.
+ * {@code edu.stanford.nlp.parser.ViterbiParser}
+ * and {@code edu.stanford.nlp.process.Function}.
  * The following simple class shows typical usage:</p>
  * <blockquote><pre>
  * import java.util.*;
@@ -323,7 +324,7 @@
  * example of doing this).  The example shows how most command-line
  * arguments can also be passed to the parser when called
  * programmatically. Note that using the
- * <code>-retainTmpSubcategories</code> option is necessary to get the best
+ * {@code -retainTmpSubcategories} option is necessary to get the best
  * results in the typed dependencies output recognizing temporal noun phrases
  * ("last week", "next February").
  * </p>
@@ -354,13 +355,13 @@
  * can also be quickly reconstructed (either programmatically or at the command line)
  * from files containing a parser in either of these formats.</p>
  * <p>The binary serialized Java
- * objects format is created using standard tools provided by the <code>java.io</code>
+ * objects format is created using standard tools provided by the {@code java.io}
  * package, and is not text, and not human-readable. To train and then save a parser
  * as a binary serialized objects file, use a command line invocation of the form:</p>
- * <blockquote><code>
+ * <blockquote>{@code
  * java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser
  * -train trainFilePath [fileRange] -saveToSerializedFile outputFilePath
- * </code></blockquote>
+ * }</blockquote>
  * <p>The text data format is human readable and modifiable, and consists of
  * four sections, appearing in the following order:</p>
  * <ul>
@@ -374,15 +375,15 @@
  * of the section. Note that the file format does not support rules of arbitrary arity,
  * only binary and unary rules. To train and then save a parser
  * as a text data file, use a command line invocation of the form:</p>
- * <blockquote><code>
+ * <blockquote>{@code
  * java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser
  * -train trainFilePath start stop -saveToTextFile outputFilePath
- * </code></blockquote>
+ * }</blockquote>
  * <p>To parse a file with a saved parser, either in text data or serialized data format, use a command line invocation of the following form:</p>
- * <blockquote><code>
+ * <blockquote>{@code
  * java -mx500m edu.stanford.nlp.parser.lexparser.LexicalizedParser
  * parserFilePath test.txt
- * </code></blockquote>
+ * }</blockquote>
  * <h4>A Note on Text Grammars</h4>
  * <p>If you want to use the text grammars in another parser and duplicate our
  * performance, you will need to know how we handle the POS tagging of rare
@@ -415,7 +416,7 @@
  * <h4>For additional information</h4>
  * <p>
  * For more information, you should next look at the Javadocs for the
- * LexicalizedParser class.  In particular, the <code>main</code> method of
+ * LexicalizedParser class.  In particular, the {@code main} method of
  * that class documents more precisely a number of the input preprocessing
  * options that were presented chattily above.
  * </p>

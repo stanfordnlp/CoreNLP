@@ -1,6 +1,5 @@
 package edu.stanford.nlp.ie.machinereading;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,16 +17,15 @@ import edu.stanford.nlp.util.CoreMap;
 /**
  * Simple extractor which combines several other Extractors.  Currently only works with RelationMentions.
  * Also note that this implementation uses Sets and will mangle the original order of RelationMentions.
- * 
+ *
  * @author David McClosky
- * 
  */
 public class ExtractorMerger implements Extractor {
-  
+
   private static final long serialVersionUID = 1L;
   private static final Logger logger = Logger.getLogger(ExtractorMerger.class.getName());
   private Extractor[] extractors;
-    
+
   public ExtractorMerger(Extractor[] extractors) {
     if (extractors.length < 2) {
       throw new IllegalArgumentException("We need at least 2 extractors for ExtractorMerger to make sense.");
@@ -35,11 +33,12 @@ public class ExtractorMerger implements Extractor {
     this.extractors = extractors;
   }
 
+  @Override
   public void annotate(Annotation dataset) {
     // TODO for now, we only merge RelationMentions
     logger.info("Extractor 0 annotating dataset.");
     extractors[0].annotate(dataset);
-    
+
     // store all the RelationMentions per sentence
     List<Set<RelationMention>> allRelationMentions = new ArrayList<>();
     for (CoreMap sentence : dataset.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -53,7 +52,7 @@ public class ExtractorMerger implements Extractor {
       logger.info("Extractor " + extractorIndex + " annotating dataset.");
       Extractor extractor = extractors[extractorIndex];
       extractor.annotate(dataset);
-      
+
       // walk through all sentences and merge our RelationMentions with the combined set
       int sentenceIndex = 0;
       for (CoreMap sentence : dataset.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -61,7 +60,7 @@ public class ExtractorMerger implements Extractor {
         allRelationMentions.get(sentenceIndex).addAll(relationMentions);
       }
     }
-    
+
     // put all merged relations back into the dataset
     int sentenceIndex = 0;
     for (CoreMap sentence : dataset.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -71,7 +70,7 @@ public class ExtractorMerger implements Extractor {
       sentenceIndex++;
     }
   }
-  
+
   public static Extractor buildRelationExtractorMerger(String[] extractorModelNames) {
     BasicRelationExtractor[] relationExtractorComponents = new BasicRelationExtractor[extractorModelNames.length];
     for (int i = 0; i < extractorModelNames.length; i++) {
@@ -79,10 +78,7 @@ public class ExtractorMerger implements Extractor {
       logger.info("Loading model " + i + " for model merging from " + modelName);
       try {
         relationExtractorComponents[i] = BasicRelationExtractor.load(modelName);
-      } catch (IOException e) {
-        logger.severe("Error loading model:");
-        e.printStackTrace();
-      } catch (ClassNotFoundException e) {
+      } catch (IOException | ClassNotFoundException e) {
         logger.severe("Error loading model:");
         e.printStackTrace();
       }
@@ -91,14 +87,18 @@ public class ExtractorMerger implements Extractor {
     return relationExtractor;
   }
 
+  @Override
   public void setLoggerLevel(Level level) {
     logger.setLevel(level);
   }
 
-  // stubs required by Extractor interface -- they don't do anything since this model is not trainable or savable 
+  // stubs required by Extractor interface -- they don't do anything since this model is not trainable or savable
+  @Override
   public void save(String path) throws IOException {
   }
 
+  @Override
   public void train(Annotation dataset) {
   }
+
 }

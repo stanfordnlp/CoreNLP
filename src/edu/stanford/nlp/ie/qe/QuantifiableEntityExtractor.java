@@ -63,8 +63,8 @@ public class QuantifiableEntityExtractor {
     env.setDefaultTokensAnnotationKey(CoreAnnotations.NumerizedTokensAnnotation.class);
 
     // Do case insensitive matching
-    env.setDefaultStringMatchFlags(Pattern.CASE_INSENSITIVE);
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+    env.setDefaultStringMatchFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     try {
       Units.registerUnits(env, options.unitsFilename);
     } catch (IOException ex)  {

@@ -156,7 +156,9 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     if (o instanceof CoreMap) {
       Boolean forcedEndValue =
               ((CoreMap)o).get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
-      return forcedEndValue != null && forcedEndValue;
+      String originalText = ((CoreMap) o).get(CoreAnnotations.OriginalTextAnnotation.class);
+      return (forcedEndValue != null && forcedEndValue) ||
+          (originalText != null && originalText.equals("\u2029"));
     } else {
       return false;
     }
@@ -579,7 +581,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         String regex = "<\\s*(?:/\\s*)?(?:" + s + ")(?:\\s+[^>]+?|\\s*(?:/\\s*)?)>";
         // log.info("Regex is |" + regex + "|");
         // todo: Historically case insensitive, but maybe better and more proper to make case sensitive?
-        this.xmlBreakElementsToDiscard.add(Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
+        this.xmlBreakElementsToDiscard.add(Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE));
       }
     }
     if (regionElementRegex != null) {

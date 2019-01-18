@@ -1,5 +1,7 @@
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
+
+import java.util.*;
+import java.util.function.DoubleUnaryOperator;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -10,31 +12,28 @@ import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.StringUtils;
-
-import java.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * CRFBiasedClassifier is used to adjust the precision-recall tradeoff
  * of any CRF model implemented using CRFClassifier. This adjustment is
- * performed after CRF training.  The method is described in (Minkov,
- * Wang, Tomasic, and Cohen, 2006): "NER Systems that Suit User's
+ * performed after CRF training.  The method is described in Minkov,
+ * Wang, Tomasic, and Cohen (2006): "NER Systems that Suit User's
  * Preferences: Adjusting the Recall-Precision Trade-off for Entity
  * Extraction".  CRFBiasedClassifier can import any model serialized
  * with {@link CRFClassifier} and supports most command-line parameters
  * available in {@link CRFClassifier}.  In addition to this,
  * CRFBiasedClassifier also interprets the parameter -classBias, as in:
- * <p><code>
- * java -server -mx500m edu.stanford.nlp.ie.crf.CRFBiasedClassifier -loadClassifier model.gz -testFile test.txt -classBias A:0.5,B:1.5
- * </code>
- * <p>
+ *
+ * {@code java -server -mx500m edu.stanford.nlp.ie.crf.CRFBiasedClassifier -loadClassifier model.gz -testFile test.txt -classBias A:0.5,B:1.5 }
+ *
  * The command above sets a bias of 0.5 towards class A and a bias of
  * 1.5 towards class B. These biases (which internally are treated as
  * feature weights in the log-linear model underpinning the CRF
- * classifier) can take any real value. As the weight of A tends to plus
+ * classifier) can take any real value. As the weight of A tends towards plus
  * infinity, the classifier will only predict A labels, and as it tends
  * towards minus infinity, it will never predict A labels.
  *
@@ -45,7 +44,7 @@ import java.util.*;
 public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFBiasedClassifier.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFBiasedClassifier.class);
 
   private static final String BIAS = "@@@DECODING_CLASS_BIAS@@@";
   private boolean testTime = false;
@@ -74,10 +73,11 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
         for (FeatureFactory<IN> featureFactory : featureFactories) {
           featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c));
         }
-        if(testTime && i==0)
-          // this feature is only present at test time and only appears
-          // in cliques of size 1 (i.e., cliques with window=0)
-          featuresC.add(BIAS);
+      }
+      if (testTime && i==0) {
+        // this feature is only present at test time and only appears
+        // in cliques of size 1 (i.e., cliques with window=0)
+        featuresC.add(BIAS);
       }
       features.add(featuresC);
     }
@@ -91,8 +91,8 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
     return new CRFDatum<>(features, new CRFLabel(labels), null);
   }
 
-  void addBiasFeature() {
-    if(!featureIndex.contains(BIAS)) {
+  private void addBiasFeature() {
+    if ( ! featureIndex.contains(BIAS)) {
       featureIndex.add(BIAS);
       double[][] newWeights = new double[weights.length+1][];
       System.arraycopy (weights,0,newWeights,0,weights.length);
@@ -120,21 +120,21 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
     return l;
   }
 
-  class CRFBiasedClassifierOptimizer implements Function<Double,Double>  {
-    CRFBiasedClassifier<IN> crf;
-    Function<Double, Double> evalFunction;
+  class CRFBiasedClassifierOptimizer implements DoubleUnaryOperator  {
+    private final CRFBiasedClassifier<IN> crf;
+    private final DoubleUnaryOperator evalFunction;
 
-    CRFBiasedClassifierOptimizer(CRFBiasedClassifier<IN> c, Function<Double, Double> e) {
+    CRFBiasedClassifierOptimizer(CRFBiasedClassifier<IN> c, DoubleUnaryOperator e) {
       crf = c;
       evalFunction = e;
     }
 
     @Override
-    public Double apply(Double w) {
+    public double applyAsDouble(double w) {
       crf.setBiasWeight(0,w);
-      return evalFunction.apply(w);
+      return evalFunction.applyAsDouble(w);
     }
-  }
+  } // end class class CRFBiasedClassifierOptimizer
 
   /**
    * Adjust the bias parameter to optimize some objective function.
@@ -142,7 +142,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
    * (class of index 0), and is thus only useful for binary classification
    * problems.
    */
-  public void adjustBias(List<List<IN>> develData, Function<Double,Double> evalFunction, double low, double high) {
+  public void adjustBias(List<List<IN>> develData, DoubleUnaryOperator evalFunction, double low, double high) {
     LineSearcher ls = new GoldenSectionLineSearch(true,1e-2,low,high);
     CRFBiasedClassifierOptimizer optimizer = new CRFBiasedClassifierOptimizer(this, evalFunction);
     double optVal = ls.minimize(optimizer);
@@ -152,12 +152,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
 
   /** The main method, which is essentially the same as in CRFClassifier. See the class documentation. */
   public static void main(String[] args) throws Exception {
-    log.info("CRFBiasedClassifier invoked at " + new Date()
-            + " with arguments:");
-    for (String arg : args) {
-      log.info(" " + arg);
-    }
-    log.info();
+    StringUtils.logInvocationString(log, args);
 
     Properties props = StringUtils.argsToProperties(args);
     CRFBiasedClassifier<CoreLabel> crf = new CRFBiasedClassifier<>(props);
@@ -167,11 +162,12 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
     if (loadPath != null) {
       crf.loadClassifierNoExceptions(loadPath, props);
     } else if (crf.flags.loadJarClassifier != null) {
-      crf.loadJarClassifier(crf.flags.loadJarClassifier, props);
+      // legacy support of old option
+      crf.loadClassifierNoExceptions(crf.flags.loadJarClassifier, props);
     } else {
       crf.loadDefaultClassifier();
     }
-    if(crf.flags.classBias != null) {
+    if (crf.flags.classBias != null) {
       StringTokenizer biases = new java.util.StringTokenizer(crf.flags.classBias,",");
       while (biases.hasMoreTokens()) {
         StringTokenizer bias = new java.util.StringTokenizer(biases.nextToken(),":");

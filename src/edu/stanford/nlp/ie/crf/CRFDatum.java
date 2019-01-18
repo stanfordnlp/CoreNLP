@@ -49,10 +49,10 @@ public class CRFDatum<FEAT,LAB> implements Serializable {
   }
 
   /**
-   * Returns the double array containing the feature values
+   * Returns the double array containing the feature values.
    *
-   * @return the double array that contains the feature values matching each feature as
-   *         returned by <code>asFeatures()</code>
+   * @return The double array that contains the feature values matching each feature as
+   *         returned by {@code asFeatures()}
    */
   public List<double[]> asFeatureVals() {
     return featureVals;
@@ -100,7 +100,7 @@ public class CRFDatum<FEAT,LAB> implements Serializable {
       return (false);
     }
 
-    Datum d = (Datum) o;
+    Datum<?, ?> d = (Datum<?, ?>) o;
     return features.equals(d.asFeatures());
   }
 

@@ -13,17 +13,16 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
-//    http://nlp.stanford.edu/downloads/crf-classifier.shtml
+//    https://nlp.stanford.edu/software/CRF-NER.html
 
 package edu.stanford.nlp.ie;
 
@@ -63,7 +62,7 @@ import java.util.zip.GZIPInputStream;
  * It is a superclass of our CMM and CRF sequence classifiers, and is even used
  * in the (deterministic) NumberSequenceClassifier. See implementing classes for
  * more information.
- * <p>
+ *
  * An implementation must implement these 5 abstract methods: <br>
  * {@code List<IN> classify(List<IN> document); } <br>
  * {@code List<IN> classifyWithGlobalInformation(List<IN> tokenSequence, final CoreMap document, final CoreMap sentence); } <br>
@@ -85,12 +84,12 @@ import java.util.zip.GZIPInputStream;
 public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements Function<String, String>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractSequenceClassifier.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(AbstractSequenceClassifier.class);
 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
 
-  // Thang Sep13: multiple feature factories (NERFeatureFactory, EmbeddingFeatureFactory)
+  /** Support multiple feature factories (NERFeatureFactory, EmbeddingFeatureFactory) - Thang Sep 13, 2013. */
   public List<FeatureFactory<IN>> featureFactories;
 
   protected IN pad;
@@ -767,14 +766,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void train(String filename,
                     DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    flags.ocrTrain = true;
+    // flags.ocrTrain = true;
     train(makeObjectBankFromFile(filename, readerAndWriter), readerAndWriter);
   }
 
   public void train(String baseTrainDir, String trainFiles,
                     DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    flags.ocrTrain = true;
+    // flags.ocrTrain = true;
     train(makeObjectBankFromFiles(baseTrainDir, trainFiles, readerAndWriter),
           readerAndWriter);
   }
@@ -782,7 +781,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void train(String[] trainFileList,
                     DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    flags.ocrTrain = true;
+    // flags.ocrTrain = true;
     train(makeObjectBankFromFiles(trainFileList, readerAndWriter),
           readerAndWriter);
   }
@@ -940,7 +939,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void printProbs(String filename,
                          DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
-    flags.ocrTrain = false;
+    // flags.ocrTrain = false;
 
     ObjectBank<List<IN>> docs =
       makeObjectBankFromFile(filename, readerAndWriter);
@@ -1501,11 +1500,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * .gz, uses a GZIPInputStream.
    */
   public void loadClassifier(String loadPath, Properties props) throws ClassCastException, IOException, ClassNotFoundException {
-    InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(loadPath);
-    Timing t = new Timing();
-    loadClassifier(is, props);
-    is.close();
-    t.done(log, "Loading classifier from " + loadPath);
+    try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(loadPath)) {
+      Timing t = new Timing();
+      loadClassifier(is, props);
+      t.done(log, "Loading classifier from " + loadPath);
+    }
   }
 
   public void loadClassifierNoExceptions(String loadPath) {
@@ -1548,9 +1547,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     } else {
       bis = new BufferedInputStream(new FileInputStream(file));
     }
-    loadClassifier(bis, props);
-    bis.close();
-    t.done(log, "Loading classifier from " + file.getAbsolutePath());
+    try {
+      loadClassifier(bis, props);
+      t.done(log, "Loading classifier from " + file.getAbsolutePath());
+    } finally {
+      bis.close();
+    }
   }
 
   public void loadClassifierNoExceptions(File file) {
@@ -1563,38 +1565,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     } catch (Exception e) {
       log.info("Error deserializing " + file.getAbsolutePath());
       throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * This function will load a classifier that is stored inside a jar file (if
-   * it is so stored). The classifier should be specified as its full path
-   * in a jar. If the classifier is not stored in the jar file or this is not run
-   * from inside a jar file, then this function will throw a RuntimeException.
-   *
-   * @param modelName
-   *          The name of the model file. Iff it ends in .gz, then it is assumed
-   *          to be gzip compressed.
-   * @param props
-   *          A Properties object which can override certain properties in the
-   *          serialized file, such as the DocumentReaderAndWriter. You can pass
-   *          in {@code null} to override nothing.
-   */
-  // todo [john bauer 2015]: This method may not be necessary.  Perhaps use the IOUtils equivalents
-  public void loadJarClassifier(String modelName, Properties props) {
-    Timing t = new Timing();
-    try {
-      InputStream is = getClass().getResourceAsStream(modelName);
-      if (modelName.endsWith(".gz")) {
-        is = new GZIPInputStream(is);
-      }
-      is = new BufferedInputStream(is);
-      loadClassifier(is, props);
-      is.close();
-      t.done(log, "Loading CLASSPATH classifier " + modelName);
-    } catch (Exception e) {
-      String msg = "Error loading classifier from jar file (most likely you are not running this code from a jar file or the named classifier is not stored in the jar file)";
-      throw new RuntimeException(msg, e);
     }
   }
 

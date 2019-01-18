@@ -28,16 +28,17 @@ public class ShiftReduceOptions extends Options {
 
   public String featureFactoryClass = "edu.stanford.nlp.parser.shiftreduce.BasicFeatureFactory";
 
+  @Override
   protected int setOptionFlag(String[] args, int i) {
     int j = super.setOptionFlag(args, i);
     if (i != j) {
       return j;
     }
     if (args[i].equalsIgnoreCase("-beamSize")) {
-      testOptions().beamSize = Integer.valueOf(args[i + 1]);
+      testOptions().beamSize = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-trainBeamSize")) {
-      trainOptions().beamSize = Integer.valueOf(args[i + 1]);
+      trainOptions().beamSize = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-compoundUnaries")) {
       compoundUnaries = true;
@@ -49,7 +50,7 @@ public class ShiftReduceOptions extends Options {
       featureFactoryClass = args[i + 1];
       i += 2;
     } else if (args[i].equalsIgnoreCase("-averagedModels")) {
-      trainOptions().averagedModels = Integer.valueOf(args[i + 1]);
+      trainOptions().averagedModels = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-cvAveragedModels")) {
       trainOptions().cvAveragedModels = true;
@@ -76,7 +77,7 @@ public class ShiftReduceOptions extends Options {
       }
       i += 2;
     } else if (args[i].equalsIgnoreCase("-featureFrequencyCutoff")) {
-      trainOptions().featureFrequencyCutoff = Integer.valueOf(args[i + 1]);
+      trainOptions().featureFrequencyCutoff = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-saveIntermediateModels")) {
       trainOptions().saveIntermediateModels = true;
@@ -95,6 +96,9 @@ public class ShiftReduceOptions extends Options {
       i += 2;
     } else if (args[i].equalsIgnoreCase("-recordDebinarized")) {
       testOptions().recordDebinarized = args[i + 1];
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-decayLearningRate")) {
+      trainOptions().decayLearningRate = Double.parseDouble(args[i + 1]);
       i += 2;
     }
     return i;

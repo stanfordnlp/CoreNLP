@@ -13,19 +13,17 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 4A
-//    Stanford CA 94305-9040
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/downloads/lex-parser.shtml
+//    https://nlp.stanford.edu/software/lex-parser.html
 
-package edu.stanford.nlp.parser.ui; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.ui;
 
 import edu.stanford.nlp.io.ui.OpenPageDialog;
 import edu.stanford.nlp.ling.*;
@@ -38,6 +36,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseTreebankLanguagePack;
 import edu.stanford.nlp.ui.JarFileChooser;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import javax.swing.*;
 import javax.swing.text.SimpleAttributeSet;
@@ -59,7 +58,6 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -74,12 +72,10 @@ import java.util.List;
 public class ParserPanel extends JPanel  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ParserPanel.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ParserPanel.class);
 
-  /**
-   *
-   */
   private static final long serialVersionUID = -2118491857333662471L;
+
   // constants for language specification
   public static final int UNTOKENIZED_ENGLISH = 0;
   public static final int TOKENIZED_CHINESE = 1;
@@ -375,7 +371,7 @@ public class ParserPanel extends JPanel  {
       urlOrFile = "file://" + filename;
     }
 
-    // TODO: why do any of this instead of just reading the file?
+    // TODO: why do any of this instead of just reading the file?  THIS SHOULD BE UPDATED FOR 2017!
     // Also, is this working correctly still?
     // load the document
     Document<Object, Word, Word> doc;
@@ -417,7 +413,7 @@ public class ParserPanel extends JPanel  {
   // TreebankLanguagePack returns a TokenizerFactory<? extends HasWord>
   // which isn't close enough in the type system, but is probably okay in practice
   @SuppressWarnings("unchecked")
-  private TokenizerFactory<Word> getTokenizerFactory() {
+  private static TokenizerFactory<Word> getTokenizerFactory() {
     return (TokenizerFactory<Word>)tlp.getTokenizerFactory();
   }
 
@@ -553,9 +549,7 @@ public class ParserPanel extends JPanel  {
       }
     }
 
-    static final int WAIT = 2000;
-    static final int CYCLE = 50;
-  }
+  } // end class SaveOutputThread
 
   /**
    * Opens dialog to load a serialized parser

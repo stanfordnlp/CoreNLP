@@ -5,15 +5,15 @@ import junit.framework.TestCase;
 import java.util.*;
 
 /**
- * Test for the interval tree
+ * Test for the interval tree.
  *
  * @author Angel Chang
  */
 public class IntervalTreeTest extends TestCase {
 
-  private void checkOverlapping(Collection<Interval<Integer>> all,
-                                Collection<Interval<Integer>> overlapping,
-                                Interval<Integer> target) {
+  private static void checkOverlapping(Collection<Interval<Integer>> all,
+                                       Collection<Interval<Integer>> overlapping,
+                                       Interval<Integer> target) {
     for (Interval<Integer> interval: all) {
       assertNotNull(interval);
     }

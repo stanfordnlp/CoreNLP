@@ -1,4 +1,4 @@
-package edu.stanford.nlp.naturalli; 
+package edu.stanford.nlp.naturalli;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
@@ -39,13 +39,13 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 public class CreateClauseDataset implements TSVSentenceProcessor  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CreateClauseDataset.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CreateClauseDataset.class);
 
   @ArgumentParser.Option(name="in", gloss="The input to read from")
   private static InputStream in = System.in;
 
-  public CreateClauseDataset() {
-  }
+
+  private CreateClauseDataset() {} // static methods class
 
 
   private static Span toSpan(List<? extends HasIndex> chunk) {
@@ -96,27 +96,27 @@ public class CreateClauseDataset implements TSVSentenceProcessor  {
   /**
    * The pattern for traces which are potential subjects
    */
-  private static Pattern TRACE_TARGET_PATTERN = Pattern.compile("(NP-.*)-([0-9]+)");
+  private static final Pattern TRACE_TARGET_PATTERN = Pattern.compile("(NP-.*)-([0-9]+)");
 
   /**
    * The pattern for trace markers.
    */
-  private static Pattern TRACE_SOURCE_PATTERN = Pattern.compile(".*\\*-([0-9]+)");
+  private static final Pattern TRACE_SOURCE_PATTERN = Pattern.compile(".*\\*-([0-9]+)");
 
   /**
    * The converter from constituency to dependency trees.
    */
-  private static UniversalEnglishGrammaticalStructureFactory parser = new UniversalEnglishGrammaticalStructureFactory();
+  private static final UniversalEnglishGrammaticalStructureFactory parser = new UniversalEnglishGrammaticalStructureFactory();
 
   /**
    * The OpenIE segmenter to use.
    */
-  private static RelationTripleSegmenter segmenter = new RelationTripleSegmenter();
+  private static final RelationTripleSegmenter segmenter = new RelationTripleSegmenter();
 
   /**
    * The natural logic annotator for marking polarity.
    */
-  private static NaturalLogicAnnotator natlog = new NaturalLogicAnnotator();
+  private static final NaturalLogicAnnotator natlog = new NaturalLogicAnnotator();
 
   /**
    * Parse a given constituency tree into a dependency graph.
@@ -168,8 +168,8 @@ public class CreateClauseDataset implements TSVSentenceProcessor  {
             Optional<List<IndexedWord>> verbChunk = segmenter.getValidChunk(depparse, verb, segmenter.VALID_ADVERB_ARCS, Optional.empty(), true);
             Optional<List<IndexedWord>> objectChunk = segmenter.getValidChunk(depparse, object, segmenter.VALID_OBJECT_ARCS, Optional.empty(), true);
             if (verbChunk.isPresent() && objectChunk.isPresent()) {
-              Collections.sort(verbChunk.get(), (a, b) -> a.index() - b.index());
-              Collections.sort(objectChunk.get(), (a, b) -> a.index() - b.index());
+              verbChunk.get().sort(Comparator.comparingInt(IndexedWord::index));
+              objectChunk.get().sort(Comparator.comparingInt(IndexedWord::index));
               // Find a trace
               int traceId = -1;
               Span verbSpan = toSpan(verbChunk.get());
@@ -298,7 +298,6 @@ public class CreateClauseDataset implements TSVSentenceProcessor  {
 
     // Prepare the files to iterate over
     Iterable<File> files = IOUtils.iterFilesRecursive(directory, "mrg");
-    Tree tree;
     int numTreesProcessed = 0;
     List<Pair<CoreMap, Collection<Pair<Span, Span>>>> trainingData = new ArrayList<>(1024);
 
@@ -306,6 +305,7 @@ public class CreateClauseDataset implements TSVSentenceProcessor  {
     for (File file : files) {
 //      log(file);
       TreeReader reader = new PennTreeReader(IOUtils.readerFromFile(file));
+      Tree tree;
       while ( (tree = reader.readTree()) != null ) {
         try {
           // Prepare the tree

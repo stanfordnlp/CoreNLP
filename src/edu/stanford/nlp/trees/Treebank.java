@@ -16,7 +16,7 @@ import java.util.Set;
 
 
 /**
- * A <code>Treebank</code> object provides access to a corpus of examples with
+ * A {@code Treebank} object provides access to a corpus of examples with
  * given tree structures.
  * This class now implements the Collection interface. However, it may offer
  * less than the full power of the Collection interface: some Treebanks are
@@ -28,8 +28,8 @@ import java.util.Set;
 public abstract class Treebank extends AbstractCollection<Tree> {
 
   /**
-   * Stores the <code>TreeReaderFactory</code> that will be used to
-   * create a <code>TreeReader</code> to process a file of trees.
+   * Stores the {@code TreeReaderFactory} that will be used to
+   * create a {@code TreeReader} to process a file of trees.
    */
   private TreeReaderFactory trf;
 
@@ -52,7 +52,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
    * Create a new Treebank.
    *
    * @param trf the factory class to be called to create a new
-   *            <code>TreeReader</code>
+   *            {@code TreeReader}
    */
   public Treebank(TreeReaderFactory trf) {
     this.trf = trf;
@@ -63,7 +63,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
    * Create a new Treebank.
    *
    * @param trf      the factory class to be called to create a new
-   *                 <code>TreeReader</code>
+   *                 {@code TreeReader}
    * @param encoding The charset encoding to use for treebank file decoding
    */
   public Treebank(TreeReaderFactory trf, String encoding) {
@@ -89,7 +89,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
    * @param initialCapacity The initial size of the underlying Collection,
    *                        (if a Collection-based storage mechanism is being provided)
    * @param trf             the factory class to be called to create a new
-   *                        <code>TreeReader</code>
+   *                        {@code TreeReader}
    */
   @SuppressWarnings({"UnusedDeclaration"})
   public Treebank(int initialCapacity, TreeReaderFactory trf) {
@@ -98,9 +98,9 @@ public abstract class Treebank extends AbstractCollection<Tree> {
 
 
   /**
-   * Get the <code>TreeReaderFactory</code> for a <code>Treebank</code> --
+   * Get the {@code TreeReaderFactory} for a {@code Treebank} --
    * this method is provided in order to make the
-   * <code>TreeReaderFactory</code> available to subclasses.
+   * {@code TreeReaderFactory} available to subclasses.
    *
    * @return The TreeReaderFactory
    */
@@ -120,7 +120,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
 
 
   /**
-   * Empty a <code>Treebank</code>.
+   * Empty a {@code Treebank}.
    */
   @Override
   public abstract void clear();
@@ -156,11 +156,11 @@ public abstract class Treebank extends AbstractCollection<Tree> {
    * Load trees from given directory.
    *
    * @param pathName    File or directory name
-   * @param suffix      Extension of files to load: If <code>pathName</code>
+   * @param suffix      Extension of files to load: If {@code pathName}
    *                    is a directory, then, if this is
-   *                    non-<code>null</code>, all and only files ending in "." followed
-   *                    by this extension will be loaded; if it is <code>null</code>,
-   *                    all files in directories will be loaded.  If <code>pathName</code>
+   *                    non-{@code null}, all and only files ending in "." followed
+   *                    by this extension will be loaded; if it is {@code null},
+   *                    all files in directories will be loaded.  If {@code pathName}
    *                    is not a directory, this parameter is ignored.
    * @param recursively descend into subdirectories as well
    */
@@ -236,7 +236,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
   public String toString() {
     final StringBuilder sb = new StringBuilder();
     apply(t -> {
-      sb.append(t.toString());
+      sb.append(t);
       sb.append('\n');
     });
     return sb.toString();
@@ -246,6 +246,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
   private static final class CounterTreeProcessor implements TreeVisitor {
     int i; // = 0;
 
+    @Override
     public void visitTree(Tree t) {
       i++;
     }
@@ -272,7 +273,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
   /** Divide a Treebank into 3, by taking every 9th sentence for the dev
    *  set and every 10th for the test set.  Penn people do this.
    */
-  public void decimate(Writer trainW, Writer devW, Writer testW) throws IOException {
+  public void decimate(Writer trainW, Writer devW, Writer testW) {
     PrintWriter trainPW = new PrintWriter(trainW, true);
     PrintWriter devPW = new PrintWriter(devW, true);
     PrintWriter testPW = new PrintWriter(testW, true);
@@ -371,7 +372,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
       }
       for (Tree subtree : t) {
         Label lab = subtree.label();
-        if (lab == null || lab.value() == null || "".equals(lab.value())) {
+        if (lab == null || lab.value() == null || lab.value().isEmpty()) {
           if (numNullLabel == 0) {
             nullLabelEg = subtree;
           }

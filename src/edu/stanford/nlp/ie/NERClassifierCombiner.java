@@ -1,9 +1,6 @@
 package edu.stanford.nlp.ie;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -395,6 +392,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
 
   // write an NERClassifierCombiner to an ObjectOutputStream
 
+  @Override
   public void serializeClassifier(ObjectOutputStream oos) {
     try {
       // first write the ClassifierCombiner part to disk
@@ -444,8 +442,8 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
    */
   private static Map<String, String> readRegexnerGazette(String mappingFile) {
     Map<String, String> mapping = new HashMap<>();
-    try {
-      for (String line : IOUtils.slurpReader(IOUtils.readerFromString(mappingFile.trim())).split("\n")) {
+    try (BufferedReader reader = IOUtils.readerFromString(mappingFile.trim())){
+      for (String line : IOUtils.slurpReader(reader).split("\n")) {
         String[] fields = line.split("\t");
         String key = fields[0];
         String target = fields[1];

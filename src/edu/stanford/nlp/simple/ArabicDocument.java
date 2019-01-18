@@ -7,6 +7,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
@@ -21,8 +22,8 @@ public class ArabicDocument extends Document {
    * The empty {@link Properties} object, for use with creating default annotators.
    */
   static final Properties EMPTY_PROPS = new Properties() {{
-    try {
-      load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-arabic.properties"));
+    try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-arabic.properties")){
+      load(is);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }

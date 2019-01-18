@@ -1,5 +1,4 @@
 package edu.stanford.nlp.parser.dvparser; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -7,8 +6,10 @@ import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -24,21 +25,21 @@ import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.ErasureUtils;
-import java.util.function.Predicate;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
+import edu.stanford.nlp.util.logging.Redwood;
 
 public class CacheParseHypotheses  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CacheParseHypotheses.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CacheParseHypotheses.class);
 
-  static final TreeReaderFactory trf = new LabeledScoredTreeReaderFactory(CoreLabel.factory(), new TreeNormalizer());
+  private static final TreeReaderFactory trf = new LabeledScoredTreeReaderFactory(CoreLabel.factory(), new TreeNormalizer());
 
   final BasicCategoryTreeTransformer treeBasicCategories;
-  final public Predicate<Tree> treeFilter;
+  public final Predicate<Tree> treeFilter;
 
   public CacheParseHypotheses(LexicalizedParser parser) {
     treeBasicCategories = new BasicCategoryTreeTransformer(parser.treebankLanguagePack());
@@ -200,7 +201,7 @@ public class CacheParseHypotheses  {
     int numThreads = 1;
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-dvKBest")) {
-        dvKBest = Integer.valueOf(args[argIndex + 1]);
+        dvKBest = Integer.parseInt(args[argIndex + 1]);
         argIndex += 2;
         continue;
       }
@@ -221,7 +222,7 @@ public class CacheParseHypotheses  {
         continue;
       }
       if (args[argIndex].equalsIgnoreCase("-numThreads")) {
-        numThreads = Integer.valueOf(args[argIndex + 1]);
+        numThreads = Integer.parseInt(args[argIndex + 1]);
         argIndex += 2;
         continue;
       }
@@ -234,7 +235,7 @@ public class CacheParseHypotheses  {
     if (output == null) {
       throw new IllegalArgumentException("Need to supply an output filename with -output");
     }
-    if (treebanks.size() == 0) {
+    if (treebanks.isEmpty()) {
       throw new IllegalArgumentException("Need to supply a treebank with -treebank");
     }
 

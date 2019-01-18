@@ -1,7 +1,8 @@
 package edu.stanford.nlp.time;
 
-import java.util.Properties;
+import java.util.*;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -30,16 +31,36 @@ public class Options {
   boolean includeRange = false;
   // Look for document date in the document text (if not provided)
   boolean searchForDocDate = false;
+  // language for SUTime
+  public String language = "english";
+  public static HashMap<String,String> languageToRulesFiles = new HashMap<String,String>();
   // TODO: Add default country for holidays and default time format
   // would want a per document default as well
   String grammarFilename = null;
   Env.Binder[] binders = null;
 
+
   static final String DEFAULT_GRAMMAR_FILES = "edu/stanford/nlp/models/sutime/defs.sutime.txt,edu/stanford/nlp/models/sutime/english.sutime.txt,edu/stanford/nlp/models/sutime/english.holidays.sutime.txt";
+  static final String DEFAULT_BRITISH_GRAMMAR_FILES =
+      "edu/stanford/nlp/models/sutime/defs.sutime.txt,edu/stanford/nlp/models/sutime/british.sutime.txt,edu/stanford/nlp/models/sutime/english.sutime.txt,edu/stanford/nlp/models/sutime/english.holidays.sutime.txt";
+  static final String DEFAULT_SPANISH_GRAMMAR_FILES =
+      "edu/stanford/nlp/models/sutime/defs.sutime.txt,edu/stanford/nlp/models/sutime/spanish.sutime.txt";
   static final String[] DEFAULT_BINDERS = { "edu.stanford.nlp.time.JollyDayHolidays" };
   //static final String[] DEFAULT_BINDERS = { };
 
+  static {
+    languageToRulesFiles.put("english", DEFAULT_GRAMMAR_FILES);
+    languageToRulesFiles.put("en", DEFAULT_GRAMMAR_FILES);
+    languageToRulesFiles.put("british", DEFAULT_BRITISH_GRAMMAR_FILES);
+    languageToRulesFiles.put("spanish", DEFAULT_SPANISH_GRAMMAR_FILES);
+    languageToRulesFiles.put("es", DEFAULT_SPANISH_GRAMMAR_FILES);
+  }
+
   boolean verbose = false;
+
+  static {
+
+  }
 
   public Options()
   {
@@ -48,19 +69,27 @@ public class Options {
   public Options(String name, Properties props)
   {
     includeRange = PropertiesUtils.getBool(props, name + ".includeRange",
-                                           includeRange);
+        includeRange);
     markTimeRanges = PropertiesUtils.getBool(props, name + ".markTimeRanges",
-                                             markTimeRanges);
+        markTimeRanges);
     includeNested = PropertiesUtils.getBool(props, name + ".includeNested",
-                                            includeNested);
+        includeNested);
     restrictToTimex3 = PropertiesUtils.getBool(props, name + ".restrictToTimex3",
-            restrictToTimex3);
+        restrictToTimex3);
     teRelHeurLevel = RelativeHeuristicLevel.valueOf(
-                       props.getProperty(name + ".teRelHeurLevel",
-                                         teRelHeurLevel.toString()));
+        props.getProperty(name + ".teRelHeurLevel",
+            teRelHeurLevel.toString()));
     verbose = PropertiesUtils.getBool(props, name + ".verbose", verbose);
 
-    grammarFilename = props.getProperty(name + ".rules", DEFAULT_GRAMMAR_FILES);
+    // set default rules by SUTime language
+    language = props.getProperty(name + ".language", language);
+    if (!languageToRulesFiles.keySet().contains(language))
+      language = "english";
+    grammarFilename = languageToRulesFiles.get(language);
+
+    // override if rules are set by properties
+    grammarFilename = props.getProperty(name + ".rules", grammarFilename);
+
 
     searchForDocDate = PropertiesUtils.getBool(props, name + ".searchForDocDate", searchForDocDate);
 

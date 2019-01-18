@@ -1,14 +1,11 @@
 package edu.stanford.nlp.international.spanish.pipeline;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
-import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
-import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
@@ -32,6 +29,8 @@ import edu.stanford.nlp.util.Pair;
  *
  * This class provides methods for detecting common linguistic patterns
  * that should be expanded in this way.
+ *
+ * @author Jon Gauthier
  */
 public class MultiWordTreeExpander {
 
@@ -65,7 +64,7 @@ public class MultiWordTreeExpander {
 
   private final TregexPattern prepositionalPhrase
     = TregexPattern.compile(// Match candidate preposition
-                            "sp000=tag < /(?i)^" + PREPOSITIONS + "$/" +
+                            "sp000=tag < /(?iu)^" + PREPOSITIONS + "$/" +
                             // Headed by a group that was generated from
                             // multi-word token expansion and that we
                             // wish to expand further
@@ -77,7 +76,7 @@ public class MultiWordTreeExpander {
 
   private final TregexPattern leadingPrepositionalPhrase
     = TregexPattern.compile(// Match candidate preposition
-                            "sp000=tag < /(?i)^" + PREPOSITIONS + "$/" +
+                            "sp000=tag < /(?iu)^" + PREPOSITIONS + "$/" +
                             // Which is the first child in a group that
                             // was generated from multi-word token
                             // expansion and that we wish to expand

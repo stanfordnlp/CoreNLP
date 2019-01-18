@@ -1,0 +1,73 @@
+###############################################################
+
+  ENV.defaults["stage"] = 1
+  ENV.defaults["ruleType"] = "tokens"
+
+  # map month names to numbers
+  MONTH_MAP = {
+      "enero": 1,
+      "febrero": 2,
+      "marzo": 3,
+      "abril": 4,
+      "mayo": 5,
+      "junio": 6,
+      "julio": 7,
+      "agosto": 8,
+      "septiembre": 9,
+      "octubre": 10,
+      "noviembre": 11,
+      "diciembre": 12
+    }
+
+  # dates
+
+  $MONTH_NAME = "/enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre/";
+
+  # full date
+  { (/el/? (/[0-9]{1,2}/) /de/ ($MONTH_NAME) /de/ (/[0-9]{4}/)) => IsoDate($3[0].numcompvalue, MONTH_MAP[$2[0].word], $1[0].numcompvalue) }
+
+  # day and month
+  { (/el/? (/[0-9]{1,2}/) /de/ ($MONTH_NAME)) => IsoDate(NIL, MONTH_MAP[$2[0].word], $1[0].numcompvalue) }
+
+  # month and year
+  { (($MONTH_NAME) /de/ (/[0-9]{4}/)) => IsoDate($2[0].numcompvalue, MONTH_MAP[$1[0].numcompvalue], NIL) }
+
+  # month alone
+  { (/enero/) => JANUARY }
+  { (/febrero/) => FEBRUARY }
+  { (/marzo/) => MARCH }
+  { (/abril/) => APRIL }
+  { (/mayo/) => MAY }
+  { (/junio/) => JUNE }
+  { (/julio/) => JULY }
+  { (/agosto/) => AUGUST }
+  { (/septiembre/) => SEPTEMBER }
+  { (/octubre/) => OCTOBER }
+  { (/noviembre/) => NOVEMBER }
+  { (/diciembre/) => DECEMBER }
+
+  # relative times
+  { (/ayer/) => YESTERDAY }
+  { (/hoy/) => TODAY }
+  { (/mañana/) => TOMORROW }
+  { (/esta/ /noche/) => TONIGHT }
+
+  # days of the week
+  { (/el|este|hoy/? /lunes/) => MONDAY }
+  { (/el|este|hoy/? /martes/) => TUESDAY }
+  { (/el|este|hoy/? /miércoles/) => WEDNESDAY }
+  { (/el|este|hoy/? /jueves/) => THURSDAY }
+  { (/el|este|hoy/? /viernes/) => FRIDAY }
+  { (/el|este|hoy/? /sábado/) => SATURDAY }
+  { (/el|este|hoy/? /domingo/) => SUNDAY }
+
+###############################################################
+
+  ENV.defaults["ruleType"] = "tokens"
+  ENV.defaults["priority"] = 0
+  ENV.defaults["locale"] = "en"
+
+  { ruleType: "time", pattern: /yyyy-?MM-?dd-?'T'HH(:?mm(:?ss([.,]S{1,3})?)?)?(Z)?/ }
+  { ruleType: "time", pattern: /yyyy-MM-dd/ }
+
+  { ruleType: "time", pattern: /dd?\\?\/MM?\\?\/(yyyy|yy)/ }

@@ -1,5 +1,4 @@
 package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -10,13 +9,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.function.Function;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.XMLBeginEndIterator;
-import java.util.function.Function;
 import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * DocumentReader for MUC format.
@@ -26,20 +26,19 @@ import edu.stanford.nlp.process.PTBTokenizer;
 public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MUCDocumentReaderAndWriter.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(MUCDocumentReaderAndWriter.class);
 
-  /**
-   *
-   */
   private static final long serialVersionUID = -8334720781758500037L;
   private SeqClassifierFlags flags;
   private IteratorFromReaderFactory<List<CoreLabel>> factory;
 
+  @Override
   public void init(SeqClassifierFlags flags) {
     this.flags = flags;
     factory = XMLBeginEndIterator.getFactory("DOC", new MUCDocumentParser(), true, true);
   }
 
+  @Override
   public Iterator<List<CoreLabel>> getIterator(Reader r) {
     return factory.getIterator(r);
   }
@@ -50,6 +49,7 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
     private static final Pattern beginEntity = Pattern.compile("<(ENAMEX|TIMEX|NUMEX) TYPE=\"([a-z]+)\"[^>]*>", Pattern.CASE_INSENSITIVE);
     private static final Pattern endEntity = Pattern.compile("</(ENAMEX|TIMEX|NUMEX)>");
 
+    @Override
     public List<CoreLabel> apply(String doc) {
 
       if (doc == null) { return null; }
@@ -62,17 +62,16 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
       int wNum = 0;
 
 
-      PTBTokenizer ptb = PTBTokenizer.newPTBTokenizer(new BufferedReader(new StringReader(doc)), false, true);
+      PTBTokenizer<CoreLabel> ptb = PTBTokenizer.newPTBTokenizer(new BufferedReader(new StringReader(doc)), false, true);
       List<CoreLabel> words = ptb.tokenize();
 
       List<CoreLabel> result = new ArrayList<>();
 
       CoreLabel prev = null;
       String prevString = "";
-      Matcher matcher;
 
       for (CoreLabel word : words) {
-        matcher = sgml.matcher(word.word());
+        Matcher matcher = sgml.matcher(word.word());
         if (matcher.matches()) {
           String tag = matcher.group(1);
           if (word.word().equalsIgnoreCase("<p>")) {
@@ -164,6 +163,7 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
     }
   }
 
+  @Override
   public void printAnswers(List<CoreLabel> doc, PrintWriter pw) {
     String prevAnswer = "O";
     String prevClass = "";

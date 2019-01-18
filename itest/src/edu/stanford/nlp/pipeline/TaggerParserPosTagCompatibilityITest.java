@@ -21,27 +21,30 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
                                   String[] maxentTaggers,
                                   String[] srParsers,
                                   String[] nnDepParsers) {
-    LexicalizedParser lp = LexicalizedParser.loadModel(lexParsers[0]);
-    Set<String> tagSet = lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction());
+    // Choose a reference point to work from. We choose the first maxent tagger, since there must be one of those.
+    String refTaggerName = maxentTaggers[0];
+    MaxentTagger refTagger = new MaxentTagger(refTaggerName);
+    Set<String> tagSet = refTagger.tagSet();
+
     for (String name : maxentTaggers) {
       MaxentTagger tagger = new MaxentTagger(name);
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
+      assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
                    "left - right: " + Sets.diff(tagSet, tagger.tagSet()) +
                    "; right - left: " + Sets.diff(tagger.tagSet(), tagSet) + "\n",
                    tagSet, tagger.tagSet());
     }
     for (String name : lexParsers) {
-      LexicalizedParser lp2 = LexicalizedParser.loadModel(name);
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
-                   "left - right: " + Sets.diff(tagSet, lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction())) + 
-                   "; right - left: " + Sets.diff(lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()), tagSet) + "\n",
-                   tagSet, lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
+      LexicalizedParser lp = LexicalizedParser.loadModel(name);
+      assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
+                   "left - right: " + Sets.diff(tagSet, lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction())) +
+                   "; right - left: " + Sets.diff(lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()), tagSet) + "\n",
+                   tagSet, lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
     }
 
     for (String name : srParsers) {
       ShiftReduceParser srp = ShiftReduceParser.loadModel(name);
 
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
+      assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
                    "left - right: " + Sets.diff(tagSet, srp.tagSet()) +
                    "; right - left: " + Sets.diff(srp.tagSet(), tagSet) + "\n",
                    tagSet, srp.tagSet());
@@ -50,7 +53,7 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
     for (String name : nnDepParsers) {
       DependencyParser dp = DependencyParser.loadFromModelFile(name);
 
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
+      assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
                    "left - right: " + Sets.diff(tagSet, dp.getPosSet()) +
                    "; right - left: " + Sets.diff(dp.getPosSet(), tagSet) + "\n",
                    tagSet, dp.getPosSet());
@@ -104,12 +107,30 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
   };
 
   private static final String[] germanNnParsers = {
-    // This one uses UD tag set not fine-grained tags!
+    // This one now uses fine-grained STTS tag set not UD tags, it appears!
+    // But it doesn't quite match because UD lacks POS tags [PPOSS, VMPP] that tagger produces. Just lacking in training data?!?
     // "edu/stanford/nlp/models/parser/nndep/UD_German.gz",
   };
 
   public void testGermanTagSet() {
     testTagSet4(germanParsers, germanTaggers, germanSrParsers, germanNnParsers);
+  }
+
+  private static final String[] germanUDTaggers = {
+    "edu/stanford/nlp/models/pos-tagger/german/german-ud.tagger",
+  };
+
+  private static final String[] germanUDParsers = {
+  };
+
+  private static final String[] germanUDSrParsers = {
+  };
+
+  private static final String[] germanUDNnParsers = {
+  };
+
+  public void testGermanUDTagSet() {
+    testTagSet4(germanUDParsers, germanUDTaggers, germanUDSrParsers, germanUDNnParsers);
   }
 
 
@@ -186,7 +207,27 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
   }
 
 
-  // todo: Add Arabic sometime
-  // todo: Add nndep parsers sometime
+  private static final String[] arabicTaggers = {
+    "edu/stanford/nlp/models/pos-tagger/arabic/arabic-train.tagger",
+    "edu/stanford/nlp/models/pos-tagger/arabic/arabic.tagger",
+  };
+
+  private static final String[] arabicParsers = {
+    "edu/stanford/nlp/models/lexparser/arabicFactored.ser.gz",
+  };
+
+  private static final String[] arabicSrParsers = {
+    "edu/stanford/nlp/models/srparser/arabicSR.ser.gz",
+  };
+
+  private static final String[] arabicNnParsers = {
+  };
+
+  public void testArabicTagSet() {
+    testTagSet4(arabicParsers, arabicTaggers, arabicSrParsers, arabicNnParsers);
+  }
+
+
+  // todo: Add other languages nndep parsers sometime
 
 }

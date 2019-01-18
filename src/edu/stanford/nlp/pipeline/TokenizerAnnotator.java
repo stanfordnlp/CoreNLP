@@ -295,6 +295,31 @@ public class TokenizerAnnotator implements Annotator  {
   }
 
   /**
+   * Helper method to set the TokenBeginAnnotation and TokenEndAnnotation of every token.
+   */
+  public void setTokenBeginTokenEnd(List<CoreLabel> tokensList) {
+    int tokenIndex = 0;
+    for (CoreLabel token : tokensList) {
+      token.set(CoreAnnotations.TokenBeginAnnotation.class, tokenIndex);
+      token.set(CoreAnnotations.TokenEndAnnotation.class, tokenIndex+1);
+      tokenIndex++;
+    }
+  }
+
+  /**
+   * set isNewline()
+   */
+  public void setNewlineStatus(List<CoreLabel> tokensList) {
+    // label newlines
+    for (CoreLabel token : tokensList) {
+      if (token.word().equals(AbstractTokenizer.NEWLINE_TOKEN) && (token.endPosition() - token.beginPosition() == 1))
+        token.set(CoreAnnotations.IsNewlineAnnotation.class, true);
+      else
+        token.set(CoreAnnotations.IsNewlineAnnotation.class, false);
+    }
+  }
+
+  /**
    * Does the actual work of splitting TextAnnotation into CoreLabels,
    * which are then attached to the TokensAnnotation.
    */
@@ -307,6 +332,9 @@ public class TokenizerAnnotator implements Annotator  {
     // for Arabic and Chinese use a segmenter instead
     if (useSegmenter) {
       segmenterAnnotator.annotate(annotation);
+      // set indexes into document wide tokens list
+      setTokenBeginTokenEnd(annotation.get(CoreAnnotations.TokensAnnotation.class));
+      setNewlineStatus(annotation.get(CoreAnnotations.TokensAnnotation.class));
       return;
     }
 
@@ -321,7 +349,15 @@ public class TokenizerAnnotator implements Annotator  {
       // token.set(CoreAnnotations.TextAnnotation.class, token.get(CoreAnnotations.TextAnnotation.class));
       // }
 
+      // label newlines
+      setNewlineStatus(tokens);
+
+      // set indexes into document wide token list
+      setTokenBeginTokenEnd(tokens);
+
+      // add tokens list to annotation
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
+
       if (VERBOSE) {
         log.info("done.");
         log.info("Tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
@@ -350,7 +386,8 @@ public class TokenizerAnnotator implements Annotator  {
         CoreAnnotations.PositionAnnotation.class,
         CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class,
-        CoreAnnotations.ValueAnnotation.class
+        CoreAnnotations.ValueAnnotation.class,
+        CoreAnnotations.IsNewlineAnnotation.class
     ));
   }
 
