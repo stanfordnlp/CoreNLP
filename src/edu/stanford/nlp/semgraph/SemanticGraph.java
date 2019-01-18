@@ -994,6 +994,25 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
+   * Returns a set of all parents bearing a certain grammatical relation, or an
+   * empty set if none.
+   */
+  public Set<IndexedWord> getParentsWithReln(IndexedWord vertex, String relnName) {
+    if (vertex.equals(IndexedWord.NO_WORD))
+      return Collections.emptySet();
+    if (!containsVertex(vertex))
+      throw new IllegalArgumentException();
+
+    Set<IndexedWord> parentList = wordMapFactory.newSet();
+    for (SemanticGraphEdge edge : incomingEdgeIterable(vertex)) {
+      if (edge.getRelation().toString().equals(relnName)) {
+        parentList.add(edge.getSource());
+      }
+    }
+    return parentList;
+  }
+
+  /**
    * Returns a set of all children bearing a certain grammatical relation, or
    * an empty set if none.
    */

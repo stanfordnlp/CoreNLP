@@ -10,6 +10,8 @@ import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 
 
+import java.util.HashMap;
+
 import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 
 
@@ -93,7 +95,7 @@ public class UniversalGrammaticalRelations {
             new GrammaticalRelation(Language.Any, "case", "case marker", DEPENDENT);
 
     public static final GrammaticalRelation CONJUNCT =
-            new GrammaticalRelation(Language.Any, "conjunct", "conjunct", DEPENDENT);
+            new GrammaticalRelation(Language.Any, "conj", "conjunct", DEPENDENT);
 
     public static final GrammaticalRelation COORDINATION =
             new GrammaticalRelation(Language.Any, "cc", "coordinating conjunction", DEPENDENT);
@@ -152,5 +154,64 @@ public class UniversalGrammaticalRelations {
 
     public static final GrammaticalRelation CONTROLLING_NOMINAL_PASSIVE_SUBJECT =
             new GrammaticalRelation(Language.Any, "nsubj:pass:xsubj", "controlling nominal passive subject", DEPENDENT);
+
+
+    public static final GrammaticalRelation RELATIVE_NOMINAL_SUBJECT =
+            new GrammaticalRelation(Language.Any, "nsubj:relsubj", "relative nominal subject", DEPENDENT);
+
+
+    public static final GrammaticalRelation RELATIVE_NOMINAL_PASSIVE_SUBJECT =
+            new GrammaticalRelation(Language.Any, "nsubj:pass:relsubj", "relative nominal passive subject", DEPENDENT);
+
+
+    public static final GrammaticalRelation RELATIVE_OBJECT =
+            new GrammaticalRelation(Language.Any, "obl:relobj", "relative object", DEPENDENT);
+
+
+    private static HashMap<String,GrammaticalRelation> nmodRelations = new HashMap<>();
+    private static HashMap<String,GrammaticalRelation> oblRelations = new HashMap<>();
+    private static HashMap<String,GrammaticalRelation> aclRelations = new HashMap<>();
+    private static HashMap<String,GrammaticalRelation> advclRelations = new HashMap<>();
+    private static HashMap<String,GrammaticalRelation> conjRelations = new HashMap<>();
+
+    public static final GrammaticalRelation getConj(String subtype) {
+        return getSpecificReln(conjRelations, subtype, CONJUNCT);
+    }
+
+    public static final GrammaticalRelation getNmod(String subtype) {
+        return getSpecificReln(nmodRelations, subtype, NOMINAL_MODIFIER);
+    }
+
+    public static final GrammaticalRelation getObl(String subtype) {
+        return getSpecificReln(oblRelations, subtype, OBLIQUE_MODIFIER);
+    }
+
+
+    public static final GrammaticalRelation getAcl(String subtype) {
+        return getSpecificReln(aclRelations, subtype, CLAUSAL_MODIFIER);
+    }
+
+
+    public static final GrammaticalRelation getAdvcl(String subtype) {
+        return getSpecificReln(advclRelations, subtype, ADV_CLAUSE_MODIFIER);
+    }
+
+    private static final GrammaticalRelation getSpecificReln(HashMap<String,GrammaticalRelation> existingRelations,
+                                                             String subtype, GrammaticalRelation parentRelation) {
+
+        if ( ! existingRelations.containsKey(subtype)) {
+            GrammaticalRelation reln = new GrammaticalRelation(Language.Any, parentRelation.getShortName(),
+                    "subtyped " + parentRelation.getLongName(), parentRelation, subtype);
+            existingRelations.put(subtype, reln);
+        }
+
+        return existingRelations.get(subtype);
+
+    }
+
+
+
+
+
 
 }

@@ -63,16 +63,31 @@ public class CoNLLUDocumentWriter {
 
                 for (IndexedWord parent : enhancedSg.getParents(token)) {
                     SemanticGraphEdge edge = enhancedSg.getEdge(parent, token);
-                    enhancedDependencies.put(parent.toCopyIndex(), edge.getRelation().toString());
+                    String relationString = edge.getRelation().toString();
+                    // for Joakim
+                    //if (edge.getWeight() == 1.0) {
+                    //    relationString = relationString + ":ENH_CONTROL";
+                    //} else if (edge.getWeight() == 3.0) {
+                    //    relationString = relationString + ":ENH_RELCL";
+                    //} else if (edge.getWeight() == 4.0) {
+                    //    relationString = relationString + ":ENH_GAPPING";
+                    //} else if (edge.getWeight() == 5.0) {
+                    //    relationString = relationString + ":ENH_CONJ_PROP";
+                    //}
+                    enhancedDependencies.put(parent.toCopyIndex(), relationString);
                 }
 
             } else {
-                //add basic dependency
-                if (gov != null) {
-                    enhancedDependencies.put(govIdx, reln.toString());
-                }
+
                 // add enhanced ones stored with token
-                enhancedDependencies.putAll(token.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class));
+                HashMap<String, String> secondaryDeps = token.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class);
+                if (secondaryDeps != null) {
+                    enhancedDependencies.putAll(token.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class));
+                    //add basic dependency
+                    if (gov != null) {
+                        enhancedDependencies.put(govIdx, reln.toString());
+                    }
+                }
             }
 
 
@@ -94,7 +109,7 @@ public class CoNLLUDocumentWriter {
                 relnName = "_";
             }
 
-            if (enhancedDependencies.isEmpty() && enhancedSg.getRoots().contains(token)) {
+            if (enhancedDependencies.isEmpty() && enhancedSg != null && enhancedSg.getRoots().contains(token)) {
                 additionalDepsString = "0:root";
             }
 

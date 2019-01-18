@@ -136,7 +136,7 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
   //makes modifications of Collins' rules to better fit with semantic notions of heads
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
-    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW", "CD", "JJ", "QP"}, {"rightdis", "JJS", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
+    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "$", "NX", "NML", "JJR", "WP"}, {"left", "NP", "PRP"}, {"rightdis", "ADJP", "FW", "CD", "JJ", "QP"}, {"rightdis", "JJS", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
     nonTerminalInfo.put("NX", nonTerminalInfo.get("NP"));
     nonTerminalInfo.put("NML", nonTerminalInfo.get("NP"));
     // WHNP clauses should have the same sort of head as an NP
@@ -200,6 +200,10 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
     nonTerminalInfo.put("ADVP", new String[][]{{"left", "ADVP"},
         {"rightdis", "RB", "RBR", "RBS", "JJ", "JJR", "JJS"},
         {"rightdis", "RP", "DT", "NN", "CD", "NP", "VBN", "NNP", "CC", "FW", "NNS", "ADJP", "NML"}, {"left"}});
+
+    nonTerminalInfo.put("GAPPINGP", new String[][]{{"left", "NP", "NX", "WHNP", "ADJP", "PP", "S", "SBAR", "SBARQ", "SINV", "SQ", "ADVP"}, {"left"},
+            {"rightdis", "RB", "RBR", "RBS", "JJ", "JJR", "JJS"},
+            {"rightdis", "RP", "DT", "NN", "CD", "NP", "VBN", "NNP", "CC", "FW", "NNS", "ADJP", "NML"}, {"left"}});
 
 
   }

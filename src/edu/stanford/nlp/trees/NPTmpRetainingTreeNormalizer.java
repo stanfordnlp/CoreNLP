@@ -58,9 +58,12 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
   private static final Pattern TmpPattern = Pattern.compile(".*-TMP.*");
   private static final Pattern NPSbjPattern = Pattern.compile("NP.*-SBJ.*");
   private static final Pattern NPAdvPattern = Pattern.compile("NP.*-ADV.*");
+  private static final Pattern GappingPattern = Pattern.compile(".*[=][0-9]+.*");
+
 
   private final int temporalAnnotation;
   private final boolean doSGappedStuff;
+  private final boolean doGappingStuff;
   private final int leaveItAll;
   private final boolean doAdverbialNP;
   private final HeadFinder headFinder;
@@ -75,7 +78,15 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
   }
 
   public NPTmpRetainingTreeNormalizer(int temporalAnnotation, boolean doSGappedStuff, int leaveItAll, boolean doAdverbialNP) {
-    this(temporalAnnotation, doSGappedStuff, leaveItAll, doAdverbialNP, new ModCollinsHeadFinder());
+    this(temporalAnnotation, doSGappedStuff, leaveItAll, doAdverbialNP, false, new ModCollinsHeadFinder());
+  }
+
+  public NPTmpRetainingTreeNormalizer(int temporalAnnotation, boolean doSGappedStuff, int leaveItAll, boolean doAdverbialNP, HeadFinder headFinder) {
+    this(temporalAnnotation, doSGappedStuff, leaveItAll, doAdverbialNP, false, headFinder);
+  }
+
+  public NPTmpRetainingTreeNormalizer(int temporalAnnotation, boolean doSGappedStuff, int leaveItAll, boolean doAdverbialNP, boolean doGappingStuff) {
+    this(temporalAnnotation, doSGappedStuff, leaveItAll, doAdverbialNP, doGappingStuff, new ModCollinsHeadFinder());
   }
 
   /**
@@ -115,6 +126,7 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
    *                           pre-pre-terminal rather than only if head).
    * @param doSGappedStuff     Leave -SBJ marking on subject NP and then mark
    *                           S-G sentences with a gapped subject.
+   * @param doGappingStuff     Add -ORPH marking on remnants of gapping construction.
    * @param leaveItAll         0 means the usual stripping of functional tags and indices;
    *                           1 leaves all functional tags but still strips indices;
    *                           2 leaves everything
@@ -123,14 +135,14 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
    * @param headFinder         A head finder that is used with some of the
    *                           options for temporalAnnotation
    */
-  public NPTmpRetainingTreeNormalizer(int temporalAnnotation, boolean doSGappedStuff, int leaveItAll, boolean doAdverbialNP, HeadFinder headFinder) {
+  public NPTmpRetainingTreeNormalizer(int temporalAnnotation, boolean doSGappedStuff, int leaveItAll, boolean doAdverbialNP, boolean doGappingStuff, HeadFinder headFinder) {
     this.temporalAnnotation = temporalAnnotation;
     this.doSGappedStuff = doSGappedStuff;
     this.leaveItAll = leaveItAll;
     this.doAdverbialNP = doAdverbialNP;
     this.headFinder = headFinder;
+    this.doGappingStuff = doGappingStuff;
   }
-
 
   /**
    * Remove things like hyphened functional tags and equals from the
@@ -142,7 +154,11 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
       return "ROOT";
       // String constants are always interned
     } else if (leaveItAll == 1) {
-      return tlp.categoryAndFunction(label);
+      String newLabel = tlp.categoryAndFunction(label);
+      if (doGappingStuff && GappingPattern.matcher(label).matches()) {
+        newLabel = newLabel + "-ORPH";
+      }
+      return newLabel;
     } else if (leaveItAll == 2) {
       return label;
     } else {
@@ -152,6 +168,8 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
       boolean anytemp = TmpPattern.matcher(label).matches();
       boolean subj = NPSbjPattern.matcher(label).matches();
       boolean npadv = NPAdvPattern.matcher(label).matches();
+      boolean gapping = GappingPattern.matcher(label).matches();
+
       label = tlp.basicCategory(label);
       if (anytemp && temporalAnnotation == TEMPORAL_ANY_TMP_PERCOLATED) {
         label += "-TMP";
@@ -167,6 +185,9 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
       }
       if (doSGappedStuff && subj) {
         label = label + "-SBJ";
+      }
+      if (doGappingStuff && gapping) {
+        label = label + "-ORPH";
       }
       return label;
     }

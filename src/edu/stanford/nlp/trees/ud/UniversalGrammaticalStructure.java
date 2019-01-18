@@ -5,19 +5,29 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.trees.GrammaticalStructure;
-import edu.stanford.nlp.trees.TreeGraphNode;
-import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
-import static edu.stanford.nlp.trees.ud.UniversalGrammaticalRelations.CONTROLLING_NOMINAL_SUBJECT;
+import static edu.stanford.nlp.trees.ud.UniversalGrammaticalRelations.*;
 
 public class UniversalGrammaticalStructure extends GrammaticalStructure {
+
+    //for Joakim
+    //private static final double RELCL_EDGE_WEIGHT = 3.0;
+    //private static final double CONTROL_EDGE_WEIGHT = 1.0;
+    //private static final double CONJPROP_EDGE_WEIGHT = 5.0;
+
+
+    private static final double RELCL_EDGE_WEIGHT = Double.NEGATIVE_INFINITY;
+    private static final double CONTROL_EDGE_WEIGHT =  Double.NEGATIVE_INFINITY;
+    private static final double CONJPROP_EDGE_WEIGHT =  Double.NEGATIVE_INFINITY;
 
     public UniversalGrammaticalStructure(List<TypedDependency> projectiveDependencies, TreeGraphNode root) {
         super(projectiveDependencies, root);
@@ -32,7 +42,7 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
 
             SemanticGraphEdge leftChildEdge = null;
             for (SemanticGraphEdge childEdge : sg.outgoingEdgeIterable(modifier)) {
-                if (relativizingWordPattern.matcher(childEdge.getDependent().value()).matches() &&
+                 if (relativizingWordPattern.matcher(childEdge.getDependent().value()).matches() &&
                         (leftChildEdge == null || childEdge.getDependent().index() < leftChildEdge.getDependent().index())) {
                     leftChildEdge = childEdge;
                 }
@@ -40,6 +50,19 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
 
             SemanticGraphEdge leftGrandchildEdge = null;
             for (SemanticGraphEdge childEdge : sg.outgoingEdgeIterable(modifier)) {
+                if (childEdge.getRelation().getShortName().contains("comp")
+                        || childEdge.getRelation().getShortName().contains("conj")
+                        || childEdge.getRelation().getShortName().contains("parataxis")
+                        || childEdge.getRelation().getShortName().contains("discourse")
+                        || childEdge.getRelation().getShortName().contains("advcl")
+                        || childEdge.getRelation().getShortName().contains("acl")
+                        || childEdge.getRelation().getShortName().contains("list")
+                        || childEdge.getRelation().getShortName().contains("orphan")
+                        || childEdge.getRelation().getShortName().contains("vocative")
+                        || childEdge.getRelation().getShortName().contains("dislocated")
+                        || childEdge.getRelation().getShortName().contains("appos")) {
+                    continue;
+                }
                 for (SemanticGraphEdge grandchildEdge : sg.outgoingEdgeIterable(childEdge.getDependent())) {
                     if (relativizingWordPattern.matcher(grandchildEdge.getDependent().value()).matches() &&
                             (leftGrandchildEdge == null || grandchildEdge.getDependent().index() < leftGrandchildEdge.getDependent().index())) {
@@ -56,7 +79,7 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
                 newDep = leftChildEdge.getDependent();
             }
             if (newDep != null && ! sg.containsEdge(head, newDep)) {
-                sg.addEdge(head, newDep, UniversalGrammaticalRelations.REFERENT, Double.NEGATIVE_INFINITY, false);
+                sg.addEdge(head, newDep, UniversalGrammaticalRelations.REFERENT, RELCL_EDGE_WEIGHT, false);
             }
         }
     }
@@ -82,7 +105,17 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
                 // disconnected) [cdm Jan 2010]
                 if (! edge.getRelation().getShortName().equals("ref") && ! edge.getGovernor().equals(ant)) {
                     sg.removeEdge(edge);
-                    sg.addEdge(edge.getGovernor(), ant, edge.getRelation(), Double.NEGATIVE_INFINITY, true);
+
+                    GrammaticalRelation reln = edge.getRelation();
+                    if (edge.getRelation().getShortName().equals("obj")) {
+                        reln = RELATIVE_OBJECT;
+                    } else if (edge.getRelation().getShortName().equals("nsubj")) {
+                        reln = RELATIVE_NOMINAL_SUBJECT;
+                    } else if (edge.getRelation().getShortName().equals("nsubj:pass")) {
+                        reln = RELATIVE_NOMINAL_PASSIVE_SUBJECT;
+                    }
+
+                    sg.addEdge(edge.getGovernor(), ant, reln, RELCL_EDGE_WEIGHT, true);
                 }
             }
         }
@@ -141,12 +174,12 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
             if ( ! objects.isEmpty()) {
                 for (IndexedWord object : objects) {
                     if ( ! sg.containsEdge(modifier, object))
-                        sg.addEdge(modifier, object, CONTROLLING_NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
+                        sg.addEdge(modifier, object, CONTROLLING_NOMINAL_SUBJECT, CONTROL_EDGE_WEIGHT, true);
                 }
             } else {
                 for (IndexedWord subject : subjects) {
                     if ( ! sg.containsEdge(modifier, subject))
-                        sg.addEdge(modifier, subject, CONTROLLING_NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
+                        sg.addEdge(modifier, subject, CONTROLLING_NOMINAL_SUBJECT, CONTROL_EDGE_WEIGHT, true);
                 }
             }
         }
@@ -165,8 +198,16 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
         Set<IndexedWord> withPassiveAuxiliary = Generics.newHashSet();
         // Construct a map of tree nodes being governor of an object grammatical
         // relation to that relation
-        // Map<TreeGraphNode, TypedDependency> objectMap = new
-        // HashMap<TreeGraphNode, TypedDependency>();
+
+        //all other core-arguments
+        Map<GrammaticalRelation, Map<IndexedWord, SemanticGraphEdge>> coreArguments = Generics.newHashMap();
+        coreArguments.put(XCLAUSAL_COMPLEMENT, Generics.newHashMap());
+        coreArguments.put(CLAUSAL_COMPLEMENT, Generics.newHashMap());
+        coreArguments.put(DIRECT_OBJECT, Generics.newHashMap());
+        coreArguments.put(INDIRECT_OBJECT, Generics.newHashMap());
+
+
+
 
         Map<IndexedWord, SemanticGraphEdge> explMap = Generics.newHashMap();
 
@@ -193,14 +234,37 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
             }
 
             // look for expletives
-            if (edge.getRelation().getShortName().equals("expl")) {
+            else if (edge.getRelation().getShortName().equals("expl")) {
                     explMap.putIfAbsent(edge.getGovernor(), edge);
             }
 
-            // look for rcmod relations
-            if (edge.getRelation().getShortName().equals("acl:relcl")) {
+            // look for acl:relcl relations
+            else if (edge.getRelation().getShortName().equals("acl:relcl")) {
                 rcmodHeads.add(edge.getGovernor());
             }
+
+            // look for xcomp relations
+            else if (edge.getRelation().getShortName().equals("xcomp")) {
+                coreArguments.get(XCLAUSAL_COMPLEMENT).put(edge.getGovernor(), edge);
+
+            }
+
+            // look for ccomp relations
+            else if (edge.getRelation().getShortName().equals("ccomp")) {
+                coreArguments.get(CLAUSAL_COMPLEMENT).put(edge.getGovernor(), edge);
+            }
+
+            // look for obj relations
+            else if (edge.getRelation().getShortName().equals("obj")) {
+                coreArguments.get(DIRECT_OBJECT).put(edge.getGovernor(), edge);
+
+            }
+
+            //look for iobj
+            else if (edge.getRelation().getShortName().equals("iobj")) {
+                coreArguments.get(INDIRECT_OBJECT).put(edge.getGovernor(), edge);
+            }
+
         }
 
         // create a new list of typed dependencies
@@ -230,9 +294,12 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
                         GrammaticalRelation newRel = edge1.getRelation();
                         //TODO: Do we want to copy case markers here?
                         if (newRel != ROOT
-                                && ! newRel.getShortName().equals("case")
-                                && ! newRel.getShortName().equals("advcl")
-                                && ! newRel.getShortName().equals("acl")
+                                //&& ! newRel.getShortName().equals("case")
+                                //&& ! newRel.getShortName().equals("advcl")
+                                //&& ! newRel.getShortName().equals("acl")
+                                && ! newRel.getShortName().equals("dislocated")
+                                && ! newRel.getShortName().equals("vocative")
+                                && ! newRel.getShortName().equals("discourse")
                                 && ! newRel.getShortName().equals("parataxis")
                                 && ! newRel.getShortName().equals("list")
                                 && ! newRel.getShortName().equals("orphan")
@@ -240,10 +307,10 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
                             if (rcmodHeads.contains(gov) && rcmodHeads.contains(dep)) {
                                 // to prevent wrong propagation in the case of long dependencies in relative clauses
                                 if (! newRel.getShortName().equals("obj") && newRel.getShortName().equals("nsubj")) {
-                                    sg.addEdge(newGov, dep, newRel, Double.NEGATIVE_INFINITY, true);
+                                    sg.addEdge(newGov, dep, newRel, CONJPROP_EDGE_WEIGHT, true);
                                 }
                             } else {
-                                sg.addEdge(newGov, dep, newRel, Double.NEGATIVE_INFINITY, true);
+                                sg.addEdge(newGov, dep, newRel, CONJPROP_EDGE_WEIGHT, true);
                             }
                         }
                     }
@@ -259,9 +326,9 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
                 // part)
                 // CDM 2008: I also added in JJ, since participial verbs are often
                 // tagged JJ
-                String tag = dep.getString(CoreAnnotations.CoarseTagAnnotation.class);
+                // SS 2017: I relaxed this assumption for UD; otherwise we'll miss many copular
+                // constructions
                 if (subjectMap.containsKey(gov)
-                        && (tag.equals("VERB") || tag.equals("ADJ"))
                         && ! subjectMap.containsKey(dep)
                         && ! explMap.containsKey(dep)) {
                     SemanticGraphEdge tdsubj = subjectMap.get(gov);
@@ -275,11 +342,210 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
                             relation = UniversalGrammaticalRelations.CLAUSAL_PASSIVE_SUBJECT;
                         }
                     }
-                    sg.addEdge(dep, tdsubj.getDependent(), relation, Double.NEGATIVE_INFINITY, true);
+                    sg.addEdge(dep, tdsubj.getDependent(), relation, CONJPROP_EDGE_WEIGHT, true);
+                }
+
+                for (GrammaticalRelation reln : coreArguments.keySet()) {
+                    Map<IndexedWord, SemanticGraphEdge> arguments = coreArguments.get(reln);
+                    if (arguments.containsKey(gov) && ! arguments.containsKey(dep)) {
+                        SemanticGraphEdge argEdge = arguments.get(gov);
+                        //Heuristic: If object depends on head of coordinated phrase, but appears after conjunct,
+                        //propagate the conjunct
+                        if (dep.index() < argEdge.getDependent().index()) {
+                            sg.addEdge(dep, argEdge.getDependent(), argEdge.getRelation(), CONJPROP_EDGE_WEIGHT, true);
+                        }
+                    }
                 }
             }
         }
 
+    }
+
+
+    //add prepositions
+    private static SemgrexPattern[] PREP_PATTERNS = {
+            SemgrexPattern.compile("{}=gov   >/^(nmod|obl)$/=reln ({}=mod >case {}=c1)"),
+            SemgrexPattern.compile("{}=gov   >/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ {}=c1)")
+    };
+
+    public static final void addCaseMarkerInformation(SemanticGraph sg) {
+        for (SemgrexPattern p: PREP_PATTERNS) {
+            SemanticGraph sgCopy = sg.makeSoftCopy();
+            SemgrexMatcher matcher = p.matcher(sgCopy);
+            IndexedWord oldCaseMarker = null;
+            while (matcher.find()) {
+
+
+                IndexedWord caseMarker = matcher.getNode("c1");
+
+                if (oldCaseMarker != null && caseMarker.equals(oldCaseMarker)) {
+                    continue;
+                }
+
+                IndexedWord gov = matcher.getNode("gov");
+                IndexedWord mod = matcher.getNode("mod");
+                addCaseMarkersToReln(sg, gov, mod, caseMarker);
+
+                oldCaseMarker = caseMarker;
+            }
+        }
+    }
+
+
+    /**
+     * Post-process graph and copy over case markers in case the PP-complement
+     * is conjoined.
+     * @param sg
+     */
+
+    public static void addCaseMarkerForConjunctions(SemanticGraph sg) {
+        SemanticGraph sgCopy = sg.makeSoftCopy();
+        for (SemanticGraphEdge edge : sgCopy.edgeIterable()) {
+            String relnName = edge.getRelation().toString();
+            if (relnName.equals("nmod") || relnName.equals("obl") || relnName.equals("acl") || relnName.equals("advcl")) {
+                Set<IndexedWord> conjParents =  sg.getParentsWithReln(edge.getDependent(), "conj");
+                for (IndexedWord conjParent : conjParents) {
+                    List<SemanticGraphEdge> conjParentIncomingEdges = sg.getIncomingEdgesSorted(conjParent);
+                    boolean changed = false;
+                    for (SemanticGraphEdge edge1: conjParentIncomingEdges) {
+
+                        if (edge1.getRelation().toString().startsWith(relnName) && edge1.getRelation().getSpecific() != null) {
+                            changed = true;
+                            sg.getEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation()).setRelation(edge1.getRelation());
+                            break;
+                        }
+                    }
+                    if (changed) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private static void addCaseMarkersToReln(SemanticGraph sg, IndexedWord gov, IndexedWord mod, IndexedWord caseMarker) {
+        SemanticGraphEdge edge = sg.getEdge(gov, mod);
+
+        List<IndexedWord> caseMarkers = new ArrayList<>();
+        caseMarkers.add(caseMarker);
+        sg.getChildrenWithReln(caseMarker, FIXED).stream().forEach(iw -> caseMarkers.add(iw));
+
+        Collections.sort(caseMarkers);
+
+        String relnName = StringUtils.join(caseMarkers.stream().map(iw->iw.value()), "_");
+
+        //for Joakim
+        //GrammaticalRelation reln = getCaseMarkedRelation(edge.getRelation(), relnName.toLowerCase() + ":ENH_CASE");
+        GrammaticalRelation reln = getCaseMarkedRelation(edge.getRelation(), relnName.toLowerCase());
+
+        edge.setRelation(reln);
+    }
+
+    /**
+     *
+     * Returns a GrammaticalRelation which combines the original relation and
+     * the preposition.
+     *
+     */
+    private static GrammaticalRelation getCaseMarkedRelation(GrammaticalRelation reln, String relationName) {
+        GrammaticalRelation newReln = reln;
+
+        if (reln.getShortName().equals("nmod")) {
+            newReln = UniversalGrammaticalRelations.getNmod(relationName);
+        } else if (reln.getShortName().equals("obl")) {
+            newReln = UniversalGrammaticalRelations.getObl(relationName);
+        } else if (reln.getShortName().equals("advcl")) {
+            newReln = UniversalGrammaticalRelations.getAdvcl(relationName);
+        } else if (reln.getShortName().equals("acl")) {
+            newReln = UniversalGrammaticalRelations.getAcl(relationName);
+        }
+        return newReln;
+    }
+
+
+
+
+
+    //TODO: do something about apples or oranges, and bananas?
+
+    //add conjunctions to relations names
+    private static final SemgrexPattern CONJUNCTION_PATTERN = SemgrexPattern.compile("{}=gov  >conj ({} >cc {}=cc) >conj {}=conj " );
+
+
+    /**
+     * Adds the type of conjunction to all conjunct relations.
+     * <p/>
+     * {@code cc(Marie, and)}, {@code conj(Marie, Chris)} and {@code conj(Marie, John)}
+     * become {@code cc(Marie, and)}, {@code conj:and(Marie, Chris)} and {@code conj:and(Marie, John)}.
+     * <p/>
+     * In case multiple coordination marker depend on the same governor
+     * the one that precedes the conjunct is appended to the conjunction relation or the
+     * first one if no preceding marker exists.
+     * <p/>
+     *
+     * @param sg A SemanticGraph from a sentence
+     */
+    public static void addConjInformation(SemanticGraph sg) {
+
+    /* Semgrexes require a graph with a root. */
+        if (sg.getRoots().isEmpty())
+            return;
+
+        SemanticGraph sgCopy = sg.makeSoftCopy();
+        SemgrexMatcher matcher = CONJUNCTION_PATTERN.matcher(sgCopy);
+
+        IndexedWord oldGov = null;
+        IndexedWord oldCcDep = null;
+        List<IndexedWord> conjDeps = Generics.newLinkedList();
+
+        while (matcher.find()) {
+            IndexedWord conjDep = matcher.getNode("conj");
+            IndexedWord gov = matcher.getNode("gov");
+            IndexedWord ccDep = matcher.getNode("cc");
+            if (oldGov != null &&  (! gov.equals(oldGov) || ! ccDep.equals(oldCcDep))) {
+                addConjToReln(sg, oldGov, conjDeps, oldCcDep);
+                conjDeps = Generics.newLinkedList();
+            }
+            oldCcDep = ccDep;
+            conjDeps.add(conjDep);
+            oldGov = gov;
+        }
+
+        if (oldGov != null) {
+            addConjToReln(sg, oldGov, conjDeps, oldCcDep);
+        }
+
+    }
+
+    /*
+     * Used by addConjInformation.
+     */
+    private static void addConjToReln(SemanticGraph sg,
+                                      IndexedWord gov, List<IndexedWord> conjDeps, IndexedWord ccDep) {
+
+        for (IndexedWord conjDep : conjDeps) {
+            SemanticGraphEdge edge = sg.getEdge(gov, conjDep);
+            if (edge.getRelation().toString().equals("conj") || conjDep.index() > ccDep.index()) {
+                //for Joakim
+                //edge.setRelation(UniversalGrammaticalRelations.getConj(conjValue(ccDep, sg) + ":ENH_CONJ"));
+                edge.setRelation(UniversalGrammaticalRelations.getConj(conjValue(ccDep, sg)));
+            }
+        }
+    }
+
+
+    private static String conjValue(IndexedWord cc, SemanticGraph sg) {
+        List<IndexedWord> yield = sg.yield(cc);
+
+        if (yield.size() < 2) {
+            return cc.value();
+        }
+
+        List<String> ccParts = new LinkedList<>();
+
+        yield.stream().forEach(iw -> ccParts.add(iw.value()));
+
+        return StringUtils.join(ccParts, "_").toLowerCase();
     }
 
 }

@@ -607,6 +607,8 @@ public abstract class TregexPattern implements Serializable  {
     String reportTreeNumbers = "-n";
     String rootLabelOnly = "-u";
     String oneLine = "-s";
+    String uniqueTrees = "-q";
+
     Map<String,Integer> flagMap = Generics.newHashMap();
     flagMap.put(extractSubtreesOption,2);
     flagMap.put(extractSubtreesFileOption,2);
@@ -630,6 +632,7 @@ public abstract class TregexPattern implements Serializable  {
     flagMap.put(reportTreeNumbers, 0);
     flagMap.put(rootLabelOnly, 0);
     flagMap.put(oneLine, 0);
+    flagMap.put(uniqueTrees, 0);
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
     args = argsMap.get(null);
 
@@ -713,6 +716,9 @@ public abstract class TregexPattern implements Serializable  {
       treePrintFormats.append("words,");
     } else {
       treePrintFormats.append("penn,");
+    }
+    if (argsMap.containsKey(uniqueTrees)) {
+      TRegexTreeVisitor.printOnlyUniqueTrees = true;
     }
 
     HeadFinder hf = new CollinsHeadFinder();
@@ -802,6 +808,7 @@ public abstract class TregexPattern implements Serializable  {
     static boolean printFilename = false;
     static boolean oneMatchPerRootNode = false;
     static boolean reportTreeNumbers = false;
+    static boolean printOnlyUniqueTrees = false;
 
     static TreePrint tp;
     private PrintWriter pw;
@@ -886,6 +893,10 @@ public abstract class TregexPattern implements Serializable  {
           }
           // pw.println();  // TreePrint already puts a blank line in
         } // end if (printMatches)
+
+        if (printOnlyUniqueTrees) {
+          break;
+        }
       } // end while match.find()
     } // end visitTree
 

@@ -922,6 +922,7 @@ public class UniversalEnglishGrammaticalRelations {
             "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < (NP|NML|NN|NNS|NNP|NNPS|FW|AFX=target $++ NN|NNS|NNP|NNPS|FW|CD=sister !<<- POS !<<- (VBZ < /^\'s$/) !$- /^,$/ !$++ (POS $++ =sister))",
             "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < JJ|JJR|JJS=sister < (NP|NML|NN|NNS|NNP|NNPS|FW=target !<<- POS !<<- (VBZ < /^\'s$/) $+ =sister) <# NN|NNS|NNP|NNPS !<<- POS !<<- (VBZ < /^\'s$/) ",
             "QP|ADJP < (/^(?:CD|$|#)$/=target !$- CC)", //number relation in original SD
+            "@NP < (/^[$]$/ $+ /^N.*/)",
             // in vitro, in vivo, etc., in Genia
             // matches against "etc etc"
             "ADJP|ADVP < (FW [ $- (FW=target !< /^(?i:etc)$/) | $- (IN=target < in|In) ] )");
@@ -1537,7 +1538,8 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   public static final GrammaticalRelation ORPHAN =
-      new GrammaticalRelation(Language.UniversalEnglish, "orphan", "orphan", DEPENDENT);
+      new GrammaticalRelation(Language.UniversalEnglish, "orphan", "orphan", DEPENDENT, "GAPPINGP",
+              tregexCompiler, "GAPPINGP < __=target");
 
 
   // TODO would be nice to have this set up automatically...
