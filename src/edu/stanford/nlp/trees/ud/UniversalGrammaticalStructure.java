@@ -432,7 +432,11 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
 
         Collections.sort(caseMarkers);
 
-        String relnName = StringUtils.join(caseMarkers.stream().map(iw->iw.value()), "_");
+        String relnName = StringUtils.join(caseMarkers.stream().map(iw->iw.lemma()), "_");
+
+        if (relnName.matches("[^a-zA-Z_]")) {
+            return;
+        }
 
         //for Joakim
         //GrammaticalRelation reln = getCaseMarkedRelation(edge.getRelation(), relnName.toLowerCase() + ":ENH_CASE");
@@ -528,7 +532,13 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
             if (edge.getRelation().toString().equals("conj") || conjDep.index() > ccDep.index()) {
                 //for Joakim
                 //edge.setRelation(UniversalGrammaticalRelations.getConj(conjValue(ccDep, sg) + ":ENH_CONJ"));
-                edge.setRelation(UniversalGrammaticalRelations.getConj(conjValue(ccDep, sg)));
+
+                String relnName = conjValue(ccDep, sg);
+
+                if (relnName.matches("[^a-zA-Z_]")) {
+                    continue;
+                }
+                edge.setRelation(UniversalGrammaticalRelations.getConj(relnName));
             }
         }
     }
@@ -538,14 +548,16 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
         List<IndexedWord> yield = sg.yield(cc);
 
         if (yield.size() < 2) {
-            return cc.value();
+            return cc.lemma();
         }
 
         List<String> ccParts = new LinkedList<>();
 
-        yield.stream().forEach(iw -> ccParts.add(iw.value()));
+        yield.stream().forEach(iw -> ccParts.add(iw.lemma()));
 
         return StringUtils.join(ccParts, "_").toLowerCase();
+
+
     }
 
 }

@@ -1,9 +1,12 @@
 package edu.stanford.nlp.trees.ud;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.Iterator;
@@ -19,6 +22,36 @@ import java.util.regex.Pattern;
 
 public class UniversalEnhancer {
 
+
+    private static boolean isEmptyNode(IndexedWord iw) {
+        return (iw.pseudoPosition() * 10) % 10 > 0;
+    }
+
+    public static void copyEmptyNodes(SemanticGraph source, SemanticGraph target) {
+        for (IndexedWord node : source.vertexSet()) {
+            if (isEmptyNode(node)) {
+                target.addVertex(node);
+                System.err.println("added vertex" + node);
+            }
+        }
+
+        //remove all orphan dependencies
+        for (SemanticGraphEdge edge: target.edgeListSorted()) {
+            if (edge.getRelation().getShortName().equals("orphan")) {
+                target.removeEdge(edge);
+                System.err.println("removed edge" + edge);
+
+            }
+        }
+        for (SemanticGraphEdge edge : source.edgeIterable()) {
+            if (edge.getRelation().getShortName().equals("orphan") || isEmptyNode(edge.getDependent()) || isEmptyNode(edge.getGovernor())) {
+                target.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
+                System.err.println("added edge" + edge);
+            }
+        }
+    }
+
+
     public static void main(String args[]) {
         Properties props = StringUtils.argsToProperties(args);
 
@@ -27,6 +60,9 @@ public class UniversalEnhancer {
         String relativePronounsPatternStr = props.getProperty("relativePronouns");
 
         String embeddingsFilename = props.getProperty("embeddings");
+
+        boolean keepEmptyNodes = PropertiesUtils.getBool(props, "keepEmpty", false);
+
 
 
         Pattern relativePronounPattern = Pattern.compile(relativePronounsPatternStr);
@@ -52,10 +88,19 @@ public class UniversalEnhancer {
             Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
             SemanticGraph basic = sgs.first();
 
+            SemanticGraph originalEnhanced = sgs.second();
+
+
             SemanticGraph enhanced = new SemanticGraph(basic.typedDependencies());
-            if (embeddings != null) {
-                UniversalGappingEnhancer.addEnhancements(enhanced, embeddings);
+
+            if (keepEmptyNodes) {
+                copyEmptyNodes(originalEnhanced, enhanced);
             }
+
+
+            //if (embeddings != null) {
+                UniversalGappingEnhancer.addEnhancements(enhanced, embeddings);
+            //}
             UniversalGrammaticalStructure.addRef(enhanced, relativePronounPattern);
             UniversalGrammaticalStructure.collapseReferent(enhanced);
             UniversalGrammaticalStructure.propagateConjuncts(enhanced);

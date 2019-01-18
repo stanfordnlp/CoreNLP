@@ -97,7 +97,7 @@ public class CoNLLUUtils {
         boolean first = true;
         if (extraDeps != null) {
             List<String> sortedKeys = new ArrayList<>(extraDeps.keySet());
-            Collections.sort(sortedKeys);
+            Collections.sort(sortedKeys,  new DepIndexComparator());
             for (String key : sortedKeys) {
                 if (!first) {
                     sb.append("|");
@@ -123,6 +123,14 @@ public class CoNLLUUtils {
         @Override
         public int compare(String featureName1, String featureName2) {
             return featureName1.toLowerCase().compareTo(featureName2.toLowerCase());
+        }
+    }
+
+    public static class DepIndexComparator implements Comparator<String> {
+
+        @Override
+        public int compare(String depIndex1, String depIndex2) {
+            return Float.valueOf(depIndex1).compareTo(Float.valueOf(depIndex2));
         }
     }
 }

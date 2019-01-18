@@ -98,11 +98,13 @@ public class UniversalGappingEnhancer {
         for (int i = 1; i < n + 1; i++) {
             for (int j = 1; j < m + 1; j++) {
 
-                SimpleMatrix fullEmbedding = fullArguments.get(i - 1).getAverageEmbeddings();
-                SimpleMatrix gappedEmbedding = gappedArguments.get(j - 1).getAverageEmbeddings();
+                double distance = 0.0;
+                if (embeddings != null) {
+                    SimpleMatrix fullEmbedding = fullArguments.get(i - 1).getAverageEmbeddings();
+                    SimpleMatrix gappedEmbedding = gappedArguments.get(j - 1).getAverageEmbeddings();
 
-                double distance = fullEmbedding.minus(gappedEmbedding).normF();
-
+                    distance = fullEmbedding.minus(gappedEmbedding).normF();
+                }
                 String fullCoarseTag = coarsenUPOSTag(fullArguments.get(i - 1).head.get(CoreAnnotations.CoarseTagAnnotation.class));
                 String gappedCoarseTag = coarsenUPOSTag(gappedArguments.get(j - 1).head.get(CoreAnnotations.CoarseTagAnnotation.class));
 
