@@ -3,10 +3,7 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import java.util.List;
 import java.util.Properties;
@@ -15,11 +12,11 @@ import java.util.Properties;
  *
  * @author mcdm
  */
-public class QuantifiableEntityNormalizingAnnotatorITest {
+
+public class QuantifiableEntityNormalizingAnnotatorITest extends TestCase {
 
   private static AnnotationPipeline pipeline;
 
-  @Before
   public void setUp() throws Exception {
     synchronized(QuantifiableEntityNormalizingAnnotatorITest.class) {
       Properties props = new Properties();
@@ -28,8 +25,7 @@ public class QuantifiableEntityNormalizingAnnotatorITest {
     }
   }
 
-  @Test
-  public void testQuantifiableEntityNormalizingAnnotator() {
+  public void testQuantifiableEntityNormalizingAnnotator() throws Exception {
     Annotation document = new Annotation(text);
     pipeline.annotate(document);
 
@@ -39,17 +35,17 @@ public class QuantifiableEntityNormalizingAnnotatorITest {
         for (CoreLabel token : tokens) {
           System.out.println(token.get(CoreAnnotations.TextAnnotation.class) + ": " + token.get(CoreAnnotations.NamedEntityTagAnnotation.class) + ", " + token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
         }
-      for (CoreLabel token : tokens) {
-        String normalization = token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-        if (normalization != null) {
-          Assert.assertEquals(answer_text[i], token.get(CoreAnnotations.OriginalTextAnnotation.class));
-          Assert.assertEquals(answer_time[i], normalization);
-          i++;
+        for (int j = 0; j < tokens.size(); j++){
+          String normalization = tokens.get(j).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+          if (normalization != null) {
+            assertEquals(answer_text[i],tokens.get(j).get(CoreAnnotations.OriginalTextAnnotation.class));
+            assertEquals(answer_time[i],normalization);
+            i++;
+          }
         }
-      }
     }
-    Assert.assertEquals(answer_text.length, i);
-    Assert.assertEquals(answer_time.length, i);
+    assertEquals(answer_text.length, i);
+    assertEquals(answer_time.length, i);
   }
 
   static final String text =
@@ -64,20 +60,19 @@ public class QuantifiableEntityNormalizingAnnotatorITest {
   };
   */
   // With SUTime
-  private static final String[] answer_text = {
+  static final String[] answer_text = {
     "January","3","1980",  // same normalization for every token in the entity
     "the","2nd", "century", "A.D.",
     "first",
     "the","late", "4th",  "century"
   };
 
-  private static final String[] answer_time = {
+  static final String[] answer_time = {
     "1980-01-03","1980-01-03","1980-01-03",  // same normalization for every token in the entity
     "01XX","01XX", "01XX", "01XX",
     "1.0",
     //"P100Y-#4", "P100Y-#4", "P100Y-#4", "P100Y-#4",
     "03XX","03XX", "03XX",  "03XX"
   };
-
 }
 

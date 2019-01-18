@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -180,9 +179,9 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
 
   }
 
-  private Predicate<CoreLabel> matchingWordRestriction = new Predicate<CoreLabel>(){
+  private Function<CoreLabel, Boolean> matchingWordRestriction = new Function<CoreLabel, Boolean>(){
     @Override
-    public boolean test(CoreLabel coreLabel) {
+    public Boolean apply(CoreLabel coreLabel) {
       return matchedRestriction(coreLabel, label);
     }
   };

@@ -32,7 +32,7 @@ public class RelationTripleSegmenter {
     // { blue cats play [quietly] with yarn,
     //   Jill blew kisses at Jack,
     //   cats are standing next to dogs }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ?>case {}=prep) ?>dobj {pos:/N.*/}=relObj"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ?>case {}=prep) ?>obj {pos:/N.*/}=relObj"));
     // { cats are cute,
     //   horses are grazing peacefully }
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb ?>case {}=prep"));

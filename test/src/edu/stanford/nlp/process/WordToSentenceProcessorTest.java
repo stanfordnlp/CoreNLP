@@ -220,18 +220,4 @@ public class WordToSentenceProcessorTest extends TestCase {
               "《 金融时报 》 周三");
 
   }
-
-
-  /**
-   * Ensure that the unicode paragraph separator always
-   * starts a new sentence.
-   */
-  public void testParagraphSeparator() {
-    checkResult(wts, "Hello\u2029World.",
-        "Hello", "World.");
-    checkResult(wts, "Hello.\u2029World.",
-        "Hello.", "World.");
-    checkResult(wts, "Hello  \u2029World.",
-        "Hello", "World.");
-  }
 }

@@ -26,6 +26,7 @@
 
 package edu.stanford.nlp.tagger.maxent;
 
+import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.io.PrintFile;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.ling.SentenceUtils;
@@ -55,7 +56,7 @@ import java.text.DecimalFormat;
 public class TestSentence implements SequenceModel  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(TestSentence.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(TestSentence.class);
 
   protected final boolean VERBOSE;
   protected static final String naTag = "NA";
@@ -186,9 +187,9 @@ public class TestSentence implements SequenceModel  {
   }
 
 
-  private ArrayList<TaggedWord> getTaggedSentence() {
+  ArrayList<TaggedWord> getTaggedSentence() {
     final boolean hasOffset;
-    hasOffset = origWords != null && ! origWords.isEmpty() && (origWords.get(0) instanceof HasOffset);
+    hasOffset = origWords != null && origWords.size() > 0 && (origWords.get(0) instanceof HasOffset);
     ArrayList<TaggedWord> taggedSentence = new ArrayList<>();
     for (int j = 0; j < size - 1; j++) {
       String tag = finalTags[j];
@@ -282,7 +283,7 @@ public class TestSentence implements SequenceModel  {
         numWrong++;
         if (pf != null) pf.print('|' + correctTags[i]);
         if (verboseResults) {
-          log.info((maxentTagger.dict.isUnknown(sent.get(i)) ? "Unk" : "") + "Word: " + sent.get(i) + "; correct: " + correctTags[i] + "; guessed: " + finalTags[i]);
+          EncodingPrintWriter.err.println((maxentTagger.dict.isUnknown(sent.get(i)) ? "Unk" : "") + "Word: " + sent.get(i) + "; correct: " + correctTags[i] + "; guessed: " + finalTags[i], encoding);
         }
 
         if (maxentTagger.dict.isUnknown(sent.get(i))) {
@@ -370,7 +371,7 @@ public class TestSentence implements SequenceModel  {
   }
 
   // do initializations for the TagScorer interface
-  private void initializeScorer() {
+  protected void initializeScorer() {
     pairs.setSize(size);
     for (int i = 0; i < size; i++)
       pairs.setWord(i,sent.get(i));
@@ -381,7 +382,7 @@ public class TestSentence implements SequenceModel  {
   /**
    * clean-up after the scorer
    */
-  private void cleanUpScorer() {
+  protected void cleanUpScorer() {
     revert(0);
   }
 
@@ -389,10 +390,8 @@ public class TestSentence implements SequenceModel  {
   // current position h.current (returns normalized scores)
   private double[] getScores(History h) {
     if (maxentTagger.hasApproximateScoring()) {
-      if (DBG) { System.err.println("Tagger has approx scoring; "); }
       return getApproximateScores(h);
     }
-    if (DBG) { System.err.println("Tagger has exact scoring"); }
     return getExactScores(h);
   }
 
@@ -432,8 +431,8 @@ public class TestSentence implements SequenceModel  {
     boolean rare = maxentTagger.isRare(ExtractorFrames.cWord.extract(h));
     Extractors ex = maxentTagger.extractors, exR = maxentTagger.extractorsRare;
     String w = pairs.getWord(h.current);
-    if (DBG) { System.err.printf("%s: loc %s lc %s dy %s; rloc %s rlc %s rdy %s%n", w, ex.local, ex.localContext, ex.dynamic, exR.local, exR.localContext, exR.dynamic); }
-    double[] lS = localScores.get(w);
+    double[] lS, lcS;
+    lS = localScores.get(w);
     if (lS == null) {
       lS = getHistories(tags, h, ex.local, rare ? exR.local : null);
       localScores.put(w,lS);
@@ -448,8 +447,7 @@ public class TestSentence implements SequenceModel  {
         localScores.put(w,lS);
       }
     }
-    double[] lcS = localContextScores[h.current];
-    if (lcS == null) {
+    if((lcS = localContextScores[h.current]) == null) {
       lcS = getHistories(tags, h, ex.localContext, rare ? exR.localContext : null);
       localContextScores[h.current] = lcS;
       ArrayMath.pairwiseAddInPlace(lcS,lS);
@@ -460,9 +458,8 @@ public class TestSentence implements SequenceModel  {
   }
 
   private double[] getHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
-    if (maxentTagger.hasApproximateScoring()) {
+    if(maxentTagger.hasApproximateScoring())
       return getApproximateHistories(tags, h, extractors, extractorsRare);
-    }
     return getExactHistories(h, extractors, extractorsRare);
   }
 
@@ -474,57 +471,29 @@ public class TestSentence implements SequenceModel  {
       int kf = e.first();
       Extractor ex = e.second();
       String val = ex.extract(h);
-      if (VERBOSE) { System.err.printf("%s extracted %s%n", ex, val); }
       int[] fAssociations = maxentTagger.fAssociations.get(kf).get(val);
       if (fAssociations != null) {
-        for (int j = 0; j < maxentTagger.ySize; j++) {
-          int fNum = fAssociations[j];
+        for (int i = 0; i < maxentTagger.ySize; i++) {
+          int fNum = fAssociations[i];
           if (fNum > -1) {
-            double score = maxentTagger.getLambdaSolve().lambda[fNum];
-            if (VERBOSE) {
-              System.err.printf("%s %s %d %s %s %f%n",
-                      ExtractorFrames.cWord.extract(h), maxentTagger.tags.getTag(j), kf, ex, val, score);
-            }
-            scores[j] += score;
-          } else {
-            if (VERBOSE) {
-              System.err.printf("%s %s %d %s %s %f%n",
-                      ExtractorFrames.cWord.extract(h), maxentTagger.tags.getTag(j), kf, ex, val, 0.0);
-            }
+            scores[i] += maxentTagger.getLambdaSolve().lambda[fNum];
           }
         }
-      } else if (VERBOSE) {
-        System.err.printf("%s %d %s NO EXTRACTED FEATURE-VALUE WEIGHTS%n",
-                ExtractorFrames.cWord.extract(h), kf, ex);
       }
     }
     if (extractorsRare != null) {
       for (Pair<Integer,Extractor> e : extractorsRare) {
         int kf = e.first();
         Extractor ex = e.second();
-        if (VERBOSE) { System.err.printf("%s%n", ex); }
         String val = ex.extract(h);
         int[] fAssociations = maxentTagger.fAssociations.get(kf+szCommon).get(val);
         if (fAssociations != null) {
-          for (int j = 0; j < maxentTagger.ySize; j++) {
-            int fNum = fAssociations[j];
+          for (int i = 0; i < maxentTagger.ySize; i++) {
+            int fNum = fAssociations[i];
             if (fNum > -1) {
-              double score = maxentTagger.getLambdaSolve().lambda[fNum];
-              if (VERBOSE) {
-                System.err.printf("%s %s %d %s %s %f%n",
-                        ExtractorFrames.cWord.extract(h), maxentTagger.tags.getTag(j), kf, ex, val, score);
-              }
-              scores[j] += score;
-            } else {
-              if (VERBOSE) {
-                System.err.printf("%s %s %d %s %s %f%n",
-                        ExtractorFrames.cWord.extract(h), maxentTagger.tags.getTag(j), kf, ex, val, 0.0);
-              }
+              scores[i] += maxentTagger.getLambdaSolve().lambda[fNum];
             }
           }
-        } else if (VERBOSE) {
-          System.err.printf("%s %d %s NO EXTRACTED FEATURE-VALUE WEIGHTS%n",
-                  ExtractorFrames.cWord.extract(h), kf, ex);
         }
       }
     }
@@ -538,7 +507,6 @@ public class TestSentence implements SequenceModel  {
 
     double[] scores = new double[tags.length];
     int szCommon = maxentTagger.extractors.size();
-    if (VERBOSE) { System.err.println("Calling approx histories"); }
 
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
@@ -551,17 +519,7 @@ public class TestSentence implements SequenceModel  {
           int tagIndex = maxentTagger.tags.getIndex(tag);
           int fNum = fAssociations[tagIndex];
           if (fNum > -1) {
-            double score = maxentTagger.getLambdaSolve().lambda[fNum];
-            if (VERBOSE) {
-              System.err.printf("%s %s %d %s %s %f%n",
-                      ExtractorFrames.cWord.extract(h), tag, kf, ex, val, score);
-            }
-            scores[j] += score;
-          } else {
-            if (VERBOSE) {
-              System.err.printf("%s %s %d %s %s %f%n",
-                      ExtractorFrames.cWord.extract(h), tag, kf, ex, val, 0.0);
-            }
+            scores[j] += maxentTagger.getLambdaSolve().lambda[fNum];
           }
         }
       }
@@ -578,17 +536,7 @@ public class TestSentence implements SequenceModel  {
             int tagIndex = maxentTagger.tags.getIndex(tag);
             int fNum = fAssociations[tagIndex];
             if (fNum > -1) {
-              double score = maxentTagger.getLambdaSolve().lambda[fNum];
-              if (VERBOSE) {
-                System.err.printf("%s %s %d %s %s %f%n",
-                        ExtractorFrames.cWord.extract(h), tag, kf, ex, val, score);
-              }
-              scores[j] += score;
-            } else {
-              if (VERBOSE) {
-                System.err.printf("%s %s %d %s %s %f%n",
-                        ExtractorFrames.cWord.extract(h), tag, kf, ex, val, 0.0);
-              }
+              scores[j] += maxentTagger.getLambdaSolve().lambda[fNum];
             }
           }
         }
@@ -783,7 +731,7 @@ public class TestSentence implements SequenceModel  {
   public double[] scoresOf(int[] tags, int pos) {
     if (DBG) {
       log.info("scoresOf(): length of tags is " + tags.length + "; position is " + pos + "; endSizePairs = " + endSizePairs + "; size is " + size + "; leftWindow is " + leftWindow());
-      log.info("  History h = new History(" + (endSizePairs - size) + ", " + (endSizePairs - 1) + ", " + (endSizePairs - size + pos - leftWindow()) + ')');
+      log.info("  History h = new History(" + (endSizePairs - size) + ", " + (endSizePairs - 1) + ", " + (endSizePairs - size + pos - leftWindow()) + ")");
     }
     history.init(endSizePairs - size, endSizePairs - 1, endSizePairs - size + pos - leftWindow());
     setHistory(pos, history, tags);

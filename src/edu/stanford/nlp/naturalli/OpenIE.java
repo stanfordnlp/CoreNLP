@@ -1,7 +1,5 @@
-package edu.stanford.nlp.naturalli;
-
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-import edu.stanford.nlp.coref.data.CorefChain;
+package edu.stanford.nlp.naturalli; 
+import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
@@ -22,7 +20,6 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,24 +31,39 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+
+import edu.stanford.nlp.coref.data.CorefChain;
 
 /**
+ * <p>
  * An OpenIE system based on valid Natural Logic deletions of a sentence.
  * The system is described in:
+ * </p>
  *
- * "Leveraging Linguistic Structure For Open Domain Information Extraction." Gabor Angeli, Melvin Johnson Premkumar, Christopher Manning. ACL 2015.
+ * <pre>
+ *   "Leveraging Linguistic Structure For Open Domain Information Extraction." Gabor Angeli, Melvin Johnson Premkumar, Christopher Manning. ACL 2015.
+ * </pre>
  *
+ * <p>
  * The paper can be found at <a href="http://nlp.stanford.edu/pubs/2015angeli-openie.pdf">http://nlp.stanford.edu/pubs/2015angeli-openie.pdf</a>.
- *
+ * </p>
+
+ * <p>
  * Documentation on the system can be found on
- * <a href="https://nlp.stanford.edu/software/openie.html">the project homepage</a>,
+ * <a href="http://nlp.stanford.edu/software/openie.shtml">the project homepage</a>,
  * or the <a href="http://stanfordnlp.github.io/CoreNLP/openie.html">CoreNLP annotator documentation page</a>.
  * The simplest invocation of the system would be something like:
+ * </p>
  *
- * {@code java -mx1g -cp stanford-openie.jar:stanford-openie-models.jar edu.stanford.nlp.naturalli.OpenIE }
+ * <pre>
+ * java -mx1g -cp stanford-openie.jar:stanford-openie-models.jar edu.stanford.nlp.naturalli.OpenIE
+ * </pre>
  *
- * Note that this class serves both as an entry point for the OpenIE system, but also as a CoreNLP annotator
- * which can be plugged into the CoreNLP pipeline (or any other annotation pipeline).
+ * <p>
+ *   Note that this class serves both as an entry point for the OpenIE system, but also as a CoreNLP annotator
+ *   which can be plugged into the CoreNLP pipeline (or any other annotation pipeline).
+ * </p>
  *
  * @see OpenIE#annotate(Annotation)
  * @see OpenIE#main(String[])
@@ -65,14 +77,14 @@ import java.util.stream.Collectors;
 public class OpenIE implements Annotator  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(OpenIE.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(OpenIE.class);
 
   private enum OutputFormat { REVERB, OLLIE, DEFAULT, QA_SRL }
 
   /**
    * A pattern for rewriting "NN_1 is a JJ NN_2" --> NN_1 is JJ"
    */
-  private static final SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/an?/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
+  private static SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/an?/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
 
   //
   // Static Options (for running standalone)
@@ -163,14 +175,15 @@ public class OpenIE implements Annotator  {
 
   /**
    * Create a ne OpenIE system, based on the given properties.
-   *
    * @param props The properties to parametrize the system with.
    */
   public OpenIE(Properties props) {
     // Fill the properties
     ArgumentParser.fillOptions(this, props);
     Properties withoutOpenIEPrefix = new Properties();
-    for (String key : props.stringPropertyNames()) {
+    Enumeration<Object> keys = props.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement().toString();
       withoutOpenIEPrefix.setProperty(key.replace("openie.", ""), props.getProperty(key));
     }
     ArgumentParser.fillOptions(this, withoutOpenIEPrefix);
@@ -432,10 +445,13 @@ public class OpenIE implements Annotator  {
   }
 
   /**
+   * <p>
    *   Annotate a single sentence.
-   *
+   * </p>
+   * <p>
    *   This annotator will, in particular, set the {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.EntailedSentencesAnnotation}
    *   and {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.RelationTriplesAnnotation} annotations.
+   * </p>
    */
   @SuppressWarnings("unchecked")
   public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
@@ -492,8 +508,10 @@ public class OpenIE implements Annotator  {
   /**
    * {@inheritDoc}
    *
-   *  This annotator will, in particular, set the {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.EntailedSentencesAnnotation}
-   *  and {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.RelationTriplesAnnotation} annotations.
+   * <p>
+   *   This annotator will, in particular, set the {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.EntailedSentencesAnnotation}
+   *   and {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.RelationTriplesAnnotation} annotations.
+   * </p>
    */
   @Override
   public void annotate(Annotation annotation) {
@@ -614,7 +632,7 @@ public class OpenIE implements Annotator  {
       case REVERB:
         return extraction.toReverbString(docid, sentence);
       case OLLIE:
-        return extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ')';
+        return extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")";
       case DEFAULT:
         return extraction.toString();
       case QA_SRL:
@@ -627,7 +645,6 @@ public class OpenIE implements Annotator  {
 
   /**
    * Process a single file or line of standard in.
-   *
    * @param pipeline The annotation pipeline to run the lines of the input through.
    * @param docid The docid of the document we are extracting.
    * @param document the document to annotate.
@@ -635,7 +652,7 @@ public class OpenIE implements Annotator  {
   @SuppressWarnings("SynchronizeOnNonFinalField")
   private static void processDocument(AnnotationPipeline pipeline, String docid, String document) {
     // Error checks
-    if (document.trim().isEmpty()) {
+    if (document.trim().equals("")) {
       return;
     }
 
@@ -701,7 +718,7 @@ public class OpenIE implements Annotator  {
       if (!"false".equalsIgnoreCase(props.getProperty("resolve_coref", props.getProperty("openie.resolve_coref", "false")))) {
         props.setProperty("coref.md.type", "dep");  // so we don't need the `parse` annotator
         props.setProperty("coref.mode", "statistical");  // explicitly ask for scoref
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,coref,natlog,openie");
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,mention,coref,natlog,openie");
       } else {
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
       }
@@ -760,7 +777,7 @@ public class OpenIE implements Annotator  {
       // This will prevent a nasty surprise 10 hours into a running job...
       for (String file : filesToProcess) {
         if (!new File(file).exists() || !new File(file).canRead()) {
-          log.error("Cannot read file (or file does not exist: '" + file + '\'');
+          log.error("Cannot read file (or file does not exist: '" + file + "'");
         }
       }
       // Actually process the files.
@@ -791,5 +808,4 @@ public class OpenIE implements Annotator  {
     log.info("DONE processing files. " + exceptionCount.get() + " exceptions encountered.");
     System.exit(exceptionCount.get());
   }
-
 }

@@ -1,11 +1,10 @@
 package edu.stanford.nlp.parser.nndep;
+import edu.stanford.nlp.util.logging.Redwood;
 
-import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,12 +16,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 /**
- * Neural network classifier which powers a transition-based dependency parser.
+ * Neural network classifier which powers a transition-based dependency
+ * parser.
  *
  * This classifier is built to accept distributed-representation
  * inputs, and feeds back errors to these input layers as it learns.
  *
- * <p>
  * In order to train a classifier, instantiate this class using the
  * {@link #Classifier(Config, Dataset, double[][], double[][], double[], double[][], java.util.List)}
  * constructor. (The presence of a non-null dataset signals that we
@@ -38,7 +37,7 @@ import java.util.stream.IntStream;
 public class Classifier  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(Classifier.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(Classifier.class);
   // E: numFeatures x embeddingSize
   // W1: hiddenSize x (embeddingSize x numFeatures)
   // b1: hiddenSize
@@ -381,10 +380,10 @@ public class Classifier  {
       this.cost += otherCost.getCost();
       this.percentCorrect += otherCost.getPercentCorrect();
 
-      ArrayMath.addInPlace(gradW1, otherCost.getGradW1());
-      ArrayMath.pairwiseAddInPlace(gradb1, otherCost.getGradb1());
-      ArrayMath.addInPlace(gradW2, otherCost.getGradW2());
-      ArrayMath.addInPlace(gradE, otherCost.getGradE());
+      addInPlace(gradW1, otherCost.getGradW1());
+      addInPlace(gradb1, otherCost.getGradb1());
+      addInPlace(gradW2, otherCost.getGradW2());
+      addInPlace(gradE, otherCost.getGradE());
     }
 
     /**
@@ -486,7 +485,7 @@ public class Classifier  {
     }
 
     double percentagePreComputed = featureIDs.size() / (float) config.numPreComputed;
-    log.info(String.format("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100));
+    System.err.printf("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100);
 
     return featureIDs;
   }
@@ -660,19 +659,18 @@ public class Classifier  {
     // actually hurt training performance! (See experiments with
     // "smallMap.")
     saved = new double[preMap.size()][config.hiddenSize];
-    final int numTokens = config.numTokens;
-    final int embeddingSize = config.embeddingSize;
 
     for (int x : toPreCompute) {
       int mapX = preMap.get(x);
-      int tok = x / numTokens;
-      int pos = x % numTokens;
-      matrixMultiplySliceSum(saved[mapX], W1, E[tok], pos * embeddingSize);
+      int tok = x / config.numTokens;
+      int pos = x % config.numTokens;
+      for (int j = 0; j < config.hiddenSize; ++j)
+        for (int k = 0; k < config.embeddingSize; ++k)
+          saved[mapX][j] += W1[j][pos * config.embeddingSize + k] * E[tok][k];
     }
-    log.info("PreComputed " + toPreCompute.size() + ", Elapsed Time: " +
-            (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+    log.info("PreComputed " + toPreCompute.size() + ", Elapsed Time: " + (System
+        .currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
-
 
   double[] computeScores(int[] feature) {
     return computeScores(feature, preMap);
@@ -683,51 +681,35 @@ public class Classifier  {
    * values of the output layer.
    */
   private double[] computeScores(int[] feature, Map<Integer, Integer> preMap) {
-    final double[] hidden = new double[config.hiddenSize];
-    final int numTokens = config.numTokens;
-    final int embeddingSize = config.embeddingSize;
-
+    double[] hidden = new double[config.hiddenSize];
     int offset = 0;
-    for (int j = 0; j < feature.length; j++) {
+    for (int j = 0; j < feature.length; ++j) {
       int tok = feature[j];
-      int index = tok * numTokens + j;
-      Integer idInteger = preMap.get(index);
-      if (idInteger != null) {
-        ArrayMath.pairwiseAddInPlace(hidden, saved[idInteger]);
+      int index = tok * config.numTokens + j;
+
+      if (preMap.containsKey(index)) {
+        int id = preMap.get(index);
+        for (int i = 0; i < config.hiddenSize; ++i)
+          hidden[i] += saved[id][i];
       } else {
-        matrixMultiplySliceSum(hidden, W1, E[tok], offset);
+        for (int i = 0; i < config.hiddenSize; ++i)
+          for (int k = 0; k < config.embeddingSize; ++k)
+            hidden[i] += W1[i][offset + k] * E[tok][k];
       }
-      offset += embeddingSize;
+      offset += config.embeddingSize;
     }
-    addCubeInPlace(hidden, b1);
-    return matrixMultiply(W2, hidden);
-  }
 
-  // extracting these small methods makes things faster; hotspot likes them
-
-  private static double[] matrixMultiply(double[][] matrix, double[] vector) {
-    double[] result = new double[matrix.length];
-    for (int i = 0; i < matrix.length; i++) {
-      result[i] = ArrayMath.dotProduct(matrix[i], vector);
+    for (int i = 0; i < config.hiddenSize; ++i) {
+      hidden[i] += b1[i];
+      hidden[i] = hidden[i] * hidden[i] * hidden[i];  // cube nonlinearity
     }
-    return result;
-  }
 
-  private static void matrixMultiplySliceSum(double[] sum, double[][] matrix, double[] vector, int leftColumnOffset) {
-    for (int i = 0; i < matrix.length; i++) {
-      for (int j = 0; j < vector.length; j++) {
-        sum[i] += matrix[i][leftColumnOffset + j] * vector[j];
-      }
-    }
+    double[] scores = new double[numLabels];
+    for (int i = 0; i < numLabels; ++i)
+      for (int j = 0; j < config.hiddenSize; ++j)
+        scores[i] += W2[i][j] * hidden[j];
+    return scores;
   }
-
-  private static void addCubeInPlace(double[] vector, double [] bias) {
-    for (int i = 0; i < vector.length; i++) {
-      vector[i] += bias[i]; // add bias
-      vector[i] = vector[i] * vector[i] * vector[i];  // cube nonlinearity
-    }
-  }
-
 
   public double[][] getW1() {
     return W1;
@@ -745,4 +727,26 @@ public class Classifier  {
     return E;
   }
 
+  /**
+   * Add the two 2d arrays in place of {@code m1}.
+   *
+   * @throws java.lang.IndexOutOfBoundsException (possibly) If
+   *                                             {@code m1} and {@code m2} are not of the same dimensions
+   */
+  private static void addInPlace(double[][] m1, double[][] m2) {
+    for (int i = 0; i < m1.length; i++)
+      for (int j = 0; j < m1[0].length; j++)
+        m1[i][j] += m2[i][j];
+  }
+
+  /**
+   * Add the two 1d arrays in place of {@code a1}.
+   *
+   * @throws java.lang.IndexOutOfBoundsException (Possibly) if
+   *                                             {@code a1} and {@code a2} are not of the same dimensions
+   */
+  private static void addInPlace(double[] a1, double[] a2) {
+    for (int i = 0; i < a1.length; i++)
+      a1[i] += a2[i];
+  }
 }

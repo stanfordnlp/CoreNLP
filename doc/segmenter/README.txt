@@ -1,4 +1,4 @@
-The Stanford segmenter distribution includes tools for segmenting
+The Stanford swgmenter distribution includes tools for segmenting
 Chinese and Arabic text.  See README-Chinese.txt and README-Arabic.txt
 for more details.
 
@@ -17,12 +17,13 @@ LICENSE
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see http://www.gnu.org/licenses/ .
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
  For more information, bug reports, fixes, contact:
     Christopher Manning
-    Dept of Computer Science, Gates 2A
-    Stanford CA 94305-9020
+    Dept of Computer Science, Gates 1A
+    Stanford CA 94305-9010
     USA
     manning@cs.stanford.edu
 
@@ -30,10 +31,6 @@ LICENSE
 ------------------------------------
 CHANGES
 ------------------------------------
-
-2018-10-16    3.9.2     Update for compatibility 
-
-2018-02-27    3.9.1     Updated for compatibility 
 
 2016-10-31    3.7.0     Update for compatibility 
 

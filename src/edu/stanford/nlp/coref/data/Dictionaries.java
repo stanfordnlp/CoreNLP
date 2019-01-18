@@ -1,4 +1,6 @@
 package edu.stanford.nlp.coref.data;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,20 +24,16 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
-
 
 /**
  * Stores various data used for coreference.
  * TODO: get rid of dependence on HybridCorefProperties
- *
  * @author Heeyoung Lee
  */
 public class Dictionaries  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(Dictionaries.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(Dictionaries.class);
 
   public enum MentionType {
     PRONOMINAL(1), NOMINAL(3), PROPER(4), LIST(2);
@@ -220,7 +218,9 @@ public class Dictionaries  {
   public Counter<String> dictScore = new ClassicCounter<>();
 
   private void setPronouns() {
-    personPronouns.addAll(animatePronouns);
+    for(String s: animatePronouns){
+      personPronouns.add(s);
+    }
 
     allPronouns.addAll(firstPersonPronouns);
     allPronouns.addAll(secondPersonPronouns);
@@ -235,7 +235,7 @@ public class Dictionaries  {
    *  The file is cased and checked cased.
    *  The result is: statesAbbreviation is a hash from each abbrev to the fullStateName.
    */
-  private void loadStateAbbreviation(String statesFile) {
+  public void loadStateAbbreviation(String statesFile) {
     BufferedReader reader = null;
     try {
       reader = IOUtils.readerFromString(statesFile);
@@ -272,7 +272,9 @@ public class Dictionaries  {
    *  demonymSet has all country (etc.) names and all demonymic Strings.
    */
   private void loadDemonymLists(String demonymFile) {
-    try (BufferedReader reader = IOUtils.readerFromString(demonymFile)) {
+    BufferedReader reader = null;
+    try {
+      reader = IOUtils.readerFromString(demonymFile);
       for (String line; (line = reader.readLine()) != null; ) {
         line = line.toLowerCase(Locale.ENGLISH);
         String[] tokens = line.split("\t");
@@ -288,6 +290,8 @@ public class Dictionaries  {
       adjectiveNation.removeAll(demonyms.keySet());
     } catch (IOException e) {
       throw new RuntimeIOException(e);
+    } finally {
+      IOUtils.closeIgnoringExceptions(reader);
     }
   }
 
@@ -318,12 +322,12 @@ public class Dictionaries  {
     if(filename==null) {
       return ;
     }
-    try (BufferedReader reader = IOUtils.readerFromString(filename)) {
-      while(reader.ready()) {
-        if(lowercase) resultSet.add(reader.readLine().toLowerCase());
-        else resultSet.add(reader.readLine());
-      }
+    BufferedReader reader = IOUtils.readerFromString(filename);
+    while(reader.ready()) {
+      if(lowercase) resultSet.add(reader.readLine().toLowerCase());
+      else resultSet.add(reader.readLine());
     }
+    IOUtils.closeIgnoringExceptions(reader);
   }
 
   private void loadAnimacyLists(String animateWordsFile, String inanimateWordsFile) {
@@ -362,15 +366,16 @@ public class Dictionaries  {
   }
 
   private void loadCountriesLists(String file) {
-    try (BufferedReader reader = IOUtils.readerFromString(file)) {
+    try{
+      BufferedReader reader = IOUtils.readerFromString(file);
       for (String line; (line = reader.readLine()) != null; ) {
         countries.add(line.split("\t")[1].toLowerCase());
       }
+      reader.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
   }
-
   /**
    * Load Bergsma and Lin (2006) gender and number list.
    * <br>
@@ -391,14 +396,14 @@ public class Dictionaries  {
     }
   }
 */
-
   /**
    * Load Bergsma and Lin (2006) gender and number list.
    *
    */
   private void loadGenderNumber(String file, String neutralWordsFile) {
-    try (BufferedReader reader = IOUtils.readerFromString(file)) {
+    try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
+      BufferedReader reader = IOUtils.readerFromString(file);
       String[] split = new String[2];
       String[] countStr = new String[3];
       for (String line; (line = reader.readLine()) != null; ) {
@@ -427,15 +432,15 @@ public class Dictionaries  {
 
         genderNumber.put(tokens, gender);
       }
+      reader.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
   }
-
-  private void loadChineseGenderNumberAnimacy(String file) {
+  public void loadChineseGenderNumberAnimacy(String file) {
     String[] split = new String[8];
     for (String line : IOUtils.readLines(file)) {
-      if (line.startsWith("#WORD")) continue;    // ignore first row
+      if(line.startsWith("#WORD")) continue;    // ignore first row
       StringUtils.splitOnChar(split, line, '\t');
 
       String word = split[0];

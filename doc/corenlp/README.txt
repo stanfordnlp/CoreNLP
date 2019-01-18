@@ -8,7 +8,7 @@ DOCUMENTATION
 
 Please look at the URL below for documentation for Stanford CoreNLP:
 
-  https://nlp.stanford.edu/software/corenlp.html
+  http://nlp.stanford.edu/software/corenlp.shtml
 
 LICENSE
 
@@ -28,12 +28,13 @@ LICENSE
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/ .
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 2A
-//    Stanford CA 94305-9020
+//    Dept of Computer Science, Gates 1A
+//    Stanford CA 94305-9010
 //    USA
 //
 
@@ -41,41 +42,27 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2018-10-05    3.9.2     improved NER pipeline and entity mention 
-                        confidences; support for Java 11; new POS 
-                        models for English; 4 methods for setting 
-                        document dates; tokenizer improvements; 
-                        CoreNLP runs as filter from stdin to stdout; 
-                        bug fixes 
+2017-06-09    3.8.0     Web service annotator, discussion forum 
+                        handling, new French and Spanish models 
 
-2018-02-27    3.9.1     Bug fixes, minor enhancements 
+2016-10-31    3.7.0     KBP Annotator, improved coreference, Arabic 
+                        pipeline 
 
-2018-01-31    3.9.0     Spanish KBP and new dependency parse model, 
-                        wrapper API for data, quote attribution 
-                        improvements, easier use of coref info, bug 
-                        fixes 
+2015-12-09    3.6.0     Improved coreference, OpenIE integration, 
+                        Stanford CoreNLP server 
 
-2017-06-09    3.8.0     Web service annotator, discussion forum
-                        handling, new French and Spanish models
+2015-04-20    3.5.2     Switch to Universal dependencies, add Chinese 
+                        coreference system to CoreNLP 
 
-2016-10-31    3.7.0     KBP Annotator, improved coreference, Arabic
-                        pipeline
+2015-01-29    3.5.1     NER, dependency parser, SPIED improvements; 
+                        general bugfixes 
 
-2015-12-09    3.6.0     Improved coreference, OpenIE integration,
-                        Stanford CoreNLP server
+2014-10-26    3.5.0     Upgrade to Java 1.8; add annotators for 
+                        dependency parsing and relation extraction 
 
-2015-04-20    3.5.2     Switch to Universal dependencies, add Chinese
-                        coreference system to CoreNLP
+2014-08-27    3.4.1     Add Spanish models 
 
-2015-01-29    3.5.1     NER, dependency parser, SPIED improvements;
-                        general bugfixes
-
-2014-10-26    3.5.0     Upgrade to Java 1.8; add annotators for
-                        dependency parsing and relation extraction
-
-2014-08-27    3.4.1     Add Spanish models
-
-2014-06-16      3.4     Add shift reduce parser
+2014-06-16      3.4     Add shift reduce parser 
 
 2014-01-04    3.3.1     Bugfix release
 

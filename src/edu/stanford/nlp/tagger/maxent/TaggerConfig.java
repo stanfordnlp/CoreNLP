@@ -145,9 +145,11 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
         name = props.getProperty("dump");
       }
       if (name != null) {
-        try (DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name))) {
+        try {
           log.info("Loading default properties from tagger " + name);
+          DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name));
           this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
+          in.close();
         } catch (Exception e) {
           throw new RuntimeIOException("No such trained tagger config file found: " + name);
         }
@@ -412,9 +414,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
    */
   public double getDefaultScore() {
     String approx = getProperty("approximate");
-    if (approx == null) {
-      return getLang().equals("english") ? 1.0 : 0.0;
-    } else if ("false".equalsIgnoreCase(approx)) {
+    if ("false".equalsIgnoreCase(approx)) {
       return -1.0;
     } else if ("true".equalsIgnoreCase(approx)) {
       return 1.0;

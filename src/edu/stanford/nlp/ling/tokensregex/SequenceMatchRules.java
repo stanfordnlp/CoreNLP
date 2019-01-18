@@ -15,27 +15,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Rules for matching sequences using regular expressions.
+ * Rules for matching sequences using regular expressions
  * <p>
  * There are 2 types of rules:
- *
  * <ol>
  * <li><b>Assignment rules</b> which assign a value to a variable for later use.
  * </li>
  * <li><b>Extraction rules</b> which specifies how regular expression patterns are to be matched against text,
  *   which matched text expressions are to extracted, and what value to assign to the matched expression.</li>
  * </ol>
+ * </p>
  *
- * NOTE: {@code #} or {@code //} can be used to indicates one-line comments.
- * <p>
- * <b>Assignment Rules</b> are used to assign values to variables.
- *     The basic format is: {@code variable = value}.
+ * NOTE: {@code #} or {@code //} can be used to indicates one-line comments
+ *
+ * <p><b>Assignment Rules</b> are used to assign values to variables.
+ *     The basic format is: {@code variable = value}
+ * </p>
  * <p>
  * <em>Variable Names</em>:
  *   <ul>
  *     <li>Variable names should follow the pattern [A-Za-z_][A-Za-z0-9_]*</li>
  *     <li>Variable names for use in regular expressions (to be expanded later) must start with {@code $}</li>
  *   </ul>
+ * </p>
  * <p>
  * <em>Value Types</em>:
  * <table>
@@ -52,6 +54,7 @@ import java.util.regex.Pattern;
  *   <tr><td>{@code LIST}</td><td>{@code ( [item1] , [item2], ... )}</td><td>{@code ("red", "blue", "yellow" )}</td>
  *       <td></td></tr>
  * </table>
+ * </p>
  * <p>
  * Some typical uses and examples for assignment rules include:
  * <ol>
@@ -81,7 +84,8 @@ import java.util.regex.Pattern;
  *  </li>
  *  <li>Defining options</li>
  * </ol>
- * <p>
+ * </p>
+ *
  * Predefined values are:
  * <table>
  *   <tr><th>Variable</th><th>Type</th><th>Description</th></tr>
@@ -91,22 +95,21 @@ import java.util.regex.Pattern;
  *   <tr><td>{@code NIL}</td><td>{@code}</td><td>The {@code null} value.</td></tr>
  *   <tr><td>{@code tags}</td><td>{@code Class}</td><td>The annotation key {@link edu.stanford.nlp.ling.tokensregex.types.Tags.TagsAnnotation}.</td></tr>
  * </table>
- *
- * <p>
- * <b>Extraction Rules</b> specifies how regular expression patterns are to be matched against text.
+ * </p>
+
+ * <p><b>Extraction Rules</b> specifies how regular expression patterns are to be matched against text.
  * See {@link CoreMapExpressionExtractor} for more information on the types of the rules, and in what sequence the rules are applied.
  * A basic rule can be specified using the following template:
- * <pre>
- *   {
- *     # Type of the rule
- *     ruleType: "tokens" | "text" | "composite" | "filter",
- *     # Pattern to match against
- *     pattern: ( &lt;TokenSequencePattern&gt; ) | /&lt;TextPattern&gt;/,
- *     # Resulting value to go into the resulting annotation
- *     result: ...
+ * <pre>{
+ *        # Type of the rule
+ *        ruleType: "tokens" | "text" | "composite" | "filter",
+ *        # Pattern to match against
+ *        pattern: ( &lt;TokenSequencePattern&gt; ) | /&lt;TextPattern&gt;/,
+ *        # Resulting value to go into the resulting annotation
+ *        result: ...
  *
- *     # More fields following...
- *   }
+ *        # More fields following...
+ *      }
  * </pre>
  * Example:
  * <pre>
@@ -116,8 +119,7 @@ import java.util.regex.Pattern;
  *     result: 1
  *   }
  * </pre>
- *
- * <p>
+ * </p>
  * Extraction rule fields (most fields are optional):
  * <table>
  *   <tr><th>Field</th><th>Values</th><th>Example</th><th>Description</th></tr>
@@ -161,17 +163,15 @@ public class SequenceMatchRules {
 
   private SequenceMatchRules() { } // static class with inner classes
 
-
-  /** A sequence match rule. */
+  /** A sequence match rule */
   public interface Rule {
   }
 
-
   /**
-   * Rule that specifies what value to assign to a variable.
+   * Rule that specifies what value to assign to a variable
    */
   public static class AssignmentRule implements Rule {
-    final Expression expr;
+    Expression expr;
 
     public AssignmentRule(AssignableExpression varExpr, Expression value) {
       expr = varExpr.assign(value);
@@ -182,10 +182,8 @@ public class SequenceMatchRules {
     }
   }
 
-
   /**
    * Rule that specifies how to extract sequence of MatchedExpression from an annotation (CoreMap).
-   *
    * @param <T> Output type (MatchedExpression)
    */
   public static class AnnotationExtractRule<S, T extends MatchedExpression> implements Rule, ExtractRule<S,T>, Predicate<T>, Serializable {
@@ -395,7 +393,6 @@ public class SequenceMatchRules {
     return MULTI_TOKEN_PATTERN_EXTRACT_RULE_CREATOR.create(env, template, patterns);
   }
 
-
   public static class AnnotationExtractRuleCreator {
     public AnnotationExtractRule create(Env env) {
       AnnotationExtractRule r = new AnnotationExtractRule();
@@ -418,7 +415,6 @@ public class SequenceMatchRules {
       return r;
     }
   }
-
 
   public static MatchedExpression.SingleAnnotationExtractor createAnnotationExtractor(Env env, AnnotationExtractRule r) {
     MatchedExpression.SingleAnnotationExtractor extractor = new MatchedExpression.SingleAnnotationExtractor();
@@ -507,7 +503,8 @@ public class SequenceMatchRules {
                                      Env env,
                                      SequencePattern.PatternExpr expr,
                                      Expression action,
-                                     Expression result) {
+                                     Expression result)
+    {
       TokenSequencePattern pattern = TokenSequencePattern.compile(expr);
       updateExtractRule(r, env, pattern, action, result);
     }
@@ -674,12 +671,9 @@ public class SequenceMatchRules {
     }
   }
 
-
   public static class AnnotationMatchedFilter implements Predicate<MatchedExpression>, Serializable {
 
-    private static final long serialVersionUID = -2085736376364259354L;
-
-    final MatchedExpression.SingleAnnotationExtractor extractor;
+    MatchedExpression.SingleAnnotationExtractor extractor;
 
     public AnnotationMatchedFilter(MatchedExpression.SingleAnnotationExtractor extractor) {
       this.extractor = extractor;
@@ -703,11 +697,10 @@ public class SequenceMatchRules {
     }
   }
 
-
   public static class StringMatchResultExtractor implements Function<MatchResult,Value> {
-    final Env env;
-    final Expression action;
-    final Expression result;
+    Env env;
+    Expression action;
+    Expression result;
 
     public StringMatchResultExtractor(Env env, Expression action, Expression result) {
       this.env = env;
@@ -716,7 +709,8 @@ public class SequenceMatchRules {
     }
 
     public StringMatchResultExtractor(Env env, Expression result) {
-      this(env, null, result);
+      this.env = env;
+      this.result = result;
     }
 
     @Override
@@ -732,11 +726,10 @@ public class SequenceMatchRules {
     }
   }
 
-
   public static class SequenceMatchResultExtractor<T> implements Function<SequenceMatchResult<T>,Value> {
-    final Env env;
-    final Expression action;
-    final Expression result;
+    Env env;
+    Expression action;
+    Expression result;
 
     public SequenceMatchResultExtractor(Env env, Expression action, Expression result) {
       this.env = env;
@@ -745,7 +738,8 @@ public class SequenceMatchRules {
     }
 
     public SequenceMatchResultExtractor(Env env, Expression result) {
-      this(env, null, result);
+      this.env = env;
+      this.result = result;
     }
 
     @Override
@@ -761,7 +755,6 @@ public class SequenceMatchRules {
     }
   }
 
-
   /**
    * Interface for a rule that extracts a list of matched items from an input.
    *
@@ -774,17 +767,15 @@ public class SequenceMatchRules {
 
   }
 
-
   /**
-   * Extraction rule that filters the input before passing it on to the next extractor.
-   *
+   * Extraction rule that filters the input before passing it on to the next extractor
    * @param <I> input type
    * @param <O> output type
    */
   public static class FilterExtractRule<I,O> implements ExtractRule<I,O> {
 
-    final Predicate<I> filter;
-    final ExtractRule<I,O> rule;
+    Predicate<I> filter;
+    ExtractRule<I,O> rule;
 
     public FilterExtractRule(Predicate<I> filter, ExtractRule<I,O> rule) {
       this.filter = filter;
@@ -807,7 +798,6 @@ public class SequenceMatchRules {
     }
   }
 
-
   /**
    * Extraction rule that applies a list of rules in sequence and aggregates
    * all matches found.
@@ -817,7 +807,7 @@ public class SequenceMatchRules {
    */
   public static class ListExtractRule<I,O> implements ExtractRule<I,O> {
 
-    final List<ExtractRule<I,O>> rules;
+    List<ExtractRule<I,O>> rules;
 
     public ListExtractRule(Collection<ExtractRule<I,O>> rules) {
       this.rules = new ArrayList<>(rules);
@@ -854,7 +844,7 @@ public class SequenceMatchRules {
       for (ExtractRule rule: rules) {
         if (rule instanceof AnnotationExtractRule) {
           AnnotationExtractRule aer = (AnnotationExtractRule) rule;
-          String ruleString; // initialized below
+          String ruleString = null;
           if (aer.pattern != null) {
             ruleString = aer.pattern.toString();
           } else if (aer.extractRule != null) {
@@ -873,24 +863,22 @@ public class SequenceMatchRules {
     }
 
     public String toString() {
-      return "ListExtractRule[" + ruleList() + ']';
+      return "ListExtractRule[" + ruleList() + "]";
     }
 
   }
 
-
   /**
-   * Extraction rule to apply a extraction rule on a particular CoreMap field.
+   * Extraction rule to apply a extraction rule on a particular CoreMap field
    * Input is of type CoreMap, output is templated type O.
-   *
    * @param <T> type of the annotation field
    * @param <O> output type
    */
-  public static class CoreMapExtractRule<T,O> implements ExtractRule<CoreMap, O> {
-
-    final Env env;
-    final Class annotationField;
-    final ExtractRule<T,O> extractRule;
+  public static class CoreMapExtractRule<T,O> implements ExtractRule<CoreMap, O>
+  {
+    Env env;
+    Class annotationField;
+    ExtractRule<T,O> extractRule;
 
     public CoreMapExtractRule(Env env, Class annotationField, ExtractRule<T,O> extractRule) {
       this.annotationField = annotationField;
@@ -901,25 +889,23 @@ public class SequenceMatchRules {
     @Override
     public boolean extract(CoreMap cm, List<O> out) {
       env.push(Expressions.VAR_SELF, cm);
-      try {
-        T field = (T) cm.get(annotationField);
-        return extractRule.extract(field, out);
-      } finally {
-        env.pop(Expressions.VAR_SELF);
-      }
+      T field = (T) cm.get(annotationField);
+      boolean res = extractRule.extract(field, out);
+      env.pop(Expressions.VAR_SELF);
+      return res;
     }
+
   }
 
-
   /**
-   * Extraction rule that treats a single CoreMap as a list/sequence of CoreMaps.
-   * (A convenience class, for use with BasicSequenceExtractRule.)
+   * Extraction rule that treats a single CoreMap as a list/sequence of CoreMaps
+   * (convenience class, for use with BasicSequenceExtractRule)
    * Input is of type CoreMap, output is templated type O.
-   *
    * @param <O> output type
    */
-  public static class CoreMapToListExtractRule<O> implements ExtractRule<CoreMap, O> {
-    final ExtractRule<List<? extends CoreMap>,O> extractRule;
+  public static class CoreMapToListExtractRule<O> implements ExtractRule<CoreMap, O>
+  {
+    ExtractRule<List<? extends CoreMap>,O> extractRule;
 
     public CoreMapToListExtractRule(ExtractRule<List<? extends CoreMap>,O> extractRule) {
       this.extractRule = extractRule;
@@ -931,14 +917,13 @@ public class SequenceMatchRules {
     }
   }
 
-
   /**
    * Extraction rule.
    * Input is of type CoreMap, output is MatchedExpression.
    */
-  public static class BasicSequenceExtractRule implements ExtractRule< List<? extends CoreMap>, MatchedExpression> {
-
-    final MatchedExpression.SingleAnnotationExtractor extractor;
+  public static class BasicSequenceExtractRule implements ExtractRule< List<? extends CoreMap>, MatchedExpression>
+  {
+    MatchedExpression.SingleAnnotationExtractor extractor;
 
     public BasicSequenceExtractRule(MatchedExpression.SingleAnnotationExtractor extractor) {
       this.extractor = extractor;
@@ -963,17 +948,19 @@ public class SequenceMatchRules {
 
   public static class SequencePatternExtractRule<T,O> implements ExtractRule< List<? extends T>, O>, Function<List<? extends T>, O> {
 
-    final SequencePattern<T> pattern;
-    final Function<SequenceMatchResult<T>, O> extractor;
-    final SequenceMatcher.FindType findType;
-    final boolean matchWithResult;
+    SequencePattern<T> pattern;
+    Function<SequenceMatchResult<T>, O> extractor;
+    SequenceMatcher.FindType findType = null;
+    boolean matchWithResult = false;
 
     public SequencePatternExtractRule(Env env, String regex, Function<SequenceMatchResult<T>, O> extractor) {
-      this(SequencePattern.compile(env, regex), extractor);
+      this.extractor = extractor;
+      this.pattern = SequencePattern.compile(env, regex);
     }
 
     public SequencePatternExtractRule(SequencePattern<T> p, Function<SequenceMatchResult<T>, O> extractor) {
-      this(p, extractor, null, false);
+      this.extractor = extractor;
+      this.pattern = p;
     }
 
     public SequencePatternExtractRule(SequencePattern<T> p, Function<SequenceMatchResult<T>, O> extractor,
@@ -1013,13 +1000,12 @@ public class SequenceMatchRules {
       }
     }
 
-  } // end static class SequencePatternExtractRule
+  } // end static class
 
 
   public static class MultiSequencePatternExtractRule<T,O> implements ExtractRule< List<? extends T>, O>, Function<List<? extends T>, O> {
-
-    final MultiPatternMatcher<T> matcher;
-    final Function<SequenceMatchResult<T>, O> extractor;
+    MultiPatternMatcher<T> matcher;
+    Function<SequenceMatchResult<T>, O> extractor;
 
     public MultiSequencePatternExtractRule(MultiPatternMatcher<T> matcher, Function<SequenceMatchResult<T>, O> extractor) {
       this.extractor = extractor;
@@ -1042,7 +1028,7 @@ public class SequenceMatchRules {
     public O apply(List<? extends T> seq) {
       if (seq == null) return null;
       List<SequenceMatchResult<T>> matched = matcher.findNonOverlappingMaxScore(seq);
-      if ( ! matched.isEmpty()) {
+      if (matched.size() > 0) {
         return extractor.apply(matched.get(0));
       } else {
         return null;
@@ -1072,7 +1058,7 @@ public class SequenceMatchRules {
     public StringPatternExtractRule(Env env, String regex, Function<MatchResult, O> extractor,
                                     boolean addWordBoundaries) {
       this.extractor = extractor;
-      if (addWordBoundaries) { regex = "\\b(?:" + regex + ")\\b"; }
+      if (addWordBoundaries) { regex = "\\b" + regex + "\\b"; }
       if (env != null) {
         pattern = env.getStringPattern(regex);
       } else {
@@ -1106,11 +1092,10 @@ public class SequenceMatchRules {
 
   } // end static class StringPatternExtractRule
 
-
-  public static class StringMatchedExpressionExtractor implements Function<MatchResult, MatchedExpression> {
-
-    final MatchedExpression.SingleAnnotationExtractor extractor;
-    final int group;
+  public static class StringMatchedExpressionExtractor implements Function<MatchResult, MatchedExpression>
+  {
+    MatchedExpression.SingleAnnotationExtractor extractor;
+    int group = 0;
 
     public StringMatchedExpressionExtractor(MatchedExpression.SingleAnnotationExtractor extractor, int group) {
       this.extractor = extractor;
@@ -1124,17 +1109,15 @@ public class SequenceMatchRules {
     }
   }
 
-
-  public static class SequenceMatchedExpressionExtractor implements Function<SequenceMatchResult<CoreMap>, MatchedExpression> {
-
-    final MatchedExpression.SingleAnnotationExtractor extractor;
-    final int group;
+  public static class SequenceMatchedExpressionExtractor implements Function<SequenceMatchResult<CoreMap>, MatchedExpression>
+  {
+    MatchedExpression.SingleAnnotationExtractor extractor;
+    int group = 0;
 
     public SequenceMatchedExpressionExtractor(MatchedExpression.SingleAnnotationExtractor extractor, int group) {
       this.extractor = extractor;
       this.group = group;
     }
-
     @Override
     public MatchedExpression apply(SequenceMatchResult<CoreMap> matched) {
       MatchedExpression te = extractor.createMatchedExpression(null, Interval.toInterval(matched.start(group), matched.end(group), Interval.INTERVAL_OPEN_END));
@@ -1152,12 +1135,11 @@ public class SequenceMatchRules {
     }
   }
 
-
-  public static class CoreMapFunctionApplier<T,O> implements Function<CoreMap, O> {
-
-    final Env env;
-    final Class annotationField;
-    final Function<T,O> func;
+  public static class CoreMapFunctionApplier<T,O> implements Function<CoreMap, O>
+  {
+    Env env;
+    Class annotationField;
+    Function<T,O> func;
 
     public CoreMapFunctionApplier(Env env, Class annotationField, Function<T,O> func) {
       this.annotationField = annotationField;
@@ -1170,25 +1152,18 @@ public class SequenceMatchRules {
 
     @Override
     public O apply(CoreMap cm) {
-      if (env != null) {
-        env.push(Expressions.VAR_SELF, cm);
-      }
-      try {
-        T field = (T) cm.get(annotationField);
-        return func.apply(field);
-      }  finally {
-        if (env != null) {
-          env.pop(Expressions.VAR_SELF);
-        }
-      }
+      if (env != null) { env.push(Expressions.VAR_SELF, cm); }
+      T field = (T) cm.get(annotationField);
+      O res = func.apply(field);
+      if (env != null) { env.pop(Expressions.VAR_SELF); }
+      return res;
     }
   }
 
-
-  public static class CoreMapToListFunctionApplier<O> implements Function<CoreMap, O> {
-
-    final Env env;
-    final Function<List<? extends CoreMap>,O> func;
+  public static class CoreMapToListFunctionApplier<O> implements Function<CoreMap, O>
+  {
+    Env env;
+    Function<List<? extends CoreMap>,O> func;
 
     public CoreMapToListFunctionApplier(Env env, Function<List<? extends CoreMap>,O> func) {
       this.func = func;
@@ -1197,18 +1172,10 @@ public class SequenceMatchRules {
 
     @Override
     public O apply(CoreMap cm) {
-      if (env != null) {
-        env.push(Expressions.VAR_SELF, cm);
-      }
-      try {
-        return func.apply(Collections.singletonList(cm));
-      } finally {
-        if (env != null) {
-          env.pop(Expressions.VAR_SELF);
-        }
-      }
+      if (env != null) { env.push(Expressions.VAR_SELF, cm); }
+      O res = func.apply(Collections.singletonList(cm));
+      if (env != null) { env.pop(Expressions.VAR_SELF); }
+      return res;
     }
-
-  } // end static class CoreMapToListFunctionApplier
-
+  }
 }

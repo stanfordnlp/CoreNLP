@@ -312,7 +312,7 @@ public class TreePrint  {
       } else {
         if (inXml) {
           pw.print("<s");
-          if ( ! StringUtils.isNullOrEmpty(id)) {
+          if (id != null && ! "".equals(id)) {
             pw.print(" id=\"");
             pw.print(XMLUtils.escapeXML(id));
             pw.print('\"');
@@ -476,7 +476,7 @@ public class TreePrint  {
         indexedTree.indexLeaves();
         Set<Dependency<Label, Label, Object>> depsSet = indexedTree.mapDependencies(dependencyWordFilter, hf);
         List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<>(depsSet);
-        sortedDeps.sort(Dependencies.dependencyIndexComparator());
+        Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
         pw.println("<dependencies style=\"untyped\">");
         for (Dependency<Label, Label, Object> d : sortedDeps) {
           pw.println(d.toString("xml"));

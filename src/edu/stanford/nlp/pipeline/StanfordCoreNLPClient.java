@@ -35,12 +35,11 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
   private static final Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLPClient.class);
 
   /** A simple URL spec, for parsing backend URLs */
-  private static final Pattern URL_PATTERN = Pattern.compile("(?:(https?)://)?([^:]+)(?::([0-9]+))?");
+  private static final Pattern URL_PATTERN = Pattern.compile("(?:(https?)://)?([^:]+):([0-9]+)?");
 
   /**
    * Information on how to connect to a backend.
    * The semantics of one of these objects is as follows:
-   *
    * <ul>
    *   <li>It should define a hostname and port to connect to.</li>
    *   <li>This represents ONE thread on the remote server. The client should
@@ -75,7 +74,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
     @Override
     public String toString() {
-      return protocol + "://" + host + ':' + port;
+      return protocol + "://" + host + ":" + port;
     }
   }
 
@@ -454,7 +453,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
         //    2. It must not throw an exception
         doAnnotation(annotation, backend, serverURL, message, 0);
       } catch (Throwable t) {
-        log.err("Could not annotate via server! Trying to annotate locally...", t);
+        log.warn("Could not annotate via server! Trying to annotate locally...", t);
         StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
         corenlp.annotate(annotation);
       } finally {
@@ -483,7 +482,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
       URLConnection connection = serverURL.openConnection();
       // 1.1 Set authentication
       if (apiKey != null && apiSecret != null) {
-        String userpass = apiKey + ':' + apiSecret;
+        String userpass = apiKey + ":" + apiSecret;
         String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
         connection.setRequestProperty("Authorization", basicAuth);
       }
@@ -533,7 +532,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
       HttpURLConnection connection = (HttpURLConnection) serverURL.openConnection();
       // 1.1 Set authentication
       if (apiKey != null && apiSecret != null) {
-        String userpass = apiKey + ':' + apiSecret;
+        String userpass = apiKey + ":" + apiSecret;
         String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
         connection.setRequestProperty("Authorization", basicAuth);
       }
@@ -674,21 +673,21 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
 
   /**
-   * Client that runs data through a StanfordCoreNLPServer either just for testing or for command-line text processing.
+   * This can be used just for testing or for command-line text processing.
    * This runs the pipeline you specify on the
-   * text in the file(s) that you specify (with -file or -filelist) and sends some results to stdout.
+   * text in the file that you specify and sends some results to stdout.
    * The current code in this main method assumes that each line of the file
    * is to be processed separately as a single sentence.
-   * A site must be specified with a protocol like "https:" in front of it.
-   *
+   * <p>
    * Example usage:<br>
-   * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP -props properties -backends site1:port1,site2:port2 <br>
-   *    or just -host https://foo.bar.com [-port 9000]
+   * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP -props properties -backends site1:port1,site2,port2 <br>
+   *    or just -host name -port number
    *
    * @param args List of required properties
    * @throws java.io.IOException If IO problem
+   * @throws ClassNotFoundException If class loading problem
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, ClassNotFoundException {
     //
     // process the arguments
     //

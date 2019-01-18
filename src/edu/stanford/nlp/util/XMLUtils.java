@@ -35,7 +35,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class XMLUtils  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(XMLUtils.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(XMLUtils.class);
 
   private XMLUtils() {} // only static methods
 
@@ -49,7 +49,7 @@ public class XMLUtils  {
     try {
       sents = getTextContentFromTagsFromFileSAXException(f, tag);
     } catch (SAXException e) {
-      log.warn(e);
+      log.info(e);
     }
     return sents;
   }
@@ -94,7 +94,7 @@ public class XMLUtils  {
         sents.add(builtUp.toString());
       }
     } catch (IOException | ParserConfigurationException e) {
-      log.warn(e);
+      log.info(e);
     }
     return sents;
   }
@@ -110,7 +110,7 @@ public class XMLUtils  {
     try {
       sents = getTagElementsFromFileSAXException(f, tag);
     } catch (SAXException e) {
-      log.warn(e);
+      log.info(e);
     }
     return sents;
   }
@@ -141,7 +141,7 @@ public class XMLUtils  {
         sents.add(element);
       }
     } catch (IOException | ParserConfigurationException e) {
-      log.warn(e);
+      log.info(e);
     }
     return sents;
   }
@@ -158,7 +158,7 @@ public class XMLUtils  {
     try {
       sents = getTagElementTriplesFromFileSAXException(f, tag);
     } catch (SAXException e) {
-      log.warn(e);
+      System.err.println(e);
     }
     return sents;
   }
@@ -177,7 +177,7 @@ public class XMLUtils  {
     try {
       sents = getTagElementTriplesFromFileNumBoundedSAXException(f, tag, num);
     } catch (SAXException e) {
-      log.warn(e);
+      System.err.println(e);
     }
     return sents;
   }
@@ -237,7 +237,7 @@ public class XMLUtils  {
         sents.add(t);
       }
     } catch (IOException | ParserConfigurationException e) {
-      log.warn(e);
+      System.err.println(e);
     }
     return sents;
   }
@@ -263,12 +263,12 @@ public class XMLUtils  {
       db.setErrorHandler(new SAXErrorHandler());
 
     } catch (ParserConfigurationException e) {
-      log.warnf("%s: Unable to create XML parser\n", XMLUtils.class.getName());
-      log.warn(e);
+      System.err.printf("%s: Unable to create XML parser\n", XMLUtils.class.getName());
+      e.printStackTrace();
 
     } catch(UnsupportedOperationException e) {
-      log.warnf("%s: API error while setting up XML parser. Check your JAXP version\n", XMLUtils.class.getName());
-      log.warn(e);
+      System.err.printf("%s: API error while setting up XML parser. Check your JAXP version\n", XMLUtils.class.getName());
+      e.printStackTrace();
     }
 
     return db;
@@ -293,16 +293,16 @@ public class XMLUtils  {
       db.setErrorHandler(new SAXErrorHandler());
 
     } catch (ParserConfigurationException e) {
-      log.warnf("%s: Unable to create XML parser\n", XMLUtils.class.getName());
-      log.warn(e);
+      System.err.printf("%s: Unable to create XML parser\n", XMLUtils.class.getName());
+      e.printStackTrace();
 
     } catch (SAXException e) {
-      log.warnf("%s: XML parsing exception while loading schema %s\n", XMLUtils.class.getName(),schemaFile.getPath());
-      log.warn(e);
+      System.err.printf("%s: XML parsing exception while loading schema %s\n", XMLUtils.class.getName(),schemaFile.getPath());
+      e.printStackTrace();
 
     } catch(UnsupportedOperationException e) {
-      log.warnf("%s: API error while setting up XML parser. Check your JAXP version\n", XMLUtils.class.getName());
-      log.warn(e);
+      System.err.printf("%s: API error while setting up XML parser. Check your JAXP version\n", XMLUtils.class.getName());
+      e.printStackTrace();
     }
 
     return db;
@@ -338,7 +338,7 @@ public class XMLUtils  {
           }
           position += text.length();
         }
-        //        System.err.println(position + " got text: " + text);
+        //        System.out.println(position + " got text: " + text);
         String tag = XMLUtils.readTag(r);
         if (tag == null) {
           break;
@@ -350,11 +350,11 @@ public class XMLUtils  {
           }
         }
         position += tag.length();
-        //        System.err.println(position + " got tag: " + tag);
+        //        System.out.println(position + " got tag: " + tag);
       } while (true);
     } catch (IOException e) {
-      log.warn("Error reading string");
-      log.warn(e);
+      log.info("Error reading string");
+      e.printStackTrace();
     }
     return result.toString();
   }
@@ -397,7 +397,7 @@ public class XMLUtils  {
     try {
       ret = new XMLTag(s);
     } catch (Exception e) {
-      log.warn("Failed to handle |" + s + "|");
+      log.info("Failed to handle |" + s + "|");
     }
     return ret;
   }
@@ -1013,18 +1013,18 @@ public class XMLUtils  {
     try {
       do {
         String text = readUntilTag(r);
-        //      System.err.println("got text: " + text);
+        //      System.out.println("got text: " + text);
         result.append(escapeXML(text));
         XMLTag tag = readAndParseTag(r);
-        //      System.err.println("got tag: " + tag);
+        //      System.out.println("got tag: " + tag);
         if (tag == null) {
           break;
         }
         result.append(tag);
       } while (true);
     } catch (IOException e) {
-      log.warn("Error reading string");
-      log.warn(e);
+      log.info("Error reading string");
+      e.printStackTrace();
     }
     return result.toString();
   }
@@ -1046,20 +1046,10 @@ public class XMLUtils  {
   }
 
   public static class XMLTag {
-
-    /** Stores the complete string passed in as the tag on construction. */
     public String text;
-
-    /** Stores the elememnt name, such as "doc". */
     public String name;
-
-    /** Stores attributes as a Map from keys to values. */
     public Map<String,String> attributes;
-
-    /** Whether this is an ending tag or not. */
     public boolean isEndTag;
-
-    /** Whether this is an empty element expressed as a single empty element tag like {@code <p/>}. */
     public boolean isSingleTag;
 
     /**
@@ -1137,7 +1127,7 @@ public class XMLUtils  {
               if (end < 0) {
                 end = tag.length();
               }
-//              System.err.println(begin + " " + end);
+//              System.out.println(begin + " " + end);
               value = tag.substring(begin, end);
             }
           }
@@ -1236,12 +1226,12 @@ public class XMLUtils  {
 
     @Override
     public void warning(SAXParseException exception) {
-      log.warn(makeBetterErrorString("Warning", exception));
+      log.info(makeBetterErrorString("Warning", exception));
     }
 
     @Override
     public void error(SAXParseException exception) {
-      log.error(makeBetterErrorString("Error", exception));
+      log.info(makeBetterErrorString("Error", exception));
     }
 
     @Override

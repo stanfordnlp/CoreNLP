@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.stanford.nlp.util.CoreMap;
-
 /**
  * SentenceUtils holds a couple utility methods for lists that are sentences.
  * Those include a method that nicely prints a list of words and methods that
@@ -184,21 +182,6 @@ public class SentenceUtils {
     for (Iterator<T> wordIterator = list.iterator(); wordIterator.hasNext();) {
       T o = wordIterator.next();
       s.append(wordToString(o, justValue, separator));
-      if (wordIterator.hasNext()) {
-        s.append(' ');
-      }
-    }
-    return s.toString();
-  }
-
-  /**
-   * Pretty print CoreMap classes using the same semantics as the toShorterString method.
-   */
-  public static <T extends CoreMap> String listToString(List<T> list, String... keys) {
-    StringBuilder s = new StringBuilder();
-    for (Iterator<T> wordIterator = list.iterator(); wordIterator.hasNext();) {
-      T o = wordIterator.next();
-      s.append(o.toShorterString(keys));
       if (wordIterator.hasNext()) {
         s.append(' ');
       }

@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
 
 
 /**
- * An abstract tokenizer. Tokenizers extending AbstractTokenizer need only
+ * An abstract tokenizer.  Tokenizers extending AbstractTokenizer need only
  * implement the {@code getNext()} method. This implementation does not
  * allow null tokens, since
  * null is used in the protected nextToken field to signify that no more
@@ -97,9 +97,6 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T>  {
     return nextToken;
   }
 
-  // Assume that the text we are being asked to tokenize is usually more than 10 tokens; save 5 reallocations
-  private static final int DEFAULT_TOKENIZE_LIST_SIZE = 64;
-
   /**
    * Returns text as a List of tokens.
    *
@@ -107,15 +104,11 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T>  {
    */
   @Override
   public List<T> tokenize() {
-    ArrayList<T> result = new ArrayList<>(DEFAULT_TOKENIZE_LIST_SIZE);
+    List<T> result = new ArrayList<>();
     while (hasNext()) {
       result.add(next());
     }
     // log.info("tokenize() produced " + result);
-    // if it was tiny, reallocate small
-    if (result.size() <= DEFAULT_TOKENIZE_LIST_SIZE / 4) {
-      result.trimToSize();
-    }
     return result;
   }
 

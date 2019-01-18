@@ -204,7 +204,7 @@ public class SentenceAlgorithmsITest {
       add("Sultanate");
       add("<-nmod:including-");
       add("trade");
-      add("<-dobj-");
+      add("<-obj-");
       add("dominated");
       add("-nmod:in->");
       add("Ages");

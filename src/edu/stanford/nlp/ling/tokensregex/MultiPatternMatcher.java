@@ -4,29 +4,28 @@ import edu.stanford.nlp.util.*;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
 
 /**
- * Matcher that takes in multiple patterns.
+ * Matcher that takes in multiple patterns
  *
  * @author Angel Chang
  */
 public class MultiPatternMatcher<T> {
-
   Collection<SequencePattern<T>> patterns;
-  private SequencePatternTrigger<T> patternTrigger;
-  private boolean matchWithResult = false;
+  SequencePatternTrigger<T> patternTrigger;
+  boolean matchWithResult = false;
 
   public MultiPatternMatcher(SequencePatternTrigger<T> patternTrigger,
-                             Collection<? extends SequencePattern<T>> patterns) {
+                             Collection<? extends SequencePattern<T>> patterns)
+  {
     this.patterns = new ArrayList<>();
     this.patterns.addAll(patterns);
     this.patternTrigger = patternTrigger;
   }
 
-  @SafeVarargs
   public MultiPatternMatcher(SequencePatternTrigger<T> patternTrigger,
-                             SequencePattern<T>... patterns) {
+                             SequencePattern<T>... patterns)
+  {
     this(patterns);
     this.patternTrigger = patternTrigger;
   }
@@ -36,10 +35,12 @@ public class MultiPatternMatcher<T> {
     this.patterns = patterns;
   }
 
-  @SafeVarargs
-  public MultiPatternMatcher(SequencePattern<T>... patterns) {
+  public MultiPatternMatcher(SequencePattern<T>... patterns)
+  {
     this.patterns = new ArrayList<>(patterns.length);
-    Collections.addAll(this.patterns, patterns);
+    for (SequencePattern<T> p:patterns) {
+      this.patterns.add(p);
+    }
   }
 
   /**
@@ -49,12 +50,12 @@ public class MultiPatternMatcher<T> {
    *     the highest priority/score is selected,
    *     then the longest pattern,
    *     then the starting offset,
-   *     then the original order.
-   *
+   *     then the original order
    * @param elements input sequence to match against
    * @return list of match results that are non-overlapping
    */
-  public List<SequenceMatchResult<T>> findNonOverlapping(List<? extends T> elements) {
+  public List<SequenceMatchResult<T>> findNonOverlapping(List<? extends T> elements)
+  {
     return findNonOverlapping(elements, SequenceMatchResult.DEFAULT_COMPARATOR);
   }
 
@@ -67,7 +68,8 @@ public class MultiPatternMatcher<T> {
    * @return list of match results that are non-overlapping
    */
   public List<SequenceMatchResult<T>> findNonOverlapping(List<? extends T> elements,
-                                                         Comparator<? super SequenceMatchResult> cmp) {
+                                                         Comparator<? super SequenceMatchResult> cmp)
+  {
     Collection<SequencePattern<T>> triggered = getTriggeredPatterns(elements);
     List<SequenceMatchResult<T>> all = new ArrayList<>();
     int i = 0;
@@ -84,7 +86,7 @@ public class MultiPatternMatcher<T> {
       i++;
     }
     List<SequenceMatchResult<T>> res = IntervalTree.getNonOverlapping( all, SequenceMatchResult.TO_INTERVAL, cmp);
-    res.sort(SequenceMatchResult.OFFSET_COMPARATOR);
+    Collections.sort(res, SequenceMatchResult.OFFSET_COMPARATOR);
 
     return res;
   }
@@ -97,7 +99,8 @@ public class MultiPatternMatcher<T> {
    * @param findType whether FindType.FIND_ALL or FindType.FIND_NONOVERLAPPING
    * @return list of match results
    */
-  public List<SequenceMatchResult<T>> find(List<? extends T> elements, SequenceMatcher.FindType findType) {
+  public List<SequenceMatchResult<T>> find(List<? extends T> elements, SequenceMatcher.FindType findType)
+  {
     Collection<SequencePattern<T>> triggered = getTriggeredPatterns(elements);
     List<SequenceMatchResult<T>> all = new ArrayList<>();
     int i = 0;
@@ -115,7 +118,7 @@ public class MultiPatternMatcher<T> {
       i++;
     }
     List<SequenceMatchResult<T>> res = IntervalTree.getNonOverlapping( all, SequenceMatchResult.TO_INTERVAL, SequenceMatchResult.DEFAULT_COMPARATOR);
-    res.sort(SequenceMatchResult.OFFSET_COMPARATOR);
+    Collections.sort(res, SequenceMatchResult.OFFSET_COMPARATOR);
 
     return res;
   }
@@ -129,21 +132,22 @@ public class MultiPatternMatcher<T> {
    * @param elements input sequence to match against
    * @return list of match results that are non-overlapping
    */
-  public List<SequenceMatchResult<T>> findNonOverlappingMaxScore(List<? extends T> elements) {
+  public List<SequenceMatchResult<T>> findNonOverlappingMaxScore(List<? extends T> elements)
+  {
     return findNonOverlappingMaxScore(elements, SequenceMatchResult.SCORER);
   }
 
   /**
    * Given a sequence, applies our patterns over the sequence and returns
    *   all non overlapping matches.  When multiple patterns overlaps,
-   *   matched patterns are selected to give the overall maximum score.
-   *
+   *   matched patterns are selected to give the overall maximum score
    * @param elements input sequence to match against
    * @param scorer scorer for scoring each match
    * @return list of match results that are non-overlapping
    */
   public List<SequenceMatchResult<T>> findNonOverlappingMaxScore(List<? extends T> elements,
-                                                                 ToDoubleFunction<? super SequenceMatchResult> scorer) {
+                                                                 Function<? super SequenceMatchResult, Double> scorer)
+  {
     Collection<SequencePattern<T>> triggered = getTriggeredPatterns(elements);
     List<SequenceMatchResult<T>> all = new ArrayList<>();
     int i = 0;
@@ -157,7 +161,7 @@ public class MultiPatternMatcher<T> {
       i++;
     }
     List<SequenceMatchResult<T>> res = IntervalTree.getNonOverlappingMaxScore( all, SequenceMatchResult.TO_INTERVAL, scorer);
-    res.sort(SequenceMatchResult.OFFSET_COMPARATOR);
+    Collections.sort(res, SequenceMatchResult.OFFSET_COMPARATOR);
 
     return res;
   }
@@ -165,12 +169,12 @@ public class MultiPatternMatcher<T> {
   /**
    * Given a sequence, applies each of our patterns over the sequence and returns
    *   all non overlapping matches for each of the patterns.
-   * Unlike #findAllNonOverlapping, overlapping matches from different patterns are kept.
-   *
+   * Unlike #findAllNonOverlapping, overlapping matches from different patterns are kept
    * @param elements input sequence to match against
    * @return iterable of match results that are non-overlapping
    */
-  public Iterable<SequenceMatchResult<T>> findAllNonOverlappingMatchesPerPattern(List<? extends T> elements) {
+  public Iterable<SequenceMatchResult<T>> findAllNonOverlappingMatchesPerPattern(List<? extends T> elements)
+  {
     Collection<SequencePattern<T>> triggered = getTriggeredPatterns(elements);
     List<Iterable<SequenceMatchResult<T>>> allMatches = new ArrayList<>(elements.size());
     for (SequencePattern<T> p:triggered) {
@@ -212,7 +216,7 @@ public class MultiPatternMatcher<T> {
    *   given a single node from a larger sequence.
    * @param <T>
    */
-  public interface NodePatternTrigger<T> extends Function<T, Collection<SequencePattern<T>>> {}
+  public static interface NodePatternTrigger<T> extends Function<T, Collection<SequencePattern<T>>> {}
 
   /**
    * A function which returns a collections of patterns that may match when
@@ -220,7 +224,7 @@ public class MultiPatternMatcher<T> {
    *   and should return ALL patterns that may match.
    * @param <T>
    */
-  public interface SequencePatternTrigger<T> extends Function<List<? extends T>, Collection<SequencePattern<T>>> {}
+  public static interface SequencePatternTrigger<T> extends Function<List<? extends T>, Collection<SequencePattern<T>>> {}
 
   /**
    * Simple SequencePatternTrigger that looks at each node, and identifies which

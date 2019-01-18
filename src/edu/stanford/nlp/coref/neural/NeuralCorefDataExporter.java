@@ -34,15 +34,13 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * Outputs the CoNLL data for training the neural coreference system
- * (implemented in python/theano).
+ * Outputs the CoNLL CoNLL data for training the neural coreference system
+ * (implented in python/theano).
  * See <a href="https://github.com/clarkkev/deep-coref">https://github.com/clarkkev/deep-coref</a>
  * for the training code.
- *
  * @author Kevin Clark
  */
 public class NeuralCorefDataExporter implements CorefDocumentProcessor {
-
   private final boolean conll;
   private final PrintWriter dataWriter;
   private final PrintWriter goldClusterWriter;
@@ -76,8 +74,13 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
     Map<Pair<Integer, Integer>, Boolean> mentionPairs = CorefUtils.getLabeledMentionPairs(document);
     List<Mention> mentionsList = CorefUtils.getSortedMentions(document);
     Map<Integer, List<Mention>> mentionsByHeadIndex = new HashMap<>();
-    for (Mention m : mentionsList) {
-      List<Mention> withIndex = mentionsByHeadIndex.computeIfAbsent(m.headIndex, k -> new ArrayList<>());
+    for (int i = 0; i < mentionsList.size(); i++) {
+      Mention m = mentionsList.get(i);
+      List<Mention> withIndex = mentionsByHeadIndex.get(m.headIndex);
+      if (withIndex == null) {
+        withIndex = new ArrayList<>();
+        mentionsByHeadIndex.put(m.headIndex, withIndex);
+      }
       withIndex.add(m);
     }
 
@@ -180,12 +183,11 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
   }
 
   public static void main(String[] args) throws Exception {
-    Properties props = StringUtils.argsToProperties("-props", args[0]);
+    Properties props = StringUtils.argsToProperties(new String[] {"-props", args[0]});
     Dictionaries dictionaries = new Dictionaries(props);
     String outputPath = args[1];
     exportData(outputPath, Dataset.TRAIN, props, dictionaries);
     exportData(outputPath, Dataset.DEV, props, dictionaries);
     exportData(outputPath, Dataset.TEST, props, dictionaries);
   }
-
 }

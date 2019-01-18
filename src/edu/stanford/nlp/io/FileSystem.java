@@ -1,4 +1,5 @@
 package edu.stanford.nlp.io; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,18 +9,17 @@ import java.nio.channels.FileChannel;
 import java.util.NoSuchElementException;
 import java.util.zip.GZIPOutputStream;
 
-import edu.stanford.nlp.util.logging.Redwood;
-
 /**
  * Provides various filesystem operations common to scripting languages such
  * as Perl and Python but not present (currently) in the Java standard libraries.
  * 
  * @author Spence Green
+ *
  */
 public final class FileSystem  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(FileSystem.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(FileSystem.class);
 
   private FileSystem() {}
   
@@ -28,24 +28,26 @@ public final class FileSystem  {
    * 
    * @param sourceFile The file to copy.
    * @param destFile The path to copy to which the file should be copied.
-   * @throws RuntimeIOException If any IO problem
+   * @throws IOException
    */
-  @SuppressWarnings("ResultOfMethodCallIgnored")
-  public static void copyFile(File sourceFile, File destFile) {
-    try {
-      if (!destFile.exists()) {
-        destFile.createNewFile();
-      }
-    } catch (IOException ioe) {
-      throw new RuntimeIOException(ioe);
-    }
+  public static void copyFile(File sourceFile, File destFile) throws IOException {
+    if(!destFile.exists())
+      destFile.createNewFile();
 
-    try (FileChannel source = new FileInputStream(sourceFile).getChannel();
-         FileChannel destination = new FileOutputStream(destFile).getChannel()) {
+    FileChannel source = null;
+    FileChannel destination = null;
+    try {
+      source = new FileInputStream(sourceFile).getChannel();
+      destination = new FileOutputStream(destFile).getChannel();
       destination.transferFrom(source, 0, source.size());
-    } catch (IOException e) {
-      throw new RuntimeIOException(String.format("FileSystem: Error copying %s to %s%n",
-              sourceFile.getPath(), destFile.getPath()), e);
+    } catch (Exception e) {
+      System.err.printf("FileSystem: Error copying %s to %s\n", sourceFile.getPath(), destFile.getPath());
+      e.printStackTrace();
+    } finally {
+      if(source != null)
+        source.close();
+      if(destination != null)
+        destination.close();
     }
   }
 
@@ -57,13 +59,18 @@ public final class FileSystem  {
    * @throws IOException
    */
   public static void gzipFile(File uncompressedFileName, File compressedFileName) throws IOException {
-    try (GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(compressedFileName));
-         FileInputStream in = new FileInputStream(uncompressedFileName)) {
-      byte[] buf = new byte[1024];
-      for (int len; (len = in.read(buf)) > 0; ) {
-        out.write(buf, 0, len);
-      }
+    GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(compressedFileName));
+    FileInputStream in = new FileInputStream(uncompressedFileName);
+
+    byte[] buf = new byte[1024];
+    int len;
+    while ((len = in.read(buf)) > 0) {
+      out.write(buf, 0, len);
     }
+    in.close();
+
+    out.finish();
+    out.close();
   }
 
   /**
@@ -75,14 +82,10 @@ public final class FileSystem  {
   public static boolean deleteDir(File dir) {
     if (dir.isDirectory()) {
       String[] children = dir.list();
-      if (children == null) {
-        return false;
-      }
       for (String aChildren : children) {
         boolean success = deleteDir(new File(dir, aChildren));
-        if (!success) {
+        if (!success)
           return false;
-        }
       }
     }
 
@@ -156,7 +159,7 @@ public final class FileSystem  {
     
     try {
       copyFile(new File(testFileName),new File(testDirName + "/" + testFileName));
-    } catch (RuntimeIOException e) {
+    } catch (IOException e) {
       log.info("Copy failed");
       System.exit(-1);
     }
@@ -166,8 +169,8 @@ public final class FileSystem  {
       Process p = r.exec(String.format("tar -cf %s.tar %s",testDirName,testDirName));
       
       int ret_val;
-      if ((ret_val = p.waitFor()) != 0) {
-        System.err.printf("tar command returned %d%n",ret_val);
+      if((ret_val = p.waitFor()) != 0) {
+        System.err.printf("tar command returned %d\n",ret_val);
         System.exit(-1);
       }
       
@@ -181,7 +184,7 @@ public final class FileSystem  {
     }
     
     try {
-      gzipFile(new File(testDirName + ".tar"), new File(testDirName + ".tar.gz"));
+      gzipFile(new File(String.format(testDirName + ".tar")), new File(testDirName + ".tar.gz"));
     } catch (IOException e) {
       log.info("gzip command failed");
       System.exit(-1);

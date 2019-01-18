@@ -202,14 +202,12 @@ public enum NaturalLogicRelation {
     put("acomp", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("advcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("acl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("acl:relcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("advmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("agent", NaturalLogicRelation.INDEPENDENCE);  //
     put("amod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("appos", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("aux", NaturalLogicRelation.INDEPENDENCE);  // he left -/-> he should leave
     put("auxpass", NaturalLogicRelation.INDEPENDENCE);  // some cat adopts -/-> some cat got adopted
-    put("comp", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("ccomp", NaturalLogicRelation.REVERSE_ENTAILMENT);  // interesting project here... "he said x" -> "x"?
     put("cc", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_conj
     put("compound", NaturalLogicRelation.INDEPENDENCE);  //
@@ -225,12 +223,12 @@ public enum NaturalLogicRelation {
     put("conj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_cc
     put("conj_x", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("cop", NaturalLogicRelation.INDEPENDENCE);  //
-    put("csubj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // clausal subject is split by clauses
+    put("csubj", NaturalLogicRelation.INDEPENDENCE);  // don't drop subjects.
     put("csubjpass", NaturalLogicRelation.INDEPENDENCE);  // as above
     put("dep", NaturalLogicRelation.REVERSE_ENTAILMENT);  // allow cutting these off, else we just miss a bunch of sentences
     put("det", NaturalLogicRelation.FORWARD_ENTAILMENT);  // todo(gabor) better treatment of generics?
     put("discourse", NaturalLogicRelation.EQUIVALENT);  //
-    put("dobj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // but, "he studied NLP at Stanford" -> "he studied NLP"
+    put("obj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // but, "he studied NLP at Stanford" -> "he studied NLP"
     put("expl", NaturalLogicRelation.EQUIVALENT);  // though we shouldn't see this...
     put("goeswith", NaturalLogicRelation.EQUIVALENT);  // also shouldn't see this
     put("infmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  // deprecated into vmod
@@ -245,7 +243,7 @@ public enum NaturalLogicRelation {
     put("number", NaturalLogicRelation.INDEPENDENCE);  //
     put("num", NaturalLogicRelation.INDEPENDENCE);  // gets a bit too vague if we allow deleting this? "he served three terms" -?-> "he served terms"
     put("op", NaturalLogicRelation.INDEPENDENCE);  //
-    put("parataxis", NaturalLogicRelation.REVERSE_ENTAILMENT);  // we split on clauses on this
+    put("parataxis", NaturalLogicRelation.INDEPENDENCE);  // or, reverse?
     put("partmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  // deprecated into vmod
     put("pcomp", NaturalLogicRelation.INDEPENDENCE);  // though, not so in collapsed dependencies
     put("pobj", NaturalLogicRelation.INDEPENDENCE);  // must delete whole preposition
@@ -389,7 +387,6 @@ public enum NaturalLogicRelation {
     put("punct", NaturalLogicRelation.EQUIVALENT);  //
     put("purpcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  // deprecated into advmod
     put("quantmod", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
-    put("ref", NaturalLogicRelation.REVERSE_ENTAILMENT);  // Delete thigns like 'which' referring back to a subject.
     put("rcmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  // "there are great tenors --rcmod--> who are modest"
     put("root", NaturalLogicRelation.INDEPENDENCE);  // err.. never delete
     put("tmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //

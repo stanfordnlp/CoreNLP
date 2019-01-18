@@ -1,4 +1,5 @@
-package edu.stanford.nlp.sentiment;
+package edu.stanford.nlp.sentiment; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -11,19 +12,18 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.logging.Redwood;
 
 public class SentimentTraining  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(SentimentTraining.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(SentimentTraining.class);
 
   private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
 
   private SentimentTraining() {} // static methods
 
-  private static void executeOneTrainingBatch(SentimentModel model, List<Tree> trainingBatch, double[] sumGradSquare) {
+  public static void executeOneTrainingBatch(SentimentModel model, List<Tree> trainingBatch, double[] sumGradSquare) {
     SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(model, trainingBatch);
     double[] theta = model.paramsToVector();
 

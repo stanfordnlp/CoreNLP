@@ -30,22 +30,17 @@ public enum Operator {
   NUM_NUM_NUM("--num-- --num-- --num--",             FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),  // TODO check me
   NUM_NUM_NUM_NUM("--num-- --num-- --num-- --num--", FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),  // TODO check me
   FEW("few",                                         FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),  // TODO check me
-  IMPLICIT_NAMED_ENTITY("__implicit_named_entity__", FORWARD_ENTAILMENT, "additive",      "multiplicative"),  // TODO check me
+  IMPLICIT_NAMED_ENTITY("__implicit_named_entity__", FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
 
   // "No" quantifiers
   NO("no",               INDEPENDENCE, "anti-additive", "anti-additive"),
   NEITHER("neither",     INDEPENDENCE, "anti-additive", "anti-additive"),
   NO_ONE("no one",       INDEPENDENCE, "anti-additive", "anti-additive"),
   NOBODY("nobody",       INDEPENDENCE, "anti-additive", "anti-additive"),
-  NOT("not",             INDEPENDENCE, "anti-additive", "anti-additive"),
-  BUT("but",             INDEPENDENCE, "anti-additive", "anti-additive"),
-  EXCEPT("except",       INDEPENDENCE, "anti-additive", "anti-additive"),
   UNARY_NO("no",         INDEPENDENCE, "anti-additive"),
   UNARY_NOT("not",       INDEPENDENCE, "anti-additive"),
   UNARY_NO_ONE("no one", INDEPENDENCE, "anti-additive"),
   UNARY_NT("n't",        INDEPENDENCE, "anti-additive"),
-  UNARY_BUT("but",       INDEPENDENCE, "anti-additive"),
-  UNARY_EXCEPT("except", INDEPENDENCE, "anti-additive"),
 
   // A general quantifier for all "doubt"-like words
   GENERAL_NEG_POLARITY("neg_polarity_trigger",   INDEPENDENCE, "anti-additive"),

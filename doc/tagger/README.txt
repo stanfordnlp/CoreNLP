@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.9.2 - 2018-10-16
+Stanford POS Tagger, v3.8.0 - 2017-06-09
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -37,6 +37,9 @@ tagger, along with some caseless versions, and we provide models for
 some other languages. The tagger can be retrained on other languages
 based on POS-annotated training text.
 
+If you really want to use this software under Java 1.4, look into RetroWeaver:
+
+  http://retroweaver.sourceforge.net/
 
 
 QUICKSTART
@@ -193,11 +196,6 @@ processing.
 CHANGES
 -----------------------------------------------
 
-2018-10-16    3.9.2     New English models, better currency symbol 
-                        handling 
-
-2018-02-27    3.9.1     new French UD model 
-
 2017-06-09    3.8.0     new Spanish and French UD models 
 
 2016-10-31    3.7.0     Update for compatibility, German UD model 
@@ -263,16 +261,17 @@ LICENSE
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see http://www.gnu.org/licenses/ .
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
  For more information, bug reports, fixes, contact:
     Christopher Manning
-    Dept of Computer Science, Gates 2A
-    Stanford CA 94305-9020
+    Dept of Computer Science, Gates 1A
+    Stanford CA 94305-9010
     USA
     Support/Questions: java-nlp-user@lists.stanford.edu
-	  Licensing: java-nlp-support@lists.stanford.edu
-    http://nlp.stanford.edu/software/tagger.html
+	Licensing: java-nlp-support@lists.stanford.edu
+    http://www-nlp.stanford.edu/software/tagger.shtml
 
 
 CONTACT

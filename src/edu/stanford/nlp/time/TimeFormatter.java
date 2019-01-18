@@ -328,7 +328,7 @@ public class TimeFormatter {
     }
 
     public Integer parseValue(String str) {
-      int v = Integer.parseInt(str);
+      int v = Integer.valueOf(str);
       if (v >= minValue && v <= maxValue) {
         return v;
       } else {
@@ -434,7 +434,6 @@ public class TimeFormatter {
       valueMapping.put(str.toLowerCase(locale), v);
     }
 
-    @Override
     public Integer parseValue(String str) {
       str = str.toLowerCase(locale);
       Integer v = valueMapping.get(str);
@@ -735,7 +734,7 @@ public class TimeFormatter {
     }
 
     public Pattern toTextPattern() {
-      return Pattern.compile(toTextRegex(), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+      return Pattern.compile(toTextRegex(), Pattern.CASE_INSENSITIVE);
     }
 
     private void appendNumericFields(DateTimeFieldType[] fieldTypes, int digits) {
@@ -906,15 +905,11 @@ public class TimeFormatter {
         throw new IllegalArgumentException("Illegal quantifier at beginning of pattern: " + str);
       }
     }
-
     protected void appendGroupStart() { appendRegexPart("(?:");}
-
     protected void appendGroupEnd() { appendRegexPart(")"); }
-
     protected void appendLiteral(char c) {
       builder.appendLiteral(c);
       appendLiteralField(String.valueOf(c));}
-
     protected void appendLiteral(String s) {
       builder.appendLiteral(s);
       appendLiteralField(s); }

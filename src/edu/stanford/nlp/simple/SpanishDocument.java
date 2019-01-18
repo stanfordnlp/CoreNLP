@@ -7,7 +7,6 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
@@ -22,8 +21,8 @@ public class SpanishDocument extends Document {
    * The empty {@link Properties} object, for use with creating default annotators.
    */
   static final Properties EMPTY_PROPS = new Properties() {{
-    try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-spanish.properties")){
-      load(is);
+    try {
+      load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-spanish.properties"));
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }

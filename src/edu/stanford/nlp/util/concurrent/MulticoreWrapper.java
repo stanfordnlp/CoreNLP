@@ -1,7 +1,6 @@
 package edu.stanford.nlp.util.concurrent;
 
 import edu.stanford.nlp.util.RuntimeInterruptedException;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +22,8 @@ import java.util.concurrent.TimeUnit;
  * See edu.stanford.nlp.util.concurrent.MulticoreWrapperTest and
  * edu.stanford.nlp.tagger.maxent.documentation.MulticoreWrapperDemo for examples of use.
  *
- * TODO(spenceg): This code does **not** support multiple consumers, i.e., multi-threaded calls to peek() and poll().
+ * TODO(spenceg): This code does **not** support multiple consumers, i.e., multi-threaded calls
+ * to peek() and poll().
  *
  * @author Spence Green
  *
@@ -32,11 +32,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class MulticoreWrapper<I,O> {
 
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(MulticoreWrapper.class);
-
   final int nThreads;
-  private int submittedItemCounter; // starts = 0;
+  int submittedItemCounter = 0;
   // Which id was the last id returned.  Only meaningful in the case
   // of a queue where output order matters.
   private int returnedItemCounter = -1;
@@ -54,7 +51,7 @@ public class MulticoreWrapper<I,O> {
    *
    * @param nThreads If less than or equal to 0, then automatically determine the number
    *                    of threads. Otherwise, the size of the underlying threadpool.
-   * @param processor  The processor (factory) for what will be run on data.
+   * @param processor
    */
   public MulticoreWrapper(int nThreads, ThreadsafeProcessor<I,O> processor) {
     this(nThreads, processor, true);
@@ -63,10 +60,10 @@ public class MulticoreWrapper<I,O> {
   /**
    * Constructor.
    *
-   * @param numThreads If less than or equal to 0, then automatically determine the number
+   * @param numThreads -- if less than or equal to 0, then automatically determine the number
    *                    of threads. Otherwise, the size of the underlying threadpool.
-   * @param processor  The processor (factory) for what will be run on data.
-   * @param orderResults If true, return results in the order submitted. Otherwise, return results
+   * @param processor
+   * @param orderResults -- If true, return results in the order submitted. Otherwise, return results
    *                        as they become available.
    */
   public MulticoreWrapper(int numThreads, ThreadsafeProcessor<I,O> processor, boolean orderResults) {
@@ -133,7 +130,7 @@ public class MulticoreWrapper<I,O> {
   public synchronized void put(I item) throws RejectedExecutionException {
     Integer procId = getProcessor();
     if (procId == null) {
-      throw new RejectedExecutionException("Couldn't submit item to threadpool: " + item);
+      throw new RejectedExecutionException("Couldn't submit item to threadpool: " + item.toString());
     }
     final int itemId = submittedItemCounter++;
     CallableJob<I,O> job = new CallableJob<>(item, itemId, processorList.get(procId), procId, callback);
@@ -197,7 +194,11 @@ public class MulticoreWrapper<I,O> {
    * @return true if a new result is available, false otherwise.
    */
   public boolean peek() {
-    return ! outputQueue.isEmpty() && ( ! orderResults || outputQueue.containsKey(returnedItemCounter + 1));
+    if (outputQueue.isEmpty()) {
+      return false;
+    } else {
+       return orderResults ? outputQueue.containsKey(returnedItemCounter + 1) : true;
+    }
   }
 
   /**
@@ -220,8 +221,8 @@ public class MulticoreWrapper<I,O> {
    *
    * @param <O>
    */
-  private interface JobCallback<O> {
-    void call(QueueItem<O> result, int processorId);
+  private static interface JobCallback<O> {
+    public void call(QueueItem<O> result, int processorId);
   }
   
   /**
@@ -250,16 +251,19 @@ public class MulticoreWrapper<I,O> {
 
     @Override
     public Integer call() {
-      O result = null;
       try {
-        result = processor.process(item);
-      } catch (Exception | Error e) {
-        log.warn(e);
+        O result = processor.process(item);
+        QueueItem<O> output = new QueueItem<>(result, itemId);
+        callback.call(output, processorId);
+        return itemId;
+      
+      } catch (Exception e) {
+        e.printStackTrace();
         // Hope that the consumer knows how to handle null!
+        QueueItem<O> output = new QueueItem<>(null, itemId);
+        callback.call(output, processorId);
+        return itemId;
       }
-      QueueItem<O> output = new QueueItem<>(result, itemId);
-      callback.call(output, processorId);
-      return itemId;
     }
   }
 
@@ -281,7 +285,7 @@ public class MulticoreWrapper<I,O> {
 
     @Override
     public int compareTo(QueueItem<O> other) {
-      return Integer.compare(this.id, other.id);
+      return this.id - other.id;
     }
 
     @SuppressWarnings("unchecked")
@@ -295,6 +299,5 @@ public class MulticoreWrapper<I,O> {
     public int hashCode() {
       return id;
     }
-  } // end static class QueueItem
-
+  }
 }

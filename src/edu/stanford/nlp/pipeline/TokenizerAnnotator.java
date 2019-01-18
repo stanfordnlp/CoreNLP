@@ -94,7 +94,7 @@ public class TokenizerAnnotator implements Annotator  {
     public static TokenizerType getTokenizerType(Properties props) {
       String tokClass = props.getProperty("tokenize.class", null);
       boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
-      String language = props.getProperty("tokenize.language", "en");
+      String language = props.getProperty("tokenize.language", null);
 
       if(whitespace) {
         return Whitespace;
@@ -121,10 +121,7 @@ public class TokenizerAnnotator implements Annotator  {
   } // end enum TokenizerType
 
 
-  @SuppressWarnings("WeakerAccess")
   public static final String EOL_PROPERTY = "tokenize.keepeol";
-  @SuppressWarnings("WeakerAccess")
-  public static final String KEEP_NL_OPTION = "tokenizeNLs,";
 
   private final boolean VERBOSE;
   private final TokenizerFactory<CoreLabel> factory;
@@ -159,7 +156,7 @@ public class TokenizerAnnotator implements Annotator  {
       }
     }
     if (keepNewline) {
-      extraOptions = KEEP_NL_OPTION;
+      extraOptions = "tokenizeNLs,";
     }
     return extraOptions;
   }
@@ -197,11 +194,9 @@ public class TokenizerAnnotator implements Annotator  {
     if (props == null) {
       props = new Properties();
     }
-    // check if segmenting must be done (Chinese or Arabic and not tokenizing on whitespace)
-    boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
+    // check if segmenting must be done
     if (props.getProperty("tokenize.language") != null &&
-            LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))
-        && !whitespace) {
+            LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))) {
       useSegmenter = true;
       if (LanguageInfo.getLanguageFromString(
               props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC)
@@ -270,7 +265,7 @@ public class TokenizerAnnotator implements Annotator  {
 
     case Whitespace:
       boolean eolIsSignificant = Boolean.valueOf(props.getProperty(EOL_PROPERTY, "false"));
-      eolIsSignificant = eolIsSignificant || KEEP_NL_OPTION.equals(computeExtraOptions(props));
+      eolIsSignificant = eolIsSignificant || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
       factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<>(new CoreLabelTokenFactory(), eolIsSignificant);
       break;
 
@@ -300,31 +295,6 @@ public class TokenizerAnnotator implements Annotator  {
   }
 
   /**
-   * Helper method to set the TokenBeginAnnotation and TokenEndAnnotation of every token.
-   */
-  private static void setTokenBeginTokenEnd(List<CoreLabel> tokensList) {
-    int tokenIndex = 0;
-    for (CoreLabel token : tokensList) {
-      token.set(CoreAnnotations.TokenBeginAnnotation.class, tokenIndex);
-      token.set(CoreAnnotations.TokenEndAnnotation.class, tokenIndex+1);
-      tokenIndex++;
-    }
-  }
-
-  /**
-   * set isNewline()
-   */
-  private static void setNewlineStatus(List<CoreLabel> tokensList) {
-    // label newlines
-    for (CoreLabel token : tokensList) {
-      if (token.word().equals(AbstractTokenizer.NEWLINE_TOKEN) && (token.endPosition() - token.beginPosition() == 1))
-        token.set(CoreAnnotations.IsNewlineAnnotation.class, true);
-      else
-        token.set(CoreAnnotations.IsNewlineAnnotation.class, false);
-    }
-  }
-
-  /**
    * Does the actual work of splitting TextAnnotation into CoreLabels,
    * which are then attached to the TokensAnnotation.
    */
@@ -337,9 +307,6 @@ public class TokenizerAnnotator implements Annotator  {
     // for Arabic and Chinese use a segmenter instead
     if (useSegmenter) {
       segmenterAnnotator.annotate(annotation);
-      // set indexes into document wide tokens list
-      setTokenBeginTokenEnd(annotation.get(CoreAnnotations.TokensAnnotation.class));
-      setNewlineStatus(annotation.get(CoreAnnotations.TokensAnnotation.class));
       return;
     }
 
@@ -354,15 +321,7 @@ public class TokenizerAnnotator implements Annotator  {
       // token.set(CoreAnnotations.TextAnnotation.class, token.get(CoreAnnotations.TextAnnotation.class));
       // }
 
-      // label newlines
-      setNewlineStatus(tokens);
-
-      // set indexes into document wide token list
-      setTokenBeginTokenEnd(tokens);
-
-      // add tokens list to annotation
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
-
       if (VERBOSE) {
         log.info("done.");
         log.info("Tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
@@ -391,8 +350,7 @@ public class TokenizerAnnotator implements Annotator  {
         CoreAnnotations.PositionAnnotation.class,
         CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class,
-        CoreAnnotations.ValueAnnotation.class,
-        CoreAnnotations.IsNewlineAnnotation.class
+        CoreAnnotations.ValueAnnotation.class
     ));
   }
 

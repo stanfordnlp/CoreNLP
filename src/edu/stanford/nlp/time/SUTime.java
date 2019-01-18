@@ -18,19 +18,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 
 import java.io.Serializable;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeParseException;
-import java.time.format.SignStyle;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalQueries;
-import java.time.temporal.UnsupportedTemporalTypeException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.time.temporal.ChronoField.*;
 
 /**
  * SUTime is a collection of data structures to represent various temporal
@@ -3551,125 +3541,17 @@ public class SUTime  {
   private static final Pattern PATTERN_ISO_AMBIGUOUS_3 = Pattern.compile(".*(\\d\\d?)\\.(\\d\\d?)\\.(\\d\\d(\\d\\d)?).*");
   private static final Pattern PATTERN_ISO_TIME_OF_DAY = Pattern.compile(".*(\\d?\\d):(\\d\\d)(:(\\d\\d)(\\.\\d+)?)?(\\s*([AP])\\.?M\\.?)?(\\s+([+\\-]\\d+|[A-Z][SD]T|GMT([+\\-]\\d+)?))?.*");
 
-
-  /**
-   * A bunch of formats to parse into
-   */
-  private static final List<java.time.format.DateTimeFormatter> DATE_TIME_FORMATS = Arrays.asList(
-      java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME,
-      java.time.format.DateTimeFormatter.ISO_DATE_TIME,
-      java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME,
-      java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-      java.time.format.DateTimeFormatter.ISO_INSTANT,
-      java.time.format.DateTimeFormatter.ISO_OFFSET_DATE,
-      java.time.format.DateTimeFormatter.ISO_DATE,
-      java.time.format.DateTimeFormatter.ISO_LOCAL_DATE,
-      java.time.format.DateTimeFormatter.ISO_OFFSET_DATE,
-      java.time.format.DateTimeFormatter.ISO_LOCAL_TIME,
-      new java.time.format.DateTimeFormatterBuilder()
-          .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-          .appendValue(MONTH_OF_YEAR, 2)
-          .appendValue(DAY_OF_MONTH, 2)
-          .appendLiteral("T")
-          .appendValue(HOUR_OF_DAY, 2)
-          .appendValue(MINUTE_OF_HOUR, 2)
-          .appendValue(SECOND_OF_MINUTE, 2)
-          .toFormatter(),
-      new java.time.format.DateTimeFormatterBuilder()
-          .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-          .appendValue(MONTH_OF_YEAR, 2)
-          .appendValue(DAY_OF_MONTH, 2)
-          .appendLiteral("T")
-          .appendValue(HOUR_OF_DAY, 2)
-          .appendValue(MINUTE_OF_HOUR, 2)
-          .appendValue(SECOND_OF_MINUTE, 2)
-          .appendZoneOrOffsetId()
-          .toFormatter(),
-      new java.time.format.DateTimeFormatterBuilder()
-          .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-          .appendValue(MONTH_OF_YEAR, 2)
-          .appendValue(DAY_OF_MONTH, 2)
-          .toFormatter()
-  );
-
-
-  /**
-   * Try parsing a given string into an {@link Instant} in as many ways as we know how.
-   * Dates will be normalized to the start of their days.
-   *
-   * @param value The instant we are parsing.
-   * @param timezone The timezone, if none is given in the instant.
-   *
-   * @return An instant corresponding to the value, if it could be parsed.
-   */
-  @SuppressWarnings("LoopStatementThatDoesntLoop")
-  public static Optional<java.time.Instant> parseInstant(String value, Optional<ZoneId> timezone) {
-    for (java.time.format.DateTimeFormatter formatter : DATE_TIME_FORMATS) {
-      try {
-        TemporalAccessor datetime = formatter.parse(value);
-        ZoneId parsedTimezone = datetime.query(TemporalQueries.zoneId());
-        ZoneOffset parsedOffset = datetime.query(TemporalQueries.offset());
-        if (parsedTimezone != null) {
-          return Optional.of(java.time.Instant.from(datetime));
-        } else if (parsedOffset != null) {
-          try {
-            return Optional.of(java.time.Instant.ofEpochSecond(datetime.getLong(ChronoField.INSTANT_SECONDS)));
-          } catch (UnsupportedTemporalTypeException e) {
-            return Optional.of(java.time.LocalDate.of(
-                datetime.get(ChronoField.YEAR),
-                datetime.get(ChronoField.MONTH_OF_YEAR),
-                datetime.get(ChronoField.DAY_OF_MONTH)
-            ).atStartOfDay().toInstant(parsedOffset));
-          }
-        } else {
-          if (timezone.isPresent()) {
-            java.time.Instant reference = java.time.LocalDate.of(
-                datetime.get(ChronoField.YEAR),
-                datetime.get(ChronoField.MONTH_OF_YEAR),
-                datetime.get(ChronoField.DAY_OF_MONTH)
-            ).atStartOfDay().toInstant(ZoneOffset.UTC);
-            ZoneOffset currentOffsetForMyZone = timezone.get().getRules().getOffset(reference);
-            try {
-              return Optional.of(java.time.LocalDateTime.of(
-                  datetime.get(ChronoField.YEAR),
-                  datetime.get(ChronoField.MONTH_OF_YEAR),
-                  datetime.get(ChronoField.DAY_OF_MONTH),
-                  datetime.get(ChronoField.HOUR_OF_DAY),
-                  datetime.get(ChronoField.MINUTE_OF_HOUR),
-                  datetime.get(ChronoField.SECOND_OF_MINUTE)
-              ).toInstant(currentOffsetForMyZone));
-            } catch (UnsupportedTemporalTypeException e) {
-              return Optional.of(java.time.LocalDate.of(
-                  datetime.get(ChronoField.YEAR),
-                  datetime.get(ChronoField.MONTH_OF_YEAR),
-                  datetime.get(ChronoField.DAY_OF_MONTH)
-              ).atStartOfDay().toInstant(currentOffsetForMyZone));
-            }
-          }
-        }
-      } catch (DateTimeParseException ignored) { }
-    }
-    return Optional.empty();
-  }
-
-
-
   /**
    * Converts a string that represents some kind of date into ISO 8601 format and
    *  returns it as a SUTime.Time
    *   YYYYMMDDThhmmss
    *
-   * @param dateStr The serialized date we are parsing to a document date.
+   * @param dateStr
    * @param allowPartial (allow partial ISO)
    */
   public static SUTime.Time parseDateTime(String dateStr, boolean allowPartial)
   {
     if (dateStr == null) return null;
-
-    Optional<java.time.Instant> refInstant = parseInstant(dateStr, Optional.empty());
-    if (refInstant.isPresent()) {
-      return new SUTime.GroundedTime(new Instant(refInstant.get().toEpochMilli()));
-    }
 
     Matcher m = PATTERN_ISO.matcher(dateStr);
     if (m.matches()) {

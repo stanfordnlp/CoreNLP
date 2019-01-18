@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  * POS tagger and the parser.
  *
  * @see edu.stanford.nlp.tagger.maxent.ExtractorFramesRare
- * @see edu.stanford.nlp.parser.lexparser.SpanishUnknownWordModel
+ * @see SpanishUnknownWordModel
  *
  * @author Jon Gauthier
  */

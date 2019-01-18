@@ -15,12 +15,14 @@ import java.util.function.Function;
  * <p>
  * Similar to Java's {@link java.util.regex.Pattern} except it is for sequences over arbitrary types T instead
  *  of just characters.
+ * </p>
  *
  * <p> A regular expression must first be compiled into
  * an instance of this class.  The resulting pattern can then be used to create
  * a {@link SequenceMatcher} object that can match arbitrary sequences of type T
  * against the regular expression.  All of the state involved in performing a match
  * resides in the matcher, so many matchers can share the same pattern.
+ * </p>
  *
  * <p>
  * To support sequence matching on a new type T, the following is needed:
@@ -37,21 +39,23 @@ import java.util.function.Function;
  * to support a specific type {@code T}.
  * <p>
  * To use
- * <pre>{@code
+ * <pre><code>
  *   SequencePattern p = SequencePattern.compile("....");
  *   SequenceMatcher m = p.getMatcher(tokens);
  *   while (m.find()) ....
- * }</pre>
+ * </code></pre>
+ * </p>
  *
  *
  * <p>
  * To support a new type {@code T}:
  * <ol>
- * <li> For a type {@code T} to be matchable, it has to have a corresponding {@code NodePattern<T>} that indicates
- *    whether a node is matched or not  (see {@code CoreMapNodePattern} for example)</li>
+ * <li> For a type {@code T} to be matchable, it has to have a corresponding <code>NodePattern<T></code> that indicates
+ *    whether a node is matched or not  (see <code>CoreMapNodePattern</code> for example)</li>
  * <li> To compile a string into corresponding pattern, will need to create a parser
- *    (see inner class {@code Parser}, {@code TokenSequencePattern} and {@code TokenSequenceParser.jj})</li>
+ *    (see inner class <code>Parser</code>, <code>TokenSequencePattern</code> and <code>TokenSequenceParser.jj</code>)</li>
  * </ol>
+ * </p>
  *
  * <p>
  * SequencePattern supports the following standard regex features:
@@ -61,6 +65,7 @@ import java.util.function.Function;
  *  <li>Groups  (capturing  / noncapturing )  </li>
  *  <li>Quantifiers (greedy / nongreedy) </li>
  * </ul>
+ * </p>
  *
  * <p>
  * SequencePattern also supports the following less standard features:
@@ -77,22 +82,20 @@ import java.util.function.Function;
  * <li> Conjunctions - conjunctions of sequence patterns (works for some cases)</li>
  * </ol>
  *
+ * </p>
  * <p>Note that this and the inherited classes do not implement any custom equals and hashCode functions.
+ * </p>
  *
  * @author Angel Chang
  * @see SequenceMatcher
  */
 public class SequencePattern<T> implements Serializable {
-
   // TODO:
   //  1. Validate backref capture groupid
   //  2. Actions
   //  3. Inconsistent templating with T
   //  4. Update TokensSequenceParser to handle backref of other attributes (\9{attr1,attr2,...})
   //  5. Improve nested capture groups (in matchresult) for other node types such as conjunctions/disjunctions
-
-  private static final long serialVersionUID = 3484918485303693833L;
-
   private String patternStr;
   private PatternExpr patternExpr;
   private SequenceMatchAction<T> action;
@@ -183,7 +186,8 @@ public class SequencePattern<T> implements Serializable {
   }
 
   // Compiles string (regex) to NFA for doing pattern simulation
-  public static <T> SequencePattern<T> compile(Env env, String string) {
+  public static <T> SequencePattern<T> compile(Env env, String string)
+  {
     try {
       Pair<PatternExpr, SequenceMatchAction<T>> p = env.parser.parseSequenceWithAction(env, string);
       return new SequencePattern<>(string, p.first(), p.second());
@@ -193,7 +197,8 @@ public class SequencePattern<T> implements Serializable {
     //throw new UnsupportedOperationException("Compile from string not implemented");
   }
 
-  protected static <T> SequencePattern<T> compile(SequencePattern.PatternExpr nodeSequencePattern) {
+  protected static <T> SequencePattern<T> compile(SequencePattern.PatternExpr nodeSequencePattern)
+  {
     return new SequencePattern<>(nodeSequencePattern);
   }
 
@@ -293,8 +298,6 @@ public class SequencePattern<T> implements Serializable {
    * Represents a sequence pattern expressions (before translating into NFA).
    */
   public abstract static class PatternExpr implements Serializable {
-
-    private static final long serialVersionUID = 7610237291757954879L;
 
     protected abstract Frag build();
 
@@ -401,13 +404,11 @@ public class SequencePattern<T> implements Serializable {
   /** Represents one element to be matched. */
   public static class SpecialNodePatternExpr extends PatternExpr {
 
-    private static final long serialVersionUID = 3347587132602082616L;
-
     private final String name;
     Factory<State> stateFactory;
 
     public SpecialNodePatternExpr(String name) {
-      this(name, null);
+      this.name = name;
     }
 
     public SpecialNodePatternExpr(String name, Factory<State> stateFactory) {
@@ -416,7 +417,8 @@ public class SequencePattern<T> implements Serializable {
     }
 
     @Override
-    protected Frag build() {
+    protected Frag build()
+    {
       State s = stateFactory.create();
       return new Frag(s);
     }
@@ -465,10 +467,8 @@ public class SequencePattern<T> implements Serializable {
     }
   }
 
-  /** Represents a sequence of patterns to be matched. */
+  // Represents a sequence of patterns to be matched
   public static class SequencePatternExpr extends PatternExpr {
-
-    private static final long serialVersionUID = 7446769896088599604L;
 
     final List<PatternExpr> patterns;
 
@@ -481,7 +481,8 @@ public class SequencePattern<T> implements Serializable {
     }
 
     @Override
-    protected Frag build() {
+    protected Frag build()
+    {
       Frag frag = null;
       if (patterns.size() > 0) {
         PatternExpr first = patterns.get(0);
@@ -512,7 +513,8 @@ public class SequencePattern<T> implements Serializable {
     }
 
     @Override
-    protected PatternExpr copy() {
+    protected PatternExpr copy()
+    {
       List<PatternExpr> newPatterns = new ArrayList<>(patterns.size());
       for (PatternExpr p:patterns) {
         newPatterns.add(p.copy());
@@ -547,10 +549,8 @@ public class SequencePattern<T> implements Serializable {
   // Need to match a previously matched group somehow
   public static class BackRefPatternExpr extends PatternExpr {
 
-    private static final long serialVersionUID = -4649629486266561619L;
-
-    private final NodesMatchChecker matcher; // How a match is determined
-    private final int captureGroupId;  // Indicates the previously matched group this need to match
+    private NodesMatchChecker matcher; // How a match is determined
+    private int captureGroupId = -1;  // Indicates the previously matched group this need to match
 
     public BackRefPatternExpr(NodesMatchChecker matcher, int captureGroupId) {
       if (captureGroupId <= 0) { throw new IllegalArgumentException("Invalid captureGroupId=" + captureGroupId); }
@@ -559,7 +559,8 @@ public class SequencePattern<T> implements Serializable {
     }
 
     @Override
-    protected Frag build() {
+    protected Frag build()
+    {
       State s = new BackRefState(matcher, captureGroupId);
       return new Frag(s);
     }
@@ -641,8 +642,6 @@ public class SequencePattern<T> implements Serializable {
   /** Expression that represents a group. */
   public static class GroupPatternExpr extends PatternExpr {
 
-    private static final long serialVersionUID = -6477601300665620926L;
-
     private final PatternExpr pattern;
     private final boolean capture; // Do capture or not?  If do capture, an capture group id will be assigned
     private int captureGroupId; // -1 if this pattern is not part of a capture group or capture group not yet assigned,
@@ -701,12 +700,14 @@ public class SequencePattern<T> implements Serializable {
     }
 
     @Override
-    protected PatternExpr optimize() {
+    protected PatternExpr optimize()
+    {
       return new GroupPatternExpr(pattern.optimize(), capture, captureGroupId, varname);
     }
 
     @Override
-    protected PatternExpr transform(NodePatternTransformer transformer) {
+    protected PatternExpr transform(NodePatternTransformer transformer)
+    {
       return new GroupPatternExpr(pattern.transform(transformer), capture, captureGroupId, varname);
     }
 
@@ -726,8 +727,6 @@ public class SequencePattern<T> implements Serializable {
 
   /**  Expression that represents a pattern that repeats for a number of times. */
   public static class RepeatPatternExpr extends PatternExpr {
-
-    private static final long serialVersionUID = 3935482630250147745L;
 
     private final PatternExpr pattern;
     private final int minMatch;
@@ -848,8 +847,6 @@ public class SequencePattern<T> implements Serializable {
 
   /**  Expression that represents a disjunction. */
   public static class OrPatternExpr extends PatternExpr {
-
-    private static final long serialVersionUID = 2566259662702631896L;
 
     private final List<PatternExpr> patterns;
 
@@ -1030,7 +1027,7 @@ public class SequencePattern<T> implements Serializable {
       for (Map.Entry<Pair<Class, Boolean>, Pair<Collection<PatternExpr>, Set<String>>> entry : stringPatterns.entrySet()) {
         Pair<Collection<PatternExpr>, Set<String>> saved = entry.getValue();
         Set<String> set = saved.second;
-        int flags = (entry.getKey().second)? (NodePattern.CASE_INSENSITIVE | NodePattern.UNICODE_CASE):0;
+        int flags = (entry.getKey().second)? NodePattern.CASE_INSENSITIVE:0;
         if (set.size() > OPTIMIZE_MIN_SIZE) {
           PatternExpr optimized = new NodePatternExpr(
                   new CoreMapNodePattern(entry.getKey().first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, flags)));
@@ -1084,8 +1081,6 @@ public class SequencePattern<T> implements Serializable {
 
   // Expression that represents a conjunction
   public static class AndPatternExpr extends PatternExpr {
-
-    private static final long serialVersionUID = -5470437627660213806L;
 
     private final List<PatternExpr> patterns;
 
@@ -1176,7 +1171,7 @@ public class SequencePattern<T> implements Serializable {
     }
   }
 
-  /* ----- NFA states for matching sequences ----- */
+  /****** NFA states for matching sequences *********/
 
   // Patterns are converted to the NFA states
   // Assumes the matcher will step through the NFA states one token at a time
@@ -1220,7 +1215,8 @@ public class SequencePattern<T> implements Serializable {
      * @param matchedStates - State of the matching so far (to be updated by the matching process)
      * @return true if match
      */
-    protected <T> boolean  match0(int bid, SequenceMatcher.MatchedStates<T> matchedStates) {
+    protected <T> boolean  match0(int bid, SequenceMatcher.MatchedStates<T> matchedStates)
+    {
       return match(bid, matchedStates, false);
     }
 
@@ -1230,11 +1226,13 @@ public class SequencePattern<T> implements Serializable {
      * @param matchedStates - State of the matching so far (to be updated by the matching process)
      * @return true if match
      */
-    protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates) {
+    protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates)
+    {
       return match(bid, matchedStates, true);
     }
 
-    protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume) {
+    protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume)
+    {
       return match(bid, matchedStates, consume, null);
     }
 
@@ -1243,14 +1241,14 @@ public class SequencePattern<T> implements Serializable {
      *  If consuming:  tries to match the next element - goes through states until an element is consumed or match is false
      *  If non-consuming: does not match the next element - goes through non element consuming states
      * In both cases, matchedStates should be updated as follows:
-     * - matchedStates should be updated with the next state to be processed.
-     *
+     * - matchedStates should be updated with the next state to be processed
      * @param bid - Branch id
      * @param matchedStates - State of the matching so far (to be updated by the matching process)
      * @param consume - Whether to consume the next element or not
      * @return true if match
      */
-    protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState) {
+    protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
+    {
       boolean match = false;
       if (next != null) {
         int i = 0;
@@ -1336,7 +1334,7 @@ public class SequencePattern<T> implements Serializable {
   }
 
   /**
-   * State for matching one element/node.
+   * State for matching one element/node
    */
   private static class NodePatternState extends State {
     final NodePattern pattern;
@@ -1667,8 +1665,8 @@ public class SequencePattern<T> implements Serializable {
     }
 
     @Override
-    protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState) {
-
+    protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
+    {
       // Opposite of GroupStartState
       // Mark the end of the group
       Object v = (prevState != null) ? prevState.value(bid, matchedStates) : null;
@@ -1682,8 +1680,8 @@ public class SequencePattern<T> implements Serializable {
     }
   }
 
-  static class ConjMatchStateInfo {
-
+  static class ConjMatchStateInfo
+  {
     // A conjunction consists of several child expressions
     //  When the conjunction state is entered,
     //    we keep track of the branch id and the node index

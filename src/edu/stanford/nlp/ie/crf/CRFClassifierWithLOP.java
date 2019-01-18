@@ -24,7 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -45,10 +45,10 @@ import java.util.zip.GZIPInputStream;
 public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN>  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierWithLOP.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierWithLOP.class);
 
-  private List<Set<Integer>> featureIndicesSetArray;
-  private List<List<Integer>> featureIndicesListArray;
+  List<Set<Integer>> featureIndicesSetArray;
+  List<List<Integer>> featureIndicesListArray;
 
   protected CRFClassifierWithLOP() {
     super(new SeqClassifierFlags());
@@ -132,8 +132,9 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
     getFeatureBoundaryIndices(numFeatures, numLopExpert);
 
     if (flags.initialLopWeights != null) {
-      try (BufferedReader br = IOUtils.readerFromString(flags.initialLopWeights)) {
+      try {
         log.info("Reading initial LOP weights from file " + flags.initialLopWeights + " ...");
+        BufferedReader br = IOUtils.readerFromString(flags.initialLopWeights);
         List<double[]> listOfWeights = new ArrayList<>(numLopExpert);
         for (String line; (line = br.readLine()) != null; ) {
           line = line.trim();
@@ -201,9 +202,10 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
     if (flags.initialLopScales == null) {
       initialScales = func.initial();
     } else {
-      log.info("Reading initial LOP scales from file " + flags.initialLopScales);
-      try (DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
-            flags.initialLopScales))))) {
+      try {
+        log.info("Reading initial LOP scales from file " + flags.initialLopScales);
+        DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
+            flags.initialLopScales))));
         initialScales = ConvertByteArray.readDoubleArr(dis);
       } catch (IOException e) {
         throw new RuntimeException("Could not read from double initial LOP scales file " + flags.initialLopScales);

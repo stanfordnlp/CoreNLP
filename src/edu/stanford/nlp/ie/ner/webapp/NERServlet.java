@@ -8,7 +8,6 @@ import java.util.zip.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import edu.stanford.nlp.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
@@ -25,33 +24,31 @@ import edu.stanford.nlp.ling.CoreAnnotations;
  *
  **/
 
-public class NERServlet extends HttpServlet {
 
-  private static final long serialVersionUID = 1584102147050497227L;
-
+public class NERServlet extends HttpServlet
+{
   private String format;
   private boolean spacing;
   private String defaultClassifier;
   private List<String> classifiers = new ArrayList<>();
-  private Map<String, CRFClassifier<CoreMap>> ners;
+  private Map<String, CRFClassifier> ners;
 
   private static final int MAXIMUM_QUERY_LENGTH = 3000;
-
-  @Override
-  public void init() throws ServletException {
+  
+  public void init() 
+    throws ServletException 
+  {
     format = getServletConfig().getInitParameter("outputFormat");
-    if (format == null || format.trim().isEmpty()) {
+    if (format == null || format.trim().equals(""))
       throw new ServletException("Invalid outputFormat setting.");
-    }
-
+    
     String spacingStr = getServletConfig().getInitParameter("preserveSpacing");
-    if (spacingStr == null || spacingStr.trim().isEmpty()) {
+    if (spacingStr == null || spacingStr.trim().equals(""))
       throw new ServletException("Invalid preserveSpacing setting.");
-    }
     //spacing = Boolean.valueOf(spacingStr).booleanValue();
     spacingStr = spacingStr.trim().toLowerCase();
     spacing = "true".equals(spacingStr);
-
+    
     String path = getServletContext().getRealPath("/WEB-INF/data/models");
     for (String classifier : new File(path).list()) {
       classifiers.add(classifier);
@@ -68,10 +65,9 @@ public class NERServlet extends HttpServlet {
       CRFClassifier model = null;
       String filename = "/WEB-INF/data/models/" + classifier;
       InputStream is = getServletConfig().getServletContext().getResourceAsStream(filename);
-
-      if (is == null) {
+      
+      if (is == null)
         throw new ServletException("File not found. Filename = " + filename);
-      }
       try {
         if (filename.endsWith(".gz")) {
           is = new BufferedInputStream(new GZIPInputStream(is));
@@ -86,15 +82,18 @@ public class NERServlet extends HttpServlet {
       } catch (ClassNotFoundException e) {
         throw new ServletException("Classifier class not found problem.");
       } finally {
-        IOUtils.closeIgnoringExceptions(is);
+        try {
+          is.close();
+        } catch (IOException e) {
+          //do nothing
+        }
       }
       ners.put(classifier, model);
     }
   }
-
-  @Override
+  
   public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException
+    throws ServletException, IOException 
   {
     if (request.getCharacterEncoding() == null) {
       request.setCharacterEncoding("utf-8");
@@ -110,47 +109,48 @@ public class NERServlet extends HttpServlet {
     this.getServletContext().getRequestDispatcher("/footer.jsp").
       include(request, response);
   }
-
-  @Override
+  
   public void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException
+    throws ServletException, IOException 
   {
     doGet(request, response);
   }
 
-  private void addResults(HttpServletRequest request,
-                          HttpServletResponse response) throws IOException {
+  public void addResults(HttpServletRequest request, 
+                         HttpServletResponse response) 
+    throws IOException
+  {
     String input = request.getParameter("input");
     if (input == null) {
       return;
     }
     input = input.trim();
-    if (input.isEmpty()) {
+    if (input.equals("")) {
       return;
     }
 
     PrintWriter out = response.getWriter();
     if (input.length() > MAXIMUM_QUERY_LENGTH) {
-      out.print("This query is too long.  If you want to run very long queries, please download and use our <a href=\"http://nlp.stanford.edu/software/CRF-NER.html\">publicly released distribution</a>.");
+      out.print("This query is too long.  If you want to run very long queries, please download and use our <a href=\"http://nlp.stanford.edu/software/CRF-NER.shtml\">publicly released distribution</a>.");
       return;
     }
-
+    
     String outputFormat = request.getParameter("outputFormat");
-    if (outputFormat == null || outputFormat.trim().isEmpty()) {
+    if (outputFormat == null || outputFormat.trim().equals("")) {
       outputFormat = this.format;
     }
-
+    
     boolean preserveSpacing;
     String preserveSpacingStr = request.getParameter("preserveSpacing");
-    if (preserveSpacingStr == null || preserveSpacingStr.trim().isEmpty()) {
+    if (preserveSpacingStr == null || preserveSpacingStr.trim().equals("")) {
       preserveSpacing = this.spacing;
     } else {
       preserveSpacingStr = preserveSpacingStr.trim();
       preserveSpacing = Boolean.valueOf(preserveSpacingStr);
     }
-
+    
     String classifier = request.getParameter("classifier");
-    if (classifier == null || classifier.trim().isEmpty()) {
+    if (classifier == null || classifier.trim().equals("")) {
       classifier = this.defaultClassifier;
     }
 
@@ -165,13 +165,13 @@ public class NERServlet extends HttpServlet {
     }
   }
 
-  private static void outputHighlighting(PrintWriter out,
-                                         CRFClassifier<CoreMap> classifier,
-                                         String input) {
+  public void outputHighlighting(PrintWriter out, 
+                                 CRFClassifier classifier,
+                                 String input) {
     Set<String> labels = classifier.labels();
     String background = classifier.backgroundSymbol();
     List<List<CoreMap>> sentences = classifier.classify(input);
-    Map<String, Color> tagToColorMap =
+    Map<String, Color> tagToColorMap = 
       NERGUI.makeTagToColorMap(labels, background);
 
     StringBuilder result = new StringBuilder();
@@ -188,7 +188,7 @@ public class NERServlet extends HttpServlet {
         // Add a color bar for any tagged words
         if (!background.equals(answer)) {
           Color color = tagToColorMap.get(answer);
-          result.append("<span style=\"color:#ffffff;background:" +
+          result.append("<span style=\"color:#ffffff;background:" + 
                         NERGUI.colorToHTML(color) + "\">");
         }
 
@@ -202,19 +202,18 @@ public class NERServlet extends HttpServlet {
       }
     }
     if (lastEndOffset < input.length()) {
-      result.append(StringEscapeUtils.escapeHtml4(input.substring(lastEndOffset)));
+      result.append(StringEscapeUtils.escapeHtml4(input.substring(lastEndOffset)));      
     }
     result.append("<br><br>");
     result.append("Potential tags:");
-    for (Map.Entry<String, Color> stringColorEntry : tagToColorMap.entrySet()) {
+    for (String label : tagToColorMap.keySet()) {
       result.append("<br>&nbsp;&nbsp;");
-      Color color = stringColorEntry.getValue();
-      result.append("<span style=\"color:#ffffff;background:" +
+      Color color = tagToColorMap.get(label);
+      result.append("<span style=\"color:#ffffff;background:" + 
                     NERGUI.colorToHTML(color) + "\">");
-      result.append(StringEscapeUtils.escapeHtml4(stringColorEntry.getKey()));
+      result.append(StringEscapeUtils.escapeHtml4(label));
       result.append("</span>");
     }
-    out.print(result);
+    out.print(result.toString());
   }
-
 }

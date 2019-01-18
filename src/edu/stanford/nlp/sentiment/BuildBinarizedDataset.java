@@ -1,4 +1,5 @@
-package edu.stanford.nlp.sentiment;
+package edu.stanford.nlp.sentiment; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.StringReader;
 import java.util.List;
@@ -16,7 +17,6 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * @author John Bauer
@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class BuildBinarizedDataset  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(BuildBinarizedDataset.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(BuildBinarizedDataset.class);
 
   private BuildBinarizedDataset() {} // static methods only
 
@@ -124,8 +124,8 @@ public class BuildBinarizedDataset  {
    * (next block starts here) <br>
    * </code>
    * By default the englishPCFG parser is used.  This can be changed
-   * with the {@code -parserModel} flag.  Specify an input file
-   * with {@code -input}.
+   * with the <code>-parserModel</code> flag.  Specify an input file
+   * with <code>-input</code>.
    * <br>
    * If a sentiment model is provided with -sentimentModel, that model
    * will be used to prelabel the sentences.  Any spans with given

@@ -103,10 +103,10 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "(ROOT (S (NP (NNP Clinton)) (VP (VBD defeated) (NP (NNP Dole))) (. .)))",
           "nsubj(defeated-2, Clinton-1)\n" +
            "root(ROOT-0, defeated-2)\n" +
-           "dobj(defeated-2, Dole-3)\n"},
+           "obj(defeated-2, Dole-3)\n"},
          {TestType.BASIC,
           "(ROOT (S (SBAR (WHNP (WP What)) (S (NP (PRP she)) (VP (VBD said)))) (VP (VBZ is) (ADJP (JJ untrue))) (. .)))",
-          "dobj(said-3, What-1)\n" +
+          "obj(said-3, What-1)\n" +
            "nsubj(said-3, she-2)\n" +
            "csubj(untrue-5, said-3)\n" +
            "cop(untrue-5, is-4)\n" +
@@ -133,7 +133,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "root(ROOT-0, gave-2)\n" +
            "iobj(gave-2, me-3)\n" +
            "det(raise-5, a-4)\n" +
-           "dobj(gave-2, raise-5)\n"},
+           "obj(gave-2, raise-5)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
           "nsubj(like-2, I-1)\n" +
@@ -153,7 +153,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "root(ROOT-0, have-2)\n" +
            "neg(information-5, no-3)\n" +
            "amod(information-5, useful-4)\n" +
-           "dobj(have-2, information-5)\n" +
+           "obj(have-2, information-5)\n" +
            "mark(risk-11, on-6)\n" +
            "mark(risk-11, whether-7)\n" +
            "nsubj(risk-11, users-8)\n" +
@@ -168,7 +168,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "nmod(heard-2, asbestos-4)\n" +
            "xcomp(heard-2, having-5)\n" +
            "amod(properties-7, questionable-6)\n" +
-           "dobj(having-5, properties-7)\n"},
+           "obj(having-5, properties-7)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP He)) (VP (VBZ says) (SBAR (IN that) (S (NP (PRP you)) (VP (VBP like) (S (VP (TO to) (VP (VB swim)))))))) (. .)))",
           "nsubj(says-2, He-1)\n" +
@@ -186,7 +186,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "mark(did-6, that-4)\n" +
            "nsubj(did-6, he-5)\n" +
            "ccomp(certain-3, did-6)\n" +
-           "dobj(did-6, it-7)\n"},
+           "obj(did-6, it-7)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
@@ -208,14 +208,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "nsubj(launched-11, insurgents-10)\n" +
            "advcl(engaged-5, launched-11)\n" +
            "amod(attacks-13, simultaneous-12)\n" +
-           "dobj(launched-11, attacks-13)\n"},
+           "obj(launched-11, attacks-13)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN man)) (SBAR (WHNP (WP who)) (S (NP (PRP you)) (VP (VBP love)))))) (. .)))",
           "nsubj(saw-2, I-1)\n" +
            "root(ROOT-0, saw-2)\n" +
            "det(man-4, the-3)\n" +
-           "dobj(saw-2, man-4)\n" +
-           "dobj(love-7, who-5)\n" +
+           "obj(saw-2, man-4)\n" +
+           "obj(love-7, who-5)\n" +
            "nsubj(love-7, you-6)\n" +
            "acl:relcl(man-4, love-7)\n"},
          {TestType.BASIC,
@@ -223,9 +223,9 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "nsubj(saw-2, I-1)\n" +
            "root(ROOT-0, saw-2)\n" +
            "det(man-4, the-3)\n" +
-           "dobj(saw-2, man-4)\n" +
+           "obj(saw-2, man-4)\n" +
            "nmod:poss(wife-6, whose-5)\n" +
-           "dobj(love-8, wife-6)\n" +
+           "obj(love-8, wife-6)\n" +
            "nsubj(love-8, you-7)\n" +
            "acl:relcl(man-4, love-8)\n"},
          {TestType.BASIC,
@@ -233,9 +233,9 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "nsubj(saw-2, I-1)\n" +
            "root(ROOT-0, saw-2)\n" +
            "det(man-4, the-3)\n" +
-           "dobj(saw-2, man-4)\n" +
+           "obj(saw-2, man-4)\n" +
            "nmod:poss(wife-6, whose-5)\n" +
-           "dobj(love-8, wife-6)\n" +
+           "obj(love-8, wife-6)\n" +
            "nsubj(love-8, you-7)\n" +
            "acl:relcl(man-4, love-8)\n"},
          {TestType.BASIC,
@@ -270,12 +270,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "advcl(tell-10, know-3)\n" +
            "nsubj(did-5, who-4)\n" +
            "ccomp(know-3, did-5)\n" +
-           "dobj(did-5, it-6)\n" +
+           "obj(did-5, it-6)\n" +
            "nsubj(tell-10, you-8)\n" +
            "aux(tell-10, should-9)\n" +
            "root(ROOT-0, tell-10)\n" +
            "det(teacher-12, the-11)\n" +
-           "dobj(tell-10, teacher-12)\n"},
+           "obj(tell-10, teacher-12)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP-TMP (JJ Last) (NN night)) (, ,) (NP (PRP I)) (VP (VBP swam) (PP (IN in) (NP (DT the) (NN pool)))) (. .)))",
           "amod(night-2, Last-1)\n" +
@@ -297,14 +297,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "mark(secure-9, to-8)\n" +
            "advcl(talked-2, secure-9)\n" +
            "det(account-11, the-10)\n" +
-           "dobj(secure-9, account-11)\n"},
+           "obj(secure-9, account-11)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN book)) (SBAR (WHNP (WDT which)) (S (NP (PRP you)) (VP (VBD bought)))))) (. .)))",
           "nsubj(saw-2, I-1)\n" +
            "root(ROOT-0, saw-2)\n" +
            "det(book-4, the-3)\n" +
-           "dobj(saw-2, book-4)\n" +
-           "dobj(bought-7, which-5)\n" +
+           "obj(saw-2, book-4)\n" +
+           "obj(bought-7, which-5)\n" +
            "nsubj(bought-7, you-6)\n" +
            "acl:relcl(book-4, bought-7)\n"},
          {TestType.BASIC,
@@ -312,12 +312,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "nsubj(eats-2, Sam-1)\n" +
            "root(ROOT-0, eats-2)\n" +
            "nummod(sheep-4, 3-3)\n" +
-           "dobj(eats-2, sheep-4)\n"},
+           "obj(eats-2, sheep-4)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBD lost) (NP (QP ($ $) (CD 3.2) (CD billion)))) (. .)))",
           "nsubj(lost-2, I-1)\n" +
            "root(ROOT-0, lost-2)\n" +
-           "dobj(lost-2, $-3)\n" +
+           "obj(lost-2, $-3)\n" +
            "compound(billion-5, 3.2-4)\n" +
            "nummod($-3, billion-5)\n"},
          {TestType.BASIC,
@@ -336,7 +336,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "appos(Sam-1, brother-4)\n" +
            "root(ROOT-0, eats-6)\n" +
            "amod(meat-8, red-7)\n" +
-           "dobj(eats-6, meat-8)\n"},
+           "obj(eats-6, meat-8)\n"},
          {TestType.BASIC,
           "(ROOT (NP (NP (DT The) (JJ Australian) (NNP Broadcasting) (NNP Corporation)) (PRN (-LRB- -LRB-) (NP (NNP ABC)) (-RRB- -RRB-)) (. .)))",
           "det(Corporation-4, The-1)\n" +
@@ -348,13 +348,13 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "(ROOT (S (NP (NNP Bill)) (VP (VBD picked) (NP (NNP Fred)) (PP (IN for) (NP (NP (DT the) (NN team)) (VP (VBG demonstrating) (NP (PRP$ his) (NN incompetence)))))) (. .)))",
           "nsubj(picked-2, Bill-1)\n" +
            "root(ROOT-0, picked-2)\n" +
-           "dobj(picked-2, Fred-3)\n" +
+           "obj(picked-2, Fred-3)\n" +
            "case(team-6, for-4)\n" +
            "det(team-6, the-5)\n" +
            "nmod(picked-2, team-6)\n" +
            "acl(team-6, demonstrating-7)\n" +
            "nmod:poss(incompetence-9, his-8)\n" +
-           "dobj(demonstrating-7, incompetence-9)\n"},
+           "obj(demonstrating-7, incompetence-9)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (RB not) (NP (DT a) (NN scientist))) (. .)))",
           "nsubj(scientist-5, Bill-1)\n" +
@@ -392,7 +392,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "root(ROOT-0, live-6)\n"},
          {TestType.BASIC,
           "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBD did) (NP (NNP Charles) (NNP Babbage)) (VP (VB invent))) (. ?)))",
-          "dobj(invent-5, What-1)\n" +
+          "obj(invent-5, What-1)\n" +
            "aux(invent-5, did-2)\n" +
            "compound(Babbage-4, Charles-3)\n" +
            "nsubj(invent-5, Babbage-4)\n" +
@@ -428,7 +428,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "root(ROOT-0, shut-2)\n" +
            "compound:prt(shut-2, down-3)\n" +
            "det(station-5, the-4)\n" +
-           "dobj(shut-2, station-5)\n"},
+           "obj(shut-2, station-5)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (NP (NNS Truffles)) (VP (VBN picked) (PP (IN during) (NP (DT the) (NN spring))))) (VP (VBP are) (ADJP (JJ tasty))) (. .)))",
           "nsubj(tasty-7, Truffles-1)\n" +
@@ -459,7 +459,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "cc:preconj(id-8, both-5)\n" +
            "det(id-8, the-6)\n" +
            "compound(id-8, entity-7)\n" +
-           "dobj(include-4, id-8)\n" +
+           "obj(include-4, id-8)\n" +
            "cc(id-8, and-9)\n" +
            "det(name-12, the-10)\n" +
            "compound(name-12, entity-11)\n" +
@@ -476,14 +476,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "det(government-2, The-1)\n" +
            "nsubj(counts-3, government-2)\n" +
            "root(ROOT-0, counts-3)\n" +
-           "dobj(counts-3, money-4)\n" +
+           "obj(counts-3, money-4)\n" +
            "mark(spent-8, as-5)\n" +
            "nsubjpass(spent-8, it-6)\n" +
            "auxpass(spent-8, is-7)\n" +
            "advcl(counts-3, spent-8)\n" +
            "nsubj(counts-11, Dodge-10)\n" +
            "parataxis(counts-3, counts-11)\n" +
-           "dobj(counts-11, contracts-12)\n" +
+           "obj(counts-11, contracts-12)\n" +
            "advmod(awarded-16, when-13)\n" +
            "nsubjpass(awarded-16, they-14)\n" +
            "auxpass(awarded-16, are-15)\n" +
@@ -505,7 +505,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB rather) (IN than)) (NP (NNS cats)))) (. .)))",
           "nsubj(like-2, I-1)\n" +
            "root(ROOT-0, like-2)\n" +
-           "dobj(like-2, dogs-3)\n" +
+           "obj(like-2, dogs-3)\n" +
            "cc(dogs-3, rather-4)\n" +
            "mwe(rather-4, than-5)\n" +
            "conj(dogs-3, cats-6)\n"},
@@ -513,7 +513,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NN brandy)) (CONJP (RB not) (TO to) (VB mention)) (NP (NN cognac)))) (. .)))",
           "nsubj(like-2, I-1)\n" +
            "root(ROOT-0, like-2)\n" +
-           "dobj(like-2, brandy-3)\n" +
+           "obj(like-2, brandy-3)\n" +
            "cc(brandy-3, not-4)\n" +
            "mwe(not-4, to-5)\n" +
            "mwe(not-4, mention-6)\n" +
@@ -524,7 +524,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "root(ROOT-0, like-2)\n" +
            "neg(only-4, not-3)\n" +
            "cc:preconj(cats-5, only-4)\n" +
-           "dobj(like-2, cats-5)\n" +
+           "obj(like-2, cats-5)\n" +
            "cc(cats-5, but-6)\n" +
            "advmod(dogs-8, also-7)\n" +
            "conj(cats-5, dogs-8)\n"},
@@ -535,7 +535,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "det(industry-6, the-3)\n" +
            "amod(engineering-5, mechanical-4)\n" +
            "compound(industry-6, engineering-5)\n" +
-           "dobj(knows-2, industry-6)\n"},
+           "obj(knows-2, industry-6)\n"},
          {TestType.BASIC,
           "( (SBARQ (WHNP (WP What) (NN weapon)) (SQ (VBZ is) (NP (DT the) (JJ mythological) (NN character) (NN Apollo)) (ADJP (RBS most) (JJ proficient) (PP (IN with)))) (. ?)))",
           "det(weapon-2, What-1)\n" +
@@ -557,7 +557,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "mark(reprint-6, to-5)\n" +
            "xcomp(free-4, reprint-6)\n" +
            "amod(material-8, such-7)\n" +
-           "dobj(reprint-6, material-8)\n"},
+           "obj(reprint-6, material-8)\n"},
          {TestType.BASIC,
           "(ROOT (SBARQ (WHNP (WHADJP (WRB How) (JJ many)) (NP (NNP James) (NNP Bond) (NNS novels))) (SQ (VBP are) (NP (EX there))) (. ?)))",
           "advmod(many-2, How-1)\n" +
@@ -590,7 +590,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "( (SINV (VP (VBG Defending) (NP (PRP$ their) (NNS ramparts))) (VP (VBP are)) (NP (NP (NNP Wall) (NNP Street) (POS 's)) (NNP Old) (NNP Guard)) (. .)))",
           "root(ROOT-0, Defending-1)\n" +
            "nmod:poss(ramparts-3, their-2)\n" +
-           "dobj(Defending-1, ramparts-3)\n" +
+           "obj(Defending-1, ramparts-3)\n" +
            "aux(Defending-1, are-4)\n" +
            "compound(Street-6, Wall-5)\n" +
            "nmod:poss(Guard-9, Street-6)\n" +
@@ -646,7 +646,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "(ROOT (S (NP (PRP He)) (VP (VBZ gets) (NP (PRP me)) (ADVP-TMP (DT every) (NN time))) (. .)))",
           "nsubj(gets-2, He-1)\n" +
            "root(ROOT-0, gets-2)\n" +
-           "dobj(gets-2, me-3)\n" +
+           "obj(gets-2, me-3)\n" +
            "det(time-5, every-4)\n" +
            "advmod(gets-2, time-5)\n"},
          {TestType.BASIC,
@@ -674,7 +674,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "nsubj(holding-3, u-1)\n" +
            "aux(holding-3, r-2)\n" +
            "root(ROOT-0, holding-3)\n" +
-           "dobj(holding-3, it-4)\n" +
+           "obj(holding-3, it-4)\n" +
            "advmod(tight-6, too-5)\n" +
            "advmod(holding-3, tight-6)\n"},
          {TestType.BASIC,
@@ -683,7 +683,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "aux(mail-4, should-2)\n" +
            "goeswith(mail-4, e-3)\n" +
            "root(ROOT-0, mail-4)\n" +
-           "dobj(mail-4, her-5)\n" +
+           "obj(mail-4, her-5)\n" +
            "advmod(mail-4, sometimes-6)\n"},
          {TestType.BASIC,
           "( (S (NP-SBJ (NN Interest)) (VP (VBZ is) (ADJP-PRD (ADJP (NP-ADV (DT a) (JJ great) (NN deal)) (JJR higher)) (SBAR (IN than) (S (NP-SBJ (PRP it)) (VP (VBD was) (ADJP-PRD (-NONE- *?*)) (ADVP-TMP (NP (DT a) (NN year)) (RB ago))))))) (. .)))",
@@ -730,7 +730,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "compound(ship-7, royal-4)\n" +
            "cc(royal-4, or-5)\n" +
            "conj(royal-4, carnival-6)\n" +
-           "dobj(specify-2, ship-7)\n" +
+           "obj(specify-2, ship-7)\n" +
            "discourse(specify-2, -LRB-:-8)\n"},
          {TestType.BASIC,
           "(NP (DT those) (RRC (ADVP-TMP (RB still)) (PP-LOC (IN under) (NP (NNP GASB) (NNS rules)))))",
@@ -785,7 +785,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "nsubj(wrote-4, Council-3)\n" +
            "root(ROOT-0, wrote-4)\n" +
            "det(BPCA-6, the-5)\n" +
-           "dobj(wrote-4, BPCA-6)\n" +
+           "obj(wrote-4, BPCA-6)\n" +
            "mark(belongs-25, that-7)\n" +
            "det(garden-23, this-8)\n" +
            "advmod(private-12, too-10)\n" +
@@ -817,7 +817,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "det(audit-11, an-10)\n" +
            "nmod(coming-8, audit-11)\n" +
            "ccomp(have-6, hearing-12)\n" +
-           "dobj(hearing-12, oohs-14)\n" +
+           "obj(hearing-12, oohs-14)\n" +
            "cc(oohs-14, and-16)\n" +
            "conj(oohs-14, ahs-18)\n"},
          {TestType.BASIC,
@@ -827,7 +827,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "nsubj(resumed-4, nationalists-3)\n" +
            "root(ROOT-0, resumed-4)\n" +
            "amod(activity-6, political-5)\n" +
-           "dobj(resumed-4, activity-6)\n" +
+           "obj(resumed-4, activity-6)\n" +
            "case(Africa-9, in-7)\n" +
            "compound(Africa-9, South-8)\n" +
            "nmod(resumed-4, Africa-9)\n" +
@@ -838,7 +838,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "case(apartheid-15, against-14)\n" +
            "nmod(fight-13, apartheid-15)\n" +
            "advcl(resumed-4, raising-17)\n" +
-           "dobj(raising-17, fears-18)\n" +
+           "obj(raising-17, fears-18)\n" +
            "case(backlash-23, of-19)\n" +
            "det(backlash-23, a-20)\n" +
            "amod(backlash-23, possible-21)\n" +
@@ -853,7 +853,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            "nmod(held-2, capacity-5)\n" +
            "advmod(irritates-7, greatly-6)\n" +
            "root(ROOT-0, irritates-7)\n" +
-           "dobj(irritates-7, them-8)\n" +
+           "obj(irritates-7, them-8)\n" +
            "cc(irritates-7, and-10)\n" +
            "aux(led-12, has-11)\n" +
            "conj(irritates-7, led-12)\n" +
@@ -864,7 +864,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
           "( (S (NP-SBJ (PRP They)) (VP (VBD acquired) (NP (NP (NNS stakes)) (PP (IN in) (NP (NP (VBG bottling) (NNS companies)) (UCP-LOC (PP (IN in) (NP (DT the) (NNP U.S.))) (CC and) (ADVP (RB overseas))))))) (. .)))",
           "nsubj(acquired-2, They-1)\n" +
            "root(ROOT-0, acquired-2)\n" +
-           "dobj(acquired-2, stakes-3)\n" +
+           "obj(acquired-2, stakes-3)\n" +
            "case(companies-6, in-4)\n" +
            "amod(companies-6, bottling-5)\n" +
            "nmod(stakes-3, companies-6)\n" +
@@ -876,7 +876,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
            // This is the say-complement case that we don't yet handle, but might someday.
            //{TestType.BASIC,
            //  "( (SBAR (WHNP-9 (WDT Which)) (S (NP-SBJ (PRP I)) (ADVP-TMP (RB then)) (VP (VBD realized) (SBAR (-NONE- *0*) (S (NP-SBJ (PRP I)) (VP (VBD missed) (NP-9 (-NONE- *T*))))))) (. .)))",
-           //  "dobj(missed-6, Which-1)\n" +
+           //  "obj(missed-6, Which-1)\n" +
            //   "nsubj(realized-4, I-2)\n" +
            //   "advmod(realized-4, then-3)\n" +
            //   "root(ROOT-0, realized-4)\n" +
@@ -887,12 +887,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
              "nsubj(saw-2, I-1)\n" +
               "root(ROOT-0, saw-2)\n" +
               "det(woman-4, the-3)\n" +
-              "dobj(saw-2, woman-4)\n" +
+              "obj(saw-2, woman-4)\n" +
               "nmod(gave-7, whom-5)\n" +
               "nsubj(gave-7, you-6)\n" +
               "acl:relcl(woman-4, gave-7)\n" +
               "det(package-9, the-8)\n" +
-              "dobj(gave-7, package-9)\n" +
+              "obj(gave-7, package-9)\n" +
               "case(whom-5, to-10)\n"},
             {TestType.BASIC,
              "( (S (NP-SBJ (PRP i)) (VP (VBP m) (ADJP-PRD (JJ fat)))))",
@@ -913,7 +913,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nmod(referred-6, friend-10)\n"},
             {TestType.BASIC,
              "( (SBARQ (WHNP-9 (WP what)) (SQ (VBZ does) (NP-SBJ (PRP it)) (VP (VB mean) (NP-9 (-NONE- *T*)) (SBAR-TMP (WHADVP-1 (WRB when)) (S (NP-SBJ (DT a) (JJ veiled) (NN chameleon) (NN egg)) (VP (VBZ is) (ADJP-PRD (JJ soft)) (ADVP-TMP-1 (-NONE- *T*))))))) (. ?)))",
-             "dobj(mean-4, what-1)\n" +
+             "obj(mean-4, what-1)\n" +
               "aux(mean-4, does-2)\n" +
               "nsubj(mean-4, it-3)\n" +
               "root(ROOT-0, mean-4)\n" +
@@ -940,7 +940,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "compound(pilots-6, Airlines-5)\n" +
               "iobj(awarded-3, pilots-6)\n" +
               "advmod($-8, between-7)\n" +
-              "dobj(awarded-3, $-8)\n" +
+              "obj(awarded-3, $-8)\n" +
               "compound(million-10, 60-9)\n" +
               "nummod($-8, million-10)\n" +
               "cc($-8, and-11)\n" +
@@ -959,7 +959,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "nmod:poss(reorganization-28, carrier-25)\n" +
               "case(carrier-25, 's-26)\n" +
               "compound(reorganization-28, bankruptcy-law-27)\n" +
-              "dobj(complicate-23, reorganization-28)\n"},
+              "obj(complicate-23, reorganization-28)\n"},
             // Check same regardless of ROOT or none and functional categories or none
             {TestType.BASIC,
              "(ROOT (S (NP (CD Two) (JJ former) (NNS ministers) ) (VP (VBD were) (ADJP (ADJP (ADVP (RB heavily) ) (VBN implicated) )) (PP (IN in) (NP (DT the) (NNP Koskotas) (NN affair) )))))",
@@ -1068,10 +1068,10 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "((S (S-IMP (NP-SBJ (-NONE- *PRO*)) (VP (VP (VB Try) (S-NOM (NP-SBJ (-NONE- *PRO*)) (VP (VBG googling) (NP (PRP it))))) (CC or) (VP (VB type) (NP (PRP it)) (PP-CLR (IN into) (NP (NNP youtube)))))) (S (NP-SBJ (PRP you)) (VP (MD might) (VP (VB get) (ADJP-PRD (JJ lucky))))) (. .)))",
               "root(ROOT-0, Try-1)\n" +
                "xcomp(Try-1, googling-2)\n" +
-               "dobj(googling-2, it-3)\n" +
+               "obj(googling-2, it-3)\n" +
                "cc(Try-1, or-4)\n" +
                "conj(Try-1, type-5)\n" +
-               "dobj(type-5, it-6)\n" +
+               "obj(type-5, it-6)\n" +
                "case(youtube-8, into-7)\n" +
                "nmod(type-5, youtube-8)\n" +
                "nsubj(get-11, you-9)\n" +
@@ -1110,19 +1110,19 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, honest-2)\n"},
              {TestType.BASIC,
               "(ROOT (SBARQ (WHNP (WP What) ) (SQ (VBZ is) (NP (PRP he) ) (VP (VBG doing)))))",
-              "dobj(doing-4, What-1)\n" +
+              "obj(doing-4, What-1)\n" +
                "aux(doing-4, is-2)\n" +
                "nsubj(doing-4, he-3)\n" +
                "root(ROOT-0, doing-4)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP What) ) (SQ (VBZ is) (NP (PRP he) ) (VP (VBG doing)))))",
-              "dobj(doing-4, What-1)\n" +
+              "obj(doing-4, What-1)\n" +
                "aux(doing-4, is-2)\n" +
                "nsubj(doing-4, he-3)\n" +
                "root(ROOT-0, doing-4)\n"},
              {TestType.BASIC,
               "(ROOT (SBARQ (WHNP (WP What) ) (SQ (VBP am) (NP (PRP I) ) (VP (VBG doing) (PP (IN in) (NP (NNP Jackson) (NNP Hole) )))) (. ?) ))",
-              "dobj(doing-4, What-1)\n" +
+              "obj(doing-4, What-1)\n" +
                "aux(doing-4, am-2)\n" +
                "nsubj(doing-4, I-3)\n" +
                "root(ROOT-0, doing-4)\n" +
@@ -1131,7 +1131,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nmod(doing-4, Hole-7)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP What) ) (SQ (VBP am) (NP (PRP I) ) (VP (VBG doing) (PP (IN in) (NP (NNP Jackson) (NNP Hole) )))) (. ?) ))",
-              "dobj(doing-4, What-1)\n" +
+              "obj(doing-4, What-1)\n" +
                "aux(doing-4, am-2)\n" +
                "nsubj(doing-4, I-3)\n" +
                "root(ROOT-0, doing-4)\n" +
@@ -1207,7 +1207,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, wrong-3)\n" +
                "mark(expecting-5, with-4)\n" +
                "advcl(wrong-3, expecting-5)\n" +
-               "dobj(expecting-5, pizza-6)\n"},
+               "obj(expecting-5, pizza-6)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (ADJP (JJ wrong) (PP (IN with) (S (VP (VBG expecting) (NP (NN pizza))))))) (. ?)))",
               "nsubj(wrong-3, What-1)\n" +
@@ -1215,7 +1215,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, wrong-3)\n" +
                "mark(expecting-5, with-4)\n" +
                "advcl(wrong-3, expecting-5)\n" +
-               "dobj(expecting-5, pizza-6)\n"},
+               "obj(expecting-5, pizza-6)\n"},
              {TestType.BASIC,
               "(ROOT (SBARQ (WHNP (WP Who) ) (SQ (VBZ is) (VP (VBG going) (S (VP (TO to) (VP (VB carry) (NP (DT the) (NN water) )))))) (. ?)))",
               "nsubj(going-3, Who-1)\n" +
@@ -1224,7 +1224,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "mark(carry-5, to-4)\n" +
                "xcomp(going-3, carry-5)\n" +
                "det(water-7, the-6)\n" +
-               "dobj(carry-5, water-7)\n"},
+               "obj(carry-5, water-7)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP Who) ) (SQ (VBZ is) (VP (VBG going) (S (VP (TO to) (VP (VB carry) (NP (DT the) (NN water) )))))) (. ?)))",
               "nsubj(going-3, Who-1)\n" +
@@ -1234,23 +1234,23 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "mark(carry-5, to-4)\n" +
                "xcomp(going-3, carry-5)\n" +
                "det(water-7, the-6)\n" +
-               "dobj(carry-5, water-7)\n"},
+               "obj(carry-5, water-7)\n"},
              {TestType.BASIC,
               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBP am) (NP (PRP I)) (VP (VBG doing) (S (VP (VBG dating) (NP (PRP her)))))) (. ?)))",
-              "dobj(doing-4, What-1)\n" +
+              "obj(doing-4, What-1)\n" +
                "aux(doing-4, am-2)\n" +
                "nsubj(doing-4, I-3)\n" +
                "root(ROOT-0, doing-4)\n" +
                "advcl(doing-4, dating-5)\n" +
-               "dobj(dating-5, her-6)\n"},
+               "obj(dating-5, her-6)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBP am) (NP (PRP I)) (VP (VBG doing) (S (VP (VBG dating) (NP (PRP her)))))) (. ?)))",
-              "dobj(doing-4, What-1)\n" +
+              "obj(doing-4, What-1)\n" +
                "aux(doing-4, am-2)\n" +
                "nsubj(doing-4, I-3)\n" +
                "root(ROOT-0, doing-4)\n" +
                "advcl(doing-4, dating-5)\n" +
-               "dobj(dating-5, her-6)\n"},
+               "obj(dating-5, her-6)\n"},
              {TestType.BASIC,
               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT that))) (. ?)))",
               "root(ROOT-0, What-1)\n" +
@@ -1319,14 +1319,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "xcomp(becoming-4, problem-6)\n"},
              {TestType.BASIC,
               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (NNP UAL) (NN stock) ) (ADJP (NN worth) )) (. ?)))",
-              "dobj(worth-5, What-1)\n" +
+              "obj(worth-5, What-1)\n" +
                "cop(worth-5, is-2)\n" +
                "compound(stock-4, UAL-3)\n" +
                "nsubj(worth-5, stock-4)\n" +
                "root(ROOT-0, worth-5)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (NNP UAL) (NN stock) ) (ADJP (NN worth) )) (. ?)))",
-              "dobj(worth-5, What-1)\n" +
+              "obj(worth-5, What-1)\n" +
                "cop(worth-5, is-2)\n" +
                "compound(stock-4, UAL-3)\n" +
                "nsubj(worth-5, stock-4)\n" +
@@ -1345,12 +1345,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VP (VBD told) (NP (PRP him)))) (. ?)))",
               "nsubj(told-2, Who-1)\n" +
                "root(ROOT-0, told-2)\n" +
-               "dobj(told-2, him-3)\n"},
+               "obj(told-2, him-3)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VP (VBD told) (NP (PRP him)))) (. ?)))",
               "nsubj(told-2, Who-1)\n" +
                "root(ROOT-0, told-2)\n" +
-               "dobj(told-2, him-3)\n"},
+               "obj(told-2, him-3)\n"},
              {TestType.BASIC,
               "(ROOT (S (NP (NNP Sue)) (VP (VBZ is) (NP (DT a) (NN lawyer))) (. .)))",
               "nsubj(lawyer-4, Sue-1)\n" +
@@ -1491,25 +1491,25 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "det(disease-2, What-1)\n" +
                "nsubj(causes-3, disease-2)\n" +
                "root(ROOT-0, causes-3)\n" +
-               "dobj(causes-3, pain-4)\n"},
+               "obj(causes-3, pain-4)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WDT What) (NN disease)) (SQ (VP (VBZ causes) (NP (NN pain)))) (. ?)))",
               "det(disease-2, What-1)\n" +
                "nsubj(causes-3, disease-2)\n" +
                "root(ROOT-0, causes-3)\n" +
-               "dobj(causes-3, pain-4)\n"},
+               "obj(causes-3, pain-4)\n"},
              {TestType.BASIC,
               "(ROOT (SBARQ (WHNP (WDT What) (NN disease)) (SQ (VBZ causes) (NP (NN pain))) (. ?)))",
               "det(disease-2, What-1)\n" +
                "nsubj(causes-3, disease-2)\n" +
                "root(ROOT-0, causes-3)\n" +
-               "dobj(causes-3, pain-4)\n"},
+               "obj(causes-3, pain-4)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WDT What) (NN disease)) (SQ (VBZ causes) (NP (NN pain))) (. ?)))",
               "det(disease-2, What-1)\n" +
                "nsubj(causes-3, disease-2)\n" +
                "root(ROOT-0, causes-3)\n" +
-               "dobj(causes-3, pain-4)\n"},
+               "obj(causes-3, pain-4)\n"},
              {TestType.BASIC,
               "(ROOT (S (VP (VB Be) (VP (VBG waiting) (PP (IN in) (NP (NN line))) (PP-TMP (IN at) (NP (CD 3) (NN p.m.))))) (. !)))",
               "aux(waiting-2, Be-1)\n" +
@@ -1541,7 +1541,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
              {TestType.BASIC,
               "(ROOT (SBARQ (RB So) (WHNP (WP what)) (SQ (VBZ is) (NP (NNP Santa) (NNP Fe) ) (ADJP (IN worth) )) (. ?) ))",
               "advmod(worth-6, So-1)\n" +
-               "dobj(worth-6, what-2)\n" +
+               "obj(worth-6, what-2)\n" +
                "cop(worth-6, is-3)\n" +
                "compound(Fe-5, Santa-4)\n" +
                "nsubj(worth-6, Fe-5)\n" +
@@ -1549,7 +1549,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (RB So) (WHNP (WP what)) (SQ (VBZ is) (NP (NNP Santa) (NNP Fe) ) (ADJP (IN worth) )) (. ?) ))",
               "advmod(worth-6, So-1)\n" +
-               "dobj(worth-6, what-2)\n" +
+               "obj(worth-6, what-2)\n" +
                "cop(worth-6, is-3)\n" +
                "compound(Fe-5, Santa-4)\n" +
                "nsubj(worth-6, Fe-5)\n" +
@@ -1572,7 +1572,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nsubj(What-1, name-6)\n"},
              {TestType.BASIC,
               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (NP (DT the) (NN fear)) (PP (IN of) (NP (NNS cockroaches)))) (VP (VBN called))) (. ?)))",
-              "dobj(called-7, What-1)\n" +
+              "obj(called-7, What-1)\n" +
                "auxpass(called-7, is-2)\n" +
                "det(fear-4, the-3)\n" +
                "nsubjpass(called-7, fear-4)\n" +
@@ -1581,7 +1581,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, called-7)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (NP (DT the) (NN fear)) (PP (IN of) (NP (NNS cockroaches)))) (VP (VBN called))) (. ?)))",
-              "dobj(called-7, What-1)\n" +
+              "obj(called-7, What-1)\n" +
                "auxpass(called-7, is-2)\n" +
                "det(fear-4, the-3)\n" +
                "nsubjpass(called-7, fear-4)\n" +
@@ -1620,10 +1620,10 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "(ROOT (S (NP (NNP Clinton)) (VP (VBD defeated) (NP (NNP Dole))) (. .)))",
                "nsubj(defeated-2, Clinton-1)\n" +
                 "root(ROOT-0, defeated-2)\n" +
-                "dobj(defeated-2, Dole-3)\n"},
+                "obj(defeated-2, Dole-3)\n"},
               {TestType.COPULA_HEAD,
                "(ROOT (S (SBAR (WHNP (WP What)) (S (NP (PRP she)) (VP (VBD said)))) (VP (VBZ is) (ADJP (JJ untrue))) (. .)))",
-               "dobj(said-3, What-1)\n" +
+               "obj(said-3, What-1)\n" +
                 "nsubj(said-3, she-2)\n" +
                 "csubj(is-4, said-3)\n" +
                 "root(ROOT-0, is-4)\n" +
@@ -1647,7 +1647,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                 "root(ROOT-0, have-2)\n" +
                 "neg(information-5, no-3)\n" +
                 "amod(information-5, useful-4)\n" +
-                "dobj(have-2, information-5)\n" +
+                "obj(have-2, information-5)\n" +
                 "mark(are-9, on-6)\n" +
                 "mark(are-9, whether-7)\n" +
                 "nsubj(are-9, users-8)\n" +
@@ -1662,7 +1662,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                 "mark(did-6, that-4)\n" +
                 "nsubj(did-6, he-5)\n" +
                 "ccomp(certain-3, did-6)\n" +
-                "dobj(did-6, it-7)\n"},
+                "obj(did-6, it-7)\n"},
               {TestType.COPULA_HEAD,
                "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
                "nsubj(am-2, I-1)\n" +
@@ -1702,7 +1702,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                 "cc:preconj(id-8, both-5)\n" +
                 "det(id-8, the-6)\n" +
                 "compound(id-8, entity-7)\n" +
-                "dobj(include-4, id-8)\n" +
+                "obj(include-4, id-8)\n" +
                 "cc(id-8, and-9)\n" +
                 "det(name-12, the-10)\n" +
                 "compound(name-12, entity-11)\n" +
@@ -1719,14 +1719,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "det(government-2, The-1)\n" +
                 "nsubj(counts-3, government-2)\n" +
                 "root(ROOT-0, counts-3)\n" +
-                "dobj(counts-3, money-4)\n" +
+                "obj(counts-3, money-4)\n" +
                 "mark(spent-8, as-5)\n" +
                 "nsubjpass(spent-8, it-6)\n" +
                 "auxpass(spent-8, is-7)\n" +
                 "advcl(counts-3, spent-8)\n" +
                 "nsubj(counts-11, Dodge-10)\n" +
                 "parataxis(counts-3, counts-11)\n" +
-                "dobj(counts-11, contracts-12)\n" +
+                "obj(counts-11, contracts-12)\n" +
                 "advmod(awarded-16, when-13)\n" +
                 "nsubjpass(awarded-16, they-14)\n" +
                 "auxpass(awarded-16, are-15)\n" +
@@ -1755,9 +1755,9 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nsubj(saw-2, I-1)\n" +
                 "root(ROOT-0, saw-2)\n" +
                 "det(man-4, the-3)\n" +
-                "dobj(saw-2, man-4)\n" +
+                "obj(saw-2, man-4)\n" +
                 "ref(man-4, who-5)\n" +
-                "dobj(love-7, who-5)\n" +
+                "obj(love-7, who-5)\n" +
                 "nsubj(love-7, you-6)\n" +
                 "acl:relcl(man-4, love-7)\n"},
               {TestType.NON_COLLAPSED,
@@ -1765,10 +1765,10 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nsubj(saw-2, I-1)\n" +
                 "root(ROOT-0, saw-2)\n" +
                 "det(man-4, the-3)\n" +
-                "dobj(saw-2, man-4)\n" +
+                "obj(saw-2, man-4)\n" +
                 "ref(man-4, whose-5)\n" +
                 "nmod:poss(wife-6, whose-5)\n" +
-                "dobj(love-8, wife-6)\n" +
+                "obj(love-8, wife-6)\n" +
                 "nsubj(love-8, you-7)\n" +
                 "acl:relcl(man-4, love-8)\n"},
               {TestType.NON_COLLAPSED,
@@ -1776,9 +1776,9 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nsubj(saw-2, I-1)\n" +
                 "root(ROOT-0, saw-2)\n" +
                 "det(book-4, the-3)\n" +
-                "dobj(saw-2, book-4)\n" +
+                "obj(saw-2, book-4)\n" +
                 "ref(book-4, which-5)\n" +
-                "dobj(bought-7, which-5)\n" +
+                "obj(bought-7, which-5)\n" +
                 "nsubj(bought-7, you-6)\n" +
                 "acl:relcl(book-4, bought-7)\n"},
               {TestType.NON_COLLAPSED,
@@ -1794,13 +1794,13 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nsubj(saw-2, I-1)\n" +
                 "root(ROOT-0, saw-2)\n" +
                 "det(woman-4, the-3)\n" +
-                "dobj(saw-2, woman-4)\n" +
+                "obj(saw-2, woman-4)\n" +
                 "ref(woman-4, whom-5)\n" +
                 "nmod(gave-7, whom-5)\n" +
                 "nsubj(gave-7, you-6)\n" +
                 "acl:relcl(woman-4, gave-7)\n" +
                 "det(package-9, the-8)\n" +
-                "dobj(gave-7, package-9)\n" +
+                "obj(gave-7, package-9)\n" +
                 "case(whom-5, to-10)\n"},
 
              /* Test printing of extra dependencies after basic dependencies. */
@@ -1906,7 +1906,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, have-2)\n" +
                "neg(information-5, no-3)\n" +
                "amod(information-5, useful-4)\n" +
-               "dobj(have-2, information-5)\n" +
+               "obj(have-2, information-5)\n" +
                "mark(risk-11, on-6)\n" +
                "mark(risk-11, whether-7)\n" +
                "nsubj(risk-11, users-8)\n" +
@@ -1921,7 +1921,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nmod:about(heard-2, asbestos-4)\n" +
                "xcomp(heard-2, having-5)\n" +
                "amod(properties-7, questionable-6)\n" +
-               "dobj(having-5, properties-7)\n"},
+               "obj(having-5, properties-7)\n"},
              {TestType.COLLAPSED,
               "(ROOT (S (NP (PRP He)) (VP (VBZ says) (SBAR (IN that) (S (NP (PRP you)) (VP (VBP like) (S (VP (TO to) (VP (VB swim)))))))) (. .)))",
               "nsubj(says-2, He-1)\n" +
@@ -1946,14 +1946,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nsubj(launched-11, insurgents-10)\n" +
                "advcl(engaged-5, launched-11)\n" +
                "amod(attacks-13, simultaneous-12)\n" +
-               "dobj(launched-11, attacks-13)\n"},
+               "obj(launched-11, attacks-13)\n"},
              {TestType.COLLAPSED,
               "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN man)) (SBAR (WHNP (WP who)) (S (NP (PRP you)) (VP (VBP love)))))) (. .)))",
               "nsubj(saw-2, I-1)\n" +
                "root(ROOT-0, saw-2)\n" +
                "det(man-4, the-3)\n" +
-               "dobj(saw-2, man-4)\n" +
-               "dobj(love-7, man-4)\n" +
+               "obj(saw-2, man-4)\n" +
+               "obj(love-7, man-4)\n" +
                "ref(man-4, who-5)\n" +
                "nsubj(love-7, you-6)\n" +
                "acl:relcl(man-4, love-7)\n"},
@@ -1962,10 +1962,10 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "nsubj(saw-2, I-1)\n" +
                "root(ROOT-0, saw-2)\n" +
                "det(man-4, the-3)\n" +
-               "dobj(saw-2, man-4)\n" +
+               "obj(saw-2, man-4)\n" +
                "nmod:poss(wife-6, man-4)\n" +
                "ref(man-4, whose-5)\n" +
-               "dobj(love-8, wife-6)\n" +
+               "obj(love-8, wife-6)\n" +
                "nsubj(love-8, you-7)\n" +
                "acl:relcl(man-4, love-8)\n"},
              {TestType.COLLAPSED,
@@ -1989,14 +1989,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "mark(secure-9, to-8)\n" +
                "advcl(talked-2, secure-9)\n" +
                "det(account-11, the-10)\n" +
-               "dobj(secure-9, account-11)\n"},
+               "obj(secure-9, account-11)\n"},
              {TestType.COLLAPSED,
               "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN book)) (SBAR (WHNP (WDT which)) (S (NP (PRP you)) (VP (VBD bought)))))) (. .)))",
               "nsubj(saw-2, I-1)\n" +
                "root(ROOT-0, saw-2)\n" +
                "det(book-4, the-3)\n" +
-               "dobj(saw-2, book-4)\n" +
-               "dobj(bought-7, book-4)\n" +
+               "obj(saw-2, book-4)\n" +
+               "obj(bought-7, book-4)\n" +
                "ref(book-4, which-5)\n" +
                "nsubj(bought-7, you-6)\n" +
                "acl:relcl(book-4, bought-7)\n"},
@@ -2004,13 +2004,13 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "(ROOT (S (NP (NNP Bill)) (VP (VBD picked) (NP (NP (NNP Fred)) (PP (IN for) (NP (NP (DT the) (NN team)) (VP (VBG demonstrating) (NP (PRP$ his) (NN incompetence))))))) (. .)))",
               "nsubj(picked-2, Bill-1)\n" +
                "root(ROOT-0, picked-2)\n" +
-               "dobj(picked-2, Fred-3)\n" +
+               "obj(picked-2, Fred-3)\n" +
                "case(team-6, for-4)\n" +
                "det(team-6, the-5)\n" +
                "nmod:for(Fred-3, team-6)\n" +
                "acl(team-6, demonstrating-7)\n" +
                "nmod:poss(incompetence-9, his-8)\n" +
-               "dobj(demonstrating-7, incompetence-9)\n"},
+               "obj(demonstrating-7, incompetence-9)\n"},
              {TestType.COLLAPSED,
               "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
               "case(city-3, In-1)\n" +
@@ -2060,7 +2060,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "( (S (NP-SBJ-1 (PRP He)) (VP (VBD achieved) (NP (DT this)) (PP-MNR (PP (IN in) (NP (NN part))) (IN through) (NP (DT an) (JJ uncanny) (NN talent)))) (. .)))",
               "nsubj(achieved-2, He-1)\n" +
                "root(ROOT-0, achieved-2)\n" +
-               "dobj(achieved-2, this-3)\n" +
+               "obj(achieved-2, this-3)\n" +
                "case(part-5, in-4)\n" +
                "nmod:in(talent-9, part-5)\n" +
                "case(talent-9, through-6)\n" +
@@ -2109,7 +2109,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "aux(wearing-9, is-7)\n" +
                "root(ROOT-0, wearing-9)\n" +
                "det(hats-11, both-10)\n" +
-               "dobj(wearing-9, hats-11)\n"},
+               "obj(wearing-9, hats-11)\n"},
              {TestType.COLLAPSED,
               "( (S (NP (NP (JJ Average) (NN maturity)) (PP (IN of) (NP (NP (NML (DT the) (NNS funds)) (POS ')) (NNS investments)))) (VP (VBD lengthened)) (. .)))",
               "amod(maturity-2, Average-1)\n" +
@@ -2188,9 +2188,9 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, produced-4)\n" +
                "neg(failures-7, no-5)\n" +
                "amod(failures-7, spectacular-6)\n" +
-               "dobj(produced-4, failures-7)\n" +
-               "dobj(produced-4, failures-7')\n" +
-               "dobj(produced-4, failures-7'')\n" +
+               "obj(produced-4, failures-7)\n" +
+               "obj(produced-4, failures-7')\n" +
+               "obj(produced-4, failures-7'')\n" +
                "conj:or(failures-7, failures-7')\n" +
                "conj:or(failures-7, failures-7'')\n" +
                "case(politics-9, in-8)\n" +
@@ -2208,7 +2208,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "conj:and(produced-4, chalked-22)\n" +
                "compound:prt(chalked-22, up-23)\n" +
                "det(successes-25, some-24)\n" +
-               "dobj(chalked-22, successes-25)\n"},
+               "obj(chalked-22, successes-25)\n"},
              {TestType.CC_PROCESSED,
               "(ROOT (S (NP (NNP Fred)) (VP (VBD walked) (PP (PP (IN out) (NP (DT the) (NN door))) (CC and) (PP (RB right) (IN into) (NP (DT a) (NN trap))))) (. .)))",
               "nsubj(walked-2, Fred-1)\n" +
@@ -2248,7 +2248,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, went-4)\n" +
                "compound:prt(went-4, out-5)\n" +
                "conj:and(went-4, drank-7)\n" +
-               "dobj(drank-7, coffee-8)\n" +
+               "obj(drank-7, coffee-8)\n" +
                "cc(went-4, and-10)\n" +
                "conj:and(went-4, talked-11)\n" +
                "case(Dependencies-14, about-12)\n" +
@@ -2312,7 +2312,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nsubj(departed-6, John-1)\n" +
                "root(ROOT-0, noticed-2)\n" +
                "det(cockroach-4, a-3)\n" +
-               "dobj(noticed-2, cockroach-4)\n" +
+               "obj(noticed-2, cockroach-4)\n" +
                "cc(noticed-2, and-5)\n" +
                "conj:and(noticed-2, departed-6)\n"},
              {TestType.CC_PROCESSED,
@@ -2380,30 +2380,30 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB as) (RB well) (IN as)) (NP (NNS cats)))) (. .)))",
               "nsubj(like-2, I-1)\n" +
                "root(ROOT-0, like-2)\n" +
-               "dobj(like-2, dogs-3)\n" +
+               "obj(like-2, dogs-3)\n" +
                "cc(dogs-3, as-4)\n" +
                "mwe(as-4, well-5)\n" +
                "mwe(as-4, as-6)\n" +
-               "dobj(like-2, cats-7)\n" +
+               "obj(like-2, cats-7)\n" +
                "conj:and(dogs-3, cats-7)\n"},
              {TestType.CC_PROCESSED,
               "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB rather) (IN than)) (NP (NNS cats)))) (. .)))",
               "nsubj(like-2, I-1)\n" +
                "root(ROOT-0, like-2)\n" +
-               "dobj(like-2, dogs-3)\n" +
+               "obj(like-2, dogs-3)\n" +
                "cc(dogs-3, rather-4)\n" +
                "mwe(rather-4, than-5)\n" +
-               "dobj(like-2, cats-6)\n" +
+               "obj(like-2, cats-6)\n" +
                "conj:negcc(dogs-3, cats-6)\n"},
              {TestType.CC_PROCESSED,
               "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NN brandy)) (CONJP (RB not) (TO to) (VB mention)) (NP (NN cognac)))) (. .)))",
               "nsubj(like-2, I-1)\n" +
                "root(ROOT-0, like-2)\n" +
-               "dobj(like-2, brandy-3)\n" +
+               "obj(like-2, brandy-3)\n" +
                "cc(brandy-3, not-4)\n" +
                "mwe(not-4, to-5)\n" +
                "mwe(not-4, mention-6)\n" +
-               "dobj(like-2, cognac-7)\n" +
+               "obj(like-2, cognac-7)\n" +
                "conj:and(brandy-3, cognac-7)\n"},
              {TestType.CC_PROCESSED,
               "( (S (NP (PRP I)) (VP (VBP like) (NP (CONJP (RB not) (RB only)) (NP (NNS cats)) (CONJP (CC but) (RB also)) (NP (NN dogs)))) (. .)))",
@@ -2411,10 +2411,10 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, like-2)\n" +
                "neg(only-4, not-3)\n" +
                "cc:preconj(cats-5, only-4)\n" +
-               "dobj(like-2, cats-5)\n" +
+               "obj(like-2, cats-5)\n" +
                "cc(cats-5, but-6)\n" +
                "advmod(dogs-8, also-7)\n" +
-               "dobj(like-2, dogs-8)\n" +
+               "obj(like-2, dogs-8)\n" +
                "conj:and(cats-5, dogs-8)\n"},
              {TestType.CC_PROCESSED,
               "((S (NP (NNP Fred)) (VP (VBD flew) (PP (CONJP (RB not) (JJ only)) (PP (TO to) (NP (NNP Greece))) (CONJP (CC but) (RB also)) (PP (TO to) (NP (NNP Serbia))))) (. .)))",
@@ -2454,7 +2454,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "aux(whipsaw-6, can-5)\n" +
                "root(ROOT-0, whipsaw-6)\n" +
                "det(funds-8, the-7)\n" +
-               "dobj(whipsaw-6, funds-8)\n"},
+               "obj(whipsaw-6, funds-8)\n"},
              {TestType.CC_PROCESSED,
               "(NP-SBJ (NNS Managers) (CC and) (NNS presenters))",
               "root(ROOT-0, Managers-1)\n" +

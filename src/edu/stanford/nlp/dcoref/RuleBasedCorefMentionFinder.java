@@ -1,4 +1,7 @@
 package edu.stanford.nlp.dcoref; 
+import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -9,28 +12,21 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
 import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.AnnotationPipeline;
-import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.pipeline.ParserAnnotator;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.*;
-// import edu.stanford.nlp.util.logging.Redwood;
 
 public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
 
-  // /** A logger for this class */
-  // private static Redwood.RedwoodChannels log = Redwood.channels(RuleBasedCorefMentionFinder.class);
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(RuleBasedCorefMentionFinder.class);
 
-  private boolean assignIds = true;
+  protected boolean assignIds = true;
 //  protected int maxID = -1;
   private final HeadFinder headFinder;
-  private Annotator parserProcessor;
+  protected Annotator parserProcessor;
 
   private final boolean allowReparsing;
 

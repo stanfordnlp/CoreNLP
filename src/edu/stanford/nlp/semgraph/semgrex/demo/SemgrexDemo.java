@@ -1,4 +1,5 @@
 package edu.stanford.nlp.semgraph.semgrex.demo; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
@@ -9,7 +10,6 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * A small demo that shows how to convert a tree to a SemanticGraph
@@ -20,10 +20,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class SemgrexDemo  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(SemgrexDemo.class);
-
-  private SemgrexDemo() {} // just static main
-
+  private static Redwood.RedwoodChannels log = Redwood.channels(SemgrexDemo.class);
   public static void main(String[] args) {
     String treeString = "(ROOT  (S (NP (PRP$ My) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))";
     // Typically the tree is constructed by parsing or reading a
@@ -53,5 +50,4 @@ public class SemgrexDemo  {
       log.info(matcher.getNode("A") + " <<nsubj " + matcher.getNode("B"));
     }
   }
-
 }

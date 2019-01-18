@@ -19,10 +19,10 @@ import edu.stanford.nlp.util.*;
 
 /**
  * A hierarchical channel-based logger. Log messages are arranged hierarchically by depth
- * (e.g., main-&gt;tagging-&gt;sentence 2) using the startTrack() and endTrack() methods.
+ * (e.g. main-&gt;tagging-&gt;sentence 2) using the startTrack() and endTrack() methods.
  * Furthermore, messages can be flagged with a number of channels, which allow filtering by channel.
- * Log levels are implemented as channels (ERROR, WARNING, etc.).
- * <p>
+ * Log levels are implemented as channels (ERROR, WARNING, etc).
+ *
  * Details on the handlers used are documented in their respective classes, which all implement
  * {@link LogRecordHandler}.
  * New handlers should implement this class.
@@ -30,8 +30,8 @@ import edu.stanford.nlp.util.*;
  * Details on configuring Redwood can be found in the {@link RedwoodConfiguration} class.
  * New configuration methods should be implemented in this class, following the standard
  * builder paradigm.
- * <p>
- * There is a <a href="https://nlp.stanford.edu/software/Redwood.pdf">tutorial on Redwood</a> on the
+ *
+ * There is a <a href="http://nlp.stanford.edu/javanlp/tutorials/Redwood.pdf"> tutorial on Redwood </a> on the
  * NLP website.
  *
  * @author Gabor Angeli (angeli at cs.stanford)
@@ -220,8 +220,7 @@ public class Redwood  {
   }
 
   /**
-   * Get a handler based on its class.
-   *
+   * Get a handler based on its class
    * @param clazz The class of the Handler to return.
    *              If multiple Handlers exist, the first one is returned.
    * @param <E> The class of the handler to return.
@@ -420,8 +419,7 @@ public class Redwood  {
    * from one of the threads; as each thread finishes, another thread begins logging,
    * first by making up the backlog, and then by printing any new log messages.
    * A thread signals that it has finished logging with the finishThread() function;
-   * the multithreaded environment is ended with the endThreads() function.
-   *
+   * the multithreaded environment is ended with the endThreads() function
    * @param title The name of the thread group being started
    */
   public static void startThreads(String title){
@@ -486,10 +484,10 @@ public class Redwood  {
         }
       }
     }
-    while( ! threadsWaiting.isEmpty()) {
+    while(threadsWaiting.size() > 0){
       assert currentThread < 0L;
       assert control.tryLock();
-      assert ! threadsWaiting.isEmpty();
+      assert !threadsWaiting.isEmpty();
       control.lock();
       attemptThreadControlThreadsafe(-1);
       control.unlock();
@@ -531,13 +529,13 @@ public class Redwood  {
   /**
    * Stop Redwood, closing all tracks and prohibiting future log messages.
    */
-  public static void stop() {
+  public static void stop(){
     //--Close logger
     isClosed = true; // <- not a thread-safe boolean
     Thread.yield(); //poor man's synchronization attempt (let everything else log that wants to)
     Thread.yield();
     //--Close Tracks
-    while (depth > 0) {
+    while(depth > 0){
       depth -= 1;
       //(send signal to handlers)
       handlers.process(null, MessageType.END_TRACK, depth, System.currentTimeMillis());
@@ -569,14 +567,14 @@ public class Redwood  {
     rest = rest / 24;
     int day = (int) rest;
     //--Make String
-    if (day > 0) b.append(day).append(day > 1 ? " days, " : " day, ");
-    if (hr > 0) b.append(hr).append(hr > 1 ? " hours, " : " hour, ");
-    if (min > 0) {
-      if (min < 10) { b.append('0'); }
-      b.append(min).append(':');
+    if(day > 0) b.append(day).append(day > 1 ? " days, " : " day, ");
+    if(hr > 0) b.append(hr).append(hr > 1 ? " hours, " : " hour, ");
+    if(min > 0) {
+      if(min < 10){ b.append("0"); }
+      b.append(min).append(":");
     }
-    if (min > 0 && sec < 10) { b.append('0'); }
-    b.append(sec).append('.').append(String.format("%04d", mili));
+    if(min > 0 && sec < 10){ b.append("0"); }
+    b.append(sec).append(".").append(String.format("%04d", mili));
     if(min > 0) b.append(" minutes");
     else b.append(" seconds");
   }
@@ -798,7 +796,7 @@ public class Redwood  {
       for(int i=0; i<depth; i++){
         b.append("  ");
       }
-      b.append(head == null ? "ROOT" : head).append('\n');
+      b.append(head == null ? "ROOT" : head).append("\n");
       for(RecordHandlerTree child : children){
         child.toStringHelper(b, depth+1);
       }
@@ -897,7 +895,7 @@ public class Redwood  {
     @Override
     public String toString() {
       return "Record [content=" + content + ", depth=" + depth
-          + ", channels=" + Arrays.toString(channels()) + ", thread=" + thread + ", timesstamp=" + timesstamp + ']';
+          + ", channels=" + Arrays.toString(channels()) + ", thread=" + thread + ", timesstamp=" + timesstamp + "]";
     }
   }
 
@@ -925,7 +923,7 @@ public class Redwood  {
   }
 
   /**
-   * Handler which prints to a specified file.
+   * Handler which prints to a specified file
    * TODO: make constructors for other ways of describing files (File, for example!)
    */
   public static class FileHandler extends OutputHandler {
@@ -950,7 +948,7 @@ public class Redwood  {
   /**
    * A utility class for Redwood intended for static import
    * (import static edu.stanford.nlp.util.logging.Redwood.Util.*;),
-   * providing a wrapper for Redwood functions and adding utility shortcuts.
+   * providing a wrapper for Redwood functions and adding utility shortcuts
    */
   @SuppressWarnings("UnusedDeclaration")
   public static class Util {
@@ -1130,9 +1128,9 @@ public class Redwood  {
     public static void threadAndRun(String title, Iterable<Runnable> runnables, int numThreads){
       // (short circuit if single thread)
       if (numThreads <= 1 || isThreaded || (runnables instanceof Collection && ((Collection<Runnable>) runnables).size() <= 1)) {
-        startTrack( "Threads (" + title + ')');
+        startTrack( "Threads (" + title + ")" );
         for (Runnable toRun : runnables) { toRun.run(); }
-        endTrack( "Threads (" + title + ')');
+        endTrack( "Threads (" + title + ")" );
         return;
       }
       //(create executor)
@@ -1253,11 +1251,6 @@ public class Redwood  {
       log(level, (Supplier<String>) () -> new Formatter().format(format, args).toString());
     }
 
-    /** Log to the info channel. @see RedwoodChannels#logf(Flag, String, Object...) */
-    public void infof(String format, Object... args) {
-      info((Supplier<String>) () -> new Formatter().format(format, args).toString());
-    }
-
     /** Log to the debug channel. @see RedwoodChannels#logf(Flag, String, Object...) */
     public void debugf(String format, Object... args) {
       debug((Supplier<String>) () -> new Formatter().format(format, args).toString());
@@ -1298,7 +1291,7 @@ public class Redwood  {
   }
 
    /**
-   * Standard channels; enum for the sake of efficiency. "info" is the default level, shown by the lack of a Flag.
+   * Standard channels; enum for the sake of efficiency
    */
   protected enum Flag {
     ERROR,
@@ -1312,16 +1305,17 @@ public class Redwood  {
 
 
   /**
-   * Various informal tests of Redwood functionality.
-   *
+   * Various informal tests of Redwood functionality
    * @param args Unused
+   *
    */
   // TODO(gabor) update this with the new RedwoodConfiguration
   @SuppressWarnings("deprecation")
   public static void main(String[] args){
 
-    RedwoodConfiguration.current().listenOnChannels(record -> System.out.println(">>> " + record.content),
-                                                    Redwood.ERR).apply();
+    RedwoodConfiguration.current().listenOnChannels(record -> {
+      System.out.println(">>> " + record.content.toString());
+    }, Redwood.ERR).apply();
     Redwood.log("hello world!");
     Redwood.log(Redwood.ERR, "an error!");
 
@@ -1467,14 +1461,14 @@ public class Redwood  {
     for(int i=0; i<50; i++){
       final int theI = i;
       exec.execute(() -> {
-        startTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ')');
+        startTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
         for(int time=0; time<5; time++){
-          log("tick " + time + " from " + theI + " (" + Thread.currentThread().getId() + ')');
+          log("tick " + time + " from " + theI + " (" + Thread.currentThread().getId() + ")");
           try {
             Thread.sleep(50);
           } catch (Exception ignored) {}
         }
-        endTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ')');
+        endTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
         finishThread();
       });
 

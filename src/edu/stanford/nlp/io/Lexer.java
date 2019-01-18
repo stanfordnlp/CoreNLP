@@ -9,14 +9,14 @@ import java.io.Reader;
  * a Lexer with the {@link #yyreset} method.  An easy way to build classes implementing this
  * interface is with JFlex (http://jflex.de).  Just make sure to include the following in the
  * JFlex source file
- *
- * In the <i>Options and Macros</i> section of the source file, include
- *
+ * <p/>
+ * <p> In the <i>Options and Macros</i> section of the source file, include
+ * <p/>
  * %class JFlexDummyLexer<br>
  * %standalone<br>
  * %unicode<br>
  * %int<br>
- * <br>
+ * <p><br>
  * %implements edu.stanford.nlp.io.Lexer<br>
  * <br>
  * %{<br>
@@ -28,7 +28,7 @@ import java.io.Reader;
  * return YYEOF;<br>
  * }<br>
  * %}<br>
- *
+ * <p/>
  * Alternatively, you can customize your own lexer and get lots of
  * flexibility out.
  *
@@ -37,34 +37,34 @@ import java.io.Reader;
 
 public interface Lexer {
 
-  int ACCEPT = 1;
-  int IGNORE = 0;
+  public int ACCEPT = 1;
+  public int IGNORE = 0;
 
   /**
    * Gets the next token from input and returns an integer value
    * signalling what to do with the token.
    */
-  int yylex() throws IOException;
+  public int yylex() throws IOException;
 
   /**
    * returns the matched input text region
    */
-  String yytext();
+  public String yytext();
 
   /**
-   * Pushes back {@code length} character positions in the
+   * Pushes back <code>length</code> character positions in the
    * lexer.  Conventionally used to push back exactly one token.
    */
-  void pushBack(int length);
+  public void pushBack(int length);
 
   /**
    * returns value for YYEOF
    */
-  int getYYEOF();
+  public int getYYEOF();
 
   /**
    * put a {@link Reader} inside the Lexer.
    */
-  void yyreset(Reader r) throws IOException;
+  public void yyreset(Reader r) throws IOException;
 
 }

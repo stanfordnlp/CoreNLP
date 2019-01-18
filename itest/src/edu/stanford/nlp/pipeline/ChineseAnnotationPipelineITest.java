@@ -1,10 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.List;
+import junit.framework.TestCase;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.List;
 
 import edu.stanford.nlp.ling.SegmenterCoreAnnotations.CharactersAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.ChineseCharAnnotation;
@@ -14,11 +12,10 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 
-public class ChineseAnnotationPipelineITest {
+public class ChineseAnnotationPipelineITest extends TestCase {
+  AnnotationPipeline pipeline = null;
 
-  AnnotationPipeline pipeline; // = null;
-
-  @Before
+  @Override
   public void setUp() throws Exception {
     synchronized(ChineseAnnotationPipelineITest.class) {
       if (pipeline == null) {
@@ -30,7 +27,6 @@ public class ChineseAnnotationPipelineITest {
     }
   }
 
-  @Test
   public void testFullPipeline() {
     String query = "你马上回来北京吗？";
     String[] expectedWords = {"你", "马上", "回来", "北京", "吗", "？"};
@@ -38,46 +34,45 @@ public class ChineseAnnotationPipelineITest {
                                    "北","京","吗","？"};
     boolean[] expectedSegs = {true, true, false, true, false,
                               true, false, true, true};
-    String[] expectedNer = {"O", "O", "O", "STATE_OR_PROVINCE", "O", "O"};
+    String[] expectedNer = {"O", "O", "O", "GPE", "O", "O"};
 
-    Assert.assertEquals(expectedCharacters.length, expectedSegs.length);
-    Assert.assertEquals(expectedWords.length, expectedNer.length);
+    assertEquals(expectedCharacters.length, expectedSegs.length);
+    assertEquals(expectedWords.length, expectedNer.length);
 
     // pipeline is expected to have tokenization, segmentation and ner
     Annotation ann = new Annotation(query);
     pipeline.annotate(ann);
 
     List<CoreMap> sentences = ann.get(SentencesAnnotation.class);
-    Assert.assertFalse(sentences == null);
-    Assert.assertEquals(1, sentences.size());
+    assertFalse(sentences == null);
+    assertEquals(1, sentences.size());
 
     List<CoreLabel> tokens = sentences.get(0).get(TokensAnnotation.class);
-    Assert.assertEquals(expectedWords.length, tokens.size());
+    assertEquals(expectedWords.length, tokens.size());
     for (int i = 0; i < expectedWords.length; ++i) {
-      Assert.assertEquals(expectedWords[i], tokens.get(i).word());
-      Assert.assertEquals(expectedNer[i], tokens.get(i).ner());
+      assertEquals(expectedWords[i], tokens.get(i).word());
+      assertEquals(expectedNer[i], tokens.get(i).ner());
     }
 
     List<CoreLabel> characters = ann.get(CharactersAnnotation.class);
-    Assert.assertEquals(expectedCharacters.length, characters.size());
+    assertEquals(expectedCharacters.length, characters.size());
     for (int i = 0; i < expectedCharacters.length; ++i) {
       CoreLabel word = characters.get(i);
-      Assert.assertEquals(expectedCharacters[i],
-              word.get(ChineseCharAnnotation.class));
-      Assert.assertEquals(expectedSegs[i] ? "1" : "0",
-              word.get(ChineseSegAnnotation.class));
+      assertEquals(expectedCharacters[i],
+                   word.get(ChineseCharAnnotation.class));
+      assertEquals(expectedSegs[i] ? "1" : "0",
+                   word.get(ChineseSegAnnotation.class));
     }
   }
 
-  @Test
   public void testTwoSentences() {
     String query = "你马上回来北京吗？我要回去美国。";
     Annotation ann = new Annotation(query);
     pipeline.annotate(ann);
 
     List<CoreMap> sentences = ann.get(SentencesAnnotation.class);
-    Assert.assertFalse(sentences == null);
-    Assert.assertEquals(2, sentences.size());
+    assertFalse(sentences == null);
+    assertEquals(2, sentences.size());
 
     String[][] expectedWords = { {"你", "马上", "回来", "北京", "吗", "？"},
                                  {"我", "要", "回去", "美国", "。"} };
@@ -85,11 +80,11 @@ public class ChineseAnnotationPipelineITest {
                                   {9, 10, 11, 13, 15, 16} };
     for (int i = 0; i < 2; ++i) {
       List<CoreLabel> tokens = sentences.get(i).get(TokensAnnotation.class);
-      Assert.assertEquals(expectedWords[i].length, tokens.size());
+      assertEquals(expectedWords[i].length, tokens.size());
       for (int j = 0; j < expectedWords.length; ++j) {
-        Assert.assertEquals(expectedWords[i][j], tokens.get(j).word());
-        Assert.assertEquals(expectedPositions[i][j], tokens.get(j).beginPosition());
-        Assert.assertEquals(expectedPositions[i][j + 1], tokens.get(j).endPosition());
+        assertEquals(expectedWords[i][j], tokens.get(j).word());
+        assertEquals(expectedPositions[i][j], tokens.get(j).beginPosition());
+        assertEquals(expectedPositions[i][j+1], tokens.get(j).endPosition());
       }
     }
   }

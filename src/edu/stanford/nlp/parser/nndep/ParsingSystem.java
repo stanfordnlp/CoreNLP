@@ -1,4 +1,5 @@
 package edu.stanford.nlp.parser.nndep;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -6,7 +7,6 @@ import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +24,7 @@ import java.util.Set;
 public abstract class ParsingSystem  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(ParsingSystem.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(ParsingSystem.class);
 
   /**
    * Defines language-specific settings for this parsing instance.
@@ -32,11 +32,17 @@ public abstract class ParsingSystem  {
   private final TreebankLanguagePack tlp;
 
   /**
-   * Dependency label used between root of sentence and ROOT node.
+   * Dependency label used between root of sentence and ROOT node
    */
   protected final String rootLabel;
 
-  protected final List<String> labels, transitions;
+  protected List<String> labels, transitions;
+
+  /**
+   * Generate all possible transitions which this parsing system can
+   * take for any given configuration.
+   */
+  protected abstract void makeTransitions();
 
   /**
    * Determine whether the given transition is legal for this
@@ -89,8 +95,8 @@ public abstract class ParsingSystem  {
   public int numTransitions() {
     return transitions.size();
   }
-
-  // TODO pass labels as Map<String, GrammaticalRelation>; use GrammaticalRelation throughout
+  // TODO pass labels as Map<String, GrammaticalRelation>; use
+  // GrammaticalRelation throughout
 
   /**
    * @param tlp TreebankLanguagePack describing the language being
@@ -98,12 +104,13 @@ public abstract class ParsingSystem  {
    * @param labels A list of possible dependency relation labels, with
    *               the ROOT relation label as the first element
    */
-  public ParsingSystem(TreebankLanguagePack tlp, List<String> labels, List<String> transitions, boolean verbose) {
+  public ParsingSystem(TreebankLanguagePack tlp, List<String> labels, boolean verbose) {
     this.tlp = tlp;
     this.labels = new ArrayList<>(labels);
+
     //NOTE: assume that the first element of labels is rootLabel
     rootLabel = labels.get(0);
-    this.transitions = transitions;
+    makeTransitions();
 
     if (verbose) {
       log.info(Config.SEPARATOR);
@@ -115,11 +122,9 @@ public abstract class ParsingSystem  {
 
   public int getTransitionID(String s) {
     int numTrans = numTransitions();
-    for (int k = 0; k < numTrans; ++k) {
-      if (transitions.get(k).equals(s)) {
+    for (int k = 0; k < numTrans; ++k)
+      if (transitions.get(k).equals(s))
         return k;
-      }
-    }
     return -1;
   }
 
@@ -230,5 +235,4 @@ public abstract class ParsingSystem  {
     Map<String, Double> result = evaluate(sentences, trees, goldTrees);
     return result == null || !result.containsKey("UASnoPunc") ? -1.0 : result.get("UASnoPunc");
   }
-
 }

@@ -23,9 +23,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class DependencyParserCoreNLPDemo {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(DependencyParserCoreNLPDemo.class);
-
-  private DependencyParserCoreNLPDemo() {} // static main method only
+  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParserDemo.class);
 
   public static void main(String[] args) {
     String text;

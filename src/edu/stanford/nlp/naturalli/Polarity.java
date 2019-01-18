@@ -249,26 +249,6 @@ public class Polarity {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (o instanceof String) {
-      switch (((String) o).toLowerCase()) {
-        case "down":
-        case "downward":
-        case "downwards":
-        case "v":
-          return this.isDownwards();
-        case "up":
-        case "upward":
-        case "upwards":
-        case "^":
-          return this.isUpwards();
-        case "flat":
-        case "none":
-        case "-":
-          return !this.isDownwards() && !this.isUpwards();
-        default:
-          return false;
-      }
-    }
     if (!(o instanceof Polarity)) return false;
     Polarity polarity = (Polarity) o;
     return Arrays.equals(projectionFunction, polarity.projectionFunction);

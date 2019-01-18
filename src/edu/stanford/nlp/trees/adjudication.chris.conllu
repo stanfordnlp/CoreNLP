@@ -1,0 +1,1422 @@
+# sent_id = w04001027
+# text = In the lower part, there are three palm trees overlooking the sea, which represent the love that the people of this Island have for their land.
+1	In	_	ADP	IN	_	4	case	_	_
+2	the	_	DET	DT	_	4	det	_	_
+3	lower	_	ADJ	JJR	_	4	amod	_	_
+4	part	_	NOUN	NN	_	7	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+5	,	_	PUNCT	,	_	7	punct	_	_
+6	there	_	DET	EX	_	7	expl	_	_|CheckUPOS=PRON
+7	are	_	VERB	VBP	_	0	root	_	_
+8	three	_	NUM	CD	_	10	nummod	_	_
+9	palm	_	NOUN	NN	_	10	compound	_	_
+10	trees	_	NOUN	NNS	_	7	nsubj	_	_
+11	overlooking	_	VERB	VBG	_	10	acl	_	_
+12	the	_	DET	DT	_	13	det	_	_
+13	sea	_	NOUN	NN	_	11	obj	_	SpaceAfter=No
+14	,	_	PUNCT	,	_	10	punct	_	_|CheckAttachment=13,13
+15	which	_	DET	WDT	_	16	nsubj	_	_
+16	represent	_	VERB	VBP	_	10	acl:relcl	_	_|CheckAttachment=13,13
+17	the	_	DET	DT	_	18	det	_	_
+18	love	_	NOUN	NN	_	16	obj	_	_
+19	that	_	DET	WDT	_	25	obj	_	_|CheckAttachment=28,25|CheckReln=obj,mark
+20	the	_	DET	DT	_	21	det	_	_
+21	people	_	NOUN	NNS	_	25	nsubj	_	_|CheckAttachment=28,25
+22	of	_	ADP	IN	_	24	case	_	_
+23	this	_	DET	DT	_	24	det	_	_
+24	Island	_	NOUN	NN	_	21	nmod	_	_
+25	have	_	VERB	VBP	_	18	acl:relcl	_	_|CheckAttachment=28,18|CheckReln=aux,ccomp|CheckUPOS=AUX
+26	for	_	ADP	IN	_	28	case	_	_
+27	their	_	PRON	PRP$	_	28	nmod:poss	_	_
+28	land	_	NOUN	NN	_	25	obl	_	SpaceAfter=No|CheckAttachment=18,25|CheckReln=acl:relcl,nmod
+29	.	_	PUNCT	.	_	7	punct	_	_
+
+# sent_id = w04001037
+# text = Furthermore, the occurrence of hurricanes on the island is possible during the summer.
+1	Furthermore	_	ADV	RB	_	11	advmod	_	SpaceAfter=No
+2	,	_	PUNCT	,	_	11	punct	_	_
+3	the	_	DET	DT	_	4	det	_	_
+4	occurrence	_	NOUN	NN	_	11	nsubj	_	_
+5	of	_	ADP	IN	_	6	case	_	_
+6	hurricanes	_	NOUN	NNS	_	4	nmod	_	_
+7	on	_	ADP	IN	_	9	case	_	_
+8	the	_	DET	DT	_	9	det	_	_
+9	island	_	NOUN	NN	_	4	nmod	_	_|CheckAttachment=6,6
+10	is	_	AUX	VBZ	_	11	cop	_	_
+11	possible	_	ADJ	JJ	_	0	root	_	_
+12	during	_	ADP	IN	_	14	case	_	_
+13	the	_	DET	DT	_	14	det	_	_
+14	summer	_	NOUN	NN	_	11	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+15	.	_	PUNCT	.	_	11	punct	_	_
+
+# sent_id = w04001053
+# text = The islands are located at the Indo-Australian Fault; the Fault arose due to the collision of the Indian and Australian plates.
+1	The	_	DET	DT	_	2	det	_	_
+2	islands	_	NOUN	NNS	_	4	nsubj	_	_
+3	are	_	AUX	VBP	_	4	cop	_	_
+4	located	_	ADJ	JJ	_	0	root	_	_
+5	at	_	ADP	IN	_	8	case	_	_
+6	the	_	DET	DT	_	8	det	_	_
+7	Indo-Australian	_	ADJ	JJ	_	8	amod	_	Proper=True|CheckReln=amod,compound
+8	Fault	_	PROPN	NN	_	4	obl	_	SpaceAfter=No|CheckReln=obl,nmod|CheckUPOS=NOUN
+9	;	_	PUNCT	:	_	4	punct	_	_
+10	the	_	DET	DT	_	11	det	_	_
+11	Fault	_	NOUN	NN	_	12	nsubj	_	_
+12	arose	_	VERB	VBD	_	4	parataxis	_	_
+13	due	_	ADP	IN	_	16	case	_	_|CheckAttachment=16,12|CheckReln=case,xcomp
+14	to	_	ADP	IN	_	13	fixed	_	_|CheckAttachment=13,16|CheckReln=fixed,case
+15	the	_	DET	DT	_	16	det	_	_
+16	collision	_	NOUN	NN	_	12	obl	_	_|CheckAttachment=12,13|CheckReln=obl,nmod
+17	of	_	ADP	IN	_	22	case	_	_
+18	the	_	DET	DT	_	22	det	_	_
+19	Indian	_	ADJ	JJ	_	22	amod	_	Proper=True
+20	and	_	CCONJ	CC	_	21	cc	_	_
+21	Australian	_	ADJ	JJ	_	19	conj	_	Proper=True
+22	plates	_	NOUN	NNS	_	16	nmod	_	SpaceAfter=No
+23	.	_	PUNCT	.	_	4	punct	_	_
+
+# sent_id = w04002008
+# text = An element supporting this hypothesis would be the intense royal livestock of horses that took place at Villa Pelucca, in Sesto San Giovanni.
+1	An	_	DET	DT	_	2	det	_	_
+2	element	_	NOUN	NN	_	11	nsubj	_	_
+3	supporting	_	VERB	VBG	_	2	acl	_	_
+4	this	_	DET	DT	_	5	det	_	_
+5	hypothesis	_	NOUN	NN	_	3	obj	_	_
+6	would	_	VERB	MD	_	11	aux	_	_|CheckUPOS=AUX
+7	be	_	AUX	VB	_	11	cop	_	_
+8	the	_	DET	DT	_	11	det	_	_
+9	intense	_	ADJ	JJ	_	11	amod	_	_
+10	royal	_	ADJ	JJ	_	11	amod	_	_
+11	livestock	_	NOUN	NN	_	0	root	_	_
+12	of	_	ADP	IN	_	13	case	_	_
+13	horses	_	NOUN	NNS	_	11	nmod	_	ToDo=nmod
+14	that	_	DET	WDT	_	15	nsubj	_	_
+15	took	_	VERB	VBD	_	11	acl:relcl	_	_|CheckAttachment=13,13
+16	place	_	NOUN	NN	_	15	obj	_	_
+17	at	_	ADP	IN	_	19	case	_	_|CheckAttachment=18,19
+18	Villa	_	PROPN	NNP	_	19	compound	_	_|CheckAttachment=15,19|CheckReln=obl,compound
+19	Pelucca	_	PROPN	NNP	_	15	obl	_	SpaceAfter=No|CheckAttachment=18,15|CheckReln=flat:name,nmod
+20	,	_	PUNCT	,	_	19	punct	_	_|CheckAttachment=15,11
+21	in	_	ADP	IN	_	24	case	_	_|CheckAttachment=22,24
+22	Sesto	_	PROPN	NNP	_	24	compound	_	_|CheckAttachment=15,24|CheckReln=obl,compound
+23	San	_	PROPN	NNP	_	24	compound	_	_|CheckAttachment=22,24|CheckReln=flat:name,compound
+24	Giovanni	_	PROPN	NNP	_	19	nmod	_	SpaceAfter=No|CheckAttachment=22,11|CheckReln=flat:name,nmod
+25	.	_	PUNCT	.	_	11	punct	_	_
+
+# sent_id = w04002048
+# text = In 1928, a 90-hectare golf course was built in the north-eastern part of the park, next to the racetrack.
+1	In	_	ADP	IN	_	2	case	_	_
+2	1928	_	NUM	CD	_	9	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+3	,	_	PUNCT	,	_	9	punct	_	_
+4	a	_	DET	DT	_	7	det	_	_
+5	90-hectare	_	ADJ	JJ	_	7	amod	_	_
+6	golf	_	NOUN	NN	_	7	compound	_	_
+7	course	_	NOUN	NN	_	9	nsubj:pass	_	_
+8	was	_	VERB	VBD	_	9	aux:pass	_	_|CheckUPOS=AUX
+9	built	_	VERB	VBN	_	0	root	_	_
+10	in	_	ADP	IN	_	13	case	_	_
+11	the	_	DET	DT	_	13	det	_	_
+12	north-eastern	_	ADJ	JJ	_	13	amod	_	_
+13	part	_	NOUN	NN	_	9	obl	_	_|CheckReln=advcl,nmod
+14	of	_	ADP	IN	_	16	case	_	_
+15	the	_	DET	DT	_	16	det	_	_
+16	park	_	NOUN	NN	_	13	nmod	_	SpaceAfter=No
+17	,	_	PUNCT	,	_	9	punct	_	_|CheckAttachment=13,9
+18	next	_	ADV	RB	_	21	advmod	_	ToDo=ex-adp-child|CheckAttachment=13,9|CheckReln=dep,advmod
+19	to	_	ADP	IN	_	21	case	_	_
+20	the	_	DET	DT	_	21	det	_	_
+21	racetrack	_	NOUN	NN	_	9	obl	_	SpaceAfter=No|CheckAttachment=13,18|CheckReln=nmod,nmod
+22	.	_	PUNCT	.	_	9	punct	_	_
+
+# sent_id = w04002055
+# text = In 1976, the racecourse was no longer used; in 1990, a fire destroyed what remained of the wooden grandstands, which were later demolished along with the stables.
+1	In	_	ADP	IN	_	2	case	_	_
+2	1976	_	NUM	CD	_	9	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+3	,	_	PUNCT	,	_	9	punct	_	_
+4	the	_	DET	DT	_	5	det	_	_
+5	racecourse	_	NOUN	NN	_	9	nsubj:pass	_	_
+6	was	_	VERB	VBD	_	9	aux:pass	_	_
+7	no	_	ADV	RB	Polarity=Neg	8	advmod	_	_|CheckReln=advmod,neg
+8	longer	_	ADV	RBR	_	9	advmod	_	_
+9	used	_	VERB	VBN	_	0	root	_	SpaceAfter=No
+10	;	_	PUNCT	:	_	9	punct	_	_
+11	in	_	ADP	IN	_	12	case	_	_
+12	1990	_	NUM	CD	_	16	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+13	,	_	PUNCT	,	_	16	punct	_	_|CheckAttachment=16,12
+14	a	_	DET	DT	_	15	det	_	_
+15	fire	_	NOUN	NN	_	16	nsubj	_	_
+16	destroyed	_	VERB	VBD	_	9	parataxis	_	_
+17	what	_	PRON	WP	_	16	nsubj	_	_|CheckAttachment=18,18
+18	remained	_	VERB	VBD	_	17	acl:relcl	_	_|CheckAttachment=16,16|CheckReln=ccomp,ccomp
+19	of	_	ADP	IN	_	22	case	_	_
+20	the	_	DET	DT	_	22	det	_	_
+21	wooden	_	ADJ	JJ	_	22	amod	_	_
+22	grandstands	_	NOUN	NNS	_	18	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+23	,	_	PUNCT	,	_	22	punct	_	_
+24	which	_	DET	WDT	_	27	nsubj:pass	_	_
+25	were	_	VERB	VBD	_	27	aux:pass	_	_|CheckUPOS=AUX
+26	later	_	ADV	RB	_	27	advmod	_	_
+27	demolished	_	VERB	VBN	_	22	acl:relcl	_	_
+28	along	_	ADV	RB	_	31	advmod	_	ToDo=ex-adp-child|CheckAttachment=27,31|CheckReln=advmod,case
+29	with	_	ADP	IN	_	31	case	_	_
+30	the	_	DET	DT	_	31	det	_	_
+31	stables	_	NOUN	NNS	_	27	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+32	.	_	PUNCT	.	_	9	punct	_	_
+
+# sent_id = w04003025
+# text = In August 1969, Pope Paul VI removed the death penalty from the Vatican law and revoked it from all offences.
+1	In	_	ADP	IN	_	2	case	_	_
+2	August	_	PROPN	NNP	_	8	obl	_	_|CheckReln=obl,nmod
+3	1969	_	NUM	CD	_	2	nmod:tmod	_	SpaceAfter=No|CheckReln=nummod,nummod
+4	,	_	PUNCT	,	_	8	punct	_	_
+5	Pope	_	PROPN	NN	_	6	compound	_	_|CheckAttachment=8,7|CheckReln=nsubj,compound|CheckUPOS=NOUN
+6	Paul	_	PROPN	NNP	_	8	nsubj	_	_|CheckAttachment=5,7|CheckReln=dep,compound
+7	VI	_	NUM	CD	_	6	nummod	_	Proper=True|CheckAttachment=6,8|CheckReln=nummod,nsubj
+8	removed	_	VERB	VBD	_	0	root	_	_
+9	the	_	DET	DT	_	11	det	_	_
+10	death	_	NOUN	NN	_	11	compound	_	_
+11	penalty	_	NOUN	NN	_	8	obj	_	_
+12	from	_	ADP	IN	_	15	case	_	_
+13	the	_	DET	DT	_	15	det	_	_
+14	Vatican	_	PROPN	NNP	_	15	compound	_	_
+15	law	_	NOUN	NN	_	8	obl	_	_|CheckReln=obl,nmod
+16	and	_	CCONJ	CC	_	17	cc	_	_
+17	revoked	_	VERB	VBD	_	8	conj	_	_
+18	it	_	PRON	PRP	_	17	obj	_	_
+19	from	_	ADP	IN	_	21	case	_	_
+20	all	_	DET	DT	_	21	det	_	_
+21	offences	_	NOUN	NNS	_	17	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+22	.	_	PUNCT	.	_	8	punct	_	_
+
+# sent_id = w04003054
+# text = The issuing of coinage is predominantly numismatic in nature, with the intention of being sold mainly to collectors.
+1	The	_	DET	DT	_	2	det	_	_
+2	issuing	_	NOUN	NN	_	7	nsubj	_	_
+3	of	_	ADP	IN	_	4	case	_	_
+4	coinage	_	NOUN	NN	_	2	nmod	_	_
+5	is	_	AUX	VBZ	_	7	cop	_	_
+6	predominantly	_	ADV	RB	_	7	advmod	_	_
+7	numismatic	_	ADJ	JJ	_	0	root	_	_
+8	in	_	ADP	IN	_	9	case	_	_
+9	nature	_	NOUN	NN	_	7	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+10	,	_	PUNCT	,	_	7	punct	_	_
+11	with	_	ADP	IN	_	13	case	_	_
+12	the	_	DET	DT	_	13	det	_	_
+13	intention	_	NOUN	NN	_	7	obl	_	_|CheckReln=obl,nmod
+14	of	_	ADP	IN	_	16	case	_	_|CheckReln=mark,mark|CheckUPOS=SCONJ
+15	being	_	VERB	VBG	_	16	aux:pass	_	_|CheckUPOS=AUX
+16	sold	_	VERB	VBN	_	13	xcomp	_	_|CheckReln=acl,acl
+17	mainly	_	ADV	RB	_	16	advmod	_	_
+18	to	_	ADP	IN	_	19	case	_	_
+19	collectors	_	NOUN	NNS	_	16	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+20	.	_	PUNCT	.	_	7	punct	_	_
+
+# sent_id = w04004005
+# text = The inner part of the region is flat and hilly, with no clear distinction between one area to the next.
+1	The	_	DET	DT	_	3	det	_	_
+2	inner	_	ADJ	JJ	_	3	amod	_	_
+3	part	_	NOUN	NN	_	8	nsubj	_	_
+4	of	_	ADP	IN	_	6	case	_	_
+5	the	_	DET	DT	_	6	det	_	_
+6	region	_	NOUN	NN	_	3	nmod	_	_
+7	is	_	AUX	VBZ	_	8	cop	_	_
+8	flat	_	ADJ	JJ	_	0	root	_	_
+9	and	_	CCONJ	CC	_	10	cc	_	_
+10	hilly	_	ADJ	JJ	_	8	conj	_	SpaceAfter=No
+11	,	_	PUNCT	,	_	8	punct	_	_|CheckAttachment=15,8
+12	with	_	ADP	IN	_	15	case	_	_
+13	no	_	DET	DT	_	15	det	_	_|CheckReln=det,neg
+14	clear	_	ADJ	JJ	_	15	amod	_	_
+15	distinction	_	NOUN	NN	_	8	obl	_	_|CheckReln=conj,nmod
+16	between	_	ADP	IN	_	18	case	_	_
+17	one	_	NUM	CD	_	18	nummod	_	_
+18	area	_	NOUN	NN	_	15	nmod	_	_
+19	to	_	ADP	IN	_	21	case	_	_
+20	the	_	DET	DT	_	21	det	_	_
+21	next	_	ADJ	JJ	_	15	nmod	_	SpaceAfter=No|CheckAttachment=18,15
+22	.	_	PUNCT	.	_	8	punct	_	_
+
+# sent_id = w04004045
+# text = There are many prehistoric artifacts, including several different menhirs and dolmens.
+1	There	_	DET	EX	_	2	expl	_	_|CheckUPOS=PRON
+2	are	_	VERB	VBP	_	0	root	_	_
+3	many	_	ADJ	JJ	_	5	amod	_	_
+4	prehistoric	_	ADJ	JJ	_	5	amod	_	_
+5	artifacts	_	NOUN	NNS	_	2	nsubj	_	SpaceAfter=No
+6	,	_	PUNCT	,	_	5	punct	_	_
+7	including	_	VERB	VBG	_	10	case	_	_
+8	several	_	ADJ	JJ	_	10	amod	_	_
+9	different	_	ADJ	JJ	_	10	amod	_	_
+10	menhirs	_	NOUN	NNS	_	5	nmod	_	_
+11	and	_	CCONJ	CC	_	12	cc	_	_
+12	dolmens	_	NOUN	NNS	_	10	conj	_	SpaceAfter=No
+13	.	_	PUNCT	.	_	2	punct	_	_
+
+# sent_id = w04004051
+# text = The second Apulian and Calabrian Royal Region was then established, also including Samnium, parts of Molise and the oriental Basilicata.
+1	The	_	DET	DT	_	7	det	_	_|CheckAttachment=3,3
+2	second	_	ADJ	JJ	_	7	amod	_	_|CheckAttachment=3,3
+3	Apulian	_	PROPN	NNP	_	7	amod	_	_|CheckAttachment=10,10|CheckReln=nsubj:pass,nsubj:pass
+4	and	_	CCONJ	CC	_	5	cc	_	Proper=True|CheckAttachment=7,7
+5	Calabrian	_	PROPN	NNP	_	3	conj	_	_|CheckAttachment=7,7|CheckReln=compound,amod
+6	Royal	_	ADJ	JJ	_	7	amod	_	Proper=True|CheckReln=amod,compound
+7	Region	_	PROPN	NN	_	10	nsubj:pass	_	_|CheckAttachment=3,3|CheckReln=conj,conj|CheckUPOS=NOUN
+8	was	_	VERB	VBD	_	10	aux:pass	_	_|CheckUPOS=AUX
+9	then	_	ADV	RB	_	10	advmod	_	_
+10	established	_	VERB	VBN	_	0	root	_	SpaceAfter=No
+11	,	_	PUNCT	,	_	10	punct	_	_
+12	also	_	ADV	RB	_	14	advmod	_	ToDo=ex-adp-child|CheckAttachment=13,14
+13	including	_	VERB	VBG	_	14	case	_	_|CheckAttachment=10,14|CheckReln=ccomp,case
+14	Samnium	_	PROPN	NNP	_	10	obl	_	SpaceAfter=No|CheckAttachment=13,10|CheckReln=obj,nmod
+15	,	_	PUNCT	,	_	14	punct	_	_|CheckAttachment=16,14
+16	parts	_	NOUN	NNS	_	14	conj	_	_|CheckReln=conj,appos
+17	of	_	ADP	IN	_	18	case	_	_
+18	Molise	_	PROPN	NNP	_	16	nmod	_	_
+19	and	_	CCONJ	CC	_	22	cc	_	_
+20	the	_	DET	DT	_	22	det	_	_
+21	oriental	_	ADJ	JJ	_	22	amod	_	_
+22	Basilicata	_	PROPN	NNP	_	14	conj	_	SpaceAfter=No|CheckAttachment=14,18
+23	.	_	PUNCT	.	_	10	punct	_	_
+
+# sent_id = w04004059
+# text = During the thirteenth century, the name Apulia was used by some authors to signify the southern part of the Italian peninsula.
+1	During	_	ADP	IN	_	4	case	_	_
+2	the	_	DET	DT	_	4	det	_	_
+3	thirteenth	_	ADJ	JJ	_	4	amod	_	_
+4	century	_	NOUN	NN	_	10	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+5	,	_	PUNCT	,	_	10	punct	_	_
+6	the	_	DET	DT	_	7	det	_	_|CheckAttachment=8,8
+7	name	_	NOUN	NN	_	10	nsubj:pass	_	_|CheckAttachment=8,8|CheckReln=nmod,compound
+8	Apulia	_	PROPN	NNP	_	7	appos	_	_|CheckAttachment=10,10|CheckReln=nsubj:pass,nsubj:pass
+9	was	_	VERB	VBD	_	10	aux:pass	_	_|CheckUPOS=AUX
+10	used	_	VERB	VBN	_	0	root	_	_
+11	by	_	ADP	IN	_	13	case	_	_
+12	some	_	DET	DT	_	13	det	_	_
+13	authors	_	NOUN	NNS	_	10	obl	_	_|CheckReln=obl,nmod
+14	to	_	PART	TO	_	15	mark	_	_
+15	signify	_	VERB	VB	_	10	acl	_	_|CheckReln=xcomp,xcomp
+16	the	_	DET	DT	_	18	det	_	_
+17	southern	_	ADJ	JJ	_	18	amod	_	_
+18	part	_	NOUN	NN	_	15	obj	_	_
+19	of	_	ADP	IN	_	22	case	_	_
+20	the	_	DET	DT	_	22	det	_	_
+21	Italian	_	ADJ	JJ	_	22	amod	_	Proper=True
+22	peninsula	_	NOUN	NN	_	18	nmod	_	SpaceAfter=No
+23	.	_	PUNCT	.	_	10	punct	_	_
+
+# sent_id = w04006023
+# text = Historian David Crouch suggests that Stephen abandoned from the challenge around this time to focus on other issues.
+1	Historian	_	NOUN	NN	_	3	compound	_	_|CheckAttachment=2,3|CheckReln=nmod,compound
+2	David	_	PROPN	NNP	_	3	compound	_	_|CheckAttachment=4,3|CheckReln=nsubj,compound
+3	Crouch	_	PROPN	NNP	_	4	nsubj	_	_|CheckAttachment=2,4|CheckReln=flat:name,nsubj
+4	suggests	_	VERB	VBZ	_	0	root	_	_
+5	that	_	ADP	IN	_	7	mark	_	_|CheckUPOS=SCONJ
+6	Stephen	_	PROPN	NNP	_	7	nsubj	_	_
+7	abandoned	_	VERB	VBD	_	4	ccomp	_	_
+8	from	_	ADP	IN	_	10	case	_	_
+9	the	_	DET	DT	_	10	det	_	_
+10	challenge	_	NOUN	NN	_	7	obl	_	_|CheckReln=obl,nmod
+11	around	_	ADP	IN	_	13	case	_	_
+12	this	_	DET	DT	_	13	det	_	_
+13	time	_	NOUN	NN	_	7	obl	_	_|CheckAttachment=10,10|CheckReln=nmod,nmod
+14	to	_	PART	TO	_	15	mark	_	_
+15	focus	_	VERB	VB	_	7	acl	_	_|CheckReln=xcomp,xcomp
+16	on	_	ADP	IN	_	18	case	_	_
+17	other	_	ADJ	JJ	_	18	amod	_	_
+18	issues	_	NOUN	NNS	_	15	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+19	.	_	PUNCT	.	_	4	punct	_	_
+
+# sent_id = w04006065
+# text = Only a handful of them (earldoms) had existed under Henry I and these had been largely symbolic.
+1	Only	_	ADV	RB	_	3	advmod	_	_
+2	a	_	DET	DT	_	3	det	_	_
+3	handful	_	NOUN	NN	_	10	nsubj	_	_
+4	of	_	ADP	IN	_	5	case	_	_
+5	them	_	PRON	PRP	_	3	nmod	_	_
+6	(	_	PUNCT	(	_	7	punct	_	SpaceAfter=No
+7	earldoms	_	NOUN	NNS	_	3	appos	_	SpaceAfter=No|CheckAttachment=3,5
+8	)	_	PUNCT	)	_	7	punct	_	_
+9	had	_	VERB	VBD	_	10	aux	_	_|CheckUPOS=AUX
+10	existed	_	VERB	VBN	_	0	root	_	_
+11	under	_	ADP	IN	_	12	case	_	_|CheckAttachment=12,13
+12	Henry	_	PROPN	NNP	_	10	obl	_	_|CheckAttachment=10,13|CheckReln=obl,compound
+13	I	_	NUM	CD	_	12	nummod	_	Proper=True|CheckAttachment=12,10|CheckReln=nummod,nmod
+14	and	_	CCONJ	CC	_	19	cc	_	_
+15	these	_	DET	DT	_	19	nsubj	_	_|CheckUPOS=PRON
+16	had	_	VERB	VBD	_	19	aux	_	_|CheckUPOS=AUX
+17	been	_	AUX	VBN	_	19	cop	_	_
+18	largely	_	ADV	RB	_	19	advmod	_	_
+19	symbolic	_	ADJ	JJ	_	10	conj	_	SpaceAfter=No
+20	.	_	PUNCT	.	_	10	punct	_	_
+
+# sent_id = w04007006
+# text = During the War of the First Coalition, light quickly began to be shed upon a young Corsican artillery officer, following the French Revolution: Napoleon Bonaparte.
+1	During	_	ADP	IN	_	3	case	_	_
+2	the	_	DET	DT	_	3	det	_	_
+3	War	_	PROPN	NN	_	11	obl	_	_|CheckReln=obl,nmod|CheckUPOS=NOUN
+4	of	_	ADP	IN	_	7	case	_	Proper=True
+5	the	_	DET	DT	_	7	det	_	Proper=True
+6	First	_	ADJ	JJ	_	7	amod	_	Proper=True|CheckReln=amod,compound
+7	Coalition	_	PROPN	NN	_	3	nmod	_	SpaceAfter=No|CheckUPOS=NOUN
+8	,	_	PUNCT	,	_	11	punct	_	_
+9	light	_	NOUN	NN	_	11	nsubj	_	_
+10	quickly	_	ADV	RB	_	11	advmod	_	_
+11	began	_	VERB	VBD	_	0	root	_	_
+12	to	_	PART	TO	_	14	aux	_	_|CheckReln=mark,mark
+13	be	_	VERB	VB	_	14	aux:pass	_	_|CheckUPOS=AUX
+14	shed	_	VERB	VBN	_	11	xcomp	_	_
+15	upon	_	ADP	IN	_	20	case	_	_
+16	a	_	DET	DT	_	20	det	_	_
+17	young	_	ADJ	JJ	_	20	amod	_	_
+18	Corsican	_	ADJ	JJ	_	20	amod	_	Proper=True
+19	artillery	_	NOUN	NN	_	20	compound	_	_
+20	officer	_	NOUN	NN	_	14	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+21	,	_	PUNCT	,	_	14	punct	_	_|CheckAttachment=20,11
+22	following	_	VERB	VBG	_	25	case	_	_
+23	the	_	DET	DT	_	25	det	_	_
+24	French	_	ADJ	JJ	_	25	amod	_	Proper=True
+25	Revolution	_	PROPN	NN	_	14	obl	_	SpaceAfter=No|CheckAttachment=20,11|CheckReln=nmod,nmod|CheckUPOS=NOUN
+26	:	_	PUNCT	:	_	28	punct	_	_|CheckAttachment=25,11
+27	Napoleon	_	PROPN	NNP	_	28	compound	_	_|CheckAttachment=25,28|CheckReln=dep,compound
+28	Bonaparte	_	PROPN	NNP	_	20	appos	_	SpaceAfter=No|CheckAttachment=27,11|CheckReln=flat:name,dep
+29	.	_	PUNCT	.	_	11	punct	_	_
+
+# sent_id = w04007021
+# text = Although not a resolver of the conflict, the French victory at the Battle of Marengo forced the Austrians to give Italy up for the second time.
+1	Although	_	ADP	IN	_	4	mark	_	_|CheckAttachment=4,0|CheckReln=mark,root|CheckUPOS=SCONJ
+2	not	_	ADV	RB	Polarity=Neg	4	advmod	_	_|CheckReln=advmod,neg
+3	a	_	DET	DT	_	4	det	_	_
+4	resolver	_	NOUN	NN	_	0	root	_	_|CheckAttachment=17,1|CheckReln=advcl,dep
+5	of	_	ADP	IN	_	7	case	_	_
+6	the	_	DET	DT	_	7	det	_	_
+7	conflict	_	NOUN	NN	_	4	nmod	_	SpaceAfter=No|ToDo=nmod
+8	,	_	PUNCT	,	_	4	punct	_	_|CheckAttachment=17,4
+9	the	_	DET	DT	_	11	det	_	_
+10	French	_	ADJ	JJ	_	11	amod	_	Proper=True
+11	victory	_	NOUN	NN	_	4	nsubj	_	_|CheckAttachment=17,17
+12	at	_	ADP	IN	_	14	case	_	_
+13	the	_	DET	DT	_	14	det	_	_
+14	Battle	_	PROPN	NN	_	11	nmod	_	_|CheckUPOS=NOUN
+15	of	_	ADP	IN	_	16	case	_	Proper=True
+16	Marengo	_	PROPN	NNP	_	14	nmod	_	_
+17	forced	_	AUX	VBD	_	4	cop	_	_|CheckAttachment=0,4|CheckReln=root,acl:relcl|CheckUPOS=VERB
+18	the	_	DET	DT	_	19	det	_	_
+19	Austrians	_	PROPN	NNPS	_	4	obj	_	_|CheckAttachment=17,17
+20	to	_	PART	TO	_	21	mark	_	_
+21	give	_	VERB	VB	_	4	xcomp	_	_|CheckAttachment=17,17
+22	Italy	_	PROPN	NNP	_	21	obj	_	_
+23	up	_	PART	RP	_	21	compound:prt	_	_|CheckUPOS=ADP
+24	for	_	ADP	IN	_	27	case	_	_
+25	the	_	DET	DT	_	27	det	_	_
+26	second	_	ADJ	JJ	_	27	amod	_	_
+27	time	_	NOUN	NN	_	21	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+28	.	_	PUNCT	.	_	4	punct	_	_|CheckAttachment=17,1
+
+# sent_id = w04007037
+# text = The blockage of Villeneuve's fleet resulted in giving up the invasion plan of the British Isles, also because new developments were taking place in the continent.
+1	The	_	DET	DT	_	2	det	_	_
+2	blockage	_	NOUN	NN	_	7	nsubj	_	_
+3	of	_	ADP	IN	_	6	case	_	_
+4	Villeneuve	_	PROPN	NNP	_	6	nmod:poss	_	SpaceAfter=No
+5	's	_	PART	POS	_	4	case	_	_
+6	fleet	_	NOUN	NN	_	2	nmod	_	_
+7	resulted	_	VERB	VBD	_	0	root	_	_
+8	in	_	ADP	IN	_	9	case	_	_|CheckReln=mark,mark|CheckUPOS=SCONJ
+9	giving	_	VERB	VBG	_	7	xcomp	_	_|CheckReln=advcl,advcl
+10	up	_	PART	RP	_	9	compound:prt	_	_|CheckUPOS=ADP
+11	the	_	DET	DT	_	13	det	_	_
+12	invasion	_	NOUN	NN	_	13	compound	_	_
+13	plan	_	NOUN	NN	_	9	obj	_	_
+14	of	_	ADP	IN	_	17	case	_	_
+15	the	_	DET	DT	_	17	det	_	_
+16	British	_	ADJ	JJ	_	17	amod	_	Proper=True
+17	Isles	_	PROPN	NNS	_	13	nmod	_	SpaceAfter=No|CheckAttachment=9,13|CheckReln=obl,nmod|CheckUPOS=NOUN
+18	,	_	PUNCT	,	_	9	punct	_	_|CheckAttachment=9,7
+19	also	_	ADV	RB	_	20	advmod	_	_|CheckAttachment=24,24
+20	because	_	ADP	IN	_	24	mark	_	_|CheckUPOS=SCONJ
+21	new	_	ADJ	JJ	_	22	amod	_	_
+22	developments	_	NOUN	NNS	_	24	nsubj	_	_
+23	were	_	VERB	VBD	_	24	aux	_	_|CheckUPOS=AUX
+24	taking	_	VERB	VBG	_	9	advcl	_	_|CheckAttachment=9,7
+25	place	_	NOUN	NN	_	24	obj	_	_
+26	in	_	ADP	IN	_	28	case	_	_
+27	the	_	DET	DT	_	28	det	_	_
+28	continent	_	NOUN	NN	_	24	obl	_	SpaceAfter=No|CheckAttachment=25,24|CheckReln=nmod,nmod
+29	.	_	PUNCT	.	_	7	punct	_	_
+
+# sent_id = w04007049
+# text = Napoleon was confident that the clear success of Austerlitz could lead to a general peace treaty, but his hopes were soon dashed: the new British Prime Minister Lord Grenville refused any agreement, and so did Tsar Alexander.
+1	Napoleon	_	PROPN	NNP	_	3	nsubj	_	_
+2	was	_	AUX	VBD	_	3	cop	_	_
+3	confident	_	ADJ	JJ	_	0	root	_	_
+4	that	_	ADP	IN	_	11	mark	_	_|CheckUPOS=SCONJ
+5	the	_	DET	DT	_	7	det	_	_
+6	clear	_	ADJ	JJ	_	7	amod	_	_
+7	success	_	NOUN	NN	_	11	nsubj	_	_
+8	of	_	ADP	IN	_	9	case	_	_
+9	Austerlitz	_	PROPN	NNP	_	7	nmod	_	_
+10	could	_	VERB	MD	_	11	aux	_	_|CheckUPOS=AUX
+11	lead	_	VERB	VB	_	3	ccomp	_	_
+12	to	_	ADP	IN	_	16	case	_	_
+13	a	_	DET	DT	_	16	det	_	_
+14	general	_	ADJ	JJ	_	16	amod	_	_
+15	peace	_	NOUN	NN	_	16	compound	_	_
+16	treaty	_	NOUN	NN	_	11	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+17	,	_	PUNCT	,	_	3	punct	_	_|CheckAttachment=23,3
+18	but	_	CCONJ	CC	_	23	cc	_	_
+19	his	_	PRON	PRP$	_	20	nmod:poss	_	_
+20	hopes	_	NOUN	NNS	_	23	nsubj:pass	_	_
+21	were	_	VERB	VBD	_	23	aux:pass	_	_|CheckUPOS=AUX
+22	soon	_	ADV	RB	_	23	advmod	_	_
+23	dashed	_	VERB	VBN	_	3	conj	_	SpaceAfter=No
+24	:	_	PUNCT	:	_	3	punct	_	_|CheckAttachment=23,23
+25	the	_	DET	DT	_	29	det	_	_|CheckAttachment=30,31
+26	new	_	ADJ	JJ	_	29	amod	_	_|CheckAttachment=30,31
+27	British	_	ADJ	JJ	_	29	amod	_	Proper=True|CheckAttachment=30,31
+28	Prime	_	ADJ	JJ	_	29	amod	_	_|CheckAttachment=30,31|CheckReln=amod,compound
+29	Minister	_	NOUN	NN	_	32	nsubj	_	_|CheckAttachment=30,31|CheckReln=compound,compound
+30	Lord	_	NOUN	NN	_	31	compound	_	_|CheckAttachment=23,31|CheckReln=obj,compound
+31	Grenville	_	PROPN	NNP	_	29	appos	_	_|CheckAttachment=32,32|CheckReln=nsubj,nsubj
+32	refused	_	VERB	VBD	_	3	parataxis	_	_|CheckAttachment=30,23|CheckReln=acl:relcl,parataxis
+33	any	_	DET	DT	_	34	det	_	_
+34	agreement	_	NOUN	NN	_	32	obj	_	SpaceAfter=No
+35	,	_	PUNCT	,	_	32	punct	_	_|CheckAttachment=38,32
+36	and	_	CCONJ	CC	_	38	cc	_	_
+37	so	_	ADV	RB	_	38	advmod	_	_
+38	did	_	VERB	VBD	_	32	conj	_	_
+39	Tsar	_	NOUN	NN	_	40	compound	_	_|CheckAttachment=38,40|CheckReln=obj,compound
+40	Alexander	_	PROPN	NNP	_	38	nsubj	_	SpaceAfter=No|CheckAttachment=39,38|CheckReln=flat:name,nsubj
+41	.	_	PUNCT	.	_	3	punct	_	_
+
+# sent_id = w04008006
+# text = With regards to religious practices, Fiorello was educated within the Episcopal Church, and remained a member of the Protestant Church throughout his life.
+1	With	_	ADP	IN	_	2	case	_	_|CheckReln=case,mark
+2	regards	_	NOUN	NNS	_	9	obl	_	_|CheckReln=obl,advcl
+3	to	_	ADP	IN	_	5	case	_	_
+4	religious	_	ADJ	JJ	_	5	amod	_	_
+5	practices	_	NOUN	NNS	_	2	nmod	_	SpaceAfter=No
+6	,	_	PUNCT	,	_	9	punct	_	_
+7	Fiorello	_	PROPN	NNP	_	9	nsubj:pass	_	_
+8	was	_	VERB	VBD	_	9	aux:pass	_	_|CheckUPOS=AUX
+9	educated	_	VERB	VBN	_	0	root	_	_
+10	within	_	ADP	IN	_	13	case	_	_
+11	the	_	DET	DT	_	13	det	_	_
+12	Episcopal	_	ADJ	JJ	_	13	amod	_	Proper=True|CheckReln=amod,compound
+13	Church	_	PROPN	NN	_	9	obl	_	SpaceAfter=No|CheckReln=obl,nmod|CheckUPOS=NOUN
+14	,	_	PUNCT	,	_	9	punct	_	_|CheckAttachment=16,9
+15	and	_	CCONJ	CC	_	18	cc	_	_|CheckAttachment=16,16
+16	remained	_	AUX	VBD	_	18	cop	_	_|CheckAttachment=9,9|CheckReln=conj,conj|CheckUPOS=VERB
+17	a	_	DET	DT	_	18	det	_	_
+18	member	_	NOUN	NN	_	9	conj	_	_|CheckAttachment=16,16|CheckReln=xcomp,xcomp
+19	of	_	ADP	IN	_	22	case	_	_
+20	the	_	DET	DT	_	22	det	_	_
+21	Protestant	_	ADJ	JJ	_	22	amod	_	Proper=True|CheckReln=amod,compound
+22	Church	_	PROPN	NN	_	18	nmod	_	ToDo=nmod|CheckUPOS=NOUN
+23	throughout	_	ADP	IN	_	25	case	_	_
+24	his	_	PRON	PRP$	_	25	nmod:poss	_	_
+25	life	_	NOUN	NN	_	18	nmod	_	SpaceAfter=No|ToDo=nmod|CheckAttachment=16,16|CheckReln=obl,nmod
+26	.	_	PUNCT	.	_	9	punct	_	_
+
+# sent_id = w04009042
+# text = The man told him that a war between the two universes is coming, as he and Walter had predicted; it is for this reason that Olivia, among others, was trained as a child.
+1	The	_	DET	DT	_	2	det	_	_
+2	man	_	NOUN	NN	_	3	nsubj	_	_
+3	told	_	VERB	VBD	_	0	root	_	_
+4	him	_	PRON	PRP	_	3	iobj	_	_|CheckReln=obj,obj
+5	that	_	ADP	IN	_	13	mark	_	_|CheckUPOS=SCONJ
+6	a	_	DET	DT	_	7	det	_	_
+7	war	_	NOUN	NN	_	13	nsubj	_	_
+8	between	_	ADP	IN	_	11	case	_	_
+9	the	_	DET	DT	_	11	det	_	_
+10	two	_	NUM	CD	_	11	nummod	_	_
+11	universes	_	NOUN	NNS	_	7	nmod	_	_
+12	is	_	VERB	VBZ	_	13	aux	_	_|CheckUPOS=AUX
+13	coming	_	VERB	VBG	_	3	ccomp	_	SpaceAfter=No
+14	,	_	PUNCT	,	_	13	punct	_	_
+15	as	_	ADP	IN	_	20	mark	_	_|CheckUPOS=SCONJ
+16	he	_	PRON	PRP	_	20	nsubj	_	_
+17	and	_	CCONJ	CC	_	18	cc	_	_
+18	Walter	_	PROPN	NNP	_	16	conj	_	_
+19	had	_	VERB	VBD	_	20	aux	_	_|CheckUPOS=AUX
+20	predicted	_	VERB	VBN	_	13	advcl	_	SpaceAfter=No
+21	;	_	PUNCT	:	_	3	punct	_	_
+22	it	_	PRON	PRP	_	23	nsubj	_	_|CheckAttachment=26,26
+23	is	_	VERB	VBZ	_	3	parataxis	_	_|CheckAttachment=26,26|CheckReln=cop,cop|CheckUPOS=AUX,AUX
+24	for	_	ADP	IN	_	26	case	_	_
+25	this	_	DET	DT	_	26	det	_	_
+26	reason	_	NOUN	NN	_	23	obl	_	_|CheckAttachment=3,3|CheckReln=parataxis,parataxis
+27	that	_	ADP	IN	_	34	mark	_	_|CheckAttachment=34,28|CheckReln=mark,det|CheckUPOS=SCONJ
+28	Olivia	_	PROPN	NNP	_	34	nsubj:pass	_	SpaceAfter=No
+29	,	_	PUNCT	,	_	34	punct	_	_|CheckAttachment=34,28
+30	among	_	ADP	IN	_	31	case	_	_
+31	others	_	NOUN	NNS	_	34	obl	_	SpaceAfter=No|CheckAttachment=34,28|CheckReln=obl,nmod
+32	,	_	PUNCT	,	_	34	punct	_	_|CheckAttachment=34,28
+33	was	_	VERB	VBD	_	34	aux:pass	_	_|CheckUPOS=AUX
+34	trained	_	VERB	VBN	_	23	ccomp	_	_|CheckAttachment=26,26|CheckReln=ccomp,acl:relcl
+35	as	_	ADP	IN	_	37	case	_	_
+36	a	_	DET	DT	_	37	det	_	_
+37	child	_	NOUN	NN	_	34	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+38	.	_	PUNCT	.	_	3	punct	_	_
+
+# sent_id = w04010027
+# text = Both students of Goffredo Petrassi, Ennio Morricone and Bruno Nicolai met at the Santa (Saint) Cecelia conservatory.
+1	Both	_	DET	DT	_	2	nsubj	_	_|CheckReln=det,det
+2	students	_	NOUN	NNS	_	0	root	_	_|CheckAttachment=12,12|CheckReln=nsubj,nsubj
+3	of	_	ADP	IN	_	5	case	_	_|CheckAttachment=4,5
+4	Goffredo	_	PROPN	NNP	_	5	compound	_	_|CheckAttachment=2,5|CheckReln=nmod,compound
+5	Petrassi	_	PROPN	NNP	_	2	nmod	_	SpaceAfter=No|ToDo=nmod|CheckAttachment=4,2|CheckReln=flat:name,nmod
+6	,	_	PUNCT	,	_	2	punct	_	_|CheckAttachment=7,5
+7	Ennio	_	PROPN	NNP	_	8	compound	_	_|CheckAttachment=4,8|CheckReln=conj,compound
+8	Morricone	_	PROPN	NNP	_	2	nsubj	_	_|CheckAttachment=7,5|CheckReln=flat:name,conj
+9	and	_	CCONJ	CC	_	11	cc	_	_|CheckAttachment=10,11
+10	Bruno	_	PROPN	NNP	_	11	compound	_	_|CheckAttachment=4,11|CheckReln=conj,compound
+11	Nicolai	_	PROPN	NNP	_	8	conj	_	_|CheckAttachment=10,5|CheckReln=flat:name,conj
+12	met	_	AUX	VBD	_	2	cop	_	_|CheckAttachment=0,0|CheckReln=root,root|CheckUPOS=VERB
+13	at	_	ADP	IN	_	20	case	_	_
+14	the	_	DET	DT	_	20	det	_	_
+15	Santa	_	PROPN	NNP	_	19	compound	_	_|CheckAttachment=19,20|CheckReln=nmod,compound
+16	(	_	PUNCT	(	_	17	punct	_	SpaceAfter=No
+17	Saint	_	NOUN	NN	_	15	appos	_	SpaceAfter=No|CheckAttachment=19,20
+18	)	_	PUNCT	)	_	17	punct	_	_
+19	Cecelia	_	PROPN	NNP	_	20	compound	_	_
+20	conservatory	_	NOUN	NN	_	2	nmod	_	SpaceAfter=No|ToDo=nmod|CheckAttachment=12,12|CheckReln=obl,nmod
+21	.	_	PUNCT	.	_	2	punct	_	_|CheckAttachment=12,12
+
+# sent_id = w04010028
+# text = Between them bloomed a long professional and amicable relationship that lasted for years.
+1	Between	_	ADP	IN	_	2	case	_	_
+2	them	_	PRON	PRP	_	3	obl	_	_|CheckReln=obl,nmod
+3	bloomed	_	VERB	VBD	_	0	root	_	_
+4	a	_	DET	DT	_	9	det	_	_|CheckAttachment=6,9|CheckReln=dep,det
+5	long	_	ADJ	JJ	_	9	amod	_	_|CheckAttachment=6,9
+6	professional	_	ADJ	JJ	_	9	amod	_	_|CheckAttachment=3,9|CheckReln=obj,amod
+7	and	_	CCONJ	CC	_	8	cc	_	_
+8	amicable	_	ADJ	JJ	_	6	conj	_	_
+9	relationship	_	NOUN	NN	_	3	nsubj	_	_|CheckReln=nsubj,obj
+10	that	_	DET	WDT	_	11	nsubj	_	_
+11	lasted	_	VERB	VBD	_	9	acl:relcl	_	_|CheckReln=ccomp,acl:relcl
+12	for	_	ADP	IN	_	13	case	_	_
+13	years	_	NOUN	NNS	_	11	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+14	.	_	PUNCT	.	_	3	punct	_	_
+
+# sent_id = w04010029
+# text = Nicolai collaborates on various cinematic scores by Morricone as Metti, one night at dinner; some of them were written by both together.
+1	Nicolai	_	PROPN	NNP	_	2	nsubj	_	_
+2	collaborates	_	VERB	VBZ	_	0	root	_	_
+3	on	_	ADP	IN	_	6	case	_	_
+4	various	_	ADJ	JJ	_	6	amod	_	_
+5	cinematic	_	ADJ	JJ	_	6	amod	_	_
+6	scores	_	NOUN	NNS	_	2	obl	_	_|CheckReln=obl,nmod
+7	by	_	ADP	IN	_	8	case	_	_|CheckAttachment=10,8
+8	Morricone	_	PROPN	NNP	_	6	nmod	_	_|CheckAttachment=10,2|CheckReln=compound,nmod
+9	as	_	ADP	IN	_	10	case	_	_|CheckReln=amod,case
+10	Metti	_	PROPN	NNP	_	2	obl	_	SpaceAfter=No|CheckAttachment=2,8|CheckReln=obl,nmod
+11	,	_	PUNCT	,	_	2	punct	_	_|CheckAttachment=10,10
+12	one	_	NUM	CD	_	13	nummod	_	_
+13	night	_	NOUN	NN	_	2	nmod:tmod	_	_|CheckAttachment=10,10|CheckReln=appos,appos
+14	at	_	ADP	IN	_	15	case	_	_
+15	dinner	_	NOUN	NN	_	13	nmod	_	SpaceAfter=No
+16	;	_	PUNCT	:	_	2	punct	_	_
+17	some	_	DET	DT	_	21	nsubj:pass	_	_
+18	of	_	ADP	IN	_	19	case	_	_
+19	them	_	PRON	PRP	_	17	nmod	_	_
+20	were	_	VERB	VBD	_	21	aux:pass	_	_|CheckUPOS=AUX
+21	written	_	VERB	VBN	_	2	parataxis	_	_
+22	by	_	ADP	IN	_	23	case	_	_|CheckAttachment=23,21|CheckReln=case,dep
+23	both	_	DET	DT	_	21	obl	_	_|CheckAttachment=21,22|CheckReln=obl,dep
+24	together	_	ADV	RB	_	23	advmod	_	SpaceAfter=No|CheckAttachment=21,23
+25	.	_	PUNCT	.	_	2	punct	_	_
+
+# sent_id = w04010030
+# text = However, the friendship has fallen apart due to unofficial collaborations between the two, which has given rise to legal disputes.
+1	However	_	ADV	RB	_	6	advmod	_	SpaceAfter=No
+2	,	_	PUNCT	,	_	6	punct	_	_
+3	the	_	DET	DT	_	4	det	_	_
+4	friendship	_	NOUN	NN	_	6	nsubj	_	_
+5	has	_	VERB	VBZ	_	6	aux	_	_|CheckUPOS=AUX
+6	fallen	_	VERB	VBN	_	0	root	_	_
+7	apart	_	PART	RP	_	6	compound:prt	_	_|CheckReln=compound:prt,advmod|CheckUPOS=ADP
+8	due	_	ADP	IN	_	11	case	_	_|CheckAttachment=11,6|CheckReln=case,xcomp
+9	to	_	ADP	IN	_	8	fixed	_	_|CheckAttachment=8,11|CheckReln=fixed,case
+10	unofficial	_	ADJ	JJ	_	11	amod	_	_
+11	collaborations	_	NOUN	NNS	_	6	obl	_	_|CheckAttachment=6,8|CheckReln=obl,nmod
+12	between	_	ADP	IN	_	14	case	_	_
+13	the	_	DET	DT	_	14	det	_	_
+14	two	_	NUM	CD	_	11	nmod	_	SpaceAfter=No
+15	,	_	PUNCT	,	_	6	punct	_	_|CheckAttachment=11,14
+16	which	_	DET	WDT	_	18	nsubj	_	_
+17	has	_	VERB	VBZ	_	18	aux	_	_|CheckUPOS=AUX
+18	given	_	VERB	VBN	_	6	acl:relcl	_	_|CheckAttachment=11,14
+19	rise	_	NOUN	NN	_	18	obj	_	_
+20	to	_	ADP	IN	_	22	case	_	_
+21	legal	_	ADJ	JJ	_	22	amod	_	_
+22	disputes	_	NOUN	NNS	_	18	obl	_	SpaceAfter=No|CheckAttachment=18,19|CheckReln=obl,nmod
+23	.	_	PUNCT	.	_	6	punct	_	_
+
+# sent_id = w04010031
+# text = During their various collaborations, it is not clear who between the two conceived of some stylistic solutions in the arrangements that later on characterised both artists' style.
+1	During	_	ADP	IN	_	4	case	_	_
+2	their	_	PRON	PRP$	_	4	nmod:poss	_	_
+3	various	_	ADJ	JJ	_	4	amod	_	_
+4	collaborations	_	NOUN	NNS	_	9	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+5	,	_	PUNCT	,	_	9	punct	_	_
+6	it	_	PRON	PRP	_	9	expl	_	_|CheckReln=nsubj,nsubj
+7	is	_	AUX	VBZ	_	9	cop	_	_
+8	not	_	ADV	RB	Polarity=Neg	9	advmod	_	_|CheckReln=advmod,neg|CheckUPOS=PART
+9	clear	_	ADJ	JJ	_	0	root	_	_
+10	who	_	PRON	WP	_	14	nsubj	_	_|CheckAttachment=14,9|CheckReln=nsubj,dep
+11	between	_	ADP	IN	_	13	case	_	_
+12	the	_	DET	DT	_	13	det	_	_
+13	two	_	NUM	CD	_	10	nmod	_	_|CheckAttachment=14,10|CheckReln=obl,nmod
+14	conceived	_	VERB	VBD	_	9	csubj	_	_|CheckAttachment=9,13|CheckReln=ccomp,acl
+15	of	_	ADP	IN	_	18	case	_	_
+16	some	_	DET	DT	_	18	det	_	_
+17	stylistic	_	ADJ	JJ	_	18	amod	_	_
+18	solutions	_	NOUN	NNS	_	14	obl	_	_|CheckReln=obl,nmod
+19	in	_	ADP	IN	_	21	case	_	_
+20	the	_	DET	DT	_	21	det	_	_
+21	arrangements	_	NOUN	NNS	_	18	nmod	_	_|CheckAttachment=14,18|CheckReln=obl,nmod
+22	that	_	DET	WDT	_	25	nsubj	_	_
+23	later	_	ADV	RB	_	24	advmod	_	_|CheckAttachment=24,25
+24	on	_	ADV	RB	_	25	advmod	_	_|CheckReln=advmod,mark
+25	characterised	_	VERB	VBN	_	21	acl:relcl	_	_
+26	both	_	DET	DT	_	27	det	_	_
+27	artists	_	NOUN	NNS	_	29	nmod:poss	_	SpaceAfter=No
+28	'	_	PART	POS	_	27	case	_	_
+29	style	_	NOUN	NN	_	25	obj	_	SpaceAfter=No
+30	.	_	PUNCT	.	_	9	punct	_	_
+
+# sent_id = w05001026
+# text = In the 20th century, between 1904 and 1914, Antonio Gaudí brought about a reform that lasted ten years.
+1	In	_	ADP	IN	_	4	case	_	_
+2	the	_	DET	DT	_	4	det	_	_
+3	20th	_	ADJ	JJ	_	4	amod	_	_
+4	century	_	NOUN	NN	_	13	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+5	,	_	PUNCT	,	_	13	punct	_	_|CheckAttachment=4,13
+6	between	_	ADP	IN	_	7	case	_	_
+7	1904	_	NUM	CD	_	13	obl	_	_|CheckAttachment=4,13|CheckReln=nmod,nmod
+8	and	_	CCONJ	CC	_	9	cc	_	_
+9	1914	_	NUM	CD	_	7	conj	_	SpaceAfter=No
+10	,	_	PUNCT	,	_	13	punct	_	_
+11	Antonio	_	PROPN	NNP	_	12	compound	_	_|CheckAttachment=13,12|CheckReln=nsubj,compound
+12	Gaudí	_	PROPN	NNP	_	13	nsubj	_	_|CheckAttachment=11,13|CheckReln=flat:name,nsubj
+13	brought	_	VERB	VBD	_	0	root	_	_
+14	about	_	PART	RP	_	13	compound:prt	_	_|CheckAttachment=13,16|CheckReln=compound:prt,advmod|CheckUPOS=ADP
+15	a	_	DET	DT	_	16	det	_	_
+16	reform	_	NOUN	NN	_	13	obj	_	_
+17	that	_	DET	WDT	_	18	nsubj	_	_
+18	lasted	_	VERB	VBD	_	16	acl:relcl	_	_
+19	ten	_	NUM	CD	_	20	nummod	_	_
+20	years	_	NOUN	NNS	_	18	nmod:tmod	_	SpaceAfter=No
+21	.	_	PUNCT	.	_	13	punct	_	_
+
+# sent_id = w05001036
+# text = It has three parallel chapels at the apse and many lateral chapels between the buttresses.
+1	It	_	PRON	PRP	_	2	nsubj	_	_
+2	has	_	VERB	VBZ	_	0	root	_	_
+3	three	_	NUM	CD	_	5	nummod	_	_
+4	parallel	_	ADJ	JJ	_	5	amod	_	_
+5	chapels	_	NOUN	NNS	_	2	obj	_	_
+6	at	_	ADP	IN	_	8	case	_	_
+7	the	_	DET	DT	_	8	det	_	_
+8	apse	_	NOUN	NN	_	5	nmod	_	_
+9	and	_	CCONJ	CC	_	12	cc	_	_
+10	many	_	ADJ	JJ	_	12	amod	_	_
+11	lateral	_	ADJ	JJ	_	12	amod	_	_
+12	chapels	_	NOUN	NNS	_	5	conj	_	_|CheckAttachment=5,8
+13	between	_	ADP	IN	_	15	case	_	_
+14	the	_	DET	DT	_	15	det	_	_
+15	buttresses	_	NOUN	NNS	_	12	nmod	_	SpaceAfter=No|CheckAttachment=12,8
+16	.	_	PUNCT	.	_	2	punct	_	_
+
+# sent_id = w05001045
+# text = Tradition has it that the theme was selected intentionally because of the great number of converted Jews who lived in Palma.
+1	Tradition	_	NOUN	NN	_	2	nsubj	_	_
+2	has	_	VERB	VBZ	_	0	root	_	_
+3	it	_	PRON	PRP	_	2	obj	_	_
+4	that	_	ADP	IN	_	8	mark	_	_|CheckUPOS=SCONJ
+5	the	_	DET	DT	_	6	det	_	_
+6	theme	_	NOUN	NN	_	8	nsubj:pass	_	_
+7	was	_	VERB	VBD	_	8	aux:pass	_	_|CheckUPOS=AUX
+8	selected	_	VERB	VBN	_	2	ccomp	_	_|CheckAttachment=3,3|CheckReln=dep,dep
+9	intentionally	_	ADV	RB	_	8	advmod	_	_|CheckAttachment=14,14
+10	because	_	ADP	IN	_	14	case	_	_
+11	of	_	ADP	IN	_	10	fixed	_	_
+12	the	_	DET	DT	_	14	det	_	_
+13	great	_	ADJ	JJ	_	14	amod	_	_
+14	number	_	NOUN	NN	_	8	obl	_	_|CheckReln=obl,nmod
+15	of	_	ADP	IN	_	17	case	_	_
+16	converted	_	ADJ	JJ	_	17	amod	_	_
+17	Jews	_	PROPN	NNPS	_	14	nmod	_	_
+18	who	_	PRON	WP	_	19	nsubj	_	_
+19	lived	_	VERB	VBD	_	17	acl:relcl	_	_|CheckAttachment=14,17
+20	in	_	ADP	IN	_	21	case	_	_
+21	Palma	_	PROPN	NNP	_	19	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+22	.	_	PUNCT	.	_	2	punct	_	_
+
+# sent_id = w05002014
+# text = Before the Andes were formed, the western margin of South America had already been the site of several orogenies.
+1	Before	_	ADP	IN	_	5	mark	_	_|CheckUPOS=SCONJ
+2	the	_	DET	DT	_	3	det	_	_
+3	Andes	_	PROPN	NNPS	_	5	nsubj:pass	_	_
+4	were	_	VERB	VBD	_	5	aux:pass	_	_|CheckUPOS=AUX
+5	formed	_	VERB	VBN	_	17	advcl	_	SpaceAfter=No
+6	,	_	PUNCT	,	_	17	punct	_	_
+7	the	_	DET	DT	_	9	det	_	_
+8	western	_	ADJ	JJ	_	9	amod	_	_
+9	margin	_	NOUN	NN	_	17	nsubj	_	_
+10	of	_	ADP	IN	_	12	case	_	_
+11	South	_	ADJ	JJ	_	12	amod	_	Proper=True|CheckReln=amod,compound
+12	America	_	PROPN	NNP	_	9	nmod	_	_
+13	had	_	VERB	VBD	_	17	aux	_	_|CheckUPOS=AUX
+14	already	_	ADV	RB	_	17	advmod	_	_
+15	been	_	AUX	VBN	_	17	cop	_	_
+16	the	_	DET	DT	_	17	det	_	_
+17	site	_	NOUN	NN	_	0	root	_	_
+18	of	_	ADP	IN	_	20	case	_	_
+19	several	_	ADJ	JJ	_	20	amod	_	_
+20	orogenies	_	NOUN	NNS	_	17	nmod	_	SpaceAfter=No|ToDo=nmod
+21	.	_	PUNCT	.	_	17	punct	_	_
+
+# sent_id = w05002032
+# text = The central Andes belong to the so-called 'Andes de tipo andino' which were formed by the subduction of the oceanic crust.
+1	The	_	DET	DT	_	3	det	_	_
+2	central	_	ADJ	JJ	_	3	amod	_	_
+3	Andes	_	PROPN	NNPS	_	4	nsubj	_	_
+4	belong	_	VERB	VBP	_	0	root	_	_
+5	to	_	ADP	IN	_	9	case	_	_|CheckAttachment=12,12
+6	the	_	DET	DT	_	9	det	_	_|CheckAttachment=12,12
+7	so-called	_	ADJ	JJ	_	9	amod	_	_|CheckAttachment=12,12
+8	'	_	PUNCT	``	_	9	punct	_	SpaceAfter=No|CheckAttachment=12,12
+9	Andes	_	X	FW	Foreign=Yes	4	obl	_	_|CheckAttachment=12,12|CheckReln=compound,compound
+10	de	_	X	FW	Foreign=Yes	9	flat	_	_|CheckAttachment=12,12|CheckReln=compound,compound
+11	tipo	_	X	FW	Foreign=Yes	9	flat	_	_|CheckAttachment=12,12|CheckReln=compound,compound
+12	andino	_	X	FW	_	9	flat	_	SpaceAfter=No|CheckAttachment=4,4|CheckReln=obl,nmod
+13	'	_	PUNCT	''	_	9	punct	_	_|CheckAttachment=12,12
+14	which	_	DET	WDT	_	16	nsubj:pass	_	_
+15	were	_	VERB	VBD	_	16	aux:pass	_	_|CheckUPOS=AUX
+16	formed	_	VERB	VBN	_	9	acl:relcl	_	_|CheckAttachment=4,12|CheckReln=ccomp,acl:relcl
+17	by	_	ADP	IN	_	19	case	_	_
+18	the	_	DET	DT	_	19	det	_	_
+19	subduction	_	NOUN	NN	_	16	obl	_	_|CheckReln=obl,nmod
+20	of	_	ADP	IN	_	23	case	_	_
+21	the	_	DET	DT	_	23	det	_	_
+22	oceanic	_	ADJ	JJ	_	23	amod	_	_
+23	crust	_	NOUN	NN	_	19	nmod	_	SpaceAfter=No
+24	.	_	PUNCT	.	_	4	punct	_	_
+
+# sent_id = w05003012
+# text = However, the breakdown between him and Linares and the discontinuation of the progressive line provoked the Revolution of Vindication which overthrew him in 1879.
+1	However	_	ADV	RB	_	16	advmod	_	SpaceAfter=No
+2	,	_	PUNCT	,	_	16	punct	_	_
+3	the	_	DET	DT	_	4	det	_	_
+4	breakdown	_	NOUN	NN	_	16	nsubj	_	_
+5	between	_	ADP	IN	_	6	case	_	_
+6	him	_	PRON	PRP	_	4	nmod	_	_
+7	and	_	CCONJ	CC	_	8	cc	_	_
+8	Linares	_	PROPN	NNP	_	6	conj	_	_
+9	and	_	CCONJ	CC	_	11	cc	_	_
+10	the	_	DET	DT	_	11	det	_	_
+11	discontinuation	_	NOUN	NN	_	4	conj	_	_|CheckAttachment=6,4
+12	of	_	ADP	IN	_	15	case	_	_
+13	the	_	DET	DT	_	15	det	_	_
+14	progressive	_	ADJ	JJ	_	15	amod	_	_
+15	line	_	NOUN	NN	_	11	nmod	_	_
+16	provoked	_	VERB	VBD	_	0	root	_	_
+17	the	_	DET	DT	_	18	det	_	_
+18	Revolution	_	PROPN	NN	_	16	obj	_	_|CheckUPOS=NOUN
+19	of	_	ADP	IN	_	20	case	_	_
+20	Vindication	_	PROPN	NN	_	18	nmod	_	_|CheckUPOS=NOUN
+21	which	_	DET	WDT	_	22	nsubj	_	_
+22	overthrew	_	VERB	VBD	_	18	acl:relcl	_	_|CheckAttachment=18,20
+23	him	_	PRON	PRP	_	22	obj	_	_
+24	in	_	ADP	IN	_	25	case	_	_
+25	1879	_	NUM	CD	_	22	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+26	.	_	PUNCT	.	_	16	punct	_	_
+
+# sent_id = w05003050
+# text = Under his administration, the female vote was approved, political parties were legalised, all of the exiled were allowed to return and the remaining political prisoners were freed.
+1	Under	_	ADP	IN	_	3	case	_	_
+2	his	_	PRON	PRP$	_	3	nmod:poss	_	_
+3	administration	_	NOUN	NN	_	9	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+4	,	_	PUNCT	,	_	9	punct	_	_
+5	the	_	DET	DT	_	7	det	_	_
+6	female	_	ADJ	JJ	_	7	amod	_	_
+7	vote	_	NOUN	NN	_	9	nsubj:pass	_	_
+8	was	_	VERB	VBD	_	9	aux:pass	_	_|CheckUPOS=AUX
+9	approved	_	VERB	VBN	_	0	root	_	SpaceAfter=No
+10	,	_	PUNCT	,	_	9	punct	_	_
+11	political	_	ADJ	JJ	_	12	amod	_	_
+12	parties	_	NOUN	NNS	_	14	nsubj:pass	_	_
+13	were	_	VERB	VBD	_	14	aux:pass	_	_|CheckUPOS=AUX
+14	legalised	_	VERB	VBN	_	9	conj	_	SpaceAfter=No|CheckReln=ccomp,ccomp
+15	,	_	PUNCT	,	_	9	punct	_	_|CheckAttachment=21,14
+16	all	_	DET	DT	_	21	nsubj:pass	_	_
+17	of	_	ADP	IN	_	19	case	_	_
+18	the	_	DET	DT	_	19	det	_	_
+19	exiled	_	ADJ	JJ	_	16	nmod	_	_
+20	were	_	VERB	VBD	_	21	aux:pass	_	_|CheckUPOS=AUX
+21	allowed	_	VERB	VBN	_	9	conj	_	_|CheckAttachment=9,14|CheckReln=conj,parataxis
+22	to	_	PART	TO	_	23	aux	_	_|CheckReln=mark,mark
+23	return	_	VERB	VB	_	21	xcomp	_	_
+24	and	_	CCONJ	CC	_	30	cc	_	_
+25	the	_	DET	DT	_	28	det	_	_
+26	remaining	_	VERB	VBG	_	28	amod	_	_
+27	political	_	ADJ	JJ	_	28	amod	_	_
+28	prisoners	_	NOUN	NNS	_	30	nsubj:pass	_	_
+29	were	_	VERB	VBD	_	30	aux:pass	_	_|CheckUPOS=AUX
+30	freed	_	VERB	VBN	_	9	conj	_	SpaceAfter=No|CheckAttachment=9,23
+31	.	_	PUNCT	.	_	9	punct	_	_
+
+# sent_id = w05003119
+# text = The collapse of and intervention in dozens of banks lead to a flight of capital, causing businesses to go bankrupt.
+1	The	_	DET	DT	_	2	det	_	_
+2	collapse	_	NOUN	NN	_	10	nsubj	_	_
+3	of	_	ADP	IN	_	2	case	_	_|CheckAttachment=2,7|CheckReln=acl,case
+4	and	_	CCONJ	CC	_	5	cc	_	_
+5	intervention	_	NOUN	NN	_	2	conj	_	_|CheckAttachment=2,3
+6	in	_	ADP	IN	_	7	case	_	_
+7	dozens	_	NOUN	NNS	_	5	nmod	_	_|CheckAttachment=5,2
+8	of	_	ADP	IN	_	9	case	_	_
+9	banks	_	NOUN	NNS	_	7	nmod	_	_
+10	lead	_	VERB	VBD	_	0	root	_	_
+11	to	_	ADP	IN	_	13	case	_	_
+12	a	_	DET	DT	_	13	det	_	_
+13	flight	_	NOUN	NN	_	10	obl	_	_|CheckReln=obl,nmod
+14	of	_	ADP	IN	_	15	case	_	_
+15	capital	_	NOUN	NN	_	13	nmod	_	SpaceAfter=No
+16	,	_	PUNCT	,	_	13	punct	_	_|CheckAttachment=10,10
+17	causing	_	VERB	VBG	_	13	acl	_	_|CheckAttachment=10,10|CheckReln=xcomp,advcl
+18	businesses	_	NOUN	NNS	_	17	obj	_	_
+19	to	_	PART	TO	_	21	mark	_	_|CheckAttachment=20,20
+20	go	_	AUX	VB	_	21	cop	_	_|CheckAttachment=17,17|CheckReln=advcl,xcomp|CheckUPOS=VERB
+21	bankrupt	_	ADJ	JJ	_	17	xcomp	_	SpaceAfter=No|CheckAttachment=20,20
+22	.	_	PUNCT	.	_	10	punct	_	_
+
+# sent_id = w05004031
+# text = It is the portion from this second boundary up to the outer boundary, the imaginary line that connects the lighthouse landmark at Punta del Este to the lighthouse landmark at Punta Rasa.
+1	It	_	PRON	PRP	_	4	nsubj	_	_
+2	is	_	AUX	VBZ	_	4	cop	_	_
+3	the	_	DET	DT	_	4	det	_	_
+4	portion	_	NOUN	NN	_	0	root	_	_
+5	from	_	ADP	IN	_	8	case	_	_
+6	this	_	DET	DT	_	8	det	_	_
+7	second	_	ADJ	JJ	_	8	amod	_	_
+8	boundary	_	NOUN	NN	_	4	nmod	_	ToDo=nmod
+9	up	_	ADV	RB	_	10	advmod	_	_|CheckAttachment=8,13|CheckReln=advmod,case
+10	to	_	ADP	IN	_	8	obj	_	ToDo=ex-adp-child,pcomp|CheckAttachment=13,13|CheckReln=case,case
+11	the	_	DET	DT	_	13	det	_	_
+12	outer	_	ADJ	JJ	_	13	amod	_	_
+13	boundary	_	NOUN	NN	_	10	obj	_	SpaceAfter=No|ToDo=pobj|CheckAttachment=9,8|CheckReln=obl,nmod
+14	,	_	PUNCT	,	_	13	punct	_	_|CheckAttachment=13,4
+15	the	_	DET	DT	_	17	det	_	_
+16	imaginary	_	ADJ	JJ	_	17	amod	_	_
+17	line	_	NOUN	NN	_	13	appos	_	_|CheckAttachment=13,4
+18	that	_	DET	WDT	_	19	nsubj	_	_
+19	connects	_	VERB	VBZ	_	17	acl:relcl	_	_|CheckAttachment=4,17
+20	the	_	DET	DT	_	22	det	_	_
+21	lighthouse	_	NOUN	NN	_	22	compound	_	_
+22	landmark	_	NOUN	NN	_	19	obj	_	_
+23	at	_	ADP	IN	_	26	case	_	_
+24	Punta	_	PROPN	NNP	_	26	compound	_	_
+25	del	_	PROPN	NNP	_	26	compound	_	_
+26	Este	_	PROPN	NNP	_	22	nmod	_	_|CheckAttachment=19,19|CheckReln=obl,nmod
+27	to	_	ADP	IN	_	30	case	_	_
+28	the	_	DET	DT	_	30	det	_	_
+29	lighthouse	_	NOUN	NN	_	30	compound	_	_
+30	landmark	_	NOUN	NN	_	19	obl	_	_|CheckAttachment=26,19|CheckReln=nmod,nmod
+31	at	_	ADP	IN	_	33	case	_	_|CheckAttachment=32,33
+32	Punta	_	PROPN	NNP	_	33	compound	_	_|CheckAttachment=30,33|CheckReln=nmod,compound
+33	Rasa	_	PROPN	NNP	_	30	nmod	_	SpaceAfter=No|CheckAttachment=32,30|CheckReln=flat:name,nmod
+34	.	_	PUNCT	.	_	4	punct	_	_
+
+# sent_id = w05005083
+# text = Things started to change in October 1777 when British forces under the command of General John Burgoyne surrendered in Saratoga in the north of the state of New York.
+1	Things	_	NOUN	NNS	_	2	nsubj	_	_
+2	started	_	VERB	VBD	_	0	root	_	_
+3	to	_	PART	TO	_	4	mark	_	_
+4	change	_	VERB	VB	_	2	xcomp	_	_
+5	in	_	ADP	IN	_	6	case	_	_
+6	October	_	PROPN	NNP	_	4	obl	_	_|CheckReln=obl,nmod
+7	1777	_	NUM	CD	_	6	nmod:tmod	_	_|CheckReln=nummod,nummod
+8	when	_	ADV	WRB	_	18	advmod	_	_
+9	British	_	ADJ	JJ	_	10	amod	_	Proper=True
+10	forces	_	NOUN	NNS	_	18	nsubj	_	_
+11	under	_	ADP	IN	_	13	case	_	_
+12	the	_	DET	DT	_	13	det	_	_
+13	command	_	NOUN	NN	_	10	nmod	_	_
+14	of	_	ADP	IN	_	17	case	_	_|CheckAttachment=16,17
+15	General	_	PROPN	NN	_	17	compound	_	_|CheckAttachment=16,17|CheckReln=nmod,compound|CheckUPOS=NOUN
+16	John	_	PROPN	NNP	_	17	compound	_	_|CheckAttachment=13,17|CheckReln=nmod,compound
+17	Burgoyne	_	PROPN	NNP	_	13	nmod	_	_|CheckAttachment=16,13|CheckReln=flat:name,nmod
+18	surrendered	_	VERB	VBD	_	4	advcl	_	_|CheckAttachment=4,6|CheckReln=advcl,acl:relcl
+19	in	_	ADP	IN	_	20	case	_	_
+20	Saratoga	_	PROPN	NNP	_	18	obl	_	_|CheckReln=obl,nmod
+21	in	_	ADP	IN	_	23	case	_	_
+22	the	_	DET	DT	_	23	det	_	_
+23	north	_	NOUN	NN	_	18	obl	_	_|CheckReln=obl,nmod
+24	of	_	ADP	IN	_	26	case	_	_
+25	the	_	DET	DT	_	26	det	_	_
+26	state	_	NOUN	NN	_	23	nmod	_	_
+27	of	_	ADP	IN	_	29	case	_	_
+28	New	_	ADJ	JJ	_	29	amod	_	Proper=True|CheckReln=amod,compound
+29	York	_	PROPN	NNP	_	26	nmod	_	SpaceAfter=No
+30	.	_	PUNCT	.	_	2	punct	_	_
+
+# sent_id = w05005084
+# text = This was the coup de grâce and encouragement the settlers needed to get their independence.
+1	This	_	DET	DT	_	4	nsubj	_	_|CheckAttachment=6,6|CheckUPOS=PRON
+2	was	_	AUX	VBD	_	4	cop	_	_|CheckAttachment=6,6
+3	the	_	DET	DT	_	4	det	_	_|CheckAttachment=6,6
+4	coup	_	X	FW	Foreign=Yes	0	root	_	_|CheckAttachment=6,6|CheckReln=compound,compound
+5	de	_	X	FW	Foreign=Yes	4	flat	_	_|CheckAttachment=6,6|CheckReln=compound,amod
+6	grâce	_	X	FW	_	4	flat	_	_|CheckAttachment=11,0|CheckReln=dep,root
+7	and	_	CCONJ	CC	_	8	cc	_	_
+8	encouragement	_	NOUN	NN	_	4	conj	_	_|CheckAttachment=6,6
+9	the	_	DET	DT	_	10	det	_	_
+10	settlers	_	NOUN	NNS	_	11	nsubj	_	_|CheckAttachment=11,8|CheckReln=nsubj,obj
+11	needed	_	VERB	VBD	_	8	acl:relcl	_	_|CheckAttachment=0,10|CheckReln=root,acl
+12	to	_	PART	TO	_	13	mark	_	_
+13	get	_	VERB	VB	_	11	acl	_	_|CheckReln=xcomp,xcomp
+14	their	_	PRON	PRP$	_	15	nmod:poss	_	_
+15	independence	_	NOUN	NN	_	13	obj	_	SpaceAfter=No
+16	.	_	PUNCT	.	_	4	punct	_	_|CheckAttachment=11,6
+
+# sent_id = w05005085
+# text = Indians arrived from Canada, led by Joseph Brant; they supported the British because the colonists were expropriating more and more of their lands.
+1	Indians	_	PROPN	NNS	_	2	nsubj	_	_|CheckUPOS=NOUN
+2	arrived	_	VERB	VBD	_	0	root	_	_
+3	from	_	ADP	IN	_	4	case	_	_
+4	Canada	_	PROPN	NNP	_	2	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+5	,	_	PUNCT	,	_	4	punct	_	_|CheckAttachment=4,2
+6	led	_	VERB	VBN	_	1	acl	_	_|CheckAttachment=4,2|CheckReln=acl,xcomp
+7	by	_	ADP	IN	_	9	case	_	_|CheckAttachment=8,9
+8	Joseph	_	PROPN	NNP	_	9	compound	_	_|CheckAttachment=6,9|CheckReln=obl,compound
+9	Brant	_	PROPN	NNP	_	6	obl	_	SpaceAfter=No|CheckAttachment=8,6|CheckReln=flat:name,nmod
+10	;	_	PUNCT	:	_	2	punct	_	_
+11	they	_	PRON	PRP	_	12	nsubj	_	_
+12	supported	_	VERB	VBD	_	2	parataxis	_	_
+13	the	_	DET	DT	_	14	det	_	_
+14	British	_	PROPN	NNP	_	12	obj	_	_
+15	because	_	ADP	IN	_	19	mark	_	_|CheckUPOS=SCONJ
+16	the	_	DET	DT	_	17	det	_	_
+17	colonists	_	NOUN	NNS	_	19	nsubj	_	_
+18	were	_	VERB	VBD	_	19	aux	_	_|CheckUPOS=AUX
+19	expropriating	_	VERB	VBG	_	12	advcl	_	_
+20	more	_	ADJ	JJR	_	19	obj	_	_
+21	and	_	CCONJ	CC	_	22	cc	_	_
+22	more	_	ADJ	JJR	_	20	conj	_	_
+23	of	_	ADP	IN	_	25	case	_	_
+24	their	_	PRON	PRP$	_	25	nmod:poss	_	_
+25	lands	_	NOUN	NNS	_	20	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+26	.	_	PUNCT	.	_	2	punct	_	_
+
+# sent_id = w05005086
+# text = The expedition was led by General Joseph Burgoyne who intended to reach Albany.
+1	The	_	DET	DT	_	2	det	_	_
+2	expedition	_	NOUN	NN	_	4	nsubj:pass	_	_
+3	was	_	VERB	VBD	_	4	aux:pass	_	_|CheckUPOS=AUX
+4	led	_	VERB	VBN	_	0	root	_	_
+5	by	_	ADP	IN	_	8	case	_	_|CheckAttachment=7,8
+6	General	_	PROPN	NN	_	8	compound	_	_|CheckAttachment=7,8|CheckReln=nmod,compound|CheckUPOS=NOUN
+7	Joseph	_	PROPN	NNP	_	8	compound	_	_|CheckAttachment=4,8|CheckReln=obl,compound
+8	Burgoyne	_	PROPN	NNP	_	4	obl	_	_|CheckAttachment=7,4|CheckReln=flat:name,nmod
+9	who	_	PRON	WP	_	10	nsubj	_	_
+10	intended	_	VERB	VBD	_	8	acl:relcl	_	_|CheckAttachment=7,8
+11	to	_	PART	TO	_	12	mark	_	_
+12	reach	_	VERB	VB	_	10	xcomp	_	_
+13	Albany	_	PROPN	NNP	_	12	obj	_	SpaceAfter=No
+14	.	_	PUNCT	.	_	4	punct	_	_
+
+# sent_id = w05005087
+# text = However, they were intercepted and had to do battle in Freeman, close to the Hudson River.
+1	However	_	ADV	RB	_	5	advmod	_	SpaceAfter=No
+2	,	_	PUNCT	,	_	5	punct	_	_
+3	they	_	PRON	PRP	_	5	nsubj:pass	_	_
+4	were	_	VERB	VBD	_	5	aux:pass	_	_|CheckUPOS=AUX
+5	intercepted	_	VERB	VBN	_	0	root	_	_
+6	and	_	CCONJ	CC	_	7	cc	_	_
+7	had	_	VERB	VBD	_	5	conj	_	_
+8	to	_	PART	TO	_	9	mark	_	_
+9	do	_	VERB	VB	_	7	xcomp	_	_
+10	battle	_	NOUN	NN	_	9	obj	_	_
+11	in	_	ADP	IN	_	12	case	_	_
+12	Freeman	_	PROPN	NNP	_	9	obl	_	SpaceAfter=No|CheckAttachment=9,10|CheckReln=obl,nmod
+13	,	_	PUNCT	,	_	12	punct	_	_|CheckAttachment=9,5
+14	close	_	ADV	RB	_	12	amod	_	_|CheckAttachment=9,5|CheckReln=advmod,advmod
+15	to	_	ADP	IN	_	18	case	_	_|CheckAttachment=17,18
+16	the	_	DET	DT	_	18	det	_	_|CheckAttachment=17,18
+17	Hudson	_	PROPN	NNP	_	18	compound	_	_|CheckAttachment=14,18|CheckReln=obl,compound
+18	River	_	PROPN	NN	_	14	obl	_	SpaceAfter=No|CheckAttachment=17,14|CheckReln=flat:name,nmod|CheckUPOS=NOUN
+19	.	_	PUNCT	.	_	5	punct	_	_
+
+# sent_id = w05006024
+# text = Golden Age Spanish or Early Modern Spanish is the variant of the language that constitutes the transition from Medieval Spanish to Modern Spanish.
+1	Golden	_	ADJ	JJ	_	2	amod	_	Proper=True|CheckAttachment=3,3|CheckReln=amod,compound
+2	Age	_	PROPN	NN	_	3	compound	_	_|CheckUPOS=NOUN
+3	Spanish	_	PROPN	NNP	_	10	nsubj	_	_
+4	or	_	CCONJ	CC	_	7	cc	_	_
+5	Early	_	ADJ	JJ	_	7	amod	_	Proper=True
+6	Modern	_	ADJ	JJ	_	7	amod	_	Proper=True|CheckReln=amod,compound
+7	Spanish	_	PROPN	NNP	_	3	conj	_	_
+8	is	_	AUX	VBZ	_	10	cop	_	_
+9	the	_	DET	DT	_	10	det	_	_
+10	variant	_	NOUN	NN	_	0	root	_	_
+11	of	_	ADP	IN	_	13	case	_	_
+12	the	_	DET	DT	_	13	det	_	_
+13	language	_	NOUN	NN	_	10	nmod	_	ToDo=nmod
+14	that	_	DET	WDT	_	15	nsubj	_	_
+15	constitutes	_	VERB	VBZ	_	13	acl:relcl	_	_
+16	the	_	DET	DT	_	17	det	_	_
+17	transition	_	NOUN	NN	_	15	obj	_	_
+18	from	_	ADP	IN	_	20	case	_	_
+19	Medieval	_	ADJ	JJ	_	20	amod	_	Proper=True
+20	Spanish	_	PROPN	NNP	_	17	nmod	_	_
+21	to	_	ADP	IN	_	23	case	_	_
+22	Modern	_	ADJ	JJ	_	23	amod	_	Proper=True|CheckReln=amod,compound
+23	Spanish	_	PROPN	NNP	_	17	nmod	_	SpaceAfter=No|CheckAttachment=15,20|CheckReln=obl,nmod
+24	.	_	PUNCT	.	_	10	punct	_	_
+
+# sent_id = w05006058
+# text = On the other hand, external history contains references to the history of Spanish speakers, their historical vicissitudes and the social use of the language.
+1	On	_	ADP	IN	_	4	case	_	_
+2	the	_	DET	DT	_	4	det	_	_
+3	other	_	ADJ	JJ	_	4	amod	_	_
+4	hand	_	NOUN	NN	_	8	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+5	,	_	PUNCT	,	_	8	punct	_	_
+6	external	_	ADJ	JJ	_	7	amod	_	_
+7	history	_	NOUN	NN	_	8	nsubj	_	_
+8	contains	_	VERB	VBZ	_	0	root	_	_
+9	references	_	NOUN	NNS	_	8	obj	_	_
+10	to	_	ADP	IN	_	12	case	_	_
+11	the	_	DET	DT	_	12	det	_	_
+12	history	_	NOUN	NN	_	9	nmod	_	_|CheckAttachment=8,9|CheckReln=obl,nmod
+13	of	_	ADP	IN	_	15	case	_	_
+14	Spanish	_	PROPN	NN	_	15	compound	_	_|CheckReln=compound,amod|CheckUPOS=NOUN
+15	speakers	_	NOUN	NNS	_	12	nmod	_	SpaceAfter=No
+16	,	_	PUNCT	,	_	12	punct	_	_|CheckAttachment=19,8
+17	their	_	PRON	PRP$	_	19	nmod:poss	_	_
+18	historical	_	ADJ	JJ	_	19	amod	_	_
+19	vicissitudes	_	NOUN	NNS	_	12	conj	_	_|CheckAttachment=15,8|CheckReln=conj,obj
+20	and	_	CCONJ	CC	_	23	cc	_	_
+21	the	_	DET	DT	_	23	det	_	_
+22	social	_	ADJ	JJ	_	23	amod	_	_
+23	use	_	NOUN	NN	_	12	conj	_	_|CheckAttachment=15,19
+24	of	_	ADP	IN	_	26	case	_	_
+25	the	_	DET	DT	_	26	det	_	_
+26	language	_	NOUN	NN	_	23	nmod	_	SpaceAfter=No
+27	.	_	PUNCT	.	_	8	punct	_	_
+
+# sent_id = w05007004
+# text = Nonetheless, if the English law had been accepted, the daughters of Luis X, Felipe V and Carlos IV would have had more of a claim to the throne, above their aunt Isabella of France.
+1	Nonetheless	_	ADV	RB	_	24	advmod	_	SpaceAfter=No
+2	,	_	PUNCT	,	_	24	punct	_	_
+3	if	_	ADP	IN	_	9	mark	_	_|CheckUPOS=SCONJ
+4	the	_	DET	DT	_	6	det	_	_
+5	English	_	ADJ	JJ	_	6	amod	_	Proper=True|CheckReln=amod,compound
+6	law	_	NOUN	NN	_	9	nsubj:pass	_	_
+7	had	_	VERB	VBD	_	9	aux	_	_|CheckUPOS=AUX
+8	been	_	VERB	VBN	_	9	aux:pass	_	_|CheckUPOS=AUX
+9	accepted	_	VERB	VBN	_	24	advcl	_	SpaceAfter=No
+10	,	_	PUNCT	,	_	24	punct	_	_
+11	the	_	DET	DT	_	12	det	_	_
+12	daughters	_	NOUN	NNS	_	24	nsubj	_	_
+13	of	_	ADP	IN	_	14	case	_	_|CheckAttachment=14,15
+14	Luis	_	PROPN	NNP	_	12	nmod	_	_|CheckAttachment=12,15|CheckReln=nmod,compound
+15	X	_	NUM	CD	_	14	nummod	_	Proper=True|SpaceAfter=No|CheckAttachment=14,12|CheckReln=nummod,nmod
+16	,	_	PUNCT	,	_	14	punct	_	_|CheckAttachment=17,15
+17	Felipe	_	PROPN	NNP	_	14	conj	_	_|CheckAttachment=14,18|CheckReln=conj,compound
+18	V	_	NUM	CD	_	17	nummod	_	Proper=True|CheckAttachment=17,15|CheckReln=nummod,conj
+19	and	_	CCONJ	CC	_	20	cc	_	_
+20	Carlos	_	PROPN	NNP	_	14	conj	_	_|CheckAttachment=14,15
+21	IV	_	NUM	CD	_	20	nummod	_	Proper=True
+22	would	_	VERB	MD	_	24	aux	_	_|CheckUPOS=AUX
+23	have	_	VERB	VB	_	24	aux	_	_|CheckUPOS=AUX
+24	had	_	VERB	VBN	_	0	root	_	_
+25	more	_	ADV	RBR	_	24	obj	_	_
+26	of	_	ADP	IN	_	28	case	_	_
+27	a	_	DET	DT	_	28	det	_	_
+28	claim	_	NOUN	NN	_	25	obl	_	_|CheckReln=obl,nmod
+29	to	_	ADP	IN	_	31	case	_	_
+30	the	_	DET	DT	_	31	det	_	_
+31	throne	_	NOUN	NN	_	28	nmod	_	SpaceAfter=No
+32	,	_	PUNCT	,	_	28	punct	_	_|CheckAttachment=28,24
+33	above	_	ADP	IN	_	35	case	_	_|CheckAttachment=36,35
+34	their	_	PRON	PRP$	_	35	nmod:poss	_	_|CheckAttachment=36,35
+35	aunt	_	NOUN	NN	_	28	nmod	_	_|CheckAttachment=36,24
+36	Isabella	_	PROPN	NNP	_	35	appos	_	_|CheckAttachment=28,35|CheckReln=nmod,dep
+37	of	_	ADP	IN	_	38	case	_	_
+38	France	_	PROPN	NNP	_	36	nmod	_	SpaceAfter=No
+39	.	_	PUNCT	.	_	24	punct	_	_
+
+# sent_id = w05007080
+# text = The attempts at making peace finally ended in spring of 1415 and Enrique decided to execute his plan: an invasion of the entire Kingdom of France.
+1	The	_	DET	DT	_	2	det	_	_
+2	attempts	_	NOUN	NNS	_	7	nsubj	_	_|CheckAttachment=0,7|CheckReln=root,nsubj
+3	at	_	ADP	IN	_	4	case	_	_|CheckReln=mark,mark|CheckUPOS=SCONJ
+4	making	_	VERB	VBG	_	2	xcomp	_	_|CheckReln=acl,acl
+5	peace	_	NOUN	NN	_	4	obj	_	_|CheckAttachment=7,4|CheckReln=nsubj,obj
+6	finally	_	ADV	RB	_	7	advmod	_	_
+7	ended	_	VERB	VBD	_	0	root	_	_|CheckAttachment=4,0|CheckReln=xcomp,root
+8	in	_	ADP	IN	_	9	case	_	_
+9	spring	_	NOUN	NN	_	7	obl	_	_|CheckReln=obl,nmod
+10	of	_	ADP	IN	_	11	case	_	_
+11	1415	_	NUM	CD	_	9	nmod	_	_
+12	and	_	CCONJ	CC	_	14	cc	_	_
+13	Enrique	_	PROPN	NNP	_	14	nsubj	_	_
+14	decided	_	VERB	VBD	_	7	conj	_	_
+15	to	_	PART	TO	_	16	mark	_	_
+16	execute	_	VERB	VB	_	14	xcomp	_	_
+17	his	_	PRON	PRP$	_	18	nmod:poss	_	_
+18	plan	_	NOUN	NN	_	16	obj	_	SpaceAfter=No
+19	:	_	PUNCT	:	_	18	punct	_	_|CheckAttachment=2,7
+20	an	_	DET	DT	_	21	det	_	_
+21	invasion	_	NOUN	NN	_	18	appos	_	_|CheckAttachment=2,7|CheckReln=dep,dep
+22	of	_	ADP	IN	_	25	case	_	_
+23	the	_	DET	DT	_	25	det	_	_
+24	entire	_	ADJ	JJ	_	25	amod	_	_
+25	Kingdom	_	PROPN	NN	_	21	nmod	_	_|CheckUPOS=NOUN
+26	of	_	ADP	IN	_	27	case	_	Proper=True
+27	France	_	PROPN	NNP	_	25	nmod	_	SpaceAfter=No
+28	.	_	PUNCT	.	_	7	punct	_	_|CheckAttachment=2,7
+
+# sent_id = w05008107
+# text = He also discussed the federalization of the City of Buenos Aires, the extension of the commercial code and the appointment of new generals to the army.
+1	He	_	PRON	PRP	_	3	nsubj	_	_
+2	also	_	ADV	RB	_	3	advmod	_	_
+3	discussed	_	VERB	VBD	_	0	root	_	_
+4	the	_	DET	DT	_	5	det	_	_
+5	federalization	_	NOUN	NN	_	3	obj	_	_
+6	of	_	ADP	IN	_	8	case	_	_
+7	the	_	DET	DT	_	8	det	_	_
+8	City	_	PROPN	NN	_	5	nmod	_	_|CheckUPOS=NOUN
+9	of	_	ADP	IN	_	11	case	_	Proper=True|CheckAttachment=10,11
+10	Buenos	_	PROPN	NNP	_	11	compound	_	_|CheckAttachment=8,11|CheckReln=nmod,compound
+11	Aires	_	PROPN	NNP	_	8	nmod	_	SpaceAfter=No|CheckAttachment=10,8|CheckReln=flat:name,nmod
+12	,	_	PUNCT	,	_	5	punct	_	_|CheckAttachment=14,5
+13	the	_	DET	DT	_	14	det	_	_
+14	extension	_	NOUN	NN	_	5	conj	_	_|CheckAttachment=8,5
+15	of	_	ADP	IN	_	18	case	_	_
+16	the	_	DET	DT	_	18	det	_	_
+17	commercial	_	ADJ	JJ	_	18	amod	_	_
+18	code	_	NOUN	NN	_	14	nmod	_	_
+19	and	_	CCONJ	CC	_	21	cc	_	_
+20	the	_	DET	DT	_	21	det	_	_
+21	appointment	_	NOUN	NN	_	5	conj	_	_|CheckAttachment=8,5
+22	of	_	ADP	IN	_	24	case	_	_
+23	new	_	ADJ	JJ	_	24	amod	_	_
+24	generals	_	NOUN	NNS	_	21	nmod	_	_
+25	to	_	ADP	IN	_	27	case	_	_
+26	the	_	DET	DT	_	27	det	_	_
+27	army	_	NOUN	NN	_	21	nmod	_	SpaceAfter=No|CheckAttachment=3,21|CheckReln=obl,nmod
+28	.	_	PUNCT	.	_	3	punct	_	_
+
+# sent_id = w05009044
+# text = In 1976 he met with a friend who worked with his record label The Rocket Record Company, Kiki Dee, to record what would be another remarkable success for him: "Don't Go Breaking My Heart".
+1	In	_	ADP	IN	_	2	case	_	_
+2	1976	_	NUM	CD	_	4	obl	_	_|CheckReln=obl,nmod
+3	he	_	PRON	PRP	_	4	nsubj	_	_
+4	met	_	VERB	VBD	_	0	root	_	_
+5	with	_	ADP	IN	_	7	case	_	_
+6	a	_	DET	DT	_	7	det	_	_
+7	friend	_	NOUN	NN	_	4	obl	_	_|CheckReln=obl,nmod
+8	who	_	PRON	WP	_	9	nsubj	_	_
+9	worked	_	VERB	VBD	_	7	acl:relcl	_	_
+10	with	_	ADP	IN	_	13	case	_	_
+11	his	_	PRON	PRP$	_	13	nmod:poss	_	_
+12	record	_	NOUN	NN	_	13	compound	_	_
+13	label	_	NOUN	NN	_	9	obl	_	_|CheckReln=obl,nmod
+14	The	_	DET	DT	_	17	det	_	Proper=True
+15	Rocket	_	PROPN	NN	_	17	compound	_	_|CheckUPOS=NOUN
+16	Record	_	PROPN	NN	_	17	compound	_	_|CheckUPOS=NOUN
+17	Company	_	PROPN	NN	_	13	appos	_	SpaceAfter=No|CheckAttachment=9,36|CheckReln=obj,nsubj|CheckUPOS=NOUN
+18	,	_	PUNCT	,	_	20	punct	_	_|CheckAttachment=17,17
+19	Kiki	_	PROPN	NNP	_	20	compound	_	_|CheckAttachment=17,20|CheckReln=appos,compound
+20	Dee	_	PROPN	NNP	_	7	appos	_	SpaceAfter=No|CheckAttachment=19,17|CheckReln=flat:name,appos
+21	,	_	PUNCT	,	_	20	punct	_	_|CheckAttachment=9,17
+22	to	_	PART	TO	_	23	mark	_	_
+23	record	_	VERB	VB	_	4	acl	_	_|CheckAttachment=9,17|CheckReln=advcl,acl
+24	what	_	PRON	WP	_	29	nsubj	_	_
+25	would	_	VERB	MD	_	29	aux	_	_|CheckUPOS=AUX
+26	be	_	AUX	VB	_	29	cop	_	_
+27	another	_	DET	DT	_	29	det	_	_
+28	remarkable	_	ADJ	JJ	_	29	amod	_	_
+29	success	_	NOUN	NN	_	23	ccomp	_	_
+30	for	_	ADP	IN	_	31	case	_	_
+31	him	_	PRON	PRP	_	29	nmod	_	SpaceAfter=No|ToDo=nmod
+32	:	_	PUNCT	:	_	29	punct	_	_|CheckAttachment=4,17
+33	"	_	PUNCT	``	_	36	punct	_	SpaceAfter=No|CheckAttachment=4,17
+34	Do	_	VERB	VBP	_	36	aux	_	Proper=True|SpaceAfter=No|CheckUPOS=AUX
+35	n't	_	ADV	RB	Polarity=Neg	36	advmod	_	Proper=True|CheckReln=advmod,neg|CheckUPOS=PART
+36	Go	_	VERB	VB	_	29	appos	_	Proper=True|CheckAttachment=4,13|CheckReln=dep,acl:relcl
+37	Breaking	_	VERB	VBG	_	36	xcomp	_	Proper=True
+38	My	_	PRON	PRP$	_	39	nmod:poss	_	Proper=True|CheckAttachment=39,37|CheckReln=nmod:poss,obj
+39	Heart	_	PROPN	NN	_	37	obj	_	SpaceAfter=No|CheckAttachment=37,38|CheckReln=obj,dep|CheckUPOS=NOUN
+40	"	_	PUNCT	''	_	36	punct	_	SpaceAfter=No|CheckAttachment=4,39
+41	.	_	PUNCT	.	_	4	punct	_	_
+
+# sent_id = w05010023
+# text = Pompey took command of two legions in Capua and began to raise levies illegally, an act that, as was predictable, took advantage of the Caesarians who were in his favor.
+1	Pompey	_	PROPN	NNP	_	2	nsubj	_	_
+2	took	_	VERB	VBD	_	0	root	_	_
+3	command	_	NOUN	NN	_	2	obj	_	_
+4	of	_	ADP	IN	_	6	case	_	_
+5	two	_	NUM	CD	_	6	nummod	_	_
+6	legions	_	NOUN	NNS	_	2	obl	_	_|CheckAttachment=3,3|CheckReln=nmod,nmod
+7	in	_	ADP	IN	_	8	case	_	_
+8	Capua	_	PROPN	NNP	_	2	obl	_	_|CheckAttachment=6,6|CheckReln=nmod,nmod
+9	and	_	CCONJ	CC	_	10	cc	_	_
+10	began	_	VERB	VBD	_	2	conj	_	_
+11	to	_	PART	TO	_	12	mark	_	_
+12	raise	_	VERB	VB	_	10	xcomp	_	_
+13	levies	_	NOUN	NNS	_	12	obj	_	_
+14	illegally	_	ADV	RB	_	12	advmod	_	SpaceAfter=No|CheckAttachment=12,13
+15	,	_	PUNCT	,	_	12	punct	_	_|CheckAttachment=12,13
+16	an	_	DET	DT	_	17	det	_	_
+17	act	_	NOUN	NN	_	12	advmod	_	_|CheckAttachment=12,13|CheckReln=obj,appos
+18	that	_	DET	WDT	_	24	nsubj	_	SpaceAfter=No
+19	,	_	PUNCT	,	_	22	punct	_	_|CheckAttachment=22,24
+20	as	_	ADP	IN	_	22	mark	_	_|CheckUPOS=SCONJ
+21	was	_	AUX	VBD	_	22	cop	_	_
+22	predictable	_	ADJ	JJ	_	24	advcl	_	SpaceAfter=No|CheckReln=parataxis,advcl
+23	,	_	PUNCT	,	_	22	punct	_	_|CheckAttachment=22,24
+24	took	_	VERB	VBD	_	17	acl:relcl	_	_
+25	advantage	_	NOUN	NN	_	24	obj	_	_
+26	of	_	ADP	IN	_	28	case	_	_
+27	the	_	DET	DT	_	28	det	_	_
+28	Caesarians	_	PROPN	NNPS	_	24	obl	_	_|CheckAttachment=25,25|CheckReln=nmod,nmod
+29	who	_	PRON	WP	_	30	nsubj	_	_|CheckAttachment=33,33
+30	were	_	VERB	VBD	_	28	acl:relcl	_	_|CheckAttachment=33,33|CheckReln=cop,cop|CheckUPOS=AUX,AUX
+31	in	_	ADP	IN	_	33	case	_	_
+32	his	_	PRON	PRP$	_	33	nmod:poss	_	_
+33	favor	_	NOUN	NN	_	30	obl	_	SpaceAfter=No|CheckAttachment=25,28|CheckReln=acl:relcl,acl:relcl
+34	.	_	PUNCT	.	_	2	punct	_	_
+
+# sent_id = w05010024
+# text = César was personally informed of Pompey's actions by Curio, who at that time had finished his term in office.
+1	César	_	PROPN	NNP	_	4	nsubj:pass	_	_
+2	was	_	VERB	VBD	_	4	aux:pass	_	_|CheckUPOS=AUX
+3	personally	_	ADV	RB	_	4	advmod	_	_
+4	informed	_	VERB	VBN	_	0	root	_	_
+5	of	_	ADP	IN	_	8	case	_	_
+6	Pompey	_	PROPN	NNP	_	8	nmod:poss	_	SpaceAfter=No
+7	's	_	PART	POS	_	6	case	_	_
+8	actions	_	NOUN	NNS	_	4	obl	_	_|CheckReln=obl,nmod
+9	by	_	ADP	IN	_	10	case	_	_
+10	Curio	_	PROPN	NNP	_	4	obl	_	SpaceAfter=No|CheckAttachment=4,8|CheckReln=obl,nmod
+11	,	_	PUNCT	,	_	10	punct	_	_
+12	who	_	PRON	WP	_	17	nsubj	_	_
+13	at	_	ADP	IN	_	15	case	_	_
+14	that	_	DET	DT	_	15	det	_	_
+15	time	_	NOUN	NN	_	17	obl	_	_|CheckReln=obl,nmod
+16	had	_	VERB	VBD	_	17	aux	_	_|CheckUPOS=AUX
+17	finished	_	VERB	VBN	_	10	acl:relcl	_	_
+18	his	_	PRON	PRP$	_	19	nmod:poss	_	_
+19	term	_	NOUN	NN	_	17	obj	_	_
+20	in	_	ADP	IN	_	21	case	_	_
+21	office	_	NOUN	NN	_	19	nmod	_	SpaceAfter=No|CheckAttachment=17,19|CheckReln=obl,nmod
+22	.	_	PUNCT	.	_	4	punct	_	_
+
+# sent_id = w05010025
+# text = Meanwhile, his place in tribune was occupied by Marco Antonio, who held the position until December.
+1	Meanwhile	_	ADV	RB	_	8	advmod	_	SpaceAfter=No
+2	,	_	PUNCT	,	_	8	punct	_	_
+3	his	_	PRON	PRP$	_	4	nmod:poss	_	_
+4	place	_	NOUN	NN	_	8	nsubj:pass	_	_
+5	in	_	ADP	IN	_	6	case	_	_
+6	tribune	_	NOUN	NN	_	4	nmod	_	_
+7	was	_	VERB	VBD	_	8	aux:pass	_	_
+8	occupied	_	VERB	VBN	_	0	root	_	_
+9	by	_	ADP	IN	_	11	case	_	_|CheckAttachment=10,11
+10	Marco	_	PROPN	NNP	_	11	compound	_	_|CheckAttachment=8,11|CheckReln=obl,compound
+11	Antonio	_	PROPN	NNP	_	8	obl	_	SpaceAfter=No|CheckAttachment=10,8|CheckReln=flat:name,nmod
+12	,	_	PUNCT	,	_	11	punct	_	_|CheckAttachment=10,11
+13	who	_	PRON	WP	_	14	nsubj	_	_
+14	held	_	VERB	VBD	_	11	acl:relcl	_	_|CheckAttachment=10,11
+15	the	_	DET	DT	_	16	det	_	_
+16	position	_	NOUN	NN	_	14	obj	_	_
+17	until	_	ADP	IN	_	18	case	_	_
+18	December	_	PROPN	NNP	_	14	obl	_	SpaceAfter=No|CheckReln=obl,nmod
+19	.	_	PUNCT	.	_	8	punct	_	_
+
+# sent_id = w05010026
+# text = But when the Senate answered him definitively by prohibiting him from competing at the consolate and giving him the option of either withdrawing his troops or becoming a public enemy, he understood that, whatever alternative he chose, he would surrender unarmed into the hands of his political enemies.
+1	But	_	CCONJ	CC	_	33	cc	_	_|CheckAttachment=33,0|CheckReln=cc,root
+2	when	_	ADV	WRB	_	5	advmod	_	_
+3	the	_	DET	DT	_	4	det	_	_
+4	Senate	_	PROPN	NN	_	5	nsubj	_	_|CheckUPOS=NOUN
+5	answered	_	VERB	VBD	_	33	advcl	_	_|CheckAttachment=33,1|CheckReln=advcl,dep
+6	him	_	PRON	PRP	_	5	obj	_	_
+7	definitively	_	ADV	RB	_	5	advmod	_	_
+8	by	_	ADP	IN	_	9	mark	_	_|CheckUPOS=SCONJ
+9	prohibiting	_	VERB	VBG	_	5	acl	_	_|CheckReln=advcl,advcl
+10	him	_	PRON	PRP	_	9	obj	_	_
+11	from	_	ADP	IN	_	12	case	_	_|CheckReln=mark,mark|CheckUPOS=SCONJ
+12	competing	_	VERB	VBG	_	9	xcomp	_	_|CheckReln=advcl,advcl
+13	at	_	ADP	IN	_	15	case	_	_
+14	the	_	DET	DT	_	15	det	_	_
+15	consolate	_	NOUN	NN	_	12	obl	_	_|CheckReln=obl,nmod
+16	and	_	CCONJ	CC	_	17	cc	_	_
+17	giving	_	VERB	VBG	_	9	conj	_	_|CheckAttachment=12,12
+18	him	_	PRON	PRP	_	17	iobj	_	_
+19	the	_	DET	DT	_	20	det	_	_
+20	option	_	NOUN	NN	_	17	obj	_	_
+21	of	_	ADP	IN	_	23	case	_	_|CheckReln=mark,mark|CheckUPOS=SCONJ
+22	either	_	CCONJ	CC	_	23	cc:preconj	_	_
+23	withdrawing	_	VERB	VBG	_	20	xcomp	_	_|CheckAttachment=20,33|CheckReln=acl,advcl
+24	his	_	PRON	PRP$	_	25	nmod:poss	_	_
+25	troops	_	NOUN	NNS	_	23	obj	_	_
+26	or	_	CCONJ	CC	_	30	cc	_	_|CheckAttachment=27,27
+27	becoming	_	AUX	VBG	_	30	cop	_	_|CheckAttachment=23,23|CheckReln=conj,conj|CheckUPOS=VERB
+28	a	_	DET	DT	_	30	det	_	_
+29	public	_	ADJ	JJ	_	30	amod	_	_
+30	enemy	_	NOUN	NN	_	23	conj	_	SpaceAfter=No|CheckAttachment=27,27|CheckReln=xcomp,xcomp
+31	,	_	PUNCT	,	_	33	punct	_	_
+32	he	_	PRON	PRP	_	33	nsubj	_	_
+33	understood	_	VERB	VBD	_	0	root	_	_|CheckAttachment=0,20|CheckReln=root,acl:relcl
+34	that	_	ADP	IN	_	44	mark	_	SpaceAfter=No|CheckAttachment=43,43|CheckUPOS=SCONJ
+35	,	_	PUNCT	,	_	37	punct	_	_|CheckAttachment=43,43
+36	whatever	_	DET	WDT	_	37	det	_	_|CheckAttachment=37,39|CheckReln=det,obj
+37	alternative	_	NOUN	NN	_	44	advmod	_	_|CheckAttachment=39,39|CheckReln=obj,dep
+38	he	_	PRON	PRP	_	39	nsubj	_	_
+39	chose	_	VERB	VBD	_	37	acl:relcl	_	SpaceAfter=No|CheckAttachment=43,43|CheckReln=advcl,advcl
+40	,	_	PUNCT	,	_	37	punct	_	_|CheckAttachment=43,43
+41	he	_	PRON	PRP	_	44	nsubj	_	_|CheckAttachment=43,43
+42	would	_	VERB	MD	_	44	aux	_	_|CheckAttachment=43,43|CheckUPOS=AUX
+43	surrender	_	AUX	VB	_	44	cop	_	_|CheckAttachment=33,33|CheckReln=ccomp,ccomp|CheckUPOS=VERB
+44	unarmed	_	ADJ	JJ	_	33	ccomp	_	_|CheckAttachment=43,43|CheckReln=xcomp,obj
+45	into	_	ADP	IN	_	47	case	_	_
+46	the	_	DET	DT	_	47	det	_	_
+47	hands	_	NOUN	NNS	_	44	obl	_	_|CheckAttachment=43,43|CheckReln=obl,nmod
+48	of	_	ADP	IN	_	51	case	_	_
+49	his	_	PRON	PRP$	_	51	nmod:poss	_	_
+50	political	_	ADJ	JJ	_	51	amod	_	_
+51	enemies	_	NOUN	NNS	_	47	nmod	_	SpaceAfter=No
+52	.	_	PUNCT	.	_	33	punct	_	_|CheckAttachment=33,1
+
+# sent_id = w05010027
+# text = On the 1st January 49 BC, Marco Antonio read a declaration from Caesar in which the proconsul declared himself a friend of peace.
+1	On	_	ADP	IN	_	3	case	_	_|CheckAttachment=6,4
+2	the	_	DET	DT	_	3	det	_	_|CheckAttachment=6,4
+3	1st	_	ADJ	JJ	_	10	obl	_	_|CheckAttachment=6,4|CheckReln=amod,amod
+4	January	_	PROPN	NNP	_	3	nmod:tmod	_	_|CheckAttachment=3,10|CheckReln=nmod:tmod,nmod
+5	49	_	NUM	CD	_	4	nmod:tmod	_	_|CheckReln=nummod,nummod
+6	BC	_	NOUN	NN	_	5	advmod	_	SpaceAfter=No|CheckAttachment=10,4|CheckReln=obl,dep
+7	,	_	PUNCT	,	_	10	punct	_	_
+8	Marco	_	PROPN	NNP	_	9	compound	_	_|CheckAttachment=10,9|CheckReln=nsubj,compound
+9	Antonio	_	PROPN	NNP	_	10	nsubj	_	_|CheckAttachment=8,10|CheckReln=flat:name,nsubj
+10	read	_	VERB	VBD	_	0	root	_	_
+11	a	_	DET	DT	_	12	det	_	_
+12	declaration	_	NOUN	NN	_	10	obj	_	_
+13	from	_	ADP	IN	_	14	case	_	_
+14	Caesar	_	PROPN	NNP	_	12	nmod	_	_|CheckAttachment=10,12|CheckReln=obl,nmod
+15	in	_	ADP	IN	_	16	case	_	_
+16	which	_	DET	WDT	_	22	nmod	_	ToDo=nmod|CheckAttachment=19,19|CheckReln=obl,nmod
+17	the	_	DET	DT	_	18	det	_	_
+18	proconsul	_	NOUN	NN	_	22	nsubj	_	_|CheckAttachment=19,19
+19	declared	_	AUX	VBD	_	22	cop	_	_|CheckAttachment=14,14|CheckReln=acl:relcl,acl:relcl|CheckUPOS=VERB
+20	himself	_	PRON	PRP	_	22	obj	_	_|CheckAttachment=22,19|CheckReln=nsubj,obj
+21	a	_	DET	DT	_	22	det	_	_
+22	friend	_	NOUN	NN	_	12	acl:relcl	_	_|CheckAttachment=19,20|CheckReln=xcomp,dep
+23	of	_	ADP	IN	_	24	case	_	_
+24	peace	_	NOUN	NN	_	22	nmod	_	SpaceAfter=No|ToDo=nmod
+25	.	_	PUNCT	.	_	10	punct	_	_

@@ -13,7 +13,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
  * both directions (via {@code get(int)} and {@code indexOf(E)}.
  * The {@code indexOf(E)} method compares objects by
  * {@code equals()}, as other Collections.
- * <p>
+ * <p/>
  * The typical usage would be:
  * <p>{@code Index<String> index = new Index<String>(collection);}
  * <p> followed by
@@ -300,7 +300,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   }
 
   /**
-   * Create a new {@code HashIndex}, backed by the given collection types.
+   * Create a new <code>HashIndex</code>, backed by the given collection types.
    * @param objLookupFactory The constructor for the object lookup -- traditionally an {@link ArrayList}.
    * @param indexLookupFactory The constructor for the index lookup -- traditionally a {@link HashMap}.
    */
@@ -334,14 +334,24 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
 
   @Override
   public void saveToFilename(String file) {
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+    BufferedWriter bw = null;
+    try {
+      bw = new BufferedWriter(new FileWriter(file));
       for (int i = 0, sz = size(); i < sz; i++) {
         bw.write(i + "=" + get(i) + '\n');
       }
+      bw.close();
     } catch (IOException e) {
-      throw new RuntimeIOException(e);
+      e.printStackTrace();
+    } finally {
+      if (bw != null) {
+        try {
+          bw.close();
+        } catch (IOException ioe) {
+          // give up
+        }
+      }
     }
-    // give up
   }
 
   /**
@@ -353,7 +363,9 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    */
   public static Index<String> loadFromFilename(String file) {
     Index<String> index = new HashIndex<>();
-    try (BufferedReader br = IOUtils.readerFromString(file)) {
+    BufferedReader br = null;
+    try {
+      br = IOUtils.readerFromString(file);
       for (String line; (line = br.readLine()) != null; ) {
         int start = line.indexOf('=');
         if (start == -1 || start == line.length() - 1) {
@@ -361,8 +373,11 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
         }
         index.add(line.substring(start + 1));
       }
+      br.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
+    } finally {
+      IOUtils.closeIgnoringExceptions(br);
     }
     return index;
   }
@@ -460,7 +475,6 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     if (i < sz) buff.append("...");
     return buff.toString();
   }
-
   /**
    * Returns an iterator over the elements of the collection.
    * @return An iterator over the objects indexed
@@ -498,14 +512,24 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    */
   public static Index<String> loadFromFileWithList(String file) {
     Index<String> index = new HashIndex<>();
-    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+    BufferedReader br = null;
+    try {
+      br = new BufferedReader(new FileReader(file));
       for (String line; (line = br.readLine()) != null; ) {
         index.add(line.trim());
       }
+      br.close();
     } catch (Exception e) {
-      throw new RuntimeIOException(e);
+      e.printStackTrace();
+    } finally {
+      if (br != null) {
+        try {
+          br.close();
+        } catch (IOException ioe) {
+          // forget it
+        }
+      }
     }
-    // forget it
     return index;
   }
 

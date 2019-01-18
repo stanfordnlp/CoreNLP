@@ -1,5 +1,9 @@
 package edu.stanford.nlp.process;
 
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.util.TSVUtils;
+import edu.stanford.nlp.util.logging.Redwood;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,22 +12,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.IntUnaryOperator;
-
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.util.logging.Redwood;
-
+import java.util.function.Function;
 
 /**
- * An interface for running an action (a callback function) on each line of a TSV file representing
- * a collection of sentences in a corpus.
+ * A callback function which operates on each line of a TSV file representing a collection of sentences.
  * This is a useful callback for processing a large batch of sentences; e.g., out of a Greenplum database.
  *
  * @author Gabor Angeli
  */
 public interface TSVSentenceProcessor {
 
-  /** A list of possible fields in the sentence table. */
+  /** A list of possible fields in the sentence table */
   enum SentenceField {
     ID,
     DEPENDENCIES_STANFORD,
@@ -43,7 +42,7 @@ public interface TSVSentenceProcessor {
     GLOSS
   }
 
-  /** The list of fields actually in the sentence table being passed as a query to TSVSentenceProcessor. */
+  /** The list of fields actually in the sentence table being passed as a query to ForEachSentence */
   List<SentenceField> DEFAULT_SENTENCE_TABLE = Collections.unmodifiableList(Arrays.asList(
           SentenceField.ID,
           SentenceField.DEPENDENCIES_STANFORD,
@@ -81,9 +80,8 @@ public interface TSVSentenceProcessor {
 
 
   /**
-   * Runs the given implementation of TSVSentenceProcessor, and then exits with the appropriate error code.
-   * The error code is the number of exceptions encountered during processing.
-   *
+   * Runs the given implementation of ForEachSentence, and then exits with the appropriate error code
+   * (that is, the number of exceptions encountered during processing)
    * @param in The input stream to read examples off of.
    * @param debugStream The stream to write debugging information to (e.g., stderr).
    * @param cleanup A function to run after annotation is over, to clean up open files, etc.
@@ -91,7 +89,7 @@ public interface TSVSentenceProcessor {
    * @param sentenceTableSpec The header of the sentence table fields being fed as input to this function.
    *                          By default, this can be {@link TSVSentenceProcessor#DEFAULT_SENTENCE_TABLE}.
    */
-  default void runAndExit(InputStream in, PrintStream debugStream, IntUnaryOperator cleanup,
+  default void runAndExit(InputStream in, PrintStream debugStream, Function<Integer, Integer> cleanup,
                           List<SentenceField> sentenceTableSpec) {
     int exceptions = 0;
 
@@ -109,16 +107,16 @@ public interface TSVSentenceProcessor {
 
           // Create Annotation
           Annotation doc = TSVUtils.parseSentence(
-                  Optional.of(fields[sentenceTableSpec.indexOf(SentenceField.DOC_ID)]),
-                  Optional.of(fields[sentenceTableSpec.indexOf(SentenceField.SENTENCE_INDEX)]),
-                  fields[sentenceTableSpec.indexOf(SentenceField.GLOSS)],
-                  fields[sentenceTableSpec.indexOf(SentenceField.DEPENDENCIES_STANFORD)],
-                  fields[sentenceTableSpec.indexOf(SentenceField.DEPENDENCIES_MALT)],
-                  fields[sentenceTableSpec.indexOf(SentenceField.WORDS)],
-                  fields[sentenceTableSpec.indexOf(SentenceField.LEMMAS)],
-                  fields[sentenceTableSpec.indexOf(SentenceField.POS_TAGS)],
-                  fields[sentenceTableSpec.indexOf(SentenceField.NER_TAGS)],
-                  Optional.of(fields[sentenceTableSpec.indexOf(SentenceField.ID)])
+              Optional.of(fields[sentenceTableSpec.indexOf(SentenceField.DOC_ID)]),
+              Optional.of(fields[sentenceTableSpec.indexOf(SentenceField.SENTENCE_INDEX)]),
+              fields[sentenceTableSpec.indexOf(SentenceField.GLOSS)],
+              fields[sentenceTableSpec.indexOf(SentenceField.DEPENDENCIES_STANFORD)],
+              fields[sentenceTableSpec.indexOf(SentenceField.DEPENDENCIES_MALT)],
+              fields[sentenceTableSpec.indexOf(SentenceField.WORDS)],
+              fields[sentenceTableSpec.indexOf(SentenceField.LEMMAS)],
+              fields[sentenceTableSpec.indexOf(SentenceField.POS_TAGS)],
+              fields[sentenceTableSpec.indexOf(SentenceField.NER_TAGS)],
+              Optional.of(fields[sentenceTableSpec.indexOf(SentenceField.ID)])
           );
 
           // Process document
@@ -129,9 +127,9 @@ public interface TSVSentenceProcessor {
           if (linesProcessed % 1000 == 0) {
             long currTime = System.currentTimeMillis();
             long sentPerSec = linesProcessed / ( (currTime - startTime)  / 1000 );
-            debugStream.println('[' + Redwood.formatTimeDifference(currTime - startTime) + "] Processed " + linesProcessed + " sentences {" + sentPerSec + " sentences / second}... ");
+            debugStream.println("[" + Redwood.formatTimeDifference(currTime - startTime) + "] Processed " + linesProcessed + " sentences {" + sentPerSec + " sentences / second}... ");
           }
-        } catch (Throwable t) {
+        } catch (Exception t) {
           debugStream.println("CAUGHT EXCEPTION ON SENTENCE ID: " + id + " (-1 if not known)");
           t.printStackTrace(debugStream);
           exceptions += 1;
@@ -139,8 +137,8 @@ public interface TSVSentenceProcessor {
       }
 
       // DONE
-      debugStream.println('[' + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + "] DONE");
-    } catch (Throwable t) {
+      debugStream.println("[" + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + "] DONE");
+    } catch (Exception t) {
       debugStream.println("FATAL EXCEPTION!");
       t.printStackTrace(debugStream);
       exceptions += 1;
@@ -148,13 +146,13 @@ public interface TSVSentenceProcessor {
       debugStream.flush();
       debugStream.close();
     }
-    System.exit(cleanup.applyAsInt(exceptions));
+    System.exit(cleanup.apply(exceptions));
   }
 
   /**
-   * @see TSVSentenceProcessor#runAndExit(InputStream, PrintStream, IntUnaryOperator, List)
+   * @see TSVSentenceProcessor#runAndExit(InputStream, PrintStream, Function, List)
    */
-  default void runAndExit(InputStream in, PrintStream debugStream, IntUnaryOperator cleanup) {
+  default void runAndExit(InputStream in, PrintStream debugStream, Function<Integer, Integer> cleanup) {
     runAndExit(in, debugStream, cleanup, DEFAULT_SENTENCE_TABLE);
   }
 

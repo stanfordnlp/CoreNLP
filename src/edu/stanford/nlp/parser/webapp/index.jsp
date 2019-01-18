@@ -85,8 +85,7 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
     CRFClassifier<CoreLabel> classifier = new CRFClassifier<>(props);
     BufferedInputStream bis = new BufferedInputStream(new GZIPInputStream(
       new FileInputStream(dataDir + File.separator + "05202008-ctb6.processed-chris6.lex.gz")));
-    classifier.loadClassifier(bis,null);
-    bis.close();
+    classifier.loadClassifier(bis,null); bis.close();
 
     // configure segmenter
     SeqClassifierFlags flags = classifier.flags;
@@ -297,7 +296,7 @@ if (pp == null) {
         String toParse = null;
         long time = -System.currentTimeMillis();
         long tokens = 0;
-        List<Tree> trees = new ArrayList<>();
+        List<Tree> trees = new ArrayList<Tree>();
 
         try {
           if (pp.segmenter != null) {
@@ -448,7 +447,7 @@ if (pp == null) {
   <% sentenceLog.close(); %>
 
   <p>
-    <em><a href="https://nlp.stanford.edu/software/lex-parser.html">Back to parser home</a></em>
+    <em><a href="http://nlp.stanford.edu/software/lex-parser.shtml">Back to parser home</a></em>
     <br/>
     <em>Last updated 2016-09-12</em>
   </p>

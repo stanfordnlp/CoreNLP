@@ -15,6 +15,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
 
@@ -23,13 +24,12 @@ import edu.stanford.nlp.util.Pair;
  *
  * @author Sebastian Schuster
  */
-public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticGraph> {
+public class CoNLLUDocumentReader implements
+    IteratorFromReaderFactory<Pair<SemanticGraph, SemanticGraph>> {
 
   private static final String COMMENT_POS = "<COMMENT>";
 
-  private static final long serialVersionUID = -7340310509954331983L;
-
-  private IteratorFromReaderFactory<SemanticGraph> ifrf;
+  private IteratorFromReaderFactory<Pair<SemanticGraph, SemanticGraph>> ifrf;
 
   public CoNLLUDocumentReader() {
     this.ifrf = DelimitRegExIterator.getFactory("\n(\\s*\n)+", new SentenceProcessor());
@@ -37,26 +37,24 @@ public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticG
 
 
   @Override
-  public Iterator<SemanticGraph> getIterator(Reader r) {
+  public Iterator<Pair<SemanticGraph, SemanticGraph>> getIterator(Reader r) {
     return ifrf.getIterator(r);
   }
 
 
-  private static final Comparator<IndexedWord> byIndex = Comparator.naturalOrder();
+  private static final Comparator<IndexedWord> byIndex = (i1, i2) -> i1.compareTo(i2);
 
-  /** Comparator for putting multiword tokens before regular tokens.  */
+  /* Comparator for putting multiword tokens before regular tokens.  */
   private static final Comparator<IndexedWord> byType = (i1, i2) ->
           i1.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class) ? -1 :
                   i2.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class) ? 1 : 0;
 
-  private static class SentenceProcessor implements Function<String,SemanticGraph> {
+  private static class SentenceProcessor implements Function<String,Pair<SemanticGraph, SemanticGraph>> {
 
     private int lineNumberCounter = 0;
 
-    private static Pair<IndexedWord, GrammaticalRelation> getGovAndReln(int govIdx,
-                                                                        int copyCount,
-                                                                        IndexedWord word, String relationName,
-                                                                        List<IndexedWord> sortedTokens) {
+    private Pair<IndexedWord, GrammaticalRelation> getGovAndReln(int govIdx, int copyCount, IndexedWord word, String relationName,
+                                                                 List<IndexedWord> sortedTokens) {
       IndexedWord gov;
       GrammaticalRelation reln;
       if (relationName.equals("root")) {
@@ -68,17 +66,17 @@ public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticG
         gov = new IndexedWord(word.docID(), word.sentIndex(), 0);
         gov.setValue("ROOT");
       } else {
-        gov = SentenceProcessor.getToken(sortedTokens, govIdx, copyCount);
+        gov = this.getToken(sortedTokens, govIdx, copyCount);
       }
       return Generics.newPair(gov, reln);
     }
 
-    private static IndexedWord getToken(List<IndexedWord> sortedTokens, int index) {
-      return SentenceProcessor.getToken(sortedTokens, index, 0);
+    private IndexedWord getToken(List<IndexedWord> sortedTokens, int index) {
+      return this.getToken(sortedTokens, index, 0);
     }
 
 
-    private static IndexedWord getToken(List<IndexedWord> sortedTokens, int index, int copyCount) {
+    private IndexedWord getToken(List<IndexedWord> sortedTokens, int index, int copyCount) {
 
 
       int tokenLength = sortedTokens.size();
@@ -92,8 +90,7 @@ public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticG
     }
 
 
-    @Override
-    public SemanticGraph apply(String line) {
+    public Pair<SemanticGraph,SemanticGraph> apply(String line) {
       if (line == null) return null;
 
       Function<String,IndexedWord> func = new WordProcessor();
@@ -115,22 +112,24 @@ public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticG
 
       wordList.stream().filter(w -> w.tag() == null || ! w.tag().equals(COMMENT_POS))
               .sorted(byIndex.thenComparing(byType))
-              .forEach(sorted::add);
+              .forEach(w -> sorted.add(w));
 
       List<IndexedWord> sortedTokens = new ArrayList<>(wordList.size());
       sorted.stream()
               .filter(w -> !w.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class))
               .filter(w -> w.copyCount() == 0)
-              .forEach(sortedTokens::add);
+              .forEach(w -> sortedTokens.add(w));
 
       sorted.stream()
           .filter(w -> !w.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class))
           .filter(w -> w.copyCount() != 0)
           .forEach(w -> sortedTokens.add(sortedTokens.get(w.index() - 1).makeSoftCopy(w.copyCount())));
 
-      /* Construct a semantic graph. */
-      List<TypedDependency> deps = new ArrayList<>(sorted.size());
 
+
+      /* Construct a semantic graph. */
+      List<TypedDependency> basicDeps = new ArrayList<>(sorted.size());
+      List<TypedDependency> enhancedDeps = new ArrayList<>(sorted.size());
       IntPair tokenSpan = null;
       String originalToken = null;
       for (IndexedWord word : sorted) {
@@ -148,16 +147,28 @@ public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticG
             tokenSpan = null;
             originalToken = null;
           }
+
+          // basic dependencies
+
+          int basicGovIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class) != null ?
+              word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class) : -1;
+          TypedDependency basicDep = null;
+          if (basicGovIdx > -1) {
+            Pair<IndexedWord, GrammaticalRelation> basicGovReln = getGovAndReln(basicGovIdx, 0, word,
+                word.get(CoreAnnotations.CoNLLDepTypeAnnotation.class), sortedTokens);
+            IndexedWord basicGov = basicGovReln.first();
+            GrammaticalRelation basicReln = basicGovReln.second();
+            basicDep = new TypedDependency(basicReln, basicGov, word);
+            word.set(CoreAnnotations.LineNumberAnnotation.class, lineNumberCounter);
+            basicDeps.add(basicDep);
+          }
+
+          // enhanced dependencies
           HashMap<String,String> extraDeps = word.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class);
           if (extraDeps.isEmpty()) {
-            int govIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
-            Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(govIdx, 0, word,
-                word.get(CoreAnnotations.CoNLLDepTypeAnnotation.class), sortedTokens);
-            IndexedWord gov = govReln.first();
-            GrammaticalRelation reln  = govReln.second();
-            TypedDependency dep = new TypedDependency(reln, gov, word);
-            word.set(CoreAnnotations.LineNumberAnnotation.class, lineNumberCounter);
-            deps.add(dep);
+            if (basicDep != null) {
+              enhancedDeps.add(basicDep);
+            }
           } else {
             for (String extraGovIdxStr : extraDeps.keySet()) {
               if (extraGovIdxStr.contains(".")) {
@@ -170,20 +181,15 @@ public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticG
                 GrammaticalRelation reln = govReln.second();
                 TypedDependency dep = new TypedDependency(reln, gov, word);
                 dep.setExtra();
-                deps.add(dep);
+                enhancedDeps.add(dep);
               } else {
                 int extraGovIdx = Integer.parseInt(extraGovIdxStr);
-                int mainGovIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class) != null ?
-                    word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class) : -1;
                 Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(extraGovIdx, 0, word,
                     extraDeps.get(extraGovIdxStr), sortedTokens);
                 IndexedWord gov = govReln.first();
                 GrammaticalRelation reln = govReln.second();
                 TypedDependency dep = new TypedDependency(reln, gov, word);
-                if (extraGovIdx != mainGovIdx) {
-                  dep.setExtra();
-                }
-                deps.add(dep);
+                enhancedDeps.add(dep);
               }
             }
           }
@@ -191,18 +197,20 @@ public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticG
       }
       lineNumberCounter++;
 
-      SemanticGraph sg = new SemanticGraph(deps);
+      SemanticGraph basicSg = new SemanticGraph(basicDeps);
+      SemanticGraph enhancedSg = new SemanticGraph(enhancedDeps);
 
-      comments.forEach(sg::addComment);
+      comments.forEach(c -> basicSg.addComment(c));
+      comments.forEach(c -> enhancedSg.addComment(c));
 
-      return sg;
+
+      return new Pair<>(basicSg, enhancedSg);
     }
   }
 
   private static class WordProcessor implements Function<String,IndexedWord> {
-
-    @Override
     public IndexedWord apply(String line) {
+
 
       IndexedWord word = new IndexedWord();
       if (line.startsWith("#")) {
@@ -210,6 +218,7 @@ public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticG
         word.setTag(COMMENT_POS);
         return word;
       }
+
 
       String[] bits = line.split("\\s+");
 
@@ -260,9 +269,7 @@ public class CoNLLUDocumentReader implements IteratorFromReaderFactory<SemanticG
         word.set(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class, extraDeps);
       }
 
-      return word;
+    return word;
     }
-
-  } // end static class WordProcessor
-
+  }
 }

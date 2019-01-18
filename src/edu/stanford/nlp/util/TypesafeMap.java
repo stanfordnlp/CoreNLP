@@ -40,7 +40,7 @@ public interface TypesafeMap {
    * have the returned set be immutable.
    */
   Set<Class<?>> keySet();
-  // Set<Class<? extends Key<?>>> keySet();
+  //public Set<Class<? extends Key<?>>> keySet();
 
   /**
    * Returns true if contains the given key.

@@ -23,7 +23,7 @@ import java.io.Serializable;
  * look for the data and how to turn it into Objects, and then use the new
  * ObjectBank in the class.  This will also make it easier to reuse code for
  * reading in the same data.
- * <p>
+ * <p/>
  * An ObjectBank is a Collection of Objects.  These objects are taken
  * from input sources and then tokenized and parsed into the desired
  * kind of Object.  An ObjectBank requires a ReaderIteratorFactory and a
@@ -35,39 +35,38 @@ import java.io.Serializable;
  * java.io.Reader into an Iterator over Objects.  The
  * IteratorFromReaderFactory splits the contents of the java.util.Reader
  * into Strings and then parses them into appropriate Objects.
- *
+ * <p/>
  *
  * <h3>Example Usages:</h3>
  *
  * The general case is covered below, but the most common thing people
  * <i>actually</i> want to do is read lines from a file.  There are special
- * methods to make this easy!  You use the {@code getLineIterator} method.
- * In its simplest use, it returns an {@code ObjectBank<String>}, which is a subclass of
- * {@code Collection<String>}.  So, statements like these work:
- *
- * <pre><code>
- * for (String str : ObjectBank.getLineIterator(filename) {
- *   System.out.println(str);
- * }
- *
+ * methods to make this easy!  You use the <code>getLineIterator</code> method.
+ * In its simplest use, it returns an ObjectBank&lt;String&gt;, which is a subclass of
+ * Collection&lt;String&gt;.  So, statements like these work:
+ * <blockquote>
+ * <code>
+ * for (String str : ObjectBank.getLineIterator(filename) { <br>
+ *   System.out.println(str); <br>
+ * } <br><br>
  * String[] strings = ObjectBank.getLineIterator(filename).toArray(new String[0]); <br><br>
  * String[] strings = ObjectBank.getLineIterator(filename, "GB18030").toArray(new String[0]);
- * </code></pre>
- *
+ * </code>
+ * </blockquote>
  * More complex uses of getLineIterator let you interpret each line of a file
  * as an object of arbitrary type via a transformer Function.
- * <p>
+ *
  * For more general uses with existing classes, you first construct a collection of sources, then a class that
  * will make the objects of interest from instances of those sources, and then set up an ObjectBank that can
  * vend those objects:
- * <pre>{@code
+ * <pre><code>
  *   ReaderIteratorFactory rif = new ReaderIteratorFactory(Arrays.asList(new String[] { "file1", "file2", "file3" }));
  *   IteratorFromReaderFactory<Mention> corefIFRF = new MUCCorefIteratorFromReaderFactory(true);
  *   for (Mention m : new ObjectBank(rif, corefIFRF)) {
  *     ...
  *   }
- * }</pre>
- *
+ * </code></pre>
+ * <p/>
  * As an example of the general power of this class, suppose you have
  * a collection of files in the directory /u/nlp/data/gre/questions.  Each file
  * contains several Puzzle documents which look like:
@@ -88,15 +87,15 @@ import java.io.Serializable;
  *    &lt;/question&gt;
  * &lt;/puzzle&gt;
  * </pre>
- *
+ * <p/>
  * First you need to build a ReaderIteratorFactory which will provide java.io.Readers
  * over all the files in your directory:
- *
- * <pre>{@code
- *   Collection c = new FileSequentialCollection("/u/nlp/data/gre/questions/", "", false);
- *   ReaderIteratorFactory rif = new ReaderIteratorFactory(c);
- * }</pre>
- *
+ * <p/>
+ * <pre>
+ * Collection c = new FileSequentialCollection("/u/nlp/data/gre/questions/", "", false);
+ * ReaderIteratorFactory rif = new ReaderIteratorFactory(c);
+ * </pre>
+ * <p/>
  * Next you need to make an IteratorFromReaderFactory which will take the
  * java.io.Readers vended by the ReaderIteratorFactory, split them up into
  * documents (Strings) and
@@ -104,8 +103,8 @@ import java.io.Serializable;
  * between each set of &lt;puzzle&gt; &lt;/puzzle&gt; tags so we would use a BeginEndTokenizerFactory.
  * You would also need to write a class which extends Function and whose apply method
  * converts the String between the &lt;puzzle&gt; &lt;/puzzle&gt; tags into Puzzle objects.
- *
- * <pre>{@code
+ * <p/>
+ * <pre>
  * public class PuzzleParser implements Function {
  *   public Object apply (Object o) {
  *     String s = (String)o;
@@ -115,26 +114,30 @@ import java.io.Serializable;
  *     return p;
  *   }
  * }
- * }</pre>
- *
+ * </pre>
+ * <p/>
  * Now to build the IteratorFromReaderFactory:
- *
- * <p>
- * {@code IteratorFromReaderFactory rtif = new BeginEndTokenizerFactory("<puzzle>", "</puzzle>", new PuzzleParser()); }
- * <p>
+ * <p/>
+ * <pre>
+ * IteratorFromReaderFactory rtif = new BeginEndTokenizerFactory("<puzzle>", "</puzzle>", new PuzzleParser());
+ * </pre>
+ * <p/>
  * Now, to create your ObjectBank you just give it the ReaderIteratorFactory and
  * IteratorFromReaderFactory that you just created:
- * <p>
- * {@code ObjectBank puzzles = new ObjectBank(rif, rtif); }
- * <p>
+ * <p/>
+ * <pre>
+ * ObjectBank puzzles = new ObjectBank(rif, rtif);
+ * </pre>
+ * <p/>
  * Now, if you get a new set of puzzles that are located elsewhere and formatted differently
  * you create a new ObjectBank for reading them in and use that ObjectBank instead with only
  * trivial changes (or possible none at all if the ObjectBank is read in on a constructor)
  * to your code.  Or even better, if someone else wants to use your code to evaluate their puzzles,
  * which are  located elsewhere and formatted differently, they already know what they have to do
  * to make your code work for them.
+ * <p/>
  *
- * @author Jenny Finkel <a href="mailto:jrfinkel@cs.stanford.edu">jrfinkel@stanford.edu</a>
+ * @author Jenny Finkel <A HREF="mailto:jrfinkel@stanford.edu>jrfinkel@stanford.edu</A>
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in types
  */
 
@@ -279,7 +282,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
 
   @Override
   public boolean isEmpty() {
-    return ! iterator().hasNext();
+    return !iterator().hasNext();
   }
 
   /**
@@ -413,14 +416,12 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
     }
 
     private void setNextObject() {
+
       if (tok != null && tok.hasNext()) {
         nextObject = tok.next();
-      } else {
-        setNextObjectHelper();
+        return;
       }
-    }
 
-    private void setNextObjectHelper() {
       while (true) {
         try {
           if (currReader != null) {

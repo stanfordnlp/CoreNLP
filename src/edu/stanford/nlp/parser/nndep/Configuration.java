@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Describe the current configuration of a parser (i.e., parser state).
@@ -221,7 +220,11 @@ public class Configuration {
       if (tree.getHead(i) == k)
         labelSet.add(tree.getLabel(i));
 
-    return makeLabelSetString(labelSet);
+    List<String> ls = new ArrayList<>(labelSet);
+    Collections.sort(ls);
+    String s = "";
+    for (String l : ls) s = s + "/" + l;
+    return s;
   }
 
   public String getRightLabelSet(int k) {
@@ -233,45 +236,30 @@ public class Configuration {
       if (tree.getHead(i) == k)
         labelSet.add(tree.getLabel(i));
 
-    return makeLabelSetString(labelSet);
-  }
-
-  private static String makeLabelSetString(Set<String> labelSet) {
     List<String> ls = new ArrayList<>(labelSet);
     Collections.sort(ls);
-    StringBuilder s = new StringBuilder(128);
-    s.append("[S]");
-    for (String l : ls) {
-      s.append('/').append(l);
-    }
-    return s.toString();
+    String s = "";
+    for (String l : ls) s = s + "/" + l;
+    return s;
   }
 
   //returns a string that concatenates all elements on the stack and buffer, and head / label.
   public String getStr() {
-    StringBuilder s = new StringBuilder(128);
-    s.append("[S]");
+    String s = "[S]";
     for (int i = 0; i < getStackSize(); ++i) {
-      if (i > 0) {
-        s.append(',');
-      }
-      s.append(stack.get(i));
+      if (i > 0) s = s + ",";
+      s = s + stack.get(i);
     }
-    s.append("[B]");
+    s = s + "[B]";
     for (int i = 0; i < getBufferSize(); ++i) {
-      if (i > 0) {
-        s.append(',');
-      }
-      s.append(buffer.get(i));
+      if (i > 0) s = s + ",";
+      s = s + buffer.get(i);
     }
-    s.append("[H]");
+    s = s + "[H]";
     for (int i = 1; i <= tree.n; ++i) {
-      if (i > 1) {
-        s.append(',');
-      }
-      s.append(getHead(i)).append('(').append(getLabel(i)).append(')');
+      if (i > 1) s = s + ",";
+      s = s + getHead(i) + "(" + getLabel(i) + ")";
     }
-    return s.toString();
+    return s;
   }
-
 }

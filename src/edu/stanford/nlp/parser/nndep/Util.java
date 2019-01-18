@@ -1,4 +1,6 @@
+
 package edu.stanford.nlp.parser.nndep;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -9,15 +11,13 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.util.*;
 import java.io.*;
 
 
 /**
  *
- *  Some utility functions for the neural network dependency parser.
+ *  Some utility functions
  *
  *  @author Danqi Chen
  *  @author Jon Gauthier
@@ -26,7 +26,7 @@ import java.io.*;
 public class Util  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(Util.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(Util.class);
 
   private Util() {} // static methods
 
@@ -40,16 +40,16 @@ public class Util  {
     double mean = 0.0;
     double std = 0.0;
     for (double[] aA : A)
-      for (double v : aA) {
+      for (int j = 0; j < aA.length; ++j) {
         count += 1;
-        mean += v;
-        std += v * v;
+        mean += aA[j];
+        std += aA[j] * aA[j];
       }
     mean = mean / count;
     std = Math.sqrt(std / count - mean * mean);
 
-    log.info("Scaling word embeddings:");
-    log.info(String.format("(mean = %.2f, std = %.2f) -> (mean = %.2f, std = %.2f)", mean, std, rMean, rStd));
+    System.err.printf("Scaling word embeddings:");
+    System.err.printf("(mean = %.2f, std = %.2f) -> (mean = %.2f, std = %.2f)", mean, std, rMean, rStd);
 
     double[][] rA = new double[A.length][A[0].length];
     for (int i = 0; i < rA.length; ++ i)
@@ -110,9 +110,9 @@ public class Util  {
    *
    * @return Shared random generator object
    */
-  private static Random getRandom(long seed) {
+  static Random getRandom(long seed) {
     random = new Random(seed);
-    log.info(String.format("Random generator initialized with seed %d%n", seed));
+    System.err.printf("Random generator initialized with seed %d%n", seed);
 
     return random;
   }
@@ -139,7 +139,9 @@ public class Util  {
   {
     CoreLabelTokenFactory tf = new CoreLabelTokenFactory(false);
 
-    try (BufferedReader reader = IOUtils.readerFromString(inFile)) {
+    BufferedReader reader = null;
+    try {
+      reader = IOUtils.readerFromString(inFile);
 
       List<CoreLabel> sentenceTokens = new ArrayList<>();
       DependencyTree tree = new DependencyTree();
@@ -163,7 +165,8 @@ public class Util  {
           int head = -1;
           try {
             head = Integer.parseInt(splits[6]);
-          } catch (NumberFormatException e) {
+          }
+          catch (NumberFormatException e) {
             continue;
           }
 
@@ -181,6 +184,8 @@ public class Util  {
       }
     } catch (IOException e) {
       throw new RuntimeIOException(e);
+    } finally {
+      IOUtils.closeIgnoringExceptions(reader);
     }
   }
 
@@ -218,8 +223,9 @@ public class Util  {
     }
   }
 
-  public static void printTreeStats(String str, List<DependencyTree> trees) {
-    log.info(Config.SEPARATOR + ' ' + str);
+  public static void printTreeStats(String str, List<DependencyTree> trees)
+  {
+    log.info(Config.SEPARATOR + " " + str);
     int nTrees = trees.size();
     int nonTree = 0;
     int multiRoot = 0;
@@ -235,15 +241,14 @@ public class Util  {
           ++multiRoot;
       }
     }
-    log.info(String.format("#Trees: %d%n", nTrees));
-    log.info(String.format("%d tree(s) are illegal (%.2f%%).%n", nonTree, nonTree * 100.0 / nTrees));
-    log.info(String.format("%d tree(s) are legal but have multiple roots (%.2f%%).%n", multiRoot, multiRoot * 100.0 / nTrees));
-    log.info(String.format("%d tree(s) are legal but not projective (%.2f%%).%n", nonProjective, nonProjective * 100.0 / nTrees));
+    System.err.printf("#Trees: %d%n", nTrees);
+    System.err.printf("%d tree(s) are illegal (%.2f%%).%n", nonTree, nonTree * 100.0 / nTrees);
+    System.err.printf("%d tree(s) are legal but have multiple roots (%.2f%%).%n", multiRoot, multiRoot * 100.0 / nTrees);
+    System.err.printf("%d tree(s) are legal but not projective (%.2f%%).%n", nonProjective, nonProjective * 100.0 / nTrees);
   }
 
   public static void printTreeStats(List<DependencyTree> trees)
   {
     printTreeStats("", trees);
   }
-
 }

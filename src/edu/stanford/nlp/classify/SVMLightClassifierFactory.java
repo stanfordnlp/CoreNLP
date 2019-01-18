@@ -1,20 +1,21 @@
 package edu.stanford.nlp.classify;
 
-import edu.stanford.nlp.ling.Datum;
-import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
-import edu.stanford.nlp.optimization.LineSearcher;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.ling.Datum;
+import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.optimization.LineSearcher;
 
 import java.io.*;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.function.DoubleUnaryOperator;
+import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import java.util.regex.Pattern;
 
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * This class is meant for training SVMs ({@link SVMLightClassifier}s).  It actually calls SVM Light, or
@@ -27,13 +28,17 @@ import java.util.regex.Pattern;
  * @author Aria Haghighi
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) (templatization)
  */
+
 public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, SVMLightClassifier<L,F>>{ //extends AbstractLinearClassifierFactory {
 
+  /**
+   *
+   */
   private static final long serialVersionUID = 1L;
 
   /**
-   * C can be tuned using held-out set or cross-validation.
-   * For binary SVM, if C=0, svmlight uses default of 1/(avg x*x).
+   * C can be tuned using held-out set or cross-validation
+   * For binary SVM, if C=0, svmlight uses default of 1/(avg x*x) 
    */
   protected double C = -1.0;
   private boolean useSigmoid = false;
@@ -125,7 +130,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
 
       BufferedReader in = new BufferedReader(new FileReader(modelFile));
 
-      for (int i=0; i < numLinesToSkip; i++) {
+      for (int i=0; i < numLinesToSkip; i++) { 
         in.readLine();
         modelLineCount ++;
       }
@@ -272,7 +277,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
           return scorer.score(classifier,devSet);
         };
 
-    DoubleUnaryOperator negativeScorer =
+    Function<Double,Double> negativeScorer =
         cToTry -> {
           C = cToTry;
           if (verbose) { System.out.print("C = "+cToTry+" "); }
@@ -304,7 +309,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     boolean oldUseSigmoid = useSigmoid;
     useSigmoid = false;
 
-    DoubleUnaryOperator negativeScorer =
+    Function<Double,Double> negativeScorer =
         cToTry -> {
           C = cToTry;
           SVMLightClassifier<L, F> classifier = trainClassifierBasic(trainSet);

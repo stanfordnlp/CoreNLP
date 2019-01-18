@@ -13,15 +13,16 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/ .
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 2A
-//    Stanford CA 94305-9020
+//    Dept of Computer Science, Gates 1A
+//    Stanford CA 94305-9010
 //    USA
 //    parser-support@lists.stanford.edu
-//    https://nlp.stanford.edu/software/lex-parser.html
+//    http://nlp.stanford.edu/software/lex-parser.shtml
 
 package edu.stanford.nlp.parser.lexparser;
 
@@ -538,8 +539,9 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   }
 
   protected static LexicalizedParser getParserFromTextFile(String textFileOrUrl, Options op) {
-    try (BufferedReader in = IOUtils.readerFromString(textFileOrUrl)) {
+    try {
       Timing tim = new Timing();
+      BufferedReader in = IOUtils.readerFromString(textFileOrUrl);
       Timing.startTime();
 
       String line = in.readLine();
@@ -583,6 +585,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       DependencyGrammar dg = new MLEDependencyGrammar(op.tlpParams, op.directional, op.distance, op.coarseDistance, op.trainOptions.basicCategoryTagsInDependencyGrammar, op, wordIndex, tagIndex);
       dg.readData(in);
 
+      in.close();
       log.info("Loading parser from text file " + textFileOrUrl + " ... done [" + tim.toSecondsString() + " sec].");
       return new LexicalizedParser(lex, bg, ug, dg, stateIndex, wordIndex, tagIndex, op);
     } catch (IOException e) {
@@ -610,11 +613,8 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
     } catch (StreamCorruptedException sce) {
       // suppress error message, on the assumption that we've really got
       // a text grammar, and that'll be tried next
-      log.info("Attempting to load " + serializedFileOrUrl +
-               " as a serialized grammar caused error below, but this may just be because it's a text grammar!");
-      log.info(sce);
     } catch (Exception e) {
-      log.error(e);
+      e.printStackTrace();
     }
     return null;
   }
@@ -1075,8 +1075,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * {@code -escaper}, the tokens <i>must</i> all be correctly
    * tokenized tokens of the appropriate treebank for the parser to work
    * well (for instance, if using the Penn English Treebank, you must have
-   * coded "(" as "-LRB-", etc.). (Note: we do not use the backslash escaping
-   * in front of / and * that appeared in Penn Treebank releases through 1999.)</li>
+   * coded "(" as "-LRB-", "3/4" as "3\/4", etc.)</LI>
    * <li>{@code -escaper class} Specify a class of type
    * {@link Function}&lt;List&lt;HasWord&gt;,List&lt;HasWord&gt;&gt; to do
    * customized escaping of tokenized text.  This class will be run over the

@@ -11,47 +11,53 @@ import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NO
 /**
  * A generic sequence matcher.
  *
+ * <p>
  * Similar to Java's {@code Matcher} except it matches sequences over an arbitrary type {@code T}
  *   instead of characters.
  * For a type {@code T} to be matchable, it has to have a corresponding {@code NodePattern<T>} that indicates
  *    whether a node is matched or not.
+ * </p>
  *
+ * <p>
  * A matcher is created as follows:
- *
- * {@code
+ * <pre><code>
  *   SequencePattern<T> p = SequencePattern<T>.compile("...");
  *   SequencePattern<T> m = p.getMatcher(List<T> sequence);
- * }
+ * </code></pre>
+ * </p>
  *
- *
+ * <p>
  * Functions for searching
- * <pre>{@code
+ * <pre><code>
  *    boolean matches()
  *    boolean find()
  *    boolean find(int start)
- * }</pre>
+ * </code></pre>
  * Functions for retrieving matched patterns
- * <pre>{@code
+ * <pre><code>
  *    int groupCount()
- *    List<T> groupNodes(), List<T> groupNodes(int g)
+ *    List&lt;T&gt; groupNodes(), List&lt;T&gt; groupNodes(int g)
  *    String group(), String group(int g)
  *    int start(), int start(int g), int end(), int end(int g)
- * }</pre>
+ * </code></pre>
  * Functions for replacing
- * <pre>{@code
- *    List<T> replaceFirst(List<T> seq), List replaceAll(List<T> seq)
- *    List<T> replaceFirstExtended(List<MatchReplacement<T>> seq), List<T> replaceAllExtended(List<MatchReplacement<T>> seq)
- * }</pre>
+ * <pre><code>
+ *    List&lt;T&gt; replaceFirst(List&lt;T&gt; seq), List replaceAll(List&lt;T&gt; seq)
+ *    List&lt;T&gt; replaceFirstExtended(List&lt;MatchReplacement&lt;T&gt;&gt; seq), List&lt;T&gt; replaceAllExtended(List&lt;MatchReplacement&lt;T&gt;&gt; seq)
+ * </code></pre>
  * Functions for defining the region of the sequence to search over
  *  (default region is entire sequence)
- * <pre>{@code
+ * <pre><code>
  *     void region(int start, int end)
  *     int regionStart()
  *     int regionEnd()
- * }</pre>
+ * </code></pre>
+ * </p>
  *
+ * <p>
  * NOTE: When find is used, matches are attempted starting from the specified start index of the sequence
  *   The match with the earliest starting index is returned.
+ * </p>
  *
  * @author Angel Chang
  */
@@ -516,8 +522,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
         if (Thread.interrupted()) {
           throw new RuntimeInterruptedException();
         }
-        cStates.match(i);
-        if (cStates.size() == 0) {
+        boolean match = cStates.match(i);
+        if (cStates == null || cStates.size() == 0) {
           break;
         }
         if (!matchAllTokens) {
@@ -1663,6 +1669,5 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       branchStates.clearGroupStart(bid, captureGroupId);
     }
 
-  } // end static class MatchedStates
-
+  }
 }

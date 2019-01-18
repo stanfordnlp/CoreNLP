@@ -3,12 +3,11 @@ package edu.stanford.nlp.ie.crf;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.util.BenchmarkingHelper;
+import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -17,10 +16,8 @@ import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.KBestSequenceFinder;
 import edu.stanford.nlp.sequences.ObjectBankWrapper;
 import edu.stanford.nlp.sequences.SequenceModel;
-import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.util.BenchmarkingHelper;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 
@@ -29,7 +26,7 @@ import edu.stanford.nlp.util.Triple;
  *
  *  @author Christopher Manning
  */
-public class CRFClassifierITest {
+public class CRFClassifierITest extends TestCase {
 
   private static final String nerPath = "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
 
@@ -308,7 +305,6 @@ public class CRFClassifierITest {
   /** I made this all one test or else you get problems in memory use if the
    *  JUnit stuff tries to run tests in parallel....
    */
-  @Test
   public void testCRF() {
     CRFClassifier<CoreLabel> crf = CRFClassifier.getClassifierNoExceptions(
         System.getProperty("ner.model", nerPath));
@@ -323,7 +319,6 @@ public class CRFClassifierITest {
       crf = CRFClassifier.getClassifierNoExceptions(nerPath2);
     }
     runKBestTest(crf, txt1, isStoredAnswer);
-    runZeroOrder(crf, txt1);
 
     /* --- Test caseless NER models --- */
 
@@ -340,7 +335,7 @@ public class CRFClassifierITest {
       highResults.setCount("NER F1", 53.5);
       BenchmarkingHelper.benchmarkResults(results, lowResults, highResults, null);
     } catch (IOException ioe) {
-      Assert.fail("IOError on CRF test file");
+      fail("IOError on CRF test file");
     }
 
     runSimpleCRFTest(crfCaseless, caselessTests);
@@ -349,12 +344,12 @@ public class CRFClassifierITest {
 
   private static void runSimpleCRFTest(CRFClassifier<CoreLabel> crf, String[][] testTexts) {
     for (String[] testText : testTexts) {
-      Assert.assertEquals("Wrong array size in test", 2, testText.length);
+      assertEquals("Wrong array size in test", 2, testText.length);
 
       String out = crf.classifyToString(testText[0], "slashTags", false).replaceAll("\r", "");
       // System.out.println("Gold:  |" + testText[5] + "|");
       // System.out.println("Guess: |" + out + "|");
-      Assert.assertEquals("CRF buggy on classifyToString(slashTags, false)", testText[1], out);
+      assertEquals("CRF buggy on classifyToString(slashTags, false)", testText[1], out);
 
     }
   }
@@ -364,52 +359,52 @@ public class CRFClassifierITest {
     for (int i = 0; i < testTexts.length; i++) {
       String[] testText = testTexts[i];
 
-      Assert.assertEquals(i + ": Wrong array size in test", 7, testText.length);
+      assertEquals(i + ": Wrong array size in test", 7, testText.length);
       // System.err.println("length of string is " + testText[0].length());
       String out;
 
       out = crf.classifyToString(testText[0]);
-      Assert.assertEquals(i + ": CRF buggy on classifyToString", testText[1], out);
+      assertEquals(i + ": CRF buggy on classifyToString", testText[1], out);
 
       out = crf.classifyWithInlineXML(testText[0]);
-      Assert.assertEquals(i + ": CRF buggy on classifyWithInlineXML", testText[2], out);
+      assertEquals(i + ": CRF buggy on classifyWithInlineXML", testText[2], out);
 
       out = crf.classifyToString(testText[0], "xml", false).replaceAll("\r", "");
-      Assert.assertEquals(i + ": CRF buggy on classifyToString(xml, false)", testText[3], out);
+      assertEquals(i + ": CRF buggy on classifyToString(xml, false)", testText[3], out);
 
       out = crf.classifyToString(testText[0], "xml", true);
-      Assert.assertEquals(i + ": CRF buggy on classifyToString(xml, true)", testText[4], out);
+      assertEquals(i + ": CRF buggy on classifyToString(xml, true)", testText[4], out);
 
       out = crf.classifyToString(testText[0], "slashTags", false).replaceAll("\r", "");
       // System.out.println("Gold:  |" + testText[5] + "|");
       // System.out.println("Guess: |" + out + "|");
-      Assert.assertEquals(i + ": CRF buggy on classifyToString(slashTags, false)", testText[5], out);
+      assertEquals(i + ": CRF buggy on classifyToString(slashTags, false)", testText[5], out);
 
       out = crf.classifyToString(testText[0], "inlineXML", false).replaceAll("\r", "");
-      Assert.assertEquals(i + ": CRF buggy on classifyToString(inlineXML, false)", testText[6], out);
+      assertEquals(i + ": CRF buggy on classifyToString(inlineXML, false)", testText[6], out);
 
       List<Triple<String,Integer,Integer>> trip = crf.classifyToCharacterOffsets(testText[0]);
       // I couldn't work out how to avoid a type warning in the next line, sigh [cdm 2009]
-      Assert.assertEquals(i + ": CRF buggy on classifyToCharacterOffsets", Arrays.asList(testTrip[i]), trip);
+      assertEquals(i + ": CRF buggy on classifyToCharacterOffsets", Arrays.asList(testTrip[i]), trip);
 
       if (i == 0) {
         // cdm 2013: I forget exactly what this was but something about the reduplicated period at the end of Jr.?
         Triple<String,Integer,Integer> x = trip.get(trip.size() - 1);
-        Assert.assertEquals("CRF buggy on classifyToCharacterOffsets abbreviation period",
+        assertEquals("CRF buggy on classifyToCharacterOffsets abbreviation period",
                 'r', testText[0].charAt(x.third() - 1));
       }
 
       if (i == 3) {
         // check that tokens have okay offsets
         List<List<CoreLabel>> doc = crf.classify(testText[0]);
-        Assert.assertEquals("Wrong number of sentences", 1, doc.size());
+        assertEquals("Wrong number of sentences", 1, doc.size());
         List<CoreLabel> tokens = doc.get(0);
-        Assert.assertEquals("Wrong number of tokens", offsets.length, tokens.size());
+        assertEquals("Wrong number of tokens", offsets.length, tokens.size());
 
         for (int j = 0, sz = tokens.size(); j < sz; j++) {
           CoreLabel token = tokens.get(j);
-          Assert.assertEquals("Wrong begin offset", offsets[j][0], (int) token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-          Assert.assertEquals("Wrong end offset", offsets[j][1], (int) token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+          assertEquals("Wrong begin offset", offsets[j][0], (int) token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+          assertEquals("Wrong end offset", offsets[j][1], (int) token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
         }
       }
     }
@@ -483,18 +478,18 @@ public class CRFClassifierITest {
     for (int k = 1; k <= K_BEST; k++) {
       Counter<int[]> kBest = new KBestSequenceFinder().kBestSequences(sequenceModel, k);
       List<Pair<CRFLabel, Double>> kBestSequences = adapt(kBest);
-      Assert.assertEquals(k, kBestSequences.size());
+      assertEquals(k, kBestSequences.size());
       // System.out.printf("k=%2d %s%n", k, kBestSequences);
       if (kBestSequencesLast != null) {
-        Assert.assertEquals("k=" + k, kBestSequencesLast, kBestSequences.subList(0, k - 1)); // The rest of the list is the same
-        Assert.assertTrue(kBestSequences.get(k - 1).second() <= kBestSequences.get(k - 2).second()); // New item is lower score
+        assertEquals("k=" + k, kBestSequencesLast, kBestSequences.subList(0, k - 1)); // The rest of the list is the same
+        assertTrue(kBestSequences.get(k - 1).second() <= kBestSequences.get(k - 2).second()); // New item is lower score
         for (int m = 0; m < (k - 1); m++) {
-          Assert.assertNotEquals(kBestSequences.get(k - 1).first(), kBestSequences.get(m).first()); // New item is different
+          assertFalse(kBestSequences.get(k - 1).first().equals(kBestSequences.get(m).first())); // New item is different
         }
       } else {
         int[] bestSequence = new ExactBestSequenceFinder().bestSequence(sequenceModel);
         int[] best1 = new ArrayList<>(kBest.keySet()).get(0);
-        Assert.assertTrue(Arrays.equals(bestSequence, best1));
+        assertTrue(Arrays.equals(bestSequence, best1));
       }
       kBestSequencesLast = kBestSequences;
     }
@@ -502,43 +497,25 @@ public class CRFClassifierITest {
     List<Pair<List<String>, Double>> lastAnswer = null;
     for (int k = 1; k <= K_BEST; k++) {
       Counter<List<CoreLabel>> out = crf.classifyKBest(input, CoreAnnotations.AnswerAnnotation.class, k);
-      Assert.assertEquals(k, out.size());
+      assertEquals(k, out.size());
       List<Pair<List<CoreLabel>, Double>> beam = Counters.toSortedListWithCounts(out);
       List<Pair<List<String>, Double>> beam2 = adapt2(beam);
       // System.out.printf("k=%2d %s%n", k, beam2);
       if (isStoredAnswer) { // done for a particular sequence model at one point
-        Assert.assertEquals(beam2.get(k - 1).first().toString(), iobesAnswers[k - 1]);
-        Assert.assertEquals(beam2.get(k - 1).second(), scores[k - 1], 1e-8);
+        assertEquals(beam2.get(k - 1).first().toString(), iobesAnswers[k - 1]);
+        assertEquals(beam2.get(k - 1).second(), scores[k - 1], 1e-8);
       }
       if (lastAnswer != null) {
-        Assert.assertEquals("k=" + k, lastAnswer, beam2.subList(0, k - 1)); // The rest of the list is the same
-        Assert.assertTrue(beam2.get(k - 1).second() <= beam2.get(k - 2).second()); // New item is lower score
+        assertEquals("k=" + k, lastAnswer, beam2.subList(0, k - 1)); // The rest of the list is the same
+        assertTrue(beam2.get(k - 1).second() <= beam2.get(k - 2).second()); // New item is lower score
         for (int m = 0; m < (k - 1); m++) {
-          Assert.assertNotEquals(beam2.get(k - 1).first(), beam2.get(m).first()); // New item is different
+          assertFalse(beam2.get(k - 1).first().equals(beam2.get(m).first())); // New item is different
         }
       } else {
         List<CoreLabel> best = crf.classify(input);
-        for (CoreLabel bestToken : best) {
-          bestToken.remove(CoreAnnotations.AnswerProbAnnotation.class);
-        }
-        Assert.assertEquals(best, beam.get(0).first());
+        assertEquals(best, beam.get(0).first());
       }
       lastAnswer = beam2;
-    }
-  }
-
-  private static void runZeroOrder(CRFClassifier<CoreLabel> crf, String str) {
-    String[] txt = str.split(" ");
-    List<CoreLabel> input = SentenceUtils.toCoreLabelList(txt);
-
-    // do the ugliness that the CRFClassifier routines do to augment the input
-    ObjectBankWrapper<CoreLabel> obw = new ObjectBankWrapper<>(crf.flags, null, crf.getKnownLCWords());
-    List<CoreLabel> input2 = obw.processDocument(input);
-
-    List<Counter<String>> probs = crf.zeroOrderProbabilities(input2);
-    Iterator<Counter<String>> iter = probs.iterator();
-    for (CoreLabel cl : input2) {
-      System.err.println(cl.word() + ": " + iter.next());
     }
   }
 

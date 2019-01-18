@@ -84,7 +84,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   /*
    * Options for "Collapsed" representation.
-   * This representation is similar to the "collapsed" SD representation
+   * This represenation is similar to the "collapsed" SD representation
    * without any "Extra" relations.
    *
    * - Process multi-word prepositions: Yes
@@ -239,7 +239,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     }
     correctWHAttachment(sg);
     if (DEBUG) {
-      printListSorted("After correcting WH attachment:", sg.typedDependencies());
+      printListSorted("After corrrecting WH attachment:", sg.typedDependencies());
     }
     convertRel(sg);
     if (DEBUG) {
@@ -286,7 +286,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * Adds the case marker(s) to all nmod, acl and advcl relations that are
    * modified by one or more case markers(s).
    *
-   * @param enhanceOnlyNmods If this is set to true, then prepositions will only be appended to nmod
+   * @param enhanceOnlyNmods If this is set to true, then prepositons will only be appended to nmod
    *                         relations (and not to acl or advcl) relations.
    *
    * @see UniversalEnglishGrammaticalStructure#addCaseMarkersToReln
@@ -404,7 +404,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   /**
    * Appends case marker information to nmod/acl/advcl relations.
-   *
+   * <p/>
    * E.g. if there is a relation {@code nmod(gov, dep)} and {@code case(dep, prep)}, then
    * the {@code nmod} relation is renamed to {@code nmod:prep}.
    *
@@ -558,13 +558,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
 
-  private static final SemgrexPattern PP_CONJP_PATTERN = SemgrexPattern.compile("{} >/^(nmod|acl|advcl)$/ (({}=gov >case {}) >cc {}=cc >conj ({}=conj >case {}))");
+  private static SemgrexPattern PP_CONJP_PATTERN = SemgrexPattern.compile("{} >/^(nmod|acl|advcl)$/ (({}=gov >case {}) >cc {}=cc >conj ({}=conj >case {}))");
 
 
   /**
    * Expands PPs with conjunctions such as in the sentence
    * "Bill flies to France and from Serbia." by copying the verb
-   * that governs the prepositional phrase resulting in the following
+   * that governs the prepositinal phrase resulting in the following
    * relations:
    * <p/>
    * {@code conj:and(flies, flies')}<br/>
@@ -747,7 +747,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
   /* Used by correctWHAttachment */
-  private static final SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
+  private static final SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|obj)$/ {}=wh ?>/(i?obj)/ {}=obj");
 
   /**
    * Tries to correct complicated cases of WH-movement in
@@ -772,7 +772,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       IndexedWord dobj = matcher.getNode("obj");
 
       /* Check if the object is a WH-word. */
-      if (wh.tag() != null && wh.tag().startsWith("W")) {
+      if (wh.tag().startsWith("W")) {
         boolean reattach = false;
         /* If the control verb already has an object, then
            we have to reattach the WH-word to the verb in the embedded clause. */
@@ -780,11 +780,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
           reattach = true;
         } else {
           /* If the control verb can't have an object, we also have to reattach. */
-          if (root.value() != null && root.tag() != null) {
-            String lemma = Morphology.lemmaStatic(root.value(), root.tag());
-            if (lemma != null && lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
-              reattach = true;
-            }
+          String lemma = Morphology.lemmaStatic(root.value(), root.tag());
+          if (lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
+            reattach = true;
           }
         }
 
@@ -1372,7 +1370,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     }
   }
 
-  private static final SemgrexPattern CORRECT_SUBJPASS_PATTERN = SemgrexPattern.compile("{}=gov >auxpass {} >/^(nsubj|csubj).*$/ {}=subj");
+  private static SemgrexPattern CORRECT_SUBJPASS_PATTERN = SemgrexPattern.compile("{}=gov >auxpass {} >/^(nsubj|csubj).*$/ {}=subj");
 
   /**
    * This method corrects subjects of verbs for which we identified an auxpass,
@@ -1417,7 +1415,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   /* These multi-word prepositions typically have a
    *   case/advmod(gov, w1)
    *   case(gov, w2)
-   * structure in the basic representation.
+   * structure in the basic represenation.
    *
    * Kept in alphabetical order.
    */
@@ -1427,7 +1425,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    *   advmod(gov1, w1)
    *   nmod(w1, gov2)
    *   case(gov2, w2)
-   * structure in the basic representation.
+   * structure in the basic represenation.
    *
    * Kept in alphabetical order.
    */
@@ -1798,6 +1796,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
 
   /**
+   *
    * Looks for NPs that should have the {@code name} relation and
    * a) changes the structure such that the leftmost token becomes the head
    * b) changes the relation from {@code compound} to {@code name}.

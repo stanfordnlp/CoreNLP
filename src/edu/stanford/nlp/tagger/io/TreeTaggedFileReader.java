@@ -3,7 +3,6 @@ package edu.stanford.nlp.tagger.io;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.trees.DiskTreebank;
@@ -13,19 +12,19 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
+import java.util.function.Predicate;
 
 public class TreeTaggedFileReader implements TaggedFileReader {
+  final Treebank treebank;
+  final String filename;
+  final TreeReaderFactory trf;
+  final TreeTransformer transformer;
+  final TreeNormalizer normalizer;
+  final Predicate<Tree> treeFilter;
 
-  private final Treebank treebank;
-  private final String filename;
-  private final TreeReaderFactory trf;
-  private final TreeTransformer transformer;
-  private final TreeNormalizer normalizer;
-  private final Predicate<Tree> treeFilter;
+  final Iterator<Tree> treeIterator;
 
-  private final Iterator<Tree> treeIterator;
-
-  private Tree next = null;
+  Tree next = null;
 
   // int numSentences = 0;
 
@@ -47,16 +46,12 @@ public class TreeTaggedFileReader implements TaggedFileReader {
     findNext();
   }
 
-  @Override
   public Iterator<List<TaggedWord>> iterator() { return this; }
 
-  @Override
   public String filename() { return filename; }
 
-  @Override
   public boolean hasNext() { return next != null; }
 
-  @Override
   public List<TaggedWord> next() {
     if (next == null) {
       throw new NoSuchElementException("Iterator exhausted.");
@@ -85,7 +80,6 @@ public class TreeTaggedFileReader implements TaggedFileReader {
     next = null;
   }
 
-  @Override
   public void remove() { throw new UnsupportedOperationException(); }
 
 }

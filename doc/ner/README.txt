@@ -1,4 +1,4 @@
-Stanford NER - v3.9.2 - 2018-10-16
+Stanford NER - v3.8.0 - 2017-06-09
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -24,7 +24,7 @@ For more information, bug reports, and fixes, contact:
     Stanford CA 94305-9020
     USA
     java-nlp-support@lists.stanford.edu
-    https://nlp.stanford.edu/software/CRF-NER.html
+    http://www-nlp.stanford.edu/software/CRF-NER.shtml
 
 CONTACT
 
@@ -36,7 +36,7 @@ TUTORIAL
 
 Quickstart guidelines, primarily for end users who wish to use the included NER
 models, are below.  For further instructions on training your own NER model,
-go to https://nlp.stanford.edu/software/crf-faq.html.
+go to http://www-nlp.stanford.edu/software/crf-faq.shtml.
 
 INCLUDED SERIALIZED MODELS / TRAINING DATA
 
@@ -71,7 +71,7 @@ Finally, we have models for other languages, including two German models,
 a Chinese model, and a Spanish model.  The files for these models can be
 found at:
 
-http://nlp.stanford.edu/software/CRF-NER.html
+http://nlp.stanford.edu/software/CRF-NER.shtml
 
 
 QUICKSTART INSTRUCTIONS
@@ -111,12 +111,12 @@ classifier contained in the jar file.
 
 USING FULL STANFORD CORENLP NER FUNCTIONALITY
 
-This standalone distribution also allows access to the full NER
-capabilities of the Stanford CoreNLP pipeline. These capabilities
+This standalone distribution also allows access to the full NER 
+capabilities of the Stanford CoreNLP pipeline. These capabilities 
 can be accessed via the NERClassifierCombiner class.
 NERClassifierCombiner allows for multiple CRFs to be used together,
 and has options for recognizing numeric sequence patterns and time
-patterns with the rule-based NER of SUTime.
+patterns with the rule-based NER of SUTime. 
 
 Suppose one combines three CRF's CRF-1,CRF-2, and CRF-3 with the
 NERClassifierCombiner.  When the NERClassiferCombiner runs, it will
@@ -140,7 +140,7 @@ list of CRF's to be combined by the NERClassifierCombiner.  Some serialized
 CRF's are provided in the classifiers directory.  In this example the CRF's
 trained on the CONLL 4 class data and the MUC 7 class data are being combined.
 
-When the flag "-ner.useSUTime" is followed by "false", SUTime is shut off.  You should
+When the flag "-ner.useSUTime" is followed by "false", SUTime is shut off.  You should 
 note that when the "false" is omitted, the text "4 days ago" suddenly is
 tagged with DATE.  These are the kinds of phrases SUTime can identify.
 
@@ -175,7 +175,7 @@ classifiers/example.serialized.ncc.ncc.ser.gz -map word=0,answer=1 \
 -testFile sample-conll-file.txt
 
 For a more exhaustive description of NERClassifierCombiner go to
-http://nlp.stanford.edu/software/ncc-faq.html
+http://nlp.stanford.edu/software/ncc-faq.shtml
 
 PROGRAMMATIC USE
 
@@ -201,9 +201,9 @@ You can specify which model to load with flags, either one on disk:
 
 java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/all.3class.crf.ser.gz 1234
 
-Or if you have put a model inside the jar file, as a resource under, say, models:
+Or if you have put a model inside the jar file:
 
-java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier models/all.3class.crf.ser.gz 1234
+java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadJarClassifier all.3class.crf.ser.gz 1234
 
 
 RUNNING CLASSIFIERS FROM INSIDE A JAR FILE
@@ -233,19 +233,15 @@ PERSON	ORGANIZATION	LOCATION
 CHANGES
 --------------------
 
-2018-10-16    3.9.2     Update for compatibility 
+2017-06-09    3.8.0     Updated for compatibility 
 
-2018-02-27    3.9.1     KBP ner models for Chinese and Spanish 
+2016-10-31    3.7.0     Improved Chinese NER 
 
-2017-06-09    3.8.0     Updated for compatibility
+2015-12-09    3.6.0     Updated for compatibility 
 
-2016-10-31    3.7.0     Improved Chinese NER
+2015-04-20    3.5.2     synch standalone and CoreNLP functionality 
 
-2015-12-09    3.6.0     Updated for compatibility
-
-2015-04-20    3.5.2     synch standalone and CoreNLP functionality
-
-2015-01-29    3.5.1     Substantial accuracy improvements
+2015-01-29    3.5.1     Substantial accuracy improvements 
 
 2014-10-26    3.5.0     Upgrade to Java 1.8
 

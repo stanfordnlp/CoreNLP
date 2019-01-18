@@ -1,11 +1,9 @@
 package edu.stanford.nlp.pipeline;
 
+import junit.framework.TestCase;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -20,12 +18,11 @@ import edu.stanford.nlp.util.CoreMap;
  * @author Heeyoung Lee
  * @author John Bauer
  */
-public class MorphaAnnotatorITest {
-
+public class MorphaAnnotatorITest extends TestCase {
   private static AnnotationPipeline fullPipeline;
   private static AnnotationPipeline shortPipeline;
 
-  @Before
+  @Override
   public void setUp() throws Exception {
     synchronized(MorphaAnnotatorITest.class) {
       if (fullPipeline == null) {
@@ -44,17 +41,16 @@ public class MorphaAnnotatorITest {
   }
 
   private static void checkResult(List<CoreLabel> words) {
-    Assert.assertEquals(words.size(), answer.length);
+    assertEquals(words.size(), answer.length);
 
     for (int i = 0 ; i < answer.length ; i++){
       CoreLabel word = words.get(i);
       String lemma = word.get(CoreAnnotations.LemmaAnnotation.class);
-      Assert.assertEquals(lemma, answer[i]);
+      assertEquals(lemma, answer[i]);
     }
   }
 
-  @Test
-  public void testMorphaAnnotator() {
+  public void testMorphaAnnotator() throws Exception {
     Annotation document = new Annotation(text);
     fullPipeline.annotate(document);
     checkResult(document.get(CoreAnnotations.TokensAnnotation.class));
@@ -76,8 +72,7 @@ public class MorphaAnnotatorITest {
     return words;
   }
 
-  @Test
-  public void testSentencesAnnotation() {
+  public void testSentencesAnnotation() throws Exception {
     List<CoreLabel> words = getTestWords();
 
     CoreMap sentence = new ArrayCoreMap();
@@ -93,27 +88,23 @@ public class MorphaAnnotatorITest {
 
   private static final String text = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
 
-  private static final String[] answer = {
-          "I", "see", "he", "order", "they", "to", "saw", ".", "Jack", "'s",
-          "father", "have", "not", "play", "golf", "since", "20", "year", "ago",
-          ".", "I", "be", "go", "to", "the", "bookstore", "to", "return", "a",
-          "book", "Jack", "and", "he", "friend", "buy", "I", "."
-  };
+  private static final String[] answer =
+  {"I", "see", "he", "order", "they", "to", "saw", ".", "Jack", "'s",
+   "father", "have", "not", "play", "golf", "since", "20", "year", "ago",
+   ".", "I", "be", "go", "to", "the", "bookstore", "to", "return", "a",
+    "book", "Jack", "and", "he", "friend", "buy", "I", "."};
 
-  private static final String[] tokenizedText = {
-          "I", "saw", "him", "ordering", "them", "to", "saw", ".", "Jack", "'s",
-          "father", "has", "n't", "played", "golf", "since", "20", "years", "ago",
-          ".", "I", "'m", "going", "to", "the", "bookstore", "to", "return", "a",
-          "book", "Jack", "and", "his", "friends", "bought", "me", "."
-  };
+  private static final String[] tokenizedText =
+  {"I", "saw", "him", "ordering", "them", "to", "saw", ".", "Jack", "'s",
+   "father", "has", "n't", "played", "golf", "since", "20", "years", "ago",
+   ".", "I", "'m", "going", "to", "the", "bookstore", "to", "return", "a",
+   "book", "Jack", "and", "his", "friends", "bought", "me", "."};
 
-  private static final String[] tokenizedTags = {
-          "PRP", "VBD", "PRP", "VBG", "PRP", "TO", "NN", ".", "NNP", "POS",
-          "NN", "VBZ", "RB", "VBN", "NN", "IN", "CD", "NNS", "RB",
-          ".", "PRP", "VBP", "VBG", "TO", "DT", "NN", "TO", "VB", "DT",
-          "NN", "NNP", "CC", "PRP$", "NNS", "VBD", "PRP", "."
-  };
-
+  private static final String[] tokenizedTags =
+  {"PRP", "VBD", "PRP", "VBG", "PRP", "TO", "NN", ".", "NNP", "POS",
+   "NN", "VBZ", "RB", "VBN", "NN", "IN", "CD", "NNS", "RB",
+   ".", "PRP", "VBP", "VBG", "TO", "DT", "NN", "TO", "VB", "DT",
+   "NN", "NNP", "CC", "PRP$", "NNS", "VBD", "PRP", "."};
 }
 
 

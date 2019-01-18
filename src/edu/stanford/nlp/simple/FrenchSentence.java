@@ -5,7 +5,6 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,8 +17,8 @@ public class FrenchSentence extends Sentence {
 
   /** A properties object for creating a document from a single sentence. Used in the constructor {@link Sentence#Sentence(String)} */
   static Properties SINGLE_SENTENCE_DOCUMENT = new Properties() {{
-    try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-french.properties")){
-      load(is);
+    try {
+      load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-french.properties"));
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -32,8 +31,8 @@ public class FrenchSentence extends Sentence {
 
   /** A properties object for creating a document from a single tokenized sentence. */
   private static Properties SINGLE_SENTENCE_TOKENIZED_DOCUMENT = new Properties() {{
-    try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-french.properties")){
-      load(is);
+    try {
+      load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-french.properties"));
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }

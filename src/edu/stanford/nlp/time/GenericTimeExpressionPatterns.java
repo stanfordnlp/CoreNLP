@@ -75,7 +75,7 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
     env.bind("nested", TimeExpression.ChildrenAnnotation.class);
     env.bind("time", new TimeFormatter.TimePatternExtractRuleCreator());
     // Do case insensitive matching
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
 
     env.bind("options", options);
     env.bind("TIME_REF", SUTime.TIME_REF);
@@ -144,7 +144,6 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
                 return t;
               }
 
-              @Override
               public boolean checkArgs(List<Value> in) {
                 // TODO: Check args
                 return true;
@@ -210,7 +209,6 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
     env.bind("DayOfWeek", new Expressions.PrimitiveValue<ValueFunction>(
             Expressions.TYPE_FUNCTION,
             new ValueFunctions.NamedValueFunction("DayOfWeek") {
-              @Override
               public boolean checkArgs(List<Value> in) {
                 if (in.size() != 1) {
                   return false;
@@ -233,7 +231,6 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
     env.bind("MonthOfYear", new Expressions.PrimitiveValue<ValueFunction>(
             Expressions.TYPE_FUNCTION,
             new ValueFunctions.NamedValueFunction("MonthOfYear") {
-              @Override
               public boolean checkArgs(List<Value> in) {
                 if (in.size() != 1) {
                   return false;
@@ -259,7 +256,6 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
               // First argument is the temporal acting as the base of the periodic set
               // Second argument is the quantifier (string)
               // Third argument is the multiple (how much to scale the natural period)
-              @Override
               public boolean checkArgs(List<Value> in) {
                 if (in.size() < 3) {
                   return false;
@@ -326,7 +322,6 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
     env.bind("TemporalCompose", new Expressions.PrimitiveValue<ValueFunction>(
             Expressions.TYPE_FUNCTION,
             new ValueFunctions.NamedValueFunction("TemporalCompose") {
-              @Override
               public boolean checkArgs(List<Value> in) {
                 if (in.size() < 1) {
                   return false;

@@ -97,7 +97,7 @@ public class OpenIETest {
     }}, clauses(
         "1\tcats\t2\tnsubj\tNN\n" +
         "2\thave\t0\troot\tVB\n" +
-        "3\ttails\t2\tdobj\tNN\n"
+        "3\ttails\t2\tobj\tNN\n"
     ));
   }
 
@@ -109,11 +109,11 @@ public class OpenIETest {
     }}, clauses(
         "1\tI\t2\tnsubj\tPR\n" +
         "2\tpersuaded\t0\troot\tVBD\n" +
-        "3\tFred\t2\tdobj\tNNP\n" +
+        "3\tFred\t2\tobj\tNNP\n" +
         "4\tto\t5\taux\tTO\n" +
         "5\tleave\t2\txcomp\tVB\n" +
         "6\tthe\t7\tdet\tDT\n" +
-        "7\troom\t5\tdobj\tNN\n"
+        "7\troom\t5\tobj\tNN\n"
     ));
   }
 
@@ -129,7 +129,7 @@ public class OpenIETest {
         "4\tto\t5\taux\tTO\n" +
         "5\tleave\t3\txcomp\tVB\n" +
         "6\tthe\t7\tdet\tDT\n" +
-        "7\troom\t5\tdobj\tNN\n"
+        "7\troom\t5\tobj\tNN\n"
     ));
   }
 
@@ -145,7 +145,7 @@ public class OpenIETest {
         "4\the\t5\tnsubj\tPR\n" +
         "5\tleave\t2\tccomp\tVB\n" +
         "6\tthe\t7\tdet\tDT\n" +
-        "7\troom\t5\tdobj\tNN\n"
+        "7\troom\t5\tobj\tNN\n"
     ));
   }
 

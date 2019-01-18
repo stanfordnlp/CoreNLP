@@ -426,21 +426,6 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
-   * The "object" grammatical relation.  An object of a VP
-   * is any direct object or indirect object of that VP; an object
-   * of a clause is an object of the VP which is the predicate
-   * of that clause.<p>
-   * <p/>
-   * Examples: <br/>
-   * "She gave me a raise" &rarr;
-   * {@code obj}(gave, me),
-   * {@code obj}(gave, raise)
-   */
-  public static final GrammaticalRelation OBJECT =
-    new GrammaticalRelation(Language.UniversalEnglish, "obj", "object", COMPLEMENT);
-
-
-  /**
    * The "direct object" grammatical relation.  The direct object
    * of a verb is the noun phrase which is the (accusative) object of
    * the verb; the direct object of a clause or VP is the direct object of
@@ -448,15 +433,15 @@ public class UniversalEnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "She gave me a raise" &rarr;
-   * {@code dobj}(gave, raise) <p/>
-   * Note that dobj can also be assigned by the conversion of rel in the postprocessing.
+   * {@code obj}(gave, raise) <p/>
+   * Note that obj can also be assigned by the conversion of rel in the postprocessing.
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
-    new GrammaticalRelation(Language.UniversalEnglish, "dobj", "direct object",
-        OBJECT, "VP|SQ|SBARQ?", tregexCompiler,
+    new GrammaticalRelation(Language.UniversalEnglish, "obj", "direct object",
+        COMPLEMENT, "VP|SQ|SBARQ?", tregexCompiler,
             "VP !< (/^(?:VB|AUX)/ [ < " + copularWordRegex + " | < " + clausalComplementRegex + " ]) < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " +
                 // The next qualification eliminates parentheticals that
-                // come after the actual dobj
+                // come after the actual obj
                 " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
 
             // Examples such as "Rolls-Royce expects sales to remain steady"
@@ -484,7 +469,7 @@ public class UniversalEnglishGrammaticalRelations {
             // "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target " +
             //   // avoid conflicts with rcmod.  TODO: we could look for
             //   // empty nodes in this kind of structure and use that to
-            //   // find dobj, tmod, advmod, etc.  won't help the parser,
+            //   // find obj, tmod, advmod, etc.  won't help the parser,
             //   // of course, but will help when converting a treebank
             //   // which contains empties
             //   // Example: "with the way his split-fingered fastball is behaving"
@@ -492,7 +477,7 @@ public class UniversalEnglishGrammaticalRelations {
 
             // If there was an NP between the WHNP and the ADJP, we want
             // that NP to have the nsubj relation, and the WHNP is either
-            // a dobj or a pobj instead.  For example, dobj(What, worth)
+            // a obj or a pobj instead.  For example, dobj(What, worth)
             // in "What is UAL stock worth?"
             "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj !< (PP !< NP)) $++ (NP $++ =adj)))"
 
@@ -527,7 +512,7 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation INDIRECT_OBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "iobj", "indirect object",
-        OBJECT, "VP", tregexCompiler,
+        COMPLEMENT, "VP", tregexCompiler,
             "VP < (NP=target !< /\\$/ !<# (/^NN/ < " + timeWordRegex + ") $+ (NP !<# (/^NN/ < " + timeWordRegex + ")))",
             // this next one was meant to fix common mistakes of our parser, but is perhaps too dangerous to keep
             // excluding selfRegex leaves out phrases such as "I cooked dinner myself"
@@ -949,7 +934,7 @@ public class UniversalEnglishGrammaticalRelations {
    * For this reason, we use the {@code compound} relation for all flat NPs and replace it with the {@code name}
    * relation during post-processing.
    * <p/>
-   * See also {@link UniversalEnglishGrammaticalStructure#processNames}.
+   * See also {@link UniversalEnglishGrammaticalStructure#processNames(SemanticGraph)}.
    * <p/>
    * Example: <br/>
    * "Hillary Rodham Clinton" &rarr;
@@ -1540,6 +1525,19 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation AGENT =
     new GrammaticalRelation(Language.UniversalEnglish, "agent", "agent", DEPENDENT);
 
+  //TODO add documentation and correct patterns
+  public static final GrammaticalRelation OBLIQUE_MODIFIER =
+      new GrammaticalRelation(Language.UniversalEnglish, "obl", "oblique", MODIFIER);
+
+  public static final GrammaticalRelation OBLIQUE_NP_ADVERBIAL_MODIFIER =
+      new GrammaticalRelation(Language.UniversalEnglish, "obl:npmod", "oblique NP adverbial modifier", MODIFIER);
+
+  public static final GrammaticalRelation OBLIQUE_TEMPORAL_MODIFIER =
+      new GrammaticalRelation(Language.UniversalEnglish, "obl:tmod", "oblique temporal modifier", MODIFIER);
+
+  public static final GrammaticalRelation ORPHAN =
+      new GrammaticalRelation(Language.UniversalEnglish, "orphan", "orphan", DEPENDENT);
+
 
   // TODO would be nice to have this set up automatically...
   /**
@@ -1572,7 +1570,6 @@ public class UniversalEnglishGrammaticalRelations {
             CLAUSAL_SUBJECT,
             CLAUSAL_PASSIVE_SUBJECT,
             COMPLEMENT,
-            OBJECT,
             DIRECT_OBJECT,
             INDIRECT_OBJECT,
             NOMINAL_MODIFIER,
@@ -1613,7 +1610,11 @@ public class UniversalEnglishGrammaticalRelations {
             CONTROLLING_NOMINAL_SUBJECT,
             CONTROLLING_NOMINAL_PASSIVE_SUBJECT,
             CONTROLLING_CLAUSAL_SUBJECT,
-            CONTROLLING_CLAUSAL_PASSIVE_SUBJECT
+            CONTROLLING_CLAUSAL_PASSIVE_SUBJECT,
+            OBLIQUE_MODIFIER,
+            OBLIQUE_NP_ADVERBIAL_MODIFIER,
+            OBLIQUE_TEMPORAL_MODIFIER,
+            ORPHAN
     }));
   // Cache frequently used views of the values list
   private static final List<GrammaticalRelation> synchronizedValues =
@@ -1708,6 +1709,7 @@ public class UniversalEnglishGrammaticalRelations {
 
   // the exhaustive list of preposition relations
   private static final Map<String, GrammaticalRelation> nmods = Generics.newConcurrentHashMap();
+  private static final Map<String, GrammaticalRelation> obls = Generics.newConcurrentHashMap();
   private static final Map<String, GrammaticalRelation> acls = Generics.newConcurrentHashMap();
   private static final Map<String, GrammaticalRelation> advcls = Generics.newConcurrentHashMap();
 
@@ -1724,6 +1726,9 @@ public class UniversalEnglishGrammaticalRelations {
     return advcls.values();
   }
 
+  public static Collection<GrammaticalRelation> getObls() {
+    return obls.values();
+  }
 
 
   /**
@@ -1752,6 +1757,37 @@ public class UniversalEnglishGrammaticalRelations {
         if (result == null) {
           result = new GrammaticalRelation(Language.UniversalEnglish, "nmod", "nmod_preposition", NOMINAL_MODIFIER, prepositionString);
           nmods.put(prepositionString, result);
+          threadSafeAddRelation(result);
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+      * The "obl" grammatical relation. Used to add case marker information
+   *  to oblique modifier relations.<p>
+   * They will be turned into nmod:word, where "word" is a preposition.
+   *
+       * @param prepositionString The preposition to make a GrammaticalRelation out of
+   * @return A grammatical relation for this preposition
+   */
+  public static GrammaticalRelation getObl(String prepositionString) {
+
+    /* Check for obl subtypes which are not stored in the `obls` map. */
+    if (prepositionString.equals("npmod")) {
+      return OBLIQUE_NP_ADVERBIAL_MODIFIER;
+    } else if(prepositionString.equals("tmod")) {
+      return OBLIQUE_TEMPORAL_MODIFIER;
+    }
+
+    GrammaticalRelation result = obls.get(prepositionString);
+    if (result == null) {
+      synchronized(obls) {
+        result = obls.get(prepositionString);
+        if (result == null) {
+          result = new GrammaticalRelation(Language.UniversalEnglish, "obl", "obl_preposition", OBLIQUE_MODIFIER, prepositionString);
+          obls.put(prepositionString, result);
           threadSafeAddRelation(result);
         }
       }

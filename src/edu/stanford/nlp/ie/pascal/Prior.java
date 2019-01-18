@@ -12,9 +12,8 @@ import java.util.Set;
  * @author Jamie Nicolson
  */
 public class Prior {
-
   // Map<String, int> maps field names to indexes in the matrix
-  private Map<String, Integer> fieldIndices;
+  private Map fieldIndices;
   private String[] indexFields;
 
   // n-dimensional boolean matrix. There will be 2^n entries in the matrix.
@@ -27,7 +26,7 @@ public class Prior {
       throw new IOException();
     }
     indexFields = line.split("\\s+");
-    fieldIndices = new HashMap<String, Integer>();
+    fieldIndices = new HashMap();
     for (int i = 0; i < indexFields.length; ++i) {
       fieldIndices.put(indexFields[i], Integer.valueOf(i));
     }
@@ -46,7 +45,7 @@ public class Prior {
   }
 
   /**
-   * {@code Map<String, boolean>}
+   * Map<String, boolean>
    */
   public double get(Set presentFields) {
     int index = 0;
@@ -59,17 +58,19 @@ public class Prior {
     return matrix[index];
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String args[]) throws Exception {
+
     BufferedReader br = new BufferedReader(new FileReader("/tmp/acstats"));
 
     Prior p = new Prior(br);
 
-    HashSet<String> hs = new HashSet<String>();
+    HashSet hs = new HashSet();
     hs.add("workshopname");
     //hs.add("workshopacronym");
 
     double d = p.get(hs);
     System.out.println("d is " + d);
+
   }
 
 }

@@ -1,8 +1,8 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.ArgumentParser.Option;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.sql.*;
@@ -12,8 +12,7 @@ import java.util.zip.GZIPInputStream;
 /** To query Google Ngrams counts from SQL in a memory efficient manner.
  *  To get count of a phrase, use GoogleNGramsSQLBacked.getCount(phrase). Set this class options using
  *  Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
- *
- *  @author Sonal Gupta
+ * Created by Sonal Gupta
  */
 
 public class GoogleNGramsSQLBacked  {
@@ -175,7 +174,7 @@ public class GoogleNGramsSQLBacked  {
   /** Note that this is really really slow for ngram > 1
    * TODO: make this fast (if we had been using mysql we could have)
    * **/
-  public static int getTotalCount(int ngram){
+  static public int getTotalCount(int ngram){
     try{
       connect();
       Statement stmt = connection.createStatement();
@@ -190,10 +189,11 @@ public class GoogleNGramsSQLBacked  {
     catch(SQLException e){
       throw new RuntimeException("getting table count is not working! " + e);
     }
+
   }
 
-  /** Return rank of 1 gram in google ngeams if it is less than 20k. Otherwise -1. */
-  public static int get1GramRank(String str) {
+  //return rank of 1 gram in google ngeams if it is less than 20k. Otherwise -1.
+  public static int get1GramRank(String str){
     String query = null;
     try{
       connect();

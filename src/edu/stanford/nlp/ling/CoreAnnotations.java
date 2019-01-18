@@ -10,12 +10,15 @@ import java.util.Map;
 import java.util.SortedSet;
 
 /**
+ * <p>
  * Set of common annotations for {@link CoreMap}s. The classes
  * defined here are typesafe keys for getting and setting annotation
  * values. These classes need not be instantiated outside of this
  * class. e.g {@link TextAnnotation}.class serves as the key and a
  * {@code String} serves as the value containing the
  * corresponding word.
+ * </p>
+ *
  * <p>
  * New types of {@link CoreAnnotation} can be defined anywhere that is
  * convenient in the source tree - they are just classes. This file exists to
@@ -24,11 +27,14 @@ import java.util.SortedSet;
  * they may often be reused throughout the code. This architecture allows for
  * flexibility, but in many ways it should be considered as equivalent to an
  * enum in which everything should be defined
+ * </p>
+ *
  * <p>
  * The getType method required by CoreAnnotation must return the same class type
  * as its value type parameter. It feels like one should be able to get away
  * without that method, but because Java erases the generic type signature, that
  * info disappears at runtime. See {@link ValueAnnotation} for an example.
+ * </p>
  *
  * @author dramage
  * @author rafferty
@@ -53,9 +59,11 @@ public class CoreAnnotations {
 
 
   /**
-   * The CoreMap key for getting the lemma (morphological stem, lexeme form) of a token.
+   * The CoreMap key for getting the lemma (morphological stem) of a token.
    *
    * This key is typically set on token annotations.
+   *
+   * TODO: merge with StemAnnotation?
    */
   public static class LemmaAnnotation implements CoreAnnotation<String> {
     @Override
@@ -83,36 +91,6 @@ public class CoreAnnotations {
    * This key is typically set on token annotations.
    */
   public static class NamedEntityTagAnnotation implements CoreAnnotation<String> {
-    @Override
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * Label and probability pair representing the coarse grained label and probability
-   */
-  public static class NamedEntityTagProbsAnnotation implements CoreAnnotation<Map<String,Double>> {
-    @Override
-    public Class<Map<String,Double>> getType() {
-      return ErasureUtils.uncheckedCast(Map.class);
-    }
-  }
-
-  /**
-   * The CoreMap key for getting the coarse named entity tag (i.e. LOCATION)
-   */
-  public static class CoarseNamedEntityTagAnnotation implements CoreAnnotation<String> {
-    @Override
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * The CoreMap key for getting the fine grained named entity tag (i.e. CITY)
-   */
-  public static class FineGrainedNamedEntityTagAnnotation implements CoreAnnotation<String> {
     @Override
     public Class<String> getType() {
       return String.class;
@@ -486,7 +464,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * CoNLL dep parsing - the dependency type, such as SBJ or OBJ. This should be unified with CoNLLDepTypeAnnotation.
+   * CoNLL dep parsing - the dependency type
    */
   public static class CoNLLDepAnnotation implements CoreAnnotation<CoreMap> {
     @Override
@@ -517,7 +495,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * CoNLL dep parsing - the dependency type, such as SBJ or OBJ. This should be unified with CoNLLDepAnnotation.
+   * CoNLL dep parsing - the dependency type
    */
   public static class CoNLLDepTypeAnnotation implements CoreAnnotation<String> {
     @Override
@@ -747,16 +725,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * The matching probability for the AnswerAnnotation
-   */
-  public static class AnswerProbAnnotation implements CoreAnnotation<Double> {
-    @Override
-    public Class<Double> getType() {
-      return Double.class;
-    }
-  }
-
-  /**
    * The standard key for the answer which is a String
    */
   public static class PresetAnswerAnnotation implements CoreAnnotation<String> {
@@ -817,8 +785,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * Stem of the word this label represents. (This means the output of an IR-style stemmer,
-   * such as the Porter stemmer, not a lemma.
+   * Morphological stem of the word this label represents
    */
   public static class StemAnnotation implements CoreAnnotation<String> {
     @Override
@@ -921,14 +888,9 @@ public class CoreAnnotations {
   }
 
   /**
-   * The CoreMap key identifying the offset of the first char of an
-   * annotation. The char with index 0 is the first char in the
+   * The CoreMap key identifying the offset of the first character of an
+   * annotation. The character with index 0 is the first character in the
    * document.
-   *
-   * Note that these are currently measured in terms of UTF-16 char offsets, not codepoints,
-   * so that when non-BMP Unicode characters are present, such a character will add 2 to
-   * the position. On the other hand, these values will work with String#substring() and
-   * you can then calculate the number of codepoints in a substring.
    *
    * This key should be set for any annotation that represents a span of text.
    */
@@ -943,11 +905,6 @@ public class CoreAnnotations {
    * The CoreMap key identifying the offset of the last character after the end
    * of an annotation. The character with index 0 is the first character in the
    * document.
-   *
-   * Note that these are currently measured in terms of UTF-16 char offsets, not codepoints,
-   * so that when non-BMP Unicode characters are present, such a character will add 2 to
-   * the position. On the other hand, these values will work with String#substring() and
-   * you can then calculate the number of codepoints in a substring.
    *
    * This key should be set for any annotation that represents a span of text.
    */
@@ -1175,44 +1132,6 @@ public class CoreAnnotations {
     @Override
     public Class<List<CoreMap>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
-    }
-  }
-
-  /** index into the list of entity mentions in a document **/
-  public static class EntityMentionIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
-    public Class<Integer> getType() {
-      return ErasureUtils.uncheckedCast(Integer.class);
-    }
-  }
-
-  /** index into the list of entity mentions in a document for canonical entity mention
-   *  ...this is primarily for linking entity mentions to their canonical entity mention
-   */
-  public static class CanonicalEntityMentionIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
-    public Class<Integer> getType() {
-      return ErasureUtils.uncheckedCast(Integer.class);
-    }
-  }
-
-  /**
-   * mapping from coref mentions to corresponding ner derived entity mentions
-   */
-  public static class CorefMentionToEntityMentionMappingAnnotation implements CoreAnnotation<Map<Integer,Integer>> {
-    @Override
-    public Class<Map<Integer,Integer>> getType() {
-      return ErasureUtils.uncheckedCast(Map.class);
-    }
-  }
-
-  /**
-   * Mapping from NER-derived entity mentions to coref mentions.
-   */
-  public static class EntityMentionToCorefMentionMappingAnnotation implements CoreAnnotation<Map<Integer,Integer>> {
-    @Override
-    public Class<Map<Integer,Integer>> getType() {
-      return ErasureUtils.uncheckedCast(Map.class);
     }
   }
 
@@ -1924,7 +1843,7 @@ public class CoreAnnotations {
   }
 
   /** Annotation indicating whether the numeric phrase the token is part of
-   * represents a NUMBER or ORDINAL (twenty first {@literal =>} ORDINAL ORDINAL).
+   * represents a NUMBER or ORDINAL (twenty first => ORDINAL ORDINAL).
    */
   public static class NumericCompositeValueAnnotation implements CoreAnnotation<Number> {
     @Override
@@ -1934,7 +1853,7 @@ public class CoreAnnotations {
   }
 
   /** Annotation indicating the numeric value of the phrase the token is part of
-   * (twenty first {@literal =>} 21 21 ).
+   * (twenty first => 21 21 ).
    */
   public static class NumericCompositeTypeAnnotation implements CoreAnnotation<String> {
     @Override
@@ -2120,29 +2039,5 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-
-  /**
-   * The CoreMap key identifying an entity mention's potential gender.
-   *
-   * This is attached to {@link CoreMap}s.
-   */
-  public static class GenderAnnotation implements CoreAnnotation<String> {
-    @Override
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * The CoreLabel key identifying whether a token is a newline or not
-   *
-   * This is attached to {@link CoreLabel}s.
-   */
-  public static class IsNewlineAnnotation implements CoreAnnotation<Boolean> {
-    @Override
-    public Class<Boolean> getType() {return Boolean.class;}
-  }
-
-
 
 }

@@ -1,10 +1,12 @@
-/*
+/**
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
  * Copyright:    Copyright (c) Trustees of Leland Stanford Junior University<p>
  */
 package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +18,6 @@ import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.tagger.io.TaggedFileReader;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -31,19 +32,22 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class ReadDataTagged  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(ReadDataTagged.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(ReadDataTagged.class);
 
   private final ArrayList<DataWordTag> v = new ArrayList<>();
-  private int numElements; // = 0;
-  private int totalSentences; // = 0;
-  private int totalWords; // = 0;
+  private int numElements = 0;
+  private int totalSentences = 0;
+  private int totalWords = 0;
   private final PairsHolder pairs;
   private final MaxentTagger maxentTagger;
 
-  //TODO: make a class DataHolder that holds the dict, tags, pairs, etc, for tagger and pass it around
+  //TODO: make a class DataHolder that holds the dict, tags, pairs, etc, for tagger
+  // and pass it around
 
   protected ReadDataTagged(TaggerConfig config, MaxentTagger maxentTagger,
-                           PairsHolder pairs) {
+                           PairsHolder pairs)
+    throws IOException
+  {
     this.maxentTagger = maxentTagger;
     this.pairs = pairs;
     List<TaggedFileRecord> fileRecords = TaggedFileRecord.createRecords(config, config.getFile());
@@ -92,17 +96,17 @@ public class ReadDataTagged  {
         sentence = newSentence;
       }
       for (TaggedWord tw : sentence) {
-        if (tw != null) {
+        if(tw != null) {
           words.add(tw.word());
           tags.add(tw.tag());
-          if ( ! maxentTagger.tagTokens.containsKey(tw.tag())) {
-            maxentTagger.tagTokens.put(tw.tag(), Generics.newHashSet());
+          if (!maxentTagger.tagTokens.containsKey(tw.tag())) {
+            maxentTagger.tagTokens.put(tw.tag(), Generics.<String>newHashSet());
           }
           maxentTagger.tagTokens.get(tw.tag()).add(tw.word());
         }
       }
-      if (sentence.size() > maxLen) { maxLen = sentence.size(); }
-      if (sentence.size() < minLen) { minLen = sentence.size(); }
+      maxLen = (sentence.size() > maxLen ? sentence.size() : maxLen);
+      minLen = (sentence.size() < minLen ? sentence.size() : minLen);
       words.add(Tagger.EOS_WORD);
       tags.add(Tagger.EOS_TAG);
       numElements = numElements + sentence.size() + 1;
@@ -132,11 +136,11 @@ public class ReadDataTagged  {
       numWords += sentence.size();
       words.clear();
       tags.clear();
-      // if ((numSentences % 100000) == 0) log.info("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words ... [still reading]");
+      if ((numSentences % 100000) == 0) log.info("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words ... [still reading]");
     }
 
-    log.info("Read " + numWords + " words and " + numSentences + " sentences (min " + minLen +
-            " words, max " + maxLen + " words).");
+    log.info("Read " + numWords + " words from " + reader.filename() + " [done].");
+    log.info("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words.");
   }
 
 

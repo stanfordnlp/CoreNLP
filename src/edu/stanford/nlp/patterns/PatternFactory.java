@@ -10,7 +10,6 @@ import java.util.*;
  * Created by sonalg on 10/27/14.
  */
 public class PatternFactory {
-
   /**
    * allow to match stop words before a target term. This is to match something
    * like "I am on some X" if the pattern is "I am on X"
@@ -29,7 +28,6 @@ public class PatternFactory {
    */
   @ArgumentParser.Option(name="useNER")
   public static boolean useNER = true;
-
   /**
    * Can just write a number (if same for all labels) or "Label1,2;Label2,3;...."
    */
@@ -39,7 +37,6 @@ public class PatternFactory {
   public static Map<String, Integer> numWordsCompoundMapped = new HashMap<>();
 
   public static int numWordsCompoundMax = 2;
-
   /**
    * Use lemma instead of words for the context tokens
    */
@@ -64,7 +61,7 @@ public class PatternFactory {
       String[] toks = numWordsCompound.split(";");
       for(String t: toks) {
         String[] toks2 = t.split(",");
-        int numWords = Integer.parseInt(toks2[1]);
+        int numWords = Integer.valueOf(toks2[1]);
         numWordsCompoundMapped.put(toks2[0], numWords);
         if(numWords > numWordsCompoundMax){
           numWordsCompoundMax = numWords;
@@ -72,9 +69,9 @@ public class PatternFactory {
       }
     } else
     {
-      numWordsCompoundMax = Integer.parseInt(numWordsCompound);
+      numWordsCompoundMax = Integer.valueOf(numWordsCompound);
       for(String label: labels){
-        numWordsCompoundMapped.put(label, Integer.parseInt(numWordsCompound));
+        numWordsCompoundMapped.put(label, Integer.valueOf(numWordsCompound));
       }
     }
     if(patternType.equals(PatternType.SURFACE))
@@ -85,11 +82,14 @@ public class PatternFactory {
       throw new UnsupportedOperationException();
   }
 
-  public enum PatternType {SURFACE, DEP}
+  public enum PatternType{SURFACE, DEP};
 
   public static boolean doNotUse(String word, Set<CandidatePhrase> stopWords) {
-    return stopWords.contains(CandidatePhrase.createOrGet(word.toLowerCase()))
-            || ignoreWordRegex.matcher(word).matches();
+    if (stopWords.contains(CandidatePhrase.createOrGet(word.toLowerCase()))
+      || ignoreWordRegex.matcher(word).matches())
+      return true;
+    else
+      return false;
   }
 
   public static Map<Integer, Set> getPatternsAroundTokens(PatternType patternType, DataInstance sent, Set<CandidatePhrase> stopWords) {

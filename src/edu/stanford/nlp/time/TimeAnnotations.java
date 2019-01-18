@@ -34,7 +34,7 @@ public class TimeAnnotations {
    */
   public static class TimexAnnotations implements CoreAnnotation<List<CoreMap>> {
     public Class<List<CoreMap>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
+      return ErasureUtils.<Class<List<CoreMap>>> uncheckedCast(List.class);
     }
   }  
 }

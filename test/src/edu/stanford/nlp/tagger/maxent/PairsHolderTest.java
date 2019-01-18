@@ -1,15 +1,12 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.ling.WordTag;
-
-import org.junit.Assert;
-import org.junit.Test;
+import junit.framework.TestCase;
 
 
 /** @author Christopher Manning */
-public class PairsHolderTest {
+public class PairsHolderTest  extends TestCase {
 
-  @Test
   public void testPairsHolder() {
     PairsHolder pairsHolder = new PairsHolder();
 
@@ -27,10 +24,10 @@ public class PairsHolderTest {
     //int x = maxentTagger.tHistories.add(h);
     int y = te.getHistoryTable().getIndex(h);
     //int y = maxentTagger.tHistories.getIndex(h);
-    Assert.assertEquals("Failing to get same index for history", x, y);
+    assertEquals("Failing to get same index for history", x, y);
     Extractor e = new Extractor(0, false);
     String k = e.extract(h);
-    Assert.assertEquals("Extractor didn't find stored word", k, "girl");
+    assertEquals("Extractor didn't find stored word", k, "girl");
   }
 
 }

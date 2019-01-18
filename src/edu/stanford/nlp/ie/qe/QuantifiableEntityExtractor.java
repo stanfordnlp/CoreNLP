@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 
 /**
  * Extracts quantifiable entities using rules.
- * The rules can be found in: {@code src/edu/stanford/nlp/ie/qe/rules/}
  *
  * @author Angel Chang
  */
@@ -64,8 +63,8 @@ public class QuantifiableEntityExtractor {
     env.setDefaultTokensAnnotationKey(CoreAnnotations.NumerizedTokensAnnotation.class);
 
     // Do case insensitive matching
-    env.setDefaultStringMatchFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    env.setDefaultStringMatchFlags(Pattern.CASE_INSENSITIVE);
+    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
     try {
       Units.registerUnits(env, options.unitsFilename);
     } catch (IOException ex)  {

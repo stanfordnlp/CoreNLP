@@ -6,7 +6,6 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
-import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.international.pennchinese.CTBErrorCorrectingTreeNormalizer;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -108,10 +107,10 @@ public class GrammaticalStructureConversionUtils {
 
     Map<Integer, Integer> indexToPos = Generics.newHashMap();
     indexToPos.put(0,0); // to deal with the special node "ROOT"
-    List<Tree> gsLeaves = gs.root().getLeaves();
+    List<Tree> gsLeaves = gs.root.getLeaves();
     for (int i = 0; i < gsLeaves.size(); i++) {
       TreeGraphNode leaf = (TreeGraphNode) gsLeaves.get(i);
-      indexToPos.put(leaf.label().index(), i + 1);
+      indexToPos.put(leaf.label.index(), i + 1);
     }
 
     if (conllx) {
@@ -159,7 +158,7 @@ public class GrammaticalStructureConversionUtils {
           bf.append("======\n");
           for (TypedDependency dep : extraDeps) {
             bf.append(toStringIndex(dep, indexToPos));
-            bf.append('\n');
+            bf.append("\n");
           }
         }
       } else {
@@ -288,8 +287,19 @@ public class GrammaticalStructureConversionUtils {
         depPrinter = altDepPrinterClass.getConstructor(String[].class).newInstance((Object) depPrintArgs);
       }
       return depPrinter;
-    } catch (IllegalArgumentException | SecurityException | IllegalAccessException | InstantiationException
-            | InvocationTargetException e) {
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+      return null;
+    } catch (SecurityException e) {
+      e.printStackTrace();
+      return null;
+    } catch (InstantiationException e) {
+      e.printStackTrace();
+      return null;
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+      return null;
+    } catch (InvocationTargetException e) {
       e.printStackTrace();
       return null;
     } catch (NoSuchMethodException e) {
@@ -303,7 +313,7 @@ public class GrammaticalStructureConversionUtils {
   }
 
   private static Function<List<? extends HasWord>, Tree> loadParser(String parserFile, String parserOptions, boolean makeCopulaHead) {
-    if (parserFile == null || parserFile.isEmpty()) {
+    if (parserFile == null || "".equals(parserFile)) {
       parserFile = DEFAULT_PARSER_FILE;
       if (parserOptions == null) {
         parserOptions = "-retainTmpSubcategories";
@@ -493,6 +503,7 @@ public class GrammaticalStructureConversionUtils {
   /**
    * Given sentences or trees, output the typed dependencies.
    * <p>
+
    * By default, the method outputs the collapsed typed dependencies with
    * processing of conjuncts. The input can be given as plain text (one sentence
    * by line) using the option -sentFile, or as trees using the option
@@ -541,10 +552,10 @@ public class GrammaticalStructureConversionUtils {
    * which get collapsed into the grammatical relations and are not part of the
    * sentence per se anymore will be annotated with "erased" as grammatical relation
    * and attached to the fake "ROOT" node with index 0.
-   * <p>
+   * <p/><p>
    * There is also an option to retain dependencies involving punctuation:
    * {@code -keepPunct}
-   * <p>
+   * </p><p>
    * The {@code -extraSep} option used with -nonCollapsed will print the basic
    * dependencies first, then a separator ======, and then the extra
    * dependencies that do not preserve the tree structure. The -test option is
@@ -553,11 +564,11 @@ public class GrammaticalStructureConversionUtils {
    * connectivity of the collapsed dependencies. If the collapsed dependencies
    * list doesn't constitute a connected graph, it prints the possible offending
    * nodes (one of them is the real root of the graph).
-   * <p>
+   * </p><p>
    * Using the -conllxFile, you can pass a file containing Stanford dependencies
    * in the CoNLL format (e.g., the basic dependencies), and obtain another
    * representation using one of the representation options.
-   * <p>
+   * </p><p>
    * Usage: <br>
    * <code>java edu.stanford.nlp.trees.GrammaticalStructure [-treeFile FILE | -sentFile FILE | -conllxFile FILE | -filter] <br>
    * [-collapsed -basic -CCprocessed -test -generateOriginalDependencies]</code>
@@ -569,6 +580,8 @@ public class GrammaticalStructureConversionUtils {
 
     /* Use a tree normalizer that removes all empty nodes.
        This prevents wrong indexing of the nodes in the dependency relations. */
+
+
 
     Iterable<GrammaticalStructure> gsBank = null;
     Properties props = StringUtils.argsToProperties(args);
@@ -715,7 +728,7 @@ public class GrammaticalStructureConversionUtils {
       // Do this by reflection to avoid this becoming a dependency when we distribute the parser
       try {
         Class sgf = Class.forName("edu.stanford.nlp.semgraph.SemanticGraphFactory");
-        m = sgf.getDeclaredMethod("makeFromTree", GrammaticalStructure.class, SemanticGraphFactory.Mode.class, GrammaticalStructure.Extras.class, Predicate.class);
+        m = sgf.getDeclaredMethod("makeFromTree", GrammaticalStructure.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, Predicate.class, String.class, int.class);
       } catch (Exception e) {
         log.info("Test cannot check for cycles in tree format (classes not available)");
       }
@@ -800,7 +813,7 @@ public class GrammaticalStructureConversionUtils {
         if (m != null) {
           try {
             // the first arg is null because it's a static method....
-            Object semGraph = m.invoke(null, gs, SemanticGraphFactory.Mode.CCPROCESSED, GrammaticalStructure.Extras.MAXIMAL, null);
+            Object semGraph = m.invoke(null, gs, false, true, false, false, false, false, null, null, 0);
             Class sg = Class.forName("edu.stanford.nlp.semgraph.SemanticGraph");
             Method mDag = sg.getDeclaredMethod("isDag");
             boolean isDag = (Boolean) mDag.invoke(semGraph);

@@ -1,6 +1,6 @@
 package edu.stanford.nlp.time;
 
-import java.util.*;
+import java.util.Properties;
 
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -30,59 +30,37 @@ public class Options {
   boolean includeRange = false;
   // Look for document date in the document text (if not provided)
   boolean searchForDocDate = false;
-  // language for SUTime
-  public String language = "english";
-  public static final HashMap<String,String> languageToRulesFiles = new HashMap<>();
   // TODO: Add default country for holidays and default time format
   // would want a per document default as well
   String grammarFilename = null;
   Env.Binder[] binders = null;
 
-
   static final String DEFAULT_GRAMMAR_FILES = "edu/stanford/nlp/models/sutime/defs.sutime.txt,edu/stanford/nlp/models/sutime/english.sutime.txt,edu/stanford/nlp/models/sutime/english.holidays.sutime.txt";
-  static final String DEFAULT_BRITISH_GRAMMAR_FILES =
-      "edu/stanford/nlp/models/sutime/defs.sutime.txt,edu/stanford/nlp/models/sutime/british.sutime.txt,edu/stanford/nlp/models/sutime/english.sutime.txt,edu/stanford/nlp/models/sutime/english.holidays.sutime.txt";
-  static final String DEFAULT_SPANISH_GRAMMAR_FILES =
-      "edu/stanford/nlp/models/sutime/defs.sutime.txt,edu/stanford/nlp/models/sutime/spanish.sutime.txt";
   static final String[] DEFAULT_BINDERS = { "edu.stanford.nlp.time.JollyDayHolidays" };
   //static final String[] DEFAULT_BINDERS = { };
 
-  static {
-    languageToRulesFiles.put("english", DEFAULT_GRAMMAR_FILES);
-    languageToRulesFiles.put("en", DEFAULT_GRAMMAR_FILES);
-    languageToRulesFiles.put("british", DEFAULT_BRITISH_GRAMMAR_FILES);
-    languageToRulesFiles.put("spanish", DEFAULT_SPANISH_GRAMMAR_FILES);
-    languageToRulesFiles.put("es", DEFAULT_SPANISH_GRAMMAR_FILES);
-  }
-
   boolean verbose = false;
 
+  public Options()
+  {
+  }
 
-  public Options() { }
-
-  public Options(String name, Properties props) {
+  public Options(String name, Properties props)
+  {
     includeRange = PropertiesUtils.getBool(props, name + ".includeRange",
-        includeRange);
+                                           includeRange);
     markTimeRanges = PropertiesUtils.getBool(props, name + ".markTimeRanges",
-        markTimeRanges);
+                                             markTimeRanges);
     includeNested = PropertiesUtils.getBool(props, name + ".includeNested",
-        includeNested);
+                                            includeNested);
     restrictToTimex3 = PropertiesUtils.getBool(props, name + ".restrictToTimex3",
-        restrictToTimex3);
+            restrictToTimex3);
     teRelHeurLevel = RelativeHeuristicLevel.valueOf(
-        props.getProperty(name + ".teRelHeurLevel",
-            teRelHeurLevel.toString()));
+                       props.getProperty(name + ".teRelHeurLevel",
+                                         teRelHeurLevel.toString()));
     verbose = PropertiesUtils.getBool(props, name + ".verbose", verbose);
 
-    // set default rules by SUTime language
-    language = props.getProperty(name + ".language", language);
-    if (!languageToRulesFiles.keySet().contains(language))
-      language = "english";
-    grammarFilename = languageToRulesFiles.get(language);
-
-    // override if rules are set by properties
-    grammarFilename = props.getProperty(name + ".rules", grammarFilename);
-
+    grammarFilename = props.getProperty(name + ".rules", DEFAULT_GRAMMAR_FILES);
 
     searchForDocDate = PropertiesUtils.getBool(props, name + ".searchForDocDate", searchForDocDate);
 
@@ -106,9 +84,9 @@ public class Options {
         int bi = i+1;
         String binderPrefix = name + ".binder." + bi;
         try {
-          Class<Env.Binder> binderClass = (Class<Env.Binder>) Class.forName(binderClasses[i]);
-          binderPrefix = binderPrefix + '.';
-          binders[i] = binderClass.getDeclaredConstructor().newInstance();
+          Class binderClass = Class.forName(binderClasses[i]);
+          binderPrefix = binderPrefix + ".";
+          binders[i] = (Env.Binder) binderClass.newInstance();
           binders[i].init(binderPrefix, props);
         } catch (Exception ex) {
           throw new RuntimeException("Error initializing binder " + bi, ex);

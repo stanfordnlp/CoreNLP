@@ -21,7 +21,7 @@ public class SsurgeonTest {
 	 */
 	@Test
 	public void simpleTest() throws Exception {
-		SemanticGraph sg = SemanticGraph.valueOf("[mixed/VBN nsubj>[Joe/NNP appos>[bartender/NN det>the/DT]]  dobj>[drink/NN det>a/DT]]");
+		SemanticGraph sg = SemanticGraph.valueOf("[mixed/VBN nsubj>[Joe/NNP appos>[bartender/NN det>the/DT]]  obj>[drink/NN det>a/DT]]");
 		SemgrexPattern semgrexPattern = SemgrexPattern.compile("{}=a1 >appos=e1 {}=a2 <nsubj=e2 {}=a3");
 		SsurgeonPattern pattern = new SsurgeonPattern(semgrexPattern);
 

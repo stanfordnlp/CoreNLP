@@ -13,17 +13,19 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/ .
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 2A
-//    Stanford CA 94305-9020
+//    Dept of Computer Science, Gates 1A
+//    Stanford CA 94305-9010
 //    USA
 //    parser-support@lists.stanford.edu
-//    https://nlp.stanford.edu/software/lex-parser.html
+//    http://nlp.stanford.edu/downloads/lex-parser.shtml
 
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -41,14 +43,13 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.util.regex.Matcher;
 
 /** An exhaustive generalized CKY PCFG parser.
  *  Fairly carefully optimized to be fast.
- *
+ *  <br>
  *  If reusing this object for multiple parses, remember to correctly
  *  set any options such as the constraints field.
  *
@@ -114,7 +115,7 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser  {
    * (as regular expression) the state Pattern given.  See the
    * documentation of the ParserConstraint class for information on
    * specifying a ParserConstraint.
-   *
+   * <br>
    * Implementation note: It would be cleaner to make this a
    * Collections.emptyList, but that actually significantly slows down
    * the processing in the case of empty lists.  Checking for null

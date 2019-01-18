@@ -22,23 +22,28 @@ public class CoNLLUDocumentWriter {
     private static final String RRB_PATTERN = "(?i)-RRB-";
 
 
-    public String printSemanticGraph(SemanticGraph sg) {
-        return printSemanticGraph(sg, true);
+    public String printSemanticGraph(SemanticGraph basicSg) {
+        return printSemanticGraph(basicSg, null, true);
     }
 
-    public String printSemanticGraph(SemanticGraph sg, boolean unescapeParenthesis) {
+    public String printSemanticGraph(SemanticGraph basicSg, SemanticGraph enhancedSg) {
+        return printSemanticGraph(basicSg, enhancedSg, true);
+    }
+
+    public String printSemanticGraph(SemanticGraph basicSg, SemanticGraph enhancedSg, boolean unescapeParenthesis) {
 
 
-        boolean isTree = SemanticGraphUtils.isTree(sg);
 
         StringBuilder sb = new StringBuilder();
 
         /* Print comments. */
-        for (String comment : sg.getComments()) {
+        for (String comment : basicSg.getComments()) {
             sb.append(comment).append("\n");
         }
 
-        for (IndexedWord token : sg.vertexListSorted()) {
+        SemanticGraph tokenSg = enhancedSg != null ? enhancedSg : basicSg;
+
+        for (IndexedWord token : tokenSg.vertexListSorted()) {
             /* Check for multiword tokens. */
             if (token.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class)) {
                 IntPair tokenSpan = token.get(CoreAnnotations.CoNLLUTokenSpanAnnotation.class);
@@ -49,21 +54,29 @@ public class CoNLLUDocumentWriter {
             }
 
             /* Try to find main governor and additional dependencies. */
-            String govIdx = null;
-            GrammaticalRelation reln = null;
+            IndexedWord gov = basicSg.containsVertex(token) ? basicSg.getParent(token) : null;
+            String govIdx = gov != null ? gov.toCopyIndex() : null;
+            GrammaticalRelation reln = gov != null ? basicSg.getEdge(gov, token).getRelation() : null;
+
             HashMap<String, String> enhancedDependencies = new HashMap<>();
-            for (IndexedWord parent : sg.getParents(token)) {
-                SemanticGraphEdge edge = sg.getEdge(parent, token);
-                if ( govIdx == null && ! edge.isExtra()) {
-                    govIdx = parent.toCopyIndex();
-                    reln = edge.getRelation();
+            if (enhancedSg != null) {
+
+                for (IndexedWord parent : enhancedSg.getParents(token)) {
+                    SemanticGraphEdge edge = enhancedSg.getEdge(parent, token);
+                    enhancedDependencies.put(parent.toCopyIndex(), edge.getRelation().toString());
                 }
-                enhancedDependencies.put(parent.toCopyIndex(), edge.getRelation().toString());
+
+            } else {
+                //add basic dependency
+                if (gov != null) {
+                    enhancedDependencies.put(govIdx, reln.toString());
+                }
+                // add enhanced ones stored with token
+                enhancedDependencies.putAll(token.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class));
             }
 
 
-
-            String additionalDepsString = isTree ? "_" : CoNLLUUtils.toExtraDepsString(enhancedDependencies);
+            String additionalDepsString =  CoNLLUUtils.toExtraDepsString(enhancedDependencies);
             String word = token.word();
             String featuresString = CoNLLUUtils.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
             String pos = token.getString(CoreAnnotations.PartOfSpeechAnnotation.class, "_");
@@ -73,13 +86,16 @@ public class CoNLLUDocumentWriter {
             String relnName = reln == null ? "_" : reln.toString();
 
             /* Root. */
-            if (govIdx == null && sg.getRoots().contains(token)) {
+            if (govIdx == null && basicSg.getRoots().contains(token)) {
                 govIdx = "0";
                 relnName = GrammaticalRelation.ROOT.toString();
-                additionalDepsString = isTree ? "_" : "0:" + relnName;
             } else if (govIdx == null) {
                 govIdx = "_";
                 relnName = "_";
+            }
+
+            if (enhancedDependencies.isEmpty() && enhancedSg.getRoots().contains(token)) {
+                additionalDepsString = "0:root";
             }
 
             if (unescapeParenthesis) {

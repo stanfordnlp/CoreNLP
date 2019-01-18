@@ -2,14 +2,13 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.Datum;
+import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.stats.ClassicCounter;
-
-import org.junit.Assert;
+import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- * @author sonalg
- * @version 11/24/14
+ * Created by sonalg on 11/24/14.
  */
 public class ShiftParamsLogisticClassifierITest {
 
@@ -20,7 +19,7 @@ public class ShiftParamsLogisticClassifierITest {
     for (int i = 0; i < features.length; i++) {
       counter.setCount(features[i], counts[i]);
     }
-    return new BasicDatum<>(counter.keySet(), label);
+    return new BasicDatum<L, F>(counter.keySet(), label);
   }
 
   private static void testStrBinaryDatums(double d1f1, double d1f2, double d2f1, double d2f2) throws Exception {
@@ -52,5 +51,4 @@ public class ShiftParamsLogisticClassifierITest {
 //    testStrBinaryDatums(0.0, 1.0, 1.0, 0.0);
 //    testStrBinaryDatums(1.0, 0.0, 0.0, 1.0);
   }
-
 }

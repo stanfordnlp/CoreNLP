@@ -27,6 +27,7 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.UniversalPOSMapper;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
 
@@ -58,23 +59,22 @@ public class UniversalDependenciesFeatureAnnotator  {
 
 
   private void loadFeatureMap() throws IOException {
-    try (Reader r = IOUtils.readerFromString(FEATURE_MAP_FILE)) {
-      BufferedReader br = new BufferedReader(r);
+    Reader r = IOUtils.readerFromString(FEATURE_MAP_FILE);
+    BufferedReader br = new BufferedReader(r);
 
-      posFeatureMap = new HashMap<>();
-      wordPosFeatureMap = new HashMap<>();
+    posFeatureMap = new HashMap<>();
+    wordPosFeatureMap = new HashMap<>();
 
-      String line;
-      while ((line = br.readLine()) != null) {
-        String[] parts = line.split("\\s+");
+    String line;
+    while ((line = br.readLine()) != null) {
+      String[] parts = line.split("\\s+");
 
-        if (parts.length < 3) continue;
+      if (parts.length < 3) continue;
 
-        if (parts[0].equals("*")) {
-          posFeatureMap.put(parts[1], CoNLLUUtils.parseFeatures(parts[2]));
-        } else {
-          wordPosFeatureMap.put(parts[0] + '_' + parts[1], CoNLLUUtils.parseFeatures(parts[2]));
-        }
+      if (parts[0].equals("*")) {
+        posFeatureMap.put(parts[1], CoNLLUUtils.parseFeatures(parts[2]));
+      } else {
+        wordPosFeatureMap.put(parts[0] + '_' + parts[1], CoNLLUUtils.parseFeatures(parts[2]));
       }
     }
   }
@@ -463,12 +463,12 @@ public class UniversalDependenciesFeatureAnnotator  {
     Reader r = IOUtils.readerFromString(coNLLUFile);
     CoNLLUDocumentReader depReader = new CoNLLUDocumentReader();
     CoNLLUDocumentWriter depWriter = new CoNLLUDocumentWriter();
-    Iterator<SemanticGraph> it = depReader.getIterator(r);
+    Iterator<Pair<SemanticGraph, SemanticGraph>> it = depReader.getIterator(r);
 
     Iterator<Tree> treeIt = treebankIterator(treeFile);
 
     while (it.hasNext()) {
-      SemanticGraph sg = it.next();
+      SemanticGraph sg = it.next().first();
       Tree t = treeIt.next();
 
       if (t == null || t.yield().size() != sg.size()) {
@@ -486,7 +486,7 @@ public class UniversalDependenciesFeatureAnnotator  {
 
       featureAnnotator.addFeatures(sg, t, true, addUPOS);
 
-      System.out.print(depWriter.printSemanticGraph(sg, !escapeParens));
+      System.out.print(depWriter.printSemanticGraph(sg, null, !escapeParens));
     }
   }
 

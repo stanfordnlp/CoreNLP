@@ -1,5 +1,4 @@
 package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -17,14 +16,14 @@ import edu.stanford.nlp.ling.HasWord;
  * files. The reader is implemented as a push-down automaton (PDA) that parses the Lisp-style
  * format in which the trees are stored. This reader is compatible with both PTB
  * and PATB trees.
- * <p>
- * One small detail to note is that the {@code PennTreeReader}
+ * <br>
+ * One small detail to note is that the <code>PennTreeReader</code>
  * silently replaces \* with * and \/ with /.  Two possible designs
- * for this were to make the {@code PennTreeReader} always do
- * this or to make the {@code TreeNormalizers} do this.  We
- * decided to put it in the {@code PennTreeReader} class itself
+ * for this were to make the <code>PennTreeReader</code> always do
+ * this or to make the <code>TreeNormalizers</code> do this.  We
+ * decided to put it in the <code>PennTreeReader</code> class itself
  * to avoid the problem of people making new
- * {@code TreeNormalizers} and forgetting to include the
+ * <code>TreeNormalizers</code> and forgetting to include the
  * unescaping.
  *
  * @author Christopher Manning
@@ -34,7 +33,7 @@ import edu.stanford.nlp.ling.HasWord;
 public class PennTreeReader implements TreeReader  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(PennTreeReader.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(PennTreeReader.class);
 
   private final Reader reader;
   private final Tokenizer<String> tokenizer;
@@ -50,12 +49,12 @@ public class PennTreeReader implements TreeReader  {
   private static final String rightParen = ")";
 
   /**
-   * Read parse trees from a {@code Reader}.
+   * Read parse trees from a <code>Reader</code>.
    * For the defaulted arguments, you get a
-   * {@code SimpleTreeFactory}, no {@code TreeNormalizer}, and
-   * a {@code PennTreebankTokenizer}.
+   * <code>SimpleTreeFactory</code>, no <code>TreeNormalizer</code>, and
+   * a <code>PennTreebankTokenizer</code>.
    *
-   * @param in The {@code Reader}
+   * @param in The <code>Reader</code>
    */
   public PennTreeReader(Reader in) {
     this(in, new LabeledScoredTreeFactory());
@@ -63,7 +62,7 @@ public class PennTreeReader implements TreeReader  {
 
 
   /**
-   * Read parse trees from a {@code Reader}.
+   * Read parse trees from a <code>Reader</code>.
    *
    * @param in the Reader
    * @param tf TreeFactory -- factory to create some kind of Tree
@@ -127,14 +126,14 @@ public class PennTreeReader implements TreeReader  {
    * input stream. The method supports additional parentheses around the
    * tree (an unnamed ROOT node) so long as they are balanced. If the token stream
    * ends before the current tree is complete, then the method will throw an
-   * {@code IOException}.
+   * <code>IOException</code>.
    * <p>
    * Note that the method will skip malformed trees and attempt to
    * read additional trees from the input stream. It is possible, however,
    * that a malformed tree will corrupt the token stream. In this case,
-   * an {@code IOException} will eventually be thrown.
+   * an <code>IOException</code> will eventually be thrown.
    *
-   * @return A single tree, or {@code null} at end of token stream.
+   * @return A single tree, or <code>null</code> at end of token stream.
    */
   @Override
   public Tree readTree() throws IOException {
@@ -266,7 +265,7 @@ public class PennTreeReader implements TreeReader  {
 
 
   /**
-   * Closes the underlying {@code Reader} used to create this
+   * Closes the underlying <code>Reader</code> used to create this
    * class.
    */
   @Override
@@ -293,7 +292,7 @@ public class PennTreeReader implements TreeReader  {
       }
       r.close();
     } catch (IOException ioe) {
-      throw new RuntimeIOException(ioe);
+      ioe.printStackTrace();
     }
   }
 

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie;
+package edu.stanford.nlp.ie; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.util.StringUtils;
@@ -15,18 +16,18 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
-import edu.stanford.nlp.util.logging.Redwood;
 
 /*****************************************************************************
  * A named-entity recognizer server for Stanford's NER.
  * Runs on a socket and waits for text to annotate and returns the
- * annotated text.  (Internally, it uses the {@code classifyString()}
+ * annotated text.  (Internally, it uses the <code>classifyString()</code>
  * method on a classifier, which can be either the default CRFClassifier
  * which is serialized inside the jar file from which it is called, or another
  * classifier which is passed as an argument to the main method.
  *
  * @version $Id$
- * @author Bjorn Aldag <br>
+ * @author
+ *      Bjorn Aldag<BR>
  *      Copyright &copy; 2000 - 2004 Cycorp, Inc.  All rights reserved.
  *      Permission granted for Stanford to distribute with their NER code
  *      by Bjorn Aldag
@@ -37,15 +38,16 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class NERServer  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(NERServer.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(NERServer.class);
 
   //// Variables
 
   /**
    * Debugging toggle.
    */
-  private static final boolean ENV_DEBUG =
-          System.getenv("NERSERVER_DEBUG") != null && Boolean.parseBoolean(System.getenv("NERSERVER_DEBUG"));
+  private static final boolean ENV_DEBUG = ((System.getenv("NERSERVER_DEBUG") != null) ?
+                                            Boolean.parseBoolean(System.getenv("NERSERVER_DEBUG")) :
+                                            false);
 
   private boolean DEBUG = ENV_DEBUG;
 
@@ -170,10 +172,10 @@ public class NERServer  {
       }
       try {
         if (! (input == null)) {
-          String output =
-            ner.classifyToString(input, ner.flags.outputFormat,
+          String output = 
+            ner.classifyToString(input, ner.flags.outputFormat, 
                                  !"slashTags".equals(ner.flags.outputFormat));
-
+          
           if (DEBUG) {
             EncodingPrintWriter.err.println("Sending: \"" + output + '\"', charset);
           }
@@ -220,23 +222,25 @@ public class NERServer  {
     private NERClient() {}
 
     public static void communicateWithNERServer(String host, int port,
-                                                String charset)
-            throws IOException {
+                                                String charset) 
+      throws IOException
+    {
       System.out.println("Input some text and press RETURN to NER tag it, " +
-              " or just RETURN to finish.");
+                         " or just RETURN to finish.");
 
-      BufferedReader stdIn =
-              new BufferedReader(new InputStreamReader(System.in, charset));
+      BufferedReader stdIn = 
+        new BufferedReader(new InputStreamReader(System.in, charset));
       communicateWithNERServer(host, port, charset, stdIn, null, true);
       stdIn.close();
     }
 
-    public static void communicateWithNERServer(String host, int port,
-                                                String charset,
+    public static void communicateWithNERServer(String host, int port, 
+                                                String charset, 
                                                 BufferedReader input,
                                                 BufferedWriter output,
                                                 boolean closeOnBlank)
-            throws IOException {
+      throws IOException 
+    {
       if (host == null) {
         host = "localhost";
       }
@@ -283,7 +287,7 @@ public class NERServer  {
   } // end static class NERClient
 
 
-  private static final String USAGE = "Usage: NERServer [-loadClassifier fileOrResource|-client] -port portNumber";
+  private static final String USAGE = "Usage: NERServer [-loadClassifier file|-loadJarClassifier resource|-client] -port portNumber";
 
   /**
    * Starts this server on the specified port.  The classifier used can be
@@ -291,13 +295,13 @@ public class NERServer  {
    * invoked or you can specify it as a filename or as another classifier
    * resource name, which must correspond to the name of a resource in the
    * /classifiers/ directory of the jar file.
-   *
+   * <p>
    * Default port is 4465.
-   *
+   * </p><p>
    * When run in server mode, additional properties can be specified
    * on the command line and will be passed to the model loaded.
-   *
-   * Usage: {@code java edu.stanford.nlp.ie.NERServer [-loadClassifier fileOrResource|-client] -port portNumber}
+   * </p><p>
+   * Usage: <code>java edu.stanford.nlp.ie.NERServer [-loadClassifier file|-loadJarClassifier resource|-client] -port portNumber</code>
    *
    * @param args Command-line arguments (described above)
    * @throws Exception If file or Java class problems with serialized classifier
@@ -338,10 +342,10 @@ public class NERServer  {
       NERClient.communicateWithNERServer(host, port, charset);
     } else {
       AbstractSequenceClassifier asc;
-      if ( ! StringUtils.isNullOrEmpty(loadFile)) {
+      if (loadFile != null && ! loadFile.equals("")) {
         asc = CRFClassifier.getClassifier(loadFile, props);
-      } else if ( ! StringUtils.isNullOrEmpty(loadJarFile)) {
-        asc = CRFClassifier.getClassifier(loadJarFile, props);
+      } else if (loadJarFile != null && ! loadJarFile.equals("")) {
+        asc = CRFClassifier.getJarClassifier(loadJarFile, props);
       } else {
         asc = CRFClassifier.getDefaultClassifier(props);
       }

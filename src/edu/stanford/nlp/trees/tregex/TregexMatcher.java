@@ -102,7 +102,7 @@ public abstract class TregexMatcher {
    */
   public abstract boolean matches();
 
-  /** Resets the matcher and tests if it matches on the tree when rooted at {@code node}.
+  /** Rests the matcher and tests if it matches on the tree when rooted at {@code node}.
    *
    *  @param node The node where the match is checked
    *  @return whether the matcher matches at node

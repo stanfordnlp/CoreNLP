@@ -42,8 +42,7 @@ public class CleanXmlAnnotator implements Annotator {
 
   /**
    * This regular expression tells us which tags end a sentence.
-   * For example, {@code "p"} would be a great candidate.
-   * The pattern should match element names not tags (i.e., you don't include the angle brackets).
+   * For example, {@code <p>} would be a great candidate.
    */
   private final Pattern sentenceEndingTagMatcher;
 
@@ -268,7 +267,7 @@ public class CleanXmlAnnotator implements Annotator {
 
   private static Pattern toCaseInsensitivePattern(String tags) {
     if (tags != null) {
-      return Pattern.compile(tags, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+      return Pattern.compile(tags, Pattern.CASE_INSENSITIVE);
     } else {
       return null;
     }
@@ -352,18 +351,6 @@ public class CleanXmlAnnotator implements Annotator {
     }
   }
 
-  /**
-   * Helper method to set the TokenBeginAnnotation and TokenEndAnnotation of every token.
-   */
-  public void setTokenBeginTokenEnd(List<CoreLabel> tokensList) {
-    int tokenIndex = 0;
-    for (CoreLabel token : tokensList) {
-      token.set(CoreAnnotations.TokenBeginAnnotation.class, tokenIndex);
-      token.set(CoreAnnotations.TokenEndAnnotation.class, tokenIndex+1);
-      tokenIndex++;
-    }
-  }
-
   @Override
   public void annotate(Annotation annotation) {
     if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
@@ -372,8 +359,6 @@ public class CleanXmlAnnotator implements Annotator {
       List<CoreLabel> newTokens = process(annotation, tokens);
       // We assume that if someone is using this annotator, they don't
       // want the old tokens any more and get rid of them
-      // redo the token indexes if xml tokens have been removed
-      setTokenBeginTokenEnd(newTokens);
       annotation.set(CoreAnnotations.TokensAnnotation.class, newTokens);
       if (DEBUG) { log.info("CleanXML: ending tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class)); }
     }
@@ -532,9 +517,7 @@ public class CleanXmlAnnotator implements Annotator {
     String quoteAuthor = null;
     int quoteStartCharOffset = -1;
 
-    // check if annotation is null for case where just processing a list of tokens
-    if (annotation != null)
-      annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<>());
+    annotation.set(CoreAnnotations.SectionsAnnotation.class, new ArrayList<>());
 
     boolean markSingleSentence = false;
 
@@ -754,9 +737,8 @@ public class CleanXmlAnnotator implements Annotator {
             currSectionCoreMap.set(CoreAnnotations.SectionDateAnnotation.class, dateString);
             // add the quotes list
             currSectionCoreMap.set(CoreAnnotations.QuotesAnnotation.class, sectionQuotes);
-            // add this to the list of sections, if there is an annotation
-            if (annotation != null)
-              annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
+            // add this to the list of sections
+            annotation.get(CoreAnnotations.SectionsAnnotation.class).add(currSectionCoreMap);
             // finish processing section
             savedTokensForSection.clear();
             sectionStartTag = null;

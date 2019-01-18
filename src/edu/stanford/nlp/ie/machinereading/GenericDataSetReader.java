@@ -1,4 +1,5 @@
 package edu.stanford.nlp.ie.machinereading;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
-// import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  *
@@ -38,7 +38,7 @@ import edu.stanford.nlp.util.CoreMap;
 public class GenericDataSetReader  {
 
   /** A logger for this class */
-  // private static Redwood.RedwoodChannels log = Redwood.channels(GenericDataSetReader.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(GenericDataSetReader.class);
   protected Logger logger;
 
   /** Finds the syntactic head of a syntactic constituent */
@@ -216,7 +216,10 @@ public class GenericDataSetReader  {
     Tree sh = null;
     try {
       sh = findSyntacticHead(ent, tree, tokens);
-    } catch (Exception | AssertionError e) {
+    } catch(Exception e) {
+      logger.severe("WARNING: failed to parse sentence. Will continue with the right-most head heuristic: " + sentenceToString(tokens));
+      e.printStackTrace();
+    } catch(AssertionError e) {
       logger.severe("WARNING: failed to parse sentence. Will continue with the right-most head heuristic: " + sentenceToString(tokens));
       e.printStackTrace();
     }
@@ -326,7 +329,7 @@ public class GenericDataSetReader  {
 
   private static String printTree(Tree tree) {
     StringBuilder sb = new StringBuilder();
-    return tree.toStringBuilder(sb).toString();
+    return tree.toStringBuilder(sb, true).toString();
   }
 
   private Tree safeHead(Tree top) {
@@ -334,9 +337,7 @@ public class GenericDataSetReader  {
     if (head != null) return head;
     // if no head found return the right-most leaf
     List<Tree> leaves = top.getLeaves();
-    if ( ! leaves.isEmpty()) {
-      return leaves.get(leaves.size() - 1);
-    }
+    if(leaves.size() > 0) return leaves.get(leaves.size() - 1);
     // fallback: return top
     return top;
   }

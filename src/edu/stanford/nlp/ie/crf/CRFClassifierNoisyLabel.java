@@ -75,7 +75,6 @@ public class CRFClassifierNoisyLabel<IN extends CoreMap> extends CRFClassifier<I
     return matrix;
   }
 
-  @Override
   protected CRFLogConditionalObjectiveFunction getObjectiveFunction(int[][][][] data, int[][] labels) {
     if (errorMatrix == null) {
       if (flags.errorMatrix != null ) {

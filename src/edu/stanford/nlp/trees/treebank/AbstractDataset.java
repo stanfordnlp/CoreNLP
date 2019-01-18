@@ -186,7 +186,11 @@ public abstract class AbstractDataset implements Dataset  {
 
       return (TreeVisitor) c.newInstance();
 
-    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
       e.printStackTrace();
     }
 

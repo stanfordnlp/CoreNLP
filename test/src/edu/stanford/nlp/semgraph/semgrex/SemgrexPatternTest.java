@@ -45,7 +45,7 @@ public class SemgrexPatternTest extends TestCase {
   public void testFind() throws Exception {
     SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass>Hughes/NNP auxpass>was/VBD prep_to>Gracia/NNP]");
     SemanticGraph t = SemanticGraph
-        .valueOf("[loved/VBD\nnsubj>Hughes/NNP\ndobj>[wife/NN poss>his/PRP$ appos>Gracia/NNP]\nconj_and>[obsessed/JJ\ncop>was/VBD\nadvmod>absolutely/RB\nprep_with>[Elicia/NN poss>his/PRP$ amod>little/JJ compound>daughter/NN]]]");
+        .valueOf("[loved/VBD\nnsubj>Hughes/NNP\nobj>[wife/NN poss>his/PRP$ appos>Gracia/NNP]\nconj_and>[obsessed/JJ\ncop>was/VBD\nadvmod>absolutely/RB\nprep_with>[Elicia/NN poss>his/PRP$ amod>little/JJ compound>daughter/NN]]]");
     String s =
         "(ROOT\n(S\n(NP (DT The) (NN chimney) (NNS sweeps))\n(VP (VBP do) (RB not)\n(VP (VB like)\n(S\n(VP (VBG working)\n(PP (IN on)\n(NP (DT an) (JJ empty) (NN stomach)))))))\n(. .)))";
     Tree tree = Tree.valueOf(s);
@@ -172,7 +172,7 @@ public class SemgrexPatternTest extends TestCase {
   }
 
   public void testSiblingPatterns() {
-    SemanticGraph sg = SemanticGraph.valueOf("[loved/VBD-2\nnsubj>Hughes/NNP-1\ndobj>[wife/NN-4 nmod:poss>his/PRP$-3 appos>Gracia/NNP-5]\nconj:and>[obsessed/JJ-9\ncop>was/VBD-7\nadvmod>absolutely/RB-8\nnmod:with>[Elicia/NN-14 nmod:poss>his/PRP$-11 amod>little/JJ-12 compound>daughter/NN-13]]]");
+    SemanticGraph sg = SemanticGraph.valueOf("[loved/VBD-2\nnsubj>Hughes/NNP-1\nobj>[wife/NN-4 nmod:poss>his/PRP$-3 appos>Gracia/NNP-5]\nconj:and>[obsessed/JJ-9\ncop>was/VBD-7\nadvmod>absolutely/RB-8\nnmod:with>[Elicia/NN-14 nmod:poss>his/PRP$-11 amod>little/JJ-12 compound>daughter/NN-13]]]");
 
     /* Test "." */
 

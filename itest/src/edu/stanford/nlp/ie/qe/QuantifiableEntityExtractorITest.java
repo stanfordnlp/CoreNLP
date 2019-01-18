@@ -54,7 +54,7 @@ public class QuantifiableEntityExtractorITest extends TestCase {
     }
   }
 
-  private static void runAndCheck(String prefix, String[] sentences, ExpectedQuantity[][] expected) {
+  private static void runAndCheck(String prefix, String[] sentences, ExpectedQuantity[][] expected) throws Exception {
     for (int si = 0; si < sentences.length; si++) {
       String sentence = sentences[si];
       Annotation annotation = createDocument(sentence);
@@ -67,7 +67,7 @@ public class QuantifiableEntityExtractorITest extends TestCase {
           Object value = matchedExpression.getValue();
           System.out.println(prefix + ": Got expression " + text + " with value " + value);
         }
-        fail(prefix + ": No expected provided");
+        assertTrue(prefix + ": No expected provided", false);
       } else {
         int minMatchable = Math.min(expected[si].length, matchedExpressions.size());
         for (int i = 0; i < minMatchable; i++) {
@@ -97,7 +97,7 @@ public class QuantifiableEntityExtractorITest extends TestCase {
     runAndCheck("testMoney", sentences, expected);
   }
 
-  public static void _testLength() {
+  public static void _testLength() throws Exception {
     String[] sentences = {
         "We are 2 kilometer away.",
         "We are 2 kilometers away.",
@@ -121,7 +121,7 @@ public class QuantifiableEntityExtractorITest extends TestCase {
 
   // We do weight instead of mass since in typical natural language
   //  kilograms are used to refer to weight vs mass (in scientific usage)
-  public static void _testWeight() {
+  public static void _testWeight() throws Exception {
     String[] sentences = {
         "The ball is 2 kilograms in weight.",
         "There are five grams.",

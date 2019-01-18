@@ -33,7 +33,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 
 /**
@@ -331,7 +330,7 @@ public class ExtractorFramesRare {
       //     extrs.add(new ExtractorCWordSuff(i));
       //     extrs.add(new ExtractorCWordPref(i));
       //   }
-      } else if (arg.equalsIgnoreCase("motleyUnknown")) {  // This is naacl2003unknown minus prefix and suffix features, and a few more.
+      } else if (arg.equalsIgnoreCase("motleyUnknown")) {  // This is naacl2003unknown minus prefix and suffix features.
         extrs.addAll(Arrays.asList(eFrames_motley_naacl2003));
       } else if (arg.startsWith("suffix(")) {
         int max = Extractor.getParenthesizedNum(arg, 1);
@@ -373,18 +372,10 @@ public class ExtractorFramesRare {
         extrs.add(new ExtractorDistsimConjunction(path, lWindow, rWindow));
       } else if (arg.equalsIgnoreCase("lctagfeatures")) {
         extrs.addAll(Arrays.asList(lcTagFeatures(ttags)));
-      } else if (arg.startsWith("rareExtractor(")) {
-        String className = Extractor.getParenthesizedArg(arg, 1);
-        try {
-          Extractor e = (Extractor) Class.forName(className).getDeclaredConstructor().newInstance();
-          extrs.add(e);
-        } catch (Exception e) {
-          throw new RuntimeException("Couldn't create POS tagger extractor class " + className, e);
-        }
       }
     }
 
-    return extrs.toArray(Extractor.EMPTY_EXTRACTOR_ARRAY);
+    return extrs.toArray(new Extractor[extrs.size()]);
   }
 
 
@@ -556,7 +547,7 @@ class RareExtractor extends Extractor {
   }
 
   static boolean startsUpperCase(String s) {
-    if (s == null || s.isEmpty()) {
+    if (s == null || s.length() == 0) {
       return false;
     }
     char ch = s.charAt(0);
@@ -594,36 +585,12 @@ class RareExtractor extends Extractor {
     return false;
   }
 
-  private static final Pattern numericPattern = Pattern.compile("[0-9,./-]+");
-
-  protected static boolean allNumeric(String s) {
-    return s != null && numericPattern.matcher(s).matches();
-  }
-
-  private static final Pattern symbolsPattern = Pattern.compile("[^A-Za-z0-9]+");
-
-  protected static boolean allSymbols(String s) {
-    return s != null && symbolsPattern.matcher(s).matches();
-  }
-
   protected static boolean containsLetter(String s) {
     if (s == null) {
       return false;
     }
     for (int i = 0, len = s.length(); i < len; i++) {
       if (Character.isLetter(s.charAt(i))) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  protected static boolean containsAlphanumeric(String s) {
-    if (s == null) {
-      return false;
-    }
-    for (int i = 0, len = s.length(); i < len; i++) {
-      if (Character.isLetter(s.charAt(i)) || Character.isDigit(s.charAt(i))) {
         return true;
       }
     }
@@ -754,6 +721,8 @@ class CaselessCompanyNameDetector extends RareExtractor {
 
   @Override
   String extract(History h, PairsHolder pH) {
+    String s = pH.getWord(h, 0);
+
     for (int i = 0; i <= CompanyNameDetector.COMPANY_NAME_WINDOW; i++) {
       String s1 = pH.getWord(h, i);
       if (companyNameEnd(s1)) {
@@ -944,7 +913,7 @@ class ExtractorCapDistLC extends RareExtractor {
 class ExtractorCapLCSeen extends RareExtractor {
 
   final String tag;
-  private int cutoff = 1;
+  int cutoff = 1;
   private final Extractor cCapDist = new ExtractorCapDistLC();
 
   private transient Dictionary dict;
@@ -986,10 +955,9 @@ class ExtractorCapLCSeen extends RareExtractor {
 
 }
 
-// todo [cdm 2018]: It should be possible to turn these next three extractors into localContext extractors, since only use of tags is to detect start of sentence!
 
 /**
- * "1" if not first word of sentence and _some_ letter is uppercase; else "0"
+ * "1" if not first word of sentence and _some_ letter is uppercase
  */
 class ExtractorMidSentenceCap extends RareExtractor {
 
@@ -999,9 +967,9 @@ class ExtractorMidSentenceCap extends RareExtractor {
   @Override
   String extract(History h, PairsHolder pH) {
     String prevTag = pH.getTag(h, -1);
-    // System.err.printf("ExtractorMidSentenceCap: h.start=%d, h.current=%d, prevTag=%s.%n", h.start, h.current, prevTag);
-    if (prevTag == null || ! prevTag.equals(naTag)) {
-      return zeroSt;
+    if(prevTag == null) { return "0"; }
+    if (prevTag.equals(naTag)) {
+      return "0";
     }
     String s = pH.getWord(h, 0);
     if (containsUpperCase(s)) {
@@ -1023,8 +991,6 @@ class ExtractorMidSentenceCap extends RareExtractor {
  */
 class ExtractorStartSentenceCap extends RareExtractor {
 
-  // todo [cdm 2018]: Can we just rewrite this as history.current = history.start and make it local context?
-
   private transient Dictionary dict;
 
   public ExtractorStartSentenceCap() {
@@ -1038,8 +1004,8 @@ class ExtractorStartSentenceCap extends RareExtractor {
   @Override
   String extract(History h, PairsHolder pH) {
     String prevTag = pH.getTag(h, -1);
-    // System.err.printf("ExtractorStartSentenceCap: h.start=%d, h.current=%d, prevTag=%s.%n", h.start, h.current, prevTag);
-    if (prevTag == null || ! prevTag.equals(naTag)) {
+    if(prevTag == null) { return zeroSt; }
+    if (!prevTag.equals(naTag)) {
       return zeroSt;
     }
     String s = pH.getWord(h, 0);
@@ -1080,8 +1046,8 @@ class ExtractorMidSentenceCapC extends RareExtractor {
   @Override
   String extract(History h, PairsHolder pH) {
     String prevTag = pH.getTag(h, -1);
-    // System.err.printf("ExtractorMidSentenceCapC: h.start=%d, h.current=%d, prevTag=%s.%n", h.start, h.current, prevTag);
-    if (prevTag == null || prevTag.equals(naTag)) {
+    if (prevTag == null) { return zeroSt; }
+    if (prevTag.equals(naTag)) {
       return zeroSt;
     }
     String s = pH.getWord(h, 0);
@@ -1257,17 +1223,16 @@ class ExtractorWordSuff extends RareExtractor {
 class ExtractorWordPref extends RareExtractor {
 
   // todo [cdm 2013]: position field in this class could be deleted and use super's position. But will break
-  private final int num;
-  private final int position;
+  private final int num, position;
 
   ExtractorWordPref(int num, int position) {
-    super(position);
     this.num = num;
     this.position = position;
   }
 
   @Override
   String extract(History h, PairsHolder pH) {
+    // String word = TestSentence.toNice(pH.getWord(h, 0));
     String word = pH.getWord(h, position);
     if (word.length() < num) {
       return "######";
@@ -1280,12 +1245,11 @@ class ExtractorWordPref extends RareExtractor {
 
   @Override
   public String toString() {
-    return StringUtils.getShortClassName(this) + "(len" + num + ",w" + position + ')';
+    return StringUtils.getShortClassName(this) + "(len" + num + ",w" + position + ")";
   }
 
   @Override public boolean isLocal() { return (position == 0); }
   @Override public boolean isDynamic() { return false; }
-
 } // end class ExtractorWordPref
 
 
@@ -1294,7 +1258,7 @@ class ExtractorsConjunction extends RareExtractor {
   private final Extractor extractor1;
   private final Extractor extractor2;
 
-  private volatile boolean isLocal, isDynamic;
+  volatile boolean isLocal, isDynamic;
 
   ExtractorsConjunction(Extractor e1, Extractor e2) {
     extractor1 = e1;
@@ -1332,76 +1296,6 @@ class ExtractorsConjunction extends RareExtractor {
     return StringUtils.getShortClassName(this) + '(' + extractor1 + ',' + extractor2 + ')';
   }
 
-} // end class ExtractorsConjunction
-
-
-/** This class is loaded by reflection in some POS taggers. */
-@SuppressWarnings("unused")
-class ExtractorNonAlphanumeric extends RareExtractor {
-
-  public ExtractorNonAlphanumeric() { }
-
-  @Override
-  String extract(History h, PairsHolder pH) {
-    String s = pH.getWord(h, 0);
-    if (containsAlphanumeric(s)) {
-      return "0";
-    }
-    return "1";
-  }
-
-  @Override public boolean isLocal() { return true; }
-  @Override public boolean isDynamic() { return false; }
-
-  private static final long serialVersionUID = 1L;
-
-}
-
-
-/** This class is loaded by reflection in some POS taggers. */
-@SuppressWarnings("unused")
-class ExtractorNumeric extends RareExtractor {
-
-  public ExtractorNumeric() { }
-
-  @Override
-  String extract(History h, PairsHolder pH) {
-    String s = pH.getWord(h, 0);
-    if (containsNumber(s) && allNumeric(s)) {
-      return "1";
-    } else {
-      return "0";
-    }
-  }
-
-  @Override public boolean isLocal() { return true; }
-  @Override public boolean isDynamic() { return false; }
-
-  private static final long serialVersionUID = 1L;
-
-}
-
-
-/** This class is loaded by reflection in some POS taggers. */
-@SuppressWarnings("unused")
-class ExtractorSymbols extends RareExtractor {
-
-  public ExtractorSymbols() { }
-
-  @Override
-  String extract(History h, PairsHolder pH) {
-    String s = pH.getWord(h, 0);
-    if (allSymbols(s)) {
-      return "1";
-    } else {
-      return "0";
-    }
-  }
-
-  @Override public boolean isLocal() { return true; }
-  @Override public boolean isDynamic() { return false; }
-
-  private static final long serialVersionUID = 1L;
 
 }
 
@@ -1442,8 +1336,6 @@ class PluralAcronymDetector extends RareExtractor {
 }
 
 
-/* -- Extractor classes for Chinese -- */
-
 class CtbPreDetector extends RareExtractor {
 
   private String t1;
@@ -1457,7 +1349,7 @@ class CtbPreDetector extends RareExtractor {
   String extract(History h, PairsHolder pH) {
     String s = TestSentence.toNice(pH.getWord(h, position));
 
-    if ( ! s.isEmpty() && CtbDict.getTagPre(t1, s.substring(0, 1)).equals("1"))
+    if (!s.equals("") && CtbDict.getTagPre(t1, s.substring(0, 1)).equals("1"))
       return "1:"+t1;
     return "0:"+t1;
   }
@@ -1488,7 +1380,7 @@ class CtbSufDetector extends RareExtractor {
   String extract(History h, PairsHolder pH) {
     String s=TestSentence.toNice(pH.getWord(h, position));
 
-    if(!s.isEmpty() && CtbDict.getTagSuf(t1, s.substring(s.length()-1)).equals("1"))
+    if(!s.equals("") && CtbDict.getTagSuf(t1, s.substring(s.length()-1, s.length())).equals("1"))
       return "1:"+t1;
     return "0:"+t1;
   }
@@ -1598,9 +1490,6 @@ class CTBunkDictDetector extends RareExtractor {
 
 
 abstract class CWordBooleanExtractor extends RareExtractor {
-
-  private static final long serialVersionUID = 4972499976788741554L;
-
   @Override
   String extract(History h, PairsHolder pH) {
     String cword = pH.getWord(h, 0);
@@ -1611,7 +1500,6 @@ abstract class CWordBooleanExtractor extends RareExtractor {
 
   @Override public boolean isLocal() { return true; }
   @Override public boolean isDynamic() { return false; }
-
 }
 
 

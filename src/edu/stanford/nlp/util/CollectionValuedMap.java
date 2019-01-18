@@ -320,7 +320,9 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
           }
         }
       }
-    } catch (ClassCastException | NullPointerException unused) {
+    } catch (ClassCastException unused) {
+      return false;
+    } catch (NullPointerException unused) {
       return false;
     }
 

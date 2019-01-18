@@ -1,11 +1,13 @@
 package edu.stanford.nlp.pipeline;
-
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.util.logging.Redwood;
+
+import edu.stanford.nlp.ie.NERClassifierCombiner;
+import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
 import edu.stanford.nlp.naturalli.OpenIE;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
@@ -95,8 +97,8 @@ public class AnnotatorImplementations  {
   /**
    * Annotate for gender of tokens
    */
-  public Annotator gender(Properties properties, String name) {
-    return new GenderAnnotator(name, properties);
+  public Annotator gender(Properties properties, boolean verbose) {
+    return new GenderAnnotator(false, properties.getProperty("gender.firstnames", DefaultPaths.DEFAULT_GENDER_FIRST_NAMES));
   }
 
   /**
@@ -165,19 +167,19 @@ public class AnnotatorImplementations  {
   /**
    * Annotate for mention (statistical or hybrid)
    */
-  public Annotator corefMention(Properties properties) {
+  public Annotator mention(Properties properties) {
     // TO DO: split up coref and mention properties
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
             true);
     Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
-            Annotator.STANFORD_COREF_MENTION + ".",
+            Annotator.STANFORD_MENTION + ".",
             true);
 
     Properties allPropsForCoref = new Properties();
     allPropsForCoref.putAll(corefProperties);
     allPropsForCoref.putAll(mentionProperties);
-    return new CorefMentionAnnotator(allPropsForCoref);
+    return new MentionAnnotator(allPropsForCoref);
   }
 
   /**
@@ -188,7 +190,7 @@ public class AnnotatorImplementations  {
             Annotator.STANFORD_COREF + ".",
             true);
     Properties mentionProperties = PropertiesUtils.extractPrefixedProperties(properties,
-            Annotator.STANFORD_COREF_MENTION + ".",
+            Annotator.STANFORD_MENTION + ".",
             true);
     Properties allPropsForCoref = new Properties();
     allPropsForCoref.putAll(corefProperties);

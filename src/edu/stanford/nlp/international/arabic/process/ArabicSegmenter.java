@@ -1,5 +1,6 @@
 package edu.stanford.nlp.international.arabic.process;
 
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,7 +43,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * Arabic word segmentation model based on conditional random fields (CRF).
  * This is a re-implementation (with extensions) of the model described in
  * (Green and DeNero, 2012).
- *
+ * <p>
  * This package includes a JFlex-based orthographic normalization package
  * that runs on the input prior to processing by the CRF-based segmentation
  * model. The normalization options are configurable, but must be consistent for
@@ -53,7 +54,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<String,String> /* Serializable */  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(ArabicSegmenter.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicSegmenter.class);
 
   private static final long serialVersionUID = -4791848633597417788L;
 
@@ -113,7 +114,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   /**
    * Make an Arabic Segmenter.
    *
-   *  @param props Options for how to tokenize. See the main method of {@link ArabicTokenizer} for details
+   *  @param props Options for how to tokenize. See the main method of {@see ArabicTokenizer} for details
    */
   public ArabicSegmenter(Properties props) {
     isTokenized = props.containsKey(optTokenized);
@@ -598,7 +599,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
         }
 
       } catch (IOException e) {
-        log.warn(e);
+        e.printStackTrace();
       }
 
     } else {
@@ -615,7 +616,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
    * load from, and if not tries to run training using the given
    * options.
    *
-   * @param options Properties to specify segmenter behavior
+   * @param options
    * @return the trained or loaded model
    */
   public static ArabicSegmenter getSegmenter(Properties options) {

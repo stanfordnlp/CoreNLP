@@ -11,8 +11,8 @@ import java.util.*;
 class DependencyTree {
 
   int n;
-  final List<Integer> head;
-  final List<String> label;
+  List<Integer> head;
+  List<String> label;
   private int counter;
 
   public DependencyTree() {

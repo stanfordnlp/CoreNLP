@@ -3,7 +3,6 @@ package edu.stanford.nlp.ling.tokensregex;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
 import java.util.regex.MatchResult;
 
 import edu.stanford.nlp.util.Comparators;
@@ -324,7 +323,7 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
 
   Comparator<? super MatchResult> DEFAULT_COMPARATOR = PRIORITY_SCORE_LENGTH_ORDER_OFFSET_COMPARATOR;
 
-  ToDoubleFunction<MatchResult> SCORER = in -> {
+  Function<MatchResult, Double> SCORER = in -> {
     if (in instanceof SequenceMatchResult) { return  ((SequenceMatchResult) in).score(); }
     else return 0.0;
   };

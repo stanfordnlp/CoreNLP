@@ -25,6 +25,7 @@
 //    http://nlp.stanford.edu/software/stanford-dependencies.shtml
 
 package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasTag;
@@ -33,10 +34,9 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.ArrayUtils;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.util.function.Predicate;
+import edu.stanford.nlp.util.Generics;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -50,35 +50,33 @@ import java.util.Set;
  * This version chooses the semantic head verb rather than the verb form
  * for cases with verbs.  And it makes similar themed changes to other
  * categories: e.g., in question phrases, like "Which Brazilian game", the
- * head is made "game" not "Which" as in common PTB head rules.
- * <p>
+ * head is made "game" not "Which" as in common PTB head rules.<p/>
+ * <p/>
  * By default the SemanticHeadFinder uses a treatment of copula where the
  * complement of the copula is taken as the head.  That is, a sentence like
- * "Bill is big" will be analyzed as:
- * <p>
- * {@code nsubj}(big, Bill) <br>
- * {@code cop}(big, is)
- * <p>
+ * "Bill is big" will be analyzed as <p/>
+ * <p/>
+ * <code>nsubj</code>(big, Bill) <br/>
+ * <code>cop</code>(big, is) <p/>
+ * <p/>
  * This analysis is used for questions and declaratives for adjective
  * complements and declarative nominal complements.  However Wh-sentences
  * with nominal complements do not receive this treatment.
  * "Who is the president?" is analyzed with "the president" as nsubj and "who"
- * as "attr" of the copula:
- * <p>
- * {@code nsubj}(is, president)<br>
- * {@code attr}(is, Who)
- * <p>
+ * as "attr" of the copula:<p/><p>
+ * <code>nsubj</code>(is, president)<br/>
+ * <code>attr</code>(is, Who) <p/>
+ * <p/>
  * (Such nominal copula sentences are complex: arguably, depending on the
  * circumstances, several analyses are possible, with either the overt NP able
  * to be any of the subject, the predicate, or one of two referential entities
  * connected by an equational copula.  These uses aren't differentiated.)
- * <p>
- * Existential sentences are treated as follows:
- * <p>
- * "There is a man" <br>
- * {@code expl}(is, There) <br>
- * {@code det}(man-4, a-3) <br>
- * {@code nsubj}(is-2, man-4)<br>
+ * <p/>
+ * Existential sentences are treated as follows:  <br/>
+ * "There is a man" <br/>
+ * <code>expl</code>(is, There) <br/>
+ * <code>det</code>(man-4, a-3) <br/>
+ * <code>nsubj</code>(is-2, man-4)<br/>
  *
  * @author John Rappaport
  * @author Marie-Catherine de Marneffe
@@ -87,7 +85,7 @@ import java.util.Set;
 public class SemanticHeadFinder extends ModCollinsHeadFinder  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(SemanticHeadFinder.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(SemanticHeadFinder.class);
 
   private static final boolean DEBUG = System.getProperty("SemanticHeadFinder", null) != null;
 
@@ -278,7 +276,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
 
   // Note: The first two SBARQ patterns only work when the SQ
   // structure has already been removed in CoordinationTransformer.
-  private static final TregexPattern[] headOfCopulaTregex = {
+  static final TregexPattern[] headOfCopulaTregex = {
     // Matches phrases such as "what is wrong"
     TregexPattern.compile("SBARQ < (WHNP $++ (/^VB/ < " + EnglishPatterns.copularWordRegex + " $++ ADJP=head))"),
 
@@ -292,20 +290,20 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
     TregexPattern.compile("SINV < (NP=head $++ (NP $++ (VP < (/^(?:VB|AUX)/ < " + EnglishPatterns.copularWordRegex + "))))"),
   };
 
-  private static final TregexPattern[] headOfConjpTregex = {
+  static final TregexPattern[] headOfConjpTregex = {
     TregexPattern.compile("CONJP < (CC <: /^(?i:but|and)$/ $+ (RB=head <: /^(?i:not)$/))"),
     TregexPattern.compile("CONJP < (CC <: /^(?i:but)$/ [ ($+ (RB=head <: /^(?i:also|rather)$/)) | ($+ (ADVP=head <: (RB <: /^(?i:also|rather)$/))) ])"),
     TregexPattern.compile("CONJP < (CC <: /^(?i:and)$/ [ ($+ (RB=head <: /^(?i:yet)$/)) | ($+ (ADVP=head <: (RB <: /^(?i:yet)$/))) ])"),
   };
 
-  private static final TregexPattern noVerbOverTempTregex = TregexPattern.compile("/^VP/ < NP-TMP !< /^V/ !< NNP|NN|NNPS|NNS|NP|JJ|ADJP|S");
+  static final TregexPattern noVerbOverTempTregex = TregexPattern.compile("/^VP/ < NP-TMP !< /^V/ !< NNP|NN|NNPS|NNS|NP|JJ|ADJP|S");
 
   /**
    * We use this to avoid making a -TMP or -ADV the head of a copular phrase.
    * For example, in the sentence "It is hands down the best dessert ...",
    * we want to avoid using "hands down" as the head.
    */
-  private static final Predicate<Tree> REMOVE_TMP_AND_ADV = tree -> {
+  static final Predicate<Tree> REMOVE_TMP_AND_ADV = tree -> {
     if (tree == null)
       return false;
     Label label = tree.label();

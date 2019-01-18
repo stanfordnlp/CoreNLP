@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
  *
  * @author Gabor Angeli
  */
+@SuppressWarnings("Convert2Diamond")
 public class AcronymMatcher {
-
   private static final Pattern discardPattern = Pattern.compile("[-._]");
 
   /** A set of words that should be considered stopwords for the acronym matcher */
@@ -151,6 +151,7 @@ public class AcronymMatcher {
     add("yourself");
     add("yourselves");
 
+
     add("de");
     add("del");
     add("di");
@@ -175,11 +176,10 @@ public class AcronymMatcher {
     add("-");
   }});
 
-  private AcronymMatcher() {} // static methods
 
-
-  private static List<String> getTokenStrs(List<CoreLabel> tokens) {
-    List<String> mainTokenStrs = new ArrayList<>(tokens.size());
+  private static List<String> getTokenStrs(List<CoreLabel> tokens)
+  {
+    List<String> mainTokenStrs = new ArrayList<String>(tokens.size());
     for (CoreLabel token:tokens) {
       String text = token.get(CoreAnnotations.TextAnnotation.class);
       mainTokenStrs.add(text);
@@ -187,8 +187,9 @@ public class AcronymMatcher {
     return mainTokenStrs;
   }
 
-  private static List<String> getMainTokenStrs(List<CoreLabel> tokens) {
-    List<String> mainTokenStrs = new ArrayList<>(tokens.size());
+  private static List<String> getMainTokenStrs(List<CoreLabel> tokens)
+  {
+    List<String> mainTokenStrs = new ArrayList<String>(tokens.size());
     for (CoreLabel token:tokens) {
       String text = token.get(CoreAnnotations.TextAnnotation.class);
       if (!text.isEmpty() && ( text.length() >= 4 || Character.isUpperCase(text.charAt(0))) ) {
@@ -198,8 +199,9 @@ public class AcronymMatcher {
     return mainTokenStrs;
   }
 
-  private static List<String> getMainTokenStrs(String[] tokens) {
-    List<String> mainTokenStrs = new ArrayList<>(tokens.length);
+  private static List<String> getMainTokenStrs(String[] tokens)
+  {
+    List<String> mainTokenStrs = new ArrayList<String>(tokens.length);
     for (String text:tokens) {
       if ( !text.isEmpty() && ( text.length() >= 4 || Character.isUpperCase(text.charAt(0)) ) ) {
         mainTokenStrs.add(text);
@@ -208,8 +210,9 @@ public class AcronymMatcher {
     return mainTokenStrs;
   }
 
-  public static List<String> getMainStrs(List<String> tokens) {
-    List<String> mainTokenStrs = new ArrayList<>(tokens.size());
+  public static List<String> getMainStrs(List<String> tokens)
+  {
+    List<String> mainTokenStrs = new ArrayList<String>(tokens.size());
     mainTokenStrs.addAll(tokens.stream().filter(text -> !text.isEmpty() && (text.length() >= 4 || Character.isUpperCase(text.charAt(0)))).collect(Collectors.toList()));
     return mainTokenStrs;
   }
@@ -219,8 +222,8 @@ public class AcronymMatcher {
   }
 
   // Public static utility methods
-
-  public static boolean isAcronymImpl(String str, List<String> tokens) {
+  public static boolean isAcronymImpl(String str, List<String> tokens)
+  {
     // Remove some words from the candidate acronym
     str = discardPattern.matcher(str).replaceAll("");
     // Remove stopwords if we need to
@@ -242,8 +245,9 @@ public class AcronymMatcher {
     }
   }
 
-  public static boolean isAcronym(String str, List<?> tokens) {
-    List<String> strs = new ArrayList<>(tokens.size());
+  public static boolean isAcronym(String str, List<?> tokens)
+  {
+    List<String> strs = new ArrayList<String>(tokens.size());
     for (Object tok : tokens) {
       if (tok instanceof String) {
         strs.add(tok.toString());
@@ -257,11 +261,11 @@ public class AcronymMatcher {
   }
 
   /**
-   * Returns true if either chunk1 or chunk2 is acronym of the other.
-   *
+   * Returns true if either chunk1 or chunk2 is acronym of the other
    * @return true if either chunk1 or chunk2 is acronym of the other
    */
-  public static boolean isAcronym(CoreMap chunk1, CoreMap chunk2) {
+  public static boolean isAcronym(CoreMap chunk1, CoreMap chunk2)
+  {
     String text1 = chunk1.get(CoreAnnotations.TextAnnotation.class);
     String text2 = chunk2.get(CoreAnnotations.TextAnnotation.class);
     if (text1.length() <= 1 || text2.length() <= 1) { return false; }
@@ -277,7 +281,8 @@ public class AcronymMatcher {
   }
 
   /** @see AcronymMatcher#isAcronym(edu.stanford.nlp.util.CoreMap, edu.stanford.nlp.util.CoreMap) */
-  public static boolean isAcronym(String[] chunk1, String[] chunk2) {
+  public static boolean isAcronym(String[] chunk1, String[] chunk2)
+  {
     String text1 = StringUtils.join(chunk1);
     String text2 = StringUtils.join(chunk2);
     if (text1.length() <= 1 || text2.length() <= 1) { return false; }
@@ -312,11 +317,11 @@ public class AcronymMatcher {
         if(prev_index == -1) {
           return false;
         }
-      } else {
+      }
+      else {
         return false;
       }
     }
     return true;
   }
-
 }

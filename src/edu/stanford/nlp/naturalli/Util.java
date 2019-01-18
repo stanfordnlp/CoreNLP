@@ -306,7 +306,7 @@ public class Util {
         if ("that".equalsIgnoreCase(edge.getDependent().word())) {
           thatEdge = edge;
         }
-        if ("dobj".equals(edge.getRelation().toString())) {
+        if ("obj".equals(edge.getRelation().toString())) {
           dobjCount += 1;
         }
       }

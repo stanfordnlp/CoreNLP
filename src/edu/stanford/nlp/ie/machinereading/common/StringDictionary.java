@@ -161,26 +161,26 @@ public class StringDictionary  {
   public void load(String path, String prefix) throws java.io.IOException {
 
     String fileName = path + java.io.File.separator + prefix + "." + mName;
-    try (BufferedReader is = IOUtils.readerFromString(fileName)) {
+    BufferedReader is = IOUtils.readerFromString(fileName);
 
-      for (String line; (line = is.readLine()) != null; ) {
-        ArrayList<String> tokens = SimpleTokenize.tokenize(line);
-        if (tokens.size() != 3) {
-          throw new RuntimeException("Invalid dictionary line: " + line);
-        }
-        int index = Integer.parseInt(tokens.get(1));
-        int count = Integer.parseInt(tokens.get(2));
-        if (index < 0 || count <= 0) {
-          throw new RuntimeException("Invalid dictionary line: " + line);
-        }
-
-        IndexAndCount ic = new IndexAndCount(index, count);
-        mDict.put(tokens.get(0), ic);
-        mInverse.put(Integer.valueOf(index), tokens.get(0));
+    for (String line; (line = is.readLine()) != null; ) {
+      ArrayList<String> tokens = SimpleTokenize.tokenize(line);
+      if (tokens.size() != 3) {
+        throw new RuntimeException("Invalid dictionary line: " + line);
+      }
+      int index = Integer.parseInt(tokens.get(1));
+      int count = Integer.parseInt(tokens.get(2));
+      if (index < 0 || count <= 0) {
+        throw new RuntimeException("Invalid dictionary line: " + line);
       }
 
-      log.info("Loaded " + mDict.size() + " entries for dictionary \"" + mName + "\".");
+      IndexAndCount ic = new IndexAndCount(index, count);
+      mDict.put(tokens.get(0), ic);
+      mInverse.put(Integer.valueOf(index), tokens.get(0));
     }
+
+    is.close();
+    log.info("Loaded " + mDict.size() + " entries for dictionary \"" + mName + "\".");
   }
 
   public java.util.Set<String> keys() {

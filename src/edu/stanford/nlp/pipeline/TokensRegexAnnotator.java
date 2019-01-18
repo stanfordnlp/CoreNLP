@@ -70,8 +70,8 @@ public class TokensRegexAnnotator implements Annotator {
     env.bind("options", options);
     if (PropertiesUtils.getBool(props, prefix+"caseInsensitive")) {
       System.err.println("using case insensitive!");
-      env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-      env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+      env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
+      env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
     }
     if (files.length != 0) {
       extractor = CoreMapExpressionExtractor.createExtractorFromFiles(env, files);

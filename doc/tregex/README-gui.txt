@@ -1,4 +1,4 @@
-Tregex GUI v3.9.2 - 2018-10-16
+Tregex GUI v3.8.0 - 2017-06-09
 ----------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -140,24 +140,21 @@ LICENSE
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see http://www.gnu.org/licenses/ .
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
  For more information, bug reports, fixes, contact:
     Christopher Manning
-    Dept of Computer Science, Gates 2A
-    Stanford CA 94305-9020
+    Dept of Computer Science, Gates 1A
+    Stanford CA 94305-9010
     USA
     parser-support@lists.stanford.edu
-    http://nlp.stanford.edu/software/tregex.html
+    http://www-nlp.stanford.edu/software/tregex.shtml
   
 
 ----------------------------
 CHANGES
 ----------------------------
-
-2018-10-16    3.9.2     Update for compatibility 
-
-2018-02-27    3.9.1     Updated for compatibility 
 
 2017-06-09    3.8.0     Updated for compatibility 
 

@@ -101,6 +101,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     spaces in tokens. Default is true.
  * <li>normalizeAmpersandEntity: Whether to map the XML {@code &amp;} to an
  *      ampersand. Default is true.
+ * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
+ *     to turn common currency characters into $, #, or "cents", reflecting
+ *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
+ *     Default is false. (Note: The default was true through CoreNLP v3.8.0, but we're
+ *     gradually inching our way towards the modern world!)
  * <li>normalizeFractions: Whether to map certain common composed
  *     fraction characters to spelled out letter forms like "1/2".
  *     Default is true.
@@ -130,14 +135,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *                        "gon na".  Default is true.
  * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
  *     of / and * as the old PTB3 WSJ does for some reason (something to do
- *     with Lisp readers??). Default is false. This flag is no longer set
- *     by ptb3Escaping.
- * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
- *     to turn common currency characters into $, #, or "cents", reflecting
- *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
- *     Default is false. (Note: The default was true through CoreNLP v3.8.0, but we're
- *     gradually inching our way towards the modern world!) This flag is no longer set
- *     by ptb3Escaping.
+ *     with Lisp readers??). Default is true.
  * <li>untokenizable: What to do with untokenizable characters (ones not
  *     known to the tokenizer).  Six options combining whether to log a
  *     warning for none, the first, or all, and whether to delete them or
@@ -379,19 +377,16 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       writer.close();
     } else {
       for (int j = 0; j < sz; j++) {
-        try (Reader r = IOUtils.readerFromString(inputFileList.get(j), charset)) {
-          BufferedWriter writer;
-          if (outputFileList == null) {
-            writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
-          } else {
-            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
-          }
-          try {
-            numTokens += ptb2Text(r, writer);
-          } finally {
-            writer.close();
-          }
+        Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
+        BufferedWriter writer;
+        if (outputFileList == null) {
+          writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
+        } else {
+          writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
         }
+        numTokens += ptb2Text(r, writer);
+        writer.close();
+        r.close();
       }
     }
     final long duration = System.nanoTime() - start;
@@ -432,16 +427,14 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   }
 
 
-  private static void tok(List<String> inputFileList, List<String> outputFileList, String charset,
-                          Pattern parseInsidePattern, Pattern filterPattern, String options,
-                          boolean preserveLines, boolean oneLinePerElement, boolean dump, boolean lowerCase) throws IOException {
+  private static void tok(List<String> inputFileList, List<String> outputFileList, String charset, Pattern parseInsidePattern, String options, boolean preserveLines, boolean dump, boolean lowerCase) throws IOException {
     final long start = System.nanoTime();
     long numTokens = 0;
     int numFiles = inputFileList.size();
     if (numFiles == 0) {
       Reader stdin = IOUtils.readerFromStdin(charset);
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
-      numTokens += tokReader(stdin, writer, parseInsidePattern, filterPattern, options, preserveLines, oneLinePerElement, dump, lowerCase);
+      numTokens += tokReader(stdin, writer, parseInsidePattern, options, preserveLines, dump, lowerCase);
       IOUtils.closeIgnoringExceptions(writer);
 
     } else {
@@ -450,12 +443,12 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         out = new BufferedWriter(new OutputStreamWriter(System.out, charset));
       }
       for (int j = 0; j < numFiles; j++) {
-        try (Reader r = IOUtils.readerFromString(inputFileList.get(j), charset)) {
-          if (outputFileList != null) {
-            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
-          }
-          numTokens += tokReader(r, out, parseInsidePattern, filterPattern, options, preserveLines, oneLinePerElement, dump, lowerCase);
+        Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
+        if (outputFileList != null) {
+          out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
         }
+        numTokens += tokReader(r, out, parseInsidePattern, options, preserveLines, dump, lowerCase);
+        r.close();
         if (outputFileList != null) {
           IOUtils.closeIgnoringExceptions(out);
         }
@@ -470,8 +463,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     System.err.printf("PTBTokenizer tokenized %d tokens at %.2f tokens per second.%n", numTokens, wordsPerSec);
   }
 
-  private static int tokReader(Reader r, BufferedWriter writer, Pattern parseInsidePattern, Pattern filterPattern, String options,
-                               boolean preserveLines, boolean oneLinePerElement, boolean dump, boolean lowerCase) throws IOException {
+  private static int tokReader(Reader r, BufferedWriter writer, Pattern parseInsidePattern, String options, boolean preserveLines, boolean dump, boolean lowerCase) throws IOException {
     int numTokens = 0;
     boolean beginLine = true;
     boolean printing = (parseInsidePattern == null); // start off printing, unless you're looking for a start entity
@@ -494,26 +486,17 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       if (m != null && m.reset(origStr).matches()) {
         printing = m.group(1).isEmpty(); // turn on printing if no end element slash, turn it off it there is
         // System.err.printf("parseInsidePattern matched against: |%s|, printing is %b.%n", origStr, printing);
-        if ( ! printing) {
-          // true only if matched a stop
-          beginLine = true;
-          if (oneLinePerElement) {
-            writer.newLine();
-          }
-        }
       } else if (printing) {
         if (dump) {
           // after having checked for tags, change str to be exhaustive
           str = obj.toShorterString();
         }
-        if (filterPattern != null && filterPattern.matcher(origStr).matches()) {
-          // skip
-        } else if (preserveLines) {
+        if (preserveLines) {
           if (NEWLINE_TOKEN.equals(origStr)) {
             beginLine = true;
             writer.newLine();
           } else {
-            if (!beginLine) {
+            if ( ! beginLine) {
               writer.write(' ');
             } else {
               beginLine = false;
@@ -521,13 +504,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
             // writer.write(str.replace("\n", ""));
             writer.write(str);
           }
-        } else if (oneLinePerElement) {
-          if ( ! beginLine) {
-            writer.write(' ');
-          } else {
-            beginLine = false;
-          }
-          writer.write(str);
         } else {
           writer.write(str);
           writer.newLine();
@@ -585,7 +561,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
     private static final long serialVersionUID = -8859638719818931606L;
 
-    @SuppressWarnings("serial")
     protected final LexedTokenFactory<T> factory;
     protected String options;
 
@@ -704,9 +679,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     public void setOptions(String options) {
       this.options = options;
     }
-
   } // end static class PTBTokenizerFactory
-
 
   /**
    * Command-line option specification.
@@ -721,9 +694,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     optionArgDefs.put("untok", 0);
     optionArgDefs.put("encoding", 1);
     optionArgDefs.put("parseInside", 1);
-    optionArgDefs.put("filter", 1);
     optionArgDefs.put("preserveLines", 0);
-    optionArgDefs.put("oneLinePerElement", 0);
     return optionArgDefs;
   }
 
@@ -733,22 +704,18 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * standalone to turn a corpus into a one-token-per-line file of tokens.
    * This main method assumes that the input file is in utf-8 encoding,
    * unless an encoding is specified.
-   * <p>
+   * <p/>
    * Usage: {@code java edu.stanford.nlp.process.PTBTokenizer [options] filename+ }
-   * <p>
+   * <p/>
    * Options:
    * <ul>
    * <li> -options options Set various tokenization options
-   *       (see the documentation in the class javadoc).
+   *       (see the documentation in the class javadoc)
    * <li> -preserveLines Produce space-separated tokens, except
-   *       when the original had a line break, not one-token-per-line.
-   * <li> -oneLinePerElement Print the tokens of an element space-separated on one line.
-   *       An "element" is either a file or one of the elements matched by the
-   *       parseInside regex. </li>
-   * <li> -filter regex Delete any token that matches() (in its entirety) the given regex. </li>
+   *       when the original had a line break, not one-token-per-line
    * <li> -encoding encoding Specifies a character encoding. If you do not
    *      specify one, the default is utf-8 (not the platform default).
-   * <li> -lowerCase Lowercase all tokens (on tokenization).
+   * <li> -lowerCase Lowercase all tokens (on tokenization)
    * <li> -parseInside regex Names an XML-style element or a regular expression
    *      over such elements.  The tokenizer will only tokenize inside elements
    *      that match this regex.  (This is done by regex matching, not an XML
@@ -767,23 +734,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * <li> -untok Heuristically untokenize tokenized text.
    * <li> -h, -help Print usage info.
    * </ul>
-   * <p>
-   * A note on {@code -preserveLines}: Basically, if you use this option, your output file should have
-   * the same number of lines as your input file. If not, there is a bug. But the truth of this statement
-   * depends on how you count lines…. Unicode includes "line separator" and "paragraph separator" characters
-   * and Unicode says that you should accept them. See e.g., http://unicode.org/standard/reports/tr13/tr13-5.html
-   * <p>
-   * However, Unix, Linux utilities, etc. don't recognize them and count only the traditional \n|\r|\r\n.
-   * And PTBTokenizer does normalize line separation. Hence, if your input text contains, say U+2028 Line Separator
-   * characters, the Unix wc utility will report more lines after tokenization than before,
-   * even though line breaks have been preserved, according to Unicode. It may be useful to compare results with the
-   * Perl uniwc script from https://raw.githubusercontent.com/briandfoy/Unicode-Tussle/master/script/uniwc
-   * <p>
-   * If it reports the same number of input and output lines, then this difference is your problem,
-   * and in a certain Unicode sense, our tokenizer did indeed preserve the line count.
-   * If not, please send us a bug report. At present there is no way to disable this process of Unicode separator
-   * characters. If you don't want this anomaly, you'll need to either delete these two characters or to map them
-   * to conventional Unix newline characters. Or to some other weirdo character.
    *
    * @param args Command line arguments
    * @throws IOException If any file I/O problem
@@ -794,9 +744,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     showHelp = PropertiesUtils.getBool(options, "h", showHelp);
     if (showHelp) {
       log.info("Usage: java edu.stanford.nlp.process.PTBTokenizer [options]* filename*");
-      log.info("  options: -h|-help|-options tokenizerOptions|-encoding encoding|-dump|");
-      log.info("           -lowerCase|-preserveLines|-oneLinePerElement|-filter regex|");
-      log.info("           -parseInside regex|-fileList|-ioFileList|-untok");
+      log.info("  options: -h|-help|-options tokenizerOptions|-preserveLines|-lowerCase|-dump|");
+      log.info("           -fileList|-ioFileList|-encoding encoding|-parseInside regex|-untok");
       return;
     }
 
@@ -809,30 +758,20 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     if (preserveLines) {
       optionsSB.append(",tokenizeNLs");
     }
-    boolean oneLinePerElement = PropertiesUtils.getBool(options, "oneLinePerElement", false);
     boolean inputOutputFileList = PropertiesUtils.getBool(options, "ioFileList", false);
     boolean fileList = PropertiesUtils.getBool(options, "fileList", false);
     boolean lowerCase = PropertiesUtils.getBool(options, "lowerCase", false);
     boolean dump = PropertiesUtils.getBool(options, "dump", false);
     boolean untok = PropertiesUtils.getBool(options, "untok", false);
     String charset = options.getProperty("encoding", "utf-8");
-    String parseInsideValue = options.getProperty("parseInside", null);
+    String parseInsideKey = options.getProperty("parseInside", null);
     Pattern parseInsidePattern = null;
-    if (parseInsideValue != null) {
+    if (parseInsideKey != null) {
       try {
         // We still allow space, but PTBTokenizer will change space to &nbsp; so need to also match it
-        parseInsidePattern = Pattern.compile("<(/?)(?:" + parseInsideValue + ")(?:(?:\\s|\u00A0)[^>]*?)?>");
+        parseInsidePattern = Pattern.compile("<(/?)(?:" + parseInsideKey + ")(?:(?:\\s|\u00A0)[^>]*?)?>");
       } catch (PatternSyntaxException e) {
         // just go with null parseInsidePattern
-      }
-    }
-    String filterValue = options.getProperty("filter", null);
-    Pattern filterPattern = null;
-    if (filterValue != null) {
-      try {
-        filterPattern = Pattern.compile(filterValue);
-      } catch (PatternSyntaxException e) {
-        // just go with null filterPattern
       }
     }
 
@@ -871,7 +810,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     if (untok) {
       untok(inputFileList, outputFileList, charset);
     } else {
-      tok(inputFileList, outputFileList, charset, parseInsidePattern, filterPattern, optionsSB.toString(), preserveLines, oneLinePerElement, dump, lowerCase);
+      tok(inputFileList, outputFileList, charset, parseInsidePattern, optionsSB.toString(), preserveLines, dump, lowerCase);
     }
   } // end main
 
