@@ -120,6 +120,14 @@ public class TextOutputter extends AnnotationOutputter {
           options.constituencyTreePrinter.printTree(tree, pw);
         }
 
+        // display the binary tree for this sentence
+        Tree binaryTree = sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
+        if (binaryTree != null) {
+          pw.println();
+          pw.println("Binary Constituency parse: ");
+          options.constituencyTreePrinter.printTree(binaryTree, pw);
+        }
+
         // display sentiment tree if they asked for sentiment
         if ( ! StringUtils.isNullOrEmpty(sentiment)) {
           pw.println();
