@@ -86,6 +86,20 @@ public class JSONOutputter extends AnnotationOutputter {
           if (!"SENTENCE_SKIPPED_OR_UNPARSABLE".equals(treeStr)) {
             l2.set("parse", treeStr);
           }
+          // binary tree (if present)
+          if (sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class) != null) {
+            StringWriter binaryTreeStrWriter = new StringWriter();
+            TreePrint binaryTreePrinter = options.constituencyTreePrinter;
+            if (binaryTreePrinter == AnnotationOutputter.DEFAULT_CONSTITUENCY_TREE_PRINTER) {
+              binaryTreePrinter = new TreePrint("oneline");
+            }
+            binaryTreePrinter.printTree(sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class),
+                    new PrintWriter(binaryTreeStrWriter, true));
+            String binaryTreeStr = binaryTreeStrWriter.toString().trim();
+            if (!"SENTENCE_SKIPPED_OR_UNPARSABLE".equals(binaryTreeStr)) {
+              l2.set("binaryParse", binaryTreeStr);
+            }
+          }
           // (dependency trees)
           l2.set("basicDependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)));
           l2.set("enhancedDependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)));
