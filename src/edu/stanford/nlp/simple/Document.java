@@ -12,6 +12,7 @@ import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.naturalli.OperatorSpec;
 import edu.stanford.nlp.naturalli.Polarity;
 import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
@@ -895,11 +896,16 @@ public class Document {
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
         Tree binaryTree = sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
         sentences.get(i).updateParse(serializer.toProto(tree),
-                                     binaryTree == null ? null : serializer.toProto(binaryTree));
-        sentences.get(i).updateDependencies(
-            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
-            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)),
-            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)));
+                binaryTree == null ? null : serializer.toProto(binaryTree));
+        // check this sentence has dependency annotations
+        SemanticGraph basicDependencies =
+                sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        if (basicDependencies != null) {
+          sentences.get(i).updateDependencies(
+                  ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
+                  ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)),
+                  ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)));
+        }
       }
     }
     return this;
