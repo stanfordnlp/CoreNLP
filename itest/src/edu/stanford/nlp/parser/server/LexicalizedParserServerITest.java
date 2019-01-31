@@ -36,7 +36,7 @@ public class LexicalizedParserServerITest extends TestCase {
      "nsubj(works-3, Bauer-2)\n" +
      "root(ROOT-0, works-3)\n" +
      "case(Stanford-5, at-4)\n" +
-     "nmod:at(works-3, Stanford-5)");
+     "obl:at(works-3, Stanford-5)");
   static final String tokenizedString = "John Bauer works at Stanford .";
 
   static final String lemmaTestString = "A man was walking in the rain.";
