@@ -102,8 +102,8 @@ public class DependencyParserITest extends TestCase {
             document.get(CoreAnnotations.SentencesAnnotation.class).get(0)
                                 .get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
     Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
-
-    GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.getConj("and");
+    
+    GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.CONJUNCT;
     assertTrue(dependencies.stream().map(TypedDependency::reln).collect(Collectors.toList()).contains(expected));
   }
 
