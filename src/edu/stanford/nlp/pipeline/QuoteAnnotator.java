@@ -7,10 +7,12 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -167,9 +169,11 @@ public class QuoteAnnotator implements Annotator  {
       timer = new Timing();
       log.info("Preparing quote annotator...");
     }
-    if (ATTRIBUTE_QUOTES)
-      quoteAttributionAnnotator = new QuoteAttributionAnnotator(props);
-
+    if (ATTRIBUTE_QUOTES)  {
+      Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(props,
+        "attribution.");
+      quoteAttributionAnnotator = new QuoteAttributionAnnotator(relevantProperties);
+    }
     if (VERBOSE) {
       timer.stop("done.");
     }
