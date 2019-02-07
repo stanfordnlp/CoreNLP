@@ -48,8 +48,6 @@ system.
 | ner.buildEntityMentions | boolean | true | whether or not to build entity mentions from token NER tags |
 | ner.combinationMode | String | NORMAL | when set to NORMAL each tag can only be applied by the first CRF classifier that applies that tag ; when set to HIGH_RECALL all CRF classifiers can apply all of their tags |
 | ner.useSUTime | boolean | true | Whether or not to use SUTime. SUTime at present only supports English; if not processing English, make sure to set this to false. |
-| ner.providedDocDate | String | - | Use the provided date in yyyy-mm-dd format as the doc date. |
-| ner.usePresentDateForDocDate | boolean | false | Use the present date for the doc date. |
 | sutime.markTimeRanges | boolean | false | Tells SUTime whether to mark phrases such as “From January to March” as a range, instead of marking "January" and "March" separately. |
 | sutime.includeRange | boolean | false | If marking time ranges, set the time range in the TIMEX output from SUTime. |
 | maxAdditionalKnownLCWords | int | - | Limit the size of the known lower case words set.  Set this to 0 to prevent ordering issues (i.e. when this is nonzero running on document1 then document2 can have different results than running on document2 then document1 |  
@@ -391,10 +389,18 @@ although note that when processing an xml document, the cleanxml
 annotator will overwrite the `DocDateAnnotation` if
 "datetime" or "date" are specified in the document.
 
-Recently some options have been added to `ner` to allow for specifying
-document date with properties.  The `ner.usePresentDateForDocDate` option
-will give documents the current date as the doc date.  The `ner.providedDocDate`
-option will use the provided date for doc date.  The date format should be `yyyy-mm-dd`.
+### Setting Document Date
+
+The `DocDateAnnotator` provides a variety of options for setting the document date.
+The `ner` annotator will run this annotator as a sub-annotator.  These can be 
+specified by setting properties for the `ner.docdate` sub-annotator.
+
+| Option | Example | Description |
+| --- | --- | --- |
+| useFixedDate | 2019-01-01 | Provide a fixed date for each document. |
+| useMappingFile | dates.txt | Use a tab-delimited file to specify doc dates.  First column is document ID, second column is date. |
+| usePresent | - | Give every document the present date. |
+| useRegex | NYT-([0-9]{4}-[0-9]{2}-[0-9]{2}).xml | Specify a regular expression matching file names.  The first group will be extracted as the date. |
 
 ## Caseless models
 
