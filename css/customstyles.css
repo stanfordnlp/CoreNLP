@@ -407,7 +407,10 @@ ul#mysidebar {
   margin-top:40px;
   
   border-radius:0px;
-  overflow:scroll;
+}
+
+#mysidebar {
+  overflow: scroll;
 }
 
 .nav ul li ul li a {
