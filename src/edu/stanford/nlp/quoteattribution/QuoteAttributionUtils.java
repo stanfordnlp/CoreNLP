@@ -48,7 +48,9 @@ public class QuoteAttributionUtils {
   }
 
   //taken from WordToSentencesAnnotator
-  private static CoreMap constructSentence(List<CoreLabel> sentenceTokens, CoreMap prevSentence, CoreMap sentence) {
+  private static CoreMap constructSentence(List<CoreLabel> sentenceTokens, CoreMap prevSentence, CoreMap sentence, 
+	DependencyParser parser) {
+	  
     // get the sentence text from the first and last character offsets
     int begin = sentenceTokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
     int last = sentenceTokens.size() - 1;
@@ -64,7 +66,7 @@ public class QuoteAttributionUtils {
     newSentence.set(CoreAnnotations.TokenEndAnnotation.class, sentence.get(CoreAnnotations.TokenEndAnnotation.class));
     newSentence.set(CoreAnnotations.ParagraphIndexAnnotation.class, sentence.get(CoreAnnotations.ParagraphIndexAnnotation.class));
 
-    newSentence.set(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class, getParse(newSentence));
+    newSentence.set(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class, getParse(newSentence, parser));
 
     return newSentence;
 //    newSentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
@@ -77,7 +79,7 @@ public class QuoteAttributionUtils {
     }
   }
 
-  public static void addEnhancedSentences(Annotation doc) {
+  public static void addEnhancedSentences(Annotation doc, DependencyParser parser) {
     //for every sentence that begins a paragraph: append this sentence and the previous one and see if sentence splitter would make a single sentence out of it. If so, add as extra sentence.
     //for each sieve that potentially uses augmentedSentences in original:
 
@@ -97,7 +99,7 @@ public class QuoteAttributionUtils {
       tokensConcat.addAll(sentence.get(CoreAnnotations.TokensAnnotation.class));
       List<List<CoreLabel>> sentenceTokens = wsp.process(tokensConcat);
       if(sentenceTokens.size() == 1) { //wsp would have put them into a single sentence --> add enhanced sentence.
-        sentence.set(EnhancedSentenceAnnotation.class, constructSentence(sentenceTokens.get(0), prevSentence, sentence));
+        sentence.set(EnhancedSentenceAnnotation.class, constructSentence(sentenceTokens.get(0), prevSentence, sentence, parser));
       }
     }
   }
@@ -220,9 +222,7 @@ public class QuoteAttributionUtils {
     return sentence;
   }
 
-  static DependencyParser parser = DependencyParser.loadFromModelFile(DependencyParser.DEFAULT_MODEL, new Properties());
-
-  private static SemanticGraph getParse(CoreMap sentence) {
+  private static SemanticGraph getParse(CoreMap sentence, DependencyParser parser) {
     GrammaticalStructure gs = parser.predict(sentence);
     GrammaticalStructure.Extras maximal = GrammaticalStructure.Extras.MAXIMAL;
 
@@ -233,7 +233,7 @@ public class QuoteAttributionUtils {
     return ccDeps;
   }
 
-  public static void annotateForDependencyParse(Annotation doc) {
+  public static void annotateForDependencyParse(Annotation doc, DependencyParser parser) {
     // for each quote, dependency parse sentences with quote-removed (if it exists).
 
     List<CoreMap> quotes = doc.get(CoreAnnotations.QuotationsAnnotation.class);
@@ -241,7 +241,8 @@ public class QuoteAttributionUtils {
       Pair<Integer, Integer> range = getRemainderInSentence(doc, quote);
       if (range != null) {
         CoreMap sentenceQuoteRemoved = constructCoreMap(doc, range);
-        quote.set(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class, getParse(sentenceQuoteRemoved));
+        quote.set(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class, 
+            getParse(sentenceQuoteRemoved, parser));
       }
     }
   }
