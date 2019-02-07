@@ -336,6 +336,7 @@ dl.dl-horizontal dd {
 /* navgoco sidebar styles (customized) */
 .nav, .nav ul, .nav li {
     list-style: none;
+    overflow: scroll;
 }
 
 .nav ul {
