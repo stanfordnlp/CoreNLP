@@ -4,6 +4,8 @@ keywords: annotators
 permalink: '/annotators.html'
 ---
 
+## Annotator Descriptions
+
 | Name | Annotator class name | Generated Annotation | Description |
 | --- | --- | --- | --- | 
 | [tokenize](tokenize.html) | TokenizerAnnotator | TokensAnnotation (list of tokens); CharacterOffsetBeginAnnotation, CharacterOffsetEndAnnotation, TextAnnotation (for each token) | Tokenizes the text. This splits the text into roughly "words", using rules or methods suitable for the language being processed. Sometimes the tokens split up surface words in ways suitable for further NLP-processing, for example "isn't" becomes "is" and "n't". The tokenizer saves the beginning and end character offsets of each token in the input text. |
@@ -21,3 +23,23 @@ permalink: '/annotators.html'
 | [relation](relation.html) | RelationExtractorAnnotator | MachineReadingAnnotations.RelationMentionsAnnotation | Stanford relation extractor is a Java implementation to find relations between two entities. The current relation extraction model is trained on the relation types (except the 'kill' relation) and data from the paper Roth and Yih, Global inference for entity and relation identification via a linear programming formulation, 2007, except instead of using the gold NER tags, we used the NER tags predicted by Stanford NER classifier to improve generalization. The default model predicts relations <tt>Live_In</tt>, <tt>Located_In</tt>, <tt>OrgBased_In</tt>, <tt>Work_For</tt>, and <tt>None</tt>. For more details of how to use and train your own model, see [this page](http://nlp.stanford.edu/software/relationExtractor.html) |
 | [natlog](natlog.html) | NaturalLogicAnnotator | OperatorAnnotation, PolarityAnnotation | Marks quantifier scope and token polarity, according to natural logic semantics. Places an OperatorAnnotation on tokens which are quantifiers (or other natural logic operators), and a PolarityAnnotation on all tokens in the sentence. |
 | [quote](quote.html) | QuoteAnnotator | QuotationAnnotation | Deterministically picks out quotes delimited by " or ' from a text. All top-level quotes are supplied by the top level annotation for a text. If a QuotationAnnotation corresponds to a quote that contains embedded quotes, these quotes will appear as embedded QuotationAnnotations that can be accessed from the QuotationAnnotation that they are embedded in. The QuoteAnnotator can handle multi-line and cross-paragraph quotes, but any embedded quotes must be delimited by a different kind of quotation mark than its parents. Does not depend on any other annotators. Support for unicode quotes is not yet present. |
+
+## Annotator Dependencies
+
+| Property name | Annotator class name | Requirements |
+| --- | --- | --- |
+| [tokenize](tokenize.html) | TokenizerAnnotator | None |
+| [cleanxml](cleanxml.html) | CleanXmlAnnotator | `tokenize` |
+| [ssplit](ssplit.html) | WordsToSentenceAnnotator | `tokenize` |
+| [pos](pos.html) | POSTaggerAnnotator | `tokenize, ssplit` |
+| [lemma](lemma.html) | MorphaAnnotator | `tokenize, ssplit, pos` |
+| [ner](ner.html) | NERClassifierCombiner | `tokenize, ssplit, pos, lemma`  |
+| [regexner](regexner.html) | RegexNERAnnotator | `tokenize, ssplit, pos` |
+| [sentiment](sentiment.html) | SentimentAnnotator | `tokenize, ssplit, pos, parse` |
+| [parse](parse.html) | ParserAnnotator | `tokenize, ssplit, parse` |
+| [depparse](depparse.html) | DependencyParseAnnotator | `tokenize, ssplit, pos` |
+| [dcoref](coref.html) | DeterministicCorefAnnotator | `tokenize, ssplit, pos, lemma, ner, parse` |
+| [coref](coref.html) | CorefAnnotator | `tokenize, ssplit, pos, lemma, ner, parse` (Can also use `depparse`) |
+| [relation](relation.html) | RelationExtractorAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse` |
+| [natlog](natlog.html) | NaturalLogicAnnotator | `tokenize, ssplit, pos, lemma, depparse` (Can also use `parse`) |
+| [quote](quote.html) | QuoteAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse, coref` |
