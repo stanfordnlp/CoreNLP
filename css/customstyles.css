@@ -336,7 +336,6 @@ dl.dl-horizontal dd {
 /* navgoco sidebar styles (customized) */
 .nav, .nav ul, .nav li {
     list-style: none;
-    overflow: scroll;
 }
 
 .nav ul {
@@ -408,6 +407,7 @@ ul#mysidebar {
   margin-top:40px;
   
   border-radius:0px;
+  overflow:scroll;
 }
 
 .nav ul li ul li a {
