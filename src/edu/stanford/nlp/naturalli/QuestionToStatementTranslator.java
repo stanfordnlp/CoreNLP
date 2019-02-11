@@ -1125,7 +1125,7 @@ public class QuestionToStatementTranslator {
    *
    * @return The post-processed utterance.
    */
-  private List<List<CoreLabel>> postProcess(List<CoreLabel> question, List<CoreLabel> statement) {
+  private static List<List<CoreLabel>> postProcess(List<CoreLabel> question, List<CoreLabel> statement) {
     // 1. Replace 'i' with 'you', etc.
     for (CoreLabel token : statement) {
       String originalText = token.originalText();

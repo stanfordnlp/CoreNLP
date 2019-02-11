@@ -703,9 +703,8 @@ public class LambdaSolve  {
       rf.close();
       return lamb;
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeIOException(e);
     }
-    return null;
   }
 
 
