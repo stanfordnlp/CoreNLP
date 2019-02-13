@@ -279,6 +279,7 @@ There are a lot of ways to match patterns in token sequences.  Below is a helpfu
 * `/works/ /for/ /the/` - exact matches "works for the" (example: "works for the")
 * `[{word:"works"}] [{word:"for"}] [{word:/the|a/}]` - matches "works for the" or "works for a" (example: "works for a")
 * `[{word:/[A-Z][A-Za-z]+/}]+` - matches any number of capitalized words in a row that only contain letters (examples: "Joe Smith", "Some Capitalized Words In A Row") 
+* `[{word:/[A-Z][A-Za-z]+/}]{2,3}` - same as above, but only matches sequences of length 2 or 3
 * `[{word:/[A-Z][A-Za-z]+/} & {tag:"NNP"}]+` - same as above, but only matches if the tokens have the part of speech tag "NNP"
 * `[{ner:"PERSON"}]+` - matches any number of tokens in a row with the "PERSON" named entity tag
 * `[{ner:"LOCATION"} | {ner: "ORGANIZATION"}]+` - matches any number of tokens in a row that have either LOCATION or ORGANIZATION as their ner tag
