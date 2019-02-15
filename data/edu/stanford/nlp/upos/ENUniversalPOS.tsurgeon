@@ -157,10 +157,10 @@ relabel target DET
 % 1 to 1 mappings
 %
 %
-% CC -> CONJ
+% CC -> CCONJ
 CC=target <... {/.*/}
 
-relabel target CONJ
+relabel target CCONJ
 
 % CD -> NUM
 CD=target <... {/.*/}
