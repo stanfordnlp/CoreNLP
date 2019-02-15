@@ -98,12 +98,12 @@ public class DependencyParserITest extends TestCase {
     Annotation document = new Annotation(text);
     pipeline.annotate(document);
 
-    SemanticGraph ccProcessed =
+    SemanticGraph enhancedPlusPlus =
             document.get(CoreAnnotations.SentencesAnnotation.class).get(0)
-                                .get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
-    Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
+                                .get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
+    Collection<TypedDependency> dependencies = enhancedPlusPlus.typedDependencies();
     
-    GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.CONJUNCT;
+    GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.getConj("and");
     assertTrue(dependencies.stream().map(TypedDependency::reln).collect(Collectors.toList()).contains(expected));
   }
 
