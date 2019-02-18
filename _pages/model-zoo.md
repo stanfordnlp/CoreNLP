@@ -27,4 +27,5 @@ If you would like to contribute to the Model Zoo contact us or issue a pull requ
 
 | Name | Language | Description | Group | Version | Requires | Download |
 | --- | | --- | --- | --- | --- | --- | --- |
-| Swedish CoreNLP | Swedish | A POS model for Swedish.  More info [here](https://medium.com/@klintcho/training-a-swedish-pos-tagger-for-stanford-corenlp-546e954a8ee7) | Andreas Klintberg | 1.0.0 | > Stanford CoreNLP 3.9.2 | [corenlp-swedish-1.0.0.jar](https://nlp.stanford.edu/software/corenlp-swedish-1.0.0.jar) | 
+| Russian CoreNLP | Russian | POS and Parsing for Russian.  More info [here](https://github.com/MANASLU8/CoreNLP) | ITMO University | 1.0.0 | latest code on GitHub | [stanford-russian-corenlp-models.jar](https://drive.google.com/file/d/1_0oU8BOiYCqHvItSsz0BjJnSNp8PRWlC/view?usp=sharing) |
+| Swedish CoreNLP | Swedish | A POS model for Swedish.  More info [here](https://medium.com/@klintcho/training-a-swedish-pos-tagger-for-stanford-corenlp-546e954a8ee7) | Andreas Klintberg | 1.0.0 | Stanford CoreNLP 3.9.2 | [corenlp-swedish-1.0.0.jar](https://nlp.stanford.edu/software/corenlp-swedish-1.0.0.jar) | 

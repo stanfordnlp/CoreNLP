@@ -17,16 +17,23 @@ by Nils Gruenwald. Incomplete. Currently only wraps tagger and TokensRegex.
 
 ### Docker
 
-Okay, Docker isn't a language, but you know what we mean…. Note on running the CoreNLP server under docker: The container’s port 9000 has to be published to the host. Give a command like:
+Okay, Docker isn't a language, but you know what we mean…. 
+
+Note on running the CoreNLP server under docker: The container’s port 9000 has to be published to the host. For example, give a command like:
 `docker run -p 9000:9000 --name coreNLP --rm -i -t motiz88/corenlp`. If, when going to `localhost:9000/`, you see the error 
 `This site can’t be reached. localhost refused to connect`, then this is what you failed to do!
 
+* [CoreNLP Complete dockerfile](https://hub.docker.com/r/graham3333/corenlp-complete) A Dockerfile for Stanford CoreNLP server by Graham MacDonald. Comes with good examples of use. Updated in Dec 2018. [GitHub](https://github.com/grahamimac/corenlp-complete-docker)
+* [stanford-corenlp-docker](https://github.com/NLPbox/stanford-corenlp-docker) A dockerfile by Arne Neumann. Updated Oct 2018. The NLPBox project provides dockerfiles for many NLP tools.
 * [corenlp-docker](https://hub.docker.com/r/motiz88/corenlp/) A Dockerfile for Stanford CoreNLP Server by motiz88.
+* [corenlp-docker](https://github.com/vzhong/corenlp-docker) And another by vzhong, a Stanford NLP graduate.
+
+And there are many others – it’s not so hard to build a dockerfile. Here are a few more:
+
 * [corenlp-docker](https://github.com/chilland/corenlp-docker) Another by chilland.
 * [corenlp-zmq](https://github.com/twneale/corenlp-zmq) By twneale. As the name says, this one has a ZMQ broker front end.
 * [stanford-corenlp-server](https://github.com/akiomik/stanford-corenlp-server) By akiomik.
 * [corenlp-server](https://github.com/hotpxl/corenlp-server) Another by hotpxl.
-* [corenlp-docker](https://github.com/vzhong/corenlp-docker) And another by vzhong, a Stanford NLP graduate.
 * [jamesbpollack/corenlp-stack](https://hub.docker.com/r/jamesbpollack/corenlp-stack/) by James Pollack.
 
 ### Elixir
