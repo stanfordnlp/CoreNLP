@@ -53,6 +53,7 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 ([github site](https://github.com/gerardobort/node-corenlp))
 by Gerardo Bort is an actively developed node.js CoreNLP library. Multilingual support.
 You can [run this package in your browser, using RunKit](https://npm.runkit.com/corenlp).
+* [corenlp-sentiment](https://www.npmjs.com/package/corenlp-sentiment) adds support for sentiment analysis to the above corenlp package. By Garrick James McMickell.
 * [stanford-corenlp](https://www.npmjs.org/package/stanford-corenlp) ([github site](https://github.com/hiteshjoshi/node-stanford-corenlp)) is a simple node.js wrapper by hiteshjoshi.
 * [CoreNLP-client](https://npmdaily.com/pkg/corenlp-client) ([GitHub site](https://github.com/rom1504/node-corenlp-client)) is a simple corenlp client to the corenlp http server using request-promise by Romain Beaumont. Extended by Christophe B. for multilingual use as [corenlp-client-multilang](https://www.npmjs.com/package/corenlp-client-multilang)
 ([github site](https://github.com/christophe77/node-corenlp-client)). The latter has multilingual support.
@@ -66,7 +67,7 @@ Other choices are now probably best avoided:
 <!-- ([github site](https://github.com/noahDess/corenlp-js-interface)) -->
 * [corenlp-js-prefab](https://www.npmjs.com/package/corenlp-js-prefab) a simple interface to the CoreNLP server with a prefab function so you only have to send text no extra parameters with each call. By Noah Dessauer. The GitHub site is no longer available.
 * [stanford-corenlp-node](https://github.com/mhewett/stanford-corenlp-node) ([github site](https://github.com/mhewett/stanford-corenlp-node)) is a webservice interface to CoreNLP in node.js by Mike Hewett. No recent development.
-* [stanford-simple-nlp](https://npmjs.org/package/stanford-simple-nlp) ([github site](https://github.com/xissy/node-stanford-simple-nlp)) is a node.js CoreNLP wrapper by  Taeho Kim (xissy). This doesn't seem to have been updated lately. You're better off with something else.
+* [stanford-simple-nlp](https://npmjs.org/package/stanford-simple-nlp) ([github site](https://github.com/xissy/node-stanford-simple-nlp)) is a node.js CoreNLP wrapper by Taeho Kim (xissy). This doesn't seem to have been updated lately. You're better off with something else.
 
 ### Lua
 
