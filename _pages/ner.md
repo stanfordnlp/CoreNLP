@@ -404,7 +404,7 @@ specified by setting properties for the `ner.docdate` sub-annotator.
 | usePresent | - | Give every document the present date. |
 | useRegex | NYT-([0-9]{4}-[0-9]{2}-[0-9]{2}).xml | Specify a regular expression matching file names.  The first group will be extracted as the date. |
 
-### Accessing Entity Confidences
+## Accessing Entity Confidences
 
 The following example shows how to access label confidences for tokens and entities.
 Each token stores the probability of its NER label given by the CRF that was used to
