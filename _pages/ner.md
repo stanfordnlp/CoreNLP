@@ -404,6 +404,51 @@ specified by setting properties for the `ner.docdate` sub-annotator.
 | usePresent | - | Give every document the present date. |
 | useRegex | NYT-([0-9]{4}-[0-9]{2}-[0-9]{2}).xml | Specify a regular expression matching file names.  The first group will be extracted as the date. |
 
+### Accessing Entity Confidences
+
+The following example shows how to access label confidences for tokens and entities.
+Each token stores the probability of its NER label given by the CRF that was used to
+assign the label in the `CoreAnnotations.NamedEntityTagProbsAnnotation.class`.  Each
+entity mention contains the probability of the token with the lowest label probability
+in its span.  For example if `Los Angeles` had the following probabilities:
+
+```
+{word: 'Los', 'tag': 'LOCATION', 'prob': .992} 
+{word: 'Angeles', 'tag': 'LOCATION', 'prob': .999}
+```
+
+the entity `Los Angeles` would be assigned the `LOCATION` tag with a confidence of `.992`.
+
+Below is code for accessing these confidences.
+
+```
+package edu.stanford.nlp.examples;
+
+import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.pipeline.*;
+import java.util.*;
+
+public class NERConfidenceExample {
+
+    public static void main(String[] args) {
+        String exampleText = "Joe Smith lives in California.";
+        Properties props = new Properties();
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+        CoreDocument document = new CoreDocument(exampleText);
+        pipeline.annotate(document);
+        // get confidences for entities
+        for (CoreEntityMention em : document.entityMentions()) {
+            System.out.println(em.text() + "\t" + em.entityTypeConfidences());
+        }
+        // get confidences for tokens
+        for (CoreLabel token : document.tokens()) {
+            System.out.println(token.word() + "\t" + token.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class));
+        }
+    }
+}
+```
+
 ## Caseless models
 
 It is possible to run Stanford CoreNLP with NER
