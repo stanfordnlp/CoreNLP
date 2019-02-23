@@ -83,6 +83,7 @@ The annotator will find the following `("subject", "relation", "object")` triple
 | kbp.semgrex | file, classpath, or URL | edu/stanford/nlp/models/kbp/english/semgrex | Directory containing semgrex rules (rules over dependency patterns) to be used by relation extractor, set to "none" to use no semgrex rules |
 | kbp.tokensregex | file, classpath, or URL | edu/stanford/nlp/models/kbp/english/tokensregex | Directory containing tokensregex rules (rules over token patterns) to be used, set to "none" to use no tokensregex rules |
 
+* There are currently models for `Chinese, English, Spanish`.  The properties files for those languages have the proper settings for using the `KBPAnnotator` in that language
 
 ## More information 
 
