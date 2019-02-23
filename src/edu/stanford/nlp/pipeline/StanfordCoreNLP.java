@@ -151,7 +151,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   public static final String NEWLINE_IS_SENTENCE_BREAK_PROPERTY = "ssplit.newlineIsSentenceBreak";
   public static final String DEFAULT_NEWLINE_IS_SENTENCE_BREAK = "never";
 
-  public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
+  public static final String DEFAULT_OUTPUT_FORMAT = "text";
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels logger = Redwood.channels(StanfordCoreNLP.class);
@@ -878,7 +878,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     os.println("\t             output is generated for every input file as file.outputExtension");
     os.println("\t\"outputDirectory\" - where to put output (defaults to the current directory)");
     os.println("\t\"outputExtension\" - extension to use for the output file (defaults to \".xml\" for XML, \".ser.gz\" for serialized).  Don't forget the dot!");
-    os.println("\t\"outputFormat\" - \"xml\" (usual default), \"text\" (default for REPL or if no XML), \"json\", \"conll\", \"conllu\", \"serialized\", or \"custom\"");
+    os.println("\t\"outputFormat\" - \"text\"  (default), \"json\", \"conll\", \"conllu\", \"serialized\", \"xml\" or \"custom\"");
     os.println("\t\"customOutputter\" - specify a class to a custom outputter instead of a pre-defined output format");
     os.println("\t\"serializer\" - Class of annotation serializer to use when outputFormat is \"serialized\".  By default, uses ProtobufAnnotationSerializer.");
     os.println("\t\"replaceExtension\" - flag to chop off the last extension before adding outputExtension to file");
