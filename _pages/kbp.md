@@ -24,6 +24,14 @@ The annotator will find the following `("subject", "relation", "object")` triple
 | --- | --- | --- |
 | kbp | KBPAnnotator | KBPTriplesAnnotation |
 
+## Example Usage
+
+### Command Line
+
+```bash
+java -Xmx16g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,coref,kbp -coref.md.type RULE -file example.txt
+```
+
 ## List Of Relations
 
 | Relation name |
