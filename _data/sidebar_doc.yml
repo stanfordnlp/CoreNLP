@@ -95,8 +95,8 @@ entries:
         - title: Sentiment 
           url: sentiment.html
 
-        - title: Relation Extraction 
-          url: relation.html
+        - title: KBP
+          url: kbp.html
 
         - title: Quote Annotator 
           url: quote.html
