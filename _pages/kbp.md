@@ -39,13 +39,13 @@ The annotator will find the following `("subject", "relation", "object")` triple
 | org_founded_by |
 | org_member_of |
 | org_members |
-| org_number_of_employeesSLASHmembers |
+| org_number_of_employees/members |
 | org_parents |
-| org_politicalSLASHreligious_affiliation |
+| org_political/religious_affiliation |
 | org_shareholders |
 | org_stateorprovince_of_headquarters |
 | org_subsidiaries |
-| org_top_membersSLASHemployees |
+| org_top_members/employees |
 | org_website |
 | per_age |
 | per_alternate_names |
