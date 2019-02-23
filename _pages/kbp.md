@@ -27,6 +27,7 @@ The annotator will find the following `("subject", "relation", "object")` triple
 ## List Of Relations
 
 | Relation name |
+| --- |
 | gpe_subsidiaries |
 | org_alternate_names |
 | org_city_of_headquarters |
