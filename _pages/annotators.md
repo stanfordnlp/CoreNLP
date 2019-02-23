@@ -43,4 +43,5 @@ permalink: '/annotators.html'
 | [coref](coref.html) | CorefAnnotator | `tokenize, ssplit, pos, lemma, ner, parse` (Can also use `depparse`) |
 | [relation](relation.html) | RelationExtractorAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse` |
 | [natlog](natlog.html) | NaturalLogicAnnotator | `tokenize, ssplit, pos, lemma, depparse` (Can also use `parse`) |
+| [kbp](kbp.html) | KBPAnnotator | `tokenize,ssplit,pos,lemma,parse,coref` (Can also use `depparse` ; `coref` optional) |
 | [quote](quote.html) | QuoteAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse, coref` |
