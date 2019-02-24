@@ -59,7 +59,7 @@ entries:
     - title : Annotators
 
       items:
-        - title: List Of All Annotators
+        - title: Complete Annotator Listing
           url: annotators.html
 
         - title: Adding a new annotator
