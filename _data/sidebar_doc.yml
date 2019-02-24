@@ -59,9 +59,12 @@ entries:
     - title : Annotators
 
       items:
-        - title: Summary
+        - title: List Of All Annotators
           url: annotators.html
 
+        - title: Adding a new annotator
+          url: new_annotator.html
+        
         - title: Tokenization
           url: tokenize.html
 
@@ -86,9 +89,6 @@ entries:
         - title: Coreference Resolution
           url: coref.html
 
-        - title: Natural Logic 
-          url: natlog.html
-
         - title: Open Information Extraction
           url: openie.html
 
@@ -103,19 +103,7 @@ entries:
 
         - title: CleanXML Annotator
           url: cleanxml.html
-
-        - title: TokensRegex
-          url: tokensregex.html
-
-        - title: Truecase Annotator
-          url: truecase.html
           
-        - title: UD Features
-          url: udfeats.html
-          
-        - title: Adding a new annotator
-          url: new_annotator.html
-
     - title: Model Zoo
 
       items:
@@ -132,6 +120,9 @@ entries:
 
         - title: Extensions
           url: extensions.html
+
+        - title: TokensRegex
+          url: tokensregex.html
 
     - title: Resources 
 
