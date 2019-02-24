@@ -67,6 +67,9 @@ entries:
         
         - title: Tokenization
           url: tokenize.html
+        
+        - title: CleanXML Annotator
+          url: cleanxml.html
 
         - title: Sentence Splitting
           url: ssplit.html
@@ -100,9 +103,6 @@ entries:
 
         - title: Quote Annotator 
           url: quote.html
-
-        - title: CleanXML Annotator
-          url: cleanxml.html
           
     - title: Model Zoo
 
