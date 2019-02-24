@@ -50,3 +50,14 @@ permalink: '/annotators.html'
 | [natlog](natlog.html) | NaturalLogicAnnotator | `tokenize, ssplit, pos, lemma, depparse` (Can also use `parse`) |
 | [kbp](kbp.html) | KBPAnnotator | `tokenize,ssplit,pos,lemma,parse,coref` (Can also use `depparse` ; `coref` optional) |
 | [quote](quote.html) | QuoteAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse, coref` |
+
+## Annotator Hierarchy
+
+While every annotator can technically be run as a top-level component, in some cases it makes sense for one annotator to run
+another as a sub-annotator.  For instance the `coref` annotator runs the `coref.mention` annotator (which identifies coref mentions) as a sub-annotator by default.  So instead of supplying an annotator list of `tokenize,ssplit,parse,coref.mention,coref` the list can just be `tokenize,ssplit,parse,coref`. Another example is the `ner` annotator running the `entitymentions` annotator to detect full entities.  Below is a table summarizing the annotator/sub-annotator relationships that currently exist in the pipeline.  By default annotators will generally run their sub-annotators.
+
+| Annotator | Sub-Annotators |
+| --- | --- |
+| coref | coref.mention |
+| ner | sutime,regexner,tokensregex,entitymentions |
+| quote | quote.attribution |
