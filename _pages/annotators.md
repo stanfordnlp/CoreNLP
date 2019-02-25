@@ -64,5 +64,5 @@ another as a sub-annotator.  For instance the `coref` annotator runs the `coref.
 | Annotator | Sub-Annotators |
 | --- | --- |
 | coref | coref.mention |
-| ner | sutime,regexner,tokensregex,entitymentions |
+| ner | docdate,sutime,regexner,tokensregex,entitymentions |
 | quote | quote.attribution |
