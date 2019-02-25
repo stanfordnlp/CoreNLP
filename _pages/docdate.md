@@ -9,7 +9,8 @@ permalink: '/docdate.html'
 Provides several methods for setting the date of documents.  As of version 3.9.2 this annotator must be used as 
 a sub-annotator of `ner`, or as a custom annotator.  Its main purpose is to provide document dates for SUTime, 
 which is generally used as a sub-annotator of `ner` as well.  If you wish to set document dates without running
-`ner` you can specify `docdate` as a custom annotator.
+`ner` you can specify `docdate` as a custom annotator.  This issue has been fixed in the latest version of the
+code on GitHub, so in future versions you won't have to set up `docdate` as a custom annotator.
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
