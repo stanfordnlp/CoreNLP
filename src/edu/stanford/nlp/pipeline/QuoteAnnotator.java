@@ -171,7 +171,7 @@ public class QuoteAnnotator implements Annotator  {
     }
     if (ATTRIBUTE_QUOTES)  {
       Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(props,
-        "attribution.");
+        "quote.attribution.");
       quoteAttributionAnnotator = new QuoteAttributionAnnotator(relevantProperties);
     }
     if (VERBOSE) {
