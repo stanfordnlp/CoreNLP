@@ -35,6 +35,6 @@ java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,sspli
 | --- | --- | --- | --- |
 | docdate.useFixedDate | String | - | Set every document to have a fixed date (e.g. 2019-01-01) |
 | docdate.useMappingFile | file, classpath, or URL | - | Use a tab-delimited file to specify doc dates. First column is document ID, second column is date. |
-| docdate.usePresent | - | Set every document to have the present date as the date. |
-| docdate.useRegex | String | Specify a regular expression matching file names. The first group will be extracted as the date. (e.g. NYT-([0-9]{4}-[0-9]{2}-[0-9]{2}).xml ) |
+| docdate.usePresent | - | - | Set every document to have the present date as the date. |
+| docdate.useRegex | String | - | Specify a regular expression matching file names. The first group will be extracted as the date. (e.g. NYT-([0-9]{4}-[0-9]{2}-[0-9]{2}).xml ) |
 
