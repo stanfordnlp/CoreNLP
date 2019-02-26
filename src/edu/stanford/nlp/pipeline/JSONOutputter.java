@@ -153,6 +153,18 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("ner", m.get(CoreAnnotations.NamedEntityTagAnnotation.class));
               l3.set("normalizedNER", m.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
               l3.set("entitylink", m.get(CoreAnnotations.WikipediaEntityAnnotation.class));
+              // add ner confidence info if there is any to report
+              Map<String,Double> nerConfidences = m.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
+              List<String> nerLabelsWithConfidences =
+                      nerConfidences.keySet().stream().filter(x -> !x.equals("O")).collect(
+                              Collectors.toList());
+              if (nerLabelsWithConfidences.size() > 0) {
+                l3.set("nerConfidences", (Consumer<Writer>) l4 -> {
+                  for (String nerLabel : nerLabelsWithConfidences) {
+                    l4.set(nerLabel, nerConfidences.get(nerLabel));
+                  }
+                });
+              }
               // Timex
               Timex time = m.get(TimeAnnotations.TimexAnnotation.class);
               writeTime(l3, time);
