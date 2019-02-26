@@ -118,6 +118,14 @@ This is a neural-network-based mention-ranking model. Some relevant options:
 
 If you'd like to benchmark our deterministic system of the CoNLL 2011/2012 shared tasks, see [the Usage section for the Stanford Deterministic Coreference Resolution System](https://nlp.stanford.edu/software/dcoref.shtml#Usage).
 
+#### Usage Example
+
+To use the English deterministic system, you need to use the `dcoref` annotator.
+
+```
+java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file example.txt
+```
+
 ### Statistical and Neural Systems
 
 If you would like to run our statistical or neural systems on the CoNLL 2012 eval data:
