@@ -31,7 +31,7 @@ java -Xmx16g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,sspl
 
 | Option name | Type | Description | Default |
 | --- | --- | ----- | --- |
-| entitylink.wikidict | file, classpath, or URL | Path of wikidict to use. | edu/stanford/nlp/models/kbp/english/wikidict.tab.gz |
+| entitylink.wikidict | file, classpath, or URL | Path of wikidict to use. | .../models/kbp/english/wikidict.tab.gz |
 | entitylink.caseless | boolean | Ignore case when matching (e.g. `barack obama` and `Barack Obama` will map to the same thing. | false |
 
 * There are currently dictionaries for `Chinese, English, Spanish`.
