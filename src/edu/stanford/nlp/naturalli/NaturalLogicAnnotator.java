@@ -1,4 +1,5 @@
 package edu.stanford.nlp.naturalli;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
@@ -44,23 +45,34 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
   /**
    * A regex for arcs that we pretend are subject arcs.
    */
-  private static final String GEN_SUBJ = "/[ni]subj(pass)?/";
+  private static final String GEN_SUBJ = "/nsubj(:pass)?/";
   /**
    * A regex for arcs that we pretend are object arcs.
    */
-  private static final String GEN_OBJ = "/[di]obj|xcomp|advcl/";
+  private static final String GEN_OBJ = "/[i]?obj|xcomp|advcl/";
   /**
    * A regex for arcs that we pretend are copula.
    */
-  private static final String GEN_COP = "/cop|aux(pass)?/";
+  private static final String GEN_COP = "/cop|aux(:pass)?/";
   /**
    * A regex for arcs which denote a sub-clause (e.g., "at Stanford" or "who are at Stanford")
    */
-  private static final String GEN_CLAUSE = "/nmod|acl:relcl/";
+  private static final String GEN_CLAUSE = "/nmod|obl|acl:relcl/";
   /**
    * A regex for arcs which denote a preposition
    */
-  private static final String GEN_PREP = "/nmod(:.{1,10})?|advcl|ccomp|advmod/";
+  private static final String GEN_PREP = "/(nmod|obl)(:.{1,10})?|advcl|ccomp|advmod/";
+
+  /**
+   * A Semgrex fragment for matching a negating quantifier.
+   */
+  private static final String NEG_QUANTIFIER = "{lemma:/(no)|(neither)|(no one)|(nobody)|(not)|(but)|(except)|(n't)/}=quantifier";
+
+  /**
+   * A Semgrex pattern for matching a negating quantifier in a dependency graph.
+   */
+  private static final SemgrexPattern NEG_PATTERN = SemgrexPattern.compile("{}=gov >/det|advmod/=negreln " + NEG_QUANTIFIER);
+
 
   /**
    * A Semgrex fragment for matching a quantifier.
@@ -77,6 +89,9 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     }
     QUANTIFIER = "[ {lemma:/" + StringUtils.join(singleWordQuantifiers, "|") + "/}=quantifier | {pos:CD}=quantifier ]";
   }
+
+
+
 
   /**
    * The patterns to use for marking quantifier scopes.
@@ -101,7 +116,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     add(SemgrexPattern.compile("{}=pivot >"+GEN_SUBJ+" {pos:NNP}=Subject >"+GEN_OBJ+" {}=object"));
     // { Felix has spoken to Fido }
     //nmod used to be prep - problem?
-    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" {pos:NNP}=Subject >/nmod|ccomp|[di]obj/ {}=object"));
+    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" {pos:NNP}=Subject >/nmod|obl|ccomp|[i]?obj/ {}=object"));
     // { Felix is a cat,
     //   Felix is cute }
     add(SemgrexPattern.compile("{}=object >"+GEN_SUBJ+" {pos:NNP}=Subject >"+GEN_COP+" {}=pivot"));
@@ -112,17 +127,17 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     //   Tuesday will not work }
     add(SemgrexPattern.compile("{}=pivot >/neg/ {}=quantifier >"+GEN_PREP+" {}=object >"+GEN_SUBJ+" {}=subject "));
     add(SemgrexPattern.compile("{pos:/J.*/}=object >/neg/ {}=quantifier >"+GEN_SUBJ+" {}=subject "));
-    add(SemgrexPattern.compile("{pos:/V.*/}=object >/neg/ {}=quantifier >"+GEN_SUBJ+" {}=subject >aux {pos:MD}"));
     // { Anytime but next Tuesday,
+    add(SemgrexPattern.compile("{pos:/V.*/}=object >/neg/ {}=quantifier >"+GEN_SUBJ+" {}=subject >aux {pos:MD}"));
     //   food but not water,
     //   not on Tuesday  }
     add(SemgrexPattern.compile("{}=pivot >>/cc/ "+QUANTIFIER+" >/conj/ {}=object"));
-    add(SemgrexPattern.compile("{lemma:/not|no|but|except/}=quantifier >/conj|nmod(:.*)?/ {}=object"));  // as above, but handle a common parse error
+    add(SemgrexPattern.compile("{lemma:/not|no|but|except/}=quantifier >/conj|(nmod|obl)(:.*)?/ {}=object"));  // as above, but handle a common parse error
     // { Anything except cabbage }
     add(SemgrexPattern.compile("{}=object >/case/ "+QUANTIFIER));
     // { All of the cats hate dogs. }
     //nmod used to be prep - problem?
-    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" ( "+QUANTIFIER+" >/nmod.*/ {}=subject ) >"+GEN_OBJ+" {}=object"));
+    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" ( "+QUANTIFIER+" >/(nmod|obl).*/ {}=subject ) >"+GEN_OBJ+" {}=object"));
 //    add(SemgrexPattern.compile("{pos:/V.*/}=pivot > ( "+QUANTIFIER+" >/nmod.*/ {}=subject ) >"+GEN_SUBJ+" {}=object"));  // as above, but handle a common parse error
     // { Either cats or dogs have tails. }
     add(SemgrexPattern.compile("{pos:/V.*/}=pivot > {lemma:either}=quantifier >"+GEN_SUBJ+" {}=subject >"+GEN_OBJ+" {}=object"));
@@ -177,9 +192,15 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     return Pair.makePair(min, max + 1);
   }
 
+  private static final Set<String> NMOD_OBL_ARCS = Collections.unmodifiableSet(new HashSet<String>() {{
+    add("nmod");
+    add("obl");
+  }});
+
   private static final Set<String> MODIFIER_ARCS = Collections.unmodifiableSet(new HashSet<String>() {{
     add("aux");
     add("nmod");
+    add("obl");
   }});
 
   private static final Set<String> NOUN_COMPONENT_ARCS = Collections.unmodifiableSet(new HashSet<String>() {{
@@ -199,7 +220,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
    */
   private static Pair<Integer, Integer> getModifierSubtreeSpan(SemanticGraph tree, IndexedWord root) {
     if (tree.outgoingEdgeList(root).stream().anyMatch(x -> "neg".equals(x.getRelation().getShortName()))) {
-      return getGeneralizedSubtreeSpan(tree, root, Collections.singleton("nmod"));
+      return getGeneralizedSubtreeSpan(tree, root, NMOD_OBL_ARCS);
     } else {
       return getGeneralizedSubtreeSpan(tree, root, MODIFIER_ARCS);
     }
@@ -294,7 +315,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
       }
       objSpan = Pair.makePair(subjSpan.second, subjSpan.second);
     } else if (subject == null) {
-      subjSpan = includeInSpan(getSubtreeSpan(tree, object), getGeneralizedSubtreeSpan(tree, pivot, Collections.singleton("nmod")));
+      subjSpan = includeInSpan(getSubtreeSpan(tree, object), getGeneralizedSubtreeSpan(tree, pivot, NMOD_OBL_ARCS));
       objSpan = Pair.makePair(subjSpan.second, subjSpan.second);
     } else {
       Pair<Integer, Integer> subjectSubtree;
@@ -358,6 +379,19 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     return Optional.empty();
   }
 
+  /**
+   * Pre-process dependency tree so that negating advmod relations get the "neg" label.
+   * @param tree dependency tree to be processed.
+   */
+  private void addNegationToDependencyGraph(SemanticGraph tree) {
+    SemanticGraph sg = tree.makeSoftCopy();
+    SemgrexMatcher matcher = NEG_PATTERN.matcher(sg);
+    while (matcher.find()) {
+      IndexedWord gov = matcher.getNode("gov");
+      IndexedWord dep = matcher.getNode("quantifier");
+      tree.getEdge(gov, dep).setRelation(UniversalEnglishGrammaticalRelations.NEGATION_MODIFIER);
+    }
+  }
 
   /**
    * Find the operators in this sentence, annotating the head word (only!) of each operator with the
@@ -371,6 +405,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     if (tree == null) {
       tree = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
     }
+    this.addNegationToDependencyGraph(tree);
     for (SemgrexPattern pattern : PATTERNS) {
       SemgrexMatcher matcher = pattern.matcher(tree);
       while (matcher.find()) {
@@ -422,7 +457,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
         if ("CD".equals(subject == null ? null : subject.tag())) {
           for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(subject)) {
             String rel = outgoingEdge.getRelation().toString();
-            if (rel.startsWith("nmod")) {
+            if (rel.startsWith("nmod") || rel.startsWith("obl")) {
               subject = outgoingEdge.getDependent();
             }
           }
