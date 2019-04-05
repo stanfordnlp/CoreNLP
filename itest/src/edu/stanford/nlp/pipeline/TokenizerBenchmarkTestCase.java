@@ -128,7 +128,7 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         testExamples = new ArrayList<TokenizerBenchmarkTestCase.TestExample>();
         List<String> currSentence = new ArrayList<String>();
         for (String conllLine : allLines) {
-            if (conllLine.strip().equals("")) {
+            if (conllLine.trim().equals("")) {
                 testExamples.add(new TokenizerBenchmarkTestCase.TestExample(currSentence));
                 currSentence.clear();
             }

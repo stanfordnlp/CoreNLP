@@ -18,5 +18,4 @@ public class TokenizerSpanishBenchmarkITest extends TokenizerBenchmarkTestCase {
         runTest("dev", "es", 0.5);
     }
 
-
 }
