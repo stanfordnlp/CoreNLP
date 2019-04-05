@@ -30,6 +30,9 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         private List<CoreLabel> goldTokensList;
         private List<CoreLabel> systemTokensList;
 
+        // CoNLL-U files have 3 lines of meta-data before tokens, tokens start at index 3
+        public int CONLL_U_TOKEN_START = 3;
+
         public TestExample(List<String> conllLines) {
             int LENGTH_OF_SENTENCE_ID_PREFIX = "# sent_id = ".length();
             sentenceID = conllLines.get(0).substring(LENGTH_OF_SENTENCE_ID_PREFIX);
@@ -37,7 +40,7 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             sentenceText = conllLines.get(1).substring(LENGTH_OF_TEXT_PREFIX);
             goldTokensList = new ArrayList<CoreLabel>();
             int charBegin = 0;
-            for (String conllLine : conllLines.subList(2, conllLines.size())) {
+            for (String conllLine : conllLines.subList(CONLL_U_TOKEN_START, conllLines.size())) {
                 String tokenText = conllLine.split("\t")[1];
                 goldTokensList.add(buildCoreLabel(tokenText, charBegin, charBegin+tokenText.length()));
                 charBegin += tokenText.length();
@@ -131,6 +134,8 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             if (conllLine.trim().equals("")) {
                 testExamples.add(new TokenizerBenchmarkTestCase.TestExample(currSentence));
                 currSentence.clear();
+            } else {
+                currSentence.add(conllLine);
             }
         }
     }
@@ -159,7 +164,7 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         System.err.println("Tokenizer Benchmark");
         System.err.println("language: "+lang);
         System.err.println("eval set: "+evalSet);
-        assertTrue("Test failure: F1 below expected value of "+expectedF1,f1Scores.getCount("f1") >= expectedF1);
+        assertTrue("Test failure: System F1 of "+f1Scores.getCount("f1")+" below expected value of "+expectedF1,f1Scores.getCount("f1") >= expectedF1);
     }
 
 }
