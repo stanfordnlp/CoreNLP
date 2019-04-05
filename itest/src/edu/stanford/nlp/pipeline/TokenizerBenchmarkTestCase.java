@@ -41,6 +41,9 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             goldTokensList = new ArrayList<CoreLabel>();
             int charBegin = 0;
             for (String conllLine : conllLines.subList(CONLL_U_TOKEN_START, conllLines.size())) {
+                if (conllLine.split("\t")[0].contains("-")) {
+                    continue;
+                }
                 String tokenText = conllLine.split("\t")[1];
                 goldTokensList.add(buildCoreLabel(tokenText, charBegin, charBegin+tokenText.length()));
                 charBegin += tokenText.length();
@@ -108,15 +111,19 @@ public class TokenizerBenchmarkTestCase extends TestCase {
                     if (cl.beginPosition() < currGoldToken.beginPosition()) {
                         // pass
                     } else if (cl.beginPosition() == currGoldToken.beginPosition()) {
-                        if (cl.endPosition() == currGoldToken.endPosition())
+                        if (cl.endPosition() == currGoldToken.endPosition()) {
                             // score a true positive
                             f1Stats.incrementCount("TP");
-                        else
+                            break;
+                        } else {
                             // score a false positive
                             f1Stats.incrementCount("FP");
+                            break;
+                        }
                     } else {
                         // score a false positive
                         f1Stats.incrementCount("FP");
+                        break;
                     }
                 }
             }
@@ -164,7 +171,8 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         System.err.println("Tokenizer Benchmark");
         System.err.println("language: "+lang);
         System.err.println("eval set: "+evalSet);
-        assertTrue("Test failure: System F1 of "+f1Scores.getCount("f1")+" below expected value of "+expectedF1,f1Scores.getCount("f1") >= expectedF1);
+        assertTrue("Test failure: System F1 of " + f1Scores.getCount("f1") + " below expected value of " +
+                expectedF1,f1Scores.getCount("f1") >= expectedF1);
     }
 
 }
