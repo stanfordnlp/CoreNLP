@@ -107,7 +107,7 @@ These packages use the Stanford CoreNLP server that we've developed over the las
 * [pynlp](https://github.com/sina-al/pynlp) A (Pythonic) Python wrapper for Stanford CoreNLP by Sina.
 [PyPI page](https://pypi.python.org/pypi/pynlp/).
 * [**NLTK**](http://www.nltk.org/) since version 3.2.3 has a new interface to Stanford CoreNLP using the StanfordCoreNLPServer: `nltk.parse.corenlp.CoreNLPParser`. There is [a nice page of instructions](https://github.com/nltk/nltk/wiki/Stanford-CoreNLP-API-in-NLTK).  See also: [instructions on using the dependency parser](http://www.nltk.org/api/nltk.parse.html#module-nltk.parse.corenlp) and [the code for this module](http://www.nltk.org/_modules/nltk/parse/corenlp.html). <!--, and if you poke around the documentation, you can find equivalent interfaces to other CoreNLP components; for example [here is Stanford CoreNLP NER](http://www.nltk.org/api/nltk.tag.html?highlight=corenlp#nltk.tag.stanford.CoreNLPNERTagger).
---> Much of the work for this was done by Dmitrijs Milajevs. You should using the Stanford tokenizer/segmenter/NER from `nltk.tokenize` and `nltk.tag` (unless stuck on a very old version of  NLTK) – these classes are *very* slow, since they perform calls to Java via the command-line for each invocation.
+--> Much of this work was done by Dmitrijs Milajevs. You should avoid using the Stanford tokenizer/segmenter/NER from `nltk.tokenize` and `nltk.tag` (unless stuck on a very old version of  NLTK) – these classes are *very* slow, since they perform calls to Java via the command-line for each invocation.
 
 #### Miscellaneous Python packages
 
