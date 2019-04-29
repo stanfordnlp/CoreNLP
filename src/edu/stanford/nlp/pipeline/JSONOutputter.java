@@ -86,6 +86,20 @@ public class JSONOutputter extends AnnotationOutputter {
           if (!"SENTENCE_SKIPPED_OR_UNPARSABLE".equals(treeStr)) {
             l2.set("parse", treeStr);
           }
+          // binary tree (if present)
+          if (sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class) != null) {
+            StringWriter binaryTreeStrWriter = new StringWriter();
+            TreePrint binaryTreePrinter = options.constituencyTreePrinter;
+            if (binaryTreePrinter == AnnotationOutputter.DEFAULT_CONSTITUENCY_TREE_PRINTER) {
+              binaryTreePrinter = new TreePrint("oneline");
+            }
+            binaryTreePrinter.printTree(sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class),
+                    new PrintWriter(binaryTreeStrWriter, true));
+            String binaryTreeStr = binaryTreeStrWriter.toString().trim();
+            if (!"SENTENCE_SKIPPED_OR_UNPARSABLE".equals(binaryTreeStr)) {
+              l2.set("binaryParse", binaryTreeStr);
+            }
+          }
           // (dependency trees)
           l2.set("basicDependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)));
           l2.set("enhancedDependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)));
@@ -139,6 +153,18 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("ner", m.get(CoreAnnotations.NamedEntityTagAnnotation.class));
               l3.set("normalizedNER", m.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
               l3.set("entitylink", m.get(CoreAnnotations.WikipediaEntityAnnotation.class));
+              // add ner confidence info if there is any to report
+              Map<String,Double> nerConfidences = m.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
+              List<String> nerLabelsWithConfidences =
+                      nerConfidences.keySet().stream().filter(x -> !x.equals("O")).collect(
+                              Collectors.toList());
+              if (nerLabelsWithConfidences.size() > 0) {
+                l3.set("nerConfidences", (Consumer<Writer>) l4 -> {
+                  for (String nerLabel : nerLabelsWithConfidences) {
+                    l4.set(nerLabel, nerConfidences.get(nerLabel));
+                  }
+                });
+              }
               // Timex
               Timex time = m.get(TimeAnnotations.TimexAnnotation.class);
               writeTime(l3, time);

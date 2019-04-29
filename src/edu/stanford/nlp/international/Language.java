@@ -11,18 +11,69 @@ import java.util.Arrays;
  * @author Spence Green (original Languages class for parsing)
  * @author Gabor Angeli (factor out Language enum)
  */
+
 public enum Language {
   Any(              new EnglishTreebankParserParams()),
+  Afrikaans(        treebankForLanguage("Afrikaans")),
+  AncientGreek(     treebankForLanguage("AncientGreek")),
   Arabic(           new ArabicTreebankParserParams()),
+  Armenian(         treebankForLanguage("Armenian")),
+  Basque(           treebankForLanguage("Basque")),
+  Breton(           treebankForLanguage("Breton")),
+  Bulgarian(        treebankForLanguage("Bulgarian")),
+  Buryat(           treebankForLanguage("Buryat")),
+  Catalan(          treebankForLanguage("Catalan")),
+  Croatian(         treebankForLanguage("Croatian")),
   Chinese(          new ChineseTreebankParserParams()),
+  Czech(            treebankForLanguage("Czech")),
+  Danish(           treebankForLanguage("Danish")),
+  Dutch(            treebankForLanguage("Dutch")),
   English(          new EnglishTreebankParserParams(){{ setGenerateOriginalDependencies(true); }}),
+  Estonian(         treebankForLanguage("Estonian")),
+  Faroese(          treebankForLanguage("Faroese")),
+  Finnish(          treebankForLanguage("Finnish")),
+  Galician(         treebankForLanguage("Galician")),
   German(           new NegraPennTreebankParserParams()),
+  Gothic(           treebankForLanguage("Gothic")),
+  Greek(            treebankForLanguage("Greek")),
   French(           new FrenchTreebankParserParams()),
   Hebrew(           new HebrewTreebankParserParams()),
+  Hindi(            treebankForLanguage("Hindi")),
+  Hungarian(        treebankForLanguage("Hungarian")),
+  Indonesian(       treebankForLanguage("Indonesian")),
+  Italian(          treebankForLanguage("Italian")),
+  Irish(            treebankForLanguage("Irish")),
+  Kazakh(           treebankForLanguage("Kazakh")),
+  Korean(           treebankForLanguage("Korean")),
+  Kurmanji(         treebankForLanguage("Kurmanji")),
+  Latin(            treebankForLanguage("Latin")),
+  Latvian(          treebankForLanguage("Latvian")),
+  Naija(            treebankForLanguage("Naija")),
+  NorthSami(        treebankForLanguage("NorthSami")),
+  Norwegian(        treebankForLanguage("Norwegian")),
+  OldChurchSlavonic( treebankForLanguage("OldChurchSlavonic")),
+  OldFrench(        treebankForLanguage("OldFrench")),
+  Persian(          treebankForLanguage("Persian")),
+  Polish(           treebankForLanguage("Polish")),
+  Portuguese(       treebankForLanguage("Portuguese")),
+  Romanian(         treebankForLanguage("Romanian")),
+  Russian(          treebankForLanguage("Russian")),
+  Serbian(          treebankForLanguage("Serbian")),
+  Slovak(           treebankForLanguage("Slovak")),
+  Slovenian(        treebankForLanguage("Slovenian")),
   Spanish(          new SpanishTreebankParserParams()),
+  Swedish(          treebankForLanguage("Swedish")),
+  Japanese(         treebankForLanguage("Japanese")),
+  Thai(             treebankForLanguage("Thai")),
+  Turkish(          treebankForLanguage("Turkish")),
+  Ukrainian(        treebankForLanguage("Ukrainian")),
   UniversalChinese( new ChineseTreebankParserParams()),
   UniversalEnglish( new EnglishTreebankParserParams()),
-  Unknown(          new EnglishTreebankParserParams());
+  Unknown(          new EnglishTreebankParserParams()),
+  UpperSorbian(     treebankForLanguage("UpperSorbian")),
+  Urdu(             treebankForLanguage("Urdu")),
+  Uyghur(           treebankForLanguage("Uyghur")),
+  Vietnamese(       treebankForLanguage("Vietnamese"));
 
   public static final String langList = StringUtils.join(Arrays.asList(Language.values()), " ");
 
@@ -30,6 +81,16 @@ public enum Language {
 
   Language(TreebankLangParserParams params) {
     this.params = params;
+  }
+
+  public static TreebankLangParserParams treebankForLanguage(String languageName) {
+    try {
+      Class clazz = Class.forName("edu.stanford.nlp.parser.lexparser."+languageName+"TreebankParserParams");
+      return (TreebankLangParserParams) clazz.newInstance();
+    } catch (ClassNotFoundException | NoClassDefFoundError | java.lang.InstantiationException |
+        java.lang.IllegalAccessException ex) {
+      return null;
+    }
   }
 
   /**

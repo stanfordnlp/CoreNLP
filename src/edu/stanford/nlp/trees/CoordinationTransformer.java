@@ -84,6 +84,14 @@ public class CoordinationTransformer implements TreeTransformer  {
     if (VERBOSE) {
       log.info("Input to CoordinationTransformer: " + t);
     }
+
+    if (performMWETransformation) {
+      t = gappingTransform(t);
+      if (VERBOSE) {
+        log.info("After       t = gappingTransform(t);\n:  " + t);
+      }
+    }
+
     t = tn.transformTree(t);
     if (VERBOSE) {
       log.info("After DependencyTreeTransformer:  " + t);
@@ -729,7 +737,19 @@ public class CoordinationTransformer implements TreeTransformer  {
 
     return t;
   }
-  
+
+  private static TregexPattern GAPPING_PATTERN = TregexPattern.compile("/^[^G].*/=gphrase < (/^[^V].*-ORPH.*/ $ /^[^V].*-ORPH.*/)");
+  private static TsurgeonPattern GAPPING_OPERATION = Tsurgeon.parseOperation("[adjoinH (GP (GAPPINGP@ )) gphrase] ");
+
+
+  public static Tree gappingTransform(Tree t) {
+
+    Tsurgeon.processPattern(GAPPING_PATTERN, GAPPING_OPERATION, t);
+
+    return t;
+
+  }
+
   public static void main(String[] args) {
 
     CoordinationTransformer transformer = new CoordinationTransformer(null);

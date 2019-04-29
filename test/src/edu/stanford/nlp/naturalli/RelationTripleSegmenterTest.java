@@ -491,7 +491,7 @@ public class RelationTripleSegmenterTest extends TestCase {
         "1\tScania-Vabis\t2\tnsubj\tNNP\tORGANIZATION\n" +
         "2\testablished\t0\troot\tVB\tO\n" +
         "3\tproduction\t4\tcompound\tNN\tO\n" +
-        "4\tplant\t2\tdobj\tNN\tO\n" +
+        "4\tplant\t2\tobj\tNN\tO\n" +
         "5\toutside\t6\tcase\tIN\tO\n" +
         "6\tSödertälje\t2\tnmod:outside\tNN\tO\n"
     );
@@ -502,7 +502,7 @@ public class RelationTripleSegmenterTest extends TestCase {
         "1\tHun\t2\tcompound\tNNP\tPERSON\n" +
         "2\tSen\t3\tnsubj\tNNP\tPERSON\n" +
         "3\tplayed\t0\troot\tVBD\tO\n" +
-        "4\tgolf\t3\tdobj\tNN\tO\n" +
+        "4\tgolf\t3\tobj\tNN\tO\n" +
         "5\twith\t6\tcase\tIN\tO\n" +
         "6\tShinawatra\t3\tnmod:with\tNNP\tPERSON\n"
     );
@@ -513,7 +513,7 @@ public class RelationTripleSegmenterTest extends TestCase {
         "1\tHun\t2\tcompound\tNNP\tPERSON\n" +
         "2\tSen\t3\tnsubj\tNNP\tPERSON\n" +
         "3\tplayed\t0\troot\tVBD\tO\n" +
-        "4\tgolf\t3\tdobj\tNN\tO\n" +
+        "4\tgolf\t3\tobj\tNN\tO\n" +
         "5\tShinawatra\t3\tnmod:with\tNNP\tPERSON\n" +
         "6\tCambodia\t3\tdobj\tNNP\tLOCATION\n"
     );
@@ -929,7 +929,7 @@ public class RelationTripleSegmenterTest extends TestCase {
         "1\tFriday\t3\tnmod:tmod\tNN\n" +
         "2\tI\t3\tnsubj\tPR\n" +
         "3\tmake\t0\troot\tVB\n" +
-        "4\ttea\t3\tdobj\tNN\n";
+        "4\ttea\t3\tobj\tNN\n";
     // Positive case
     Optional<RelationTriple> extraction = mkExtraction(conll, true);
     assertTrue("No extraction for sentence!", extraction.isPresent());

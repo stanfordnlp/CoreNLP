@@ -61,7 +61,7 @@ public class ClauseSplitterSearchProblem  {
       add("simple");
     }});
     put("xcomp", new ArrayList<String>() {{
-      add("clone_dobj");
+      add("clone_obj");
       add("clone_nsubj");
       add("simple");
     }});
@@ -70,7 +70,7 @@ public class ClauseSplitterSearchProblem  {
       add("simple");
     }});
     put("csubj", new ArrayList<String>() {{
-      add("clone_dobj");
+      add("clone_obj");
       add("simple");
     }});
     put("advcl", new ArrayList<String>() {{
@@ -83,7 +83,7 @@ public class ClauseSplitterSearchProblem  {
     }});
     put("conj:*", new ArrayList<String>() {{
       add("clone_nsubj");
-      add("clone_dobj");
+      add("clone_obj");
       add("simple");
     }});
     put("acl:relcl", new ArrayList<String>() {{  // no doubt (-> that cats have tails <-)
@@ -685,7 +685,7 @@ public class ClauseSplitterSearchProblem  {
     actionSpace.add(new Action() {
       @Override
       public String signature() {
-        return "clone_dobj";
+        return "clone_obj";
       }
 
       @Override
@@ -886,7 +886,7 @@ public class ClauseSplitterSearchProblem  {
                 Counters.logNormalizeInPlace(scores);
               }
               String rel = outgoingEdge.getRelation().toString();
-              if ("nsubj".equals(rel) || "dobj".equals(rel)) {
+              if ("nsubj".equals(rel) || "obj".equals(rel)) {
                 scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);  // Always at least yield on nsubj and dobj
               }
               logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);

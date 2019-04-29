@@ -327,7 +327,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         case "csubj":
           isSubject = true;
           break;
-        case "dobj":
+        case "obj":
         case "nsubjpass":
         case "nsubj:pass":
           isDirectObject = true;

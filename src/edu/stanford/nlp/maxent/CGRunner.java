@@ -147,8 +147,8 @@ public class CGRunner  {
   public void solveOWLQN2(double weight) {
     LikelihoodFunction df = new LikelihoodFunction(prob, tol, useGaussianPrior, priorSigmaS, sigmaSquareds);
     MonitorFunction monitor = new MonitorFunction(prob, df, filename);
-    Minimizer<DiffFunction> cgm = new QNMinimizer(monitor, 10);
-    ((QNMinimizer) cgm).useOWLQN(true, weight);
+    QNMinimizer cgm = new QNMinimizer(monitor, 10);
+    cgm.useOWLQN(true, weight);
 
     // all parameters are started at 0.0
     prob.lambda = cgm.minimize(df, tol, new double[df.domainDimension()]);

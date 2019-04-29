@@ -159,7 +159,7 @@ public class UniversalEnglishGrammaticalRelations {
     * "Kennedy has been killed" &rarr; {@code auxpass}(killed, been)
     */
   public static final GrammaticalRelation AUX_PASSIVE_MODIFIER =
-     new GrammaticalRelation(Language.UniversalEnglish, "auxpass", "passive auxiliary",
+     new GrammaticalRelation(Language.UniversalEnglish, "aux:pass", "passive auxiliary",
          AUX_MODIFIER, "VP|SQ|SINV", tregexCompiler,
          "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )",
          "SQ|SINV < (/^(?:VB|AUX|POS)/=target < " + beAuxiliaryRegex + " $++ (VP < VBD|VBN))",
@@ -372,7 +372,7 @@ public class UniversalEnglishGrammaticalRelations {
    * expression we could come up with.
    */
   public static final GrammaticalRelation NOMINAL_PASSIVE_SUBJECT =
-    new GrammaticalRelation(Language.UniversalEnglish, "nsubjpass", "nominal passive subject",
+    new GrammaticalRelation(Language.UniversalEnglish, "nsubj:pass", "nominal passive subject",
         NOMINAL_SUBJECT, "S|SQ", tregexCompiler,
             "S|SQ < (WHNP|NP=target !< EX) < (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + ")  < (VP < VBN|VBD))");
 
@@ -400,7 +400,7 @@ public class UniversalEnglishGrammaticalRelations {
    * "That she lied was suspected by everyone" &rarr; {@code csubjpass}(suspected, lied)
    */
   public static final GrammaticalRelation CLAUSAL_PASSIVE_SUBJECT =
-    new GrammaticalRelation(Language.UniversalEnglish, "csubjpass", "clausal passive subject",
+    new GrammaticalRelation(Language.UniversalEnglish, "csubj:pass", "clausal passive subject",
         CLAUSAL_SUBJECT, "S", tregexCompiler,
             "S < (SBAR|S=target !$+ /^,$/ $++ (VP < (VP < VBN|VBD) < (/^(?:VB|AUXG?)/ < " + passiveAuxWordRegex + ") !$-- NP))",
             "S < (SBAR|S=target !$+ /^,$/ $++ (VP <+(VP) (VP < VBN|VBD > (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + "))) !$-- NP))");
@@ -426,21 +426,6 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
-   * The "object" grammatical relation.  An object of a VP
-   * is any direct object or indirect object of that VP; an object
-   * of a clause is an object of the VP which is the predicate
-   * of that clause.<p>
-   * <p/>
-   * Examples: <br/>
-   * "She gave me a raise" &rarr;
-   * {@code obj}(gave, me),
-   * {@code obj}(gave, raise)
-   */
-  public static final GrammaticalRelation OBJECT =
-    new GrammaticalRelation(Language.UniversalEnglish, "obj", "object", COMPLEMENT);
-
-
-  /**
    * The "direct object" grammatical relation.  The direct object
    * of a verb is the noun phrase which is the (accusative) object of
    * the verb; the direct object of a clause or VP is the direct object of
@@ -448,15 +433,15 @@ public class UniversalEnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "She gave me a raise" &rarr;
-   * {@code dobj}(gave, raise) <p/>
-   * Note that dobj can also be assigned by the conversion of rel in the postprocessing.
+   * {@code obj}(gave, raise) <p/>
+   * Note that obj can also be assigned by the conversion of rel in the postprocessing.
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
-    new GrammaticalRelation(Language.UniversalEnglish, "dobj", "direct object",
-        OBJECT, "VP|SQ|SBARQ?", tregexCompiler,
+    new GrammaticalRelation(Language.UniversalEnglish, "obj", "direct object",
+        COMPLEMENT, "VP|SQ|SBARQ?", tregexCompiler,
             "VP !< (/^(?:VB|AUX)/ [ < " + copularWordRegex + " | < " + clausalComplementRegex + " ]) < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " +
                 // The next qualification eliminates parentheticals that
-                // come after the actual dobj
+                // come after the actual obj
                 " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
 
             // Examples such as "Rolls-Royce expects sales to remain steady"
@@ -484,7 +469,7 @@ public class UniversalEnglishGrammaticalRelations {
             // "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target " +
             //   // avoid conflicts with rcmod.  TODO: we could look for
             //   // empty nodes in this kind of structure and use that to
-            //   // find dobj, tmod, advmod, etc.  won't help the parser,
+            //   // find obj, tmod, advmod, etc.  won't help the parser,
             //   // of course, but will help when converting a treebank
             //   // which contains empties
             //   // Example: "with the way his split-fingered fastball is behaving"
@@ -492,7 +477,7 @@ public class UniversalEnglishGrammaticalRelations {
 
             // If there was an NP between the WHNP and the ADJP, we want
             // that NP to have the nsubj relation, and the WHNP is either
-            // a dobj or a pobj instead.  For example, dobj(What, worth)
+            // a obj or a pobj instead.  For example, dobj(What, worth)
             // in "What is UAL stock worth?"
             "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj !< (PP !< NP)) $++ (NP $++ =adj)))"
 
@@ -527,7 +512,7 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation INDIRECT_OBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "iobj", "indirect object",
-        OBJECT, "VP", tregexCompiler,
+        COMPLEMENT, "VP", tregexCompiler,
             "VP < (NP=target !< /\\$/ !<# (/^NN/ < " + timeWordRegex + ") $+ (NP !<# (/^NN/ < " + timeWordRegex + ")))",
             // this next one was meant to fix common mistakes of our parser, but is perhaps too dangerous to keep
             // excluding selfRegex leaves out phrases such as "I cooked dinner myself"
@@ -742,20 +727,25 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation NOMINAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "nmod", "nominal modifier",
         MODIFIER, ".*", tregexCompiler,
-            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [< @NP|WHNP|NML | < (PP < @NP|WHNP|NML)]) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
-            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
+            "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|PRN)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [< @NP|WHNP|NML | < (PP < @NP|WHNP|NML)]) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+            "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|PRN)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
             // only allow a PP < PP one if there is not a verb, or other pattern that matches acl/advcl under it.  Else acl/advcl
-            "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO)",
-            "S|SINV < (PP|PP-TMP=target !< SBAR|S) < VP|S",
-            "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
-            "@NP < (@UCP|PRN=target <# @PP)",
-            // to handle "What weapon is Apollo most proficient with?"
-            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP <: IN)) $++ (NP $++ =adj)))",
-            //to handle "What is the esophagus used for"? or "What radio station did Paul Harvey work for?"
-            "SBARQ < (WHNP=target [$++ (VP < (PP <: IN)) | $++ (SQ < (VP < (PP <: IN)))])");
+            "@NP < (@UCP|PRN=target <# @PP)");
 
 
 
+  public static final GrammaticalRelation OBLIQUE_MODIFIER =
+          new GrammaticalRelation(Language.UniversalEnglish, "obl", "oblique modifier",
+                  MODIFIER, ".*", tregexCompiler,
+                  "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [< @NP|WHNP|NML | < (PP < @NP|WHNP|NML)]) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+                  "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
+                  // to handle "What weapon is Apollo most proficient with?"
+                  "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP <: IN)) $++ (NP $++ =adj)))",
+                  //to handle "What is the esophagus used for"? or "What radio station did Paul Harvey work for?"
+                  "SBARQ < (WHNP=target [$++ (VP < (PP <: IN)) | $++ (SQ < (VP < (PP <: IN)))])",
+                  "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
+                  "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO)",
+                  "S|SINV < (PP|PP-TMP=target !< SBAR|S) < VP|S");
 
 
   /**
@@ -932,6 +922,7 @@ public class UniversalEnglishGrammaticalRelations {
             "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < (NP|NML|NN|NNS|NNP|NNPS|FW|AFX=target $++ NN|NNS|NNP|NNPS|FW|CD=sister !<<- POS !<<- (VBZ < /^\'s$/) !$- /^,$/ !$++ (POS $++ =sister))",
             "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < JJ|JJR|JJS=sister < (NP|NML|NN|NNS|NNP|NNPS|FW=target !<<- POS !<<- (VBZ < /^\'s$/) $+ =sister) <# NN|NNS|NNP|NNPS !<<- POS !<<- (VBZ < /^\'s$/) ",
             "QP|ADJP < (/^(?:CD|$|#)$/=target !$- CC)", //number relation in original SD
+            "@NP < (/^[$]$/ $+ /^N.*/)",
             // in vitro, in vivo, etc., in Genia
             // matches against "etc etc"
             "ADJP|ADVP < (FW [ $- (FW=target !< /^(?i:etc)$/) | $- (IN=target < in|In) ] )");
@@ -1080,7 +1071,8 @@ public class UniversalEnglishGrammaticalRelations {
         MODIFIER,
         "VP|ADJP|WHADJP|ADVP|WHADVP|S|SBAR|SINV|SQ|SBARQ|XS|(?:WH)?(?:PP|NP)(?:-TMP|-ADV)?|RRC|CONJP|JJP|QP", tregexCompiler,
             //last term is to exclude "at least/most..."
-            "/^(?:VP|ADJP|JJP|WHADJP|SQ?|SBARQ?|SINV|XS|RRC|(?:WH)?NP(?:-TMP|-ADV)?)$/ < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + " [!<+(/ADVP/) (@ADVP < (IN < /(?i:at)/)) |  !<+(/ADVP/) (@ADVP < NP)] )",
+            //"/^(?:VP|ADJP|JJP|WHADJP|SQ?|SBARQ?|SINV|XS|RRC|(?:WH)?NP(?:-TMP|-ADV)?)$/ < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + " [!<+(/ADVP/) (@ADVP < (IN < /(?i:at)/)) |  !<+(/ADVP/) (@ADVP < NP)] )",
+            "/^(?:VP|ADJP|JJP|WHADJP|SQ?|SBARQ?|SINV|XS|RRC|(?:WH)?NP(?:-TMP|-ADV)?)$/ < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + ETC_PAT + " [!<+(/ADVP/) (@ADVP < (IN < /(?i:at)/)) |  !<+(/ADVP/) (@ADVP < NP)] )",
             "QP < IN|RB|RBR|RBS|PDT|DT|JJ|JJR|JJS|XS=target", //quantmod relation in original SD
             "QP < (MWE=target < (JJR|RBR|IN < /^(?i)(more|less)$/) < (IN < /^(?i)than$/))", //more than / less than
             // avoids adverb conjunctions matching as advmod; added JJ to catch How long
@@ -1088,13 +1080,16 @@ public class UniversalEnglishGrammaticalRelations {
             // we allow CC|CONJP as long as it is not between the target and the head
             // TODO: perhaps remove that last clause if we transform
             // more and more, less and less, etc.
-            "ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target !< " + NOT_PAT + " !< /^(?i:no)$/ !< " + ETC_PAT + ") [ !< /^CC|CONJP$/ | ( <#__=head !< (/^CC|CONJP$/ [ ($++ =head $-- =target) | ($-- =head $++ =target) ])) ]",
+            //"ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target !< " + NOT_PAT + " !< /^(?i:no)$/ !< " + ETC_PAT + ") [ !< /^CC|CONJP$/ | ( <#__=head !< (/^CC|CONJP$/ [ ($++ =head $-- =target) | ($-- =head $++ =target) ])) ]",
+            "ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target !< " + ETC_PAT + ") [ !< /^CC|CONJP$/ | ( <#__=head !< (/^CC|CONJP$/ [ ($++ =head $-- =target) | ($-- =head $++ =target) ])) ]",
             //this one gets "at least" advmod(at, least) or "fewer than" advmod(than, fewer)
             "SBAR < (WHNP=target < WRB)", "SBARQ <, WHADVP=target", "XS < JJ=target",
             // for PP, only ones before head, or after NP, since others afterwards are pcomp
-            "/(?:WH)?PP(?:-TMP|-ADV)?$/ <# (__ $-- (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + "))",
-            "/(?:WH)?PP(?:-TMP|-ADV)?$/ < @NP|WHNP < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
-            "CONJP < (RB=target !< " + NOT_PAT + " !< " + ETC_PAT + ")");
+            //"/(?:WH)?PP(?:-TMP|-ADV)?$/ <# (__ $-- (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + "))",
+            "/(?:WH)?PP(?:-TMP|-ADV)?$/ <# (__ $-- (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + ETC_PAT + "))",
+//          "/(?:WH)?PP(?:-TMP|-ADV)?$/ < @NP|WHNP < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
+            "/(?:WH)?PP(?:-TMP|-ADV)?$/ < @NP|WHNP < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + ETC_PAT + ")",
+            "CONJP < (RB=target !< " + ETC_PAT + ")");
 
 
   /**
@@ -1110,7 +1105,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation NEGATION_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "neg", "negation modifier",
         ADVERBIAL_MODIFIER,
-        "VP|ADJP|S|SBAR|SINV|SQ|NP(?:-TMP|-ADV)?|FRAG|CONJP|PP|NAC|NML|NX|ADVP|WHADVP", tregexCompiler,
+        "XXXX", tregexCompiler,
             "/^(?:VP|NP(?:-TMP|-ADV)?|ADJP|SQ|S|FRAG|CONJP|PP)$/< (RB=target < " + NOT_PAT + ")",
             "VP|ADJP|S|SBAR|SINV|FRAG < (ADVP=target <# (RB < " + NOT_PAT + "))",
             "VP > SQ $-- (RB=target < " + NOT_PAT + ")",
@@ -1163,7 +1158,7 @@ public class UniversalEnglishGrammaticalRelations {
    * as a separate relation.
    */
   public static final GrammaticalRelation NP_ADVERBIAL_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "nmod:npmod", "noun phrase adverbial modifier",
+    new GrammaticalRelation(Language.UniversalEnglish, "obl:npmod", "noun phrase adverbial modifier",
         MODIFIER, "VP|(?:WH)?(?:NP|ADJP|ADVP|PP|QP)(?:-TMP|-ADV)?", tregexCompiler,
             "@ADVP|ADJP|WHADJP|WHADVP|PP|WHPP <# (JJ|JJR|IN|RB|RBR !< notwithstanding $- (@NP=target !< NNP|NNPS))",
             // one word nouns like "cost efficient", "ice-free"
@@ -1191,7 +1186,7 @@ public class UniversalEnglishGrammaticalRelations {
    * {@code nmod:tmod}(swam, night)
    */
   public static final GrammaticalRelation TEMPORAL_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "nmod:tmod", "temporal modifier",
+    new GrammaticalRelation(Language.UniversalEnglish, "obl:tmod", "temporal modifier",
         NOMINAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP|RRC", tregexCompiler,
             "VP|ADJP|RRC [ < NP-TMP=target | < (VP=target <# NP-TMP !$ /^,|CC|CONJP$/) | < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old)) ]",
             // CDM Jan 2010: For constructions like "during the same period last year"
@@ -1222,7 +1217,7 @@ public class UniversalEnglishGrammaticalRelations {
    * @see <a href="http://universaldependencies.github.io/docs/en/dep/mwe.html">List of multi-word expressions</a>
    */
   public static final GrammaticalRelation MULTI_WORD_EXPRESSION =
-    new GrammaticalRelation(Language.UniversalEnglish, "mwe", "multi-word expression",
+    new GrammaticalRelation(Language.UniversalEnglish, "fixed", "multi-word expression",
         MODIFIER, "MWE", tregexCompiler,
             "MWE < (IN|TO|RB|NP|NN|JJ|VB|CC|VBZ|VBD|ADVP|PP|JJS|RBS=target)");
 
@@ -1238,17 +1233,18 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation DETERMINER =
     new GrammaticalRelation(Language.UniversalEnglish, "det", "determiner",
         MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NAC|NML|NX|X|ADVP|ADJP", tregexCompiler,
-            "/^(?:NP(?:-TMP|-ADV)?|NAC|NML|NX|X)$/ < (DT=target !< /^(?i:either|neither|both|no)$/ !$+ DT !$++ CC $++ /^(?:N[MNXP]|CD|JJ|FW|ADJP|QP|RB|PRP(?![$])|PRN)/=det !$++ (/^PRP[$]|POS/ $++ =det !$++ (/''/ $++ =det)))",
+            "/^(?:NP(?:-TMP|-ADV)?|NAC|NML|NX|X)$/ < (DT=target !< /^(?i:either|neither|both)$/ !$+ DT !$++ CC $++ /^(?:N[MNXP]|CD|JJ|FW|ADJP|QP|RB|PRP(?![$])|PRN)/=det !$++ (/^PRP[$]|POS/ $++ =det !$++ (/''/ $++ =det)))",
             "NP|NP-TMP|NP-ADV < (DT=target [ (< /^(?i:either|neither|both)$/ !$+ DT !$++ CC $++ /^(?:NN|NX|NML)/ !$++ (NP < CC)) | " +
-                                            "(!< /^(?i:either|neither|both|no)$/ $++ CC $++ /^(?:NN|NX|NML)/) | " +
-                                            "(!< /^(?i:no)$/ $++ (/^JJ/ !$+ /^NN/) !$++CC !$+ DT) ] )",
+                                            "(!< /^(?i:either|neither|both)$/ $++ CC $++ /^(?:NN|NX|NML)/) ] ) ", // +
+                                           // "(!< /^(?i:no)$/ $++ (/^JJ/ !$+ /^NN/) !$++CC !$+ DT) ] )",
             // "NP|NP-TMP|NP-ADV < (RB=target $++ (/^PDT$/ $+ /^NN/))", // todo: This matches nothing. Was it meant to be a PDT rule for (NP almost/RB no/DT chairs/NNS)?
             "NP|NP-TMP|NP-ADV <<, PRP <- (NP|DT|RB=target <<- /^(?i:all|both|each)$/)", // we all, them all; various structures
             "WHNP < (NP $-- (WHNP=target < WDT))",
             // testing against CC|CONJP avoids conflicts with preconj in
             // phrases such as "both foo and bar"
             // however, we allow WDT|WP to account for "what foo or bar" and "whatever foo or bar"
-            "@WHNP|ADVP|ADJP < (/^(?:NP|NN|CD|RBS|JJ)/ $-- (DT|WDT|WP=target !< /^(?i:no)$/ [ ==WDT|WP | !$++ CC|CONJP ]))",
+            //"@WHNP|ADVP|ADJP < (/^(?:NP|NN|CD|RBS|JJ)/ $-- (DT|WDT|WP=target !< /^(?i:no)$/ [ ==WDT|WP | !$++ CC|CONJP ]))",
+            "@WHNP|ADVP|ADJP < (/^(?:NP|NN|CD|RBS|JJ)/ $-- (DT|WDT|WP=target [ ==WDT|WP | !$++ CC|CONJP ]))",
             "@NP < (/^(?:NP|NN|CD|RBS)/ $-- WDT|WP=target)");
 
 
@@ -1485,7 +1481,7 @@ public class UniversalEnglishGrammaticalRelations {
    *
    */
   public static final GrammaticalRelation CONTROLLING_NOMINAL_PASSIVE_SUBJECT =
-      new GrammaticalRelation(Language.UniversalEnglish, "nsubjpass:xsubj", "controlling nominal passive subject",
+      new GrammaticalRelation(Language.UniversalEnglish, "nsubj:pass:xsubj", "controlling nominal passive subject",
           UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT);
 
 
@@ -1538,7 +1534,12 @@ public class UniversalEnglishGrammaticalRelations {
    * {@code agent}(killed, police)
    */
   public static final GrammaticalRelation AGENT =
-    new GrammaticalRelation(Language.UniversalEnglish, "agent", "agent", DEPENDENT);
+    new GrammaticalRelation(Language.UniversalEnglish, "obl:agent", "agent", DEPENDENT);
+
+
+  public static final GrammaticalRelation ORPHAN =
+      new GrammaticalRelation(Language.UniversalEnglish, "orphan", "orphan", DEPENDENT, "GAPPINGP",
+              tregexCompiler, "GAPPINGP < __=target");
 
 
   // TODO would be nice to have this set up automatically...
@@ -1572,10 +1573,10 @@ public class UniversalEnglishGrammaticalRelations {
             CLAUSAL_SUBJECT,
             CLAUSAL_PASSIVE_SUBJECT,
             COMPLEMENT,
-            OBJECT,
             DIRECT_OBJECT,
             INDIRECT_OBJECT,
             NOMINAL_MODIFIER,
+            OBLIQUE_MODIFIER,
             CLAUSAL_COMPLEMENT,
             XCLAUSAL_COMPLEMENT,
             MARKER,
@@ -1613,7 +1614,8 @@ public class UniversalEnglishGrammaticalRelations {
             CONTROLLING_NOMINAL_SUBJECT,
             CONTROLLING_NOMINAL_PASSIVE_SUBJECT,
             CONTROLLING_CLAUSAL_SUBJECT,
-            CONTROLLING_CLAUSAL_PASSIVE_SUBJECT
+            CONTROLLING_CLAUSAL_PASSIVE_SUBJECT,
+            ORPHAN
     }));
   // Cache frequently used views of the values list
   private static final List<GrammaticalRelation> synchronizedValues =
@@ -1708,6 +1710,7 @@ public class UniversalEnglishGrammaticalRelations {
 
   // the exhaustive list of preposition relations
   private static final Map<String, GrammaticalRelation> nmods = Generics.newConcurrentHashMap();
+  private static final Map<String, GrammaticalRelation> obls = Generics.newConcurrentHashMap();
   private static final Map<String, GrammaticalRelation> acls = Generics.newConcurrentHashMap();
   private static final Map<String, GrammaticalRelation> advcls = Generics.newConcurrentHashMap();
 
@@ -1724,6 +1727,9 @@ public class UniversalEnglishGrammaticalRelations {
     return advcls.values();
   }
 
+  public static Collection<GrammaticalRelation> getObls() {
+    return obls.values();
+  }
 
 
   /**
@@ -1752,6 +1758,37 @@ public class UniversalEnglishGrammaticalRelations {
         if (result == null) {
           result = new GrammaticalRelation(Language.UniversalEnglish, "nmod", "nmod_preposition", NOMINAL_MODIFIER, prepositionString);
           nmods.put(prepositionString, result);
+          threadSafeAddRelation(result);
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+      * The "obl" grammatical relation. Used to add case marker information
+   *  to oblique modifier relations.<p>
+   * They will be turned into nmod:word, where "word" is a preposition.
+   *
+       * @param prepositionString The preposition to make a GrammaticalRelation out of
+   * @return A grammatical relation for this preposition
+   */
+  public static GrammaticalRelation getObl(String prepositionString) {
+
+    /* Check for obl subtypes which are not stored in the `obls` map. */
+    if (prepositionString.equals("npmod")) {
+      return NP_ADVERBIAL_MODIFIER;
+    } else if(prepositionString.equals("tmod")) {
+      return TEMPORAL_MODIFIER;
+    }
+
+    GrammaticalRelation result = obls.get(prepositionString);
+    if (result == null) {
+      synchronized(obls) {
+        result = obls.get(prepositionString);
+        if (result == null) {
+          result = new GrammaticalRelation(Language.UniversalEnglish, "obl", "obl_preposition", OBLIQUE_MODIFIER, prepositionString);
+          obls.put(prepositionString, result);
           threadSafeAddRelation(result);
         }
       }

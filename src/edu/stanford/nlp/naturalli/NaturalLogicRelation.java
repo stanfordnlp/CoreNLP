@@ -208,12 +208,12 @@ public enum NaturalLogicRelation {
     put("amod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("appos", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("aux", NaturalLogicRelation.INDEPENDENCE);  // he left -/-> he should leave
-    put("auxpass", NaturalLogicRelation.INDEPENDENCE);  // some cat adopts -/-> some cat got adopted
+    put("aux:pass", NaturalLogicRelation.INDEPENDENCE);  // some cat adopts -/-> some cat got adopted
     put("comp", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("ccomp", NaturalLogicRelation.REVERSE_ENTAILMENT);  // interesting project here... "he said x" -> "x"?
     put("cc", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_conj
     put("compound", NaturalLogicRelation.INDEPENDENCE);  //
-    put("name", NaturalLogicRelation.INDEPENDENCE);  //
+    put("flat", NaturalLogicRelation.INDEPENDENCE);  //
     put("mwe", NaturalLogicRelation.INDEPENDENCE);  //
     put("conj:and\\/or", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("conj:and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -226,11 +226,11 @@ public enum NaturalLogicRelation {
     put("conj_x", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("cop", NaturalLogicRelation.INDEPENDENCE);  //
     put("csubj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // clausal subject is split by clauses
-    put("csubjpass", NaturalLogicRelation.INDEPENDENCE);  // as above
+    put("csubj:pass", NaturalLogicRelation.INDEPENDENCE);  // as above
     put("dep", NaturalLogicRelation.REVERSE_ENTAILMENT);  // allow cutting these off, else we just miss a bunch of sentences
     put("det", NaturalLogicRelation.FORWARD_ENTAILMENT);  // todo(gabor) better treatment of generics?
     put("discourse", NaturalLogicRelation.EQUIVALENT);  //
-    put("dobj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // but, "he studied NLP at Stanford" -> "he studied NLP"
+    put("obj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // but, "he studied NLP at Stanford" -> "he studied NLP"
     put("expl", NaturalLogicRelation.EQUIVALENT);  // though we shouldn't see this...
     put("goeswith", NaturalLogicRelation.EQUIVALENT);  // also shouldn't see this
     put("infmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  // deprecated into vmod
@@ -241,9 +241,9 @@ public enum NaturalLogicRelation {
     put("nn", NaturalLogicRelation.INDEPENDENCE);  //
     put("npadvmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  // "9 months after his election, <main clause>"
     put("nsubj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // Note[gabor]: Only true for _duplicate_ nsubj relations. @see NaturalLogicWeights.
-    put("nsubjpass", NaturalLogicRelation.INDEPENDENCE);  //
+    put("nsubj:pass", NaturalLogicRelation.INDEPENDENCE);  //
     put("number", NaturalLogicRelation.INDEPENDENCE);  //
-    put("num", NaturalLogicRelation.INDEPENDENCE);  // gets a bit too vague if we allow deleting this? "he served three terms" -?-> "he served terms"
+    put("nummod", NaturalLogicRelation.INDEPENDENCE);  // gets a bit too vague if we allow deleting this? "he served three terms" -?-> "he served terms"
     put("op", NaturalLogicRelation.INDEPENDENCE);  //
     put("parataxis", NaturalLogicRelation.REVERSE_ENTAILMENT);  // we split on clauses on this
     put("partmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  // deprecated into vmod
@@ -385,6 +385,136 @@ public enum NaturalLogicRelation {
     put("nmod:with_regard_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:with_respect_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:about", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:above", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:according_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:across_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:across", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:after", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:against", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:ahead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:along", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:alongside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:alongside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:along_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:amid", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:among", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:anti", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:apart_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:around", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:as_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:as_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:aside_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:as_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:as_per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:as_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:at", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:away_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:based_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:because_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:before", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:behind", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:below", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:beneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:beside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:besides", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:between", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:beyond", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:by_means_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:depending_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:dep", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:despite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:down", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:due_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:during", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:en", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:except_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:excepting", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:except", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:excluding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:exclusive_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:followed_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:following", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:if", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:in_accordance_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:in_addition_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:in_case_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:including", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:in_front_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:in_lieu_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:in_place_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:in", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:inside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:inside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:in_spite_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:instead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:into", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:irrespective_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:like", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:minus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:near", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:near_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:next_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:off_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:off", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:on_account_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:on_behalf_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:on_top_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:onto", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:opposite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:out_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:out", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:outside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:outside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:over", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:owing_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:past", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:plus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:preliminary_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:preparatory_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:previous_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:prior_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:pursuant_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:regarding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:regardless_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:round", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:save", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:since", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:subsequent_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:such_as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:thanks_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:than", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:throughout", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:through", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:together_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:toward", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:towards", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:underneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:under", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:unlike", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:until", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:upon", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:up", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:versus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:via", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:vs.", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:whether", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:within", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:without", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:with_regard_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:with_respect_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("obl:with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prt", NaturalLogicRelation.INDEPENDENCE);  //
     put("punct", NaturalLogicRelation.EQUIVALENT);  //
     put("purpcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  // deprecated into advmod

@@ -68,7 +68,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 //  }
 
   //StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_42);
-  IndexWriterConfig iwc=new IndexWriterConfig(Version.LUCENE_42, analyzer);
+  IndexWriterConfig iwc=new IndexWriterConfig(analyzer);
   DirectoryReader reader = null;
   IndexSearcher searcher;
   ProtobufAnnotationSerializer p = new ProtobufAnnotationSerializer();
@@ -82,7 +82,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
 
   void setIndexReaderSearcher() throws IOException {
-    FSDirectory index = FSDirectory.open(indexDir);
+    FSDirectory index = FSDirectory.open(indexDir.toPath());
     if(reader == null){
       reader = DirectoryReader.open(index);
       searcher = new IndexSearcher(reader);
@@ -126,16 +126,17 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
    * **/
   Set<String> queryIndexGetSentences(CollectionValuedMap<String, String> words) throws IOException, ParseException {
     setIndexReaderSearcher();
-    BooleanQuery query = new BooleanQuery();
+    BooleanQuery.Builder builder = new BooleanQuery.Builder();
     String pkey  = Token.getKeyForClass(PatternsAnnotations.ProcessedTextAnnotation.class);
 
     for(Map.Entry<String, Collection<String>> en: words.entrySet()){
       boolean processedKey = en.getKey().equals(pkey);
       for(String en2: en.getValue()){
           if(!processedKey || !stopWords.contains(en2.toLowerCase()))
-            query.add(new BooleanClause(new TermQuery(new Term(en.getKey(), en2)), BooleanClause.Occur.MUST));
+            builder.add(new BooleanClause(new TermQuery(new Term(en.getKey(), en2)), BooleanClause.Occur.MUST));
       }
     }
+    BooleanQuery query = builder.build();
     //query.add(new BooleanClause(new TermQuery(new Term("textannotation","sonal")), BooleanClause.Occur.MUST));
 
 //    String queryStr = "";
@@ -304,7 +305,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
   void setIndexWriter()  {try{
     if(indexWriter == null){
-      dir = FSDirectory.open(indexDir);
+      dir = FSDirectory.open(indexDir.toPath());
       Redwood.log(Redwood.DBG, "Updating lucene index at " + indexDir);
       indexWriter = new IndexWriter(dir, iwc);
     }}catch(IOException e){

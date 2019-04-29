@@ -6,6 +6,7 @@ import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -66,7 +67,9 @@ public class UniversalDependenciesConverter {
 
   private static SemanticGraph convertTreeToBasic(Tree tree) {
     addLemmata(tree);
-    addNERTags(tree);
+    if (USE_NAME) {
+      addNERTags(tree);
+    }
     SemanticGraph sg = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC,
         GrammaticalStructure.Extras.NONE, null, false, true);
 
@@ -79,7 +82,7 @@ public class UniversalDependenciesConverter {
   }
 
 
-  private static class TreeToSemanticGraphIterator implements Iterator<SemanticGraph> {
+  private static class TreeToSemanticGraphIterator implements Iterator<Pair<SemanticGraph, SemanticGraph>> {
 
     private Iterator<Tree> treeIterator;
     private Tree currentTree; // = null;
@@ -94,10 +97,10 @@ public class UniversalDependenciesConverter {
     }
 
     @Override
-    public SemanticGraph next() {
+    public Pair<SemanticGraph, SemanticGraph> next() {
       Tree t = treeIterator.next();
       currentTree = t;
-      return convertTreeToBasic(t);
+      return new Pair<>(convertTreeToBasic(t), null);
     }
 
     public Tree getCurrentTree() {
@@ -204,10 +207,10 @@ public class UniversalDependenciesConverter {
     String conlluFileName = props.getProperty("conlluFile");
     String outputRepresentation = props.getProperty("outputRepresentation", "basic");
 
-    Iterator<SemanticGraph> sgIterator; // = null;
+    Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
 
     if (treeFileName != null) {
-      MemoryTreebank tb = new MemoryTreebank(new NPTmpRetainingTreeNormalizer(0, false, 1, false));
+      MemoryTreebank tb = new MemoryTreebank(new NPTmpRetainingTreeNormalizer(0, false, 1, false, true));
       tb.loadPath(treeFileName);
       Iterator<Tree> treeIterator = tb.iterator();
       sgIterator = new TreeToSemanticGraphIterator(treeIterator);
@@ -230,7 +233,8 @@ public class UniversalDependenciesConverter {
     CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
 
     while (sgIterator.hasNext()) {
-      SemanticGraph sg = sgIterator.next();
+      Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
+      SemanticGraph sg = sgs.first();
 
       if (treeFileName != null) {
         //add UPOS tags
@@ -249,12 +253,13 @@ public class UniversalDependenciesConverter {
         }
       }
 
+      SemanticGraph enhanced = null;
       if (outputRepresentation.equalsIgnoreCase("enhanced")) {
-        sg = convertBasicToEnhanced(sg);
+        enhanced = convertBasicToEnhanced(sg);
       } else if (outputRepresentation.equalsIgnoreCase("enhanced++")) {
-        sg = convertBasicToEnhancedPlusPlus(sg);
+        enhanced = convertBasicToEnhancedPlusPlus(sg);
       }
-      System.out.print(writer.printSemanticGraph(sg));
+      System.out.print(writer.printSemanticGraph(sg, enhanced));
     }
 
   }

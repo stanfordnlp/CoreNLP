@@ -360,7 +360,11 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
 
   public String toCopyIndex() {
     if (copyCount == 0) {
-      return String.valueOf(this.index());
+      if (Double.isNaN(this.pseudoPosition)) {
+        return String.valueOf(this.index());
+      } else {
+        return String.valueOf(this.pseudoPosition);
+      }
     } else {
       return this.index() + "." + copyCount;
     }

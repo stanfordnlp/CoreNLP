@@ -245,7 +245,7 @@ public class NERBenchmarkITest extends TestCase {
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP spanishPipeline = new StanfordCoreNLP(props);
     runNERTest("Spanish Ancora Dev 4 Class ", spanishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
-        77.00);
+        76.98);
   }
 
   public void testSpanishNEROnConLLTest() throws IOException {

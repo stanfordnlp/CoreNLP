@@ -46,7 +46,7 @@ public class SemgrexPatternITest extends TestCase {
     CoreMap sent = doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
     SemanticGraph graph = sent.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
     graph.prettyPrint();
-    String patStr = "({word:/lives/} >/nmod:in/ {word:/\\QCalifornia\\E|\\QWashington\\E/} >nsubj {ner:PERSON})";
+    String patStr = "({word:/lives/} >/obl:in/ {word:/\\QCalifornia\\E|\\QWashington\\E/} >nsubj {ner:PERSON})";
     SemgrexPattern pat = SemgrexPattern.compile(patStr);
     SemgrexMatcher mat = pat.matcher(graph, true);
     assertTrue(mat.find());

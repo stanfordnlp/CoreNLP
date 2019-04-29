@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.CoreMap;
  * This class adds gender information (MALE / FEMALE) to entity mentions as GenderAnnotations.
  * The default is to use name lists from our KBP system.
  *
- * @author jebolton
+ * @author jtibs
  */
 
 public class GenderAnnotator implements Annotator {

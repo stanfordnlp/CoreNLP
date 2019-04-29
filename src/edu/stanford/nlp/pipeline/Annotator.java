@@ -86,6 +86,7 @@ public interface Annotator {
   String STANFORD_TOKENIZE = "tokenize";
   String STANFORD_CLEAN_XML = "cleanxml";
   String STANFORD_SSPLIT = "ssplit";
+  String STANFORD_DOCDATE = "docdate";
   String STANFORD_POS = "pos";
   String STANFORD_LEMMA = "lemma";
   String STANFORD_NER = "ner";
@@ -122,6 +123,7 @@ public interface Annotator {
     put(STANFORD_TOKENIZE,                 new LinkedHashSet<>(Arrays.asList()));
     put(STANFORD_CLEAN_XML,                new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE)));
     put(STANFORD_SSPLIT,                   new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE)));
+    put(STANFORD_DOCDATE,                  new LinkedHashSet<>(Arrays.asList()));
     put(STANFORD_POS,                      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
     put(STANFORD_LEMMA,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS)));
     put(STANFORD_NER,                      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA)));

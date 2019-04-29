@@ -1,10 +1,9 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
+ * Copyright:    Copyright (c) The Board of Trustees of Leland Stanford Junior University<p>
  * Company:      Stanford University<p>
  */
-
 
 package edu.stanford.nlp.tagger.maxent;
 
@@ -25,9 +24,9 @@ public class FeatureKey {
 
   // this object is used as a hash key and such instances should be treated as read-only
   // TODO: refactor code so that FeatureKeys are immutable? Or is the object reuse in a tight loop worth it?
-  int num;
-  String val;
-  String tag;
+  int num; // extractor ID
+  String val; // calculated key based on history (x), like "NN!VBD", "Xxx", or "0"
+  String tag; // tag (y) value -- we could think of using an int here too
 
   public FeatureKey() {
   }
@@ -81,7 +80,7 @@ public class FeatureKey {
 
   ---------- */
 
-  private int hashCode = 0;
+  private int hashCode; // = 0;
   @Override
   public int hashCode() {
     /* I'm not sure why this is happening, and i really don't want to

@@ -994,6 +994,25 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
+   * Returns a set of all parents bearing a certain grammatical relation, or an
+   * empty set if none.
+   */
+  public Set<IndexedWord> getParentsWithReln(IndexedWord vertex, String relnName) {
+    if (vertex.equals(IndexedWord.NO_WORD))
+      return Collections.emptySet();
+    if (!containsVertex(vertex))
+      throw new IllegalArgumentException();
+
+    Set<IndexedWord> parentList = wordMapFactory.newSet();
+    for (SemanticGraphEdge edge : incomingEdgeIterable(vertex)) {
+      if (edge.getRelation().toString().equals(relnName)) {
+        parentList.add(edge.getSource());
+      }
+    }
+    return parentList;
+  }
+
+  /**
    * Returns a set of all children bearing a certain grammatical relation, or
    * an empty set if none.
    */
@@ -1998,6 +2017,22 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
+   * Given a semantic graph, and the short name of a target relation, returns a list of all
+   * relations (edges) matching.
+   *
+   */
+  public List<SemanticGraphEdge> findAllRelns(String tgtRelationShortname) {
+    ArrayList<SemanticGraphEdge> relns = new ArrayList<>();
+    for (SemanticGraphEdge edge : edgeIterable()) {
+      GrammaticalRelation edgeRelation = edge.getRelation();
+      if ((edgeRelation != null) && (edgeRelation.getShortName().equals(tgtRelationShortname))) {
+        relns.add(edge);
+      }
+    }
+    return relns;
+  }
+
+  /**
    * Delete all duplicate edges.
    *
    */
@@ -2057,6 +2092,31 @@ public class SemanticGraph implements Serializable  {
       }
     }
     return Pair.makePair(min, max);
+  }
+
+
+  /**
+   * Returns the yield of a node, i.e., all descendents of the node.
+   *
+   * @param word The word acting as the root of the constituent we are finding.
+   */
+  public List<IndexedWord> yield(IndexedWord word) {
+    List<IndexedWord> yield = new LinkedList<>();
+    Stack<IndexedWord> fringe = new Stack<>();
+    fringe.push(word);
+    while ( ! fringe.isEmpty()) {
+      IndexedWord parent = fringe.pop();
+      yield.add(parent);
+      for (SemanticGraphEdge edge : outgoingEdgeIterable(parent)) {
+        if (!edge.isExtra()) {
+          fringe.push(edge.getDependent());
+        }
+      }
+    }
+
+    Collections.sort(yield);
+
+    return yield;
   }
 
   /**

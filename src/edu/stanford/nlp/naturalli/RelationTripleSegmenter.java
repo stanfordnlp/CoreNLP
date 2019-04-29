@@ -32,18 +32,18 @@ public class RelationTripleSegmenter {
     // { blue cats play [quietly] with yarn,
     //   Jill blew kisses at Jack,
     //   cats are standing next to dogs }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ?>case {}=prep) ?>dobj {pos:/N.*/}=relObj"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/(nmod|obl|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ?>case {}=prep) ?>obj {pos:/N.*/}=relObj"));
     // { cats are cute,
     //   horses are grazing peacefully }
-    add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb ?>case {}=prep"));
+    add(SemgrexPattern.compile("{$}=object >/.subj(:pass)?/ {}=subject >/cop|aux(:pass)?/ {}=verb ?>case {}=prep"));
     // { fish like to swim }
-    add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
+    add(SemgrexPattern.compile("{$}=verb >/.subj(:pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
-    add(SemgrexPattern.compile("{$}=verb ?>/aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
+    add(SemgrexPattern.compile("{$}=verb ?>/aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Tom and Jerry were fighting }
-    add(SemgrexPattern.compile("{$}=verb >/nsubj(pass)?/ ( {}=subject >/conj:and/=subjIgnored {}=object )"));
+    add(SemgrexPattern.compile("{$}=verb >/nsubj(:pass)?/ ( {}=subject >/conj:and/=subjIgnored {}=object )"));
     // { mass of iron is 55amu }
-    add(SemgrexPattern.compile("{pos:/NNS?/}=object >cop {}=relappend1 >/nsubj(pass)?/ ( {}=verb >/nmod:of/ ( {pos:/NNS?/}=subject >case {}=relappend0 ) )"));
+    add(SemgrexPattern.compile("{pos:/NNS?/}=object >cop {}=relappend1 >/nsubj(:pass)?/ ( {}=verb >/nmod:of/ ( {pos:/NNS?/}=subject >case {}=relappend0 ) )"));
   }});
 
   /**
@@ -57,7 +57,7 @@ public class RelationTripleSegmenter {
     for (SemgrexPattern pattern : VERB_PATTERNS) {
       String fullPattern = pattern.pattern();
       String vpPattern = fullPattern
-          .replace(">/.subj(pass)?/ {}=subject", "")  // drop the subject
+          .replace(">/.subj(:pass)?/ {}=subject", "")  // drop the subject
           .replace("$", "pos:/V.*/");                 // but, force the root to be on a verb
       add(SemgrexPattern.compile(vpPattern));
     }
@@ -398,7 +398,7 @@ public class RelationTripleSegmenter {
   /** A set of valid arcs denoting an adverbial modifier we are interested in */
   public final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or");
-    add("auxpass"); add("compound:*");
+    add("auxpass"); add("compound:*"); add("obl:*");  add("obl");
   }});
 
   /**
@@ -420,7 +420,7 @@ public class RelationTripleSegmenter {
     IndexedWord primaryCase = null;
     for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(originalRoot)) {
       String shortName = edge.getRelation().getShortName();
-      if (shortName.equals("cop") || shortName.equals("auxpass")) {
+      if (shortName.equals("cop") || shortName.equals("aux:pass")) {
         isCopula = true;
       }
       if (shortName.equals("case")) {
@@ -448,7 +448,7 @@ public class RelationTripleSegmenter {
         if (shortName.startsWith("conj")) { hasConj = true; }
         if (shortName.equals("cc")) { hasCC = true; }
         //noinspection StatementWithEmptyBody
-        if (isCopula && (shortName.equals("cop") || shortName.contains("subj") || shortName.equals("auxpass") )) {
+        if (isCopula && (shortName.equals("cop") || shortName.contains("subj") || shortName.equals("aux:pass") )) {
           // noop; ignore nsubj, cop for extractions with copula
         } else if (edge.getDependent() == primaryCase) {
           // noop: ignore case edge
@@ -467,9 +467,10 @@ public class RelationTripleSegmenter {
       }
 
       // Ensure that we don't have a conj without a cc, or vice versa
-      if (Boolean.logicalXor(hasConj, hasCC)) {
-        return Optional.empty();
-      }
+      // TODO sebschu: this no longer works with ccs being attached to the following conjunct
+      //if (Boolean.logicalXor(hasConj, hasCC)) {
+      //  return Optional.empty();
+      //}
     }
 
     return Optional.of(chunk.toSortedList());

@@ -1,7 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.util.logging.Redwood;
-
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -11,14 +9,13 @@ import edu.stanford.nlp.ling.tokensregex.types.Tags;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.TimeExpression;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.*;
-import java.text.SimpleDateFormat;
+
 
 /**
  * This class will add NER information to an Annotation using a combination of NER models.
@@ -277,7 +274,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    *
    * @param properties Properties for the DocDateAnnotator sub-annotator
    */
-  public void setUpDocDateAnnotator(Properties properties) throws IOException {
+  private void setUpDocDateAnnotator(Properties properties) throws IOException {
     for (String property : properties.stringPropertyNames()) {
       if (property.length() >= 11 && property.substring(0,11).equals("ner.docdate")) {
         setDocDate = true;
@@ -355,7 +352,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   /** convert Spanish tag content of older models **/
-  public static String spanishToEnglishTag(String spanishTag) {
+  private static String spanishToEnglishTag(String spanishTag) {
     return spanishToEnglishTag.getOrDefault(spanishTag, spanishTag);
   }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
  * Copyright:    Copyright (c) Kristina Toutanova<p>
@@ -119,7 +119,7 @@ public class History {
   @Override
   public int hashCode() {
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < extractors.size(); i++) {
+    for (int i = 0, sz = extractors.size(); i < sz; i++) {
       sb.append(getX(i));
     }
     return sb.toString().hashCode();

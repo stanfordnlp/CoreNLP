@@ -431,7 +431,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     if (specific == null) {
       return shortName;
     } else {
-      char sep = language == Language.UniversalEnglish ? ':' : '_';
+      char sep = (language == Language.English || language == Language.Chinese )? '_' : ':';
       return shortName + sep + specific;
     }
   }

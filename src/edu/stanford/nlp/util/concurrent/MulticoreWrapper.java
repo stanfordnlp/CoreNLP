@@ -23,8 +23,7 @@ import java.util.concurrent.TimeUnit;
  * See edu.stanford.nlp.util.concurrent.MulticoreWrapperTest and
  * edu.stanford.nlp.tagger.maxent.documentation.MulticoreWrapperDemo for examples of use.
  *
- * TODO(spenceg): This code does **not** support multiple consumers, i.e., multi-threaded calls
- * to peek() and poll().
+ * TODO(spenceg): This code does **not** support multiple consumers, i.e., multi-threaded calls to peek() and poll().
  *
  * @author Spence Green
  *
@@ -37,7 +36,7 @@ public class MulticoreWrapper<I,O> {
   private static final Redwood.RedwoodChannels log = Redwood.channels(MulticoreWrapper.class);
 
   final int nThreads;
-  private int submittedItemCounter = 0;
+  private int submittedItemCounter; // starts = 0;
   // Which id was the last id returned.  Only meaningful in the case
   // of a queue where output order matters.
   private int returnedItemCounter = -1;
@@ -55,7 +54,7 @@ public class MulticoreWrapper<I,O> {
    *
    * @param nThreads If less than or equal to 0, then automatically determine the number
    *                    of threads. Otherwise, the size of the underlying threadpool.
-   * @param processor
+   * @param processor  The processor (factory) for what will be run on data.
    */
   public MulticoreWrapper(int nThreads, ThreadsafeProcessor<I,O> processor) {
     this(nThreads, processor, true);
@@ -64,10 +63,10 @@ public class MulticoreWrapper<I,O> {
   /**
    * Constructor.
    *
-   * @param numThreads -- if less than or equal to 0, then automatically determine the number
+   * @param numThreads If less than or equal to 0, then automatically determine the number
    *                    of threads. Otherwise, the size of the underlying threadpool.
-   * @param processor
-   * @param orderResults -- If true, return results in the order submitted. Otherwise, return results
+   * @param processor  The processor (factory) for what will be run on data.
+   * @param orderResults If true, return results in the order submitted. Otherwise, return results
    *                        as they become available.
    */
   public MulticoreWrapper(int numThreads, ThreadsafeProcessor<I,O> processor, boolean orderResults) {
@@ -198,11 +197,7 @@ public class MulticoreWrapper<I,O> {
    * @return true if a new result is available, false otherwise.
    */
   public boolean peek() {
-    if (outputQueue.isEmpty()) {
-      return false;
-    } else {
-       return orderResults ? outputQueue.containsKey(returnedItemCounter + 1) : true;
-    }
+    return ! outputQueue.isEmpty() && ( ! orderResults || outputQueue.containsKey(returnedItemCounter + 1));
   }
 
   /**
@@ -225,8 +220,8 @@ public class MulticoreWrapper<I,O> {
    *
    * @param <O>
    */
-  private static interface JobCallback<O> {
-    public void call(QueueItem<O> result, int processorId);
+  private interface JobCallback<O> {
+    void call(QueueItem<O> result, int processorId);
   }
   
   /**

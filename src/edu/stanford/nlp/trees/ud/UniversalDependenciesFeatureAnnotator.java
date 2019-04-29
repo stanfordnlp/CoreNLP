@@ -27,6 +27,7 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.UniversalPOSMapper;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
 
@@ -187,7 +188,8 @@ public class UniversalDependenciesFeatureAnnotator  {
     if (parent != null) {
       SemanticGraphEdge edge = sg.getEdge(parent, word);
       if (edge != null) {
-        if (UniversalEnglishGrammaticalRelations.OBJECT.isAncestor(edge.getRelation())) {
+        if (edge.getRelation().equals(UniversalEnglishGrammaticalRelations.DIRECT_OBJECT) ||
+            edge.getRelation().equals(UniversalEnglishGrammaticalRelations.INDIRECT_OBJECT)) {
           /* "you" is an object. */
           return "Acc";
         } else if (UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER.isAncestor(edge.getRelation())
@@ -463,12 +465,12 @@ public class UniversalDependenciesFeatureAnnotator  {
     Reader r = IOUtils.readerFromString(coNLLUFile);
     CoNLLUDocumentReader depReader = new CoNLLUDocumentReader();
     CoNLLUDocumentWriter depWriter = new CoNLLUDocumentWriter();
-    Iterator<SemanticGraph> it = depReader.getIterator(r);
+    Iterator<Pair<SemanticGraph, SemanticGraph>> it = depReader.getIterator(r);
 
     Iterator<Tree> treeIt = treebankIterator(treeFile);
 
     while (it.hasNext()) {
-      SemanticGraph sg = it.next();
+      SemanticGraph sg = it.next().first();
       Tree t = treeIt.next();
 
       if (t == null || t.yield().size() != sg.size()) {
@@ -486,7 +488,7 @@ public class UniversalDependenciesFeatureAnnotator  {
 
       featureAnnotator.addFeatures(sg, t, true, addUPOS);
 
-      System.out.print(depWriter.printSemanticGraph(sg, !escapeParens));
+      System.out.print(depWriter.printSemanticGraph(sg, null, !escapeParens));
     }
   }
 

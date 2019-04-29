@@ -72,7 +72,7 @@ public class OpenIE implements Annotator  {
   /**
    * A pattern for rewriting "NN_1 is a JJ NN_2" --> NN_1 is JJ"
    */
-  private static final SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/an?/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
+  private static final SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/an?/} >amod {}=adj ?>/(nmod|acl).*/=prep {}=pobj");
 
   //
   // Static Options (for running standalone)
@@ -701,7 +701,7 @@ public class OpenIE implements Annotator  {
       if (!"false".equalsIgnoreCase(props.getProperty("resolve_coref", props.getProperty("openie.resolve_coref", "false")))) {
         props.setProperty("coref.md.type", "dep");  // so we don't need the `parse` annotator
         props.setProperty("coref.mode", "statistical");  // explicitly ask for scoref
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,mention,coref,natlog,openie");
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,coref,natlog,openie");
       } else {
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
       }

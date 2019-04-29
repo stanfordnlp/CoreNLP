@@ -97,8 +97,8 @@ import java.text.DecimalFormat;
  * given in NLP_DATA_HOME.</dt>
  * <p>
  * <dt>To tag a List of HasWord and get a List of TaggedWord, you can use one of: </dt>
- * <dd>{@code List&lt;TaggedWord&gt; taggedSentence = tagger.tagSentence(List&lt;? extends HasWord&gt; sentence)}</dd>
- * <dd>{@code List&lt;TaggedWord&gt; taggedSentence = tagger.apply(List&lt;? extends HasWord&gt; sentence)}</dd>
+ * <dd>{@code List<TaggedWord> taggedSentence = tagger.tagSentence(List<? extends HasWord> sentence)}</dd>
+ * <dd>{@code List<TaggedWord> taggedSentence = tagger.apply(List<? extends HasWord> sentence)}</dd>
  * <p>
  * <dt>To tag a list of sentences and get back a list of tagged sentences:
  * <dd>{@code List taggedList = tagger.process(List sentences)}</dd>
@@ -139,9 +139,9 @@ import java.text.DecimalFormat;
  *
  * Usage:
  * For tagging (plain text):
- * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -model &lt;modelFile&gt; -textFile &lt;textfile&gt; </pre>
+ * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -model modelFile -textFile textfile </pre>
  * For testing (evaluating against tagged text):
- * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -model &lt;modelFile&gt; -testFile &lt;testfile&gt; </pre>
+ * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -model modelFile -testFile testfile </pre>
  * You can use the same properties file as for training
  * if you pass it in with the "-props" argument. The most important
  * arguments for tagging (besides "model" and "file") are "tokenize"
@@ -192,7 +192,7 @@ import java.text.DecimalFormat;
  * <tr><td>tokenizerOptions</td><td>String</td><td></td><td>Tag,Test</td><td>Known options for the particular tokenizer used. A comma-separated list. For PTBTokenizer, options of interest include {@code americanize=false} and {@code asciiQuotes} (for German). Note that any choice of tokenizer options that conflicts with the tokenization used in the tagger training data will likely degrade tagger performance.</td></tr>
  * <tr><td>sentenceDelimiter</td><td>String</td><td>null</td><td>Tag,Test</td><td>A marker used to separate a text into sentences. If not set (equal to {@code null}), sentence breaking is done by content (looking for periods, etc.) Otherwise, it will break on this String, except that if the String is "newline", it breaks on the String "\\n".</td></tr>
  * <tr><td>arch</td><td>String</td><td>generic</td><td>Train</td><td>Architecture of the model, as a comma-separated list of options, some with a parenthesized integer argument written k here: this determines what features are used to build your model.  See {@link ExtractorFrames} and {@link ExtractorFramesRare} for more information.</td></tr>
- * <tr><td>wordFunction</td><td>String</td><td>(none)</td><td>Train</td><td>A function to apply to the text before training or testing.  Must inherit from edu.stanford.nlp.util.Function&lt;String, String&gt;.  Can be blank.</td></tr>
+ * <tr><td>wordFunction</td><td>String</td><td>(none)</td><td>Train</td><td>A function to apply to the text before training or testing.  Must inherit from {@code java.util.function.Function<String, String>}.  Can be blank.</td></tr>
  * <tr><td>lang</td><td>String</td><td>english</td><td>Train</td><td>Language from which the part of speech tags are drawn. This option determines which tags are considered closed-class (only fixed set of words can be tagged with a closed-class tag, such as prepositions). Defined languages are 'english' (Penn tag set), 'polish' (very rudimentary), 'french', 'chinese', 'arabic', 'german', and 'medline'.  </td></tr>
  * <tr><td>openClassTags</td><td>String</td><td>N/A</td><td>Train</td><td>Space separated list of tags that should be considered open-class.  All tags encountered that are not in this list are considered closed-class.  E.g. format: "NN VB"</td></tr>
  * <tr><td>closedClassTags</td><td>String</td><td>N/A</td><td>Train</td><td>Space separated list of tags that should be considered closed-class.  All tags encountered that are not in this list are considered open-class.</td></tr>
@@ -361,8 +361,9 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   private LambdaSolveTagger prob;
-  // For each extractor index, we have a map from possible extracted
-  // features to an array which maps from tag number to feature weight index in the lambdas array.
+
+  // For each extractor index (List index), we have a Map from possible extracted
+  // feature values to an array which maps from tag number to feature weight index in the lambdas array.
   List<Map<String, int[]>> fAssociations = Generics.newArrayList();
   //PairsHolder pairs = new PairsHolder();
   Extractors extractors;
@@ -522,8 +523,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       // log.info("occurringTagsOnly: "+occurringTagsOnly);
       // log.info("possibleTagsOnly: "+possibleTagsOnly);
 
-      if(config.getDefaultScore() >= 0)
-        defaultScore = config.getDefaultScore();
+      defaultScore = config.getDefaultScore();
     }
 
     // just in case, reset the defaultScores array so it will be
@@ -880,16 +880,22 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       for (int i = 0; i < extractors.size() + extractorsRare.size(); ++i) {
         fAssociations.add(Generics.<String, int[]>newHashMap());
       }
-      if (VERBOSE) log.info("Reading %d feature keys...%n",sizeAssoc);
+      if (VERBOSE) log.infof("Reading %d feature keys...%n", sizeAssoc);
       PrintFile pfVP = null;
       if (VERBOSE) {
         pfVP = new PrintFile("pairs.txt");
       }
+      FeatureKey fK = new FeatureKey(); // reused in for loop but not stored. just a temp variable
       for (int i = 0; i < sizeAssoc; i++) {
         int numF = rf.readInt();
-        FeatureKey fK = new FeatureKey();
         fK.read(rf);
         numFA[fK.num]++;
+        if (VERBOSE) {
+          String eName = (fK.num < extractors.size() ? extractors.get(fK.num): extractorsRare.get(fK.num - extractors.size())).toString();
+          pfVP.print(eName);
+          pfVP.print(' ');
+          pfVP.println(fK);
+        }
 
         // TODO: rewrite the writing / reading code to store
         // fAssociations in a cleaner manner?  Only do this when
@@ -911,7 +917,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       }
       if (VERBOSE) {
         for (int k = 0; k < numFA.length; k++) {
-          log.info("Number of features of kind " + k + ' ' + numFA[k]);
+          log.info("Number of features of kind " + k + ' ' + (k < extractors.size() ? extractors.get(k): extractorsRare.get(k - extractors.size())) +": " + numFA[k]);
         }
       }
       prob = new LambdaSolveTagger(rf);
@@ -927,7 +933,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
 
-  protected void dumpModel(PrintStream out) {
+  private void dumpModel(PrintStream out) {
     out.println("Features: template featureValue tag: lambda");
     NumberFormat nf = new DecimalFormat(" 0.000000;-0.000000");
     for (int i = 0; i < fAssociations.size(); ++i) {
@@ -941,7 +947,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
           if (association >= 0) {
             FeatureKey fk = new FeatureKey(i, featureValue, tags.getTag(j));
             out.println((fk.num < extractors.size() ? extractors.get(fk.num) : extractorsRare.get(fk.num - extractors.size()))
-                    + " " + fk.val + " " + fk.tag + ": " + nf.format(getLambdaSolve().lambda[association]));
+                    + " " + fk.val + ' ' + fk.tag + ": " + nf.format(getLambdaSolve().lambda[association]));
           }
         }
       }
@@ -1147,7 +1153,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       tagger.config.dump(System.out);
       tagger.dumpModel(System.out);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.err(e);
     }
   }
 
@@ -1159,7 +1165,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    */
   private static void runTest(TaggerConfig config) {
     if (config.getVerbose()) {
-      log.info("## tagger testing invoked at " + new Date() + " with arguments:");
+      log.info("Tagger testing invoked at " + new Date() + " with arguments:");
       config.dump();
     }
 
@@ -1172,8 +1178,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       printErrWordsPerSec(millis, testClassifier.getNumWords());
       testClassifier.printModelAndAccuracy(tagger);
     } catch (Exception e) {
-      log.info("An error occurred while testing the tagger.");
-      e.printStackTrace();
+      log.warn("An error occurred while testing the tagger.", e);
     }
   }
 

@@ -412,7 +412,9 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
    */
   public double getDefaultScore() {
     String approx = getProperty("approximate");
-    if ("false".equalsIgnoreCase(approx)) {
+    if (approx == null) {
+      return getLang().equals("english") ? 1.0 : 0.0;
+    } else if ("false".equalsIgnoreCase(approx)) {
       return -1.0;
     } else if ("true".equalsIgnoreCase(approx)) {
       return 1.0;

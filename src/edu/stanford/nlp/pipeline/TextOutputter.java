@@ -120,6 +120,14 @@ public class TextOutputter extends AnnotationOutputter {
           options.constituencyTreePrinter.printTree(tree, pw);
         }
 
+        // display the binary tree for this sentence
+        Tree binaryTree = sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
+        if (binaryTree != null) {
+          pw.println();
+          pw.println("Binary Constituency parse: ");
+          options.constituencyTreePrinter.printTree(binaryTree, pw);
+        }
+
         // display sentiment tree if they asked for sentiment
         if ( ! StringUtils.isNullOrEmpty(sentiment)) {
           pw.println();
@@ -151,9 +159,18 @@ public class TextOutputter extends AnnotationOutputter {
           pw.println();
           pw.println("Extracted the following NER entity mentions:");
           for (CoreMap entityMention : entityMentions) {
+            String nerConfidenceEntry;
+            Map<String,Double> nerConfidences = entityMention.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
+            String nerConfidenceKey =
+                    nerConfidences.keySet().size() > 0 ? (String) nerConfidences.keySet().toArray()[0] : "" ;
+            if (!nerConfidenceKey.equals("") && !nerConfidenceKey.equals("O"))
+              nerConfidenceEntry = nerConfidenceKey+":"+Double.toString(nerConfidences.get(nerConfidenceKey));
+            else
+              nerConfidenceEntry = "-";
             if (entityMention.get(CoreAnnotations.EntityTypeAnnotation.class) != null) {
               pw.println(entityMention.get(CoreAnnotations.TextAnnotation.class) + '\t'
-                  + entityMention.get(CoreAnnotations.EntityTypeAnnotation.class));
+                  + entityMention.get(CoreAnnotations.EntityTypeAnnotation.class) + '\t'
+                      + nerConfidenceEntry);
             }
           }
         }

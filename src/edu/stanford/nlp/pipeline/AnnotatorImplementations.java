@@ -46,6 +46,18 @@ public class AnnotatorImplementations  {
   }
 
   /**
+   * Set document date
+   */
+  public Annotator docDate(Properties properties) {
+    String annotatorName = "docdate";
+    try {
+      return new DocDateAnnotator(annotatorName, properties);
+    } catch (IOException e) {
+      throw new RuntimeIOException("Error reading docdate mapping file.");
+    }
+  }
+
+  /**
    * Part of speech tag
    */
   public Annotator posTagger(Properties properties) {
@@ -262,8 +274,14 @@ public class AnnotatorImplementations  {
    * Annotate quotes and extract them like sentences
    */
   public Annotator quote(Properties properties) {
-    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_QUOTE + '.');
+	Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+	    Annotator.STANFORD_QUOTE + '.', true);
+	Properties depparseProperties = PropertiesUtils.extractPrefixedProperties(properties,
+	    Annotator.STANFORD_DEPENDENCIES + '.');
+	for (String key: depparseProperties.stringPropertyNames())  {
+	    relevantProperties.setProperty("quote.attribution." + Annotator.STANFORD_DEPENDENCIES + '.' + key,
+		depparseProperties.getProperty(key));
+		}
     return new QuoteAnnotator(relevantProperties);
   }
 

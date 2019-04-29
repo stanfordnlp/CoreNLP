@@ -316,7 +316,7 @@ public class EntityMentionsAnnotator implements Annotator {
     List<CoreMap> allEntityMentions = new ArrayList<>();
     int entityMentionIndex = 0;
     for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-      for (CoreMap entityMention : sentence.get(CoreAnnotations.MentionsAnnotation.class)) {
+      for (CoreMap entityMention : sentence.get(mentionsCoreAnnotationClass)) {
         entityMention.set(CoreAnnotations.EntityMentionIndexAnnotation.class, entityMentionIndex);
         entityMention.set(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class, entityMentionIndex);
         for (CoreLabel entityMentionToken : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {

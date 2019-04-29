@@ -235,9 +235,9 @@ public class SemanticGraphFormatter {
     System.out.println("12345678901234567890123456789012345678901234567890123456789012345678901234567890");
     System.out.println();
 
-    fmt.test("[like subj>Bill dobj>[muffins compound>blueberrry]]");
+    fmt.test("[like subj>Bill obj>[muffins compound>blueberrry]]");
 
-    fmt.test("[eligible nsubj>Zambia cop>became xcomp>[receive mark>to dobj>[assistance amod>UNCDF] nmod:in>1991]]");
+    fmt.test("[eligible nsubj>Zambia cop>became xcomp>[receive mark>to obj>[assistance amod>UNCDF] nmod:in>1991]]");
 
     fmt.test("[say advcl>[are mark>If nsubj>[polls det>the] xcomp>[believed aux>to auxpass>be]] nsubj>[voters amod>American] aux>will advmod>[much dep>[same det>the]] nmod:to>[Republicans nmod:poss>[Bush case>'s compound>George] case>to] dep>[vote advmod>when nsubj>they nmod:in>[elections amod>congressional det>the case>in] nmod:on>[[November num>7th case>on]]]]");
   }
