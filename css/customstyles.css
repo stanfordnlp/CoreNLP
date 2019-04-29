@@ -126,6 +126,7 @@ th {
 }
 table {
   max-width: 100%;
+  width:100%;
   margin-bottom: 20px;
   border: 1px solid #dedede;
 }
