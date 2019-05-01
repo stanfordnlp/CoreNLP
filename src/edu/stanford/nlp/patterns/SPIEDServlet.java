@@ -128,9 +128,9 @@ public class SPIEDServlet extends HttpServlet {
     if(model.equalsIgnoreCase("new"))
       testmode = false;
 
-    logger.info("Testmode is " + testmode);
+    logger.finest("Testmode is " + testmode);
 
-    logger.info("model is " + model);
+    logger.finest("model is " + model);
 
 
     String suggestions;
@@ -152,10 +152,10 @@ public class SPIEDServlet extends HttpServlet {
 
       String modelDir = getServletContext().getRealPath("/WEB-INF/data/"+modelNametoDirName.get(model));
       testProps.setProperty("patternsWordsDir", modelDir);
-      logger.info("Reading saved model from " + modelDir);
+      logger.finest("Reading saved model from " + modelDir);
       String seedWordsFiles="NAME,"+modelDir+"/NAME/seedwords.txt,"+modelDir+"/NAME/phrases.txt";
       String modelPropertiesFile = modelDir+"/model.properties";
-      logger.info("Loading model properties from " + modelPropertiesFile);
+      logger.finest("Loading model properties from " + modelPropertiesFile);
       String stopWordsFile = modelDir+"/stopwords.txt";
       boolean writeOutputFile = false;
       annotate.setUpProperties(jsonObject, false, writeOutputFile, seedWordsFiles);
@@ -175,7 +175,7 @@ public class SPIEDServlet extends HttpServlet {
    * {@inheritDoc}
    */
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    logger.info("GET SPIED query from " + request.getRemoteAddr());
+    logger.finest("GET SPIED query from " + request.getRemoteAddr());
     if (request.getCharacterEncoding() == null) {
       request.setCharacterEncoding("utf-8");
     }
@@ -203,8 +203,8 @@ public class SPIEDServlet extends HttpServlet {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     t.printStackTrace(pw);
-    logger.info("input is " + input);
-    logger.info(sw.toString());
+    logger.finest("input is " + input);
+    logger.finest(sw.toString());
     out.print("{\"okay\":false, \"reason\":\"Something bad happened. Contact the author.\"}");
   }
 
@@ -212,7 +212,7 @@ public class SPIEDServlet extends HttpServlet {
    * {@inheritDoc}
    */
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    logger.info("Responding to the request for SPIED");
+    logger.finest("Responding to the request for SPIED");
     getServletContext().log("Responding through SPIED through servlet context!!");
   doGet(request, response);
 //    logger.info("POST SPIED query from " + request.getRemoteAddr());

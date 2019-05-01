@@ -36,7 +36,7 @@ public class ExtractorMerger implements Extractor {
   @Override
   public void annotate(Annotation dataset) {
     // TODO for now, we only merge RelationMentions
-    logger.info("Extractor 0 annotating dataset.");
+    logger.finest("Extractor 0 annotating dataset.");
     extractors[0].annotate(dataset);
 
     // store all the RelationMentions per sentence
@@ -49,7 +49,7 @@ public class ExtractorMerger implements Extractor {
 
     // skip first extractor since we did it at the top
     for (int extractorIndex = 1; extractorIndex < extractors.length; extractorIndex++) {
-      logger.info("Extractor " + extractorIndex + " annotating dataset.");
+      logger.finest("Extractor " + extractorIndex + " annotating dataset.");
       Extractor extractor = extractors[extractorIndex];
       extractor.annotate(dataset);
 
@@ -75,7 +75,7 @@ public class ExtractorMerger implements Extractor {
     BasicRelationExtractor[] relationExtractorComponents = new BasicRelationExtractor[extractorModelNames.length];
     for (int i = 0; i < extractorModelNames.length; i++) {
       String modelName = extractorModelNames[i];
-      logger.info("Loading model " + i + " for model merging from " + modelName);
+      logger.finest("Loading model " + i + " for model merging from " + modelName);
       try {
         relationExtractorComponents[i] = BasicRelationExtractor.load(modelName);
       } catch (IOException | ClassNotFoundException e) {

@@ -262,8 +262,8 @@ public class ACEMentionExtractor extends MentionExtractor {
       sent += "\n";
       doc.append(sent);
     }
-    if (gold) logger.fine("New DOC: (GOLD MENTIONS) ==================================================");
-    else logger.fine("New DOC: (Predicted Mentions) ==================================================");
-    logger.fine(doc.toString());
+    if (gold) logger.finest("New DOC: (GOLD MENTIONS) ==================================================");
+    else logger.finest("New DOC: (Predicted Mentions) ==================================================");
+    logger.finest(doc.toString());
   }
 }

@@ -364,7 +364,7 @@ public class AceDocument extends AceElement  {
    */
   public static AceDocument parseDocument(String prefix, boolean usePredictedBoundaries) throws java.io.IOException,
       org.xml.sax.SAXException, javax.xml.parsers.ParserConfigurationException {
-    mLog.fine("Reading document " + prefix);
+    mLog.finest("Reading document " + prefix);
     AceDocument doc = null;
 
     //
@@ -532,7 +532,7 @@ public class AceDocument extends AceElement  {
   //
   public static AceDocument parseDocument(String prefix, boolean usePredictedBoundaries, String AceVersion) throws java.io.IOException,
       org.xml.sax.SAXException, javax.xml.parsers.ParserConfigurationException {
-    mLog.fine("Reading document " + prefix);
+    mLog.finest("Reading document " + prefix);
     AceDocument doc = null;
 
     //

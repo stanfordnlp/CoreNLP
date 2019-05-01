@@ -161,7 +161,7 @@ public class EventMention extends RelationMention  {
           // safe to discard this arg: we already have it with the same name
           return;
         } else {
-          logger.info("Trying to add one argument: " + a + " with name " + an + " when this already exists with a different name: " + this + " in sentence: " + getSentence().get(CoreAnnotations.TextAnnotation.class));
+          logger.finest("Trying to add one argument: " + a + " with name " + an + " when this already exists with a different name: " + this + " in sentence: " + getSentence().get(CoreAnnotations.TextAnnotation.class));
           if(discardSameArgDifferentName) return;
         }
       }
@@ -200,7 +200,7 @@ public class EventMention extends RelationMention  {
     if(! type.equals(oldType)){
       // This is not important: we use anchor types in the parser, not event types
       // This is done just for completeness of code
-      logger.fine("Type changed from " + oldType + " to " + type + " during check 3 merge.");
+      logger.finest("Type changed from " + oldType + " to " + type + " during check 3 merge.");
     }
     
     // add e's arguments
@@ -209,7 +209,7 @@ public class EventMention extends RelationMention  {
       String an = e.getArgNames().get(i);
       // TODO: we might need more complex cycle detection than just contains()...
       if(a instanceof EventMention && ((EventMention) a).contains(this)){
-        logger.info("Found event cycle during merge between e1 " + this + " and e2 " + e);
+        logger.finest("Found event cycle during merge between e1 " + this + " and e2 " + e);
       } else {
         // remove e from a's parents
         if(a instanceof EventMention) ((EventMention) a).removeParent(e);

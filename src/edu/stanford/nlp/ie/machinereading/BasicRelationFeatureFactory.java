@@ -211,7 +211,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
           pathStringBuilder.append(((node == join) ? "" : " -> ") + node.label().value());
         }
         String pathString = pathStringBuilder.toString();
-        if(logger != null && ! rel.getType().equals(RelationMention.UNRELATED)) logger.info("full_tree_path: " + pathString);
+        if(logger != null && ! rel.getType().equals(RelationMention.UNRELATED)) logger.finest("full_tree_path: " + pathString);
         features.setCount("treepath:"+pathString, 1.0);
       } else {
         log.info("WARNING: found weird argument offsets. Most likely because arguments appear in different sentences than the relation:");
@@ -646,7 +646,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
     }
     if (usingFeature(types, checklist, "dependency_path_lowlevel")) {
       String depLowLevel = dependencyPath(edgePath, node0);
-      if(logger != null && ! rel.getType().equals(RelationMention.UNRELATED)) logger.info("dependency_path_lowlevel: " + depLowLevel);
+      if(logger != null && ! rel.getType().equals(RelationMention.UNRELATED)) logger.finest("dependency_path_lowlevel: " + depLowLevel);
       features.setCount("dependency_path_lowlevel:" + depLowLevel, 1.0);
     }
 

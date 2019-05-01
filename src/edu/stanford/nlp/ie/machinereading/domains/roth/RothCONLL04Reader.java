@@ -48,7 +48,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
   public Annotation read(String path) throws IOException {
     Annotation doc = new Annotation("");
 
-    logger.info("Reading file: " + path);
+    logger.finest("Reading file: " + path);
 
     // Each iteration through this loop processes a single sentence along with any relations in it
     for (Iterator<String> lineIterator = IOUtils.readLines(path).iterator(); lineIterator.hasNext(); ) {

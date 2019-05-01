@@ -193,7 +193,7 @@ public class AceReader extends GenericDataSetReader  {
     for(String k: keys){
       b.append("\t").append(k).append(": ").append(c.getCount(k)).append("\n");
     }
-    logger.info(b.toString());
+    logger.finest(b.toString());
   }
 
    /**
@@ -222,7 +222,7 @@ public class AceReader extends GenericDataSetReader  {
    */
   private List<CoreMap> readDocument(String prefix, Annotation corpus) throws IOException, SAXException,
       ParserConfigurationException {
-    logger.info("Reading document: " + prefix);
+    logger.finest("Reading document: " + prefix);
     List<CoreMap> results = new ArrayList<>();
     AceDocument aceDocument;
     if(aceVersion.equals("ACE2004")){
@@ -273,7 +273,7 @@ public class AceReader extends GenericDataSetReader  {
       CoreMap sentence = new Annotation(textContent.toString());
       sentence.set(CoreAnnotations.DocIDAnnotation.class, docId);
       sentence.set(CoreAnnotations.TokensAnnotation.class, words);
-      logger.info("Reading sentence: \"" + textContent + "\"");
+      logger.finest("Reading sentence: \"" + textContent + "\"");
 
       List<AceEntityMention> entityMentions = aceDocument.getEntityMentions(sentenceIndex);
       List<AceRelationMention> relationMentions = aceDocument.getRelationMentions(sentenceIndex);
@@ -292,8 +292,8 @@ public class AceReader extends GenericDataSetReader  {
         EntityMention convertedMention = convertAceEntityMention(aceEntityMention, docId, sentence, tokenOffset, corefID);
 //        EntityMention convertedMention = convertAceEntityMention(aceEntityMention, docId, sentence, tokenOffset);
         entityCounts.incrementCount(convertedMention.getType());
-        logger.info("CONVERTED MENTION HEAD SPAN: " + convertedMention.getHead());
-        logger.info("CONVERTED ENTITY MENTION: " + convertedMention);
+        logger.finest("CONVERTED MENTION HEAD SPAN: " + convertedMention.getHead());
+        logger.finest("CONVERTED ENTITY MENTION: " + convertedMention);
         AnnotationUtils.addEntityMention(sentence, convertedMention);
         entityMentionMap.put(aceEntityMention.getId(), convertedMention);
 
@@ -305,7 +305,7 @@ public class AceReader extends GenericDataSetReader  {
         RelationMention convertedMention = convertAceRelationMention(aceRelationMention, docId, sentence, entityMentionMap);
         if(convertedMention != null){
           relationCounts.incrementCount(convertedMention.getType());
-          logger.info("CONVERTED RELATION MENTION: " + convertedMention);
+          logger.finest("CONVERTED RELATION MENTION: " + convertedMention);
           AnnotationUtils.addRelationMention(sentence, convertedMention);
         }
 
@@ -317,7 +317,7 @@ public class AceReader extends GenericDataSetReader  {
         EventMention convertedMention = convertAceEventMention(aceEventMention, docId, sentence, entityMentionMap, tokenOffset);
         if(convertedMention != null){
           eventCounts.incrementCount(convertedMention.getType());
-          logger.info("CONVERTED EVENT MENTION: " + convertedMention);
+          logger.finest("CONVERTED EVENT MENTION: " + convertedMention);
           AnnotationUtils.addEventMention(sentence, convertedMention);
         }
 

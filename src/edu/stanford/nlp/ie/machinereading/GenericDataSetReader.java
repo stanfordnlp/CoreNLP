@@ -226,8 +226,8 @@ public class GenericDataSetReader  {
       CoreLabel label = (CoreLabel) sh.label();
       headPos = label.get(CoreAnnotations.BeginIndexAnnotation.class);
     } else {
-      logger.fine("WARNING: failed to find syntactic head for entity: " + ent + " in tree: " + tree);
-      logger.fine("Fallback strategy: will set head to last token in mention: " + tokens.get(headPos));
+      logger.finest("WARNING: failed to find syntactic head for entity: " + ent + " in tree: " + tree);
+      logger.finest("Fallback strategy: will set head to last token in mention: " + tokens.get(headPos));
     }
     ent.setHeadTokenPosition(headPos);
 
@@ -250,10 +250,10 @@ public class GenericDataSetReader  {
       // we might already have syntactic annotation from offline files
       List<CoreMap> sentences = dataset.get(CoreAnnotations.SentencesAnnotation.class);
       if (sentences.size() > 0 && !sentences.get(0).containsKey(TreeCoreAnnotations.TreeAnnotation.class)) {
-        logger.info("Annotating dataset with " + processor);
+        logger.finest("Annotating dataset with " + processor);
         processor.annotate(dataset);
       } else {
-        logger.info("Found existing syntactic annotations. Will not use the NLP processor.");
+        logger.finest("Found existing syntactic annotations. Will not use the NLP processor.");
       }
     }
     /*
@@ -267,10 +267,10 @@ public class GenericDataSetReader  {
     */
 
     List<CoreMap> sentences = dataset.get(CoreAnnotations.SentencesAnnotation.class);
-    logger.fine("Extracted " + sentences.size() + " sentences.");
+    logger.finest("Extracted " + sentences.size() + " sentences.");
     for (CoreMap sentence : sentences) {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      logger.fine("Processing sentence " + tokens);
+      logger.finest("Processing sentence " + tokens);
       Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
       if(tree == null) throw new RuntimeException("ERROR: MR requires full syntactic analysis!");
 
@@ -282,20 +282,20 @@ public class GenericDataSetReader  {
       CoreLabel l = (CoreLabel) tree.label();
       if(forceGenerationOfIndexSpans || (! l.containsKey(CoreAnnotations.BeginIndexAnnotation.class) && ! l.containsKey(CoreAnnotations.EndIndexAnnotation.class))){
         tree.indexSpans(0);
-        logger.fine("Index spans were generated.");
+        logger.finest("Index spans were generated.");
       } else {
-        logger.fine("Index spans were NOT generated.");
+        logger.finest("Index spans were NOT generated.");
       }
-      logger.fine("Parse tree using CoreLabel:\n" + tree.pennString());
+      logger.finest("Parse tree using CoreLabel:\n" + tree.pennString());
 
       //
       // now match all entity mentions against the syntactic tree
       //
       if (sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class) != null) {
         for (EntityMention ent : sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class)) {
-          logger.fine("Finding head for entity: " + ent);
+          logger.finest("Finding head for entity: " + ent);
           int headPos = assignSyntacticHead(ent, tree, tokens, calculateHeadSpan);
-          logger.fine("Syntactic head of mention \"" + ent + "\" is: " + tokens.get(headPos).word());
+          logger.finest("Syntactic head of mention \"" + ent + "\" is: " + tokens.get(headPos).word());
 
           assert(ent.getExtent() != null);
           assert(ent.getHead() != null);
@@ -355,14 +355,14 @@ public class GenericDataSetReader  {
       return originalFindSyntacticHead(ent, root, tokens);
     }
 
-    logger.fine("Searching for tree matching " + ent);
+    logger.finest("Searching for tree matching " + ent);
     Tree exactMatch = findTreeWithSpan(root, ent.getExtentTokenStart(), ent.getExtentTokenEnd());
 
     //
     // found an exact match
     //
     if (exactMatch != null) {
-      logger.fine("Mention \"" + ent + "\" mapped to tree: " + printTree(exactMatch));
+      logger.finest("Mention \"" + ent + "\" mapped to tree: " + printTree(exactMatch));
       return safeHead(exactMatch);
     }
 
@@ -394,19 +394,19 @@ public class GenericDataSetReader  {
     ParserConstraint constraint = new ParserConstraint(ADDED_WORDS, extentTokens.size() - 1, ".*");
     List<ParserConstraint> constraints = Collections.singletonList(constraint);
     Tree tree = parse(extentTokens, constraints);
-    logger.fine("No exact match found. Local parse:\n" + tree.pennString());
+    logger.finest("No exact match found. Local parse:\n" + tree.pennString());
     convertToCoreLabels(tree);
     tree.indexSpans(ent.getExtentTokenStart() - ADDED_WORDS);  // remember it has ADDED_WORDS extra words at the beginning
     Tree subtree = findPartialSpan(tree, ent.getExtentTokenStart());
     Tree extentHead = safeHead(subtree);
-    logger.fine("Head is: " + extentHead);
+    logger.finest("Head is: " + extentHead);
     assert(extentHead != null);
     // extentHead is a child in the local extent parse tree. we need to find the corresponding node in the main tree
     // Because we deleted dashes, it's index will be >= the index in the extent parse tree
     CoreLabel l = (CoreLabel) extentHead.label();
     // Tree realHead = findTreeWithSpan(root, l.get(CoreAnnotations.BeginIndexAnnotation.class), l.get(CoreAnnotations.EndIndexAnnotation.class));
     Tree realHead = funkyFindLeafWithApproximateSpan(root, l.value(), l.get(CoreAnnotations.BeginIndexAnnotation.class), approximateness);
-    if(realHead != null) logger.fine("Chosen head: " + realHead);
+    if(realHead != null) logger.finest("Chosen head: " + realHead);
     return realHead;
   }
 
@@ -414,7 +414,7 @@ public class GenericDataSetReader  {
     CoreLabel label = (CoreLabel) current.label();
     int startIndex = label.get(CoreAnnotations.BeginIndexAnnotation.class);
     if (startIndex == start) {
-      logger.fine("findPartialSpan: Returning " + current);
+      logger.finest("findPartialSpan: Returning " + current);
       return current;
     }
     for (Tree kid : current.children()) {
@@ -430,7 +430,7 @@ public class GenericDataSetReader  {
   }
 
   private Tree funkyFindLeafWithApproximateSpan(Tree root, String token, int index, int approximateness) {
-    logger.fine("Looking for " + token + " at pos " + index + " plus upto " + approximateness + " in tree: " + root.pennString());
+    logger.finest("Looking for " + token + " at pos " + index + " plus upto " + approximateness + " in tree: " + root.pennString());
     List<Tree> leaves = root.getLeaves();
     for (Tree leaf : leaves) {
       CoreLabel label = CoreLabel.class.cast(leaf.label());
@@ -460,14 +460,14 @@ public class GenericDataSetReader  {
    *     It will be a leaf in the parse tree.
    */
   public Tree originalFindSyntacticHead(EntityMention ent, Tree root, List<CoreLabel> tokens) {
-    logger.fine("Searching for tree matching " + ent);
+    logger.finest("Searching for tree matching " + ent);
     Tree exactMatch = findTreeWithSpan(root, ent.getExtentTokenStart(), ent.getExtentTokenEnd());
 
     //
     // found an exact match
     //
     if (exactMatch != null) {
-      logger.fine("Mention \"" + ent + "\" mapped to tree: " + printTree(exactMatch));
+      logger.finest("Mention \"" + ent + "\" mapped to tree: " + printTree(exactMatch));
       return safeHead(exactMatch);
     }
 
@@ -480,7 +480,7 @@ public class GenericDataSetReader  {
       extentTokens.add(tokens.get(i));
 
     Tree tree = parse(extentTokens);
-    logger.fine("No exact match found. Local parse:\n" + tree.pennString());
+    logger.finest("No exact match found. Local parse:\n" + tree.pennString());
     convertToCoreLabels(tree);
     tree.indexSpans(ent.getExtentTokenStart());
     Tree extentHead = safeHead(tree);

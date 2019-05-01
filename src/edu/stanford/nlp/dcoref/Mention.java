@@ -485,7 +485,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   private void setType(Dictionaries dict) {
     if (isListLike()) {
       mentionType = MentionType.LIST;
-      SieveCoreferenceSystem.logger.finer("IS LIST: " + this);
+      SieveCoreferenceSystem.logger.finest("IS LIST: " + this);
     } else if (headWord.containsKey(CoreAnnotations.EntityTypeAnnotation.class)){    // ACE gold mention type
       if (headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PRO")) {
         mentionType = MentionType.PRONOMINAL;
@@ -514,7 +514,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     gender = Gender.UNKNOWN;
     if(genderNumberResult!=null && this.number!=Number.PLURAL){
       gender = genderNumberResult;
-      SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\t" + gender + ":\t" +  headString + "\tspan:" + spanToString());
+      SieveCoreferenceSystem.logger.finest("[Gender number count] New gender assigned:\t" + gender + ":\t" +  headString + "\tspan:" + spanToString());
     }
     if (mentionType == MentionType.PRONOMINAL) {
       if (dict.malePronouns.contains(headString)) {
@@ -533,27 +533,27 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
             String name = t.word().toLowerCase();
             if(dict.maleWords.contains(name)) {
               gender = Gender.MALE;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  name + "\tspan:" + spanToString());
+              SieveCoreferenceSystem.logger.finest("[Bergsma List] New gender assigned:\tMale:\t" +  name + "\tspan:" + spanToString());
               break;
             }
             else if(dict.femaleWords.contains(name))  {
               gender = Gender.FEMALE;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  name + "\tspan:" + spanToString());
+              SieveCoreferenceSystem.logger.finest("[Bergsma List] New gender assigned:\tFemale:\t" +  name + "\tspan:" + spanToString());
               break;
             }
           }
         } else {
           if(dict.maleWords.contains(headString)) {
             gender = Gender.MALE;
-            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
+            SieveCoreferenceSystem.logger.finest("[Bergsma List] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
           }
           else if(dict.femaleWords.contains(headString))  {
             gender = Gender.FEMALE;
-            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
+            SieveCoreferenceSystem.logger.finest("[Bergsma List] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
           }
           else if(dict.neutralWords.contains(headString))   {
             gender = Gender.NEUTRAL;
-            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
+            SieveCoreferenceSystem.logger.finest("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
           }
         }
       }

@@ -39,7 +39,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
   }
 
   public RuleBasedCorefMentionFinder(boolean allowReparsing) {
-    SieveCoreferenceSystem.logger.fine("Using SEMANTIC HEAD FINDER!!!!!!!!!!!!!!!!!!!");
+    SieveCoreferenceSystem.logger.finest("Using SEMANTIC HEAD FINDER!!!!!!!!!!!!!!!!!!!");
     this.headFinder = new SemanticHeadFinder();
     this.allowReparsing = allowReparsing;
   }

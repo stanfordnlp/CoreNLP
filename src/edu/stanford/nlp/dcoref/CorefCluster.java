@@ -158,16 +158,16 @@ public class CorefCluster implements Serializable{
       to.firstMention = from.firstMention;
     }
     if(from.representative.moreRepresentativeThan(to.representative)) to.representative = from.representative;
-    SieveCoreferenceSystem.logger.finer("merged clusters: "+toID+" += "+from.clusterID);
+    SieveCoreferenceSystem.logger.finest("merged clusters: "+toID+" += "+from.clusterID);
     to.printCorefCluster(SieveCoreferenceSystem.logger);
     from.printCorefCluster(SieveCoreferenceSystem.logger);
-    SieveCoreferenceSystem.logger.finer("");
+    SieveCoreferenceSystem.logger.finest("");
   }
 
   /** Print cluster information */
   public void printCorefCluster(Logger logger){
-    logger.finer("Cluster ID: "+clusterID+"\tNumbers: "+numbers+"\tGenders: "+genders+"\tanimacies: "+animacies);
-    logger.finer("NE: "+nerStrings+"\tfirst Mention's ID: "+firstMention.mentionID+"\tHeads: "+heads+"\twords: "+words);
+    logger.finest("Cluster ID: "+clusterID+"\tNumbers: "+numbers+"\tGenders: "+genders+"\tanimacies: "+animacies);
+    logger.finest("NE: "+nerStrings+"\tfirst Mention's ID: "+firstMention.mentionID+"\tHeads: "+heads+"\twords: "+words);
     TreeMap<Integer, Mention> forSortedPrint = new TreeMap<>();
     for(Mention m : this.corefMentions){
       forSortedPrint.put(m.mentionID, m);
@@ -175,11 +175,11 @@ public class CorefCluster implements Serializable{
     for(Mention m : forSortedPrint.values()){
       String rep = (representative == m)? "*":"";
       if(m.goldCorefClusterID==-1){
-        logger.finer(rep + "mention-> id:"+m.mentionID+"\toriginalRef: "
+        logger.finest(rep + "mention-> id:"+m.mentionID+"\toriginalRef: "
                 +m.originalRef+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "
                 +m.startIndex+"\tType: "+m.mentionType+"\tNER: "+m.nerString);
       } else{
-        logger.finer(rep + "mention-> id:"+m.mentionID+"\toriginalClusterID: "
+        logger.finest(rep + "mention-> id:"+m.mentionID+"\toriginalClusterID: "
                 +m.goldCorefClusterID+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "
                 +m.startIndex +"\toriginalRef: "+m.originalRef+"\tType: "+m.mentionType+"\tNER: "+m.nerString);
       }

@@ -174,7 +174,7 @@ public class BasicEntityExtractor implements Extractor  {
       // this is an entity end boundary followed by O
       if (type == null && lastType != null) {
         makeEntityMention(sentence, startIndex, i, lastType, extractedEntities, sentCount);
-        logger.info("Found entity: " + extractedEntities.get(extractedEntities.size() - 1));
+        logger.finest("Found entity: " + extractedEntities.get(extractedEntities.size() - 1));
         startIndex = -1;
       }
 
@@ -189,7 +189,7 @@ public class BasicEntityExtractor implements Extractor  {
           (lastType.startsWith("I-") && type.startsWith("I-") && ! lastType.equals(type)) ||
           (notBIO(lastType) && notBIO(type) && ! lastType.equals(type)))){
         makeEntityMention(sentence, startIndex, i, lastType, extractedEntities, sentCount);
-        logger.info("Found entity: " + extractedEntities.get(extractedEntities.size() - 1));
+        logger.finest("Found entity: " + extractedEntities.get(extractedEntities.size() - 1));
         startIndex = i;
       }
 
@@ -254,7 +254,7 @@ public class BasicEntityExtractor implements Extractor  {
             new Span(start, end),
             new Span(start, end),
             entityType, null, null);
-        logger.info("Created " + entityType + " entity mention: " + m);
+        logger.finest("Created " + entityType + " entity mention: " + m);
         start = end - 1;
         mentions.add(m);
       }
@@ -278,7 +278,7 @@ public class BasicEntityExtractor implements Extractor  {
     assert words != null;
     if(mentions == null)
     {  
-      this.logger.info("mentions are null");
+      this.logger.finest("mentions are null");
       mentions = new ArrayList<>();
     }
 
@@ -307,7 +307,7 @@ public class BasicEntityExtractor implements Extractor  {
             new Span(start, end),
             entityType, null, null);
         //TODO: changed entityType in the above sentence to nerTag - Sonal
-        logger.info("Created " + entityType + " entity mention: " + m);
+        logger.finest("Created " + entityType + " entity mention: " + m);
         start = end - 1;
         mentions.add(m);
       }

@@ -127,7 +127,7 @@ public class BasicRelationExtractor implements Extractor {
   }
 
   protected static void reportWeights(LinearClassifier<String, String> classifier, String classLabel) {
-    if (classLabel != null) logger.fine("CLASSIFIER WEIGHTS FOR LABEL " + classLabel);
+    if (classLabel != null) logger.finest("CLASSIFIER WEIGHTS FOR LABEL " + classLabel);
     Map<String, Counter<String>> labelsToFeatureWeights = classifier.weightsAsMapOfCounters();
     List<String> labels = new ArrayList<>(labelsToFeatureWeights.keySet());
     Collections.sort(labels);
@@ -139,7 +139,7 @@ public class BasicRelationExtractor implements Extractor {
       for (Pair<String, Double> feat: sorted) {
         bos.append(' ').append(feat.first()).append(':').append(feat.second()+"\n");
       }
-      logger.fine(bos.toString());
+      logger.finest(bos.toString());
     }
   }
 
@@ -199,11 +199,11 @@ public class BasicRelationExtractor implements Extractor {
       if (logger.isLoggable(Level.INFO)) {
         justificationOf(testDatum, pw, label);
       }
-      logger.info("Current sentence: " + AnnotationUtils.tokensAndNELabelsToString(rel.getArg(0).getSentence()) + "\n"
+      logger.finest("Current sentence: " + AnnotationUtils.tokensAndNELabelsToString(rel.getArg(0).getSentence()) + "\n"
               + "Classifying relation: " + rel + "\n"
               + "JUSTIFICATION for label GOLD:" + rel.getType() + " SYS:" + label + " (prob:" + prob + "):\n"
               + sw.toString());
-      logger.info("Justification done.");
+      logger.finest("Justification done.");
       RelationMention relation = relationMentionFactory.constructRelationMention(
               rel.getObjectId(),
               sentence,
@@ -215,13 +215,13 @@ public class BasicRelationExtractor implements Extractor {
       extractions.add(relation);
 
       if(! relation.getType().equals(rel.getType())){
-        logger.info("Classification: found different type " + relation.getType() + " for relation: " + rel);
-        logger.info("The predicted relation is: " + relation);
-        logger.info("Current sentence: " + AnnotationUtils.tokensAndNELabelsToString(rel.getArg(0).getSentence()));
+        logger.finest("Classification: found different type " + relation.getType() + " for relation: " + rel);
+        logger.finest("The predicted relation is: " + relation);
+        logger.finest("Current sentence: " + AnnotationUtils.tokensAndNELabelsToString(rel.getArg(0).getSentence()));
       } else{
-        logger.info("Classification: found similar type " + relation.getType() + " for relation: " + rel);
-        logger.info("The predicted relation is: " + relation);
-        logger.info("Current sentence: " + AnnotationUtils.tokensAndNELabelsToString(rel.getArg(0).getSentence()));
+        logger.finest("Classification: found similar type " + relation.getType() + " for relation: " + rel);
+        logger.finest("The predicted relation is: " + relation);
+        logger.finest("Current sentence: " + AnnotationUtils.tokensAndNELabelsToString(rel.getArg(0).getSentence()));
       }
     }
     return extractions;
@@ -240,14 +240,14 @@ public class BasicRelationExtractor implements Extractor {
       if (logger.isLoggable(Level.FINE)) {
         justificationOf(testDatum, pw, label);
       }
-      logger.fine("JUSTIFICATION for label GOLD:" + testDatum.label() + " SYS:" + label + " (prob:" + prob + "):\n"
+      logger.finest("JUSTIFICATION for label GOLD:" + testDatum.label() + " SYS:" + label + " (prob:" + prob + "):\n"
               + sw.toString() + "\nJustification done.");
       predictedLabels.add(label);
 
       if(! testDatum.label().equals(label)){
-        logger.info("Classification: found different type " + label + " for relation: " + testDatum);
+        logger.finest("Classification: found different type " + label + " for relation: " + testDatum);
       } else{
-        logger.info("Classification: found similar type " + label + " for relation: " + testDatum);
+        logger.finest("Classification: found similar type " + label + " for relation: " + testDatum);
       }
     }
 
@@ -269,7 +269,7 @@ public class BasicRelationExtractor implements Extractor {
     // caution: this removes the old list of relation mentions!
     for (RelationMention r: relations) {
       if (! r.getType().equals(RelationMention.UNRELATED)) {
-        logger.fine("Found positive relation in annotateSentence: " + r);
+        logger.finest("Found positive relation in annotateSentence: " + r);
       }
     }
     sentence.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, relations);

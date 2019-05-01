@@ -30,11 +30,11 @@ public class JavaUtilLoggingHandler extends OutputHandler {
         impl.log(Level.WARNING, line);
         break;
       case DEBUG:
-        impl.log(Level.FINE, line);
+        impl.log(Level.FINEST, line);
         break;
       case STDOUT:
       case STDERR:
-        impl.info(line);
+        impl.finest(line);
         break;
       case FORCE:
         throw new IllegalStateException("Should not reach this switch case");

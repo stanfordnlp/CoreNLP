@@ -860,8 +860,8 @@ public class Document implements Serializable {
     for(Mention g : allGoldMentions.values()) {
       if(!g.twinless) foundGoldCount++;
     }
-    SieveCoreferenceSystem.logger.fine("# of found gold mentions: "+foundGoldCount + " / # of gold mentions: "+allGoldMentions.size());
-    SieveCoreferenceSystem.logger.fine("gold mentions == ");
+    SieveCoreferenceSystem.logger.finest("# of found gold mentions: "+foundGoldCount + " / # of gold mentions: "+allGoldMentions.size());
+    SieveCoreferenceSystem.logger.finest("gold mentions == ");
   }
 
 }

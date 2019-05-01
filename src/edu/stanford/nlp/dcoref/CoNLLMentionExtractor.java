@@ -206,12 +206,12 @@ public class CoNLLMentionExtractor extends MentionExtractor {
       List<Pair<Integer,Integer>> goldMentionsSpans = extractSpans(goldMentionsSent);
 
       for (Pair<Integer,Integer> mentionSpan: goldMentionsSpans){
-        logger.finer("RECALL ERROR\n");
-        logger.finer(coreMap + "\n");
+        logger.finest("RECALL ERROR\n");
+        logger.finest(coreMap + "\n");
         for (int x=mentionSpan.first;x<mentionSpan.second;x++){
-          logger.finer(words.get(x).value() + " ");
+          logger.finest(words.get(x).value() + " ");
         }
-        logger.finer("\n"+tree + "\n");
+        logger.finest("\n"+tree + "\n");
       }
     }
   }

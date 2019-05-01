@@ -90,7 +90,7 @@ public class CoNLL2011DocumentReader  {
       Collections.sort(this.fileList);
     }
     curFileIndex = 0;
-    logger.info("Reading " + fileList.size() + " CoNll2011 files from " + filepath);
+    logger.finest("Reading " + fileList.size() + " CoNll2011 files from " + filepath);
   }
 
   private static List<File> getFiles(String filepath, Pattern filter)
@@ -121,7 +121,7 @@ public class CoNLL2011DocumentReader  {
         docIterator = new DocumentIterator(curFile.getAbsolutePath(), options);
       }
       while ( ! docIterator.hasNext()) {
-        logger.info("Processed " + docIterator.docCnt + " documents in " + curFile.getAbsolutePath());
+        logger.finest("Processed " + docIterator.docCnt + " documents in " + curFile.getAbsolutePath());
         docIterator.close();
         curFileIndex++;
         if (curFileIndex >= fileList.size()) {
@@ -131,7 +131,7 @@ public class CoNLL2011DocumentReader  {
         docIterator = new DocumentIterator(curFile.getAbsolutePath(), options);
       }
       Document next = docIterator.next();
-      SieveCoreferenceSystem.logger.fine("Reading document: " + next.getDocumentID());
+      SieveCoreferenceSystem.logger.finest("Reading document: " + next.getDocumentID());
       return next;
     } catch (IOException ex) {
       throw new RuntimeIOException(ex);
@@ -858,8 +858,8 @@ public class CoNLL2011DocumentReader  {
             if (span.getSource() == tokenStart && span.getTarget() == tokenEnd - 1) {
               mentionExactTreeSpan++;
             } else {
-              logger.info("Tree span is " + span + ", tree node is " + t);
-              logger.info("Mention span is " + tokenStart + " " + (tokenEnd - 1) + ", mention is " + m);
+              logger.finest("Tree span is " + span + ", tree node is " + t);
+              logger.finest("Mention span is " + tokenStart + " " + (tokenEnd - 1) + ", mention is " + m);
             }
           } else {
             logger.warning("No span for " + t);
@@ -870,15 +870,15 @@ public class CoNLL2011DocumentReader  {
             npt2 = npt;
           } else {
             mentionTreePretermNonPretermNoMatchLabelCounter.incrementCount(t.label().value());
-            logger.info("NPT: Tree span is " + span + ", tree node is " + npt);
-            logger.info("NPT: Mention span is " + tokenStart + " " + (tokenEnd - 1) + ", mention is " + m);
+            logger.finest("NPT: Tree span is " + span + ", tree node is " + npt);
+            logger.finest("NPT: Mention span is " + tokenStart + " " + (tokenEnd - 1) + ", mention is " + m);
             Label tlabel = t.label();
             if (tlabel instanceof CoreLabel) {
               CoreMap mention = ((CoreLabel) tlabel).get(CorefMentionAnnotation.class);
               String corefClusterId = mention.get(CorefCoreAnnotations.CorefAnnotation.class);
               Collection<CoreMap> clusteredMentions = doc.corefChainMap.get(corefClusterId);
               for (CoreMap m2:clusteredMentions) {
-                logger.info("NPT: Clustered mention " + m2.get(CoreAnnotations.TextAnnotation.class));
+                logger.finest("NPT: Clustered mention " + m2.get(CoreAnnotations.TextAnnotation.class));
               }
             }
 
@@ -899,10 +899,10 @@ public class CoNLL2011DocumentReader  {
                 Label plabel = parent.label();
                 if (plabel instanceof CoreLabel) {
                   if (((CoreLabel) plabel).containsKey(NamedEntityAnnotation.class)) {
-                    logger.info("NER Mention: " + m);
+                    logger.finest("NER Mention: " + m);
                     CoreMap parentNerChunk = ((CoreLabel) plabel).get(NamedEntityAnnotation.class);
-                    logger.info("Nested inside NER Mention: " + parentNerChunk);
-                    logger.info("Nested inside NER Mention parent node: " + parent);
+                    logger.finest("Nested inside NER Mention: " + parentNerChunk);
+                    logger.finest("Nested inside NER Mention parent node: " + parent);
                     nestedNerMentions++;
                     break;
                   }
@@ -971,7 +971,7 @@ public class CoNLL2011DocumentReader  {
       System.exit(-1);
     }
     PrintWriter fout = new PrintWriter(outfile);
-    logger.info("Writing to " + outfile);
+    logger.finest("Writing to " + outfile);
     String ext = props.getProperty("ext");
     Options options;
     if (ext != null) {
