@@ -95,14 +95,16 @@ Other choices are now probably best avoided:
 
 ### Python
 
-#### Packages using the Stanford CoreNLP server
+#### Official StanfordNLP Package
 
 We are actively developing a Python package called StanfordNLP.  This package includes an API for starting and making requests to a
-Stanford CoreNLP server.
+Stanford CoreNLP server.  It is the recommended way to use Stanford CoreNLP in Python.
 
 * [StanfordNLP](https://stanfordnlp.github.io/stanfordnlp/) Official Stanford NLP Python package, covering 70+ languages
 
-These packages use the Stanford CoreNLP server that we've developed over the last couple of years. You should probably use one of them.
+#### Packages using the Stanford CoreNLP server
+
+These packages use the Stanford CoreNLP server that we've developed over the last couple of years.
 
 * [stanfordcorenlp](https://github.com/Lynten/stanford-corenlp) by Lynten Guo. A Python wrapper to Stanford CoreNLP server, version 3.9.1. [PyPI page](https://pypi.python.org/pypi/stanfordcorenlp/): `pip install stanfordcorenlp`
 * [pycorenlp, A Python wrapper for Stanford CoreNLP](https://github.com/smilli/py-corenlp) by Smitha Milli that uses the new CoreNLP v3.6+ server. Available on [PyPI](https://pypi.python.org/pypi/pycorenlp/).
