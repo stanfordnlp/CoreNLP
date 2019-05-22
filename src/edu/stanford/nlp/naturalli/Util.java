@@ -338,7 +338,7 @@ public class Util {
       if ("case".equals(edge.getRelation().toString())) {
         boolean isPrepTarget = false;
         for (SemanticGraphEdge incoming : tree.incomingEdgeIterable(edge.getGovernor())) {
-          if ("nmod".equals(incoming.getRelation().getShortName())) {
+          if ("nmod".equals(incoming.getRelation().getShortName()) || "obl".equals(incoming.getRelation().getShortName())) {
             isPrepTarget = true;
             break;
           }
