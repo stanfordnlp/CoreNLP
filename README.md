@@ -10,7 +10,7 @@ The Stanford CoreNLP code is written in Java and licensed under the GNU General 
 
 ### Note About Current Issues With Master (2019/05/21)
 
-After the release of Stanford CoreNLP 3.9.2, a lot of attention was devoted to our new Python code base [StanfordNLP](https://github.com/stanfordnlp/stanfordnlp). During this time we have also started working on transitioning Stanford CoreNLP to using UD 2.0, which has broken some functionality (e.g. OpenIE) which used models expecting UD 1.3 dependency parses.  We are actively working on finishing this upgrade and retraining models to use UD 2.0 dependency parses, and hope to complete this work soon.  At this time it is advised to use Stanford CoreNLP 3.9.2.  If you want access to bug fixes and improvements not related to the UD 2.0 transition it is advised to cherry pick them.
+After the release of Stanford CoreNLP 3.9.2, a lot of attention was devoted to our new Python code base [StanfordNLP](https://github.com/stanfordnlp/stanfordnlp). During this time we have also started working on transitioning Stanford CoreNLP to using UD 2.0, which has broken some functionality (e.g. OpenIE) which uses models expecting UD 1.3 dependency parses.  We are actively working on finishing this upgrade and retraining models to use UD 2.0 dependency parses, and hope to complete this work soon.  At this time it is advised to use Stanford CoreNLP 3.9.2.  If you want access to bug fixes and improvements not related to the UD 2.0 transition it is advised to cherry pick them.
 
 Also after this transition is completed, we are going to switch to actively developing on a development branch and only updating master periodically.  
 
