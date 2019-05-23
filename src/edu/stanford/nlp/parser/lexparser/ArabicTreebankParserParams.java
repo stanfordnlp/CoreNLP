@@ -1,7 +1,7 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.*;
 
 import edu.stanford.nlp.international.arabic.ArabicMorphoFeatureSpecification;
@@ -14,13 +14,10 @@ import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.arabic.*;
 import edu.stanford.nlp.trees.tregex.*;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
-
-
 
 /**
  * A {@link TreebankLangParserParams} implementing class for
@@ -35,7 +32,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(ArabicTreebankParserParams.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicTreebankParserParams.class);
 
   private static final long serialVersionUID = 8853426784197984653L;
 
@@ -52,6 +49,8 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
   private HeadFinder headFinder;
   private final Map<String,Pair<TregexPattern,Function<TregexMatcher,String>>> annotationPatterns;
   private final List<Pair<TregexPattern,Function<TregexMatcher,String>>> activeAnnotations;
+
+  private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
   private MorphoFeatureSpecification morphoSpec = null;
   
@@ -137,7 +136,6 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
 
     protected final TreeFactory tf = new LabeledScoredTreeFactory();
 
-    @Override
     public Tree transformTree(Tree tree) {
       Label lab = tree.label();
       String s = lab.value();
@@ -190,9 +188,9 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
    * Returns a TreeTransformer that retains categories
    * according to the following options supported by setOptionFlag:
    * <p>
-   * {@code -retainNPTmp} Retain temporal NP marking on NPs.
-   * {@code -retainNPSbj} Retain NP subject function tags
-   * {@code -markPRDverbs} Retain PRD verbs.
+   * <code>-retainNPTmp</code> Retain temporal NP marking on NPs.
+   * <code>-retainNPSbj</code> Retain NP subject function tags
+   * <code>-markPRDverbs</code> Retain PRD verbs.
    * </p>
    */
   //NOTE (WSG): This is applied to both the best parse by getBestParse()
@@ -221,7 +219,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
 
   @Override
   public String[] sisterSplitters() {
-    return StringUtils.EMPTY_STRING_ARRAY;
+    return EMPTY_STRING_ARRAY;
   }
 
   // WSGDEBUG -- Annotate POS tags with nominal (grammatical) gender
@@ -255,7 +253,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
     }
 
     //Update the label(s)
-    String newCat = baseCat + newCategory;
+    String newCat = baseCat + newCategory.toString();
     t.setValue(newCat);
     if (t.isPreTerminal() && t.label() instanceof HasTag)
       ((HasTag) t.label()).setTag(newCat);
@@ -428,7 +426,6 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
 
     private String result;
 
-    @Override
     public String apply(TregexMatcher tregexMatcher) {
       return result;
     }
@@ -461,7 +458,6 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
       this.key2 = key2;
     }
 
-    @Override
     public String apply(TregexMatcher m) {
       if(key2 == null)
         return annotationMark + ((doBasicCat) ? tlp.basicCategory(m.getNode(key).label().value()) : m.getNode(key).label().value());
@@ -506,7 +502,6 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
       }
     }
 
-    @Override
     public String apply(TregexMatcher m) {
       String val = m.getNode(key).label().value();
       if (pattern != null) {
@@ -550,7 +545,6 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
       this.key = key;
     }
 
-    @Override
     public String apply(TregexMatcher m) {
       String node = m.getNode(key).label().value();
       if (node.startsWith("S")) {
@@ -580,7 +574,6 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
       this.key = key;
     }
 
-    @Override
     public String apply(TregexMatcher m) {
       String node = m.getNode(key).label().value();
       // We also tried if (node.startsWith("V")) [var2] and if (node.startsWith("V") || node.startsWith("S")) [var3]. Both seemed markedly worse than the basic function or this var form (which seems a bit better than the basic equiv option).
@@ -602,7 +595,6 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
 
     private static final Pattern quote = Pattern.compile("^\"$");
 
-    @Override
     public String apply(TregexMatcher m) {
 
       final String punc = m.getNode(key).value();
@@ -662,7 +654,6 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
       this.key = key;
     }
 
-    @Override
     public String apply(TregexMatcher m) {
       String node = m.getNode(key).value();
       String eqClass = tlp.basicCategory(node);
@@ -742,10 +733,10 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
   /** Some options for setOptionFlag:
    *
    * <p>
-   * {@code -retainNPTmp} Retain temporal NP marking on NPs.
-   * {@code -retainNPSbj} Retain NP subject function tags
-   * {@code -markGappedVP} marked gapped VPs.
-   * {@code -collinizerRetainsPunctuation} does what it says.
+   * <code>-retainNPTmp</code> Retain temporal NP marking on NPs.
+   * <code>-retainNPSbj</code> Retain NP subject function tags
+   * <code>-markGappedVP</code> marked gapped VPs.
+   * <code>-collinizerRetainsPunctuation</code> does what it says.
    * </p>
    *
    * @param args flag arguments (usually from commmand line
@@ -809,7 +800,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
 
     } else if (args[i].equalsIgnoreCase("-headFinder") && (i + 1 < args.length)) {
       try {
-        HeadFinder hf = (HeadFinder) Class.forName(args[i + 1]).getDeclaredConstructor().newInstance();
+        HeadFinder hf = (HeadFinder) Class.forName(args[i + 1]).newInstance();
         setHeadFinder(hf);
         optionsString.append("HeadFinder: " + args[i + 1] + "\n");
 
@@ -881,7 +872,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
       for(Tree subtree : t) {
         tlpp.transformTree(subtree, t);
       }
-      System.out.println(t);
+      System.out.println(t.toString());
     }
   }
 }

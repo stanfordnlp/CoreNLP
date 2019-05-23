@@ -422,7 +422,7 @@ public class ChineseGrammaticalRelations {
    *         (NP (NN 药品))
    *         (QP (CD 一亿多)
    *           (CLP (M 元))))
-   * {@code range }(成交, 元)
+   * <code>range </code>(成交, 元)
    */
   public static final GrammaticalRelation RANGE =
     new GrammaticalRelation(Language.Chinese,
@@ -474,7 +474,7 @@ public class ChineseGrammaticalRelations {
    *        (NP (NR 浦东))
    *      (VP (VC 是)
    *          (NP (NN 工程)))))
-   * {@code attr } (是, 工程)
+   * <code> attr </code> (是, 工程)
    */
   public static final GrammaticalRelation ATTRIBUTIVE =
     new GrammaticalRelation(Language.Chinese, "attr", "attributive",
@@ -494,7 +494,7 @@ public class ChineseGrammaticalRelations {
    *                 (VP (SB 被)
    *                   (VP (VV 纳入)
    *                     (NP (NN 法制) (NN 轨道)))))))))))
-   * {@code ccomp } (出现, 纳入)
+   * <code> ccomp </code> (出现, 纳入)
    */
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.Chinese,
@@ -541,7 +541,7 @@ public class ChineseGrammaticalRelations {
    *                 (NP (NN 中心))))))
    *         (DEC 的))
    * Example:
-   *{@code cpm } (振兴, 的)
+   *<code> cpm </code> (振兴, 的)
    */
 
   public static final GrammaticalRelation COMPLEMENTIZER =
@@ -577,7 +577,7 @@ public class ChineseGrammaticalRelations {
    *   (VP (VV 达)
    *     (QP (CD 四百三十八点八亿)
    *       (CLP (M 美元))))
-   * {@code loc } (占-11, 以上-13)
+   * <code> loc </code> (占-11, 以上-13)
    */
   public static final GrammaticalRelation LC_COMPLEMENT =
     new GrammaticalRelation(Language.Chinese,
@@ -622,7 +622,7 @@ public class ChineseGrammaticalRelations {
    *           (VP (VV 能)
    *             (VP (VV 得到)
    *               (NP (NN 保障)))))))))
-   * {@code mmod } (得到-64, 能-63)
+   * <code> mmod </code> (得到-64, 能-63)
    */
   public static final GrammaticalRelation MODAL_VERB =
     new GrammaticalRelation(Language.Chinese, "mmod", "modal verb",
@@ -664,7 +664,7 @@ public class ChineseGrammaticalRelations {
    *       (LC 来))
    *     (VP
    *       (VCD (VV 颁布) (VV 实行))
-   * {@code tmod } (遇到, 以前)
+   * <code> tmod </code> (遇到, 以前)
    */
   public static final GrammaticalRelation TEMPORAL_MODIFIER =
     new GrammaticalRelation(Language.Chinese,
@@ -701,7 +701,7 @@ public class ChineseGrammaticalRelations {
    *                  (PU ”)))
    *               (DEC 的))
    *             (NP (NN 做法)))))))
-   * {@code lccomp } (以后, 积累)
+   * <code> lccomp </code> (以后, 积累)
    */
   // pichuan: previously "tclaus"
   public static final GrammaticalRelation TIME =
@@ -727,7 +727,7 @@ public class ChineseGrammaticalRelations {
    *     (NP (NN 问题)))))))
    * (PU 。)))
    * the new problem that has not been encountered.
-   * {@code rcmod } (问题, 遇到)
+   * <code> rcmod </code> (问题, 遇到)
    */
   public static final GrammaticalRelation RELATIVE_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.Chinese, "rcmod", "relative clause modifier",
@@ -772,7 +772,7 @@ public class ChineseGrammaticalRelations {
    * (QP (CD 七十一)
    *           (CLP (M 件)))
    *         (NP (NN 法规性) (NN 文件)))))
-   * {@code clf } (文件-26, 件-24)
+   * <code> clf </code> (文件-26, 件-24)
    */
   public static final GrammaticalRelation NUMBER_MODIFIER =
     new GrammaticalRelation(Language.Chinese,
@@ -793,7 +793,7 @@ public class ChineseGrammaticalRelations {
    *         (CC 与)
    *         (NN 法制) (NN 建设)))
    *     (VP (VV 同步))))
-   * {@code nn } (浦东, 上海)
+   * <code> nn </code> (浦东, 上海)
    */
   public static final GrammaticalRelation NOUN_COMPOUND_MODIFIER =
     new GrammaticalRelation(Language.Chinese,
@@ -813,7 +813,7 @@ public class ChineseGrammaticalRelations {
    *         (NP
    *           (ADJP (JJ 新))
    *           (NP (NN 问题)))))))
-   * {@code amod } (情况-34, 新-33)
+   * <code> amod </code> (情况-34, 新-33)
    */
   public static final GrammaticalRelation ADJECTIVAL_MODIFIER =
     new GrammaticalRelation(Language.Chinese,
@@ -1018,7 +1018,7 @@ public class ChineseGrammaticalRelations {
    *           (VP (VA 简单))
    *           (DEV 的))
    *         (VP (VV 采取)
-   * {@code prep } (采取-9, 对-1)
+   * <code> prep </code> (采取-9, 对-1)
    */
   public static final GrammaticalRelation PREPOSITIONAL_MODIFIER =
     new GrammaticalRelation(Language.Chinese,
@@ -1041,7 +1041,7 @@ public class ChineseGrammaticalRelations {
    *             (ADVP (AD 就))
    *             (ADVP (AD 比较))
    *             (VP (VA 规范)))))))
-   * {@code pccomp } (因为-18, 开始-20)
+   * <code> pccomp </code> (因为-18, 开始-20)
    */
   // pichuan: previously "clmpd"
   public static final GrammaticalRelation CL_MODIFIER =
@@ -1075,7 +1075,7 @@ public class ChineseGrammaticalRelations {
    * (VP
    *     (ADVP (AD 基本))
    *     (VP (VV 做到) (AS 了)
-   * {@code asp } (做到,了)
+   * <code> asp </code> (做到,了)
    */
   public static final GrammaticalRelation PREDICATE_ASPECT =
     new GrammaticalRelation(Language.Chinese, "asp", "aspect",
@@ -1098,7 +1098,7 @@ public class ChineseGrammaticalRelations {
    *(NP
    *                 (NP (NN 经济) (PU 、) (NN 贸易) (PU 、) (NN 建设) (PU 、) (NN 规划) (PU 、) (NN 科技) (PU 、) (NN 文教) (ETC 等))
    *                 (NP (NN 领域)))))
-   * {@code etc } (办法-70, 等-71)
+   * <code> etc </code> (办法-70, 等-71)
    */
 
   public static final GrammaticalRelation ETC =
@@ -1137,7 +1137,7 @@ public class ChineseGrammaticalRelations {
    *                       (LC 中)))
    *                   (ADVP (AD 逐步))
    *                   (VP (VV 完善))))))))))
-   * {@code xsubj } (完善-26, 有些-14)
+   * <code> xsubj </code> (完善-26, 有些-14)
    */
   public static final GrammaticalRelation CONTROLLED_SUBJECT =
     new GrammaticalRelation(Language.Chinese,

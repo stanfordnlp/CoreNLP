@@ -2,7 +2,6 @@ package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.StringUtils;
 
 
 /**
@@ -24,6 +23,8 @@ import edu.stanford.nlp.util.StringUtils;
 
 public class CollinsHeadFinder extends AbstractCollinsHeadFinder {
 
+  private static final String[] EMPTY_STRING_ARRAY = {};
+
   public CollinsHeadFinder() {
     this(new PennTreebankLanguagePack());
   }
@@ -34,7 +35,7 @@ public class CollinsHeadFinder extends AbstractCollinsHeadFinder {
    *  @param tlp TreebankLanguagePack used for basic category function
    */
   public CollinsHeadFinder(TreebankLanguagePack tlp) {
-    this(tlp, StringUtils.EMPTY_STRING_ARRAY);
+    this(tlp, EMPTY_STRING_ARRAY);
   }
 
   public CollinsHeadFinder(TreebankLanguagePack tlp, String... categoriesToAvoid) {

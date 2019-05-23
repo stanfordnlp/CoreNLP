@@ -1369,7 +1369,7 @@ public class StringUtils  {
     if (b.length() > 0) {
       result.add(b.toString());
     }
-    return result.toArray(EMPTY_STRING_ARRAY);
+    return result.toArray(new String[result.size()]);
   }
 
   /**
