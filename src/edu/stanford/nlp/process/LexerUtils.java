@@ -2,7 +2,7 @@ package edu.stanford.nlp.process;
 
 import java.util.regex.Pattern;
 
-/** This class contains various static utility methods invoked by JFlex lexers.
+/** This class contains various static utility methods invoked by our JFlex NL lexers.
  *  Having this utility code placed outside the lexers facilitates normal
  *  IDE code editing.
  *
@@ -134,5 +134,19 @@ public class LexerUtils {
     }
     return s;
   }
+
+  // U+00B4 should be acute accent, but stuff happens
+  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u008B\u0091\u00B4\u2018\u0092\u2019\u009B\u201A\u201B\u2039\u203A']");
+  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
+
+  /** Convert all single and double quote like characters to the ASCII quote characters: ' ". */
+  public static String asciiQuotes(String in) {
+    String s1 = in;
+    s1 = asciiSingleQuote.matcher(s1).replaceAll("'");
+    s1 = asciiDoubleQuote.matcher(s1).replaceAll("\"");
+    return s1;
+  }
+
+
 
 }

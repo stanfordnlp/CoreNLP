@@ -252,13 +252,6 @@ import edu.stanford.nlp.util.logging.Redwood;
     return getNext(out, in);
   }
 
-  private static String asciiQuotes(String in) {
-    String s1 = in;
-    s1 = s1.replaceAll("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']", "'");
-    s1 = s1.replaceAll("&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]", "\"");
-    return s1;
-  }
-
   private static String asciiDash(String in) {
     return in.replaceAll("[_\u058A\u2010\u2011]","-");
   }
@@ -485,7 +478,7 @@ cannot			{ yypushback(3) ; return getNext(); }
 {SPPUNC} |
 {TIMEXP}                { return getNext(); }
 {ELISION}		{ final String origTxt = yytext();
-                          return getNext(asciiQuotes(origTxt), origTxt);
+                          return getNext(LexerUtils.asciiQuotes(origTxt), origTxt);
 			}
 {WORD}/{OBJPRON}        { return getNext(); }
 
@@ -494,7 +487,7 @@ cannot			{ yypushback(3) ; return getNext(); }
                         }
 
 {VERBPREF}/{ELISION}    { final String origTxt = yytext();
-                          String txt = asciiQuotes(origTxt);
+                          String txt = LexerUtils.asciiQuotes(origTxt);
                           return getNext(asciiDash(txt), origTxt);
                         }
 
@@ -559,7 +552,7 @@ cannot			{ yypushback(3) ; return getNext(); }
 {ACRO}/{SPACENL}	{ return getNext(); }
 {DBLQUOT} |
 {QUOTES}		{ final String origTxt = yytext();
-                          return getNext(asciiQuotes(origTxt), origTxt);
+                          return getNext(LexerUtils.asciiQuotes(origTxt), origTxt);
 			}
 
 {PHONE}                 { String txt = yytext();

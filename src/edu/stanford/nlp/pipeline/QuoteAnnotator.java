@@ -4,6 +4,7 @@ import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.process.LexerUtils;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
@@ -15,6 +16,7 @@ import java.util.*;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 /**
  * An annotator which picks quotations out of the given text. Allows
@@ -315,19 +317,9 @@ public class QuoteAnnotator implements Annotator  {
     return total;
   }
 
-  // Stolen from PTBLexer
-  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
-  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
-
-  private static String asciiQuotes(String in) {
-    String s1 = in;
-    s1 = asciiSingleQuote.matcher(s1).replaceAll("'");
-    s1 = asciiDoubleQuote.matcher(s1).replaceAll("\"");
-    return s1;
-  }
 
   public static String replaceUnicode(String text) {
-    return asciiQuotes(text);
+    return LexerUtils.asciiQuotes(text);
   }
 
   public static Comparator<CoreMap> getQuoteComparator() {

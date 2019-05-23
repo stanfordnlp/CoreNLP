@@ -12769,13 +12769,6 @@ class FrenchLexer {
     return getNext(out, in);
   }
 
-  private static String asciiQuotes(String in) {
-    String s1 = in;
-    s1 = s1.replaceAll("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']", "'");
-    s1 = s1.replaceAll("&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]", "\"");
-    return s1;
-  }
-
   private static String asciiDash(String in) {
     return in.replaceAll("[_\u058A\u2010\u2011]","-");
   }
@@ -13265,7 +13258,7 @@ class FrenchLexer {
           case 45: break;
           case 12: 
             { final String origTxt = yytext();
-                          return getNext(asciiQuotes(origTxt), origTxt);
+                          return getNext(LexerUtils.asciiQuotes(origTxt), origTxt);
             }
           case 46: break;
           case 13: 
@@ -13383,7 +13376,7 @@ class FrenchLexer {
               zzMarkedPos = zzFPos;
             }
             { final String origTxt = yytext();
-                          String txt = asciiQuotes(origTxt);
+                          String txt = LexerUtils.asciiQuotes(origTxt);
                           return getNext(asciiDash(txt), origTxt);
             }
           case 59: break;

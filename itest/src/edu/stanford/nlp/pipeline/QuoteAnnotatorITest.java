@@ -513,7 +513,7 @@ public class QuoteAnnotatorITest extends TestCase {
     return false;
   }
 
-  public List<CoreMap> runUnclosedQuotes(String text, int numQuotes, StanfordCoreNLP pipeline) {
+  public static List<CoreMap> runUnclosedQuotes(String text, int numQuotes, StanfordCoreNLP pipeline) {
     Annotation doc = new Annotation(text);
     pipeline.annotate(doc);
 

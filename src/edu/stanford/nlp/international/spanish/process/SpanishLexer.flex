@@ -275,23 +275,14 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
 
-  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
-  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
-
   private static String  Shlomi2AsciiQuotes(String in) {
-    return asciiQuotes(in);
+    return LexerUtils.asciiQuotes(in);
   }
 
   private static String  Shlomi3AsciiQuotes(String in) {
-    return asciiQuotes(in);
+    return LexerUtils.asciiQuotes(in);
   }
 
-  private static String asciiQuotes(String in) {
-    String s1 = in;
-    s1 = asciiSingleQuote.matcher(s1).replaceAll("'");
-    s1 = asciiDoubleQuote.matcher(s1).replaceAll("\"");
-    return s1;
-  }
 
   private static String nonCp1252Quotes(String in) {
     switch(in) {
@@ -314,7 +305,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   private String handleQuotes(String in){
     if (asciiQuotes) {
-      return asciiQuotes(in);
+      return LexerUtils.asciiQuotes(in);
     } else {
       return nonCp1252Quotes(in);
     }
