@@ -16,8 +16,8 @@ public class MWTAnnotator {
 
     public MWTAnnotator(String name, Properties props) {
         String prefix = (name != null && !name.equals("")) ? name+".mwt." : "mwt.";
-        System.out.println(prefix+"mappingFile");
-        System.out.println(props.getProperty(prefix+"mappingFile"));
+        //System.out.println(prefix+"mappingFile");
+        //System.out.println(props.getProperty(prefix+"mappingFile"));
         loadMultiWordTokenMappings(props.getProperty(prefix+"mappingFile"));
     }
 
@@ -39,11 +39,11 @@ public class MWTAnnotator {
         for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
             // check if token text is in the mapping
             if (multiWordTokenMapping.containsKey(token.word())) {
-                System.err.println("found match: "+token.word());
+                //System.err.println("found match: "+token.word());
                 int numWordsForToken = multiWordTokenMapping.get(token.word()).size();
                 List<CoreLabel> newTokens = new ArrayList<CoreLabel>();
                 for (String word : multiWordTokenMapping.get(token.word())) {
-                    System.err.println("splitting into: "+word);
+                    //System.err.println("splitting into: "+word);
                     CoreLabel newToken = new CoreLabel();
                     newToken.setWord(word);
                     newToken.setValue(word);

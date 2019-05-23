@@ -223,7 +223,7 @@ public class TokenizerAnnotator implements Annotator  {
     }
     // set up an MWTAnnotator if a mapping file is provided
     if (!props.getProperty("tokenize.mwt.mappingFile", "").equals("")) {
-      System.out.println("Setting up MWTAnnotator!!");
+      //System.out.println("Setting up MWTAnnotator!!");
       splitMWTTokens = true;
       mwtAnnotator = new MWTAnnotator("tokenize", props);
     }
