@@ -565,6 +565,34 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   }
 
   /**
+   * Set value of IsNewlineAnnotation
+   *
+   * @return value of IsNewlineAnnotation
+   */
+  public void setIsNewline(boolean isNewline) {
+    set(CoreAnnotations.IsNewlineAnnotation.class, isNewline);
+  }
+
+  /**
+   * Get value of IsMultiWordToken
+   *
+   * @return value of IsNewlineAnnotation
+   */
+  public Boolean isMWT() {
+    return get(CoreAnnotations.IsMultiWordTokenAnnotation.class);
+  }
+
+  /**
+   * Set value of IsMultiWordToken
+   *
+   * @return value of IsNewlineAnnotation
+   */
+  public void setIsMWT(boolean isMWT) {
+    set(CoreAnnotations.IsMultiWordTokenAnnotation.class, isMWT);
+  }
+
+
+  /**
    * {@inheritDoc}
    */
   @Override

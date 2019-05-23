@@ -2143,6 +2143,46 @@ public class CoreAnnotations {
     public Class<Boolean> getType() {return Boolean.class;}
   }
 
+  /**
+   * The CoreLabel key identifying whether a token is a multi-word-token
+   *
+   * This is attached to {@link CoreLabel}s.
+   */
+  public static class IsMultiWordTokenAnnotation implements CoreAnnotation<Boolean> {
+    @Override
+    public Class<Boolean> getType() {return Boolean.class;}
+  }
+
+    /**
+     * Text of the token that was used to create this word during a multi word token split.
+     */
+    public static class MWTTokenTextAnnotation implements CoreAnnotation<String> {
+        @Override
+        public Class<String> getType() {
+            return String.class;
+        }
+    }
+
+    /**
+     * Begin character offset for the token that was used to create this word.
+     */
+    public static class MWTTokenCharacterOffsetBeginAnnotation implements CoreAnnotation<Integer> {
+        @Override
+        public Class<Integer> getType() {
+            return Integer.class;
+        }
+    }
+
+    /**
+     * End character offset for the token that was used to create this word.
+     */
+    public static class MWTTokenCharacterOffsetEndAnnotation implements CoreAnnotation<Integer> {
+        @Override
+        public Class<Integer> getType() {
+            return Integer.class;
+        }
+    }
+
 
 
 }
