@@ -177,7 +177,7 @@ public abstract class AnnotationSerializer {
       }
 
       // compute root nodes if they weren't stored in the graph
-      if (!graph.isEmpty() && graph.getRoots().size() == 0){
+      if ( ! graph.isEmpty() && graph.getRoots().isEmpty()) {
         graph.resetRoots();
       }
 
