@@ -31,8 +31,7 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         private List<CoreLabel> goldTokensList;
         private List<CoreLabel> systemTokensList;
 
-        // CoNLL-U files have 3 lines of meta-data before tokens, tokens start at index 3
-        public int CONLL_U_TOKEN_START = 3;
+        int CONLL_U_TOKEN_START = 2;
 
         public TestExample(List<String> conllLines) {
             int LENGTH_OF_SENTENCE_ID_PREFIX = "# sent_id = ".length();
@@ -46,6 +45,10 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             // give words in a mwt the character offsets of the original token
             int currMWT = 0;
             for (String conllLine : conllLines.subList(CONLL_U_TOKEN_START, conllLines.size())) {
+                // ignore commented out lines
+                if (conllLine.startsWith("#")) {
+                    continue;
+                }
                 if (conllLine.split("\t")[0].contains("-")) {
                     String[] mwtRange = conllLine.split("\t")[0].split("-");
                     currMWT = 1 + Integer.parseInt(mwtRange[1]) - Integer.parseInt(mwtRange[0]);
