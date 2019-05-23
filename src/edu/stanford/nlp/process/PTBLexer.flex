@@ -740,9 +740,9 @@ ABTAXONOMY = (s(ub)?)?spp?|aff|[f][l]
 /* ABBREV1 abbreviations are normally followed by lower case words.
  * If they're followed by an uppercase one, we assume there is also a
  * sentence boundary.
- * Notes: many misspell etc. ect.; kr. is some other currency
+ * Notes: many misspell etc. ect.; kr. is some other currency. Tech is for Indian B. Tech. degrees
  */
-ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|{ABTAXONOMY}|etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr)\.
+ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|{ABTAXONOMY}|etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr|Tech)\.
 
 /* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
 /* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
