@@ -4,7 +4,6 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.ClassicCounter;
 
-
 import java.util.*;
 import java.util.stream.*;
 
@@ -41,27 +40,13 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             sentenceText = conllLines.get(1).substring(LENGTH_OF_TEXT_PREFIX);
             goldTokensList = new ArrayList<CoreLabel>();
             int charBegin = 0;
-            int charEnd = 0;
-            // if a mwt line is encountered, the next currMWT tokens need to be special cased
-            // give words in a mwt the character offsets of the original token
-            int currMWT = 0;
             for (String conllLine : conllLines.subList(CONLL_U_TOKEN_START, conllLines.size())) {
                 if (conllLine.split("\t")[0].contains("-")) {
-                    String[] mwtRange = conllLine.split("\t")[0].split("-");
-                    currMWT = 1 + Integer.parseInt(mwtRange[1]) - Integer.parseInt(mwtRange[0]);
-                    charEnd = charBegin + conllLine.split("\t")[1].length();
                     continue;
-                } else {
-                    String tokenText = conllLine.split("\t")[1];
-                    if (currMWT == 0) {
-                        charEnd = charBegin + tokenText.length();
-                    }
-                    goldTokensList.add(buildCoreLabel(tokenText, charBegin, charEnd));
-                    if (currMWT > 0)
-                        currMWT--;
-                    if (currMWT == 0)
-                        charBegin = charEnd;
                 }
+                String tokenText = conllLine.split("\t")[1];
+                goldTokensList.add(buildCoreLabel(tokenText, charBegin, charBegin+tokenText.length()));
+                charBegin += tokenText.length();
             }
             tokenizeSentenceText();
         }
@@ -105,86 +90,41 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         /** tokenize text with pipeline, populate systemTokensList **/
         public void tokenizeSentenceText() {
             systemTokensList = new ArrayList<CoreLabel>();
-            CoreLabel currMWTToken = null;
             CoreDocument exampleTokensDoc = new CoreDocument(pipeline.process(sentenceText));
+            // iterate through tokens, build CoreLabel objects with char offsets based on token characters only
+            // e.g. "ab c" character offsets would refer to the string "abc"
+            int charBegin = 0;
             for (CoreLabel tok : exampleTokensDoc.tokens()) {
-                if (containedByMultiWordToken(tok)) {
-                    if (currMWTToken == null || !isMultiWordTokenOf(tok, currMWTToken)) {
-                        int charBegin =
-                                systemTokensList.size() == 0 ?
-                                        0 : systemTokensList.get(systemTokensList.size()-1).endPosition();
-                        currMWTToken = placeholderMWTToken(tok, charBegin);
-                    }
-                    systemTokensList.add(buildCoreLabel(tok.word(), currMWTToken.beginPosition(), currMWTToken.endPosition()));
-                } else {
-                    currMWTToken = null;
-                    int charBegin =
-                            systemTokensList.size() == 0 ?
-                                    0 : systemTokensList.get(systemTokensList.size()-1).endPosition();
-                    systemTokensList.add(buildCoreLabel(tok.word(), charBegin, charBegin + tok.word().length()));
-                }
-            }
-        }
-
-        /** create a placeholder CoreLabel with the info of the original mwt token **/
-        public CoreLabel placeholderMWTToken(CoreLabel containedToken, int beginPosition) {
-            CoreLabel placeholderToken = new CoreLabel();
-            placeholderToken.setWord(containedToken.get(CoreAnnotations.MWTTokenTextAnnotation.class));
-            placeholderToken.setBeginPosition(beginPosition);
-            placeholderToken.setEndPosition(beginPosition + placeholderToken.word().length());
-            placeholderToken.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class,
-                    containedToken.get(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class));
-            placeholderToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class,
-                    containedToken.get(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class));
-            placeholderToken.setIsMWT(true);
-            return placeholderToken;
-        }
-
-        /** check if a token is split off from a multi word token **/
-        public boolean containedByMultiWordToken(CoreLabel tok) {
-            if (tok.get(CoreAnnotations.MWTTokenTextAnnotation.class) != null) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        /** check if a token is a split off token of another **/
-        public boolean isMultiWordTokenOf(CoreLabel splitToken, CoreLabel multiWordPlaceholderToken) {
-            int mwtPlaceholderBegin = multiWordPlaceholderToken.get(
-                    CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class
-            );
-            int mwtPlaceholderEnd = multiWordPlaceholderToken.get(
-                    CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class
-            );
-            if (splitToken.get(CoreAnnotations.MWTTokenTextAnnotation.class).equals(multiWordPlaceholderToken.word())
-                    && mwtPlaceholderBegin <= splitToken.beginPosition()
-                    && mwtPlaceholderBegin <= splitToken.endPosition()
-                    && mwtPlaceholderEnd >= splitToken.beginPosition()
-                    && mwtPlaceholderEnd >= splitToken.endPosition()) {
-                return true;
-            } else {
-                return false;
+                systemTokensList.add(buildCoreLabel(tok.word(), charBegin, charBegin + tok.word().length()));
+                charBegin += tok.word().length();
             }
         }
 
         /** return TP, FP, FN stats for this example **/
         public ClassicCounter<String> f1Stats() {
             ClassicCounter<String> f1Stats = new ClassicCounter<>();
+            int currStart = 0;
             // match system tokens to gold tokens
             for (CoreLabel cl : systemTokensList) {
-                boolean foundMatch = false;
-                for (CoreLabel gl : goldTokensList) {
-                    if (cl.word().equals(gl.word())
-                            && cl.beginPosition() == gl.beginPosition() && cl.endPosition() == gl.endPosition()) {
-                        foundMatch = true;
+                for (int goldIdx = currStart; goldIdx < goldTokensList.size(); goldIdx++, currStart++) {
+                    CoreLabel currGoldToken = goldTokensList.get(goldIdx);
+                    if (cl.beginPosition() < currGoldToken.beginPosition()) {
+                        // pass
+                    } else if (cl.beginPosition() == currGoldToken.beginPosition()) {
+                        if (cl.endPosition() == currGoldToken.endPosition()) {
+                            // score a true positive
+                            f1Stats.incrementCount("TP");
+                            break;
+                        } else {
+                            // score a false positive
+                            f1Stats.incrementCount("FP");
+                            break;
+                        }
+                    } else {
+                        // score a false positive
+                        f1Stats.incrementCount("FP");
                         break;
                     }
-                }
-                if (foundMatch) {
-                    f1Stats.incrementCount("TP");
-                } else {
-                    f1Stats.incrementCount("FP");
                 }
             }
             f1Stats.setCount("FN", goldTokensList.size() - f1Stats.getCount("TP"));
@@ -224,21 +164,13 @@ public class TokenizerBenchmarkTestCase extends TestCase {
     public void runTest(String evalSet, String lang, double expectedF1) {
         loadTokenizerTestExamples();
         ClassicCounter<String> allF1Stats = new ClassicCounter<String>();
-        for (TokenizerBenchmarkTestCase.TestExample testExample : testExamples) {
-            System.out.println("---");
-            System.out.println(testExample.sentenceID);
-            System.out.println(testExample.sentenceText);
-            System.out.println(testExample.f1Stats());
+        for (TokenizerBenchmarkTestCase.TestExample testExample : testExamples)
             allF1Stats.addAll(testExample.f1Stats());
-        }
         ClassicCounter<String> f1Scores = f1Scores(allF1Stats);
         System.err.println("---");
         System.err.println("Tokenizer Benchmark");
         System.err.println("language: "+lang);
         System.err.println("eval set: "+evalSet);
-        System.err.println("Precision: "+f1Scores.getCount("precision"));
-        System.err.println("Recall: "+f1Scores.getCount("recall"));
-        System.err.println("F1: "+f1Scores.getCount("f1"));
         assertTrue("Test failure: System F1 of " + f1Scores.getCount("f1") + " below expected value of " +
                 expectedF1,f1Scores.getCount("f1") >= expectedF1);
     }

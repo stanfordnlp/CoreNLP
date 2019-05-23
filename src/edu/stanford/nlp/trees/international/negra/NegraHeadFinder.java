@@ -173,6 +173,7 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder  {
   /** Called by determineHead and may be overridden in subclasses
    *  if special treatment is necessary for particular categories.
    */
+  @Override
   protected Tree determineNonTrivialHead(Tree t, Tree parent) {
     Tree theHead = null;
     String motherCat = basicCategory(t.label().value());

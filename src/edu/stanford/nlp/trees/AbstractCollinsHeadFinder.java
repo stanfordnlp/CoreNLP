@@ -134,8 +134,8 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
    * Determine which daughter of the current parse tree is the head.
    *
    * @param t The parse tree to examine the daughters of.
-   *          If this is a leaf, <code>null</code> is returned
-   * @return The daughter parse tree that is the head of <code>t</code>
+   *          If this is a leaf, {@code null} is returned
+   * @return The daughter parse tree that is the head of {@code t}
    * @see Tree#percolateHeads(HeadFinder)
    *      for a routine to call this and spread heads throughout a tree
    */
@@ -148,9 +148,9 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
    * Determine which daughter of the current parse tree is the head.
    *
    * @param t The parse tree to examine the daughters of.
-   *          If this is a leaf, <code>null</code> is returned
+   *          If this is a leaf, {@code null} is returned
    * @param parent The parent of t
-   * @return The daughter parse tree that is the head of <code>t</code>.
+   * @return The daughter parse tree that is the head of {@code t}.
    *   Returns null for leaf nodes.
    * @see Tree#percolateHeads(HeadFinder)
    *      for a routine to call this and spread heads throughout a tree
@@ -241,9 +241,8 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
         TreePrint printer = new TreePrint("penn");
         StringWriter buffer = new StringWriter();
         printer.printTree(t, new PrintWriter(buffer));
-        // TODO: we could get really fancy and define our own
-        // exception class to represent this
-        throw new IllegalArgumentException("No head rule defined for " + motherCat + " using " + this.getClass() + " in " + buffer.toString());
+        // TODO: we could get really fancy and define our own exception class to represent this
+        throw new IllegalArgumentException("No head rule defined for " + motherCat + " using " + this.getClass() + " in " + buffer);
       }
     }
     for (int i = 0; i < how.length; i++) {
@@ -264,7 +263,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
    * Go through daughterTrees looking for things from or not in a set given by
    * the contents of the array how, and if
    * you do not find one, take leftmost or rightmost perhaps matching thing iff
-   * lastResort is true, otherwise return <code>null</code>.
+   * lastResort is true, otherwise return {@code null}.
    */
   protected Tree traverseLocate(Tree[] daughterTrees, String[] how, boolean lastResort) {
     int headIdx;

@@ -23,15 +23,15 @@ import java.util.Optional;
 @SuppressWarnings("AssertEqualsBetweenInconvertibleTypes")
 public class RelationTripleSegmenterTest extends TestCase {
 
-  protected Optional<RelationTriple> mkExtraction(String conll) {
+  private static Optional<RelationTriple> mkExtraction(String conll) {
     return mkExtraction(conll, 0, false);
   }
 
-  protected Optional<RelationTriple> mkExtraction(String conll, boolean allNominals) {
+  private static Optional<RelationTriple> mkExtraction(String conll, boolean allNominals) {
     return mkExtraction(conll, 0, allNominals);
   }
 
-  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
+  private static Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
     return mkExtraction(conll, listIndex, false);
   }
 
@@ -43,11 +43,11 @@ public class RelationTripleSegmenterTest extends TestCase {
    * @return A pair of a SemanticGraph and a token list, corresponding to the parse of the sentence
    *         and to tokens in the sentence.
    */
-  protected Pair<SemanticGraph, List<CoreLabel>> mkTree(String conll) {
+  private static Pair<SemanticGraph, List<CoreLabel>> mkTree(String conll) {
     List<CoreLabel> sentence = new ArrayList<>();
     SemanticGraph tree = new SemanticGraph();
     for (String line : conll.split("\n")) {
-      if (line.trim().equals("")) { continue; }
+      if (line.trim().isEmpty()) { continue; }
       String[] fields = line.trim().split("\\s+");
       int index = Integer.parseInt(fields[0]);
       String word = fields[1];
@@ -70,7 +70,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     }
     int i = 0;
     for (String line : conll.split("\n")) {
-      if (line.trim().equals("")) { continue; }
+      if (line.trim().isEmpty()) { continue; }
       String[] fields = line.trim().split("\\s+");
       int parent = Integer.parseInt(fields[2]);
       String reln = fields[3];
@@ -94,7 +94,7 @@ public class RelationTripleSegmenterTest extends TestCase {
    *   word_index  word  parent_index  incoming_relation
    * </pre>
    */
-  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex, boolean allNominals) {
+  private static Optional<RelationTriple> mkExtraction(String conll, int listIndex, boolean allNominals) {
     Pair<SemanticGraph, List<CoreLabel>> info = mkTree(conll);
     SemanticGraph tree = info.first;
     List<CoreLabel> sentence = info.second;
@@ -110,7 +110,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     return Optional.empty();
   }
 
-  protected RelationTriple blueCatsPlayWithYarnNoIndices() {
+  private static RelationTriple blueCatsPlayWithYarnNoIndices() {
     List<CoreLabel> sentence = new ArrayList<>();
     sentence.add(IETestUtils.mkWord("blue", -1));
     sentence.add(IETestUtils.mkWord("cats", -1));
@@ -120,7 +120,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     return new RelationTriple(sentence.subList(0, 2), sentence.subList(2, 4), sentence.subList(4, 5));
   }
 
-  protected RelationTriple blueCatsPlayWithYarn() {
+  private static RelationTriple blueCatsPlayWithYarn() {
     List<CoreLabel> sentence = new ArrayList<>();
     sentence.add(IETestUtils.mkWord("blue", 0));
     sentence.add(IETestUtils.mkWord("cats", 1));
@@ -130,7 +130,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     return new RelationTriple(sentence.subList(0, 2), sentence.subList(2, 4), sentence.subList(4, 5));
   }
 
-  protected RelationTriple yarnBlueCatsPlayWith() {
+  private static RelationTriple yarnBlueCatsPlayWith() {
     List<CoreLabel> sentence = new ArrayList<>();
     sentence.add(IETestUtils.mkWord("yarn", 0));
     sentence.add(IETestUtils.mkWord("blue", 1));
@@ -184,6 +184,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("yarn", blueCatsPlayWithYarn().objectGloss());
   }
 
+  // todo [cdm 2019]: Really "with yarn" should be obl:with now.
   public void testBlueCatsPlayWithYarn() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tblue\t2\tamod\n" +
@@ -196,6 +197,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tblue cats\tplay with\tyarn", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: Really "with yarn" should be obl:with now.
   public void testBlueCatsPlayQuietlyWithYarn() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\tblue\t2\tamod\n" +
@@ -209,6 +211,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tblue cats\tplay quietly with\tyarn", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: dobj should be obj now.
   public void testCatsHaveTails() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\tcats\t2\tnsubj\n" +
@@ -219,6 +222,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tcats\thave\ttails", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: dobj should be obj now.
   public void testrabbitsEatVegetables() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\trabbits\t2\tnsubj\n" +
@@ -229,6 +233,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\trabbits\teat\tvegetables", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: "to" should be mark now.
   public void testFishLikeToSwim() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\tfish\t2\tnsubj\n" +
@@ -240,6 +245,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tfish\tlike\tto swim", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: "to" should be mark now.
   public void testFishLikeToSwimAlternateParse() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tfish\t2\tnsubj\n" +
@@ -251,6 +257,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tfish\tlike to\tswim", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: Really "with yarn" should be obl:with now.
   public void testMyCatsPlayWithYarn() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tmy\t2\tnmod:poss\n" +
@@ -304,10 +311,11 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\ttruffles picked\tare\ttasty", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: "as president" is either obl:as or probably should be xcomp
   public void testHeWasInaugurated() {
     Optional<RelationTriple> extraction = mkExtraction(
-            "1\the\t3\tnsubjpass\n" +
-            "2\twas\t3\tauxpass\n" +
+            "1\the\t3\tnsubj:pass\n" +
+            "2\twas\t3\taux:pass\n" +
             "3\tinaugurated\t0\troot\n" +
             "4\tas\t5\tcase\n" +
             "5\tpresident\t3\tnmod:as\n"
@@ -316,6 +324,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\the\twas inaugurated as\tpresident", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: "as president" is either obl:as or probably should be xcomp
   public void testPPAttachment() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\the\t2\tnsubj\n" +
@@ -346,8 +355,8 @@ public class RelationTripleSegmenterTest extends TestCase {
 
   public void testXComp() {
     Optional<RelationTriple> extraction = mkExtraction(
-        "1\tObama\t3\tnsubjpass\n" +
-        "2\twas\t3\tauxpass\n" +
+        "1\tObama\t3\tnsubj:pass\n" +
+        "2\twas\t3\taux:pass\n" +
         "3\tnamed\t0\troot\n" +
         "4\t2009\t8\tnummod\n" +
         "5\tNobel\t8\tcompound\n" +
@@ -359,10 +368,11 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tObama\twas named\t2009 Nobel Peace Prize Laureate", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: tmod should be obl:tmod
   public void testPassiveNSubj() {
     Optional<RelationTriple> extraction = mkExtraction(
-        "1\tHRE\t3\tnsubjpass\n" +
-        "2\twas\t3\tauxpass\n" +
+        "1\tHRE\t3\tnsubj:pass\n" +
+        "2\twas\t3\taux:pass\n" +
         "3\tfounded\t0\troot\n" +
         "4\tin\t5\tcase\n" +
         "5\t1991\t3\tnmod:in\n"
@@ -370,9 +380,10 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tHRE\twas founded in\t1991", extraction.get().toString());
 
+    // todo [cdm 2019]: tmod should be obl:tmod
     extraction = mkExtraction(
         "1\tfounded\t0\troot\n" +
-        "2\tHRE\t1\tnsubjpass\n" +
+        "2\tHRE\t1\tnsubj:pass\n" +
         "3\tin\t4\tcase\n" +
         "4\t2003\t1\tnmod:in\n"
     );
@@ -414,6 +425,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tTim\t's father is\tTom", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: Really "in Tucson" should be obl:with now.
   public void testApposInObject() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tNewspaper\t2\tnsubj\n" +
@@ -449,12 +461,13 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tTom\tfighting\tJerry", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: This one is weird, since it's not actually passive. You'd want "Tom and Jerry were killed" but then would you get the relation shown? It only seems to apply to symmetric predicates....
   public void testPassiveReflexive() {
     Optional<RelationTriple> extraction = mkExtraction(
-        "1\tTom\t5\tnsubjpass\n" +
+        "1\tTom\t5\tnsubj:pass\n" +
         "2\tand\t1\tcc\n" +
         "3\tJerry\t1\tconj:and\n" +
-        "4\twere\t5\tauxpass\n" +
+        "4\twere\t5\taux:pass\n" +
         "5\tfighting\t0\troot\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
@@ -614,8 +627,8 @@ public class RelationTripleSegmenterTest extends TestCase {
 
   public void testAdvObjectPassive() {
     Optional<RelationTriple> extraction = mkExtraction(
-        "1\tthings\t3\tnsubjpass\n" +
-        "2\tare\t3\tauxpass\n" +
+        "1\tthings\t3\tnsubj:pass\n" +
+        "2\tare\t3\taux:pass\n" +
         "3\tarranged\t0\troot\n" +
         "4\tneatly\t3\tadvmod\n"
     );

@@ -32,6 +32,7 @@ public class NoPunctuationHeadFinder extends ModCollinsHeadFinder {
         && !(label.equals("$") || label.equals("%"));
   }
 
+  @Override
   protected int postOperationFix(int headIdx, Tree[] daughterTrees) {
     int index = super.postOperationFix(headIdx, daughterTrees);
     // if the current index is a punctuation mark, we search left until we

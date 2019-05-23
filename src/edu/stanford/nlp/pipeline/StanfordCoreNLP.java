@@ -275,6 +275,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     this.pipelineSetupTime = tim.report();
   }
 
+
   //
   // @Override-able methods to change pipeline behavior
   //
@@ -604,6 +605,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
   }
+
+
 
   public static synchronized Annotator getExistingAnnotator(String name) {
     Optional<Annotator> annotator = GLOBAL_ANNOTATOR_CACHE.entrySet().stream()
