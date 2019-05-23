@@ -17,7 +17,7 @@ public class TokenizerGermanBenchmarkITest extends TokenizerBenchmarkTestCase {
 
     public void testOnDev() {
         goldFilePath = "/u/nlp/data/stanford-corenlp-testing/data/tokenize/de_gsd-ud-dev.conllu";
-        runTest("dev", "es", 0.5);
+        runTest("dev", "de", 0.5);
     }
 
 
