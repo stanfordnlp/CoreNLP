@@ -106,12 +106,17 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
 
     private String getStringFromTokens(Token head, Token tail, boolean includeSpecial) {
       StringBuilder sb = new StringBuilder();
-      for( Token p = head ; p != tail ; p = p.next ) {
+      Token p;
+      for( p = head ; p != tail ; p = p.next ) {
         if (includeSpecial) {
           appendSpecialTokens( sb, p.specialToken );
         }
         sb.append( p.image );
       }
+      if (includeSpecial) {
+        appendSpecialTokens( sb, p.specialToken );
+      }
+      sb.append( p.image );
       return sb.toString();
     }
 }
