@@ -109,8 +109,12 @@ public class CoNLLUDocumentWriter {
                 relnName = "_";
             }
 
-            if (enhancedDependencies.isEmpty() && enhancedSg != null && enhancedSg.getRoots().contains(token)) {
-                additionalDepsString = "0:root";
+            if (enhancedSg != null && enhancedSg.getRoots().contains(token)) {
+                if (enhancedDependencies.isEmpty()) {
+                    additionalDepsString = "0:root";
+                } else {
+                    additionalDepsString = "0:root|" + additionalDepsString;
+                }
             }
 
             if (unescapeParenthesis) {
