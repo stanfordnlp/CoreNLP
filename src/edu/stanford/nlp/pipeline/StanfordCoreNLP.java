@@ -1015,7 +1015,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         }
         break;
       case CONLLU:
-        new CoNLLUOutputter().print(annotation, fos, outputOptions);
+        new CoNLLUOutputter(properties).print(annotation, fos, outputOptions);
         break;
       case CUSTOM:
         AnnotationOutputter customOutputter = ReflectionLoading.loadByReflection(properties.getProperty("customOutputter"));

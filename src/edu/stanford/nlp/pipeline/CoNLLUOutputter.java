@@ -2,10 +2,8 @@ package edu.stanford.nlp.pipeline;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.*;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -86,7 +84,23 @@ public class CoNLLUOutputter extends AnnotationOutputter {
 
   private static final CoNLLUDocumentWriter conllUWriter = new CoNLLUDocumentWriter();
 
-  public CoNLLUOutputter() {}
+  /**
+   * The type of dependencies to print, options:
+   * - basic
+   * - enhanced
+   * - enhancedPlusPlus
+   *
+   * basic is the default
+   */
+  private final String dependenciesType;
+
+  public CoNLLUOutputter() {
+    this(new Properties());
+  }
+
+  public CoNLLUOutputter(Properties props) {
+    dependenciesType = props.getProperty("output.dependenciesType", "basic");
+  }
 
   @Override
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
@@ -96,8 +110,15 @@ public class CoNLLUOutputter extends AnnotationOutputter {
     for (CoreMap sentence : sentences) {
       SemanticGraph sg = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       if (sg != null) {
-        SemanticGraph enhancedSg = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
-        writer.print(conllUWriter.printSemanticGraph(sg, enhancedSg));
+        if (dependenciesType.equals("enhanced")) {
+          SemanticGraph enhancedSg = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+          writer.print(conllUWriter.printSemanticGraph(sg, enhancedSg));
+        } else if (dependenciesType.equals("enhancedPlusPlus")) {
+          SemanticGraph enhancedSg = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
+          writer.print(conllUWriter.printSemanticGraph(sg, enhancedSg));
+        } else {
+          writer.print(conllUWriter.printSemanticGraph(sg));
+        }
       } else {
         writer.print(conllUWriter.printPOSAnnotations(sentence));
       }
