@@ -98,6 +98,7 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder  {
   private final Pattern headMarkedPattern2;
 
   /* Many TueBaDZ local trees have an explicitly marked head, as :HD or -HD.  (Almost!) all the time, there is only one :HD per local tree.  Use it if possible. */
+   @Override
    protected Tree findMarkedHead(Tree t) {
      Tree[] kids = t.children();
      for (Tree kid : kids) {
@@ -160,6 +161,7 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder  {
    /** Called by determineHead and may be overridden in subclasses
     *  if special treatment is necessary for particular categories.
     */
+   @Override
    protected Tree determineNonTrivialHead(Tree t, Tree parent) {
      Tree theHead = null;
      String motherCat = basicCategory(t.label().value());
