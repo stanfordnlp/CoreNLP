@@ -606,8 +606,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     return pool;
   }
 
-
-
   public static synchronized Annotator getExistingAnnotator(String name) {
     Optional<Annotator> annotator = GLOBAL_ANNOTATOR_CACHE.entrySet().stream()
         .filter(entry -> name.equals(entry.getKey().name))
