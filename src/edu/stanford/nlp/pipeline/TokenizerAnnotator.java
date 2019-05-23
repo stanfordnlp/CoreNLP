@@ -133,6 +133,9 @@ public class TokenizerAnnotator implements Annotator  {
   private final boolean useSegmenter;
   private final Annotator segmenterAnnotator;
 
+  private boolean splitMWTTokens = false;
+  private MWTAnnotator mwtAnnotator;
+
   // CONSTRUCTORS
 
   /** Gives a non-verbose, English tokenizer. */
@@ -218,6 +221,13 @@ public class TokenizerAnnotator implements Annotator  {
       useSegmenter = false;
       segmenterAnnotator = null;
     }
+    // set up an MWTAnnotator if a mapping file is provided
+    if (!props.getProperty("tokenize.mwt.mappingFile", "").equals("")) {
+      System.out.println("Setting up MWTAnnotator!!");
+      splitMWTTokens = true;
+      mwtAnnotator = new MWTAnnotator("tokenize", props);
+    }
+
     VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
     TokenizerType type = TokenizerType.getTokenizerType(props);
     factory = initFactory(type, props, options);
@@ -370,6 +380,12 @@ public class TokenizerAnnotator implements Annotator  {
     } else {
       throw new RuntimeException("Tokenizer unable to find text in annotation: " + annotation);
     }
+
+    // if an MWTAnnotator is set up, use it after basic annotation is done
+    if (splitMWTTokens) {
+      mwtAnnotator.annotate(annotation);
+    }
+
   }
 
   @Override

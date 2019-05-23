@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
@@ -130,7 +130,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     newLabel.setValue(part);
     newLabel.setBeginPosition(beginPosition);
     newLabel.setEndPosition(endPosition);
-    newLabel.set(OriginalTextAnnotation.class, part);
+    newLabel.set(CoreAnnotations.OriginalTextAnnotation.class, part);
     return newLabel;
   }
 
@@ -209,13 +209,26 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     int lengthRemoved = 0;
     for (String pronoun : stripped.getPronouns()) {
       int beginOffset = stemEnd + lengthRemoved;
-      compoundBuffer.add(copyCoreLabel(cl, pronoun, beginOffset));
+      CoreLabel compoundCoreLabel = copyCoreLabel(cl, pronoun, beginOffset);
+      addMWTTokenInfo(cl, compoundCoreLabel);
+      compoundBuffer.add(compoundCoreLabel);
       lengthRemoved += pronoun.length();
     }
-
     CoreLabel stem = copyCoreLabel(cl, stripped.getStem(), cl.beginPosition(), stemEnd);
     stem.setOriginalText(stripped.getOriginalStem());
+    addMWTTokenInfo(cl, stem);
     return stem;
+  }
+
+  /**
+   * Add MWT info to tokens created by splitting a multi-word token
+   */
+
+  private void addMWTTokenInfo(CoreLabel originalToken, CoreLabel splitToken) {
+    splitToken.set(CoreAnnotations.MWTTokenTextAnnotation.class, originalToken.word());
+    splitToken.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class, originalToken.beginPosition());
+    splitToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class, originalToken.endPosition());
+    splitToken.setIsMWT(true);
   }
 
   private static final Pattern pDash = Pattern.compile("\\-");
@@ -235,7 +248,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       newLabel.setValue(part);
       newLabel.setBeginPosition(cl.beginPosition() + lengthAccum);
       newLabel.setEndPosition(cl.beginPosition() + lengthAccum + part.length());
-      newLabel.set(OriginalTextAnnotation.class, part);
+      newLabel.set(CoreAnnotations.OriginalTextAnnotation.class, part);
       compoundBuffer.add(newLabel);
 
       lengthAccum += part.length();
