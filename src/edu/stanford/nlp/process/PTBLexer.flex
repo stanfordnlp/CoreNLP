@@ -436,17 +436,6 @@ import edu.stanford.nlp.util.logging.Redwood;
     return s1;
   }
 
-  // U+00B4 should be acute accent, but stuff happens
-  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u008B\u0091\u00B4\u2018\u0092\u2019\u009B\u201A\u201B\u2039\u203A']");
-  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
-
-  private static String asciiQuotes(String in) {
-    String s1 = in;
-    s1 = asciiSingleQuote.matcher(s1).replaceAll("'");
-    s1 = asciiDoubleQuote.matcher(s1).replaceAll("\"");
-    return s1;
-  }
-
   private static final Pattern unicodeLeftSingleQuote = Pattern.compile("\u0091");
   private static final Pattern unicodeRightSingleQuote = Pattern.compile("\u0092");
   private static final Pattern unicodeLeftDoubleQuote = Pattern.compile("\u0093");
@@ -478,7 +467,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     } else if (unicodeQuotes) {
       return unicodeQuotes(tok, probablyLeft);
     } else if (asciiQuotes) {
-      return asciiQuotes(tok);
+      return LexerUtils.asciiQuotes(tok);
     } else {
       return tok;
     }
@@ -750,7 +739,8 @@ ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|{ABTAXONOMY}|e
 ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 /* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. St[ae] does Saint, Santa, suite, etc. */
-ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
+/* "Rt." occurs both in "Rt. Rev." (capitalized following) and in abbreviation at end of Hungarian company (lower follows). */
+ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Rt|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
 ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
@@ -1082,7 +1072,7 @@ RM/{NUM}        { String txt = yytext();
                           if (DEBUG) { logger.info("Used {ABBREV2} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
-/* Last millenium (in the WSJ) "Alex." is generally an abbreviation for Alex. Brown, brokers! Recognize just this case. */
+/* Last millennium (in the WSJ) "Alex." is generally an abbreviation for Alex. Brown, brokers! Recognize just this case. */
 <YyNotTokenizePerLine>Alex\./{SPACENL}Brown   { String tok = yytext();
                                                 if (DEBUG) { logger.info("Used {ALEX} to recognize " + tok); }
                                                 return getNext(tok, tok);
