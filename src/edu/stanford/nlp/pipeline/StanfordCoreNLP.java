@@ -275,7 +275,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     this.pipelineSetupTime = tim.report();
   }
 
-
   //
   // @Override-able methods to change pipeline behavior
   //
