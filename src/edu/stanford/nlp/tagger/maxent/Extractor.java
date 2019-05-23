@@ -8,7 +8,7 @@ package edu.stanford.nlp.tagger.maxent;
 
 import java.io.Serializable;
 
-// import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.StringUtils;
 
 
 /**
@@ -105,7 +105,7 @@ public class Extractor implements Serializable  {
    *  @param tag The possible tag that the feature will be generated for
    *  @return Whether the feature extractor is applicable (true) or not (false)
    */
-  @SuppressWarnings({"MethodMayBeStatic", "UnusedDeclaration"})
+  @SuppressWarnings({"UnusedDeclaration"})
   public boolean precondition(String tag) {
     return true;
   }
@@ -238,22 +238,30 @@ public class Extractor implements Serializable  {
 
 
   /** This is used for argument parsing in arch variable.
-   *  It can extract a comma separated argument.
-   *  Assumes the input format is "name(arg,arg,arg)".
+   *  It can extract from a comma separated values argument list.
+   *  Values can be quoted with double quotes (with a second double quote as double quote escape char)
+   *  like in a regular CSV file. It assumes the input format is "name(arg,arg,arg)".
    *
    *  @param str arch variable component input
-   *  @param num Number of argument
+   *  @param num Number of argument. Numbers are 1-indexed (i.e., start from 1 not 0)
    *  @return The parenthesized String, or null if none.
    */
   static String getParenthesizedArg(String str, int num) {
-    String[] args = str.split("\\s*[,()]\\s*");
-    if (args.length <= num) {
-      return null;
+    int left = str.indexOf('(');
+    int right = str.lastIndexOf(')');
+    if (left < 0 || right <= left) {
+      throw new IllegalArgumentException("getParenthesizedArg: Bad format String: " + str);
     }
+    String argStr = str.substring(left + 1, right);
+    String[] args = StringUtils.splitOnCharWithQuoting(argStr, ',', '"', '"');
     // log.info("getParenthesizedArg split " + str + " into " + args.length + " pieces; returning number " + num);
     // for (int i = 0; i < args.length; i++) {
     //   log.info("  " + args[i]);
     // }
+    num--;
+    if (args.length <= num || num < 0) {
+      return null;
+    }
     return args[num];
   }
 
@@ -266,11 +274,12 @@ public class Extractor implements Serializable  {
    *  @param num Number of argument
    *  @return The int value of the arg or 0 if missing or empty
    */
+  @SuppressWarnings("ConstantConditions")
   static int getParenthesizedNum(String str, int num) {
-    String[] args = str.split("\\s*[,()]\\s*");
+    String arg = getParenthesizedArg(str, num);
     int ans = 0;
     try {
-      ans = Integer.parseInt(args[num]);
+      ans = Integer.parseInt(arg);
     } catch (NumberFormatException | ArrayIndexOutOfBoundsException nfe) {
       // just leave ans as 0
     }
