@@ -24,14 +24,15 @@ public class TokenizerBenchmarkTestCase extends TestCase {
     public StanfordCoreNLP pipeline;
 
     /** nested class for holding test example info such as text and gold tokens **/
-    static class TestExample {
+    class TestExample {
 
         private String sentenceID;
         private String sentenceText;
         private List<CoreLabel> goldTokensList;
         private List<CoreLabel> systemTokensList;
 
-        int CONLL_U_TOKEN_START = 2;
+        // CoNLL-U files have 3 lines of meta-data before tokens, tokens start at index 3
+        public int CONLL_U_TOKEN_START = 3;
 
         public TestExample(List<String> conllLines) {
             int LENGTH_OF_SENTENCE_ID_PREFIX = "# sent_id = ".length();
@@ -45,14 +46,11 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             // give words in a mwt the character offsets of the original token
             int currMWT = 0;
             for (String conllLine : conllLines.subList(CONLL_U_TOKEN_START, conllLines.size())) {
-                // ignore commented out lines
-                if (conllLine.startsWith("#")) {
-                    continue;
-                }
                 if (conllLine.split("\t")[0].contains("-")) {
                     String[] mwtRange = conllLine.split("\t")[0].split("-");
                     currMWT = 1 + Integer.parseInt(mwtRange[1]) - Integer.parseInt(mwtRange[0]);
                     charEnd = charBegin + conllLine.split("\t")[1].length();
+                    continue;
                 } else {
                     String tokenText = conllLine.split("\t")[1];
                     if (currMWT == 0) {
@@ -69,7 +67,7 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         }
 
         /** helper method to build a CoreLabel from String and offsets **/
-        public static CoreLabel buildCoreLabel(String word, int begin, int end) {
+        public CoreLabel buildCoreLabel(String word, int begin, int end) {
             CoreLabel token = new CoreLabel();
             token.setWord(word);
             token.setBeginPosition(begin);
@@ -106,70 +104,69 @@ public class TokenizerBenchmarkTestCase extends TestCase {
 
         /** tokenize text with pipeline, populate systemTokensList **/
         public void tokenizeSentenceText() {
-// todo [cdm 2019]: Restore all these tests that I deleted so that things build
-//            systemTokensList = new ArrayList<CoreLabel>();
-//            CoreLabel currMWTToken = null;
-//            CoreDocument exampleTokensDoc = new CoreDocument(pipeline.process(sentenceText));
-//            for (CoreLabel tok : exampleTokensDoc.tokens()) {
-//                if (containedByMultiWordToken(tok)) {
-//                    if (currMWTToken == null || !isMultiWordTokenOf(tok, currMWTToken)) {
-//                        int charBegin =
-//                                systemTokensList.size() == 0 ?
-//                                        0 : systemTokensList.get(systemTokensList.size()-1).endPosition();
-//                        currMWTToken = placeholderMWTToken(tok, charBegin);
-//                    }
-//                    systemTokensList.add(buildCoreLabel(tok.word(), currMWTToken.beginPosition(), currMWTToken.endPosition()));
-//                } else {
-//                    currMWTToken = null;
-//                    int charBegin =
-//                            systemTokensList.size() == 0 ?
-//                                    0 : systemTokensList.get(systemTokensList.size()-1).endPosition();
-//                    systemTokensList.add(buildCoreLabel(tok.word(), charBegin, charBegin + tok.word().length()));
-//                }
-//            }
+            systemTokensList = new ArrayList<CoreLabel>();
+            CoreLabel currMWTToken = null;
+            CoreDocument exampleTokensDoc = new CoreDocument(pipeline.process(sentenceText));
+            for (CoreLabel tok : exampleTokensDoc.tokens()) {
+                if (containedByMultiWordToken(tok)) {
+                    if (currMWTToken == null || !isMultiWordTokenOf(tok, currMWTToken)) {
+                        int charBegin =
+                                systemTokensList.size() == 0 ?
+                                        0 : systemTokensList.get(systemTokensList.size()-1).endPosition();
+                        currMWTToken = placeholderMWTToken(tok, charBegin);
+                    }
+                    systemTokensList.add(buildCoreLabel(tok.word(), currMWTToken.beginPosition(), currMWTToken.endPosition()));
+                } else {
+                    currMWTToken = null;
+                    int charBegin =
+                            systemTokensList.size() == 0 ?
+                                    0 : systemTokensList.get(systemTokensList.size()-1).endPosition();
+                    systemTokensList.add(buildCoreLabel(tok.word(), charBegin, charBegin + tok.word().length()));
+                }
+            }
         }
 
-//        /** create a placeholder CoreLabel with the info of the original mwt token **/
-//        public CoreLabel placeholderMWTToken(CoreLabel containedToken, int beginPosition) {
-//            CoreLabel placeholderToken = new CoreLabel();
-//            placeholderToken.setWord(containedToken.get(CoreAnnotations.MWTTokenTextAnnotation.class));
-//            placeholderToken.setBeginPosition(beginPosition);
-//            placeholderToken.setEndPosition(beginPosition + placeholderToken.word().length());
-//            placeholderToken.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class,
-//                    containedToken.get(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class));
-//            placeholderToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class,
-//                    containedToken.get(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class));
-//            placeholderToken.setIsMWT(true);
-//            return placeholderToken;
-//        }
-//
-//        /** check if a token is split off from a multi word token **/
-//        public boolean containedByMultiWordToken(CoreLabel tok) {
-//            if (tok.get(CoreAnnotations.MWTTokenTextAnnotation.class) != null) {
-//                return true;
-//            } else {
-//                return false;
-//            }
-//        }
-//
-//        /** check if a token is a split off token of another **/
-//        public boolean isMultiWordTokenOf(CoreLabel splitToken, CoreLabel multiWordPlaceholderToken) {
-//            int mwtPlaceholderBegin = multiWordPlaceholderToken.get(
-//                    CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class
-//            );
-//            int mwtPlaceholderEnd = multiWordPlaceholderToken.get(
-//                    CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class
-//            );
-//            if (splitToken.get(CoreAnnotations.MWTTokenTextAnnotation.class).equals(multiWordPlaceholderToken.word())
-//                    && mwtPlaceholderBegin <= splitToken.beginPosition()
-//                    && mwtPlaceholderBegin <= splitToken.endPosition()
-//                    && mwtPlaceholderEnd >= splitToken.beginPosition()
-//                    && mwtPlaceholderEnd >= splitToken.endPosition()) {
-//                return true;
-//            } else {
-//                return false;
-//            }
-//        }
+        /** create a placeholder CoreLabel with the info of the original mwt token **/
+        public CoreLabel placeholderMWTToken(CoreLabel containedToken, int beginPosition) {
+            CoreLabel placeholderToken = new CoreLabel();
+            placeholderToken.setWord(containedToken.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+            placeholderToken.setBeginPosition(beginPosition);
+            placeholderToken.setEndPosition(beginPosition + placeholderToken.word().length());
+            placeholderToken.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class,
+                    containedToken.get(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class));
+            placeholderToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class,
+                    containedToken.get(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class));
+            placeholderToken.setIsMWT(true);
+            return placeholderToken;
+        }
+
+        /** check if a token is split off from a multi word token **/
+        public boolean containedByMultiWordToken(CoreLabel tok) {
+            if (tok.get(CoreAnnotations.MWTTokenTextAnnotation.class) != null) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /** check if a token is a split off token of another **/
+        public boolean isMultiWordTokenOf(CoreLabel splitToken, CoreLabel multiWordPlaceholderToken) {
+            int mwtPlaceholderBegin = multiWordPlaceholderToken.get(
+                    CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class
+            );
+            int mwtPlaceholderEnd = multiWordPlaceholderToken.get(
+                    CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class
+            );
+            if (splitToken.get(CoreAnnotations.MWTTokenTextAnnotation.class).equals(multiWordPlaceholderToken.word())
+                    && mwtPlaceholderBegin <= splitToken.beginPosition()
+                    && mwtPlaceholderBegin <= splitToken.endPosition()
+                    && mwtPlaceholderEnd >= splitToken.beginPosition()
+                    && mwtPlaceholderEnd >= splitToken.endPosition()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
 
         /** return TP, FP, FN stats for this example **/
         public ClassicCounter<String> f1Stats() {
