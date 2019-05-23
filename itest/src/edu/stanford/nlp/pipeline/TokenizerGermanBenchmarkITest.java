@@ -2,8 +2,6 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.Properties;
 
-import java.util.Properties;
-
 public class TokenizerGermanBenchmarkITest extends TokenizerBenchmarkTestCase {
 
     @Override
@@ -12,6 +10,8 @@ public class TokenizerGermanBenchmarkITest extends TokenizerBenchmarkTestCase {
         Properties props = new Properties();
         props.put("annotators", "tokenize");
         props.put("tokenize.language", "de");
+        props.put("tokenize.mwt.mappingFile",
+                "/u/nlp/data/stanford-corenlp-testing/resources/de_mwt.tsv");
         pipeline = new StanfordCoreNLP(props);
     }
 
