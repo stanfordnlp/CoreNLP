@@ -103,7 +103,7 @@ wget http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
 ```
 Or using curl (what you get by default on macOS):
 ```
-curl -O http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
+curl -O -L http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
 ```
 1. Unzip the release:
 ```
@@ -164,7 +164,7 @@ wget http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar
 ```
 Or using curl (what you get by default on macOS):
 ```
-curl -O http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar
+curl -O -L http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar
 ```
 1. Set up your classpath. If you're using an IDE, you should set the
    classpath in your IDE. For bash or a bash-like shell, the following
