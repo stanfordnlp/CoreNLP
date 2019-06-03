@@ -1,17 +1,12 @@
 /*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
  * Company:      Stanford University<p>
  */
-
-
 package edu.stanford.nlp.tagger.maxent;
 
-import java.io.PrintStream;
-
-
-/**
+/** A History is used to look inside a PairsHolder with indices for the start and end of a sentence and
+ *  the current position. It may be looking at the PairsHolder contained within it or another one.
  *
  *  @author Kristina Toutanova
  *  @version 1.0
@@ -21,6 +16,7 @@ public class History {
   int end;    //this is the index of the last word in the sentence - the dot
   int current; // this is the index of the current word
   final PairsHolder pairs;
+  // todo [cdm 2018]: Is extractors even needed or could it be eliminated??? It seems like it is used in tagger construction but it still confuses me since this only stores regular extractors not rareExtractors
   final Extractors extractors;
 
   History(PairsHolder pairs, Extractors extractors) {
@@ -51,7 +47,6 @@ public class History {
     }
   }
 
-
   public void read(InDataStreamFile rf) {
     try {
       start = rf.readInt();
@@ -77,6 +72,7 @@ public class History {
   }
 
 
+  /*
   void print(PrintStream ps) {
     String[] str = getX();
     for (String aStr : str) {
@@ -94,6 +90,7 @@ public class History {
     }
     System.out.println();
   }
+  */
 
   protected void setTag(int pos, String tag) {
     pairs.setTag(pos + start, tag);
@@ -116,6 +113,7 @@ public class History {
     return sb.toString();
   }
 
+  // maybe not needed? Are histories hashed? (Yes, I think they currently are in tagger construction, though not sure why....)
   @Override
   public int hashCode() {
     StringBuilder sb = new StringBuilder();
@@ -124,7 +122,6 @@ public class History {
     }
     return sb.toString().hashCode();
   }
-
 
   @Override
   public boolean equals(Object h1) {

@@ -686,10 +686,10 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
 
   /**
    * Searching the lambda array for 0 entries, removes them.  This
-   * saves a large chunk of space in the tagger models which are build
+   * saves a large chunk of space in the tagger models which are built
    * with L1 regularization.
-   * <br>
-   * After removing the zeros, go through the feature arrays and
+   * <p>
+   * After removing the zeroes, go through the feature arrays and
    * reindex the pointers into the lambda array.  This saves some time
    * later on at runtime.
    */
@@ -878,7 +878,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       int sizeAssoc = rf.readInt();
       fAssociations = Generics.newArrayList();
       for (int i = 0; i < extractors.size() + extractorsRare.size(); ++i) {
-        fAssociations.add(Generics.<String, int[]>newHashMap());
+        fAssociations.add(Generics.newHashMap());
       }
       if (VERBOSE) log.infof("Reading %d feature keys...%n", sizeAssoc);
       PrintFile pfVP = null;
@@ -892,15 +892,19 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
         numFA[fK.num]++;
         if (VERBOSE) {
           String eName = (fK.num < extractors.size() ? extractors.get(fK.num): extractorsRare.get(fK.num - extractors.size())).toString();
+          Map<String, int[]> valFeats = fAssociations.get(fK.num);
           pfVP.print(eName);
           pfVP.print(' ');
-          pfVP.println(fK);
+          pfVP.print(fK);
+          pfVP.print(' ');
+          if (valFeats != null) {
+            pfVP.print(valFeats.keySet());
+          }
+          pfVP.println();
         }
 
-        // TODO: rewrite the writing / reading code to store
-        // fAssociations in a cleaner manner?  Only do this when
-        // rebuilding all the tagger models anyway.  When we do that, we
-        // can get rid of FeatureKey
+        // TODO: rewrite the writing / reading code to store fAssociations in a cleaner manner?
+        // Only do this when rebuilding all the tagger models anyway.  When we do that, we can get rid of FeatureKey
         Map<String, int[]> fValueAssociations = fAssociations.get(fK.num);
         int[] fTagAssociations = fValueAssociations.get(fK.val);
         if (fTagAssociations == null) {
@@ -1128,7 +1132,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * fed into tagSentence.
    *
    * @param r Reader where untokenized text is read
-   * @param tokenizerFactory Tokenizer.  This can be <code>null</code> in which case
+   * @param tokenizerFactory Tokenizer.  This can be {@code null} in which case
    *     the default English tokenizer (PTBTokenizerFactory) is used.
    * @return List of tokenized sentences
    */

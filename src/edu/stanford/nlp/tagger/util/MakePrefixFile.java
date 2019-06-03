@@ -27,7 +27,9 @@ import java.util.Random;
 public class MakePrefixFile  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MakePrefixFile.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(MakePrefixFile.class);
+
+  private MakePrefixFile() { } // static main only
 
   public static void main(String[] args) {
     Properties config = StringUtils.argsToProperties(args);

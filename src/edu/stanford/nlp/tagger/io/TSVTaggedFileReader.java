@@ -11,14 +11,15 @@ import java.util.NoSuchElementException;
 import edu.stanford.nlp.ling.TaggedWord;
 
 public class TSVTaggedFileReader implements TaggedFileReader {
-  final BufferedReader reader;
-  final String filename;
-  final int wordColumn, tagColumn;
-  List<TaggedWord> next = null;
-  int linesRead = 0;
 
-  static final int DEFAULT_WORD_COLUMN = 0;
-  static final int DEFAULT_TAG_COLUMN = 1;
+  private final BufferedReader reader;
+  private final String filename;
+  private final int wordColumn, tagColumn;
+  private List<TaggedWord> next; // = null;
+  private int linesRead; // = 0;
+
+  private static final int DEFAULT_WORD_COLUMN = 0;
+  private static final int DEFAULT_TAG_COLUMN = 1;
 
   public TSVTaggedFileReader(TaggedFileRecord record) {
     filename = record.file;
@@ -36,12 +37,16 @@ public class TSVTaggedFileReader implements TaggedFileReader {
     primeNext();
   }
 
+  @Override
   public Iterator<List<TaggedWord>> iterator() { return this; }
 
+  @Override
   public String filename() { return filename; }
 
+  @Override
   public boolean hasNext() { return next != null; }
 
+  @Override
   public List<TaggedWord> next() {
     if (next == null) {
       throw new NoSuchElementException();
@@ -52,10 +57,10 @@ public class TSVTaggedFileReader implements TaggedFileReader {
   }
 
 
-  void primeNext() {
+  private void primeNext() {
     // eat all blank lines until we hit the next block of text
     String line = "";
-    while (line.trim().equals("")) {
+    while (line.trim().isEmpty()) {
       try {
         line = reader.readLine();
         ++linesRead;
@@ -71,7 +76,7 @@ public class TSVTaggedFileReader implements TaggedFileReader {
     // until we hit the next blank line.  the next blank line (or EOF)
     // ends the sentence.
     next = new ArrayList<>();
-    while (line != null && !line.trim().equals("")) {
+    while (line != null && ! line.trim().isEmpty()) {
       String[] pieces = line.split("\t");
       if (pieces.length <= wordColumn || pieces.length <= tagColumn) {
         throw new IllegalArgumentException("File " + filename + " line #" +
@@ -89,5 +94,7 @@ public class TSVTaggedFileReader implements TaggedFileReader {
     }
   }
 
+  @Override
   public void remove() { throw new UnsupportedOperationException(); }
+
 }

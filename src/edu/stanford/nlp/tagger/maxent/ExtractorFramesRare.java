@@ -92,6 +92,13 @@ import java.util.regex.Pattern;
  */
 public class ExtractorFramesRare {
 
+  // When designing POS tagger features for this tagger, remember that it doesn't create
+  // features for all labels for each data pattern matched. Rather it only creates features
+  // for observed labels. This means unobserved labels have zero weight and not a negative
+  // weight. Hence it is important that there are positive features where an observed
+  // combination of data pattern and label are given a positive weight and that the
+  // pattern is sufficiently general to apply over new words seen at runtime.
+
   /**
    * Last 1-4 characters of word
    */
@@ -190,32 +197,9 @@ public class ExtractorFramesRare {
 
   private static final Extractor[] french_unknown_extractors = { cWordFrenchNounSuffix, cWordFrenchAdvSuffix, cWordFrenchVerbSuffix, cWordFrenchAdjSuffix, cWordFrenchPluralSuffix };
 
-  /**
-   * Extracts Spanish gender patterns.
-   */
-  private static final ExtractorSpanishGender cWordSpanishGender =
-    new ExtractorSpanishGender();
-
-  /**
-   * Matches conditional-tense verb suffixes.
-   */
-  private static final ExtractorSpanishConditionalSuffix cWordSpanishConditionalSuffix =
-    new ExtractorSpanishConditionalSuffix();
-
-  /**
-   * Matches imperfect-tense verb suffixes (-er, -ir verbs).
-   */
-  private static final ExtractorSpanishImperfectErIrSuffix cWordSpanishImperfectErIrSuffix =
-    new ExtractorSpanishImperfectErIrSuffix();
-
-  private static final Extractor[] spanish_unknown_extractors = {
-    cWordSpanishGender, cWordSpanishConditionalSuffix,
-    cWordSpanishImperfectErIrSuffix
-  };
 
 
-  private ExtractorFramesRare() {
-  }
+  private ExtractorFramesRare() { } // static methods
 
   /**
    * Adds a few specific extractors needed by both "naacl2003unknowns"
@@ -275,6 +259,10 @@ public class ExtractorFramesRare {
         extrs.addAll(Arrays.asList(naacl2003Conjunctions()));
       } else if ("frenchunknowns".equalsIgnoreCase(arg)) {
         extrs.addAll(Arrays.asList(french_unknown_extractors));
+      } else if ("spanishunknowns".equalsIgnoreCase(arg)) {
+        extrs.add(new ExtractorSpanishGender());
+        extrs.add(new ExtractorSpanishConditionalSuffix());
+        extrs.add(new ExtractorSpanishImperfectErIrSuffix());
       } else if (arg.startsWith("wordshapes(")) {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
         int rWindow = Extractor.getParenthesizedNum(arg, 2);
@@ -600,6 +588,7 @@ class RareExtractor extends Extractor {
     return s != null && numericPattern.matcher(s).matches();
   }
 
+  // todo: delete this ExtractorNonAlphanumeric serves (better)
   private static final Pattern symbolsPattern = Pattern.compile("[^A-Za-z0-9]+");
 
   protected static boolean allSymbols(String s) {
@@ -1136,7 +1125,9 @@ class ExtractorCapC extends RareExtractor {
 // TODO: the next time we have to rebuild the tagger files anyway, we
 // should change this class's name to something like
 // "ExtractorNoLowercase" to distinguish it from
-// ExtractorAllCapitalized
+// ExtractorAllCapitalized.
+// Also, it seems like this is just a bad extractor to have, as it wrongly makes you use
+// word tags like CD, NNP for symbols. Prefer ExtractorAllCapitalized!
 class ExtractorAllCap extends RareExtractor {
 
   public ExtractorAllCap() {
@@ -1335,7 +1326,9 @@ class ExtractorsConjunction extends RareExtractor {
 } // end class ExtractorsConjunction
 
 
-/** This class is loaded by reflection in some POS taggers. */
+/** Returns true ("1") if and only if this word has no alphanumeric characters in it.
+ *  This class is loaded by reflection in some POS taggers.
+ */
 @SuppressWarnings("unused")
 class ExtractorNonAlphanumeric extends RareExtractor {
 
@@ -1381,8 +1374,8 @@ class ExtractorNumeric extends RareExtractor {
 
 }
 
-
 /** This class is loaded by reflection in some POS taggers. */
+// todo: delete this ExtractorNonAlphanumeric serves (better)
 @SuppressWarnings("unused")
 class ExtractorSymbols extends RareExtractor {
 
@@ -1670,6 +1663,9 @@ class ExtractorFrenchPluralSuffix extends CWordBooleanExtractor {
 }
 
 
+/**
+ * Extracts Spanish gender patterns.
+ */
 class ExtractorSpanishGender extends RareExtractor {
 
   private static final long serialVersionUID = -7359312929174070404L;
@@ -1687,6 +1683,9 @@ class ExtractorSpanishGender extends RareExtractor {
 }
 
 
+/**
+ * Matches conditional-tense verb suffixes.
+ */
 class ExtractorSpanishConditionalSuffix extends CWordBooleanExtractor {
 
   private static final long serialVersionUID = 4383251116043848632L;
@@ -1697,7 +1696,9 @@ class ExtractorSpanishConditionalSuffix extends CWordBooleanExtractor {
   }
 }
 
-
+/**
+ * Matches imperfect-tense verb suffixes (-er, -ir verbs).
+ */
 class ExtractorSpanishImperfectErIrSuffix extends CWordBooleanExtractor {
 
   private static final long serialVersionUID = -5804047931816433075L;

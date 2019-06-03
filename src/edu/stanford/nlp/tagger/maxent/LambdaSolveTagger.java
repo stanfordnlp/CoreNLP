@@ -93,7 +93,7 @@ public class LambdaSolveTagger extends LambdaSolve  {
     super.setBinary();
   }
 
-  void initCondsZlambdaEtc() {
+  private void initCondsZlambdaEtc() {
     // init pcond
     for (int x = 0; x < p.data.xSize; x++) {
       for (int y = 0; y < p.data.ySize; y++) {

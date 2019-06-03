@@ -119,11 +119,11 @@ public class ConvertTreesToTags  {
         inputFilenames.add(args[i]);
       }
     }
-    if (outputFilename.equals("")) {
+    if (outputFilename.isEmpty()) {
       log.info("Must specify an output filename, -output");
       System.exit(2);
     }
-    if (inputFilenames.size() == 0) {
+    if (inputFilenames.isEmpty()) {
       log.info("Must specify one or more input filenames");
       System.exit(2);
     }

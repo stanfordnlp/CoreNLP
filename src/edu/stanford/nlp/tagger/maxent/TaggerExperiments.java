@@ -34,7 +34,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.Set;
@@ -83,7 +82,7 @@ public class TaggerExperiments extends Experiments  {
   /** This method gets feature statistics from a training file found in the TaggerConfig.
    *  It is the start of the training process.
    */
-  protected TaggerExperiments(TaggerConfig config, MaxentTagger maxentTagger) throws IOException {
+  protected TaggerExperiments(TaggerConfig config, MaxentTagger maxentTagger) {
     this(maxentTagger);
 
     log.info("TaggerExperiments: adding word/tags");
@@ -256,7 +255,7 @@ public class TaggerExperiments extends Experiments  {
           // look up the tag # in the index
           if (maxentTagger.fAssociations.size() <= fK.num) {
             for (int i = maxentTagger.fAssociations.size(); i <= fK.num; ++i) {
-              maxentTagger.fAssociations.add(Generics.<String, int[]>newHashMap());
+              maxentTagger.fAssociations.add(Generics.newHashMap());
             }
           }
           Map<String, int[]> fValueAssociations = maxentTagger.fAssociations.get(fK.num);

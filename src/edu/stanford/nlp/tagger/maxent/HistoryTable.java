@@ -1,8 +1,7 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
- * Company:      Stanford University<p>
+ * Copyright:    Copyright (c) Stanford University<p>
  */
 
 package edu.stanford.nlp.tagger.maxent;
@@ -11,7 +10,7 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.HashIndex;
 
 /**
- * <i>Notes:</i> This maintains a two way lookup between a History and
+ * This maintains a two way lookup between a History and
  * an Integer index.
  *
  * @author Kristina Toutanova

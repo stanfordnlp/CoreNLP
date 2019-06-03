@@ -1,105 +1,22 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
- * Company:      Stanford University<p>
+ * Copyright:    Copyright (c) Stanford University<p>
  */
-
 package edu.stanford.nlp.tagger.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+// import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 
-/**
- * Hash the instances on the things that the features look at.
- *
- * @author Kristina Toutanova
- * @version 1.0
- */
-class ListInstances {
-
-  private final ArrayList<Integer> v = new ArrayList<>();
-  private int[] positions = null;
-  private int num = 0;
-
-  ListInstances() {
-  }
-
-  protected void add(int x) {
-    v.add(x);
-  }
-
-  protected void addPositions(int s, int e) {
-    positions = new int[2];
-    positions[0] = s;
-    positions[1] = e;
-
-  }
-
-  public int[] getPositions() {
-    return positions;
-  }
-
-  protected void inc() {
-    num++;
-  }
-
-
-  public int getNum() {
-    return num;
-  }
-
-
-  public int[] getInstances() {
-    int[] arr = new int[v.size()];
-    Integer[] arr1 = new Integer[v.size()];
-    v.toArray(arr1);
-    for (int i = 0; i < v.size(); i++) {
-      arr[i] = arr1[i];
-    }
-    return arr;
-  }
-
-  /*
-  Methods unused: commented for now.
-  public void save(DataOutputStream rf) {
-    try {
-      rf.writeInt(v.size());
-      int[] arr = getInstances();
-      for (int i = 0; i < v.size(); i++) {
-        rf.writeInt(arr[i]);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  public void read(DataInputStream rf) {
-    try {
-      int len = rf.readInt();
-      for (int i = 0; i < len; i++) {
-        int x = rf.readInt();
-        add(x);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-  }// end read
-
-  */
-
-}
-
 public class TemplateHash  {
 
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TemplateHash.class);
+  // /** A logger for this class */
+  // private static final Redwood.RedwoodChannels log = Redwood.channels(TemplateHash.class);
 
   // the positions of the feature extractors
   private final Map<Pair<Integer,String>,ListInstances> tempHash = Generics.newHashMap();
@@ -147,8 +64,7 @@ public class TemplateHash  {
     if (tempHash.containsKey(wT)) {
       ListInstances li = tempHash.get(wT);
       // TODO: can we clean this call up somehow?  perhaps make the
-      // TemplateHash aware of the TaggerExperiments if we need to, or
-      // vice-versa?
+      // TemplateHash aware of the TaggerExperiments if we need to, or vice-versa?
       if (TaggerExperiments.isPopulated(nFeatFrame, li.getNum(), maxentTagger)) {
         li.add(number);
       }
@@ -257,5 +173,83 @@ public class TemplateHash  {
   }
 
   */
+
+
+  /**
+   * Hash the instances on the things that the features look at.
+   *
+   * @author Kristina Toutanova
+   * @version 1.0
+   */
+  static class ListInstances {
+
+    private final ArrayList<Integer> v = new ArrayList<>();
+    private int[] positions; // = null;
+    private int num; // = 0;
+
+    ListInstances() { }
+
+    protected void add(int x) {
+      v.add(x);
+    }
+
+    protected void addPositions(int s, int e) {
+      positions = new int[2];
+      positions[0] = s;
+      positions[1] = e;
+    }
+
+    public int[] getPositions() {
+      return positions;
+    }
+
+    protected void inc() {
+      num++;
+    }
+
+    public int getNum() {
+      return num;
+    }
+
+    public int[] getInstances() {
+      int[] arr = new int[v.size()];
+      Integer[] arr1 = new Integer[v.size()];
+      v.toArray(arr1);
+      for (int i = 0; i < v.size(); i++) {
+        arr[i] = arr1[i];
+      }
+      return arr;
+    }
+
+  /*
+  Methods unused: commented for now.
+  public void save(DataOutputStream rf) {
+    try {
+      rf.writeInt(v.size());
+      int[] arr = getInstances();
+      for (int i = 0; i < v.size(); i++) {
+        rf.writeInt(arr[i]);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void read(DataInputStream rf) {
+    try {
+      int len = rf.readInt();
+      for (int i = 0; i < len; i++) {
+        int x = rf.readInt();
+        add(x);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+  }// end read
+
+  */
+
+  }
 
 }

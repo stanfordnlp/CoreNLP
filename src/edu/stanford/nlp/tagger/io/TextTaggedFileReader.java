@@ -12,13 +12,13 @@ import java.util.StringTokenizer;
 import edu.stanford.nlp.ling.TaggedWord;
 
 public class TextTaggedFileReader implements TaggedFileReader {
-  final BufferedReader reader;
-  final String tagSeparator;
-  final String filename;
+  private final BufferedReader reader;
+  private final String tagSeparator;
+  private final String filename;
 
-  int numSentences = 0;
+  private int numSentences; // = 0;
 
-  List<TaggedWord> next;
+  private List<TaggedWord> next;
 
   public TextTaggedFileReader(TaggedFileRecord record) {
     filename = record.file;
@@ -34,12 +34,16 @@ public class TextTaggedFileReader implements TaggedFileReader {
     primeNext();
   }
 
+  @Override
   public Iterator<List<TaggedWord>> iterator() { return this; }
 
+  @Override
   public String filename() { return filename; }
 
+  @Override
   public boolean hasNext() { return next != null; }
 
+  @Override
   public List<TaggedWord> next() {
     if (next == null) {
       throw new NoSuchElementException();
@@ -49,7 +53,7 @@ public class TextTaggedFileReader implements TaggedFileReader {
     return thisIteration;
   }
 
-  void primeNext() {
+  private void primeNext() {
     String line;
     try {
       line = reader.readLine();
@@ -79,5 +83,7 @@ public class TextTaggedFileReader implements TaggedFileReader {
     }
   }
 
+  @Override
   public void remove() { throw new UnsupportedOperationException(); }
+
 }

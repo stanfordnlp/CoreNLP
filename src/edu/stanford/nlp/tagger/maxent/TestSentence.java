@@ -45,6 +45,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
+import java.util.stream.IntStream;
 
 
 /**
@@ -144,7 +145,7 @@ public class TestSentence implements SequenceModel  {
     }
     size = sz + 1;
     if (VERBOSE) {
-      log.info("Sentence is " + SentenceUtils.listToString(sent, false, tagSeparator));
+      log.info("Sentence: " + SentenceUtils.listToString(sent, false, tagSeparator));
     }
     init();
     ArrayList<TaggedWord> result = testTagInference();
@@ -237,10 +238,6 @@ public class TestSentence implements SequenceModel  {
         String[] tags = stringTagsAt(h.current - h.start + leftWindow());
         double[] probs = getHistories(tags, h);
         ArrayMath.logNormalize(probs);
-
-        // log.info("word: " + pairs.getWord(current));
-        // log.info("tags: " + Arrays.asList(tags));
-        // log.info("probs: " + ArrayMath.toString(probs));
 
         for (int j = 0; j < tags.length; j++) {
           // score the j-th tag
@@ -427,16 +424,70 @@ public class TestSentence implements SequenceModel  {
     return scores;
   }
 
-  // This precomputes scores of local features (localScores).
+  // this is for the VERBOSE debugging code
+  private double[][] fullScores; // = null;
+
+  /** This computes scores of tags at a position in a sentence (the so called "History").
+   *  Usually, it precomputes scores of local features (localScores).
+   *  This is turned off if VERBOSE is set to make printing feature weights simpler....
+   *
+   * @param tags
+   * @param h
+   * @return
+   */
   protected double[] getHistories(String[] tags, History h) {
     boolean rare = maxentTagger.isRare(ExtractorFrames.cWord.extract(h));
-    Extractors ex = maxentTagger.extractors, exR = maxentTagger.extractorsRare;
+    Extractors ex = maxentTagger.extractors;
+    Extractors exR = maxentTagger.extractorsRare;
     String w = pairs.getWord(h.current);
-    if (DBG) { System.err.printf("%s: loc %s lc %s dy %s; rloc %s rlc %s rdy %s%n", w, ex.local, ex.localContext, ex.dynamic, exR.local, exR.localContext, exR.dynamic); }
+    // if (DBG) { System.err.printf("%s: loc %s lc %s dy %s; rloc %s rlc %s rdy %s%n", w, ex.local, ex.localContext, ex.dynamic, exR.local, exR.localContext, exR.dynamic); }
+
+    if (VERBOSE) {
+      // Good options to print out what is calculated here are: -debug -verbose -verboseResults false -approximate false
+      int extractorsSize = rare ? ex.size() + exR.size() : ex.size();
+      fullScores = new double[extractorsSize][maxentTagger.ySize];
+
+      List<Pair<Integer, Extractor>> allEx = new ArrayList<>(ex.local);
+      allEx.addAll(ex.localContext);
+      allEx.addAll(ex.dynamic);
+      List<Pair<Integer, Extractor>> allExR = new ArrayList<>();
+      if (rare) {
+        allExR.addAll(exR.local);
+        allExR.addAll(exR.localContext);
+        allExR.addAll(exR.dynamic);
+      }
+
+      // = null;
+      ArrayList<String> extractorVals = new ArrayList<>();
+      for (int i = 0; i < extractorsSize; i++) {
+        extractorVals.add("foo");
+      }
+      for (Pair<Integer, Extractor> pair : allEx) {
+        int kf = pair.first();
+        Extractor e = pair.second();
+        String val = e.extract(h);
+        extractorVals.set(kf, e + " " + val);
+      }
+      for (Pair<Integer, Extractor> pair : allExR) {
+        int kf = pair.first();
+        Extractor e = pair.second();
+        String val = e.extract(h);
+        extractorVals.set(kf + ex.size(), e + " " + val);
+      }
+
+      double[] totalS = getHistories(tags, h, allEx, rare ? allExR : null);
+
+      NumberFormat nf = new DecimalFormat("0.00");
+      Object[] colNames = IntStream.range(0, maxentTagger.ySize).mapToObj(k -> maxentTagger.tags.getTag(k)).toArray();
+      System.err.println(ArrayMath.toString(fullScores, 6, extractorVals.toArray(), colNames,
+              48, nf, false, true, w));
+      return totalS;
+    } // end if (VERBOSE) case
+
     double[] lS = localScores.get(w);
     if (lS == null) {
       lS = getHistories(tags, h, ex.local, rare ? exR.local : null);
-      localScores.put(w,lS);
+      localScores.put(w, lS);
     } else if (lS.length != tags.length) {
       // This case can occur when a word was given a specific forced
       // tag, and then later it shows up without the forced tag.
@@ -445,17 +496,17 @@ public class TestSentence implements SequenceModel  {
       // given is not the same tag as before
       lS = getHistories(tags, h, ex.local, rare ? exR.local : null);
       if (tags.length > 1) {
-        localScores.put(w,lS);
+        localScores.put(w, lS);
       }
     }
     double[] lcS = localContextScores[h.current];
     if (lcS == null) {
       lcS = getHistories(tags, h, ex.localContext, rare ? exR.localContext : null);
       localContextScores[h.current] = lcS;
-      ArrayMath.pairwiseAddInPlace(lcS,lS);
+      ArrayMath.pairwiseAddInPlace(lcS, lS);
     }
     double[] totalS = getHistories(tags, h, ex.dynamic, rare ? exR.dynamic : null);
-    ArrayMath.pairwiseAddInPlace(totalS,lcS);
+    ArrayMath.pairwiseAddInPlace(totalS, lcS);
     return totalS;
   }
 
@@ -468,13 +519,10 @@ public class TestSentence implements SequenceModel  {
 
   private double[] getExactHistories(History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
     double[] scores = new double[maxentTagger.ySize];
-    int szCommon = maxentTagger.extractors.size();
-
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
       Extractor ex = e.second();
       String val = ex.extract(h);
-      if (VERBOSE) { System.err.printf("%s extracted %s%n", ex, val); }
       int[] fAssociations = maxentTagger.fAssociations.get(kf).get(val);
       if (fAssociations != null) {
         for (int j = 0; j < maxentTagger.ySize; j++) {
@@ -482,49 +530,41 @@ public class TestSentence implements SequenceModel  {
           if (fNum > -1) {
             double score = maxentTagger.getLambdaSolve().lambda[fNum];
             if (VERBOSE) {
-              System.err.printf("%s %s %d %s %s %f%n",
-                      ExtractorFrames.cWord.extract(h), maxentTagger.tags.getTag(j), kf, ex, val, score);
+              fullScores[kf][j] = score;
             }
             scores[j] += score;
-          } else {
-            if (VERBOSE) {
-              System.err.printf("%s %s %d %s %s %f%n",
-                      ExtractorFrames.cWord.extract(h), maxentTagger.tags.getTag(j), kf, ex, val, 0.0);
-            }
           }
         }
-      } else if (VERBOSE) {
-        System.err.printf("%s %d %s NO EXTRACTED FEATURE-VALUE WEIGHTS%n",
-                ExtractorFrames.cWord.extract(h), kf, ex);
       }
     }
     if (extractorsRare != null) {
+      int szCommon = maxentTagger.extractors.size();  // needs to be full size list of extractors not subset of some type
       for (Pair<Integer,Extractor> e : extractorsRare) {
         int kf = e.first();
         Extractor ex = e.second();
-        if (VERBOSE) { System.err.printf("%s%n", ex); }
         String val = ex.extract(h);
+
         int[] fAssociations = maxentTagger.fAssociations.get(kf+szCommon).get(val);
+//        String word = h.pairs.getWord(h, 0);
+//        if (kf + szCommon == 30) { // ExtractorWordPref(len5,w0)
+//          System.err.print(ex + ": word=" + word + ", val=" + val);
+//          if (fAssociations == null) {
+//            System.err.println(", fAssociations is NULL");
+//          } else {
+//            System.err.println(", fAssociations = " + Arrays.toString(fAssociations));
+//          }
+//        }
         if (fAssociations != null) {
           for (int j = 0; j < maxentTagger.ySize; j++) {
             int fNum = fAssociations[j];
             if (fNum > -1) {
               double score = maxentTagger.getLambdaSolve().lambda[fNum];
               if (VERBOSE) {
-                System.err.printf("%s %s %d %s %s %f%n",
-                        ExtractorFrames.cWord.extract(h), maxentTagger.tags.getTag(j), kf, ex, val, score);
+                fullScores[kf+szCommon][j] = score;
               }
               scores[j] += score;
-            } else {
-              if (VERBOSE) {
-                System.err.printf("%s %s %d %s %s %f%n",
-                        ExtractorFrames.cWord.extract(h), maxentTagger.tags.getTag(j), kf, ex, val, 0.0);
-              }
             }
           }
-        } else if (VERBOSE) {
-          System.err.printf("%s %d %s NO EXTRACTED FEATURE-VALUE WEIGHTS%n",
-                  ExtractorFrames.cWord.extract(h), kf, ex);
         }
       }
     }
@@ -553,15 +593,9 @@ public class TestSentence implements SequenceModel  {
           if (fNum > -1) {
             double score = maxentTagger.getLambdaSolve().lambda[fNum];
             if (VERBOSE) {
-              System.err.printf("%s %s %d %s %s %f%n",
-                      ExtractorFrames.cWord.extract(h), tag, kf, ex, val, score);
+              fullScores[kf][j] = score;
             }
             scores[j] += score;
-          } else {
-            if (VERBOSE) {
-              System.err.printf("%s %s %d %s %s %f%n",
-                      ExtractorFrames.cWord.extract(h), tag, kf, ex, val, 0.0);
-            }
           }
         }
       }
@@ -580,15 +614,9 @@ public class TestSentence implements SequenceModel  {
             if (fNum > -1) {
               double score = maxentTagger.getLambdaSolve().lambda[fNum];
               if (VERBOSE) {
-                System.err.printf("%s %s %d %s %s %f%n",
-                        ExtractorFrames.cWord.extract(h), tag, kf, ex, val, score);
+                fullScores[kf+szCommon][j] = score;
               }
               scores[j] += score;
-            } else {
-              if (VERBOSE) {
-                System.err.printf("%s %s %d %s %s %f%n",
-                        ExtractorFrames.cWord.extract(h), tag, kf, ex, val, 0.0);
-              }
             }
           }
         }
@@ -806,7 +834,7 @@ public class TestSentence implements SequenceModel  {
     String word = sent.get(pos - leftWindow());
     if (maxentTagger.dict.isUnknown(word)) {
       Set<String> open = maxentTagger.tags.getOpenTags();  // todo: really want array of String or int here
-      arr1 = open.toArray(new String[open.size()]);
+      arr1 = open.toArray(StringUtils.EMPTY_STRING_ARRAY);
     } else {
       arr1 = maxentTagger.dict.getTags(word);
     }

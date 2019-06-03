@@ -118,7 +118,7 @@
  *
  * <p>In an extractor we can also specify for which tags to
  * instantiate the template. The method
- * <code>boolean precondition(String tag)</code> is by default true, meaning
+ * {@code boolean precondition(String tag)} is by default true, meaning
  * that a feature can be created for every tag. Sometimes we would like to
  * restrict that, and say that features should be created for only the VB and VBP
  * tags, for example. In this case the method precondition has to be redefined to
@@ -156,7 +156,7 @@
  *
  * <p>At present, many of the extractor and rare extractor combinations can
  * be flexibly set from a properties file by suitable specifications of the
- * <code>arch</code> option, whereas others require changing the code.</p>
+ * {@code arch} option, whereas others require changing the code.</p>
  *
  * <h3>Specifying closed-class POS tags</h3>
  *

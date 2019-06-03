@@ -1,7 +1,5 @@
 package edu.stanford.nlp.tagger.util; 
-import edu.stanford.nlp.util.logging.Redwood;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +16,7 @@ import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.tagger.maxent.TaggerConfig;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -52,35 +51,36 @@ import edu.stanford.nlp.util.StringUtils;
 public class CountClosedTags  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CountClosedTags.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CountClosedTags.class);
+
   /**
    * Which tags to look for
    */
-  Set<String> closedTags;
+  private Set<String> closedTags;
 
   /**
    * Words seen in the first trainingRatio fraction of the trainFiles
    */
-  Map<String, Set<String>> trainingWords = Generics.newHashMap();
+  private Map<String, Set<String>> trainingWords = Generics.newHashMap();
   /**
    * Words seen in either trainFiles or testFiles
    */
-  Map<String, Set<String>> allWords = Generics.newHashMap();
+  private Map<String, Set<String>> allWords = Generics.newHashMap();
 
-  static final double DEFAULT_TRAINING_RATIO = 2.0 / 3.0;
+  private static final double DEFAULT_TRAINING_RATIO = 2.0 / 3.0;
   /**
    * How much of each training file to count for trainingWords
    */
-  final double trainingRatio;
+  private final double trainingRatio;
   /**
    * Whether or not the final output should print the words
    */
-  final boolean printWords;
+  private final boolean printWords;
 
-  /**
+  /*
    * Tag separator...
    */
-  private static final String tagSeparator = "_";
+  // private static final String tagSeparator = "_";
 
   // intended to be a standalone program, not a class
   private CountClosedTags(Properties props) {
@@ -105,23 +105,21 @@ public class CountClosedTags  {
   }
 
   /**
-   * Count how many sentences there are in filename
+   * Count how many sentences there are in filename.
    */
-  private static int countSentences(TaggedFileRecord file)
-    throws IOException
-  {
+  private static int countSentences(TaggedFileRecord file) {
     int count = 0;
-    for (List<TaggedWord> line : file.reader())
+    for (List<TaggedWord> ignored : file.reader())
       ++count;
     return count;
   }
 
   /**
    * Given a line, split it into tagged words and add each word to
-   * the given tagWordMap
+   * the given tagWordMap.
    */
-  void addTaggedWords(List<TaggedWord> line,
-                      Map<String, Set<String>> tagWordMap) {
+  private void addTaggedWords(List<TaggedWord> line,
+                              Map<String, Set<String>> tagWordMap) {
     for (TaggedWord taggedWord : line) {
       String word = taggedWord.word();
       String tag = taggedWord.tag();
@@ -138,9 +136,7 @@ public class CountClosedTags  {
    * Count trainingRatio of the sentences for both trainingWords and
    * allWords, and count the rest for just allWords
    */
-  void countTrainingTags(TaggedFileRecord file)
-    throws IOException
-  {
+  private void countTrainingTags(TaggedFileRecord file) {
     int sentences = countSentences(file);
     int trainSentences = (int) (sentences * trainingRatio);
     TaggedFileReader reader = file.reader();
@@ -159,9 +155,7 @@ public class CountClosedTags  {
   /**
    * Count all the words in the given file for just allWords
    */
-  void countTestTags(TaggedFileRecord file)
-    throws IOException
-  {
+  private void countTestTags(TaggedFileRecord file) {
     for (List<TaggedWord> line : file.reader()) {
       addTaggedWords(line, allWords);
     }
@@ -170,7 +164,7 @@ public class CountClosedTags  {
   /**
    * Print out the results found
    */
-  void report() {
+  private void report() {
     List<String> successfulTags = new ArrayList<>();
     Set<String> tags = new TreeSet<>();
     tags.addAll(allWords.keySet());
@@ -184,21 +178,21 @@ public class CountClosedTags  {
                       allWords.get(tag).size() : 0);
       if (numTraining == numTotal && numTraining > 0)
         successfulTags.add(tag);
-      System.out.println(tag + " " + numTraining + " " + numTotal);
+      System.out.println(tag + ' ' + numTraining + ' ' + numTotal);
       if (printWords) {
         Set<String> trainingSet = trainingWords.get(tag);
         if (trainingSet == null)
           trainingSet = Collections.emptySet();
         Set<String> allSet = allWords.get(tag);
         for (String word : trainingSet) {
-          System.out.print(" " + word);
+          System.out.print(' ' + word);
         }
         if (trainingSet.size() < allSet.size()) {
           System.out.println();
           System.out.print(" *");
           for (String word : allWords.get(tag)) {
             if (!trainingSet.contains(word)) {
-              System.out.print(" " + word);
+              System.out.print(' ' + word);
             }
           }
         }
@@ -208,11 +202,11 @@ public class CountClosedTags  {
     System.out.println(successfulTags);
   }
 
-  public static final String TEST_FILE_PROPERTY = "testFile";
-  public static final String TRAIN_FILE_PROPERTY = "trainFile";
-  public static final String CLOSED_TAGS_PROPERTY = "closedTags";
-  public static final String TRAINING_RATIO_PROPERTY = "trainingRatio";
-  public static final String PRINT_WORDS_PROPERTY = "printWords";
+  private static final String TEST_FILE_PROPERTY = "testFile";
+  private static final String TRAIN_FILE_PROPERTY = "trainFile";
+  private static final String CLOSED_TAGS_PROPERTY = "closedTags";
+  private static final String TRAINING_RATIO_PROPERTY = "trainingRatio";
+  private static final String PRINT_WORDS_PROPERTY = "printWords";
 
   private static final Set<String> knownArgs =
     Generics.newHashSet(Arrays.asList(TEST_FILE_PROPERTY,
@@ -224,7 +218,7 @@ public class CountClosedTags  {
                                       TaggerConfig.TAG_SEPARATOR_PROPERTY));
 
   private static void help(String error) {
-    if (error != null && !error.equals("")) {
+    if (error != null && ! error.isEmpty()) {
       log.info(error);
     }
     System.exit(2);
@@ -263,4 +257,5 @@ public class CountClosedTags  {
     }
     cct.report();
   }
+
 }
