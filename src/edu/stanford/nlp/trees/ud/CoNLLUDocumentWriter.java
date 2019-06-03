@@ -38,7 +38,7 @@ public class CoNLLUDocumentWriter {
 
         /* Print comments. */
         for (String comment : basicSg.getComments()) {
-            sb.append(comment).append("\n");
+            sb.append(comment).append(System.lineSeparator());
         }
 
         SemanticGraph tokenSg = enhancedSg != null ? enhancedSg : basicSg;
@@ -127,7 +127,7 @@ public class CoNLLUDocumentWriter {
             sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.toCopyIndex(), word,
                     lemma, upos, pos, featuresString, govIdx, relnName, additionalDepsString, misc));
         }
-        sb.append("\n");
+        sb.append(System.lineSeparator());
 
         return sb.toString();
     }
@@ -153,7 +153,7 @@ public class CoNLLUDocumentWriter {
           sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.index(), token.word(),
               lemma, upos , pos, featuresString, "_", "_", "_", misc));
       }
-      sb.append("\n");
+      sb.append(System.lineSeparator());
 
       return sb.toString();
 

@@ -138,8 +138,8 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
 
         String output = writer.printSemanticGraph(basicSg, enhancedSg);
 
+        clean = clean.replaceAll("\n", System.lineSeparator());
         assertEquals(clean, output);
-
     }
 
 
