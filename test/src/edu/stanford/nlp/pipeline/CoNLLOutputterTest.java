@@ -17,16 +17,16 @@ public class CoNLLOutputterTest extends TestCase {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(PropertiesUtils.asProperties("annotators", "tokenize, ssplit"));
     pipeline.annotate(ann);
     String actual = new CoNLLOutputter().print(ann);
-    String expected = "1\tCoNLL\t_\t_\t_\t_\t_\n" +
-        "2\tis\t_\t_\t_\t_\t_\n" +
-        "3\tneat\t_\t_\t_\t_\t_\n" +
-        "4\t.\t_\t_\t_\t_\t_\n" +
-        '\n' +
-        "1\tBetter\t_\t_\t_\t_\t_\n" +
-        "2\tthan\t_\t_\t_\t_\t_\n" +
-        "3\tXML\t_\t_\t_\t_\t_\n" +
-        "4\t.\t_\t_\t_\t_\t_\n" +
-        '\n';
+    String expected = "1\tCoNLL\t_\t_\t_\t_\t_" + System.lineSeparator() +
+        "2\tis\t_\t_\t_\t_\t_" + System.lineSeparator() +
+        "3\tneat\t_\t_\t_\t_\t_" + System.lineSeparator() +
+        "4\t.\t_\t_\t_\t_\t_" + System.lineSeparator() +
+        System.lineSeparator() +
+        "1\tBetter\t_\t_\t_\t_\t_" + System.lineSeparator() +
+        "2\tthan\t_\t_\t_\t_\t_" + System.lineSeparator() +
+        "3\tXML\t_\t_\t_\t_\t_" + System.lineSeparator() +
+        "4\t.\t_\t_\t_\t_\t_" + System.lineSeparator() +
+        System.lineSeparator();
     assertEquals(expected, actual);
   }
 
@@ -37,16 +37,16 @@ public class CoNLLOutputterTest extends TestCase {
             "output.columns", outputKeys));
     pipeline.annotate(ann);
     String actual = new CoNLLOutputter().print(ann, pipeline);
-    String expected = "CoNLL\t_\n" +
-        "is\t_\n" +
-        "neat\t_\n" +
-        ".\t_\n" +
-        '\n' +
-        "Better\t_\n" +
-        "than\t_\n" +
-        "XML\t_\n" +
-        ".\t_\n" +
-        '\n';
+    String expected = "CoNLL\t_" + System.lineSeparator() +
+        "is\t_" + System.lineSeparator() +
+        "neat\t_" + System.lineSeparator() +
+        ".\t_" + System.lineSeparator() +
+        System.lineSeparator() +
+        "Better\t_" + System.lineSeparator() +
+        "than\t_" + System.lineSeparator() +
+        "XML\t_" + System.lineSeparator() +
+        ".\t_" + System.lineSeparator() +
+        System.lineSeparator();
     assertEquals(expected, actual);
   }
 
