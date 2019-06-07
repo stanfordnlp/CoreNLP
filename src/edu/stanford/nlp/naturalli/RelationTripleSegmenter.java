@@ -39,7 +39,9 @@ public class RelationTripleSegmenter {
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(:pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
-    add(SemgrexPattern.compile("{$}=verb ?>/aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
+    // older versions of dependencies produce dobj, newer may just be obj.
+    // this expression accommodates both
+    add(SemgrexPattern.compile("{$}=verb ?>/aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/[di]?obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Tom and Jerry were fighting }
     add(SemgrexPattern.compile("{$}=verb >/nsubj(:pass)?/ ( {}=subject >/conj:and/=subjIgnored {}=object )"));
     // { mass of iron is 55amu }
