@@ -304,8 +304,6 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\ttruffles picked\tare\ttasty", extraction.get().toString());
   }
 
-  // todo [cdm 2019]: "as president" is either obl:as or probably should be xcomp
-  // todo: check parser to see what it actually produces.  obl:as is ok according to chris
   public void testHeWasInaugurated() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\the\t3\tnsubj:pass\n" +
