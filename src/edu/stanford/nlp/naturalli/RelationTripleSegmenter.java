@@ -387,13 +387,13 @@ public class RelationTripleSegmenter {
   /** A set of valid arcs denoting a subject entity we are interested in */
   public final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod:poss"); add("nmod:tmod"); add("expl");
-    add("nsubj"); add("case");
+    add("nsubj"); add("case"); add("mark");
   }});
 
   /** A set of valid arcs denoting an object entity we are interested in */
   public final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
-    add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("case");
+    add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("case"); add("mark");
     // add("advcl"); // Born in Hawaii, Obama is a US citizen; citizen -advcl-> Born.
   }});
 

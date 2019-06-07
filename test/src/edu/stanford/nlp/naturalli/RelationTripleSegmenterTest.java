@@ -229,20 +229,17 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\trabbits\teat\tvegetables", extraction.get().toString());
   }
 
-  // todo [cdm 2019]: "to" should be mark now.
-  // to's dependency should be mark, not aux
   public void testFishLikeToSwim() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\tfish\t2\tnsubj\n" +
             "2\tlike\t0\troot\n" +
-            "3\tto\t4\taux\n" +
+            "3\tto\t4\tmark\n" +
             "4\tswim\t2\txcomp\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tfish\tlike\tto swim", extraction.get().toString());
   }
 
-  // todo [cdm 2019]: "to" should be mark now.
   public void testFishLikeToSwimAlternateParse() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tfish\t2\tnsubj\n" +
@@ -419,7 +416,6 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tTim\t's father is\tTom", extraction.get().toString());
   }
 
-  // todo [cdm 2019]: Really "in Tucson" should be obl:in now.
   public void testApposInObject() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tNewspaper\t2\tnsubj\n" +
@@ -455,13 +451,12 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tTom\tfighting\tJerry", extraction.get().toString());
   }
 
-  // todo [cdm 2019]: This one is weird, since it's not actually passive. You'd want "Tom and Jerry were killed" but then would you get the relation shown? It only seems to apply to symmetric predicates....
   public void testPassiveReflexive() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tTom\t5\tnsubj:pass\n" +
         "2\tand\t1\tcc\n" +
         "3\tJerry\t1\tconj:and\n" +
-        "4\twere\t5\taux\n" +   // changed aux:pass to aux
+        "4\twere\t5\taux\n" +   // changed aux:pass to aux for UD 2.0
         "5\tfighting\t0\troot\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
