@@ -237,6 +237,11 @@ public class OpenIEITest {
       add("Chess\tis\tphysical sport");
       add("Chess\tis\tsport");
     }}, "Chess is a physical sport");
+    // TODO: this is failing either because a potential triple is
+    // being extracted when it shouldn't in RelationTripleSegmenter,
+    // or because there's a polarity check after that extraction and
+    // the polarity is registered as "up" and doesn't encode the
+    // negation
     assertExtracted(new HashSet<String>() {{
     }}, "Chess is not a physical sport");
   }
