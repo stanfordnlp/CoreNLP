@@ -19,10 +19,22 @@ public class CoNLLUOutputterITest extends TestCase {
                 setProperty("parse.keepPunct", "true");
             }});
 
+    /** Make sure that an invalid dependency type barfs. */
+    public void testInvalidOutputter() throws IOException {
+        try {
+            Annotation ann = new Annotation("CoNLL-U is neat. Better than XML.");
+            pipeline.annotate(ann);
+            String actual = new CoNLLUOutputter("this should fail").print(ann);
+            throw new AssertionError("This should have failed");
+        } catch (IllegalArgumentException e) {
+            // yay
+        }
+    }
+
     public void testSimpleSentence() throws IOException {
         Annotation ann = new Annotation("CoNLL-U is neat. Better than XML.");
         pipeline.annotate(ann);
-        String actual = new CoNLLUOutputter().print(ann);
+        String actual = new CoNLLUOutputter("enhanced").print(ann);
         String expected = "1\tCoNLL-U\tconll-u\tNOUN\tNN\tNumber=Sing\t3\tnsubj\t3:nsubj\t_\n" +
                 "2\tis\tbe\tVERB\tVBZ\tMood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin\t3\tcop\t3:cop\t_\n" +
                 "3\tneat\tneat\tADJ\tJJ\tDegree=Pos\t0\troot\t0:root\t_\n" +
