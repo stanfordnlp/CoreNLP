@@ -200,13 +200,13 @@ public class SentenceAlgorithmsITest {
       add("Geledi");
       add("<-nmod:of-");
       add("Sultanate");
-      add("<-conj-");
+      add("<-appos-");
       add("Sultanate");
       add("<-nmod:including-");
       add("trade");
-      add("<-dobj-");
+      add("<-obj-");
       add("dominated");
-      add("-nmod:in->");
+      add("-obl:in->");
       add("Ages");
       add("-compound->");
       add("Middle");
