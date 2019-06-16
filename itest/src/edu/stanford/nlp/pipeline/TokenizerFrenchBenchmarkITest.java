@@ -15,7 +15,7 @@ public class TokenizerFrenchBenchmarkITest  extends TokenizerBenchmarkTestCase {
         props.put("mwt.mappingFile",
                 "/u/nlp/data/stanford-corenlp/test/data/mwt/fr-mwt.tsv");
         props.put("mwt.pos.model", "/u/nlp/data/stanford-corenlp/test/models/fr-mwt.tagger");
-        props.put("tokenize.mwt.statisticalMappingFile",
+        props.put("mwt.statisticalMappingFile",
                 "/u/nlp/data/stanford-corenlp/test/data/fr-mwt-statistical.tsv");
         props.put("ssplit.isOneSentence", "true");
         pipeline = new StanfordCoreNLP(props);
