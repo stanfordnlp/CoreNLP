@@ -11,7 +11,7 @@ import java.util.stream.*;
  * An Annotator for splitting tokens into words based on a dictionary, rules, or a statistical model.
  */
 
-public class MWTAnnotator {
+public class MWTAnnotator implements Annotator {
 
     /**
      * Mapping from an original token to a list of words
@@ -148,5 +148,24 @@ public class MWTAnnotator {
             sentence.set(CoreAnnotations.TokensAnnotation.class, newSentenceTokens);
         }
         annotation.set(CoreAnnotations.TokensAnnotation.class, finalDocumentTokens);
+    }
+
+    @Override
+    public Set<Class<? extends CoreAnnotation>> requires() {
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+                CoreAnnotations.TokensAnnotation.class,
+                CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+                CoreAnnotations.CharacterOffsetEndAnnotation.class,
+                CoreAnnotations.SentencesAnnotation.class
+        )));
+    }
+
+    @Override
+    public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+                CoreAnnotations.MWTTokenTextAnnotation.class,
+                CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class,
+                CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class
+        )));
     }
 }

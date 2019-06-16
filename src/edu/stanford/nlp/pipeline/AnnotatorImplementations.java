@@ -46,6 +46,14 @@ public class AnnotatorImplementations  {
   }
 
   /**
+   * Multi-word-token, split tokens into words (e.g. "des" in French into "de" and "les")
+   */
+  public Annotator multiWordToken(Properties props) {
+    String annotatorName = "mwt";
+    return new MWTAnnotator(annotatorName, props);
+  }
+
+  /**
    * Set document date
    */
   public Annotator docDate(Properties properties) {
