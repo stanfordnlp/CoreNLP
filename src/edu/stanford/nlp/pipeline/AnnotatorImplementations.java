@@ -49,8 +49,8 @@ public class AnnotatorImplementations  {
    * Multi-word-token, split tokens into words (e.g. "des" in French into "de" and "les")
    */
   public Annotator multiWordToken(Properties props) {
-    String annotatorName = "mwt";
-    return new MWTAnnotator(annotatorName, props);
+    // MWTAnnotator defaults to using "mwt." as prefix
+    return new MWTAnnotator("", props);
   }
 
   /**
