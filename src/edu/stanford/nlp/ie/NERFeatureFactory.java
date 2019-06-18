@@ -92,7 +92,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td> loadAuxClassifier </td><td>String</td><td>n/a</td><td>Path to auxiliary classifier to load.</td></tr>
  * <tr><td> serializeTo</td><td>String</td><td>n/a</td><td>Path to serialize classifier to</td></tr>
  * <tr><td> trainFile</td><td>String</td><td>n/a</td><td>Path of file to use as training data</td></tr>
- * <tr><td> testFile</td><td>String</td><td>n/a</td><td>Path of file to use as training data</td></tr>
+ * <tr><td> testFile</td><td>String</td><td>n/a</td><td>Path of file to use as test data</td></tr>
  * <tr><td> map</td><td>String</td><td>see below</td><td>This applies at training time or if testing on tab-separated column data.  It says what is in each column.  It doesn't apply when running on plain text data.  The simplest scenario for training is having words and classes in two column.  word=0,answer=1 is the default if conllNoTags is specified; otherwise word=0,tag=1,answer=2 is the default.  But you can add other columns, such as for a part-of-speech tag, presences in a lexicon, etc.  That would only be useful at runtime if you have part-of-speech information or whatever available and are passing it in with the tokens (that is, you can pass to classify CoreLabel tokens with additional fields stored in them).</td></tr>
  * <tr><td> useWord</td><td>boolean</td><td>true</td><td>Gives you feature for w</td></tr>
  * <tr><td> useBinnedLength</td><td>String</td><td>null</td><td>If non-null, treat as a sequence of comma separated integer bounds, where items above the previous bound up to the next bound are binned Len-<i>range</i></td></tr>
