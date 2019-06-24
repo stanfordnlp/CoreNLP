@@ -50,7 +50,7 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{pos:/NNS?/}=object >cop {}=relappend1 >/nsubj(:pass)?/ ( {}=verb >/nmod:of/ ( {pos:/NNS?/}=subject >case {}=relappend0 ) )"));
   }});
 
-  private final Pattern NOT_PAT = Pattern.compile(EnglishPatterns.NOT_PAT,
+  private final Pattern NOT_PAT = Pattern.compile(EnglishPatterns.NOT_PAT_WORD,
                                                   Pattern.CASE_INSENSITIVE);
   
   /**
