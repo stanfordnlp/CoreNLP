@@ -39,7 +39,9 @@ public class RelationTripleSegmenter {
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(:pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
-    add(SemgrexPattern.compile("{$}=verb ?>/aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
+    // older versions of dependencies produce dobj, newer may just be obj.
+    // this expression accommodates both
+    add(SemgrexPattern.compile("{$}=verb ?>/aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/[di]?obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Tom and Jerry were fighting }
     add(SemgrexPattern.compile("{$}=verb >/nsubj(:pass)?/ ( {}=subject >/conj:and/=subjIgnored {}=object )"));
     // { mass of iron is 55amu }
@@ -385,13 +387,13 @@ public class RelationTripleSegmenter {
   /** A set of valid arcs denoting a subject entity we are interested in */
   public final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod:poss"); add("nmod:tmod"); add("expl");
-    add("nsubj"); add("case");
+    add("nsubj"); add("case"); add("mark");
   }});
 
   /** A set of valid arcs denoting an object entity we are interested in */
   public final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
-    add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("case");
+    add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("case"); add("mark");
     // add("advcl"); // Born in Hawaii, Obama is a US citizen; citizen -advcl-> Born.
   }});
 

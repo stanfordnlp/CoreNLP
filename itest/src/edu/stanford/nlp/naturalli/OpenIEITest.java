@@ -5,11 +5,13 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.Sets;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
+
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -53,11 +55,12 @@ public class OpenIEITest {
 
   public void assertExtracted(Set<String> expectedSet, String text) {
     Collection<RelationTriple> extractions = annotate(text).get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-    String actual = StringUtils.join(
-        extractions.stream().map(x -> x.toString().substring(x.toString().indexOf("\t") + 1).toLowerCase()).sorted(),
-        "\n");
-    String expected = StringUtils.join(expectedSet.stream().map(String::toLowerCase).sorted(), "\n");
-    assertEquals(expected, actual);
+    Set<String> actual = 
+      extractions.stream().map(x -> x.toString().substring(x.toString().indexOf("\t") + 1).toLowerCase())
+      .collect(Collectors.toSet());
+    Set<String> expected = expectedSet.stream().map(String::toLowerCase).collect(Collectors.toSet());
+    Sets.assertEquals(expected, actual, "expected", "actual", true, 
+                      () -> "Unexpected results processing " + text);
   }
 
   public void assertEntailed(String expected, String text) {
@@ -234,6 +237,11 @@ public class OpenIEITest {
       add("Chess\tis\tphysical sport");
       add("Chess\tis\tsport");
     }}, "Chess is a physical sport");
+    // TODO: this is failing either because a potential triple is
+    // being extracted when it shouldn't in RelationTripleSegmenter,
+    // or because there's a polarity check after that extraction and
+    // the polarity is registered as "up" and doesn't encode the
+    // negation
     assertExtracted(new HashSet<String>() {{
     }}, "Chess is not a physical sport");
   }

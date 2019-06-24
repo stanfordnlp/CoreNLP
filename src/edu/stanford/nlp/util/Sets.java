@@ -3,6 +3,7 @@ package edu.stanford.nlp.util;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Supplier; 
 
 
 /**
@@ -115,6 +116,60 @@ public class Sets {
       s.add(elt);
       return pow;
     }
+  }
+
+  /**
+   * Tests whether two sets are equal.  If not, throws an assertion
+   * and gives a detailed report on the differences.  May be long
+   * depending on the sizes of the sets!
+   *
+   * @param first a set to compare
+   * @param second a set to compare against
+   * @param firstName the name of the first set, used if an error occurs
+   * @param secondName the name of the second set, used if an error occurs
+   * @param outputShared output the common values for the two sets
+   * @param errorMessage a Supplier of an error message, in case it is expensive to generate
+   */
+  public static <E> void assertEquals(Set<E> first, Set<E> second,
+                                      String firstName, String secondName,
+                                      boolean outputShared, Supplier<String> errorMessage) {
+    if (first.equals(second)) {
+      return;
+    }
+
+    // now we know something is different.  find out what and throw an assertion
+    Set<E> firstExtras = diff(first, second);
+    Set<E> secondExtras = diff(second, first);
+    StringBuilder builder = new StringBuilder();
+    builder.append(errorMessage.get());
+    builder.append("\n");
+    if (firstExtras.size() > 0) {
+      builder.append("-- Extra results in " + firstName + ": --\n");
+      for (E extra : firstExtras) {
+        builder.append(extra == null ? "(null)" : extra.toString());
+        builder.append("\n");
+      }
+    }
+    if (secondExtras.size() > 0) {
+      builder.append("-- Extra results in " + secondName + ": --\n");
+      for (E extra : secondExtras) {
+        builder.append(extra == null ? "(null)" : extra.toString());
+        builder.append("\n");
+      }
+    }
+
+    if (outputShared) {
+      Set<E> shared = intersection(first, second);
+      if (shared.size() > 0) {
+        builder.append("-- Common results in " + firstName + " and " + secondName + ": --\n");
+        for (E extra : shared) {
+          builder.append(extra == null ? "(null)" : extra.toString());
+          builder.append("\n");
+        }
+      }
+    }
+
+    throw new AssertionError(builder.toString());
   }
 
   public static void main(String[] args) {
