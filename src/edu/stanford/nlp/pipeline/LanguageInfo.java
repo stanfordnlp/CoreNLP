@@ -1,8 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.io.IOUtils;
-
-import java.io.*;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -57,14 +54,6 @@ public class LanguageInfo {
     return languageToPropertiesFile.get(getLanguageFromString(inputString));
   }
 
-  /** return an actual properties object for a given language **/
-  public static Properties getLanguageProperties(String inputString) throws IOException {
-    Properties props = new Properties();
-    InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(getLanguagePropertiesFile(inputString));
-    props.load(is);
-    return props;
-  }
-
   /** convert various input strings to language enum **/
   public static HumanLanguage getLanguageFromString(String inputString) {
     if (inputString.toLowerCase().equals("arabic") || inputString.toLowerCase().equals("ar"))
@@ -81,11 +70,6 @@ public class LanguageInfo {
       return HumanLanguage.SPANISH;
     else
       return null;
-  }
-
-  /** boolean saying whether String represents a Stanford CoreNLP supported language **/
-  public static boolean isStanfordCoreNLPSupportedLang(String lang) {
-    return (getLanguageFromString(lang) != null);
   }
 
   /** Check if language is a segmenter language, return boolean. **/

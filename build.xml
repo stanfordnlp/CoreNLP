@@ -160,8 +160,7 @@
   <target name="itest" depends="classpath,compile"
           description="Run core integration tests">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="12g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no"
-           haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
+    <junit fork="yes" maxmemory="12g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
@@ -174,7 +173,6 @@
         </fileset>
       </batchtest>
     </junit>
-    <fail message="Test failure detected, check test results." if="test.failed" />
   </target>
 
   <target name="itest-many-docs" depends="classpath"

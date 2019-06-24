@@ -98,12 +98,6 @@ public class CoNLLUOutputter extends AnnotationOutputter {
     this(new Properties());
   }
 
-  public CoNLLUOutputter(String type) {
-    this(new Properties() {{
-           setProperty("output.dependenciesType", type);
-    }});
-  }
-
   public CoNLLUOutputter(Properties props) {
     dependenciesType = props.getProperty("output.dependenciesType", "basic");
   }
@@ -122,10 +116,8 @@ public class CoNLLUOutputter extends AnnotationOutputter {
         } else if (dependenciesType.equals("enhancedPlusPlus")) {
           SemanticGraph enhancedSg = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
           writer.print(conllUWriter.printSemanticGraph(sg, enhancedSg));
-        } else if (dependenciesType.equals("basic")) {
-          writer.print(conllUWriter.printSemanticGraph(sg));
         } else {
-          throw new IllegalArgumentException("CoNLLUOutputter: unknown dependencies type " + dependenciesType);
+          writer.print(conllUWriter.printSemanticGraph(sg));
         }
       } else {
         writer.print(conllUWriter.printPOSAnnotations(sentence));

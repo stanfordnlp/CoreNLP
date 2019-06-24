@@ -338,9 +338,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   }
 
   private static Properties loadProperties(String name, ClassLoader loader) {
-    // check if name represents a Stanford CoreNLP supported language
-    if (LanguageInfo.isStanfordCoreNLPSupportedLang(name))
-      name = LanguageInfo.getLanguagePropertiesFile(name);
     if(name.endsWith (PROPS_SUFFIX)) name = name.substring(0, name.length () - PROPS_SUFFIX.length ());
     name = name.replace('.', '/');
     name += PROPS_SUFFIX;
@@ -520,7 +517,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     pool.put(STANFORD_TOKENIZE, (props, impl) -> impl.tokenizer(props));
     pool.put(STANFORD_CLEAN_XML, (props, impl) -> impl.cleanXML(props));
     pool.put(STANFORD_SSPLIT, (props, impl) -> impl.wordToSentences(props));
-    pool.put(STANFORD_MWT, (props, impl) -> impl.multiWordToken(props));
     pool.put(STANFORD_DOCDATE, (props, impl) -> impl.docDate(props));
     pool.put(STANFORD_POS, (props, impl) -> impl.posTagger(props));
     pool.put(STANFORD_LEMMA, (props, impl) -> impl.morpha(props, false));

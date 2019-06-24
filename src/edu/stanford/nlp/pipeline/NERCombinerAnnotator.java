@@ -80,6 +80,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private DocDateAnnotator docDateAnnotator;
 
   public NERCombinerAnnotator(Properties properties) throws IOException {
+    // TODO: condense  -ner.useSUTime false -ner.applyNumericClassifiers false  -ner.applyFineGrained false into one option, possibly associated with the situation of -ner.model being just one model
 
     List<String> models = new ArrayList<>();
     String modelNames = properties.getProperty("ner.model");
@@ -185,6 +186,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime,
                               int maxSentenceLength, boolean fineGrained, boolean entityMentions) {
+    // TODO: why is this so separate from the NERCombinerAnnotator constructor?
     VERBOSE = verbose;
     this.ner = ner;
     this.maxTime = maxTime;

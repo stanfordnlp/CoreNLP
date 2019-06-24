@@ -184,18 +184,20 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("yarn", blueCatsPlayWithYarn().objectGloss());
   }
 
+  // todo [cdm 2019]: Really "with yarn" should be obl:with now.
   public void testBlueCatsPlayWithYarn() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tblue\t2\tamod\n" +
         "2\tcats\t3\tnsubj\n" +
         "3\tplay\t0\troot\n" +
         "4\twith\t5\tcase\n" +
-        "5\tyarn\t3\tobl:with\n"
+        "5\tyarn\t3\tnmod:with\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tblue cats\tplay with\tyarn", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: Really "with yarn" should be obl:with now.
   public void testBlueCatsPlayQuietlyWithYarn() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\tblue\t2\tamod\n" +
@@ -203,43 +205,47 @@ public class RelationTripleSegmenterTest extends TestCase {
             "3\tplay\t0\troot\n" +
             "4\tquietly\t3\tadvmod\n" +
             "5\twith\t6\tcase\n" +
-            "6\tyarn\t3\tobl:with\n"
+            "6\tyarn\t3\tnmod:with\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tblue cats\tplay quietly with\tyarn", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: dobj should be obj now.
   public void testCatsHaveTails() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\tcats\t2\tnsubj\n" +
             "2\thave\t0\troot\n" +
-            "3\ttails\t2\tobj\n"
+            "3\ttails\t2\tdobj\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tcats\thave\ttails", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: dobj should be obj now.
   public void testrabbitsEatVegetables() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\trabbits\t2\tnsubj\n" +
         "2\teat\t0\troot\n" +
-        "3\tvegetables\t2\tobj\n"
+        "3\tvegetables\t2\tdobj\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\trabbits\teat\tvegetables", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: "to" should be mark now.
   public void testFishLikeToSwim() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\tfish\t2\tnsubj\n" +
             "2\tlike\t0\troot\n" +
-            "3\tto\t4\tmark\n" +
+            "3\tto\t4\taux\n" +
             "4\tswim\t2\txcomp\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tfish\tlike\tto swim", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: "to" should be mark now.
   public void testFishLikeToSwimAlternateParse() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tfish\t2\tnsubj\n" +
@@ -251,13 +257,14 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tfish\tlike to\tswim", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: Really "with yarn" should be obl:with now.
   public void testMyCatsPlayWithYarn() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tmy\t2\tnmod:poss\n" +
         "2\tcats\t3\tnsubj\n" +
         "3\tplay\t0\troot\n" +
         "4\twith\t5\tcase\n" +
-        "5\tyarn\t3\tobl:with\n"
+        "5\tyarn\t3\tnmod:with\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tmy cats\tplay with\tyarn", extraction.get().toString());
@@ -304,24 +311,26 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\ttruffles picked\tare\ttasty", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: "as president" is either obl:as or probably should be xcomp
   public void testHeWasInaugurated() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\the\t3\tnsubj:pass\n" +
             "2\twas\t3\taux:pass\n" +
             "3\tinaugurated\t0\troot\n" +
             "4\tas\t5\tcase\n" +
-            "5\tpresident\t3\tobl:as\n"
+            "5\tpresident\t3\tnmod:as\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\the\twas inaugurated as\tpresident", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: "as president" is either obl:as or probably should be xcomp
   public void testPPAttachment() {
     Optional<RelationTriple> extraction = mkExtraction(
             "1\the\t2\tnsubj\n" +
             "2\tserved\t0\troot\n" +
             "3\tas\t4\tcase\n" +
-            "4\tpresident\t2\tobl:as\n" +
+            "4\tpresident\t2\tnmod:as\n" +
             "5\tof\t8\tcase\n" +
             "6\tHarvard\t8\tcompound\n" +
             "7\tLaw\t8\tcompound\n" +
@@ -359,22 +368,24 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tObama\twas named\t2009 Nobel Peace Prize Laureate", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: tmod should be obl:tmod
   public void testPassiveNSubj() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tHRE\t3\tnsubj:pass\n" +
         "2\twas\t3\taux:pass\n" +
         "3\tfounded\t0\troot\n" +
         "4\tin\t5\tcase\n" +
-        "5\t1991\t3\tobl:in\n"
+        "5\t1991\t3\tnmod:in\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tHRE\twas founded in\t1991", extraction.get().toString());
 
+    // todo [cdm 2019]: tmod should be obl:tmod
     extraction = mkExtraction(
         "1\tfounded\t0\troot\n" +
         "2\tHRE\t1\tnsubj:pass\n" +
         "3\tin\t4\tcase\n" +
-        "4\t2003\t1\tobl:in\n"
+        "4\t2003\t1\tnmod:in\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tHRE\tfounded in\t2003", extraction.get().toString());
@@ -414,12 +425,13 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tTim\t's father is\tTom", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: Really "in Tucson" should be obl:with now.
   public void testApposInObject() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tNewspaper\t2\tnsubj\n" +
         "2\tpublished\t0\troot\n" +
         "3\tin\t4\tcase\n" +
-        "4\tTucson\t2\tobl:in\n" +
+        "4\tTucson\t2\tnmod:in\n" +
         "5\tArizona\t4\tappos\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
@@ -449,12 +461,13 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tTom\tfighting\tJerry", extraction.get().toString());
   }
 
+  // todo [cdm 2019]: This one is weird, since it's not actually passive. You'd want "Tom and Jerry were killed" but then would you get the relation shown? It only seems to apply to symmetric predicates....
   public void testPassiveReflexive() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tTom\t5\tnsubj:pass\n" +
         "2\tand\t1\tcc\n" +
         "3\tJerry\t1\tconj:and\n" +
-        "4\twere\t5\taux\n" +   // changed aux:pass to aux for UD 2.0
+        "4\twere\t5\taux:pass\n" +
         "5\tfighting\t0\troot\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
