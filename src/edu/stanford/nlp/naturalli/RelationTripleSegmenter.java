@@ -10,10 +10,12 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.trees.EnglishPatterns;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +50,9 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{pos:/NNS?/}=object >cop {}=relappend1 >/nsubj(:pass)?/ ( {}=verb >/nmod:of/ ( {pos:/NNS?/}=subject >case {}=relappend0 ) )"));
   }});
 
+  private final Pattern NOT_PAT = Pattern.compile(EnglishPatterns.NOT_PAT,
+                                                  Pattern.CASE_INSENSITIVE);
+  
   /**
    * <p>
    *   A set of derivative patterns from {@link RelationTripleSegmenter#VERB_PATTERNS} that ignore the subject
@@ -579,8 +584,11 @@ public class RelationTripleSegmenter {
               "compound:*".equals(edge.getRelation().toString().replaceAll(":.*", ":*"))) {
             // Add adverb modifiers
             String tag = edge.getDependent().backingLabel().tag();
+            String word = edge.getDependent().backingLabel().word();
             if (tag == null ||
-                (!tag.startsWith("W") && !edge.getDependent().backingLabel().word().equalsIgnoreCase("then"))) {  // prohibit advmods like "where"
+                (!tag.startsWith("W") && // prohibit advmods like "where"
+                 !word.equalsIgnoreCase("then") &&
+                 !NOT_PAT.matcher(word).matches())) { // prohibit "not"
               adverbs.add(edge.getDependent());
             }
           } else if (edge.getDependent().equals(relObj)) {

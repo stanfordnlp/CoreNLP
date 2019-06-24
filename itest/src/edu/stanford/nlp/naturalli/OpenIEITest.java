@@ -247,6 +247,15 @@ public class OpenIEITest {
   }
 
   @Test
+  public void testSara() {
+    assertExtracted(new HashSet<String>() {{
+      add("John\tdid see\tSara");
+    }}, "John did see Sara");
+    assertExtracted(new HashSet<String>() {{
+    }}, "John did not see Sara");  // the "not" should reject the relation
+  }
+
+  @Test
   public void dummyTest() {
     assertTrue(true);
   }
