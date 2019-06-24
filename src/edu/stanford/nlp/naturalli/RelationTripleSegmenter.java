@@ -32,7 +32,8 @@ public class RelationTripleSegmenter {
   private final Pattern NOT_PAT = Pattern.compile(EnglishPatterns.NOT_PAT_WORD,
                                                   Pattern.CASE_INSENSITIVE);
 
-  private final String NOT_WORD = "word:/" + EnglishPatterns.NOT_PAT_WORD + "/";
+  // for semgrex patterns which don't want to be over a not word
+  private final String NOT_OVER_NOT_WORD = "!> {word:/" + EnglishPatterns.NOT_PAT_WORD + "/}";
 
   /** A list of patterns to match relation extractions against */
   public final List<SemgrexPattern> VERB_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
@@ -42,7 +43,7 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/(nmod|obl|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ?>case {}=prep) ?>obj {pos:/N.*/}=relObj"));
     // { cats are cute,
     //   horses are grazing peacefully }
-    add(SemgrexPattern.compile("{$}=object >/.subj(:pass)?/ {}=subject >/cop|aux(:pass)?/ {}=verb ?>case {}=prep !> {" + NOT_WORD + "}"));
+    add(SemgrexPattern.compile("{$}=object >/.subj(:pass)?/ {}=subject >/cop|aux(:pass)?/ {}=verb ?>case {}=prep " + NOT_OVER_NOT_WORD));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(:pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
