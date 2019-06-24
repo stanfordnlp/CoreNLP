@@ -115,13 +115,28 @@ public class Timing  {
   /**
    * Print elapsed time (without stopping timer).
    *
+   * @param logger Logger to log a timed operation with
+   * @param str    Additional prefix string to be printed
+   * @return Number of milliseconds elapsed
+   */
+  public long report(Redwood.RedwoodChannels logger, String str) {
+    long elapsed = this.report();
+    logger.info(str + " ... Time elapsed: " +
+                toSecondsString(elapsed) + " sec");
+    return elapsed;
+  }
+
+  /**
+   * Print elapsed time (without stopping timer).
+   *
    * @param str    Additional prefix string to be printed
    * @param writer PrintWriter on which to write output
    * @return Number of milliseconds elapsed
    */
   public long report(String str, PrintWriter writer) {
     long elapsed = this.report();
-    writer.println(str + " Time elapsed: " + (elapsed) + " ms");
+    writer.println(str + " ... Time elapsed: " +
+                   toSecondsString(elapsed) + " sec");
     return elapsed;
   }
 
