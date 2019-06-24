@@ -29,6 +29,11 @@ public class RelationTripleSegmenter {
 
   private final boolean allowNominalsWithoutNER;
 
+  private final Pattern NOT_PAT = Pattern.compile(EnglishPatterns.NOT_PAT_WORD,
+                                                  Pattern.CASE_INSENSITIVE);
+
+  private final String NOT_WORD = "word:/" + EnglishPatterns.NOT_PAT_WORD + "/";
+
   /** A list of patterns to match relation extractions against */
   public final List<SemgrexPattern> VERB_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn,
@@ -37,7 +42,7 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/(nmod|obl|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ?>case {}=prep) ?>obj {pos:/N.*/}=relObj"));
     // { cats are cute,
     //   horses are grazing peacefully }
-    add(SemgrexPattern.compile("{$}=object >/.subj(:pass)?/ {}=subject >/cop|aux(:pass)?/ {}=verb ?>case {}=prep"));
+    add(SemgrexPattern.compile("{$}=object >/.subj(:pass)?/ {}=subject >/cop|aux(:pass)?/ {}=verb ?>case {}=prep !> {" + NOT_WORD + "}"));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(:pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
@@ -50,9 +55,6 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{pos:/NNS?/}=object >cop {}=relappend1 >/nsubj(:pass)?/ ( {}=verb >/nmod:of/ ( {pos:/NNS?/}=subject >case {}=relappend0 ) )"));
   }});
 
-  private final Pattern NOT_PAT = Pattern.compile(EnglishPatterns.NOT_PAT_WORD,
-                                                  Pattern.CASE_INSENSITIVE);
-  
   /**
    * <p>
    *   A set of derivative patterns from {@link RelationTripleSegmenter#VERB_PATTERNS} that ignore the subject
@@ -65,7 +67,7 @@ public class RelationTripleSegmenter {
       String fullPattern = pattern.pattern();
       String vpPattern = fullPattern
           .replace(">/.subj(:pass)?/ {}=subject", "")  // drop the subject
-          .replace("$", "pos:/V.*/");                 // but, force the root to be on a verb
+          .replace("{$}", "{pos:/V.*/}");                 // but, force the root to be on a verb
       add(SemgrexPattern.compile(vpPattern));
     }
   }});
