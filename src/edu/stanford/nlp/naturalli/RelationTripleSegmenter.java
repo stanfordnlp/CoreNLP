@@ -106,9 +106,9 @@ public class RelationTripleSegmenter {
     this.allowNominalsWithoutNER = allowNominalsWithoutNER;
     NOUN_DEPENDENCY_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
       // { Durin, son of Thorin }
-      add(SemgrexPattern.compile("{tag:/N.*/}=subject >appos ( {}=relation >/nmod:.*/=relaux {}=object)"));
+      add(SemgrexPattern.compile("{tag:/N.*/}=subject >appos ( {}=relation >/(nmod|obl):.*/=relaux {}=object)"));
       // { Thorin's son, Durin }
-      add(SemgrexPattern.compile("{}=relation >/nmod:.*/=relaux {}=subject >appos {}=object"));
+      add(SemgrexPattern.compile("{}=relation >/(nmod|obl):.*/=relaux {}=subject >appos {}=object"));
       // { Stanford's Chris Manning  }
       add(SemgrexPattern.compile("{tag:/N.*/}=object >/nmod:poss/=relaux ( {}=subject >case {} )"));
       // { Chris Manning of Stanford,
@@ -117,7 +117,7 @@ public class RelationTripleSegmenter {
         add(SemgrexPattern.compile("{tag:/N.*/}=subject >/nmod:(?!poss).*/=relaux {}=object"));
       } else {
         add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/nmod:(?!poss).*/=relaux {ner:/..+/}=object"));
-        add(SemgrexPattern.compile("{tag:/N.*/}=subject >/nmod:(in|with)/=relaux {}=object"));
+        add(SemgrexPattern.compile("{tag:/N.*/}=subject >/(nmod|obl):(in|with)/=relaux {}=object"));
       }
       //  { President Obama }
       if (allowNominalsWithoutNER) {
@@ -395,6 +395,7 @@ public class RelationTripleSegmenter {
   /** A set of valid arcs denoting a subject entity we are interested in */
   public final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod:poss"); add("nmod:tmod"); add("expl");
+    add("obl:tmod");
     add("nsubj"); add("case"); add("mark");
   }});
 
@@ -402,6 +403,7 @@ public class RelationTripleSegmenter {
   public final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
     add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("case"); add("mark");
+    add("obl"); add("obl:*"); add("obl:tmod");
     // add("advcl"); // Born in Hawaii, Obama is a US citizen; citizen -advcl-> Born.
   }});
 
@@ -781,7 +783,7 @@ public class RelationTripleSegmenter {
               objectSpan.addAll(maybeObjSpan.get());
             }
             // Collect pp
-            else if (rel.startsWith("nmod:")) {
+            else if (rel.startsWith("nmod:") || rel.startsWith("obl:")) {
               if (!ppSpan.isEmpty()) {
                 return Optional.empty();  // duplicate objects!
               }
