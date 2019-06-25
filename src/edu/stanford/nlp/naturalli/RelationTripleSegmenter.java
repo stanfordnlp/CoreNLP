@@ -455,8 +455,41 @@ public class RelationTripleSegmenter {
       for (SemanticGraphEdge edge : parse.getOutEdgesSorted(root)) {
         String shortName = edge.getRelation().getShortName();
         String name = edge.getRelation().toString();
-        if (shortName.startsWith("conj")) { hasConj = true; }
-        if (shortName.equals("cc")) { hasCC = true; }
+        if (shortName.startsWith("conj")) {
+          hasConj = true;
+          // "cc" is now supposed to be attached to the other side of
+          // the "conj".  Check that the child has a "CC" coming off
+          // it somewhere.  If not here, perhaps one of the other
+          // children has a CC child, so we don't immediately abort if
+          // not found here
+          for (SemanticGraphEdge ccEdge :
+                 parse.getOutEdgesSorted(edge.getDependent())) {
+            if (ccEdge.getRelation().getShortName().equals("cc")) {
+              hasCC = true;
+              break;
+            }
+          }
+        }
+
+        if (shortName.equals("cc")) {
+          // If we have a "cc" below us, we should be part of a
+          // "conj" relation above us.  Double check that
+          boolean hasParentConj = false;
+          for (SemanticGraphEdge conjEdge :
+                 parse.getIncomingEdgesSorted(edge.getGovernor())) {
+            if (conjEdge.getRelation().getShortName().startsWith("conj")) {
+              hasParentConj = true;
+              break;
+            }
+          }
+          if (!hasParentConj) {
+            // If we found a CC and are not part of a conj, perhaps
+            // that means something went haywire in the parse.
+            // Regardless, we abort immediately
+            return Optional.empty();
+          }
+        }
+
         //noinspection StatementWithEmptyBody
         if (isCopula && (shortName.equals("cop") || shortName.contains("subj") || shortName.equals("aux:pass") )) {
           // noop; ignore nsubj, cop for extractions with copula
@@ -477,10 +510,9 @@ public class RelationTripleSegmenter {
       }
 
       // Ensure that we don't have a conj without a cc, or vice versa
-      // TODO sebschu: this no longer works with ccs being attached to the following conjunct
-      //if (Boolean.logicalXor(hasConj, hasCC)) {
-      //  return Optional.empty();
-      //}
+      if (Boolean.logicalXor(hasConj, hasCC)) {
+        return Optional.empty();
+      }
     }
 
     return Optional.of(chunk.toSortedList());
