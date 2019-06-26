@@ -74,22 +74,6 @@ public class OpenIEITest {
     assertTrue("The sentence '" + expected + "' was not entailed from '" + text + "'", found);
   }
 
-  // TODO: tests to add:
-  //
-  // in addition to
-  //   "he did X and did Y"
-  // such as ObamaWikiFour
-  //   he did X, did Y, and did Z
-  //
-  // a few more negation examples:
-  //   each of the tests in RelationTripleSegmenter could be tested,
-  //   and their negations tested as well
-  //
-  // some time examples:
-  //   this may actually require some different detection of time phrases
-  //   for example, "on Thursday" is obl:on, "in 2019" is obl:in,
-  //   "from 1992 to 2004" is obl:from, and finally "this summer" is obl:tmod
-  
   @Test
   public void testAnnotatorRuns() {
     annotate("all cats have tails");
@@ -183,11 +167,8 @@ public class OpenIEITest {
       add("He\ttaught\tconstitutional law");
       add("He\ttaught\tlaw");
       add("He\ttaught law at\tUniversity of Chicago");
-      // currently this one isn't found because the underlying parse
-      // is missing a tmod
-      // add("He\ttaught law at_time\tLaw School");
-      
-      // add("He\ttaught law at\tUniversity of Chicago Law School from 1992");
+      add("He\ttaught law at_time\tLaw School");
+//      add("He\ttaught law at\tUniversity of Chicago Law School from 1992");
       add("He\ttaught law at\tUniversity");
       add("He\ttaught law from\t1992 to 2004");  // shouldn't be here, but sometimes appears?
     }}, "He worked as a civil rights attorney and taught constitutional law at the University of Chicago Law School from 1992 to 2004.");
@@ -256,17 +237,13 @@ public class OpenIEITest {
       add("Chess\tis\tphysical sport");
       add("Chess\tis\tsport");
     }}, "Chess is a physical sport");
+    // TODO: this is failing either because a potential triple is
+    // being extracted when it shouldn't in RelationTripleSegmenter,
+    // or because there's a polarity check after that extraction and
+    // the polarity is registered as "up" and doesn't encode the
+    // negation
     assertExtracted(new HashSet<String>() {{
     }}, "Chess is not a physical sport");
-  }
-
-  @Test
-  public void testSara() {
-    assertExtracted(new HashSet<String>() {{
-      add("John\tdid see\tSara");
-    }}, "John did see Sara");
-    assertExtracted(new HashSet<String>() {{
-    }}, "John did not see Sara");  // the "not" should reject the relation
   }
 
   @Test

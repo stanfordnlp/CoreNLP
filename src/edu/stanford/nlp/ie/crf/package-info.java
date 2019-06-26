@@ -5,15 +5,16 @@
  * be labeled with one of a fixed set of classes.
  * <p>
  * Through the use of different
- * <code>edu.stanford.nlp.sequences.FeatureFactory</code> classes and different
- * <code>edu.stanford.nlp.sequences.DocumentReaderAndWriter</code> classes,
+ * {@code edu.stanford.nlp.sequences.FeatureFactory} classes and different
+ * {@code edu.stanford.nlp.sequences.DocumentReaderAndWriter} classes,
  * it can read data in various formats, and be customized for various
  * sequence inference tasks.  Most of its use has been for Named Entity
  * Recognition, but it has also been used for other applications such as
  * Chinese word segmentation and OCR.
  * <p>
  * For more usage information, consult the Javadoc of the
- * <code>CRFClassifier</code> class.
+ * {@code CRFClassifier} class.
+ *
  * @author Jenny Finkel
  */
 package edu.stanford.nlp.ie.crf;

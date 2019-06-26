@@ -329,18 +329,6 @@ public class ClauseSplitterSearchProblem  {
         }
       }
     }
-    if (toKeep.getRelation().toString().startsWith("conj")) {
-      // A conj may be connected to a cc below it, but
-      // keeping that would result in weird / incorrect fragments
-      // such as
-      // "he and taught constitutional law..."
-      // so we remove the "and" / cc relation here
-      for (SemanticGraphEdge out : tree.outgoingEdgeIterable(toKeep.getDependent())) {
-        if (out.getRelation().toString().equals("cc")) {
-          nodesToRemove.add(out.getDependent());
-        }
-      }
-    }
     // Remove nodes
     nodesToRemove.forEach(tree::removeVertex);
     // Set new root
@@ -351,7 +339,7 @@ public class ClauseSplitterSearchProblem  {
   /**
    * The basic method for splitting off a clause of a tree.
    * This modifies the tree in place.
-   * This method additionally follows ref edges.
+   * This method addtionally follows ref edges.
    *
    * @param tree The tree to split a clause from.
    * @param toKeep The edge representing the clause to keep.
