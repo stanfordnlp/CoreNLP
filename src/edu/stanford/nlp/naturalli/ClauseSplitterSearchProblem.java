@@ -329,6 +329,19 @@ public class ClauseSplitterSearchProblem  {
         }
       }
     }
+    if (toKeep.getRelation().toString().startsWith("conj")) {
+      // A conj may be connected to a cc below it, but
+      // keeping that would result in weird / incorrect fragments
+      // such as
+      // "he and taught constitutional law..."
+      // so we remove the "and" / cc relation here
+      for (SemanticGraphEdge out : tree.outgoingEdgeIterable(toKeep.getDependent())) {
+        if (out.getRelation().toString().equals("cc")) {
+          System.out.println("Adding & removing a cc: " + out);
+          nodesToRemove.add(out.getDependent());
+        }
+      }
+    }
     // Remove nodes
     nodesToRemove.forEach(tree::removeVertex);
     // Set new root
