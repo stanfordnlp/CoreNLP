@@ -89,6 +89,8 @@ public class OpenIEITest {
   //   this may actually require some different detection of time phrases
   //   for example, "on Thursday" is obl:on, "in 2019" is obl:in,
   //   "from 1992 to 2004" is obl:from, and finally "this summer" is obl:tmod
+  //   so ultimately we probably need to incorporate sutime
+  //   in order to get good results
   
   @Test
   public void testAnnotatorRuns() {
