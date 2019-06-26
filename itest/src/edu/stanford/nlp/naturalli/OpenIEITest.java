@@ -74,6 +74,17 @@ public class OpenIEITest {
     assertTrue("The sentence '" + expected + "' was not entailed from '" + text + "'", found);
   }
 
+  // TODO: tests to add:
+  //
+  // in addition to
+  //   "he did X and did Y"
+  // such as ObamaWikiFour
+  //   he did X, did Y, and did Z
+  //
+  // a few more negation examples:
+  //   each of the tests in RelationTripleSegmenter could be tested,
+  //   and their negations tested as well
+  
   @Test
   public void testAnnotatorRuns() {
     annotate("all cats have tails");
