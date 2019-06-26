@@ -84,6 +84,11 @@ public class OpenIEITest {
   // a few more negation examples:
   //   each of the tests in RelationTripleSegmenter could be tested,
   //   and their negations tested as well
+  //
+  // some time examples:
+  //   this may actually require some different detection of time phrases
+  //   for example, "on Thursday" is obl:on, "in 2019" is obl:in,
+  //   "from 1992 to 2004" is obl:from, and finally "this summer" is obl:tmod
   
   @Test
   public void testAnnotatorRuns() {
