@@ -10,10 +10,12 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.trees.EnglishPatterns;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +29,12 @@ public class RelationTripleSegmenter {
 
   private final boolean allowNominalsWithoutNER;
 
+  private final Pattern NOT_PAT = Pattern.compile(EnglishPatterns.NOT_PAT_WORD,
+                                                  Pattern.CASE_INSENSITIVE);
+
+  // for semgrex patterns which don't want to be over a not word
+  private final String NOT_OVER_NOT_WORD = "!> {word:/" + EnglishPatterns.NOT_PAT_WORD + "/}";
+
   /** A list of patterns to match relation extractions against */
   public final List<SemgrexPattern> VERB_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn,
@@ -35,7 +43,7 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/(nmod|obl|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ?>case {}=prep) ?>obj {pos:/N.*/}=relObj"));
     // { cats are cute,
     //   horses are grazing peacefully }
-    add(SemgrexPattern.compile("{$}=object >/.subj(:pass)?/ {}=subject >/cop|aux(:pass)?/ {}=verb ?>case {}=prep"));
+    add(SemgrexPattern.compile("{$}=object >/.subj(:pass)?/ {}=subject >/cop|aux(:pass)?/ {}=verb ?>case {}=prep " + NOT_OVER_NOT_WORD));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(:pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
@@ -60,7 +68,7 @@ public class RelationTripleSegmenter {
       String fullPattern = pattern.pattern();
       String vpPattern = fullPattern
           .replace(">/.subj(:pass)?/ {}=subject", "")  // drop the subject
-          .replace("$", "pos:/V.*/");                 // but, force the root to be on a verb
+          .replace("{$}", "{pos:/V.*/}");                 // but, force the root to be on a verb
       add(SemgrexPattern.compile(vpPattern));
     }
   }});
@@ -98,9 +106,9 @@ public class RelationTripleSegmenter {
     this.allowNominalsWithoutNER = allowNominalsWithoutNER;
     NOUN_DEPENDENCY_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
       // { Durin, son of Thorin }
-      add(SemgrexPattern.compile("{tag:/N.*/}=subject >appos ( {}=relation >/nmod:.*/=relaux {}=object)"));
+      add(SemgrexPattern.compile("{tag:/N.*/}=subject >appos ( {}=relation >/(nmod|obl):.*/=relaux {}=object)"));
       // { Thorin's son, Durin }
-      add(SemgrexPattern.compile("{}=relation >/nmod:.*/=relaux {}=subject >appos {}=object"));
+      add(SemgrexPattern.compile("{}=relation >/(nmod|obl):.*/=relaux {}=subject >appos {}=object"));
       // { Stanford's Chris Manning  }
       add(SemgrexPattern.compile("{tag:/N.*/}=object >/nmod:poss/=relaux ( {}=subject >case {} )"));
       // { Chris Manning of Stanford,
@@ -109,7 +117,7 @@ public class RelationTripleSegmenter {
         add(SemgrexPattern.compile("{tag:/N.*/}=subject >/nmod:(?!poss).*/=relaux {}=object"));
       } else {
         add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/nmod:(?!poss).*/=relaux {ner:/..+/}=object"));
-        add(SemgrexPattern.compile("{tag:/N.*/}=subject >/nmod:(in|with)/=relaux {}=object"));
+        add(SemgrexPattern.compile("{tag:/N.*/}=subject >/(nmod|obl):(in|with)/=relaux {}=object"));
       }
       //  { President Obama }
       if (allowNominalsWithoutNER) {
@@ -387,6 +395,7 @@ public class RelationTripleSegmenter {
   /** A set of valid arcs denoting a subject entity we are interested in */
   public final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod:poss"); add("nmod:tmod"); add("expl");
+    add("obl:tmod");
     add("nsubj"); add("case"); add("mark");
   }});
 
@@ -394,6 +403,7 @@ public class RelationTripleSegmenter {
   public final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
     add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("case"); add("mark");
+    add("obl"); add("obl:*"); add("obl:tmod");
     // add("advcl"); // Born in Hawaii, Obama is a US citizen; citizen -advcl-> Born.
   }});
 
@@ -447,8 +457,41 @@ public class RelationTripleSegmenter {
       for (SemanticGraphEdge edge : parse.getOutEdgesSorted(root)) {
         String shortName = edge.getRelation().getShortName();
         String name = edge.getRelation().toString();
-        if (shortName.startsWith("conj")) { hasConj = true; }
-        if (shortName.equals("cc")) { hasCC = true; }
+        if (shortName.startsWith("conj")) {
+          hasConj = true;
+          // "cc" is now supposed to be attached to the other side of
+          // the "conj".  Check that the child has a "CC" coming off
+          // it somewhere.  If not here, perhaps one of the other
+          // children has a CC child, so we don't immediately abort if
+          // not found here
+          for (SemanticGraphEdge ccEdge :
+                 parse.getOutEdgesSorted(edge.getDependent())) {
+            if (ccEdge.getRelation().getShortName().equals("cc")) {
+              hasCC = true;
+              break;
+            }
+          }
+        }
+
+        if (shortName.equals("cc")) {
+          // If we have a "cc" below us, we should be part of a
+          // "conj" relation above us.  Double check that
+          boolean hasParentConj = false;
+          for (SemanticGraphEdge conjEdge :
+                 parse.getIncomingEdgesSorted(edge.getGovernor())) {
+            if (conjEdge.getRelation().getShortName().startsWith("conj")) {
+              hasParentConj = true;
+              break;
+            }
+          }
+          if (!hasParentConj) {
+            // If we found a CC and are not part of a conj, perhaps
+            // that means something went haywire in the parse.
+            // Regardless, we abort immediately
+            return Optional.empty();
+          }
+        }
+
         //noinspection StatementWithEmptyBody
         if (isCopula && (shortName.equals("cop") || shortName.contains("subj") || shortName.equals("aux:pass") )) {
           // noop; ignore nsubj, cop for extractions with copula
@@ -469,10 +512,9 @@ public class RelationTripleSegmenter {
       }
 
       // Ensure that we don't have a conj without a cc, or vice versa
-      // TODO sebschu: this no longer works with ccs being attached to the following conjunct
-      //if (Boolean.logicalXor(hasConj, hasCC)) {
-      //  return Optional.empty();
-      //}
+      if (Boolean.logicalXor(hasConj, hasCC)) {
+        return Optional.empty();
+      }
     }
 
     return Optional.of(chunk.toSortedList());
@@ -579,8 +621,11 @@ public class RelationTripleSegmenter {
               "compound:*".equals(edge.getRelation().toString().replaceAll(":.*", ":*"))) {
             // Add adverb modifiers
             String tag = edge.getDependent().backingLabel().tag();
+            String word = edge.getDependent().backingLabel().word();
             if (tag == null ||
-                (!tag.startsWith("W") && !edge.getDependent().backingLabel().word().equalsIgnoreCase("then"))) {  // prohibit advmods like "where"
+                (!tag.startsWith("W") && // prohibit advmods like "where"
+                 !word.equalsIgnoreCase("then") &&
+                 !NOT_PAT.matcher(word).matches())) { // prohibit "not"
               adverbs.add(edge.getDependent());
             }
           } else if (edge.getDependent().equals(relObj)) {
@@ -738,7 +783,7 @@ public class RelationTripleSegmenter {
               objectSpan.addAll(maybeObjSpan.get());
             }
             // Collect pp
-            else if (rel.startsWith("nmod:")) {
+            else if (rel.startsWith("nmod:") || rel.startsWith("obl:")) {
               if (!ppSpan.isEmpty()) {
                 return Optional.empty();  // duplicate objects!
               }
