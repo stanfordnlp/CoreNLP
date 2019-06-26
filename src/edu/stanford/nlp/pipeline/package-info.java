@@ -114,6 +114,7 @@
  * 	"ner.model.3class" - path towards the three-class NER model
  * 	"ner.model.7class" - path towards the seven-class NER model
  * 	"ner.model.MISCclass" - path towards the NER model with a MISC class
+ *      "ner.docdate.useFixedDate" - a reference date to use when processing underspecified time values such as "January 5th" or "this Friday"
  * 	If annotator "truecase" is defined:
  * 	"truecase.model" - path towards the true-casing model; default: StanfordCoreNLPModels/truecase/noUN.ser.gz
  * 	"truecase.bias" - class bias of the true case model; default: INIT_UPPER:-0.7,UPPER:-0.7,O:0
