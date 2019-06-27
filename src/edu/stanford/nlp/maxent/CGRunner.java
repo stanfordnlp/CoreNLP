@@ -1,7 +1,7 @@
 /*
  * Title:       Stanford JavaNLP.
  * Description: A Maximum Entropy Toolkit.
- * Copyright:   Copyright (c) 2002. Kristina Toutanova, Stanford University
+ * Copyright:   Copyright (c) 2002. Board of Trustees of Leland Stanford Junior University.
  * Company:     Stanford University, All Rights Reserved.
  */
 package edu.stanford.nlp.maxent; 
@@ -287,7 +287,7 @@ public class CGRunner  {
 
 
   /**
-   * This one is used in the monitor
+   * This class is used in the monitor.
    */
   private static final class MonitorFunction implements Function {
 
@@ -303,7 +303,6 @@ public class CGRunner  {
     }
 
     @Override
-    @SuppressWarnings({"ConstantConditions", "PointlessBooleanExpression"})
     public double valueAt(double[] lambda) {
       double likelihood = lf.likelihood();
       // this line is printed in the middle of the normal line of QN minimization, so put println at beginning

@@ -81,6 +81,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
   } // end enum Output style
 
   private static final Pattern sgml = Pattern.compile("<[^>]*>");
+  // TODO: allow for turning off splitting on . if we are processing already tokenized text
   private final WordToSentenceProcessor<IN> wts =
           new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
 

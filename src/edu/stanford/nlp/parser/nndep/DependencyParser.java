@@ -622,6 +622,7 @@ public class DependencyParser  {
       config.hiddenSize = hSize;
       config.embeddingSize = eSize;
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
+      t.report(log, "Done reading from disk");
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
