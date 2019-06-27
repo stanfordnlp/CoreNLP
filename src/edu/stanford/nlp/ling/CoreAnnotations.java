@@ -1186,8 +1186,8 @@ public class CoreAnnotations {
     }
   }
 
-  /** Index into the list of entity mentions in a document for canonical entity mention.
-   *  This is primarily for linking entity mentions to their canonical entity mention.
+  /** index into the list of entity mentions in a document for canonical entity mention
+   *  ...this is primarily for linking entity mentions to their canonical entity mention
    */
   public static class CanonicalEntityMentionIndexAnnotation implements CoreAnnotation<Integer> {
     @Override

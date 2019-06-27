@@ -351,18 +351,16 @@ public class Timex implements Serializable {
    * @return The matching Calendar.
    */
   public Calendar getDate() {
-    if (val != null) {
-      if (Pattern.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d", this.val)) {
-        int year = Integer.parseInt(this.val.substring(0, 4));
-        int month = Integer.parseInt(this.val.substring(5, 7));
-        int day = Integer.parseInt(this.val.substring(8, 10));
-        return makeCalendar(year, month, day);
-      } else if (Pattern.matches("\\d\\d\\d\\d\\d\\d\\d\\d", this.val)) {
-        int year = Integer.parseInt(this.val.substring(0, 4));
-        int month = Integer.parseInt(this.val.substring(4, 6));
-        int day = Integer.parseInt(this.val.substring(6, 8));
-        return makeCalendar(year, month, day);
-      }
+    if (Pattern.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d", this.val)) {
+      int year = Integer.parseInt(this.val.substring(0, 4));
+      int month = Integer.parseInt(this.val.substring(5, 7));
+      int day = Integer.parseInt(this.val.substring(8, 10));
+      return makeCalendar(year, month, day);
+    } else if (Pattern.matches("\\d\\d\\d\\d\\d\\d\\d\\d", this.val)) {
+      int year = Integer.parseInt(this.val.substring(0, 4));
+      int month = Integer.parseInt(this.val.substring(4, 6));
+      int day = Integer.parseInt(this.val.substring(6, 8));
+      return makeCalendar(year, month, day);
     }
     throw new UnsupportedOperationException(String.format("%s is not a fully specified date", this));
   }

@@ -138,9 +138,6 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
 
         String output = writer.printSemanticGraph(basicSg, enhancedSg);
 
-        // TODO: check what happens if you give input with \r\n
-        // (for windows tests, specifically)
-        
         clean = clean.replaceAll("\n", System.lineSeparator());
         assertEquals(clean, output);
     }

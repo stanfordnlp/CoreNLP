@@ -652,7 +652,7 @@ public class RelationTripleSegmenterTest extends TestCase {
         "1\tObama\t6\tnsubj\n" +
         "2\tis\t6\tcop\n" +
         "3\t44th\t6\tamod\n" +
-        "4\tand\t5\tcc\n" +
+        "4\tand\t3\tcc\n" +
         "5\tcurrent\t3\tconj:and\n" +
         "6\tpresident\t0\troot\n" +
         "7\tof\t8\tcase\n" +
