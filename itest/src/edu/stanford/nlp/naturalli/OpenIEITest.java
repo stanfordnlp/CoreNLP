@@ -91,6 +91,11 @@ public class OpenIEITest {
   //   "from 1992 to 2004" is obl:from, and finally "this summer" is obl:tmod
   //   so ultimately we probably need to incorporate sutime
   //   in order to get good results
+  //
+  // some of the tests from RelationTripleSegmenterTest
+  //   in particular, "Tom and Jerry were fighting" is not working as expected
+  //   good idea to make sure that the parses produced by the
+  //   real parser are working as intended
   
   @Test
   public void testAnnotatorRuns() {
