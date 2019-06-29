@@ -57,7 +57,7 @@ public class MWTAnnotator implements Annotator {
         // load the MWT dictionary entries
         loadMultiWordTokenMappings(multiWordTokenMapping, props.getProperty(prefix+"mappingFile"));
         // if a part-of-speech tagging model was provided, use statistical MWT as well
-        if (!props.getProperty(prefix+"pos.model", "").equals("")) {
+        if (!props.getProperty(prefix+".pos.model", "").equals("")) {
             useStatisticalModel = true;
             statisticalMWTAnnotator = new POSTaggerAnnotator("mwt.pos", props);
             // load dictionary entries for the statistical MWT
@@ -147,14 +147,7 @@ public class MWTAnnotator implements Annotator {
             }
             sentence.set(CoreAnnotations.TokensAnnotation.class, newSentenceTokens);
         }
-        // set final tokens list for document
         annotation.set(CoreAnnotations.TokensAnnotation.class, finalDocumentTokens);
-        // remove mwt part-of-speech tags
-        if (useStatisticalModel) {
-            for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
-                token.remove(CoreAnnotations.PartOfSpeechAnnotation.class);
-            }
-        }
     }
 
     @Override

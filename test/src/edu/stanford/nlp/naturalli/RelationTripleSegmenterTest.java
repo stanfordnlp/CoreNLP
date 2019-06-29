@@ -440,7 +440,7 @@ public class RelationTripleSegmenterTest extends TestCase {
   public void testReflexive() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tTom\t5\tnsubj\n" +
-        "2\tand\t3\tcc\n" +
+        "2\tand\t1\tcc\n" +
         "3\tJerry\t1\tconj:and\n" +
         "4\twere\t5\taux\n" +
         "5\tfighting\t0\troot\n"
@@ -450,13 +450,11 @@ public class RelationTripleSegmenterTest extends TestCase {
   }
 
   public void testPassiveReflexive() {
-    // same test as testReflexive, but use passive voice
-    // (even if it's not exactly appropriate for this parse)
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tTom\t5\tnsubj:pass\n" +
-        "2\tand\t3\tcc\n" +
+        "2\tand\t1\tcc\n" +
         "3\tJerry\t1\tconj:and\n" +
-        "4\twere\t5\taux:pass\n" +
+        "4\twere\t5\taux\n" +   // changed aux:pass to aux for UD 2.0
         "5\tfighting\t0\troot\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());

@@ -51,7 +51,7 @@ public class RelationTripleSegmenter {
     // this expression accommodates both
     add(SemgrexPattern.compile("{$}=verb ?>/aux(:pass)?/ {}=be >/.subj(:pass)?/ {}=subject >/[di]?obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Tom and Jerry were fighting }
-    add(SemgrexPattern.compile("{$}=verb >/nsubj(:pass)?/ ( {}=subject >/conj:and/=subjIgnored ( {}=object ?>/cc/=objIgnored {} ))"));
+    add(SemgrexPattern.compile("{$}=verb >/nsubj(:pass)?/ ( {}=subject >/conj:and/=subjIgnored {}=object )"));
     // { mass of iron is 55amu }
     add(SemgrexPattern.compile("{pos:/NNS?/}=object >cop {}=relappend1 >/nsubj(:pass)?/ ( {}=verb >/nmod:of/ ( {pos:/NNS?/}=subject >case {}=relappend0 ) )"));
   }});

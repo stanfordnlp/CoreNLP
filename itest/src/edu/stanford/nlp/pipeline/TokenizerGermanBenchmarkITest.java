@@ -8,16 +8,15 @@ public class TokenizerGermanBenchmarkITest extends TokenizerBenchmarkTestCase {
     public void setUp() {
         // set up the pipeline
         Properties props = new Properties();
-        props.put("annotators", "tokenize,ssplit,mwt");
+        props.put("annotators", "tokenize");
         props.put("tokenize.language", "de");
-        props.put("tokenize.options", "ptb3Escaping=false");
-        props.put("mwt.mappingFile",
-                "/u/nlp/data/stanford-corenlp/test/data/mwt/de-mwt.tsv");
+        props.put("tokenize.mwt.mappingFile",
+                "/u/nlp/data/stanford-corenlp-testing/resources/de_mwt.tsv");
         pipeline = new StanfordCoreNLP(props);
     }
 
     public void testOnDev() {
-        goldFilePath = "/u/nlp/data/stanford-corenlp/test/data/tokenize/de_gsd-ud-dev.conllu";
+        goldFilePath = "/u/nlp/data/stanford-corenlp-testing/data/tokenize/de_gsd-ud-dev.conllu";
         runTest("dev", "de", 0.95);
     }
 
