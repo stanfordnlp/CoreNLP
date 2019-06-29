@@ -24,7 +24,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * 
  * @author Spence Green
  *
- * @param <E>
+ * @param <E> Element type to store
  */
 public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Iterable<E> {
 

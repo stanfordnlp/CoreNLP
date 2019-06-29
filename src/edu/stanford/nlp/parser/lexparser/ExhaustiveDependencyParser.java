@@ -53,13 +53,12 @@ import edu.stanford.nlp.util.logging.Redwood;
  * picture of the Eisner and Satta dependency parsing papers, but without the
  * tricks in defining items that they use to get an O(n<sup>3</sup>)
  * dependency parser.  The parser is as described in:
- * <p/>
+ * <br>
  * Dan Klein and Christopher D. Manning. 2003. Fast Exact Inference with a
  * Factored Model for Natural Language Parsing. In Suzanna Becker, Sebastian
  * Thrun, and Klaus Obermayer (eds), Advances in Neural Information Processing
  * Systems 15 (NIPS 2002). Cambridge, MA: MIT Press, pp. 3-10.
  * http://nlp.stanford.edu/pubs/lex-parser.pdf
- * <p/>
  *
  * @author Dan Klein
  */

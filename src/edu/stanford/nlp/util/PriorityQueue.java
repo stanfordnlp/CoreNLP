@@ -10,7 +10,7 @@ import java.util.Set;
  * <p>
  * There are several important differences between this interface and
  * the JDK {@link java.util.PriorityQueue}:
- * <p>
+ * </p>
  * <ol>
  * <li> This interface uses explicitly-assigned {@code double} values
  * as priorities for queue elements, while
@@ -42,7 +42,7 @@ import java.util.Set;
  * <p>
  * On the other hand, this interface and {@link java.util.PriorityQueue}
  * also have some characteristics in common:
- * <p>
+ * </p>
  * <ol>
  * <li> Both make no guarantee about the order in which elements with equal
  * priority are returned from the queue.  This does <i>not</i> mean that

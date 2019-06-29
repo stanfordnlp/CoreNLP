@@ -18,7 +18,7 @@ import edu.stanford.nlp.util.PaddedList;
  * 
  * @author Spence Green
  *
- * @param <IN>
+ * @param <IN> Label type
  */
 public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> {
   

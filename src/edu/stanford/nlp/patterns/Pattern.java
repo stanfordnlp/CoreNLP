@@ -17,7 +17,7 @@ import java.util.Set;
  * An abstract class to represent a Pattern. Currently only surface patterns are implemented.
  * In future, dependency patterns shd be implemented too.
  *
- * @Author Sonal Gupta @sonalg.
+ * @author Sonal Gupta @sonalg.
  */
 public abstract class Pattern implements Serializable{
 

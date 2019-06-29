@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * Creates an inverted index of (classkey:value) => {sentid1,sentid2,.. }.
+ * Creates an inverted index of (classkey:value) =&gt; {sentid1,sentid2,.. }.
  *
  *
  * @author Sonal Gupta (sonalg@stanford.edu)

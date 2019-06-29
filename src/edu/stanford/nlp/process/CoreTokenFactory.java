@@ -9,7 +9,7 @@ import edu.stanford.nlp.util.CoreMap;
  * 
  * @author Sonal Gupta
  * 
- * @param <IN>
+ * @param <IN> Token type this factory creates
  */
 public interface CoreTokenFactory<IN extends CoreMap> {
   public IN makeToken();

@@ -23,8 +23,8 @@ import edu.stanford.nlp.util.TypesafeMap;
 
 /**
  * CanNOT handle overlapping labeled text (that is one token cannot belong to
- * multiple labels)! Note that there has to be spaces around the tags <label>
- * and </label> for the reader to work correctly!
+ * multiple labels)! Note that there has to be spaces around the tags 
+ * &lt;label&gt; and &lt;/label&gt; for the reader to work correctly!
  * 
  * @author Sonal Gupta (sonalg@stanford.edu)
  * 

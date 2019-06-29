@@ -332,7 +332,7 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   /**
    * Information about a matched group.
    *
-   * @param <T>
+   * @param <T> The type of object in the sequence
    */
   final class MatchedGroupInfo<T> {
     public final String text;

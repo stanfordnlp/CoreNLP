@@ -9,30 +9,30 @@ import edu.stanford.nlp.util.Pair;
 
 /**
  * Online Limited-Memory Quasi-Newton BFGS implementation based on the algorithms in
- * <p>
+ * <br>
  * Nocedal, Jorge, and Stephen J. Wright.  2000.  Numerical Optimization.  Springer.  pp. 224--
- * <p>
+ * <br>
  * and modified to the online version presented in
- * <p>
+ * <br>
  * A Stocahstic Quasi-Newton Method for Online Convex Optimization
  * Schraudolph, Yu, Gunter (2007)
- * <p>
+ * <br>
  * As of now, it requires a
  * Stochastic differentiable function (AbstractStochasticCachingDiffFunction) as input.
- * <p/>
+ * <br>
  * The basic way to use the minimizer is with a null constructor, then
  * the simple minimize method:
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * THIS IS NOT UPDATE FOR THE STOCHASTIC VERSION YET.
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * <p/>
+ * <br>
  * <p><code>Minimizer qnm = new QNMinimizer();</code>
  * <br><code>DiffFunction df = new SomeDiffFunction();</code>
  * <br><code>double tol = 1e-4;</code>
  * <br><code>double[] initial = getInitialGuess();</code>
  * <br><code>double[] minimum = qnm.minimize(df,tol,initial);</code>
- * <p/>
- * <p/>
+ * <br>
+ * <br>
  * If you do not choose a value of M, it will use the max amount of memory
  * available, up to M of 20.  This will slow things down a bit at first due
  * to forced garbage collection, but is probably faster overall b/c you are

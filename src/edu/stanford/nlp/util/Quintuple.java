@@ -11,11 +11,6 @@ import java.util.List;
  * A quintuple (length five) of ordered objects.
  * 
  * @author Spence Green
- *
- * @param <T1>
- * @param <T2>
- * @param <T3>
- * @param <T4>
  */
 public class Quintuple<T1,T2,T3,T4, T5> implements Comparable<Quintuple<T1,T2,T3,T4,T5>>, Serializable, PrettyLoggable {
 
@@ -25,9 +20,6 @@ public class Quintuple<T1,T2,T3,T4, T5> implements Comparable<Quintuple<T1,T2,T3
   public T2 second;
   public T3 third;
   public T4 fourth;
-
-
-
   public T5 fifth;
 
   public Quintuple(T1 first, T2 second, T3 third, T4 fourth, T5 fifth) {

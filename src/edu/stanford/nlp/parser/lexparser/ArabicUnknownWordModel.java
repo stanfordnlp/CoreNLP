@@ -8,7 +8,7 @@ import edu.stanford.nlp.util.Index;
  * This is a basic unknown word model for Arabic.  It supports 4 different
  * types of feature modeling; see {@link #getSignature(String, int)}.
  *
- * <i>Implementation note: the contents of this class tend to overlap somewhat
+ * <i>Implementation note</i>: the contents of this class tend to overlap somewhat
  * with {@link EnglishUnknownWordModel} and were originally included in {@link BaseLexicon}.
  *
  * @author Roger Levy

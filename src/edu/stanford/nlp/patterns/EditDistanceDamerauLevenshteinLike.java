@@ -7,19 +7,20 @@ import java.util.Arrays;
 
 
 /**
+ * <p>
  * COPIED FROM https://gist.github.com/steveash (public domain license) 
  * Implementation of the OSA (optimal string alignment) which is similar
  * to the Damerau-Levenshtein in that it allows for transpositions to
  * count as a single edit distance, but is not a true metric and can
  * over-estimate the cost because it disallows substrings to edited more than
  * once. See wikipedia for more discussion on OSA vs DL
- * <p/>
+ * </p><p>
  * See Algorithms on Strings, Trees and Sequences by Dan Gusfield for more
  * information.
- * <p/>
+ * </p><p>
  * This also has a set of local buffer implementations to avoid allocating new
  * buffers each time, which might be a premature optimization
- * <p/>
+ * </p>
  * 
  * @author Steve Ash, copied by Sonal Gupta (changed to remove dependence on Google code)
  */

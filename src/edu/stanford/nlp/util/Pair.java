@@ -243,9 +243,6 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
    * <code>ClassCastException</code>
    * @author jonathanberant
-   *
-   * @param <T1>
-   * @param <T2>
    */
   public static class ByFirstPairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
 

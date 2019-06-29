@@ -19,7 +19,8 @@ import edu.stanford.nlp.util.AbstractIterator;
  * delimiter, and then subsequently processed by an Function to produce
  * Objects of type T.
  *
- * @author Jenny Finkel <a href="mailto:jrfinkel@cs.stanford.edu>jrfinkel@cs.stanford.edu</a>
+ * @author <a href="mailto:jrfinkel@cs.stanford.edu">Jenny Finkel</a>
+ *
  * @param <T> The type of the objects returned
  */
 public class DelimitRegExIterator<T> extends AbstractIterator<T> {

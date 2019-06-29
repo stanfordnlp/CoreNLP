@@ -35,7 +35,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * This is a basic unknown word model for English.  It supports 5 different
  * types of feature modeling; see {@link #getSignature(String, int)}.
  *
- * <i>Implementation note: the contents of this class tend to overlap somewhat
+ * <i>Implementation note</i>: the contents of this class tend to overlap somewhat
  * with {@link ArabicUnknownWordModel} and were originally included in {@link BaseLexicon}.
  *
  * @author Dan Klein

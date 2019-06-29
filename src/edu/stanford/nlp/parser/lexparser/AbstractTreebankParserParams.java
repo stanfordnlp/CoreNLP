@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * An abstract class providing a common method base from which to
  * complete a {@code TreebankLangParserParams} implementing class.
- * <p/>
+ * <br>
  * With some extending classes you'll want to have access to special
  * attributes of the corresponding TreebankLanguagePack while taking
  * advantage of this class's code for making the TreebankLanguagePack

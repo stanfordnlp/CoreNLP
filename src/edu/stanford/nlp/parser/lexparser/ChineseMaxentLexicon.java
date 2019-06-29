@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 /**
  * A Lexicon class that computes the score of word|tag according to a maxent model
  * of tag|word (divided by MLE estimate of P(tag)).
- * <p/>
+ * <br>
  * It would be nice to factor out a superclass MaxentLexicon that takes a WordFeatureExtractor
  *
  * @author Galen Andrew

@@ -23,7 +23,7 @@ import edu.stanford.nlp.util.Index;
  *
  * @author Spence Green
  *
- * @param <E>
+ * @param <E> Element type to store
  */
 public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Index<E>, RandomAccess {
 
