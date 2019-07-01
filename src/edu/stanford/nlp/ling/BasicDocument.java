@@ -20,10 +20,11 @@ import java.util.List;
  * for custom
  * document formats or to do a custom job of tokenization. BasicDocument should
  * only be used for documents that are small enough to store in memory.
- *
+ * <br>
  * The easiest way to use BasicDocuments is to construct them and call an init
  * method in the same line (we use init methods instead of constructors because
  * they're inherited and allow subclasses to have other more specific constructors).
+ * <br>
  * For example, to read in a file {@code file} and tokenize it, you can call
  * {@code Document doc = new BasicDocument().init(file); }.
  *
