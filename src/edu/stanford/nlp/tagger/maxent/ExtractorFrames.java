@@ -43,6 +43,7 @@ import java.util.*;
  *
  * The following options are supported:
  * <table>
+ * <caption>Supported feature options for the maxent tagger</caption>
  * <tr><td>Name</td><td>Args</td><td>Effect</td></tr>
  * <tr><td>words</td><td>begin, end</td>
  *     <td>Individual features for words begin ... end.

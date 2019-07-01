@@ -10,7 +10,7 @@ import edu.stanford.nlp.util.Generics;
  * In general, if a method is operating on a pair of Distribution objects, we imagine that the
  * set of possible keys for each Distribution is the same.
  * Therefore we require that d1.numberOFKeys = d2.numberOfKeys and that the number of keys in the union
- * of the two key sets <= numKeys
+ * of the two key sets &lt;= numKeys
  *
  *
  * @author Jeff Michels (jmichels@stanford.edu)

@@ -49,7 +49,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * but with different methods for easily getting/setting/incrementing counts
  * for objects and computing various functions with the counts.
  * The Counter constructor
- * and <tt>addAll</tt> method can be used to copy another Counter's contents
+ * and <code>addAll</code> method can be used to copy another Counter's contents
  * over.
  * <p>
  * <i>Implementation notes:</i>

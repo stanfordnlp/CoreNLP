@@ -116,12 +116,12 @@ import java.util.function.Function;
  * (can be expensive)</td>
  * </tr>
  * <tr>
- * <td>tokenizerOptions</td></td>String</td>
+ * <td>tokenizerOptions</td><td>String</td>
  * <td>(null)</td>
  * <td>Extra options to supply to the tokenizer when creating it.</td>
  * </tr>
  * <tr>
- * <td>tokenizerFactory</td></td>String</td>
+ * <td>tokenizerFactory</td><td>String</td>
  * <td>(null)</td>
  * <td>A different tokenizer factory to use if the ReaderAndWriter in question uses tokenizers.</td>
  * </tr>

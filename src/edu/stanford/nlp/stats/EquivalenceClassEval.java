@@ -19,7 +19,7 @@ import edu.stanford.nlp.util.Sets;
  * A class for calculating precision and recall statistics based on
  * comparisons between two {@link Collection}s.
  * Allows flexible specification of:
- * <p/>
+ * <br>
  * <ul>
  * <li>The criterion by which to evaluate whether two Objects are equivalent
  * for purposes of precision and recall

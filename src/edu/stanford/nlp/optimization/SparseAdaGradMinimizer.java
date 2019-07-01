@@ -11,8 +11,8 @@ import java.util.Random;
 
 /**
  * AdaGrad optimizer that works online, and use sparse gradients, need a
- * function that takes a Counter<K> as argument and returns a Counter<K> as
- * gradient
+ * function that takes a Counter&lt;K&gt; as argument and returns a 
+ * Counter&lt;K&gt; as gradient
  * 
  * @author Sida Wang
  */

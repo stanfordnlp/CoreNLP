@@ -19,6 +19,7 @@ import java.io.*;
  * This file also contains several {@code DataSeries} implementations as
  * nested static classes:
  *
+ * <ul>
  * <li> {@code FunctionDataSeries}, which computes data series values
  * dynamically, according to a function supplied at construction; </li>
  *
@@ -31,6 +32,7 @@ import java.io.*;
  * <li> {@code AverageDataSeries}, which computes data series values
  * dynamically as a linear combination of the value of other data series
  * supplied at construction. </li>
+ * </ul>
  *
  * @author Bill MacCartney
  */
