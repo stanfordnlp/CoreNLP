@@ -21,19 +21,19 @@ import edu.stanford.nlp.util.Pair;
  *
  * The basic way to use the minimizer is with a null constructor, then
  * the simple minimize method:
- * <p/>
+ * <br>
  * <p><code>Minimizer smd = new SGDMinimizer();</code>
  * <br><code>DiffFunction df = new SomeDiffFunction(); //Note that it must be a incidence of AbstractStochasticCachingDiffFunction</code>
  * <br><code>double tol = 1e-4;</code>
  * <br><code>double[] initial = getInitialGuess();</code>
  * <br><code>int maxIterations = someSafeNumber;</code>
  * <br><code>double[] minimum = qnm.minimize(df,tol,initial,maxIterations);</code>
- * <p/>
+ * <br>
  * Constructing with a null constructor will use the default values of
  * <p>
  * <br><code>batchSize = 15;</code>
  * <br><code>initialGain = 0.1;</code>
- * <p/>
+ * <br>
  *
  * @author <a href="mailto:akleeman@stanford.edu">Alex Kleeman</a>
  * @version 1.0

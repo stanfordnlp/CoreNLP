@@ -5,32 +5,32 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * <p>
+ * <br>
  * Stochastic Meta Descent Minimizer based on
  *
- * <p>
+ * <br>
  * Accelerated training of conditional random fields with stochastic gradient methods
  * S. V. N. Vishwanathan, Nicol N. Schraudolph, Mark W. Schmidt, Kevin P. Murphy
  * June 2006 	 	Proceedings of the 23rd international conference on Machine learning ICML '06
  * Publisher: ACM Press
- * <p/>
+ * <br>
  * The basic way to use the minimizer is with a null constructor, then
  * the simple minimize method:
- * <p/>
+ * <br>
  * <p><code>Minimizer smd = new SMDMinimizer();</code>
  * <br><code>DiffFunction df = new SomeDiffFunction();</code>
  * <br><code>double tol = 1e-4;</code>
  * <br><code>double[] initial = getInitialGuess();</code>
- * <br><code>int maxIterations = someSafeNumber;
+ * <br><code>int maxIterations = someSafeNumber;</code>
  * <br><code>double[] minimum = qnm.minimize(df,tol,initial,maxIterations);</code>
- * <p/>
+ * <br>
  * Constructing with a null constructor will use the default values of
  * <p>
  * <br><code>batchSize = 15;</code>
  * <br><code>initialGain = 0.1;</code>
  * <br><code>useAlgorithmicDifferentiation = true;</code>
- * <p/>
- * <p/>
+ * <br>
+ * <br>
  *
  * @author <a href="mailto:akleeman@stanford.edu">Alex Kleeman</a>
  * @version 1.0

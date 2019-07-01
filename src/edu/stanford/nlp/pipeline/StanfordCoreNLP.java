@@ -64,9 +64,9 @@ import java.util.regex.Pattern;
  * you take the objects you wish to annotate and pass
  * them in and get in return a fully annotated object.
  * At the command-line level you can, e.g., tokenize text with StanfordCoreNLP with a command like:
- * <br/><pre>
+ * <br><pre>
  * java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file document.txt
- * </pre><br/>
+ * </pre><br>
  * Please see the package level javadoc for sample usage
  * and a more complete description.
  *

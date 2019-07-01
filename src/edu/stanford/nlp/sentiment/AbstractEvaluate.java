@@ -18,7 +18,7 @@ import java.util.Set;
 /**
  *
  * @author John Bauer
- * @author Michael Haas <haas@cl.uni-heidelberg.de> (extracted this abstract class from Evaluate)
+ * @author <a href="mailto:haas@cl.uni-heidelberg.de"> Michael Haas </a>(extracted this abstract class from Evaluate)
  */
 public abstract class AbstractEvaluate  {
 

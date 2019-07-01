@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.Generics;
 /**
  * A <code>Processor</code> whose <code>process</code> method deletes all
  * SGML/XML/HTML tags (tokens starting with <code>&lt;</code> and ending
- * with <code>&gt;<code>. Optionally, newlines can be inserted after the
+ * with <code>&gt;</code>. Optionally, newlines can be inserted after the
  * end of block-level tags to roughly simulate where continuous text was
  * broken up (this helps finding sentence boundaries for example).
  *

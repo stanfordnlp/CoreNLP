@@ -115,7 +115,7 @@ import java.util.regex.Pattern;
  *          For these types, only if the matched expression has NER type matching the
  *          specified overwriteableType for the regex will the NER type be overwritten.</td>
  *      <td>{@code}</td></tr>
- *   <tr><td>{@code ignoreCase}</td><td>If true, case is ignored</td></td>
+ *   <tr><td>{@code ignoreCase}</td><td>If true, case is ignored</td>
  *      <td>{@code false}</td></tr>
  *   <tr><td>{@code verbose}</td><td>If true, turns on extra debugging messages.</td>
  *      <td>{@code false}</td></tr>

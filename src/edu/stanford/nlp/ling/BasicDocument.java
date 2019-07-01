@@ -24,8 +24,8 @@ import java.util.List;
  * The easiest way to use BasicDocuments is to construct them and call an init
  * method in the same line (we use init methods instead of constructors because
  * they're inherited and allow subclasses to have other more specific constructors).
- * For example, to read in a file {@code file} and tokenize it, you can call
- * {@code Document doc = new BasicDocument().init(file); }.
+ * For example, to read in a file <pre>file</pre> and tokenize it, you can call
+ * <pre>Document doc=new BasicDocument().init(file);</pre>.
  *
  * @author Joseph Smarr (jsmarr@stanford.edu)
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) (Templatization)
@@ -60,7 +60,8 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
 
   /**
    * Constructs a new (empty) BasicDocument using a {@link PTBTokenizer}.
-   * Call one of the {@code init} methods to populate the document from a desired source.
+   * Call one of the <tt>init</tt> * methods to populate the document
+   * from a desired source.
    */
   public BasicDocument() {
     this(PTBTokenizer.factory());
@@ -68,7 +69,8 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
 
   /**
    * Constructs a new (empty) BasicDocument using the given tokenizer.
-   * Call one of the {@code init} methods to populate the document from a desired source.
+   * Call one of the <tt>init</tt> * methods to populate the document
+   * from a desired source.
    */
   public BasicDocument(TokenizerFactory<Word> tokenizerFactory) {
     setTokenizerFactory(tokenizerFactory);
@@ -268,7 +270,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
   }
 
   /**
-   * Returns {@code this} (the features are the list of words).
+   * Returns <tt>this</tt> (the features are the list of words).
    */
   @Override
   public Collection<Word> asFeatures() {
@@ -296,7 +298,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
   /**
    * Removes all currently assigned labels for this Document then adds
    * the given label.
-   * Calling {@code setLabel(null)} effectively clears all labels.
+   * Calling <tt>setLabel(null)</tt> effectively clears all labels.
    */
   public void setLabel(L label) {
     labels.clear();
@@ -354,7 +356,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
 
   /**
    * Sets the tokenizerFactory to be used by {@link #parse(String)}.
-   * Set this tokenizer before calling one of the {@code init} methods
+   * Set this tokenizer before calling one of the <tt>init</tt> methods
    * because
    * it will probably call parse. Note that the tokenizer can equivalently be
    * passed in to the constructor.
@@ -375,19 +377,17 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * Subclasses that want to preserve extra state should
    * override this method and add the extra state to the new document before
    * returning it. The new BasicDocument is created by calling
-   * {@code getClass().newInstance()} so it should be of the correct subclass,
+   * <tt>getClass().newInstance()</tt> so it should be of the correct subclass,
    * and thus you should be able to cast it down and add extra meta data directly.
    * Note however that in the event an Exception is thrown on instantiation
    * (e.g. if your subclass doesn't have a public empty constructor--it should btw!)
-   * then a new {@code BasicDocument} is used instead. Thus if you want to be paranoid
+   * then a new <tt>BasicDocument</tt> is used instead. Thus if you want to be paranoid
    * (or some would say "correct") you should check that your instance is of
    * the correct sub-type as follows (this example assumes the subclass is called
-   * {@code NumberedDocument} and it has the additional {@code number} property):
-   * <pre>
-   * Document blankDocument=super.blankDocument();
+   * <tt>NumberedDocument</tt> and it has the additional <tt>number</tt>property):
+   * <pre>Document blankDocument=super.blankDocument();
    * if(blankDocument instanceof NumberedDocument) {
-   *     ((NumberedDocument)blankDocument).setNumber(getNumber());
-   * </pre>
+   *     ((NumberedDocument)blankDocument).setNumber(getNumber());</pre>
    */
   @Override
   public <OUT> Document<L, Word, OUT> blankDocument() {
@@ -395,7 +395,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
 
     // tries to instantiate by reflection, settles for direct instantiation
     try {
-      bd = ErasureUtils.<BasicDocument<L>>uncheckedCast(getClass().getDeclaredConstructor().newInstance());
+      bd = ErasureUtils.<BasicDocument<L>>uncheckedCast(getClass().newInstance());
     } catch (Exception e) {
       bd = new BasicDocument<>();
     }
@@ -465,7 +465,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * For internal debugging purposes only.
    * Prints the state of the given BasicDocument to stderr.
    */
-  private static <L> void printState(BasicDocument<L> bd) {
+  public static <L> void printState(BasicDocument<L> bd) throws Exception {
     log.info("BasicDocument:");
     log.info("\tTitle: " + bd.title());
     log.info("\tLabels: " + bd.labels());
