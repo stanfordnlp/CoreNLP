@@ -24,10 +24,11 @@ import java.util.regex.Pattern;
  *   Expressions are made up of identifiers, literals (numbers, strings "I'm a string", TRUE, FALSE),
  *     function calls ( FUNC(args) ).
  *
- * <p>
+ * <br>
  * After a pattern has been matched, we can access the capture groups using one of the following methods:
- * <p>
+ * <br>
  * <table>
+ * <caption>Capture group methods</caption>
  *   <tr><th>Field</th><th>Description</th></tr>
  *   <tr><th colspan="2">Accessing captured groups as list of tokens</th></tr>
  *   <tr><td>$n</td><td>Capture group (as list of tokens) corresponding to the variable {@code $n}.
@@ -53,6 +54,7 @@ import java.util.regex.Pattern;
  * <p>
  *   The following functions are supported:
  * <table>
+ * <caption>Supported functions</caption>
  *   <tr><th>Function</th><th>Description</th></tr>
  *   <tr><td>{@code Annotate(CoreMap, field, value)}</td><td>Annotates the CoreMap with specified field=value</td></tr>
  *   <tr><td>{@code Aggregate(function, initialValue,...)}</td><td>Aggregates values using function (like fold)</td></tr>

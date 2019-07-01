@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
  * <p>
  * <em>Value Types</em>:
  * <table>
+ * <caption>Value Types</caption>
  *   <tr><th>Type</th><th>Format</th><th>Example</th><th>Description</th></tr>
  *   <tr><td>{@code BOOLEAN}</td><td>{@code TRUE | FALSE}</td><td>{@code TRUE}</td><td></td></tr>
  *   <tr><td>{@code STRING}</td><td>{@code "..."}</td><td>{@code "red"}</td><td></td></tr>
@@ -84,6 +85,7 @@ import java.util.regex.Pattern;
  * <p>
  * Predefined values are:
  * <table>
+ * <caption>Predefined values</caption>
  *   <tr><th>Variable</th><th>Type</th><th>Description</th></tr>
  *   <tr><td>{@code ENV}</td><td>{@link Env}</td><td>The environment with respect to which the rules are applied.</td></tr>
  *   <tr><td>{@code TRUE}</td><td>{@code BOOLEAN}</td><td>The {@code Boolean}  value {@code true}.</td></tr>
@@ -120,6 +122,7 @@ import java.util.regex.Pattern;
  * <p>
  * Extraction rule fields (most fields are optional):
  * <table>
+ * <caption>Extraction rule fields</caption>
  *   <tr><th>Field</th><th>Values</th><th>Example</th><th>Description</th></tr>
  *   <tr><td>{@code ruleType}</td><td>{@code "tokens" | "text" | "composite" | "filter" }</td>
  *      <td>{@code tokens}</td><td>Type of the rule (required).</td></tr>

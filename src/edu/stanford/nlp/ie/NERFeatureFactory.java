@@ -87,6 +87,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * or directly on the command line. The following properties are recognized:
  *
  * <table border="1">
+ * <caption>NER Parameters</caption>
  * <tr><td><b>Property Name</b></td><td><b>Type</b></td><td><b>Default Value</b></td><td><b>Description</b></td></tr>
  * <tr><td> loadClassifier </td><td>String</td><td>n/a</td><td>Path to serialized classifier to load</td></tr>
  * <tr><td> loadAuxClassifier </td><td>String</td><td>n/a</td><td>Path to auxiliary classifier to load.</td></tr>

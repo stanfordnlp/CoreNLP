@@ -31,7 +31,7 @@ import org.w3c.dom.Element;
  *
  * tid ::= ID
  *   {tid ::= TimeID
- *    TimeID ::= t<integer>}
+ *    TimeID ::= t&lt;integer&gt;}
  * type ::= 'DATE' | 'TIME' | 'DURATION' | 'SET'
  * beginPoint ::= IDREF
  *    {beginPoint ::= TimeID}
@@ -47,7 +47,7 @@ import org.w3c.dom.Element;
  * value ::= Duration | Date | Time | WeekDate | WeekTime | Season | PartOfYear | PaPrFu
  * valueFromFunction ::= IDREF
  *    {valueFromFunction ::= TemporalFunctionID
- * TemporalFunctionID ::= tf<integer>}
+ * TemporalFunctionID ::= tf&lt;integer&gt;}
  * mod ::= 'BEFORE' | 'AFTER' | 'ON_OR_BEFORE' | 'ON_OR_AFTER' |'LESS_THAN' | 'MORE_THAN' |
  *         'EQUAL_OR_LESS' | 'EQUAL_OR_MORE' | 'START' | 'MID' | 'END' | 'APPROX'
  * anchorTimeID ::= IDREF

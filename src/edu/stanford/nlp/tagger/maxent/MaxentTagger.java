@@ -88,24 +88,24 @@ import java.text.DecimalFormat;
  * <dt>
  * A MaxentTagger can be made with a constructor taking as argument the location of parameter files for a trained tagger: </dt>
  * <dd> {@code MaxentTagger tagger = new MaxentTagger("models/left3words-wsj-0-18.tagger"); }</dd>
- * <p>
+ * <br>
  * <dt>A default path is provided for the location of the tagger on the Stanford NLP machines:</dt>
  * <dd>{@code MaxentTagger tagger = new MaxentTagger(DEFAULT_NLP_GROUP_MODEL_PATH); }</dd>
- * <p>
+ * <br>
  * <dt>If you set the NLP_DATA_HOME environment variable,
  * DEFAULT_NLP_GROUP_MODEL_PATH will instead point to the directory
  * given in NLP_DATA_HOME.</dt>
- * <p>
+ * <br>
  * <dt>To tag a List of HasWord and get a List of TaggedWord, you can use one of: </dt>
  * <dd>{@code List<TaggedWord> taggedSentence = tagger.tagSentence(List<? extends HasWord> sentence)}</dd>
  * <dd>{@code List<TaggedWord> taggedSentence = tagger.apply(List<? extends HasWord> sentence)}</dd>
- * <p>
+ * <br>
  * <dt>To tag a list of sentences and get back a list of tagged sentences:
  * <dd>{@code List taggedList = tagger.process(List sentences)}</dd>
- * <p>
+ * <br>
  * <dt>To tag a String of text and to get back a String with tagged words:</dt>
  * <dd> {@code String taggedString = tagger.tagString("Here's a tagged string.")}</dd>
- * <p>
+ * <br>
  * <dt>To tag a string of <i>correctly tokenized</i>, whitespace-separated words and get a string of tagged words back:</dt>
  * <dd> {@code String taggedString = tagger.tagTokenizedString("Here 's a tagged string .")}</dd>
  * </dl>
@@ -157,6 +157,7 @@ import java.text.DecimalFormat;
  * ("-") to turn them into a flag. The following properties are recognized:
  *
  * <table border="1">
+ * <caption>MaxentTagger command line params</caption>
  * <tr><td><b>Property Name</b></td><td><b>Type</b></td><td><b>Default Value</b></td><td><b>Relevant Phase(s)</b></td><td><b>Description</b></td></tr>
  * <tr><td>model</td><td>String</td><td>N/A</td><td>All</td><td>Path and filename where you would like to save the model (training) or where the model should be loaded from (testing, tagging).</td></tr>
  * <tr><td>trainFile</td><td>String</td><td>N/A</td><td>Train</td>
@@ -688,7 +689,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * Searching the lambda array for 0 entries, removes them.  This
    * saves a large chunk of space in the tagger models which are built
    * with L1 regularization.
-   * <p>
+   * <br>
    * After removing the zeroes, go through the feature arrays and
    * reindex the pointers into the lambda array.  This saves some time
    * later on at runtime.
@@ -780,7 +781,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   /** This reads the complete tagger from a single model stored in a file, at a URL,
    *  or as a resource in a jar file, and initializes the tagger using a
    *  combination of the properties passed in and parameters from the file.
-   *  <p>
+   *  <br>
    *  <i>Note for the future:</i> This assumes that the TaggerConfig in the file
    *  has already been read and used.  This work is done inside the
    *  constructor of TaggerConfig.  It might be better to refactor
@@ -803,7 +804,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   /** This reads the complete tagger from a single model provided as an InputStream,
    *  and initializes the tagger using a
    *  combination of the properties passed in and parameters from the file.
-   *  <p>
+   *  <br>
    *  <i>Note for the future:</i> This assumes that the TaggerConfig in the file
    *  has already been read and used.  This work is done inside the
    *  constructor of TaggerConfig.  It might be better to refactor
@@ -831,7 +832,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   /** This reads the complete tagger from a single model file, and inits
    *  the tagger using a combination of the properties passed in and
    *  parameters from the file.
-   *  <p>
+   *  <br>
    *  <i>Note for the future: This assumes that the TaggerConfig in the file
    *  has already been read and used.  It might be better to refactor
    *  things so that is all done inside this method, but for the moment
@@ -1014,7 +1015,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * Tags the Words in each Sentence in the given List with their
    * grammatical part-of-speech. The returned List contains Sentences
    * consisting of TaggedWords.
-   * <p><b>NOTE: </b>The input document must contain sentences as its elements,
+   * <br><b>NOTE: </b>The input document must contain sentences as its elements,
    * not words. To turn a Document of words into a Document of sentences, run
    * it through {@link edu.stanford.nlp.process.WordToSentenceProcessor}.
    *

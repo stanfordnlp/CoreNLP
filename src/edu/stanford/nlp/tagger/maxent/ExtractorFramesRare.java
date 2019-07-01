@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
  *
  * The following options are supported:
  * <table>
+ * <caption>Options for rare extractor frames</caption>
  * <tr><td>Name</td><td>Args</td><td>Effect</td></tr>
  * <tr><td>wordshapes</td><td>left, right</td>
  *     <td>Word shape features, e.g., transform Foo5 into Xxx#

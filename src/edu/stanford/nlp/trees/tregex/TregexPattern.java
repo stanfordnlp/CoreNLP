@@ -111,14 +111,14 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td>A &gt;- B <td>A is the last child of B
  * <tr><td>A &lt;` B <td>B is the last child of A
  * <tr><td>A &gt;` B <td>A is the last child of B
- * <tr><td>A &lt;i B <td>B is the ith child of A (i > 0)
- * <tr><td>A &gt;i B <td>A is the ith child of B (i > 0)
- * <tr><td>A &lt;-i B <td>B is the ith-to-last child of A (i > 0)
- * <tr><td>A &gt;-i B <td>A is the ith-to-last child of B (i > 0)
+ * <tr><td>A &lt;i B <td>B is the ith child of A (i &gt; 0)
+ * <tr><td>A &gt;i B <td>A is the ith child of B (i &gt; 0)
+ * <tr><td>A &lt;-i B <td>B is the ith-to-last child of A (i &gt; 0)
+ * <tr><td>A &gt;-i B <td>A is the ith-to-last child of B (i &gt; 0)
  * <tr><td>A &lt;: B <td>B is the only child of A
  * <tr><td>A &gt;: B <td>A is the only child of B
- * <tr><td>A &lt;&lt;: B <td>A dominates B via an unbroken chain (length > 0) of unary local trees.
- * <tr><td>A &gt;&gt;: B <td>A is dominated by B via an unbroken chain (length > 0) of unary local trees.
+ * <tr><td>A &lt;&lt;: B <td>A dominates B via an unbroken chain (length &gt; 0) of unary local trees.
+ * <tr><td>A &gt;&gt;: B <td>A is dominated by B via an unbroken chain (length &gt; 0) of unary local trees.
  * <tr><td>A &#36;++ B <td>A is a left sister of B (same as &#36;.. for context-free trees)
  * <tr><td>A &#36;-- B <td>A is a right sister of B (same as &#36;,, for context-free trees)
  * <tr><td>A &#36;+ B <td>A is the immediate left sister of B (same as &#36;. for context-free trees)

@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.PaddedList;
  * 
  * @author Spence Green
  *
- * @param <IN>
+ * @param <IN> CoreLabel type to produce
  */
 public class BigWindowArabicSegmenterFeatureFactory<IN extends CoreLabel> extends ArabicSegmenterFeatureFactory<IN> {
   

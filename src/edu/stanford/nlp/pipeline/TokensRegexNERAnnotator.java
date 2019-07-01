@@ -86,6 +86,7 @@ import java.util.regex.Pattern;
  * <p>
  *   Configuration:
  * <table>
+ * <caption>Annotator configuration</caption>
  *   <tr><th>Field</th><th>Description</th><th>Default</th></tr>
  *   <tr><td>{@code mapping}</td><td>Comma separated list of mapping files to use </td>
  *      <td>{@code edu/stanford/nlp/models/kbp/regexner_caseless.tab}</td>
