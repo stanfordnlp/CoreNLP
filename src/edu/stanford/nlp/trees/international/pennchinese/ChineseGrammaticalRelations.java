@@ -197,7 +197,7 @@ public class ChineseGrammaticalRelations {
    * The "coordination" grammatical relation.
    * A coordination is the relation between
    * an element and a conjunction.<p>
-   * <p/>
+   * <br>
    * Example:
    * <code>
    * <pre>
@@ -244,7 +244,7 @@ public class ChineseGrammaticalRelations {
   /**
    * The "nominal subject" grammatical relation.  A nominal subject is
    * a subject which is an noun phrase.<p>
-   * <p/>
+   * <br>
    * Example:
    * <code>
    * <pre>

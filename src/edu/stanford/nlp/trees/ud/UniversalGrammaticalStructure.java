@@ -478,14 +478,14 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
 
     /**
      * Adds the type of conjunction to all conjunct relations.
-     * <p/>
+     * <br>
      * {@code cc(Marie, and)}, {@code conj(Marie, Chris)} and {@code conj(Marie, John)}
      * become {@code cc(Marie, and)}, {@code conj:and(Marie, Chris)} and {@code conj:and(Marie, John)}.
-     * <p/>
+     * <br>
      * In case multiple coordination marker depend on the same governor
      * the one that precedes the conjunct is appended to the conjunction relation or the
      * first one if no preceding marker exists.
-     * <p/>
+     * <br>
      *
      * @param sg A SemanticGraph from a sentence
      */

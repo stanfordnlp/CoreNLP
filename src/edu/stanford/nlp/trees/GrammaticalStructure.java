@@ -937,7 +937,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   /**
    * Destructively modify the {@code Collection&lt;TypedDependency&gt;} to collapse
    * language-dependent transitive dependencies.
-   * <p/>
+   * <br>
    * Default is no-op; to be over-ridden in subclasses.
    *
    * @param list A list of dependencies to process for possible collapsing
@@ -951,7 +951,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   /**
    *
    * Destructively applies different enhancements to the dependency graph.
-   * <p/>
+   * <br>
    * Default is no-op; to be over-ridden in subclasses.
    *
    * @param list A list of dependencies
@@ -964,7 +964,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   /**
    * Destructively modify the {@code Collection&lt;TypedDependency&gt;} to collapse
    * language-dependent transitive dependencies but keeping a tree structure.
-   * <p/>
+   * <br>
    * Default is no-op; to be over-ridden in subclasses.
    *
    * @param list A list of dependencies to process for possible collapsing
@@ -978,7 +978,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   /**
    * Destructively modify the {@code TypedDependencyGraph} to correct
    * language-dependent dependencies. (e.g., nsubjpass in a relative clause)
-   * <p/>
+   * <br>
    * Default is no-op; to be over-ridden in subclasses.
    *
    */

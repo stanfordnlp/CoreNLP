@@ -423,7 +423,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * showing coreference, etc.  By 'function', this means
    * keeping, say, Penn Treebank functional tags or ICE phrasal functions,
    * perhaps returning them as <code>category-function</code>.
-   * <p/>
+   * <br>
    * This implementation strips numeric tags after label introducing
    * characters (assuming that non-numeric things are functional tags).
    *

@@ -128,7 +128,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   /**
    * The "governor" grammatical relation, which is the inverse of "dependent".<p>
-   * <p/>
+   * <br>
    * Example: "the red car" &rarr; {@code gov}(red, car)
    */
   public static final GrammaticalRelation GOVERNOR =
@@ -137,7 +137,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   /**
    * The "dependent" grammatical relation, which is the inverse of "governor".<p>
-   * <p/>
+   * <br>
    * Example: "the red car" &rarr; {@code dep}(car, red)
    */
   public static final GrammaticalRelation DEPENDENT =

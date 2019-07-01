@@ -7,7 +7,7 @@ import java.util.Set;
 
 /**
  * For interning (canonicalizing) things.
- * <p/>
+ * <br>
  * It maps any object to a unique interned version which .equals the
  * presented object.  If presented with a new object which has no
  * previous interned version, the presented object becomes the
@@ -18,11 +18,11 @@ import java.util.Set;
  * still be garbage collected.  Since the gc thread can silently
  * remove things from the backing map, there's no public way to get
  * the backing map, but feel free to add one at your own risk.
- * <p/>
+ * <br>
  * Note that in general it is just as good or better to use the
  * static Interner.globalIntern() method rather than making an
  * instance of Interner and using the instance-level intern().
- * <p/>
+ * <br>
  * Author: Dan Klein
  * Date: 9/28/03
  *

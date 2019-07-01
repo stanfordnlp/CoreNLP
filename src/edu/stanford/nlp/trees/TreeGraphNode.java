@@ -290,7 +290,7 @@ public class TreeGraphNode extends Tree implements HasParent  {
    * and to store references to the head word node and head tag node
    * in this node's {@link CoreLabel {@code CoreLabel}} and the
    * {@code CoreLabel}s of all its descendants.<p>
-   * <p/>
+   * <br>
    * Note that, in contrast to {@link Tree#percolateHeads
    * {@code Tree.percolateHeads()}}, which assumes {@link
    * edu.stanford.nlp.ling.CategoryWordTag

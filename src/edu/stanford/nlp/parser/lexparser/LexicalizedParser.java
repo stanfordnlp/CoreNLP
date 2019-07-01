@@ -786,9 +786,9 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   /**
    * A method for training from two different treebanks, the second of which is presumed
    * to be orders of magnitude larger.
-   * <p/>
+   * <br>
    * Trees are not read into memory but processed as they are read from disk.
-   * <p/>
+   * <br>
    * A weight (typically &lt;= 1) can be put on the second treebank.
    *
    * @param trainTreebank A treebank to train from
@@ -969,7 +969,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * passed in should
    * be specified like command-line arguments, including with an initial
    * minus sign.
-   * <p/>
+   * <br>
    * <i>Notes:</i> This can be used to set parsing-time flags for a
    * serialized parser.  You can also still change things serialized
    * in Options, but this will probably degrade parsing performance.

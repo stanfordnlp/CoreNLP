@@ -22,10 +22,10 @@ import java.util.List;
  * depending on the position of the character in the word: _S for single-char
  * words, _B for first char of multi-char words, _M for middle chars and _E
  * for final chars.
- * <p/>
+ * <br>
  * This is used in combining Chinese parsing and word segmentation using the
  * method of Luo '03.
- * <p/>
+ * <br>
  * Note: it implements TreeTransformer because we might want to do away
  * with TreeNormalizers in favor of TreeTransformers
  *

@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 /**
  * Iterator that represents the concatenation of two other iterators.
- * <p/>
+ * <br>
  * User: Dan Klein (klein@cs.stanford.edu)
  * Date: Oct 22, 2003
  * Time: 7:27:39 PM

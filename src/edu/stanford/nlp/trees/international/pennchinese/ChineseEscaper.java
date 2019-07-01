@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.UTF8EquivalenceFunction;
  * An Escaper for Chinese normalization to match Treebank.
  * Currently normalizes "ASCII" characters into the full-width
  * range used inside the Penn Chinese Treebank.
- * <p/>
+ * <br>
  * <i>Notes:</i> Smart quotes appear in CTB, and are left unchanged.
  * I think you get various hyphen types from U+2000 range too - certainly,
  * Roger lists them in LanguagePack.

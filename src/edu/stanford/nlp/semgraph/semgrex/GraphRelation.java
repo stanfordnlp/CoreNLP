@@ -22,12 +22,12 @@ import java.util.function.Predicate;
  * relations that do not require arguments, and private subclasses for those
  * with arguments. All invocations should be made through the static factory
  * methods.
- * <p/>
+ * <br>
  * If you want to add a new relation, you just have to fill in the definition of
  * <code>satisfies()</code> and <code>searchNodeIterator()</code>. Also be
  * careful to make the appropriate adjustments to
  * <code>getRelation()</code>. Finally, if you are using the SemgrexParser, you
- * need to add the new relation symbol to the list of tokens. <p/>
+ * need to add the new relation symbol to the list of tokens. <br>
  *
  * @author Chloe Kiddon
  */

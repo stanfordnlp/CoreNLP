@@ -9,7 +9,7 @@ import edu.stanford.nlp.ling.HasWord;
  * The interface for parser objects.  The only responsibility of a
  * parser is to return the parsability of input sentences.  That is,
  * parsers need only actually be recognizers/acceptors.
- * <p/>
+ * <br>
  * Specification of the grammar or model
  * parameters is meant to be done by implementing classes' constructors.
  * If there is no specification of a goal, then this will also be determined

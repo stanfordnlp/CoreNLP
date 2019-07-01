@@ -8,7 +8,7 @@ import java.util.function.Predicate;
  * the original Map. This increases Map access time (roughly doubles it) but eliminates
  * Map creation time and decreases memory usage (if you're keeping the original Map in memory
  * anyway).
- * <p/>
+ * <br>
  * @author Teg Grenager (grenager@cs.stanford.edu)
  * @version Jan 9, 2004 9:19:06 AM
  */

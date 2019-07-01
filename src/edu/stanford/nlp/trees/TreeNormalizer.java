@@ -9,7 +9,7 @@ import java.io.Serializable;
  * empty elements).  Another operation that a {@code TreeNormalizer}
  * may wish to perform is interning the {@code String}s passed to
  * it.  Can be reused as a Singleton.  Designed to be extended.
- * <p/>
+ * <br>
  * The {@code TreeNormalizer} methods are in two groups.
  * The contract for this class is that first normalizeTerminal or
  * normalizeNonterminal will be called on each {@code String} that will
@@ -20,7 +20,7 @@ import java.io.Serializable;
  * {@code TreeNormalizer} need not make a deep copy of a
  * {@code Tree}.  It is assumed to be able to work destructively,
  * because afterwards we will only use the normalized {@code Tree}.
- * <p/>
+ * <br>
  * <i>Implementation note:</i> This is a very old legacy class used in conjunction
  * with PennTreeReader.  It seems now that it would be better to move the
  * String normalization into the tokenizer, and then we are just left with a

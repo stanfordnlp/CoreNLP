@@ -20,12 +20,12 @@ import java.util.*;
  * <code>S &lt; (/^NP-SBJ/ &lt; -NONE-) --> S-G</code>  <br>
  * 3) Leave all functional tags on nodes. <br>
  * 4) Keeps -ADV labels on NP and marks head tag with &`^ADV
- * <p/>
+ * <br>
  * <i>Performance note:</i> At one point in time, PCFG labeled F1 results
  * for the various TEMPORAL options in lexparser were:
  * 0=86.7, 1=87.49, 2=86.87, 3=87.49, 4=87.48, 5=87.5, 6=87.07.
  * So, mainly avoid values of 0, 2, and 6.
- * <p/>
+ * <br>
  * At another point they were:
  * 0=86.53, 1=87.1, 2=87.14, 3=87.22, 4=87.1, 5=87.13, 6=86.95, 7=87.16
  *

@@ -9,7 +9,7 @@ import edu.stanford.nlp.trees.TreeTransformer;
  * Removes a boundary symbol (Lexicon.BOUNDARY_TAG or Lexicon.BOUNDARY), which
  * is the rightmost daughter of a tree.  Otherwise does nothing.
  * This is needed because the dependency parser uses such symbols.
- * <p/>
+ * <br>
  * <i>Note:</i> This method is a function and not destructive. A new root tree is returned.
  *
  * @author Christopher Manning

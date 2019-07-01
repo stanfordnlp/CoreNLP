@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 /** This class contains a few String constants and
  *  static methods for dealing with Chinese text.
- *  <p/>
+ *  <br>
  *  <b>Warning:</b> The code contains a version that uses codePoint methods
  *  to handle full Unicode.  But it seems to tickle some bugs in
  *  Sun's JDK 1.5.  It works correctly with JDK 1.6+.  By default it is

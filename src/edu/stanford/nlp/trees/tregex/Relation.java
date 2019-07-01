@@ -28,7 +28,7 @@ import edu.stanford.nlp.util.Pair;
  * with arguments. All invocations should be made through the static factory
  * methods, which insure that there is only a single instance of each relation.
  * Thus == can be used instead of .equals.
- * <p/>
+ * <br>
  * If you want to add a new
  * relation, you just have to fill in the definition of satisfies and
  * searchNodeIterator. Also be careful to make the appropriate adjustments to

@@ -10,7 +10,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 
 /** This is a very simple demo of calling the Chinese Word Segmenter
  *  programmatically.  It assumes an input file in UTF8.
- *  <p/>
+ *  <br>
  *  <code>
  *  Usage: java -mx1g -cp seg.jar SegDemo fileName
  *  </code>

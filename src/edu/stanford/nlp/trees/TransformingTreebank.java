@@ -32,7 +32,7 @@ public class TransformingTreebank extends Treebank {
   /**
    * Create a new TransformingTreebank.
    * The trees are made with a <code>LabeledScoredTreeReaderFactory</code>.
-   * <p/>
+   * <br>
    * <i>Compatibility note: Until Sep 2004, this used to create a Treebank
    * with a SimpleTreeReaderFactory, but this was changed as the old
    * default wasn't very useful, especially to naive users.</i>

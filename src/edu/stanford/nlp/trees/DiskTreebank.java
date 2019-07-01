@@ -14,7 +14,7 @@ import edu.stanford.nlp.ling.HasIndex;
  * get at a corpus of trees that is stored on disk.  Access is usually
  * via apply()'ing a TreeVisitor to each Tree in the Treebank or by using
  * an iterator() to get an iteration over the Trees.
- * <p/>
+ * <br>
  * If the root Label of the Tree objects built by the TreeReader
  * implements HasIndex, then the filename and index of the tree in
  * a corpus will be inserted as they are read in.

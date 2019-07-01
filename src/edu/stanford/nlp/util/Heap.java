@@ -6,7 +6,7 @@ import java.util.Iterator;
  * Heap interface.
  * These heaps implement a decreaseKey operation, which requires
  * a separate Object to Index map, and for objects to be unique in the Heap.
- * <p/>
+ * <br>
  * An interface cannot specify constructors, but it is nevertheless
  * expected that an implementation of this interface has a constructor
  * that takes a Comparator, which is used for ordering ("scoring")

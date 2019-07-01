@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Simple Good-Turing smoothing, based on code from Sampson, available at:
- * ftp://ftp.informatics.susx.ac.uk/pub/users/grs2/SGT.c <p/>
+ * ftp://ftp.informatics.susx.ac.uk/pub/users/grs2/SGT.c <br>
  *
  * See also http://www.grsampson.net/RGoodTur.html
  * 
@@ -233,7 +233,7 @@ public class SimpleGoodTuring {
    * STDOUT.  The input should contain two integers on each line, separated by
    * whitespace.  The first integer is a count; the second is a count for that
    * count.  The input must be sorted in ascending order, and should not contain
-   * 0s.  For example, valid input is: <p/>
+   * 0s.  For example, valid input is: <br>
    *
    * <pre>
    *   1 10

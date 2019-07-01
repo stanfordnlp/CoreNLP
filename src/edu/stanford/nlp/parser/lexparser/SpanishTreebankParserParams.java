@@ -285,7 +285,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
    * Set language-specific options according to flags. This routine should process the option starting in args[i] (which
    * might potentially be several arguments long if it takes arguments). It should return the index after the last index
    * it consumed in processing.  In particular, if it cannot process the current option, the return value should be i.
-   * <p/>
+   * <br>
    * Generic options are processed separately by {@link edu.stanford.nlp.parser.lexparser.Options#setOption(String[], int)}, and implementations of this
    * method do not have to worry about them. The Options class handles routing options. TreebankParserParams that extend
    * this class should call super when overriding this method.

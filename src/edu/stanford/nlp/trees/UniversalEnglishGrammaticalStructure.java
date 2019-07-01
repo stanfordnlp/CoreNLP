@@ -24,7 +24,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 
 /**
  * A GrammaticalStructure for Universal Dependencies English.
- * <p/>
+ * <br>
  * For feeding Stanford parser trees into this class, the Stanford parser should be run with the
  * "-retainNPTmpSubcategories" option for best results!
  *
@@ -458,14 +458,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * Expands prepositions with conjunctions such as in the sentence
    * "Bill flies to and from Serbia." by copying the verb resulting
    * in the following relations:
-   * <p/>
+   * <br>
    * {@code conj:and(flies, flies')}<br/>
    * {@code case(Serbia, to)}<br/>
    * {@code cc(to, and)}<br/>
    * {@code conj(to, from)}<br/>
    * {@code nmod(flies, Serbia)}<br/>
    * {@code nmod(flies', Serbia)}<br/>
-   * <p/>
+   * <br>
    * The label of the conjunct relation includes the conjunction type
    * because if the verb has multiple cc relations then it can be impossible
    * to infer which coordination marker belongs to which conjuncts.
@@ -575,14 +575,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * "Bill flies to France and from Serbia." by copying the verb
    * that governs the prepositional phrase resulting in the following
    * relations:
-   * <p/>
+   * <br>
    * {@code conj:and(flies, flies')}<br/>
    * {@code case(France, to)}<br/>
    * {@code cc(flies, and)}<br/>
    * {@code case(Serbia, from)}<br/>
    * {@code nmod(flies, France)}<br/>
    * {@code nmod(flies', Serbia)}<br/>
-   * <p/>
+   * <br>
    * The label of the conjunct relation includes the conjunction type
    * because if the verb has multiple cc relations then it can be impossible
    * to infer which coordination marker belongs to which conjuncts.
@@ -700,14 +700,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   /**
    * Adds the type of conjunction to all conjunct relations.
-   * <p/>
+   * <br>
    * {@code cc(Marie, and)}, {@code conj(Marie, Chris)} and {@code conj(Marie, John)}
    * become {@code cc(Marie, and)}, {@code conj:and(Marie, Chris)} and {@code conj:and(Marie, John)}.
-   * <p/>
+   * <br>
    * In case multiple coordination marker depend on the same governor
    * the one that precedes the conjunct is appended to the conjunction relation or the
    * first one if no preceding marker exists.
-   * <p/>
+   * <br>
    * Some multi-word coordination markers are collapsed to {@code conj:and} or {@code conj:negcc}.
    * See {@link #conjValue(IndexedWord, SemanticGraph)}.
    *
@@ -992,7 +992,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * of the governor.
    * If called with a tree of dependencies and both CCprocess and
    * includeExtras set to false, then the tree structure is preserved.
-   * <p/>
+   * <br>
    *
    * <dl>
    * <dt>nominal modifier dependencies: nmod</dt>

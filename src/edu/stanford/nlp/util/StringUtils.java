@@ -830,9 +830,9 @@ public class StringUtils  {
 
   /**
    * Parses command line arguments into a Map. Arguments of the form
-   * <p/>
+   * <br>
    * {@code -flag1 arg1a arg1b ... arg1m -flag2 -flag3 arg3a ... arg3n}
-   * <p/>
+   * <br>
    * will be parsed so that the flag is a key in the Map (including
    * the hyphen) and its value will be a {@link String}[] containing
    * the optional arguments (if present).  The non-flag values not
@@ -852,9 +852,9 @@ public class StringUtils  {
 
   /**
    * Parses command line arguments into a Map. Arguments of the form
-   * <p/>
+   * <br>
    * {@code -flag1 arg1a arg1b ... arg1m -flag2 -flag3 arg3a ... arg3n}
-   * <p/>
+   * <br>
    * will be parsed so that the flag is a key in the Map (including
    * the hyphen) and its value will be a {@link String}[] containing
    * the optional arguments (if present).  The non-flag values not
@@ -864,16 +864,16 @@ public class StringUtils  {
    * can be specified as an {@link Integer} value of the appropriate
    * flag key in the {@code flagsToNumArgs} {@link Map}
    * argument. (By default, flags cannot take arguments.)
-   * <p/>
+   * <br>
    * Example of usage:
-   * <p/>
+   * <br>
    * <code>
    * Map flagsToNumArgs = new HashMap();
    * flagsToNumArgs.put("-x",new Integer(2));
    * flagsToNumArgs.put("-d",new Integer(1));
    * Map result = argsToMap(args,flagsToNumArgs);
    * </code>
-   * <p/>
+   * <br>
    * If a given flag appears more than once, the extra args are appended to
    * the String[] value for that flag.
    *
@@ -1911,7 +1911,7 @@ public class StringUtils  {
 
 
   /**
-   * Strip directory from filename.  Like Unix 'basename'. <p/>
+   * Strip directory from filename.  Like Unix 'basename'. <br>
    *
    * Example: {@code getBaseName("/u/wcmac/foo.txt") ==> "foo.txt"}
    */

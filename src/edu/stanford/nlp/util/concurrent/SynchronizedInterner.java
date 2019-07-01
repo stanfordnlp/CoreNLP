@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.Interner;
  * Note that in general it is just as good or better to use the
  * static SynchronizedInterner.globalIntern() method rather than making an
  * instance of SynchronizedInterner and using the instance-level intern().
- * <p/>
+ * <br>
  *
  * @author Ilya Sherman
  * @see edu.stanford.nlp.util.Interner

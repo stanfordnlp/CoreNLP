@@ -1505,7 +1505,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * leaves.  Null values, if any, are inserted into the list like any
    * other value.  This has been rewritten to thread, so only one List
    * is used.
-   * <p/>
+   * <br>
    * <i>Implementation note:</i> when we summon up enough courage, this
    * method will be changed to take and return a {@code List<W extends TaggedWord>}.
    *
@@ -2024,7 +2024,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * of a node's children are pruned, that node is cut as well.
    * A {@code Filter} can assume
    * that it will not be called with a {@code null} argument.
-   * <p/>
+   * <br>
    * For example, the following code excises all PP nodes from a Tree: <br>
    * <tt>
    * Filter<Tree> f = new Filter<Tree> { <br>
