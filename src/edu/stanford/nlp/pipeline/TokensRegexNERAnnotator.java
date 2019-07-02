@@ -46,15 +46,15 @@ import java.util.regex.Pattern;
  * <ol>
  * <li> A TokensRegex expression (marked by starting with "( " and ending with " )".
  *      See {@link TokenSequencePattern} for TokensRegex syntax.
- *    <br/><em>Example</em>: {@code ( /University/ /of/ [ {ner:LOCATION} ] )    SCHOOL}
+ *    <br><em>Example</em>: {@code ( /University/ /of/ [ {ner:LOCATION} ] )    SCHOOL}
  * </li>
  * <li> a sequence of regex, each separated by whitespace (matching "\s+").
- *    <br/><em>Example</em>: {@code Stanford    SCHOOL}
- *    <br/>
+ *    <br><em>Example</em>: {@code Stanford    SCHOOL}
+ *    <br>
  *    The regex will match if the successive regex match a sequence of tokens in the input.
  *    Spaces can only be used to separate regular expression tokens; within tokens \s or similar non-space
  *    representations need to be used instead.
- *    <br/>
+ *    <br>
  *    Notes: Following Java regex conventions, some characters in the file need to be escaped. Only a single
  *    backslash should be used though, as these are not String literals. The input to RegexNER will have
  *    already been tokenized.  So, for example, with our usual English tokenization, things like genitives
@@ -73,10 +73,10 @@ import java.util.regex.Pattern;
  *   <li>Supports both TokensRegex patterns and patterns over the text of the tokens</li>
  *   <li>When NER annotation can be overwritten based on the original NER labels.  The rules for when the new NER labels are used
  *       are given below:
- *       <br/>If the found expression overlaps with a previous NER phrase, then the NER labels are not replaced.
- *       <br/>  <em>Example</em>: Old NER phrase: {@code The ABC Company}, Found Phrase: {@code ABC => } Old NER labels are not replaced.
- *       <br/>If the found expression has inconsistent NER tags among the tokens, then the NER labels are replaced.
- *       <br/>  <em>Example</em>: Old NER phrase: {@code The/O ABC/MISC Company/ORG => The/ORG ABC/ORG Company/ORG}
+ *       <br>If the found expression overlaps with a previous NER phrase, then the NER labels are not replaced.
+ *       <br>  <em>Example</em>: Old NER phrase: {@code The ABC Company}, Found Phrase: {@code ABC => } Old NER labels are not replaced.
+ *       <br>If the found expression has inconsistent NER tags among the tokens, then the NER labels are replaced.
+ *       <br>  <em>Example</em>: Old NER phrase: {@code The/O ABC/MISC Company/ORG => The/ORG ABC/ORG Company/ORG}
  *   </li>
  *   <li>How {@code validpospattern} is handled for POS tags is specified by {@code PosMatchType}</li>
  *   <li>By default, there is no {@code validPosPattern}</li>
@@ -102,9 +102,9 @@ import java.util.regex.Pattern;
  *      <td>{@code O,MISC}</td></tr>
  *   <tr><td>{@code posmatchtype}</td>
  *     <td>How should {@code validpospattern} be used to match the POS of the tokens.
- *         {@code MATCH_ALL_TOKENS} - All tokens has to match.<br/>
- *         {@code MATCH_AT_LEAST_ONE_TOKEN} - At least one token has to match.<br/>
- *         {@code MATCH_ONE_TOKEN_PHRASE_ONLY} - Only has to match for one token phrases.<br/>
+ *         {@code MATCH_ALL_TOKENS} - All tokens has to match.<br>
+ *         {@code MATCH_AT_LEAST_ONE_TOKEN} - At least one token has to match.<br>
+ *         {@code MATCH_ONE_TOKEN_PHRASE_ONLY} - Only has to match for one token phrases.<br>
  *      </td>
  *      <td>{@code MATCH_AT_LEAST_ONE_TOKEN}</td>
  *   </tr>

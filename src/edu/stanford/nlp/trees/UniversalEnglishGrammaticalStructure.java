@@ -459,12 +459,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * "Bill flies to and from Serbia." by copying the verb resulting
    * in the following relations:
    * <br>
-   * {@code conj:and(flies, flies')}<br/>
-   * {@code case(Serbia, to)}<br/>
-   * {@code cc(to, and)}<br/>
-   * {@code conj(to, from)}<br/>
-   * {@code nmod(flies, Serbia)}<br/>
-   * {@code nmod(flies', Serbia)}<br/>
+   * {@code conj:and(flies, flies')}<br>
+   * {@code case(Serbia, to)}<br>
+   * {@code cc(to, and)}<br>
+   * {@code conj(to, from)}<br>
+   * {@code nmod(flies, Serbia)}<br>
+   * {@code nmod(flies', Serbia)}<br>
    * <br>
    * The label of the conjunct relation includes the conjunction type
    * because if the verb has multiple cc relations then it can be impossible
@@ -576,12 +576,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * that governs the prepositional phrase resulting in the following
    * relations:
    * <br>
-   * {@code conj:and(flies, flies')}<br/>
-   * {@code case(France, to)}<br/>
-   * {@code cc(flies, and)}<br/>
-   * {@code case(Serbia, from)}<br/>
-   * {@code nmod(flies, France)}<br/>
-   * {@code nmod(flies', Serbia)}<br/>
+   * {@code conj:and(flies, flies')}<br>
+   * {@code case(France, to)}<br>
+   * {@code cc(flies, and)}<br>
+   * {@code case(Serbia, from)}<br>
+   * {@code nmod(flies, France)}<br>
+   * {@code nmod(flies', Serbia)}<br>
    * <br>
    * The label of the conjunct relation includes the conjunction type
    * because if the verb has multiple cc relations then it can be impossible
@@ -1042,7 +1042,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   /**
    * Does some hard coding to deal with relation in CONJP. For now we deal with:
-   * but not, if not, instead of, rather than, but rather GO TO negcc <br/>
+   * but not, if not, instead of, rather than, but rather GO TO negcc <br>
    * as well as, not to mention, but also, & GO TO and.
    *
    * @param cc The head dependency of the conjunction marker
@@ -1350,12 +1350,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   /**
    * Add extra nsubj dependencies when collapsing basic dependencies.
-   * <br/>
+   * <br>
    * In the general case, we look for an aux modifier under an xcomp
    * modifier, and assuming there aren't already associated nsubj
    * dependencies as daughters of the original xcomp dependency, we
    * add nsubj dependencies for each nsubj daughter of the aux.
-   * <br/>
+   * <br>
    * There is also a special case for "to" words, in which case we add
    * a dependency if and only if there is no nsubj associated with the
    * xcomp and there is no other aux dependency.  This accounts for

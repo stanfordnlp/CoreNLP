@@ -61,6 +61,7 @@ public class TooltipJList extends JList {
           s.append("<br>");
         s.append(curLine);
         if(!isFirstLine)
+          // TODO: maybe just <br> ?
           s.append("</br>");
         else
           isFirstLine = false;

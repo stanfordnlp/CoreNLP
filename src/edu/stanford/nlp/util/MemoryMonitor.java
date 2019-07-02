@@ -198,7 +198,7 @@ public class MemoryMonitor  {
    * Simply launch a <code>PeakMemoryMonitor</code> as
    *
    * <blockquote><code>
-   * Thread monitor = new Thread(new PeakMemoryMonitor());<br />
+   * Thread monitor = new Thread(new PeakMemoryMonitor());<br>
    * monitor.start()
    * </code></blockquote>
    *

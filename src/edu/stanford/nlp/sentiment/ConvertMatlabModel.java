@@ -43,7 +43,7 @@ public class ConvertMatlabModel  {
     wordVectors.put(target, new SimpleMatrix(wordVectors.get(source)));
   }
 
-  /** <br>Will</br> overwrite an existing word vector */
+  /** <b>Will</b> overwrite an existing word vector */
   public static void replaceWordVector(Map<String, SimpleMatrix> wordVectors, String source, String target) {
     if (!wordVectors.containsKey(source)) {
       return;

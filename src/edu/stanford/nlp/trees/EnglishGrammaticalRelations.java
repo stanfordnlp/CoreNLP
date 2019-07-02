@@ -120,7 +120,7 @@ public class EnglishGrammaticalRelations {
    * subject is the predicate of the clause to which the subject
    * belongs.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Reagan died" &rarr; {@code pred}(Reagan, died)
    */
   public static final GrammaticalRelation PREDICATE =
@@ -133,7 +133,7 @@ public class EnglishGrammaticalRelations {
    * The "auxiliary" grammatical relation.  An auxiliary of a clause is a
    * non-main verb of the clause.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Reagan has died" &rarr; {@code aux}(died, has)
    */
   public static final GrammaticalRelation AUX_MODIFIER =
@@ -151,7 +151,7 @@ public class EnglishGrammaticalRelations {
     * clause is a
     * non-main verb of the clause which contains the passive information.
     * <br>
-    * Example: <br/>
+    * Example: <br>
     * "Kennedy has been killed" &rarr; {@code auxpass}(killed, been)
     */
   public static final GrammaticalRelation AUX_PASSIVE_MODIFIER =
@@ -167,8 +167,8 @@ public class EnglishGrammaticalRelations {
    * The "copula" grammatical relation.  A copula is the relation between
    * the complement of a copular verb and the copular verb.<p>
    * <br>
-   * Examples: <br/>
-   * "Bill is big" &rarr; {@code cop}(big, is) <br/>
+   * Examples: <br>
+   * "Bill is big" &rarr; {@code cop}(big, is) <br>
    * "Bill is an honest man" &rarr; {@code cop}(man, is)
    */
   public static final GrammaticalRelation COPULA =
@@ -201,7 +201,7 @@ public class EnglishGrammaticalRelations {
    * asymmetrically: The head of the relation is the first conjunct and other
    * conjunctions depend on it via the <i>conj</i> relation.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Bill is big and honest" &rarr; {@code conj}(big, honest)
    * <br>
    * <i>Note:</i>Modified in 2010 to exclude the case of a CC/CONJP first in its phrase: it has to conjoin things.
@@ -249,7 +249,7 @@ public class EnglishGrammaticalRelations {
    * The "coordination" grammatical relation.  A coordination is the relation
    * between an element and a conjunction.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Bill is big and honest." &rarr; {@code cc}(big, and)
    */
   public static final GrammaticalRelation COORDINATION =
@@ -263,7 +263,7 @@ public class EnglishGrammaticalRelations {
    * punctuation in a clause, if punctuation is being retained in the
    * typed dependencies.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Go home!" &rarr; {@code punct}(Go, !)
    * <br>
    * The condition for NFP to appear hear is that it does not match the emoticon patterns under discourse.
@@ -281,7 +281,7 @@ public class EnglishGrammaticalRelations {
    * an argument of the VP which is the predicate of that
    * clause.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Clinton defeated Dole" &rarr; {@code arg}(defeated, Clinton), {@code arg}(defeated, Dole)
    */
   public static final GrammaticalRelation ARGUMENT =
@@ -294,8 +294,8 @@ public class EnglishGrammaticalRelations {
    * subject of a clause is the subject of the VP which is the
    * predicate of that clause.<p>
    * <br>
-   * Examples: <br/>
-   * "Clinton defeated Dole" &rarr; {@code subj}(defeated, Clinton) <br/>
+   * Examples: <br>
+   * "Clinton defeated Dole" &rarr; {@code subj}(defeated, Clinton) <br>
    * "What she said is untrue" &rarr; {@code subj}(is, What she said)
    */
   public static final GrammaticalRelation SUBJECT =
@@ -306,7 +306,7 @@ public class EnglishGrammaticalRelations {
    * The "nominal subject" grammatical relation.  A nominal subject is
    * a subject which is an noun phrase.
    *
-   * Example: <br/>
+   * Example: <br>
    * "Clinton defeated Dole" &rarr; {@code nsubj}(defeated, Clinton)
    */
   public static final GrammaticalRelation NOMINAL_SUBJECT =
@@ -354,7 +354,7 @@ public class EnglishGrammaticalRelations {
    * The "nominal passive subject" grammatical relation.  A nominal passive
    * subject is a subject of a passive which is an noun phrase.
    *
-   * Example: <br/>
+   * Example: <br>
    * "Dole was defeated by Clinton" &rarr; {@code nsubjpass}(defeated, Dole)
    * <p>
    * This pattern recognizes basic (non-coordinated) examples.  The coordinated
@@ -372,8 +372,8 @@ public class EnglishGrammaticalRelations {
    * The "clausal subject" grammatical relation.  A clausal subject is
    * a subject which is a clause.<p>
    * <br>
-   * Examples: (subject is "what she said" in both examples) <br/>
-   * "What she said makes sense" &rarr; {@code csubj}(makes, said) <br/>
+   * Examples: (subject is "what she said" in both examples) <br>
+   * "What she said makes sense" &rarr; {@code csubj}(makes, said) <br>
    * "What she said is untrue" &rarr; {@code csubj}(untrue, said)
    */
   public static final GrammaticalRelation CLAUSAL_SUBJECT =
@@ -387,7 +387,7 @@ public class EnglishGrammaticalRelations {
    * The "clausal passive subject" grammatical relation.  A clausal passive subject is
    * a subject of a passive verb which is a clause.<p>
    * <br>
-   * Example: (subject is "that she lied") <br/>
+   * Example: (subject is "that she lied") <br>
    * "That she lied was suspected by everyone" &rarr; {@code csubjpass}(suspected, lied)
    */
   public static final GrammaticalRelation CLAUSAL_PASSIVE_SUBJECT =
@@ -405,10 +405,10 @@ public class EnglishGrammaticalRelations {
    * of a clause is an complement of the VP which is the predicate
    * of that clause.<p>
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "She gave me a raise" &rarr;
    * {@code comp}(gave, me),
-   * {@code comp}(gave, a raise) <br/>
+   * {@code comp}(gave, a raise) <br>
    * "I like to swim" &rarr;
    * {@code comp}(like, to swim)
    */
@@ -422,7 +422,7 @@ public class EnglishGrammaticalRelations {
    * of a clause is an object of the VP which is the predicate
    * of that clause.<p>
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "She gave me a raise" &rarr;
    * {@code obj}(gave, me),
    * {@code obj}(gave, raise)
@@ -437,7 +437,7 @@ public class EnglishGrammaticalRelations {
    * the verb; the direct object of a clause or VP is the direct object of
    * the head predicate of that clause.
    *
-   * Example: <br/>
+   * Example: <br>
    * "She gave me a raise" &rarr;
    * {@code dobj}(gave, raise) <br>
    * Note that dobj can also be assigned by the conversion of rel in the postprocessing.
@@ -512,7 +512,7 @@ public class EnglishGrammaticalRelations {
    * of the verb; the indirect object of a clause is the indirect
    * object of the VP which is the predicate of that clause.
    * <br>
-   * Example:  <br/>
+   * Example:  <br>
    * "She gave me a raise" &rarr;
    * {@code iobj}(gave, me)
    */
@@ -534,7 +534,7 @@ public class EnglishGrammaticalRelations {
    * We here define cases of VBG quasi-prepositions like "including",
    * "concerning", etc. as instances of pobj (unlike the Penn Treebank).
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "I sat on the chair" &rarr;
    * {@code pobj}(on, chair)
    * <br>
@@ -575,11 +575,11 @@ public class EnglishGrammaticalRelations {
    * a preposition is the head of the sentence following the preposition,
    * or the preposition head of the PP.
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "We have no useful information on whether users are at risk" &arr;
-   * {@code pcomp}(on, are) <br/>
+   * {@code pcomp}(on, are) <br>
    * "They heard about you missing classes." &arr;
-   * {@code pcomp}(about, missing) <br/>
+   * {@code pcomp}(about, missing) <br>
    * It is warmer in Greece than in Italy &arr;
    * {@code pcomp}(than, in)
    */
@@ -625,11 +625,11 @@ public class EnglishGrammaticalRelations {
    * also classify the complement of causative "have" (She had him arrested)
    * in this category.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "He says that you like to swim" &rarr;
-   * {@code ccomp}(says, like) <br/>
+   * {@code ccomp}(says, like) <br>
    * "I am certain that he did it" &rarr;
-   * {@code ccomp}(certain, did) <br/>
+   * {@code ccomp}(certain, did) <br>
    * "I admire the fact that you are honest" &rarr;
    * {@code ccomp}(fact, honest)
    */
@@ -680,9 +680,9 @@ public class EnglishGrammaticalRelations {
    * (Mainly "TO-clause" are recognized, but also some VBG like "stop eating")
    * <br>
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "I like to swim" &rarr;
-   * {@code xcomp}(like, swim) <br/>
+   * {@code xcomp}(like, swim) <br>
    * "I am ready to leave" &rarr;
    * {@code xcomp}(ready, leave)
    */
@@ -733,9 +733,9 @@ public class EnglishGrammaticalRelations {
    * The "referent" grammatical relation.  A
    * referent of the Wh-word of a NP is  the relative word introducing the relative clause modifying the NP.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "I saw the book which you bought" &rarr;
-   * {@code ref}(book, which) <br/>
+   * {@code ref}(book, which) <br>
    * "I saw the book the cover of which you designed" &rarr;
    * {@code ref}(book, which)
    */
@@ -749,7 +749,7 @@ public class EnglishGrammaticalRelations {
    * This relation captures an existential there.
    * <br>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "There is a statue in the corner" &rarr;
    * {@code expl}(is, there)
    */
@@ -766,7 +766,7 @@ public class EnglishGrammaticalRelations {
    * complement of a clause is the adjectival complement of the VP which is
    * the predicate of that clause.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "She looks very beautiful" &rarr;
    * {@code acomp}(looks, beautiful)
    */
@@ -785,7 +785,7 @@ public class EnglishGrammaticalRelations {
    * VP); a modifier of a clause is an modifier of the VP which is
    * the predicate of that clause.<p>
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "Last night, I swam in the pool" &rarr;
    * {@code mod}(swam, in the pool),
    * {@code mod}(swam, last night)
@@ -799,9 +799,9 @@ public class EnglishGrammaticalRelations {
    * modifier of some predicates, such as a VP or (inverted) sentence is a clause modifying the verb
    * (temporal clauses, consequences, conditional clauses, etc.).
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "The accident happened as the night was falling" &rarr;
-   * {@code advcl}(happened, falling) <br/>
+   * {@code advcl}(happened, falling) <br>
    * "If you know who did it, you should tell the teacher" &rarr;
    * {@code advcl}(tell, know)
    */
@@ -853,7 +853,7 @@ public class EnglishGrammaticalRelations {
    * distinguish these from xcomp's. We can also recognize "to" clauses
    * introduced by "be VBN".
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "He talked to the president in order to secure the account" &rarr;
    * {@code purpcl}(talked, secure)
    */
@@ -866,9 +866,9 @@ public class EnglishGrammaticalRelations {
    * normally a verb.
    * <br>
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "I saw the man you love" &rarr;
-   * {@code rcmod}(man, love)  <br/>
+   * {@code rcmod}(man, love)  <br>
    * "I saw the book which you bought" &rarr;
    * {@code rcmod}(book, bought)
    */
@@ -891,7 +891,7 @@ public class EnglishGrammaticalRelations {
   * role with other clausal modifiers.
   * <br>
   * <br>
-  * Example: <br/>
+  * Example: <br>
   * "He says that you like to swim" &rarr;
   * {@code complm}(like, that)
   */
@@ -902,7 +902,7 @@ public class EnglishGrammaticalRelations {
    * For a complement clause, this will typically be "that" or "whether".
    * For an adverbial clause, the marker is typically a preposition like "while" or "although".
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "U.S. forces have been engaged in intense fighting after insurgents launched simultaneous attacks" &rarr;
    * {@code mark}(launched, after)
    */
@@ -918,13 +918,13 @@ public class EnglishGrammaticalRelations {
    * modifier of an NP is any adjectival phrase that serves to modify
    * the meaning of the NP.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Sam eats red meat" &rarr;
    * {@code amod}(meat, red) <br>
    * The relation amod is also used for multiword country adjectives, despite their
    * questionable treebank representation.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "the West German economy" &rarr;
    * {@code amod}(German, West),
    * {@code amod}(economy, German)
@@ -944,7 +944,7 @@ public class EnglishGrammaticalRelations {
    * modifier of an NP is any number phrase that serves to modify
    * the meaning of the NP.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Sam eats 3 sheep" &rarr;
    * {@code num}(sheep, 3)
    */
@@ -966,7 +966,7 @@ public class EnglishGrammaticalRelations {
    * The "compound number modifier" grammatical relation.  A compound number
    * modifier is a part of a number phrase or currency amount.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "I lost $ 3.2 billion" &rarr;
    * {@code number}($, billion)
    */
@@ -980,7 +980,7 @@ public class EnglishGrammaticalRelations {
    * The "quantifier phrase modifier" grammatical relation.  A quantifier
    * modifier is an element modifying the head of a QP constituent.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "About 200 people came to the party" &rarr;
    * {@code quantmod}(200, About)
    */
@@ -1004,7 +1004,7 @@ public class EnglishGrammaticalRelations {
    * VBZ instead of a POS.  TODO: remove that if a revised PTB is ever
    * released.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Oil price futures" &rarr;
    * {@code nn}(futures, oil),
    * {@code nn}(futures, price) <br>
@@ -1029,9 +1029,9 @@ public class EnglishGrammaticalRelations {
    * modifier of an NP is an NP that serves to modify
    * the meaning of the NP.  It includes parenthesized examples, as well as defining abbreviations.
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "Sam, my brother, eats red meat" &rarr;
-   * {@code appos}(Sam, brother) <br/>
+   * {@code appos}(Sam, brother) <br>
    * "Bill (John's cousin)" &rarr; {@code appos}(Bill, cousin).
    *
    * "The Australian Broadcasting Corporation (ABC)" &rarr;
@@ -1077,7 +1077,7 @@ public class EnglishGrammaticalRelations {
    * modifier of an NP, VP, or S is a S/VP[part] that serves to modify
    * the meaning of the NP or VP.
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "truffles picked during the spring are tasty" &rarr;
    * {@code vmod}(truffles, picked) <br>
    * "Bill picked Fred for the team demonstrating his incompetence" &rarr;
@@ -1115,9 +1115,9 @@ public class EnglishGrammaticalRelations {
    * modifier of a word is a (non-clausal) RB or ADVP that serves to modify
    * the meaning of the word.<p>
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "genetically modified food" &rarr;
-   * {@code advmod}(modified, genetically) <br/>
+   * {@code advmod}(modified, genetically) <br>
    * "less often" &rarr;
    * {@code advmod}(often, less)
    */
@@ -1144,9 +1144,9 @@ public class EnglishGrammaticalRelations {
    * The "negation modifier" grammatical relation.  The negation modifier
    * is the relation between a negation word and the word it modifies.
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "Bill is not a scientist" &rarr;
-   * {@code neg}(scientist, not) <br/>
+   * {@code neg}(scientist, not) <br>
    * "Bill doesn't drive" &rarr;
    * {@code neg}(drive, n't)
    */
@@ -1173,32 +1173,32 @@ public class EnglishGrammaticalRelations {
    * <li> A measure phrase, which is the relation between
    * the head of an ADJP/ADVP and the head of a measure-phrase modifying the ADJP/ADVP.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "The director is 65 years old" &rarr;
    * {@code npadvmod}(old, years)
    * </li>
    * <li> Noun phrases giving extent inside a VP which are not objects
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Shares eased a fraction" &rarr;
    * {@code npadvmod}(eased, fraction)
    * </li>
    * <li> Financial constructions involving an adverbial or PP-like NP, notably
    * the following construction where the NP means "per share"
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "IBM earned $ 5 a share" &rarr;
    * {@code npadvmod}($, share)
    * </li>
    * <li>Reflexives
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "The silence is itself significant" &rarr;
    * {@code npadvmod}(significant, itself)
    * </li>
    * <li>Certain other absolutive NP constructions.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "90% of Australians like him, the most of any country" &rarr;
    * {@code npadvmod}(like, most)
    * </ul>
@@ -1228,7 +1228,7 @@ public class EnglishGrammaticalRelations {
    * clause is an temporal modifier of the VP which is the
    * predicate of that clause.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Last night, I swam in the pool" &rarr;
    * {@code tmod}(swam, night)
    */
@@ -1254,9 +1254,9 @@ public class EnglishGrammaticalRelations {
    * as well as, rather than, instead of, but also;
    * such as, because of, all but, in addition to ....
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "dogs as well as cats" &rarr;
-   * {@code mwe}(well, as)<br/>
+   * {@code mwe}(well, as)<br>
    * {@code mwe}(well, as)<br>
    * "fewer than 700 bottles" &rarr;
    * {@code mwe}(than, fewer)
@@ -1280,7 +1280,7 @@ public class EnglishGrammaticalRelations {
    * The "measure-phrase" grammatical relation. The measure-phrase is the relation between
    * the head of an ADJP/ADVP and the head of a measure-phrase modifying the ADJP/ADVP.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "The director is 65 years old" &rarr;
    * {@code measure}(old, years)
    *
@@ -1296,8 +1296,8 @@ public class EnglishGrammaticalRelations {
   /**
    * The "determiner" grammatical relation.
    *
-   * Examples: <br/>
-   * "The man is here" &rarr; {@code det}(man,the) <br/>
+   * Examples: <br>
+   * "The man is here" &rarr; {@code det}(man,the) <br>
    * "Which man do you prefer?" &rarr; {@code det}(man,which) <br>
    * (The ADVP match is because sometimes "a little" or "every time" is tagged
    * as an AVDVP with POS tags straight under it.)
@@ -1322,7 +1322,7 @@ public class EnglishGrammaticalRelations {
   /**
    * The "predeterminer" grammatical relation.
    * <p> <br>
-   * Example: <br/>
+   * Example: <br>
    * "All the boys are here" &rarr; {@code predet}(boys,all)
    */
   public static final GrammaticalRelation PREDETERMINER =
@@ -1336,7 +1336,7 @@ public class EnglishGrammaticalRelations {
   /**
    * The "preconjunct" grammatical relation.
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "Both the boys and the girls are here" &rarr; {@code preconj}(boys,both)
    */
   public static final GrammaticalRelation PRECONJUNCT =
@@ -1354,9 +1354,9 @@ public class EnglishGrammaticalRelations {
   /**
    * The "possession" grammatical relation between the possessum and the possessor.<p>
    * </p>
-   * Examples: <br/>
+   * Examples: <br>
    * "their offices" &rarr;
-   * {@code poss}(offices, their)<br/>
+   * {@code poss}(offices, their)<br>
    * "Bill 's clothes" &rarr;
    * {@code poss}(clothes, Bill)
    */
@@ -1376,7 +1376,7 @@ public class EnglishGrammaticalRelations {
    * The "possessive" grammatical relation.  This is the relation given to
    * 's (or ' with plurals).<p>
    * </p>
-   * Example: <br/>
+   * Example: <br>
    * "John's book" &rarr;
    * {@code possessive}(John, 's)
    */
@@ -1394,11 +1394,11 @@ public class EnglishGrammaticalRelations {
    * We also generate prep modifiers of PPs to account for treebank (PP PP PP) constructions
    * (from 1984 through 2002). <p>
    * <br>
-   * Examples: <br/>
+   * Examples: <br>
    * "I saw a cat in a hat" &rarr;
-   * {@code prep}(cat, in) <br/>
+   * {@code prep}(cat, in) <br>
    * "I saw a cat with a telescope" &rarr;
-   * {@code prep}(saw, with) <br/>
+   * {@code prep}(saw, with) <br>
    * "He is responsible for meals" &rarr;
    * {@code prep}(responsible, for)
    */
@@ -1418,7 +1418,7 @@ public class EnglishGrammaticalRelations {
    * The "phrasal verb particle" grammatical relation.  The "phrasal verb particle"
    * relation identifies phrasal verb.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "They shut down the station." &rarr;
    * {@code prt}(shut, down)
    */
@@ -1434,8 +1434,8 @@ public class EnglishGrammaticalRelations {
    * and other sentential elements, such as a sentential parenthetical, a sentence after a ":" or a ";", when two
    * sentences are juxtaposed next to each other without any coordinator or subordinator, etc.
    * <p> <br>
-   * Examples: <br/>
-   * "The guy, John said, left early in the morning." &rarr; {@code parataxis}(left,said) <br/>
+   * Examples: <br>
+   * "The guy, John said, left early in the morning." &rarr; {@code parataxis}(left,said) <br>
    * "
    */
   public static final GrammaticalRelation PARATAXIS =
@@ -1460,7 +1460,7 @@ public class EnglishGrammaticalRelations {
    * The "goes with" grammatical relation.  This corresponds to use of the GW (goes with) part-of-speech tag
    * in the recent Penn Treebanks. It marks partial words that should be combined with some other word. <p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "They come here with out legal permission." &rarr;
    * {@code goeswith}(out, with)
    */
@@ -1483,7 +1483,7 @@ public class EnglishGrammaticalRelations {
    * The "agent" grammatical relation. The agent of a passive VP
    * is the complement introduced by "by" and doing the action.<p>
    * <br>
-   * Example: <br/>
+   * Example: <br>
    * "The man has been killed by the police" &rarr;
    * {@code agent}(killed, police)
    */

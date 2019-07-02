@@ -1922,9 +1922,9 @@ public class StringUtils  {
   /**
    * Strip directory and suffix from filename.  Like Unix 'basename'.
    *
-   * Example: {@code getBaseName("/u/wcmac/foo.txt", "") ==> "foo.txt"}<br/>
-   * Example: {@code getBaseName("/u/wcmac/foo.txt", ".txt") ==> "foo"}<br/>
-   * Example: {@code getBaseName("/u/wcmac/foo.txt", ".pdf") ==> "foo.txt"}<br/>
+   * Example: {@code getBaseName("/u/wcmac/foo.txt", "") ==> "foo.txt"}<br>
+   * Example: {@code getBaseName("/u/wcmac/foo.txt", ".txt") ==> "foo"}<br>
+   * Example: {@code getBaseName("/u/wcmac/foo.txt", ".pdf") ==> "foo.txt"}<br>
    */
   public static String getBaseName(String fileName, String suffix) {
     return getBaseName(fileName, suffix, "/");
@@ -1933,8 +1933,8 @@ public class StringUtils  {
   /**
    * Strip directory and suffix from the given name.  Like Unix 'basename'.
    *
-   * Example: {@code getBaseName("/tmp/foo/bar/foo", "", "/") ==> "foo"}<br/>
-   * Example: {@code getBaseName("edu.stanford.nlp", "", "\\.") ==> "nlp"}<br/>
+   * Example: {@code getBaseName("/tmp/foo/bar/foo", "", "/") ==> "foo"}<br>
+   * Example: {@code getBaseName("edu.stanford.nlp", "", "\\.") ==> "nlp"}<br>
    */
   public static String getBaseName(String fileName, String suffix, String sep) {
     String[] elts = fileName.split(sep);
