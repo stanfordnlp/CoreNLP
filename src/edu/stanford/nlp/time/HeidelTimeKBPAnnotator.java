@@ -81,7 +81,7 @@ public class HeidelTimeKBPAnnotator implements Annotator {
     this.put("*NL*", "\n");
   }};
   public void annotate(CoreMap document) throws IOException {
-    try {
+    //try {
 
       //--Create Input File
       //(create file)
@@ -115,11 +115,11 @@ public class HeidelTimeKBPAnnotator implements Annotator {
       if (outputResults) {
         System.out.println(timexAnns);
       }
-    } catch (Exception e) {
-      e.printStackTrace(System.err);
-      System.err.println("error running HeidelTime on this doc: "+document.get(CoreAnnotations.DocIDAnnotation.class));
+    //} catch (Exception e) {
+      //e.printStackTrace(System.err);
+      //System.err.println("error running HeidelTime on this doc: "+document.get(CoreAnnotations.DocIDAnnotation.class));
 //      throw e;
-    }
+    //}
   }
 
   private Optional<String> getPubDate(CoreMap document) {
