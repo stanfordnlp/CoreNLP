@@ -11,6 +11,7 @@ public class TokenizerFrenchBenchmarkITest  extends TokenizerBenchmarkTestCase {
         Properties props = new Properties();
         props.put("annotators", "tokenize,ssplit,mwt");
         props.put("tokenize.language", "fr");
+        props.put("tokenize.options", "splitContractions=false,splitCompounds=false");
         props.put("mwt.mappingFile",
                 "/u/nlp/data/stanford-corenlp/test/data/mwt/fr-mwt.tsv");
         props.put("mwt.pos.model", "/u/nlp/data/stanford-corenlp/test/models/fr-mwt.tagger");
@@ -22,7 +23,7 @@ public class TokenizerFrenchBenchmarkITest  extends TokenizerBenchmarkTestCase {
 
     public void testOnDev() {
         goldFilePath = "/u/nlp/data/stanford-corenlp/test/data/tokenize/fr_gsd-ud-dev.conllu";
-        runTest("dev", "fr", 0.90);
+        runTest("dev", "fr", 0.985);
     }
 
 }
