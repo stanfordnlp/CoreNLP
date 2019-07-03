@@ -45,7 +45,7 @@ public class DependencyParserITest extends TestCase {
   }
 
   // Lower because we're evaluating on PTB + extraDevTest, not just PTB
-  private static final double EnglishUdLas = 88.78652574464478; // was until Sept 2016: 88.72648417258083;
+  private static final double EnglishUdLas = 88.84021929576669; // was until Sept 2016: 88.72648417258083;
 
   /**
    * Test that the NN dependency parser performance doesn't change.
