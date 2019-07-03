@@ -222,53 +222,53 @@ class FrenchLexer {
     "\1\4\1\1\10\4\1\13\3\4\1\14\4\4\1\10"+
     "\1\15\3\4\1\14\10\4\1\16\1\17\1\2\1\6"+
     "\1\20\2\14\5\21\2\4\1\22\1\10\115\0\10\4"+
-    "\1\23\7\4\2\0\1\23\1\14\1\23\1\4\1\14"+
-    "\1\0\1\4\1\24\2\4\1\24\3\4\1\0\4\4"+
-    "\1\24\5\4\1\24\2\4\1\0\22\4\2\0\74\4"+
+    "\1\23\7\4\2\0\1\23\1\24\1\23\1\4\1\24"+
+    "\1\0\1\4\1\25\2\4\1\25\3\4\1\0\4\4"+
+    "\1\25\5\4\1\25\2\4\1\0\22\4\2\0\74\4"+
     "\1\0\3\4\1\0\1\21\2\0\1\4\2\0\1\4"+
     "\5\0\1\21\14\4\1\0\1\23\1\4\1\0\6\4"+
     "\20\0\1\4\1\12\3\0\1\4\2\0\1\4\5\0"+
     "\3\4\3\0\1\20\1\14\14\4\2\0\20\4\1\0"+
-    "\1\20\1\21\2\0\1\21\71\0\1\25\41\0\7\4"+
-    "\1\26\4\4\1\0\1\4\1\26\1\0\30\27\13\0"+
-    "\13\4\2\24\4\0\11\4\1\26\6\4\1\0\1\26"+
-    "\1\0\30\27\1\0\12\4\1\0\10\4\1\0\6\4"+
+    "\1\20\1\21\2\0\1\21\71\0\1\26\41\0\7\4"+
+    "\1\27\4\4\1\0\1\4\1\27\1\0\30\30\13\0"+
+    "\13\4\2\25\4\0\11\4\1\27\6\4\1\0\1\27"+
+    "\1\0\30\30\1\0\12\4\1\0\10\4\1\0\6\4"+
     "\5\0\12\4\3\0\1\13\2\4\1\0\1\4\1\0"+
-    "\2\4\1\0\1\13\4\4\1\0\2\4\6\0\2\30"+
-    "\2\0\2\30\4\0\1\12\1\13\3\4\2\0\1\4"+
+    "\2\4\1\0\1\13\4\4\1\0\2\4\6\0\2\31"+
+    "\2\0\2\31\4\0\1\12\1\13\3\4\2\0\1\4"+
     "\1\0\1\4\1\0\2\13\1\4\2\0\10\4\1\0"+
     "\1\11\14\4\1\0\2\21\1\0\1\21\42\0\1\7"+
-    "\42\0\2\4\2\0\2\4\21\0\4\4\4\0\2\27"+
-    "\2\0\2\31\2\27\2\32\2\0\2\32\4\27\1\0"+
-    "\3\33\10\0\1\33\2\4\12\0\2\4\3\0\2\4"+
-    "\11\0\6\4\3\0\2\27\2\0\2\31\2\27\2\32"+
-    "\2\0\2\32\4\27\1\0\4\4\2\0\6\4\1\0"+
+    "\42\0\2\4\2\0\2\4\21\0\4\4\4\0\2\30"+
+    "\2\0\2\32\2\30\2\33\2\0\2\33\4\30\1\0"+
+    "\3\34\10\0\1\34\2\4\12\0\2\4\3\0\2\4"+
+    "\11\0\6\4\3\0\2\30\2\0\2\32\2\30\2\33"+
+    "\2\0\2\33\4\30\1\0\4\4\2\0\6\4\1\0"+
     "\2\4\2\0\6\4\7\0\1\13\1\4\1\0\2\4"+
-    "\3\0\1\4\2\0\1\13\1\27\11\0\1\13\1\4"+
+    "\3\0\1\4\2\0\1\13\1\30\11\0\1\13\1\4"+
     "\2\0\1\4\1\0\1\4\1\0\2\13\1\4\3\0"+
     "\1\20\2\4\3\0\1\11\6\4\2\0\1\21\2\0"+
-    "\1\10\16\0\2\34\2\0\1\35\35\0\2\4\2\0"+
-    "\2\27\1\0\7\36\2\37\10\36\4\37\1\36\4\4"+
-    "\10\0\14\27\2\34\23\0\2\4\2\0\2\27\1\0"+
-    "\2\4\10\36\11\0\14\27\2\4\1\0\2\4\1\0"+
+    "\1\10\16\0\2\35\2\0\1\36\35\0\2\4\2\0"+
+    "\2\30\1\0\7\37\2\40\10\37\4\40\1\37\4\4"+
+    "\10\0\14\30\2\35\23\0\2\4\2\0\2\30\1\0"+
+    "\2\4\10\37\11\0\14\30\2\4\1\0\2\4\1\0"+
     "\4\4\7\0\1\13\4\4\1\0\1\13\2\4\3\0"+
     "\1\13\2\4\1\13\3\4\1\0\1\13\2\4\4\0"+
     "\2\4\7\0\2\11\6\4\2\0\2\21\20\0\1\4"+
     "\1\10\33\0\2\4\6\0\2\4\42\0\2\4\3\0"+
-    "\1\27\12\0\2\4\2\40\6\0\1\41\1\13\3\4"+
-    "\2\0\1\4\1\41\2\0\1\41\1\13\2\4\1\41"+
+    "\1\30\12\0\2\4\2\41\6\0\1\42\1\13\3\4"+
+    "\2\0\1\4\1\42\2\0\1\42\1\13\2\4\1\42"+
     "\1\0\1\4\3\0\1\20\2\0\1\4\5\0\4\4"+
-    "\1\0\1\21\41\0\2\4\54\0\2\4\23\0\1\41"+
-    "\1\0\1\4\1\0\1\4\1\0\3\41\1\4\6\0"+
-    "\1\34\1\11\2\4\2\0\1\34\33\0\2\4\13\0"+
-    "\3\34\1\4\33\0\2\4\15\0\1\41\1\4\1\0"+
-    "\1\41\1\0\3\41\2\4\3\0\2\34\1\4\35\0"+
-    "\2\4\40\0\2\4\10\0\1\4\1\0\1\41\1\42"+
-    "\1\4\2\0\3\34\33\0\2\4\34\0\2\4\4\0"+
-    "\1\4\1\42\1\41\1\42\1\4\1\0\1\34\1\4"+
-    "\1\34\33\0\2\4\32\0\2\4\2\0\1\4\2\42"+
-    "\1\4\1\0\1\34\32\0\2\4\32\0\2\4\1\0"+
-    "\2\42\32\0\2\4\32\0\2\4\32\0\2\4\32\0"+
+    "\1\0\1\21\41\0\2\4\54\0\2\4\23\0\1\42"+
+    "\1\0\1\4\1\0\1\4\1\0\3\42\1\4\6\0"+
+    "\1\35\1\11\2\4\2\0\1\35\33\0\2\4\13\0"+
+    "\3\35\1\4\33\0\2\4\15\0\1\42\1\4\1\0"+
+    "\1\42\1\0\3\42\2\4\3\0\2\35\1\4\35\0"+
+    "\2\4\40\0\2\4\10\0\1\4\1\0\1\42\1\43"+
+    "\1\4\2\0\3\35\33\0\2\4\34\0\2\4\4\0"+
+    "\1\4\1\43\1\42\1\43\1\4\1\0\1\35\1\4"+
+    "\1\35\33\0\2\4\32\0\2\4\2\0\1\4\2\43"+
+    "\1\4\1\0\1\35\32\0\2\4\32\0\2\4\1\0"+
+    "\2\43\32\0\2\4\32\0\2\4\32\0\2\4\32\0"+
     "\2\4\32\0\2\4\32\0\2\4\32\0\2\4\32\0"+
     "\2\4\32\0\2\4\32\0\2\4\32\0\2\4\32\0"+
     "\2\4\32\0\2\4\32\0\2\4\32\0\2\4\32\0"+
@@ -13188,7 +13188,7 @@ class FrenchLexer {
               return getNext();
           }
             }
-          case 35: break;
+          case 36: break;
           case 2: 
             { if (normalizeOtherBrackets) {
                     return getNext(openparen, yytext()); }
@@ -13196,7 +13196,7 @@ class FrenchLexer {
                     return getNext();
                   }
             }
-          case 36: break;
+          case 37: break;
           case 3: 
             { if (escapeForwardSlashAsterisk) {
                     return getNext(LexerUtils.escapeChar(yytext(), '/'), yytext()); }
@@ -13204,11 +13204,11 @@ class FrenchLexer {
                     return getNext();
                   }
             }
-          case 37: break;
+          case 38: break;
           case 4: 
             { return getNext();
             }
-          case 38: break;
+          case 39: break;
           case 5: 
             { if (tokenizeNLs) {
                       return getNext(NEWLINE_TOKEN, yytext()); // js: for tokenizing carriage returns
@@ -13216,7 +13216,7 @@ class FrenchLexer {
                       prevWordAfter.append(yytext());
                   }
             }
-          case 39: break;
+          case 40: break;
           case 6: 
             { if (normalizeOtherBrackets) {
                     return getNext(closeparen, yytext()); }
@@ -13224,7 +13224,7 @@ class FrenchLexer {
                     return getNext();
                   }
             }
-          case 40: break;
+          case 41: break;
           case 7: 
             { if (ptb3Dashes) {
                             return getNext(ptbmdash, yytext()); }
@@ -13232,17 +13232,17 @@ class FrenchLexer {
                             return getNext();
                           }
             }
-          case 41: break;
+          case 42: break;
           case 8: 
             { if (invertible) {
                      prevWordAfter.append(yytext());
                   }
             }
-          case 42: break;
+          case 43: break;
           case 9: 
             { return handleEllipsis(yytext());
             }
-          case 43: break;
+          case 44: break;
           case 10: 
             { if (yylength() >= 3 && yylength() <= 4 && ptb3Dashes) {
 	            return getNext(ptbmdash, yytext());
@@ -13251,16 +13251,16 @@ class FrenchLexer {
                     return getNext(asciiDash(origTxt), origTxt);
 		  }
             }
-          case 44: break;
+          case 45: break;
           case 11: 
             { return normalizeFractions(yytext());
             }
-          case 45: break;
+          case 46: break;
           case 12: 
             { final String origTxt = yytext();
-                          return getNext(LexerUtils.asciiQuotes(origTxt), origTxt);
+                          return getNext();
             }
-          case 46: break;
+          case 47: break;
           case 13: 
             { if (normalizeOtherBrackets) {
                     return getNext(closebrace, yytext()); }
@@ -13268,7 +13268,7 @@ class FrenchLexer {
                     return getNext();
                   }
             }
-          case 47: break;
+          case 48: break;
           case 14: 
             { if (normalizeParentheses) {
                     return getNext(openparen, yytext()); }
@@ -13276,7 +13276,7 @@ class FrenchLexer {
                     return getNext();
                   }
             }
-          case 48: break;
+          case 49: break;
           case 15: 
             { if (normalizeParentheses) {
                     return getNext(closeparen, yytext()); }
@@ -13284,7 +13284,7 @@ class FrenchLexer {
                     return getNext();
                   }
             }
-          case 49: break;
+          case 50: break;
           case 16: 
             { if (escapeForwardSlashAsterisk) {
                     return getNext(LexerUtils.escapeChar(yytext(), '*'), yytext()); }
@@ -13292,13 +13292,13 @@ class FrenchLexer {
                     return getNext();
                   }
             }
-          case 50: break;
+          case 51: break;
           case 17: 
             { String txt = yytext();
                   if (DEBUG) { LOGGER.info("Used {EMOJI} to recognize " + txt); }
                   return getNext(txt, txt);
             }
-          case 51: break;
+          case 52: break;
           case 18: 
             { if (normalizeOtherBrackets) {
                     return getNext(openbrace, yytext()); }
@@ -13306,26 +13306,31 @@ class FrenchLexer {
                     return getNext();
                   }
             }
-          case 52: break;
+          case 53: break;
           case 19: 
             // lookahead expression with fixed lookahead length
             zzMarkedPos = Character.offsetByCodePoints
                 (zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzMarkedPos, -1);
             { return getNext();
             }
-          case 53: break;
+          case 54: break;
           case 20: 
+            { final String origTxt = yytext();
+                          return getNext(LexerUtils.asciiQuotes(origTxt), origTxt);
+            }
+          case 55: break;
+          case 21: 
             { final String origTxt = yytext();
                           return getNext(origTxt, origTxt, CONTR_ANNOTATION);
             }
-          case 54: break;
-          case 21: 
+          case 56: break;
+          case 22: 
             { if (!noSGML) {
                             return getNext();
 			  }
             }
-          case 55: break;
-          case 22: 
+          case 57: break;
+          case 23: 
             { // this one should only match if we're basically at the end of file
 			  // since the last one matches two things, even newlines
                           String s;
@@ -13338,18 +13343,18 @@ class FrenchLexer {
                           }
 	                  return getNext(s, yytext());
             }
-          case 56: break;
-          case 23: 
+          case 58: break;
+          case 24: 
             { final String origTxt = yytext();
                           return getNext(asciiDash(origTxt), origTxt, COMPOUND_ANNOTATION);
             }
-          case 57: break;
-          case 24: 
+          case 59: break;
+          case 25: 
             { final String origTxt = yytext();
                           return getNext(asciiDash(origTxt), origTxt);
             }
-          case 58: break;
-          case 25: 
+          case 60: break;
+          case 26: 
             // general lookahead, find correct zzMarkedPos
             { int zzFState = 3;
               int zzFPos = zzStartRead;
@@ -13379,8 +13384,8 @@ class FrenchLexer {
                           String txt = LexerUtils.asciiQuotes(origTxt);
                           return getNext(asciiDash(txt), origTxt);
             }
-          case 59: break;
-          case 26: 
+          case 61: break;
+          case 27: 
             // general lookahead, find correct zzMarkedPos
             { int zzFState = 1;
               int zzFPos = zzStartRead;
@@ -13408,8 +13413,8 @@ class FrenchLexer {
             }
             { return getNext();
             }
-          case 60: break;
-          case 27: 
+          case 62: break;
+          case 28: 
             // general lookahead, find correct zzMarkedPos
             { int zzFState = 7;
               int zzFPos = zzStartRead;
@@ -13437,8 +13442,8 @@ class FrenchLexer {
             }
             { return getNext();
             }
-          case 61: break;
-          case 28: 
+          case 63: break;
+          case 29: 
             { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
                             txt = LexerUtils.escapeChar(txt, '/');
@@ -13446,19 +13451,19 @@ class FrenchLexer {
                           }
                           return getNext(txt, yytext());
             }
-          case 62: break;
-          case 29: 
+          case 64: break;
+          case 30: 
             { return getNormalizedAmpNext();
             }
-          case 63: break;
-          case 30: 
+          case 65: break;
+          case 31: 
             // lookahead expression with fixed lookahead length
             zzMarkedPos = Character.offsetByCodePoints
                 (zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzMarkedPos, -2);
             { return getNext();
             }
-          case 64: break;
-          case 31: 
+          case 66: break;
+          case 32: 
             // general lookahead, find correct zzMarkedPos
             { int zzFState = 5;
               int zzFPos = zzStartRead;
@@ -13494,20 +13499,20 @@ class FrenchLexer {
                           }
 	                  return getNext(s, yytext());
             }
-          case 65: break;
-          case 32: 
+          case 67: break;
+          case 33: 
             { yypushback(3) ; return getNext();
             }
-          case 66: break;
-          case 33: 
+          case 68: break;
+          case 34: 
             { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
                             txt = LexerUtils.escapeChar(txt, '/');
                           }
                           return getNext(txt, yytext());
             }
-          case 67: break;
-          case 34: 
+          case 69: break;
+          case 35: 
             { String txt = yytext();
 			  if (normalizeParentheses) {
 			    txt = txt.replaceAll("\\(", openparen);
@@ -13515,7 +13520,7 @@ class FrenchLexer {
 			  }
 			  return getNext(txt, yytext());
             }
-          case 68: break;
+          case 70: break;
           default:
             zzScanError(ZZ_NO_MATCH);
         }

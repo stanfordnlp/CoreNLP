@@ -552,7 +552,7 @@ cannot			{ yypushback(3) ; return getNext(); }
 {ACRO}/{SPACENL}	{ return getNext(); }
 {DBLQUOT} |
 {QUOTES}		{ final String origTxt = yytext();
-                          return getNext(LexerUtils.asciiQuotes(origTxt), origTxt);
+                          return getNext();
 			}
 
 {PHONE}                 { String txt = yytext();
