@@ -228,10 +228,10 @@ public class EntityMentionsAnnotator implements Annotator {
     for (String labelWithProb : labelsWithProbs) {
       entityLabelProbVals.put(labelWithProb, 1.1);
     }
+
     // go through each token, see if you can find a smaller prob value for that label
     for (CoreLabel token : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {
-      Map<String,Double> labelProbsForToken =
-          token.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
+      Map<String,Double> labelProbsForToken = token.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
       for (String label : labelProbsForToken.keySet()) {
         if (entityLabelProbVals.containsKey(label) && labelProbsForToken.get(label) < entityLabelProbVals.get(label))
           entityLabelProbVals.put(label, labelProbsForToken.get(label));
@@ -329,8 +329,7 @@ public class EntityMentionsAnnotator implements Annotator {
 
     // set the entity mention confidence
     for (CoreMap entityMention : allEntityMentions) {
-      HashMap<String,Double> entityMentionLabelProbVals =
-          determineEntityMentionConfidences(entityMention);
+      HashMap<String,Double> entityMentionLabelProbVals = determineEntityMentionConfidences(entityMention);
       entityMention.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, entityMentionLabelProbVals);
     }
 
@@ -354,7 +353,7 @@ public class EntityMentionsAnnotator implements Annotator {
 
     // Iterate over tokens...
     for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
-      List<CoreMap> sentenceMentions = new ArrayList<CoreMap>();
+      List<CoreMap> sentenceMentions = new ArrayList<>();
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       Integer totalTokensOffset = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
       for (int i = 0; i < tokens.size(); ++i) {

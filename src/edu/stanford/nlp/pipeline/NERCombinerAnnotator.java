@@ -205,13 +205,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    *
    * @param properties Properties for the TokensRegexNER sub-annotator
    */
-  public void setUpFineGrainedNER(Properties properties) {
+  private void setUpFineGrainedNER(Properties properties) {
     // set up fine grained ner
     this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
     if (this.applyFineGrained) {
       String fineGrainedPrefix = "ner.fine.regexner";
       Properties fineGrainedProps =
-          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+".", true);
+          PropertiesUtils.extractPrefixedProperties(properties, fineGrainedPrefix+ '.', true);
       // explicity set fine grained ner default here
       if (!fineGrainedProps.containsKey("ner.fine.regexner.mapping"))
         fineGrainedProps.setProperty("ner.fine.regexner.mapping", DefaultPaths.DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS);
@@ -225,13 +225,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    *
    * @param properties Properties for the TokensRegexNER sub-annotator
    */
-  public void setUpAdditionalRulesNER(Properties properties) {
+  private void setUpAdditionalRulesNER(Properties properties) {
     this.applyAdditionalRules =
-        (!properties.getProperty("ner.additional.regexner.mapping","").equals(""));
+        (!properties.getProperty("ner.additional.regexner.mapping", "").isEmpty());
     if (this.applyAdditionalRules) {
       String additionalRulesPrefix = "ner.additional.regexner";
       Properties additionalRulesProps =
-          PropertiesUtils.extractPrefixedProperties(properties, additionalRulesPrefix+".", true);
+          PropertiesUtils.extractPrefixedProperties(properties, additionalRulesPrefix+ '.', true);
       // build the additional rules ner TokensRegexNERAnnotator
       additionalRulesNERAnnotator = new TokensRegexNERAnnotator(additionalRulesPrefix, additionalRulesProps);
     }
@@ -242,13 +242,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    *
    * @param properties Properties for the TokensRegex sub-annotator
    */
-  public void setUpTokensRegexRules(Properties properties) {
+  private void setUpTokensRegexRules(Properties properties) {
     this.applyTokensRegexRules =
-        (!properties.getProperty("ner.additional.tokensregex.rules","").equals(""));
+        (!properties.getProperty("ner.additional.tokensregex.rules", "").isEmpty());
     if (this.applyTokensRegexRules) {
       String tokensRegexRulesPrefix = "ner.additional.tokensregex";
       Properties tokensRegexRulesProps =
-          PropertiesUtils.extractPrefixedProperties(properties, tokensRegexRulesPrefix+".", true);
+          PropertiesUtils.extractPrefixedProperties(properties, tokensRegexRulesPrefix+ '.', true);
       // build the additional rules ner TokensRegexNERAnnotator
       tokensRegexAnnotator = new TokensRegexAnnotator(tokensRegexRulesPrefix, tokensRegexRulesProps);
     }
@@ -259,12 +259,12 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    *
    * @param properties Properties for the EntityMentionsAnnotator sub-annotator
    */
-  public void setUpEntityMentionBuilding(Properties properties) {
+  private void setUpEntityMentionBuilding(Properties properties) {
     this.buildEntityMentions = PropertiesUtils.getBool(properties, "ner.buildEntityMentions", true);
     if (this.buildEntityMentions) {
       String entityMentionsPrefix = "ner.entitymentions";
       Properties entityMentionsProps =
-          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+".", true);
+          PropertiesUtils.extractPrefixedProperties(properties, entityMentionsPrefix+ '.', true);
       // pass language info to the entity mention annotator
       entityMentionsProps.setProperty("ner.entitymentions.language", language.name());
       entityMentionsAnnotator = new EntityMentionsAnnotator(entityMentionsPrefix, entityMentionsProps);
@@ -348,9 +348,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
 
     // if entity mentions should be built, run that
-    if (this.buildEntityMentions)
+    if (this.buildEntityMentions) {
       entityMentionsAnnotator.annotate(annotation);
-
+    }
   }
 
   /** convert Spanish tag content of older models **/
@@ -463,7 +463,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     HashSet<Class<? extends CoreAnnotation>> nerRequirementsSatisfied =
