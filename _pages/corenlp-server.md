@@ -36,13 +36,27 @@ You should see a website similar to [corenlp.run](http://corenlp.run/), with an 
 wget --post-data 'The quick brown fox jumped over the lazy dog.' 'localhost:9000/?properties={"annotators":"tokenize,ssplit,pos","outputFormat":"json"}' -O -
 ```
 
+Or if you have one of those fancy IPv6 stacks, then you can instead use:
+
+```bash
+wget --post-data 'The quick brown fox jumped over the lazy dog.' 'http://[::]:9000/?properties={"annotators":"tokenize,ssplit,pos","outputFormat":"json"}' -O -
+```
+
 Or if you only have or prefer [curl](https://curl.haxx.se/):
 
 ```bash
 curl --data 'The quick brown fox jumped over the lazy dog.' 'http://localhost:9000/?properties={{ "{%" }}22annotators%22%3A%22tokenize%2Cssplit%2Cpos%22%2C%22outputFormat%22%3A%22json%22}' -o -
 ```
 
-The rest of this document: describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server.
+Or finally, here's a minimal Python program that interfaces with this
+endpoint using the `requests` library:
+
+```python
+import requests
+print(requests.post('http://[::]:9000/?properties={"annotators":"tokenize,ssplit,pos","outputFormat":"json"}', data = {'data':'The quick brown fox jumped over the lazy dog.'}).text)
+```
+
+The rest of this document: describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server. If you're using Python or another program language, we don't suggest that you start with the minimal example above, but rather first look through [available other language APIs](other-languages.html) that uses the CoreNLP server.
 
 
 ## API Documentation
