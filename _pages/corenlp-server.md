@@ -56,7 +56,7 @@ import requests
 print(requests.post('http://[::]:9000/?properties={"annotators":"tokenize,ssplit,pos","outputFormat":"json"}', data = {'data':'The quick brown fox jumped over the lazy dog.'}).text)
 ```
 
-The rest of this document: describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server. If you're using Python or another program language, we don't suggest that you start with the minimal example above, but rather first look through [available other language APIs](other-languages.html) that uses the CoreNLP server.
+The rest of this document: describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server. If you're using Python or another programming language, we don't suggest that you start with the minimal example above, but rather first look through [available other language APIs](other-languages.html) that use the CoreNLP server.
 
 
 ## API Documentation
