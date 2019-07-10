@@ -28,6 +28,7 @@ import edu.stanford.nlp.util.StringUtils;
  * The default fields currently output are:
  *
  * <table>
+ * <caption>Output fields</caption>
  *   <tr>
  *     <td>Field Number</td>
  *     <td>Field Name</td>

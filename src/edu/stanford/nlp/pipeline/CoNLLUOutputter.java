@@ -18,6 +18,7 @@ import edu.stanford.nlp.util.CoreMap;
  * <p>The fields currently output are:</p>
  *
  * <table>
+ * <caption>Output fields</caption>
  *   <tr>
  *     <td>Field Number</td>
  *     <td>Field Name</td>

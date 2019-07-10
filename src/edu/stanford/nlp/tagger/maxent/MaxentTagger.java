@@ -85,28 +85,28 @@ import java.text.DecimalFormat;
  * <h3>Using the Java API</h3>
  *
  * <dl>
- * <dt>
+ * <dt style="margin-top:2em">
  * A MaxentTagger can be made with a constructor taking as argument the location of parameter files for a trained tagger: </dt>
  * <dd> {@code MaxentTagger tagger = new MaxentTagger("models/left3words-wsj-0-18.tagger"); }</dd>
- * <br>
- * <dt>A default path is provided for the location of the tagger on the Stanford NLP machines:</dt>
+ * <dt style="margin-top:2em">
+ * A default path is provided for the location of the tagger on the Stanford NLP machines:</dt>
  * <dd>{@code MaxentTagger tagger = new MaxentTagger(DEFAULT_NLP_GROUP_MODEL_PATH); }</dd>
- * <br>
- * <dt>If you set the NLP_DATA_HOME environment variable,
+ * <dt style="margin-top:2em">
+ * If you set the NLP_DATA_HOME environment variable,
  * DEFAULT_NLP_GROUP_MODEL_PATH will instead point to the directory
  * given in NLP_DATA_HOME.</dt>
- * <br>
- * <dt>To tag a List of HasWord and get a List of TaggedWord, you can use one of: </dt>
+ * <dt style="margin-top:2em">
+ * To tag a List of HasWord and get a List of TaggedWord, you can use one of: </dt>
  * <dd>{@code List<TaggedWord> taggedSentence = tagger.tagSentence(List<? extends HasWord> sentence)}</dd>
  * <dd>{@code List<TaggedWord> taggedSentence = tagger.apply(List<? extends HasWord> sentence)}</dd>
- * <br>
- * <dt>To tag a list of sentences and get back a list of tagged sentences:
+ * <dt style="margin-top:2em">
+ * To tag a list of sentences and get back a list of tagged sentences:
  * <dd>{@code List taggedList = tagger.process(List sentences)}</dd>
- * <br>
- * <dt>To tag a String of text and to get back a String with tagged words:</dt>
+ * <dt style="margin-top:2em">
+ * To tag a String of text and to get back a String with tagged words:</dt>
  * <dd> {@code String taggedString = tagger.tagString("Here's a tagged string.")}</dd>
- * <br>
- * <dt>To tag a string of <i>correctly tokenized</i>, whitespace-separated words and get a string of tagged words back:</dt>
+ * <dt style="margin-top:2em">
+ * To tag a string of <i>correctly tokenized</i>, whitespace-separated words and get a string of tagged words back:</dt>
  * <dd> {@code String taggedString = tagger.tagTokenizedString("Here 's a tagged string .")}</dd>
  * </dl>
  *

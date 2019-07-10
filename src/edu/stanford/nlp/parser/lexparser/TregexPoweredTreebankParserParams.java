@@ -28,7 +28,7 @@ import java.util.Map;
  * and label matching trees in some way. For example, a <em>coord</em>
  * feature might have an annotation behavior which searches for
  * coordinating noun phrases and labels the associated constituent
- * with a suffix <tt>-coordinating</tt>.
+ * with a suffix <code>-coordinating</code>.
  *
  * The "search" in this process is conducted via Tregex, and the
  * actual annotation is done through execution of an arbitrary
@@ -55,9 +55,9 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
    * {@link #annotations}.
    *
    * It is a collection of <em>features:</em> a map from feature name
-   * to behavior, where each behavior is a tuple <tt>(t, f)</tt>.
-   * <tt>t</tt> is a Tregex pattern which matches subtrees
-   * corresponding to the feature, and <tt>f</tt> is a function which
+   * to behavior, where each behavior is a tuple <code>(t, f)</code>.
+   * <code>t</code> is a Tregex pattern which matches subtrees
+   * corresponding to the feature, and <code>f</code> is a function which
    * accepts such matches and generates an annotation which the matched
    * subtree should be given.
    *
@@ -71,9 +71,9 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
    * annotated.
    *
    * It is a collection of <em>features:</em> a map from feature name
-   * to behavior, where each behavior is a tuple <tt>(t, f)</tt>.
-   * <tt>t</tt> is a string form of a TregexPattern which matches
-   * subtrees corresponding to the feature, and <tt>f</tt> is a
+   * to behavior, where each behavior is a tuple <code>(t, f)</code>.
+   * <code>t</code> is a string form of a TregexPattern which matches
+   * subtrees corresponding to the feature, and <code>f</code> is a
    * function which accepts such matches and generates an annotation
    * which the matched subtree should be given.
    *

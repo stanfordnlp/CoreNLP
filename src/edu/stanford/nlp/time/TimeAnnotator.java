@@ -30,8 +30,8 @@ import java.util.Set;
  * <blockquote>{@code annotation.set(CoreAnnotations.DocDateAnnotation.class, "2013-07-14");}</blockquote>
  * <p>
  * <br>
- * <b>Input annotations</b>
  * <table border="1">
+ *   <caption><b>Input annotations</b></caption>
  *   <tr>
  *     <th>Annotation</th>
  *     <th>Type</th>
@@ -102,8 +102,8 @@ import java.util.Set;
  *
  * <p>
  * <br>
- * <b>Output annotations</b>
  * <table border="1">
+ *   <caption><b>Output annotations</b></caption>
  *   <tr>
  *     <th>Annotation</th>
  *     <th>Type</th>

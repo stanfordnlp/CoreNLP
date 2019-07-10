@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 
 /** 
  * This class wraps another Treebank, and will vend trees that passed
- * a Filter<Tree>.
+ * a Filter&lt;Tree&gt;.
  *
  *  @author John Bauer
  */
