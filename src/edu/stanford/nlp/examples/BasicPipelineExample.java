@@ -6,6 +6,7 @@ import edu.stanford.nlp.ie.util.*;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.*;
 import edu.stanford.nlp.trees.*;
+
 import java.util.*;
 
 
@@ -17,6 +18,8 @@ public class BasicPipelineExample {
       "After eating some escargot for the first time, Joe said, \"That was delicious!\" " +
       "He sent a postcard to his sister Jane Smith. " +
       "After hearing about Joe's trip, Jane decided she might go to France one day.";
+
+  private BasicPipelineExample() { } // static main
 
   public static void main(String[] args) {
     // set up pipeline properties
