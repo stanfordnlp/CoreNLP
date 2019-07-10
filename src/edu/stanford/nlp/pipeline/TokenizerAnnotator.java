@@ -40,10 +40,10 @@ public class TokenizerAnnotator implements Annotator  {
     Unspecified(null, null, "invertible,ptb3Escaping=true"),
     Arabic     ("ar", null, ""),
     Chinese    ("zh", null, ""),
-    Spanish    ("es", "SpanishTokenizer", "invertible,ptb3Escaping=true,splitAll=true"),
+    Spanish    ("es", "SpanishTokenizer", "splitAll=false"),
     English    ("en", "PTBTokenizer", "invertible,ptb3Escaping=true"),
-    German     ("de", null, "invertible,ptb3Escaping=true"),
-    French     ("fr", "FrenchTokenizer", ""),
+    German     ("de", null, "ptb3Escaping=false,splitHyphenated=true"),
+    French     ("fr", "FrenchTokenizer", "splitCompounds=false,splitContractions=false"),
     Whitespace (null, "WhitespaceTokenizer", "");
 
     private final String abbreviation;

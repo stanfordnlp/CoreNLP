@@ -10,7 +10,6 @@ public class TokenizerSpanishBenchmarkITest extends TokenizerBenchmarkTestCase {
         Properties props = new Properties();
         props.put("annotators", "tokenize,ssplit,mwt");
         props.put("tokenize.language", "es");
-        props.put("tokenize.options", "splitAll=false");
         props.put("mwt.mappingFile",
                   "/u/nlp/data/stanford-corenlp/test/data/mwt/es-mwt.tsv");
         pipeline = new StanfordCoreNLP(props);
