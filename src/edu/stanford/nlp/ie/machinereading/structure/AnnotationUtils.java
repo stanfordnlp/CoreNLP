@@ -232,12 +232,12 @@ public class AnnotationUtils  {
     newSent.set(CoreAnnotations.DocIDAnnotation.class, sentence.get(CoreAnnotations.DocIDAnnotation.class));
 
     // deep copy of all mentions lists
-    List<EntityMention> ents = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
-    if(ents != null) newSent.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, new ArrayList<>(ents));
-    List<RelationMention> rels = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-    if(rels != null) newSent.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, new ArrayList<>(rels));
-    List<EventMention> evs = sentence.get(MachineReadingAnnotations.EventMentionsAnnotation.class);
-    if(evs != null) newSent.set(MachineReadingAnnotations.EventMentionsAnnotation.class, new ArrayList<>(evs));
+    List<EntityMention> ents = getEntityMentions( sentence );
+    if(ents.size() > 0) newSent.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, new ArrayList<>(ents));
+    List<RelationMention> rels = getRelationMentions( sentence );
+    if(rels.size() > 0) newSent.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, new ArrayList<>(rels));
+    List<EventMention> evs = getEventMentions( sentence );
+    if(evs.size() > 0) newSent.set(MachineReadingAnnotations.EventMentionsAnnotation.class, new ArrayList<>(evs));
 
     return newSent;
   }
@@ -255,13 +255,11 @@ public class AnnotationUtils  {
    * Returns a list containing a relation of type UNRELATED if this sentence contains no relation between the entities.
    */
   public static List<RelationMention> getRelations(RelationMentionFactory factory, CoreMap sentence, ExtractionObject... args) {
-    List<RelationMention> relationMentions = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
+    List<RelationMention> relationMentions = getRelationMentions( sentence );
     List<RelationMention> matchingRelationMentions = new ArrayList<>();
-    if (relationMentions != null) {
-      for (RelationMention rel : relationMentions) {
-        if (rel.argsMatch(args)) {
-          matchingRelationMentions.add(rel);
-        }
+    for (RelationMention rel : relationMentions) {
+      if (rel.argsMatch(args)) {
+        matchingRelationMentions.add(rel);
       }
     }
     if (matchingRelationMentions.size() == 0) {
@@ -275,9 +273,8 @@ public class AnnotationUtils  {
    * Use with care. This is an expensive call due to getAllUnrelatedRelations, which creates all non-existing relations between all entity mentions
    */
   public static List<RelationMention> getAllRelations(RelationMentionFactory factory, CoreMap sentence, boolean createUnrelatedRelations) {
-    List<RelationMention> relationMentions = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-    List<RelationMention> allRelations = new ArrayList<>();
-    if(relationMentions != null) allRelations.addAll(relationMentions);
+    List<RelationMention> relationMentions = getRelationMentions( sentence );
+    List<RelationMention> allRelations = new ArrayList<>( relationMentions );
     if(createUnrelatedRelations){
       allRelations.addAll(getAllUnrelatedRelations(factory, sentence, true));
     }
@@ -286,31 +283,29 @@ public class AnnotationUtils  {
 
   public static List<RelationMention> getAllUnrelatedRelations(RelationMentionFactory factory, CoreMap sentence, boolean checkExisting) {
 
-    List<RelationMention> relationMentions = (checkExisting ? sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class) : null);
-    List<EntityMention> entityMentions = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
+    List<RelationMention> relationMentions = (checkExisting ? getRelationMentions( sentence ) : null);
+    List<EntityMention> entityMentions = getEntityMentions( sentence );
     List<RelationMention> nonRelations = new ArrayList<>();
 
     //
     // scan all possible arguments
     //
-    if(entityMentions != null){
-      for(int i = 0; i < entityMentions.size(); i ++){
-        for(int j = 0; j < entityMentions.size(); j ++){
-          if(i == j) continue;
-          EntityMention arg1 = entityMentions.get(i);
-          EntityMention arg2 = entityMentions.get(j);
-          boolean match = false;
-          if(relationMentions != null){
-            for (RelationMention rel : relationMentions) {
-              if (rel.argsMatch(arg1, arg2)) {
-                match = true;
-                break;
-              }
+    for(int i = 0; i < entityMentions.size(); i ++){
+      for(int j = 0; j < entityMentions.size(); j ++){
+        if(i == j) continue;
+        EntityMention arg1 = entityMentions.get(i);
+        EntityMention arg2 = entityMentions.get(j);
+        boolean match = false;
+        if(relationMentions != null){
+          for (RelationMention rel : relationMentions) {
+            if (rel.argsMatch(arg1, arg2)) {
+              match = true;
+              break;
             }
           }
-          if (match == false) {
-          	nonRelations.add(RelationMention.createUnrelatedRelation(factory, arg1,arg2));
-          }
+        }
+        if (match == false) {
+          nonRelations.add(RelationMention.createUnrelatedRelation(factory, arg1,arg2));
         }
       }
     }
@@ -336,7 +331,7 @@ public class AnnotationUtils  {
     l.addAll(args);
   }
 
-  public List<EntityMention> getEntityMentions(CoreMap sent) {
+  public static List<EntityMention> getEntityMentions(CoreMap sent) {
     return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class));
   }
 
@@ -358,7 +353,7 @@ public class AnnotationUtils  {
     l.addAll(args);
   }
 
-  public List<RelationMention> getRelationMentions(CoreMap sent) {
+  public static List<RelationMention> getRelationMentions(CoreMap sent) {
     return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class));
   }
 
@@ -380,7 +375,7 @@ public class AnnotationUtils  {
     l.addAll(args);
   }
 
-  public List<EventMention> getEventMentions(CoreMap sent) {
+  public static List<EventMention> getEventMentions(CoreMap sent) {
     return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.EventMentionsAnnotation.class));
   }
 
@@ -429,12 +424,10 @@ public class AnnotationUtils  {
     sb.append("\"" + StringUtils.join(tokens, " ") + "\"");
     sb.append("\n");
 
-    List<RelationMention> relationMentions = sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-    if(relationMentions != null){
-      for (RelationMention rel : relationMentions) {
-        sb.append("\n");
-        sb.append(rel);
-      }
+    List<RelationMention> relationMentions = getRelationMentions( sent );
+    for (RelationMention rel : relationMentions) {
+      sb.append("\n");
+      sb.append(rel);
     }
 
     // TODO: add entity and event mentions
