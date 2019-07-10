@@ -34,7 +34,7 @@ public class BasicPipelineExample {
     // examples
 
     // 10th token of the document
-    CoreLabel token = document.tokens().get(10);
+    CoreLabel token = document.tokens().get(9);
     System.out.println("Example: token");
     System.out.println(token);
     System.out.println();
