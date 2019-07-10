@@ -46,7 +46,6 @@ import javax.servlet.http.HttpServletResponse;
  * <p>
  * By default, it also sets following request attributes, that helps to
  * determine nature of request downstream.
- * </p>
  * <ul>
  * <li><b>cors.isCorsRequest:</b> Flag to determine if request is a CORS
  * request. Set to <code>true</code> if CORS request; <code>false</code>
@@ -57,6 +56,7 @@ import javax.servlet.http.HttpServletResponse;
  * <li><b>cors.request.headers:</b> Request headers sent as
  * 'Access-Control-Request-Headers' header, for pre-flight request.</li>
  * </ul>
+ * </p>
  * 
  * @author Mohit Soni
  * @see <a href="http://www.w3.org/TR/cors/">CORS specification</a>

@@ -26,7 +26,6 @@ import java.util.function.Function;
  *
  * Some general flags are described here
  * <table border="1">
- * <caption>Flags for sequence classifiers</caption>
  * <tr>
  * <td><b>Property Name</b></td>
  * <td><b>Type</b></td>

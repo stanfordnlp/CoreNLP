@@ -100,7 +100,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * expression
  *
  * <blockquote>
- *{@code {} [<subj {} | <agent {}] & @ {} }
+ *{@code {} [&lt;subj {} | &lt;agent {}] &amp; @ {} }
  * </blockquote>
  *
  * matches a node that is either the dep of a subj or agent relationship and
@@ -118,13 +118,13 @@ import edu.stanford.nlp.util.logging.Redwood;
  * descendants:
  *
  * <blockquote>
- * {@code {}=a >> {word:foo} : {}=a >> {word:bar} }
+ * {@code {}=a &gt;&gt; {word:foo} : {}=a &gt;&gt; {word:bar} }
  * </blockquote>
  *
  * This pattern could have been written
  *
  * <blockquote>
- * {@code {}=a >> {word:foo} >> {word:bar} }
+ * {@code {}=a &gt;&gt; {word:foo} &gt;&gt; {word:bar} }
  * </blockquote>
  *
  * However, for more complex examples, partitioning a pattern may make
@@ -147,12 +147,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * Named nodes that refer back to previously named nodes need not have a node
  * description -- this is known as "backreferencing".  In this case, the
  * expression will match only when all instances of the same name get matched to
- * the same node.</p>
- * <p>
- * For example:
- * <blockquote>
- * {@code {} >dobj ({} > {}=foo) >mod ({} > {}=foo) }
- * </blockquote>
+ * the same node.  For example: the pattern
+ * {@code {} &gt;dobj ({} &gt; {}=foo) &gt;mod ({} &gt; {}=foo) }
  * will match a graph in which there are two nodes, {@code X} and
  * {@code Y}, for which {@code X} is the grandparent of
  * {@code Y} and there are two paths to {@code Y}, one of

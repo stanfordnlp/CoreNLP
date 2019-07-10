@@ -422,8 +422,6 @@ ABBREV2 = {ABBREV4}\.
 PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{2,4}[\- \u00A0])?[0-9]{2,4}[\- \u00A0])[0-9]{3,4}[\- \u00A0]?[0-9]{3,5}|((\+\+?)?[0-9]{2,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 
-SPACE_SEP_NUM = [0-9]{1,2}([ ][0-9]{3})+
-
 FAKEDUCKFEET = <<|>>
 OPBRAC = [<\[]|&lt;
 CLBRAC = [>\]]|&gt;
@@ -564,7 +562,6 @@ cannot			{ yypushback(3) ; return getNext(); }
 			  }
 			  return getNext(txt, yytext());
 			}
-{SPACE_SEP_NUM}         { return getNext(yytext(),yytext()); }
 0x7f		{ if (invertible) {
                      prevWordAfter.append(yytext());
                   } }

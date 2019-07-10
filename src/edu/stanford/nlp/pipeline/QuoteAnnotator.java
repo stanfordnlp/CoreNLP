@@ -59,7 +59,7 @@ import java.util.regex.Pattern;
  * </ul>
  *
  * The annotator adds a QuotationsAnnotation to the Annotation
- * which returns a List&lt;CoreMap&gt; that
+ * which returns a List<CoreMap> that
  * contain the following information:
  * <ul>
  *  <li>CharacterOffsetBeginAnnotation</li>

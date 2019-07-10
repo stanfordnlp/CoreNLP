@@ -86,6 +86,7 @@ public class FrenchTreebankLanguagePack extends AbstractTreebankLanguagePack {
    *
    * @return The sentence final punctuation tags
    */
+  @Override
   public String[] sentenceFinalPunctuationWords() {
     return frenchSFPunctWords;
   }
@@ -121,16 +122,19 @@ public class FrenchTreebankLanguagePack extends AbstractTreebankLanguagePack {
   /**
    * Returns the extension of treebank files for this treebank.
    */
+  @Override
   public String treebankFileExtension() {
     return "xml";
   }
 
   /** {@inheritDoc} */
+  @Override
   public HeadFinder headFinder() {
     return new FrenchHeadFinder(this);
   }
   
   /** {@inheritDoc} */
+  @Override
   public HeadFinder typedDependencyHeadFinder() {
     return new FrenchHeadFinder(this);
   }

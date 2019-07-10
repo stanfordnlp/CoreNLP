@@ -62,13 +62,6 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *     <li>@See FileBackedCache#readNextObject</li>
  *   </ul>
  *
- * <p>
- * Note: this class currently does not work on Windows.  The issue is that the FileBackedCache
- * locks each file it uses before accessing the file, and then it opens new FileOutputStreams
- * in order to write to cache files.  On Windows, you cannot open a second stream to a file
- * once you have already locked it.
- * </p>
- *
  * @param <KEY> The key to cache by
  * @param <T> The object to cache
  *
