@@ -11,7 +11,7 @@ public class TokenizerGermanBenchmarkITest extends TokenizerBenchmarkTestCase {
         props.put("annotators", "tokenize,ssplit,mwt");
         props.put("tokenize.language", "de");
         props.put("mwt.mappingFile",
-                "/u/nlp/data/stanford-corenlp/test/data/mwt/de-mwt.tsv");
+                "edu/stanford/nlp/models/mwt/german/german-mwt.tsv");
         pipeline = new StanfordCoreNLP(props);
     }
 
