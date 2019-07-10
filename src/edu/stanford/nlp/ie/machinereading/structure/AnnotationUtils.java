@@ -1,5 +1,4 @@
 package edu.stanford.nlp.ie.machinereading.structure; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,16 +18,18 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Utilities to manipulate Annotations storing datasets or sentences with Machine Reading info
- * @author Mihai
  *
+ * @author Mihai
  */
 public class AnnotationUtils  {
 
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotationUtils.class);
+  /** A logger for this class. */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotationUtils.class);
+
   private AnnotationUtils() {} // only static methods
 
   /**
@@ -54,7 +55,8 @@ public class AnnotationUtils  {
   }
 
   /**
-   * Converts the labels of all entity mentions in this dataset to sequences of CoreLabels
+   * Converts the labels of all entity mentions in this dataset to sequences of CoreLabels.
+   *
    * @param dataset
    * @param annotationsToSkip
    * @param useSubTypes
@@ -73,7 +75,8 @@ public class AnnotationUtils  {
   }
 
   /**
-   * Converts the labels of all entity mentions in this sentence to sequences of CoreLabels
+   * Converts the labels of all entity mentions in this sentence to sequences of CoreLabels.
+   *
    * @param sentence
    * @param addAnswerAnnotation
    * @param annotationsToSkip
@@ -188,9 +191,7 @@ public class AnnotationUtils  {
       sents = new ArrayList<>();
       dataset.set(CoreAnnotations.SentencesAnnotation.class, sents);
     }
-    for(CoreMap sentence: sentences){
-      sents.add(sentence);
-    }
+    sents.addAll(sentences);
   }
 
   /**
@@ -218,7 +219,8 @@ public class AnnotationUtils  {
 
   /**
    * Deep copy of the sentence: we create new entity/relation/event lists here.
-   * However,  we do not deep copy the ExtractionObjects themselves!
+   * However, we do not deep copy the ExtractionObjects themselves!
+   *
    * @param sentence
    */
   public static Annotation sentenceDeepMentionCopy(Annotation sentence) {
@@ -233,11 +235,11 @@ public class AnnotationUtils  {
 
     // deep copy of all mentions lists
     List<EntityMention> ents = getEntityMentions( sentence );
-    if(ents.size() > 0) newSent.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, new ArrayList<>(ents));
+    if( ! ents.isEmpty()) newSent.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, new ArrayList<>(ents));
     List<RelationMention> rels = getRelationMentions( sentence );
-    if(rels.size() > 0) newSent.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, new ArrayList<>(rels));
+    if ( ! rels.isEmpty()) newSent.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, new ArrayList<>(rels));
     List<EventMention> evs = getEventMentions( sentence );
-    if(evs.size() > 0) newSent.set(MachineReadingAnnotations.EventMentionsAnnotation.class, new ArrayList<>(evs));
+    if ( ! evs.isEmpty()) newSent.set(MachineReadingAnnotations.EventMentionsAnnotation.class, new ArrayList<>(evs));
 
     return newSent;
   }
@@ -262,7 +264,7 @@ public class AnnotationUtils  {
         matchingRelationMentions.add(rel);
       }
     }
-    if (matchingRelationMentions.size() == 0) {
+    if (matchingRelationMentions.isEmpty()) {
       matchingRelationMentions.add(RelationMention.createUnrelatedRelation(factory, args));
     }
     return matchingRelationMentions;
@@ -304,7 +306,7 @@ public class AnnotationUtils  {
             }
           }
         }
-        if (match == false) {
+        if ( ! match) {
           nonRelations.add(RelationMention.createUnrelatedRelation(factory, arg1,arg2));
         }
       }
@@ -379,7 +381,7 @@ public class AnnotationUtils  {
     return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.EventMentionsAnnotation.class));
   }
 
-	/**
+  /**
    * Prepare a string for printing in a spreadsheet for Mechanical Turk input.
    * @param s String to be formatted
    * @return String string enclosed in quotes with other quotes escaped, and with better formatting for readability by Turkers.
@@ -409,10 +411,10 @@ public class AnnotationUtils  {
    */
   public static String getTextContent(CoreMap sent, Span span) {
     List<CoreLabel> tokens = sent.get(CoreAnnotations.TokensAnnotation.class);
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     assert(span != null);
-    for(int i = span.start(); i < span.end(); i ++){
-      if(i > span.start()) buf.append(" ");
+    for (int i = span.start(); i < span.end(); i ++){
+      if (i > span.start()) buf.append(' ');
       buf.append(tokens.get(i).word());
     }
     return buf.toString();
@@ -421,7 +423,7 @@ public class AnnotationUtils  {
   public static String sentenceToString(CoreMap sent) {
     StringBuilder sb = new StringBuilder(512);
     List<CoreLabel> tokens = sent.get(CoreAnnotations.TokensAnnotation.class);
-    sb.append("\"" + StringUtils.join(tokens, " ") + "\"");
+    sb.append("\"").append(StringUtils.join(tokens, " ")).append("\"");
     sb.append("\n");
 
     List<RelationMention> relationMentions = getRelationMentions( sent );
@@ -436,7 +438,7 @@ public class AnnotationUtils  {
   }
 
   public static String tokensAndNELabelsToString(CoreMap sentence) {
-    StringBuffer os = new StringBuffer();
+    StringBuilder os = new StringBuilder();
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if(tokens != null){
       boolean first = true;
@@ -444,7 +446,7 @@ public class AnnotationUtils  {
         if(! first) os.append(" ");
         os.append(token.word());
         if(token.ner() != null && ! token.ner().equals("O")){
-          os.append("/" + token.ner());
+          os.append("/").append(token.ner());
         }
         first = false;
       }
@@ -454,13 +456,13 @@ public class AnnotationUtils  {
 
   public static String datasetToString(CoreMap dataset){
     List<CoreMap> sents = dataset.get(CoreAnnotations.SentencesAnnotation.class);
-    StringBuffer b = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     if(sents != null){
       for(CoreMap sent: sents){
-        b.append(sentenceToString(sent));
+        sb.append(sentenceToString(sent));
       }
     }
-    return b.toString();
+    return sb.toString();
   }
 
   /*
@@ -479,11 +481,11 @@ public class AnnotationUtils  {
   */
 
   public static String tokensToString(List<CoreLabel> tokens) {
-    StringBuffer os = new StringBuffer();
+    StringBuilder os = new StringBuilder();
     boolean first = true;
     for(CoreLabel t: tokens){
       if(! first) os.append(" ");
-      os.append(t.word() + "{" + t.beginPosition() + ", " + t.endPosition() + "}");
+      os.append(t.word()).append("{").append(t.beginPosition()).append(", ").append(t.endPosition()).append("}");
       first = false;
     }
     return os.toString();
@@ -529,7 +531,6 @@ public class AnnotationUtils  {
   public static List<CoreMap> readSentencesFromFile(String path) throws IOException, ClassNotFoundException {
     Annotation doc = (Annotation) IOUtils.readObjectFromFile(path);
     return doc.get(CoreAnnotations.SentencesAnnotation.class);
-
   }
 
 }
