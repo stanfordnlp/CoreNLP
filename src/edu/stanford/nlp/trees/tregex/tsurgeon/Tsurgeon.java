@@ -72,22 +72,22 @@ import java.util.stream.Collectors;
  * Here's the simplest form of invocation on a single Tree:
  * <pre>
  * Tree t = Tree.valueOf("(ROOT (S (NP (NP (NNP Bank)) (PP (IN of) (NP (NNP America)))) (VP (VBD called)) (. .)))");
- * TregexPattern pat = TregexPattern.compile("NP <1 (NP << Bank) <2 PP=remove");
+ * TregexPattern pat = TregexPattern.compile("NP &lt;1 (NP &lt;&lt; Bank) &lt;2 PP=remove");
  * TsurgeonPattern surgery = Tsurgeon.parseOperation("excise remove remove");
  * Tsurgeon.processPattern(pat, surgery, t).pennPrint();
  * </pre>
  * <p>
  * Here is another sample invocation:
  * <pre>
- * TregexPattern matchPattern = TregexPattern.compile("SQ=sq < (/^WH/ $++ VP)");
- * List<TsurgeonPattern> ps = new ArrayList<TsurgeonPattern>();
+ * TregexPattern matchPattern = TregexPattern.compile("SQ=sq &lt; (/^WH/ $++ VP)");
+ * List&lt;TsurgeonPattern&gt; ps = new ArrayList&lt;TsurgeonPattern&gt;();
  *
  * TsurgeonPattern p = Tsurgeon.parseOperation("relabel sq S");
  *
  * ps.add(p);
  *
  * Treebank lTrees;
- * List<Tree> result = Tsurgeon.processPatternOnTrees(matchPattern,Tsurgeon.collectOperations(ps),lTrees);
+ * List&lt;Tree&gt; result = Tsurgeon.processPatternOnTrees(matchPattern,Tsurgeon.collectOperations(ps),lTrees);
  * </pre>
  * <p>
  * <i>Note:</i> If you want to apply multiple surgery patterns, you
@@ -145,7 +145,7 @@ public class Tsurgeon  {
    *
    * <blockquote>
    * <code>
-   *    SBARQ=n1 < SQ=n2<br>
+   *    SBARQ=n1 &lt; SQ=n2<br>
    *    <br>
    *    excise n1 n1<br>
    *    relabel n2 S
@@ -269,7 +269,7 @@ public class Tsurgeon  {
    * <blockquote>
    * Tsurgeon: {@code adjoin (FOO (BAR@)) foo} <br>
    * Tregex: {@code B=foo} <br>
-   * Input: {@code (A (B 1 2))}
+   * Input: {@code (A (B 1 2))} <br>
    * Output: {@code (A (FOO (BAR 1 2)))}
    * </blockquote>
    * <p>
@@ -283,7 +283,7 @@ public class Tsurgeon  {
    * <blockquote>
    * <code>
    *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP"); <br>
-   *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) >-1 node");
+   *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) &gt;-1 node");
    * </code>
    * </blockquote>
    * <p>
@@ -292,7 +292,7 @@ public class Tsurgeon  {
    * <blockquote>
    * <code>
    *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP !&lt;&lt; foo"); <br>
-   *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) >-1 node");
+   *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) &gt;-1 node");
    * </code>
    * </blockquote>
    *
@@ -624,9 +624,9 @@ public class Tsurgeon  {
    * <p>
    * Example of use:
    * <p>
-   * <tt>
+   * <code>
    * TsurgeonPattern p = Tsurgeon.parseOperation("prune ed");
-   * </tt>
+   * </code>
    * @param operationString The operation to perform, as a text string
    * @return the operation pattern.
    */

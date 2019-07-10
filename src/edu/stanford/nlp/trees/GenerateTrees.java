@@ -30,7 +30,7 @@ import edu.stanford.nlp.util.Pair;
  * To run this script, run with an input file, an output file, and a
  * number of trees specified.
  * <br>
- * A more complete example is as following:
+ * A more complete example is as follows:
  * <code><pre>
 
 # This grammar produces trees that look like
@@ -61,7 +61,7 @@ relabel n3 Z
 </pre></code>
  *
  * <br>
- * You then run the problem with
+ * You then run the program with
  * <br>
  * <code>java edu.stanford.nlp.trees.GenerateTrees input.txt output.txt 100</code>
  *

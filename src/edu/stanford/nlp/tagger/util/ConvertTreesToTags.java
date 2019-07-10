@@ -21,6 +21,7 @@ import edu.stanford.nlp.tagger.io.TaggedFileRecord;
  * <p>
  * There are a few command line arguments available:
  * <table>
+ * <caption>Command line arguments</caption>
  * <tr>
  * <td> -output &lt;filename&gt; </td>
  * <td> File to output the data to </td>

@@ -23,6 +23,7 @@ import java.util.Set;
  *
  * <p>
  *   Configuration:
+ * </p>
  *   <ul>
  *     <li>{@code rules} - Name of file containing extraction rules
  *        (see {@link CoreMapExpressionExtractor} and {@link edu.stanford.nlp.ling.tokensregex.SequenceMatchRules}</li>
@@ -34,7 +35,6 @@ import java.util.Set;
  *     <li>{@code flatten} - whether to flatten matched expressions into individual tokens</li>
  *     <li>{@code matchedExpressionsAnnotationKey} - Annotation key where matched expressions are stored as a list</li>
  *   </ul>
- * </p>
  * <p>Multiple {@code TokensRegexAnnotator} can be configured using the same properties file by specifying
  * difference prefix for the {@code TokensRegexAnnotator}</p>
  *

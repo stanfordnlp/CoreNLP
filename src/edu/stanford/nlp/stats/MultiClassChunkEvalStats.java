@@ -17,7 +17,7 @@ import java.util.Properties;
  * Calculates phrase based precision and recall (similar to conlleval)
  * Handles various encodings such as IO, IOB, IOE, BILOU, SBEIO, []
  *
- * Usage: java edu.stanford.nlp.stats.MultiClassChunkEvalStats [options] < filename <br>
+ * Usage: java edu.stanford.nlp.stats.MultiClassChunkEvalStats [options] &lt; filename <br>
  *        -r - Do raw token based evaluation <br>
  *        -d delimiter - Specifies delimiter to use (instead of tab) <br>
  *        -b boundary - Boundary token (default is -X- ) <br>
