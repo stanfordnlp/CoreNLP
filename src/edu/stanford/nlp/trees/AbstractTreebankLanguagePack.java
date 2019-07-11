@@ -261,7 +261,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
 
   /**
    * Return the input Charset encoding for the Treebank.
-   * See documentation for the <code>Charset</code> class.
+   * See documentation for the {@code Charset} class.
    *
    * @return Name of Charset
    */
@@ -337,7 +337,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * Returns the basic syntactic category of a String.
    * This implementation basically truncates
    * stuff after an occurrence of one of the
-   * <code>labelAnnotationIntroducingCharacters()</code>.
+   * {@code labelAnnotationIntroducingCharacters()}.
    * However, there is also special case stuff to deal with
    * labelAnnotationIntroducingCharacters in category labels:
    * (i) if the first char is in this set, it's never truncated
@@ -422,7 +422,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * This normally involves truncating numerical coindexation
    * showing coreference, etc.  By 'function', this means
    * keeping, say, Penn Treebank functional tags or ICE phrasal functions,
-   * perhaps returning them as <code>category-function</code>.
+   * perhaps returning them as {@code category-function}.
    * <br>
    * This implementation strips numeric tags after label introducing
    * characters (assuming that non-numeric things are functional tags).
@@ -448,8 +448,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * Returns the index within this string of the last occurrence of a
    * isLabelAnnotationIntroducingCharacter which is followed by only
    * digits, corresponding to a numeric tag at the end of the string.
-   * Example: <code>lastIndexOfNumericTag("NP-TMP-1") returns
-   * 6</code>.
+   * Example: {@code lastIndexOfNumericTag("NP-TMP-1") returns
+   * 6}.
    *
    * @param category A String category
    * @return The index within this string of the last occurrence of a

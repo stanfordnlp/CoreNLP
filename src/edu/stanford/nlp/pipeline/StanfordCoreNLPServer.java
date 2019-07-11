@@ -905,7 +905,6 @@ public class StanfordCoreNLPServer implements Runnable {
         // Return error message.
         respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
         // Cancel the future if it's alive
-        //noinspection ConstantConditions
         if (completedAnnotationFuture != null) {  // just in case...
           completedAnnotationFuture.cancel(true);
         }
@@ -1505,7 +1504,7 @@ public class StanfordCoreNLPServer implements Runnable {
         new StanfordCoreNLP(props);
       } catch (Throwable ignored) {
         err("Could not pre-load annotators in server; encountered exception:");
-        ignored.printStackTrace();
+        err(ignored);
       }
     }
 
@@ -1517,12 +1516,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Run the server
     log("Starting server...");
-    if (server.ssl) {
-      server.run(credentials, req -> true, res -> {}, homepage, true, live);
-    } else {
-      server.run(credentials, req -> true, res -> {}, homepage, false, live);
-
-    }
+    server.run(credentials, req -> true, res -> {}, homepage, server.ssl, live);
   } // end main()
 
 }
