@@ -1,4 +1,5 @@
 package edu.stanford.nlp.ie.machinereading.structure; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,18 +19,16 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Utilities to manipulate Annotations storing datasets or sentences with Machine Reading info
- *
  * @author Mihai
+ *
  */
 public class AnnotationUtils  {
 
-  /** A logger for this class. */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotationUtils.class);
-
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotationUtils.class);
   private AnnotationUtils() {} // only static methods
 
   /**
@@ -55,8 +54,7 @@ public class AnnotationUtils  {
   }
 
   /**
-   * Converts the labels of all entity mentions in this dataset to sequences of CoreLabels.
-   *
+   * Converts the labels of all entity mentions in this dataset to sequences of CoreLabels
    * @param dataset
    * @param annotationsToSkip
    * @param useSubTypes
@@ -75,8 +73,7 @@ public class AnnotationUtils  {
   }
 
   /**
-   * Converts the labels of all entity mentions in this sentence to sequences of CoreLabels.
-   *
+   * Converts the labels of all entity mentions in this sentence to sequences of CoreLabels
    * @param sentence
    * @param addAnswerAnnotation
    * @param annotationsToSkip
@@ -191,7 +188,9 @@ public class AnnotationUtils  {
       sents = new ArrayList<>();
       dataset.set(CoreAnnotations.SentencesAnnotation.class, sents);
     }
-    sents.addAll(sentences);
+    for(CoreMap sentence: sentences){
+      sents.add(sentence);
+    }
   }
 
   /**
@@ -219,8 +218,7 @@ public class AnnotationUtils  {
 
   /**
    * Deep copy of the sentence: we create new entity/relation/event lists here.
-   * However, we do not deep copy the ExtractionObjects themselves!
-   *
+   * However,  we do not deep copy the ExtractionObjects themselves!
    * @param sentence
    */
   public static Annotation sentenceDeepMentionCopy(Annotation sentence) {
@@ -234,12 +232,12 @@ public class AnnotationUtils  {
     newSent.set(CoreAnnotations.DocIDAnnotation.class, sentence.get(CoreAnnotations.DocIDAnnotation.class));
 
     // deep copy of all mentions lists
-    List<EntityMention> ents = getEntityMentions( sentence );
-    if( ! ents.isEmpty()) newSent.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, new ArrayList<>(ents));
-    List<RelationMention> rels = getRelationMentions( sentence );
-    if ( ! rels.isEmpty()) newSent.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, new ArrayList<>(rels));
-    List<EventMention> evs = getEventMentions( sentence );
-    if ( ! evs.isEmpty()) newSent.set(MachineReadingAnnotations.EventMentionsAnnotation.class, new ArrayList<>(evs));
+    List<EntityMention> ents = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
+    if(ents != null) newSent.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, new ArrayList<>(ents));
+    List<RelationMention> rels = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
+    if(rels != null) newSent.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, new ArrayList<>(rels));
+    List<EventMention> evs = sentence.get(MachineReadingAnnotations.EventMentionsAnnotation.class);
+    if(evs != null) newSent.set(MachineReadingAnnotations.EventMentionsAnnotation.class, new ArrayList<>(evs));
 
     return newSent;
   }
@@ -257,14 +255,16 @@ public class AnnotationUtils  {
    * Returns a list containing a relation of type UNRELATED if this sentence contains no relation between the entities.
    */
   public static List<RelationMention> getRelations(RelationMentionFactory factory, CoreMap sentence, ExtractionObject... args) {
-    List<RelationMention> relationMentions = getRelationMentions( sentence );
+    List<RelationMention> relationMentions = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
     List<RelationMention> matchingRelationMentions = new ArrayList<>();
-    for (RelationMention rel : relationMentions) {
-      if (rel.argsMatch(args)) {
-        matchingRelationMentions.add(rel);
+    if (relationMentions != null) {
+      for (RelationMention rel : relationMentions) {
+        if (rel.argsMatch(args)) {
+          matchingRelationMentions.add(rel);
+        }
       }
     }
-    if (matchingRelationMentions.isEmpty()) {
+    if (matchingRelationMentions.size() == 0) {
       matchingRelationMentions.add(RelationMention.createUnrelatedRelation(factory, args));
     }
     return matchingRelationMentions;
@@ -275,8 +275,9 @@ public class AnnotationUtils  {
    * Use with care. This is an expensive call due to getAllUnrelatedRelations, which creates all non-existing relations between all entity mentions
    */
   public static List<RelationMention> getAllRelations(RelationMentionFactory factory, CoreMap sentence, boolean createUnrelatedRelations) {
-    List<RelationMention> relationMentions = getRelationMentions( sentence );
-    List<RelationMention> allRelations = new ArrayList<>( relationMentions );
+    List<RelationMention> relationMentions = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
+    List<RelationMention> allRelations = new ArrayList<>();
+    if(relationMentions != null) allRelations.addAll(relationMentions);
     if(createUnrelatedRelations){
       allRelations.addAll(getAllUnrelatedRelations(factory, sentence, true));
     }
@@ -285,29 +286,31 @@ public class AnnotationUtils  {
 
   public static List<RelationMention> getAllUnrelatedRelations(RelationMentionFactory factory, CoreMap sentence, boolean checkExisting) {
 
-    List<RelationMention> relationMentions = (checkExisting ? getRelationMentions( sentence ) : null);
-    List<EntityMention> entityMentions = getEntityMentions( sentence );
+    List<RelationMention> relationMentions = (checkExisting ? sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class) : null);
+    List<EntityMention> entityMentions = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
     List<RelationMention> nonRelations = new ArrayList<>();
 
     //
     // scan all possible arguments
     //
-    for(int i = 0; i < entityMentions.size(); i ++){
-      for(int j = 0; j < entityMentions.size(); j ++){
-        if(i == j) continue;
-        EntityMention arg1 = entityMentions.get(i);
-        EntityMention arg2 = entityMentions.get(j);
-        boolean match = false;
-        if(relationMentions != null){
-          for (RelationMention rel : relationMentions) {
-            if (rel.argsMatch(arg1, arg2)) {
-              match = true;
-              break;
+    if(entityMentions != null){
+      for(int i = 0; i < entityMentions.size(); i ++){
+        for(int j = 0; j < entityMentions.size(); j ++){
+          if(i == j) continue;
+          EntityMention arg1 = entityMentions.get(i);
+          EntityMention arg2 = entityMentions.get(j);
+          boolean match = false;
+          if(relationMentions != null){
+            for (RelationMention rel : relationMentions) {
+              if (rel.argsMatch(arg1, arg2)) {
+                match = true;
+                break;
+              }
             }
           }
-        }
-        if ( ! match) {
-          nonRelations.add(RelationMention.createUnrelatedRelation(factory, arg1,arg2));
+          if (match == false) {
+          	nonRelations.add(RelationMention.createUnrelatedRelation(factory, arg1,arg2));
+          }
         }
       }
     }
@@ -333,7 +336,7 @@ public class AnnotationUtils  {
     l.addAll(args);
   }
 
-  public static List<EntityMention> getEntityMentions(CoreMap sent) {
+  public List<EntityMention> getEntityMentions(CoreMap sent) {
     return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class));
   }
 
@@ -355,7 +358,7 @@ public class AnnotationUtils  {
     l.addAll(args);
   }
 
-  public static List<RelationMention> getRelationMentions(CoreMap sent) {
+  public List<RelationMention> getRelationMentions(CoreMap sent) {
     return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class));
   }
 
@@ -377,11 +380,11 @@ public class AnnotationUtils  {
     l.addAll(args);
   }
 
-  public static List<EventMention> getEventMentions(CoreMap sent) {
+  public List<EventMention> getEventMentions(CoreMap sent) {
     return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.EventMentionsAnnotation.class));
   }
 
-  /**
+	/**
    * Prepare a string for printing in a spreadsheet for Mechanical Turk input.
    * @param s String to be formatted
    * @return String string enclosed in quotes with other quotes escaped, and with better formatting for readability by Turkers.
@@ -411,10 +414,10 @@ public class AnnotationUtils  {
    */
   public static String getTextContent(CoreMap sent, Span span) {
     List<CoreLabel> tokens = sent.get(CoreAnnotations.TokensAnnotation.class);
-    StringBuilder buf = new StringBuilder();
+    StringBuffer buf = new StringBuffer();
     assert(span != null);
-    for (int i = span.start(); i < span.end(); i ++){
-      if (i > span.start()) buf.append(' ');
+    for(int i = span.start(); i < span.end(); i ++){
+      if(i > span.start()) buf.append(" ");
       buf.append(tokens.get(i).word());
     }
     return buf.toString();
@@ -423,13 +426,15 @@ public class AnnotationUtils  {
   public static String sentenceToString(CoreMap sent) {
     StringBuilder sb = new StringBuilder(512);
     List<CoreLabel> tokens = sent.get(CoreAnnotations.TokensAnnotation.class);
-    sb.append("\"").append(StringUtils.join(tokens, " ")).append("\"");
+    sb.append("\"" + StringUtils.join(tokens, " ") + "\"");
     sb.append("\n");
 
-    List<RelationMention> relationMentions = getRelationMentions( sent );
-    for (RelationMention rel : relationMentions) {
-      sb.append("\n");
-      sb.append(rel);
+    List<RelationMention> relationMentions = sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
+    if(relationMentions != null){
+      for (RelationMention rel : relationMentions) {
+        sb.append("\n");
+        sb.append(rel);
+      }
     }
 
     // TODO: add entity and event mentions
@@ -438,7 +443,7 @@ public class AnnotationUtils  {
   }
 
   public static String tokensAndNELabelsToString(CoreMap sentence) {
-    StringBuilder os = new StringBuilder();
+    StringBuffer os = new StringBuffer();
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if(tokens != null){
       boolean first = true;
@@ -446,7 +451,7 @@ public class AnnotationUtils  {
         if(! first) os.append(" ");
         os.append(token.word());
         if(token.ner() != null && ! token.ner().equals("O")){
-          os.append("/").append(token.ner());
+          os.append("/" + token.ner());
         }
         first = false;
       }
@@ -456,13 +461,13 @@ public class AnnotationUtils  {
 
   public static String datasetToString(CoreMap dataset){
     List<CoreMap> sents = dataset.get(CoreAnnotations.SentencesAnnotation.class);
-    StringBuilder sb = new StringBuilder();
+    StringBuffer b = new StringBuffer();
     if(sents != null){
       for(CoreMap sent: sents){
-        sb.append(sentenceToString(sent));
+        b.append(sentenceToString(sent));
       }
     }
-    return sb.toString();
+    return b.toString();
   }
 
   /*
@@ -481,11 +486,11 @@ public class AnnotationUtils  {
   */
 
   public static String tokensToString(List<CoreLabel> tokens) {
-    StringBuilder os = new StringBuilder();
+    StringBuffer os = new StringBuffer();
     boolean first = true;
     for(CoreLabel t: tokens){
       if(! first) os.append(" ");
-      os.append(t.word()).append("{").append(t.beginPosition()).append(", ").append(t.endPosition()).append("}");
+      os.append(t.word() + "{" + t.beginPosition() + ", " + t.endPosition() + "}");
       first = false;
     }
     return os.toString();
@@ -531,6 +536,7 @@ public class AnnotationUtils  {
   public static List<CoreMap> readSentencesFromFile(String path) throws IOException, ClassNotFoundException {
     Annotation doc = (Annotation) IOUtils.readObjectFromFile(path);
     return doc.get(CoreAnnotations.SentencesAnnotation.class);
+
   }
 
 }
