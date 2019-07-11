@@ -94,8 +94,8 @@ public class OpenIEITest {
   //
   // some of the tests from RelationTripleSegmenterTest
   //   in particular, "Tom and Jerry were fighting" is not working as expected
-  //   good idea to make sure that the parses produced by the
-  //   real parser are working as intended
+  //   see testTomJerry for more information.  basically, it's impossible to
+  //   distinguish "fighting" from other verbs
   
   @Test
   public void testAnnotatorRuns() {
@@ -276,6 +276,50 @@ public class OpenIEITest {
     }}, "John did not see Sara");  // the "not" should reject the relation
   }
 
+  @Test
+  public void testTomJerry() {
+    assertExtracted(new HashSet<String>() {{
+      add("Tom\thave\ttails");
+      add("Jerry\thave\ttails");
+    }}, "Tom and Jerry have tails");
+    assertExtracted(new HashSet<String>() {{
+      add("Tom\tare\tfriends");
+      add("Jerry\tare\tfriends");
+    }}, "Tom and Jerry are friends");
+    // TODO:
+    //   given the current system, it is almost impossible to
+    //   distinguish the following examples
+    //
+    //   we would want
+    //     "Tom, fighting, Jerry"
+    //   and
+    //     "Tom, is, crying"
+    //     "Jerry, is, crying"
+    //
+    //   Unfortunately, the parses come back as follows:
+    //
+    //    -> crying/VBG (root)
+    //      -> Tom/NNP (nsubj)
+    //        -> Jerry/NNP (conj:and)
+    //          -> and/CC (cc)
+    //      -> Jerry/NNP (nsubj)
+    //      -> are/VBP (aux)
+    //
+    //    -> fighting/VBG (root)
+    //      -> Tom/NNP (nsubj)
+    //        -> Jerry/NNP (conj:and)
+    //          -> and/CC (cc)
+    //      -> Jerry/NNP (nsubj)
+    //      -> were/VBD (aux)
+    //
+    // so...  ¯\_(ツ)_/¯
+    //
+    //assertExtracted(new HashSet<String>() {{
+    //}}, "Tom and Jerry are crying");
+    //assertExtracted(new HashSet<String>() {{
+    //}}, "Tom and Jerry are fighting");
+  }
+  
   @Test
   public void dummyTest() {
     assertTrue(true);
