@@ -432,10 +432,21 @@ public class OpenIE implements Annotator  {
   }
 
   /**
-   *   Annotate a single sentence.
+   * Annotate a single sentence.
    *
-   *   This annotator will, in particular, set the {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.EntailedSentencesAnnotation}
-   *   and {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.RelationTriplesAnnotation} annotations.
+   * This annotator will, in particular, set the 
+   * {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.EntailedSentencesAnnotation}
+   * and 
+   * {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.RelationTriplesAnnotation}
+   * annotations.
+   * <br>
+   * The annotations happen as follows:
+   * <br>
+   * First, we break a sentence into its candidate clauses.  That can mean elimination of 
+   *   conjugations or other similar phrases to make shorter sentences which are hopefully
+   *   still valid text.<br>
+   * We then split off shorter fragments from each of the clauses.<br>
+   * Then, the RelationTripleSegmenter analyzes each fragment to see if it is a valid triple.
    */
   @SuppressWarnings("unchecked")
   public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {

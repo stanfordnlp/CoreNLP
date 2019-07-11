@@ -849,13 +849,29 @@ public class RelationTripleSegmenter {
 
   /**
    * <p>
-   * Try to segment this sentence as a relation triple.
+   * This is the main entry point from the Annotator.
+   * </p>
+   * <p>
+   * Tries to segment this sentence as a relation triple.
    * This sentence must already match one of a few strict patterns for a valid OpenIE extraction.
    * If it does not, then no relation triple is created.
    * That is, this is <b>not</b> a relation extractor; it is just a utility to segment what is already a
    * (subject, relation, object) triple into these three parts.
    * </p>
-   *
+   * <p>
+   * Relations are verified using semgrex expressions.  For example,
+   * look at VERB_PATTERNS for a list of semgrex expressions involving
+   * verbs.
+   * </p>
+   * <p>
+   * Once a relation is potentially here, this method goes through
+   * some pruning steps to eliminate invalid relations.  For example,
+   * if one of the get clauses contains a NOT or similar word, we
+   * eliminate that, since the system has not been written to handle
+   * negation.  Other possible eliminations are for having arcs
+   * which were not expected as part of the semgrex expression used to
+   * identify the triple.
+   * </p>
    * <p>
    *   This method will attempt to use both the verb-centric patterns and the ACL-centric patterns.
    * </p>
