@@ -67,6 +67,33 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * locks each file it uses before accessing the file, and then it opens new FileOutputStreams
  * in order to write to cache files.  On Windows, you cannot open a second stream to a file
  * once you have already locked it.
+ * </p><p>
+ * To fix this without reducing the functionality would be quite an
+ * undertaking.  Of course, the easiest thing would be to simply not
+ * lock files on Windows.  This means that a second program could
+ * clobber the files and throw everything off.  In order to keep the
+ * lock the whole time, we would need to reuse the same
+ * RandomAccessFile (or other form of read/write channel) for each use
+ * of the file.  This doesn't sound too awful in terms of single
+ * threaded programs, but the problem is that if multiple threads want
+ * to use the same file, threading the uses of the channel would be a
+ * giant hassle.
+ * </p><p>
+ * One consideration is that locking the file is questionably useful
+ * to begin with.  The locks are acquired and released for each
+ * operation, which means another process can clobber something on
+ * disk in between operations.
+ * </p><p>
+ * According to Gabor, having a second program change things
+ * underneath is fine as long as the changes aren't occurring
+ * simultaneously.
+ * </p><p>
+ * One could theoretically replace the entire class with a Map in most
+ * places it gets used, but there is a bit of a caveat in that the
+ * caching feature is actually used.  A couple generations ago, the
+ * kbp annotator would write to it, and the runner would read it back.
+ * To further complicate things, the Map for that project is too large
+ * for serializing the whole thing at once to be a practical solution.
  * </p>
  *
  * @param <KEY> The key to cache by
