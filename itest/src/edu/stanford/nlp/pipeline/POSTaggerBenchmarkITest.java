@@ -22,31 +22,31 @@ public class POSTaggerBenchmarkITest extends TestCase {
   }
 
   public void testGermanDevPOS()  throws IOException {
-    runPOSTest("edu/stanford/nlp/models/pos-tagger/french/french-ud.tagger",
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/french/german-ud.tagger",
             "format=TSV,wordColumn=1,tagColumn=3,/u/nlp/data/depparser/nn/models-4.0.0/data/clean/de_gsd-ud-dev.conllu.clean",
             93.07);
   }
 
   public void testGermanTestPOS()  throws IOException {
-    runPOSTest("edu/stanford/nlp/models/pos-tagger/french/french-ud.tagger",
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/french/german-ud.tagger",
             "format=TSV,wordColumn=1,tagColumn=3,/u/nlp/data/depparser/nn/models-4.0.0/data/clean/de_gsd-ud-test.conllu.clean",
             92.84);
   }
 
   public void testSpanishDevPOS()  throws IOException {
-    runPOSTest("edu/stanford/nlp/models/pos-tagger/french/french-ud.tagger",
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/french/spanish-ud.tagger",
             "format=TSV,wordColumn=1,tagColumn=3,/u/nlp/data/depparser/nn/models-4.0.0/data/clean/es_ancora-ud-dev.conllu.clean",
             97.77);
   }
 
   public void testSpanishTestPOS()  throws IOException {
-    runPOSTest("edu/stanford/nlp/models/pos-tagger/french/french-ud.tagger",
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/french/spanish-ud.tagger",
             "format=TSV,wordColumn=1,tagColumn=3,/u/nlp/data/depparser/nn/models-4.0.0/data/clean/es_ancora-ud-test.conllu.clean",
             97.76);
   }
 
   public void runPOSTest(String modelPath, String dataPath, double expectedTokenAccuracy) throws IOException {
-    String argsString = String.format("-model %s -testFile %s", modelPath, dataPath);
+    String argsString = String.format("-model %s -testFile %s -verboseResults false", modelPath, dataPath);
     TaggerConfig config = new TaggerConfig(argsString.split(" "));
     MaxentTagger tagger = new MaxentTagger(config.getModel(), config);
     TestClassifier testClassifier = new TestClassifier(tagger);
