@@ -144,7 +144,7 @@ public class TestClassifier  {
   }
 
 
-  String resultsString(MaxentTagger maxentTagger) {
+  public String resultsString(MaxentTagger maxentTagger) {
     StringBuilder output = new StringBuilder();
     output.append(String.format("Model %s has xSize=%d, ySize=%d, and numFeatures=%d.%n",
             maxentTagger.config.getModel(),
@@ -169,6 +169,10 @@ public class TestClassifier  {
     }
 
     return output.toString();
+  }
+
+  public double tagAccuracy() {
+    return (numRight * 100.0) / (numRight + numWrong);
   }
 
   void printModelAndAccuracy(MaxentTagger maxentTagger) {
