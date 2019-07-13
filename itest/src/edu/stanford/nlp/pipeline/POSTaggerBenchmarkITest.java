@@ -21,6 +21,12 @@ public class POSTaggerBenchmarkITest extends TestCase {
             96.80);
   }
 
+  public void testChineseTestPOS() throws IOException {
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger",
+            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/chinese/ctb7.test.tsv",
+            97.40);
+  }
+
   public void testFrenchDevPOS()  throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/french/french-ud.tagger",
             "format=TSV,wordColumn=1,tagColumn=3,/u/nlp/data/depparser/nn/models-4.0.0/data/clean/fr_gsd-ud-dev.conllu.clean",
