@@ -9,6 +9,18 @@ import java.io.*;
 
 public class POSTaggerBenchmarkITest extends TestCase {
 
+  public void testEnglishWSJDevPOS() throws IOException {
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger",
+            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-19-21.tsv",
+            96.80);
+  }
+
+  public void testEnglishWSJTestPOS() throws IOException {
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger",
+            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-22-24.tsv",
+            96.80);
+  }
+
   public void testFrenchDevPOS()  throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/french/french-ud.tagger",
             "format=TSV,wordColumn=1,tagColumn=3,/u/nlp/data/depparser/nn/models-4.0.0/data/clean/fr_gsd-ud-dev.conllu.clean",
