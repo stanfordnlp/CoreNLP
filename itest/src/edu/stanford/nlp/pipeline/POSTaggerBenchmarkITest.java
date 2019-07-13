@@ -24,7 +24,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
   public void testEnglishBiDirectionalWSJDevPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-bidirectional/english-bidirectional-distsim.tagger",
             "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-19-21.tsv",
-            97.20);
+            97.12);
   }
 
   public void testEnglishBiDirectionalWSJTestPOS() throws IOException {
@@ -36,13 +36,13 @@ public class POSTaggerBenchmarkITest extends TestCase {
   public void testEnglishCaselessWSJDevPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
             "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-19-21.caseless.tsv",
-            97.20);
+            95.90);
   }
 
   public void testEnglishCaselessWSJTestPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
             "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-22-24.caseless.tsv",
-            97.20);
+            95.92);
   }
 
   public void testChineseTestPOS() throws IOException {
