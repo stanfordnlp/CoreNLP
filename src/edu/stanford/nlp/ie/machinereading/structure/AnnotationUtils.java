@@ -334,7 +334,11 @@ public class AnnotationUtils  {
   }
 
   public static List<EntityMention> getEntityMentions(CoreMap sent) {
-    return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class));
+    List<EntityMention> sentEntities =
+            sent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class) == null ?
+                    new ArrayList<>() :
+                    sent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
+    return Collections.unmodifiableList(sentEntities);
   }
 
   public static void addRelationMention(CoreMap sentence, RelationMention arg) {
