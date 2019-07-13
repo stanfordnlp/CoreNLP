@@ -21,6 +21,30 @@ public class POSTaggerBenchmarkITest extends TestCase {
             96.86);
   }
 
+  public void testEnglishBiDirectionalWSJDevPOS() throws IOException {
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/english-bidirectional/english-bidirectional-distsim.tagger",
+            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-19-21.tsv",
+            97.20);
+  }
+
+  public void testEnglishBiDirectionalWSJTestPOS() throws IOException {
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/english-bidirectional/english-bidirectional-distsim.tagger",
+            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-22-24.tsv",
+            97.20);
+  }
+
+  public void testEnglishCaselessWSJDevPOS() throws IOException {
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
+            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-19-21.tsv",
+            97.20);
+  }
+
+  public void testEnglishCaselessWSJTestPOS() throws IOException {
+    runPOSTest("edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
+            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-22-24.tsv",
+            97.20);
+  }
+
   public void testChineseTestPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger",
             "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/chinese/ctb7.test.tsv",
@@ -68,6 +92,9 @@ public class POSTaggerBenchmarkITest extends TestCase {
     TaggerConfig config = new TaggerConfig(argsString.split(" "));
     MaxentTagger tagger = new MaxentTagger(config.getModel(), config);
     TestClassifier testClassifier = new TestClassifier(tagger);
+    System.err.println("---");
+    System.err.println(modelPath);
+    System.err.println(dataPath);
     System.err.println(testClassifier.tagAccuracy());
     assertTrue(testClassifier.tagAccuracy() >= expectedTokenAccuracy);
   }
