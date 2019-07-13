@@ -12,19 +12,19 @@ public class POSTaggerBenchmarkITest extends TestCase {
   public void testEnglishWSJDevPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger",
             "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-19-21.tsv",
-            96.80);
+            96.83);
   }
 
   public void testEnglishWSJTestPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger",
             "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-22-24.tsv",
-            96.80);
+            96.86);
   }
 
   public void testChineseTestPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger",
             "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/chinese/ctb7.test.tsv",
-            97.40);
+            97.46);
   }
 
   public void testFrenchDevPOS()  throws IOException {
