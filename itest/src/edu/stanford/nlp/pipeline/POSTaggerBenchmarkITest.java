@@ -35,13 +35,13 @@ public class POSTaggerBenchmarkITest extends TestCase {
 
   public void testEnglishCaselessWSJDevPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
-            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-19-21.tsv",
+            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-19-21.caseless.tsv",
             97.20);
   }
 
   public void testEnglishCaselessWSJTestPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
-            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-22-24.tsv",
+            "format=TSV,wordColumn=0,tagColumn=1,/u/nlp/data/pos-tagger/english/test-wsj-22-24.caseless.tsv",
             97.20);
   }
 
