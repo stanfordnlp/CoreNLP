@@ -360,7 +360,11 @@ public class AnnotationUtils  {
   }
 
   public static List<RelationMention> getRelationMentions(CoreMap sent) {
-    return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class));
+    List<RelationMention> sentRelations =
+            sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class) == null ?
+                    new ArrayList<>() :
+                    sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
+    return Collections.unmodifiableList(sentRelations);
   }
 
   public static void addEventMention(CoreMap sentence, EventMention arg) {
@@ -382,7 +386,11 @@ public class AnnotationUtils  {
   }
 
   public static List<EventMention> getEventMentions(CoreMap sent) {
-    return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.EventMentionsAnnotation.class));
+    List<EventMention> sentEvents =
+            sent.get(MachineReadingAnnotations.EventMentionsAnnotation.class) == null ?
+                    new ArrayList<>() :
+                    sent.get(MachineReadingAnnotations.EventMentionsAnnotation.class);
+    return Collections.unmodifiableList(sentEvents);
   }
 
   /**
