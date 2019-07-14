@@ -30,8 +30,8 @@ public class TokenizerAnnotatorITest extends TestCase {
   }
 
   private static final String spanishText = "Me voy a Madrid (ES).\n\"Me gusta\", lo dice.";
-  private static List<String> spanishTokens = Arrays.asList(new String[] { "Me", "voy", "a", "Madrid", "=LRB=", "ES", "=RRB=", ".", "\"", "Me", "gusta", "\"", ",", "lo", "dice", "." });
-  private static List<String> spanishTokens2 = Arrays.asList(new String[] { "Me", "voy", "a", "Madrid", "=LRB=", "ES", "=RRB=", ".", AbstractTokenizer.NEWLINE_TOKEN, "\"", "Me", "gusta", "\"", ",", "lo", "dice", "." });
+  private static List<String> spanishTokens = Arrays.asList(new String[] { "Me", "voy", "a", "Madrid", "(", "ES", ")", ".", "\"", "Me", "gusta", "\"", ",", "lo", "dice", "." });
+  private static List<String> spanishTokens2 = Arrays.asList(new String[] { "Me", "voy", "a", "Madrid", "(", "ES", ")", ".", AbstractTokenizer.NEWLINE_TOKEN, "\"", "Me", "gusta", "\"", ",", "lo", "dice", "." });
 
   public void testSpanishTokenizer() {
     TokenizerAnnotator annotator = new TokenizerAnnotator(false, "es", null);

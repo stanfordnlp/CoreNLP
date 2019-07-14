@@ -91,7 +91,11 @@ public class MWTAnnotator implements Annotator {
         if (useStatisticalModel) {
             statisticalMWTAnnotator.annotate(annotation);
         }
+        // keep track of sentence number
+        int sentNum = 0;
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+            // set token begin for sentence
+            sentence.set(CoreAnnotations.TokenBeginAnnotation.class, finalDocumentTokens.size());
             List<CoreLabel> newSentenceTokens = new ArrayList<>();
             int sentenceIndex = 1;
             for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
@@ -129,6 +133,7 @@ public class MWTAnnotator implements Annotator {
                         newToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class, token.endPosition());
                         newToken.setIsMWT(true);
                         newToken.setIndex(sentenceIndex);
+                        newToken.setSentIndex(sentNum);
                         // add finalized token
                         newSentenceTokens.add(newToken);
                         finalDocumentTokens.add(newToken);
@@ -145,7 +150,10 @@ public class MWTAnnotator implements Annotator {
                     sentenceIndex++;
                 }
             }
+            // set end token index for sentence
+            sentence.set(CoreAnnotations.TokenEndAnnotation.class, finalDocumentTokens.size());
             sentence.set(CoreAnnotations.TokensAnnotation.class, newSentenceTokens);
+            sentNum++;
         }
         // set final tokens list for document
         annotation.set(CoreAnnotations.TokensAnnotation.class, finalDocumentTokens);
