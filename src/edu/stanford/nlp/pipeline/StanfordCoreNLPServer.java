@@ -14,19 +14,20 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
-import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import javax.net.ssl.*;
 import java.io.*;
 import java.lang.ref.SoftReference;
 import java.math.BigInteger;
 import java.net.*;
+import javax.net.ssl.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.*;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 
 import static edu.stanford.nlp.pipeline.StanfordCoreNLP.CUSTOM_ANNOTATOR_PREFIX;
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
+
 import static java.net.HttpURLConnection.*;
 
 
@@ -52,7 +54,7 @@ public class StanfordCoreNLPServer implements Runnable {
   protected HttpServer server;
   @SuppressWarnings("unused")
   @ArgumentParser.Option(name="server_id", gloss="a name for this server")
-  protected String serverID = null; // currently not used
+  protected String serverID; // = null; // currently not used
   @ArgumentParser.Option(name="port", gloss="The port to run the server on")
   protected int serverPort = 9000;
   @ArgumentParser.Option(name="status_port", gloss="The port to serve the status check endpoints on. If different from the server port, this will run in a separate thread.")
@@ -88,7 +90,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
 
 
-  protected final String shutdownKey;
+  private final String shutdownKey;
 
   private final Properties defaultProps;
 
@@ -165,18 +167,16 @@ public class StanfordCoreNLPServer implements Runnable {
     // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
     String defaultParserPath;
     ClassLoader classLoader = getClass().getClassLoader();
-    URL srResource =
-            classLoader.getResource("edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-    log("setting default constituency parser");
+    URL srResource = classLoader.getResource("edu/stanford/nlp/models/srparser/englishSR.ser.gz");
     if (srResource != null) {
       defaultParserPath = "edu/stanford/nlp/models/srparser/englishSR.ser.gz";
-      log("using SR parser: edu/stanford/nlp/models/srparser/englishSR.ser.gz");
+      log("Setting default constituency parser to SR parser: edu/stanford/nlp/models/srparser/englishSR.ser.gz");
     } else {
       defaultParserPath = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
-      log("warning: cannot find edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-      log("using: edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz instead");
-      log("to use shift reduce parser download English models jar from:");
-      log("http://stanfordnlp.github.io/CoreNLP/download.html");
+      log("Warning: cannot find edu/stanford/nlp/models/srparser/englishSR.ser.gz");
+      log("Setting default constituency parser to PCFG parser: edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
+      log("To use shift reduce parser download English models jar from:");
+      log("https://stanfordnlp.github.io/CoreNLP/download.html");
     }
     this.defaultProps = PropertiesUtils.asProperties(
         "annotators", defaultAnnotators,  // Run these annotators by default
@@ -274,6 +274,15 @@ public class StanfordCoreNLPServer implements Runnable {
    * Reads the POST contents of the request and parses it into an Annotation object, ready to be annotated.
    * This method can also read a serialized document, if the input format is set to be serialized.
    *
+   * The POST contents will be treated as UTF-8 unless the strict property is set to true (in which case they will
+   * be treated as ISO-8859-1. They should be application/x-www-form-urlencoded, and decoding will be done via the
+   * java.net.URLDecoder.decode(String, String) function. This will attempt to decode each
+   * percent sign followed by two characters as a byte in hexadecimal. Other characters are passed through unchanged.
+   * However, it normally also works fine to simple pass text to this method in a POST. Our method doesn't accept
+   * encoding ' ' as '+' (a plus will be hex encoded) and converts any '%' not followed by a hex digit to "%25".
+   * The only thing you really must do is to escape a '%' character that is a percent followed by two potential
+   * hex digit characters as "%25".
+   *
    * @param props The properties we are annotating with. This is where the input format is retrieved from.
    * @param httpExchange The exchange we are reading POST data from.
    *
@@ -308,12 +317,16 @@ public class StanfordCoreNLPServer implements Runnable {
         }
 
         String text = IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding));
+        // System.err.println("The text I got was |" + text + '|');
 
-
-        // Remove the \ and + characters that mess up the URL decoding.
-        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+        // Remove the % and + characters that mess up the URL decoding.
+        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25"); // Escape a percent that isn't followed by a hex byte
         text = text.replaceAll("\\+", "%2B");
-        text = URLDecoder.decode(text, encoding).trim();
+        // System.err.println("The text fiddled:  |" + text + '|');
+        text = URLDecoder.decode(text, encoding);
+        // System.err.println("The text decoded: |" + text + '|');
+        // We use to trim. But now we don't. It seems like doing that is illegitimate. text = text.trim();
+
         // Read the annotation
         Annotation annotation = new Annotation(text);
         // Set the date (if provided)
@@ -496,7 +509,7 @@ public class StanfordCoreNLPServer implements Runnable {
   private static void respondUnauthorized(HttpExchange httpExchange) throws IOException {
     log("Responding unauthorized to " + httpExchange.getRemoteAddress());
     httpExchange.getResponseHeaders().add("Content-type", "application/javascript");
-    byte[] content = "{\"message\": \"Unauthorized API request\"}".getBytes("utf-8");
+    byte[] content = "{\"message\": \"Unauthorized API request\"}".getBytes(StandardCharsets.UTF_8);
     httpExchange.sendResponseHeaders(HTTP_UNAUTHORIZED, content.length);
     httpExchange.getResponseBody().write(content);
     httpExchange.close();
@@ -844,7 +857,7 @@ public class StanfordCoreNLPServer implements Runnable {
           }
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        warn(e);
         respondError("Could not handle incoming annotation", httpExchange);
         return;
       }
@@ -891,7 +904,7 @@ public class StanfordCoreNLPServer implements Runnable {
         }
       } catch (TimeoutException e) {
         // Print the stack trace for debugging
-        e.printStackTrace();
+        warn(e);
         // Return error message.
         respondError("CoreNLP request timed out. Your document may be too long.", httpExchange);
         // Cancel the future if it's alive
@@ -901,7 +914,7 @@ public class StanfordCoreNLPServer implements Runnable {
         }
       } catch (Exception e) {
         // Print the stack trace for debugging
-        e.printStackTrace();
+        warn(e);
         // Return error message.
         respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
         // Cancel the future if it's alive
@@ -1035,7 +1048,7 @@ public class StanfordCoreNLPServer implements Runnable {
             }
           }), doc);
         } catch (Exception e) {
-          e.printStackTrace();
+          warn(e);
           try {
             respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
           } catch (IOException ignored) {
@@ -1162,7 +1175,7 @@ public class StanfordCoreNLPServer implements Runnable {
             }
           }), doc);
         } catch (Exception e) {
-          e.printStackTrace();
+          warn(e);
           try {
             respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
           } catch (IOException ignored) {
@@ -1267,7 +1280,7 @@ public class StanfordCoreNLPServer implements Runnable {
             }))
           ), doc);
         } catch (Exception e) {
-          e.printStackTrace();
+          warn(e);
           try {
             respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
           } catch (IOException ignored) {
@@ -1448,7 +1461,7 @@ public class StanfordCoreNLPServer implements Runnable {
       live.set(true);
       log("StanfordCoreNLPServer listening at " + server.getAddress());
     } catch (IOException e) {
-      e.printStackTrace();
+      warn(e);
     }
   }
 
@@ -1502,9 +1515,9 @@ public class StanfordCoreNLPServer implements Runnable {
       props.setProperty("annotators", StanfordCoreNLPServer.preloadedAnnotators);
       try {
         new StanfordCoreNLP(props);
-      } catch (Throwable ignored) {
+      } catch (Throwable throwable) {
         err("Could not pre-load annotators in server; encountered exception:");
-        err(ignored);
+        err(throwable);
       }
     }
 

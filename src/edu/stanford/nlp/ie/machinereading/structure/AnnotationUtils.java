@@ -334,11 +334,7 @@ public class AnnotationUtils  {
   }
 
   public static List<EntityMention> getEntityMentions(CoreMap sent) {
-    List<EntityMention> sentEntities =
-            sent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class) == null ?
-                    new ArrayList<>() :
-                    sent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
-    return Collections.unmodifiableList(sentEntities);
+    return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class));
   }
 
   public static void addRelationMention(CoreMap sentence, RelationMention arg) {
@@ -360,11 +356,7 @@ public class AnnotationUtils  {
   }
 
   public static List<RelationMention> getRelationMentions(CoreMap sent) {
-    List<RelationMention> sentRelations =
-            sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class) == null ?
-                    new ArrayList<>() :
-                    sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-    return Collections.unmodifiableList(sentRelations);
+    return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class));
   }
 
   public static void addEventMention(CoreMap sentence, EventMention arg) {
@@ -386,11 +378,7 @@ public class AnnotationUtils  {
   }
 
   public static List<EventMention> getEventMentions(CoreMap sent) {
-    List<EventMention> sentEvents =
-            sent.get(MachineReadingAnnotations.EventMentionsAnnotation.class) == null ?
-                    new ArrayList<>() :
-                    sent.get(MachineReadingAnnotations.EventMentionsAnnotation.class);
-    return Collections.unmodifiableList(sentEvents);
+    return Collections.unmodifiableList(sent.get(MachineReadingAnnotations.EventMentionsAnnotation.class));
   }
 
   /**

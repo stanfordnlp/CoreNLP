@@ -21,7 +21,9 @@ import java.util.Properties;
 public class SpanishTokenizerAnnotatorITest extends TestCase {
 
   private static List<String> spanishTokens = Arrays.asList(
-      "Damelo");
+      "Da",
+      "me",
+      "lo");
 
   public void testSpanish() {
     Annotation ann = new Annotation("Damelo");
