@@ -34,9 +34,30 @@ public class RelationExtractorAnnotator implements Annotator  {
   MachineReading mr;
   private static boolean verbose = false;
 
+  static boolean getVerbose(Properties props) {
+    // we keep the old parameter for backwards compatibility
+    if (props.containsKey("sup.relation.verbose")) {
+      log.warning("sup.relation.verbose is DEPRECATED.  use relation.verbose instead");
+      return Boolean.parseBoolean(props.getProperty("sup.relation.verbose"));
+    } else {
+      return Boolean.parseBoolean(props.getProperty("relation.verbose", "false"));
+    }
+  }
+
+  static String getModelName(Properties props) {
+    // we keep the old parameter for backwards compatibility
+    if (props.containsKey("sup.relation.model")) {
+      log.warning("sup.relation.model is DEPRECATED.  use relation.model instead");
+      return props.getProperty("sup.relation.model");
+    } else {
+      return props.getProperty("relation.model", DefaultPaths.DEFAULT_SUP_RELATION_EX_RELATION_MODEL);
+    }
+  }
+  
   public RelationExtractorAnnotator(Properties props){
-    verbose = Boolean.parseBoolean(props.getProperty("sup.relation.verbose", "false"));
-    String relationModel = props.getProperty("sup.relation.model", DefaultPaths.DEFAULT_SUP_RELATION_EX_RELATION_MODEL);
+    verbose = getVerbose(props);
+    final String relationModel = getModelName(props);
+
     try {
       Extractor entityExtractor = new RothEntityExtractor();
       BasicRelationExtractor relationExtractor = BasicRelationExtractor.load(relationModel);
