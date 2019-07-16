@@ -100,7 +100,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
 
   //file choosing components for loading trees
   private JFileChooser chooser; // = null;
-  private static File chooserFile;
 
   final TreeTransformer transformer;
 
@@ -408,17 +407,12 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     final JFileChooser chooser = new JFileChooser();
     //  sets up default file view
     try {
-      chooserFile = new File((new File(".").getCanonicalPath()));
-    } catch (Exception e) {
-      // go with current directory.
+      final File chooserFile = new File((new File(".").getCanonicalPath()));
+      chooser.setCurrentDirectory(chooserFile);
+    } catch (IOException e) {
+      // go with default directory.
     }
-    chooser.setCurrentDirectory(chooserFile);
 
-    chooser.addActionListener(e -> {
-      if(e.getActionCommand().equals("ApproveSelection")) {
-        chooserFile = chooser.getSelectedFile();
-      }
-    });
     chooser.setMultiSelectionEnabled(true);
     chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     return chooser;

@@ -21,8 +21,8 @@ public class CoNLLUReader {
     public static final int CoNLLU_IndexField = 0;
     public static final int CoNLLU_WordField = 1;
     public static final int CoNLLU_LemmaField = 2;
-    public static final int CoNLLU_UPOSField = 3;
-    public static final int CoNLLU_XPOSField = 4;
+    public static final int CoNLLU_XPOSField = 3;
+    public static final int CoNLLU_UPOSField = 4;
     public static final int CoNLLU_GovField = 6;
     public static final int CoNLLU_RelnField = 7;
     public static final int CoNLLU_MiscField = 9;

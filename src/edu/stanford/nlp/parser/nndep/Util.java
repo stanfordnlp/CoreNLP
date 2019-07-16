@@ -4,7 +4,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -140,46 +139,7 @@ public class Util  {
   {
     CoreLabelTokenFactory tf = new CoreLabelTokenFactory(false);
 
-    try {
-      CoNLLUReader conllUReader = new CoNLLUReader();
-      List<CoNLLUReader.CoNLLUDocument> docs = conllUReader.readCoNLLUFileCreateCoNLLUDocuments(inFile);
-      for (CoNLLUReader.CoNLLUDocument doc : docs) {
-        for (CoNLLUReader.CoNLLUSentence conllSent : doc.sentences) {
-          CoreMap sentence = new CoreLabel();
-          List<CoreLabel> sentenceTokens = new ArrayList<>();
-          DependencyTree tree = new DependencyTree();
-          for (String tokenLine : conllSent.tokenLines) {
-            String[] splits = tokenLine.split("\t");
-            String word = splits[CoNLLUReader.CoNLLU_WordField],
-                    pos = cPOS ? splits[CoNLLUReader.CoNLLU_UPOSField] : splits[CoNLLUReader.CoNLLU_XPOSField],
-                    depType = splits[CoNLLUReader.CoNLLU_RelnField];
-            int head = -1;
-            try {
-              head = Integer.parseInt(splits[6]);
-            } catch (NumberFormatException e) {
-              continue;
-            }
-            CoreLabel token = tf.makeToken(word, 0,0);
-            token.setTag(pos);
-            token.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, head);
-            token.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depType);
-            sentenceTokens.add(token);
-            if (!unlabeled)
-              tree.add(head, depType);
-            else
-              tree.add(head, Config.UNKNOWN);
-          }
-          trees.add(tree);
-          sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
-          sents.add(sentence);
-        }
-      }
-
-    } catch (Exception e) {
-
-    }
-
-    /*try (BufferedReader reader = IOUtils.readerFromString(inFile)) {
+    try (BufferedReader reader = IOUtils.readerFromString(inFile)) {
 
       List<CoreLabel> sentenceTokens = new ArrayList<>();
       DependencyTree tree = new DependencyTree();
@@ -221,7 +181,7 @@ public class Util  {
       }
     } catch (IOException e) {
       throw new RuntimeIOException(e);
-    }*/
+    }
   }
 
   public static void loadConllFile(String inFile, List<CoreMap> sents, List<DependencyTree> trees)
