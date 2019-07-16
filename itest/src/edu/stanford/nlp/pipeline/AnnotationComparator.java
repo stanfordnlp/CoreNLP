@@ -15,7 +15,7 @@ import java.util.List;
 
 public class AnnotationComparator {
 
-    public static void compareTokensLists(Annotation originalDoc, Annotation newDoc) {
+    public static void compareTokensLists(CoreMap originalDoc, CoreMap newDoc) {
         List<CoreLabel> originalTokens = originalDoc.get(CoreAnnotations.TokensAnnotation.class);
         List<CoreLabel> newTokens = newDoc.get(CoreAnnotations.TokensAnnotation.class);
         if (originalTokens.size() != newTokens.size()) {
