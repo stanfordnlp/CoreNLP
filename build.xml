@@ -143,7 +143,8 @@
   <target name="test" depends="classpath,compile"
           description="Run core unit tests">
     <echo message="${ant.project.name}" />
-    <junit fork="true" maxmemory="1g" printsummary="off" outputtoformatters="false" forkmode="perBatch" haltonfailure="true">
+    <junit fork="true" maxmemory="1g" printsummary="off" outputtoformatters="false" forkmode="perBatch" haltonfailure="no" 
+        haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
@@ -155,6 +156,7 @@
         </fileset>
       </batchtest>
     </junit>
+    <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
 
   <target name="itest" depends="classpath,compile"
@@ -174,13 +176,14 @@
         </fileset>
       </batchtest>
     </junit>
-    <fail message="Test failure detected, check test results." if="test.failed" />
+    <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
 
   <target name="itest-many-docs" depends="classpath"
           description="Run StanfordCoreNLP on a large volume of documents.">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+        haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
@@ -192,12 +195,14 @@
         </fileset>
       </batchtest>
     </junit>
+    <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
   <target name="itest-coreference" depends="classpath"
           description="Coreference related slow itests.">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="7g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+    <junit fork="yes" maxmemory="7g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+        haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
@@ -212,12 +217,14 @@
         </fileset>
       </batchtest>
     </junit>
+    <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
   <target name="itest-protobuf" depends="classpath"
           description="Protocol buffer related slow itests.">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+        haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
@@ -229,12 +236,14 @@
         </fileset>
       </batchtest>
     </junit>
+    <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
   <target name="itest-kbp" depends="classpath"
           description="KBP related slow itests.">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+        haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
@@ -246,12 +255,14 @@
         </fileset>
       </batchtest>
     </junit>
+    <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
   <target name="itest-ner" depends="classpath"
           description="NER related slow itests">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+        haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
@@ -264,12 +275,14 @@
         </fileset>
       </batchtest>
     </junit>
+    <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
   <target name="itest-misc" depends="classpath"
           description="NER related slow itests">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+        haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
@@ -282,12 +295,14 @@
         </fileset>
       </batchtest>
     </junit>
+    <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
   <target name="itest-debug" depends="classpath"
            description="target for debug purposes">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+        haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
