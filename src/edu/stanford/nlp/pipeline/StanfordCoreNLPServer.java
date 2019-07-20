@@ -423,7 +423,7 @@ public class StanfordCoreNLPServer implements Runnable {
     if (language != null && !"default".equals(language)) {
       String languagePropertiesFile = LanguageInfo.getLanguagePropertiesFile(language);
       if (languagePropertiesFile != null) {
-        try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(languagePropertiesFile)){
+        try (BufferedReader is = IOUtils.readerFromString(languagePropertiesFile)){
           Properties languageSpecificProperties = new Properties();
           languageSpecificProperties.load(is);
           PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
