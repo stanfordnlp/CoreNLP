@@ -1318,11 +1318,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *
    * @param doc Documents to write out
    * @param printWriter Writer to use for output
-   * @throws IOException If an IO problem
    */
   public void writeAnswers(List<IN> doc, PrintWriter printWriter,
-                           DocumentReaderAndWriter<IN> readerAndWriter)
-          throws IOException {
+                           DocumentReaderAndWriter<IN> readerAndWriter) {
     if (flags.lowerNewgeneThreshold) {
       return;
     }
