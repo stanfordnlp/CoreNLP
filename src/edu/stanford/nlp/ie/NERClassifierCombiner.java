@@ -269,6 +269,13 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   @Override
   public List<CoreLabel> classifyWithGlobalInformation(List<CoreLabel> tokens, final CoreMap document, final CoreMap sentence) {
     List<CoreLabel> output = super.classify(tokens);
+    // drop probabilities for O tag ... this is to correct an error where downstream tags are erroneously
+    // getting the probability for the O tag
+    for (CoreLabel outputLabel : output) {
+      if (outputLabel.get(CoreAnnotations.AnswerAnnotation.class).equals(nsc.flags.backgroundSymbol)) {
+        outputLabel.remove(CoreAnnotations.AnswerProbAnnotation.class);
+      }
+    }
     if (applyNumericClassifiers) {
       try {
         // recognizes additional MONEY, TIME, DATE, and NUMBER using a set of deterministic rules
