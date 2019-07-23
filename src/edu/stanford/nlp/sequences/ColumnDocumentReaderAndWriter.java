@@ -28,6 +28,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   private static final Redwood.RedwoodChannels log = Redwood.channels(ColumnDocumentReaderAndWriter.class);
 
   private static final long serialVersionUID = 3806263423697973704L;
+  private static final boolean includeProbabilities = false;
 
 //  private SeqClassifierFlags flags; // = null;
   //map can be something like "word=0,tag=1,answer=2"
@@ -110,7 +111,12 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
     for (CoreLabel wi : doc) {
       String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
       String goldAnswer = wi.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      out.println(wi.word() + '\t' + goldAnswer + '\t' + answer);
+      if (includeProbabilities) {
+        double answerProb = wi.get(CoreAnnotations.AnswerProbAnnotation.class);
+        out.println(wi.word() + '\t' + goldAnswer + '\t' + answer + '\t' + answerProb);
+      } else {
+        out.println(wi.word() + '\t' + goldAnswer + '\t' + answer);
+      }
     }
     out.println();
   }

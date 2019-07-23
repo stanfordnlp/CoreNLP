@@ -285,23 +285,22 @@ public class CRFClassifierITest {
    *  and gives the entity output as entity type and character offset triples.
    */
   @SuppressWarnings({"unchecked"})
-  private static final Triple[][] testTrip =
+  private static final Triple[][] testTrip = {
+          { new Triple("ORGANIZATION",16,31),
+                  new Triple("ORGANIZATION",99,114),
+                  new Triple("ORGANIZATION",330,362),
+                  new Triple("PERSON",374,393),
+                  new Triple("ORGANIZATION",416,428),
+                  new Triple("ORGANIZATION",434,442),
+                  new Triple("PERSON",453,472),
+          },
+          { new Triple("LOCATION", 0, 6)
+          },
           {
-                  { new Triple("ORGANIZATION",16,31),
-                    new Triple("ORGANIZATION",99,114),
-                    new Triple("ORGANIZATION",330,362),
-                    new Triple("PERSON",374,393),
-                    new Triple("ORGANIZATION",416,428),
-                    new Triple("ORGANIZATION",434,442),
-                    new Triple("PERSON",453,472),
-                  },
-                  { new Triple("LOCATION", 0, 6)
-                  },
-                  {
-                  },
-                  { new Triple("PERSON", 16, 21)
-                  },
-          };
+          },
+          { new Triple("PERSON", 16, 21)
+          },
+  };
 
   private static final int[][] offsets = { { 2, 3}, { 3, 14 } , { 16, 21}, {22, 24}, {24, 25} };
 
@@ -494,7 +493,7 @@ public class CRFClassifierITest {
       } else {
         int[] bestSequence = new ExactBestSequenceFinder().bestSequence(sequenceModel);
         int[] best1 = new ArrayList<>(kBest.keySet()).get(0);
-        Assert.assertTrue(Arrays.equals(bestSequence, best1));
+        Assert.assertArrayEquals(bestSequence, best1);
       }
       kBestSequencesLast = kBestSequences;
     }
