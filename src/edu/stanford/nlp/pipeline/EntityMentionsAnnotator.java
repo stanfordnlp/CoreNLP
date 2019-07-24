@@ -309,7 +309,7 @@ public class EntityMentionsAnnotator implements Annotator {
     if (doAcronyms) { addAcronyms(annotation); }
 
     // Post-process add in KBP pronominal mentions, (English only for now)
-    if (entityMentionsLanguage.equals(LanguageInfo.HumanLanguage.ENGLISH))
+    if (LanguageInfo.HumanLanguage.ENGLISH.equals(entityMentionsLanguage))
       annotatePronominalMentions(annotation);
 
     // build document wide entity mentions list
