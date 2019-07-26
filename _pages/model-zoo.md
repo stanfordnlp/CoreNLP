@@ -23,7 +23,10 @@ wget https://nlp.stanford.edu/software/model_zoo/corenlp-swedish-1.0.0.jar
 java -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos -pos.model edu/stanford/nlp/models/zoo/corenlp-swedish/swedish.tagger -file example-swedish-sentence.txt -outputFormat text
 ```
 
-If you would like to contribute to the Model Zoo contact us or issue a pull request on our GitHub !
+If you would like to contribute to the Model Zoo,
+<a href="mailto:java-nlp-support@lists.stanford.edu">contact us</a>
+or issue a pull request on our
+<a href="https://github.com/stanfordnlp/CoreNLP/blob/gh-pages/_pages/model-zoo.md">GitHub</a>!
 
 | Name | Language | Description | Group | Version | Requires | Download |
 | --- | | --- | --- | --- | --- | --- | --- |
