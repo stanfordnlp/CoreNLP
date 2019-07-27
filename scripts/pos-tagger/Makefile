@@ -4,7 +4,8 @@ ARABIC_TEST = format=TREES,/u/nlp/data/lexparser/trees/Arabic/2-Unvoc-Test.utf8.
 
 CHINESE_TEST = format=TREES,/u/nlp/data/chinese/ctb7/test.mrg
 
-ENGLISH_TEST = /u/nlp/data/pos-tagger/english/test-wsj-22-24
+# Use dev set for regression testing
+ENGLISH_TEST = /u/nlp/data/pos-tagger/english/test-wsj-19-21
 
 FRENCH_TEST = format=TREES,/u/nlp/data/lexparser/trees/French/FTB-Test.utf8.txt
 
@@ -41,7 +42,7 @@ english-bidirectional-distsim.tagger english-caseless-left3words-distsim.tagger 
 	@echo Training $@
 	@echo Will test on $(ENGLISH_TEST)
 	java -mx6g edu.stanford.nlp.tagger.maxent.MaxentTagger -props $@.props > $@.out 2>&1
-	java -mx6g edu.stanford.nlp.tagger.maxent.MaxentTagger -model $@ -testFile $(ENGLISH_TEST)  -verboseResults false >> $@.out 2>&1
+	java -mx2g edu.stanford.nlp.tagger.maxent.MaxentTagger -model $@ -testFile $(ENGLISH_TEST)  -verboseResults false >> $@.out 2>&1
 
 french: french.tagger
 
