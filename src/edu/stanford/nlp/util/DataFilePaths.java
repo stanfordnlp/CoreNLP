@@ -9,7 +9,7 @@ package edu.stanford.nlp.util;
  * and it will convert that to
  * "/u/nlp/data/pos-tagger/wsj3t0-18-left3words"
  * unless you have set $NLP_DATA_HOME to something else.
- * <br>
+ *
  * The only environment variable expanded is that defined by
  * ENV_VARIABLE, and the only place in the string it is expanded is at
  * the start of the string.

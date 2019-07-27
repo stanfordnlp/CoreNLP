@@ -23,7 +23,6 @@ public class TrueCaseAnnotator implements Annotator  {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(TrueCaseAnnotator.class);
 
-  @SuppressWarnings("unchecked")
   private final CRFBiasedClassifier<CoreLabel> trueCaser;
 
   private final Map<String,String> mixedCaseMap;
