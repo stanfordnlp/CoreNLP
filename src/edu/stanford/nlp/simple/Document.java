@@ -251,7 +251,7 @@ public class Document {
    *
    * @return An annotator as specified by the given name and properties.
    */
-  private static synchronized Supplier<Annotator> getOrCreate(String name, Properties props, Supplier<Annotator> annotator) {
+  private synchronized static Supplier<Annotator> getOrCreate(String name, Properties props, Supplier<Annotator> annotator) {
     StanfordCoreNLP.AnnotatorSignature key = new StanfordCoreNLP.AnnotatorSignature(name, PropertiesUtils.getSignature(name, props));
     customAnnotators.register(name, props, StanfordCoreNLP.GLOBAL_ANNOTATOR_CACHE.computeIfAbsent(key, (sig) -> Lazy.cache(annotator)));
     return () -> customAnnotators.get(name);
@@ -792,7 +792,7 @@ public class Document {
 
   synchronized Document runPOS(Properties props) {
     // Cached result
-    if (this.sentences != null && ! this.sentences.isEmpty() && this.sentences.get(0).rawToken(0).hasPos()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPos()) {
       return this;
     }
     // Prerequisites
@@ -810,7 +810,7 @@ public class Document {
 
   synchronized Document runLemma(Properties props) {
     // Cached result
-    if (this.sentences != null && ! this.sentences.isEmpty() && this.sentences.get(0).rawToken(0).hasLemma()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasLemma()) {
       return this;
     }
     // Prerequisites
@@ -828,7 +828,7 @@ public class Document {
 
   synchronized Document mockLemma(Properties props) {
     // Cached result
-    if (this.sentences != null && ! this.sentences.isEmpty() && this.sentences.get(0).rawToken(0).hasLemma()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasLemma()) {
       return this;
     }
     // Prerequisites
@@ -843,7 +843,7 @@ public class Document {
   }
 
   synchronized Document runNER(Properties props) {
-    if (this.sentences != null && ! this.sentences.isEmpty() && this.sentences.get(0).rawToken(0).hasNer()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasNer()) {
       return this;
     }
     // Run prerequisites
@@ -874,7 +874,7 @@ public class Document {
   }
 
   synchronized Document runParse(Properties props) {
-    if (this.sentences != null && ! this.sentences.isEmpty() && this.sentences.get(0).rawSentence().hasParseTree()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasParseTree()) {
       return this;
     }
     // Run annotator
@@ -916,7 +916,7 @@ public class Document {
   }
 
   synchronized Document runDepparse(Properties props) {
-    if (this.sentences != null && ! this.sentences.isEmpty() &&
+    if (this.sentences != null && this.sentences.size() > 0 &&
         this.sentences.get(0).rawSentence().hasBasicDependencies()) {
       return this;
     }
@@ -940,7 +940,7 @@ public class Document {
   }
 
   synchronized Document runNatlog(Properties props) {
-    if (this.sentences != null && ! this.sentences.isEmpty() && this.sentences.get(0).rawToken(0).hasPolarity()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPolarity()) {
       return this;
     }
     // Run prerequisites
@@ -1012,12 +1012,12 @@ public class Document {
 
 
   synchronized Document runSentiment(Properties props) {
-    if (this.sentences != null && ! this.sentences.isEmpty() && this.sentences.get(0).rawSentence().hasSentiment()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasSentiment()) {
         return this;
     }
     // Run prerequisites
     runParse(props);
-    if (this.sentences != null && ! this.sentences.isEmpty() && ! this.sentences.get(0).rawSentence().hasBinarizedParseTree()) {
+    if (this.sentences != null && this.sentences.size() > 0 && !this.sentences.get(0).rawSentence().hasBinarizedParseTree()) {
       throw new IllegalStateException("No binarized parse tree (perhaps it's not supported in this language?)");
     }
     // Run annotator

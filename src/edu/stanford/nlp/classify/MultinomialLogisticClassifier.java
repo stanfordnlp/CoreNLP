@@ -11,8 +11,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -20,8 +18,6 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * A multinomial logistic regression classifier. Please see FlippingProbsLogisticClassifierFactory
@@ -35,9 +31,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassifier<L, F>, RVFClassifier<L, F> {
 
   private static final long serialVersionUID = 1L;
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels logger = Redwood.channels(MultinomialLogisticClassifier.class);
 
   private final double[][] weights;
   private final Index<F> featureIndex;
@@ -114,17 +107,17 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
     return result;
   }
 
-  private static <LL,FF> MultinomialLogisticClassifier<LL,FF> load(String path) {
-    Timing t = new Timing();
-    try (ObjectInputStream in = IOUtils.readStreamFromString(path)) {
-      double[][] myWeights = ErasureUtils.uncheckedCast(in.readObject());
-      Index<FF> myFeatureIndex = ErasureUtils.uncheckedCast(in.readObject());
-      Index<LL> myLabelIndex = ErasureUtils.uncheckedCast(in.readObject());
-      t.done(logger, "Loading classifier from " + path);
-      return new MultinomialLogisticClassifier<>(myWeights, myFeatureIndex, myLabelIndex);
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeIOException("Error loading classifier from " + path, e);
-    }
+  private static <LL,FF> MultinomialLogisticClassifier<LL,FF> load(String path)
+          throws IOException, ClassNotFoundException {
+    System.err.print("Loading classifier from " + path + "... ");
+
+    ObjectInputStream in = new ObjectInputStream(new FileInputStream(path));
+    double[][] myWeights = ErasureUtils.uncheckedCast(in.readObject());
+    Index<FF> myFeatureIndex = ErasureUtils.uncheckedCast(in.readObject());
+    Index<LL> myLabelIndex = ErasureUtils.uncheckedCast(in.readObject());
+    in.close();
+    System.err.println("done.");
+    return new MultinomialLogisticClassifier<>(myWeights, myFeatureIndex, myLabelIndex);
   }
 
   private void save(String path) throws IOException {

@@ -1,6 +1,6 @@
 ## tagger training invoked at Sun Sep 23 19:24:37 PST 2018 with arguments:
                    model = english-left3words-distsim.tagger
-                    arch = left3words,naacl2003unknowns,wordshapes(-1,1),distsim(/u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters,-1,1),distsimconjunction(/u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters,-1,1)
+                    arch = left3words,wordshapes(-1,1),distsim(/u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters,-1,1),distsimconjunction(/u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters,-1,1),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorUCase),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorCNumber),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorDash),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorLetterDigitDash),rareExtractor(edu.stanford.nlp.tagger.maxent.CompanyNameDetector),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorAllCapitalized),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorUpperDigitDash),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorStartSentenceCap),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorMidSentenceCapC),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorMidSentenceCap),prefix(10),suffix(10),unicodeshapes(0),rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorNonAlphanumeric)
             wordFunction = edu.stanford.nlp.process.AmericanizeFunction
                trainFile = /u/nlp/data/pos-tagger/english/train-wsj-0-18;/u/nlp/data/pos-tagger/english/train-extra-english;/u/nlp/data/pos-tagger/english/train-tech-english;/u/nlp/data/pos-tagger/english/train-currency
          closedClassTags = 
@@ -15,7 +15,7 @@
     learnClosedClassTags = false
         minFeatureThresh = 2
            openClassTags = 
-rareWordMinFeatureThresh = 10
+rareWordMinFeatureThresh = 5
           rareWordThresh = 5
                   search = owlqn
                     sgml = false

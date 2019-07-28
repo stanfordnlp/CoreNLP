@@ -15,11 +15,9 @@ import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Pair;
 
-public class ClassifierDemo {
+class ClassifierDemo {
 
   private static String where = "";
-
-  private ClassifierDemo() {} // Static methods
 
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
