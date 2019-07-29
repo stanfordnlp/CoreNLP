@@ -1,5 +1,5 @@
 // Stanford Dependencies - Code for producing and using Stanford dependencies.
-// Copyright © 2005-2014 The Board of Trustees of
+// Copyright © 2005-2014,2019 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -13,16 +13,15 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/stanford-dependencies.shtml
+//    http://nlp.stanford.edu/software/stanford-dependencies.html
 
 package edu.stanford.nlp.trees;
 
@@ -669,7 +668,11 @@ public class EnglishGrammaticalRelations {
             "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
             // JJ catches a couple of funny NPs with heads like "enough"
             // Note that we eliminate SBAR which also match an vmod pattern
-            "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )");
+            "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )",
+            // New ones to pick up some more "say" patterns (2019)
+            "VP < (/^V/ < " + sayVerbRegex + ") < (@S=target <+(S) (VP < /^VB[DZP]$/))",
+            "@S < /^S-TPC/=target < VP"
+          );
 
 
   /**
@@ -1137,7 +1140,10 @@ public class EnglishGrammaticalRelations {
             // for PP, only ones before head, or after NP, since others afterwards are pcomp
             "/(?:WH)?PP(?:-TMP|-ADV)?$/ <# (__ $-- (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + "))",
             "/(?:WH)?PP(?:-TMP|-ADV)?$/ < @NP|WHNP < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
-            "CONJP < (RB=target !< " + NOT_PAT + " !< " + ETC_PAT + ")");
+            "CONJP < (RB=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
+            // Sometimes you have a JJ before a JJ in an ADJP. Make it advmod. Rule out capitalized for (old TB) "New York-based"
+            "ADJP < (JJ|JJR|JJS=target $. JJ|JJR|JJS !< /^[A-Z]/) <# JJ|JJR|JJS !< (CC|CONJP)"
+          );
 
 
   /**

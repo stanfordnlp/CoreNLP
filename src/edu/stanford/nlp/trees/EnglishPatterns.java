@@ -58,9 +58,10 @@ public class EnglishPatterns {
   public static final String xcompNoObjVerbRegex =
       "/^(?i:advis|afford|allow|am$|appear|are$|ask|attempt|avoid|be$|bec[oa]m|beg[ia]n|believ|call|caus[ei]|ceas[ei]|choos[ei]|chose|claim|consider|continu|convinc|decid|decline|end|enjoy|expect|feel|felt|find|forb[ia]d|forc[ei]|forg[eo]t|found|going|gon|g[eo]t|happen|hat[ei]|ha[vds]|help|hesitat|hop[ei]|intend|instruct|invit|['i]s$|keep|kept|learn|leav[ei]|left|let|lik[ei]|look|lov[ei]|made|mak[ei]|manag|nam[ei]|need|offer|order|plan|pretend|proceed|promis|prov[ei]|rate|recommend|refus|regret|remember|requir|sa[iy]|seem|sound|start|stop|suggest|suppos|tell|tend|threaten|told|tr[yi]|turn|used|wan|was$|willing|wish)/";
 
-  // A list of verbs where the answer to a question involving that
-  // verb would be a ccomp.  For example, "I know when the train is
-  // arriving."  What does the person know?
+  /** A list of verbs where the answer to a question involving that
+   *  verb would be a ccomp.  For example, "I know when the train is
+   * arriving."  What does the person know?
+   */
   public static final String ccompVerbRegex =
     "/^(?i:ask|asks|asked|asking|know|knows|knew|knowing|specify|specifies|specified|specifying|tell|tells|told|telling|understand|understands|understood|understanding|wonder|wonders|wondered|wondering)$/";
 
@@ -70,6 +71,13 @@ public class EnglishPatterns {
   // expect a ccomp between "know" and the head of "when ..."
   public static final String ccompObjVerbRegex =
     "/^(?i:tell|tells|told|telling)$/";
+
+  /** A list of verbs which are verbs of speaking that easily take an S (as a complement or topicalized)
+   *  which is a direct speech ccomp. For example: "He concedes: ``This is a difficult market.''"
+   */
+  public static final String sayVerbRegex =
+    "/^(?i:say|says|said|saying|(?:add|counsel|respond|yell|remark|recall|boast|interject|short|confess|proclaim|report|claim)(?:s|ed|ing)?|(?:announc|acknowledg|conced|declar|stat)(?:e|es|ed|ing)|reply|replied|replies|replying|admit|admits|admitted|admitting|hold|holds|holding|held|write|writes|writing|wrote|tell|tells|telling|told|quipped|quip|quips|quipping|think|thinks|thinking|thought|write|writes|writing|wrote|agree|agrees|agreeing|agreed)$/";
+
 
   // TODO: is there some better pattern to look for? We do not have tag information at this point
   public static final String RELATIVIZING_WORD_REGEX = "(?i:that|what|which|who|whom|whose)";
