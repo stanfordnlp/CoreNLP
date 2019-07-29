@@ -18,6 +18,7 @@ import edu.stanford.nlp.neural.SimpleTensor;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.TwoDimensionalSet;
 
@@ -628,7 +629,10 @@ public class SentimentModel implements Serializable  {
 
   public static SentimentModel loadSerialized(String path) {
     try {
-      return IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
+      Timing timing = new Timing();
+      SentimentModel model = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
+      timing.done(log, "Loading sentiment model " + path);
+      return model;
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
