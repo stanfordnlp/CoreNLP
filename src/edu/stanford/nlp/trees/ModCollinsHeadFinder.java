@@ -59,7 +59,7 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
     // remove ADVP; it just shouldn't be there.
     // if two JJ, should take right one (e.g. South Korean)
     // nonTerminalInfo.put("ADJP", new String[][]{{"left", "NNS", "NN", "$", "QP"}, {"right", "JJ"}, {"left", "VBN", "VBG", "ADJP", "JJP", "JJR", "NP", "JJS", "DT", "FW", "RBR", "RBS", "SBAR", "RB"}});
-    nonTerminalInfo.put("ADJP", new String[][]{{"left", "$"}, {"rightdis", "NNS", "NN", "JJ", "QP", "VBN", "VBG"}, {"left", "ADJP"}, {"rightdis", "JJP", "JJR", "JJS", "DT", "RB", "RBR", "CD", "IN", "VBD"}, {"left", "ADVP", "NP"}});
+    nonTerminalInfo.put("ADJP", new String[][]{{"left", "$"}, {"rightdis", "NNS", "NN", "JJ", "JJP", "JJR", "JJS", "QP", "VBN", "VBG"}, {"left", "ADJP"}, {"rightdis", "DT", "RB", "RBR", "CD", "IN", "VBD"}, {"left", "ADVP", "NP"}});
     nonTerminalInfo.put("JJP", new String[][]{{"left", "NNS", "NN", "$", "QP", "JJ", "VBN", "VBG", "ADJP", "JJP", "JJR", "NP", "JJS", "DT", "FW", "RBR", "RBS", "SBAR", "RB"}});  // JJP is introduced for NML-like adjective phrases in Vadas' treebank; Chris wishes he hadn't used JJP which should be a POS-tag.
     // ADVP rule rewritten by Chris in Nov 2010 to be rightdis.  This is right! JJ.* is often head and rightmost.
     nonTerminalInfo.put("ADVP", new String[][]{{"left", "ADVP", "IN"},
