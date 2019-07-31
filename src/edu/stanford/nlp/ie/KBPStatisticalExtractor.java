@@ -177,11 +177,11 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
    * Get information from the span between the two mentions.
    * Canonically, get the words in this span.
    * For instance, for "Obama was born in Hawaii", this would return a list
-   * "was born in" if the selector is <code>CoreLabel::token</code>;
-   * or "be bear in" if the selector is <code>CoreLabel::lemma</code>.
+   * "was born in" if the selector is {@code CoreLabel::token};
+   * or "be bear in" if the selector is {@code CoreLabel::lemma}.
    *
    * @param input The featurizer input.
-   * @param selector The field to compute for each element in the span. A good default is <code></code>CoreLabel::word</code> or <code></code>CoreLabel::token</code>
+   * @param selector The field to compute for each element in the span. A good default is {@code CoreLabel::word} or {@code CoreLabel::token}
    * @param <E> The type of element returned by the selector.
    *
    * @return A list of elements between the two mentions.
@@ -194,7 +194,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
 
     // Corner cases
     if (Span.overlaps(subjSpan, objSpan)) {
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
 
     // Get the range between the subject and object
@@ -207,7 +207,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     if (begin > end) {
       throw new IllegalArgumentException("Gabor sucks at logic and he should feel bad about it: " + subjSpan + " and " + objSpan);
     } else if (begin == end) {
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
 
     // Compute the return value
