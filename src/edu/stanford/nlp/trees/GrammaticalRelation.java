@@ -318,8 +318,8 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       previous = sToR.put(toString(), this);
     }
     if (previous != null) {
-      if (!previous.isFromString() && !isFromString()) {
-        throw new IllegalArgumentException("There is already a relation named " + toString() + '!');
+      if ( ! previous.isFromString() && ! isFromString()) {
+        throw new IllegalArgumentException("There is already a relation named " + this + '!');
       } else {
         /* We get here if we previously just built a fake relation from a string
          * we previously read in from a file.
@@ -493,8 +493,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     // TODO(gabor) perhaps Language.Any shouldn't be equal to any language? This is a bit of a hack around some dependencies caring about language and others not.
     return (this.language.compatibleWith(gr.language)) &&
              this.shortName.equals(gr.shortName) &&
-             (this.specific == gr.specific ||
-              (this.specific != null && this.specific.equals(gr.specific)));
+             (Objects.equals(this.specific, gr.specific));
   }
 
   @Override
