@@ -49,8 +49,12 @@ public class DVParser  {
     return op;
   }
 
-  DVModel getDVModel() {
+  public DVModel getDVModel() {
     return dvModel;
+  }
+
+  public LexicalizedParser getBaseParser() {
+    return parser;
   }
 
   private static final NumberFormat NF = new DecimalFormat("0.00");
