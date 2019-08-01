@@ -27,7 +27,7 @@ public class DVModelReranker implements Reranker {
     this.model = model;
   }
 
-  DVModel getModel() {
+  public DVModel getModel() {
     return model;
   }
 
