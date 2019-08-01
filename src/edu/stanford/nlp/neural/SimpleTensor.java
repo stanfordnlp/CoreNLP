@@ -55,7 +55,13 @@ public class SimpleTensor implements Serializable {
       }
       this.slices[i] = new SimpleMatrix(slices[i]);
     }
+  }
 
+  /**
+   * Copies everything
+   */
+  public SimpleTensor(SimpleTensor other) {
+    this(other.slices);
   }
 
   /**
