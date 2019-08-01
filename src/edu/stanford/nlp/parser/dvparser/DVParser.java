@@ -41,9 +41,9 @@ public class DVParser  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(DVParser.class);
-  DVModel dvModel;
-  LexicalizedParser parser;
-  Options op;
+  final DVModel dvModel;
+  final LexicalizedParser parser;
+  final Options op;
 
   public Options getOp() {
     return op;
