@@ -14,6 +14,10 @@ import java.util.function.Function;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.neural.SimpleTensor;
+import edu.stanford.nlp.parser.dvparser.DVModel;
+import edu.stanford.nlp.parser.dvparser.DVModelReranker;
+import edu.stanford.nlp.parser.dvparser.DVParser;
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.sentiment.RNNOptions;
 import edu.stanford.nlp.sentiment.SentimentModel;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -25,6 +29,10 @@ public class ConvertModels {
 
   public enum Stage {
     OLD, NEW
+  }
+
+  public enum Model {
+    SENTIMENT, DVPARSER
   }
 
   /**
@@ -148,14 +156,66 @@ public class ConvertModels {
                               unaryClassification, wordVectors, op);
   }
 
+  public static void writeParser(LexicalizedParser model, DVModelReranker reranker, ObjectOutputStream out)
+    throws IOException
+  {
+    out.writeObject(model);
+    
+    Function<SimpleMatrix, List<List<Double>>> f = (SimpleMatrix x) -> fromMatrix(x);
+
+    DVModel dvmodel = reranker.getModel();
+    out.writeObject(transform2DMap(dvmodel.binaryTransform, f));
+    out.writeObject(transformMap(dvmodel.unaryTransform, f));
+    out.writeObject(transform2DMap(dvmodel.binaryScore, f));
+    out.writeObject(transformMap(dvmodel.unaryScore, f));
+    out.writeObject(transformMap(dvmodel.wordVectors, f));
+  }
+
+  public static LexicalizedParser readParser(ObjectInputStream in) 
+    throws IOException, ClassNotFoundException
+  {
+    LexicalizedParser model = ErasureUtils.uncheckedCast(in.readObject());
+
+    Function<List<List<Double>>, SimpleMatrix> f = (x) -> toMatrix(x);
+
+    TwoDimensionalMap<String, String, List<List<Double>>> map2dSM = 
+      ErasureUtils.uncheckedCast(in.readObject());
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryTransform = transform2DMap(map2dSM, f);
+
+    Map<String, List<List<Double>>> map = ErasureUtils.uncheckedCast(in.readObject());
+    Map<String, SimpleMatrix> unaryTransform = transformMap(map, f);
+
+    map2dSM = ErasureUtils.uncheckedCast(in.readObject());
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryScore = transform2DMap(map2dSM, f);
+
+    map = ErasureUtils.uncheckedCast(in.readObject());
+    Map<String, SimpleMatrix> unaryScore = transformMap(map, f);
+
+    map = ErasureUtils.uncheckedCast(in.readObject());
+    Map<String, SimpleMatrix> wordVectors = transformMap(map, f);
+
+    DVModel dvModel = new DVModel(binaryTransform, unaryTransform, binaryScore,
+                                  unaryScore, wordVectors, model.getOp());
+    DVModelReranker reranker = new DVModelReranker(dvModel);
+    model.reranker = reranker;
+    return model;
+  }
+
   public static void main(String[] args) throws IOException, ClassNotFoundException {
     Properties props = StringUtils.argsToProperties(args);
 
-    Stage stage;
+    final Stage stage;
     try {
-      stage = Stage.valueOf(props.getProperty("stage"));
+      stage = Stage.valueOf(props.getProperty("stage").toUpperCase());
     } catch (IllegalArgumentException | NullPointerException e) {
       throw new IllegalArgumentException("Please specify -stage, either OLD or NEW");
+    }
+
+    final Model modelType;
+    try {
+      modelType = Model.valueOf(props.getProperty("model").toUpperCase());
+    } catch (IllegalArgumentException | NullPointerException e) {
+      throw new IllegalArgumentException("Please specify -model, either SENTIMENT or DVPARSER");
     }
 
     if (!props.containsKey("input")) {
@@ -166,15 +226,35 @@ public class ConvertModels {
       throw new IllegalArgumentException("Please specify -output");
     }
 
-    if (stage == Stage.OLD) {
-      SentimentModel model = SentimentModel.loadSerialized(props.getProperty("input"));
-      ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(props.getProperty("output")));
-      writeSentiment(model, out);
-      out.close();
-    } else {
-      ObjectInputStream in = new ObjectInputStream(new FileInputStream(props.getProperty("input")));
-      SentimentModel model = readSentiment(in);
-      model.saveSerialized(props.getProperty("output"));
+    if (modelType == Model.SENTIMENT) {
+      if (stage == Stage.OLD) {
+        SentimentModel model = SentimentModel.loadSerialized(props.getProperty("input"));
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(props.getProperty("output")));
+        writeSentiment(model, out);
+        out.close();
+      } else {
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream(props.getProperty("input")));
+        SentimentModel model = readSentiment(in);
+        model.saveSerialized(props.getProperty("output"));
+      }
+    } else if (modelType == Model.DVPARSER) {
+      if (stage == Stage.OLD) {
+        String inFile = props.getProperty("input");
+        LexicalizedParser model = LexicalizedParser.loadModel(inFile);
+        if (model.reranker == null) {
+          System.out.println("Nothing to do for " + inFile);
+        } else {
+          DVModelReranker reranker = (DVModelReranker) model.reranker; // will barf if not successful
+          model.reranker = null;
+          ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(props.getProperty("output")));
+          writeParser(model, reranker, out);
+          out.close();
+        }
+      } else {
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream(props.getProperty("input")));
+        LexicalizedParser model = readParser(in);
+        model.saveParserToSerialized(props.getProperty("output"));
+      }
     }
   }
 }
