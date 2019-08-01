@@ -118,6 +118,17 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
     }
   }
 
+  /**
+   * Replace each of the elements with the application of a function.
+   *
+   * TODO: use a TriFunction?  Such a thing does not exist
+   */
+  public void replaceAll(Function<V, ? extends V> f) {
+    for (K1 k : map.keySet()) {
+      map.get(k).replaceAll((x, y) -> f.apply(y));
+    }
+  }
+
   public TwoDimensionalMap() {
     this(MapFactory.<K1, Map<K2, V>>hashMapFactory(), MapFactory.<K2, V>hashMapFactory());
   }
