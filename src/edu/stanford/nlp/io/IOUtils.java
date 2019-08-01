@@ -313,11 +313,12 @@ public class IOUtils  {
 
   public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(Redwood.RedwoodChannels log, String msg, String path) {
     T obj;
+    Timing timing = new Timing();
     try {
-      Timing timing = new Timing();
       obj = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
       log.info(msg + ' ' + path + " ... done [" + timing.toSecondsString() + " sec].");
     } catch (IOException | ClassNotFoundException e) {
+      log.info(msg + ' ' + path + " ... failed! [" + timing.toSecondsString() + " sec].");
       throw new RuntimeIOException(e);
     }
     return obj;
