@@ -82,6 +82,13 @@ public class DVModel implements Serializable  {
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     in.defaultReadObject();
 
+    // TODO: get rid of this when ejml is upgraded to a version which can deserialize SimpleMatrix
+    binaryTransform.replaceAll(x -> new SimpleMatrix(x));
+    unaryTransform.replaceAll((x, y) -> new SimpleMatrix(y));
+    binaryScore.replaceAll(x -> new SimpleMatrix(x));
+    unaryScore.replaceAll((x, y) -> new SimpleMatrix(y));
+    wordVectors.replaceAll((x, y) -> new SimpleMatrix(y));
+
     identity = SimpleMatrix.identity(numRows);
   }
 
