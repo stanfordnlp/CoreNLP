@@ -187,7 +187,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private static final boolean DEBUG = false;
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels LOGGER = Redwood.channels(SpanishLexer.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(SpanishLexer.class);
 
   private LexedTokenFactory<?> tokenFactory;
   private CoreLabel prevWord;
@@ -252,28 +252,6 @@ import edu.stanford.nlp.util.logging.Redwood;
   private static final Pattern ONE_THIRD_PATTERN = Pattern.compile("\u2153");
   private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
 
-  private Object normalizeFractions(final String in) {
-    // Strip non-breaking space
-    String out = NO_BREAK_SPACE.matcher(in).replaceAll("");
-
-    if (normalizeFractions) {
-      if (escapeForwardSlashAsterisk) {
-        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1\\\\/4");
-        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1\\\\/2");
-        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3\\\\/4");
-        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1\\\\/3");
-        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2\\\\/3");
-      } else {
-        out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1/4");
-        out = ONE_HALF_PATTERN.matcher(out).replaceAll("1/2");
-        out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3/4");
-        out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1/3");
-        out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2/3");
-      }
-    }
-    return getNext(out, in);
-  }
-
 
   private static String  Shlomi2AsciiQuotes(String in) {
     return LexerUtils.asciiQuotes(in);
@@ -284,30 +262,11 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
 
-  private static String nonCp1252Quotes(String in) {
-    switch(in) {
-    case "\u008B":
-      return "\u2039";
-    case "\u0091":
-      return "\u2018";
-    case "\u0092":
-      return "\u2019";
-    case "\u0093":
-      return "\u201C";
-    case "\u0094":
-      return "\u201D";
-    case "\u009B":
-      return "\u203A";
-    default:
-      return in;
-    }
-  }
-
   private String handleQuotes(String in){
     if (asciiQuotes) {
       return LexerUtils.asciiQuotes(in);
     } else {
-      return nonCp1252Quotes(in);
+      return LexerUtils.nonCp1252Quotes(in);
     }
   }
 
@@ -332,10 +291,11 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
   private static String convertToEl(String l) {
-    if(Character.isLowerCase(l.charAt(0)))
-	return "e" + l;
-    else
-        return "E" + l;
+    if (Character.isLowerCase(l.charAt(0))) {
+      return "e" + l;
+    } else {
+      return "E" + l;
+    }
   }
 
   private Object getNext() {
@@ -643,12 +603,18 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 			  if ("\u0080".equals(tok)) {
 			      norm = "\u20AC";
                           }
-                          if (DEBUG) { LOGGER.info("Used {MONEYSIGN} to recognize " + tok + " as " + norm); }
+                          if (DEBUG) { logger.info("Used {MONEYSIGN} to recognize " + tok + " as " + norm); }
                           return getNext(norm, tok);
 			}
 {FRAC} |
 {FRACSTB3} |
-{FRAC2}			{ return normalizeFractions(yytext()); }
+{FRAC2}                     { String txt = yytext();
+                              String norm = LexerUtils.normalizeFractions(normalizeFractions, escapeForwardSlashAsterisk, txt);
+                              if (DEBUG) { logger.info("Used {FRAC2} to recognize " + txt + " as " + norm +
+                                                   "; normalizeFractions=" + normalizeFractions +
+                                                   ", escapeForwardSlashAsterisk=" + escapeForwardSlashAsterisk); }
+                              return getNext(norm, txt);
+                            }
 
 {ABBREV1}/{SENTEND}	{
                           String s;
@@ -702,7 +668,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                   return getNext(txt, origText);
                 }
 {EMOJI}         { String txt = yytext();
-                  if (DEBUG) { LOGGER.info("Used {EMOJI} to recognize " + txt); }
+                  if (DEBUG) { logger.info("Used {EMOJI} to recognize " + txt); }
                   return getNext(txt, txt);
                 }
 {OPBRAC}	{ if (normalizeOtherBrackets) {
@@ -771,7 +737,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 {MISCSYMBOL}	{ return getNext(); }
 {CP1252_MISC_SYMBOL}  { String tok = yytext();
                         String norm = LexerUtils.processCp1252misc(tok);
-                        if (DEBUG) { LOGGER.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
+                        if (DEBUG) { logger.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
                         return getNext(norm, tok);
                       }
 
@@ -803,7 +769,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                 prevWordAfter.append(str);
               }
               if ( ! this.seenUntokenizableCharacter) {
-                LOGGER.warning(msg);
+                logger.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               break;
@@ -811,19 +777,19 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
               if (invertible) {
                 prevWordAfter.append(str);
               }
-              LOGGER.warning(msg);
+              logger.warning(msg);
               this.seenUntokenizableCharacter = true;
               break;
             case NONE_KEEP:
               return getNext();
             case FIRST_KEEP:
               if ( ! this.seenUntokenizableCharacter) {
-                LOGGER.warning(msg);
+                logger.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               return getNext();
             case ALL_KEEP:
-              LOGGER.warning(msg);
+              logger.warning(msg);
               this.seenUntokenizableCharacter = true;
               return getNext();
           }

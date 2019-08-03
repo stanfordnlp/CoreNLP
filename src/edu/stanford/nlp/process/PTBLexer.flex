@@ -407,65 +407,12 @@ import edu.stanford.nlp.util.logging.Redwood;
    * em dash    97      0151    2014    8212
    */
 
-  private static final Pattern singleQuote = Pattern.compile("&apos;|'");
-  // If they typed `` they probably meant it, but if it's '' or mixed, we use our heuristics.
-  private static final Pattern doubleQuote = Pattern.compile("\"|''|'`|`'|&quot;");
-
-  // 82,84,91,92,93,94 aren't valid unicode points, but sometimes they show
-  // up from cp1252 and need to be translated
-  private static final Pattern leftSingleQuote = Pattern.compile("[\u0082\u008B\u0091\u2018\u201A\u201B\u2039]");
-  private static final Pattern rightSingleQuote = Pattern.compile("[\u0092\u009B\u00B4\u2019\u203A]");
-  private static final Pattern leftDoubleQuote = Pattern.compile("[\u0084\u0093\u201C\u201E\u00AB]|[\u0091\u2018]'");
-  private static final Pattern rightDoubleQuote = Pattern.compile("[\u0094\u201D\u00BB]|[\u0092\u2019]'");
-
-  private static String latexQuotes(String in, boolean probablyLeft) {
-    // System.err.println("Handling quote on " + in + " probablyLeft=" + probablyLeft);
-    String s1 = in;
-    if (probablyLeft) {
-      s1 = singleQuote.matcher(s1).replaceAll("`");
-      s1 = doubleQuote.matcher(s1).replaceAll("``");
-    } else {
-      s1 = singleQuote.matcher(s1).replaceAll("'");
-      s1 = doubleQuote.matcher(s1).replaceAll("''");
-    }
-    s1 = leftSingleQuote.matcher(s1).replaceAll("`");
-    s1 = rightSingleQuote.matcher(s1).replaceAll("'");
-    s1 = leftDoubleQuote.matcher(s1).replaceAll("``");
-    s1 = rightDoubleQuote.matcher(s1).replaceAll("''");
-    // System.err.println("  Mapped to " + s1);
-    return s1;
-  }
-
-  private static final Pattern unicodeLeftSingleQuote = Pattern.compile("\u0091");
-  private static final Pattern unicodeRightSingleQuote = Pattern.compile("\u0092");
-  private static final Pattern unicodeLeftDoubleQuote = Pattern.compile("\u0093");
-  private static final Pattern unicodeRightDoubleQuote = Pattern.compile("\u0094");
-  private static final Pattern leftDuck = Pattern.compile("\u008B");
-  private static final Pattern rightDuck = Pattern.compile("\u009B");
-
-  private static String unicodeQuotes(String in, boolean probablyLeft) {
-    String s1 = in;
-    if (probablyLeft) {
-      s1 = singleQuote.matcher(s1).replaceAll("\u2018");
-      s1 = doubleQuote.matcher(s1).replaceAll("\u201c");
-    } else {
-      s1 = singleQuote.matcher(s1).replaceAll("\u2019");
-      s1 = doubleQuote.matcher(s1).replaceAll("\u201d");
-    }
-    s1 = unicodeLeftSingleQuote.matcher(s1).replaceAll("\u2018");
-    s1 = unicodeRightSingleQuote.matcher(s1).replaceAll("\u2019");
-    s1 = unicodeLeftDoubleQuote.matcher(s1).replaceAll("\u201c");
-    s1 = unicodeRightDoubleQuote.matcher(s1).replaceAll("\u201d");
-    s1 = leftDuck.matcher(s1).replaceAll("\u2039");
-    s1 = rightDuck.matcher(s1).replaceAll("\u203A");
-    return s1;
-  }
 
   private String handleQuotes(String tok, boolean probablyLeft) {
     if (latexQuotes) {
-      return latexQuotes(tok, probablyLeft);
+      return LexerUtils.latexQuotes(tok, probablyLeft);
     } else if (unicodeQuotes) {
-      return unicodeQuotes(tok, probablyLeft);
+      return LexerUtils.unicodeQuotes(tok, probablyLeft);
     } else if (asciiQuotes) {
       return LexerUtils.asciiQuotes(tok);
     } else {
@@ -997,7 +944,7 @@ RM/{NUM}        { String txt = yytext();
                   return getNext(txt, yytext());
                 }
 {FRAC2}         { String txt = yytext();
-                  String norm = LexerUtils.normalizeFractions(normalizeFractions, escapeForwardSlashAsterisk, yytext());
+                  String norm = LexerUtils.normalizeFractions(normalizeFractions, escapeForwardSlashAsterisk, txt);
                   if (DEBUG) { logger.info("Used {FRAC2} to recognize " + txt + " as " + norm +
                                        "; normalizeFractions=" + normalizeFractions +
                                        ", escapeForwardSlashAsterisk=" + escapeForwardSlashAsterisk); }

@@ -24,7 +24,13 @@ public class LexerUtils {
   private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
 
 
-  /** Change precomposed fraction characters to spelled out letter forms. */
+  /** Change precomposed fraction characters to spelled out letter forms.
+   *
+   *  @param normalizeFractions If false, do nothing; if true normalize to ASCII character sequence
+   *  @param escapeForwardSlashAsterisk If true also escape forward slash with backslash (deprecated historical PTB)
+   *  @param in The input string to normalize
+   *  @return The normalized fraction string
+   */
   public static String normalizeFractions(boolean normalizeFractions, boolean escapeForwardSlashAsterisk, final String in) {
     String out = in;
     if (normalizeFractions) {
@@ -135,9 +141,21 @@ public class LexerUtils {
     return s;
   }
 
+
+  private static final Pattern singleQuote = Pattern.compile("&apos;|'");
+  // If they typed `` they probably meant it, but if it's '' or mixed, we use our heuristics.
+  private static final Pattern doubleQuote = Pattern.compile("\"|''|'`|`'|&quot;");
+
   // U+00B4 should be acute accent, but stuff happens
   private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0082\u008B\u0091\u00B4\u2018\u0092\u2019\u009B\u201A\u201B\u2039\u203A']");
   private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
+
+  // 82,84,91,92,93,94 aren't valid unicode points, but sometimes they show
+  // up from cp1252 and need to be translated
+  private static final Pattern leftSingleQuote = Pattern.compile("[\u0082\u008B\u0091\u2018\u201A\u201B\u2039]");
+  private static final Pattern rightSingleQuote = Pattern.compile("[\u0092\u009B\u00B4\u2019\u203A]");
+  private static final Pattern leftDoubleQuote = Pattern.compile("[\u0084\u0093\u201C\u201E\u00AB]|[\u0091\u2018]'");
+  private static final Pattern rightDoubleQuote = Pattern.compile("[\u0094\u201D\u00BB]|[\u0092\u2019]'");
 
   /** Convert all single and double quote like characters to the ASCII quote characters: ' ". */
   public static String asciiQuotes(String in) {
@@ -147,6 +165,67 @@ public class LexerUtils {
     return s1;
   }
 
+  public static String latexQuotes(String in, boolean probablyLeft) {
+    // System.err.println("Handling quote on " + in + " probablyLeft=" + probablyLeft);
+    String s1 = in;
+    if (probablyLeft) {
+      s1 = singleQuote.matcher(s1).replaceAll("`");
+      s1 = doubleQuote.matcher(s1).replaceAll("``");
+    } else {
+      s1 = singleQuote.matcher(s1).replaceAll("'");
+      s1 = doubleQuote.matcher(s1).replaceAll("''");
+    }
+    s1 = leftSingleQuote.matcher(s1).replaceAll("`");
+    s1 = rightSingleQuote.matcher(s1).replaceAll("'");
+    s1 = leftDoubleQuote.matcher(s1).replaceAll("``");
+    s1 = rightDoubleQuote.matcher(s1).replaceAll("''");
+    // System.err.println("  Mapped to " + s1);
+    return s1;
+  }
 
+  private static final Pattern unicodeLeftSingleQuote = Pattern.compile("\u0091");
+  private static final Pattern unicodeRightSingleQuote = Pattern.compile("\u0092");
+  private static final Pattern unicodeLeftDoubleQuote = Pattern.compile("\u0093");
+  private static final Pattern unicodeRightDoubleQuote = Pattern.compile("\u0094");
+  private static final Pattern leftDuck = Pattern.compile("\u008B");
+  private static final Pattern rightDuck = Pattern.compile("\u009B");
+
+  public static String unicodeQuotes(String in, boolean probablyLeft) {
+    String s1 = in;
+    if (probablyLeft) {
+      s1 = singleQuote.matcher(s1).replaceAll("\u2018");
+      s1 = doubleQuote.matcher(s1).replaceAll("\u201c");
+    } else {
+      s1 = singleQuote.matcher(s1).replaceAll("\u2019");
+      s1 = doubleQuote.matcher(s1).replaceAll("\u201d");
+    }
+    s1 = unicodeLeftSingleQuote.matcher(s1).replaceAll("\u2018");
+    s1 = unicodeRightSingleQuote.matcher(s1).replaceAll("\u2019");
+    s1 = unicodeLeftDoubleQuote.matcher(s1).replaceAll("\u201c");
+    s1 = unicodeRightDoubleQuote.matcher(s1).replaceAll("\u201d");
+    s1 = leftDuck.matcher(s1).replaceAll("\u2039");
+    s1 = rightDuck.matcher(s1).replaceAll("\u203A");
+    return s1;
+  }
+
+  /** This was the version originally written for Spanish to just recode cp1252 range quotes. */
+  public static String nonCp1252Quotes(String in) {
+    switch(in) {
+      case "\u008B":
+        return "\u2039";
+      case "\u0091":
+        return "\u2018";
+      case "\u0092":
+        return "\u2019";
+      case "\u0093":
+        return "\u201C";
+      case "\u0094":
+        return "\u201D";
+      case "\u009B":
+        return "\u203A";
+      default:
+        return in;
+    }
+  }
 
 }

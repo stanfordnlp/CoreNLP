@@ -12726,7 +12726,7 @@ class FrenchLexer {
   private static final boolean DEBUG = false;
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels LOGGER = Redwood.channels(FrenchLexer.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(FrenchLexer.class);
 
 
   private LexedTokenFactory<?> tokenFactory;
@@ -12776,27 +12776,6 @@ class FrenchLexer {
   public static final String COMPOUND_ANNOTATION = "comp";
   public static final String CONTR_ANNOTATION = "contraction";
 
-
-  private Object normalizeFractions(final String in) {
-    // Strip non-breaking space
-    String out = in.replaceAll("\u00A0", "");
-    if (normalizeFractions) {
-      if (escapeForwardSlashAsterisk) {
-        out = out.replaceAll("\u00BC", "1\\\\/4");
-        out = out.replaceAll("\u00BD", "1\\\\/2");
-        out = out.replaceAll("\u00BE", "3\\\\/4");
-        out = out.replaceAll("\u2153", "1\\\\/3");
-        out = out.replaceAll("\u2153", "2\\\\/3");
-     } else {
-        out = out.replaceAll("\u00BC", "1/4");
-        out = out.replaceAll("\u00BD", "1/2");
-        out = out.replaceAll("\u00BE", "3/4");
-        out = out.replaceAll("\u2153", "1/3");
-        out = out.replaceAll("\u2153", "2/3");
-      }
-    }
-    return getNext(out, in);
-  }
 
   private static String asciiDash(String in) {
     return in.replaceAll("[_\u058A\u2010\u2011]","-");
@@ -13192,7 +13171,7 @@ class FrenchLexer {
                 prevWordAfter.append(str);
               }
               if ( ! this.seenUntokenizableCharacter) {
-                LOGGER.warning(msg);
+                logger.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               break;
@@ -13200,19 +13179,19 @@ class FrenchLexer {
               if (invertible) {
                 prevWordAfter.append(str);
               }
-              LOGGER.warning(msg);
+              logger.warning(msg);
               this.seenUntokenizableCharacter = true;
               break;
             case NONE_KEEP:
               return getNext();
             case FIRST_KEEP:
               if ( ! this.seenUntokenizableCharacter) {
-                LOGGER.warning(msg);
+                logger.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               return getNext();
             case ALL_KEEP:
-              LOGGER.warning(msg);
+              logger.warning(msg);
               this.seenUntokenizableCharacter = true;
               return getNext();
           }
@@ -13282,7 +13261,12 @@ class FrenchLexer {
             }
           case 46: break;
           case 11: 
-            { return normalizeFractions(yytext());
+            { String txt = yytext();
+                              String norm = LexerUtils.normalizeFractions(normalizeFractions, escapeForwardSlashAsterisk, txt);
+                              if (DEBUG) { logger.info("Used {FRAC2} to recognize " + txt + " as " + norm +
+                                                   "; normalizeFractions=" + normalizeFractions +
+                                                   ", escapeForwardSlashAsterisk=" + escapeForwardSlashAsterisk); }
+                              return getNext(norm, txt);
             }
           case 47: break;
           case 12: 
@@ -13324,7 +13308,7 @@ class FrenchLexer {
           case 52: break;
           case 17: 
             { String txt = yytext();
-                  if (DEBUG) { LOGGER.info("Used {EMOJI} to recognize " + txt); }
+                  if (DEBUG) { logger.info("Used {EMOJI} to recognize " + txt); }
                   return getNext(txt, txt);
             }
           case 53: break;

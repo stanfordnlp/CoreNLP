@@ -180,7 +180,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private static final boolean DEBUG = false;
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels LOGGER = Redwood.channels(FrenchLexer.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(FrenchLexer.class);
 
 
   private LexedTokenFactory<?> tokenFactory;
@@ -230,27 +230,6 @@ import edu.stanford.nlp.util.logging.Redwood;
   public static final String COMPOUND_ANNOTATION = "comp";
   public static final String CONTR_ANNOTATION = "contraction";
 
-
-  private Object normalizeFractions(final String in) {
-    // Strip non-breaking space
-    String out = in.replaceAll("\u00A0", "");
-    if (normalizeFractions) {
-      if (escapeForwardSlashAsterisk) {
-        out = out.replaceAll("\u00BC", "1\\\\/4");
-        out = out.replaceAll("\u00BD", "1\\\\/2");
-        out = out.replaceAll("\u00BE", "3\\\\/4");
-        out = out.replaceAll("\u2153", "1\\\\/3");
-        out = out.replaceAll("\u2153", "2\\\\/3");
-     } else {
-        out = out.replaceAll("\u00BC", "1/4");
-        out = out.replaceAll("\u00BD", "1/2");
-        out = out.replaceAll("\u00BE", "3/4");
-        out = out.replaceAll("\u2153", "1/3");
-        out = out.replaceAll("\u2153", "2/3");
-      }
-    }
-    return getNext(out, in);
-  }
 
   private static String asciiDash(String in) {
     return in.replaceAll("[_\u058A\u2010\u2011]","-");
@@ -499,7 +478,7 @@ cannot			{ yypushback(3) ; return getNext(); }
 {COMPOUND} |
 {COMPOUND2}             { final String origTxt = yytext();
                           return getNext(asciiDash(origTxt), origTxt, COMPOUND_ANNOTATION);
-			}
+			                  }
 
 {WORD}			{ return getNext(); }
 
@@ -525,7 +504,13 @@ cannot			{ yypushback(3) ; return getNext(); }
 
 {FRAC} |
 {FRACSTB3} |
-{FRAC2}			{ return normalizeFractions(yytext()); }
+{FRAC2}			                { String txt = yytext();
+                              String norm = LexerUtils.normalizeFractions(normalizeFractions, escapeForwardSlashAsterisk, txt);
+                              if (DEBUG) { logger.info("Used {FRAC2} to recognize " + txt + " as " + norm +
+                                                   "; normalizeFractions=" + normalizeFractions +
+                                                   ", escapeForwardSlashAsterisk=" + escapeForwardSlashAsterisk); }
+                              return getNext(norm, txt);
+                            }
 
 {ABBREV1}/{SENTEND}	{
                           String s;
@@ -569,7 +554,7 @@ cannot			{ yypushback(3) ; return getNext(); }
                      prevWordAfter.append(yytext());
                   } }
 {EMOJI}         { String txt = yytext();
-                  if (DEBUG) { LOGGER.info("Used {EMOJI} to recognize " + txt); }
+                  if (DEBUG) { logger.info("Used {EMOJI} to recognize " + txt); }
                   return getNext(txt, txt);
                 }
 {OPBRAC}	{ if (normalizeOtherBrackets) {
@@ -665,7 +650,7 @@ cannot			{ yypushback(3) ; return getNext(); }
                 prevWordAfter.append(str);
               }
               if ( ! this.seenUntokenizableCharacter) {
-                LOGGER.warning(msg);
+                logger.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               break;
@@ -673,19 +658,19 @@ cannot			{ yypushback(3) ; return getNext(); }
               if (invertible) {
                 prevWordAfter.append(str);
               }
-              LOGGER.warning(msg);
+              logger.warning(msg);
               this.seenUntokenizableCharacter = true;
               break;
             case NONE_KEEP:
               return getNext();
             case FIRST_KEEP:
               if ( ! this.seenUntokenizableCharacter) {
-                LOGGER.warning(msg);
+                logger.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               return getNext();
             case ALL_KEEP:
-              LOGGER.warning(msg);
+              logger.warning(msg);
               this.seenUntokenizableCharacter = true;
               return getNext();
           }
