@@ -69,6 +69,7 @@ public class JodaTimeUtils {
   public static final DurationFieldType Quarters = new DurationFieldType("quarters") {
     private static final long serialVersionUID = -8167713675442491871L;
 
+    @Override
     public DurationField getField(Chronology chronology) {
       return new ScaledDurationField(chronology.months(), Quarters, 3);
     }
@@ -77,6 +78,7 @@ public class JodaTimeUtils {
   public static final DurationFieldType HalfYears = new DurationFieldType("halfyear") {
     private static final long serialVersionUID = -8167713675442491872L;
 
+    @Override
     public DurationField getField(Chronology chronology) {
       return new ScaledDurationField(chronology.months(), HalfYears, 6);
     }
@@ -85,6 +87,7 @@ public class JodaTimeUtils {
   public static final DurationFieldType Decades = new DurationFieldType("decades") {
     private static final long serialVersionUID = -4594189766036833410L;
 
+    @Override
     public DurationField getField(Chronology chronology) {
       return new ScaledDurationField(chronology.years(), Decades, 10);
     }
@@ -93,6 +96,7 @@ public class JodaTimeUtils {
   public static final DurationFieldType Centuries = new DurationFieldType("centuries") {
     private static final long serialVersionUID = -7268694266711862790L;
 
+    @Override
     public DurationField getField(Chronology chronology) {
       return new ScaledDurationField(chronology.years(), Centuries, 100);
     }
@@ -102,14 +106,17 @@ public class JodaTimeUtils {
   public static final DateTimeFieldType QuarterOfYear = new DateTimeFieldType("quarterOfYear") {
     private static final long serialVersionUID = -5677872459807379123L;
 
+    @Override
     public DurationFieldType getDurationType() {
       return Quarters;
     }
 
+    @Override
     public DurationFieldType getRangeDurationType() {
       return DurationFieldType.years();
     }
 
+    @Override
     public DateTimeField getField(Chronology chronology) {
       return new OffsetDateTimeField(new DividedDateTimeField(new OffsetDateTimeField(chronology.monthOfYear(), -1), QuarterOfYear, 3), 1);
     }
@@ -118,14 +125,17 @@ public class JodaTimeUtils {
   public static final DateTimeFieldType HalfYearOfYear = new DateTimeFieldType("halfYearOfYear") {
     private static final long serialVersionUID = -5677872459807379123L;
 
+    @Override
     public DurationFieldType getDurationType() {
       return HalfYears;
     }
 
+    @Override
     public DurationFieldType getRangeDurationType() {
       return DurationFieldType.years();
     }
 
+    @Override
     public DateTimeField getField(Chronology chronology) {
       return new OffsetDateTimeField(new DividedDateTimeField(new OffsetDateTimeField(chronology.monthOfYear(), -1), HalfYearOfYear, 6), 1);
     }
@@ -134,14 +144,17 @@ public class JodaTimeUtils {
   public static final DateTimeFieldType MonthOfQuarter = new DateTimeFieldType("monthOfQuarter") {
     private static final long serialVersionUID = -5677872459807379123L;
 
+    @Override
     public DurationFieldType getDurationType() {
       return DurationFieldType.months();
     }
 
+    @Override
     public DurationFieldType getRangeDurationType() {
       return Quarters;
     }
 
+    @Override
     public DateTimeField getField(Chronology chronology) {
       return new OffsetDateTimeField(new RemainderDateTimeField(new OffsetDateTimeField(chronology.monthOfYear(), -1), MonthOfQuarter, 3), 1);
     }
@@ -150,14 +163,17 @@ public class JodaTimeUtils {
   public static final DateTimeFieldType MonthOfHalfYear = new DateTimeFieldType("monthOfHalfYear") {
     private static final long serialVersionUID = -5677872459807379123L;
 
+    @Override
     public DurationFieldType getDurationType() {
       return DurationFieldType.months();
     }
 
+    @Override
     public DurationFieldType getRangeDurationType() {
       return HalfYears;
     }
 
+    @Override
     public DateTimeField getField(Chronology chronology) {
       return new OffsetDateTimeField(new RemainderDateTimeField(new OffsetDateTimeField(chronology.monthOfYear(), -1), MonthOfHalfYear, 6), 1);
     }
@@ -166,14 +182,17 @@ public class JodaTimeUtils {
   public static final DateTimeFieldType WeekOfMonth = new DateTimeFieldType("weekOfMonth") {
     private static final long serialVersionUID = 8676056306203579438L;
 
+    @Override
     public DurationFieldType getDurationType() {
       return DurationFieldType.weeks();
     }
 
+    @Override
     public DurationFieldType getRangeDurationType() {
       return DurationFieldType.months();
     }
 
+    @Override
     public DateTimeField getField(Chronology chronology) {
       return new OffsetDateTimeField(new RemainderDateTimeField(new OffsetDateTimeField(chronology.weekOfWeekyear(), -1), WeekOfMonth, 4), 1);
     }
@@ -182,14 +201,17 @@ public class JodaTimeUtils {
   public static final DateTimeFieldType DecadeOfCentury = new DateTimeFieldType("decadeOfCentury") {
     private static final long serialVersionUID = 4301444712229535664L;
 
+    @Override
     public DurationFieldType getDurationType() {
       return Decades;
     }
 
+    @Override
     public DurationFieldType getRangeDurationType() {
       return DurationFieldType.centuries();
     }
 
+    @Override
     public DateTimeField getField(Chronology chronology) {
       return new DividedDateTimeField(chronology.yearOfCentury(), DecadeOfCentury, 10);
     }
@@ -198,14 +220,17 @@ public class JodaTimeUtils {
   public static final DateTimeFieldType YearOfDecade = new DateTimeFieldType("yearOfDecade") {
     private static final long serialVersionUID = 4301444712229535664L;
 
+    @Override
     public DurationFieldType getDurationType() {
       return DurationFieldType.years();
     }
 
+    @Override
     public DurationFieldType getRangeDurationType() {
       return Decades;
     }
 
+    @Override
     public DateTimeField getField(Chronology chronology) {
       return new DividedDateTimeField(chronology.yearOfCentury(), YearOfDecade, 10);
     }
