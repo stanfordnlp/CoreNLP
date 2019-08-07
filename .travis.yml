@@ -2,7 +2,8 @@ language: java
 sudo: required
 
 jdk:
-- oraclejdk8
+- openjdk8
+# - oraclejdk8
 # `openjdk8` not available
 
 install:
