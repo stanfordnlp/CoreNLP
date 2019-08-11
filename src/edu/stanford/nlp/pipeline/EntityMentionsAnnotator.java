@@ -45,8 +45,6 @@ public class EntityMentionsAnnotator implements Annotator {
    */
   private final boolean doAcronyms;
 
-  private boolean matchTokenText = false;
-
   private LanguageInfo.HumanLanguage entityMentionsLanguage;
 
   // TODO: Provide properties
@@ -301,16 +299,6 @@ public class EntityMentionsAnnotator implements Annotator {
               }
             }
           }
-
-          if (!matchTokenText) {
-            String entityMentionText =
-                    annotation.get(CoreAnnotations.TextAnnotation.class).substring(
-                            mention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-                            mention.get(CoreAnnotations.CharacterOffsetEndAnnotation.class)
-                    );
-            mention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
-          }
-
         }
       }
 
