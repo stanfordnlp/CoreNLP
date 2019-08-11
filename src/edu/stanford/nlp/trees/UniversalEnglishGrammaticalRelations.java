@@ -1,5 +1,5 @@
 // Universal Stanford Dependencies - Code for producing and using Universal Stanford dependencies.
-// Copyright © 2005-2014 The Board of Trustees of
+// Copyright © 2013-2019 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -13,8 +13,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
@@ -22,7 +21,7 @@
 //    Stanford CA 94305-9020
 //    USA
 //    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/stanford-dependencies.shtml
+//    http://nlp.stanford.edu/software/stanford-dependencies.html
 
 package edu.stanford.nlp.trees;
 
@@ -288,7 +287,7 @@ public class UniversalEnglishGrammaticalRelations {
    * clause.
    * <br>
    * Example: <br>
-   * "Clinton defeated Dole" &rarr; <code>arg</code>(defeated, Clinton), {@code arg}(defeated, Dole)
+   * "Clinton defeated Dole" &rarr; {@code arg}(defeated, Clinton), {@code arg}(defeated, Dole)
    */
   public static final GrammaticalRelation ARGUMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "arg", "argument", DEPENDENT);
@@ -926,8 +925,9 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
-   * The "name" relation. This relation is used for proper
-   * nouns constituted of multiple nominal elements.  Words joined by name should all be part of a
+   * The "name" relation. This relation was used in UDv1 for proper
+   * nouns constituted of multiple nominal elements. It was removed in UDv2
+   * Words joined by name should all be part of a
    * minimal noun phrase; otherwise regular syntactic relations should be used.
    * In general, names are annotated in a flat, head-initial structure, in which all words in the name
    * modify the first one using the {@code name} label.
@@ -936,8 +936,6 @@ public class UniversalEnglishGrammaticalRelations {
    * The distinction between {@code compound} and {@code name} can only be made on the basis of NER tags.
    * For this reason, we use the {@code compound} relation for all flat NPs and replace it with the {@code name}
    * relation during post-processing.
-   * <br>
-   * See also {@link UniversalEnglishGrammaticalStructure#processNames}.
    * <br>
    * Example: <br>
    * "Hillary Rodham Clinton" &rarr;
@@ -1006,7 +1004,7 @@ public class UniversalEnglishGrammaticalRelations {
    * The "clausal modifier of noun" relation. {@code acl} is used for
    * finite and non-finite clauses that modify a noun. Note that in
    * English relative clauses get assigned a specific relation
-   * <code>acl:relcl</code>, a subtype of {@code acl}.
+   * {@code acl:relcl}, a subtype of {@code acl}.
    * <br>
    * Examples: <br>
    * "the issues as he sees them" &rarr;
