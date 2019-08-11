@@ -1,6 +1,7 @@
 package edu.stanford.nlp.international.french.process;
 
 import java.io.Reader;
+import java.util.Locale;
 import java.util.Properties;
 
 import edu.stanford.nlp.ling.CoreLabel;
@@ -120,6 +121,9 @@ import edu.stanford.nlp.util.logging.Redwood;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
+        quoteStyle = val ? LexerUtils.QuotesEnum.ASCII : LexerUtils.QuotesEnum.ORIGINAL;
+      } else if ("quotes".equals(key)) {
+        quoteStyle = LexerUtils.QuotesEnum.valueOf(key.trim().toLowerCase(Locale.ROOT));
       } else if ("normalizeAmpersandEntity".equals(key)) {
         normalizeAmpersandEntity = val;
       } else if ("normalizeFractions".equals(key)) {
@@ -190,7 +194,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private enum UntokenizableOptions { NONE_DELETE, FIRST_DELETE, ALL_DELETE, NONE_KEEP, FIRST_KEEP, ALL_KEEP }
   private UntokenizableOptions untokenizable = UntokenizableOptions.FIRST_DELETE;
 
-  /* Flags begin with historical ptb3Escaping behavior */
+  /* Flags begin with historical ptb3Escaping behavior, except do ASCII quotes */
   private boolean invertible;
   private boolean tokenizeNLs;
   private boolean noSGML;
@@ -200,6 +204,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean normalizeOtherBrackets;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
+  private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.ASCII;
   private boolean ptb3Dashes;
   private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3;
@@ -210,13 +215,13 @@ import edu.stanford.nlp.util.logging.Redwood;
    * at either their correct Unicode codepoints, or in their invalid
    * positions as 8 bit chars inside the iso-8859 control region.
    *
-   * ellipsis  	85  	0133  	2026  	8230
-   * single quote curly starting 	91 	0145 	2018 	8216
-   * single quote curly ending 	92 	0146 	2019 	8217
-   * double quote curly starting 	93 	0147 	201C 	8220
-   * double quote curly ending 	94 	0148 	201D 	8221
-   * en dash  	96  	0150  	2013  	8211
-   * em dash  	97  	0151  	2014  	8212
+   * ellipsis   85      0133    2026    8230
+   * single quote curly starting        91      0145    2018    8216
+   * single quote curly ending  92      0146    2019    8217
+   * double quote curly starting        93      0147    201C    8220
+   * double quote curly ending  94      0148    201D    8221
+   * en dash    96      0150    2013    8211
+   * em dash    97      0151    2014    8212
    */
 
   public static final String openparen = "-LRB-";
@@ -233,16 +238,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   private static String asciiDash(String in) {
     return in.replaceAll("[_\u058A\u2010\u2011]","-");
-  }
-
-  private Object handleEllipsis(final String tok) {
-    if (ptb3Ellipsis) {
-      return getNext(ptb3EllipsisStr, tok);
-    } else if (unicodeEllipsis) {
-      return getNext(unicodeEllipsisStr, tok);
-    } else {
-      return getNext(tok, tok);
-    }
   }
 
   private Object getNext() {
@@ -406,7 +401,9 @@ SPACE_SEP_NUM = [0-9]{1,2}([ ][0-9]{3})+
 FAKEDUCKFEET = <<|>>
 OPBRAC = [<\[]|&lt;
 CLBRAC = [>\]]|&gt;
-LDOTS = \.{3,5}|(\.[ \u00A0]){2,4}\.|[\u0085\u2026]
+LDOTS = \.\.\.+|[\u0085\u2026]
+SPACEDLDOTS = \.[ \u00A0](\.[ \u00A0])+\.
+
 ATS = @+
 UNDS = _+
 ASTS = \*+|(\\\*){1,3}
@@ -443,24 +440,23 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
-cannot			{ yypushback(3) ; return getNext(); }
-{SGML}			{ if (!noSGML) {
+{SGML}                  { if (!noSGML) {
                             return getNext();
-			  }
+                          }
                         }
-{SPMDASH}		{ if (ptb3Dashes) {
+{SPMDASH}               { if (ptb3Dashes) {
                             return getNext(ptbmdash, yytext()); }
                           else {
                             return getNext();
                           }
                         }
 {ORDINAL}/{SPACE}       { return getNext(); }
-{SPAMP}			{ return getNormalizedAmpNext(); }
+{SPAMP}                 { return getNormalizedAmpNext(); }
 {SPPUNC} |
 {TIMEXP}                { return getNext(); }
-{ELISION}		{ final String origTxt = yytext();
-                          return getNext(LexerUtils.asciiQuotes(origTxt), origTxt);
-			}
+{ELISION}               { final String origTxt = yytext();
+                          return getNext(LexerUtils.handleQuotes(origTxt, false, quoteStyle), origTxt);
+                        }
 {WORD}/{OBJPRON}        { return getNext(); }
 
 {OBJPRON}               { final String origTxt = yytext();
@@ -468,7 +464,7 @@ cannot			{ yypushback(3) ; return getNext(); }
                         }
 
 {VERBPREF}/{ELISION}    { final String origTxt = yytext();
-                          String txt = LexerUtils.asciiQuotes(origTxt);
+                          String txt = LexerUtils.handleQuotes(origTxt, false, quoteStyle);
                           return getNext(asciiDash(txt), origTxt);
                         }
 
@@ -478,21 +474,22 @@ cannot			{ yypushback(3) ; return getNext(); }
 {COMPOUND} |
 {COMPOUND2}             { final String origTxt = yytext();
                           return getNext(asciiDash(origTxt), origTxt, COMPOUND_ANNOTATION);
-			                  }
+                                          }
 
-{WORD}			{ return getNext(); }
+{WORD}                  { return getNext(); }
 
 {FULLURL} |
-{LIKELYURL}		{ String txt = yytext();
+{LIKELYURL}             { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
                             txt = LexerUtils.escapeChar(txt, '/');
                             txt = LexerUtils.escapeChar(txt, '*');
                           }
-                          return getNext(txt, yytext()); }
-{EMAIL}	|
+                          return getNext(txt, yytext());
+                        }
+{EMAIL} |
 {TWITTER}               { return getNext(); }
 
-{DATE}			{ String txt = yytext();
+{DATE}                  { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
                             txt = LexerUtils.escapeChar(txt, '/');
                           }
@@ -500,11 +497,11 @@ cannot			{ yypushback(3) ; return getNext(); }
                          }
 {NUMBER} |
 {SUBSUPNUM} |
-{MONEYSIGN}		{ return getNext(); }
+{MONEYSIGN}             { return getNext(); }
 
 {FRAC} |
 {FRACSTB3} |
-{FRAC2}			                { String txt = yytext();
+{FRAC2}                     { String txt = yytext();
                               String norm = LexerUtils.normalizeFractions(normalizeFractions, escapeForwardSlashAsterisk, txt);
                               if (DEBUG) { logger.info("Used {FRAC2} to recognize " + txt + " as " + norm +
                                                    "; normalizeFractions=" + normalizeFractions +
@@ -512,7 +509,7 @@ cannot			{ yypushback(3) ; return getNext(); }
                               return getNext(norm, txt);
                             }
 
-{ABBREV1}/{SENTEND}	{
+{ABBREV1}/{SENTEND}     {
                           String s;
                           if (strictTreebank3 && ! "U.S.".equals(yytext())) {
                             yypushback(1); // return a period for next time
@@ -521,10 +518,10 @@ cannot			{ yypushback(3) ; return getNext(); }
                             s = yytext();
                             yypushback(1); // return a period for next time
                           }
-	                  return getNext(s, yytext()); }
-{ABBREV1}/[^][^]	{ return getNext(); }
-{ABBREV1}		{ // this one should only match if we're basically at the end of file
-			  // since the last one matches two things, even newlines
+                          return getNext(s, yytext()); }
+{ABBREV1}/[^][^]        { return getNext(); }
+{ABBREV1}               { // this one should only match if we're basically at the end of file
+                          // since the last one matches two things, even newlines
                           String s;
                           if (strictTreebank3 && ! "U.S.".equals(yytext())) {
                             yypushback(1); // return a period for next time
@@ -533,86 +530,90 @@ cannot			{ yypushback(3) ; return getNext(); }
                             s = yytext();
                             yypushback(1); // return a period for next time
                           }
-	                  return getNext(s, yytext()); }
-{ABBREV2}		{ return getNext(); }
-{ABBREV4}/{SPACE}	{ return getNext(); }
-{ACRO}/{SPACENL}	{ return getNext(); }
+                          return getNext(s, yytext()); }
+{ABBREV2}               { return getNext(); }
+{ABBREV4}/{SPACE}       { return getNext(); }
+{ACRO}/{SPACENL}        { return getNext(); }
 {DBLQUOT} |
-{QUOTES}		{ final String origTxt = yytext();
-                          return getNext();
-			}
+{QUOTES}                { final String origText = yytext();
+                          return getNext(LexerUtils.handleQuotes(origText, false, quoteStyle), origText);
+                        }
 
-{PHONE}                 { String txt = yytext();
-			  if (normalizeParentheses) {
-			    txt = txt.replaceAll("\\(", openparen);
-			    txt = txt.replaceAll("\\)", closeparen);
-			  }
-			  return getNext(txt, yytext());
-			}
-{SPACE_SEP_NUM}         { return getNext(yytext(),yytext()); }
-0x7f		{ if (invertible) {
+{PHONE}     { String txt = yytext();
+              if (normalizeParentheses) {
+                txt = txt.replaceAll("\\(", openparen);
+                txt = txt.replaceAll("\\)", closeparen);
+              }
+              return getNext(txt, yytext());
+            }
+{SPACE_SEP_NUM}     { return getNext(yytext(),yytext()); }
+0x7f            { if (invertible) {
                      prevWordAfter.append(yytext());
                   } }
 {EMOJI}         { String txt = yytext();
                   if (DEBUG) { logger.info("Used {EMOJI} to recognize " + txt); }
                   return getNext(txt, txt);
                 }
-{OPBRAC}	{ if (normalizeOtherBrackets) {
+{OPBRAC}        { if (normalizeOtherBrackets) {
                     return getNext(openparen, yytext()); }
                   else {
                     return getNext();
                   }
                 }
-{CLBRAC}	{ if (normalizeOtherBrackets) {
+{CLBRAC}        { if (normalizeOtherBrackets) {
                     return getNext(closeparen, yytext()); }
                   else {
                     return getNext();
                   }
                 }
-\{		{ if (normalizeOtherBrackets) {
+\{              { if (normalizeOtherBrackets) {
                     return getNext(openbrace, yytext()); }
                   else {
                     return getNext();
                   }
                 }
-\}		{ if (normalizeOtherBrackets) {
+\}              { if (normalizeOtherBrackets) {
                     return getNext(closebrace, yytext()); }
                   else {
                     return getNext();
                   }
                 }
-\(		{ if (normalizeParentheses) {
+\(              { if (normalizeParentheses) {
                     return getNext(openparen, yytext()); }
                   else {
                     return getNext();
                   }
                 }
-\)		{ if (normalizeParentheses) {
+\)              { if (normalizeParentheses) {
                     return getNext(closeparen, yytext()); }
                   else {
                     return getNext();
                   }
                 }
-{HYPHENS}	{ if (yylength() >= 3 && yylength() <= 4 && ptb3Dashes) {
-	            return getNext(ptbmdash, yytext());
+{HYPHENS}       { if (yylength() >= 3 && yylength() <= 4 && ptb3Dashes) {
+                    return getNext(ptbmdash, yytext());
                   } else {
-		    String origTxt = yytext();
+                    String origTxt = yytext();
                     return getNext(asciiDash(origTxt), origTxt);
-		  }
-		}
-{LDOTS}		{ return handleEllipsis(yytext()); }
-{FNMARKS}	{ return getNext(); }
-{ASTS}		{ if (escapeForwardSlashAsterisk) {
+                  }
+                }
+{LDOTS}|{SPACEDLDOTS}    { String tok = yytext();
+                           String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                           if (DEBUG) { logger.info("Used {LDOTS} to recognize " + tok + " as " + norm); }
+                           return getNext(norm, tok);
+                         }
+{FNMARKS}       { return getNext(); }
+{ASTS}          { if (escapeForwardSlashAsterisk) {
                     return getNext(LexerUtils.escapeChar(yytext(), '*'), yytext()); }
                   else {
                     return getNext();
                   }
                 }
-{INSENTP}	{ return getNext(); }
+{INSENTP}       { return getNext(); }
 [?!]+           { return getNext(); }
-[.¡¿\u037E\u0589\u061F\u06D4\u0700-\u0702\u07FA\u3002]	{ return getNext(); }
-=		{ return getNext(); }
-\/		{ if (escapeForwardSlashAsterisk) {
+[.¡¿\u037E\u0589\u061F\u06D4\u0700-\u0702\u07FA\u3002]  { return getNext(); }
+=               { return getNext(); }
+\/              { if (escapeForwardSlashAsterisk) {
                     return getNext(LexerUtils.escapeChar(yytext(), '/'), yytext()); }
                   else {
                     return getNext();
@@ -620,19 +621,19 @@ cannot			{ yypushback(3) ; return getNext(); }
                 }
 
 {FAKEDUCKFEET} |
-{MISCSYMBOL}	{ return getNext(); }
+{MISCSYMBOL}    { return getNext(); }
 
-\0|{SPACES}|[\u200B\u200E-\u200F\uFEFF]	{ if (invertible) {
+\0|{SPACES}|[\u200B\u200E-\u200F\uFEFF] { if (invertible) {
                      prevWordAfter.append(yytext());
                   }
                 }
-{NEWLINE}	{ if (tokenizeNLs) {
+{NEWLINE}       { if (tokenizeNLs) {
                       return getNext(NEWLINE_TOKEN, yytext()); // js: for tokenizing carriage returns
                   } else if (invertible) {
                       prevWordAfter.append(yytext());
                   }
                 }
-&nbsp;		{ if (invertible) {
+&nbsp;          { if (invertible) {
                      prevWordAfter.append(yytext());
                   }
                 }

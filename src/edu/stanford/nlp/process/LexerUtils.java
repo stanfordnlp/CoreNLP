@@ -23,6 +23,11 @@ public class LexerUtils {
   private static final Pattern ONE_THIRD_PATTERN = Pattern.compile("\u2153");
   private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
 
+  private static final String ptb3EllipsisStr = "...";
+  private static final String unicodeEllipsisStr = "\u2026";
+
+  public enum QuotesEnum { UNICODE, LATEX, ASCII, NOT_CP1252, ORIGINAL }
+
 
   /** Change precomposed fraction characters to spelled out letter forms.
    *
@@ -165,7 +170,7 @@ public class LexerUtils {
     return s1;
   }
 
-  public static String latexQuotes(String in, boolean probablyLeft) {
+  private static String latexQuotes(String in, boolean probablyLeft) {
     // System.err.println("Handling quote on " + in + " probablyLeft=" + probablyLeft);
     String s1 = in;
     if (probablyLeft) {
@@ -190,7 +195,7 @@ public class LexerUtils {
   private static final Pattern leftDuck = Pattern.compile("\u008B");
   private static final Pattern rightDuck = Pattern.compile("\u009B");
 
-  public static String unicodeQuotes(String in, boolean probablyLeft) {
+  private static String unicodeQuotes(String in, boolean probablyLeft) {
     String s1 = in;
     if (probablyLeft) {
       s1 = singleQuote.matcher(s1).replaceAll("\u2018");
@@ -209,7 +214,7 @@ public class LexerUtils {
   }
 
   /** This was the version originally written for Spanish to just recode cp1252 range quotes. */
-  public static String nonCp1252Quotes(String in) {
+  private static String nonCp1252Quotes(String in) {
     switch(in) {
       case "\u008B":
         return "\u2039";
@@ -225,6 +230,32 @@ public class LexerUtils {
         return "\u203A";
       default:
         return in;
+    }
+  }
+
+  public static String handleQuotes(String tok, boolean probablyLeft, QuotesEnum quoteStyle) {
+    switch (quoteStyle) {
+      case LATEX:
+        return latexQuotes(tok, probablyLeft);
+      case UNICODE:
+        return unicodeQuotes(tok, probablyLeft);
+      case ASCII:
+        return asciiQuotes(tok);
+      case NOT_CP1252:
+        return nonCp1252Quotes(tok);
+      case ORIGINAL:
+      default:
+        return tok;
+    }
+  }
+
+  public static String handleEllipsis(final String tok, boolean ptb3Ellipsis, boolean unicodeEllipsis) {
+    if (ptb3Ellipsis) {
+      return ptb3EllipsisStr;
+    } else if (unicodeEllipsis) {
+      return unicodeEllipsisStr;
+    } else {
+      return tok;
     }
   }
 

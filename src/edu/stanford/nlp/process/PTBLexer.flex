@@ -27,6 +27,7 @@ package edu.stanford.nlp.process;
 
 
 import java.io.Reader;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -117,11 +118,11 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   /**
    * Constructs a new PTBLexer.  You specify the type of result tokens with a
-   * LexedTokenFactory, and can specify the treatment of tokens by boolean
+   * LexedTokenFactory, and can specify the treatment of tokens by
    * options given in a comma separated String
    * (e.g., "invertible,normalizeParentheses=true").
    * If the String is {@code null} or empty, you get the traditional
-   * PTB3 normalization behaviour (i.e., you get ptb3Escaping=false).  If you
+   * PTB3 normalization behaviour (i.e., you get ptb3Escaping=true).  If you
    * want no normalization, then you should pass in the String
    * "ptb3Escaping=false".  See the documentation in the {@link PTBTokenizer}
    * class for full discussion of all the available options.
@@ -159,9 +160,7 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeFractions = val;
         normalizeParentheses = val;
         normalizeOtherBrackets = val;
-        latexQuotes = val;
-        unicodeQuotes = val;
-        asciiQuotes = val;
+        quoteStyle = val ? LexerUtils.QuotesEnum.LATEX : LexerUtils.QuotesEnum.ORIGINAL;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
@@ -179,19 +178,8 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeParentheses = val;
       } else if ("normalizeOtherBrackets".equals(key)) {
         normalizeOtherBrackets = val;
-      } else if ("latexQuotes".equals(key)) {
-        latexQuotes = val;
-      } else if ("unicodeQuotes".equals(key)) {
-        unicodeQuotes = val;
-        if (val) {
-          latexQuotes = false; // need to override default
-        }
-      } else if ("asciiQuotes".equals(key)) {
-        asciiQuotes = val;
-        if (val) {
-          latexQuotes = false; // need to override default
-          unicodeQuotes = false;
-        }
+      } else if ("quotes".equals(key)) {
+        quoteStyle = LexerUtils.QuotesEnum.valueOf(key.trim().toLowerCase(Locale.ROOT));
       } else if ("splitAssimilations".equals(key)) {
         splitAssimilations = val;
       } else if ("splitHyphenated".equals(key)) {
@@ -272,9 +260,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean normalizeFractions = true;
   private boolean normalizeParentheses = true;
   private boolean normalizeOtherBrackets = true;
-  private boolean latexQuotes = true;
-  private boolean unicodeQuotes;
-  private boolean asciiQuotes;
+  private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.LATEX;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
   private boolean ptb3Dashes = true;
@@ -320,8 +306,6 @@ import edu.stanford.nlp.util.logging.Redwood;
   public static final String openbrace = "-LCB-";
   public static final String closebrace = "-RCB-";
   public static final String ptbmdash = "--";
-  public static final String ptb3EllipsisStr = "...";
-  public static final String unicodeEllipsisStr = "\u2026";
 
   /* This pattern now also include newlines, since we sometimes allow them in SGML tokens.... */
   private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ \r\n]");
@@ -407,28 +391,6 @@ import edu.stanford.nlp.util.logging.Redwood;
    * em dash    97      0151    2014    8212
    */
 
-
-  private String handleQuotes(String tok, boolean probablyLeft) {
-    if (latexQuotes) {
-      return LexerUtils.latexQuotes(tok, probablyLeft);
-    } else if (unicodeQuotes) {
-      return LexerUtils.unicodeQuotes(tok, probablyLeft);
-    } else if (asciiQuotes) {
-      return LexerUtils.asciiQuotes(tok);
-    } else {
-      return tok;
-    }
-  }
-
-  private Object handleEllipsis(final String tok) {
-    if (ptb3Ellipsis) {
-      return getNext(ptb3EllipsisStr, tok);
-    } else if (unicodeEllipsis) {
-      return getNext(unicodeEllipsisStr, tok);
-    } else {
-      return getNext(tok, tok);
-    }
-  }
 
   private int indexOfSpace(String txt) {
     for (int i = 0, len = txt.length(); i < len; i++) {
@@ -864,7 +826,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           return getNext(tok, origTxt);
                         }
 {APOWORD}               { String tok = yytext();
-                          String norm = handleQuotes(tok, false);
+                          String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {APOWORD} to recognize " + tok + " as " + norm +
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
@@ -897,13 +859,13 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                         }
 {TWITTER}               { return getNext(); }
 {REDAUX}/[^\p{Alpha}]   { String tok = yytext();
-                          String norm = handleQuotes(tok, false);
+                          String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {REDAUX} to recognize " + tok + " as " + norm +
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
 {SREDAUX}/[^\p{Alpha}]  { String tok = yytext();
-                          String norm = handleQuotes(tok, false);
+                          String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {SREDAUX} to recognize " + tok + " as " + norm +
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
@@ -1056,13 +1018,13 @@ RM/{NUM}        { String txt = yytext();
                           return getNext(txt, yytext());
                         }
 {DBLQUOT}/[\p{Alpha}\p{Digit}$]  { String tok = yytext();
-                                   String norm = handleQuotes(tok, true);
+                                   String norm = LexerUtils.handleQuotes(tok, true, quoteStyle);
                                    if (DEBUG) { logger.info("Used {DBLQUOT} to recognize " + tok + " as " + norm +
                                                             "; probablyLeft=" + true); }
                                    return getNext(norm, tok);
                                  }
 {DBLQUOT}               { String tok = yytext();
-                          String norm = handleQuotes(tok, false);
+                          String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {SREDAUX} to recognize " + tok + " as " + norm +
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
@@ -1135,19 +1097,39 @@ RM/{NUM}        { String txt = yytext();
                     return getNext();
                   }
                 }
-<YyNotTokenizePerLine>{LDOTS}/\.{SPACENLS}[:letter:]    { /* attempt to treat fourth ellipsis as period if followed by space and letter. */
-                                    return handleEllipsis(yytext());
-                                  }
-<YyTokenizePerLine>{LDOTS}/\.{SPACES}[:letter:]    { /* attempt to treat fourth ellipsis as period if followed by space and letter. */
-                                    return handleEllipsis(yytext());
-                                  }
-<YyNotTokenizePerLine>{SPACEDLDOTS}/{SPACE}\.{SPACENLS}[:letter:]    { /* attempt to treat fourth ellipsis as period if followed by space and letter. */
-                                    return handleEllipsis(yytext());
-                                  }
-<YyTokenizePerLine>{SPACEDLDOTS}/{SPACE}\.{SPACES}[:letter:]    { /* attempt to treat fourth ellipsis as period if followed by space and letter. */
-                                    return handleEllipsis(yytext());
-                                  }
-{LDOTS}|{SPACEDLDOTS}         { return handleEllipsis(yytext()); }
+<YyNotTokenizePerLine>{LDOTS}/\.{SPACENLS}[:letter:]    {
+                  /* attempt to treat fourth ellipsis as period if followed by space and letter. */
+                  String tok = yytext();
+                  String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                  if (DEBUG) { logger.info("Used {LDOTS1} to recognize " + tok + " as " + norm); }
+                  return getNext(norm, tok);
+                }
+<YyTokenizePerLine>{LDOTS}/\.{SPACES}[:letter:]    {
+                  /* attempt to treat fourth ellipsis as period if followed by space and letter. */
+                  String tok = yytext();
+                  String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                  if (DEBUG) { logger.info("Used {LDOTS2} to recognize " + tok + " as " + norm); }
+                  return getNext(norm, tok);
+                }
+<YyNotTokenizePerLine>{SPACEDLDOTS}/{SPACE}\.{SPACENLS}[:letter:]    {
+                  /* attempt to treat fourth ellipsis as period if followed by space and letter. */
+                  String tok = yytext();
+                  String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                  if (DEBUG) { logger.info("Used {LDOTS3} to recognize " + tok + " as " + norm); }
+                  return getNext(norm, tok);
+                }
+<YyTokenizePerLine>{SPACEDLDOTS}/{SPACE}\.{SPACES}[:letter:]    {
+                  /* attempt to treat fourth ellipsis as period if followed by space and letter. */
+                  String tok = yytext();
+                  String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                  if (DEBUG) { logger.info("Used {LDOTS4} to recognize " + tok + " as " + norm); }
+                  return getNext(norm, tok);
+                }
+{LDOTS}|{SPACEDLDOTS}    { String tok = yytext();
+                           String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                           if (DEBUG) { logger.info("Used {LDOTS5} to recognize " + tok + " as " + norm); }
+                           return getNext(norm, tok);
+                         }
 {FNMARKS}       { return getNext(); }
 {ASTS}          { if (escapeForwardSlashAsterisk) {
                     return getNext(LexerUtils.escapeChar(yytext(), '*'), yytext()); }
@@ -1189,7 +1171,7 @@ RM/{NUM}        { String txt = yytext();
                 }
 /* {THING}\./{INSENTP}          { String tok = yytext();       // cdm [2017]: I don't understand what this was for, and it seems harmful....
                                /* A THING can contain quote like O'Malley */
-                               String norm = handleQuotes(tok, false);
+                               String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                                 if (DEBUG) { logger.info("Used {THING} to recognize " + tok + " as " + norm +
                                                          "; probablyLeft=" + false); }
                                 return getNext(norm, tok);
@@ -1197,7 +1179,7 @@ RM/{NUM}        { String txt = yytext();
 {THING}         { // breakByHyphens(yytext()); // this is causing fail of attempted to pushback too much!
                   String tok = yytext();
                   /* A THING can contain quote like O'Malley */
-                  String norm = handleQuotes(tok, false);
+                  String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                   if (DEBUG) { logger.info("Used {THING} (2) to recognize " + tok + " as " + norm +
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
@@ -1224,7 +1206,7 @@ RM/{NUM}        { String txt = yytext();
                         }
 /* Special case so as to prefer treating ''' as a single followed by a double quote (happens in newswire) */
 '/''[^'\p{Alpha}]       { String tok = yytext();
-                          String norm = handleQuotes(tok, false);
+                          String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {'/''} to recognize " + tok + " as " + norm +
                                            "; probablyLeft=" + false); }
                           return getNext(norm, tok);
@@ -1236,7 +1218,7 @@ RM/{NUM}        { String txt = yytext();
                   // can't have digit here because of cases like '90s
                   String tok = yytext();
                   /* invert single quote - often but not always right */
-                  String norm = handleQuotes(tok, true);
+                  String norm = LexerUtils.handleQuotes(tok, true, quoteStyle);
                   if (DEBUG) { logger.info("Used {QUOTES} to recognize " + tok + " as " + norm +
                                            "; probablyLeft=" + true); }
                   return getNext(norm, tok);
@@ -1246,13 +1228,13 @@ RM/{NUM}        { String txt = yytext();
                   // can't have digit here because of cases like '90s
                   String tok = yytext();
                   /* invert single quote - often but not always right */
-                  String norm = handleQuotes(tok, true);
+                  String norm = LexerUtils.handleQuotes(tok, true, quoteStyle);
                   if (DEBUG) { logger.info("Used {QUOTES} (2) to recognize " + tok + " as " + norm +
                                            "; probablyLeft=" + true); }
                   return getNext(norm, tok);
                 }
 {QUOTES}        { String tok = yytext();
-                  String norm = handleQuotes(tok, false);
+                  String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                   if (DEBUG) { logger.info("Used {QUOTES} (3) to recognize " + tok + " as " + norm +
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
@@ -1263,7 +1245,7 @@ RM/{NUM}        { String txt = yytext();
                   return getNext(tok, tok);
                 }
 {SREDAUX}       { String tok = yytext();
-                  String norm = handleQuotes(tok, false);
+                  String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                   if (DEBUG) { logger.info("Used {SREDAUX} (2) to recognize " + tok + " as " + norm +
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);

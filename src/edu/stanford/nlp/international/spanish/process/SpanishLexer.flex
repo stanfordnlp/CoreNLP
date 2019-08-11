@@ -1,6 +1,7 @@
 package edu.stanford.nlp.international.spanish.process;
 
 import java.io.Reader;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -120,9 +121,11 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeOtherBrackets = val;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
-        asciiQuotes = val;
         asciiDash = val;
         ptb3Dashes = val;
+        quoteStyle = val ? LexerUtils.QuotesEnum.ASCII : LexerUtils.QuotesEnum.ORIGINAL;
+      } else if ("quotes".equals(key)) {
+        quoteStyle = LexerUtils.QuotesEnum.valueOf(key.trim().toLowerCase(Locale.ROOT));
       } else if ("normalizeAmpersandEntity".equals(key)) {
         normalizeAmpersandEntity = val;
       } else if ("normalizeFractions".equals(key)) {
@@ -135,8 +138,6 @@ import edu.stanford.nlp.util.logging.Redwood;
         ptb3Ellipsis = val;
       } else if ("unicodeEllipsis".equals(key)) {
         unicodeEllipsis = val;
-      } else if ("asciiQuotes".equals(key)) {
-        asciiQuotes = val;
       } else if ("asciiDash".equals(key)) {
           asciiDash = val;
       } else if ("ptb3Dashes".equals(key)) {
@@ -206,7 +207,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean normalizeOtherBrackets;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
-  private boolean asciiQuotes;
+  private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.ASCII;
   private boolean asciiDash;
   private boolean ptb3Dashes;
   private boolean escapeForwardSlashAsterisk = false;
@@ -246,31 +247,8 @@ import edu.stanford.nlp.util.logging.Redwood;
   private static final Pattern LEFT_PAREN_PATTERN = Pattern.compile("\\(");
   private static final Pattern RIGHT_PAREN_PATTERN = Pattern.compile("\\)");
 
-  private static final Pattern ONE_FOURTH_PATTERN = Pattern.compile("\u00BC");
-  private static final Pattern ONE_HALF_PATTERN = Pattern.compile("\u00BD");
-  private static final Pattern THREE_FOURTHS_PATTERN = Pattern.compile("\u00BE");
-  private static final Pattern ONE_THIRD_PATTERN = Pattern.compile("\u2153");
-  private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
-
-
-  private static String  Shlomi2AsciiQuotes(String in) {
-    return LexerUtils.asciiQuotes(in);
-  }
-
-  private static String  Shlomi3AsciiQuotes(String in) {
-    return LexerUtils.asciiQuotes(in);
-  }
-
-
-  private String handleQuotes(String in){
-    if (asciiQuotes) {
-      return LexerUtils.asciiQuotes(in);
-    } else {
-      return LexerUtils.nonCp1252Quotes(in);
-    }
-  }
-
   private static final Pattern dashes = Pattern.compile("[_\u058A\u2010\u2011]");
+
   private static String asciiDash(String in) {
     return dashes.matcher(in).replaceAll("-");
   }
@@ -278,16 +256,6 @@ import edu.stanford.nlp.util.logging.Redwood;
   private String handleDash(String in) {
       if (asciiDash) return asciiDash(in);
       else return in;
-  }
-
-  private Object handleEllipsis(final String tok) {
-    if (ptb3Ellipsis) {
-      return getNext(ptb3EllipsisStr, tok);
-    } else if (unicodeEllipsis) {
-      return getNext(unicodeEllipsisStr, tok);
-    } else {
-      return getNext(tok, tok);
-    }
   }
 
   private static String convertToEl(String l) {
@@ -501,7 +469,8 @@ LESSTHAN = <|&lt;
 GREATERTHAN = >|&gt;
 OPBRAC = [<\[]|&lt;
 CLBRAC = [>\]]|&gt;
-LDOTS = \.{3,5}|(\.[ \u00A0]){2,4}\.|[\u0085\u2026]
+LDOTS = \.\.\.+|[\u0085\u2026]
+SPACEDLDOTS = \.[ \u00A0](\.[ \u00A0])+\.
 ATS = @+
 UNDS = _+
 ASTS = \*+|(\\\*){1,3}
@@ -568,15 +537,16 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           return getNext(origTxt, origTxt, VB_PRON_ANNOTATION);}
 
 {COMPOUND_NOSPLIT}      { final String origTxt = yytext();
-                          return getNext(handleQuotes(handleDash(origTxt)), origTxt);}
-
+                          return getNext(LexerUtils.handleQuotes(handleDash(origTxt), false, quoteStyle), origTxt);
+                        }
 {COMPOUND}              { final String origTxt = yytext();
-                          return getNext(handleQuotes(handleDash(origTxt)), origTxt, COMPOUND_ANNOTATION);}
+                          return getNext(LexerUtils.handleQuotes(handleDash(origTxt), false, quoteStyle), origTxt, COMPOUND_ANNOTATION);
+                        }
 
 {NUM}/{UNIT}            { return getNext(); }
 
 {WORD2}                 { final String origTxt = yytext();
-                          return getNext (handleQuotes(origTxt), origTxt);}
+                          return getNext(LexerUtils.handleQuotes(origTxt, false, quoteStyle), origTxt);}
 
 {WORD}|{WORD3}	        { return getNext(); }
 
@@ -643,20 +613,20 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 {ACRO}/{SPACENL}	{ return getNext(); }
 {DBLQUOT} |
 {QUOTES}		{ final String origTxt = yytext();
-                          return getNext(handleQuotes(origTxt), origTxt);
-			}
+                          return getNext(LexerUtils.handleQuotes(origTxt, false, quoteStyle), origTxt);
+			      }
 
-{PHONE}                 { String txt = yytext();
-			  if (normalizeParentheses) {
+{PHONE}    { String txt = yytext();
+			       if (normalizeParentheses) {
                               txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
                               txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
-			  }
-			  return getNext(txt, yytext());
-			}
+			       }
+			       return getNext(txt, yytext());
+			    }
 \x7F		{ if (invertible) {
-                     prevWordAfter.append(yytext());
-                  }
-                }
+            prevWordAfter.append(yytext());
+          }
+        }
 {LESSTHAN}      { return getNext("<", yytext()); }
 {GREATERTHAN}   { return getNext(">", yytext()); }
 {SMILEY}/[^\p{Alpha}\p{Digit}] { String txt = yytext();
@@ -709,12 +679,16 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                 }
 {HYPHENS}	{ if (yylength() >= 3 && yylength() <= 4 && ptb3Dashes) {
 	            return getNext(ptbmdash, yytext());
-                  } else {
-		    String origTxt = yytext();
-                    return getNext(handleDash(origTxt), origTxt);
-		  }
-		}
-{LDOTS}		{ return handleEllipsis(yytext()); }
+            } else {
+              String origTxt = yytext();
+              return getNext(handleDash(origTxt), origTxt);
+		        }
+		      }
+{LDOTS}|{SPACEDLDOTS}    { String tok = yytext();
+                           String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                           if (DEBUG) { logger.info("Used {LDOTS} to recognize " + tok + " as " + norm); }
+                           return getNext(norm, tok);
+                         }
 {FNMARKS}	{ return getNext(); }
 {ASTS}		{ if (escapeForwardSlashAsterisk) {
                     return getNext(LexerUtils.escapeChar(yytext(), '*'), yytext()); }

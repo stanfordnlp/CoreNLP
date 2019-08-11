@@ -36,24 +36,22 @@ import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
  * Tokenizer for raw Spanish text. This tokenization scheme is a derivative
  * of PTB tokenization, but with extra rules for Spanish contractions and
  * assimilations. It is based heavily on the FrenchTokenizer.
- * <p>
+ *
  * The tokenizer tokenizes according to the modified AnCora corpus tokenization
  * standards, so the rules are a little different from PTB.
- * </p>
- * <p>
+ *
  * A single instance of a Spanish Tokenizer is not thread safe, as it
  * uses a non-threadsafe JFlex object to do the processing.  Multiple
  * instances can be created safely, though.  A single instance of a
  * SpanishTokenizerFactory is also not thread safe, as it keeps its
  * options in a local variable.
- * </p>
  *
  * @author Ishita Prasad
  */
 public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishTokenizer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SpanishTokenizer.class);
 
   // The underlying JFlex lexer
   private final SpanishLexer lexer;
@@ -224,14 +222,14 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * Add MWT info to tokens created by splitting a multi-word token
    */
 
-  private void addMWTTokenInfo(CoreLabel originalToken, CoreLabel splitToken) {
+  private static void addMWTTokenInfo(CoreLabel originalToken, CoreLabel splitToken) {
     splitToken.set(CoreAnnotations.MWTTokenTextAnnotation.class, originalToken.word());
     splitToken.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class, originalToken.beginPosition());
     splitToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class, originalToken.endPosition());
     splitToken.setIsMWT(true);
   }
 
-  private static final Pattern pDash = Pattern.compile("\\-");
+  private static final Pattern pDash = Pattern.compile("-");
   private static final Pattern pSpace = Pattern.compile("\\s+");
 
   /**
