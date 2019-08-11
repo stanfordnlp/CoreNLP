@@ -50,6 +50,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder  {
     int[] tagNum = new int[padLength];
     if (DEBUG) { log.info("Doing bestSequence length " + length + "; leftWin " + leftWindow + "; rightWin " + rightWindow + "; padLength " + padLength); }
     for (int pos = 0; pos < padLength; pos++) {
+      // potentially constrain values considered in inference (e.g., to only observed tags for a word if word is common)
       tags[pos] = ts.getPossibleValues(pos);
       tagNum[pos] = tags[pos].length;
       if (DEBUG) { log.info("There are " + tagNum[pos] + " values at position " + pos + ": " + Arrays.toString(tags[pos])); }
