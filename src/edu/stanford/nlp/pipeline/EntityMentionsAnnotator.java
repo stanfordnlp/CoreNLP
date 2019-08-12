@@ -303,12 +303,15 @@ public class EntityMentionsAnnotator implements Annotator {
           }
 
           if (!matchTokenText) {
-            String entityMentionText =
-                    annotation.get(CoreAnnotations.TextAnnotation.class).substring(
-                            mention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-                            mention.get(CoreAnnotations.CharacterOffsetEndAnnotation.class)
-                    );
-            mention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
+            if (mention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) != null &&
+                    mention.get(CoreAnnotations.CharacterOffsetEndAnnotation.class) != null) {
+              String entityMentionText =
+                      annotation.get(CoreAnnotations.TextAnnotation.class).substring(
+                              mention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
+                              mention.get(CoreAnnotations.CharacterOffsetEndAnnotation.class)
+                      );
+              mention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
+            }
           }
 
         }
