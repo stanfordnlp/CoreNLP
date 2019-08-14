@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
@@ -36,10 +35,10 @@ import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
  * Tokenizer for raw Spanish text. This tokenization scheme is a derivative
  * of PTB tokenization, but with extra rules for Spanish contractions and
  * assimilations. It is based heavily on the FrenchTokenizer.
- *
+ * <p>
  * The tokenizer tokenizes according to the modified AnCora corpus tokenization
  * standards, so the rules are a little different from PTB.
- *
+ * <p>
  * A single instance of a Spanish Tokenizer is not thread safe, as it
  * uses a non-threadsafe JFlex object to do the processing.  Multiple
  * instances can be created safely, though.  A single instance of a
@@ -272,7 +271,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    *
    * @param <T>
    */
-  public static class SpanishTokenizerFactory<T extends HasWord> implements TokenizerFactory<T>, Serializable  {
+  public static class SpanishTokenizerFactory<T extends HasWord> implements TokenizerFactory<T>  { // Serializable
 
     private static final long serialVersionUID = 946818805507187330L;
 
@@ -361,18 +360,18 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         } else if (fields.length == 2) {
           switch (fields[0]) {
             case "splitAll":
-              splitCompoundOption = Boolean.valueOf(fields[1]);
-              splitVerbOption = Boolean.valueOf(fields[1]);
-              splitContractionOption = Boolean.valueOf(fields[1]);
+              splitCompoundOption = Boolean.parseBoolean(fields[1]);
+              splitVerbOption = Boolean.parseBoolean(fields[1]);
+              splitContractionOption = Boolean.parseBoolean(fields[1]);
               break;
             case "splitCompounds":
-              splitCompoundOption = Boolean.valueOf(fields[1]);
+              splitCompoundOption = Boolean.parseBoolean(fields[1]);
               break;
             case "splitVerbs":
-              splitVerbOption = Boolean.valueOf(fields[1]);
+              splitVerbOption = Boolean.parseBoolean(fields[1]);
               break;
             case "splitContractions":
-              splitContractionOption = Boolean.valueOf(fields[1]);
+              splitContractionOption = Boolean.parseBoolean(fields[1]);
               break;
             default:
               lexerProperties.setProperty(fields[0], fields[1]);
@@ -447,9 +446,8 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * Currently, this tokenizer does not do line splitting. It assumes that the input
    * file is delimited by the system line separator. The output will be equivalently
    * delimited.
-   * </p>
    *
-   * @param args
+   * @param args Command-line arguments
    */
   public static void main(String[] args) {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());

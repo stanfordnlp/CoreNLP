@@ -1,20 +1,17 @@
-package edu.stanford.nlp.process; 
-import edu.stanford.nlp.util.logging.Redwood;
-
-
-import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.StringUtils;
-
-
-import edu.stanford.nlp.ling.HasWord;
+package edu.stanford.nlp.process;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -221,7 +218,6 @@ public class Americanize implements Function<HasWord,HasWord>  {
 
   // static initialization block
   static {
-    //noinspection ConstantConditions
     if (converters.length != converted.length || timexConverters.length != timexConverted.length || pats.length != reps.length || pats.length != excepts.length) {
       throw new RuntimeException("Americanize: Bad initialization data");
     }

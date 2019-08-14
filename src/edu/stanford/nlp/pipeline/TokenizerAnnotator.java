@@ -93,7 +93,7 @@ public class TokenizerAnnotator implements Annotator  {
      */
     public static TokenizerType getTokenizerType(Properties props) {
       String tokClass = props.getProperty("tokenize.class", null);
-      boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
+      boolean whitespace = Boolean.parseBoolean(props.getProperty("tokenize.whitespace", "false"));
       String language = props.getProperty("tokenize.language", "en");
 
       if(whitespace) {
@@ -146,7 +146,7 @@ public class TokenizerAnnotator implements Annotator  {
 
   private static String computeExtraOptions(Properties properties) {
     String extraOptions = null;
-    boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false")); // ssplit.eolonly
+    boolean keepNewline = Boolean.parseBoolean(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false")); // ssplit.eolonly
 
     String hasSsplit = properties.getProperty("annotators");
     if (hasSsplit != null && hasSsplit.contains(StanfordCoreNLP.STANFORD_SSPLIT)) { // ssplit
@@ -201,7 +201,7 @@ public class TokenizerAnnotator implements Annotator  {
       props = new Properties();
     }
     // check if segmenting must be done (Chinese or Arabic and not tokenizing on whitespace)
-    boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
+    boolean whitespace = Boolean.parseBoolean(props.getProperty("tokenize.whitespace", "false"));
     if (props.getProperty("tokenize.language") != null &&
             LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))
         && !whitespace) {
@@ -279,7 +279,7 @@ public class TokenizerAnnotator implements Annotator  {
       break;
 
     case Whitespace:
-      boolean eolIsSignificant = Boolean.valueOf(props.getProperty(EOL_PROPERTY, "false"));
+      boolean eolIsSignificant = Boolean.parseBoolean(props.getProperty(EOL_PROPERTY, "false"));
       eolIsSignificant = eolIsSignificant || KEEP_NL_OPTION.equals(computeExtraOptions(props));
       factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<>(new CoreLabelTokenFactory(), eolIsSignificant);
       break;
@@ -340,10 +340,6 @@ public class TokenizerAnnotator implements Annotator  {
    */
   @Override
   public void annotate(Annotation annotation) {
-    if (VERBOSE) {
-      log.info("Tokenizing ... ");
-    }
-
     // for Arabic and Chinese use a segmenter instead
     if (useSegmenter) {
       segmenterAnnotator.annotate(annotation);
@@ -374,8 +370,7 @@ public class TokenizerAnnotator implements Annotator  {
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
       if (VERBOSE) {
-        log.info("done.");
-        log.info("Tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
+        log.info("Tokenized: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
       }
     } else {
       throw new RuntimeException("Tokenizer unable to find text in annotation: " + annotation);
@@ -385,7 +380,6 @@ public class TokenizerAnnotator implements Annotator  {
     if (splitMWTTokens) {
       mwtAnnotator.annotate(annotation);
     }
-
   }
 
   @Override
