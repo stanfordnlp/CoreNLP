@@ -74,8 +74,8 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
     // TODO: NNP should be head (rare cases, could be ignored):
     //   (NAC (NML New York) (NNP Court) (PP of Appeals))
     //   (NAC (NML Prudential Insurance) (NNP Co.) (PP Of America))
-    // Chris: This could maybe still do with more thought, but NAC is rare.
-    nonTerminalInfo.put("NAC", new String[][]{{"left", "NN", "NNS", "NML", "NNP", "NNPS", "NP", "NAC", "EX", "$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "JJP", "FW"}});
+    // Chris: This could maybe still do with more thought, but NAC is rare. But for now adding new rightdis to prefer rightmost noun (usually but not always right)
+    nonTerminalInfo.put("NAC", new String[][]{{"rightdis", "NN", "NNS", "NNP", "NNPS" }, {"left", "NML", "NP", "NAC", "EX", "$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "JJP", "FW"}});
 
     // Added JJ to PP head table, since it is a head in several cases, e.g.:
     // (PP (JJ next) (PP to them))
