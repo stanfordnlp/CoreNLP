@@ -99,6 +99,28 @@
 	value: InexactTime( TimeRange( IsoDate(ANY, 12, 21), IsoDate(ANY, 12, 22) ) )
   }
 
+  // Financial Quarters
+  FYQ1 = {
+      type: QUARTER_OF_YEAR,
+      label: "FYQ1",
+      value: TimeWithRange(TimeRange(IsoDate(ANY,10,1), IsoDate(ANY,12,31), QUARTER))
+  }
+  FYQ2 = {
+      type: QUARTER_OF_YEAR,
+      label: "FYQ2",
+      value: TimeWithRange(TimeRange(IsoDate(ANY,1,1), IsoDate(ANY,3,31), QUARTER))
+  }
+  FYQ3 = {
+      type: QUARTER_OF_YEAR,
+      label: "FYQ3",
+      value: TimeWithRange(TimeRange(IsoDate(ANY,4,1), IsoDate(ANY,6,30), QUARTER))
+  }
+  FYQ4 = {
+      type: QUARTER_OF_YEAR,
+      label: "FYQ4",
+      value: TimeWithRange(TimeRange(IsoDate(ANY,7,1), IsoDate(ANY,9,30), QUARTER))
+  }
+
   // Dates for seasons are rough with respect to northern hemisphere
   SPRING = {
       type: SEASON_OF_YEAR,

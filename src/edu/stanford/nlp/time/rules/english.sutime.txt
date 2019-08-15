@@ -124,6 +124,21 @@
   }
   $BasicOrdTerm = CreateRegex(Keys(BASIC_ORDINAL_MAP))
 
+  # Finanical Quarters
+  FISCAL_YEAR_QUARTER_MAP = {
+    "Q1": FYQ1,
+    "Q2": FYQ2,
+    "Q3": FYQ3,
+    "Q4": FYQ4
+  }
+  FISCAL_YEAR_QUARTER_YEAR_OFFSETS_MAP = {
+    "Q1": 1,
+    "Q2": 0,
+    "Q3": 0,
+    "Q4": 0
+  }
+  $FiscalYearQuarterTerm = CreateRegex(Keys(FISCAL_YEAR_QUARTER_MAP))
+
   ########################################################################################################################
 
   ENV.defaults["stage"] = 0
@@ -593,6 +608,18 @@
     }
   }
 
+  {
+    matchWithResults: TRUE,
+    pattern: ((/$FiscalYearQuarterTerm/) (FY)? (/(FY)?([0-9]{4})/)),
+    result:  TemporalCompose(INTERSECT, IsoDate(Subtract({type: "NUMBER", value: $$3.matchResults[0].word.group(2)}, FISCAL_YEAR_QUARTER_YEAR_OFFSETS_MAP[$1[0].word]), ANY, ANY), FISCAL_YEAR_QUARTER_MAP[$1[0].word])
+  }
+
+  {
+    pattern: ((/$FiscalYearQuarterTerm/)),
+    result: FISCAL_YEAR_QUARTER_MAP[$1[0].word]
+  }
+
+
   { name: "composite-date-expression-1a",
 	priority: 1,
 	pattern: ( (/every/ $NUM_ORD) (?$month [ { temporal::MONTH }]) ),
@@ -946,6 +973,7 @@
                 (/would/ | /could/ | /should/ | /will/ | /going/ /to/ | /'/ /ll/ | /'ll/ ) ),
      action: VTag( $0[0].temporal.value, "resolveTo", RESOLVE_TO_FUTURE )
   }
+
 
  ########################################################################################################################
   # Final filtering rules
