@@ -1347,6 +1347,30 @@ public class SUTimeITest extends TestCase {
     assertFalse(expectedTimexes.hasNext());
   }
 
+  public void testInnerCaptureGroupAccess() throws IOException {
+    // Set up test text
+    String testText = "The sword is believed to be from the 10th-century a.d. according to experts.";
+    // set up expected results
+    Iterator<Timex> expectedTimexes =
+            Arrays.asList(
+                    Timex.fromXml("<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"09XX\">the 10th-century a.d.</TIMEX3>")
+            ).iterator();
+    // run test
+    // create document
+    Annotation document = createDocument(testText);
+
+    // Time annotate
+    TimeAnnotator sutime = getTimeAnnotator();
+    sutime.annotate(document);
+
+    // Check answers
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
+      Timex expectedTimex = expectedTimexes.next();
+      checkTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
+    }
+    assertFalse(expectedTimexes.hasNext());
+  }
+
   public void testOverlaps() throws IOException {
     String testText = "Sun Apr 21\n" +
             "Wed Apr 24\n" +
