@@ -91,8 +91,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     sets or clears all the options below. (Default setting of the various
  *     properties below that this flag controls is equivalent to it being set
  *     to true.)
- * <li>ud: [From CoreNLP 4.0] Enable options that make tokenization like what is used in UD v2. This is a
- *     macro flag that sets various of the options below. It ignores a value for this key. </li>
  * <li>americanize: Whether to rewrite common British English spellings
  *     as American English spellings. (This is useful if your training
  *     material uses American English spelling, such as the Penn Treebank.)
@@ -111,9 +109,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li>normalizeOtherBrackets: Whether to map other common bracket characters
  *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank.
  *     Default is true.
- * <li>quotes: [From CoreNLP 4.0] Select a style of mapping quotes. Supports the traditional options
- *     below plus new options via an enum with values: latex, unicode, ascii,not_cp1252, original.
- *     "original" leaves all quotes as they were. "not_cp1252" only remaps invalid cp1252 quotes to Unicode. </li>
  * <li>asciiQuotes: Whether to map all quote characters to the traditional ' and ".
  *     Default is false.
  * <li>latexQuotes: Whether to map quotes to ``, `, ', '', as in Latex
@@ -166,8 +161,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  *      in Supplementary Guidelines for ETTB 2.0 by Justin Mott, Colin Warner, Ann Bies,
  *      Ann Taylor and CLEAR guidelines (Bracketing Biomedical Text) by Colin Warner et al. (2012).
  *      Default is false, which maintains old treebank tokenizer behavior.
- *  <li>splitForwardSlash: [From CoreNLP 4.0] Whether to tokenize segments of slashed tokens separately
- *      ("Asian" "/" "Indian", "and" "/" "or"). Default is false. </li>
  * </ol>
  * <p>
  * A single instance of a PTBTokenizer is not thread safe, as it uses
@@ -175,6 +168,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * instances can be created safely, though.  A single instance of a
  * PTBTokenizerFactory is also not thread safe, as it keeps its
  * options in a local variable.
+ * </p>
  *
  * @author Tim Grow (his tokenizer is a Java implementation of Professor
  *     Chris Manning's Flex tokenizer, pgtt-treebank.l)

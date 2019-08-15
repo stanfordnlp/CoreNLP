@@ -1024,7 +1024,6 @@ public class UniversalEnglishGrammaticalRelations {
 
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
           "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)");
-          // [todo [cdm2019]: Add somthing for clause acl not acl:relcl like: (NP (NP no question) (SBAR that (S (NP some) (VP contracted (NP diseases)))))
 
   /**
    * The "relative clause modifier" grammatical relation.  A relative clause

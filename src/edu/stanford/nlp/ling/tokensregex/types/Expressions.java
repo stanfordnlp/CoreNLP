@@ -1115,7 +1115,17 @@ public class Expressions  {
         }
       }
       try {
-        Object res = method.invoke(mainObj, objs);
+        Object res;
+        if (mainObj instanceof MatchResult && method.getName().equals("group")
+                && objs.length == 1 && objs[0] instanceof Integer) {
+          // handle case of calling MatchResult's group(int group) method
+          // this requires casting the mainObj to a MatchResult post Java 8 because
+          // Matcher's toMatchResult() now returns a Matcher$ImmutableMatchResult
+          res = ((MatchResult) mainObj).group((Integer) objs[0]);
+        } else {
+          // handle all other cases
+          res = method.invoke(mainObj, objs);
+        }
         return new PrimitiveValue<>(function, res);
       } catch (InvocationTargetException | IllegalAccessException ex) {
         throw new RuntimeException("Cannot evaluate method " + function + " on object " + mainObj, ex);
