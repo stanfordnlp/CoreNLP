@@ -100,6 +100,7 @@ Several properties can be set to alter the behavior of SUTime.
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
+| sutime.rules | String | comma separated list of rules to use |
 | sutime.markTimeRanges | boolean | Whether or not to recognize time ranges such as "July to August" |
 | sutime.includeNested | boolean | Whether to mark time expressions within time expressions as well (e.g. "July" in "July to August") |
 | sutime.teRelHeurLevel | String | Heuristic setting for resolving time expressions (NONE, BASIC, MORE) |
@@ -265,3 +266,101 @@ Here is a breakdown of the value of different components of the above expression
 | `TemporalCompose(INTERSECT, IsoDate(...), ...)` | intersection of `2018` with `FYQ1` |
 
 The final temporal object is built and associated with the phrase.
+
+## Example 2: Mapping Phrases To Southern Hemisphere Seasons
+
+The word `winter` means different periods of time in the USA and in Australia.
+
+If you wanted to customize the time period the season referred to, the best way to do this is 
+to alter the seasonal definitions in `defs.sutime.txt`.
+
+```
+  // Dates are rough with respect to northern hemisphere (actual
+  // solstice/equinox days depend on the year)
+  SPRING_EQUINOX = {
+    type: DAY_OF_YEAR,
+	value: InexactTime( TimeRange( IsoDate(ANY, 3, 20), IsoDate(ANY, 3, 21) ) )
+  }
+  SUMMER_SOLSTICE = {
+    type: DAY_OF_YEAR,
+	value: InexactTime( TimeRange( IsoDate(ANY, 6, 20), IsoDate(ANY, 6, 21) ) )
+  }
+  FALL_EQUINOX = {
+    type: DAY_OF_YEAR,
+	value: InexactTime( TimeRange( IsoDate(ANY, 9, 22), IsoDate(ANY, 9, 23) ) )
+  }
+  WINTER_SOLSTICE = {
+    type: DAY_OF_YEAR,
+	value: InexactTime( TimeRange( IsoDate(ANY, 12, 21), IsoDate(ANY, 12, 22) ) )
+  }
+
+  ...
+  
+  // Dates for seasons are rough with respect to northern hemisphere
+  SPRING = {
+      type: SEASON_OF_YEAR,
+      label: "SP",
+      value: InexactTime( SPRING_EQUINOX, QUARTER, TimeRange( MARCH, JUNE, QUARTER ) ) }
+  SUMMER = {
+      type: SEASON_OF_YEAR,
+      label: "SU",
+      value: InexactTime( SUMMER_SOLSTICE, QUARTER, TimeRange( JUNE, SEPTEMBER, QUARTER ) )
+  }
+  FALL = {
+      type: SEASON_OF_YEAR,
+      label: "FA",
+      value: InexactTime( FALL_EQUINOX, QUARTER, TimeRange( SEPTEMBER, DECEMBER, QUARTER ) )
+  }
+  WINTER = {
+      type: SEASON_OF_YEAR,
+      label: "WI",
+      value: InexactTime( WINTER_SOLSTICE, QUARTER, TimeRange( DECEMBER, MARCH, QUARTER ) )
+  }
+```
+
+For instance, these would be the updated rules in `defs.sutime.txt`
+
+```
+// Dates are rough with respect to northern hemisphere (actual
+// solstice/equinox days depend on the year)
+SPRING_EQUINOX = {
+   type: DAY_OF_YEAR,
+   value: InexactTime( TimeRange( IsoDate(ANY, 9, 22), IsoDate(ANY, 9, 23) ) )
+}
+SUMMER_SOLSTICE = {
+   type: DAY_OF_YEAR,
+   value: InexactTime( TimeRange( IsoDate(ANY, 12, 21), IsoDate(ANY, 12, 22) ) )
+}
+FALL_EQUINOX = {
+   type: DAY_OF_YEAR,
+   value: InexactTime( TimeRange( IsoDate(ANY, 3, 20), IsoDate(ANY, 3, 21) ) )
+}
+WINTER_SOLSTICE = {
+   type: DAY_OF_YEAR,
+   value: InexactTime( TimeRange( IsoDate(ANY, 6, 20), IsoDate(ANY, 6, 21) ) )
+}
+
+// Dates for seasons are rough with respect to northern hemisphere
+SPRING = {
+    type: SEASON_OF_YEAR,
+    label: "SP",
+    value: InexactTime( SPRING_EQUINOX, QUARTER, TimeRange( SEPTEMBER, DECEMBER, QUARTER ) ) }
+SUMMER = {
+    type: SEASON_OF_YEAR,
+    label: "SU",
+    value: InexactTime( SUMMER_SOLSTICE, QUARTER, TimeRange( DECEMBER, MARCH, QUARTER ) )
+}
+FALL = {
+    type: SEASON_OF_YEAR,
+    label: "FA",
+    value: InexactTime( FALL_EQUINOX, QUARTER, TimeRange( MARCH, JUNE, QUARTER ) )
+}
+WINTER = {
+    type: SEASON_OF_YEAR,
+    label: "WI",
+    value: InexactTime( WINTER_SOLSTICE, QUARTER, TimeRange( JUNE, SEPTEMBER, QUARTER ) )
+}
+```
+
+If you have created a custom rules file, you can tell SUTime to use it by setting the `sutime.rules` property
+when running a pipeline.  This property takes in a list of rules files and reads them in order.
