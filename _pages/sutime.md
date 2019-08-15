@@ -31,7 +31,14 @@ object.
 
 Phrases are recognized and linked based on a set of TokensRegex rules.
 
-The English rules are `edu/stanford/nlp/models/sutime/defs.sutime.txt,edu/stanford/nlp/models/sutime/english.sutime.txt,edu/stanford/nlp/models/sutime/english.holidays.sutime.txt`.  These files are available in the default models jar and can also be viewed on [GitHub](https://github.com/stanfordnlp/CoreNLP/tree/master/src/edu/stanford/nlp/time/rules).
+The default English rules are: 
+```
+edu/stanford/nlp/models/sutime/defs.sutime.txt,
+edu/stanford/nlp/models/sutime/english.sutime.txt,
+edu/stanford/nlp/models/sutime/english.holidays.sutime.txt`
+```
+
+These files are available in the default models jar and can also be viewed on [GitHub](https://github.com/stanfordnlp/CoreNLP/tree/master/src/edu/stanford/nlp/time/rules).
 
 SUTime is generally run as a subcomponent of the `ner` annotator.  After it has run, the tokens of a time phrase will have a `NamedEntityTagAnnotation` for the 
 type (e.g. DATE, TIME, DURATION, SET), and will have a `edu.stanford.nlp.time.Timex` object stored in the `TimexAnnotation` field.
