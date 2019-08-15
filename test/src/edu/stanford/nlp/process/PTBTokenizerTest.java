@@ -801,8 +801,8 @@ public class PTBTokenizerTest {
           // "bad?what opinion?kisses", // Not yet sure whether to break on this one (don't on periods)
           "I´m wrong and she\u00B4s right, anna_goldie.",
           "Left Duxbury Ave. and read para. 13.8 and attached 3802.doc.",
-          "Phone:86-0832-2115188",
-          "The athlete saw his son, Alex. In the Shu'la neighborhood.",
+          "Phone:86-0832-2115188. DIAL `M' FOR MANNERS.",
+          "The athlete didn't see his son, Alex. In the Shu'la neighborhood.",
           "China is very high tech. Moose are wont to roam here.",
   };
 
@@ -823,8 +823,8 @@ public class PTBTokenizerTest {
           // { "bad", "?", "what", "opinion", "?", "kisses" },
           { "I", "'m", "wrong", "and", "she", "'s", "right", ",", "anna_goldie", "." },
           { "Left", "Duxbury", "Ave.", "and", "read", "para.", "13.8", "and", "attached", "3802.doc", "." },
-          { "Phone", ":", "86-0832-2115188" },
-          { "The", "athlete", "saw", "his", "son", ",", "Alex", ".", "In", "the", "Shu'la", "neighborhood", "." },
+          { "Phone", ":", "86-0832-2115188", ".", "DIAL", "`", "M", "'", "FOR", "MANNERS", "." },
+          { "The", "athlete", "did", "nt", "see", "his", "son", ",", "Alex", ".", "In", "the", "Shu'la", "neighborhood", "." },
           { "China", "is", "very", "high", "tech", ".", "Moose", "are", "wont", "to", "roam", "here", "." },
   };
 

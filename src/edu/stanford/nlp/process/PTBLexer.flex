@@ -918,13 +918,13 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           return getNext(tok, tok);
                         }
 {TWITTER}               { return getNext(); }
-{REDAUX}/[^\p{Alpha}]   { String tok = yytext();
+{REDAUX}/[^\p{Alpha}'’]   { String tok = yytext();
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {REDAUX} to recognize " + tok + " as " + norm +
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
-{SREDAUX}/[^\p{Alpha}]  { String tok = yytext();
+{SREDAUX}/[^\p{Alpha}'’]  { String tok = yytext();
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {SREDAUX} to recognize " + tok + " as " + norm +
                                                    "; probablyLeft=" + false); }
