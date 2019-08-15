@@ -35,7 +35,7 @@ The default English rules are:
 ```
 edu/stanford/nlp/models/sutime/defs.sutime.txt,
 edu/stanford/nlp/models/sutime/english.sutime.txt,
-edu/stanford/nlp/models/sutime/english.holidays.sutime.txt`
+edu/stanford/nlp/models/sutime/english.holidays.sutime.txt
 ```
 
 These files are available in the default models jar and can also be viewed on [GitHub](https://github.com/stanfordnlp/CoreNLP/tree/master/src/edu/stanford/nlp/time/rules).
@@ -110,3 +110,158 @@ Several properties can be set to alter the behavior of SUTime.
 | ner.docdate.useRegex | String | Specify a regular expression matching file names. The first group will be extracted as the date. |
 
 The document date used by SUTime can also be set by specifying a date in an `xml` file and using the `cleanxml` annotator.
+
+## Example 1: Fiscal Year
+
+The English SUTime system in Stanford CoreNLP is specified in 3 rules files:
+
+* `defs.sutime.txt` handles setting up fundamental definitions which will be used in the later files.
+* `english.sutime.txt` contains the bulk of the English SUTime rules
+* `english.holidays.sutime.txt` contains additional rules for handling holidays
+
+In general, temporal concepts are set up in `defs.sutime.txt`, and the rules for matching phrases to temporal concepts 
+are specified in `english.sutime.txt`.  We will follow this pattern when adding fiscal year rules.
+
+In this example we will add rules to match phrases such as `Q3 FY 2018`.
+
+The fiscal year is typically divided into 4 quarters.   Here is an example for `FY 2019`.
+
+| Quarter | Time Period |
+| :--- | :--- |
+| Q1 | October - December 2018 |
+| Q2 | January - March 2019 |
+| Q3 | April - June 2019 |
+| Q4 | July - September 2019 |
+
+The first step is to specify these periods of time in `defs.sutime.txt`.  Here are the rules in that file
+that define those blocks of time:
+
+```
+  // Financial Quarters
+  FYQ1 = {
+      type: QUARTER_OF_YEAR,
+      label: "FYQ1",
+      value: TimeWithRange(TimeRange(IsoDate(ANY,10,1), IsoDate(ANY,12,31), QUARTER))
+  }
+  FYQ2 = {
+      type: QUARTER_OF_YEAR,
+      label: "FYQ2",
+      value: TimeWithRange(TimeRange(IsoDate(ANY,1,1), IsoDate(ANY,3,31), QUARTER))
+  }
+  FYQ3 = {
+      type: QUARTER_OF_YEAR,
+      label: "FYQ3",
+      value: TimeWithRange(TimeRange(IsoDate(ANY,4,1), IsoDate(ANY,6,30), QUARTER))
+  }
+  FYQ4 = {
+      type: QUARTER_OF_YEAR,
+      label: "FYQ4",
+      value: TimeWithRange(TimeRange(IsoDate(ANY,7,1), IsoDate(ANY,9,30), QUARTER))
+  }
+```
+
+The value of time objects in this example is an object of type `TimeWithRange`.  These class definitions
+can be found in `edu.stanford.nlp.time.SUTime`.  If you want to capture a particular concept of time,
+the best advice is to look through `defs.sutime.txt` and find a comparable temporal concept to model after.
+The financial quarters were modeled after the seasons for example.
+
+After this rule has been specified in `defs.sutime.txt`, further in that rule file and in the subsequent
+rule files `FYQ1` can be accessed to refer to that temporal concept.
+
+The remainder of this example will focus on making additions to `english.sutime.txt`.  
+
+First, a few maps and regexes need to be defined.
+
+```
+  # Finanical Quarters
+  FISCAL_YEAR_QUARTER_MAP = {
+    "Q1": FYQ1,
+    "Q2": FYQ2,
+    "Q3": FYQ3,
+    "Q4": FYQ4
+  }
+  FISCAL_YEAR_QUARTER_YEAR_OFFSETS_MAP = {
+    "Q1": 1,
+    "Q2": 0,
+    "Q3": 0,
+    "Q4": 0
+  }
+  $FiscalYearQuarterTerm = CreateRegex(Keys(FISCAL_YEAR_QUARTER_MAP))
+```
+
+Here two maps are produced, which will map `String`'s to specific financial quarters, and to integer offsets.
+When we specify the final rule, we need to potentially subtract 1 from the year if we are recognizing `Q1`.
+Also, using the `CreateRegex` function, we can generate a regex that will match any of the keys in the
+`FISCAL_YEAR_QUARTER_MAP`.
+
+Now that we have these tools, we can write the final TokensRegex rule that will match the actual phrases
+for financial quarters.
+
+```
+  {
+    matchWithResults: TRUE,
+    pattern: ((/$FiscalYearQuarterTerm/) (FY)? (/(FY)?([0-9]{4})/)),
+    result:  TemporalCompose(INTERSECT, IsoDate(Subtract({type: "NUMBER", value: $$3.matchResults[0].word.group(2)}, FISCAL_YEAR_QUARTER_YEAR_OFFSETS_MAP[$1[0].word]), ANY, ANY), FISCAL_YEAR_QUARTER_MAP[$1[0].word])
+  }
+
+  {
+    pattern: ((/$FiscalYearQuarterTerm/)),
+    result: FISCAL_YEAR_QUARTER_MAP[$1[0].word]
+  }
+```
+
+The TokensRegex rule specifies a pattern over tokens, and then specifies the temporal value to return.
+
+As a reminder, TokensRegex rules specify regular expression which match tokens.  Each space separated
+regular expression matches a single token or sequence of tokens.
+
+It is helpful to look at the first rule.  In the `pattern` part of the rule, 3 potential tokens are specifed. 
+
+The `(/$FiscalYearQuarterTerm/)` token would represent `Q1, Q2, Q3, Q4`.
+The `(FY)?` represents an optional `FY` token.  This is so both `Q1 2019` can be recognized as well as `Q1 FY 2019`.
+The `(/(FY)?([0-9]{4})/)` token captures the year component of phrase, so both `Q1 FY2019` can be recognized as well as `Q1 2019`.
+
+The `result` part of the rule specifies what temporal object to create when this pattern over tokens is recognized.
+
+Here are some explanations of components of this admittedly complex expression which represents the intersection of the 
+fiscal quarter with the specified year.
+
+```
+TemporalCompose(INTERSECT, IsoDate(Subtract({type: "NUMBER", value: $$3.matchResults[0].word.group(2)}, FISCAL_YEAR_QUARTER_YEAR_OFFSETS_MAP[$1[0].word]), ANY, ANY), FISCAL_YEAR_QUARTER_MAP[$1[0].word])
+```
+
+* The high level structure of this expression is to intersect the specified year with the specified quarter, hence the `TemporalCompose(INTERSECT, ... , ...)`
+
+* Keep in mind that there are two types of patterns to consider, patterns over tokens, and patterns that match the `String` contents of a given token.
+
+* For example `(/Q*/) (/[0-9]{4}/)` will match 2 tokens, the first token must start with a `Q`, and the second must be any 4-digit number. 
+
+* In our example, the token pattern has 3 capture groups, and the String pattern for matching the year token has 2 capture groups `(FY)?` and `([0-9]{4})`.
+  This means `$$3.matchResults[0].word.group(2)` will refer to the 3rd capture group of the token pattern (the year token), and the 2nd group of the
+  regex matching the year token's `String`, which is the numerical part of the `String`.  
+
+* The first component of the intersection is the result of the `Subtract`, which simply subtracts the quarter offset from the numerical value
+  of the year token.  So if `FY2019` is matched, the numerical component will be `2019`.  The `FISCAL_YEAR_QUARTER_YEAR_OFFSETS_MAP` is used
+  to determine the offset.  If `Q1 FY2019` was matched, `Q1` would be mapped to `1`, otherwise `0`.  So either `1` or `0` will be subtracted
+  from `2019`, giving the correct year.  Note the Subtract is wrapped in an `IsoDate`.  You can build a specific date with `IsoDate($Year, $Month, $Day)`.
+  Passing `ANY` to `IsoDate` will create a date with nothing specified for that field.  So `IsoDate(2019, ANY, ANY)` means the year 2019.
+
+* The second component of the intersection is the fiscal quarter object.  Recall that the `FISCAL_YEAR_QUARTER_MAP` maps `String`'s to fiscal quarters.
+  So the result of `FISCAL_YEAR_QUARTER_MAP[$1[0].word]` is the mapping for the `Q*` token.
+
+Here is a breakdown of the value of different components of the above expression if it matched the phrase `Q1 FY2019`.
+
+| Sub Expression | Description |
+| :--- | :--- |
+| `$1` | capture group 1 of the token pattern, e.g. `(/$FiscalYearQuarterTerm/)` |
+| `$1[0]` | first token of capture group 1 of the token pattern, e.g. the `"Q1"` token |
+| `$1[0].word` | string value of the first token of capture group 1 of the token pattern, e.g. the `String` `"Q1"` |
+| `FISCAL_YEAR_QUARTER_MAP[$1[0].word]` | mapping of `"Q1"` token to `FYQ1` (defined in `defs.sutime.txt`) |
+| `$$3.matchResults[0].word.group(2)` | token pattern capture group 3, string pattern capture group 2, e.g. `2019` |
+| `$$3.matchResults[0].word.group(1)` | token pattern capture group 3, string pattern capture group 1, e.g. `FY` |
+| `FISCAL_YEAR_QUARTER_YEAR_OFFSETS_MAP[$1[0].word]` | map `"Q1"` to `1` |
+| `Subtract(..., ...)` | `2019 - 1 = 2018` |
+| `IsoDate(..., ..., ...)` | an `IsoDate` built with `(2018, ANY, ANY)` |
+| `TemporalCompose(INTERSECT, IsoDate(...), ...)` | intersection of `2018` with `FYQ1` |
+
+The final temporal object is built and associated with the phrase.
