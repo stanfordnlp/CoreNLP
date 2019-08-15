@@ -585,10 +585,6 @@ DOLSIGN = ([A-Z]*\$|#)
 DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AA\u20AC\u20B9\u060B\u0E3F\u20A4\uFFE0\uFFE1\uFFE5\uFFE6\u20BD\u20A9]
 /* not used DOLLAR      {DOLSIGN}[ \t]*{NUMBER}  */
 /* |\( ?{NUMBER} ?\))    # is for pound signs */
-/* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
-LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
-/* Allow in the zero-width (non-)joiner characters. */
-WORD = {LETTER}({LETTER}|{DIGIT})*([.!?\u200c\u200d]{LETTER}({LETTER}|{DIGIT})*)*
 FILENAME_EXT = 3gp|avi|bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|flv|gif|gz|h|hei[cf]|htm|html|jar|java|jpeg|jpg|mov|mp[34g]|mpeg|o|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|wm[va]
 FILENAME = [\p{Alpha}\p{Digit}]+([-._/#][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}
 /* Curse of intelligent tokenization, here we come. To model what LDC does, we separate out some \p{Digit}+\p{Alpha}+ tokens as 2 words */
@@ -599,6 +595,10 @@ SEP_UNITS = (lbs?|ltr|mins?|[kcm][gml]|[MGTP]([B]|[H][z])|fps|bpm|[MG][b][p][s])
 SEP_OTHER = ([ap]m|hrs?|words?|m(on)?ths?|y(ea)?rs?|pts?)
 /* If there is a longer alphabetic match, another longer pattern will match so don't need to filter that. */
 SEP_SUFFIX = ({SEP_CURRENCY}|{SEP_UNITS}|{SEP_OTHER})
+/* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
+LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
+/* Allow in the zero-width (non-)joiner characters. */
+WORD = {LETTER}({LETTER}|{DIGIT})*([.!?\u200c\u200d]{LETTER}({LETTER}|{DIGIT})*)*
 /* THING: The $ was for things like New$;
    WAS: only keep hyphens with short one side like co-ed
    But treebank just allows hyphenated things as words!
@@ -609,9 +609,8 @@ THING3 = [\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}(\\?\/[\p{Alpha}\p{Digit}]+(-[
 APOS = ['\u0092\u2019´]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or reversed quote or HTML SGML escape */
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
-/* HTHING recognizes hyphenated words, including ones with various kinds of numbers in them.
-   It's not quite clear what this recognizes that THING doesn't. Delete this one?!? */
-HTHING = [\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD]*(-([\p{Alpha}\p{Digit}\u00AD]+(\.[:digit:]+)?|{ACRO2}\.))+
+/* HTHING recognizes hyphenated words, including ones with various kinds of numbers in them. And with underscores. */
+HTHING = [\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD]*([-_]([\p{Alpha}\p{Digit}\u00AD]+(\.[:digit:]+)?|{ACRO2}\.))+
 /* from the CLEAR (biomedical?) treebank documentation */
 /* we're going to split on most hypens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
@@ -690,8 +689,9 @@ ABNUM = tel|est|ext|sq
 ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Esq
 /* ss?p and aff are for bio taxonomy; also gen and cf but appear elsewhere as ABBREV4 already; fl for flourished */
 ABTAXONOMY = (s(ub)?)?spp?|aff|[f][l]
-/* Notes: many misspell etc. ect.; kr. is some other currency. Tech is for Indian B. Tech. degrees. eg. for e.g. */
-ABVARIA = etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr|Tech|eg
+/* Notes: many misspell etc. ect.; kr. is some other currency. eg. for e.g. */
+/*  Tech would be useful for Indian B. Tech. degrees, but "tech" is used too much as a word. */
+ABVARIA = etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr|eg
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
  * If they're followed by an uppercase one, we assume there is also a
@@ -791,7 +791,8 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 PROG_LANGS = c[+][+]|(c|f)#
 ASSIMILATIONS3 = cannot|'twas|dunno
 /* "nno" is a remnant after pushing back from dunno in ASSIMILATIONS3 */
-ASSIMILATIONS2 = {APOS}tis|gonna|gotta|lemme|gimme|wanna|nno|aint|dont|doesnt|didnt|wont|theyre
+/* Include splitting some apostrophe-less negations, but not ones like "wont" that are also words. */
+ASSIMILATIONS2 = {APOS}tis|gonna|gotta|lemme|gimme|wanna|nno|aint|dont|doesnt|didnt|theyre
 
 /* CP1252: dagger, double dagger, per mille, bullet, small tilde, trademark */
 CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]

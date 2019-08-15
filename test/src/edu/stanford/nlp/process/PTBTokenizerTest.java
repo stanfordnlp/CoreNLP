@@ -799,9 +799,11 @@ public class PTBTokenizerTest {
           "\"Whereas strategic considerations have to be based on 'real- politick' and harsh facts,\" Saleem said.",
           "F*ck, cr-p, I met Uchenna Nnobuko yesterday.",  // remnant of "dunno" should not match prefix
           // "bad?what opinion?kisses", // Not yet sure whether to break on this one (don't on periods)
-          "I´m wrong and she\u00B4s right.", // not working: I´m
+          "I´m wrong and she\u00B4s right, anna_goldie.",
           "Left Duxbury Ave. and read para. 13.8 and attached 3802.doc.",
           "Phone:86-0832-2115188",
+          "The athlete saw his son, Alex. In the Shu'la neighborhood.",
+          "China is very high tech. Moose are wont to roam here.",
   };
 
   private final String[][] hyphenGold = {
@@ -819,9 +821,11 @@ public class PTBTokenizerTest {
                   "`", "real", "-", "politick", "'", "and", "harsh", "facts", ",", "''", "Saleem", "said", "." },
           { "F*ck", ",", "cr-p", ",", "I", "met", "Uchenna", "Nnobuko", "yesterday", "." },
           // { "bad", "?", "what", "opinion", "?", "kisses" },
-          { "I", "'m", "wrong", "and", "she", "'s", "right", "." },
+          { "I", "'m", "wrong", "and", "she", "'s", "right", ",", "anna_goldie", "." },
           { "Left", "Duxbury", "Ave.", "and", "read", "para.", "13.8", "and", "attached", "3802.doc", "." },
           { "Phone", ":", "86-0832-2115188" },
+          { "The", "athlete", "saw", "his", "son", ",", "Alex", ".", "In", "the", "Shu'la", "neighborhood", "." },
+          { "China", "is", "very", "high", "tech", ".", "Moose", "are", "wont", "to", "roam", "here", "." },
   };
 
   @Test
