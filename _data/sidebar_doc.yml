@@ -121,6 +121,9 @@ entries:
         - title: Extensions
           url: extensions.html
 
+        - title: SUTime
+          url: sutime.html
+
         - title: TokensRegex
           url: tokensregex.html
 
