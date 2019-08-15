@@ -1,5 +1,6 @@
 package edu.stanford.nlp.process;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** This class contains various static utility methods invoked by our JFlex NL lexers.
@@ -257,6 +258,18 @@ public class LexerUtils {
     } else {
       return tok;
     }
+  }
+
+  /** @return index of pattern in s or -1, if not found. */
+  public static int indexOfRegex(Pattern pattern, String s) {
+    Matcher matcher = pattern.matcher(s);
+    return matcher.find() ? matcher.start() : -1;
+  }
+
+  /** @return index of pattern in s or -1, if not found, starting from index. */
+  public static int indexOfRegex(Pattern pattern, String s, int index) {
+    Matcher matcher = pattern.matcher(s);
+    return matcher.find(index) ? matcher.start() : -1;
   }
 
 }

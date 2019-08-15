@@ -1,8 +1,9 @@
 package edu.stanford.nlp.process;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class AmericanizeTest extends TestCase {
+public class AmericanizeTest {
 
   private String[] exBrEWords = new String[]{
     "colour", "encyclopaedia", "devour", "glamour", "armour",
@@ -16,13 +17,14 @@ public class AmericanizeTest extends TestCase {
     "realize", "rumors", "detour", "Defense"
   };
 
+  @Test
   public void testAmericanize() {
     Americanize am = new Americanize();
     assert(exBrEWords.length == exAmEWords.length);
 
     for (int i = 0; i < exBrEWords.length; i++) {
-      assertEquals("Americanization failed to agree",
-                   Americanize.americanize(exBrEWords[i]), exAmEWords[i]);
+      Assert.assertEquals("Americanization failed to agree",
+              Americanize.americanize(exBrEWords[i]), exAmEWords[i]);
     }
   }
 

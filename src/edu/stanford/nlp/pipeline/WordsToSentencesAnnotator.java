@@ -40,9 +40,9 @@ public class WordsToSentencesAnnotator implements Annotator  {
 
 
   public WordsToSentencesAnnotator(Properties properties) {
-    boolean nlSplitting = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+    boolean nlSplitting = Boolean.parseBoolean(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
     if (nlSplitting) {
-      boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
+      boolean whitespaceTokenization = Boolean.parseBoolean(properties.getProperty("tokenize.whitespace", "false"));
       if (whitespaceTokenization) {
         if (System.lineSeparator().equals("\n")) {
           // this constructor will keep empty lines as empty sentences
@@ -115,7 +115,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
             (boundaryMultiTokenRegex != null) ? TokenSequencePattern.compile(boundaryMultiTokenRegex) : null, tokenRegexesToDiscard);
       }
     }
-    VERBOSE = Boolean.valueOf(properties.getProperty("ssplit.verbose", "false"));
+    VERBOSE = Boolean.parseBoolean(properties.getProperty("ssplit.verbose", "false"));
   }
 
   public WordsToSentencesAnnotator(boolean verbose) {
@@ -310,7 +310,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
     // at end of this annotator, it should be as though newline tokens
     // were never used
     // reset token indexes
-    List<CoreLabel> finalTokens = new ArrayList<CoreLabel>();
+    List<CoreLabel> finalTokens = new ArrayList<>();
     int tokenIndex = 0;
     CoreLabel prevToken = null;
     for (CoreLabel currToken : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
