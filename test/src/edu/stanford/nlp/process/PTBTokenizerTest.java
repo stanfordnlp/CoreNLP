@@ -802,7 +802,7 @@ public class PTBTokenizerTest {
           "I´m wrong and she\u00B4s right, anna_goldie.",
           "Left Duxbury Ave. and read para. 13.8 and attached 3802.doc.",
           "Phone:86-0832-2115188. DIAL `M' FOR MANNERS.",
-          "The athlete didnt see his son, Alex. In the Shu'la neighborhood.",
+          "The athlete didn't see his son, Alex. In the Shu'la neighborhood.",
           "China is very high tech. Moose are wont to roam here.",
   };
 
