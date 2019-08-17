@@ -28,6 +28,7 @@ public class TTags {
   private Index<String> index = new HashIndex<>();
   private final Set<String> closed = Generics.newHashSet();
   private Set<String> openTags; // = null; /* cache */
+  private transient String[] openTagsArr; // = null; used for cache
   private final boolean isEnglish; // for speed
   private static final boolean doDeterministicTagExpansion = true;
 
@@ -294,7 +295,7 @@ public class TTags {
    * Returns a list of all open class tags
    * @return set of open tags
    */
-  public Set<String> getOpenTags() {
+  public synchronized Set<String> getOpenTags() {
     if (openTags == null) { /* cache check */
       Set<String> open = Generics.newHashSet();
 
@@ -305,8 +306,27 @@ public class TTags {
       }
 
       openTags = open;
+      openTagsArr = null;
     } // if
     return openTags;
+  }
+
+  /**
+   * Returns a list of all open class tags as an array.
+   * This saves a little time in TestSentence.
+   *
+   * @return array of open tags
+   */
+  public synchronized String[] getOpenTagsArray() {
+    if (openTagsArr == null) {
+      List<String> tags = new ArrayList<>(getOpenTags());
+      String[] arr = new String[tags.size()];
+      for (int i = 0; i < tags.size(); ++i) {
+        arr[i] = tags.get(i);
+      }
+      openTagsArr = arr;
+    }
+    return openTagsArr;
   }
 
   protected int add(String tag) {
@@ -391,9 +411,10 @@ public class TTags {
     learnClosedTags = learn;
   }
 
-  public void setOpenClassTags(String[] openClassTags) {
+  public synchronized void setOpenClassTags(String[] openClassTags) {
     openTags = Generics.newHashSet();
     openTags.addAll(Arrays.asList(openClassTags));
+    openTagsArr = null;
     for (String tag : openClassTags) {
       add(tag);
     }

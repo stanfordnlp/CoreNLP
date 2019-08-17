@@ -833,8 +833,7 @@ public class TestSentence implements SequenceModel  {
 
     String word = sent.get(pos - leftWindow());
     if (maxentTagger.dict.isUnknown(word)) {
-      Set<String> open = maxentTagger.tags.getOpenTags();  // todo: really want array of String or int here
-      arr1 = open.toArray(StringUtils.EMPTY_STRING_ARRAY);
+      arr1 = maxentTagger.tags.getOpenTagsArray();
     } else {
       arr1 = maxentTagger.dict.getTags(word);
     }
