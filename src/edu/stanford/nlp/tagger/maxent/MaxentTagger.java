@@ -216,6 +216,7 @@ import java.text.DecimalFormat;
  * <tr><td>debug</td><td>boolean</td><td>boolean</td><td>All</td><td>Whether to write debugging information (words, top words, unknown words, confusion matrix).  Useful for error analysis.</td></tr>
  * <tr><td>debugPrefix</td><td>String</td><td>N/A</td><td>All</td><td>File (path) prefix for where to write out the debugging information (relevant only if debug=true).</td></tr>
  * <tr><td>nthreads</td><td>int</td><td>1</td><td>Test,Text</td><td>Number of threads to use when processing text.</td></tr>
+ * <tr><td>minWordsLockTags</td><td>int</td><td>1</td><td>All</td><td>If a word occurs at least this many times in the training data, the tagger will only propose known tags as candidates.</td></tr>
  * </table>
  *
  *

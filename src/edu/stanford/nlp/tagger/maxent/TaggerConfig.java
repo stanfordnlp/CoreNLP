@@ -14,10 +14,11 @@ import edu.stanford.nlp.util.logging.Redwood;
 /**
  * Reads and stores configuration information for a POS tagger.
  *
- * <i>Implementation note:</i> To add a new parameter: (1) define a default
- * String value, (2) add it to defaultValues map, (3) add line to constructor,
- * (4) add getter method, (5) add to dump() method, (6) add to printGenProps()
- * method, (7) add to class javadoc of MaxentTagger.
+ * <i>Implementation note:</i> To add a new parameter: (1) define a
+ * default String value, (2) add it to defaultValues map, (3) add line
+ * to constructor via setProperties, (4) add getter method, (5) add to
+ * dump() method, (6) add to printGenProps() method, (7) add to class
+ * javadoc of MaxentTagger.
  *
  *  @author William Morgan
  *  @author Anna Rafferty
@@ -67,7 +68,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
   OUTPUT_FILE = "",
   OUTPUT_FORMAT = "slashTags",
   OUTPUT_FORMAT_OPTIONS = "",
-  NTHREADS = "1";
+  NTHREADS = "1",
+  MIN_WORDS_LOCK_TAGS = "1";
 
   public static final String ENCODING_PROPERTY = "encoding",
   TAG_SEPARATOR_PROPERTY = "tagSeparator";
@@ -109,6 +111,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     defaultValues.put("outputFormat", OUTPUT_FORMAT);
     defaultValues.put("outputFormatOptions", OUTPUT_FORMAT_OPTIONS);
     defaultValues.put("nthreads", NTHREADS);
+    defaultValues.put("minWordsLockTags", MIN_WORDS_LOCK_TAGS);
   }
 
   /**
@@ -258,6 +261,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     this.setProperty("outputFormat", props.getProperty("outputFormat", this.getProperty("outputFormat")).trim()); //this isn't something we save from time to time
     this.setProperty("outputFormatOptions", props.getProperty("outputFormatOptions", this.getProperty("outputFormatOptions")).trim()); //this isn't something we save from time to time
     this.setProperty("nthreads", props.getProperty("nthreads", this.getProperty("nthreads", NTHREADS)).trim());
+    this.setProperty("minWordsLockTags", props.getProperty("minWordsLockTags", this.getProperty("minWordsLockTags", MIN_WORDS_LOCK_TAGS)).trim());
     String sentenceDelimiter = props.getProperty("sentenceDelimiter", this.getProperty("sentenceDelimiter"));
     if (sentenceDelimiter != null) {
       // this isn't something we save from time to time.
@@ -375,6 +379,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
 
   public int getNThreads() { return Integer.parseInt(getProperty("nthreads")); }
 
+  public int getMinWordsLockTags() { return Integer.parseInt(getProperty("minWordsLockTags")); }
+
 
   /** Return a regex of XML elements to tag inside of.  This may return an
    *  empty String, but never null.
@@ -475,6 +481,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     pw.println("            outputFormat = " + getProperty("outputFormat"));
     pw.println("     outputFormatOptions = " + getProperty("outputFormatOptions"));
     pw.println("                nthreads = " + getProperty("nthreads"));
+    pw.println("        minWordsLockTags = " + getProperty("minWordsLockTags"));
     pw.flush();
   }
 
@@ -718,6 +725,11 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
 
     out.println("# testFile and textFile can use multiple threads to process text.");
     out.println("# nthreads = " + NTHREADS);
+    out.println();
+
+    out.println("# The tagger will only use tags it has seen for a particular word");
+    out.println("# if the word occurred at least this many times in the training data.");
+    out.println("# minWordsLockTags = " + MIN_WORDS_LOCK_TAGS);
   }
 
   public Mode getMode() {

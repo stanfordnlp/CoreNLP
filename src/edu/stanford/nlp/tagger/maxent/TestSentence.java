@@ -66,6 +66,7 @@ public class TestSentence implements SequenceModel  {
 
   protected final String tagSeparator;
   protected final String encoding;
+  protected final int minWordsLockTags;
   protected final PairsHolder pairs = new PairsHolder();
   protected List<String> sent;
   private List<String> originalTags;
@@ -96,10 +97,12 @@ public class TestSentence implements SequenceModel  {
       tagSeparator = maxentTagger.config.getTagSeparator();
       encoding = maxentTagger.config.getEncoding();
       VERBOSE = maxentTagger.config.getVerbose();
+      minWordsLockTags = maxentTagger.config.getMinWordsLockTags();
     } else {
       tagSeparator = TaggerConfig.getDefaultTagSeparator();
       encoding = "utf-8";
       VERBOSE = false;
+      minWordsLockTags = 1;
     }
     history = new History(pairs, maxentTagger.extractors);
   }
@@ -832,7 +835,8 @@ public class TestSentence implements SequenceModel  {
     }
 
     String word = sent.get(pos - leftWindow());
-    if (maxentTagger.dict.isUnknown(word)) {
+    int count = maxentTagger.dict.sum(word);
+    if (count == 0 || count < minWordsLockTags) {
       arr1 = maxentTagger.tags.getOpenTagsArray();
     } else {
       arr1 = maxentTagger.dict.getTags(word);
