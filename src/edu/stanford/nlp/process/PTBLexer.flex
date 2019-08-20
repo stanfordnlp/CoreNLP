@@ -789,7 +789,7 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 /* Math and other symbols that stand alone: °²× ∀ */
 
 PROG_LANGS = c[+][+]|(c|f)#
-ASSIMILATIONS3 = cannot|'twas|dunno
+ASSIMILATIONS3 = cannot|'twas|dunno|['’]d['’]ve
 /* "nno" is a remnant after pushing back from dunno in ASSIMILATIONS3 */
 /* Include splitting some apostrophe-less negations, but not ones like "wont" that are also words. */
 ASSIMILATIONS2 = {APOS}tis|gonna|gotta|lemme|gimme|wanna|nno|aint|dont|doesnt|didnt|theyre

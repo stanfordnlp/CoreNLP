@@ -804,6 +804,7 @@ public class PTBTokenizerTest {
           "Phone:86-0832-2115188. DIAL `M' FOR MANNERS.",
           "The athlete didnt see his son, Alex. In the Shu'la neighborhood.",
           "China is very high tech. Moose are wont to roam here.",
+          "I'd've thought that they'd've liked it.",
   };
 
   private final String[][] hyphenGold = {
@@ -826,6 +827,7 @@ public class PTBTokenizerTest {
           { "Phone", ":", "86-0832-2115188", ".", "DIAL", "`", "M", "'", "FOR", "MANNERS", "." },
           { "The", "athlete", "did", "nt", "see", "his", "son", ",", "Alex", ".", "In", "the", "Shu'la", "neighborhood", "." },
           { "China", "is", "very", "high", "tech", ".", "Moose", "are", "wont", "to", "roam", "here", "." },
+          { "I", "'d", "'ve", "thought", "that", "they", "'d", "'ve", "liked", "it", "." },
   };
 
   @Test
