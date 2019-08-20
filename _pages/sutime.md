@@ -43,12 +43,12 @@ These files are available in the default models jar and can also be viewed on [G
 SUTime is generally run as a subcomponent of the `ner` annotator.  After it has run, the tokens of a time phrase will have a `NamedEntityTagAnnotation` for the 
 type (e.g. DATE, TIME, DURATION, SET), and will have a `edu.stanford.nlp.time.Timex` object stored in the `TimexAnnotation` field.
 
-Recognized temporal expressions can be resolved to the document date.  For instance, the expression `this Wednesday` will be resolved to the 
+Recognized temporal expressions can be resolved relative to the document date.  For instance, the expression `this Wednesday` will be resolved to the 
 Wednesday that is closest to the document date, be it the current date or any other date.  The document date can be set in several ways
 as will be documented below.
 
 If you would like to customize SUTime or make additions, you can alter the rules files accordingly or add new rules files.  Setting
-the property `sutime.rules = /path/to/my-rules.txt` will set the pipeline to use your custom rules.
+the property `sutime.rules = /path/to/my-rules.txt` (or a comma-separated list of rules files) will set the pipeline to use your custom rules.
 
 
 ### Java API
@@ -85,7 +85,8 @@ public class SUTimeBasicExample {
             pipeline.annotate(document);
             for (CoreEntityMention cem : document.entityMentions()) {
                 System.out.println("temporal expression: "+cem.text());
-                System.out.println("temporal value: "+cem.coreMap().get(TimeAnnotations.TimexAnnotation.class));
+                System.out.println("temporal value: " +
+                                   cem.coreMap().get(TimeAnnotations.TimexAnnotation.class));
             }
         }
     }
@@ -95,14 +96,13 @@ public class SUTimeBasicExample {
 ### Running SUTime in a Stanford CoreNLP Pipeline
 
 SUTime will be run automatically as a subcomponent of the `ner` annotator.
-
 Several properties can be set to alter the behavior of SUTime.
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
-| sutime.rules | String | comma separated list of rules to use |
+| sutime.rules | String | Comma separated list of rules to use |
 | sutime.markTimeRanges | boolean | Whether or not to recognize time ranges such as "July to August" |
-| sutime.includeNested | boolean | Whether to mark time expressions within time expressions as well (e.g. "July" in "July to August") |
+| sutime.includeNested | boolean | Whether to mark time expressions within time expressions as well (e.g., "July" in "July to August") |
 | sutime.teRelHeurLevel | String | Heuristic setting for resolving time expressions (NONE, BASIC, MORE) |
 | sutime.includeRange | boolean | Whether or not to add range info to the TIMEX3 object |
 | ner.docdate.useFixedDate | String | Provide a fixed date for each document. |
