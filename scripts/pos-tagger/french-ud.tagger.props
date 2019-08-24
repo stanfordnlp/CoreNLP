@@ -24,7 +24,7 @@ rareWordMinFeatureThresh = 10
                tagInside = 
                 tokenize = true
         tokenizerFactory = 
-        tokenizerOptions = asciiQuotes
+        tokenizerOptions = quotes=ascii
                  verbose = false
           verboseResults = true
     veryCommonWordThresh = 250
