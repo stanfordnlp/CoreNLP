@@ -177,8 +177,7 @@ public class MWTAnnotator implements Annotator {
     public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
         return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
                 CoreAnnotations.MWTTokenTextAnnotation.class,
-                CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class,
-                CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class
+                CoreAnnotations.IsMultiWordTokenAnnotation.class
         )));
     }
 }
