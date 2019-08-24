@@ -1773,6 +1773,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
 
   private static void demoteQuantificationalModifiers(SemanticGraph sg) {
+	  
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+	  return;
+    
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = QUANT_MOD_3W_PATTERN.matcher(sgCopy);
 
@@ -1860,6 +1865,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     if ( ! USE_NAME) {
       return;
     }
+    
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+	  return;
 
     // check whether NER tags are available
     IndexedWord rootToken = sg.getFirstRoot();
