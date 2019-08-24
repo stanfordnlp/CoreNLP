@@ -26,7 +26,6 @@ import java.math.BigInteger;
 import java.net.*;
 import javax.net.ssl.*;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -735,7 +734,7 @@ public class StanfordCoreNLPServer implements Runnable {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       httpExchange.getResponseHeaders().set("Content-type", this.contentType);
-      ByteBuffer buffer = Charset.forName("UTF-8").encode(content);
+      ByteBuffer buffer = StandardCharsets.UTF_8.encode(content);
       byte[] bytes = new byte[buffer.remaining()];
       buffer.get(bytes);
       httpExchange.sendResponseHeaders(HTTP_OK, bytes.length);
@@ -1490,8 +1489,7 @@ public class StanfordCoreNLPServer implements Runnable {
     ArgumentParser.fillOptions(server, args);
     // align status port and server port in case status port hasn't been set and
     // server port is not the default 9000
-    if (serverProperties != null && !serverProperties.containsKey("status_port") &&
-        serverProperties.containsKey("port")) {
+    if ( ! serverProperties.containsKey("status_port") && serverProperties.containsKey("port")) {
       server.statusPort = Integer.parseInt(serverProperties.getProperty("port"));
     }
     log("    Threads: " + ArgumentParser.threads);

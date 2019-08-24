@@ -366,14 +366,17 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    */
   public StanfordCoreNLPClient(Properties properties, String host, int port, int threads,
                                String apiKey, String apiSecret) {
-    this(properties, new ArrayList<Backend>() {{
-      for (int i = 0; i < threads; ++i) {
-        add(new Backend(host.startsWith("http://") ? "http" : "https",
-            host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
-            port));
-      }
-    }},
-    apiKey, apiSecret);
+    this(properties, getBackends(host, port, threads), apiKey, apiSecret);
+  }
+
+  private static List<Backend> getBackends(String host, int port, int threads) {
+    List<Backend> backends = new ArrayList<>();
+    for (int i = 0; i < threads; i++) {
+      backends.add(new Backend(host.startsWith("http://") ? "http" : "https",
+              host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
+              port));
+    }
+    return backends;
   }
 
   /**
@@ -527,6 +530,12 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     }
   }
 
+  /** Return true if the referenced server is alive and returns a non-error response code.
+   *
+   * @param serverURL The server (running CoreNLP) to check
+   * @return true if the server is alive and returns a response code between 200 and 400 inclusive
+   */
+  @SuppressWarnings("unused")
   public boolean checkStatus(URL serverURL) {
     try {
       // 1. Set up the connection
