@@ -129,8 +129,6 @@ public class MWTAnnotator implements Annotator {
                         newToken.setBeginPosition(token.beginPosition());
                         newToken.setEndPosition(token.endPosition());
                         newToken.set(CoreAnnotations.MWTTokenTextAnnotation.class, token.word());
-                        newToken.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class, token.beginPosition());
-                        newToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class, token.endPosition());
                         newToken.setIsMWT(true);
                         newToken.setIndex(sentenceIndex);
                         newToken.setSentIndex(sentNum);

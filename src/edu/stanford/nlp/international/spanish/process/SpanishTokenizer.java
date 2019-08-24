@@ -207,25 +207,12 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     for (String pronoun : stripped.getPronouns()) {
       int beginOffset = stemEnd + lengthRemoved;
       CoreLabel compoundCoreLabel = copyCoreLabel(cl, pronoun, beginOffset);
-      addMWTTokenInfo(cl, compoundCoreLabel);
       compoundBuffer.add(compoundCoreLabel);
       lengthRemoved += pronoun.length();
     }
     CoreLabel stem = copyCoreLabel(cl, stripped.getStem(), cl.beginPosition(), stemEnd);
     stem.setOriginalText(stripped.getOriginalStem());
-    addMWTTokenInfo(cl, stem);
     return stem;
-  }
-
-  /**
-   * Add MWT info to tokens created by splitting a multi-word token
-   */
-
-  private static void addMWTTokenInfo(CoreLabel originalToken, CoreLabel splitToken) {
-    splitToken.set(CoreAnnotations.MWTTokenTextAnnotation.class, originalToken.word());
-    splitToken.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class, originalToken.beginPosition());
-    splitToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class, originalToken.endPosition());
-    splitToken.setIsMWT(true);
   }
 
   private static final Pattern pDash = Pattern.compile("-");
