@@ -129,6 +129,8 @@ public class MWTAnnotator implements Annotator {
                         newToken.setBeginPosition(token.beginPosition());
                         newToken.setEndPosition(token.endPosition());
                         newToken.set(CoreAnnotations.MWTTokenTextAnnotation.class, token.word());
+                        newToken.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class, token.beginPosition());
+                        newToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class, token.endPosition());
                         newToken.setIsMWT(true);
                         newToken.setIndex(sentenceIndex);
                         newToken.setSentIndex(sentNum);
@@ -177,7 +179,8 @@ public class MWTAnnotator implements Annotator {
     public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
         return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
                 CoreAnnotations.MWTTokenTextAnnotation.class,
-                CoreAnnotations.IsMultiWordTokenAnnotation.class
+                CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class,
+                CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class
         )));
     }
 }

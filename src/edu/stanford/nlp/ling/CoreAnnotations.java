@@ -2163,4 +2163,26 @@ public class CoreAnnotations {
         }
     }
 
+    /**
+     * Begin character offset for the token that was used to create this word.
+     */
+    public static class MWTTokenCharacterOffsetBeginAnnotation implements CoreAnnotation<Integer> {
+        @Override
+        public Class<Integer> getType() {
+            return Integer.class;
+        }
+    }
+
+    /**
+     * End character offset for the token that was used to create this word.
+     */
+    public static class MWTTokenCharacterOffsetEndAnnotation implements CoreAnnotation<Integer> {
+        @Override
+        public Class<Integer> getType() {
+            return Integer.class;
+        }
+    }
+
+
+
 }
