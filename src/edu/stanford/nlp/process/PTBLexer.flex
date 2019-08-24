@@ -161,8 +161,7 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeParentheses = val;
         normalizeOtherBrackets = val;
         quoteStyle = val ? LexerUtils.QuotesEnum.LATEX : LexerUtils.QuotesEnum.ORIGINAL;
-        ptb3Ellipsis = val;
-        unicodeEllipsis = val;
+        ellipsisStyle = val ? LexerUtils.EllipsesEnum.PTB3 : LexerUtils.EllipsesEnum.ORIGINAL;
         ptb3Dashes = val;
       } else if ("ud".equals(key)) {
         // todo: should we deal with value? But may be null.
@@ -173,8 +172,7 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeParentheses = false;
         normalizeOtherBrackets = false;
         quoteStyle = LexerUtils.QuotesEnum.NOT_CP1252;
-        ptb3Ellipsis = true;
-        unicodeEllipsis = false;
+        ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
         ptb3Dashes = false;
         splitHyphenated=true;
         splitForwardSlash=true;
@@ -204,10 +202,12 @@ import edu.stanford.nlp.util.logging.Redwood;
         splitHyphenated = val;
       } else if ("splitForwardSlash".equals(key)) {
         splitForwardSlash = val;
-      } else if ("ptb3Ellipsis".equals(key)) {
-        ptb3Ellipsis = val;
-      } else if ("unicodeEllipsis".equals(key)) {
-        unicodeEllipsis = val;
+      } else if ("ellipses".equals(key)) {
+        try {
+          ellipsisStyle = LexerUtils.EllipsesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException iae) {
+          throw new IllegalArgumentException ("Not a valid ellipses style: " + value);
+        }
       } else if ("ptb3Dashes".equals(key)) {
         ptb3Dashes = val;
       } else if ("escapeForwardSlashAsterisk".equals(key)) {
@@ -281,8 +281,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean normalizeParentheses = true;
   private boolean normalizeOtherBrackets = true;
   private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.LATEX;
-  private boolean ptb3Ellipsis = true;
-  private boolean unicodeEllipsis;
+  private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.PTB3;
   private boolean ptb3Dashes = true;
   private boolean escapeForwardSlashAsterisk = false; // this is true in Penn Treebank 3 but we don't do it now
   private boolean strictTreebank3 = false;
@@ -374,28 +373,33 @@ import edu.stanford.nlp.util.logging.Redwood;
     if (prevWord != null && in.length() >= 2 &&
         HYPHENS_DASHES.matcher(in).lookingAt() && ! HYPHENS_DASHES.matcher(in.substring(1)).lookingAt()) {
       String lastWord = prevWord.originalText().toLowerCase(Locale.ROOT);
-      switch (lastWord) {
-        case "early":
-        case "mid":
-        case "late":
-        case "for":
-        case "top":
-        case "ak":
-        case "b":
-        case "c":
-        case "dc":
-        case "f":
-        case "m":
-          yypushback(in.length() - 1);
-          break;
-        default:
-          if (lastWord.length() > 0 && NUMBER.matcher(lastWord).matches() &&
-              (prevWordAfter == null || prevWordAfter.length() == 0)) {
-            // last word is a number as well; cases like scores "2-3"
-            // this code is best run with invertible=true, but if not, if the prior context is number, we guess there was no space....
+
+      if (lastWord.length() > 0 && prevWordAfter != null && prevWordAfter.length() == 0) {
+        // We're running under invertible = true and there was no space after previous thing, like for "TRS-80"
+        yypushback(in.length() - 1);
+      } else if (lastWord.length() > 0) {
+        // It's not invertible=true, and so we don't know if there is space before, but we guess not if number of common case
+        switch (lastWord) {
+          case "early":
+          case "mid":
+          case "late":
+          case "for":
+          case "top":
+          case "ak":
+          case "b":
+          case "c":
+          case "dc":
+          case "f":
+          case "m":
             yypushback(in.length() - 1);
-          }
-          break;
+            break;
+          default:
+            if (NUMBER.matcher(lastWord).matches() && prevWordAfter == null) {
+              // last word is a number as well; cases like scores "2-3"
+              // if no spacing info, if the prior context is number, we guess there was no space....
+              yypushback(in.length() - 1);
+            }
+        }
       }
     }
     // System.err.println("handleHyphenatedNumber made token " + in + " into " + yytext());
@@ -600,8 +604,7 @@ LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E
 /* Allow in the zero-width (non-)joiner characters. */
 WORD = {LETTER}({LETTER}|{DIGIT})*([.!?\u200c\u200d]{LETTER}({LETTER}|{DIGIT})*)*
 /* THING: The $ was for things like New$;
-   WAS: only keep hyphens with short one side like co-ed
-   But treebank just allows hyphenated things as words!
+   WAS: only keep hyphens with short one side like co-ed. But (old) treebank just allows hyphenated things as words!
    THING allows d'Avignon or NUMBER before HYPHEN and the same things after it. Only first number can be negative. */
 THING = ([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUM}))*
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
@@ -1163,33 +1166,33 @@ RM/{NUM}        { String txt = yytext();
 <YyNotTokenizePerLine>{LDOTS}/\.{SPACENLS}[:letter:]    {
                   /* attempt to treat fourth ellipsis as period if followed by space and letter. */
                   String tok = yytext();
-                  String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                  String norm = LexerUtils.handleEllipsis(tok, ellipsisStyle);
                   if (DEBUG) { logger.info("Used {LDOTS1} to recognize " + tok + " as " + norm); }
                   return getNext(norm, tok);
                 }
 <YyTokenizePerLine>{LDOTS}/\.{SPACES}[:letter:]    {
                   /* attempt to treat fourth ellipsis as period if followed by space and letter. */
                   String tok = yytext();
-                  String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                  String norm = LexerUtils.handleEllipsis(tok, ellipsisStyle);
                   if (DEBUG) { logger.info("Used {LDOTS2} to recognize " + tok + " as " + norm); }
                   return getNext(norm, tok);
                 }
 <YyNotTokenizePerLine>{SPACEDLDOTS}/{SPACE}\.{SPACENLS}[:letter:]    {
                   /* attempt to treat fourth ellipsis as period if followed by space and letter. */
                   String tok = yytext();
-                  String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                  String norm = LexerUtils.handleEllipsis(tok, ellipsisStyle);
                   if (DEBUG) { logger.info("Used {LDOTS3} to recognize " + tok + " as " + norm); }
                   return getNext(norm, tok);
                 }
 <YyTokenizePerLine>{SPACEDLDOTS}/{SPACE}\.{SPACES}[:letter:]    {
                   /* attempt to treat fourth ellipsis as period if followed by space and letter. */
                   String tok = yytext();
-                  String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                  String norm = LexerUtils.handleEllipsis(tok, ellipsisStyle);
                   if (DEBUG) { logger.info("Used {LDOTS4} to recognize " + tok + " as " + norm); }
                   return getNext(norm, tok);
                 }
 {LDOTS}|{SPACEDLDOTS}    { String tok = yytext();
-                           String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                           String norm = LexerUtils.handleEllipsis(tok, ellipsisStyle);
                            if (DEBUG) { logger.info("Used {LDOTS5} to recognize " + tok + " as " + norm); }
                            return getNext(norm, tok);
                          }
@@ -1239,7 +1242,7 @@ RM/{NUM}        { String txt = yytext();
                                                          "; probablyLeft=" + false); }
                                 return getNext(norm, tok);
                               } */
-{THING}         { // breakByHyphensSlashes(yytext()); // this is causing fail of attempted to pushback too much!
+{THING}         { breakByHyphensSlashes(yytext()); // this was causing fail of attempted to pushback too much!
                   String tok = yytext();
                   /* A THING can contain quote like O'Malley */
                   String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);

@@ -593,7 +593,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     out.println("# Options to the tokenizer.  A comma separated list.");
     out.println("# This depends on what the tokenizer supports.");
     out.println("# For PTBTokenizer, you might try options like americanize=false");
-    out.println("# or asciiQuotes (for German!).");
+    out.println("# or quotes=ascii (for German!).");
     out.println("# tokenizerOptions = ");
     out.println();
     out.println("# Whether to tokenize text for tag and test operations. Default is true.");

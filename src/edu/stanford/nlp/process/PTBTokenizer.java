@@ -111,27 +111,20 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li>normalizeOtherBrackets: Whether to map other common bracket characters
  *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank.
  *     Default is true.
- * <li>quotes: [From CoreNLP 4.0] Select a style of mapping quotes. Supports the traditional options
- *     below plus new options via an enum with values: latex, unicode, ascii,not_cp1252, original.
- *     "original" leaves all quotes as they were. "not_cp1252" only remaps invalid cp1252 quotes to Unicode. </li>
- * <li>asciiQuotes: Whether to map all quote characters to the traditional ' and ".
- *     Default is false.
- * <li>latexQuotes: Whether to map quotes to ``, `, ', '', as in Latex
- *     and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
- *     If true, this takes precedence over the setting of unicodeQuotes;
- *     if both are false, no mapping is done.  Default is true.
- * <li>unicodeQuotes: Whether to map quotes to the range U+2018 to U+201D,
- *     the preferred unicode encoding of single and double quotes.
- *     Default is false.
- * <li>ptb3Ellipsis: Whether to map ellipses to three dots (...), the
- *     old PTB3 WSJ coding of an ellipsis. If true, this takes precedence
- *     over the setting of unicodeEllipsis; if both are false, no mapping
- *     is done. Default is true.
- * <li>unicodeEllipsis: Whether to map dot and optional space sequences to
- *     U+2026, the Unicode ellipsis character. Default is false.
+ * <li>quotes: [From CoreNLP 4.0] Select a style of mapping quotes. An enum with possible values (case insensitive):
+ *     latex, unicode, ascii,not_cp1252, original. "ascii" maps all quote characters to the traditional ' and ".
+ *     "latex" maps quotes to ``, `, ', '', as in Latex and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
+ *     "unicode" maps quotes to the range U+2018 to U+201D, the preferred unicode encoding of single and double quotes.
+ *     "original" leaves all quotes as they were. "not_cp1252" only remaps invalid cp1252 quotes to Unicode.
+ *     The default is "latex". </li>
+ * <li>ellipses: [From CoreNLP 4.0] Select a style for mapping ellipses (3 dots).  An enum with possible values
+ *     (case insensitive): unicode, ptb3, not_cp1252, original. "ptb3" maps ellipses to three dots (...), the
+ *     old PTB3 WSJ coding of an ellipsis. "unicode" maps three dot and optional space sequences to
+ *     U+2026, the Unicode ellipsis character. "not_cp1252" only remaps invalid cp1252 ellipses to unicode.
+ *     "original" uses all ellipses as they were. The default is ptb3. </li>
  * <li>ptb3Dashes: Whether to turn various dash characters into "--",
  *     the dominant encoding of dashes in the PTB3 WSJ. Default is true.
- * <li>keepAssimilations: true to tokenize "gonna", false to tokenize
+ * <li>splitAssimilations: true to tokenize "gonna", false to tokenize
  *                        "gon na".  Default is true.
  * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
  *     of / and * as the old PTB3 WSJ does for some reason (something to do
@@ -292,7 +285,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * @return the next token in the token stream, or null if none exists.
    */
   @Override
-  @SuppressWarnings("unchecked")
   protected T getNext() {
     // if (lexer == null) {
     //   return null;
@@ -591,7 +583,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
     private static final long serialVersionUID = -8859638719818931606L;
 
-    @SuppressWarnings("serial")
     protected final LexedTokenFactory<T> factory;
     protected String options;
 

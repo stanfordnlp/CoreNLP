@@ -65,11 +65,11 @@ import edu.stanford.nlp.util.logging.Redwood;
    *     -RRB-, as in the Penn Treebank
    * <li>normalizeOtherBrackets: Whether to map other common bracket characters
    *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank
-   * <li>ptb3Ellipsis: Whether to map ellipses to ..., the old PTB3 WSJ coding
-   *     of an ellipsis. If true, this takes precedence over the setting of
-   *     unicodeEllipsis; if both are false, no mapping is done.
-   * <li>unicodeEllipsis: Whether to map dot and optional space sequences to
-   *     U+2026, the Unicode ellipsis character
+   * <li>ellipses: [From CoreNLP 4.0] Select a style for mapping ellipses (3 dots).  An enum with possible values
+   *     (case insensitive): unicode, ptb3, not_cp1252, original. "ptb3" maps ellipses to three dots (...), the
+   *     old PTB3 WSJ coding of an ellipsis. "unicode" maps three dot and optional space sequences to
+   *     U+2026, the Unicode ellipsis character. "not_cp1252" only remaps invalid cp1252 ellipses to unicode.
+   *     "original" uses all ellipses as they were. The default is ptb3. </li>
    * <li>ptb3Dashes: Whether to turn various dash characters into "--",
    *     the dominant encoding of dashes in the PTB3 WSJ
    * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
@@ -119,8 +119,7 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeFractions = val;
         normalizeParentheses = val;
         normalizeOtherBrackets = val;
-        ptb3Ellipsis = val;
-        unicodeEllipsis = val;
+        ellipsisStyle = val ? LexerUtils.EllipsesEnum.PTB3 : LexerUtils.EllipsesEnum.ORIGINAL;
         asciiDash = val;
         ptb3Dashes = val;
         quoteStyle = val ? LexerUtils.QuotesEnum.ASCII : LexerUtils.QuotesEnum.ORIGINAL;
@@ -134,10 +133,12 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeParentheses = val;
       } else if ("normalizeOtherBrackets".equals(key)) {
         normalizeOtherBrackets = val;
-      } else if ("ptb3Ellipsis".equals(key)) {
-        ptb3Ellipsis = val;
-      } else if ("unicodeEllipsis".equals(key)) {
-        unicodeEllipsis = val;
+      } else if ("ellipses".equals(key)) {
+        try {
+          ellipsisStyle = LexerUtils.EllipsesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException iae) {
+          throw new IllegalArgumentException ("Not a valid ellipses style: " + value);
+        }
       } else if ("asciiDash".equals(key)) {
           asciiDash = val;
       } else if ("ptb3Dashes".equals(key)) {
@@ -205,8 +206,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean normalizeFractions = true;
   private boolean normalizeParentheses;
   private boolean normalizeOtherBrackets;
-  private boolean ptb3Ellipsis = true;
-  private boolean unicodeEllipsis;
+  private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.PTB3;
   private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.ASCII;
   private boolean asciiDash;
   private boolean ptb3Dashes;
@@ -235,8 +235,6 @@ import edu.stanford.nlp.util.logging.Redwood;
   public static final String closebrace = "=RCB=";
 
   public static final String ptbmdash = "--";
-  public static final String ptb3EllipsisStr = "...";
-  public static final String unicodeEllipsisStr = "\u2026";
   public static final String NEWLINE_TOKEN = "*NL*";
   public static final String COMPOUND_ANNOTATION = "comp";
   public static final String VB_PRON_ANNOTATION = "vb_pn_attached";
@@ -685,7 +683,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 		        }
 		      }
 {LDOTS}|{SPACEDLDOTS}    { String tok = yytext();
-                           String norm = LexerUtils.handleEllipsis(tok, ptb3Ellipsis, unicodeEllipsis);
+                           String norm = LexerUtils.handleEllipsis(tok, ellipsisStyle);
                            if (DEBUG) { logger.info("Used {LDOTS} to recognize " + tok + " as " + norm); }
                            return getNext(norm, tok);
                          }

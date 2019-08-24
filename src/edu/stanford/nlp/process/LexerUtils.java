@@ -29,6 +29,8 @@ public class LexerUtils {
 
   public enum QuotesEnum { UNICODE, LATEX, ASCII, NOT_CP1252, ORIGINAL }
 
+  public enum EllipsesEnum { UNICODE, PTB3, NOT_CP1252, ORIGINAL }
+
 
   /** Change precomposed fraction characters to spelled out letter forms.
    *
@@ -250,13 +252,21 @@ public class LexerUtils {
     }
   }
 
-  public static String handleEllipsis(final String tok, boolean ptb3Ellipsis, boolean unicodeEllipsis) {
-    if (ptb3Ellipsis) {
-      return ptb3EllipsisStr;
-    } else if (unicodeEllipsis) {
-      return unicodeEllipsisStr;
-    } else {
-      return tok;
+  public static String handleEllipsis(final String tok, EllipsesEnum ellipsesStyle) {
+    switch (ellipsesStyle) {
+      case UNICODE:
+        return unicodeEllipsisStr;
+      case PTB3:
+        return ptb3EllipsisStr;
+      case NOT_CP1252:
+        if (tok.equals("\u0085")) {
+          return unicodeEllipsisStr;
+        } else {
+          return tok;
+        }
+      case ORIGINAL:
+      default:
+        return tok;
     }
   }
 

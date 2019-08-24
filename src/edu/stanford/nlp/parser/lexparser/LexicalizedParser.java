@@ -1089,7 +1089,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * <li>{@code -tokenizerOptions options} Specifies options to a
    * TokenizerFactory class to be used for tokenization.   A comma-separated
    * list. For PTBTokenizer, options of interest include
-   * {@code americanize=false} and {@code asciiQuotes} (for German).
+   * {@code americanize=false} and {@code quotes=ascii} (for German).
    * Note that any choice of tokenizer options that conflicts with the
    * tokenization used in the parser training data will likely degrade parser
    * performance. </li>

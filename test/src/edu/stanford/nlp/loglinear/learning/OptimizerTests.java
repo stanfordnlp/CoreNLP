@@ -32,7 +32,7 @@ public class OptimizerTests {
                                         @ForAll(sampleSize = 2) @From(LogLikelihoodFunctionTest.WeightsGenerator.class) ConcatVector initialWeights,
                                         @ForAll(sampleSize = 2) @InRange(minDouble = 0.0, maxDouble = 5.0) double l2regularization) {
     AbstractDifferentiableFunction<GraphicalModel> ll = new LogLikelihoodDifferentiableFunction();
-    ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization, 1.0e-7, true);
+    ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization, 1.0e-6, true);
     System.err.println("Finished optimizing");
 
     double logLikelihood = getValueSum(dataset, finalWeights, ll, l2regularization);
