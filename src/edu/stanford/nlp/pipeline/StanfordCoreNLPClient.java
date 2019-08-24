@@ -77,7 +77,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     public String toString() {
       return protocol + "://" + host + ':' + port;
     }
-  }
+  } // end static class Backend
 
   /**
    * A special type of {@link Thread}, which is responsible for scheduling jobs
@@ -239,6 +239,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    * (protocol buffers) and the {@link Annotation} classes.
    */
   private final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(true);
+
+  private boolean fallbackToLocalPipeline;
 
   /**
    * The main constructor. Create a client from a properties file and a list of backends.
@@ -457,9 +459,12 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
         //    2. It must not throw an exception
         doAnnotation(annotation, backend, serverURL, message, 0);
       } catch (Throwable t) {
-        log.err("Could not annotate via server! Trying to annotate locally...", t);
-        StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
-        corenlp.annotate(annotation);
+        log.err("Could not annotate via server!", t);
+        if (fallbackToLocalPipeline) {
+          log.info("Trying to annotate locally...");
+          StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
+          corenlp.annotate(annotation);
+        }
       } finally {
         callback.accept(annotation);
         isFinishedCallback.accept(backend);
@@ -689,6 +694,14 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    * The current code in this main method assumes that each line of the file
    * is to be processed separately as a single sentence.
    * A site must be specified with a protocol like "https:" in front of it.
+   * <p>
+   * Options:
+   * <ul>
+   *   <li>-h or -help: print a help message</li>
+   *   <li>-backends: Specify the URL of backends to use (default is: http://localhost:9000)</li>
+   *   <li>-host and -port: Legacy alternative to -backends</li>
+   *   <li>-fallbackToLocalPipeline: If processing via the server fails, try to process a text with a local pipeline</li>
+   * </ul>
    *
    * Example usage:<br>
    * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP -props properties -backends site1:port1,site2:port2 <br>
@@ -752,6 +765,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
     // Run the pipeline
     StanfordCoreNLPClient client = new StanfordCoreNLPClient(props, backends);
+    client.fallbackToLocalPipeline = props.containsKey("fallbackToLocalPipeline");
     client.run();
     try {
       client.shutdown();  // In case anything is pending on the server
