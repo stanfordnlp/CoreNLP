@@ -16,6 +16,20 @@ import junit.framework.TestCase;
 
 public class TokenizerBenchmarkTestCase extends TestCase {
 
+    public static class MWTTokenCharacterOffsetBeginAnnotation implements CoreAnnotation<Integer> {
+        @Override
+        public Class<Integer> getType() {
+            return Integer.class;
+        }
+    }
+
+    public static class MWTTokenCharacterOffsetEndAnnotation implements CoreAnnotation<Integer> {
+        @Override
+        public Class<Integer> getType() {
+            return Integer.class;
+        }
+    }
+
     // path to eval CoNLL-U
     public String goldFilePath;
     // list of examples
@@ -135,10 +149,10 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             placeholderToken.setWord(containedToken.get(CoreAnnotations.MWTTokenTextAnnotation.class));
             placeholderToken.setBeginPosition(beginPosition);
             placeholderToken.setEndPosition(beginPosition + placeholderToken.word().length());
-            placeholderToken.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class,
-                    containedToken.get(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class));
-            placeholderToken.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class,
-                    containedToken.get(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class));
+            placeholderToken.set(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetBeginAnnotation.class,
+                    containedToken.get(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetBeginAnnotation.class));
+            placeholderToken.set(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetEndAnnotation.class,
+                    containedToken.get(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetEndAnnotation.class));
             placeholderToken.setIsMWT(true);
             return placeholderToken;
         }
@@ -155,10 +169,10 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         /** check if a token is a split off token of another **/
         public boolean isMultiWordTokenOf(CoreLabel splitToken, CoreLabel multiWordPlaceholderToken) {
             int mwtPlaceholderBegin = multiWordPlaceholderToken.get(
-                    CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class
+                    TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetBeginAnnotation.class
             );
             int mwtPlaceholderEnd = multiWordPlaceholderToken.get(
-                    CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class
+                    TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetEndAnnotation.class
             );
             if (splitToken.get(CoreAnnotations.MWTTokenTextAnnotation.class).equals(multiWordPlaceholderToken.word())
                     && mwtPlaceholderBegin <= splitToken.beginPosition()

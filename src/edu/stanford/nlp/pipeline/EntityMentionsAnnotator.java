@@ -297,17 +297,16 @@ public class EntityMentionsAnnotator implements Annotator {
                     "O".equals(mention.get(CoreAnnotations.WikipediaEntityAnnotation.class))) &&
                   ( token.get(CoreAnnotations.WikipediaEntityAnnotation.class) != null &&
                     !"O".equals(token.get(CoreAnnotations.WikipediaEntityAnnotation.class))) ) {
-                mention.set(CoreAnnotations.WikipediaEntityAnnotation.class, token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
+                mention.set(CoreAnnotations.WikipediaEntityAnnotation.class,
+                        token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
               }
             }
           }
 
           if (!matchTokenText) {
-            if (
-                    annotation.get(CoreAnnotations.TextAnnotation.class) != null &&
-                    mention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) != null &&
-                    mention.get(CoreAnnotations.CharacterOffsetEndAnnotation.class) != null
-            ) {
+            if (annotation.get(CoreAnnotations.TextAnnotation.class) != null
+                            && mention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) != null
+                            && mention.get(CoreAnnotations.CharacterOffsetEndAnnotation.class) != null) {
               String entityMentionText =
                       annotation.get(CoreAnnotations.TextAnnotation.class).substring(
                               mention.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
@@ -316,7 +315,6 @@ public class EntityMentionsAnnotator implements Annotator {
               mention.set(CoreAnnotations.TextAnnotation.class, entityMentionText);
             }
           }
-
         }
       }
 

@@ -318,10 +318,8 @@ public class CoNLLUReader {
                 if (sentence.mwtData.get(cl.index()-1) == processedMWTTokens) {
                     // add this MWT to the doc text
                     cl.setBeginPosition(doc.docText.length());
-                    cl.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class, doc.docText.length());
                     doc.docText += sentence.mwtTokens.get(processedMWTTokens);
                     cl.setEndPosition(doc.docText.length());
-                    cl.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class, doc.docText.length());
                     lastMWTCharBegin = cl.beginPosition();
                     lastMWTCharEnd = cl.endPosition();
                     // add after for this MWT by getting after of last CoreLabel for this MWT
@@ -330,9 +328,7 @@ public class CoNLLUReader {
                     processedMWTTokens += 1;
                 } else {
                     cl.setBeginPosition(lastMWTCharBegin);
-                    cl.set(CoreAnnotations.MWTTokenCharacterOffsetBeginAnnotation.class, lastMWTCharBegin);
                     cl.setEndPosition(lastMWTCharEnd);
-                    cl.set(CoreAnnotations.MWTTokenCharacterOffsetEndAnnotation.class, lastMWTCharEnd);
                 }
                 cl.setIsMWT(true);
             } else {

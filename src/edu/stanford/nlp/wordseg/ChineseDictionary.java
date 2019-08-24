@@ -187,6 +187,23 @@ public class ChineseDictionary {
     }
   }
 
+  /**
+   * This program creates or expands a Chinese dictionary, primarily
+   * for use in the CRF segmentation tool.
+   * <br>
+   * Note that the maximum length of words is MAX_LEXICON_LENGTH.
+   * <br>
+   * To create a new dictionary:
+   * <br>
+   * <code>java edu.stanford.nlp.wordseg.ChineseDictionary -inputDicts foo.txt,bar.txt -output mydict.ser.gz</code>
+   * <br>
+   * To expand an existing dictionary, such as possibly the chris6 dict included with Chinese CoreNLP:
+   * <br>
+   * <code>java edu.stanford.nlp.wordseg.ChineseDictionary -inputDicts edu/stanford/nlp/models/segmenter/chinese/dict-chris6.ser.gz,new_words.txt -output mydict.ser.gz</code>
+   * <br>
+   * In either case, you will then have to give the correct path for
+   * the dictionary to CoreNLP or whichever tool you are using.
+   */
   public static void main(String[] args) {
     String inputDicts = "/u/nlp/data/chinese-dictionaries/plain/ne_wikipedia-utf8.txt,/u/nlp/data/chinese-dictionaries/plain/newsexplorer_entities_utf8.txt,/u/nlp/data/chinese-dictionaries/plain/Ch-name-list-utf8.txt,/u/nlp/data/chinese-dictionaries/plain/wikilex-20070908-zh-en.txt,/u/nlp/data/chinese-dictionaries/plain/adso-1.25-050405-monolingual-clean.utf8.txt,/u/nlp/data/chinese-dictionaries/plain/lexicon_108k_normalized.txt,/u/nlp/data/chinese-dictionaries/plain/lexicon_mandarintools_normalized.txt,/u/nlp/data/chinese-dictionaries/plain/harbin-ChineseNames_utf8.txt,/u/nlp/data/chinese-dictionaries/plain/lexicon_HowNet_normalized.txt";
 
