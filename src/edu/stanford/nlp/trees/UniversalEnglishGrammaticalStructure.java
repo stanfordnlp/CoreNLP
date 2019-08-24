@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -836,8 +835,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       }
     }
 
-    for (SemanticGraphEdge edge : newHeads.keySet()) {
-      IndexedWord newGovernor = sg.getNodeByIndex(newHeads.get(edge));
+    for (Map.Entry<SemanticGraphEdge, Integer> entry : newHeads.entrySet()) {
+      SemanticGraphEdge edge = entry.getKey();
+      IndexedWord newGovernor = sg.getNodeByIndex(entry.getValue());
       sg.removeEdge(edge);
       sg.addEdge(newGovernor, edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
@@ -1773,11 +1773,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
 
   private static void demoteQuantificationalModifiers(SemanticGraph sg) {
-	  
+
     /* Semgrexes require a graph with a root. */
-    if (sg.getRoots().isEmpty())
-	  return;
-    
+    if (sg.getRoots().isEmpty()) {
+      return;
+    }
+
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = QUANT_MOD_3W_PATTERN.matcher(sgCopy);
 
@@ -1865,10 +1866,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     if ( ! USE_NAME) {
       return;
     }
-    
+
     /* Semgrexes require a graph with a root. */
-    if (sg.getRoots().isEmpty())
-	  return;
+    if (sg.getRoots().isEmpty()) {
+      return;
+    }
 
     // check whether NER tags are available
     IndexedWord rootToken = sg.getFirstRoot();
