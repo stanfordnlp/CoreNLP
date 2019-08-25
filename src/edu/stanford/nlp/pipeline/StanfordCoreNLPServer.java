@@ -1270,6 +1270,7 @@ public class StanfordCoreNLPServer implements Runnable {
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i++), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
                     matchWriter.set("match", matcher.getMatch().pennString());
+                    matchWriter.set("spanString", matcher.getMatch().spanString());
                     matchWriter.set("namedNodes", matcher.getNodeNames().stream().map(nodeName -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeWriter) ->
                       namedNodeWriter.set(nodeName, matcher.getNode(nodeName).pennString())
                     ));
