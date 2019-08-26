@@ -43,7 +43,6 @@ public class OutputSubtrees {
     Properties props = StringUtils.argsToProperties(args, new HashMap<String, Integer>() {{
           put("ignore_labels", 1);
         }});
-    System.out.println(props);
     ArgumentParser.fillOptions(new Class[]{ArgumentParser.class, OutputSubtrees.class}, props);
 
     Set<String> ignored;
