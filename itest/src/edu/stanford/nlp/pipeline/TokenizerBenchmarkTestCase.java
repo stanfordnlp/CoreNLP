@@ -150,9 +150,9 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             placeholderToken.setBeginPosition(beginPosition);
             placeholderToken.setEndPosition(beginPosition + placeholderToken.word().length());
             placeholderToken.set(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetBeginAnnotation.class,
-                    containedToken.get(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetBeginAnnotation.class));
+                    containedToken.beginPosition());
             placeholderToken.set(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetEndAnnotation.class,
-                    containedToken.get(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetEndAnnotation.class));
+                    containedToken.endPosition());
             placeholderToken.setIsMWT(true);
             return placeholderToken;
         }
