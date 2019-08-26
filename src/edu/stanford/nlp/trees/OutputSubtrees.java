@@ -1,8 +1,11 @@
 package edu.stanford.nlp.trees;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.Label;
@@ -32,10 +35,24 @@ public class OutputSubtrees {
   @ArgumentParser.Option(name="root_only", gloss="Output only the roots", required=false)
   private static boolean ROOT_ONLY = false;
 
+  @ArgumentParser.Option(name="ignore_labels", gloss="Labels to ignore as a WS-separated list.", required=false)
+  private static String IGNORE_LABELS; // = null;
+
   public static void main(String[] args) {
     // Parse the arguments
-    Properties props = StringUtils.argsToProperties(args);
+    Properties props = StringUtils.argsToProperties(args, new HashMap<String, Integer>() {{
+          put("ignore_labels", 1);
+        }});
+    System.out.println(props);
     ArgumentParser.fillOptions(new Class[]{ArgumentParser.class, OutputSubtrees.class}, props);
+
+    Set<String> ignored;
+    if (IGNORE_LABELS != null) {
+      ignored = new HashSet<>(StringUtils.split(IGNORE_LABELS));
+      System.err.println("Ignoring the following labels: " + ignored);
+    } else {
+      ignored = Collections.emptySet();
+    }
 
     MemoryTreebank treebank = new MemoryTreebank("utf-8");
     treebank.loadPath(INPUT, null);
@@ -51,7 +68,10 @@ public class OutputSubtrees {
         List<Tree> leaves = Trees.leaves(subtree);
         List<Label> labels = leaves.stream().map(x -> x.label()).collect(Collectors.toList());
         String text = SentenceUtils.listToString(labels);
-          
+        if (ignored.contains(value)) {
+          continue;
+        }
+
         System.out.println(value + "   " + text);
       }
       System.out.println();
