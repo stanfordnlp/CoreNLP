@@ -1271,11 +1271,13 @@ public class StanfordCoreNLPServer implements Runnable {
                   sentWriter.set(Integer.toString(i++), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
                     matchWriter.set("match", matcher.getMatch().pennString());
                     matchWriter.set("spanString", matcher.getMatch().spanString());
-                    matchWriter.set("namedNodes", matcher.getNodeNames().stream().map(nodeName -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeWriter) ->
-                      namedNodeWriter.set(nodeName, matcher.getNode(nodeName).pennString())
+                    matchWriter.set("namedNodes", matcher.getNodeNames().stream().map(nodeName -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeWriter) -> 
+                      namedNodeWriter.set(nodeName, (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeSubWriter) -> {
+                        namedNodeSubWriter.set("match", matcher.getNode(nodeName).pennString());
+                        namedNodeSubWriter.set("spanString", matcher.getNode(nodeName).spanString());
+                      })
                     ));
                   });
-
                 }
             }))
           ), doc);

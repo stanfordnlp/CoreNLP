@@ -43,4 +43,30 @@ public class SpanStringITest extends TestCase {
         String sentenceOneSpanString = document.sentences().get(0).constituencyParse().spanString();
         assertEquals(sentenceOneSpanStringGold, sentenceOneSpanString);
     }
+
+    public void testNamedSpanString() {
+        // set up pipeline properties
+        Properties props = new Properties();
+        // set the list of annotators to run
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,parse");
+        // build pipeline
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+        // create a document object
+        CoreDocument document = new CoreDocument(text);
+        // annnotate the document
+        pipeline.annotate(document);
+        List<String> foundNounPhraseStrings = new ArrayList<String>();
+        // test all of the noun phrases worked properly
+        List<String> goldNounPhraseStrings = Arrays.asList(new String[] {"The small goat", "the big mountain", "I" });
+        TregexPattern p = TregexPattern.compile("NP=np");
+        for (CoreSentence sentence : document.sentences()) {
+            TregexMatcher matcher = p.matcher(sentence.constituencyParse());
+            while (matcher.find()) {
+                for (String nodeName: matcher.getNodeNames()) {
+                    foundNounPhraseStrings.add(matcher.getNode(nodeName).spanString());
+                }
+            }
+        }
+        assertEquals(goldNounPhraseStrings, foundNounPhraseStrings);
+    }
 }
