@@ -970,10 +970,11 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     }
     List<CoreLabel> coreLabels = this.getLeaves().stream().map(l -> ((CoreLabel) l.label())).collect(Collectors.toList());
     // reconstruct original String from CoreLabel fields
-    String spanString = coreLabels.subList(0, Math.max(0, coreLabels.size()-2)).stream().map(
+    String spanString = coreLabels.subList(0, Math.max(0, coreLabels.size()-1)).stream().map(
             cl -> cl.word()+cl.after()).collect(Collectors.joining(""));
     // don't add the after of the last word
     spanString += coreLabels.get(coreLabels.size()-1).word();
+    String blah = this.pennString();
     return spanString;
   }
 
