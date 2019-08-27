@@ -26,6 +26,21 @@ At present [the current released version of the code](https://stanfordnlp.github
 [stanford-corenlp.jar (last built: 2017-04-14)](http://nlp.stanford.edu/software/stanford-corenlp-2017-04-14-build.jar)
 -->
 
+#### Latest Models
+
+If using a build of the latest code, make sure to use the latest models jar.
+
+| Language | Model Jar | Last Updated |
+| --- | --- | --- |
+| Arabic | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar) | 3.9.2 |
+| English (default) | [download](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar) | 2019-07-29 |
+| English (full) | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar) | 2019-07-29 |
+| English (kbp) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) | 2019-07-29 |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar) | 3.9.2 |
+| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar) | 2019-08-27 |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar) | 2019-07-10 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar) | 2019-08-27 |
+
 #### Build with Ant
 
 1. Make sure you have Ant installed, details here: [http://ant.apache.org/](http://ant.apache.org/)
