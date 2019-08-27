@@ -4,8 +4,11 @@ import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.util.*;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 import java.util.stream.*;
+
 
 /**
  * An Annotator for splitting tokens into words based on a dictionary, rules, or a statistical model.
@@ -22,7 +25,14 @@ public class MWTAnnotator implements Annotator {
      *
      */
 
-    public HashMap<String, List<String>> multiWordTokenMapping = new HashMap<>();
+    private HashMap<String, List<String>> multiWordTokenMapping = new HashMap<>();
+    private boolean useDictionary = false;
+
+    /**
+     * Preserve casing when generating multi word tokens (e.g. Des -> de les OR De les)
+     * or not ?
+     */
+    private boolean preserveCasing;
 
     /**
      * A sub annotator for part-of-speech tagging to help with MWT decisions
@@ -47,15 +57,18 @@ public class MWTAnnotator implements Annotator {
      *
      */
 
-    public Annotator statisticalMWTAnnotator;
-    public HashMap<String, List<String>> statisticalMultiWordTokenMapping = new HashMap<>();
-    public boolean useStatisticalModel = false;
+    private Annotator statisticalMWTAnnotator;
+    private HashMap<String, List<String>> statisticalMultiWordTokenMapping = new HashMap<>();
+    private boolean useStatisticalModel = false;
 
 
     public MWTAnnotator(String name, Properties props) {
         String prefix = (name != null && !name.equals("")) ? name+".mwt." : "mwt.";
-        // load the MWT dictionary entries
-        loadMultiWordTokenMappings(multiWordTokenMapping, props.getProperty(prefix+"mappingFile"));
+        // load the MWT dictionary entries if applicable
+        if (!props.getProperty(prefix+"mappingFile", "").equals("")) {
+            loadMultiWordTokenMappings(multiWordTokenMapping, props.getProperty(prefix + "mappingFile"));
+            useDictionary = true;
+        }
         // if a part-of-speech tagging model was provided, use statistical MWT as well
         if (!props.getProperty(prefix+"pos.model", "").equals("")) {
             useStatisticalModel = true;
@@ -64,16 +77,22 @@ public class MWTAnnotator implements Annotator {
             loadMultiWordTokenMappings(statisticalMultiWordTokenMapping,
                     props.getProperty(prefix+"statisticalMappingFile"));
         }
+        // check whether or not to preserve casing, default is true
+        preserveCasing = PropertiesUtils.getBool(props, prefix + "preserveCasing", true);
     }
 
-    public void loadMultiWordTokenMappings(HashMap<String, List<String>> mapHashMap, String mapFilePath) {
+    public void loadMultiWordTokenMappings(HashMap<String, List<String>> dictionary, String mapFilePath) {
         // read in entries from mapping file
         List<String> mapEntries = IOUtils.linesFromFile(mapFilePath);
         // load entries into the HashMap
+        // map should be all lower case
         for (String mapEntry : mapEntries) {
-            String originalWord = mapEntry.split("\t")[0];
-            String[] finalWords = mapEntry.split("\t")[1].split(",");
-            mapHashMap.put(originalWord, Arrays.asList(finalWords));
+            String originalWord = mapEntry.split("\t")[0].toLowerCase();
+            List<String> mwtWords =
+                    Arrays.asList(
+                            mapEntry.split("\t")[1].split(",")).stream().map(
+                                    w -> w.toLowerCase()).collect(Collectors.toList());
+            dictionary.put(originalWord, mwtWords);
         }
     }
 
@@ -99,10 +118,12 @@ public class MWTAnnotator implements Annotator {
             List<CoreLabel> newSentenceTokens = new ArrayList<>();
             int sentenceIndex = 1;
             for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+                // list of potential multi word tokens
                 List<String> tokenWords = new ArrayList<>();
+
                 // check if statistical model detected a split
                 if (useStatisticalModel) {
-                    String mwtTagKey = String.format("%s-%s", token.word().toLowerCase(), token.tag());
+                    String mwtTagKey = String.format("%s-%s", token.word().toLowerCase(), token.tag()).toLowerCase();
                     if (statisticalMultiWordTokenMapping.containsKey(mwtTagKey))
                         tokenWords = statisticalMultiWordTokenMapping.get(mwtTagKey).stream().collect(Collectors.toList());
                 }
@@ -111,11 +132,26 @@ public class MWTAnnotator implements Annotator {
                 // will take precedence...that is, if "des" is an entry for both the statistical model and the
                 // dictionary, the split dictated by the dictionary will be used regardless of what the model says
                 // in other words...deterministic
-                if (multiWordTokenMapping.containsKey(token.word().toLowerCase())) {
+
+                // check if deterministic dictionary says to split
+                if (useDictionary && multiWordTokenMapping.containsKey(token.word().toLowerCase())) {
                     tokenWords =
                             multiWordTokenMapping.get(token.word().toLowerCase()).stream().collect(Collectors.toList());
                 }
+
+                // process the words
                 if (tokenWords.size() > 1) {
+                    // this is an MWT token
+                    // check if case needs to be corrected
+                    if (preserveCasing) {
+                        if (StringUtils.isAllUpperCase(token.word())) {
+                            // DES
+                            tokenWords = tokenWords.stream().map(t -> t.toUpperCase()).collect(Collectors.toList());
+                        } else if (StringUtils.capitalize(token.word().toLowerCase()).equals(token.word())) {
+                            // Des
+                            tokenWords.set(0, StringUtils.capitalize(tokenWords.get(0)));
+                        }
+                    }
                     for (String word : tokenWords) {
                         CoreLabel newToken = new CoreLabel();
                         newToken.setWord(word);
