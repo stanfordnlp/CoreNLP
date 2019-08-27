@@ -974,7 +974,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
             cl -> cl.word()+cl.after()).collect(Collectors.joining(""));
     // don't add the after of the last word
     spanString += coreLabels.get(coreLabels.size()-1).word();
-    String blah = this.pennString();
     return spanString;
   }
 
