@@ -16,7 +16,7 @@ public class CoreWrapperITest extends TestCase {
   public void testPipeline() throws Exception {
     // set up pipeline
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse,coref,kbp,quote");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,kbp,quote");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // make a basic document
     CoreDocument exampleDocument =
