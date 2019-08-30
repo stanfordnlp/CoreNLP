@@ -16,7 +16,8 @@ public class CoreWrapperITest extends TestCase {
   public void testPipeline() throws Exception {
     // set up pipeline
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,kbp,quote");
+    //props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,kbp,quote");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // make a basic document
     CoreDocument exampleDocument =
@@ -48,12 +49,34 @@ public class CoreWrapperITest extends TestCase {
     // char offsets
     Pair<Integer,Integer> sentenceTwoOffsets = new Pair<>(51,123);
     assertEquals(sentenceTwoOffsets, secondSentence.charOffsets());
+    // part-of-speech tags
+    List<String> expectedPartOfSpeechTags = Arrays.asList("NNP", "NNP", "VBD", "VBN", "IN", "NNP", "IN", "NNP", "CD", ",",
+            "CD", ".");
+    assertEquals(expectedPartOfSpeechTags, firstSentence.posTags());
+    // named entity tags
+    List<String> expectedNamedEntityTags = Arrays.asList("PERSON", "PERSON", "O", "O", "O", "STATE_OR_PROVINCE", "O",
+            "DATE", "DATE", "DATE", "DATE", "O");
+    // constituency parse
+    assertEquals(expectedNamedEntityTags, firstSentence.nerTags());
     // mention info from sentences
     assertEquals(6, secondSentence.entityMentions().size());
     CoreEntityMention arizonaMentionFromSentence = secondSentence.entityMentions().get(2);
     CoreEntityMention arizonaMentionFromDocument = exampleDocument.entityMentions().get(5);
     assertEquals("Arizona", arizonaMentionFromSentence.text());
     assertSame(arizonaMentionFromSentence, arizonaMentionFromDocument);
+    // noun phrases and verb phrases from sentence
+    List<String> expectedNounPhrases =
+            Arrays.asList("He", "president in 2008", "president", "2008", "Arizona senator John McCain");
+    List<String> expectedVerbPhrases =
+            Arrays.asList("was elected president in 2008, defeating Arizona senator John McCain",
+                    "elected president in 2008, defeating Arizona senator John McCain",
+                    "defeating Arizona senator John McCain");
+    assertEquals(expectedNounPhrases, secondSentence.nounPhrases());
+    assertEquals(expectedVerbPhrases, secondSentence.verbPhrases());
+    // retrieve general tregex pattern
+    String tregexPattern = "NP < (NP $ PP)";
+    String expectedResultTree = "(NP\n  (NP (NN president))\n  (PP (IN in)\n    (NP (CD 2008))))\n";
+    assertEquals(expectedResultTree, secondSentence.tregexResultTrees(tregexPattern).get(0).pennString());
     // kbp relation info from sentences
     List<RelationTriple> kbpRelationsFromSentenceOne = firstSentence.relations();
     String sentenceOneRelationOne = '(' +kbpRelationsFromSentenceOne.get(0).subjectGloss()+ ',' +

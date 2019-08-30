@@ -27,8 +27,8 @@ public class CoreSentence {
   private List<CoreEntityMention> entityMentions;
 
   /** common patterns to search for constituency parses **/
-  TregexPattern nounPhrasePattern = TregexPattern.compile("NP");
-  TregexPattern verbPhrasePattern = TregexPattern.compile("VP");
+  private static TregexPattern nounPhrasePattern = TregexPattern.compile("NP");
+  private static TregexPattern verbPhrasePattern = TregexPattern.compile("VP");
 
   /** cache to hold general patterns **/
   private static ConcurrentHashMap<String, TregexPattern> patternCache = new ConcurrentHashMap<String, TregexPattern>();
