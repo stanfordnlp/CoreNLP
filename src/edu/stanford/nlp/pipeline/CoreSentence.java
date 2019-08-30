@@ -75,8 +75,15 @@ public class CoreSentence {
     return sentenceCoreMap.get(CoreAnnotations.TokensAnnotation.class);
   }
 
+  /** list of tokens as String **/
+  public List<String> tokensAsStrings() {
+    return tokens().stream().map(token -> token.word()).collect(Collectors.toList()); }
+
   /** list of pos tags **/
   public List<String> posTags() { return tokens().stream().map(token -> token.tag()).collect(Collectors.toList()); }
+
+  /** list of lemma tags **/
+  public List<String> lemmas() { return tokens().stream().map(token -> token.lemma()).collect(Collectors.toList()); }
 
   /** list of ner tags **/
   public List<String> nerTags() { return tokens().stream().map(token -> token.ner()).collect(Collectors.toList()); }
