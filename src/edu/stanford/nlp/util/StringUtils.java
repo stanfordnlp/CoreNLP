@@ -982,7 +982,8 @@ public class StringUtils  {
         } else {
           value = join(flagArgs, " ");
         }
-        if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS) || key.equalsIgnoreCase(LANG)) {
+        if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) ||
+                key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS) || key.equalsIgnoreCase(LANG)) {
           result.setProperty(PROPERTIES, value);
         } else {
           result.setProperty(key, value);
