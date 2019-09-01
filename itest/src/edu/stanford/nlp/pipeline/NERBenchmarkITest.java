@@ -236,7 +236,7 @@ public class NERBenchmarkITest extends TestCase {
 
   public void testSpanishNEROnConLLDev() throws IOException {
     String conllTestPath =
-        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ancora.ner.dev.4class.tsv";
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ancora.dev.conll";
     Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-spanish.properties");
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
@@ -250,7 +250,7 @@ public class NERBenchmarkITest extends TestCase {
 
   public void testSpanishNEROnConLLTest() throws IOException {
     String conllTestPath =
-        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ancora.ner.test.4class.tsv";
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ancora.test.conll";
     Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-spanish.properties");
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
