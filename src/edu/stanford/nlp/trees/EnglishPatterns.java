@@ -23,6 +23,15 @@ public class EnglishPatterns {
           "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase",
           "get", "getting", "gets", "got", "gotten" };
 
+  /* A few times the apostrophe is missing on "'s", so we have "s" */
+  /* Tricky auxiliaries: "a", "na" is from "(gon|wan)na", "ve" from "Weve", etc.  "of" as non-standard for "have" */
+  /* "as" is "has" with missing first letter. "to" is rendered "the" once in EWT. */
+  public static final String[] auxiliaries = {
+          "will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "'ll", "ll", "-ll", "cold",
+          "has", "have", "had", "having", "'ve", "ve", "v", "of", "hav", "hvae", "as",
+          "get", "gets", "getting", "got", "gotten", "do", "does", "did", "'d", "d", "du",
+          "to", "2", "na", "a", "ot", "ta", "the", "too" };
+
   public static final String timeWordRegex =
     "/^(?i:Mondays?|Tuesdays?|Wednesdays?|Thursdays?|Fridays?|Saturdays?|Sundays?|years?|months?|weeks?|days?|mornings?|evenings?|nights?|January|Jan\\.|February|Feb\\.|March|Mar\\.|April|Apr\\.|May|June|July|August|Aug\\.|September|Sept\\.|October|Oct\\.|November|Nov\\.|December|Dec\\.|today|yesterday|tomorrow|spring|summer|fall|autumn|winter)$/";
 

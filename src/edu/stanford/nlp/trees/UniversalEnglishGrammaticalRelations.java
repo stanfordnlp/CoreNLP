@@ -572,7 +572,11 @@ public class UniversalEnglishGrammaticalRelations {
             "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
             // JJ catches a couple of funny NPs with heads like "enough"
             // Note that we eliminate SBAR which also match an vmod pattern
-            "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )");
+            "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )",
+            // New ones to pick up some more "say" patterns (2019); avoid S-ADV descendants
+            "VP < (/^V/ < " + sayVerbRegex + ") < (S|S-CLF|S-TTL|SQ=target <+(S) (VP < /^VB[DZP]$/))",
+            "@S < /^S-TPC/=target < VP"
+          );
 
 
   /**
@@ -1085,7 +1089,10 @@ public class UniversalEnglishGrammaticalRelations {
             "/(?:WH)?PP(?:-TMP|-ADV)?$/ <# (__ $-- (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + ETC_PAT + "))",
 //          "/(?:WH)?PP(?:-TMP|-ADV)?$/ < @NP|WHNP < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
             "/(?:WH)?PP(?:-TMP|-ADV)?$/ < @NP|WHNP < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + ETC_PAT + ")",
-            "CONJP < (RB=target !< " + ETC_PAT + ")");
+            "CONJP < (RB=target !< " + ETC_PAT + ")",
+            // Sometimes you have a JJ before a JJ in an ADJP. Make it advmod. Rule out capitalized for (old TB) "New York-based"
+            "ADJP < (JJ|JJR|JJS=target $. JJ|JJR|JJS !< /^[A-Z]/) <# JJ|JJR|JJS !< (CC|CONJP)"
+    );
 
 
   /**

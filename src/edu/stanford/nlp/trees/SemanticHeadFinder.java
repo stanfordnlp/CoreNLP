@@ -91,15 +91,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
 
   private static final boolean DEBUG = System.getProperty("SemanticHeadFinder", null) != null;
 
-  /* A few times the apostrophe is missing on "'s", so we have "s" */
-  /* Tricky auxiliaries: "a", "na" is from "(gon|wan)na", "ve" from "Weve", etc.  "of" as non-standard for "have" */
-  /* "as" is "has" with missing first letter. "to" is rendered "the" once in EWT. */
-  private static final String[] auxiliaries = {
-          "will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "'ll", "ll", "-ll", "cold",
-          "has", "have", "had", "having", "'ve", "ve", "v", "of", "hav", "hvae", "as",
-          "get", "gets", "getting", "got", "gotten", "do", "does", "did", "'d", "d", "du",
-          "to", "2", "na", "a", "ot", "ta", "the", "too" };
-
   // include Charniak tags (AUX, AUXG) so can do BLLIP right
   private static final String[] verbTags = {"TO", "MD", "VB", "VBD", "VBP", "VBZ", "VBG", "VBN", "AUX", "AUXG"};
   // These ones are always auxiliaries, even if the word is "too", "my", or whatever else appears in web text.
@@ -143,7 +134,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
 
     // make a distinction between auxiliaries and copula verbs to
     // get the NP has semantic head in sentences like "Bill is an honest man".  (Added "sha" for "shan't" May 2009
-    verbalAuxiliaries = Generics.newHashSet(Arrays.asList(auxiliaries));
+    verbalAuxiliaries = Generics.newHashSet(Arrays.asList(EnglishPatterns.auxiliaries));
 
     passiveAuxiliaries = Generics.newHashSet(Arrays.asList(EnglishPatterns.beGetVerbs));
 
@@ -162,7 +153,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
     return makeCopulaHead;
   }
 
-  //makes modifications of Collins' rules to better fit with semantic notions of heads
+  // makes modifications of Collins' rules to better fit with semantic notions of heads
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
     // verbs are here so that POS isn't favored in the case of bad parses
