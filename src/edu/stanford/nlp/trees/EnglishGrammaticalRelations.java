@@ -669,8 +669,8 @@ public class EnglishGrammaticalRelations {
             // JJ catches a couple of funny NPs with heads like "enough"
             // Note that we eliminate SBAR which also match an vmod pattern
             "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )",
-            // New ones to pick up some more "say" patterns (2019)
-            "VP < (/^V/ < " + sayVerbRegex + ") < (@S=target <+(S) (VP < /^VB[DZP]$/))",
+            // New ones to pick up some more "say" patterns (2019); avoid S-ADV descendants
+            "VP < (/^V/ < " + sayVerbRegex + ") < (S|S-CLF|S-TTL|SQ=target <+(S) (VP < /^VB[DZP]$/))",
             "@S < /^S-TPC/=target < VP"
           );
 

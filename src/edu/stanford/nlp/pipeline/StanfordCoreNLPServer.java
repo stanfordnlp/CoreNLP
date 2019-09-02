@@ -74,6 +74,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected String username = null;
   @ArgumentParser.Option(name="password", gloss="The password component of a username/password basic auth credential")
   protected String password = null;
+  @ArgumentParser.Option(name="annotators", gloss="The default annotators to run over a given sentence.")
+  protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,natlog,openie,kbp";
   @ArgumentParser.Option(name="preload", gloss="Cache the following annotators on startup")
   protected static String preloadedAnnotators = "";
   @ArgumentParser.Option(name="serverProperties", gloss="Default properties file for server's StanfordCoreNLP instance")
@@ -85,11 +87,7 @@ public class StanfordCoreNLPServer implements Runnable {
   @ArgumentParser.Option(name="stanford", gloss="If true, do special options (blacklist, timeout modifications) for public Stanford server")
   protected boolean stanford = false;
 
-  /** Default annotators for a server **/
-  private static String serverDefaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,natlog,openie,kbp";
 
-  /** List of server specific properties **/
-  private static List<String> serverSpecificProperties = ArgumentParser.listOptions(StanfordCoreNLPServer.class);
 
   private final String shutdownKey;
 
@@ -179,11 +177,8 @@ public class StanfordCoreNLPServer implements Runnable {
       log("To use shift reduce parser download English models jar from:");
       log("https://stanfordnlp.github.io/CoreNLP/download.html");
     }
-
-    // server default properties for a pipeline, these will be overwritten by file provided and command line
-    // provided defaults...the precedence is 1.) command line, 2.) properties file, 3.) server defaults
     this.defaultProps = PropertiesUtils.asProperties(
-        "annotators", serverDefaultAnnotators,  // Run these annotators by default
+        "annotators", defaultAnnotators,  // Run these annotators by default
         "coref.mention.type", "dep",  // Use dependency trees with coref by default
         "coref.mode", "statistical",  // Use the new coref
         "coref.language", "en",  // We're English by default
@@ -197,18 +192,9 @@ public class StanfordCoreNLPServer implements Runnable {
     // overwrite all default properties with provided server properties
     // for instance you might want to provide a default ner model
     if (serverPropertiesPath != null) {
-      Properties pipelinePropsFromFile = StringUtils.argsToProperties("-props", serverPropertiesPath);
-      PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromFile);
+      Properties serverProperties = StringUtils.argsToProperties("-props", serverPropertiesPath);
+      PropertiesUtils.overWriteProperties(this.defaultProps, serverProperties);
     }
-
-    // extract pipeline specific properties from command line and overwrite server and file provided properties
-    Properties pipelinePropsFromCL = new Properties();
-    for (String key : props.stringPropertyNames()) {
-      if (!serverSpecificProperties.contains(key)) {
-        pipelinePropsFromCL.setProperty(key, props.getProperty(key));
-      }
-    }
-    PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromCL);
 
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
     this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
@@ -1284,7 +1270,6 @@ public class StanfordCoreNLPServer implements Runnable {
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i++), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
                     matchWriter.set("match", matcher.getMatch().pennString());
-                    matchWriter.set("spanString", matcher.getMatch().spanString());
                     matchWriter.set("namedNodes", matcher.getNodeNames().stream().map(nodeName -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeWriter) ->
                       namedNodeWriter.set(nodeName, matcher.getNode(nodeName).pennString())
                     ));
