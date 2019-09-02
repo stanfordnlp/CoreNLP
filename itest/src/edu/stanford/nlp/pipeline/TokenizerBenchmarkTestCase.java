@@ -150,9 +150,9 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             placeholderToken.setBeginPosition(beginPosition);
             placeholderToken.setEndPosition(beginPosition + placeholderToken.word().length());
             placeholderToken.set(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetBeginAnnotation.class,
-                    containedToken.get(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetBeginAnnotation.class));
+                    containedToken.beginPosition());
             placeholderToken.set(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetEndAnnotation.class,
-                    containedToken.get(TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetEndAnnotation.class));
+                    containedToken.endPosition());
             placeholderToken.setIsMWT(true);
             return placeholderToken;
         }
@@ -242,10 +242,14 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         loadTokenizerTestExamples();
         ClassicCounter<String> allF1Stats = new ClassicCounter<String>();
         for (TokenizerBenchmarkTestCase.TestExample testExample : testExamples) {
-            System.out.println("---");
-            System.out.println(testExample.sentenceID);
-            System.out.println(testExample.sentenceText);
-            System.out.println(testExample.f1Stats());
+            System.err.println("---");
+            System.err.println("sentence id: "+testExample.sentenceID);
+            System.err.println("sentence text: "+testExample.sentenceText);
+            System.err.println("gold tokens: "+testExample.goldTokensList.stream().map(
+                    cl -> cl.word()).collect(Collectors.toList()));
+            System.err.println("system tokens: "+testExample.systemTokensList.stream().map(
+                    cl -> cl.word()).collect(Collectors.toList()));
+            System.err.println(testExample.f1Stats());
             allF1Stats.addAll(testExample.f1Stats());
         }
         ClassicCounter<String> f1Scores = f1Scores(allF1Stats);

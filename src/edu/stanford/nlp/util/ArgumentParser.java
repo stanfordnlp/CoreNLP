@@ -722,6 +722,24 @@ public class ArgumentParser  {
     return allProperties;
   }
 
+  /**
+   * Return the list of {@link ArgumentParser.Option}'s for provided Class
+   * @param c The Class to analyze
+   * @return A List containing the {@link ArgumentParser.Option} names
+   */
+
+  public static List<String> listOptions(Class c) {
+    try {
+      return Arrays.stream(scrapeFields(c)).map(field -> {
+        ArgumentParser.Option[] anns = field.getAnnotationsByType(ArgumentParser.Option.class);
+        return (anns.length > 0) ? anns[0].name() : null;
+      }
+      ).filter(argOpt -> (argOpt != null)).collect(Collectors.toList());
+    } catch (Exception e) {
+      throw new RuntimeException("Exception thrown while scraping fields from "+c.getName());
+    }
+  }
+
 
   /**
    * Return a string describing the usage of the program this method is called from, given the

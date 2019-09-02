@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.math.SloppyMath;
+import edu.stanford.nlp.pipeline.LanguageInfo;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -62,11 +63,13 @@ public class StringUtils  {
   private StringUtils() {}
 
   public static final String[] EMPTY_STRING_ARRAY = new String[0];
+  private static final String LANG = "lang";
   private static final String PROP = "prop";
   private static final String PROPS = "props";
   private static final String PROPERTIES = "properties";
   private static final String ARGS = "args";
   private static final String ARGUMENTS = "arguments";
+
 
   /**
    * Say whether this regular expression can be found inside
@@ -979,7 +982,8 @@ public class StringUtils  {
         } else {
           value = join(flagArgs, " ");
         }
-        if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
+        if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) ||
+                key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS) || key.equalsIgnoreCase(LANG)) {
           result.setProperty(PROPERTIES, value);
         } else {
           result.setProperty(key, value);
@@ -995,6 +999,8 @@ public class StringUtils  {
     /* Processing in reverse order, add properties that aren't present only. Thus, later ones override earlier ones. */
     while (result.containsKey(PROPERTIES)) {
       String file = result.getProperty(PROPERTIES);
+      if (LanguageInfo.isStanfordCoreNLPSupportedLang(file))
+              file = LanguageInfo.getLanguagePropertiesFile(file);
       result.remove(PROPERTIES);
       Properties toAdd = new Properties();
       BufferedReader reader = null;
