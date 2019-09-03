@@ -1089,6 +1089,15 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                             "nsubj(arrived-6, guards-5)\n" +
                             "root(ROOT-0, arrived-6)\n"},
 
+            {TestType.BASIC,
+                    "( (S (NP (DT Some) (ADJP (NN gun) (HYPH -) (VBG toting)) (NNS guards)) (VP (VBD arrived)) (. .)))",
+                    "det(guards-5, Some-1)\n" +
+                            "obl(toting-4, gun-2)\n" +
+                            "punct(toting-4, --3)\n" +
+                            "amod(guards-5, toting-4)\n" +
+                            "nsubj(arrived-6, guards-5)\n" +
+                            "root(ROOT-0, arrived-6)\n"},
+
             /* Test the various verb "to be" cases in statements, questions, and imperatives. */
             {TestType.BASIC,
               "(ROOT (S (NP (NNP Sue)) (VP (VBZ is) (VP (VBG speaking))) (. .)))",
