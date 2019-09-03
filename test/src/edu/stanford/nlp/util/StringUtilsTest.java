@@ -184,9 +184,8 @@ public class StringUtilsTest {
     Assert.assertEquals("Bung test", csvInputs.length, csvOutputs.length);
     for (int i = 0; i < csvInputs.length; i++) {
       String[] answer = StringUtils.splitOnCharWithQuoting(csvInputs[i], ',', '"', escapeInputs[i]);
-      Assert.assertTrue("Bad CSV line handling of ex " + i + ": " + Arrays.toString(csvOutputs[i]) +
-                      " vs. " + Arrays.toString(answer),
-              Arrays.equals(csvOutputs[i], answer));
+      Assert.assertArrayEquals("Bad CSV line handling of ex " + i + ": " + Arrays.toString(csvOutputs[i]) +
+              " vs. " + Arrays.toString(answer), csvOutputs[i], answer);
     }
   }
 
@@ -194,7 +193,7 @@ public class StringUtilsTest {
   public void testGetCharacterNgrams() {
     testCharacterNgram("abc", 0, 0);
     testCharacterNgram("abc", 1, 1, "a", "b", "c");
-    testCharacterNgram("abc", 2, 2, "ab", "bc");
+    testCharacterNgram("def", 2, 2, "de", "ef");
     testCharacterNgram("abc", 1, 2, "a", "b", "c", "ab", "bc");
     testCharacterNgram("abc", 1, 3, "a", "b", "c", "ab", "bc", "abc");
     testCharacterNgram("abc", 1, 4, "a", "b", "c", "ab", "bc", "abc");
@@ -215,14 +214,14 @@ public class StringUtilsTest {
 
   @Test
   public void testExpandEnvironmentVariables() {
-    Map<String, String> env = new HashMap<String, String>() {{
-      put("A", "[outA]");
-      put("A_B", "[outA_B]");
-      put("a_B", "[outa_B]");
-      put("a_B45", "[outa_B45]");
-      put("_A", "[out_A]");
-      put("3A", "[out_3A]");
-    }};
+    Map<String, String> env = new HashMap<>();
+    env.put("A", "[outA]");
+    env.put("A_B", "[outA_B]");
+    env.put("a_B", "[outa_B]");
+    env.put("a_B45", "[outa_B45]");
+    env.put("_A", "[out_A]");
+    env.put("3A", "[out_3A]");
+
     Assert.assertEquals("xxx [outA] xxx", StringUtils.expandEnvironmentVariables("xxx $A xxx", env));
     Assert.assertEquals("xxx[outA] xxx", StringUtils.expandEnvironmentVariables("xxx$A xxx", env));
     Assert.assertEquals("xxx[outA]xxx", StringUtils.expandEnvironmentVariables("xxx${A}xxx", env));
@@ -238,7 +237,7 @@ public class StringUtilsTest {
   public void testDecodeArray() throws IOException {
     String tempFile1 = Files.createTempFile("test", "tmp").toString();
     String tempFile2 = Files.createTempFile("test", "tmp").toString();
-    String[] decodedArray = StringUtils.decodeArray("'"+tempFile1 + "','" + tempFile2+"'");
+    String[] decodedArray = StringUtils.decodeArray('\'' + tempFile1 + "','" + tempFile2 + '\'');
 
     Assert.assertEquals(2, decodedArray.length);
     Assert.assertEquals(tempFile1, decodedArray[0]);

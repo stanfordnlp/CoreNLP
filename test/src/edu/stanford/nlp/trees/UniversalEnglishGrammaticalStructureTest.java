@@ -1,5 +1,5 @@
 // EnglishGrammaticalStructureTest -- unit tests for Stanford dependencies.
-// Copyright (c) 2005, 2011, 2013 The Board of Trustees of
+// Copyright © 2005, 2011, 2013, 2019 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -13,13 +13,12 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    Support/Questions: parser-user@lists.stanford.edu
 //    Licensing: parser-support@lists.stanford.edu
@@ -47,7 +46,7 @@ import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
  */
 
 @RunWith(Parameterized.class)
-public class UniversalEnglishGrammaticalStructureTest extends Assert{
+public class UniversalEnglishGrammaticalStructureTest extends Assert {
 
 
   private String testTree;
@@ -1079,6 +1078,16 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "aux(get-11, might-10)\n" +
                "parataxis(Try-1, get-11)\n" +
                "xcomp(get-11, lucky-12)\n"},
+
+            /* Added in 2019 to improve new treebank tokenization */
+            {TestType.BASIC,
+                    "( (S (NP (DT Some) (ADJP (NP (NN gun)) (HYPH -) (VBG toting)) (NNS guards)) (VP (VBD arrived)) (. .)))",
+                    "det(guards-5, Some-1)\n" +
+                            "obl(toting-4, gun-2)\n" +
+                            "punct(toting-4, --3)\n" +
+                            "amod(guards-5, toting-4)\n" +
+                            "nsubj(arrived-6, guards-5)\n" +
+                            "root(ROOT-0, arrived-6)\n"},
 
             /* Test the various verb "to be" cases in statements, questions, and imperatives. */
             {TestType.BASIC,
@@ -2627,7 +2636,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
    * Uses the sentence examples from the manual to at least test each relation.
    *
    */
-  public void testBasicRelation() {
+  private void testBasicRelation() {
     TreeReaderFactory trf = new NPTmpRetainingTreeNormalizer.NPTmpAdvRetainingTreeReaderFactory();
     // specifying our own TreeReaderFactory is vital so that functional
     // categories - that is -TMP and -ADV in particular - are not stripped off
@@ -2636,7 +2645,6 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
 
     assertEquals("Unexpected basic dependencies for tree " + testTree,
           testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(), tree, false, false, false));
-
   }
 
 
@@ -2646,7 +2654,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
    * a hard-coded tree with copulae being the head.
    *
    */
-  public void testBasicRelationWithCopulaAsHead() {
+  private void testBasicRelationWithCopulaAsHead() {
       TreeReaderFactory trf = new NPTmpRetainingTreeNormalizer.NPTmpAdvRetainingTreeReaderFactory();
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
@@ -2666,7 +2674,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
    * correctly from a hard-coded tree.
    *
    */
-  public void testNonCollapsedRelation() {
+   private void testNonCollapsedRelation() {
     TreeReaderFactory trf = new NPTmpRetainingTreeNormalizer.NPTmpAdvRetainingTreeReaderFactory();
     // specifying our own TreeReaderFactory is vital so that functional
     // categories - that is -TMP and -ADV in particular - are not stripped off
@@ -2682,7 +2690,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
    * Tests printing of the extra dependencies after the basic ones.
    *
    */
-  public void testNonCollapsedSeparator() {
+  private void testNonCollapsedSeparator() {
 
     TreeReaderFactory trf = new PennTreeReaderFactory();
     // specifying our own TreeReaderFactory is vital so that functional
@@ -2701,7 +2709,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
    * a hard-coded tree.
    *
    */
-  public void testCollapsedRelation() {
+  private void testCollapsedRelation() {
     TreeReaderFactory trf = new PennTreeReaderFactory();
 
     // specifying our own TreeReaderFactory is vital so that functional
@@ -2719,7 +2727,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
    * a hard-coded tree.
    *
    */
-  public void testCCProcessedRelation() {
+  private void testCCProcessedRelation() {
 
     TreeReaderFactory trf = new PennTreeReaderFactory();
 

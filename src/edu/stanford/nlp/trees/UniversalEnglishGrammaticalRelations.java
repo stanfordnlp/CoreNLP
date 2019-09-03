@@ -745,7 +745,10 @@ public class UniversalEnglishGrammaticalRelations {
                   "SBARQ < (WHNP=target [$++ (VP < (PP <: IN)) | $++ (SQ < (VP < (PP <: IN)))])",
                   "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
                   "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO)",
-                  "S|SINV < (PP|PP-TMP=target !< SBAR|S) < VP|S");
+                  "S|SINV < (PP|PP-TMP=target !< SBAR|S) < VP|S",
+                  // For cases like "some uzi - toting guards" with new tokenization
+                  "@ADJP > @NP < (@NP=target . (HYPH . VBN|VBG))"
+          );
 
 
   /**
