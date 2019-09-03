@@ -714,7 +714,10 @@ public class EnglishGrammaticalRelations {
             // The old attr relation, used here to recover xcomp relations instead.
             "VP=vp < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + " >># =vp) !$ (NP < EX)",
             // "Such a great idea this was" if "was" is the root, eg -makeCopulaHead
-            "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))");
+            "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))",
+            // For new treebank xcomp changes, match V + NP + xcomp patterns
+            "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))"
+    );
 
 
   /**

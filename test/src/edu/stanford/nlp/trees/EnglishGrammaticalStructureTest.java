@@ -135,6 +135,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "( (S (NP-SBJ (PRP They)) (VP (VBD acquired) (NP (NP (NNS stakes)) (PP (IN in) (NP (NP (VBG bottling) (NNS companies)) (UCP-LOC (PP (IN in) (NP (DT the) (NNP U.S.))) (CC and) (ADVP (RB overseas))))))) (. .)))",
          "( (S (NP (DT Some) (ADJP (NP (NN gun)) (HYPH -) (VBG toting)) (NNS guards)) (VP (VBD arrived)) (. .)))",
          "( (S (NP (DT Some) (ADJP (NN gun) (HYPH -) (VBG toting)) (NNS guards)) (VP (VBD arrived)) (. .)))",
+         "( (S (NP (PRP She)) (VP (VBD asked) (NP (DT the) (NN man)) (S (VP (TO to) (VP (VB leave))))) (. .)))",
     };
 
     // the expected dependency answers (basic)
@@ -528,6 +529,12 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                     "amod(guards-5, toting-4)\n" +
                     "nsubj(arrived-6, guards-5)\n" +
                     "root(ROOT-0, arrived-6)\n",
+            "nsubj(asked-2, She-1)\n" +
+                    "root(ROOT-0, asked-2)\n" +
+                    "det(man-4, the-3)\n" +
+                    "dobj(asked-2, man-4)\n" +
+                    "aux(leave-6, to-5)\n" +
+                    "xcomp(asked-2, leave-6)\n"
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);

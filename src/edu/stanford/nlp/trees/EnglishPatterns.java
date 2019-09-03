@@ -60,7 +60,8 @@ public class EnglishPatterns {
     "/^(?i:myself|yourself|himself|herself|itself|ourselves|yourselves|themselves)$/";
 
   public static final String xcompVerbRegex =
-      "/^(?i:advise|advises|advised|advising|allow|allows|allowed|allowing|ask|asks|asked|asking|beg|begs|begged|begging|convice|convinces|convinced|convincing|demand|demands|demanded|demanding|desire|desires|desired|desiring|expect|expects|expected|expecting|encourage|encourages|encouraged|encouraging|force|forces|forced|forcing|implore|implores|implored|imploring|lobby|lobbies|lobbied|lobbying|order|orders|ordered|ordering|persuade|persuades|persuaded|persuading|pressure|pressures|pressured|pressuring|prompt|prompts|prompted|prompting|require|requires|required|requiring|tell|tells|told|telling|urge|urges|urged|urging)$/";
+      "/^(?i:(?:allow|ask|demand|expect|help|order|prompt)(?:s|ed|ing)?|(?:advis|convinc|declar|defin|desir|encourag|forc|implor|nam|persuad|pressur|requir|urg)(?:e|es|ed|ing)|" +
+              "beg|begs|begged|begging|compel|compels|compelled|compelling|lobby|lobbies|lobbied|lobbying|permit|permits|permitted|permitting|tell|tells|told|telling)$/";
 
   // A list of verbs with an xcomp as an argument
   // which don't require a NP before the xcomp.

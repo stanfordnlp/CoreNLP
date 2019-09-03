@@ -586,7 +586,6 @@ public class UniversalEnglishGrammaticalRelations {
    * The name <i>xcomp</i> is borrowed from Lexical-Functional Grammar.
    * (Mainly "TO-clause" are recognized, but also some VBG like "stop eating")
    * <br>
-   * <br>
    * Examples: <br>
    * "I like to swim" &rarr;
    * {@code xcomp}(like, swim) <br>
@@ -614,16 +613,16 @@ public class UniversalEnglishGrammaticalRelations {
             // Also, xcomp(becoming, problem) in "Why is Dave becoming a problem?"
             "(VP $-- (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (/^VB/ < " + clausalComplementRegex + ") < NP=target)",
             "VP < (/^(?:VB|AUX)/ < " + clausalComplementRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " +
-                // The next qualification eliminates parentheticals that
-                // come after the actual dobj
+                // The next qualification eliminates parentheticals that come after the actual dobj
                 " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
             // The old attr relation, used here to recover xcomp relations instead.
             "VP=vp < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + " >># =vp) !$ (NP < EX)",
             // "Such a great idea this was" if "was" is the root, eg -makeCopulaHead
             "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))",
-
             //Former acomp expression
-            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]"
+            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]",
+            // For new treebank xcomp changes, match V + NP + xcomp patterns
+            "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))"
         );
 
 
