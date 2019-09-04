@@ -237,6 +237,8 @@ public class ReadSentimentDataset  {
    * <br>
    * Macro arguments exist in -inputDir and -outputDir, so you can for example run <br>
    * <code>java edu.stanford.nlp.sentiment.ReadSentimentDataset -inputDir /u/nlp/data/sentiment/stanfordSentimentTreebank  -outputDir .</code>
+   * or if you're on my laptop:
+   * <code>java edu.stanford.nlp.sentiment.ReadSentimentDataset -inputDir ../data/sentiment/stanfordSentimentTreebank  -outputDir .</code>
    */
   public static void main(String[] args) {
     String dictionaryFilename = null;
