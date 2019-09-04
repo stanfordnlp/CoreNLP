@@ -115,6 +115,10 @@ public class ReadSentimentDataset  {
     new Transformation(TregexPattern.compile("-LRB-=lrb . (__=n1 !< __ . (__=n2 !< __ . (__=n3 !< __ . -RRB-=rrb))) : (=n1 [ (== the . (=n2 == characters . (=n3 == /^\'$/))) | (== the . (=n2 == movie . (=n3 == /^\'s$/))) | (== of . (=n2 == middle-aged . (=n3 == romance))) | (== Binoche . (=n2 == and . (=n3 == Magimel))) | (==the . (=n2 == Funk . (=n3 == Brothers))) | (== Jack . (=n2 == Nicholson . (=n3 == /^\'s$/))) | (== De . (=n2 == Palma . (=n3 == /^\'s$/))) | (== Clara . (=n2 == and . (=n3 == Paul))) | (== Sex . (=n2 == and . (=n3 == Lucía))) ])"),
                        Tsurgeon.parseOperation("[prune rrb] [prune lrb]")),
     
+    // parens with four word expressions
+    new Transformation(TregexPattern.compile("-LRB-=lrb . (__=n1 !< __ . (__=n2 !< __ . (__=n3 !< __ . (__=n4 !< __ . -RRB-=rrb)))) : (=n1 (== Scorsese . (=n2 ==/^\'s$/ . (=n3 == Mean . (=n4 == Streets)))) | (== the . (=n2 ==warden . (=n3 ==/^\'s$/ . (=n4 ==daughter)))) | (== Attal . (=n2 ==and . (=n3 ==Gainsbourg . (=n4 ==/^\'s$/)))) | (== as . (=n2 ==The . (=n3 ==Full . (=n4 ==Monty)))) | (== wo . (=n2 ==n't . (=n3 ==be . (=n4 ==an)))) )"),
+                       Tsurgeon.parseOperation("[prune rrb] [prune lrb]")),
+    
     // only one of these, so can be very general
     new Transformation(TregexPattern.compile("/^401$/ > (__ > __=top)"),
                        Tsurgeon.parseOperation("replace top (2 (2 401k) (2 statement))")),
