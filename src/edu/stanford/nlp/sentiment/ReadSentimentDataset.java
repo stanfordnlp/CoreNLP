@@ -104,7 +104,7 @@ public class ReadSentimentDataset  {
                        Tsurgeon.parseOperation("[prune rrb] [prune lrb]")),
     
     // parens with a single word that we can drop
-    new Transformation(TregexPattern.compile("-LRB-=lrb . and|Haneke|is|Evans|Harmon|Harris|its|it|Aniston|headbanger|Testud|but|frames|yet|Denis|DeNiro|sinks|screenwriter|Cho|meditation|Watts|that|the|this|Madonna|Ahola|Franco|Hopkins|Crudup|writer-director|Diggs|very|Crane|Frei|Reno|Jones|Quills|Bobby|Hill|Kim|subjects|Wang|Jaglom|Vega|Sabara|Sade|Goldbacher|too|being|opening=last : (=last . -RRB-=rrb)"),
+    new Transformation(TregexPattern.compile("-LRB-=lrb . and|Haneke|is|Evans|Harmon|Harris|its|it|Aniston|headbanger|Testud|but|frames|yet|Denis|DeNiro|sinks|screenwriter|Cho|meditation|Watts|that|the|this|Madonna|Ahola|Franco|Hopkins|Crudup|writer-director|Diggs|very|Crane|Frei|Reno|Jones|Quills|Bobby|Hill|Kim|subjects|Wang|Jaglom|Vega|Sabara|Sade|Goldbacher|too|being|opening|enough|long|like|sci-fi=last : (=last . -RRB-=rrb)"),
                        Tsurgeon.parseOperation("[prune rrb] [prune lrb]")),
     
     // parens with two word expressions
@@ -126,9 +126,17 @@ public class ReadSentimentDataset  {
     new Transformation(TregexPattern.compile("/^(?:20th|21st)$/ . Century=century"),
                        Tsurgeon.parseOperation("relabel century century")),
 
+    // empowerment was separated, with a stray ' at the end of the sentence
+    new Transformation(TregexPattern.compile("__=top < (__ < /'em/) < (__ < /powerment/) >> (__ !> __ < (__=apos < /'/))"),
+                       Tsurgeon.parseOperation("[replace top (3 empowerment)] [prune apos]")),
+
     // Fix any stranded unitary nodes
     new Transformation(TregexPattern.compile("__ <: (__=unitary < __)"),
                        Tsurgeon.parseOperation("[excise unitary unitary]")),
+
+    // 2 for 1: misspelled AND mistokenized!
+    new Transformation(TregexPattern.compile("__=top < (__ < Pasach)"),
+                       Tsurgeon.parseOperation("[replace top (2 (2 Pesach) (2 Burstein))]")),
 
     // relabel some nodes where punctuation changes the score for no apparent reason
     // new Transformation(TregexPattern.compile("__=node <2 (__ < /^[!.?,;]$/) !<1 ~node <1 __=child > ~child"),
