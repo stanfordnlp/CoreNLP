@@ -56,6 +56,12 @@ public class ReadSentimentDataset  {
       add(new Pair<>("Formuliac", "Formulaic"));
       add(new Pair<>("unhibited", "uninhibited"));
       add(new Pair<>("democracie", "democracies"));
+      add(new Pair<>("scuzbag", "scuzzbag"));
+      add(new Pair<>("provocatuers", "provocateurs"));
+      add(new Pair<>("aborbing", "absorbing"));
+      add(new Pair<>("idoosyncratic", "idiosyncratic"));
+      add(new Pair<>("corruscating", "coruscating"));
+      add(new Pair<>("alientation", "alienation"));
     }};
   
   static private class Transformation {
