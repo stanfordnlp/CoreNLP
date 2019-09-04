@@ -224,10 +224,19 @@ public class ReadSentimentDataset  {
       if (score == null) {
         throw new RuntimeException("Could not find sentiment score for phrase id " + phraseId);
       }
-      // TODO: make this a numClasses option
-      int classLabel = Math.round((float) Math.floor(score * (float) numClasses));
-      if (classLabel > numClasses - 1) {
-        classLabel = numClasses - 1;
+
+      int classLabel = Math.round((float) Math.floor(score * (float) 5));
+      if (classLabel > 5 || classLabel < 0) {
+        throw new RuntimeException("Unexpected class label");
+      }
+      if (numClasses == 2) {
+        if (classLabel < 2) {
+          classLabel = 0;
+        } else if (classLabel == 2) {
+          classLabel = -1;
+        } else {
+          classLabel = 1;
+        }
       }
       subtrees[i].label().setValue(Integer.toString(classLabel));
     }
@@ -355,10 +364,12 @@ public class ReadSentimentDataset  {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-numClasses")) {
         numClasses = Integer.parseInt(args[argIndex + 1]);
+        if (numClasses != 2 && numClasses != 5) {
+          throw new IllegalArgumentException("numClasses must be 2 or 5");
+        }
         argIndex += 2;
       } else {
-        log.info("Unknown argument " + args[argIndex]);
-        System.exit(2);
+        throw new IllegalArgumentException("Unknown argument " + args[argIndex]);
       }
     }
 
