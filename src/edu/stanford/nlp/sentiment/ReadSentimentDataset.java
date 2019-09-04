@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Pair;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 
@@ -43,69 +45,99 @@ public class ReadSentimentDataset  {
     return word;
   };
 
-  // A bunch of trees have some funky tokenization which we can
-  // somewhat correct using these tregex / tsurgeon expressions.
-  static final TregexPattern[] tregexPatterns = {
-    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[a-zA-Z]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <2 =single <1 (__=useless <<- (__=word !< __)))"),
-    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[aA]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <1 =single <2 (__=useless <<, /^n$/=word))"),
-    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__=A <... { (__ < /^[aA]$/=letter) ; (__=paren < /^-RRB-$/) })"),
-    TregexPattern.compile("__ <1 (__ <<- (/^(?i:provide)$/=provide !<__)) <2 (__ <<, (__=s > __=useless <... { (__ <: -LRB-) ; (__ <1 (__ <: s)) } ))"),
-    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[a-zA-Z]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <1 =single <2 (__=useless <<, (__=word !< __)))"),
-    TregexPattern.compile("-LRB-=lrb !, __ : (__=ltop > __ <<, =lrb <<- (-RRB-=rrb > (__ > __=rtop)) !<< (-RRB- !== =rrb))"),
-    // uncensor "fucked"
-    TregexPattern.compile("__=top <1 (__=f1 < f) <2 (__=f2 <... { (__ < /^[*\\\\]+$/) ; (__ < ed) })"),
-    // fix don ' t
-    TregexPattern.compile("__=top <1 (__=f1 <1 (__ < don=do) <2 (__ < /^[\']$/=apos)) <2 (__=wrong < t)"),
-    // parens at the start of a sentence - always appears wrong
-    TregexPattern.compile("-LRB-=lrb !, __ .. (-RRB-=rrb !< __ !.. -RRB-)"),
-    // parens with a single word that we can drop
-    TregexPattern.compile("-LRB-=lrb . and|Haneke|is|Evans|Harmon|Harris|its|it|Aniston|headbanger|Testud|but|frames|yet|Denis|DeNiro|sinks|screenwriter|Cho|meditation|Watts|that|the|this|Madonna|Ahola|Franco|Hopkins|Crudup|writer-director|Diggs|very|Crane|Frei|Reno|Jones|Quills|Bobby|Hill|Kim|subjects|Wang|Jaglom|Vega|Sabara|Sade|Goldbacher|too|being|opening=last : (=last . -RRB-=rrb)"),
-    // parens with two word expressions
-    TregexPattern.compile("-LRB-=lrb . (__=n1 !< __ . (__=n2 !< __ . -RRB-=rrb)) : (=n1 (== Besson|Kissinger|Godard|Seagal|jaglon|It|it|Tsai|Nelson|Rifkan|Shakespeare|Solondz|Madonna|Herzog|Witherspoon|Woo|Eyre|there|Moore|Ricci|Seinfeld . (=n2 == /^\'s$/)) | (== Denis|Skins|Spears|Assayas . (=n2 == /^\'$/)) | (== Je-Gyu . (=n2 == is)) | (== the . (=n2 == leads|film|story|characters)) | (== Monsoon . (=n2 == Wedding)) | (== De . (=n2 == Niro)) | (== Roman . (=n2 == Coppola)) | (== than . (=n2 == Leon)) | (==Colgate . (=n2 == /^U.$/)) | (== teen . (=n2 == comedy)) | (== a . (=n2 == remake)) | (== Powerpuff . (=n2 == Girls)) | (== Woody . (=n2 == Allen)))"),
-    // parens with three word expressions
-    TregexPattern.compile("-LRB-=lrb . (__=n1 !< __ . (__=n2 !< __ . (__=n3 !< __ . -RRB-=rrb))) : (=n1 [ (== the . (=n2 == characters . (=n3 == /^\'$/))) | (== the . (=n2 == movie . (=n3 == /^\'s$/))) | (== of . (=n2 == middle-aged . (=n3 == romance))) | (== Jack . (=n2 == Nicholson . (=n3 == /^\'s$/))) | (== De . (=n2 == Palma . (=n3 == /^\'s$/))) | (== Clara . (=n2 == and . (=n3 == Paul))) | (== Sex . (=n2 == and . (=n3 == Lucía))) ])"),
-    // only one of these, so can be very general
-    TregexPattern.compile("/^401$/ > (__ > __=top)"),
-    TregexPattern.compile("by . (all > (__=all > __=allgp) . (means > (__=means > __=meansgp))) : (=allgp !== =meansgp)"),
-    // 20th century, 21st century
-    TregexPattern.compile("/^(?:20th|21st)$/ . Century=century"),
-
-    // Fix any stranded unitary nodes
-    TregexPattern.compile("__ <: (__=unitary < __)"),
-    // relabel some nodes where punctuation changes the score for no apparent reason
-    // TregexPattern.compile("__=node <2 (__ < /^[!.?,;]$/) !<1 ~node <1 __=child > ~child"),
-    // TODO: relabel words in some less expensive way?
-    TregexPattern.compile("/^[1]$/=label <: /^(?i:protagonist)$/"),
-  };
-
-  static final TsurgeonPattern[] tsurgeonPatterns = {
-    Tsurgeon.parseOperation("[relabel word /^.*$/={word}={letter}/] [prune single] [excise useless useless]"),
-    Tsurgeon.parseOperation("[relabel word /^.*$/={letter}n/] [prune single] [excise useless useless]"),
-    Tsurgeon.parseOperation("[excise single A] [prune paren]"),
-    Tsurgeon.parseOperation("[relabel provide /^.*$/={provide}s/] [prune s] [excise useless useless]"),
-    Tsurgeon.parseOperation("[relabel word /^.*$/={letter}={word}/] [prune single] [excise useless useless]"),
-    Tsurgeon.parseOperation("[prune lrb] [prune rrb] [excise ltop ltop] [excise rtop rtop]"),
-    Tsurgeon.parseOperation("replace top (0 fucked)"),
-    Tsurgeon.parseOperation("[prune wrong] [relabel do do] [relabel apos /^.*$/n={apos}t/] [excise top top]"),
-    // Note: the next couple leave unitary nodes, so we then fix them at the end
-    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
-    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
-    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
-    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
-    Tsurgeon.parseOperation("replace top (2 (2 401k) (2 statement))"),
-    Tsurgeon.parseOperation("[move means $- all] [excise meansgp meansgp] [createSubtree 2 all means]"),
-    Tsurgeon.parseOperation("relabel century century"),
-    // Fix any stranded unitary nodes
-    Tsurgeon.parseOperation("[excise unitary unitary]"),
-    //Tsurgeon.parseOperation("relabel node /^.*$/={child}/"),
-    Tsurgeon.parseOperation("relabel label /^.*$/2/"),
-  };
-
-  static {
-    if (tregexPatterns.length != tsurgeonPatterns.length) {
-      throw new RuntimeException("Expected the same number of tregex and tsurgeon when initializing");
+  // A bunch of words need to be replaced - it's kind of awkward to do
+  // this in code but we just want to get it done
+  static final List<Pair<String, String>> singleWordReplacements = new ArrayList<Pair<String, String>>() {{
+      add(new Pair<>("Stortelling", "Storytelling"));
+      add(new Pair<>("surfacey", "surfacy"));
+      add(new Pair<>("hotsies", "hotties"));
+      add(new Pair<>("be-bop", "bebop"));
+      add(new Pair<>("kibbitzes", "kibitzes"));
+      add(new Pair<>("Formuliac", "Formulaic"));
+      add(new Pair<>("unhibited", "uninhibited"));
+      add(new Pair<>("democracie", "democracies"));
+    }};
+  
+  static private class Transformation {
+    final TregexPattern tregex;
+    final TsurgeonPattern surgery;
+    
+    Transformation(TregexPattern tregex, TsurgeonPattern surgery) {
+      this.tregex = tregex;
+      this.surgery = surgery;
     }
   }
+
+  // A bunch of trees have some funky tokenization which we can
+  // somewhat correct using these tregex / tsurgeon expressions.
+  static final Transformation[] transformations = {
+    new Transformation(TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[a-zA-Z]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <2 =single <1 (__=useless <<- (__=word !< __)))"),
+                       Tsurgeon.parseOperation("[relabel word /^.*$/={word}={letter}/] [prune single] [excise useless useless]")),
+
+    new Transformation(TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[aA]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <1 =single <2 (__=useless <<, /^n$/=word))"),
+                       Tsurgeon.parseOperation("[relabel word /^.*$/={letter}n/] [prune single] [excise useless useless]")),
+                           
+    new Transformation(TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__=A <... { (__ < /^[aA]$/=letter) ; (__=paren < /^-RRB-$/) })"),
+                       Tsurgeon.parseOperation("[excise single A] [prune paren]")),
+    
+    new Transformation(TregexPattern.compile("__ <1 (__ <<- (/^(?i:provide)$/=provide !<__)) <2 (__ <<, (__=s > __=useless <... { (__ <: -LRB-) ; (__ <1 (__ <: s)) } ))"),
+                       Tsurgeon.parseOperation("[relabel provide /^.*$/={provide}s/] [prune s] [excise useless useless]")),
+    
+    new Transformation(TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[a-zA-Z]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <1 =single <2 (__=useless <<, (__=word !< __)))"),
+                       Tsurgeon.parseOperation("[relabel word /^.*$/={letter}={word}/] [prune single] [excise useless useless]")),
+    
+    new Transformation(TregexPattern.compile("-LRB-=lrb !, __ : (__=ltop > __ <<, =lrb <<- (-RRB-=rrb > (__ > __=rtop)) !<< (-RRB- !== =rrb))"),
+                       Tsurgeon.parseOperation("[prune lrb] [prune rrb] [excise ltop ltop] [excise rtop rtop]")),
+    
+    // uncensor "fucked"
+    new Transformation(TregexPattern.compile("__=top <1 (__=f1 < f) <2 (__=f2 <... { (__ < /^[*\\\\]+$/) ; (__ < ed) })"),
+                       Tsurgeon.parseOperation("replace top (0 fucked)")),
+    
+    // fix don ' t
+    new Transformation(TregexPattern.compile("__=top <1 (__=f1 <1 (__ < don=do) <2 (__ < /^[\']$/=apos)) <2 (__=wrong < t)"),
+                       Tsurgeon.parseOperation("[prune wrong] [relabel do do] [relabel apos /^.*$/n={apos}t/] [excise top top]")),
+
+    // Note: the next couple leave unitary nodes, so we then fix them at the end
+    
+    // parens at the start of a sentence - always appears wrong
+    new Transformation(TregexPattern.compile("-LRB-=lrb !, __ .. (-RRB-=rrb !< __ !.. -RRB-)"),
+                       Tsurgeon.parseOperation("[prune rrb] [prune lrb]")),
+    
+    // parens with a single word that we can drop
+    new Transformation(TregexPattern.compile("-LRB-=lrb . and|Haneke|is|Evans|Harmon|Harris|its|it|Aniston|headbanger|Testud|but|frames|yet|Denis|DeNiro|sinks|screenwriter|Cho|meditation|Watts|that|the|this|Madonna|Ahola|Franco|Hopkins|Crudup|writer-director|Diggs|very|Crane|Frei|Reno|Jones|Quills|Bobby|Hill|Kim|subjects|Wang|Jaglom|Vega|Sabara|Sade|Goldbacher|too|being|opening=last : (=last . -RRB-=rrb)"),
+                       Tsurgeon.parseOperation("[prune rrb] [prune lrb]")),
+    
+    // parens with two word expressions
+    new Transformation(TregexPattern.compile("-LRB-=lrb . (__=n1 !< __ . (__=n2 !< __ . -RRB-=rrb)) : (=n1 (== Besson|Kissinger|Godard|Seagal|jaglon|It|it|Tsai|Nelson|Rifkan|Shakespeare|Solondz|Madonna|Herzog|Witherspoon|Woo|Eyre|there|Moore|Ricci|Seinfeld . (=n2 == /^\'s$/)) | (== Denis|Skins|Spears|Assayas . (=n2 == /^\'$/)) | (== Je-Gyu . (=n2 == is)) | (== the . (=n2 == leads|film|story|characters)) | (== Monsoon . (=n2 == Wedding)) | (== De . (=n2 == Niro)) | (== Roman . (=n2 == Coppola)) | (== than . (=n2 == Leon)) | (==Colgate . (=n2 == /^U.$/)) | (== teen . (=n2 == comedy)) | (== a . (=n2 == remake)) | (== Powerpuff . (=n2 == Girls)) | (== Woody . (=n2 == Allen)))"),
+                       Tsurgeon.parseOperation("[prune rrb] [prune lrb]")),
+    
+    // parens with three word expressions
+    new Transformation(TregexPattern.compile("-LRB-=lrb . (__=n1 !< __ . (__=n2 !< __ . (__=n3 !< __ . -RRB-=rrb))) : (=n1 [ (== the . (=n2 == characters . (=n3 == /^\'$/))) | (== the . (=n2 == movie . (=n3 == /^\'s$/))) | (== of . (=n2 == middle-aged . (=n3 == romance))) | (== Jack . (=n2 == Nicholson . (=n3 == /^\'s$/))) | (== De . (=n2 == Palma . (=n3 == /^\'s$/))) | (== Clara . (=n2 == and . (=n3 == Paul))) | (== Sex . (=n2 == and . (=n3 == Lucía))) ])"),
+                       Tsurgeon.parseOperation("[prune rrb] [prune lrb]")),
+    
+    // only one of these, so can be very general
+    new Transformation(TregexPattern.compile("/^401$/ > (__ > __=top)"),
+                       Tsurgeon.parseOperation("replace top (2 (2 401k) (2 statement))")),
+    
+    new Transformation(TregexPattern.compile("by . (all > (__=all > __=allgp) . (means > (__=means > __=meansgp))) : (=allgp !== =meansgp)"),
+                       Tsurgeon.parseOperation("[move means $- all] [excise meansgp meansgp] [createSubtree 2 all means]")),
+    
+    // 20th century, 21st century
+    new Transformation(TregexPattern.compile("/^(?:20th|21st)$/ . Century=century"),
+                       Tsurgeon.parseOperation("relabel century century")),
+
+    // Fix any stranded unitary nodes
+    new Transformation(TregexPattern.compile("__ <: (__=unitary < __)"),
+                       Tsurgeon.parseOperation("[excise unitary unitary]")),
+
+    // relabel some nodes where punctuation changes the score for no apparent reason
+    // new Transformation(TregexPattern.compile("__=node <2 (__ < /^[!.?,;]$/) !<1 ~node <1 __=child > ~child"),
+    // Tsurgeon.parseOperation("relabel node /^.*$/={child}/")),
+
+    // TODO: relabel words in some less expensive way?
+    new Transformation(TregexPattern.compile("/^[1]$/=label <: /^(?i:protagonist)$/"),
+                       Tsurgeon.parseOperation("relabel label /^.*$/2/")),
+  };
 
   private ReadSentimentDataset() {} // static class
 
@@ -180,11 +212,17 @@ public class ReadSentimentDataset  {
 
     for (int i = 0; i < sentence.size(); ++i) {
       Tree leaf = subtrees[i].children()[0];
+      for (Pair<String, String> replacement : singleWordReplacements) {
+        if (leaf.label().value().equals(replacement.first)) {
+          leaf.label().setValue(replacement.second);
+        }
+      }
       leaf.label().setValue(escaper.escapeString(leaf.label().value()));
     }
 
-    for (int i = 0; i < tregexPatterns.length; ++i) {
-      root = Tsurgeon.processPattern(tregexPatterns[i], tsurgeonPatterns[i], root);
+    for (int i = 0; i < transformations.length; ++i) {
+      root = Tsurgeon.processPattern(transformations[i].tregex,
+                                     transformations[i].surgery, root);
     }
 
     return root;
