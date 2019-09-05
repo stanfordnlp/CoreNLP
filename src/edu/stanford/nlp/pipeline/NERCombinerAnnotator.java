@@ -6,10 +6,12 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
+import edu.stanford.nlp.process.CoreLabelProcessor;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.TimeExpression;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -43,17 +45,12 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final long maxTime;
   private final int nThreads;
   private final int maxSentenceLength;
+  private final boolean applyNumericClassifiers;
   private LanguageInfo.HumanLanguage language = LanguageInfo.HumanLanguage.ENGLISH;
 
-  /** Spanish NER enhancements **/
-  private static final Map<String, String> spanishToEnglishTag = new HashMap<>();
-
-  static {
-    spanishToEnglishTag.put("PERS", "PERSON");
-    spanishToEnglishTag.put("ORG", "ORGANIZATION");
-    spanishToEnglishTag.put("LUG", "LOCATION");
-    spanishToEnglishTag.put("OTROS", "MISC");
-  }
+  /** Optional token processor to run before and after classification **/
+  private CoreLabelProcessor tokenProcessor;
+  private boolean processTokens = false;
 
   private static final String spanishNumberRegexRules =
       "edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_number_sp.tag";
@@ -79,6 +76,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   /** doc date finding **/
   private DocDateAnnotator docDateAnnotator;
 
+
   public NERCombinerAnnotator(Properties properties) throws IOException {
     // TODO: condense  -ner.useSUTime false -ner.applyNumericClassifiers false  -ner.applyFineGrained false into one option, possibly associated with the situation of -ner.model being just one model
 
@@ -100,6 +98,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         PropertiesUtils.getBool(properties,
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
+    this.applyNumericClassifiers = applyNumericClassifiers;
 
     boolean useSUTime =
         PropertiesUtils.getBool(properties,
@@ -128,6 +127,16 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this.maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
     this.language =
         LanguageInfo.getLanguageFromString(PropertiesUtils.getString(properties, "ner.language", "en"));
+
+    String tokenProcessorClass = properties.getProperty("ner.tokenProcessor", "");
+    try {
+      if (!tokenProcessorClass.equals("")) {
+        tokenProcessor = ReflectionLoading.loadByReflection(tokenProcessorClass);
+        processTokens = true;
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Loading: "+tokenProcessorClass+" failed with: "+e.getMessage());
+    }
 
     // in case of Spanish, use the Spanish number regexner annotator
     if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
@@ -192,6 +201,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this.maxTime = maxTime;
     this.nThreads = nThreads;
     this.maxSentenceLength = maxSentenceLength;
+    this.applyNumericClassifiers = true;
     Properties nerProperties = new Properties();
     nerProperties.setProperty("ner.applyFineGrained", Boolean.toString(fineGrained));
     nerProperties.setProperty("ner.buildEntityMentions", Boolean.toString(entityMentions));
@@ -313,7 +323,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       log.info("done.");
     }
     // if Spanish, run the regexner with Spanish number rules
-    if (LanguageInfo.HumanLanguage.SPANISH.equals(language))
+    if (LanguageInfo.HumanLanguage.SPANISH.equals(language) && this.applyNumericClassifiers)
       spanishNumberAnnotator.annotate(annotation);
     // perform safety clean up
     // MONEY and NUMBER ner tagged items should not have Timex values
@@ -353,18 +363,21 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
   }
 
-  /** convert Spanish tag content of older models **/
-  private static String spanishToEnglishTag(String spanishTag) {
-    return spanishToEnglishTag.getOrDefault(spanishTag, spanishTag);
-  }
-
   @Override
   public void doOneSentence(Annotation annotation, CoreMap sentence) {
-    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> originalTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> classifierInputTokens;
+    // do any pre-classification token processing
+    // example: merge words with hyphens for German NER to match German NER training data
+    //          this will improve German NER performance
+    if (processTokens)
+      classifierInputTokens = tokenProcessor.process(originalTokens);
+    else
+      classifierInputTokens = originalTokens;
     List<CoreLabel> output; // only used if try assignment works.
-    if (tokens.size() <= this.maxSentenceLength) {
+    if (classifierInputTokens.size() <= this.maxSentenceLength) {
       try {
-        output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
+        output = this.ner.classifySentenceWithGlobalInformation(classifierInputTokens, annotation, sentence);
       } catch (RuntimeInterruptedException e) {
         // If we get interrupted, set the NER labels to the background
         // symbol if they are not already set, then exit.
@@ -376,26 +389,26 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (output == null) {
       doOneFailedSentence(annotation, sentence);
     } else {
-      for (int i = 0, sz = tokens.size(); i < sz; ++i) {
+      if (processTokens)
+        // restore tokens to match original tokenization scheme before processing
+        // example: split words with hyphens for German NER to match CoNLL 2018 standard
+        output = tokenProcessor.restore(originalTokens, output);
+      for (int i = 0, sz = originalTokens.size(); i < sz; ++i) {
         // add the named entity tag to each token
         String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
         String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
         Map<String,Double> neTagProbMap = output.get(i).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
-        if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
-          neTag = spanishToEnglishTag(neTag);
-          normNeTag = spanishToEnglishTag(normNeTag);
-        }
-        tokens.get(i).setNER(neTag);
-        tokens.get(i).set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, neTagProbMap);
-        tokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
-        if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
-        NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
+        originalTokens.get(i).setNER(neTag);
+        originalTokens.get(i).set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, neTagProbMap);
+        originalTokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
+        if (normNeTag != null) originalTokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
+        NumberSequenceClassifier.transferAnnotations(output.get(i), originalTokens.get(i));
       }
 
       if (VERBOSE) {
         boolean first = true;
         StringBuilder sb = new StringBuilder("NERCombinerAnnotator output: [");
-        for (CoreLabel w : tokens) {
+        for (CoreLabel w : originalTokens) {
           if (first) {
             first = false;
           } else {
