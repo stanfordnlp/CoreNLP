@@ -4,6 +4,7 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.process.*;
 
 import java.util.*;
+import java.util.function.*;
 
 
 /**
@@ -17,6 +18,10 @@ import java.util.*;
  */
 
 public class GermanNERCoreLabelProcessor extends CoreLabelProcessor {
+
+  /** Check that after() is not null and the empty string **/
+  public Function<CoreLabel, Boolean> afterIsEmpty = tok ->
+      tok.containsKey(CoreAnnotations.AfterAnnotation.class) && tok.after().equals("");
 
   /**
    * merge the contents of two tokens
@@ -36,10 +41,10 @@ public class GermanNERCoreLabelProcessor extends CoreLabelProcessor {
       CoreLabel processedToken = new CoreLabel(currToken);
       CoreLabel lastProcessedToken =
           processedTokens.size() > 0 ? processedTokens.get(processedTokens.size() - 1) : null;
-      if (lastProcessedToken != null && lastProcessedToken.after().equals("") && currToken.word().equals("-")) {
+      if (lastProcessedToken != null && afterIsEmpty.apply(lastProcessedToken) && currToken.word().equals("-")) {
         mergeTokens(lastProcessedToken, currToken);
       } else if (lastProcessedToken != null && lastProcessedToken.word().endsWith("-") &&
-          lastProcessedToken.after().equals("")) {
+          afterIsEmpty.apply(lastProcessedToken)) {
         mergeTokens(lastProcessedToken, currToken);
       } else {
         processedTokens.add(processedToken);
