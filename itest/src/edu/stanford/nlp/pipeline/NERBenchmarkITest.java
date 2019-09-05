@@ -207,7 +207,62 @@ public class NERBenchmarkITest extends TestCase {
     runNERTest("OntoNotes English Test 3 Class", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
         90.77);
   }
-  
+
+  public void testGermanNEROnConLLDev() throws IOException {
+    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/deu.io.f15.utf8.testa";
+    Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-german.properties");
+    props.setProperty("annotators", "tokenize,ssplit,pos,ner");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
+    StanfordCoreNLP germanPipeline = new StanfordCoreNLP(props);
+    runNERTest("German CoNLL Dev 4 Class ", germanPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        82.48);
+  }
+
+  public void testGermanNEROnConLLTest() throws IOException {
+    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/deu.io.f15.utf8.testb";
+    Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-german.properties");
+    props.setProperty("annotators", "tokenize,ssplit,pos,ner");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
+    StanfordCoreNLP germanPipeline = new StanfordCoreNLP(props);
+    runNERTest("German CoNLL Test 4 Class ", germanPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        79.43);
+  }
+
+  public void testSpanishNEROnConLLDev() throws IOException {
+    String conllTestPath =
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ancora.dev.conll";
+    Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-spanish.properties");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
+    StanfordCoreNLP spanishPipeline = new StanfordCoreNLP(props);
+    runNERTest("Spanish Ancora Dev 4 Class ", spanishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        76.98);
+  }
+
+  public void testSpanishNEROnConLLTest() throws IOException {
+    String conllTestPath =
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ancora.test.conll";
+    Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-spanish.properties");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("tokenize.whitespace", "true");
+    props.setProperty("ner.applyFineGrained", "false");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.applyNumericClassifiers", "false");
+    StanfordCoreNLP spanishPipeline = new StanfordCoreNLP(props);
+    runNERTest("Spanish Ancora Test 4 Class ", spanishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
+        75.41);
+  }
+
+
   public void runNERTest(String testName, StanfordCoreNLP pipeline, String workingDir, String goldFilePath,
                          double f1Threshold) throws IOException {
     // load gold data
