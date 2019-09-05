@@ -1,8 +1,15 @@
 package edu.stanford.nlp.parser.common;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.StringReader;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 
 import edu.stanford.nlp.util.logging.Redwood;
@@ -142,6 +149,11 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
    *         root.
    */
   public abstract Tree parse(List<? extends HasWord> words);
+  
+  /**
+   * Similar to parse(), but instead of returning an X tree on failure, returns null.
+   */
+  public abstract Tree parseTree(List<? extends HasWord> words);
 
   /**
    * Returns a list of extra Eval objects to use when scoring the parser.
@@ -191,5 +203,44 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
     }
     return parser;
   }
+
+  public static ParserGrammar loadModelFromZip(String zipFilename,
+                                               String modelName) {
+    Object object = null;
+    try {
+      File file = new File(zipFilename);
+      if (file.exists()) {
+        ZipFile zin = new ZipFile(file);
+        ZipEntry zentry = zin.getEntry(modelName);
+        if (zentry != null) {
+          InputStream in = zin.getInputStream(zentry);
+          // gunzip it if necessary
+          if (modelName.endsWith(".gz")) {
+            in = new GZIPInputStream(in);
+          }
+          ObjectInputStream ois = new ObjectInputStream(in);
+          object = ois.readObject();
+          
+          ois.close();
+          in.close();
+        }
+        zin.close();
+      } else {
+        throw new FileNotFoundException("Could not find " + modelName +
+                                        " inside " + zipFilename);
+      }
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    if (object instanceof ParserGrammar) {
+      return (ParserGrammar) object;
+    }
+    throw new ClassCastException("Wanted LexicalizedParser, got " +
+                                 object.getClass());
+  }
+
 
 }
