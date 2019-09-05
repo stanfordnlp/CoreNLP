@@ -572,7 +572,11 @@ public class UniversalEnglishGrammaticalRelations {
             "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
             // JJ catches a couple of funny NPs with heads like "enough"
             // Note that we eliminate SBAR which also match an vmod pattern
-            "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )");
+            "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )",
+            // New ones to pick up some more "say" patterns (2019); avoid S-ADV descendants
+            "VP < (/^V/ < " + sayVerbRegex + ") < (S|S-CLF|S-TTL|SQ=target <+(S) (VP < /^VB[DZP]$/))",
+            "@S < /^S-TPC/=target < VP"
+          );
 
 
   /**
@@ -581,7 +585,6 @@ public class UniversalEnglishGrammaticalRelations {
    * external subject.  These complements are always non-finite.
    * The name <i>xcomp</i> is borrowed from Lexical-Functional Grammar.
    * (Mainly "TO-clause" are recognized, but also some VBG like "stop eating")
-   * <br>
    * <br>
    * Examples: <br>
    * "I like to swim" &rarr;
@@ -610,16 +613,16 @@ public class UniversalEnglishGrammaticalRelations {
             // Also, xcomp(becoming, problem) in "Why is Dave becoming a problem?"
             "(VP $-- (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (/^VB/ < " + clausalComplementRegex + ") < NP=target)",
             "VP < (/^(?:VB|AUX)/ < " + clausalComplementRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " +
-                // The next qualification eliminates parentheticals that
-                // come after the actual dobj
+                // The next qualification eliminates parentheticals that come after the actual dobj
                 " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
             // The old attr relation, used here to recover xcomp relations instead.
             "VP=vp < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + " >># =vp) !$ (NP < EX)",
             // "Such a great idea this was" if "was" is the root, eg -makeCopulaHead
             "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))",
-
             //Former acomp expression
-            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]"
+            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]",
+            // For new treebank xcomp changes, match V + NP + xcomp patterns
+            "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))"
         );
 
 
@@ -741,7 +744,10 @@ public class UniversalEnglishGrammaticalRelations {
                   "SBARQ < (WHNP=target [$++ (VP < (PP <: IN)) | $++ (SQ < (VP < (PP <: IN)))])",
                   "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
                   "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO)",
-                  "S|SINV < (PP|PP-TMP=target !< SBAR|S) < VP|S");
+                  "S|SINV < (PP|PP-TMP=target !< SBAR|S) < VP|S",
+                  // For cases like "some uzi - toting guards" with new tokenization
+                  "@ADJP > @NP < (@NP|NN|NNP|NNS|NNPS=target . (HYPH . VBN|VBG))"
+          );
 
 
   /**
@@ -1085,7 +1091,10 @@ public class UniversalEnglishGrammaticalRelations {
             "/(?:WH)?PP(?:-TMP|-ADV)?$/ <# (__ $-- (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + ETC_PAT + "))",
 //          "/(?:WH)?PP(?:-TMP|-ADV)?$/ < @NP|WHNP < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
             "/(?:WH)?PP(?:-TMP|-ADV)?$/ < @NP|WHNP < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + ETC_PAT + ")",
-            "CONJP < (RB=target !< " + ETC_PAT + ")");
+            "CONJP < (RB=target !< " + ETC_PAT + ")",
+            // Sometimes you have a JJ before a JJ in an ADJP. Make it advmod. Rule out capitalized for (old TB) "New York-based"
+            "ADJP < (JJ|JJR|JJS=target $. JJ|JJR|JJS !< /^[A-Z]/) <# JJ|JJR|JJS !< (CC|CONJP)"
+    );
 
 
   /**
