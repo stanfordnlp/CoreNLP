@@ -15,7 +15,7 @@ public class NERBenchmarkGermanITest  extends NERBenchmarkTestCase {
 
   @Override
   public void addLanguageSpecificProperties() {
-    pipelineProperties.put("ner.tokenProcessor", "");
+
   }
 
 }
