@@ -1,5 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.util.StringUtils;
+
 import java.util.Properties;
 
 
@@ -8,14 +10,8 @@ public class TokenizerFrenchBenchmarkITest extends TokenizerBenchmarkTestCase {
   @Override
   public void setUp() {
     // set up the pipeline
-    Properties props = new Properties();
+    Properties props = StringUtils.argsToProperties("-props", "french");
     props.put("annotators", "tokenize,ssplit,mwt");
-    props.put("tokenize.language", "fr");
-    props.put("mwt.mappingFile",
-        "edu/stanford/nlp/models/mwt/french/french-mwt.tsv");
-    props.put("mwt.pos.model", "edu/stanford/nlp/models/mwt/french/french-mwt.tagger");
-    props.put("mwt.statisticalMappingFile",
-        "edu/stanford/nlp/models/mwt/french/french-mwt-statistical.tsv");
     props.put("ssplit.isOneSentence", "true");
     pipeline = new StanfordCoreNLP(props);
   }

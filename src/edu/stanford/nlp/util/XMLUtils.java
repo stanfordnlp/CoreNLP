@@ -412,11 +412,11 @@ public class XMLUtils  {
     int end = 0;
     while (m.find()) {
       int start = m.start();
-      result.append(s, end, start);
+      result.append(s.substring(end, start));
       end = m.end();
       result.append(translate(s.substring(start, end)));
     }
-    result.append(s, end, s.length());
+    result.append(s.substring(end, s.length()));
     return result.toString();
   }
 

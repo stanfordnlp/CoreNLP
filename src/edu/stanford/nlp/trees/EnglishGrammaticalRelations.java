@@ -669,8 +669,8 @@ public class EnglishGrammaticalRelations {
             // JJ catches a couple of funny NPs with heads like "enough"
             // Note that we eliminate SBAR which also match an vmod pattern
             "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )",
-            // New ones to pick up some more "say" patterns (2019); avoid S-ADV descendants
-            "VP < (/^V/ < " + sayVerbRegex + ") < (S|S-CLF|S-TTL|SQ=target <+(S) (VP < /^VB[DZP]$/))",
+            // New ones to pick up some more "say" patterns (2019)
+            "VP < (/^V/ < " + sayVerbRegex + ") < (@S=target <+(S) (VP < /^VB[DZP]$/))",
             "@S < /^S-TPC/=target < VP"
           );
 
@@ -714,10 +714,7 @@ public class EnglishGrammaticalRelations {
             // The old attr relation, used here to recover xcomp relations instead.
             "VP=vp < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + " >># =vp) !$ (NP < EX)",
             // "Such a great idea this was" if "was" is the root, eg -makeCopulaHead
-            "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))",
-            // For new treebank xcomp changes, match V + NP + xcomp patterns
-            "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))"
-    );
+            "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))");
 
 
   /**
@@ -1210,11 +1207,6 @@ public class EnglishGrammaticalRelations {
    * Example: <br>
    * "90% of Australians like him, the most of any country" &rarr;
    * {@code npadvmod}(like, most)
-   * <li>Participial pre-modifiers of nouns
-   * <br>
-   * Example: <br>
-   * "Gun - toting guards arrived" &rarr;
-   * {@code npadvmod}(toting, Gun)
    * </ul>
    * A temporal modifier (tmod) is a subclass of npadvmod which is distinguished
    * as a separate relation.
@@ -1232,10 +1224,7 @@ public class EnglishGrammaticalRelations {
             "@NP|WHNP [ < (NP=target <: (PRP < " + selfRegex + ")) | < (PRP=target < " + selfRegex + ") ] : (=target $-- NP|NN|NNS|NNP|NNPS|PRP=noun !$-- (/^,|CC|CONJP$/ $-- =noun))",
             // this next one is for weird financial listings: 4.7% three months
             "@NP <1 (@NP <<# /^%$/) <2 (@NP=target <<# days|month|months) !<3 __",
-            "@VP < /^NP-ADV/=target",
-            // For cases like "some uzi - toting guards" with new tokenization
-            "@ADJP > @NP < (@NP|NN|NNP|NNS|NNPS=target . (HYPH . VBN|VBG))"
-    );
+            "@VP < /^NP-ADV/=target");
 
 
   /**

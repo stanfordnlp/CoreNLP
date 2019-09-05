@@ -404,7 +404,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       IndexedWord gov, IndexedWord mod, IndexedWord caseMarker) {
 
     SemanticGraphEdge edge = sg.getEdge(gov, mod);
-    edge.setRelation(UniversalEnglishGrammaticalRelations.AGENT);
+    GrammaticalRelation reln = UniversalEnglishGrammaticalRelations.AGENT;
+    edge.setRelation(reln);
   }
 
 

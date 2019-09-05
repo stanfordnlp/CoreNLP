@@ -133,9 +133,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "( (S (NP-SBJ-1 (VBN Freed) (JJ black) (NNS nationalists)) (VP (VP (VBD resumed) (NP (JJ political) (NN activity)) (PP-LOC (IN in) (NP (NNP South) (NNP Africa)))) (CC and) (VP (VBD vowed) (S (NP-SBJ (-NONE- *-1)) (VP (TO to) (VP (VB fight) (PP-CLR (IN against) (NP (NN apartheid))))))) (, ,) (S-ADV (NP-SBJ (-NONE- *)) (VP (VBG raising) (NP (NP (NNS fears)) (PP (IN of) (NP (DT a) (JJ possible) (JJ white) (NN backlash))))))) (. .)))",
          "( (S (S-NOM-SBJ (NP-SBJ-1 (-NONE- *)) (VP (VBG Being) (VP (VBN held) (S (NP-SBJ (-NONE- *-1)) (PP-PRD (ADVP (RB well)) (IN below) (NP (NN capacity))))))) (VP (VP (ADVP-MNR (RB greatly)) (VBZ irritates) (NP (PRP them))) (, ,) (CC and) (VP (VBZ has) (VP (VBN led) (PP-CLR (TO to) (NP (JJ widespread) (NN cheating)))))) (. .)))",
          "( (S (NP-SBJ (PRP They)) (VP (VBD acquired) (NP (NP (NNS stakes)) (PP (IN in) (NP (NP (VBG bottling) (NNS companies)) (UCP-LOC (PP (IN in) (NP (DT the) (NNP U.S.))) (CC and) (ADVP (RB overseas))))))) (. .)))",
-         "( (S (NP (DT Some) (ADJP (NP (NN gun)) (HYPH -) (VBG toting)) (NNS guards)) (VP (VBD arrived)) (. .)))",
-         "( (S (NP (DT Some) (ADJP (NN gun) (HYPH -) (VBG toting)) (NNS guards)) (VP (VBD arrived)) (. .)))",
-         "( (S (NP (PRP She)) (VP (VBD asked) (NP (DT the) (NN man)) (S (VP (TO to) (VP (VB leave))))) (. .)))",
     };
 
     // the expected dependency answers (basic)
@@ -519,22 +516,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "pobj(in-7, U.S.-9)\n" +
                 "cc(in-7, and-10)\n" +
                 "conj(in-7, overseas-11)\n",
-            "det(guards-5, Some-1)\n" +
-                    "npadvmod(toting-4, gun-2)\n" +
-                    "amod(guards-5, toting-4)\n" +
-                    "nsubj(arrived-6, guards-5)\n" +
-                    "root(ROOT-0, arrived-6)\n",
-            "det(guards-5, Some-1)\n" +
-                    "npadvmod(toting-4, gun-2)\n" +
-                    "amod(guards-5, toting-4)\n" +
-                    "nsubj(arrived-6, guards-5)\n" +
-                    "root(ROOT-0, arrived-6)\n",
-            "nsubj(asked-2, She-1)\n" +
-                    "root(ROOT-0, asked-2)\n" +
-                    "det(man-4, the-3)\n" +
-                    "dobj(asked-2, man-4)\n" +
-                    "aux(leave-6, to-5)\n" +
-                    "xcomp(asked-2, leave-6)\n"
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);

@@ -23,15 +23,6 @@ public class EnglishPatterns {
           "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase",
           "get", "getting", "gets", "got", "gotten" };
 
-  /* A few times the apostrophe is missing on "'s", so we have "s" */
-  /* Tricky auxiliaries: "a", "na" is from "(gon|wan)na", "ve" from "Weve", etc.  "of" as non-standard for "have" */
-  /* "as" is "has" with missing first letter. "to" is rendered "the" once in EWT. */
-  public static final String[] auxiliaries = {
-          "will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "'ll", "ll", "-ll", "cold",
-          "has", "have", "had", "having", "'ve", "ve", "v", "of", "hav", "hvae", "as",
-          "get", "gets", "getting", "got", "gotten", "do", "does", "did", "'d", "d", "du",
-          "to", "2", "na", "a", "ot", "ta", "the", "too" };
-
   public static final String timeWordRegex =
     "/^(?i:Mondays?|Tuesdays?|Wednesdays?|Thursdays?|Fridays?|Saturdays?|Sundays?|years?|months?|weeks?|days?|mornings?|evenings?|nights?|January|Jan\\.|February|Feb\\.|March|Mar\\.|April|Apr\\.|May|June|July|August|Aug\\.|September|Sept\\.|October|Oct\\.|November|Nov\\.|December|Dec\\.|today|yesterday|tomorrow|spring|summer|fall|autumn|winter)$/";
 
@@ -60,8 +51,7 @@ public class EnglishPatterns {
     "/^(?i:myself|yourself|himself|herself|itself|ourselves|yourselves|themselves)$/";
 
   public static final String xcompVerbRegex =
-      "/^(?i:(?:allow|ask|demand|expect|help|order|prompt)(?:s|ed|ing)?|(?:advis|convinc|declar|defin|desir|encourag|forc|implor|nam|persuad|pressur|requir|urg)(?:e|es|ed|ing)|" +
-              "beg|begs|begged|begging|compel|compels|compelled|compelling|lobby|lobbies|lobbied|lobbying|permit|permits|permitted|permitting|tell|tells|told|telling)$/";
+      "/^(?i:advise|advises|advised|advising|allow|allows|allowed|allowing|ask|asks|asked|asking|beg|begs|begged|begging|convice|convinces|convinced|convincing|demand|demands|demanded|demanding|desire|desires|desired|desiring|expect|expects|expected|expecting|encourage|encourages|encouraged|encouraging|force|forces|forced|forcing|implore|implores|implored|imploring|lobby|lobbies|lobbied|lobbying|order|orders|ordered|ordering|persuade|persuades|persuaded|persuading|pressure|pressures|pressured|pressuring|prompt|prompts|prompted|prompting|require|requires|required|requiring|tell|tells|told|telling|urge|urges|urged|urging)$/";
 
   // A list of verbs with an xcomp as an argument
   // which don't require a NP before the xcomp.
@@ -86,7 +76,7 @@ public class EnglishPatterns {
    *  which is a direct speech ccomp. For example: "He concedes: ``This is a difficult market.''"
    */
   public static final String sayVerbRegex =
-    "/^(?i:say|says|said|saying|(?:add|boast|counsel|explain|inform|interject|recall|remark|respond|proclaim|report|claim|shout|whisper|yell)(?:s|ed|ing)?|(?:advis|announc|acknowledg|conced|conclud|decid|declar|observ|stat|not|inton)(?:e|es|ed|ing)|(?:confess)(?:es|ed|ing)?|(?:agree)(?:s|d|ing)?|reply|replied|replies|replying|admit|admits|admitted|admitting|hold|holds|holding|held|write|writes|writing|wrote|tell|tells|telling|told|quipped|quip|quips|quipping|think|thinks|thinking|thought)$/";
+    "/^(?i:say|says|said|saying|(?:add|counsel|respond|yell|remark|recall|boast|interject|short|confess|proclaim|report|claim)(?:s|ed|ing)?|(?:announc|acknowledg|conced|declar|stat)(?:e|es|ed|ing)|reply|replied|replies|replying|admit|admits|admitted|admitting|hold|holds|holding|held|write|writes|writing|wrote|tell|tells|telling|told|quipped|quip|quips|quipping|think|thinks|thinking|thought|write|writes|writing|wrote|agree|agrees|agreeing|agreed)$/";
 
 
   // TODO: is there some better pattern to look for? We do not have tag information at this point

@@ -1,5 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.util.StringUtils;
+
 import java.util.Properties;
 
 public class TokenizerSpanishBenchmarkITest extends TokenizerBenchmarkTestCase {
@@ -7,11 +9,9 @@ public class TokenizerSpanishBenchmarkITest extends TokenizerBenchmarkTestCase {
   @Override
   public void setUp() {
     // set up the pipeline
-    Properties props = new Properties();
+    Properties props = StringUtils.argsToProperties("-props", "spanish");
     props.put("annotators", "tokenize,ssplit,mwt");
-    props.put("tokenize.language", "es");
-    props.put("mwt.mappingFile",
-        "edu/stanford/nlp/models/mwt/spanish/spanish-mwt.tsv");
+    props.put("ssplit.isOneSentence", "true");
     pipeline = new StanfordCoreNLP(props);
   }
 
