@@ -270,7 +270,7 @@
       <formatter type="brief" usefile="false"/>
       <batchtest fork="yes">
         <fileset dir="${itests.path}">
-          <include name="**/NERBenchmarkSlowITest.java"/>
+          <include name="**/NERBenchmark*SlowITest.java"/>
           <include name="**/TrainCRFClassifierSlowITest.java"/>
         </fileset>
       </batchtest>
