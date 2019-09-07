@@ -55,7 +55,10 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -207,6 +210,36 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
     }
   }
 
+  public static LexicalizedParser loadModelFromZip(String zipFilename,
+                                                   String modelName) {
+    LexicalizedParser parser = null;
+    try {
+      File file = new File(zipFilename);
+      if (file.exists()) {
+        ZipFile zin = new ZipFile(file);
+        ZipEntry zentry = zin.getEntry(modelName);
+        if (zentry != null) {
+          InputStream in = zin.getInputStream(zentry);
+          // gunzip it if necessary
+          if (modelName.endsWith(".gz")) {
+            in = new GZIPInputStream(in);
+          }
+          ObjectInputStream ois = new ObjectInputStream(in);
+          parser = loadModel(ois);
+          ois.close();
+          in.close();
+        }
+        zin.close();
+      } else {
+        throw new FileNotFoundException("Could not find " + modelName +
+                                        " inside " + zipFilename);
+      }
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+    return parser;
+  }
+
   public static LexicalizedParser copyLexicalizedParser(LexicalizedParser parser) {
     return new LexicalizedParser(parser.lex, parser.bg, parser.ug, parser.dg, parser.stateIndex, parser.wordIndex, parser.tagIndex, parser.op);
   }
@@ -262,7 +295,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * Parses the list of HasWord.  If the parse fails for some reason,
    * an X tree is returned instead of barfing.
    */
-  @Override
   public Tree parse(List<? extends HasWord> lst) {
     try {
       ParserQuery pq = parserQuery();
@@ -330,7 +362,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   /**
    * Similar to parse(), but instead of returning an X tree on failure, returns null.
    */
-  @Override
   public Tree parseTree(List<? extends HasWord> sentence) {
     ParserQuery pq = parserQuery();
     if (pq.parse(sentence)) {

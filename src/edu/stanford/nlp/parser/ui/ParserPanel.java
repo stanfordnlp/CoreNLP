@@ -25,10 +25,8 @@
 
 package edu.stanford.nlp.parser.ui;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.ui.OpenPageDialog;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.*;
@@ -107,7 +105,7 @@ public class ParserPanel extends JPanel  {
   private int startIndex, endIndex;
 
   private TreeJPanel treePanel;
-  private ParserGrammar parser;
+  private LexicalizedParser parser;
 
   // worker threads to handle long operations
   private LoadParserThread lpThread;
@@ -587,14 +585,8 @@ public class ParserPanel extends JPanel  {
     }
 
     // check if file exists before we start the worker thread and progress monitor
-    boolean exists = false;
-    try {
-      IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename);
-      exists = true;
-    } catch (IOException e) {
-      // exists will stay false
-    }
-    if (exists) {
+    File file = new File(filename);
+    if (file.exists()) {
       lpThread = new LoadParserThread(filename);
       lpThread.start();
       startProgressMonitor("Loading Parser", PARSER_LOAD_TIME);
@@ -671,9 +663,9 @@ public class ParserPanel extends JPanel  {
     public void run() {
       try {
         if (zipFilename != null) {
-          parser = ParserGrammar.loadModelFromZip(zipFilename, filename);
+          parser = LexicalizedParser.loadModelFromZip(zipFilename, filename);
         } else {
-          parser = ParserGrammar.loadModel(filename);
+          parser = LexicalizedParser.loadModel(filename);
         }
       } catch (Exception ex) {
         JOptionPane.showMessageDialog(ParserPanel.this, "Error loading parser: " + filename, null, JOptionPane.ERROR_MESSAGE);
