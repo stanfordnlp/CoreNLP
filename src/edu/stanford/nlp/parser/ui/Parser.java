@@ -30,7 +30,7 @@ package edu.stanford.nlp.parser.ui;
  * using lexparser.LexicalizedParser, load a text data file or type in text,
  * parse sentences within the input text, and view the resultant parse tree.
  *
- * Usage: {@code java edu.stanford.nlp.parser.ui.ParserPanel [parserFilename] [textFilename]}
+ * Usage: {@code java edu.stanford.nlp.parser.ui.Parser [parserFilename] [textFilename]}
  *
  * @author Huy Nguyen (htnguyen@cs.stanford.edu)
  * @see ParserPanel

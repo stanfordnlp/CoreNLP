@@ -185,6 +185,15 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     return ParserUtils.xTree(sentence);
   }
 
+  @Override
+  public Tree parseTree(List<? extends HasWord> sentence) {
+    ShiftReduceParserQuery pq = new ShiftReduceParserQuery(this);
+    if (pq.parse(sentence)) {
+      return pq.getBestParse();
+    }
+    return null;
+  }
+
 
   /** TODO: add an eval which measures transition accuracy? */
   @Override
