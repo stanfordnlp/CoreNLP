@@ -8,9 +8,7 @@ import edu.stanford.nlp.util.CoreMap;
 import junit.framework.TestCase;
 
 import java.io.StringReader;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 
 /**
@@ -170,6 +168,44 @@ public class NERCombinerAnnotatorITest extends TestCase {
     sb.append(".\t.\tO\n");
 
     checkAnnotation(sb.toString());
+  }
+
+  /** Basic test to check if statisticalOnly option is working properly **/
+  public void testStatisticalOnlyOption() {
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.put("ssplit.isOneSentence", "true");
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz");
+    props.setProperty("ner.statisticalOnly", "true");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    List<String> examples = Arrays.asList("Joe Smith lives in California.", "He has 3 dogs.",
+        "The party is on July 4th, 2019.");
+    List<List<String>> goldNERTags = Arrays.asList(Arrays.asList("PERSON", "PERSON", "O", "O", "LOCATION", "O"),
+        Arrays.asList("O", "O", "O", "O", "O"),
+        Arrays.asList("O", "O", "O", "O", "O", "O", "O", "O", "O"));
+    for (int i = 0 ; i < examples.size() ; i++) {
+      CoreDocument doc = new CoreDocument(pipeline.process(examples.get(i)));
+      assertEquals(goldNERTags.get(i), doc.sentences().get(0).nerTags());
+    }
+  }
+
+  /** Basic test to check if statisticalOnly option is working properly **/
+  public void testRulesOnlyOption() {
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.put("ssplit.isOneSentence", "true");
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz");
+    props.setProperty("ner.rulesOnly", "true");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    List<String> examples = Arrays.asList("Joe Smith lives in California.", "He has 3 dogs.",
+        "The party is on July 4th, 2019.");
+    List<List<String>> goldNERTags = Arrays.asList(Arrays.asList("O", "O", "O", "O", "STATE_OR_PROVINCE", "O"),
+        Arrays.asList("O", "O", "NUMBER", "O", "O"),
+        Arrays.asList("O", "O", "O", "O", "DATE", "DATE", "DATE", "DATE", "O"));
+    for (int i = 0 ; i < examples.size() ; i++) {
+      CoreDocument doc = new CoreDocument(pipeline.process(examples.get(i)));
+      assertEquals(goldNERTags.get(i), doc.sentences().get(0).nerTags());
+    }
   }
 
 }
