@@ -39,6 +39,11 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
   private final NERClassifierCombiner ner;
 
+  // options for specifying only using rules or only using the statistical model
+  // default is to use the full pipeline
+  private boolean rulesOnly = false;
+  private boolean statisticalOnly = false;
+
   private final boolean VERBOSE;
   private boolean setDocDate = false;
 
@@ -78,32 +83,36 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
 
   public NERCombinerAnnotator(Properties properties) throws IOException {
-    // TODO: condense  -ner.useSUTime false -ner.applyNumericClassifiers false  -ner.applyFineGrained false into one option, possibly associated with the situation of -ner.model being just one model
-
+    // if rulesOnly is set, just run the rules-based NER
+    rulesOnly = PropertiesUtils.getBool(properties, "ner.rulesOnly", false);
+    // if statisticalOnly is set, just run statistical models
+    statisticalOnly = PropertiesUtils.getBool(properties, "ner.statisticalOnly", false);
+    // set up models list
     List<String> models = new ArrayList<>();
-    String modelNames = properties.getProperty("ner.model");
-    if (modelNames == null) {
-      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
-    }
-    if ( ! modelNames.isEmpty()) {
-      models.addAll(Arrays.asList(modelNames.split(",")));
-    }
-    if (models.isEmpty()) {
-      // Allow for no real NER model - can just use numeric classifiers or SUTime.
-      // Have to unset ner.model, so unlikely that people got here by accident.
-      log.info("WARNING: no NER models specified");
+    // check for rulesOnly
+    if (!rulesOnly) {
+      String modelNames = properties.getProperty("ner.model");
+      if (modelNames == null) {
+        modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+      }
+      if (!modelNames.isEmpty()) {
+        models.addAll(Arrays.asList(modelNames.split(",")));
+      }
+      if (models.isEmpty()) {
+        // Allow for no real NER model - can just use numeric classifiers or SUTime.
+        // Have to unset ner.model, so unlikely that people got here by accident.
+        log.info("WARNING: no NER models specified");
+      }
     }
 
-    boolean applyNumericClassifiers =
-        PropertiesUtils.getBool(properties,
-            NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
-            NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-    this.applyNumericClassifiers = applyNumericClassifiers;
+    this.applyNumericClassifiers = PropertiesUtils.getBool(properties,
+        NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
+        NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT) && !statisticalOnly;
 
     boolean useSUTime =
         PropertiesUtils.getBool(properties,
             NumberSequenceClassifier.USE_SUTIME_PROPERTY,
-            NumberSequenceClassifier.USE_SUTIME_DEFAULT);
+            NumberSequenceClassifier.USE_SUTIME_DEFAULT) && !statisticalOnly;
 
     NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
         NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
@@ -128,6 +137,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this.language =
         LanguageInfo.getLanguageFromString(PropertiesUtils.getString(properties, "ner.language", "en"));
 
+    // processor for modifying tokenization before submission to CRFClassifier
+    // the German properties file specifies this, to allow for merging on hyphens
+    // any NER pipeline could customize how tokenization is changed for the statistical model
     String tokenProcessorClass = properties.getProperty("ner.tokenProcessor", "");
     try {
       if (!tokenProcessorClass.equals("")) {
@@ -168,6 +180,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
 
+  // TODO evaluate necessity of these legacy constructors, primarily used in testing,
+  // we should probably get rid of them
   public NERCombinerAnnotator() throws IOException, ClassNotFoundException {
     this(true);
   }
@@ -195,7 +209,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime,
                               int maxSentenceLength, boolean fineGrained, boolean entityMentions) {
-    // TODO: why is this so separate from the NERCombinerAnnotator constructor?
     VERBOSE = verbose;
     this.ner = ner;
     this.maxTime = maxTime;
@@ -217,7 +230,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    */
   private void setUpFineGrainedNER(Properties properties) {
     // set up fine grained ner
-    this.applyFineGrained = PropertiesUtils.getBool(properties, "ner.applyFineGrained", true);
+    this.applyFineGrained =
+        PropertiesUtils.getBool(properties, "ner.applyFineGrained", true) && !statisticalOnly;
     if (this.applyFineGrained) {
       String fineGrainedPrefix = "ner.fine.regexner";
       Properties fineGrainedProps =
@@ -237,7 +251,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    */
   private void setUpAdditionalRulesNER(Properties properties) {
     this.applyAdditionalRules =
-        (!properties.getProperty("ner.additional.regexner.mapping", "").isEmpty());
+        (!properties.getProperty("ner.additional.regexner.mapping", "").isEmpty()) && !statisticalOnly;
     if (this.applyAdditionalRules) {
       String additionalRulesPrefix = "ner.additional.regexner";
       Properties additionalRulesProps =
@@ -254,7 +268,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    */
   private void setUpTokensRegexRules(Properties properties) {
     this.applyTokensRegexRules =
-        (!properties.getProperty("ner.additional.tokensregex.rules", "").isEmpty());
+        (!properties.getProperty("ner.additional.tokensregex.rules", "").isEmpty())
+            && !statisticalOnly;
     if (this.applyTokensRegexRules) {
       String tokensRegexRulesPrefix = "ner.additional.tokensregex";
       Properties tokensRegexRulesProps =
@@ -332,7 +347,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         token.remove(TimeAnnotations.TimexAnnotation.class);
     }
     // if fine grained ner is requested, run that
-    if (this.applyFineGrained || this.applyAdditionalRules) {
+    if (!statisticalOnly && (this.applyFineGrained || this.applyAdditionalRules || this.applyTokensRegexRules)) {
       // run the fine grained NER
       if (this.applyFineGrained)
         fineGrainedNERAnnotator.annotate(annotation);
