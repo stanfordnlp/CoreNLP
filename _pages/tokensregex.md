@@ -450,7 +450,7 @@ In the third and final phase, we will filter out the COMPLETE_JOB_TITLE "deputy 
 The following rules file `multi_step_ner.rules` implements this multi-step pipeline.
 
 ```bash
-# make all patterns case-insensitive in the rules file
+# uncomment to make all patterns case-insensitive in the rules file
 # ENV.defaultStringMatchFlags = 66
 # ENV.defaultStringPatternFlags = 66
 
