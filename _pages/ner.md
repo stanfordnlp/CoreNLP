@@ -43,6 +43,8 @@ system.
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
 | ner.model | List(String) | null | A comma-separated list of NER model names (or just a single name is okay). If none are specified, a default list of English models is used (3class, 7class, and MISCclass, in that order). The names will be looked for as classpath resources, filenames, or URLs. |
+| ner.rulesOnly | boolean | false | Whether or not to only run rules based NER.  (Note: this option only available in latest GitHub version of code) |
+| ner.statisticalOnly | boolean | false | Whether or not to only run statistical NER.  (Note: this option only available in latest GitHub version of code) |
 | ner.applyNumericClassifiers | boolean | true | Whether or not to use numeric classifiers, for money, percent, numbers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
 | ner.applyFineGrained | boolean | true | whether or not to apply fine-grained NER tags (e.g. LOCATION --> CITY) ; this will slow down performance |
 | ner.buildEntityMentions | boolean | true | whether or not to build entity mentions from token NER tags |
@@ -109,7 +111,8 @@ by setting `ner.useSUTime` to `false`.
 At this point, a series of rules used for the KBP 2017 competition will be run to create more fine-grained
 NER tags.  These rules are applied using a TokensRegexNERAnnotator sub-annotator.  That is the main
 `NERCombinerAnnotator` builds a `TokensRegexNERAnnotator` as a sub-annotator and runs it on all sentences
-as part of it's entire tagging process.
+as part of it's entire tagging process.  The purpose of these rules is give tokens more specific tags.
+So for instance `California` would be tagged as a `STATE_OR_PROVINCE` rather than just a `LOCATION`.
 
 The `TokensRegexNERAnnotator` runs TokensRegex rules.  You can review all of the settings for a TokensRegexNERAnnotator
 [here](https://stanfordnlp.github.io/CoreNLP/regexner.html).
@@ -260,9 +263,23 @@ At this point the NER process will be finished, having tagged tokens with NER ta
 
 ## Command Line Examples
 
+There a variety of ways to customize an NER pipeline.  Below are some example commands.
+
 ```bash
 # run default NER
 java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -file example.txt -outputFormat text
+```
+
+```bash
+# only run rules based NER (numeric classifiers, SUTime, TokensRegexNER, TokensRegex)
+# NOTE: this is currently only available in the current version of the code on GitHub
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.rulesOnly -file example.txt 
+```
+
+```bash
+# only run statistical NER
+# NOTE: this is currently only available in the current version of the code on GitHub
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.statisticalOnly -file example.txt 
 ```
 
 ```bash
@@ -274,6 +291,12 @@ java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokeni
 ```bash
 # shut off SUTime
 java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.useSUTime false -file example.txt -outputFormat text
+```
+
+```bash
+# specify doc date for each document to be 2019-01-01
+# other options for setting doc date specified below
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.docdate.useFixedDate 2019-01-01 -file example.txt
 ```
 
 ```bash
@@ -326,18 +349,27 @@ public class NERPipelineDemo {
     // example customizations (these are commented out but you can uncomment them to see the results
 
     // disable fine grained ner
-    //props.setProperty("ner.applyFineGrained", "false");
+    // props.setProperty("ner.applyFineGrained", "false");
 
     // customize fine grained ner
-    //props.setProperty("ner.fine.regexner.mapping", "example.rules");
-    //props.setProperty("ner.fine.regexner.ignorecase", "true");
+    // props.setProperty("ner.fine.regexner.mapping", "example.rules");
+    // props.setProperty("ner.fine.regexner.ignorecase", "true");
 
-    // add additional rules
-    //props.setProperty("ner.additional.regexner.mapping", "example.rules");
-    //props.setProperty("ner.additional.regexner.ignorecase", "true");
+    // add additional rules, customize TokensRegexNER annotator
+    // props.setProperty("ner.additional.regexner.mapping", "example.rules");
+    // props.setProperty("ner.additional.regexner.ignorecase", "true");
 
     // add 2 additional rules files ; set the first one to be case-insensitive
-    //props.setProperty("ner.additional.regexner.mapping", "ignorecase=true,example_one.rules;example_two.rules");
+    // props.setProperty("ner.additional.regexner.mapping", "ignorecase=true,example_one.rules;example_two.rules");
+
+    // set document date to be a specific date (other options are explained in the document date section)
+    // props.setProperty("ner.docdate.useFixedDate", "2019-01-01");
+
+    // only run rules based NER
+    // props.setProperty("ner.rulesOnly", "true");
+
+    // only run statistical NER
+    // props.setProperty("ner.statisticalOnly", "true");
 
     // set up pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
