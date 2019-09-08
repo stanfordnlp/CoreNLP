@@ -54,7 +54,7 @@ If using a build of the latest code, make sure to use the latest models as well.
 | English (kbp) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) | 2019-07-29 |
 | Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar) | 3.9.2 |
 | French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar) | 2019-08-28 |
-| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar) | 2019-07-10 |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar) | 2019-09-04 |
 | Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar) | 2019-08-27 |
 
 ### Useful resources
