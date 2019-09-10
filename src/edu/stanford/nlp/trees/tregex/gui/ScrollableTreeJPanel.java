@@ -21,6 +21,8 @@ import edu.stanford.nlp.util.IntPair;
 /**
  * Component for displaying a tree in a JPanel that works correctly with
  * scrolling.
+ * <br>
+ * This panel also incorporates the text of the tree below the tree itself. 
  *
  * @author Anna Rafferty
  */
@@ -180,12 +182,12 @@ public class ScrollableTreeJPanel extends TreeJPanel    {
     g2.setColor(paintColor);
     g2.drawString(nodeStr, (float) (nodeTab + start.getX()), (float) (start.getY() + nodeAscent));
     g2.setColor(curColor);
-    double layerMultiplier = (1.0 + belowLineSkip + aboveLineSkip + parentSkip);
-    double layerHeight = nodeHeight * layerMultiplier;
     if (t.isLeaf()) {
       yieldOffsets[leafCtr++] = (float) (nodeTab + start.getX());
       return nodeWidth;
     }
+    double layerMultiplier = (1.0 + belowLineSkip + aboveLineSkip + parentSkip);
+    double layerHeight = nodeHeight * layerMultiplier;
     double childStartX = start.getX() + childTab;
     double childStartY = start.getY() + layerHeight;
     double lineStartX = start.getX() + nodeCenter;
