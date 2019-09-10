@@ -159,6 +159,9 @@ public class ReadSentimentDataset  {
     // TODO: relabel words in some less expensive way?
     new Transformation(TregexPattern.compile("/^[1]$/=label <: /^(?i:protagonist)$/"),
                        Tsurgeon.parseOperation("relabel label /^.*$/2/")),
+
+    new Transformation(TregexPattern.compile("/^[2]$/=label <: /^(?i:courage)$/"),
+                       Tsurgeon.parseOperation("relabel label /^.*$/3/")),
   };
 
   private ReadSentimentDataset() {} // static class
