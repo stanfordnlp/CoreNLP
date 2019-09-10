@@ -144,6 +144,32 @@ public class ReadSentimentDataset  {
     new Transformation(TregexPattern.compile("__=top < (__ < /'em/) < (__ < /powerment/) >> (__ !> __ < (__=apos < /'/))"),
                        Tsurgeon.parseOperation("[replace top (3 empowerment)] [prune apos]")),
 
+    // Blair Witch-style was mangled in the parsing
+    new Transformation(TregexPattern.compile("/Witch-style/ > (/2/ > (/2/ > (/3/=top < (/2/ < Blair))))"),
+                       Tsurgeon.parseOperation("[replace top (3 (2 (2 Blair) (2 (2 Witch) (2 (2 -) (2 style)))) (2 commitment))]")),
+
+    // huge-screen also got mis-attached.  This creates some unaries which get pruned later
+    new Transformation(TregexPattern.compile("/huge-screen/ > (/3/=huge > (/3/ < (/3/ < (/2/=format < format)) > (/3/ < /2/=the)))"),
+                       Tsurgeon.parseOperation("[replace the (2 (2 the) (2 (2 (2 huge) (2 (2 -) (2 screen))) (2 format)))] " +
+                                               "[prune huge] [prune format]")),
+
+    // another dash that got mangled
+    new Transformation(TregexPattern.compile("/Banderas-Lucy/ > (/2/=oops > (/2/ > (/2/ < (/2/=banderas < Antonio)) < (/2/ < (/2/=liu < Liu))))"),
+                       Tsurgeon.parseOperation("[replace liu (2 (2 Lucy) (2 Liu))] " +
+                                               "[replace banderas (2 (2 Antonio) (2 Banderas))] " +
+                                               "[replace oops (2 -)] ")),
+    new Transformation(TregexPattern.compile("/already-shallow/ > /1/=shallow . (genre > /2/=genre)"),
+                       Tsurgeon.parseOperation("[prune genre] [replace shallow (1 (1 (2 already) (2 (2 -) (2 shallow))) (2 genre))]")),
+    new Transformation(TregexPattern.compile("/Pie-like/ > /2/=pie , (American > /2/=american)"),
+                       Tsurgeon.parseOperation("[prune pie] " +
+                                               "[replace american (2 (2 American) (2 (2 Pie) (2 (2 (2 -) (2 like)))))]")),
+    new Transformation(TregexPattern.compile("/([0-9]+)-minute/#1%time=node > __=parent"),
+                       Tsurgeon.parseOperation("[relabel node /^.*$/%{time}/] " + // turn 88-minute into 88
+                                               "[adjoin (2 (2@) (2 (2 -) (2 minute))) parent]")), // add - minute as new nodes
+    
+    //new Transformation(TregexPattern.compile("again-courage=again > (__ > (__ > (__=fork <2 __=courage)))"),
+    //                   Tsurgeon.parseOperation("[relabel again again]")),
+
     // Fix any stranded unitary nodes
     new Transformation(TregexPattern.compile("__ <: (__=unitary < __)"),
                        Tsurgeon.parseOperation("[excise unitary unitary]")),
