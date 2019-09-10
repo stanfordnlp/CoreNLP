@@ -164,6 +164,18 @@ public class ReadSentimentDataset  {
                        Tsurgeon.parseOperation("relabel label /^.*$/3/")),
   };
 
+
+  static final Transformation[] binaryTransformations = {
+    new Transformation(TregexPattern.compile("/^[2]$/=label < __"),  // non-leaf
+                       Tsurgeon.parseOperation("relabel label /^.*$/-1/")),
+
+    new Transformation(TregexPattern.compile("/^[1]$/=label < __"),  // non-leaf
+                       Tsurgeon.parseOperation("relabel label /^.*$/0/")),
+
+    new Transformation(TregexPattern.compile("/^[34]$/=label < __"),  // non-leaf
+                       Tsurgeon.parseOperation("relabel label /^.*$/1/")),
+  };
+
   private ReadSentimentDataset() {} // static class
 
   public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper, int numClasses) {
@@ -232,15 +244,6 @@ public class ReadSentimentDataset  {
       if (classLabel > 4 || classLabel < 0) {
         throw new RuntimeException("Unexpected class label: score " + score + " became " + classLabel);
       }
-      if (numClasses == 2) {
-        if (classLabel < 2) {
-          classLabel = 0;
-        } else if (classLabel == 2) {
-          classLabel = -1;
-        } else {
-          classLabel = 1;
-        }
-      }
       subtrees[i].label().setValue(Integer.toString(classLabel));
     }
 
@@ -257,6 +260,12 @@ public class ReadSentimentDataset  {
     for (int i = 0; i < transformations.length; ++i) {
       root = Tsurgeon.processPattern(transformations[i].tregex,
                                      transformations[i].surgery, root);
+    }
+
+    if (numClasses == 2) {
+      for (Transformation trans : binaryTransformations) {
+        root = Tsurgeon.processPattern(trans.tregex, trans.surgery, root);
+      }
     }
 
     return root;
