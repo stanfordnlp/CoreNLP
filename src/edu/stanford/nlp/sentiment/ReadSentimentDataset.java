@@ -328,6 +328,18 @@ public class ReadSentimentDataset  {
 
     int numClasses = 5;
 
+    // find numClasses first so we can dynamically change the names of
+    // the ouput files
+    for (int argIndex = 0; argIndex < args.length; ++argIndex) {
+      if (args[argIndex].equalsIgnoreCase("-numClasses")) {
+        numClasses = Integer.parseInt(args[argIndex + 1]);
+        if (numClasses != 2 && numClasses != 5) {
+          throw new IllegalArgumentException("numClasses must be 2 or 5");
+        }
+        break;
+      }
+    }
+
     int argIndex = 0;
     while (argIndex < args.length) {
       if (args[argIndex].equalsIgnoreCase("-dictionary")) {
@@ -364,15 +376,18 @@ public class ReadSentimentDataset  {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-outputDir") ||
                  args[argIndex].equalsIgnoreCase("-outputDirectory")) {
-        trainFilename = args[argIndex + 1] + "/train.txt";
-        devFilename = args[argIndex + 1] + "/dev.txt";
-        testFilename = args[argIndex + 1] + "/test.txt";
+        if (numClasses == 2) {
+          trainFilename = args[argIndex + 1] + "/train-binary.txt";
+          devFilename = args[argIndex + 1] + "/dev-binary.txt";
+          testFilename = args[argIndex + 1] + "/test-binary.txt";
+        } else {
+          trainFilename = args[argIndex + 1] + "/train.txt";
+          devFilename = args[argIndex + 1] + "/dev.txt";
+          testFilename = args[argIndex + 1] + "/test.txt";
+        }
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-numClasses")) {
-        numClasses = Integer.parseInt(args[argIndex + 1]);
-        if (numClasses != 2 && numClasses != 5) {
-          throw new IllegalArgumentException("numClasses must be 2 or 5");
-        }
+        // already been processed
         argIndex += 2;
       } else {
         throw new IllegalArgumentException("Unknown argument " + args[argIndex]);
