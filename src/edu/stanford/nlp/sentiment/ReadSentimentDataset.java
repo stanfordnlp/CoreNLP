@@ -226,8 +226,8 @@ public class ReadSentimentDataset  {
       }
 
       int classLabel = Math.round((float) Math.floor(score * (float) 5));
-      if (classLabel > 5 || classLabel < 0) {
-        throw new RuntimeException("Unexpected class label");
+      if (classLabel > 4 || classLabel < 0) {
+        throw new RuntimeException("Unexpected class label: score " + score + " became " + classLabel);
       }
       if (numClasses == 2) {
         if (classLabel < 2) {
@@ -401,7 +401,12 @@ public class ReadSentimentDataset  {
       }
       String[] pieces = line.split("\\|");
       Integer id = Integer.valueOf(pieces[0]);
-      Double score = Double.valueOf(pieces[1]);
+      final Double score;
+      if (pieces[1].equals("1")) {
+        score = 0.9999;
+      } else {
+        score = Double.valueOf(pieces[1]);
+      }
       sentimentScores.put(id, score);
     }
 
