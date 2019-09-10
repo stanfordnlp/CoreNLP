@@ -308,6 +308,9 @@ public class ReadSentimentDataset  {
    * <code>java edu.stanford.nlp.sentiment.ReadSentimentDataset -inputDir /u/nlp/data/sentiment/stanfordSentimentTreebank  -outputDir .</code>
    * or if you're on my laptop:
    * <code>java edu.stanford.nlp.sentiment.ReadSentimentDataset -inputDir ../data/sentiment/stanfordSentimentTreebank  -outputDir .</code>
+   * or if you're on my desktop (please go away):
+   * <code>java edu.stanford.nlp.sentiment.ReadSentimentDataset -inputDir ../../extern_data/sentiment/stanfordSentimentTreebank -outputDir ../../extern_data/sentiment/sst/fiveclass</code>
+   * <code>java edu.stanford.nlp.sentiment.ReadSentimentDataset -inputDir ../../extern_data/sentiment/stanfordSentimentTreebank -outputDir ../../extern_data/sentiment/sst/binary -numClasses 2</code>
    */
   public static void main(String[] args) {
     String dictionaryFilename = null;
