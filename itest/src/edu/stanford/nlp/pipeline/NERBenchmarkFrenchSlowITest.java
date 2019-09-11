@@ -9,7 +9,7 @@ public class NERBenchmarkFrenchSlowITest extends NERBenchmarkTestCase {
     devGoldFile = "french-ner.wikiner.4class.dev";
     testGoldFile = "french-ner.wikiner.4class.test";
     expectedDevScore = 89.68;
-    expectedTestScore = 84.59;
+    expectedTestScore = 89.42;
   }
 
   @Override
