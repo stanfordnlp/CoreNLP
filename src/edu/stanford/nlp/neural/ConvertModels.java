@@ -232,6 +232,10 @@ public class ConvertModels {
    * <br>
    * To upgrade an RNN model (did anyone train this themselves?) use <code>-model DVPARSER</code>
    * <br>
+   * <code> java edu.stanford.nlp.neural.ConvertModels -stage OLD -model DVPARSER -input /u/nlp/data/lexparser/chineseRNN.e21.ser.gz -output /u/nlp/data/lexparser/chineseRNN.INT.ser.gz</code>
+   * <br>
+   * <code> java edu.stanford.nlp.neural.ConvertModels -stage NEW -model DVPARSER -input /u/nlp/data/lexparser/chineseRNN.INT.ser.gz -output /u/nlp/data/lexparser/chineseRNN.e38.ser.gz</code>
+   * <br>
    *
    * @author <a href=horatio@gmail.com>John Bauer</a>
    */
