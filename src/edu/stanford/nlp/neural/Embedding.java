@@ -15,6 +15,14 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.Redwood;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.List;
+import java.util.function.Function;
+import edu.stanford.nlp.neural.ConvertModels;
+import edu.stanford.nlp.util.ErasureUtils;
+
 /**
  * @author Minh-Thang Luong {@code <lmthang@stanford.edu>}
  * @author John Bauer
@@ -76,6 +84,35 @@ public class Embedding implements Serializable  {
     this.embeddingSize = embeddingSize;
     loadWordVectors(wordFile, vectorFile);
   }
+
+  private void readObject(ObjectInputStream in)
+    throws IOException, ClassNotFoundException
+  {
+    in.defaultReadObject();
+
+    ConvertModels.transformMap(wordVectors, x -> new SimpleMatrix(x));
+  }
+
+  /*
+  private void readObject(ObjectInputStream in)
+    throws IOException, ClassNotFoundException
+  {
+    Map<String, List<List<Double>>> map = ErasureUtils.uncheckedCast(in.readObject());
+    wordVectors = ConvertModels.transformMap(map, x -> ConvertModels.toMatrix(x));
+    embeddingSize = in.readInt();
+  }
+  */
+
+  /*
+  private void writeObject(ObjectOutputStream out)
+    throws IOException
+  {
+    Function<SimpleMatrix, List<List<Double>>> f = (SimpleMatrix x) -> ConvertModels.fromMatrix(x);
+    out.writeObject(ConvertModels.transformMap(wordVectors, f));
+    out.writeInt(embeddingSize);
+  }
+  */
+
 
   /**
    * This method reads a file of raw word vectors, with a given expected size, and returns a map of word to vector.
