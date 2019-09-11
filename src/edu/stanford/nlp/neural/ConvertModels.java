@@ -201,6 +201,40 @@ public class ConvertModels {
     return model;
   }
 
+  /**
+   * This program converts a sentiment model or an RNN parser model
+   * from EJML v23, used by CoreNLP 3.9.2, to a more recent version of
+   * EJML, such as v38.  The reason for this is that the EJML v31
+   * update changed the serialization of SimpleMatrix in a way that
+   * broke all the old models, so for years we never bit the bullet of
+   * upgrading.  This script handles the upgrade of our models which
+   * use SimpleMatrix.  It needs to be done in two steps.
+   * <br>
+   * The first conversion turns a model into a file with lists of
+   * doubles in place of the SimpleMatrix objects used in ejml.
+   * <br>
+   * The second conversion turns the lists of doubles back into a new
+   * SentimentModel or RNN parser.
+   * <br>
+   * In between the two steps you should replace the EJML version you
+   * are using with 0.38, although no one is judging you if you
+   * aimlessly convert back and forth using the same EJML version.
+   * <br>
+   * Concrete steps:
+   * <br>
+   * <code> java edu.stanford.nlp.neural.ConvertModels -stage OLD -model SENTIMENT -input edu/stanford/nlp/models/sentiment/sentiment.ser.gz -output sentiment.INT.ser.gz</code> 
+   * <br>
+   * ... update EJML library to v38 or a later
+   * <br>
+   * <code> java edu.stanford.nlp.neural.ConvertModels -stage NEW -model SENTIMENT -input sentiment.INT.ser.gz -output sentiment.38.ser.gz</code> 
+   * <br>
+   * Congratulations, your old model will now work with EJML v38.
+   * <br>
+   * To upgrade an RNN model (did anyone train this themselves?) use <code>-model DVPARSER</code>
+   * <br>
+   *
+   * @author <a href=horatio@gmail.com>John Bauer</a>
+   */
   public static void main(String[] args) throws IOException, ClassNotFoundException {
     Properties props = StringUtils.argsToProperties(args);
 
