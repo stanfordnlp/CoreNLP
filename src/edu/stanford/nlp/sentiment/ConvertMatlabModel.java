@@ -154,7 +154,7 @@ public class ConvertMatlabModel  {
     }
 
     if (!wordVectors.containsKey(SentimentModel.UNKNOWN_WORD)) {
-      wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random64(numSlices, 1, -0.00001, 0.00001, new Random()));
+      wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random_DDRM(numSlices, 1, -0.00001, 0.00001, new Random()));
     }
 
     SentimentModel model = SentimentModel.modelFromMatrices(W, Wcat, tensor, wordVectors, op);

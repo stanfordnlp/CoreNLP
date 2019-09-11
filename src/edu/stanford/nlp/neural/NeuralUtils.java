@@ -259,7 +259,7 @@ public class NeuralUtils {
    */
   public static SimpleMatrix elementwiseApplyTanhDerivative(SimpleMatrix input) {
     SimpleMatrix output = new SimpleMatrix(input.numRows(), input.numCols());
-    output.set(1.0);
+    output.fill(1.0);
     output = output.minus(input.elementMult(input));
     return output;
   }

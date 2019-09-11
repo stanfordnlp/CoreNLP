@@ -286,10 +286,10 @@ LAST UPDATE: 2016-07-24
 LAST UPDATE BY: Christopher Manning
 
 -----------------------------------------------------------------------
-ejml-core-0.32.jar
-ORIGINAL JAR NAME: ejml-core-0.32.jar
-VERSION: 0.32
-RELEASE DATE: 2017-09-18
+ejml-core-0.38.jar
+ORIGINAL JAR NAME: ejml-core-0.38.jar
+VERSION: 0.38
+RELEASE DATE: 2019-03-14
 SOURCE AVAILABLE: yes
 DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
     size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
@@ -298,14 +298,14 @@ URL: http://ejml.org/
 USED BY: Used in deep learning, especially RNN parser and sentiment
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2017-11-30
-LAST UPDATE BY: Christopher Manning
+LAST UPDATE: 2019-07-29
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-ejml-ddense-0.32.jar
-ORIGINAL JAR NAME: ejml-ddense-0.32.jar
-VERSION: 0.32
-RELEASE DATE: 2017-09-18
+ejml-ddense-0.38.jar
+ORIGINAL JAR NAME: ejml-ddense-0.38.jar
+VERSION: 0.38
+RELEASE DATE: 2019-03-14
 SOURCE AVAILABLE: yes
 DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
     size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
@@ -314,14 +314,14 @@ URL: http://ejml.org/
 USED BY: Used in deep learning, especially RNN parser and sentiment
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2017-11-30
-LAST UPDATE BY: Christopher Manning
+LAST UPDATE: 2019-07-29
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-ejml-simple-0.32.jar
-ORIGINAL JAR NAME: ejml-simple-0.32.jar
-VERSION: 0.32
-RELEASE DATE: 2017-09-18
+ejml-simple-0.38.jar
+ORIGINAL JAR NAME: ejml-simple-0.38.jar
+VERSION: 0.38
+RELEASE DATE: 2019-03-14
 SOURCE AVAILABLE: yes
 DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
     size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
@@ -330,8 +330,8 @@ URL: http://ejml.org/
 USED BY: Used in deep learning, especially RNN parser and sentiment
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2017-11-30
-LAST UPDATE BY: Christopher Manning
+LAST UPDATE: 2019-07-29
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 javacc.jar
