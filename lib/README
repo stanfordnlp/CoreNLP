@@ -286,19 +286,51 @@ LAST UPDATE: 2016-07-24
 LAST UPDATE BY: Christopher Manning
 
 -----------------------------------------------------------------------
-ejml-0.23.jar
-ORIGINAL JAR NAME: ejml-0.23.jar
-VERSION: 0.23
-RELEASE DATE: 2013-06-21
+ejml-core-0.32.jar
+ORIGINAL JAR NAME: ejml-core-0.32.jar
+VERSION: 0.32
+RELEASE DATE: 2017-09-18
 SOURCE AVAILABLE: yes
 DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
     size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
-URL: http://code.google.com/p/efficient-java-matrix-library/
+URL: http://ejml.org/
 
 USED BY: Used in deep learning, especially RNN parser and sentiment
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2013-10-14
+LAST UPDATE: 2017-11-30
+LAST UPDATE BY: Christopher Manning
+
+-----------------------------------------------------------------------
+ejml-ddense-0.32.jar
+ORIGINAL JAR NAME: ejml-ddense-0.32.jar
+VERSION: 0.32
+RELEASE DATE: 2017-09-18
+SOURCE AVAILABLE: yes
+DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
+    size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
+URL: http://ejml.org/
+
+USED BY: Used in deep learning, especially RNN parser and sentiment
+Needed by CoreNLP distributions.
+
+LAST UPDATE: 2017-11-30
+LAST UPDATE BY: Christopher Manning
+
+-----------------------------------------------------------------------
+ejml-simple-0.32.jar
+ORIGINAL JAR NAME: ejml-simple-0.32.jar
+VERSION: 0.32
+RELEASE DATE: 2017-09-18
+SOURCE AVAILABLE: yes
+DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
+    size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
+URL: http://ejml.org/
+
+USED BY: Used in deep learning, especially RNN parser and sentiment
+Needed by CoreNLP distributions.
+
+LAST UPDATE: 2017-11-30
 LAST UPDATE BY: Christopher Manning
 
 -----------------------------------------------------------------------

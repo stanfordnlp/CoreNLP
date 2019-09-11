@@ -97,9 +97,21 @@
     </dependency>
 
     <dependency>
-      <groupId>com.googlecode.efficient-java-matrix-library</groupId>
-      <artifactId>ejml</artifactId>
-      <version>0.23</version>
+      <groupId>org.ejml</groupId>
+      <artifactId>ejml-core</artifactId>
+      <version>0.32</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ejml</groupId>
+      <artifactId>ejml-ddense</artifactId>
+      <version>0.32</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ejml</groupId>
+      <artifactId>ejml-simple</artifactId>
+      <version>0.32</version>
     </dependency>
 
     <dependency>

@@ -8,7 +8,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Predicate;
+
+import org.ejml.data.DMatrix;
 import org.ejml.ops.MatrixIO;
 import org.ejml.simple.SimpleMatrix;
 
@@ -65,12 +66,8 @@ public class NeuralUtils {
   }
 
   public static SimpleMatrix convertTextMatrix(String text) {
-    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Predicate<String>() {
-        @Override
-        public boolean test(String s) {
-          return s.trim().length() > 0;
-        }
-      });
+    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")),
+            s -> ! s.trim().isEmpty());
     int numRows = lines.size();
     int numCols = lines.get(0).trim().split("\\s+").length;
     double[][] data = new double[numRows][numCols];
@@ -93,7 +90,7 @@ public class NeuralUtils {
    */
   public static String toString(SimpleMatrix matrix, String format) {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    MatrixIO.print(new PrintStream(stream), matrix.getMatrix(), format);
+    MatrixIO.print(new PrintStream(stream), (DMatrix) matrix.getMatrix(), format);
     return stream.toString();
   }
 
@@ -170,7 +167,7 @@ public class NeuralUtils {
   /**
    * Given a sequence of iterators over the matrices, builds a vector
    * out of those matrices in the order given.  The vector is scaled
-   * according to the <code>scale</code> parameter.  Asks for an
+   * according to the {@code scale} parameter.  Asks for an
    * expected total size as a time savings.  AssertionError thrown if
    * the vector sizes do not exactly match.
    */
@@ -195,7 +192,7 @@ public class NeuralUtils {
   }
 
   /**
-   * Returns a sigmoid applied to the input <code>x</code>.
+   * Returns a sigmoid applied to the input {@code x}.
    */
   public static double sigmoid(double x) {
     return 1.0 / (1.0 + Math.exp(-x));
@@ -338,5 +335,6 @@ public class NeuralUtils {
     }
     return true;
   }
+
 }
 

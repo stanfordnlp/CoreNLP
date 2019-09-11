@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sentiment; 
+package edu.stanford.nlp.sentiment;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
@@ -154,7 +154,7 @@ public class ConvertMatlabModel  {
     }
 
     if (!wordVectors.containsKey(SentimentModel.UNKNOWN_WORD)) {
-      wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));
+      wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random64(numSlices, 1, -0.00001, 0.00001, new Random()));
     }
 
     SentimentModel model = SentimentModel.modelFromMatrices(W, Wcat, tensor, wordVectors, op);
