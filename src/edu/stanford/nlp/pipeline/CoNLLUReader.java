@@ -142,6 +142,8 @@ public class CoNLLUReader {
     public HashMap<Integer, Integer> mwtData = new HashMap<>();
     // mwt tokens
     public List<String> mwtTokens = new ArrayList<>();
+    // mwt misc info
+    public List<String> mwtMiscs = new ArrayList<>();
     // indexes of last CoreLabel for each MWT
     public List<Integer> mwtLastCoreLabels = new ArrayList<>();
 
@@ -185,6 +187,7 @@ public class CoNLLUReader {
         mwtData.put(i, mwtTokens.size());
       }
       mwtTokens.add(mwtText);
+      mwtMiscs.add(mwtFields[CoNLLU_MiscField]);
       mwtLastCoreLabels.add(mwtEnd - 1);
     }
   }
@@ -245,6 +248,8 @@ public class CoNLLUReader {
 
   /**
    * Convert a CoNLLUDocument into an Annotation
+   * The convention is that a CoNLLU document represents a list of sentences,
+   * one sentence per line, separated by newline.
    **/
   public Annotation convertCoNLLUDocumentToAnnotation(CoNLLUDocument doc) {
     Annotation finalAnnotation = new Annotation();
@@ -262,6 +267,11 @@ public class CoNLLUReader {
     int sentenceIdx = 0;
     for (CoreMap sentence : finalAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
       sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
+      if (sentenceIdx > 0) {
+        // for now we're treating a CoNLL-U document as sentences separated by newline
+        // so every sentence after the first should have a newline as the previous character
+        sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).setBefore("\n");
+      }
       for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
         token.set(CoreAnnotations.TokenBeginAnnotation.class, documentIdx);
         token.set(CoreAnnotations.TokenEndAnnotation.class, documentIdx + 1);
@@ -329,14 +339,47 @@ public class CoNLLUReader {
 
       // handle the MWT info
       if (sentence.mwtData.containsKey(sentenceTokenIndex - 1)) {
+        // set MWT text
         cl.set(CoreAnnotations.MWTTokenTextAnnotation.class,
             sentence.mwtTokens.get(sentence.mwtData.get(sentenceTokenIndex - 1)));
+        cl.setIsMWT(true);
+        // check if first
+        if (sentence.mwtData.containsKey(sentenceTokenIndex - 2) &&
+            sentence.mwtData.get(sentenceTokenIndex-2).equals(sentence.mwtData.get(sentenceTokenIndex-1))) {
+          cl.setIsMWTFirst(false);
+        } else {
+          cl.setIsMWTFirst(true);
+        }
+        // handle MISC info
+        String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
+        for (String miscKV : miscInfo.split("\\|")) {
+          if (miscKV.startsWith("SpaceAfter")) {
+            cl.setAfter(miscKV.split("=")[1].equals("No") ? "" : " ");
+          }
+        }
+      } else {
+        cl.setIsMWT(false);
+        cl.setIsMWTFirst(false);
       }
       sentenceTokenIndex++;
       coreLabels.add(cl);
     }
     // the last token should have a newline after
     coreLabels.get(coreLabels.size() - 1).setAfter("\n");
+    // set before
+    coreLabels.get(0).setBefore("");
+    for (int i = 1 ; i < coreLabels.size() ; i++) {
+      if (coreLabels.get(i).isMWT() && !coreLabels.get(i).isMWTFirst()) {
+        // if an MWT derived token and NOT the first one, match before of
+        // previous ; MWT derived tokens should have same char offsets,
+        // before, and after of the original token before splitting
+        coreLabels.get(i).setBefore(coreLabels.get(i-1).before());
+      } else {
+        // standard tokens and first derived token from an MWT
+        // should set before to match after of previous token
+        coreLabels.get(i).setBefore(coreLabels.get(i - 1).after());
+      }
+    }
     // handle MWT tokens and build the final sentence text
     int sentenceCharBegin = doc.docText.length();
     int processedMWTTokens = 0;
