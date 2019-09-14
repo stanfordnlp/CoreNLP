@@ -44,10 +44,8 @@ public class GermanTokenizerPostProcessor extends CoreLabelProcessor {
           processedTokens.size() > 0 ? processedTokens.get(processedTokens.size() - 1) : null;
       boolean nextTokenPredictsOrdinal =
           i+1 < tokens.size() ? ordinalPredictingWords.contains(tokens.get(i+1).word()) : false ;
-      boolean numberRange = lastProcessedToken.word().matches("[0-9]+") && i+1 < tokens.size() ?
-          tokens.get(i+1).word().matches("[0-9]+") : false;
-      if (lastProcessedToken != null && afterIsEmpty.apply(lastProcessedToken) && ((currToken.word().equals(".") &&
-          nextTokenPredictsOrdinal) || (currToken.word().equals("-") && numberRange))) {
+      if (lastProcessedToken != null && afterIsEmpty.apply(lastProcessedToken) && currToken.word().equals(".") &&
+          nextTokenPredictsOrdinal) {
         mergeTokens(lastProcessedToken, currToken);
       } else {
         processedTokens.add(processedToken);
