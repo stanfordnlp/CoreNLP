@@ -35,6 +35,8 @@ public class GermanTokenizerPostProcessor extends CoreLabelProcessor {
   @Override
   public List<CoreLabel> process(List<CoreLabel> tokens) {
     List<CoreLabel> processedTokens = new ArrayList<CoreLabel>();
+    if (tokens.size() > 0)
+      processedTokens.add(tokens.get(0));
     for (int i = 1 ; i < tokens.size() ; i++) {
       CoreLabel currToken = tokens.get(i);
       CoreLabel processedToken = new CoreLabel(currToken);
