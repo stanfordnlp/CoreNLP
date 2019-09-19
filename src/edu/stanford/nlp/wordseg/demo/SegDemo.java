@@ -46,9 +46,11 @@ public class SegDemo {
       segmenter.classifyAndWriteAnswers(filename);
     }
 
-    String sample = "我住在美国。";
-    List<String> segmented = segmenter.segmentString(sample);
-    System.out.println(segmented);
+    if (args.length == 0) {
+      String sample = "我住在美国。";
+      List<String> segmented = segmenter.segmentString(sample);
+      System.out.println(segmented);
+    }
   }
 
 }
