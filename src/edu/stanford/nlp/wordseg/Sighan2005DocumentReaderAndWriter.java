@@ -246,9 +246,13 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     for (int i = 0; i < lwiSize; i++) {
       lbegin[i] = lmiddle[i] = lend[i] = 0;
     }
-    //nonspaceLineSB.append(wordString);
+    // This builder will be reused to save time.  At each position,
+    // built up one character per iteration, then cleared at the start
+    // of the loop for the next position
+    StringBuilder text = new StringBuilder();
     for (int i = 0; i < lwiSize; i++) {
-      StringBuilder text = new StringBuilder();
+      // clear the StringBuilder
+      text.setLength(0);
       for (int leng = 1; leng <= ChineseDictionary.MAX_LEXICON_LENGTH && i+leng-1 < lwiSize; leng++) {
         String next = lwi.get(i+leng-1).get(CoreAnnotations.CharAnnotation.class);
         text.append(next);
