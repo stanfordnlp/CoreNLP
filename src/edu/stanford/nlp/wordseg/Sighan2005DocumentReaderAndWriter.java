@@ -148,7 +148,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
           if (surrogate) {
             wordString = line.substring(index, index+2);
           } else {
-            wordString = line.substring(index, index+1);
+            wordString = Character.toString(line.charAt(index));
           }
           wi.set(CoreAnnotations.CharAnnotation.class, intern(wordString));
 
