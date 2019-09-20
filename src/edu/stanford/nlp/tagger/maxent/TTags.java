@@ -446,59 +446,54 @@ public class TTags {
    * @return A superset of tags
    */
   String[] deterministicallyExpandTags(String[] tags) {
-    if (isEnglish && doDeterministicTagExpansion) {
-      boolean seenVBN = false;
-      boolean seenVBD =	false;
-      boolean seenVB =	false;
-      boolean seenVBP = false;
-      for (String tag : tags) {
-        char ch = tag.charAt(0);
-        if (ch == 'V') {
-          switch (tag) {
-            case "VBD":
-              seenVBD = true;
-              break;
-            case "VBN":
-              seenVBN = true;
-              break;
-            case "VB":
-              seenVB = true;
-              break;
-            case "VBP":
-              seenVBP = true;
-              break;
-          }
-        }
-      }
-      int toAdd = 0;
-      if ((seenVBN ^ seenVBD)) { // ^ is xor
-        toAdd++;
-      }
-      if (seenVB ^ seenVBP) {
-        toAdd++;
-      }
-      if (toAdd > 0) {
-        int ind = tags.length;
-        String[] newTags = new String[ind + toAdd];
-        System.arraycopy(tags, 0, newTags, 0, tags.length);
-        if (seenVBN && ! seenVBD) {
-          newTags[ind++] = "VBD";
-        } else if (seenVBD && ! seenVBN) {
-          newTags[ind++] = "VBN";
-        }
-        if (seenVB && ! seenVBP) {
-          newTags[ind] = "VBP";
-        } else if (seenVBP && ! seenVB) {
-          newTags[ind] = "VB";
-        }
-        return newTags;
-      } else {
-        return tags;
-      }
-    } else {
+    if (!isEnglish || !doDeterministicTagExpansion) {
       // no tag expansion for other languages currently
       return tags;
     }
+    boolean seenVBN = false, seenVBD = false, seenVB  = false, seenVBP = false;
+    for (String tag : tags) {
+      char ch = tag.charAt(0);
+      if (ch == 'V') {
+        switch (tag) {
+        case "VBD":
+          seenVBD = true;
+          break;
+        case "VBN":
+          seenVBN = true;
+          break;
+        case "VB":
+          seenVB = true;
+          break;
+        case "VBP":
+          seenVBP = true;
+          break;
+        }
+      }
+    }
+    int toAdd = 0;
+    if (seenVBN ^ seenVBD) { // ^ is xor
+      toAdd++;
+    }
+    if (seenVB ^ seenVBP) {
+      toAdd++;
+    }
+    if (toAdd == 0) {
+      return tags;
+    }
+    int ind = tags.length;
+    String[] newTags = new String[ind + toAdd];
+    System.arraycopy(tags, 0, newTags, 0, tags.length);
+    if (seenVBN && ! seenVBD) {
+      newTags[ind++] = "VBD";
+    } else if (seenVBD && ! seenVBN) {
+      newTags[ind++] = "VBN";
+    }
+    if (seenVB && ! seenVBP) {
+      newTags[ind] = "VBP";
+    } else if (seenVBP && ! seenVB) {
+      newTags[ind] = "VB";
+    }
+    return newTags;
   }
 
   @Override
