@@ -319,12 +319,8 @@ public class TTags {
    */
   public synchronized String[] getOpenTagsArray() {
     if (openTagsArr == null) {
-      List<String> tags = new ArrayList<>(getOpenTags());
-      String[] arr = new String[tags.size()];
-      for (int i = 0; i < tags.size(); ++i) {
-        arr[i] = tags.get(i);
-      }
-      openTagsArr = arr;
+      Set<String> open = getOpenTags();
+      openTagsArr = deterministicallyExpandTags(open.toArray(new String[open.size()]));
     }
     return openTagsArr;
   }
@@ -395,16 +391,15 @@ public class TTags {
 
 
   protected boolean isClosed(String tag) {
-    if (openFixed) {
-      return !openTags.contains(tag);
-    } else {
-      return closed.contains(tag);
-    }
+    return openFixed ? !openTags.contains(tag) : closed.contains(tag);
   }
 
   void markClosed(String tag) {
     add(tag);
     closed.add(tag);
+    if (!openFixed) {
+      openTagsArr = null;
+    }
   }
 
   public void setLearnClosedTags(boolean learn) {
@@ -414,10 +409,10 @@ public class TTags {
   public synchronized void setOpenClassTags(String[] openClassTags) {
     openTags = Generics.newHashSet();
     openTags.addAll(Arrays.asList(openClassTags));
-    openTagsArr = null;
     for (String tag : openClassTags) {
       add(tag);
     }
+    openTagsArr = openClassTags;
     openFixed = true;
   }
 
@@ -508,9 +503,7 @@ public class TTags {
 
   @Override
   public String toString() {
-    StringBuilder s = new StringBuilder();
-    s.append(index);
-    s.append(' ');
+    StringBuilder s = new StringBuilder(200).append(index).append(' ');
     if (openFixed) {
       s.append(" OPEN:").append(getOpenTags());
     } else {
