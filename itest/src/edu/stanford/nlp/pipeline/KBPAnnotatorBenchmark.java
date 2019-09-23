@@ -107,6 +107,11 @@ public class KBPAnnotatorBenchmark extends TestCase {
           relationTriplesForThisDoc.add(rt);
         }
       }
+      System.out.println();
+      System.out.println("gold relations: ");
+      for (String goldRelation : docIDToRelations.get(docID)) {
+        System.out.println("\t"+goldRelation);
+      }
       Set<String> foundRelationStrings = convertKBPTriplesToStrings(relationTriplesForThisDoc);
       HashSet<String> intersectionOfFoundAndGold = new HashSet<>(foundRelationStrings);
       if (docIDToRelations.get(docID) != null) {
@@ -116,8 +121,16 @@ public class KBPAnnotatorBenchmark extends TestCase {
       } else {
         totalWrongFoundRelations += foundRelationStrings.size();
       }
+      System.out.println();
+      System.out.println("correct: "+intersectionOfFoundAndGold.size());
+      System.out.println("wrong: "+(foundRelationStrings.size()-intersectionOfFoundAndGold.size()));
+      System.out.println();
       totalGuessRelations += foundRelationStrings.size();
       System.out.println("curr score: ");
+      System.out.println("\ttotal correct: "+totalCorrectFoundRelations);
+      System.out.println("\ttotal wrong: "+totalWrongFoundRelations);
+      System.out.println("\ttotal guesses: "+totalGuessRelations);
+      System.out.println("\ttotal gold relations: "+totalGoldRelations);
       double recall = (((double) totalCorrectFoundRelations)/((double) totalGoldRelations));
       double precision = (((double) totalCorrectFoundRelations)/((double) totalGuessRelations));
       System.out.println("\trecall: "+recall);
