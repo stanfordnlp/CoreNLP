@@ -109,8 +109,10 @@ public class KBPAnnotatorBenchmark extends TestCase {
       }
       System.out.println();
       System.out.println("gold relations: ");
-      for (String goldRelation : docIDToRelations.get(docID)) {
-        System.out.println("\t"+goldRelation);
+      if (docIDToRelations.get(docID) != null) {
+        for (String goldRelation : docIDToRelations.get(docID)) {
+          System.out.println("\t" + goldRelation);
+        }
       }
       Set<String> foundRelationStrings = convertKBPTriplesToStrings(relationTriplesForThisDoc);
       HashSet<String> intersectionOfFoundAndGold = new HashSet<>(foundRelationStrings);
