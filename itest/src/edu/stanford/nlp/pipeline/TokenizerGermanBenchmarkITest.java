@@ -17,12 +17,12 @@ public class TokenizerGermanBenchmarkITest extends TokenizerBenchmarkTestCase {
 
   public void testOnDev() {
     goldFilePath = "/u/nlp/data/stanford-corenlp/test/data/tokenize/de_gsd-ud-dev.conllu";
-    runTest("dev", "de", 0.992);
+    runTest("dev", "de", 0.994);
   }
 
   public void testOnTest() {
     goldFilePath = "/u/nlp/data/stanford-corenlp/test/data/tokenize/de_gsd-ud-test.conllu";
-    runTest("test", "de", 0.992);
+    runTest("test", "de", 0.995);
   }
 
 }

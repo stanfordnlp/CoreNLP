@@ -12,6 +12,7 @@ import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.logging.Redwood;
 
 
@@ -133,8 +134,9 @@ public class TokenizerAnnotator implements Annotator  {
   private final boolean useSegmenter;
   private final Annotator segmenterAnnotator;
 
-  private boolean splitMWTTokens = false;
-  private MWTAnnotator mwtAnnotator;
+  /** run a custom post processor after the lexer **/
+  private final boolean usePostProcessor;
+  private final CoreLabelProcessor postProcessor;
 
   // CONSTRUCTORS
 
@@ -221,11 +223,19 @@ public class TokenizerAnnotator implements Annotator  {
       useSegmenter = false;
       segmenterAnnotator = null;
     }
-    // set up an MWTAnnotator if a mapping file is provided
-    if (!props.getProperty("tokenize.mwt.mappingFile", "").equals("")) {
-      //System.out.println("Setting up MWTAnnotator!!");
-      splitMWTTokens = true;
-      mwtAnnotator = new MWTAnnotator("tokenize", props);
+
+    // load any custom token post processing
+    String postProcessorClass = props.getProperty("tokenize.postProcessor", "");
+    try {
+      if (!postProcessorClass.equals("")) {
+        postProcessor = ReflectionLoading.loadByReflection(postProcessorClass);
+        usePostProcessor = true;
+      } else {
+        postProcessor = null;
+        usePostProcessor = false;
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Loading: "+postProcessorClass+" failed with: "+e.getMessage());
     }
 
     VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
@@ -366,6 +376,10 @@ public class TokenizerAnnotator implements Annotator  {
       // set indexes into document wide token list
       setTokenBeginTokenEnd(tokens);
 
+      // run post processing
+      if (usePostProcessor)
+        tokens = postProcessor.process(tokens);
+
       // add tokens list to annotation
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
@@ -376,10 +390,6 @@ public class TokenizerAnnotator implements Annotator  {
       throw new RuntimeException("Tokenizer unable to find text in annotation: " + annotation);
     }
 
-    // if an MWTAnnotator is set up, use it after basic annotation is done
-    if (splitMWTTokens) {
-      mwtAnnotator.annotate(annotation);
-    }
   }
 
   @Override

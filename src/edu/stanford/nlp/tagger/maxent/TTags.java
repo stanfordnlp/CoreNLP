@@ -319,12 +319,8 @@ public class TTags {
    */
   public synchronized String[] getOpenTagsArray() {
     if (openTagsArr == null) {
-      List<String> tags = new ArrayList<>(getOpenTags());
-      String[] arr = new String[tags.size()];
-      for (int i = 0; i < tags.size(); ++i) {
-        arr[i] = tags.get(i);
-      }
-      openTagsArr = arr;
+      Set<String> open = getOpenTags();
+      openTagsArr = deterministicallyExpandTags(open.toArray(new String[open.size()]));
     }
     return openTagsArr;
   }
@@ -395,16 +391,15 @@ public class TTags {
 
 
   protected boolean isClosed(String tag) {
-    if (openFixed) {
-      return !openTags.contains(tag);
-    } else {
-      return closed.contains(tag);
-    }
+    return openFixed ? !openTags.contains(tag) : closed.contains(tag);
   }
 
   void markClosed(String tag) {
     add(tag);
     closed.add(tag);
+    if (!openFixed) {
+      openTagsArr = null;
+    }
   }
 
   public void setLearnClosedTags(boolean learn) {
@@ -414,10 +409,10 @@ public class TTags {
   public synchronized void setOpenClassTags(String[] openClassTags) {
     openTags = Generics.newHashSet();
     openTags.addAll(Arrays.asList(openClassTags));
-    openTagsArr = null;
     for (String tag : openClassTags) {
       add(tag);
     }
+    openTagsArr = openClassTags;
     openFixed = true;
   }
 
@@ -451,66 +446,59 @@ public class TTags {
    * @return A superset of tags
    */
   String[] deterministicallyExpandTags(String[] tags) {
-    if (isEnglish && doDeterministicTagExpansion) {
-      boolean seenVBN = false;
-      boolean seenVBD =	false;
-      boolean seenVB =	false;
-      boolean seenVBP = false;
-      for (String tag : tags) {
-        char ch = tag.charAt(0);
-        if (ch == 'V') {
-          switch (tag) {
-            case "VBD":
-              seenVBD = true;
-              break;
-            case "VBN":
-              seenVBN = true;
-              break;
-            case "VB":
-              seenVB = true;
-              break;
-            case "VBP":
-              seenVBP = true;
-              break;
-          }
-        }
-      }
-      int toAdd = 0;
-      if ((seenVBN ^ seenVBD)) { // ^ is xor
-        toAdd++;
-      }
-      if (seenVB ^ seenVBP) {
-        toAdd++;
-      }
-      if (toAdd > 0) {
-        int ind = tags.length;
-        String[] newTags = new String[ind + toAdd];
-        System.arraycopy(tags, 0, newTags, 0, tags.length);
-        if (seenVBN && ! seenVBD) {
-          newTags[ind++] = "VBD";
-        } else if (seenVBD && ! seenVBN) {
-          newTags[ind++] = "VBN";
-        }
-        if (seenVB && ! seenVBP) {
-          newTags[ind] = "VBP";
-        } else if (seenVBP && ! seenVB) {
-          newTags[ind] = "VB";
-        }
-        return newTags;
-      } else {
-        return tags;
-      }
-    } else {
+    if (!isEnglish || !doDeterministicTagExpansion) {
       // no tag expansion for other languages currently
       return tags;
     }
+    boolean seenVBN = false, seenVBD = false, seenVB  = false, seenVBP = false;
+    for (String tag : tags) {
+      char ch = tag.charAt(0);
+      if (ch == 'V') {
+        switch (tag) {
+        case "VBD":
+          seenVBD = true;
+          break;
+        case "VBN":
+          seenVBN = true;
+          break;
+        case "VB":
+          seenVB = true;
+          break;
+        case "VBP":
+          seenVBP = true;
+          break;
+        }
+      }
+    }
+    int toAdd = 0;
+    if (seenVBN ^ seenVBD) { // ^ is xor
+      toAdd++;
+    }
+    if (seenVB ^ seenVBP) {
+      toAdd++;
+    }
+    if (toAdd == 0) {
+      return tags;
+    }
+    int ind = tags.length;
+    String[] newTags = new String[ind + toAdd];
+    System.arraycopy(tags, 0, newTags, 0, tags.length);
+    if (seenVBN && ! seenVBD) {
+      newTags[ind++] = "VBD";
+    } else if (seenVBD && ! seenVBN) {
+      newTags[ind++] = "VBN";
+    }
+    if (seenVB && ! seenVBP) {
+      newTags[ind] = "VBP";
+    } else if (seenVBP && ! seenVB) {
+      newTags[ind] = "VB";
+    }
+    return newTags;
   }
 
   @Override
   public String toString() {
-    StringBuilder s = new StringBuilder();
-    s.append(index);
-    s.append(' ');
+    StringBuilder s = new StringBuilder(200).append(index).append(' ');
     if (openFixed) {
       s.append(" OPEN:").append(getOpenTags());
     } else {

@@ -2153,14 +2153,27 @@ public class CoreAnnotations {
     public Class<Boolean> getType() {return Boolean.class;}
   }
 
-    /**
-     * Text of the token that was used to create this word during a multi word token split.
-     */
-    public static class MWTTokenTextAnnotation implements CoreAnnotation<String> {
-        @Override
-        public Class<String> getType() {
-            return String.class;
-        }
+  /**
+   * Text of the token that was used to create this word during a multi word token split.
+   */
+  public static class MWTTokenTextAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
     }
+  }
+
+  /**
+   * The CoreLabel key identifying whether a token is the first word derived
+   * from a multi-word-token.  So if "des" is split into "de" and "les", "de"
+   * would be marked as true.
+   */
+  public static class IsFirstWordOfMWTAnnotation implements CoreAnnotation<Boolean> {
+    @Override
+    public Class<Boolean> getType() {
+      return Boolean.class;
+    }
+  }
+
 
 }

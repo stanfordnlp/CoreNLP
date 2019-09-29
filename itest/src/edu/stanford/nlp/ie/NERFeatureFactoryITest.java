@@ -41,13 +41,17 @@ public class NERFeatureFactoryITest extends TestCase {
     NERFeatureFactory<CoreLabel> factory = new NERFeatureFactory<>();
     factory.init(flags);
 
-    Set<String> features;
-    features = new HashSet<String>(factory.featuresC(paddedSentence, 4));
+    Set<String> features = new HashSet<String>();
+    NERFeatureFactory.FeatureCollector collector = new NERFeatureFactory.FeatureCollector(features);
+    factory.featuresC(paddedSentence, 4, collector);
     checkFeatures(features, "BAR-GAZ", "BAZ-GAZ", "FOO-GAZ", "BAR-GAZ2", "BAZ-GAZ2", "FOO-GAZ1", "John-WORD");
-    features = new HashSet<String>(factory.featuresC(paddedSentence, 5));
+    features.clear();
+    factory.featuresC(paddedSentence, 5, collector);
     checkFeatures(features, "BAR-GAZ", "BAZ-GAZ", "BAR-GAZ2", "BAZ-GAZ2", "Bauer-WORD");
-    features = new HashSet<String>(factory.featuresC(paddedSentence, 6));
+    features.clear();
+    factory.featuresC(paddedSentence, 6, collector);
     checkFeatures(features, "has-WORD");
+    features.clear();
   }
 
 }

@@ -36,7 +36,7 @@ public final class Characters {
   /**
    * Returns a string representation of a character's unicode
    * block.
-   * 
+   *
    * @param c
    * @return
    */
@@ -44,7 +44,19 @@ public final class Characters {
     Character.Subset block = Character.UnicodeBlock.of(c);
     return block == null ? "Undefined" : block.toString();
   }
-  
+
+  /**
+   * Returns a string representation of a character's unicode
+   * block.
+   *
+   * @param c
+   * @return
+   */
+  public static String unicodeBlockStringOf(int codePoint) {
+    Character.Subset block = Character.UnicodeBlock.of(codePoint);
+    return block == null ? "Undefined" : block.toString();
+  }
+
   /**
    * Returns true if a character is punctuation, and false
    * otherwise.
