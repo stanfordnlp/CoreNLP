@@ -138,30 +138,22 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       int origIndex = 0;
       int position = 0;
 
+      StringBuilder nonspaceLineSB = new StringBuilder();
+
       for (int index = 0, len = line.length(); index < len; index++) {
-        // TODO: can double chars be whitespace / isocontrol?
-        int codePoint = Character.codePointAt(line, index);
+        char ch = line.charAt(index);
         CoreLabel wi = new CoreLabel();
-        if ( ! Character.isWhitespace(codePoint) && ! Character.isISOControl(codePoint)) {
-          boolean surrogate = Character.isSupplementaryCodePoint(codePoint);
-          String wordString;
-          if (surrogate) {
-            wordString = line.substring(index, index+2);
-          } else {
-            wordString = Character.toString(line.charAt(index));
-          }
+        if ( ! Character.isWhitespace(ch) && ! Character.isISOControl(ch)) {
+          String wordString = Character.toString(ch);
           wi.set(CoreAnnotations.CharAnnotation.class, intern(wordString));
+          nonspaceLineSB.append(wordString);
 
           // non-breaking space is skipped as well
           while (Character.isWhitespace(origLine.charAt(origIndex)) || Character.isISOControl(origLine.charAt(origIndex)) || (origLine.charAt(origIndex) == '\u00A0')) {
             origIndex++;
           }
 
-          if (surrogate) {
-            wordString = origLine.substring(origIndex, origIndex+2);
-          } else {
-            wordString = Character.toString(origLine.charAt(origIndex));
-          }
+          wordString = Character.toString(origLine.charAt(origIndex));
           wi.set(CoreAnnotations.OriginalCharAnnotation.class, intern(wordString));
 
           // put in a word shape
@@ -169,11 +161,13 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
             wi.set(CoreAnnotations.ShapeAnnotation.class, shapeOf(wordString));
           }
           if (flags.useUnicodeType || flags.useUnicodeType4gram || flags.useUnicodeType5gram) {
-            wi.set(CoreAnnotations.UTypeAnnotation.class, Character.getType(codePoint));
+            wi.set(CoreAnnotations.UTypeAnnotation.class, Character.getType(ch));
           }
           if (flags.useUnicodeBlock) {
-            wi.set(CoreAnnotations.UBlockAnnotation.class, Characters.unicodeBlockStringOf(codePoint));
+            wi.set(CoreAnnotations.UBlockAnnotation.class, Characters.unicodeBlockStringOf(ch));
           }
+
+          origIndex++;
 
           if (index == 0) { // first character of a sentence (a line)
             wi.set(CoreAnnotations.AnswerAnnotation.class, "1");
@@ -192,20 +186,16 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
           position++;
           if (DEBUG_MORE) EncodingPrintWriter.err.println(wi.toString(), "UTF-8");
           lwi.add(wi);
-
-          if (surrogate) {
-            index++;
-            origIndex++;
-          }
-          origIndex++;
         }
       }
       if (flags.dictionary != null || flags.serializedDictionary != null) {
-        addDictionaryFeatures(cdict, CoreAnnotations.LBeginAnnotation.class, CoreAnnotations.LMiddleAnnotation.class, CoreAnnotations.LEndAnnotation.class, lwi);
+        String nonspaceLine = nonspaceLineSB.toString();
+        addDictionaryFeatures(cdict, CoreAnnotations.LBeginAnnotation.class, CoreAnnotations.LMiddleAnnotation.class, CoreAnnotations.LEndAnnotation.class, nonspaceLine, lwi);
       }
 
       if (flags.dictionary2 != null) {
-        addDictionaryFeatures(cdict2, CoreAnnotations.D2_LBeginAnnotation.class, CoreAnnotations.D2_LMiddleAnnotation.class, CoreAnnotations.D2_LEndAnnotation.class, lwi);
+        String nonspaceLine = nonspaceLineSB.toString();
+        addDictionaryFeatures(cdict2, CoreAnnotations.D2_LBeginAnnotation.class, CoreAnnotations.D2_LMiddleAnnotation.class, CoreAnnotations.D2_LEndAnnotation.class, nonspaceLine, lwi);
       }
       // logger.info("output: " + lwi.size());
       return lwi;
@@ -238,46 +228,36 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
   }
 
 
-  private static void addDictionaryFeatures(ChineseDictionary dict, Class<? extends CoreAnnotation<String>> lbeginFieldName, Class<? extends CoreAnnotation<String>> lmiddleFieldName, Class<? extends CoreAnnotation<String>> lendFieldName, List<CoreLabel> lwi) {
+  private static void addDictionaryFeatures(ChineseDictionary dict, Class<? extends CoreAnnotation<String>> lbeginFieldName, Class<? extends CoreAnnotation<String>> lmiddleFieldName, Class<? extends CoreAnnotation<String>> lendFieldName, String nonspaceLine, List<CoreLabel> lwi) {
     int lwiSize = lwi.size();
+    if (lwiSize != nonspaceLine.length()) { throw new RuntimeException(); }
     int[] lbegin = new int[lwiSize];
     int[] lmiddle = new int[lwiSize];
     int[] lend = new int[lwiSize];
     for (int i = 0; i < lwiSize; i++) {
       lbegin[i] = lmiddle[i] = lend[i] = 0;
     }
-    // This builder will be reused to save time.  At each position,
-    // built up one character per iteration, then cleared at the start
-    // of the loop for the next position
-    StringBuilder text = new StringBuilder();
     for (int i = 0; i < lwiSize; i++) {
-      // clear the StringBuilder
-      text.setLength(0);
-      for (int leng = 1; leng <= ChineseDictionary.MAX_LEXICON_LENGTH && i+leng-1 < lwiSize; leng++) {
-        String next = lwi.get(i+leng-1).get(CoreAnnotations.CharAnnotation.class);
-        text.append(next);
-        String word = text.toString();
-        if (word.length() > ChineseDictionary.MAX_LEXICON_LENGTH) {
-          // This can happen if there are double length characters
-          break;
-        }
-        if (dict.contains(word)) {
-          // lbegin
-          if (leng > lbegin[i]) {
-            lbegin[i] = leng;
-          }
-          // lmid
-          int last = i+leng-1;
-          if (leng==ChineseDictionary.MAX_LEXICON_LENGTH) { last+=1; }
-          for (int mid = i+1; mid < last; mid++) {
-            if (leng > lmiddle[mid]) {
-              lmiddle[mid] = leng;
+      for (int leng = ChineseDictionary.MAX_LEXICON_LENGTH; leng >= 1; leng--) {
+        if (i+leng-1 < lwiSize) {
+          if (dict.contains(nonspaceLine.substring(i, i+leng))) {
+            // lbegin
+            if (leng > lbegin[i]) {
+              lbegin[i] = leng;
             }
-          }
-          // lend
-          if (leng<ChineseDictionary.MAX_LEXICON_LENGTH) {
-            if (leng > lend[i+leng-1]) {
-              lend[i+leng-1] = leng;
+            // lmid
+            int last = i+leng-1;
+            if (leng==ChineseDictionary.MAX_LEXICON_LENGTH) { last+=1; }
+            for (int mid = i+1; mid < last; mid++) {
+              if (leng > lmiddle[mid]) {
+                lmiddle[mid] = leng;
+              }
+            }
+            // lend
+            if (leng<ChineseDictionary.MAX_LEXICON_LENGTH) {
+              if (leng > lend[i+leng-1]) {
+                lend[i+leng-1] = leng;
+              }
             }
           }
         }

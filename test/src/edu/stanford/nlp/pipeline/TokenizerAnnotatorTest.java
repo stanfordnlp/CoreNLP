@@ -126,7 +126,7 @@ public class TokenizerAnnotatorTest extends TestCase {
     String out = SentenceUtils.listToString(toks);
     assertEquals(oldWords, out);
 
-    Properties props2 = PropertiesUtils.asProperties("annotators", "tokenize", "tokenize.options", "splitHyphenated=true,invertible");
+    Properties props2 = PropertiesUtils.asProperties("annotators", "tokenize", "tokenize.options", "splitForwardSlash=false,splitHyphenated=true,invertible");
     Annotation ann2 = new Annotation(test);
     StanfordCoreNLP pipeline2 = new StanfordCoreNLP(props2);
     pipeline2.annotate(ann2);
@@ -144,13 +144,21 @@ public class TokenizerAnnotatorTest extends TestCase {
     System.err.println(toks3);
     assertEquals(newWords3, out3);
 
-    Properties props4 = PropertiesUtils.asProperties("annotators", "tokenize", "tokenize.options", "splitForwardSlash");
+    Properties props4 = PropertiesUtils.asProperties("annotators", "tokenize", "tokenize.options", "ptb3Escaping=true,splitForwardSlash");
     Annotation ann4 = new Annotation(test);
     StanfordCoreNLP pipeline4 = new StanfordCoreNLP(props4);
     pipeline4.annotate(ann4);
     List<CoreLabel> toks4 = ann4.get(CoreAnnotations.TokensAnnotation.class);
     String out4 = SentenceUtils.listToString(toks4);
     assertEquals(newWords4, out4);
+
+    Properties props5 = PropertiesUtils.asProperties("annotators", "tokenize", "tokenize.options", "ud");
+    Annotation ann5 = new Annotation(test);
+    StanfordCoreNLP pipeline5 = new StanfordCoreNLP(props5);
+    pipeline5.annotate(ann5);
+    List<CoreLabel> toks5 = ann5.get(CoreAnnotations.TokensAnnotation.class);
+    String out5 = SentenceUtils.listToString(toks5);
+    assertEquals(newWords3, out5);
 
   }
 

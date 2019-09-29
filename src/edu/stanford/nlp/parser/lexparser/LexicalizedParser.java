@@ -1187,8 +1187,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
     List<String> optionArgs = new ArrayList<>();
     String encoding = null;
     // while loop through option arguments
-    while (argIndex < args.length && args[argIndex].charAt(0) == '-' &&
-           !args[argIndex].equals("-")) { // single - represents parse from stdin
+    while (argIndex < args.length && args[argIndex].charAt(0) == '-') {
       if (args[argIndex].equalsIgnoreCase("-train") ||
           args[argIndex].equalsIgnoreCase("-trainTreebank")) {
         train = true;

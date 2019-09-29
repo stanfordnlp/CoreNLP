@@ -1,7 +1,7 @@
 package edu.stanford.nlp.process;
 
 // Stanford English Tokenizer -- a deterministic, fast high-quality tokenizer
-// Copyright (c) 2002-2016 The Board of Trustees of
+// Copyright (c) 2002-2019 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -15,13 +15,12 @@ package edu.stanford.nlp.process;
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see http://www.gnu.org/licenses/ .
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/
@@ -88,11 +87,14 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     for input after a newline is seen when the previous line ends with an abbreviation. </li>
  * <li>ptb3Escaping: Enable all traditional PTB3 token transforms
  *     (like parentheses becoming -LRB-, -RRB-).  This is a macro flag that
- *     sets or clears all the options below. (Default setting of the various
- *     properties below that this flag controls is equivalent to it being set
+ *     sets or clears all the options below. Note that because properties are set in a Map,
+ *     if you specify both this flag and flags it sets, the resulting behaviour is non-deterministic (sorry!).
+ *     (Default setting of the various properties below that this flag controls is equivalent to it being set
  *     to true.)
  * <li>ud: [From CoreNLP 4.0] Enable options that make tokenization like what is used in UD v2. This is a
- *     macro flag that sets various of the options below. It ignores a value for this key. </li>
+ *     macro flag that sets various of the options below. It ignores a value for this key.
+ *     Note that because properties are set in a Map, if you specify both this flag and flags it sets,
+ *     the resulting behaviour is non-deterministic (sorry!).</li>
  * <li>americanize: Whether to rewrite common British English spellings
  *     as American English spellings. (This is useful if your training
  *     material uses American English spelling, such as the Penn Treebank.)
@@ -540,6 +542,11 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   /** @return A PTBTokenizerFactory that vends Word tokens. */
   public static TokenizerFactory<Word> factory() {
     return PTBTokenizerFactory.newTokenizerFactory();
+  }
+
+  /** @return A PTBTokenizerFactory that vends Word tokens. */
+  public static TokenizerFactory<Word> factory(String options) {
+    return PTBTokenizerFactory.newWordTokenizerFactory(options);
   }
 
   /** @return A PTBTokenizerFactory that vends CoreLabel tokens. */

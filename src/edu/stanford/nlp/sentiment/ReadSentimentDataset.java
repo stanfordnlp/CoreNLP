@@ -202,17 +202,6 @@ public class ReadSentimentDataset  {
                        Tsurgeon.parseOperation("relabel label /^.*$/1/")),
   };
 
-  static final Transformation[] threeClassTransformations = {
-    new Transformation(TregexPattern.compile("/^[1]$/=label < __"),  // non-leaf
-                       Tsurgeon.parseOperation("relabel label /^.*$/0/")),
-
-    new Transformation(TregexPattern.compile("/^[2]$/=label < __"),  // non-leaf
-                       Tsurgeon.parseOperation("relabel label /^.*$/1/")),
-
-    new Transformation(TregexPattern.compile("/^[34]$/=label < __"),  // non-leaf
-                       Tsurgeon.parseOperation("relabel label /^.*$/2/")),
-  };
-
   private ReadSentimentDataset() {} // static class
 
   public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper, int numClasses) {
@@ -303,10 +292,6 @@ public class ReadSentimentDataset  {
       for (Transformation trans : binaryTransformations) {
         root = Tsurgeon.processPattern(trans.tregex, trans.surgery, root);
       }
-    } else if (numClasses == 3) {
-      for (Transformation trans : threeClassTransformations) {
-        root = Tsurgeon.processPattern(trans.tregex, trans.surgery, root);
-      }
     }
 
     return root;
@@ -383,8 +368,8 @@ public class ReadSentimentDataset  {
     for (int argIndex = 0; argIndex < args.length; ++argIndex) {
       if (args[argIndex].equalsIgnoreCase("-numClasses")) {
         numClasses = Integer.parseInt(args[argIndex + 1]);
-        if (numClasses != 2 && numClasses != 3 && numClasses != 5) {
-          throw new IllegalArgumentException("numClasses must be 2, 3, or 5");
+        if (numClasses != 2 && numClasses != 5) {
+          throw new IllegalArgumentException("numClasses must be 2 or 5");
         }
         break;
       }
@@ -430,10 +415,6 @@ public class ReadSentimentDataset  {
           trainFilename = args[argIndex + 1] + "/train-binary.txt";
           devFilename = args[argIndex + 1] + "/dev-binary.txt";
           testFilename = args[argIndex + 1] + "/test-binary.txt";
-        } else if (numClasses == 3) {
-          trainFilename = args[argIndex + 1] + "/train-3class.txt";
-          devFilename = args[argIndex + 1] + "/dev-3class.txt";
-          testFilename = args[argIndex + 1] + "/test-3class.txt";
         } else {
           trainFilename = args[argIndex + 1] + "/train.txt";
           devFilename = args[argIndex + 1] + "/dev.txt";

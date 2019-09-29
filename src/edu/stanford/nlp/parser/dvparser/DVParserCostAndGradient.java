@@ -1,7 +1,6 @@
 package edu.stanford.nlp.parser.dvparser; 
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.IdentityHashMap;
@@ -90,12 +89,12 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
       throw e;
     }
 
-    BigDecimal score = new BigDecimal(0);
+    double score = 0.0;
     for (Tree node : scores.keySet()) {
-      score = score.add(new BigDecimal(scores.get(node)));
-      //log.info(score.toString());
+      score += scores.get(node);
+      //log.info(Double.toString(score));
     }
-    return score.doubleValue();
+    return score;
   }
 
   private void forwardPropagateTree(Tree tree, List<String> words,

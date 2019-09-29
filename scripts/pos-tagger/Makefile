@@ -7,7 +7,7 @@ CHINESE_TEST = format=TREES,/u/nlp/data/chinese/ctb7/test.mrg
 # Use dev set for regression testing
 ENGLISH_TEST = /u/nlp/data/pos-tagger/english/test-wsj-19-21
 
-FRENCH_TEST = format=TREES,/u/nlp/data/lexparser/trees/FrenchCC/FTB-Test.utf8.txt
+FRENCH_TEST = format=TREES,/u/nlp/data/lexparser/trees/French/FTB-Test.utf8.txt
 
 GERMAN_TEST = format=TREES,trf=edu.stanford.nlp.trees.international.negra.NegraPennTreeReaderFactory,/u/nlp/data/GermanACL08/negra/negra_3.mrg
 

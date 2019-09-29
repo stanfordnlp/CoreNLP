@@ -36,27 +36,12 @@ public class ArrayMath {
    * Generate a range of integers from start (inclusive) to end (exclusive).
    * Similar to the Python range() builtin function.
    *
-   * @param end Ending number (exclusive)
-   * @return integers from [0...end)
-   */
-  public static int[] range(int end) {
-    assert end >= 0;
-    int[] range = new int[end];
-    for (int i = 0; i < end; ++i)
-      range[i] = i;
-    return range;
-  }
-
-  /**
-   * Generate a range of integers from start (inclusive) to end (exclusive).
-   * Similar to the Python range() builtin function.
-   *
    * @param start Beginning number (inclusive)
    * @param end Ending number (exclusive)
    * @return integers from [start...end)
    */
   public static int[] range(int start, int end) {
-    assert end >= start;
+    assert end > start;
     int len = end - start;
     int[] range = new int[len];
     for (int i = 0; i < range.length; ++i) {
@@ -1037,15 +1022,21 @@ public class ArrayMath {
         max = logInputs[i];
       }
     }
+    boolean haveTerms = false;
     double intermediate = 0.0;
     double cutoff = max - SloppyMath.LOGTOLERANCE;
     // we avoid rearranging the array and so test indices each time!
     for (int i = fromIndex; i < toIndex; i++) {
       if (i != maxIdx && logInputs[i] > cutoff) {
+        haveTerms = true;
         intermediate += Math.exp(logInputs[i] - max);
       }
     }
-    return intermediate != 0 ? (max + Math.log(1 + intermediate)) : max;
+    if (haveTerms) {
+      return max + Math.log(1.0 + intermediate);
+    } else {
+      return max;
+    }
   }
 
   /**

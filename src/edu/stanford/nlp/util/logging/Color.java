@@ -9,7 +9,7 @@ package edu.stanford.nlp.util.logging;
  */
 public enum Color {
 
-  //note: NONE BLACK and WHITE must be first three (for random colors in OutputHandler to work)
+  //note: NONE, BLACK and WHITE must be first three (for random colors in OutputHandler to work)
   NONE(""), BLACK("\033[30m"), WHITE("\033[37m"), RED("\033[31m"), GREEN("\033[32m"),
   YELLOW("\033[33m"), BLUE("\033[34m"), MAGENTA("\033[35m"), CYAN("\033[36m");
 
@@ -20,11 +20,11 @@ public enum Color {
   }
 
   public String apply(String toColor) {
-    StringBuilder b = new StringBuilder();
-    if (Redwood.supportsAnsi) { b.append(ansiCode); }
-    b.append(toColor);
-    if (Redwood.supportsAnsi) { b.append("\033[0m"); }
-    return b.toString();
+    if (Redwood.supportsAnsi) {
+      return ansiCode + toColor + "\033[0m";
+    } else {
+      return toColor;
+    }
   }
 
 }

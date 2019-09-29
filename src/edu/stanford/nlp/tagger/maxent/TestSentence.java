@@ -244,8 +244,10 @@ public class TestSentence implements SequenceModel  {
 
         for (int j = 0; j < tags.length; j++) {
           // score the j-th tag
-          int tagindex = maxentTagger.hasApproximateScoring() ? maxentTagger.tags.getIndex(tags[j]) : j;
-          // log.info("Mapped from j="+ j + " " + tags[j] + " to " + tagindex);
+          String tag = tags[j];
+          boolean approximate = maxentTagger.hasApproximateScoring();
+          int tagindex = approximate ? maxentTagger.tags.getIndex(tag) : j;
+          // log.info("Mapped from j="+ j + " " + tag + " to " + tagindex);
           probabilities[current][hyp][tagindex] = probs[j];
         }
       } // for current
@@ -355,13 +357,15 @@ public class TestSentence implements SequenceModel  {
 
     int left = leftWindow();
     int right = rightWindow();
-    final TTags ttags = maxentTagger.tags;
 
-    // Loop range, with guards:
-    final int s = Math.max(current - left, left);
-    final int e = Math.min(current + right, size + left - 1);
-    for (int j = s; j <= e; j++) {
-      h.setTag(j - left, ttags.getTag(tags[j]));
+    for (int j = current - left; j <= current + right; j++) {
+      if (j < left) {
+        continue;
+      } //but shouldn't happen
+      if (j >= size + left) {
+        break;
+      } //but shouldn't happen
+      h.setTag(j - left, maxentTagger.tags.getTag(tags[j]));
     }
   }
 
@@ -384,7 +388,12 @@ public class TestSentence implements SequenceModel  {
   // This scores the current assignment in PairsHolder at
   // current position h.current (returns normalized scores)
   private double[] getScores(History h) {
-    return maxentTagger.hasApproximateScoring() ? getApproximateScores(h) : getExactScores(h);
+    if (maxentTagger.hasApproximateScoring()) {
+      if (DBG) { System.err.println("Tagger has approx scoring; "); }
+      return getApproximateScores(h);
+    }
+    if (DBG) { System.err.println("Tagger has exact scoring"); }
+    return getExactScores(h);
   }
 
   private double[] getExactScores(History h) {
@@ -505,68 +514,120 @@ public class TestSentence implements SequenceModel  {
   }
 
   private double[] getHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
-    return maxentTagger.hasApproximateScoring() ? getApproximateHistories(tags, h, extractors, extractorsRare) : getExactHistories(h, extractors, extractorsRare);
+    if (maxentTagger.hasApproximateScoring()) {
+      return getApproximateHistories(tags, h, extractors, extractorsRare);
+    }
+    return getExactHistories(h, extractors, extractorsRare);
   }
 
   private double[] getExactHistories(History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
     double[] scores = new double[maxentTagger.ySize];
-    if (VERBOSE) { System.err.println("Calling exact histories"); }
-    double[] lambda = maxentTagger.getLambdaSolve().lambda;
     for (Pair<Integer,Extractor> e : extractors) {
-      runExactExtractor(e.first(), e.second(), h, scores, lambda);
+      int kf = e.first();
+      Extractor ex = e.second();
+      String val = ex.extract(h);
+      int[] fAssociations = maxentTagger.fAssociations.get(kf).get(val);
+      if (fAssociations != null) {
+        for (int j = 0; j < maxentTagger.ySize; j++) {
+          int fNum = fAssociations[j];
+          if (fNum > -1) {
+            double score = maxentTagger.getLambdaSolve().lambda[fNum];
+            if (VERBOSE) {
+              fullScores[kf][j] = score;
+            }
+            scores[j] += score;
+          }
+        }
+      }
     }
     if (extractorsRare != null) {
       int szCommon = maxentTagger.extractors.size();  // needs to be full size list of extractors not subset of some type
       for (Pair<Integer,Extractor> e : extractorsRare) {
-        runExactExtractor(szCommon + e.first(), e.second(), h, scores, lambda);
-      }
-    }
-    return scores;
-  }
+        int kf = e.first();
+        Extractor ex = e.second();
+        String val = ex.extract(h);
 
-  private void runExactExtractor(int kf, Extractor ex, History h, double[] scores, double[] lambda) {
-    int[] fAssociations = maxentTagger.fAssociations.get(kf).get(ex.extract(h));
-    if (fAssociations != null) {
-      for (int j = 0; j < maxentTagger.ySize; j++) {
-        int fNum = fAssociations[j];
-        if (fNum >= 0) {
-          scores[j] += lambda[fNum];
-          if (VERBOSE) { fullScores[kf][j] = lambda[fNum]; }
+        int[] fAssociations = maxentTagger.fAssociations.get(kf+szCommon).get(val);
+//        String word = h.pairs.getWord(h, 0);
+//        if (kf + szCommon == 30) { // ExtractorWordPref(len5,w0)
+//          System.err.print(ex + ": word=" + word + ", val=" + val);
+//          if (fAssociations == null) {
+//            System.err.println(", fAssociations is NULL");
+//          } else {
+//            System.err.println(", fAssociations = " + Arrays.toString(fAssociations));
+//          }
+//        }
+        if (fAssociations != null) {
+          for (int j = 0; j < maxentTagger.ySize; j++) {
+            int fNum = fAssociations[j];
+            if (fNum > -1) {
+              double score = maxentTagger.getLambdaSolve().lambda[fNum];
+              if (VERBOSE) {
+                fullScores[kf+szCommon][j] = score;
+              }
+              scores[j] += score;
+            }
+          }
         }
       }
     }
+    return scores;
   }
 
+  // todo [cdm 2016]: Could this be sped up a bit by caching lambda array, extracting method for shared code?
+  // todo [cdm 2016]: Also it's allocating java.util.ArrayList$Itr for for loop - why can't it just random access array?
   /** Returns an unnormalized score (in log space) for each tag. */
   private double[] getApproximateHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
-    double[] scores = new double[tags.length];
-    if (VERBOSE) { System.err.println("Calling approx histories"); }
-    double[] lambda = maxentTagger.getLambdaSolve().lambda;
 
-    for (Pair<Integer, Extractor> e : extractors) {
-      runApproximateExtractor(e.first(), e.second(), h, tags, scores, lambda);
+    double[] scores = new double[tags.length];
+    int szCommon = maxentTagger.extractors.size();
+    if (VERBOSE) { System.err.println("Calling approx histories"); }
+
+    for (Pair<Integer,Extractor> e : extractors) {
+      int kf = e.first();
+      Extractor ex = e.second();
+      String val = ex.extract(h);
+      int[] fAssociations = maxentTagger.fAssociations.get(kf).get(val);
+      if (fAssociations != null) {
+        for (int j = 0; j < tags.length; j++) {
+          String tag = tags[j];
+          int tagIndex = maxentTagger.tags.getIndex(tag);
+          int fNum = fAssociations[tagIndex];
+          if (fNum > -1) {
+            double score = maxentTagger.getLambdaSolve().lambda[fNum];
+            if (VERBOSE) {
+              fullScores[kf][j] = score;
+            }
+            scores[j] += score;
+          }
+        }
+      }
     }
     if (extractorsRare != null) {
-      int szCommon = maxentTagger.extractors.size();
-      for (Pair<Integer, Extractor> e : extractorsRare) {
-        runApproximateExtractor(szCommon + e.first(), e.second(), h, tags, scores, lambda);
+      for (Pair<Integer,Extractor> e : extractorsRare) {
+        int kf = e.first();
+        Extractor ex = e.second();
+        String val = ex.extract(h);
+        int[] fAssociations = maxentTagger.fAssociations.get(szCommon+kf).get(val);
+        if (fAssociations != null) {
+          for (int j = 0; j < tags.length; j++) {
+            String tag = tags[j];
+            int tagIndex = maxentTagger.tags.getIndex(tag);
+            int fNum = fAssociations[tagIndex];
+            if (fNum > -1) {
+              double score = maxentTagger.getLambdaSolve().lambda[fNum];
+              if (VERBOSE) {
+                fullScores[kf+szCommon][j] = score;
+              }
+              scores[j] += score;
+            }
+          }
+        }
       }
     }
     return scores;
   }
 
-  private void runApproximateExtractor(int kf, Extractor extractor, History h, String[] tags, double[] scores, double[] lambda) {
-    int[] fAssociations = maxentTagger.fAssociations.get(kf).get(extractor.extract(h));
-    if (fAssociations == null) return;
-    final TTags ttags = maxentTagger.tags;
-    for (int j = 0; j < tags.length; j++) {
-      int fNum = fAssociations[ttags.getIndex(tags[j])];
-      if (fNum >= 0) {
-        scores[j] += lambda[fNum];
-        if (VERBOSE) { fullScores[kf][j] = lambda[fNum]; }
-      }
-    }
-  }
 
   /**
    * This method should be called after the sentence has been tagged.
@@ -736,9 +797,8 @@ public class TestSentence implements SequenceModel  {
     double[] scores = scoresOf(tags, pos);
     double score = Double.NEGATIVE_INFINITY;
     int[] pv = getPossibleValues(pos);
-    final int search = tags[pos];
     for (int i = 0; i < scores.length; i++) {
-      if (pv[i] == search) {
+      if (pv[i] == tags[pos]) {
         score = scores[i];
       }
     }
@@ -761,30 +821,28 @@ public class TestSentence implements SequenceModel  {
     return getScores(history);
   }
 
-  // todo [cdm 2013]: Tagging could be sped up quite a bit here if we cached int
-  // arrays of tags by index, not Strings
+  // todo [cdm 2013]: Tagging could be sped up quite a bit here if we cached int arrays of tags by index, not Strings
   protected String[] stringTagsAt(int pos) {
-    pos -= leftWindow(); // Adjust once, for everything below:
-    if ((pos < 0) || (pos >= size)) {
+    if ((pos < leftWindow()) || (pos >= size + leftWindow())) {
       return naTagArr;
     }
 
-    if (originalTags != null) {
-      final String orig = originalTags.get(pos);
-      if (orig != null) {
-        return new String[] { orig };
-      }
+    String[] arr1;
+    if (originalTags != null && originalTags.get(pos - leftWindow()) != null) {
+      arr1 = new String[1];
+      arr1[0] = originalTags.get(pos - leftWindow());
+      return arr1;
     }
 
-    String[] arr1;
-    String word = sent.get(pos);
+    String word = sent.get(pos - leftWindow());
     int count = maxentTagger.dict.sum(word);
     if (count == 0 || count < minWordsLockTags) {
       arr1 = maxentTagger.tags.getOpenTagsArray();
     } else {
       arr1 = maxentTagger.dict.getTags(word);
     }
-    return maxentTagger.tags.deterministicallyExpandTags(arr1);
+    arr1 = maxentTagger.tags.deterministicallyExpandTags(arr1);
+    return arr1;
   }
 
 }

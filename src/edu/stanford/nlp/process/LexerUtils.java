@@ -218,22 +218,13 @@ public class LexerUtils {
 
   /** This was the version originally written for Spanish to just recode cp1252 range quotes. */
   private static String nonCp1252Quotes(String in) {
-    switch(in) {
-      case "\u008B":
-        return "\u2039";
-      case "\u0091":
-        return "\u2018";
-      case "\u0092":
-        return "\u2019";
-      case "\u0093":
-        return "\u201C";
-      case "\u0094":
-        return "\u201D";
-      case "\u009B":
-        return "\u203A";
-      default:
-        return in;
-    }
+    in = in.replace('\u008B', '\u2039');
+    in = in.replace('\u0091', '\u2018');
+    in = in.replace('\u0092', '\u2019');
+    in = in.replace('\u0093', '\u201C');
+    in = in.replace('\u0094', '\u201D');
+    in = in.replace('\u009B', '\u203A');
+    return in;
   }
 
   public static String handleQuotes(String tok, boolean probablyLeft, QuotesEnum quoteStyle) {

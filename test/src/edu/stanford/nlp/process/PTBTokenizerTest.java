@@ -193,39 +193,39 @@ public class PTBTokenizerTest {
       { "Based", "in", "Eugene", ",", "Ore.", ",", "PakTech", "needs", "a", "new",
           "distributor", "after", "Sydney", "-", "based", "Creative", "Pack", "Pty.", "Ltd.",
           "went", "into", "voluntary", "administration", "." },
-      { "The", "Iron", "Age", "-LRB-", "ca.", "1300", "--", "ca.", "300", "BC", "-RRB-", "." },
+      { "The", "Iron", "Age", "(", "ca.", "1300", "–", "ca.", "300", "BC", ")", "." },
       { "Indonesian", "shipping", "-" },
       { "Gim", "me", "a", "phone", ",", "I", "'m", "gon", "na", "call", "."},
-      { "``", "John", "&", "Mary", "'s", "dog", ",", "''", "Jane", "thought", "-LRB-", "to", "herself", "-RRB-",
-          ".", "``", "What", "a", "#", "$", "%", "!", "a", "-", "``", "I", "like", "AT&T", "''", ".", "''" },
+      { "\"", "John", "&", "Mary", "'s", "dog", ",", "\"", "Jane", "thought", "(", "to", "herself", ")",
+          ".", "\"", "What", "a", "#", "$", "%", "!", "a", "-", "``", "I", "like", "AT&T", "''", ".", "\"" },
       { "I", "said", "at", "4:45", "pm", "."},
-      { "I", "ca", "n't", "believe", "they", "wan", "na", "keep", "40", "%", "of", "that", ".", "''",
-          "``", "Whatcha", "think", "?", "''", "``", "I", "do", "n't", "--", "think", "so", "…", ",", "''" },
+      { "I", "ca", "n't", "believe", "they", "wan", "na", "keep", "40", "%", "of", "that", ".", "\"",
+          "``", "Whatcha", "think", "?", "''", "\"", "I", "do", "n't", "---", "think", "so", "…", ",", "\"" },
       // We don't yet split "Whatcha" but probably should following model of "Whaddya" --> What d ya. Maybe What cha
       { "You", "`", "paid", "'", "US$", "170,000", "?!", "You", "should", "'ve", "paid", "only", "$", "16.75", "." },
       { "1", ".", "Buy", "a", "new", "Chevrolet",
-          "-LRB-", "37", "%", "-", "owned", "in", "the", "U.S.", ".", "-RRB-", ".", "15", "%" },
+          "(", "37", "%", "-", "owned", "in", "the", "U.S.", ".", ")", ".", "15", "%" },
       // Unclear if 37%-owned is right or wrong under old PTB....  Maybe should be 37 %-owned even though sort of crazy
-      { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  ":-LRB-", ".",
-          "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
-      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84", "km", "-RRB-", ".",
-          "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
+      { "I", "like", "you", ";-)", "but", "do", "you", "care",  ":(", ".",
+          "I", "'m", "happy", "^_^", "but", "shy", "(x.x)", "!" },
+      { "Diamond", "(", "``", "Not", "even",  "the", "chair", "''", ")", "lives", "near", "Udaipur", "(", "84", "km", ")", ".",
+          "{", "1", ".", "A", "potential", "Palmer", "trade", ":", "}"},
       { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
-      { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
+      { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "(", "sometimes", "a", "Ph.", "D", ")", "from", "Stanford", "." },
       { "@Harry_Styles", "did", "n`t", "like", "Mu`ammar", "al", "-", "Qaddafi" },
       { "Kenneth", "liked", "Windows", "3.1", ",", "Windows", "3.x", ",", "and", "Mesa", "A.B", "as", "I", "remember", "things", ".", },
       { "I", "like", "programming", "in", "F#", "more", "than", "C#", "." },
       { "NBC", "Live", "will", "be", "available", "free", "through", "the", "Yahoo!", "Chat", "Web", "site", ".",
           "E!", "Entertainment", "said", "``", "Jeopardy!", "''", "is", "a", "game", "show", "." },
-      { "I", "lived", "in", "O'Malley", "and", "read", "OK!", "Magazine", "." },
-      { "I", "lived", "in", "O'Malley", "and", "read", "OK!", "Magazine", "." },
+      { "I", "lived", "in", "O’Malley", "and", "read", "OK!", "Magazine", "." },
+      { "I", "lived", "in", "O’Malley", "and", "read", "OK!", "Magazine", "." },
       { "I", "like", ":", "\u2022", "wine", ",", "\u2022", "cheese", ",", "\u2023", "salami",
           ",", "&", "\u2043", "speck", "." },
       { "I", "do", "n't", "give", "a", "f**k", "about", "your", "sh*tty", "life", "." },
       { "First", "sentence", "…", ".", "Second", "sentence", "." },
       { "First", "sentence", "…", ".", "Second", "sentence", "." },
-      { "I", "was", "n't", "really", "…", "well", ",", "what", "I", "mean", "…", "see", "…", "what", "I", "'m", "saying",
-          ",", "the", "thing", "is", "…", "I", "did", "n't", "mean", "it", "." },
+      { "I", "was", "n’t", "really", "…", "well", ",", "what", "I", "mean", "…", "see", "…", "what", "I", "'m", "saying",
+          ",", "the", "thing", "is", "…", "I", "did", "n’t", "mean", "it", "." },
       { "This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "http://google.com", "." },
       { "This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "htvp", ":", "/", "/", "google.com", "." },
       { "Download", "from", "ftp://myname@host.dom/%2Fetc/motd" },
@@ -242,8 +242,8 @@ public class PTBTokenizerTest {
       { "Contact", ":", "sue@google.com", ",", "fred@stanford.edu", ";", "michael.inman@lab.rpi.cs.cmu.edu", "." },
       { "Email", ":", "recruiters@marvelconsultants.com", "<mailto:recruiters@marvelconsultants.com>" },
       { "Jeremy", "Meier", "<jermeier@earthlink.net>" },
-      { "Ram", "Tackett", ",", "-LRB-", "mailto:rtackett@abacustech.net", "-RRB-" },
-      { "-LSB-", "Jgerma5@aol.com", "-RSB-", ".", "Danny_Jones%ENRON@eott.com" },
+      { "Ram", "Tackett", ",", "(", "mailto:rtackett@abacustech.net", ")" },
+      { "[", "Jgerma5@aol.com", "]", ".", "Danny_Jones%ENRON@eott.com" },
       { "https://fancy.startup.ai" },
       { "mid-2015" },
       { "UK", "-", "based" },
@@ -280,15 +280,15 @@ public class PTBTokenizerTest {
 //      { "the", "9-to-11:45", "a.m.", "weekday", "shift" },
       { "Brighton", "Rd.", "Pacifica"},
       { "Walls", "keeping", "water", "out", "of", "the", "bowl", "-", "shaped", "city", "have", "been", "breached", ",", "and",
-              "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
-              "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
-          { "i", "got", "-LRB-", "89.2", "%", "-RRB-", "in", "my", "exams" },
+              "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "(", "3,000", "lb",
+              ")", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
+          { "i", "got", "(", "89.2", "%", ")", "in", "my", "exams" },
 
   };
 
   @Test
   public void testPTBTokenizerWord() {
-    TokenizerFactory<Word> tokFactory = PTBTokenizer.factory();
+    TokenizerFactory<Word> tokFactory = PTBTokenizer.factory("ptb3Escaping");
     runOnTwoArrays(tokFactory, ptbInputs, ptbGold);
   }
 
@@ -315,10 +315,24 @@ public class PTBTokenizerTest {
           { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},
   };
 
+  private final String[][] moreGoldUD = {
+          { "Joseph", "Someone", "(", "fl.", "2050", "–", "75", ")", "liked", "the", "noble", "gases", ",",
+                  "viz.", "helium", ",", "neon", ",", "argon", ",", "xenon", ",", "krypton", "and", "radon", "." },
+          { "Sambucus", "nigra", "subsp.", "canadensis", "and", "Canis", "spp.", "missing" },
+          { "Jim", "Jackon", "&", "Co.", "LLC", "replied", "." },
+          { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
+          { "\u2010", "-", "___" },
+          { "whenever", "one", "goes", "'", "tisk", "tisk", "'", "at", "something" },
+          { "She", "hates", "Alex", "."},
+          { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},
+  };
+
   @Test
   public void testPTBTokenizerCoreLabel() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory();
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("ptb3Escaping");
     runOnTwoArrays(tokFactory, moreInputs, moreGold);
+    TokenizerFactory<CoreLabel> tokFactoryUD = PTBTokenizer.coreLabelFactory();
+    runOnTwoArrays(tokFactoryUD, moreInputs, moreGoldUD);
   }
 
 
@@ -482,15 +496,15 @@ public class PTBTokenizerTest {
   };
 
   private final String[][] sgmlGold = {
-    { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium/olodaterol",
-            "5/2", "μg", "-LRB-", "p", "=", "0.008", "-RRB-", ",", "5/5", "μg", "-LRB-", "p", "=", "0.012", "-RRB-",
-            ",", "and", "5/10", "μg", "-LRB-", "p", "<", "0.0001", "-RRB-", "versus", "tiotropium", "monotherapy",
-            "-LSB-", "51", "-RSB-", "." },
+    { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium", "/", "olodaterol",
+            "5/2", "μg", "(", "p", "=", "0.008", ")", ",", "5/5", "μg", "(", "p", "=", "0.012", ")",
+            ",", "and", "5/10", "μg", "(", "p", "<", "0.0001", ")", "versus", "tiotropium", "monotherapy",
+            "[", "51", "]", "." },
     { "Panasonic", "brand", "products", "are", "produced", "by", "Samsung", "Electronics", "Co.", "Ltd.", ".",
             "Sanyo", "products", "are", "n't", ".", },
-    { "Oesophageal", "acid", "exposure", "-LRB-", "%", "time", "<", "pH", "4", "-RRB-", "was", "similar", "in",
-            "patients", "with", "or", "without", "complications", "-LRB-", "19.2", "%", "v", "19.3", "%",
-            "p", ">", "0.05", "-RRB-", ".", },
+    { "Oesophageal", "acid", "exposure", "(", "%", "time", "<", "pH", "4", ")", "was", "similar", "in",
+            "patients", "with", "or", "without", "complications", "(", "19.2", "%", "v", "19.3", "%",
+            "p", ">", "0.05", ")", ".", },
     { "<!DOCTYPE\u00A0html\u00A0PUBLIC\u00A0\"-//W3C//DTD\u00A0HTML\u00A04.01\u00A0Strict//EN\"\u00A0\"http://www.w3.org/TR/html4/strict.dtd\">" }, // spaces go to &nbsp; \u00A0
     { "Hi", "!", "<foo\u00A0bar=\"baz\u00A0xy\u00A0=\u00A0foo\u00A0!$*)\u00A0422\"\u00A0>", "<?PITarget\u00A0PIContent?>", "<?PITarget\u00A0PIContent>", "Hi", "!" },
     { "<?xml\u00A0version=\"1.0\"\u00A0encoding=\"UTF-8\"\u00A0?>", "<?xml-stylesheet\u00A0type=\"text/xsl\"\u00A0href=\"style.xsl\"?>",
@@ -521,15 +535,15 @@ public class PTBTokenizerTest {
 
 
   private final String[][] sgmlPerLineGold = {
-    { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium/olodaterol",
-            "5/2", "μg", "-LRB-", "p", "=", "0.008", "-RRB-", ",", "5/5", "μg", "-LRB-", "p", "=", "0.012", "-RRB-",
-            ",", "and", "5/10", "μg", "-LRB-", "p", "<", "0.0001", "-RRB-", "versus", "tiotropium", "monotherapy",
-            "-LSB-", "51", "-RSB-", "." },
+    { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium", "/", "olodaterol",
+            "5/2", "μg", "(", "p", "=", "0.008", ")", ",", "5/5", "μg", "(", "p", "=", "0.012", ")",
+            ",", "and", "5/10", "μg", "(", "p", "<", "0.0001", ")", "versus", "tiotropium", "monotherapy",
+            "[", "51", "]", "." },
     { "Panasonic", "brand", "products", "are", "produced", "by", "Samsung", "Electronics", "Co.", "Ltd.", ".",
             "Sanyo", "products", "are", "n't", ".", },
-    { "Oesophageal", "acid", "exposure", "-LRB-", "%", "time", "<", "pH", "4", "-RRB-", "was", "similar", "in",
-            "patients", "with", "or", "without", "complications", "-LRB-", "19.2", "%", "v", "19.3", "%",
-            "p", ">", "0.05", "-RRB-", ".", },
+    { "Oesophageal", "acid", "exposure", "(", "%", "time", "<", "pH", "4", ")", "was", "similar", "in",
+            "patients", "with", "or", "without", "complications", "(", "19.2", "%", "v", "19.3", "%",
+            "p", ">", "0.05", ")", ".", },
     { "<!DOCTYPE\u00A0html\u00A0PUBLIC\u00A0\"-//W3C//DTD\u00A0HTML\u00A04.01\u00A0Strict//EN\"\u00A0\"http://www.w3.org/TR/html4/strict.dtd\">" }, // spaces go to &nbsp; \u00A0
     { "Hi", "!", "<foo\u00A0bar=\"baz\u00A0xy\u00A0=\u00A0foo\u00A0!$*)\u00A0422\"\u00A0>", "<?PITarget\u00A0PIContent?>", "<?PITarget\u00A0PIContent>", "Hi", "!" },
     { "<?xml\u00A0version=\"1.0\"\u00A0encoding=\"UTF-8\"\u00A0?>", "<?xml-stylesheet\u00A0type=\"text/xsl\"\u00A0href=\"style.xsl\"?>",
@@ -537,16 +551,16 @@ public class PTBTokenizerTest {
     { "<chapter\u00A0xml:id=\"chapter_1\">", "<?php\u00A0echo\u00A0$a;\u00A0?>", "<!--\u00A0This\u00A0is\u00A0an\u00A0SGML/XML\u00A0comment\u00A0\"Hi!\"\u00A0-->",
             "<p>", "</p>", "<p-fix\u00A0/\u00A0>"},
     { "<a href=\"http:\\\\it's\\here\">", "<quote orig_author='some \"dude'/>", "<", "not", "sgmltag" },
-    { "<", "quote", "previouspost", "=", "''",
+    { "<", "quote", "previouspost", "=", "\"",
             ">", ">", "I", "really", "do", "n't", "want", "to", "process", "this", "junk", ".",
             ">", "No", "one", "said", "you", "did", ",", "runny", ".", "What", "'s", "got", "you", "so", "scared", ",", "anyway", "?", "-",
-            "''", ">" },
+            "\"", ">" },
     { "&lt;b...@canada.com&gt;", "funky@thedismalscience.net", "<myemail@where.com>" },
     { "<DOC>", "<DOCID>", "nyt960102", ".0516", "</DOCID>", "<STORYID\u00A0cat=w\u00A0pri=u>", "A0264", "</STORYID>", "<SLUG\u00A0fv=ttj-z>" },
     { "<!--\u00A0copy\u00A0from\u00A0here\u00A0-->", "<a\u00A0href=\"http://strategis.gc.ca/epic/internet/inabc-eac.nsf/en/home\">",
-            "<", "img", "src", "=", "``", "id-images/ad-220x80_01e.jpg", "''", "alt", "=", "``", "Aboriginal", "Business", "Canada", ":",
-            "Opening", "New", "Doors", "for", "Your", "Business", "''",
-            "width", "=", "``", "220", "''", "height", "=", "``", "80", "''", "border", "=", "``", "0", "''", ">",
+            "<", "img", "src", "=", "\"", "id-images/ad-220x80_01e.jpg", "\"", "alt", "=", "\"", "Aboriginal", "Business", "Canada", ":",
+            "Opening", "New", "Doors", "for", "Your", "Business", "\"",
+            "width", "=", "\"", "220", "\"", "height", "=", "\"", "80", "\"", "border", "=", "\"", "0", "\"", ">",
             "</a>",  "<!--\u00A0copy\u00A0to\u00A0here\u00A0-->", "Small", "ABC", "Graphic", "Instructions", "1", "." },
     { "We", "traveled", "from", "No", ".", "Korea", "to", "the", "U.S.A.", "Why", "?" },
   };
@@ -594,7 +608,7 @@ public class PTBTokenizerTest {
         if (i >= desired[sent].length) {
           fail("PTBTokenizer generated too many tokens for sentence " + sent + "! Added " + w.value());
         } else {
-          assertEquals("PTBTokenizer got wrong token", desired[sent][i], w.value());
+          assertEquals("PTBTokenizer got wrong token for " + inputs[sent], desired[sent][i], w.value());
         }
       }
     }
@@ -658,7 +672,7 @@ public class PTBTokenizerTest {
     String[] sample = { "Das TV-Duell von Kanzlerin Merkel und SPD-Herausforderer Steinbrück war eher lahm - können es die Spitzenleute der kleinen Parteien besser? ",
             "Die erquickende Sicherheit und Festigkeit in der Bewegung, den Vorrat von Kraft, kann ja die Versammlung nicht fühlen, hören will sie sie nicht, also muß sie sie sehen; und die sehe man einmal in einem Paar spitzen Schultern, zylindrischen Schenkeln, oder leeren Ärmeln, oder lattenförmigen Beinen." };
     String[][] tokenized = {
-            { "Das", "TV-Duell", "von", "Kanzlerin", "Merkel", "und", "SPD-Herausforderer", "Steinbrück", "war", "eher",
+            { "Das", "TV", "-", "Duell", "von", "Kanzlerin", "Merkel", "und", "SPD", "-", "Herausforderer", "Steinbrück", "war", "eher",
               "lahm", "-", "können", "es", "die", "Spitzenleute", "der", "kleinen", "Parteien", "besser", "?", },
             {"Die", "erquickende", "Sicherheit", "und", "Festigkeit", "in", "der", "Bewegung", ",", "den", "Vorrat", "von",
                     "Kraft", ",", "kann", "ja", "die", "Versammlung", "nicht", "fühlen", ",", "hören", "will", "sie", "sie",
@@ -701,10 +715,28 @@ public class PTBTokenizerTest {
             "and", "explain", "wrt.", "the", "principles", "." },
   };
 
+  private final String[][] mtGoldUD = {
+          { "Enter", "an", "option", "[", "?", "/", "Current", "]", ":", "{", "1", "}" },
+          { "for", "example", ",", "{", "1", "}", "http://www.autodesk.com", "{", "2", "}", ",", "or", "a", "path" },
+          { "enter", "{", "3", "}", "@", "{", "4", "}", "at", "the", "Of", "prompt", "." },
+          { "{", "1", "}", "block", "name", "=", "{", "2", "}" },
+          // todo [cdm 2019]: The current output on this next one could still be improved!!!
+          { "1202", "-03-04", "5:32:56", "2004-03-04T18:32:56" },
+          { "20", "°C", "is", "68", "°F", "because", "0", "℃", "is", "32", "℉" },
+          { "a.jpg", "a-b.jpg", "a.b.jpg", "a-b.jpg", "a_b.jpg", "a-b-c.jpg", "0-1-2.jpg", "a-b/c-d_e.jpg", "a-b/c-9a9_9a.jpg"},
+          { "¯\\_(ツ)_/¯" },
+          { "#hashtag", "#Azərbaycanca", "#mûǁae", "#Čeština", "#日本語ハッシュタグ", "#", "1", "#", "23", "#Trump2016", "@", "3", "@acl_2016" },
+          { "Sect.", "793", "of", "the", "Penal", "Code" },
+          { "Pls.", "copy", "the", "text", "within", "this", "quote", "to", "the", "subject", "part", "of", "your", "email",
+                  "and", "explain", "wrt.", "the", "principles", "." },
+  };
+
   @Test
   public void testPTBTokenizerMT() {
-    TokenizerFactory<Word> tokFactory = PTBTokenizer.factory();
+    TokenizerFactory<Word> tokFactory = PTBTokenizer.factory("ptb3Escaping");
     runOnTwoArrays(tokFactory, mtInputs, mtGold);
+    TokenizerFactory<Word> tokFactoryUD = PTBTokenizer.factory();
+    runOnTwoArrays(tokFactoryUD, mtInputs, mtGoldUD);
   }
 
   private final String[] emojiInputs = {
@@ -749,7 +781,7 @@ public class PTBTokenizerTest {
           "I know that the inside of the mall opens @5am.",
           "I have ordered Bose Headfones worth 300USD. Not 156bpmt. FCPX MP4 playback choppy on 5k iMac",
           "RT @Suns: What happens when you combine @50cent, #StarWars and introductions at an @NBA game? This.",
-          "RT @ShirleyHoman481: '#StarWars' Premiere Street Closures Are “Bigger Than the Oscars\": Four blocks of Hollywood Blvd. -- from Highland… ht…",
+          "RT @ShirleyHoman481: '#StarWars' Premiere Street Closures Are “Bigger Than the Oscars”: Four blocks of Hollywood Blvd. -- from Highland… ht…",
           "In 2009, Wiesel criticized the Vatican for lifting the excommunication of controversial bishop Richard Williamson, a member of the Society of Saint Pius X.",
           "RM460.35 million",
   };
@@ -759,9 +791,9 @@ public class PTBTokenizerTest {
                   "Owen", "'s", "dad", "?", "Check", "out", ".@WHMPodcast", "'s", "rant", "on", "Ep2",
                   "https://t.co/9iJMMkAokT" },
           { "RT", "@BiIlionaires", ":", "#TheForceAwakens", "inspired", "vehicles", "are", "a", "big", "hit", "in", "LA", "." },
-          { "``", "@people", ":", "A", "woman", "built", "the", "perfect", "#StarWars", "costume", "for", "her", "dog",
-                  "https://t.co/VJRQwNZB0t", "https://t.co/nmNROB7diR", "''", "@guacomole123" },
-          { "I", "would", "like", "to", "get", "a", "13", "''", "MB", "Air", "with", "an", "i7", "@", "1,7", "GHz" },
+          { "“", "@people", ":", "A", "woman", "built", "the", "perfect", "#StarWars", "costume", "for", "her", "dog",
+                  "https://t.co/VJRQwNZB0t", "https://t.co/nmNROB7diR", "”", "@guacomole123" },
+          { "I", "would", "like", "to", "get", "a", "13", "\"", "MB", "Air", "with", "an", "i7", "@", "1,7", "GHz" },
           { "So", "you", "have", "audio", "track", "1", "@", "145", "bpm", "and", "global", "project", "tempo", "is",
                   "now", "145", "bpm" },
           { "I", "know", "that", "the", "inside", "of", "the", "mall", "opens", "@", "5", "am", "." },
@@ -769,9 +801,9 @@ public class PTBTokenizerTest {
             "FCPX", "MP4", "playback", "choppy", "on", "5k", "iMac" },
           { "RT", "@Suns", ":", "What", "happens", "when", "you", "combine", "@50cent", ",", "#StarWars", "and",
                   "introductions", "at", "an", "@NBA", "game", "?", "This", "." },
-          { "RT", "@ShirleyHoman481", ":", "'", "#StarWars", "'", "Premiere", "Street", "Closures", "Are", "``",
-                  "Bigger", "Than", "the", "Oscars", "''", ":", "Four", "blocks", "of", "Hollywood", "Blvd.", "--",
-                  "from", "Highland", "...", "ht", "..." },
+          { "RT", "@ShirleyHoman481", ":", "'", "#StarWars", "'", "Premiere", "Street", "Closures", "Are", "“",
+                  "Bigger", "Than", "the", "Oscars", "”", ":", "Four", "blocks", "of", "Hollywood", "Blvd.", "--",
+                  "from", "Highland", "…", "ht", "…" },
           // Should really be "Saint Pius X ." but unclear how to achieve.
           { "In", "2009", ",", "Wiesel", "criticized", "the", "Vatican", "for", "lifting", "the", "excommunication",
                   "of", "controversial", "bishop", "Richard", "Williamson", ",", "a", "member", "of", "the",
@@ -833,7 +865,7 @@ public class PTBTokenizerTest {
 
   @Test
   public void testHyphensQuoteAndBOM() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false,invertible");
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false,invertible,ptb3Escaping");
     runOnTwoArrays(tokFactory, hyphenInputs, hyphenGold);
     runAgainstOrig(tokFactory, hyphenInputs);
   }

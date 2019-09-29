@@ -163,6 +163,8 @@ import edu.stanford.nlp.util.logging.Redwood;
         quoteStyle = val ? LexerUtils.QuotesEnum.LATEX : LexerUtils.QuotesEnum.ORIGINAL;
         ellipsisStyle = val ? LexerUtils.EllipsesEnum.PTB3 : LexerUtils.EllipsesEnum.ORIGINAL;
         ptb3Dashes = val;
+        splitHyphenated = ! val;
+        splitForwardSlash = ! val;
       } else if ("ud".equals(key)) {
         // todo: should we deal with value? But may be null.
         invertible = true; // this helps for straight quote sentence splitting
@@ -269,7 +271,11 @@ import edu.stanford.nlp.util.logging.Redwood;
   private enum UntokenizableOptions { NONE_DELETE, FIRST_DELETE, ALL_DELETE, NONE_KEEP, FIRST_KEEP, ALL_KEEP }
   private UntokenizableOptions untokenizable = UntokenizableOptions.FIRST_DELETE;
 
-  /* Flags begin with historical ptb3Escaping behavior. */
+  /* Flags used to begin with historical ptb3Escaping behavior, now got with option -tokenizerOptions ptb3Escaping.
+   * Starting with CoreNLP 4.0, flags begin as UD tokenization default.
+   * This is like "new LDC treebank" tokenization except that we do not escape parentheses except on
+   * s-expression tree input/output.
+   */
   private boolean invertible;
   private boolean tokenizeNLs;
   private boolean tokenizePerLine;
@@ -278,16 +284,16 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean normalizeAmpersandEntity = true;
   private boolean normalizeCurrency = false; // only $ and # in Penn Treebank 3 data, but we now allow other currency
   private boolean normalizeFractions = true;
-  private boolean normalizeParentheses = true;
-  private boolean normalizeOtherBrackets = true;
-  private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.LATEX;
-  private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.PTB3;
-  private boolean ptb3Dashes = true;
+  private boolean normalizeParentheses = false;
+  private boolean normalizeOtherBrackets = false;
+  private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.NOT_CP1252;
+  private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
+  private boolean ptb3Dashes = false;
   private boolean escapeForwardSlashAsterisk = false; // this is true in Penn Treebank 3 but we don't do it now
   private boolean strictTreebank3 = false;
   private boolean splitAssimilations = true;
-  private boolean splitHyphenated; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
-  private boolean splitForwardSlash; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
+  private boolean splitHyphenated = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
+  private boolean splitForwardSlash = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
 
   /* Bracket characters and forward slash and asterisk:
    *

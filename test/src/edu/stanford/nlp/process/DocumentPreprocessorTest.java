@@ -70,7 +70,7 @@ public class DocumentPreprocessorTest extends TestCase {
   /** Test if fails with punctuation near end. We did at one point. */
   public void testNearFinalPunctuation2() {
     String test = "(I lied.)";
-    String[] expectedResults = { "-LRB- I lied . -RRB-" };
+    String[] expectedResults = { "( I lied . )" };
     runTest(test, expectedResults);
   }
 

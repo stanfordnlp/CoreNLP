@@ -223,6 +223,7 @@ public class WordsToSentencesAnnotatorTest {
     Properties props = PropertiesUtils.asProperties(
             "annotators", "tokenize, cleanxml, ssplit",
             "tokenize.language", "en",
+            "tokenize.options", "ptb3Escaping=true",
             "ssplit.newlineIsSentenceBreak", "two",
             "ssplit.boundaryMultiTokenRegex",
             "( /\\*NL\\*/ /\\p{Lu}[-\\p{L}]+/+ /,/ ( /[-\\p{L}]+/+ /,/ )? " +
@@ -290,7 +291,7 @@ public class WordsToSentencesAnnotatorTest {
       pipeline.annotate(document1);
       List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
 
-     assertEquals("For " + dateLineSpanishTexts[i] + " annotation is " + document1, 2, sentences.size());
+      assertEquals("For " + dateLineSpanishTexts[i] + " annotation is " + document1, 2, sentences.size());
 
       List<CoreLabel> sentenceOneTokens = sentences.get(0).get(CoreAnnotations.TokensAnnotation.class);
       String sentenceOne = SentenceUtils.listToString(sentenceOneTokens);

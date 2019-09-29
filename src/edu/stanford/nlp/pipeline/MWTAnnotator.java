@@ -149,7 +149,6 @@ public class MWTAnnotator implements Annotator {
               tokenWords.set(0, StringUtils.capitalize(tokenWords.get(0)));
             }
           }
-          boolean isFirst = true;
           for (String word : tokenWords) {
             CoreLabel newToken = new CoreLabel();
             newToken.setWord(word);
@@ -160,22 +159,10 @@ public class MWTAnnotator implements Annotator {
                 token.get(CoreAnnotations.ParentAnnotation.class));
             newToken.set(CoreAnnotations.TokenBeginAnnotation.class, finalDocumentTokens.size());
             newToken.set(CoreAnnotations.TokenEndAnnotation.class, finalDocumentTokens.size() + 1);
-            // the char offsets, before, and after should match the original token
             newToken.setBeginPosition(token.beginPosition());
             newToken.setEndPosition(token.endPosition());
-            newToken.setBefore(token.before());
-            newToken.setAfter(token.after());
             newToken.set(CoreAnnotations.MWTTokenTextAnnotation.class, token.word());
-            // set that this is a multi-word-token
             newToken.setIsMWT(true);
-            // set that this is the first word derived from a multi-word-token
-            // e.g. when "des" is split into "de" and "les", "de" would be true
-            if (isFirst) {
-              newToken.setIsMWTFirst(true);
-              isFirst = false;
-            } else {
-              newToken.setIsMWTFirst(false);
-            }
             newToken.setIndex(sentenceIndex);
             newToken.setSentIndex(sentNum);
             // add finalized token
@@ -188,8 +175,6 @@ public class MWTAnnotator implements Annotator {
           newToken.set(CoreAnnotations.TokenBeginAnnotation.class, finalDocumentTokens.size());
           newToken.set(CoreAnnotations.TokenEndAnnotation.class, finalDocumentTokens.size() + 1);
           newToken.setIndex(sentenceIndex);
-          newToken.setIsMWT(false);
-          newToken.setIsMWTFirst(false);
           // add finalized token
           newSentenceTokens.add(newToken);
           finalDocumentTokens.add(newToken);

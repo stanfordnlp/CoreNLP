@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -397,169 +398,68 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
    */
   @Override
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
-    Set<String> features = Generics.newHashSet(100);
-    FeatureCollector c = new FeatureCollector(features);
+    Collection<String> features = Generics.newHashSet();
     String domain = cInfo.get(0).get(CoreAnnotations.DomainAnnotation.class);
+    final boolean doFE = domain != null;
 
 //    log.info(doFE+"\t"+domain);
 
     // there are two special cases below, because 2 cliques have 2 names
-    c.setDomain(domain);
+    Collection<String> c;
+    String suffix;
     if (clique == cliqueC) {
       //200710: tried making this clique null; didn't improve performance (rafferty)
-      featuresC(cInfo, loc, c.setSuffix("C"));
+      c = featuresC(cInfo, loc);
+      suffix = "C";
     } else if (clique == cliqueCpC) {
-      featuresCpC(cInfo, loc, c.setSuffix("CpC"));
-      featuresCnC(cInfo, loc - 1, c.setSuffix("CnC"));
+      c = featuresCpC(cInfo, loc);
+      suffix = "CpC";
+      addAllInterningAndSuffixing(features, c, suffix);
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain + '-' + suffix);
+      }
+      c = featuresCnC(cInfo, loc-1);
+      suffix = "CnC";
     } else if (clique == cliqueCp2C) {
-      featuresCp2C(cInfo, loc, c.setSuffix("Cp2C"));
+      c = featuresCp2C(cInfo, loc);
+      suffix = "Cp2C";
     } else if (clique == cliqueCp3C) {
-      featuresCp3C(cInfo, loc, c.setSuffix("Cp3C"));
+      c = featuresCp3C(cInfo, loc);
+      suffix = "Cp3C";
     } else if (clique == cliqueCp4C) {
-      featuresCp4C(cInfo, loc, c.setSuffix("Cp4C"));
+      c = featuresCp4C(cInfo, loc);
+      suffix = "Cp4C";
     } else if (clique == cliqueCp5C) {
-      featuresCp5C(cInfo, loc, c.setSuffix("Cp5C"));
+      c = featuresCp5C(cInfo, loc);
+      suffix = "Cp5C";
     } else if (clique == cliqueCpCp2C) {
-      featuresCpCp2C(cInfo, loc, c.setSuffix("CpCp2C"));
-      featuresCpCnC(cInfo, loc - 1, c.setSuffix("CpCnC"));
+      c = featuresCpCp2C(cInfo, loc);
+      suffix = "CpCp2C";
+      addAllInterningAndSuffixing(features, c, suffix);
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+ '-' + suffix);
+      }
+      c = featuresCpCnC(cInfo, loc-1);
+      suffix = "CpCnC";
     } else if (clique == cliqueCpCp2Cp3C) {
-      featuresCpCp2Cp3C(cInfo, loc, c.setSuffix("CpCp2Cp3C"));
+      c = featuresCpCp2Cp3C(cInfo, loc);
+      suffix = "CpCp2Cp3C";
     } else if (clique == cliqueCpCp2Cp3Cp4C) {
-      featuresCpCp2Cp3Cp4C(cInfo, loc, c.setSuffix("CpCp2Cp3Cp4C"));
+      c = featuresCpCp2Cp3Cp4C(cInfo, loc);
+      suffix = "CpCp2Cp3Cp4C";
     } else {
       throw new IllegalArgumentException("Unknown clique: " + clique);
+    }
+
+    addAllInterningAndSuffixing(features, c, suffix);
+    if (doFE) {
+      addAllInterningAndSuffixing(features, c, domain + '-' + suffix);
     }
 
     // log.info(StringUtils.join(features,"\n")+"\n");
     return features;
   }
 
-  /**
-   * This class handles collecting features into a set, in a more memory efficient way.
-   *
-   * The benefits arise from handling the concatenation and suffix appending re-using a
-   * single buffer, rather than repeatedly concatenating strings.
-   *
-   * This class is <em>not thread safe</em>, but you are unlikely to want to parallelize
-   * at this low level anyway.
-   *
-   * @author Erich Schubert
-   */
-  protected static class FeatureCollector {
-    /** Suffix to append */
-    String suffix = null;
-
-    /** Domain (may be null) */
-    String domain = null;
-
-    /** String builder */
-    private StringBuilder buf = new StringBuilder(100);
-
-    /** Output collection */
-    Set<String> collection;
-
-    /**
-     * Constructor
-     *
-     * @param output Output collection
-     */
-    public FeatureCollector(Set<String> output) {
-      this.collection = output;
-    }
-
-    /**
-     * Set the suffix to append to each token (separated by "|")
-     *
-     * @param suffix Suffix to use
-     */
-    public FeatureCollector setSuffix(String suffix) {
-      assert suffix != null && !suffix.isEmpty() : "Only non-empty suffixes are supported right now";
-      this.suffix = suffix;
-      return this;
-    }
-
-    /**
-     * Additional suffix domain.
-     *
-     * If a domain is set, then all features will be duplicated
-     * with the alternate suffix "|" + domain + "-" + suffix".
-     *
-     * @param domain Suffix domain
-     */
-    public void setDomain(String domain) {
-      this.domain = domain;
-    }
-
-    /** Handle string interning. A no-op right now. */
-    private String intern(String s) {
-      return s; // flags.intern2 ? s.intern() : s;
-    }
-
-    /**
-     * Begin a new feature construction.
-     *
-     * @return this
-     */
-    public FeatureCollector build() {
-      assert buf.length() == 0 : "Previous feature not added? " + buf.toString();
-      buf.setLength(0);
-      return this;
-    }
-
-    /**
-     * Append to the current feature name
-     *
-     * @param s String fragment
-     * @return this
-     */
-    public FeatureCollector append(String s) {
-      buf.append(s);
-      return this;
-    }
-
-    /**
-     * Append to the current feature name
-     *
-     * @param c Character
-     * @return this
-     */
-    public FeatureCollector append(char c) {
-      buf.append(c);
-      return this;
-    }
-
-    /**
-     * Append '-' to the current feature name
-     *
-     * @return this
-     */
-    public FeatureCollector dash() {
-      buf.append('-');
-      return this;
-    }
-
-    /**
-     * End the current feature, and add with suffixes.
-     */
-    public void add() {
-      final int l = buf.append('|').length();
-      collection.add(intern(buf.append(suffix).toString()));
-      if (domain != null) {
-        buf.setLength(l);
-        collection.add(intern(buf.append(domain).append('-').append(suffix).toString()));
-      }
-      buf.setLength(0);
-    }
-
-    /**
-     * Add a feature (+ suffix).
-     *
-     * @param feat Feature
-     */
-    public void add(String feat) {
-      build().append(feat).add();
-    }
-  }
 
   // TODO: when breaking serialization, it seems like it would be better to
   // move the lexicon into (Abstract)SequenceClassifier and to do this
@@ -576,7 +476,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       return;
     }
     Timing timing = new Timing();
-    lexicon = Generics.newHashMap(10000);
+    lexicon = Generics.newHashMap();
     boolean terryKoo = "terryKoo".equals(flags.distSimFileFormat);
     Pattern p = Pattern.compile(terryKoo ? "\\t" : "\\s+");
     for (String line : ObjectBank.getLineIterator(flags.distSimLexicon,
@@ -858,23 +758,23 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
   private static final Pattern splitSlashHyphenWordsPattern = Pattern.compile("[-/]");
 
-  private void generateSlashHyphenFeatures(String word, String fragSuffix, String wordSuffix, FeatureCollector out) {
+  private void generateSlashHyphenFeatures(String word, Collection<String> featuresC, String fragSuffix, String wordSuffix) {
     String[] bits = splitSlashHyphenWordsPattern.split(word);
     for (String bit : bits) {
       if (flags.slashHyphenTreatment == SeqClassifierFlags.SlashHyphenEnum.WFRAG) {
-        out.build().append(bit).append(fragSuffix).add();
+        featuresC.add(bit + fragSuffix);
       } else if (flags.slashHyphenTreatment == SeqClassifierFlags.SlashHyphenEnum.BOTH) {
-        out.build().append(bit).append(fragSuffix).add();
-        out.build().append(bit).append(wordSuffix).add();
+        featuresC.add(bit + fragSuffix);
+        featuresC.add(bit + wordSuffix);
       } else {
         // option WORD
-        out.build().append(bit).append(wordSuffix).add();
+        featuresC.add(bit + wordSuffix);
       }
     }
   }
 
 
-  protected void featuresC(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+  protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
     CoreLabel p3 = cInfo.get(loc - 3);
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p = cInfo.get(loc - 1);
@@ -889,77 +789,84 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String pShape = p.getString(CoreAnnotations.ShapeAnnotation.class);
     String nShape = n.getString(CoreAnnotations.ShapeAnnotation.class);
 
+    Collection<String> featuresC = new ArrayList<>();
+
     if (flags.useDistSim) {
       distSimAnnotate(cInfo);
     }
 
     if (flags.useBagOfWords) {
       for (IN word : cInfo) {
-        out.build().append(getWord(word)).append("-BAGOFWORDS").add();
+        featuresC.add(getWord(word) + "-BAGOFWORDS");
       }
     }
 
     if (flags.useDistSim && flags.useMoreTags) {
-      out.build().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(cWord).append("-PDISTSIM-CWORD").add();
+      featuresC.add(p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + cWord + "-PDISTSIM-CWORD");
     }
+
 
     if (flags.useDistSim) {
-      out.build().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append("-DISTSIM").add();
+      featuresC.add(c.get(CoreAnnotations.DistSimAnnotation.class) + "-DISTSIM");
     }
 
+
     if (flags.useTitle) {
-      if (titlePattern.matcher(cWord).matches()) {
-        out.add("IS_TITLE");
+      Matcher m = titlePattern.matcher(cWord);
+      if (m.matches()) {
+        featuresC.add("IS_TITLE");
       }
     }
     else if (flags.useTitle2) {
-      if (titlePattern2.matcher(cWord).matches()) {
-        out.add("IS_TITLE");
+      Matcher m = titlePattern2.matcher(cWord);
+      if (m.matches()) {
+        featuresC.add("IS_TITLE");
       }
     }
 
     if (flags.slashHyphenTreatment != SeqClassifierFlags.SlashHyphenEnum.NONE) {
       if (flags.useWord) {
-        generateSlashHyphenFeatures(cWord, "-WFRAG", "-WORD", out);
+        generateSlashHyphenFeatures(cWord, featuresC, "-WFRAG", "-WORD");
       }
     }
 
     if (flags.useInternal && flags.useExternal ) {
+
       if (flags.useWord) {
-        out.build().append(cWord).append("-WORD").add();
+        featuresC.add(cWord + "-WORD");
       }
 
       if (flags.use2W) {
-        out.build().append(getWord(p2)).append("-P2W").add();
-        out.build().append(getWord(n2)).append("-N2W").add();
+        featuresC.add(getWord(p2) + "-P2W");
+        featuresC.add(getWord(n2) + "-N2W");
       }
 
       if (flags.useLC) {
-        out.build().append(cWord.toLowerCase()).append("-CL").add();
-        out.build().append(pWord.toLowerCase()).append("-PL").add();
-        out.build().append(nWord.toLowerCase()).append("-NL").add();
+        featuresC.add(cWord.toLowerCase() + "-CL");
+        featuresC.add(pWord.toLowerCase() + "-PL");
+        featuresC.add(nWord.toLowerCase() + "-NL");
       }
 
       if (flags.useUnknown) { // for true casing
-        out.build().append(c.get(CoreAnnotations.UnknownAnnotation.class)).append("-UNKNOWN").add();
-        out.build().append(p.get(CoreAnnotations.UnknownAnnotation.class)).append("-PUNKNOWN").add();
-        out.build().append(n.get(CoreAnnotations.UnknownAnnotation.class)).append("-NUNKNOWN").add();
+        featuresC.add(c.get(CoreAnnotations.UnknownAnnotation.class)+"-UNKNOWN");
+        featuresC.add(p.get(CoreAnnotations.UnknownAnnotation.class)+"-PUNKNOWN");
+        featuresC.add(n.get(CoreAnnotations.UnknownAnnotation.class)+"-NUNKNOWN");
       }
 
       if (flags.useLemmas) {
         String lem = c.getString(CoreAnnotations.LemmaAnnotation.class);
-        if (!lem.isEmpty()) {
-          out.build().append(lem).append("-LEM").add();
+        if (! "".equals(lem)) {
+          featuresC.add(lem + "-LEM");
         }
       }
       if (flags.usePrevNextLemmas) {
         String plem = p.getString(CoreAnnotations.LemmaAnnotation.class);
         String nlem = n.getString(CoreAnnotations.LemmaAnnotation.class);
-        if (!plem.isEmpty()) {
-          out.build().append(plem).append("-PLEM").add();
+        if (! "".equals(plem)) {
+          featuresC.add(plem + "-PLEM");
         }
-        if (!nlem.isEmpty()) {
-          out.build().append(nlem).append("-NLEM").add();
+        if (! "".equals(nlem)) {
+          featuresC.add(nlem + "-NLEM");
         }
       }
 
@@ -967,174 +874,182 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         try {
           if (lastNames == null) {
             lastNames = Generics.newHashSet();
+
             for (String line : ObjectBank.getLineIterator(flags.lastNameList)) {
-              lastNames.add(line.split("\\s+")[0]);
+              String[] cols = line.split("\\s+");
+              lastNames.add(cols[0]);
             }
           }
           if (maleNames == null) {
             maleNames = Generics.newHashSet();
             for (String line : ObjectBank.getLineIterator(flags.maleNameList)) {
-              maleNames.add(line.split("\\s+")[0]);
+              String[] cols = line.split("\\s+");
+              maleNames.add(cols[0]);
             }
           }
           if (femaleNames == null) {
             femaleNames = Generics.newHashSet();
             for (String line : ObjectBank.getLineIterator(flags.femaleNameList)) {
-              femaleNames.add(line.split("\\s+")[0]);
+              String[] cols = line.split("\\s+");
+              femaleNames.add(cols[0]);
             }
           }
 
           String name = cWord.toUpperCase();
           if (lastNames.contains(name)) {
-            out.add("LAST_NAME");
+            featuresC.add("LAST_NAME");
           }
 
           if (maleNames.contains(name)) {
-            out.add("MALE_NAME");
+            featuresC.add("MALE_NAME");
           }
 
           if (femaleNames.contains(name)) {
-            out.add("FEMALE_NAME");
+            featuresC.add("FEMALE_NAME");
           }
+
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
       }
 
       if (flags.binnedLengths != null) {
-        int len = cWord.length(), beg = -1, end = -1;
-        for (int i = 0; i < flags.binnedLengths.length; i++) {
-          if (len <= flags.binnedLengths[i]) {
-            beg = i == 0 ? 1 : flags.binnedLengths[i - 1];
-            end = flags.binnedLengths[i];
+        int len = cWord.length();
+        String featureName = null;
+        for (int i = 0; i <= flags.binnedLengths.length; i++) {
+          if (i == flags.binnedLengths.length) {
+            featureName = "Len-" + flags.binnedLengths[flags.binnedLengths.length - 1] + "-Inf";
+          } else if (len <= flags.binnedLengths[i]) {
+            featureName = "Len-" + ((i == 0) ? 1 : flags.binnedLengths[i - 1]) + '-' + flags.binnedLengths[i];
             break;
           }
         }
-        if (beg < 0) {
-          beg = flags.binnedLengths[flags.binnedLengths.length - 1];
-        }
-        out.build().append("Len-").append(Integer.toString(beg)).dash().append(end > 0 ? Integer.toString(end) : "Inf").add();
+        featuresC.add(featureName);
       }
 
       if (flags.useABGENE) {
-        out.build().append(c.get(CoreAnnotations.AbgeneAnnotation.class)).append("-ABGENE").add();
-        out.build().append(p.get(CoreAnnotations.AbgeneAnnotation.class)).append("-PABGENE").add();
-        out.build().append(n.get(CoreAnnotations.AbgeneAnnotation.class)).append("-NABGENE").add();
+        featuresC.add(c.get(CoreAnnotations.AbgeneAnnotation.class) + "-ABGENE");
+        featuresC.add(p.get(CoreAnnotations.AbgeneAnnotation.class) + "-PABGENE");
+        featuresC.add(n.get(CoreAnnotations.AbgeneAnnotation.class) + "-NABGENE");
       }
 
       if (flags.useABSTRFreqDict) {
-        out.build().append(c.get(CoreAnnotations.AbstrAnnotation.class)).append("-ABSTRACT").append(c.get(CoreAnnotations.FreqAnnotation.class)).append("-FREQ").append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TAG").add();
-        out.build().append(c.get(CoreAnnotations.AbstrAnnotation.class)).append("-ABSTRACT").append(c.get(CoreAnnotations.DictAnnotation.class)).append("-DICT").append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TAG").add();
-        out.build().append(c.get(CoreAnnotations.AbstrAnnotation.class)).append("-ABSTRACT").append(c.get(CoreAnnotations.DictAnnotation.class)).append("-DICT").append(c.get(CoreAnnotations.FreqAnnotation.class)).append("-FREQ").append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TAG").add();
+        featuresC.add(c.get(CoreAnnotations.AbstrAnnotation.class) + "-ABSTRACT" + c.get(CoreAnnotations.FreqAnnotation.class) + "-FREQ" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TAG");
+        featuresC.add(c.get(CoreAnnotations.AbstrAnnotation.class) + "-ABSTRACT" + c.get(CoreAnnotations.DictAnnotation.class) + "-DICT" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TAG");
+        featuresC.add(c.get(CoreAnnotations.AbstrAnnotation.class) + "-ABSTRACT" + c.get(CoreAnnotations.DictAnnotation.class) + "-DICT" + c.get(CoreAnnotations.FreqAnnotation.class) + "-FREQ" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TAG");
       }
 
       if (flags.useABSTR) {
-        out.build().append(c.get(CoreAnnotations.AbstrAnnotation.class)).append("-ABSTRACT").add();
-        out.build().append(p.get(CoreAnnotations.AbstrAnnotation.class)).append("-PABSTRACT").add();
-        out.build().append(n.get(CoreAnnotations.AbstrAnnotation.class)).append("-NABSTRACT").add();
+        featuresC.add(c.get(CoreAnnotations.AbstrAnnotation.class) + "-ABSTRACT");
+        featuresC.add(p.get(CoreAnnotations.AbstrAnnotation.class) + "-PABSTRACT");
+        featuresC.add(n.get(CoreAnnotations.AbstrAnnotation.class) + "-NABSTRACT");
       }
 
       if (flags.useGENIA) {
-        out.build().append(c.get(CoreAnnotations.GeniaAnnotation.class)).append("-GENIA").add();
-        out.build().append(p.get(CoreAnnotations.GeniaAnnotation.class)).append("-PGENIA").add();
-        out.build().append(n.get(CoreAnnotations.GeniaAnnotation.class)).append("-NGENIA").add();
+        featuresC.add(c.get(CoreAnnotations.GeniaAnnotation.class) + "-GENIA");
+        featuresC.add(p.get(CoreAnnotations.GeniaAnnotation.class) + "-PGENIA");
+        featuresC.add(n.get(CoreAnnotations.GeniaAnnotation.class) + "-NGENIA");
       }
       if (flags.useWEBFreqDict) {
-        out.build().append(c.get(CoreAnnotations.WebAnnotation.class)).append("-WEB").append(c.get(CoreAnnotations.FreqAnnotation.class)).append("-FREQ").append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TAG").add();
-        out.build().append(c.get(CoreAnnotations.WebAnnotation.class)).append("-WEB").append(c.get(CoreAnnotations.DictAnnotation.class)).append("-DICT").append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TAG").add();
-        out.build().append(c.get(CoreAnnotations.WebAnnotation.class)).append("-WEB").append(c.get(CoreAnnotations.DictAnnotation.class)).append("-DICT").append(c.get(CoreAnnotations.FreqAnnotation.class)).append("-FREQ").append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TAG").add();
+        featuresC.add(c.get(CoreAnnotations.WebAnnotation.class) + "-WEB" + c.get(CoreAnnotations.FreqAnnotation.class) + "-FREQ" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TAG");
+        featuresC.add(c.get(CoreAnnotations.WebAnnotation.class) + "-WEB" + c.get(CoreAnnotations.DictAnnotation.class) + "-DICT" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TAG");
+        featuresC.add(c.get(CoreAnnotations.WebAnnotation.class) + "-WEB" + c.get(CoreAnnotations.DictAnnotation.class) + "-DICT" + c.get(CoreAnnotations.FreqAnnotation.class) + "-FREQ" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TAG");
       }
 
       if (flags.useWEB) {
-        out.build().append(c.get(CoreAnnotations.WebAnnotation.class)).append("-WEB").add();
-        out.build().append(p.get(CoreAnnotations.WebAnnotation.class)).append("-PWEB").add();
-        out.build().append(n.get(CoreAnnotations.WebAnnotation.class)).append("-NWEB").add();
+        featuresC.add(c.get(CoreAnnotations.WebAnnotation.class) + "-WEB");
+        featuresC.add(p.get(CoreAnnotations.WebAnnotation.class) + "-PWEB");
+        featuresC.add(n.get(CoreAnnotations.WebAnnotation.class) + "-NWEB");
       }
 
       if (flags.useIsURL) {
-        out.build().append(c.get(CoreAnnotations.IsURLAnnotation.class)).append("-ISURL").add();
+        featuresC.add(c.get(CoreAnnotations.IsURLAnnotation.class) + "-ISURL");
       }
       if (flags.useEntityRule) {
-        out.build().append(c.get(CoreAnnotations.EntityRuleAnnotation.class)).append("-ENTITYRULE").add();
+        featuresC.add(c.get(CoreAnnotations.EntityRuleAnnotation.class)+"-ENTITYRULE");
       }
       if (flags.useEntityTypes) {
-        out.build().append(c.get(CoreAnnotations.EntityTypeAnnotation.class)).append("-ENTITYTYPE").add();
+        featuresC.add(c.get(CoreAnnotations.EntityTypeAnnotation.class) + "-ENTITYTYPE");
       }
       if (flags.useIsDateRange) {
-        out.build().append(c.get(CoreAnnotations.IsDateRangeAnnotation.class)).append("-ISDATERANGE").add();
+        featuresC.add(c.get(CoreAnnotations.IsDateRangeAnnotation.class) + "-ISDATERANGE");
       }
+
       if (flags.useABSTRFreq) {
-        out.build().append(c.get(CoreAnnotations.AbstrAnnotation.class)).append("-ABSTRACT").append(c.get(CoreAnnotations.FreqAnnotation.class)).append("-FREQ").add();
+        featuresC.add(c.get(CoreAnnotations.AbstrAnnotation.class) + "-ABSTRACT" + c.get(CoreAnnotations.FreqAnnotation.class) + "-FREQ");
       }
+
       if (flags.useFREQ) {
-        out.build().append(c.get(CoreAnnotations.FreqAnnotation.class)).append("-FREQ").add();
+        featuresC.add(c.get(CoreAnnotations.FreqAnnotation.class) + "-FREQ");
       }
+
       if (flags.useMoreTags) {
-        out.build().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(cWord).append("-PTAG-CWORD").add();
+        featuresC.add(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + cWord + "-PTAG-CWORD");
       }
+
       if (flags.usePosition) {
-        out.build().append(c.get(CoreAnnotations.PositionAnnotation.class)).append("-POSITION").add();
+        featuresC.add(c.get(CoreAnnotations.PositionAnnotation.class) + "-POSITION");
       }
       if (flags.useBeginSent) {
         String pos = c.get(CoreAnnotations.PositionAnnotation.class);
         if ("0".equals(pos)) {
-          out.add("BEGIN-SENT");
-          out.build().append(cShape).append("-BEGIN-SENT").add();
+          featuresC.add("BEGIN-SENT");
+          featuresC.add(cShape + "-BEGIN-SENT");
         } else if (Integer.toString(cInfo.size() - 1).equals(pos)) {
-          out.add("END-SENT");
-          out.build().append(cShape).append("-END-SENT").add();
+          featuresC.add("END-SENT");
+          featuresC.add(cShape + "-END-SENT");
         } else {
-          out.add("IN-SENT");
-          out.build().append(cShape).append("-IN-SENT").add();
+          featuresC.add("IN-SENT");
+          featuresC.add(cShape + "-IN-SENT");
         }
       }
       if (flags.useTags) {
-        out.build().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TAG").add();
+        featuresC.add(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TAG");
       }
 
       if (flags.useOrdinal) {
         if (isOrdinal(cInfo, loc)) {
-          out.add("C_ORDINAL");
+          featuresC.add("C_ORDINAL");
           if (isOrdinal(cInfo, loc-1)) {
             //log.info(getWord(p) + " ");
-            out.add("PC_ORDINAL");
+            featuresC.add("PC_ORDINAL");
           }
           //log.info(cWord);
         }
         if (isOrdinal(cInfo, loc-1)) {
-          out.add("P_ORDINAL");
+          featuresC.add("P_ORDINAL");
         }
       }
 
       if (flags.usePrev) {
-        out.build().append(pWord).append("-PW").add();
+        featuresC.add(pWord + "-PW");
         if (flags.useTags) {
-          out.build().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-PTAG").add();
+          featuresC.add(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-PTAG");
         }
         if (flags.useDistSim) {
-          out.build().append(p.get(CoreAnnotations.DistSimAnnotation.class)).append("-PDISTSIM").add();
+          featuresC.add(p.get(CoreAnnotations.DistSimAnnotation.class) + "-PDISTSIM");
         }
         if (flags.useIsURL) {
-          out.build().append(p.get(CoreAnnotations.IsURLAnnotation.class)).append("-PISURL").add();
+          featuresC.add(p.get(CoreAnnotations.IsURLAnnotation.class) + "-PISURL");
         }
         if (flags.useEntityTypes) {
-          out.build().append(p.get(CoreAnnotations.EntityTypeAnnotation.class)).append("-PENTITYTYPE").add();
+          featuresC.add(p.get(CoreAnnotations.EntityTypeAnnotation.class) + "-PENTITYTYPE");
         }
       }
 
       if (flags.useNext) {
-        out.build().append(nWord).append("-NW").add();
+        featuresC.add(nWord + "-NW");
         if (flags.useTags) {
-          out.build().append(n.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-NTAG").add();
+          featuresC.add(n.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-NTAG");
         }
         if (flags.useDistSim) {
-          out.build().append(n.get(CoreAnnotations.DistSimAnnotation.class)).append("-NDISTSIM").add();
+          featuresC.add(n.get(CoreAnnotations.DistSimAnnotation.class) + "-NDISTSIM");
         }
         if (flags.useIsURL) {
-          out.build().append(n.get(CoreAnnotations.IsURLAnnotation.class)).append("-NISURL").add();
+          featuresC.add(n.get(CoreAnnotations.IsURLAnnotation.class) + "-NISURL");
         }
         if (flags.useEntityTypes) {
-          out.build().append(n.get(CoreAnnotations.EntityTypeAnnotation.class)).append("-NENTITYTYPE").add();
+          featuresC.add(n.get(CoreAnnotations.EntityTypeAnnotation.class) + "-NENTITYTYPE");
         }
       }
       /*here, entityTypes refers to the type in the PASCAL IE challenge:
@@ -1142,104 +1057,104 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
 
       if (flags.useEitherSideWord) {
-        out.build().append(pWord).append("-EW").add();
-        out.build().append(nWord).append("-EW").add();
+        featuresC.add(pWord + "-EW");
+        featuresC.add(nWord + "-EW");
       }
 
       if (flags.useWordPairs) {
-        out.build().append(cWord).dash().append(pWord).append("-W-PW").add();
-        out.build().append(cWord).dash().append(nWord).append("-W-NW").add();
+        featuresC.add(cWord + '-' + pWord + "-W-PW");
+        featuresC.add(cWord + '-' + nWord + "-W-NW");
       }
 
       if (flags.useSymTags) {
         if (flags.useTags) {
-          out.build().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(n.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-PCNTAGS").add();
-          out.build().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(n.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-CNTAGS").add();
-          out.build().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-PCTAGS").add();
+          featuresC.add(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + n.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-PCNTAGS");
+          featuresC.add(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + n.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-CNTAGS");
+          featuresC.add(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-PCTAGS");
         }
         if (flags.useDistSim) {
-          out.build().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(n.get(CoreAnnotations.DistSimAnnotation.class)).append("-PCNDISTSIM").add();
-          out.build().append(c.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(n.get(CoreAnnotations.DistSimAnnotation.class)).append("-CNDISTSIM").add();
-          out.build().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append("-PCDISTSIM").add();
+          featuresC.add(p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + '-' + n.get(CoreAnnotations.DistSimAnnotation.class) + "-PCNDISTSIM");
+          featuresC.add(c.get(CoreAnnotations.DistSimAnnotation.class) + '-' + n.get(CoreAnnotations.DistSimAnnotation.class) + "-CNDISTSIM");
+          featuresC.add(p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + "-PCDISTSIM");
         }
+
       }
 
       if (flags.useSymWordPairs) {
-        out.build().append(pWord).dash().append(nWord).append("-SWORDS").add();
+        featuresC.add(pWord + '-' + nWord + "-SWORDS");
       }
 
-      if (flags.useGazFeatures || flags.useMoreGazFeatures) {
-        String pGazAnnotation = p.get(CoreAnnotations.GazAnnotation.class);
-        String nGazAnnotation = n.get(CoreAnnotations.GazAnnotation.class);
-        String cGazAnnotation = c.get(CoreAnnotations.GazAnnotation.class);
-        if (flags.useGazFeatures) {
-          if (cGazAnnotation != null && !cGazAnnotation.equals(flags.dropGaz)) {
-            out.build().append(cGazAnnotation).append("-GAZ").add();
-          }
-          // n
-          if (nGazAnnotation != null && !nGazAnnotation.equals(flags.dropGaz)) {
-            out.build().append(nGazAnnotation).append("-NGAZ").add();
-          }
-          // p
-          if (pGazAnnotation != null && !pGazAnnotation.equals(flags.dropGaz)) {
-            out.build().append(pGazAnnotation).append("-PGAZ").add();
-          }
+      String pGazAnnotation = (flags.useGazFeatures || flags.useMoreGazFeatures) ? p.get(CoreAnnotations.GazAnnotation.class) : null;
+      String nGazAnnotation = (flags.useGazFeatures || flags.useMoreGazFeatures) ? n.get(CoreAnnotations.GazAnnotation.class) : null;
+      String cGazAnnotation = (flags.useGazFeatures || flags.useMoreGazFeatures) ? c.get(CoreAnnotations.GazAnnotation.class) : null;
+      if (flags.useGazFeatures) {
+
+        if (cGazAnnotation != null && !cGazAnnotation.equals(flags.dropGaz)) {
+          featuresC.add(cGazAnnotation + "-GAZ");
         }
+        // n
+        if (nGazAnnotation != null && !nGazAnnotation.equals(flags.dropGaz)) {
+          featuresC.add(nGazAnnotation + "-NGAZ");
+        }
+        // p
+        if (pGazAnnotation != null && !pGazAnnotation.equals(flags.dropGaz)) {
+          featuresC.add(pGazAnnotation + "-PGAZ");
+        }
+      }
 
-        if (flags.useMoreGazFeatures) {
-          if (cGazAnnotation != null && !cGazAnnotation.equals(flags.dropGaz)) {
-            out.build().append(cGazAnnotation).dash().append(cWord).append("-CG-CW-GAZ").add();
+      if (flags.useMoreGazFeatures) {
+        if (cGazAnnotation != null && !cGazAnnotation.equals(flags.dropGaz)) {
+          featuresC.add(cGazAnnotation + '-' + cWord + "-CG-CW-GAZ");
 
-            // c-n
-            if (nGazAnnotation != null && !nGazAnnotation.equals(flags.dropGaz)) {
-              out.build().append(cGazAnnotation).dash().append(nGazAnnotation).append("-CNGAZ").add();
-            }
+          // c-n
+          if (nGazAnnotation != null && !nGazAnnotation.equals(flags.dropGaz)) {
+            featuresC.add(cGazAnnotation + '-' + nGazAnnotation + "-CNGAZ");
+          }
 
-            // p-c
-            if (pGazAnnotation != null && !pGazAnnotation.equals(flags.dropGaz)) {
-              out.build().append(pGazAnnotation).dash().append(cGazAnnotation).append("-PCGAZ").add();
-            }
+          // p-c
+          if (pGazAnnotation != null && !pGazAnnotation.equals(flags.dropGaz)) {
+            featuresC.add(pGazAnnotation + '-' + cGazAnnotation + "-PCGAZ");
           }
         }
       }
 
       if (flags.useAbbr || flags.useMinimalAbbr) {
-        out.build().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-ABBR").add();
+        featuresC.add(c.get(CoreAnnotations.AbbrAnnotation.class) + "-ABBR");
       }
 
       if (flags.useAbbr1 || flags.useMinimalAbbr1) {
         if (!c.get(CoreAnnotations.AbbrAnnotation.class).equals("XX")) {
-          out.build().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-ABBR").add();
+          featuresC.add(c.get(CoreAnnotations.AbbrAnnotation.class) + "-ABBR");
         }
       }
 
       if (flags.useAbbr) {
-        out.build().append(p.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-PCABBR").add();
-        out.build().append(c.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(n.get(CoreAnnotations.AbbrAnnotation.class)).append("-CNABBR").add();
-        out.build().append(p.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(n.get(CoreAnnotations.AbbrAnnotation.class)).append("-PCNABBR").add();
+        featuresC.add(p.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-PCABBR");
+        featuresC.add(c.get(CoreAnnotations.AbbrAnnotation.class) + '-' + n.get(CoreAnnotations.AbbrAnnotation.class) + "-CNABBR");
+        featuresC.add(p.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + '-' + n.get(CoreAnnotations.AbbrAnnotation.class) + "-PCNABBR");
       }
 
       if (flags.useAbbr1) {
         if (!c.get(CoreAnnotations.AbbrAnnotation.class).equals("XX")) {
-          out.build().append(p.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-PCABBR").add();
-          out.build().append(c.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(n.get(CoreAnnotations.AbbrAnnotation.class)).append("-CNABBR").add();
-          out.build().append(p.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(n.get(CoreAnnotations.AbbrAnnotation.class)).append("-PCNABBR").add();
+          featuresC.add(p.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-PCABBR");
+          featuresC.add(c.get(CoreAnnotations.AbbrAnnotation.class) + '-' + n.get(CoreAnnotations.AbbrAnnotation.class) + "-CNABBR");
+          featuresC.add(p.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + '-' + n.get(CoreAnnotations.AbbrAnnotation.class) + "-PCNABBR");
         }
       }
 
       if (flags.useChunks) {
-        out.build().append(p.get(CoreAnnotations.ChunkAnnotation.class)).dash().append(c.get(CoreAnnotations.ChunkAnnotation.class)).append("-PCCHUNK").add();
-        out.build().append(c.get(CoreAnnotations.ChunkAnnotation.class)).dash().append(n.get(CoreAnnotations.ChunkAnnotation.class)).append("-CNCHUNK").add();
-        out.build().append(p.get(CoreAnnotations.ChunkAnnotation.class)).dash().append(c.get(CoreAnnotations.ChunkAnnotation.class)).dash().append(n.get(CoreAnnotations.ChunkAnnotation.class)).append("-PCNCHUNK").add();
+        featuresC.add(p.get(CoreAnnotations.ChunkAnnotation.class) + '-' + c.get(CoreAnnotations.ChunkAnnotation.class) + "-PCCHUNK");
+        featuresC.add(c.get(CoreAnnotations.ChunkAnnotation.class) + '-' + n.get(CoreAnnotations.ChunkAnnotation.class) + "-CNCHUNK");
+        featuresC.add(p.get(CoreAnnotations.ChunkAnnotation.class) + '-' + c.get(CoreAnnotations.ChunkAnnotation.class) + '-' + n.get(CoreAnnotations.ChunkAnnotation.class) + "-PCNCHUNK");
       }
 
       if (flags.useMinimalAbbr) {
-        out.build().append(cWord).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-CWABB").add();
+        featuresC.add(cWord + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-CWABB");
       }
 
       if (flags.useMinimalAbbr1) {
         if (!c.get(CoreAnnotations.AbbrAnnotation.class).equals("XX")) {
-          out.build().append(cWord).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-CWABB").add();
+          featuresC.add(cWord + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-CWABB");
         }
       }
 
@@ -1249,10 +1164,10 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
           CoreLabel wi = cInfo.get(j);
           if (wi == cInfo.getPad()) {
             prevVB = "X";
-            out.add("X-PVB");
+            featuresC.add("X-PVB");
             break;
           } else if (wi.getString(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("VB")) {
-            out.build().append(getWord(wi)).append("-PVB").add();
+            featuresC.add(getWord(wi) + "-PVB");
             prevVB = getWord(wi);
             break;
           }
@@ -1263,11 +1178,11 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         for (int j = loc + 1; ; j++) {
           CoreLabel wi = cInfo.get(j);
           if (wi == cInfo.getPad()) {
-            out.add("X-NVB");
+            featuresC.add("X-NVB");
             nextVB = "X";
             break;
           } else if (wi.getString(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("VB")) {
-            out.build().append(getWord(wi)).append("-NVB").add();
+            featuresC.add(getWord(wi) + "-NVB");
             nextVB = getWord(wi);
             break;
           }
@@ -1275,45 +1190,46 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
 
       if (flags.useVB) {
-        out.build().append(prevVB).dash().append(nextVB).append("-PNVB").add();
+        featuresC.add(prevVB + '-' + nextVB + "-PNVB");
       }
 
       if (flags.useShapeConjunctions) {
-        out.build().append(c.get(CoreAnnotations.PositionAnnotation.class)).append(cShape).append("-POS-SH").add();
+        featuresC.add(c.get(CoreAnnotations.PositionAnnotation.class) + cShape + "-POS-SH");
         if (flags.useTags) {
-          out.build().append(c.tag()).append(cShape).append("-TAG-SH").add();
+          featuresC.add(c.tag() + cShape + "-TAG-SH");
         }
         if (flags.useDistSim) {
-          out.build().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append(cShape).append("-DISTSIM-SH").add();
+          featuresC.add(c.get(CoreAnnotations.DistSimAnnotation.class) + cShape + "-DISTSIM-SH");
         }
+
       }
 
       if (flags.useWordTag) {
-        out.build().append(cWord).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-W-T").add();
-        out.build().append(cWord).dash().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-W-PT").add();
-        out.build().append(cWord).dash().append(n.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-W-NT").add();
+        featuresC.add(cWord + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-W-T");
+        featuresC.add(cWord + '-' + p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-W-PT");
+        featuresC.add(cWord + '-' + n.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-W-NT");
       }
 
       if (flags.useNPHead) {
         // TODO: neat idea, but this would need to be set somewhere.
         // Probably should have its own annotation as this one would
         // be more narrow and would clobber other potential uses
-        out.build().append(c.get(CoreAnnotations.HeadWordStringAnnotation.class)).append("-HW").add();
+        featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-HW");
         if (flags.useTags) {
-          out.build().append(c.get(CoreAnnotations.HeadWordStringAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-HW-T").add();
+          featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-HW-T");
         }
         if (flags.useDistSim) {
-          out.build().append(c.get(CoreAnnotations.HeadWordStringAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append("-HW-DISTSIM").add();
+          featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-" + c.get(CoreAnnotations.DistSimAnnotation.class) + "-HW-DISTSIM");
         }
       }
 
       if (flags.useNPGovernor) {
-        out.build().append(c.get(CoreAnnotations.GovernorAnnotation.class)).append("-GW").add();
+        featuresC.add(c.get(CoreAnnotations.GovernorAnnotation.class) + "-GW");
         if (flags.useTags) {
-          out.build().append(c.get(CoreAnnotations.GovernorAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-GW-T").add();
+          featuresC.add(c.get(CoreAnnotations.GovernorAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-GW-T");
         }
         if (flags.useDistSim) {
-          out.build().append(c.get(CoreAnnotations.GovernorAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append("-DISTSIM-T1").add();
+          featuresC.add(c.get(CoreAnnotations.GovernorAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + "-DISTSIM-T1");
         }
       }
 
@@ -1321,15 +1237,16 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         // TODO: neat idea, but this would need to be set somewhere.
         // Probably should have its own annotation as this one would
         // be more narrow and would clobber other potential uses
-        out.build().append(c.get(CoreAnnotations.HeadWordStringAnnotation.class)).dash().append(c.get(CoreAnnotations.GovernorAnnotation.class)).append("-HW_GW").add();
+        featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-" + c.get(CoreAnnotations.GovernorAnnotation.class) + "-HW_GW");
       }
 
       if (flags.useClassFeature) {
-        out.add("###");
+        featuresC.add("###");
       }
 
       if (flags.useFirstWord) {
-        out.add(getWord(cInfo.get(0)));
+        String firstWord = getWord(cInfo.get(0));
+        featuresC.add(firstWord);
       }
 
       if (flags.useNGrams) {
@@ -1377,12 +1294,11 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
             wordToSubstrings.put(cWord, subs);
           }
         }
-        for (String sub : subs) {
-          out.add(sub);
-        }
+        featuresC.addAll(subs);
         if (flags.conjoinShapeNGrams) {
           for (String str : subs) {
-            out.build().append(str).dash().append(cShape).append("-CNGram-CS").add();
+            String feat = str + '-' + cShape + "-CNGram-CS";
+            featuresC.add(feat);
           }
         }
       }
@@ -1391,68 +1307,67 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (flags.sloppyGazette) {
           Collection<String> entries = wordToGazetteEntries.get(cWord);
           if (entries != null) {
-            for (String entry : entries) {
-              out.add(entry);
-            }
+            featuresC.addAll(entries);
           }
         }
         if (flags.cleanGazette) {
           Collection<GazetteInfo> infos = wordToGazetteInfos.get(cWord);
           if (infos != null) {
-            gazette: for (GazetteInfo gInfo : infos) {
+            for (GazetteInfo gInfo : infos) {
+              boolean ok = true;
               for (int gLoc = 0; gLoc < gInfo.words.length; gLoc++) {
-                if (!gInfo.words[gLoc].equals(getWord(cInfo.get(loc + gLoc - gInfo.loc)))) {
-                  continue gazette;
-                }
+                ok &= gInfo.words[gLoc].equals(getWord(cInfo.get(loc + gLoc - gInfo.loc)));
               }
-              out.add(gInfo.feature);
+              if (ok) {
+                featuresC.add(gInfo.feature);
+              }
             }
           }
         }
       }
 
       if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings) {
-        out.build().append(cShape).append("-TYPE").add();
+        featuresC.add(cShape + "-TYPE");
         if (flags.useTypeSeqs) {
-          out.build().append(pShape).append("-PTYPE").add();
-          out.build().append(nShape).append("-NTYPE").add();
-          out.build().append(pWord).append("...").append(cShape).append("-PW_CTYPE").add();
-          out.build().append(cShape).append("...").append(nWord).append("-NW_CTYPE").add();
-          out.build().append(pShape).append("...").append(cShape).append("-PCTYPE").add();
-          out.build().append(cShape).append("...").append(nShape).append("-CNTYPE").add();
-          out.build().append(pShape).append("...").append(cShape).append("...").append(nShape).append("-PCNTYPE").add();
+          featuresC.add(pShape + "-PTYPE");
+          featuresC.add(nShape + "-NTYPE");
+          featuresC.add(pWord + "..." + cShape + "-PW_CTYPE");
+          featuresC.add(cShape + "..." + nWord + "-NW_CTYPE");
+          featuresC.add(pShape + "..." + cShape + "-PCTYPE");
+          featuresC.add(cShape + "..." + nShape + "-CNTYPE");
+          featuresC.add(pShape + "..." + cShape + "..." + nShape + "-PCNTYPE");
         }
       }
 
       if (flags.useLastRealWord) {
         if (pWord.length() <= 3) {
           // extending this to check for 2 short words doesn't seem to help....
-          out.build().append(getWord(p2)).append("...").append(cShape).append("-PPW_CTYPE").add();
+          featuresC.add(getWord(p2) + "..." + cShape + "-PPW_CTYPE");
         }
       }
 
       if (flags.useNextRealWord) {
         if (nWord.length() <= 3) {
           // extending this to check for 2 short words doesn't seem to help....
-          out.build().append(getWord(n2)).append("...").append(cShape).append("-NNW_CTYPE").add();
+          featuresC.add(getWord(n2) + "..." + cShape + "-NNW_CTYPE");
         }
       }
 
       if (flags.useOccurrencePatterns) {
-        occurrencePatterns(cInfo, loc, out);
+        featuresC.addAll(occurrencePatterns(cInfo, loc));
       }
 
       if (flags.useDisjunctive) {
         for (int i = 1; i <= flags.disjunctionWidth; i++) {
           CoreLabel dn = cInfo.get(loc + i);
           CoreLabel dp = cInfo.get(loc - i);
-          out.build().append(getWord(dn)).append("-DISJN").add();
+          featuresC.add(getWord(dn) + "-DISJN");
           if (flags.useDisjunctiveShapeInteraction) {
-            out.build().append(getWord(dn)).dash().append(cShape).append("-DISJN-CS").add();
+            featuresC.add(getWord(dn) + '-' + cShape + "-DISJN-CS");
           }
-          out.build().append(getWord(dp)).append("-DISJP").add();
+          featuresC.add(getWord(dp) + "-DISJP");
           if (flags.useDisjunctiveShapeInteraction) {
-            out.build().append(getWord(dp)).dash().append(cShape).append("-DISJP-CS").add();
+            featuresC.add(getWord(dp) + '-' + cShape + "-DISJP-CS");
           }
         }
       }
@@ -1461,55 +1376,56 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         for (int i = 1; i <= flags.disjunctionWidth; i++) {
           CoreLabel dn = cInfo.get(loc + i);
           CoreLabel dp = cInfo.get(loc - i);
-          out.build().append(getWord(dn)).append("-DISJ").add();
-          out.build().append(getWord(dp)).append("-DISJ").add();
+          featuresC.add(getWord(dn) + "-DISJ");
+          featuresC.add(getWord(dp) + "-DISJ");
         }
       }
 
       if (flags.useWideDisjunctive) {
         for (int i = 1; i <= flags.wideDisjunctionWidth; i++) {
-          out.build().append(getWord(cInfo.get(loc + i))).append("-DISJWN").add();
-          out.build().append(getWord(cInfo.get(loc - i))).append("-DISJWP").add();
+          featuresC.add(getWord(cInfo.get(loc + i)) + "-DISJWN");
+          featuresC.add(getWord(cInfo.get(loc - i)) + "-DISJWP");
         }
       }
 
       if (flags.useEitherSideDisjunctive) {
         for (int i = 1; i <= flags.disjunctionWidth; i++) {
-          out.build().append(getWord(cInfo.get(loc + i))).append("-DISJWE").add();
-          out.build().append(getWord(cInfo.get(loc - i))).append("-DISJWE").add();
+          featuresC.add(getWord(cInfo.get(loc + i)) + "-DISJWE");
+          featuresC.add(getWord(cInfo.get(loc - i)) + "-DISJWE");
         }
       }
 
       if (flags.useDisjShape) {
         for (int i = 1; i <= flags.disjunctionWidth; i++) {
-          out.build().append(cInfo.get(loc + i).get(CoreAnnotations.ShapeAnnotation.class)).append("-NDISJSHAPE").add();
-          // out.build().append((cInfo.get(loc - i).get(CoreAnnotations.ShapeAnnotation.class)).append("-PDISJSHAPE").add();
-          out.build().append(cShape).dash().append(cInfo.get(loc + i).get(CoreAnnotations.ShapeAnnotation.class)).append("-CNDISJSHAPE").add();
-          // out.build().append(c.get(CoreAnnotations.ShapeAnnotation.class)).dash().append(cInfo.get(loc - i).get(CoreAnnotations.ShapeAnnotation.class)).append("-CPDISJSHAPE").add();
+          featuresC.add(cInfo.get(loc + i).get(CoreAnnotations.ShapeAnnotation.class) + "-NDISJSHAPE");
+          // featuresC.add(cInfo.get(loc - i).get(CoreAnnotations.ShapeAnnotation.class) + "-PDISJSHAPE");
+          featuresC.add(cShape + '-' + cInfo.get(loc + i).get(CoreAnnotations.ShapeAnnotation.class) + "-CNDISJSHAPE");
+          // featuresC.add(c.get(CoreAnnotations.ShapeAnnotation.class) + "-" + cInfo.get(loc - i).get(CoreAnnotations.ShapeAnnotation.class) + "-CPDISJSHAPE");
         }
       }
 
       if (flags.useExtraTaggySequences) {
         if (flags.useTags) {
-          out.build().append(p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TTS").add();
-          out.build().append(p3.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TTTS").add();
+          featuresC.add(p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TTS");
+          featuresC.add(p3.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TTTS");
         }
         if (flags.useDistSim) {
-          out.build().append(p2.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append("-DISTSIM_TTS1").add();
-          out.build().append(p3.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(p2.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append("-DISTSIM_TTTS1").add();
+          featuresC.add(p2.get(CoreAnnotations.DistSimAnnotation.class) + '-' + p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + "-DISTSIM_TTS1");
+          featuresC.add(p3.get(CoreAnnotations.DistSimAnnotation.class) + '-' + p2.get(CoreAnnotations.DistSimAnnotation.class) + '-' + p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + "-DISTSIM_TTTS1");
         }
       }
 
       if (flags.useMUCFeatures) {
-        out.build().append(c.get(CoreAnnotations.SectionAnnotation.class)).append("-SECTION").add();
-        out.build().append(c.get(CoreAnnotations.WordPositionAnnotation.class)).append("-WORD_POSITION").add();
-        out.build().append(c.get(CoreAnnotations.SentencePositionAnnotation.class)).append("-SENT_POSITION").add();
-        out.build().append(c.get(CoreAnnotations.ParaPositionAnnotation.class)).append("-PARA_POSITION").add();
-        out.build().append(c.get(CoreAnnotations.WordPositionAnnotation.class)).dash().append(c.get(CoreAnnotations.ShapeAnnotation.class)).append("-WORD_POSITION_SHAPE").add();
+        featuresC.add(c.get(CoreAnnotations.SectionAnnotation.class)+"-SECTION");
+        featuresC.add(c.get(CoreAnnotations.WordPositionAnnotation.class)+"-WORD_POSITION");
+        featuresC.add(c.get(CoreAnnotations.SentencePositionAnnotation.class)+"-SENT_POSITION");
+        featuresC.add(c.get(CoreAnnotations.ParaPositionAnnotation.class)+"-PARA_POSITION");
+        featuresC.add(c.get(CoreAnnotations.WordPositionAnnotation.class)+ '-' +c.get(CoreAnnotations.ShapeAnnotation.class)+"-WORD_POSITION_SHAPE");
       }
     } else if (flags.useInternal) {
+
       if (flags.useWord) {
-        out.build().append(cWord).append("-WORD").add();
+        featuresC.add(cWord + "-WORD");
       }
 
       if (flags.useNGrams) {
@@ -1542,64 +1458,64 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
             wordToSubstrings.put(cWord, subs);
           }
         }
-        for (String sub : subs) {
-          out.add(sub);
-        }
+        featuresC.addAll(subs);
         if (flags.conjoinShapeNGrams) {
           String shape = c.get(CoreAnnotations.ShapeAnnotation.class);
           for (String str : subs) {
-            out.build().append(str).dash().append(shape).append("-CNGram-CS").add();
+            String feat = str + '-' + shape + "-CNGram-CS";
+            featuresC.add(feat);
           }
         }
       }
 
       if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings) {
-        out.build().append(cShape).append("-TYPE").add();
+        featuresC.add(cShape + "-TYPE");
       }
 
       if (flags.useOccurrencePatterns) {
-        occurrencePatterns(cInfo, loc, out);
+        featuresC.addAll(occurrencePatterns(cInfo, loc));
       }
+
     } else if (flags.useExternal) {
+
       if (flags.usePrev) {
-        out.build().append(pWord).append("-PW").add();
+        featuresC.add(pWord + "-PW");
       }
 
       if (flags.useNext) {
-        out.build().append(nWord).append("-NW").add();
+        featuresC.add(nWord + "-NW");
       }
 
       if (flags.useWordPairs) {
-        out.build().append(cWord).dash().append(pWord).append("-W-PW").add();
-        out.build().append(cWord).dash().append(nWord).append("-W-NW").add();
+        featuresC.add(cWord + '-' + pWord + "-W-PW");
+        featuresC.add(cWord + '-' + nWord + "-W-NW");
       }
 
       if (flags.useSymWordPairs) {
-        out.build().append(pWord).dash().append(nWord).append("-SWORDS").add();
+        featuresC.add(pWord + '-' + nWord + "-SWORDS");
       }
 
       if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings) {
         if (flags.useTypeSeqs) {
-          out.build().append(pShape).append("-PTYPE").add();
-          out.build().append(nShape).append("-NTYPE").add();
-          out.build().append(pWord).append("...").append(cShape).append("-PW_CTYPE").add();
-          out.build().append(cShape).append("...").append(nWord).append("-NW_CTYPE").add();
-          if (flags.maxLeft > 0)
-            out.build().append(pShape).append("...").append(cShape).append("-PCTYPE").add(); // this one just isn't useful, at least given c,pc,s,ps.  Might be useful 0th-order
-          out.build().append(cShape).append("...").append(nShape).append("-CNTYPE").add();
-          out.build().append(pShape).append("...").append(cShape).append("...").append(nShape).append("-PCNTYPE").add();
+          featuresC.add(pShape + "-PTYPE");
+          featuresC.add(nShape + "-NTYPE");
+          featuresC.add(pWord + "..." + cShape + "-PW_CTYPE");
+          featuresC.add(cShape + "..." + nWord + "-NW_CTYPE");
+          if (flags.maxLeft > 0) featuresC.add(pShape + "..." + cShape + "-PCTYPE"); // this one just isn't useful, at least given c,pc,s,ps.  Might be useful 0th-order
+          featuresC.add(cShape + "..." + nShape + "-CNTYPE");
+          featuresC.add(pShape + "..." + cShape + "..." + nShape + "-PCNTYPE");
         }
       }
 
       if (flags.useLastRealWord) {
         if (pWord.length() <= 3) {
-          out.build().append(getWord(p2)).append("...").append(cShape).append("-PPW_CTYPE").add();
+          featuresC.add(getWord(p2) + "..." + cShape + "-PPW_CTYPE");
         }
       }
 
       if (flags.useNextRealWord) {
         if (nWord.length() <= 3) {
-          out.build().append(getWord(n2)).append("...").append(cShape).append("-NNW_CTYPE").add();
+          featuresC.add(getWord(n2) + "..." + cShape + "-NNW_CTYPE");
         }
       }
 
@@ -1607,49 +1523,50 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         for (int i = 1; i <= flags.disjunctionWidth; i++) {
           CoreLabel dn = cInfo.get(loc + i);
           CoreLabel dp = cInfo.get(loc - i);
-          out.build().append(getWord(dn)).append("-DISJN").add();
+          featuresC.add(getWord(dn) + "-DISJN");
           if (flags.useDisjunctiveShapeInteraction) {
-            out.build().append(getWord(dn)).dash().append(cShape).append("-DISJN-CS").add();
+            featuresC.add(getWord(dn) + '-' + cShape + "-DISJN-CS");
           }
-          out.build().append(getWord(dp)).append("-DISJP").add();
+          featuresC.add(getWord(dp) + "-DISJP");
           if (flags.useDisjunctiveShapeInteraction) {
-            out.build().append(getWord(dp)).dash().append(cShape).append("-DISJP-CS").add();
+            featuresC.add(getWord(dp) + '-' + cShape + "-DISJP-CS");
           }
         }
       }
 
       if (flags.useWideDisjunctive) {
         for (int i = 1; i <= flags.wideDisjunctionWidth; i++) {
-          out.build().append(getWord(cInfo.get(loc + i))).append("-DISJWN").add();
-          out.build().append(getWord(cInfo.get(loc - i))).append("-DISJWP").add();
+          featuresC.add(getWord(cInfo.get(loc + i)) + "-DISJWN");
+          featuresC.add(getWord(cInfo.get(loc - i)) + "-DISJWP");
         }
       }
 
       if (flags.useDisjShape) {
         for (int i = 1; i <= flags.disjunctionWidth; i++) {
-          out.build().append(cInfo.get(loc + i).get(CoreAnnotations.ShapeAnnotation.class)).append("-NDISJSHAPE").add();
-          // out.build().append((cInfo.get(loc - i).get(CoreAnnotations.ShapeAnnotation.class)).append("-PDISJSHAPE").add();
-          out.build().append(c.get(CoreAnnotations.ShapeAnnotation.class)).dash().append(cInfo.get(loc + i).get(CoreAnnotations.ShapeAnnotation.class)).append("-CNDISJSHAPE").add();
-          // out.build().append(c.get(CoreAnnotations.ShapeAnnotation.class)).dash().append(cInfo.get(loc - i).get(CoreAnnotations.ShapeAnnotation.class)).append("-CPDISJSHAPE").add();
+          featuresC.add(cInfo.get(loc + i).get(CoreAnnotations.ShapeAnnotation.class) + "-NDISJSHAPE");
+          // featuresC.add(cInfo.get(loc - i).get(CoreAnnotations.ShapeAnnotation.class) + "-PDISJSHAPE");
+          featuresC.add(c.get(CoreAnnotations.ShapeAnnotation.class) + '-' + cInfo.get(loc + i).get(CoreAnnotations.ShapeAnnotation.class) + "-CNDISJSHAPE");
+          // featuresC.add(c.get(CoreAnnotations.ShapeAnnotation.class) + "-" + cInfo.get(loc - i).get(CoreAnnotations.ShapeAnnotation.class) + "-CPDISJSHAPE");
         }
       }
+
     }
 
     // Stuff to add binary features from the additional columns
     if (flags.twoStage) {
-      out.build().append(c.get(Bin1Annotation.class)).append("-BIN1").add();
-      out.build().append(c.get(Bin2Annotation.class)).append("-BIN2").add();
-      out.build().append(c.get(Bin3Annotation.class)).append("-BIN3").add();
-      out.build().append(c.get(Bin4Annotation.class)).append("-BIN4").add();
-      out.build().append(c.get(Bin5Annotation.class)).append("-BIN5").add();
-      out.build().append(c.get(Bin6Annotation.class)).append("-BIN6").add();
+      featuresC.add(c.get(Bin1Annotation.class) + "-BIN1");
+      featuresC.add(c.get(Bin2Annotation.class) + "-BIN2");
+      featuresC.add(c.get(Bin3Annotation.class) + "-BIN3");
+      featuresC.add(c.get(Bin4Annotation.class) + "-BIN4");
+      featuresC.add(c.get(Bin5Annotation.class) + "-BIN5");
+      featuresC.add(c.get(Bin6Annotation.class) + "-BIN6");
     }
 
     if(flags.useIfInteger){
       try {
         int val = Integer.parseInt(cWord);
-        if(val > 0) out.add("POSITIVE_INTEGER");
-        else if(val < 0) out.add("NEGATIVE_INTEGER");
+        if(val > 0) featuresC.add("POSITIVE_INTEGER");
+        else if(val < 0) featuresC.add("NEGATIVE_INTEGER");
         // log.info("FOUND INTEGER");
       } catch(NumberFormatException e){
         // not an integer value, nothing to do
@@ -1663,81 +1580,85 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         makeGenericKeyCache(c);
       }
       //now look through the cached keys
-      for (Class<?> key : genericAnnotationKeys) {
+      for (Class key : genericAnnotationKeys) {
         //log.info("Adding feature: " + CoreLabel.genericValues.get(key) + " with value " + c.get(key));
-        Object col = c.get((Class<CoreAnnotation<Object>>) key);
-        if (col instanceof Collection) {
-          for (Object ob: (Collection<?>)col) {
-            out.build().append(ob.toString()).dash().append(CoreLabel.genericValues.get(key)).add();
+        if (c.get(key) != null && c.get(key) instanceof Collection) {
+          for (Object ob: (Collection)c.get(key)) {
+            featuresC.add(ob + "-" + CoreLabel.genericValues.get(key));
           }
-        } else if (col != null) {
-          out.build().append(col.toString()).dash().append(CoreLabel.genericValues.get(key)).add();
+        } else {
+          featuresC.add(c.get(key) + "-" + CoreLabel.genericValues.get(key));
         }
       }
     }
 
     if(flags.useTopics){
-      //out.build().append(p.get(CoreAnnotations.TopicAnnotation.class), "-", cWord, "--CWORD").add();
-      out.build().append(c.get(CoreAnnotations.TopicAnnotation.class)).append("-TopicID").add();
-      out.build().append(p.get(CoreAnnotations.TopicAnnotation.class)).append("-PTopicID").add();
-      out.build().append(n.get(CoreAnnotations.TopicAnnotation.class)).append("-NTopicID").add();
-      //out.build().append(p.get(CoreAnnotations.TopicAnnotation.class)).dash().append(c.get(CoreAnnotations.TopicAnnotation.class)).dash().append(n.get(CoreAnnotations.TopicAnnotation.class)).append("-PCNTopicID").add();
-      //out.build().append(c.get(CoreAnnotations.TopicAnnotation.class)).dash().append(n.get(CoreAnnotations.TopicAnnotation.class)).append("-CNTopicID").add();
-      //out.build().append(p.get(CoreAnnotations.TopicAnnotation.class)).dash().append(c.get(CoreAnnotations.TopicAnnotation.class)).append("-PCTopicID").add();
-      //out.build().append(c.get(CoreAnnotations.TopicAnnotation.class)).append(cShape).append("-TopicID-SH").add();
+      //featuresC.add(p.get(CoreAnnotations.TopicAnnotation.class) + '-' + cWord + "--CWORD");
+      featuresC.add(c.get(CoreAnnotations.TopicAnnotation.class)+ "-TopicID");
+      featuresC.add(p.get(CoreAnnotations.TopicAnnotation.class) + "-PTopicID");
+      featuresC.add(n.get(CoreAnnotations.TopicAnnotation.class) + "-NTopicID");
+      //featuresC.add(p.get(CoreAnnotations.TopicAnnotation.class) + '-' + c.get(CoreAnnotations.TopicAnnotation.class) + '-' + n.get(CoreAnnotations.TopicAnnotation.class) + "-PCNTopicID");
+      //featuresC.add(c.get(CoreAnnotations.TopicAnnotation.class) + '-' + n.get(CoreAnnotations.TopicAnnotation.class) + "-CNTopicID");
+      //featuresC.add(p.get(CoreAnnotations.TopicAnnotation.class) + '-' + c.get(CoreAnnotations.TopicAnnotation.class) + "-PCTopicID");
+      //featuresC.add(c.get(CoreAnnotations.TopicAnnotation.class) + cShape + "-TopicID-SH");
+      //asdasd
     }
 
     // todo [cdm 2014]: Have this guarded by a flag and things would be a little faster. Set flag in current uses of this annotation.
     // NER tag annotations from a previous NER system
     if (c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) != null) {
-      out.build().append(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).append("-CStackedNERTag").add();
-      out.build().append(cWord).dash().append(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).append("-WCStackedNERTag").add();
+      featuresC.add(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)+ "-CStackedNERTag");
+      featuresC.add(cWord + "-" + c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)+ "-WCStackedNERTag");
 
       if (flags.useNext) {
-        out.build().append(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).dash().append(n.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).append("-CNStackedNERTag").add();
-        out.build().append(cWord).dash().append(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).dash().append(n.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).append("-WCNStackedNERTag").add();
+        featuresC.add(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + '-' + n.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + "-CNStackedNERTag");
+        featuresC.add(cWord + "-" + c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + '-' + n.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + "-WCNStackedNERTag");
 
         if (flags.usePrev) {
-          out.build().append(p.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).dash().append(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).dash().append(n.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).append("-PCNStackedNERTag").add();
-          out.build().append(p.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).dash().append(cWord).append(" -").append(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)
-             ).dash().append(n.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).append("-PWCNStackedNERTag").add();
+          featuresC.add(p.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + '-' + c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + '-' + n.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + "-PCNStackedNERTag");
+          featuresC.add(p.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + '-' + cWord + " -" + c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)
+              + '-' + n.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + "-PWCNStackedNERTag");
         }
       }
       if (flags.usePrev) {
-        out.build().append(p.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).dash().append(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)).append("-PCStackedNERTag").add();
+        featuresC.add(p.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + '-' + c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) + "-PCStackedNERTag");
       }
     }
     if(flags.useWordnetFeatures)
-      out.build().append(c.get(CoreAnnotations.WordnetSynAnnotation.class)).append("-WordnetSyn").add();
+      featuresC.add(c.get(CoreAnnotations.WordnetSynAnnotation.class)+"-WordnetSyn");
     if(flags.useProtoFeatures)
-      out.build().append(c.get(CoreAnnotations.ProtoAnnotation.class)).append("-Proto").add();
+      featuresC.add(c.get(CoreAnnotations.ProtoAnnotation.class)+"-Proto");
     if(flags.usePhraseWordTags)
-      out.build().append(c.get(CoreAnnotations.PhraseWordsTagAnnotation.class)).append("-PhraseTag").add();
+      featuresC.add(c.get(CoreAnnotations.PhraseWordsTagAnnotation.class)+"-PhraseTag");
     if(flags.usePhraseWords)
     {
-      for(String w: c.get(CoreAnnotations.PhraseWordsAnnotation.class)) {
-        out.build().append(w).append("-PhraseWord").add();
-      }
+      for(String w: c.get(CoreAnnotations.PhraseWordsAnnotation.class))
+      featuresC.add(w+"-PhraseWord");
     }
     if(flags.useCommonWordsFeature)
-      out.add(c.get(CoreAnnotations.CommonWordsAnnotation.class));
+      featuresC.add(c.get(CoreAnnotations.CommonWordsAnnotation.class));
 
     if (flags.useRadical && cWord.length() > 0) {
       // todo [cdm 2016]: Really all stuff in this file should be fixed to work with codepoints outside BMP
       if (cWord.length() == 1) {
-        out.build().append(RadicalMap.getRadical(cWord.charAt(0))).append("-SINGLE-CHAR-RADICAL").add();
+        featuresC.add(RadicalMap.getRadical(cWord.charAt(0)) +
+                      "-SINGLE-CHAR-RADICAL");
       } else {
-        out.build().append(RadicalMap.getRadical(cWord.charAt(0))).append("-START-RADICAL").add();
-        out.build().append(RadicalMap.getRadical(cWord.charAt(cWord.length() - 1))).append("-END-RADICAL").add();
+        featuresC.add(RadicalMap.getRadical(cWord.charAt(0)) +
+                      "-START-RADICAL");
+        featuresC.add(RadicalMap.getRadical(cWord.charAt(cWord.length() - 1)) +
+                      "-END-RADICAL");
       }
       for (int i = 0; i < cWord.length(); ++i) {
-        out.build().append(RadicalMap.getRadical(cWord.charAt(i))).append("-RADICAL").add();
+        featuresC.add(RadicalMap.getRadical(cWord.charAt(i)) +
+                      "-RADICAL");
       }
     }
 
-    if (flags.splitWordRegex != null && !flags.splitWordRegex.isEmpty()){
-      for(String s: c.word().split(flags.splitWordRegex)) {
-        out.build().append(s).append("-SPLITWORD").add();
+    if(flags.splitWordRegex != null && !flags.splitWordRegex.isEmpty()){
+      String[] ws = c.word().split(flags.splitWordRegex);
+      for(String s: ws){
+       featuresC.add(s+"-SPLITWORD");
       }
     }
 
@@ -1747,10 +1668,11 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         maxLen = flags.maxNGramLeng;
       }
       for (int len = 1; len <= maxLen; ++len) {
-        out.build().append(pWord.substring(0, len)).append("-PREV-PREFIX").add();
+        featuresC.add(pWord.substring(0, len) + "-PREV-PREFIX");
       }
       for (int pos = pWord.length() - maxLen; pos < pWord.length(); ++pos) {
-        out.build().append(pWord.substring(pos, pWord.length())).append("-PREV-SUFFIX").add();
+        featuresC.add(pWord.substring(pos, pWord.length()) +
+                        "-PREV-SUFFIX");
       }
 
       maxLen = nWord.length();
@@ -1758,12 +1680,15 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         maxLen = flags.maxNGramLeng;
       }
       for (int len = 1; len <= maxLen; ++len) {
-        out.build().append(nWord.substring(0, len)).append("-NEXT-PREFIX").add();
+        featuresC.add(nWord.substring(0, len) + "-NEXT-PREFIX");
       }
       for (int pos = nWord.length() - maxLen; pos < nWord.length(); ++pos) {
-        out.build().append(nWord.substring(pos, nWord.length())).append("-NEXT-SUFFIX").add();
+        featuresC.add(nWord.substring(pos, nWord.length()) +
+                        "-NEXT-SUFFIX");
       }
     }
+
+    return featuresC;
   } // end featuresC()
 
 
@@ -1796,11 +1721,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
 
 
-  protected void featuresCpC(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
-    if (flags.noEdgeFeature) {
-      return;
-    }
-
+  protected Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel c = cInfo.get(loc);
     CoreLabel n = cInfo.get(loc + 1);
@@ -1811,10 +1732,14 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String pDS = p.getString(CoreAnnotations.DistSimAnnotation.class);
     String cShape = c.getString(CoreAnnotations.ShapeAnnotation.class);
     String pShape = p.getString(CoreAnnotations.ShapeAnnotation.class);
+    Collection<String> featuresCpC = new ArrayList<>();
+
+    if (flags.noEdgeFeature)
+      return featuresCpC;
 
     if (flags.transitionEdgeOnly) {
-      out.add("PSEQ");
-      return;
+      featuresCpC.add("PSEQ");
+      return featuresCpC;
     }
 
     if (flags.useNeighborNGrams) {
@@ -1823,10 +1748,11 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         maxLen = flags.maxNGramLeng;
       }
       for (int len = 1; len <= maxLen; ++len) {
-        out.build().append(pWord.substring(0, len)).append("-PREVIOUS-PREFIX").add();
+        featuresCpC.add(pWord.substring(0, len) + "-PREVIOUS-PREFIX");
       }
       for (int pos = pWord.length() - maxLen; pos < pWord.length(); ++pos) {
-        out.build().append(pWord.substring(pos, pWord.length())).append("-PREVIOUS-SUFFIX").add();
+        featuresCpC.add(pWord.substring(pos, pWord.length()) +
+                        "-PREVIOUS-SUFFIX");
       }
 
       maxLen = cWord.length();
@@ -1834,63 +1760,65 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         maxLen = flags.maxNGramLeng;
       }
       for (int len = 1; len <= maxLen; ++len) {
-        out.build().append(cWord.substring(0, len)).append("-CURRENT-PREFIX").add();
+        featuresCpC.add(cWord.substring(0, len) + "-CURRENT-PREFIX");
       }
       for (int pos = cWord.length() - maxLen; pos < cWord.length(); ++pos) {
-        out.build().append(cWord.substring(pos, cWord.length())).append("-CURRENT-SUFFIX").add();
+        featuresCpC.add(cWord.substring(pos, cWord.length()) +
+                        "-CURRENT-SUFFIX");
       }
     }
 
     if (flags.useInternal && flags.useExternal ) {
+
       if (flags.useOrdinal) {
         if (isOrdinal(cInfo, loc)) {
-          out.add("C_ORDINAL");
+          featuresCpC.add("C_ORDINAL");
           if (isOrdinal(cInfo, loc-1)) {
-            out.add("PC_ORDINAL");
+            featuresCpC.add("PC_ORDINAL");
           }
         }
         if (isOrdinal(cInfo, loc-1)) {
-          out.add("P_ORDINAL");
+          featuresCpC.add("P_ORDINAL");
         }
       }
 
       if (flags.useAbbr || flags.useMinimalAbbr) {
-        out.build().append(p.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-PABBRANS").add();
+        featuresCpC.add(p.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-PABBRANS");
       }
 
       if (flags.useAbbr1 || flags.useMinimalAbbr1) {
         if (!c.get(CoreAnnotations.AbbrAnnotation.class).equals("XX")) {
-          out.build().append(p.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-PABBRANS").add();
+          featuresCpC.add(p.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-PABBRANS");
         }
       }
 
       if (flags.useChunkySequences) {
-        out.build().append(p.get(CoreAnnotations.ChunkAnnotation.class)).dash().append(c.get(CoreAnnotations.ChunkAnnotation.class)).dash().append(n.get(CoreAnnotations.ChunkAnnotation.class)).append("-PCNCHUNK").add();
+        featuresCpC.add(p.get(CoreAnnotations.ChunkAnnotation.class) + '-' + c.get(CoreAnnotations.ChunkAnnotation.class) + '-' + n.get(CoreAnnotations.ChunkAnnotation.class) + "-PCNCHUNK");
       }
 
       if (flags.usePrev) {
         if (flags.useSequences && flags.usePrevSequences) {
-          out.add("PSEQ");
-          out.build().append(cWord).append("-PSEQW").add();
+          featuresCpC.add("PSEQ");
+          featuresCpC.add(cWord + "-PSEQW");
 
           if ( ! flags.strictGoodCoNLL) {
-            out.build().append(pWord).dash().append(cWord).append("-PSEQW2").add();  // added later after goodCoNLL
-            out.build().append(pWord).append("-PSEQpW").add(); // added later after goodCoNLL
+            featuresCpC.add(pWord+ '-' +cWord + "-PSEQW2");  // added later after goodCoNLL
+            featuresCpC.add(pWord + "-PSEQpW"); // added later after goodCoNLL
           }
 
           if (flags.useDistSim) {
-            out.build().append(pDS).append("-PSEQpDS").add();
-            out.build().append(cDS).append("-PSEQcDS").add();
-            out.build().append(pDS).dash().append(cDS).append("-PSEQpcDS").add();
+            featuresCpC.add(pDS + "-PSEQpDS");
+            featuresCpC.add(cDS + "-PSEQcDS");
+            featuresCpC.add(pDS+ '-' +cDS + "-PSEQpcDS");
           }
 
           if (((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings)) {
             if ( ! flags.strictGoodCoNLL) {     // These ones were added later after goodCoNLL
-              out.build().append(pShape).append("-PSEQpS").add();
-              out.build().append(cShape).append("-PSEQcS").add();
+              featuresCpC.add(pShape + "-PSEQpS");
+              featuresCpC.add(cShape + "-PSEQcS");
             }
             if (flags.strictGoodCoNLL && ! flags.removeStrictGoodCoNLLDuplicates) {
-              out.build().append(pShape).dash().append(cShape).append("-PSEQpcS").add(); // Duplicate (in goodCoNLL orig, see -TYPES below)
+              featuresCpC.add(pShape + '-' + cShape + "-PSEQpcS"); // Duplicate (in goodCoNLL orig, see -TYPES below)
             }
           }
         }
@@ -1900,31 +1828,31 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
            flags.useShapeStrings)
           && flags.useTypeSeqs && (flags.useTypeSeqs2 || flags.useTypeSeqs3)) {
         if (flags.useTypeSeqs3) {
-          out.build().append(pShape).dash().append(cShape).dash().append(n.get(CoreAnnotations.ShapeAnnotation.class)).append("-PCNSHAPES").add();
+          featuresCpC.add(pShape + '-' + cShape + '-' + n.get(CoreAnnotations.ShapeAnnotation.class) + "-PCNSHAPES");
         }
         if (flags.useTypeSeqs2) {
-          out.build().append(pShape).dash().append(cShape).append("-TYPES").add();  // this duplicates PSEQpcS above
+          featuresCpC.add(pShape + '-' + cShape + "-TYPES");  // this duplicates PSEQpcS above
         }
 
         if (flags.useYetMoreCpCShapes) {
           String p2Shape = cInfo.get(loc - 2).getString(CoreAnnotations.ShapeAnnotation.class);
-          out.build().append(p2Shape).dash().append(pShape).dash().append(cShape).append("-YMS").add();
-          out.build().append(pShape).dash().append(cShape).dash().append(n.getString(CoreAnnotations.ShapeAnnotation.class)).append("-YMSPCN").add();
+          featuresCpC.add(p2Shape + '-' + pShape + '-' + cShape + "-YMS");
+          featuresCpC.add(pShape + '-' + cShape + "-" + n.getString(CoreAnnotations.ShapeAnnotation.class) + "-YMSPCN");
         }
       }
 
       if (flags.useTypeySequences) {
-        out.build().append(cShape).append("-TPS2").add();
-        out.build().append(n.get(CoreAnnotations.ShapeAnnotation.class)).append("-TNS1").add();
-        // out.build().append(pShape)).dash().append(cShape)).append("-TPS").add(); // duplicates -TYPES, so now omitted; you may need to slightly increase sigma to duplicate previous results, however.
+        featuresCpC.add(cShape + "-TPS2");
+        featuresCpC.add(n.get(CoreAnnotations.ShapeAnnotation.class) + "-TNS1");
+        // featuresCpC.add(pShape) + "-" + cShape) + "-TPS"); // duplicates -TYPES, so now omitted; you may need to slightly increase sigma to duplicate previous results, however.
       }
 
       if (flags.useTaggySequences) {
         if (flags.useTags) {
-          out.build().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TS").add();
+          featuresCpC.add(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TS");
         }
         if (flags.useDistSim) {
-          out.build().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append("-DISTSIM_TS1").add();
+          featuresCpC.add(p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + "-DISTSIM_TS1");
         }
       }
 
@@ -1932,50 +1860,57 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (flags.useReverse) {
           if (cWord.equals("(") || cWord.equals("[") || cWord.equals("-LRB-")) {
             if (pWord.equals(")") || pWord.equals("]") || pWord.equals("-RRB-")) {
-              out.add("PAREN-MATCH");
+              featuresCpC.add("PAREN-MATCH");
             }
           }
         } else {
           if (cWord.equals(")") || cWord.equals("]") || cWord.equals("-RRB-")) {
             if (pWord.equals("(") || pWord.equals("[") || pWord.equals("-LRB-")) {
-              out.add("PAREN-MATCH");
+              featuresCpC.add("PAREN-MATCH");
             }
           }
         }
       }
       if (flags.useEntityTypeSequences) {
-        out.build().append(p.get(CoreAnnotations.EntityTypeAnnotation.class)).dash().append(c.get(CoreAnnotations.EntityTypeAnnotation.class)).append("-ETSEQ").add();
+        featuresCpC.add(p.get(CoreAnnotations.EntityTypeAnnotation.class) + '-' + c.get(CoreAnnotations.EntityTypeAnnotation.class) + "-ETSEQ");
       }
       if (flags.useURLSequences) {
-        out.build().append(p.get(CoreAnnotations.IsURLAnnotation.class)).dash().append(c.get(CoreAnnotations.IsURLAnnotation.class)).append("-URLSEQ").add();
+        featuresCpC.add(p.get(CoreAnnotations.IsURLAnnotation.class) + '-' + c.get(CoreAnnotations.IsURLAnnotation.class) + "-URLSEQ");
       }
     } else if (flags.useInternal) {
+
       if (flags.useSequences && flags.usePrevSequences) {
-        out.add("PSEQ");
-        out.build().append(cWord).append("-PSEQW").add();
+        featuresCpC.add("PSEQ");
+        featuresCpC.add(cWord + "-PSEQW");
       }
 
       if (flags.useTypeySequences) {
-        out.build().append(cShape).append("-TPS2").add();
+        featuresCpC.add(cShape + "-TPS2");
       }
+
     } else if (flags.useExternal) {
-      if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE || flags.useShapeStrings) && flags.useTypeSeqs) {
+
+      if( ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) ||
+           flags.useShapeStrings)
+          && flags.useTypeSeqs && (flags.useTypeSeqs2 || flags.useTypeSeqs3)) {
         if (flags.useTypeSeqs3) {
-          out.build().append(pShape).dash().append(cShape).dash().append(n.get(CoreAnnotations.ShapeAnnotation.class)).append("-PCNSHAPES").add();
+          featuresCpC.add(pShape + '-' + cShape + '-' + n.get(CoreAnnotations.ShapeAnnotation.class) + "-PCNSHAPES");
         }
         if (flags.useTypeSeqs2) {
-          out.build().append(pShape).dash().append(cShape).append("-TYPES").add();
+          featuresCpC.add(pShape + '-' + cShape + "-TYPES");
         }
       }
 
       if (flags.useTypeySequences) {
-        out.build().append(n.get(CoreAnnotations.ShapeAnnotation.class)).append("-TNS1").add();
-        out.build().append(pShape).dash().append(c.get(CoreAnnotations.ShapeAnnotation.class)).append("-TPS").add();
+        featuresCpC.add(n.get(CoreAnnotations.ShapeAnnotation.class) + "-TNS1");
+        featuresCpC.add(pShape + '-' + c.get(CoreAnnotations.ShapeAnnotation.class) + "-TPS");
       }
     }
+
+    return featuresCpC;
   }
 
-  protected void featuresCp2C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+  protected Collection<String> featuresCp2C(PaddedList<IN> cInfo, int loc) {
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -1983,18 +1918,19 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String cWord = getWord(c);
     String pWord = getWord(p);
     String p2Word = getWord(p2);
+    Collection<String> featuresCp2C = new ArrayList<>();
 
     if (flags.useMoreAbbr) {
-      out.build().append(p2.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-P2ABBRANS").add();
+      featuresCp2C.add(p2.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-P2ABBRANS");
     }
 
     if (flags.useMinimalAbbr) {
-      out.build().append(p2.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-P2AP2CABB").add();
+      featuresCp2C.add(p2.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-P2AP2CABB");
     }
 
     if (flags.useMinimalAbbr1) {
       if (!c.get(CoreAnnotations.AbbrAnnotation.class).equals("XX")) {
-        out.build().append(p2.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-P2AP2CABB").add();
+        featuresCp2C.add(p2.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-P2AP2CABB");
       }
     }
 
@@ -2002,23 +1938,22 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       if (flags.useReverse) {
         if (cWord.equals("(") || cWord.equals("[") || cWord.equals("-LRB-")) {
           if ((p2Word.equals(")") || p2Word.equals("]") || p2Word.equals("-RRB-")) && ! (pWord.equals(")") || pWord.equals("]") || pWord.equals("-RRB-"))) {
-            out.add("PAREN-MATCH");
+            featuresCp2C.add("PAREN-MATCH");
           }
         }
       } else {
         if (cWord.equals(")") || cWord.equals("]") || cWord.equals("-RRB-")) {
           if ((p2Word.equals("(") || p2Word.equals("[") || p2Word.equals("-LRB-")) && ! (pWord.equals("(") || pWord.equals("[") || pWord.equals("-LRB-"))) {
-            out.add("PAREN-MATCH");
+            featuresCp2C.add("PAREN-MATCH");
           }
         }
       }
     }
+
+    return featuresCp2C;
   }
 
-  protected void featuresCp3C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
-    if (!flags.useParenMatching) {
-      return;
-    }
+  protected Collection<String> featuresCp3C(PaddedList<IN> cInfo, int loc) {
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -2028,26 +1963,28 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String pWord = getWord(p);
     String p2Word = getWord(p2);
     String p3Word = getWord(p3);
+    Collection<String> featuresCp3C = new ArrayList<>();
 
-    if (flags.useReverse) {
-      if (cWord.equals("(") || cWord.equals("[")) {
-        if ((flags.maxLeft >= 3) && (p3Word.equals(")") || p3Word.equals("]")) && !(p2Word.equals(")") || p2Word.equals("]") || pWord.equals(")") || pWord.equals("]"))) {
-          out.add("PAREN-MATCH");
+    if (flags.useParenMatching) {
+      if (flags.useReverse) {
+        if (cWord.equals("(") || cWord.equals("[")) {
+          if ((flags.maxLeft >= 3) && (p3Word.equals(")") || p3Word.equals("]")) && !(p2Word.equals(")") || p2Word.equals("]") || pWord.equals(")") || pWord.equals("]"))) {
+            featuresCp3C.add("PAREN-MATCH");
+          }
         }
-      }
-    } else {
-      if (cWord.equals(")") || cWord.equals("]")) {
-        if ((flags.maxLeft >= 3) && (p3Word.equals("(") || p3Word.equals("[")) && !(p2Word.equals("(") || p2Word.equals("[") || pWord.equals("(") || pWord.equals("["))) {
-          out.add("PAREN-MATCH");
+      } else {
+        if (cWord.equals(")") || cWord.equals("]")) {
+          if ((flags.maxLeft >= 3) && (p3Word.equals("(") || p3Word.equals("[")) && !(p2Word.equals("(") || p2Word.equals("[") || pWord.equals("(") || pWord.equals("["))) {
+            featuresCp3C.add("PAREN-MATCH");
+          }
         }
       }
     }
+
+    return featuresCp3C;
   }
 
-  protected void featuresCp4C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
-    if (!flags.useParenMatching) {
-      return;
-    }
+  protected Collection<String> featuresCp4C(PaddedList<IN> cInfo, int loc) {
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -2060,25 +1997,28 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String p3Word = getWord(p3);
     String p4Word = getWord(p4);
 
-    if (flags.useReverse) {
-      if (cWord.equals("(") || cWord.equals("[")) {
-        if ((flags.maxLeft >= 4) && (p4Word.equals(")") || p4Word.equals("]")) && !(p3Word.equals(")") || p3Word.equals("]") || p2Word.equals(")") || p2Word.equals("]") || pWord.equals(")") || pWord.equals("]"))) {
-          out.add("PAREN-MATCH");
+    Collection<String> featuresCp4C = new ArrayList<>();
+
+    if (flags.useParenMatching) {
+      if (flags.useReverse) {
+        if (cWord.equals("(") || cWord.equals("[")) {
+          if ((flags.maxLeft >= 4) && (p4Word.equals(")") || p4Word.equals("]")) && !(p3Word.equals(")") || p3Word.equals("]") || p2Word.equals(")") || p2Word.equals("]") || pWord.equals(")") || pWord.equals("]"))) {
+            featuresCp4C.add("PAREN-MATCH");
+          }
         }
-      }
-    } else {
-      if (cWord.equals(")") || cWord.equals("]")) {
-        if ((flags.maxLeft >= 4) && (p4Word.equals("(") || p4Word.equals("[")) && !(p3Word.equals("(") || p3Word.equals("[") || p2Word.equals("(") || p2Word.equals("[") || pWord.equals("(") || pWord.equals("["))) {
-          out.add("PAREN-MATCH");
+      } else {
+        if (cWord.equals(")") || cWord.equals("]")) {
+          if ((flags.maxLeft >= 4) && (p4Word.equals("(") || p4Word.equals("[")) && !(p3Word.equals("(") || p3Word.equals("[") || p2Word.equals("(") || p2Word.equals("[") || pWord.equals("(") || pWord.equals("["))) {
+            featuresCp4C.add("PAREN-MATCH");
+          }
         }
       }
     }
+
+    return featuresCp4C;
   }
 
-  protected void featuresCp5C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
-    if (!flags.useParenMatching) {
-      return;
-    }
+  protected Collection<String> featuresCp5C(PaddedList<IN> cInfo, int loc) {
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -2092,23 +2032,28 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String p3Word = getWord(p3);
     String p4Word = getWord(p4);
     String p5Word = getWord(p5);
+    Collection<String> featuresCp5C = new ArrayList<>();
 
-    if (flags.useReverse) {
-      if (cWord.equals("(") || cWord.equals("[")) {
-        if ((flags.maxLeft >= 5) && (p5Word.equals(")") || p5Word.equals("]")) && !(p4Word.equals(")") || p4Word.equals("]") || p3Word.equals(")") || p3Word.equals("]") || p2Word.equals(")") || p2Word.equals("]") || pWord.equals(")") || pWord.equals("]"))) {
-          out.add("PAREN-MATCH");
+    if (flags.useParenMatching) {
+      if (flags.useReverse) {
+        if (cWord.equals("(") || cWord.equals("[")) {
+          if ((flags.maxLeft >= 5) && (p5Word.equals(")") || p5Word.equals("]")) && !(p4Word.equals(")") || p4Word.equals("]") || p3Word.equals(")") || p3Word.equals("]") || p2Word.equals(")") || p2Word.equals("]") || pWord.equals(")") || pWord.equals("]"))) {
+            featuresCp5C.add("PAREN-MATCH");
+          }
         }
-      }
-    } else {
-      if (cWord.equals(")") || cWord.equals("]")) {
-        if ((flags.maxLeft >= 5) && (p5Word.equals("(") || p5Word.equals("[")) && !(p4Word.equals("(") || p4Word.equals("[") || p3Word.equals("(") || p3Word.equals("[") || p2Word.equals("(") || p2Word.equals("[") || pWord.equals("(") || pWord.equals("["))) {
-          out.add("PAREN-MATCH");
+      } else {
+        if (cWord.equals(")") || cWord.equals("]")) {
+          if ((flags.maxLeft >= 5) && (p5Word.equals("(") || p5Word.equals("[")) && !(p4Word.equals("(") || p4Word.equals("[") || p3Word.equals("(") || p3Word.equals("[") || p2Word.equals("(") || p2Word.equals("[") || pWord.equals("(") || pWord.equals("["))) {
+            featuresCp5C.add("PAREN-MATCH");
+          }
         }
       }
     }
+    return featuresCp5C;
   }
 
-  protected void featuresCpCp2C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+
+  protected Collection<String> featuresCpCp2C(PaddedList<IN> cInfo, int loc) {
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -2116,25 +2061,28 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String pWord = getWord(p);
     // String p2Word = getWord(p2);
 
+    Collection<String> featuresCpCp2C = new ArrayList<>();
+
     if (flags.useInternal && flags.useExternal) {
+
       if (flags.strictGoodCoNLL && ! flags.removeStrictGoodCoNLLDuplicates && flags.useTypeySequences && flags.maxLeft >= 2) {
         // this feature duplicates -TYPETYPES below, so probably don't include it, but it was in original tests of CMM goodCoNLL
-        out.build().append(p2.get(CoreAnnotations.ShapeAnnotation.class)).dash().append(p.get(CoreAnnotations.ShapeAnnotation.class)).dash().append(c.get(CoreAnnotations.ShapeAnnotation.class)).append("-TTPS").add();
+        featuresCpCp2C.add(p2.get(CoreAnnotations.ShapeAnnotation.class) + '-' + p.get(CoreAnnotations.ShapeAnnotation.class) + '-' + c.get(CoreAnnotations.ShapeAnnotation.class) + "-TTPS");
       }
 
       if (flags.useAbbr) {
-        out.build().append(p2.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(p.get(CoreAnnotations.AbbrAnnotation.class)).dash().append(c.get(CoreAnnotations.AbbrAnnotation.class)).append("-2PABBRANS").add();
+        featuresCpCp2C.add(p2.get(CoreAnnotations.AbbrAnnotation.class) + '-' + p.get(CoreAnnotations.AbbrAnnotation.class) + '-' + c.get(CoreAnnotations.AbbrAnnotation.class) + "-2PABBRANS");
       }
 
       if (flags.useChunks) {
-        out.build().append(p2.get(CoreAnnotations.ChunkAnnotation.class)).dash().append(p.get(CoreAnnotations.ChunkAnnotation.class)).dash().append(c.get(CoreAnnotations.ChunkAnnotation.class)).append("-2PCHUNKS").add();
+        featuresCpCp2C.add(p2.get(CoreAnnotations.ChunkAnnotation.class) + '-' + p.get(CoreAnnotations.ChunkAnnotation.class) + '-' + c.get(CoreAnnotations.ChunkAnnotation.class) + "-2PCHUNKS");
       }
 
       if (flags.useLongSequences) {
-        out.add("PPSEQ");
+        featuresCpCp2C.add("PPSEQ");
       }
       if (flags.useBoundarySequences && pWord.equals(CoNLLDocumentReaderAndWriter.BOUNDARY)) {
-        out.add("BNDRY-SPAN-PPSEQ");
+        featuresCpCp2C.add("BNDRY-SPAN-PPSEQ");
       }
       // This more complex consistency checker didn't help!
       // if (flags.useBoundarySequences) {
@@ -2147,15 +2095,15 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
       if (flags.useTaggySequences) {
         if (flags.useTags) {
-          out.build().append(p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TTS").add();
+          featuresCpCp2C.add(p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TTS");
           if (flags.useTaggySequencesShapeInteraction) {
-            out.build().append(p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.get(CoreAnnotations.ShapeAnnotation.class)).append("-TTS-CS").add();
+            featuresCpCp2C.add(p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.get(CoreAnnotations.ShapeAnnotation.class) + "-TTS-CS");
           }
         }
         if (flags.useDistSim) {
-          out.build().append(p2.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append("-DISTSIM_TTS1").add();
+          featuresCpCp2C.add(p2.get(CoreAnnotations.DistSimAnnotation.class) + '-' + p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + "-DISTSIM_TTS1");
           if (flags.useTaggySequencesShapeInteraction) {
-            out.build().append(p2.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.ShapeAnnotation.class)).append("-DISTSIM_TTS1-CS").add();
+            featuresCpCp2C.add(p2.get(CoreAnnotations.DistSimAnnotation.class) + '-' + p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.ShapeAnnotation.class) + "-DISTSIM_TTS1-CS");
           }
         }
       }
@@ -2166,15 +2114,17 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         String cShape = c.get(CoreAnnotations.ShapeAnnotation.class);
         String pShape = p.get(CoreAnnotations.ShapeAnnotation.class);
         String p2Shape = p2.get(CoreAnnotations.ShapeAnnotation.class);
-        out.build().append(p2Shape).dash().append(pShape).dash().append(cShape).append("-TYPETYPES").add();
+        featuresCpCp2C.add(p2Shape + '-' + pShape + '-' + cShape + "-TYPETYPES");
       }
     } else if (flags.useInternal) {
+
       if (flags.useLongSequences) {
-        out.add("PPSEQ");
+        featuresCpCp2C.add("PPSEQ");
       }
     } else if (flags.useExternal) {
+
       if (flags.useLongSequences) {
-        out.add("PPSEQ");
+        featuresCpCp2C.add("PPSEQ");
       }
 
       if (((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) ||
@@ -2183,32 +2133,36 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         String cShape = c.get(CoreAnnotations.ShapeAnnotation.class);
         String pShape = p.get(CoreAnnotations.ShapeAnnotation.class);
         String p2Shape = p2.get(CoreAnnotations.ShapeAnnotation.class);
-        out.build().append(p2Shape).dash().append(pShape).dash().append(cShape).append("-TYPETYPES").add();
+        featuresCpCp2C.add(p2Shape + '-' + pShape + '-' + cShape + "-TYPETYPES");
       }
     }
+
+    return featuresCpCp2C;
   }
 
 
-  protected void featuresCpCp2Cp3C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+  protected Collection<String> featuresCpCp2Cp3C(PaddedList<IN> cInfo, int loc) {
+    CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
+    CoreLabel p2 = cInfo.get(loc - 2);
+    CoreLabel p3 = cInfo.get(loc - 3);
+
+    Collection<String> featuresCpCp2Cp3C = new ArrayList<>();
 
     if (flags.useTaggySequences) {
-      CoreLabel c = cInfo.get(loc);
-      CoreLabel p2 = cInfo.get(loc - 2);
-      CoreLabel p3 = cInfo.get(loc - 3);
       if (flags.useTags) {
         if (flags.maxLeft >= 3 && !flags.dontExtendTaggy) {
-          out.build().append(p3.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).append("-TTTS").add();
+          featuresCpCp2Cp3C.add(p3.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-TTTS");
           if (flags.useTaggySequencesShapeInteraction) {
-            out.build().append(p3.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(p.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.getString(CoreAnnotations.PartOfSpeechAnnotation.class)).dash().append(c.get(CoreAnnotations.ShapeAnnotation.class)).append("-TTTS-CS").add();
+            featuresCpCp2Cp3C.add(p3.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + p.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + '-' + c.get(CoreAnnotations.ShapeAnnotation.class) + "-TTTS-CS");
           }
         }
       }
       if (flags.useDistSim) {
         if (flags.maxLeft >= 3 && !flags.dontExtendTaggy) {
-          out.build().append(p3.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(p2.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).append("-DISTSIM_TTTS1").add();
+          featuresCpCp2Cp3C.add(p3.get(CoreAnnotations.DistSimAnnotation.class) + '-' + p2.get(CoreAnnotations.DistSimAnnotation.class) + '-' + p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + "-DISTSIM_TTTS1");
           if (flags.useTaggySequencesShapeInteraction) {
-            out.build().append(p3.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(p2.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(p.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.DistSimAnnotation.class)).dash().append(c.get(CoreAnnotations.ShapeAnnotation.class)).append("-DISTSIM_TTTS1-CS").add();
+            featuresCpCp2Cp3C.add(p3.get(CoreAnnotations.DistSimAnnotation.class) + '-' + p2.get(CoreAnnotations.DistSimAnnotation.class) + '-' + p.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.DistSimAnnotation.class) + '-' + c.get(CoreAnnotations.ShapeAnnotation.class) + "-DISTSIM_TTTS1-CS");
           }
         }
       }
@@ -2216,49 +2170,71 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
     if (flags.maxLeft >= 3) {
       if (flags.useLongSequences) {
-        out.add("PPPSEQ");
+        featuresCpCp2Cp3C.add("PPPSEQ");
       }
       if (flags.useBoundarySequences && getWord(p).equals(CoNLLDocumentReaderAndWriter.BOUNDARY)) {
-        out.add("BNDRY-SPAN-PPPSEQ");
+        featuresCpCp2Cp3C.add("BNDRY-SPAN-PPPSEQ");
       }
     }
+
+    return featuresCpCp2Cp3C;
   }
 
-  protected void featuresCpCp2Cp3Cp4C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+  protected Collection<String> featuresCpCp2Cp3Cp4C(PaddedList<IN> cInfo, int loc) {
+    Collection<String> featuresCpCp2Cp3Cp4C = new ArrayList<>();
+
+    CoreLabel p = cInfo.get(loc - 1);
+
     if (flags.maxLeft >= 4) {
-      CoreLabel p = cInfo.get(loc - 1);
       if (flags.useLongSequences) {
-        out.add("PPPPSEQ");
+        featuresCpCp2Cp3Cp4C.add("PPPPSEQ");
       }
       if (flags.useBoundarySequences && getWord(p).equals(CoNLLDocumentReaderAndWriter.BOUNDARY)) {
-        out.add("BNDRY-SPAN-PPPPSEQ");
+        featuresCpCp2Cp3Cp4C.add("BNDRY-SPAN-PPPPSEQ");
       }
     }
+
+    return featuresCpCp2Cp3Cp4C;
   }
 
 
-  protected void featuresCnC(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
-    if (flags.useNext && flags.useSequences && flags.useNextSequences) {
-      CoreLabel c = cInfo.get(loc);
-      out.add("NSEQ");
-      out.build().append(getWord(c)).append("-NSEQW").add();
+  protected Collection<String> featuresCnC(PaddedList<IN> cInfo, int loc) {
+    CoreLabel c = cInfo.get(loc);
+
+    Collection<String> featuresCnC = new ArrayList<>();
+
+    if (flags.useNext) {
+      if (flags.useSequences && flags.useNextSequences) {
+        featuresCnC.add("NSEQ");
+        featuresCnC.add(getWord(c) + "-NSEQW");
+      }
     }
+
+    return featuresCnC;
   }
 
 
-  protected void featuresCpCnC(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
-    if (flags.useNext && flags.usePrev && flags.useSequences && flags.usePrevSequences && flags.useNextSequences) {
-      CoreLabel c = cInfo.get(loc);
-      out.add("PNSEQ");
-      out.build().append(getWord(c)).append("-PNSEQW").add();
+  protected Collection<String> featuresCpCnC(PaddedList<IN> cInfo, int loc) {
+    CoreLabel c = cInfo.get(loc);
+
+    Collection<String> featuresCpCnC = new ArrayList<>();
+
+    if (flags.useNext && flags.usePrev) {
+      if (flags.useSequences && flags.usePrevSequences && flags.useNextSequences) {
+        featuresCpCnC.add("PNSEQ");
+        featuresCpCnC.add(getWord(c) + "-PNSEQW");
+      }
     }
+
+    return featuresCpCnC;
   }
+
 
   private int reverse(int i) {
     return (flags.useReverse ? -1 * i : i);
   }
 
-  private void occurrencePatterns(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+  private Collection<String> occurrencePatterns(PaddedList<IN> cInfo, int loc) {
     // features on last Cap
     String word = getWord(cInfo.get(loc));
     String nWord = getWord(cInfo.get(loc + reverse(1)));
@@ -2266,26 +2242,26 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String pWord = getWord(p);
     // log.info(word+" "+nWord);
     if (!(isNameCase(word) && noUpperCase(nWord) && hasLetter(nWord) && hasLetter(pWord) && p != cInfo.getPad())) {
-      out.add("NO-OCCURRENCE-PATTERN");
-      return;
+      return Collections.singletonList("NO-OCCURRENCE-PATTERN");
     }
     // log.info("LOOKING");
+    Set<String> l = Generics.newHashSet();
     if (cInfo.get(loc - reverse(1)).getString(CoreAnnotations.PartOfSpeechAnnotation.class) != null && isNameCase(pWord) && cInfo.get(loc - reverse(1)).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
       for (int jump = 3; jump < 150; jump++) {
         if (getWord(cInfo.get(loc + reverse(jump))).equals(word)) {
           if (getWord(cInfo.get(loc + reverse(jump - 1))).equals(pWord)) {
-            out.add("XY-NEXT-OCCURRENCE-XY");
+            l.add("XY-NEXT-OCCURRENCE-XY");
           } else {
-            out.add("XY-NEXT-OCCURRENCE-Y");
+            l.add("XY-NEXT-OCCURRENCE-Y");
           }
         }
       }
       for (int jump = -3; jump > -150; jump--) {
         if (getWord(cInfo.get(loc + reverse(jump))).equals(word)) {
           if (getWord(cInfo.get(loc + reverse(jump - 1))).equals(pWord)) {
-            out.add("XY-PREV-OCCURRENCE-XY");
+            l.add("XY-PREV-OCCURRENCE-XY");
           } else {
-            out.add("XY-PREV-OCCURRENCE-Y");
+            l.add("XY-PREV-OCCURRENCE-Y");
           }
         }
       }
@@ -2293,34 +2269,44 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       for (int jump = 3; jump < 150; jump++) {
         if (getWord(cInfo.get(loc + reverse(jump))).equals(word)) {
           if (isNameCase(getWord(cInfo.get(loc + reverse(jump - 1)))) && (cInfo.get(loc + reverse(jump - 1))).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
-            out.add("X-NEXT-OCCURRENCE-YX");
+            l.add("X-NEXT-OCCURRENCE-YX");
             // log.info(getWord(cInfo.get(loc+reverse(jump-1))));
           } else if (isNameCase(getWord(cInfo.get(loc + reverse(jump + 1)))) && (cInfo.get(loc + reverse(jump + 1))).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
             // log.info(getWord(cInfo.get(loc+reverse(jump+1))));
-            out.add("X-NEXT-OCCURRENCE-XY");
+            l.add("X-NEXT-OCCURRENCE-XY");
           } else {
-            out.add("X-NEXT-OCCURRENCE-X");
+            l.add("X-NEXT-OCCURRENCE-X");
           }
         }
       }
       for (int jump = -3; jump > -150; jump--) {
         if (getWord(cInfo.get(loc + jump)) != null && getWord(cInfo.get(loc + jump)).equals(word)) {
           if (isNameCase(getWord(cInfo.get(loc + reverse(jump + 1)))) && (cInfo.get(loc + reverse(jump + 1))).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
-            out.add("X-PREV-OCCURRENCE-YX");
+            l.add("X-PREV-OCCURRENCE-YX");
             // log.info(getWord(cInfo.get(loc+reverse(jump+1))));
           } else if (isNameCase(getWord(cInfo.get(loc + reverse(jump - 1)))) && cInfo.get(loc + reverse(jump - 1)).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
-            out.add("X-PREV-OCCURRENCE-XY");
+            l.add("X-PREV-OCCURRENCE-XY");
             // log.info(getWord(cInfo.get(loc+reverse(jump-1))));
           } else {
-            out.add("X-PREV-OCCURRENCE-X");
+            l.add("X-PREV-OCCURRENCE-X");
           }
         }
       }
     }
+    /*
+    if (!l.isEmpty()) {
+      log.info(pWord+" "+word+" "+nWord+" "+l);
+    }
+    */
+    return l;
   }
 
   private String intern(String s) {
-    return flags.intern ? s.intern() : s;
+    if (flags.intern) {
+      return s.intern();
+    } else {
+      return s;
+    }
   }
 
   private void initGazette() {
