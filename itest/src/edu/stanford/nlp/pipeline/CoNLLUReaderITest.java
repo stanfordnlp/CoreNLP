@@ -12,16 +12,14 @@ import junit.framework.TestCase;
 /**
  * Test reading in a CoNLL-U document.  Compare the Annotation created from file to a gold one.
  */
-
-
 public class CoNLLUReaderITest extends TestCase {
 
-    public String exampleDocument = "Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un " +
+    private String exampleDocument = "Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un " +
             "descuido de fábrica.\nDe allí las rebajas.\n";
-    public String examplePath = "/u/nlp/data/stanford-corenlp/test/data/conllu/es-example.conllu";
-    public StanfordCoreNLP pipeline;
-    public Annotation goldDocument;
-    public Annotation readInDocument;
+    private String examplePath = "/u/nlp/data/stanford-corenlp/test/data/conllu/es-example.conllu";
+    private StanfordCoreNLP pipeline;
+    private Annotation goldDocument;
+    private Annotation readInDocument;
 
     @Override
     public void setUp() throws IOException {

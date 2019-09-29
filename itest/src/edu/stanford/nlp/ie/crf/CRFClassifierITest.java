@@ -243,19 +243,19 @@ public class CRFClassifierITest {
                           "It 's \n",
                   },
                   { "  \"anaesthetic  Smith is\"  ",
-                          "  ``/Oanaesthetic/O  Smith/PERSON is/O''/O  ",
+                          "  \"/Oanaesthetic/O  Smith/PERSON is/O\"/O  ",
                           "  \"anaesthetic  <PERSON>Smith</PERSON> is\"  ",
-                          "<wi num=\"0\" entity=\"O\">``</wi>\n" +
+                          "<wi num=\"0\" entity=\"O\">&dquot;</wi>\n" +
                                   "<wi num=\"1\" entity=\"O\">anaesthetic</wi>\n" +
                                   "<wi num=\"2\" entity=\"PERSON\">Smith</wi>\n" +
                                   "<wi num=\"3\" entity=\"O\">is</wi>\n" +
-                                  "<wi num=\"4\" entity=\"O\">&apos;&apos;</wi>\n",
+                                  "<wi num=\"4\" entity=\"O\">&dquot;</wi>\n",
                           "  <wi num=\"0\" entity=\"O\">``</wi>" +
                                   "<wi num=\"1\" entity=\"O\">anaesthetic</wi>  " +
                                   "<wi num=\"2\" entity=\"PERSON\">Smith</wi> " +
                                   "<wi num=\"3\" entity=\"O\">is</wi>" +
                                   "<wi num=\"4\" entity=\"O\">&apos;&apos;</wi>  ",
-                          "``/O anaesthetic/O Smith/PERSON is/O ''/O \n",
+                          "\"/O anaesthetic/O Smith/PERSON is/O \"/O \n",
                           "\" anaesthetic <PERSON>Smith</PERSON> is \" \n",
 
                   },
@@ -316,7 +316,7 @@ public class CRFClassifierITest {
     crf = CRFClassifier.getDefaultClassifier();
     runCRFTest(crf);
 
-    final boolean isStoredAnswer = Boolean.valueOf(System.getProperty("ner.useStoredAnswer", "false"));
+    final boolean isStoredAnswer = Boolean.parseBoolean(System.getProperty("ner.useStoredAnswer", "false"));
     String txt1 = "Jenny Finkel works for Mixpanel in San Francisco .";
     if (isStoredAnswer) {
       crf = CRFClassifier.getClassifierNoExceptions(nerPath2);

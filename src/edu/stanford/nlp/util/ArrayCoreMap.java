@@ -13,15 +13,15 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
 /**
  * Base implementation of {@link CoreMap} backed by two Java arrays.
- *
+ * <p>
  * Reasonable care has been put into ensuring that this class is both fast and
  * has a light memory footprint.
- *
+ * <p>
  * Note that like the base classes in the Collections API, this implementation
  * is <em>not thread-safe</em>. For speed reasons, these methods are not
  * synchronized. A synchronized wrapper could be developed by anyone so
  * inclined.
- *
+ * <p>
  * Equality is defined over the complete set of keys and values currently
  * stored in the map.  Because this class is mutable, it should not be used
  * as a key in a Map.
@@ -159,10 +159,10 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
   @Override
   public Set<Class<?>> keySet() {
 
-    return new AbstractSet<Class<?>>() {
+    return new AbstractSet<>() {
       @Override
       public Iterator<Class<?>> iterator() {
-        return new Iterator<Class<?>>() {
+        return new Iterator<>() {
           private int i; // = 0;
 
           @Override
@@ -182,7 +182,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
           @Override
           @SuppressWarnings("unchecked")
           public void remove() {
-            ArrayCoreMap.this.remove((Class)keys[i]);
+            ArrayCoreMap.this.remove((Class) keys[i]);
           }
         };
       }
@@ -541,30 +541,29 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     if (this.size != other.size) {
       result = false;
     } else {
-    for (int i = 0; i < this.size; i++) {
-      // test if other contains this key,value pair
-      boolean matched = false;
-      for (int j = 0; j < other.size; j++) {
-        if (this.keys[i] == other.keys[j]) {
-          if ((this.values[i] == null && other.values[j] != null) ||
-              (this.values[i] != null && other.values[j] == null)) {
-            matched = false;
-            break;
-          }
+      for (int i = 0; i < this.size; i++) {
+        // test if other contains this key,value pair
+        boolean matched = false;
+        for (int j = 0; j < other.size; j++) {
+          if (this.keys[i] == other.keys[j]) {
+            if ((this.values[i] == null && other.values[j] != null) ||
+                    (this.values[i] != null && other.values[j] == null)) {
+              // matched = false; // must be true
+              break;
+            }
 
-          if ((this.values[i] == null && other.values[j] == null) ||
-              (this.values[i].equals(other.values[j]))) {
-            matched = true;
-            break;
+            if (Objects.equals(this.values[i], other.values[j])) {
+              matched = true;
+              break;
+            }
           }
         }
-      }
 
-      if (!matched) {
-        result = false;
-        break;
+        if ( ! matched) {
+          result = false;
+          break;
+        }
       }
-    }
     }
 
     if (createdCalledMap) {
