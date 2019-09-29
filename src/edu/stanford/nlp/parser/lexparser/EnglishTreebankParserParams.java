@@ -2208,7 +2208,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
       i += 2;
     } else if (args[i].equalsIgnoreCase("-headFinder") && (i + 1 < args.length)) {
       try {
-        headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
+        headFinder = (HeadFinder) Class.forName(args[i + 1]).getDeclaredConstructor().newInstance();
       } catch (Exception e) {
         log.info("Error: Unable to load HeadFinder; default HeadFinder will be used.");
         e.printStackTrace();

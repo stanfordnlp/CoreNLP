@@ -720,7 +720,7 @@ public class TreePrint  {
     if (wnc == null) {
       try {
         Class<?> cl = Class.forName("edu.stanford.nlp.trees.WordNetInstance");
-        wnc = (WordNetConnection) cl.newInstance();
+        wnc = (WordNetConnection) cl.getDeclaredConstructor().newInstance();
       } catch (Exception e) {
         log.info("Couldn't open WordNet Connection.  Aborting collocation detection.");
         log.info(e);
@@ -814,21 +814,21 @@ public class TreePrint  {
     flagMap.put("-hf", 1);
     Map<String,String[]> argsMap = StringUtils.argsToMap(args,flagMap);
     args = argsMap.get(null);
-    if(argsMap.keySet().contains("-format")) {
+    if (argsMap.containsKey("-format")) {
       format = argsMap.get("-format")[0];
     }
-    if(argsMap.keySet().contains("-options")) {
+    if(argsMap.containsKey("-options")) {
       options = argsMap.get("-options")[0];
     }
-    if (argsMap.keySet().contains("-tLP")) {
+    if (argsMap.containsKey("-tLP")) {
       tlpName = argsMap.get("-tLP")[0];
     }
-    if (argsMap.keySet().contains("-hf")) {
+    if (argsMap.containsKey("-hf")) {
       hfName = argsMap.get("-hf")[0];
     }
     TreebankLanguagePack tlp;
     try {
-      tlp = (TreebankLanguagePack) Class.forName(tlpName).newInstance();
+      tlp = (TreebankLanguagePack) Class.forName(tlpName).getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       log.warning(e);
       return;
@@ -836,7 +836,7 @@ public class TreePrint  {
     HeadFinder hf;
     if (hfName != null) {
       try {
-        hf = (HeadFinder) Class.forName(hfName).newInstance();
+        hf = (HeadFinder) Class.forName(hfName).getDeclaredConstructor().newInstance();
       } catch (Exception e) {
         log.warning(e);
         return;
@@ -849,7 +849,7 @@ public class TreePrint  {
     if (args.length > 0) {
       Treebank trees; // initialized below
       TreeReaderFactory trf;
-      if (argsMap.keySet().contains("-useTLPTreeReader")) {
+      if (argsMap.containsKey("-useTLPTreeReader")) {
         trf = tlp.treeReaderFactory();
       } else {
         trf = in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new TreeNormalizer());

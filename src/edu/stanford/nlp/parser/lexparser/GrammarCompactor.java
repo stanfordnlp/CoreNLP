@@ -220,13 +220,13 @@ public abstract class GrammarCompactor  {
     if (isSyntheticState(parentString)) {
       String topcat = getTopCategoryOfSyntheticState(parentString);
       TransducerGraph graph = getGraphFromMap(graphs, topcat);
-      Double output = new Double(smartNegate(rule.score()));
+      Double output = Double.valueOf(smartNegate(rule.score()));
       graph.addArc(graph.getStartNode(), parentString, childString, output);
       return true;
     } else if (isSyntheticState(childString)) {
       // need to add Arc from synthetic state to endState
       TransducerGraph graph = getGraphFromMap(graphs, parentString);
-      Double output = new Double(smartNegate(rule.score()));
+      Double output = Double.valueOf(smartNegate(rule.score()));
       graph.addArc(childString, parentString, END, output); // parentString should the the same as endState
       graph.setEndNode(parentString);
       return true;
@@ -257,7 +257,7 @@ public abstract class GrammarCompactor  {
       return false;
     }
     target = parentString;
-    Double output = new Double(smartNegate(rule.score())); // makes it a real  0 <= k <= infty
+    Double output = Double.valueOf(smartNegate(rule.score())); // makes it a real  0 <= k <= infty
     String topcat = getTopCategoryOfSyntheticState(source);
     if (topcat == null) {
       throw new RuntimeException("can't have null topcat");

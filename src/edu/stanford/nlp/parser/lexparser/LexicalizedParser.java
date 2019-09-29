@@ -1204,11 +1204,14 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         secondaryTreebankWeight = treebankDescription.third();
       } else if (args[argIndex].equalsIgnoreCase("-tLPP") && (argIndex + 1 < args.length)) {
         try {
-          op.tlpParams = (TreebankLangParserParams) Class.forName(args[argIndex + 1]).newInstance();
+          op.tlpParams = (TreebankLangParserParams) Class.forName(args[argIndex + 1]).getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException e) {
           log.info("Class not found: " + args[argIndex + 1]);
           throw new RuntimeException(e);
-        } catch (InstantiationException e) {
+        } catch (NoSuchMethodException e) {
+          log.info("Method not found: " + args[argIndex + 1]);
+          throw new RuntimeException(e);
+        } catch (InstantiationException|InvocationTargetException e) {
           log.info("Couldn't instantiate: " + args[argIndex + 1] + ": " + e.toString());
           throw new RuntimeException(e);
         } catch (IllegalAccessException e) {

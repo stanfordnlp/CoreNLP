@@ -1,4 +1,4 @@
-/**
+/*
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
  * Copyright:    Copyright (c) Trustees of Leland Stanford Junior University<p>
@@ -85,12 +85,12 @@ public class Feature {
     return instanceIndex.get(index);
   }
 
-  int getXInstance(int index) {
+  private int getXInstance(int index) {
     IntPair iP = getPair(index);
     return iP.get(0);
   }
 
-  int getYInstance(int index) {
+  private int getYInstance(int index) {
     IntPair iP = getPair(index);
     return iP.get(1);
   }
@@ -237,7 +237,7 @@ public class Feature {
     for (int i = 0; i < len(); i++) {
       int x = getX(i);
       int y = getY(i);
-      Double value = new Double(getVal(i));
+      Double value = Double.valueOf(getVal(i));
       this.hashValues.put(Integer.valueOf(indexOf(x, y)), value);
     }
   }

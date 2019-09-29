@@ -3,6 +3,7 @@ package edu.stanford.nlp.international;
 import edu.stanford.nlp.parser.lexparser.*;
 import edu.stanford.nlp.util.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 /**
@@ -86,9 +87,9 @@ public enum Language {
   public static TreebankLangParserParams treebankForLanguage(String languageName) {
     try {
       Class clazz = Class.forName("edu.stanford.nlp.parser.lexparser."+languageName+"TreebankParserParams");
-      return (TreebankLangParserParams) clazz.newInstance();
-    } catch (ClassNotFoundException | NoClassDefFoundError | java.lang.InstantiationException |
-        java.lang.IllegalAccessException ex) {
+      return (TreebankLangParserParams) clazz.getDeclaredConstructor().newInstance();
+    } catch (ClassNotFoundException | NoClassDefFoundError | InstantiationException |
+        IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
       return null;
     }
   }
@@ -100,4 +101,5 @@ public enum Language {
   public boolean compatibleWith(Language other) {
     return this == other || this == Any || other == Any;
   }
+
 }

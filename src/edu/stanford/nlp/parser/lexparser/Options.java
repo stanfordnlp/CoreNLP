@@ -1224,7 +1224,7 @@ public class Options implements Serializable  {
     line = in.readLine();
     value = line.substring(line.indexOf(' ') + 1);
     try {
-      tlpParams = (TreebankLangParserParams) Class.forName(value).newInstance();
+      tlpParams = (TreebankLangParserParams) Class.forName(value).getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       IOException ioe = new IOException("Problem instantiating parserParams: " + line);
       ioe.initCause(e);
