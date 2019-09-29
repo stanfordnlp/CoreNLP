@@ -159,10 +159,10 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
   @Override
   public Set<Class<?>> keySet() {
 
-    return new AbstractSet<>() {
+    return new AbstractSet<Class<?>>() {
       @Override
       public Iterator<Class<?>> iterator() {
-        return new Iterator<>() {
+        return new Iterator<Class<?>>() {
           private int i; // = 0;
 
           @Override
