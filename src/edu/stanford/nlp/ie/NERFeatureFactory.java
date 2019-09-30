@@ -407,25 +407,25 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     c.setDomain(domain);
     if (clique == cliqueC) {
       //200710: tried making this clique null; didn't improve performance (rafferty)
-      featuresC(cInfo, loc, c.setSuffix("C"));
+      featuresC(cInfo, loc, c);
     } else if (clique == cliqueCpC) {
-      featuresCpC(cInfo, loc, c.setSuffix("CpC"));
-      featuresCnC(cInfo, loc - 1, c.setSuffix("CnC"));
+      featuresCpC(cInfo, loc, c);
+      featuresCnC(cInfo, loc - 1, c);
     } else if (clique == cliqueCp2C) {
-      featuresCp2C(cInfo, loc, c.setSuffix("Cp2C"));
+      featuresCp2C(cInfo, loc, c);
     } else if (clique == cliqueCp3C) {
-      featuresCp3C(cInfo, loc, c.setSuffix("Cp3C"));
+      featuresCp3C(cInfo, loc, c);
     } else if (clique == cliqueCp4C) {
-      featuresCp4C(cInfo, loc, c.setSuffix("Cp4C"));
+      featuresCp4C(cInfo, loc, c);
     } else if (clique == cliqueCp5C) {
-      featuresCp5C(cInfo, loc, c.setSuffix("Cp5C"));
+      featuresCp5C(cInfo, loc, c);
     } else if (clique == cliqueCpCp2C) {
-      featuresCpCp2C(cInfo, loc, c.setSuffix("CpCp2C"));
-      featuresCpCnC(cInfo, loc - 1, c.setSuffix("CpCnC"));
+      featuresCpCp2C(cInfo, loc, c);
+      featuresCpCnC(cInfo, loc - 1, c);
     } else if (clique == cliqueCpCp2Cp3C) {
-      featuresCpCp2Cp3C(cInfo, loc, c.setSuffix("CpCp2Cp3C"));
+      featuresCpCp2Cp3C(cInfo, loc, c);
     } else if (clique == cliqueCpCp2Cp3Cp4C) {
-      featuresCpCp2Cp3Cp4C(cInfo, loc, c.setSuffix("CpCp2Cp3Cp4C"));
+      featuresCpCp2Cp3Cp4C(cInfo, loc, c);
     } else {
       throw new IllegalArgumentException("Unknown clique: " + clique);
     }
@@ -875,6 +875,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
 
   protected void featuresC(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+    out.setSuffix("C");
+
     CoreLabel p3 = cInfo.get(loc - 3);
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p = cInfo.get(loc - 1);
@@ -1801,6 +1803,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       return;
     }
 
+    out.setSuffix("CpC");
+
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel c = cInfo.get(loc);
     CoreLabel n = cInfo.get(loc + 1);
@@ -1976,6 +1980,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   }
 
   protected void featuresCp2C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+    out.setSuffix("Cp2C");
+
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -2019,6 +2025,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     if (!flags.useParenMatching) {
       return;
     }
+    out.setSuffix("Cp3C");
+
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -2048,6 +2056,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     if (!flags.useParenMatching) {
       return;
     }
+    out.setSuffix("Cp4C");
+
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -2079,6 +2089,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     if (!flags.useParenMatching) {
       return;
     }
+    out.setSuffix("Cp5C");
+
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -2109,6 +2121,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   }
 
   protected void featuresCpCp2C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+    out.setSuffix("CpCp2C");
+
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -2190,6 +2204,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
 
   protected void featuresCpCp2Cp3C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
+    out.setSuffix("CpCp2Cp3C");
     CoreLabel p = cInfo.get(loc - 1);
 
     if (flags.useTaggySequences) {
@@ -2226,6 +2241,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
   protected void featuresCpCp2Cp3Cp4C(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
     if (flags.maxLeft >= 4) {
+      out.setSuffix("CpCp2Cp3Cp4C");
+
       CoreLabel p = cInfo.get(loc - 1);
       if (flags.useLongSequences) {
         out.add("PPPPSEQ");
@@ -2240,6 +2257,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   protected void featuresCnC(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
     if (flags.useNext && flags.useSequences && flags.useNextSequences) {
       CoreLabel c = cInfo.get(loc);
+      out.setSuffix("CnC");
       out.add("NSEQ");
       out.build().append(getWord(c)).append("-NSEQW").add();
     }
@@ -2249,6 +2267,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   protected void featuresCpCnC(PaddedList<IN> cInfo, int loc, FeatureCollector out) {
     if (flags.useNext && flags.usePrev && flags.useSequences && flags.usePrevSequences && flags.useNextSequences) {
       CoreLabel c = cInfo.get(loc);
+      out.setSuffix("CpCnC");
       out.add("PNSEQ");
       out.build().append(getWord(c)).append("-PNSEQW").add();
     }

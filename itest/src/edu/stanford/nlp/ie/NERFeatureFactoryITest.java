@@ -44,15 +44,14 @@ public class NERFeatureFactoryITest extends TestCase {
     Set<String> features = new HashSet<String>();
     NERFeatureFactory.FeatureCollector collector = new NERFeatureFactory.FeatureCollector(features);
     factory.featuresC(paddedSentence, 4, collector);
-    checkFeatures(features, "FOO-GAZ|null", "BAR-GAZ|null", "John-WORD|null", "FOO-GAZ1|null", "BAR-GAZ2|null",
-        "BAZ-GAZ2|null", "BAZ-GAZ|null");
+    checkFeatures(features, "FOO-GAZ|C", "BAR-GAZ|C", "John-WORD|C", "FOO-GAZ1|C", "BAR-GAZ2|C",
+                  "BAZ-GAZ2|C", "BAZ-GAZ|C");
     features.clear();
     factory.featuresC(paddedSentence, 5, collector);
-    checkFeatures(features, "BAR-GAZ|null", "BAZ-GAZ|null", "BAR-GAZ2|null", "BAZ-GAZ2|null",
-        "Bauer-WORD|null");
+    checkFeatures(features, "BAR-GAZ|C", "BAZ-GAZ|C", "BAR-GAZ2|C", "BAZ-GAZ2|C", "Bauer-WORD|C");
     features.clear();
     factory.featuresC(paddedSentence, 6, collector);
-    checkFeatures(features, "has-WORD|null");
+    checkFeatures(features, "has-WORD|C");
     features.clear();
   }
 
