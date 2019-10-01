@@ -275,7 +275,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     }
 
     double startPosLogProb = cliqueTree.logProbStartPos();
-    if (VERBOSE) {
+    if (VERBOSE || Double.isNaN(startPosLogProb)) {
       System.err.printf("P_-1(Background) = % 5.3f%n", startPosLogProb);
     }
     double prob = startPosLogProb;
@@ -284,7 +284,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     for (int i = 0; i < docData.length; i++) {
       int label = docLabels[i];
       double p = cliqueTree.condLogProbGivenPrevious(i, label, given);
-      if (VERBOSE) {
+      if (VERBOSE || Double.isNaN(p)) {
         log.info("P(" + label + "|" + ArrayMath.toString(given) + ")=" + p);
       }
       prob += p;
