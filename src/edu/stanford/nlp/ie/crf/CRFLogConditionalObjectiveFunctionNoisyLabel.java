@@ -49,8 +49,8 @@ public class CRFLogConditionalObjectiveFunctionNoisyLabel extends CRFLogConditio
   @Override
   protected double regularGradientAndValue() {
     int totalLen = data.length;
-    List<Integer> docIDs = new ArrayList<>(totalLen);
-    for (int m=0; m < totalLen; m++) docIDs.add(m);
+    int[] docIDs = new int[totalLen];
+    for (int m=0; m < totalLen; m++) docIDs[m] = m;
 
     return multiThreadGradient(docIDs, true);
   }
