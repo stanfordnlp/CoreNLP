@@ -350,11 +350,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
 
   protected double regularGradientAndValue() {
-    int totalLen = data.length;
-    int[] docIDs = new int[totalLen];
-    for (int m=0; m < totalLen; m++) docIDs[m] = m;
-
-    return multiThreadGradient(docIDs, false);
+    return multiThreadGradient(ArrayMath.range(0, data.length), false);
   }
 
   protected double multiThreadGradient(int[] docIDs, boolean calculateEmpirical) {
@@ -516,7 +512,8 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   @Override
   public double calculateStochasticUpdate(double[] x, double xScale, int[] batch, double gScale) {
     // int[][] wis = getWeightIndices();
-    to2D(x, xScale, weights);
+    ArrayMath.multiplyInPlace(x, xScale);
+    to2D(x, weights);
     setWeights(weights);
 
     // if (eHat4Update == null) {
@@ -595,7 +592,8 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   public double valueAt(double[] x, double xScale, int[] batch) {
     double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     // int[][] wis = getWeightIndices();
-    to2D(x, xScale, weights);
+    ArrayMath.multiplyInPlace(x, xScale);
+    to2D(x, weights);
     setWeights(weights);
 
     // iterate over all the documents
@@ -613,13 +611,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
   @Override
   public int[][] getFeatureGrouping() {
-    if (featureGrouping != null)
-      return featureGrouping;
-    else {
-      int[][] fg = new int[1][];
-      fg[0] = ArrayMath.range(0, domainDimension());
-      return fg;
-    }
+    return featureGrouping != null ? featureGrouping : new int[][] { ArrayMath.range(domainDimension()) };
   }
 
   public void setFeatureGrouping(int[][] fg) {
@@ -629,32 +621,33 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   protected void applyPrior(double[] x, double batchScale) {
     // incorporate priors
     if (prior == QUADRATIC_PRIOR) {
-      double lambda = 1 / (sigma * sigma);
+      double lambda = batchScale / (sigma * sigma);
       for (int i = 0; i < x.length; i++) {
         double w = x[i];
-        value += batchScale * w * w * lambda * 0.5;
-        derivative[i] += batchScale * w * lambda;
+        value += w * w * lambda * 0.5;
+        derivative[i] += w * lambda;
       }
     } else if (prior == HUBER_PRIOR) {
-      double sigmaSq = sigma * sigma;
+      double batchScaleSigmaSq = batchScale / (sigma * sigma);
       for (int i = 0; i < x.length; i++) {
         double w = x[i];
         double wabs = Math.abs(w);
         if (wabs < epsilon) {
-          value += batchScale*w * w / 2.0 / epsilon / sigmaSq;
-          derivative[i] += batchScale*w / epsilon / sigmaSq;
+          double weps = batchScaleSigmaSq * w / epsilon;
+          value += w * .5 * weps;
+          derivative[i] += weps;
         } else {
-          value += batchScale*(wabs - epsilon / 2) / sigmaSq;
-          derivative[i] += batchScale*((w < 0.0) ? -1.0 : 1.0) / sigmaSq;
+          value += batchScaleSigmaSq*(wabs - epsilon * .5);
+          derivative[i] += w < 0 ? -batchScaleSigmaSq : batchScaleSigmaSq;
         }
       }
     } else if (prior == QUARTIC_PRIOR) {
-      double sigmaQu = sigma * sigma * sigma * sigma;
-      double lambda = 1 / 2.0 / sigmaQu;
+      double sigmasq = sigma * sigma, batchScaleSigmaQu = batchScale / (sigmasq * sigmasq);
+      double lambda = .5 * batchScaleSigmaQu;
       for (int i = 0; i < x.length; i++) {
-        double w = x[i];
-        value += batchScale * w * w * w * w * lambda;
-        derivative[i] += batchScale * w / sigmaQu;
+        double w = x[i], ww = w * w;
+        value += ww * ww * lambda;
+        derivative[i] += batchScaleSigmaQu * w;
       }
     }
   }
@@ -663,22 +656,15 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   protected Pair<double[][][], double[][][]> getCondProbs(CRFCliqueTree<String> cTree, int[][][] docData) {
     // first index position is curr index, second index curr-class, third index prev-class
     // e.g. [1][2][3] means curr is at position 1 with class 2, prev is at position 0 with class 3
-    double[][][] prevGivenCurr = new double[docData.length][][];
+    double[][][] prevGivenCurr = new double[docData.length][numClasses][numClasses];
     // first index position is curr index, second index curr-class, third index next-class
     // e.g. [0][2][3] means curr is at position 0 with class 2, next is at position 1 with class 3
-    double[][][] nextGivenCurr = new double[docData.length][][];
-
-    for (int i = 0; i < docData.length; i++) {
-      prevGivenCurr[i] = new double[numClasses][];
-      nextGivenCurr[i] = new double[numClasses][];
-      for (int j = 0; j < numClasses; j++) {
-        prevGivenCurr[i][j] = new double[numClasses];
-        nextGivenCurr[i][j] = new double[numClasses];
-      }
-    }
+    double[][][] nextGivenCurr = new double[docData.length][numClasses][numClasses];
 
     // computing prevGivenCurr and nextGivenCurr
     for (int i=0; i < docData.length; i++) {
+      final double[][] prevGivenCurrI = prevGivenCurr[i];
+      final double[][] nextGivenCurrIm1 = i > 0 ? nextGivenCurr[i-1] : null;
       int[] labelPair = new int[2];
       for (int l1 = 0; l1 < numClasses; l1++) {
         labelPair[0] = l1;
@@ -686,57 +672,57 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
           labelPair[1] = l2;
           double prob = cTree.logProb(i, labelPair);
           // log.info(prob);
-          if (i-1 >= 0)
-            nextGivenCurr[i-1][l1][l2] = prob;
-          prevGivenCurr[i][l2][l1] = prob;
+          if (i > 0)
+            nextGivenCurrIm1[l1][l2] = prob;
+          prevGivenCurrI[l2][l1] = prob;
         }
       }
 
       if (DEBUG2) {
         log.info("unnormalized conditionals:");
         if (i>0) {
-        log.info("nextGivenCurr[" + (i-1) + "]:");
-        for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
-          for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
-            log.info((nextGivenCurr[i-1][a][b])+"\t");
-          log.info();
-        }
+          log.info("nextGivenCurr[" + (i-1) + "]:");
+          for (int a = 0; a < nextGivenCurrIm1.length; a++) {
+            for (int b = 0; b < nextGivenCurrIm1[a].length; b++)
+              log.info((nextGivenCurrIm1[a][b])+"\t");
+            log.info();
+          }
         }
         log.info("prevGivenCurr[" + (i) + "]:");
-        for (int a = 0; a < prevGivenCurr[i].length; a++) {
-          for (int b = 0; b < prevGivenCurr[i][a].length; b++)
-            log.info((prevGivenCurr[i][a][b])+"\t");
+        for (int a = 0; a < prevGivenCurrI.length; a++) {
+          for (int b = 0; b < prevGivenCurrI[a].length; b++)
+            log.info((prevGivenCurrI[a][b])+"\t");
           log.info();
         }
       }
 
       for (int j=0; j< numClasses; j++) {
-        if (i-1 >= 0) {
+        if (i > 0) {
           // ArrayMath.normalize(nextGivenCurr[i-1][j]);
-          ArrayMath.logNormalize(nextGivenCurr[i-1][j]);
-          for (int k = 0; k < nextGivenCurr[i-1][j].length; k++)
-            nextGivenCurr[i-1][j][k] = Math.exp(nextGivenCurr[i-1][j][k]);
+          double[] row = nextGivenCurrIm1[j];
+          ArrayMath.logNormalize(row);
+          ArrayMath.expInPlace(row);
         }
         // ArrayMath.normalize(prevGivenCurr[i][j]);
-        ArrayMath.logNormalize(prevGivenCurr[i][j]);
-        for (int k = 0; k < prevGivenCurr[i][j].length; k++)
-          prevGivenCurr[i][j][k] = Math.exp(prevGivenCurr[i][j][k]);
+        double[] row = prevGivenCurrI[j];
+        ArrayMath.logNormalize(row);
+        ArrayMath.expInPlace(row);
       }
 
       if (DEBUG2) {
         log.info("normalized conditionals:");
         if (i>0) {
-        log.info("nextGivenCurr[" + (i-1) + "]:");
-        for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
-          for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
-            log.info((nextGivenCurr[i-1][a][b])+"\t");
-          log.info();
-        }
+          log.info("nextGivenCurr[" + (i-1) + "]:");
+          for (int a = 0; a < nextGivenCurrIm1.length; a++) {
+            for (int b = 0; b < nextGivenCurrIm1[a].length; b++)
+              log.info((nextGivenCurrIm1[a][b])+"\t");
+            log.info();
+          }
         }
         log.info("prevGivenCurr[" + (i) + "]:");
-        for (int a = 0; a < prevGivenCurr[i].length; a++) {
-          for (int b = 0; b < prevGivenCurr[i][a].length; b++)
-            log.info((prevGivenCurr[i][a][b])+"\t");
+        for (int a = 0; a < prevGivenCurrI.length; a++) {
+          for (int b = 0; b < prevGivenCurrI[a].length; b++)
+            log.info((prevGivenCurrI[a][b])+"\t");
           log.info();
         }
       }
@@ -830,22 +816,6 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   }
 
   public void to2D(double[] weights1D, double[][] newWeights) {
-    to2D(weights1D, this.labelIndices, this.map, newWeights);
-  }
-
-  /** Beware: this changes the input weights array in place. */
-  public double[][] to2D(double[] weights1D, double wScale) {
-    for (int i = 0; i < weights1D.length; i++)
-      weights1D[i] *= wScale;
-
-    return to2D(weights1D, this.labelIndices, this.map);
-  }
-
-  /** Beware: this changes the input weights array in place. */
-  public void to2D(double[] weights1D, double wScale, double[][] newWeights) {
-    for (int i = 0; i < weights1D.length; i++)
-      weights1D[i] *= wScale;
-
     to2D(weights1D, this.labelIndices, this.map, newWeights);
   }
 
