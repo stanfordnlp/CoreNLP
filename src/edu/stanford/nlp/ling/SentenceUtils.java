@@ -248,6 +248,11 @@ public class SentenceUtils {
     StringBuilder s = new StringBuilder();
     for (HasWord word : list) {
       CoreLabel cl = (CoreLabel) word;
+      // check if this is an MWT
+      // skip all but the first MWT token in that case
+      if (cl.containsKey(CoreAnnotations.IsMultiWordTokenAnnotation.class) && cl.isMWT() && !cl.isMWTFirst()) {
+        continue;
+      }
       if (printBeforeBeforeStart) {
         // Only print Before for first token, since otherwise same as After of previous token
         // BUG: if you print a sequence of sentences, you double up between sentence spacing.
@@ -256,7 +261,11 @@ public class SentenceUtils {
         }
         printBeforeBeforeStart = false;
       }
-      s.append(cl.get(CoreAnnotations.OriginalTextAnnotation.class));
+      if (cl.containsKey(CoreAnnotations.IsMultiWordTokenAnnotation.class) && cl.isMWT()) {
+        s.append(cl.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+      } else {
+        s.append(cl.get(CoreAnnotations.OriginalTextAnnotation.class));
+      }
       if (cl.get(CoreAnnotations.AfterAnnotation.class) != null) {
         s.append(cl.get(CoreAnnotations.AfterAnnotation.class));
       } else {
@@ -265,9 +274,6 @@ public class SentenceUtils {
     }
     return s.toString();
   }
-
-
-
 
   public static <T> String wordToString(T o, final boolean justValue) {
     return wordToString(o, justValue, null);
