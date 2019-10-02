@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ie.crf;
 
+import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Index;
 
 import java.util.*;
@@ -48,11 +49,7 @@ public class CRFLogConditionalObjectiveFunctionNoisyLabel extends CRFLogConditio
 
   @Override
   protected double regularGradientAndValue() {
-    int totalLen = data.length;
-    List<Integer> docIDs = new ArrayList<>(totalLen);
-    for (int m=0; m < totalLen; m++) docIDs.add(m);
-
-    return multiThreadGradient(docIDs, true);
+    return multiThreadGradient(ArrayMath.range(data.length), true);
   }
 
   /**
