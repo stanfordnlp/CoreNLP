@@ -703,6 +703,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    *          {@code List<CoreLabel>}.
    */
   protected void makeAnswerArraysAndTagIndex(Collection<List<IN>> ob) {
+    // TODO: slow?
     boolean useFeatureCountThresh = flags.featureCountThresh > 1;
 
     Set<String>[] featureIndices = new HashSet[windowSize];
