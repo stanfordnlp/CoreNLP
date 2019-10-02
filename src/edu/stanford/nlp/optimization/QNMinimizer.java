@@ -308,12 +308,12 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     // zero gradient.
 
     // for convergence test
-    private final List<Double> evals = new ArrayList<>();
-    private final List<Double> values = new ArrayList<>();
-    private List<Double> gNorms = new ArrayList<>();
-    // List<Double> xNorms = new ArrayList<Double>();
-    private final List<Integer> funcEvals = new ArrayList<>();
-    private final List<Double> time = new ArrayList<>();
+    private final List<Double> evals = new ArrayList<>(100);
+    private final List<Double> values = new ArrayList<>(100);
+    private List<Double> gNorms = new ArrayList<>(100);
+    // List<Double> xNorms = new ArrayList<Double>(100);
+    private final List<Integer> funcEvals = new ArrayList<>(100);
+    private final List<Double> time = new ArrayList<>(100);
     // gNormInit: This makes it so that if for some reason
     // you try and divide by the initial norm before it's been
     // initialized you don't get a NAN but you will also never
@@ -328,7 +328,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     private int maxSize = 100; // This will control the number of func values /
     // gradients to retain.
     private Function mon = null;
-    private boolean quiet = false;
     private boolean memoryConscious = true;
     private PrintWriter outputFile = null;
 
@@ -522,45 +521,57 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     // Diagonal Options
     // Line search Options
     // Memory stuff
-    private List<double[]> s = null;
-    private List<double[]> y = null;
-    private List<Double> rho = null;
+    private double[][] s = null;
+    private double[][] y = null;
+    private double[] rho = null;
     private double gamma;
     public double[] d = null;
-    private int mem;
-    private int maxMem = 20;
+    private int mem = 20, used = 0;
     public eScaling scaleOpt = eScaling.SCALAR;
 
     QNInfo(int size) {
-      s = new ArrayList<>();
-      y = new ArrayList<>();
-      rho = new ArrayList<>();
+      mem = size > 0 ? size : 20;
+      s = new double[mem][];
+      y = new double[mem][];
+      rho = new double[mem];
       gamma = 1;
-      mem = size;
     }
 
     QNInfo(List<double[]> sList, List<double[]> yList) {
-      s = new ArrayList<>();
-      y = new ArrayList<>();
-      rho = new ArrayList<>();
+      s = new double[mem][];
+      y = new double[mem][];
+      rho = new double[mem];
       gamma = 1;
       setHistory(sList, yList);
     }
 
     int size() {
-      return s.size();
+      return used;
     }
 
     double getRho(int ind) {
-      return rho.get(ind);
+      return rho[ind];
     }
 
     double[] getS(int ind) {
-      return s.get(ind);
+      return s[ind];
     }
 
     double[] getY(int ind) {
-      return y.get(ind);
+      return y[ind];
+    }
+
+    void removeFirst() {
+      // This looks expensive, but it is what the old ArrayList code
+      // would also do.  Ultimately it is just a few reference copies
+      // per iteration.  A circular buffer would save on that, but is
+      // probably not worth the effort.
+      System.arraycopy(s, 1, s, 0, s.length - 1);
+      s[s.length - 1] = null;
+      System.arraycopy(y, 1, y, 0, y.length - 1);
+      y[y.length - 1] = null;
+      System.arraycopy(rho, 1, rho, 0, rho.length - 1);
+      --used;
     }
 
     void useDiagonalScaling() {
@@ -582,9 +593,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     }
 
     void clear() {
-      s.clear();
-      y.clear();
-      rho.clear();
+      // Fill the arrays with null in order to free the objects for GC
+      used = 0;
+      Arrays.fill(s, null);
+      Arrays.fill(y, null);
+      // Arrays.fill(rho, Double.NaN);
       d = null;
     }
 
@@ -619,7 +632,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
           }
           // Scale element-wise
           for (int i = 0; i < x.length; i++) {
-            x[i] = x[i] / (d[i]);
+            x[i] /= d[i];
           }
         }
         break;
@@ -645,11 +658,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       double[] newS, newY;
       double sy, yy, sg;
 
-      // allocate arrays for new s,y pairs (or replace if the list is already full)
-      if (mem > 0 && s.size() == mem || s.size() == maxMem) {
-        newS = s.remove(0);
-        newY = y.remove(0);
-        rho.remove(0);
+      // allocate arrays for new s,y pairs (or reuse if the list is already full)
+      if (used == mem) {
+        newS = s[0];
+        newY = y[0];
+        removeFirst();
       } else {
         newS = new double[x.length];
         newY = new double[x.length];
@@ -660,11 +673,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       yy = 0;
       sg = 0;
       for (int i = 0; i < x.length; i++) {
-        newS[i] = newX[i] - x[i];
-        newY[i] = newGrad[i] - grad[i];
-        sy += newS[i] * newY[i];
-        yy += newY[i] * newY[i];
-        sg += newS[i] * newGrad[i];
+        double nSi = newS[i] = newX[i] - x[i];
+        double nYi = newY[i] = newGrad[i] - grad[i];
+        sy += nSi * nYi;
+        yy += nYi * nYi;
+        sg += nSi * newGrad[i];
       }
 
       // Apply the updates used for the initial hessian.
@@ -755,27 +768,27 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
         // If s is already of size mem, remove the oldest vector and free it up.
 
-        if (mem > 0 && s.size() == mem || s.size() == maxMem) {
-          s.remove(0);
-          y.remove(0);
-          rho.remove(0);
+        if (used == mem) {
+          removeFirst();
         }
 
         // Actually add the pair.
-        s.add(newS);
-        y.add(newY);
-        rho.add(1 / sy);
-
+        s[used] = newS;
+        y[used] = newY;
+        rho[used] = 1 / sy;
+        ++used;
       } catch (NegativeCurvature nc) {
         // NOTE: if applying QNMinimizer to a non convex problem, we would still
         // like to update the matrix
         // or we could get stuck in a series of skipped updates.
-        sayln(" Negative curvature detected, update skipped ");
+        if (!quiet)
+          log.info(" Negative curvature detected, update skipped ");
       } catch (ZeroGradient zg) {
-        sayln(" Either convergence, or floating point errors combined with extremely linear region ");
+        if (!quiet)
+          log.info(" Either convergence, or floating point errors combined with extremely linear region ");
       }
 
-      return s.size();
+      return used;
     } // end update
 
   } // end class QNInfo
@@ -832,8 +845,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     if (evaluators == null) return Double.NEGATIVE_INFINITY;
     double score = 0;
     for (Evaluator eval:evaluators) {
-      if (!suppressTestPrompt)
-        sayln("  Evaluating: " + eval.toString());
+      if (!suppressTestPrompt && !quiet)
+        log.info("  Evaluating: " + eval.toString());
       score = eval.evaluate(x);
     }
     return score;
@@ -860,12 +873,10 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
   public double[] minimize(DiffFunction dFunction, double functionTolerance,
       double[] initial, int maxFunctionEvaluations, QNInfo qn) {
 
-    if (mem > 0) {
-      sayln("QNMinimizer called on double function of "
-              + dFunction.domainDimension() + " variables, using M = " + mem + '.');
-    } else {
-      sayln("QNMinimizer called on double function of "
-              + dFunction.domainDimension() + " variables, using dynamic setting of M.");
+    if (!quiet) {
+      log.info("QNMinimizer called on double function of "
+            + dFunction.domainDimension() + " variables, using " +
+            (mem > 0 ? "M = " + mem : "dynamic settings of M") + '.');
     }
 
     if (qn == null && presetInfo == null) {
@@ -933,35 +944,37 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         : Integer.MAX_VALUE;
     // maxIterations = (maxIterations > 0) ? maxIterations : Integer.MAX_VALUE;
 
-    sayln("               An explanation of the output:");
-    sayln("Iter           The number of iterations");
-    sayln("evals          The number of function evaluations");
-    sayln("SCALING        <D> Diagonal scaling was used; <I> Scaled Identity");
-    sayln("LINESEARCH     [## M steplength]  Minpack linesearch");
-    sayln("                   1-Function value was too high");
-    sayln("                   2-Value ok, gradient positive, positive curvature");
-    sayln("                   3-Value ok, gradient negative, positive curvature");
-    sayln("                   4-Value ok, gradient negative, negative curvature");
-    sayln("               [.. B]  Backtracking");
-    sayln("VALUE          The current function value");
-    sayln("TIME           Total elapsed time");
-    sayln("|GNORM|        The current norm of the gradient");
-    sayln("{RELNORM}      The ratio of the current to initial gradient norms");
-    sayln("AVEIMPROVE     The average improvement / current value");
-    sayln("EVALSCORE      The last available eval score");
-    sayln();
-    sayln("Iter ## evals ## <SCALING> [LINESEARCH] VALUE TIME |GNORM| {RELNORM} AVEIMPROVE EVALSCORE");
+    if (!quiet) {
+      log.info("               An explanation of the output:");
+      log.info("Iter           The number of iterations");
+      log.info("evals          The number of function evaluations");
+      log.info("SCALING        <D> Diagonal scaling was used; <I> Scaled Identity");
+      log.info("LINESEARCH     [## M steplength]  Minpack linesearch");
+      log.info("                   1-Function value was too high");
+      log.info("                   2-Value ok, gradient positive, positive curvature");
+      log.info("                   3-Value ok, gradient negative, positive curvature");
+      log.info("                   4-Value ok, gradient negative, negative curvature");
+      log.info("               [.. B]  Backtracking");
+      log.info("VALUE          The current function value");
+      log.info("TIME           Total elapsed time");
+      log.info("|GNORM|        The current norm of the gradient");
+      log.info("{RELNORM}      The ratio of the current to initial gradient norms");
+      log.info("AVEIMPROVE     The average improvement / current value");
+      log.info("EVALSCORE      The last available eval score");
+      log.info(" ");
+      log.info("Iter ## evals ## <SCALING> [LINESEARCH] VALUE TIME |GNORM| {RELNORM} AVEIMPROVE EVALSCORE");
+    }
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder(100);
     eState state = eState.CONTINUE;
 
     // Beginning of the loop.
     do {
       try {
         if ( ! quiet) {
-          sayln(sb.toString());
+          log.info(sb.toString());
         }
-        sb = new StringBuilder();
+        sb.setLength(0);
         boolean doEval = (its >= 0 && its >= startEvaluateIters && evaluateIters > 0 && its % evaluateIters == 0);
         its += 1;
         double newValue;
@@ -980,7 +993,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
           if (grad[i] != grad[i]) hasNaNGrad = true;
         }
         if (hasNaNDir && !hasNaNGrad) {
-          sayln("(NaN dir likely due to Hessian approx - resetting) ");
+          if (!quiet) log.info("(NaN dir likely due to Hessian approx - resetting) ");
           qn.clear();
           // re-compute the search direction
           sb.append('<');
@@ -1014,9 +1027,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         }
 
         newValue = newPoint[f];
-        sb.append(' ');
-        sb.append(nf.format(newPoint[a]));
-        sb.append("] ");
+        sb.append(' ').append(nf.format(newPoint[a])).append("] ");
 
         // This shouldn't actually evaluate anything since that should have been
         // done in the lineSearch.
@@ -1057,22 +1068,22 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
           throw new MaxEvaluationsExceeded("Exceeded in minimize() loop.");
         }
       } catch (SurpriseConvergence s) {
-        sayln("QNMinimizer aborted due to surprise convergence");
+        if (!quiet) log.info("QNMinimizer aborted due to surprise convergence");
         break;
       } catch (MaxEvaluationsExceeded m) {
-        sayln("QNMinimizer aborted due to maximum number of function evaluations");
-        sayln(m.toString());
-        sayln("** This is not an acceptable termination of QNMinimizer, consider");
-        sayln("** increasing the max number of evaluations, or safeguarding your");
-        sayln("** program by checking the QNMinimizer.wasSuccessful() method.");
+        if (!quiet) {
+          log.info("QNMinimizer aborted due to maximum number of function evaluations");
+          log.info(m.toString());
+          log.info("** This is not an acceptable termination of QNMinimizer, consider");
+          log.info("** increasing the max number of evaluations, or safeguarding your");
+          log.info("** program by checking the QNMinimizer.wasSuccessful() method.");
+        }
         break;
       } catch (OutOfMemoryError oome) {
-        if ( qn.s.size() > 1) {
-          qn.s.remove(0);
-          qn.y.remove(0);
-          qn.rho.remove(0);
-          sb.append("{Caught OutOfMemory, changing m from ").append(qn.mem).append(" to ").append(qn.s.size()).append("}]");
-          qn.mem = qn.s.size();
+        if (qn.used > 1) {
+          qn.removeFirst();
+          sb.append("{Caught OutOfMemory, changing m from ").append(qn.mem).append(" to ").append(qn.used).append("}]");
+          qn.mem = qn.used;
         } else {
           throw oome;
         }
@@ -1082,7 +1093,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     if (evaluateIters > 0) {
       // do final evaluation
       double evalScore = (useEvalImprovement ? doEvaluation(rec.getBest()) : doEvaluation(x));
-      sayln("final evalScore is: " + evalScore);
+      if (!quiet) log.info("final evalScore is: " + evalScore);
     }
 
     //
@@ -1090,23 +1101,23 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     //
     switch (state) {
     case TERMINATE_GRADNORM:
-      sayln("QNMinimizer terminated due to numerically zero gradient: |g| < EPS  max(1,|x|) ");
+      if (!quiet) log.info("QNMinimizer terminated due to numerically zero gradient: |g| < EPS  max(1,|x|) ");
       success = true;
       break;
     case TERMINATE_RELATIVENORM:
-      sayln("QNMinimizer terminated due to sufficient decrease in gradient norms: |g|/|g0| < TOL ");
+      if (!quiet) log.info("QNMinimizer terminated due to sufficient decrease in gradient norms: |g|/|g0| < TOL ");
       success = true;
       break;
     case TERMINATE_AVERAGEIMPROVE:
-      sayln("QNMinimizer terminated due to average improvement: | newest_val - previous_val | / |newestVal| < TOL ");
+      if (!quiet) log.info("QNMinimizer terminated due to average improvement: | newest_val - previous_val | / |newestVal| < TOL ");
       success = true;
       break;
     case TERMINATE_MAXITR:
-      sayln("QNMinimizer terminated due to reached max iteration " + maxItr );
+      if (!quiet) log.info("QNMinimizer terminated due to reached max iteration " + maxItr);
       success = true;
       break;
     case TERMINATE_EVALIMPROVE:
-      sayln("QNMinimizer terminated due to no improvement on eval ");
+      if (!quiet) log.info("QNMinimizer terminated due to no improvement on eval ");
       success = true;
       x = rec.getBest();
       break;
@@ -1117,7 +1128,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     }
 
     double completionTime = rec.howLong();
-    sayln("Total time spent in optimization: " + nfsec.format(completionTime) + 's');
+    if (!quiet) log.info("Total time spent in optimization: " + nfsec.format(completionTime) + 's');
 
     if (outputToFile) {
       infoFile.println(completionTime + "; Total Time ");
@@ -1130,20 +1141,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     return x;
 
   } // end minimize()
-
-
-
-  private void sayln() {
-    if (!quiet) {
-      log.info(" ");  // no argument seems to cause Redwoods to act weird (in 2016)
-    }
-  }
-
-  private void sayln(String s) {
-    if (!quiet) {
-      log.info(s);
-    }
-  }
 
   // todo [cdm 2013]: Can this be sped up by returning a Pair rather than copying array?
   private double evaluateFunction(DiffFunction dfunc, double[] x, double[] grad) {
@@ -1335,8 +1332,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
     double normGradInDir = ArrayMath.innerProduct(dir, grad);
     sb.append('(').append(nf.format(normGradInDir)).append(')');
-    if (normGradInDir > 0) {
-      sayln("{WARNING--- direction of positive gradient chosen!}");
+    if (normGradInDir > 0 && !quiet) {
+      log.info("{WARNING--- direction of positive gradient chosen!}");
     }
 
     // c1 can be anything between 0 and 1, exclusive (usu. 1/10 - 1/2)
@@ -1462,15 +1459,15 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       if ((bracketed && (newPt[a] <= stpMin || newPt[a] >= stpMax))
           || infoc == 0) {
         info = 6;
-        sayln(" line search failure: bracketed but no feasible found ");
+        if (!quiet) log.info(" line search failure: bracketed but no feasible found ");
       }
       if (newPt[a] == aMax && newPt[f] <= fTest && newPt[g] <= gTest) {
         info = 5;
-        sayln(" line search failure: sufficient decrease, but gradient is more negative ");
+        if (!quiet) log.info(" line search failure: sufficient decrease, but gradient is more negative ");
       }
       if (newPt[a] == aMin && (newPt[f] > fTest || newPt[g] >= gTest)) {
         info = 4;
-        sayln(" line search failure: minimum step length reached ");
+        if (!quiet) log.info(" line search failure: minimum step length reached ");
       }
       if (fevals >= maxFevals) {
         // info = 3;
@@ -1478,7 +1475,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       }
       if (bracketed && stpMax - stpMin <= tol * stpMax) {
         info = 2;
-        sayln(" line search failure: interval is too small ");
+        if (!quiet) log.info(" line search failure: interval is too small ");
       }
       if (newPt[f] <= fTest && Math.abs(newPt[g]) <= -gtol * g0) {
         info = 1;
@@ -1572,8 +1569,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       theta = 3 * (bestPt[f] - newPt[f]) / (newPt[a] - bestPt[a]) + bestPt[g]
           + newPt[g];
       s = Math.max(Math.max(theta, newPt[g]), bestPt[g]);
+      final double theta_s = theta / s;
       gamma = s
-          * Math.sqrt((theta / s) * (theta / s) - (bestPt[g] / s)
+          * Math.sqrt(theta_s * theta_s - (bestPt[g] / s)
               * (newPt[g] / s));
       if (newPt[a] < bestPt[a]) {
         gamma = -gamma;
@@ -1609,8 +1607,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       theta = 3 * (bestPt[f] - newPt[f]) / (newPt[a] - bestPt[a]) + bestPt[g]
           + newPt[g];
       s = Math.max(Math.max(theta, bestPt[g]), newPt[g]);
+      final double theta_s = theta / s;
       gamma = s
-          * Math.sqrt((theta / s) * (theta / s) - (bestPt[g] / s)
+          * Math.sqrt(theta_s * theta_s - (bestPt[g] / s)
               * (newPt[g] / s));
       if (newPt[a] > bestPt[a]) {
         gamma = -gamma;
@@ -1690,8 +1689,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         theta = 3 * (bestPt[f] - newPt[f]) / (newPt[a] - bestPt[a]) + bestPt[g]
             + newPt[g];
         s = Math.max(Math.max(theta, bestPt[g]), newPt[g]);
+        final double theta_s = theta / s;
         gamma = s
-            * Math.sqrt((theta / s) * (theta / s) - (bestPt[g] / s)
+            * Math.sqrt(theta_s * theta_s - (bestPt[g] / s)
                 * (newPt[g] / s));
         if (newPt[a] > bestPt[a]) {
           gamma = -gamma;
