@@ -263,8 +263,13 @@ public final class SloppyMath  {
       max = ly;
       negDiff = lx - ly;
     }
-    return (max == Float.NEGATIVE_INFINITY || negDiff < -LOGTOLERANCE_F) ? max : //
-      max + (float) Math.log(1.0 + Math.exp(negDiff));
+    if (max == Double.NEGATIVE_INFINITY) {
+      return max;
+    } else if (negDiff < -LOGTOLERANCE_F) {
+      return max;
+    } else {
+      return max + (float) Math.log(1.0 + Math.exp(negDiff));
+    }
   }
 
   /**

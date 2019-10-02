@@ -4,8 +4,6 @@ import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.*;
 import java.util.stream.*;
 
@@ -144,9 +142,9 @@ public class MWTAnnotator implements Annotator {
             if (StringUtils.isAllUpperCase(token.word())) {
               // DES
               tokenWords = tokenWords.stream().map(t -> t.toUpperCase()).collect(Collectors.toList());
-            } else if (StringUtils.capitalize(token.word().toLowerCase()).equals(token.word())) {
+            } else if (StringUtils.isTitleCase(token.word())) {
               // Des
-              tokenWords.set(0, StringUtils.capitalize(tokenWords.get(0)));
+              tokenWords.set(0, StringUtils.toTitleCase(tokenWords.get(0)));
             }
           }
           boolean isFirst = true;

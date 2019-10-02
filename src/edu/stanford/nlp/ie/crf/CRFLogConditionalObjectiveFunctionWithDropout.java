@@ -30,7 +30,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
   private final double unsupDropoutScale;
 
   private List<List<Set<Integer>>> dataFeatureHash;
-  private List<Map<Integer, int[]>> condensedMap;
+  private List<Map<Integer, List<Integer>>> condensedMap;
   private int[][] dataFeatureHashByDoc;
   private int edgeLabelIndexSize;
   private int nodeLabelIndexSize;
@@ -122,7 +122,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
 
     int[] activeFeatures = dataFeatureHashByDoc[docIndex];
     List<Set<Integer>> docDataHash = dataFeatureHash.get(docIndex);
-    Map<Integer, int[]> condensedFeaturesMap = condensedMap.get(docIndex);
+    Map<Integer, List<Integer>> condensedFeaturesMap = condensedMap.get(docIndex);
 
     double prob = 0;
     int[][][] docData = totalData[docIndex];
@@ -208,7 +208,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         if (dropoutApprox) {
           for (int fIndex: docDataHashI) {
             if (condensedFeaturesMap.containsKey(fIndex)) {
-              int[] aList = condensedFeaturesMap.get(fIndex);
+              List<Integer> aList = condensedFeaturesMap.get(fIndex);
               for (int toCopyInto: aList) {
                 double[] arr = EForADocPosAtI.get(fIndex);
                 double[] targetArr = new double[arr.length];
@@ -223,9 +223,9 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       }
 
       // copy for condensedFeaturesMap
-      for (Map.Entry<Integer, int[]> entry: condensedFeaturesMap.entrySet()) {
+      for (Map.Entry<Integer, List<Integer>> entry: condensedFeaturesMap.entrySet()) {
         int key = entry.getKey();
-        int[] aList = entry.getValue();
+        List<Integer> aList = entry.getValue();
         for (int toCopyInto: aList) {
           double[] arr = EForADoc.get(key);
           double[] targetArr = new double[arr.length];
@@ -317,9 +317,9 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         Arrays.fill(representFeatures, -1);
 
         for (Map.Entry<Integer, Integer> entry: occurPos.entrySet()) {
+          int key = entry.getKey();
           int pos = entry.getValue();
           if (pos != -1) {
-            int key = entry.getKey();
             if (representFeatures[pos] == -1) { // use this as representFeatures
               representFeatures[pos] = key;
               condensedFeaturesMap.put(key, new ArrayList<>());
@@ -348,16 +348,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         if (DEBUG3)
           log.info("After condense, activeFeatures = " + setOfFeatures.size() + ", condensedCount = " + condensedCount);
         macroCondensedTotalCount += setOfFeatures.size();
-        // Convert to primitive arrays (less memory, faster)
-        Map<Integer, int[]> transformed = new HashMap<>(condensedFeaturesMap.size());
-        for(Map.Entry<Integer, List<Integer>> ent : condensedFeaturesMap.entrySet()) {
-          List<Integer> list = ent.getValue();
-          int[] a = new int[list.size()];
-          for(int i = 0; i < a.length; i++)
-            a[i] = list.get(i); // Supposedly an array list.
-          transformed.put(ent.getKey(), a);
-        }
-        condensedMap.add(transformed);
+        condensedMap.add(condensedFeaturesMap);
       }
 
       dataFeatureHash.add(aList);
@@ -374,7 +365,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
 
   private double getDropoutPrior(CRFCliqueTree<String> cliqueTree, int[][][] docData,
       Map<Integer, double[]> EForADoc, List<Set<Integer>> docDataHash, int[] activeFeatures, Map<Integer, double[]> dropoutPriorGrad,
-      Map<Integer, int[]> condensedFeaturesMap, List<Map<Integer, double[]>> EForADocPos) {
+      Map<Integer, List<Integer>> condensedFeaturesMap, List<Map<Integer, double[]>> EForADocPos) {
 
     Map<Integer, double[]> dropoutPriorGradFirstHalf = sparseE(activeFeatures);
 
@@ -649,9 +640,9 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     }
     if (CONDENSE) {
       // copy for condensedFeaturesMap
-      for (Map.Entry<Integer, int[]> entry: condensedFeaturesMap.entrySet()) {
+      for (Map.Entry<Integer, List<Integer>> entry: condensedFeaturesMap.entrySet()) {
         int key = entry.getKey();
-        int[] aList = entry.getValue();
+        List<Integer> aList = entry.getValue();
         for (int toCopyInto: aList) {
           double[] arr = dropoutPriorGrad.get(key);
           double[] targetArr = new double[arr.length];
