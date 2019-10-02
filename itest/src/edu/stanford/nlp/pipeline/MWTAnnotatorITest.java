@@ -40,7 +40,6 @@ public class MWTAnnotatorITest extends TestCase {
         // now test with preserve casing
         Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-french.properties");
         props.setProperty("annotators", "tokenize,ssplit,mwt");
-        props.setProperty("mwt.preserveCasing", "false");
         props.setProperty("mwt.preserveCasing", "true");
         StanfordCoreNLP frenchPipelinePreserveCasing = new StanfordCoreNLP(props);
         CoreDocument capitalizedDocPreserveCasing =
