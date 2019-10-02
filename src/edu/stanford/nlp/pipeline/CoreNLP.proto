@@ -199,6 +199,11 @@ message Token {
   repeated uint32 corefMentionIndex = 64;
   optional uint32 entityMentionIndex = 65;
 
+  // mwt stuff
+  optional bool isMWT = 67;
+  optional bool isFirstMWT = 68;
+  optional string mwtText = 69;
+
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
   //       uint32 sentenceIndex  @see Sentence#sentenceIndex
