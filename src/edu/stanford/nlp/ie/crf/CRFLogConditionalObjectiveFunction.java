@@ -163,9 +163,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     int[] docLabels = labels[docIndex];
     int[] windowLabels = new int[window];
     Arrays.fill(windowLabels, classIndex.indexOf(backgroundSymbol));
-    double[][][] featureValArr = null;
-    if (featureVal != null)
-      featureValArr = featureVal[docIndex];
+    double[][][] featureValArr = (featureVal != null) ? featureVal[docIndex] : null;
 
     if (docLabels.length>docData.length) { // only true for self-training
       // fill the windowLabel array with the extra docLabels
@@ -295,50 +293,68 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return prob;
   }
 
-  private ThreadsafeProcessor<Pair<Integer, int[]>, Pair<Integer, Double>> expectedThreadProcessor = new ExpectationThreadsafeProcessor();
-  private ThreadsafeProcessor<Pair<Integer, int[]>, Pair<Integer, Double>> expectedAndEmpiricalThreadProcessor = new ExpectationThreadsafeProcessor(true);
+  /** Task part for a single thread */
+  private static class TaskPart {
+    public int id, begin, end;
+    public int[] docIds;
 
-  class ExpectationThreadsafeProcessor implements ThreadsafeProcessor<Pair<Integer, int[]>, Pair<Integer, Double>> {
-    boolean calculateEmpirical = false;
-    public ExpectationThreadsafeProcessor() {
+    public TaskPart(int id, int begin, int end, int[] docIds) {
+      this.id = id;
+      this.begin = begin;
+      this.end = end;
+      this.docIds = docIds;
     }
+  }
 
-    public ExpectationThreadsafeProcessor(boolean calculateEmpirical) {
-      this.calculateEmpirical = calculateEmpirical;
+  /** Objective function result of a single thread */
+  private static class TaskResult {
+    public int id;
+    public double objective;
+
+    public TaskResult(int id, double objective) {
+      this.id = id;
+      this.objective = objective;
     }
+  }
 
+  private ThreadsafeProcessor<TaskPart, TaskResult> expectedThreadProcessor = new ExpectationThreadsafeProcessor();
+  private ThreadsafeProcessor<TaskPart, TaskResult> expectedAndEmpiricalThreadProcessor = new ExpectationThreadsafeProcessorWithEmpirical();
+
+  class ExpectationThreadsafeProcessor implements ThreadsafeProcessor<TaskPart, TaskResult> {
     @Override
-    public Pair<Integer, Double> process(Pair<Integer, int[]> threadIDAndDocIndices) {
-      int tID = threadIDAndDocIndices.first();
-      if (tID < 0 || tID >= multiThreadGrad) throw new IllegalArgumentException("threadID must be with in range 0 <= tID < multiThreadGrad(="+multiThreadGrad+")");
-      int[] docIDs = threadIDAndDocIndices.second();
-      double[][] partE; // initialized below
-      double[][] partEhat = null; // initialized below
-      if (multiThreadGrad == 1) {
-        partE = E;
-        if (calculateEmpirical)
-          partEhat = Ehat;
-      } else {
-        partE = parallelE[tID];
-        // TODO: if we put this on the heap, this clearing will be unnecessary
-        clear2D(partE);
-        if (calculateEmpirical) {
-          partEhat = parallelEhat[tID];
-          clear2D(partEhat);
-        }
-      }
+    public TaskResult process(TaskPart part) {
+      double[][] partE = multiThreadGrad == 1 ? E : clear2D(parallelE[part.id]);
+      int begin = part.begin, end = part.end;
+      int[] docIds = part.docIds;
       double probSum = 0;
-      if (calculateEmpirical)
-        for (int docIndex: docIDs)
-          probSum += expectedAndEmpiricalCountsAndValueForADoc(partE, partEhat, docIndex);
-      else
-        for (int docIndex: docIDs)
-          probSum += expectedCountsAndValueForADoc(partE, docIndex);
-      return new Pair<>(tID, probSum);
+      for (int i = begin; i < end; i++) {
+        probSum += expectedCountsAndValueForADoc(partE, docIds[i]);
+      }
+      return new TaskResult(part.id, probSum);
     }
 
     @Override
-    public ThreadsafeProcessor<Pair<Integer, int[]>, Pair<Integer, Double>> newInstance() {
+    public ThreadsafeProcessor<TaskPart, TaskResult> newInstance() {
+      return this;
+    }
+  }
+
+  class ExpectationThreadsafeProcessorWithEmpirical implements ThreadsafeProcessor<TaskPart, TaskResult> {
+    @Override
+    public TaskResult process(TaskPart part) {
+      double[][] partE = multiThreadGrad == 1 ? E : clear2D(parallelE[part.id]);
+      double[][] partEhat = multiThreadGrad == 1 ? Ehat : clear2D(parallelEhat[part.id]);
+      int begin = part.begin, end = part.end;
+      int[] docIds = part.docIds;
+      double probSum = 0;
+      for (int i = begin; i < end; i++) {
+        probSum += expectedAndEmpiricalCountsAndValueForADoc(partE, partEhat, docIds[i]);
+      }
+      return new TaskResult(part.id, probSum);
+    }
+
+    @Override
+    public ThreadsafeProcessor<TaskPart, TaskResult> newInstance() {
       return this;
     }
   }
@@ -355,48 +371,44 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
   protected double multiThreadGradient(int[] docIDs, boolean calculateEmpirical) {
     double objective = 0.0;
+    if (multiThreadGrad <= 1) {
+      return (calculateEmpirical ? expectedAndEmpiricalThreadProcessor : expectedThreadProcessor).process(new TaskPart(0, 0, docIDs.length, docIDs)).objective;
+    }
     // TODO: This is a bunch of unnecessary heap traffic, should all be on the stack
-    if (multiThreadGrad > 1) {
-      if (parallelE == null) {
-        parallelE = new double[multiThreadGrad][][];
-        for (int i=0; i<multiThreadGrad; i++)
-          parallelE[i] = empty2D();
+    if (parallelE == null) {
+      parallelE = new double[multiThreadGrad][][];
+      for (int i=0; i<multiThreadGrad; i++) {
+        parallelE[i] = empty2D();
       }
-      if (calculateEmpirical) {
-        if (parallelEhat == null) {
-          parallelEhat = new double[multiThreadGrad][][];
-          for (int i=0; i<multiThreadGrad; i++)
-            parallelEhat[i] = empty2D();
-        }
+    }
+    if (calculateEmpirical && parallelEhat == null) {
+      parallelEhat = new double[multiThreadGrad][][];
+      for (int i=0; i<multiThreadGrad; i++) {
+        parallelEhat[i] = empty2D();
       }
     }
 
     // TODO: this is a huge amount of machinery for no discernible reason
-    MulticoreWrapper<Pair<Integer, int[]>, Pair<Integer, Double>> wrapper =
-            new MulticoreWrapper<>(multiThreadGrad, (calculateEmpirical ? expectedAndEmpiricalThreadProcessor : expectedThreadProcessor));
+    MulticoreWrapper<TaskPart, TaskResult> wrapper =
+            new MulticoreWrapper<>(multiThreadGrad,
+                (calculateEmpirical ? expectedAndEmpiricalThreadProcessor : expectedThreadProcessor));
 
     int totalLen = docIDs.length;
-    int partLen = totalLen / multiThreadGrad;
-    int currIndex = 0;
-    for (int part=0; part < multiThreadGrad; part++) {
-      int endIndex = currIndex + partLen;
-      if (part == multiThreadGrad-1)
-        endIndex = totalLen;
-      // TODO: let's not construct a sub-list of DocIDs, unnecessary object creation, can calculate directly from ThreadID
-      int[] subList = Arrays.copyOfRange(docIDs, currIndex, endIndex);
-      wrapper.put(new Pair<>(part, subList));
-      currIndex = endIndex;
+    int partLen = (totalLen + multiThreadGrad - 1) / multiThreadGrad;
+    for (int part = 0; part < multiThreadGrad; part++) {
+      int currIndex = part * partLen;
+      int endIndex = Math.min(currIndex + partLen, totalLen);
+      wrapper.put(new TaskPart(part, currIndex, endIndex, docIDs));
     }
     wrapper.join();
     // This all seems fine. May want to start running this after the joins, in case we have different end-times
     while (wrapper.peek()) {
-      Pair<Integer, Double> result = wrapper.poll();
-      int tID = result.first();
-      objective += result.second();
-      if (multiThreadGrad > 1) {
-        combine2DArr(E, parallelE[tID]);
-        if (calculateEmpirical)
-          combine2DArr(Ehat, parallelEhat[tID]);
+      TaskResult result = wrapper.poll();
+      int tID = result.id;
+      objective += result.objective;
+      combine2DArr(E, parallelE[tID]);
+      if (calculateEmpirical) {
+        combine2DArr(Ehat, parallelEhat[tID]);
       }
     }
 
@@ -570,10 +582,11 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
     int index = 0;
     for (int i = 0; i < E.length; i++) {
-      for (int j = 0; j < E[i].length; j++) {
+      final double[] Ei = E[i], Ehati = Ehat[i];
+      for (int j = 0; j < Ei.length; j++) {
         // real gradient should be empirical-expected;
         // but since we minimize -L(\theta), the gradient is -(empirical-expected)
-        derivative[index++] = (E[i][j]-Ehat[i][j]);
+        derivative[index++] = (Ei[j] - Ehati[j]);
       }
     }
   }
@@ -784,13 +797,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     for (int i = 0; i < map.length; i++) {
       int labelSize = labelIndices.get(map[i]).size();
       newWeights[i] = new double[labelSize];
-      try {
-        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
-      } catch (Exception ex) {
-        log.info("weights: " + Arrays.toString(weights));
-        log.info("newWeights["+i+"]: " + Arrays.toString(newWeights[i]));
-        throw new RuntimeException(ex);
-      }
+      System.arraycopy(weights, index, newWeights[i], 0, labelSize);
       index += labelSize;
     }
     return newWeights;
@@ -800,17 +807,19 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return to2D(weights, this.labelIndices, this.map);
   }
 
+  /**
+   * Takes a double array of weights and populates a 2D array where:
+   *
+   * the first element is the mapped index of the clique size (e.g., node-0, edge-1) matching featuresIndex i
+   * the second element is the number of output classes for that clique size
+   *
+   * @return a 2D weight array
+   */
   public static void to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map, double[][] newWeights) {
     int index = 0;
     for (int i = 0; i < map.length; i++) {
       int labelSize = labelIndices.get(map[i]).size();
-      try {
-        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
-      } catch (Exception ex) {
-        log.info("weights: " + Arrays.toString(weights));
-        log.info("newWeights["+i+"]: " + Arrays.toString(newWeights[i]));
-        throw new RuntimeException(ex);
-      }
+      System.arraycopy(weights, index, newWeights[i], 0, labelSize);
       index += labelSize;
     }
   }
@@ -819,9 +828,10 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     to2D(weights1D, this.labelIndices, this.map, newWeights);
   }
 
-  public static void clear2D(double[][] arr2D) {
+  public static double[][] clear2D(double[][] arr2D) {
     for (int i = 0; i < arr2D.length; i++)
       Arrays.fill(arr2D[i], 0);
+    return arr2D;
   }
 
   public static void to1D(double[][] weights, double[] newWeights) {
@@ -851,10 +861,9 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       weightIndices = new int[map.length][];
       int index = 0;
       for (int i = 0; i < map.length; i++) {
-        weightIndices[i] = new int[labelIndices.get(map[i]).size()];
+        int[] row = weightIndices[i] = new int[labelIndices.get(map[i]).size()];
         for (int j = 0; j < labelIndices.get(map[i]).size(); j++) {
-          weightIndices[i][j] = index;
-          index++;
+          row[j] = index++;
         }
       }
     }

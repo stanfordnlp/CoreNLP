@@ -87,9 +87,10 @@ public class ArrayMath {
   public static double[][] floatArrayToDoubleArray(float[][] a) {
     double[][] result = new double[a.length][];
     for (int i = 0; i < a.length; i++) {
-      result[i] = new double[a[i].length];
-      for (int j = 0; j < a[i].length; j++) {
-        result[i][j] = a[i][j];
+      float[] a_i = a[i];
+      double[] row = result[i] = new double[a_i.length];
+      for (int j = 0; j < a_i.length; j++) {
+        row[j] = a_i[j];
       }
     }
     return result;
@@ -98,9 +99,10 @@ public class ArrayMath {
   public static float[][] doubleArrayToFloatArray(double[][] a) {
     float[][] result = new float[a.length][];
     for (int i = 0; i < a.length; i++) {
-      result[i] = new float[a[i].length];
-      for (int j = 0; j < a[i].length; j++) {
-        result[i][j] = (float) a[i][j];
+      double[] a_i = a[i];
+      float[] row = result[i] = new float[a_i.length];
+      for (int j = 0; j < a_i.length; j++) {
+        row[j] = (float) a_i[j];
       }
     }
     return result;
@@ -142,8 +144,7 @@ public class ArrayMath {
     double[] newScales = new double[scales.length];
     double sum = 0;
     for (int i = 0; i < scales.length; i++) {
-      newScales[i] = Math.exp(scales[i]);
-      sum += newScales[i];
+      sum += newScales[i] = Math.exp(scales[i]);
     }
     for (int i = 0; i < scales.length; i++) {
       newScales[i] /= sum;
@@ -161,7 +162,7 @@ public class ArrayMath {
    */
   public static void addInPlace(double[] a, double b) {
     for (int i = 0; i < a.length; i++) {
-      a[i] = a[i] + b;
+      a[i] += b;
     }
   }
 
@@ -191,7 +192,7 @@ public class ArrayMath {
    */
   public static void multiplyInPlace(double[] a, double b) {
     for (int i = 0; i < a.length; i++) {
-      a[i] = a[i] * b;
+      a[i] *= b;
     }
   }
 
@@ -200,7 +201,7 @@ public class ArrayMath {
    */
   public static void multiplyInPlace(float[] a, double b) {
     for (int i = 0; i < a.length; i++) {
-      a[i] = (float) (a[i] * b);
+      a[i] *= b;
     }
   }
 
@@ -209,7 +210,7 @@ public class ArrayMath {
    */
   public static void divideInPlace(double[] a, double b) {
     for (int i = 0; i < a.length; i++) {
-      a[i] = a[i] / b;
+      a[i] /= b;
     }
   }
 
@@ -301,7 +302,7 @@ public class ArrayMath {
       throw new IllegalArgumentException("to length:" + to.length + " from length:" + from.length);
     }
     for (int i = 0; i < to.length; i++) {
-      to[i] = to[i] + from[i];
+      to[i] += from[i];
     }
   }
 
@@ -315,7 +316,7 @@ public class ArrayMath {
       throw new IllegalArgumentException("to length:" + to.length + " from length:" + from.length);
     }
     for (int i = 0; i < to.length; i++) {
-      to[i] = to[i] + from[i];
+      to[i] += from[i];
     }
   }
 
@@ -324,7 +325,7 @@ public class ArrayMath {
       throw new IllegalArgumentException();
     }
     for (int i = 0; i < to.length; i++) {
-      to[i] = to[i] + from[i];
+      to[i] += from[i];
     }
   }
 
@@ -333,7 +334,7 @@ public class ArrayMath {
       throw new IllegalArgumentException();
     }
     for (int i = 0; i < to.length; i++) {
-      to[i] = to[i] + from[i];
+      to[i] += from[i];
     }
   }
 
@@ -354,25 +355,28 @@ public class ArrayMath {
 
   public static void pairwiseSubtractInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
-      throw new RuntimeException();
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
     }
     for (int i = 0; i < to.length; i++) {
-      to[i] = to[i] - from[i];
+      to[i] -= from[i];
     }
   }
 
   public static void pairwiseScaleAddInPlace(double[] to, double[] from, double fromScale) {
     if (to.length != from.length) {
-      throw new RuntimeException();
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
     }
     for (int i = 0; i < to.length; i++) {
-      to[i] = to[i] + fromScale * from[i];
+      to[i] += fromScale * from[i];
     }
   }
 
   // OPERATIONS WITH TWO ARRAYS - NONDESTRUCTIVE
 
   public static int[] pairwiseAdd(int[] a, int[] b) {
+    if (a.length != b.length) {
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
+    }
     int[] result = new int[a.length];
     for (int i = 0; i < a.length; i++) {
       result[i] = a[i] + b[i];
@@ -381,18 +385,20 @@ public class ArrayMath {
   }
 
   public static double[] pairwiseAdd(double[] a, double[] b) {
+    if (a.length != b.length) {
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
+    }
     double[] result = new double[a.length];
     for (int i = 0; i < a.length; i++) {
-      if (i < b.length) {
-        result[i] = a[i] + b[i];
-      } else {
-        result[i] = a[i];
-      }
+      result[i] = a[i] + b[i];
     }
     return result;
   }
 
   public static float[] pairwiseAdd(float[] a, float[] b) {
+    if (a.length != b.length) {
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
+    }
     float[] result = new float[a.length];
     for (int i = 0; i < a.length; i++) {
       result[i] = a[i] + b[i];
@@ -401,6 +407,9 @@ public class ArrayMath {
   }
 
   public static double[] pairwiseScaleAdd(double[] a, double[] b, double bScale) {
+    if (a.length != b.length) {
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
+    }
     double[] result = new double[a.length];
     for (int i = 0; i < a.length; i++) {
       result[i] = a[i] + bScale * b[i];
@@ -408,10 +417,11 @@ public class ArrayMath {
     return result;
   }
 
-
   public static double[] pairwiseSubtract(double[] a, double[] b) {
+    if (a.length != b.length) {
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
+    }
     double[] c = new double[a.length];
-
     for (int i = 0; i < a.length; i++) {
       c[i] = a[i] - b[i];
     }
@@ -419,8 +429,10 @@ public class ArrayMath {
   }
 
   public static float[] pairwiseSubtract(float[] a, float[] b) {
+    if (a.length != b.length) {
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
+    }
     float[] c = new float[a.length];
-
     for (int i = 0; i < a.length; i++) {
       c[i] = a[i] - b[i];
     }
@@ -432,7 +444,7 @@ public class ArrayMath {
    */
   public static double dotProduct(double[] a, double[] b) {
     if (a.length != b.length) {
-      throw new RuntimeException("Can't calculate dot product of multiple different lengths: a.length=" + a.length + " b.length=" + b.length);
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
     }
     double result = 0;
     for (int i = 0; i < a.length; i++) {
@@ -448,7 +460,7 @@ public class ArrayMath {
    */
   public static double[] pairwiseMultiply(double[] a, double[] b) {
     if (a.length != b.length) {
-      throw new RuntimeException("Can't pairwise multiple different lengths: a.length=" + a.length + " b.length=" + b.length);
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
     }
     double[] result = new double[a.length];
     for (int i = 0; i < result.length; i++) {
@@ -462,7 +474,7 @@ public class ArrayMath {
    */
   public static float[] pairwiseMultiply(float[] a, float[] b) {
     if (a.length != b.length) {
-      throw new RuntimeException();
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
     }
     float[] result = new float[a.length];
     for (int i = 0; i < result.length; i++) {
@@ -477,7 +489,7 @@ public class ArrayMath {
    */
   public static void pairwiseMultiply(double[] a, double[] b, double[] result) {
     if (a.length != b.length) {
-      throw new RuntimeException();
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
     }
     for (int i = 0; i < result.length; i++) {
       result[i] = a[i] * b[i];
@@ -490,7 +502,7 @@ public class ArrayMath {
    */
   public static void pairwiseMultiply(float[] a, float[] b, float[] result) {
     if (a.length != b.length) {
-      throw new RuntimeException();
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
     }
     for (int i = 0; i < result.length; i++) {
       result[i] = a[i] * b[i];
@@ -504,10 +516,10 @@ public class ArrayMath {
    */
   public static void pairwiseDivideInPlace(double[] a, double[] b) {
     if (a.length != b.length) {
-      throw new RuntimeException();
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
     }
     for (int i = 0; i < a.length; i++) {
-      a[i] = a[i] / b[i];
+      a[i] /= b[i];
     }
   }
 
@@ -676,17 +688,15 @@ public class ArrayMath {
   }
 
   public static double average(double[] a) {
-    double total = ArrayMath.sum(a);
-    return total / a.length;
+    return ArrayMath.sum(a) / a.length;
   }
 
-  /** This version avoids any possibility of overflow. */
+  /** This version avoids certain types of overflow. */
   public static double iterativeAverage(double[] a) {
     double avg = 0.0;
-    int t = 1;
+    int t = 0;
     for (double x : a) {
-      avg += (x - avg) / t;
-      t++;
+      avg += (x - avg) / ++t;
     }
     return avg;
   }
@@ -733,7 +743,7 @@ public class ArrayMath {
   public static double norm_1(double[] a) {
     double sum = 0.0;
     for (double anA : a) {
-      sum += Math.abs(anA);
+      sum += anA < 0 ? -anA : anA;
     }
     return sum;
   }
@@ -747,7 +757,7 @@ public class ArrayMath {
   public static double norm_1(float[] a) {
     double sum = 0.0;
     for (float anA : a) {
-      sum += Math.abs(anA);
+      sum += anA < 0 ? -anA : anA;
     }
     return sum;
   }
@@ -788,8 +798,9 @@ public class ArrayMath {
     double max = Double.NEGATIVE_INFINITY;
     int argmax = 0;
     for (int i = 0; i < a.length; i++) {
-      if (a[i] > max) {
-        max = a[i];
+      double d = a[i];
+      if (d > max) {
+        max = d;
         argmax = i;
       }
     }
@@ -803,8 +814,9 @@ public class ArrayMath {
     double max = Double.NEGATIVE_INFINITY;
     int argmax = 0;
     for (int i = 0; i < a.length; i++) {
-      if (a[i] >= max) {
-        max = a[i];
+      double d = a[i];
+      if (d >= max) {
+        max = d;
         argmax = i;
       }
     }
@@ -830,8 +842,9 @@ public class ArrayMath {
     float max = Float.NEGATIVE_INFINITY;
     int argmax = 0;
     for (int i = 0; i < a.length; i++) {
-      if (a[i] > max) {
-        max = a[i];
+      float d = a[i];
+      if (d > max) {
+        max = d;
         argmax = i;
       }
     }
@@ -849,8 +862,9 @@ public class ArrayMath {
     double min = Double.POSITIVE_INFINITY;
     int argmin = 0;
     for (int i = 0; i < a.length; i++) {
-      if (a[i] < min) {
-        min = a[i];
+      double d = a[i];
+      if (d < min) {
+        min = d;
         argmin = i;
       }
     }
@@ -877,8 +891,7 @@ public class ArrayMath {
    */
   public static double safeMin(double[] v) {
     double[] u = filterNaNAndInfinite(v);
-    if (numRows(u) == 0) return 0.0;
-    return min(u);
+    return numRows(u) == 0 ? 0.0 : min(u);
   }
 
   /**
@@ -888,8 +901,9 @@ public class ArrayMath {
     float min = Float.POSITIVE_INFINITY;
     int argmin = 0;
     for (int i = 0; i < a.length; i++) {
-      if (a[i] < min) {
-        min = a[i];
+      float d = a[i];
+      if (d < min) {
+        min = d;
         argmin = i;
       }
     }
@@ -907,8 +921,9 @@ public class ArrayMath {
     int min = Integer.MAX_VALUE;
     int argmin = 0;
     for (int i = 0; i < a.length; i++) {
-      if (a[i] < min) {
-        min = a[i];
+      int d = a[i];
+      if (d < min) {
+        min = d;
         argmin = i;
       }
     }
@@ -936,8 +951,9 @@ public class ArrayMath {
     int max = Integer.MIN_VALUE;
     int argmax = 0;
     for (int i = 0; i < a.length; i++) {
-      if (a[i] > max) {
-        max = a[i];
+      int d = a[i];
+      if (d > max) {
+        max = d;
         argmax = i;
       }
     }
@@ -987,8 +1003,7 @@ public class ArrayMath {
    */
   public static double safeMax(double[] v) {
     double[] u = filterNaNAndInfinite(v);
-    if (numRows(u) == 0) return 0.0;
-    return max(u);
+    return numRows(u) == 0 ? 0.0 : max(u);
   }
 
   /**
@@ -1032,17 +1047,19 @@ public class ArrayMath {
     int maxIdx = fromIndex;
     double max = logInputs[fromIndex];
     for (int i = fromIndex+1; i < toIndex; i++) {
-      if (logInputs[i] > max) {
+      double d = logInputs[i];
+      if (d > max) {
         maxIdx = i;
-        max = logInputs[i];
+        max = d;
       }
     }
     double intermediate = 0.0;
     double cutoff = max - SloppyMath.LOGTOLERANCE;
     // we avoid rearranging the array and so test indices each time!
     for (int i = fromIndex; i < toIndex; i++) {
-      if (i != maxIdx && logInputs[i] > cutoff) {
-        intermediate += Math.exp(logInputs[i] - max);
+      double d = logInputs[i];
+      if (i != maxIdx && d > cutoff) {
+        intermediate += Math.exp(d - max);
       }
     }
     return intermediate != 0 ? (max + Math.log(1 + intermediate)) : max;
@@ -1073,26 +1090,22 @@ public class ArrayMath {
     int maxIdx = fromIndex;
     double max = logInputs[fromIndex];
     for (int i = fromIndex + stride; i < afterIndex; i += stride) {
-      if (logInputs[i] > max) {
+      double d = logInputs[i];
+      if (d > max) {
         maxIdx = i;
-        max = logInputs[i];
+        max = d;
       }
     }
-    boolean haveTerms = false;
     double intermediate = 0.0;
     double cutoff = max - SloppyMath.LOGTOLERANCE;
     // we avoid rearranging the array and so test indices each time!
     for (int i = fromIndex; i < afterIndex; i += stride) {
-      if (i != maxIdx && logInputs[i] > cutoff) {
-        haveTerms = true;
-        intermediate += Math.exp(logInputs[i] - max);
+      double d = logInputs[i];
+      if (i != maxIdx && d > cutoff) {
+        intermediate += Math.exp(d - max);
       }
     }
-    if (haveTerms) {
-      return max + Math.log(1.0 + intermediate);  // using Math.log1p(intermediate) may be more accurate, but is slower
-    } else {
-      return max;
-    }
+    return intermediate != 0 ? max + Math.log(1.0 + intermediate) : max;
   }
 
   public static double logSum(List<Double> logInputs) {
@@ -1114,22 +1127,16 @@ public class ArrayMath {
         max = d;
       }
     }
-    boolean haveTerms = false;
     double intermediate = 0.0;
     double cutoff = max - SloppyMath.LOGTOLERANCE;
     // we avoid rearranging the array and so test indices each time!
     for (int i = fromIndex; i < toIndex; i++) {
       double d = logInputs.get(i);
       if (i != maxIdx && d > cutoff) {
-        haveTerms = true;
         intermediate += Math.exp(d - max);
       }
     }
-    if (haveTerms) {
-      return max + Math.log(1.0 + intermediate);
-    } else {
-      return max;
-    }
+    return intermediate != 0. ? max + Math.log(1.0 + intermediate) : max;
   }
 
 
@@ -1151,26 +1158,21 @@ public class ArrayMath {
     int maxIdx = 0;
     float max = logInputs[0];
     for (int i = 1; i < leng; i++) {
-      if (logInputs[i] > max) {
+      float d = logInputs[i];
+      if (d > max) {
         maxIdx = i;
-        max = logInputs[i];
+        max = d;
       }
     }
-    boolean haveTerms = false;
     double intermediate = 0.0f;
     float cutoff = max - SloppyMath.LOGTOLERANCE_F;
     // we avoid rearranging the array and so test indices each time!
     for (int i = 0; i < leng; i++) {
       if (i != maxIdx && logInputs[i] > cutoff) {
-        haveTerms = true;
         intermediate += Math.exp(logInputs[i] - max);
       }
     }
-    if (haveTerms) {
-      return max + (float) Math.log(1.0 + intermediate);
-    } else {
-      return max;
-    }
+    return intermediate != 0. ? max + (float) Math.log(1.0 + intermediate) : max;
   }
 
   // LINEAR ALGEBRAIC FUNCTIONS
@@ -1253,9 +1255,10 @@ public class ArrayMath {
   public static int[][] castToInt(double[][] doubleCounts) {
     int[][] result = new int[doubleCounts.length][];
     for (int i=0; i<doubleCounts.length; i++) {
-      result[i] = new int[doubleCounts[i].length];
-      for (int j=0; j<doubleCounts[i].length; j++) {
-        result[i][j] = (int) doubleCounts[i][j];
+      double[] drow = doubleCounts[i];
+      int[] row = result[i] = new int[drow.length];
+      for (int j=0; j<drow.length; j++) {
+        row[j] = (int) drow[j];
       }
     }
     return result;
@@ -1270,36 +1273,29 @@ public class ArrayMath {
   public static void normalize(double[] a) {
     double total = sum(a);
     if (total == 0.0 || Double.isNaN(total)) {
-      throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
+      throw new ArithmeticException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
     }
     multiplyInPlace(a, 1.0/total); // divide each value by total
   }
 
   public static void L1normalize(double[] a) {
     double total = L1Norm(a);
-    if (total == 0.0 || Double.isNaN(total)) {
+    if (total == 0.0 || Double.isNaN(total))
       if (a.length < 100) {
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
+        throw new ArithmeticException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
       } else {
-        double[] aTrunc = new double[100];
-        System.arraycopy(a, 0, aTrunc, 0, 100);
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(aTrunc) + " ... ");
+        throw new ArithmeticException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(Arrays.copyOf(a, 100)) + " ... ");
       }
-
-    }
     multiplyInPlace(a, 1.0/total); // divide each value by total
   }
   public static void L2normalize(double[] a) {
     double total = L2Norm(a);
     if (total == 0.0 || Double.isNaN(total)) {
       if (a.length < 100) {
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
+        throw new ArithmeticException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
       } else {
-        double[] aTrunc = new double[100];
-        System.arraycopy(a, 0, aTrunc, 0, 100);
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(aTrunc) + " ... ");
+        throw new ArithmeticException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(Arrays.copyOf(a, 100)) + " ... ");
       }
-
     }
     multiplyInPlace(a, 1.0/total); // divide each value by total
   }
@@ -1311,7 +1307,7 @@ public class ArrayMath {
   public static void normalize(float[] a) {
     float total = sum(a);
     if (total == 0.0f || Double.isNaN(total)) {
-      throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN");
+      throw new ArithmeticException("Can't normalize an array with sum 0.0 or NaN");
     }
     multiplyInPlace(a, 1.0f/total); // divide each value by total
   }
@@ -1319,11 +1315,9 @@ public class ArrayMath {
     float total = L2Norm(a);
     if (total == 0.0 || Float.isNaN(total)) {
       if (a.length < 100) {
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
+        throw new ArithmeticException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
       } else {
-        float[] aTrunc = new float[100];
-        System.arraycopy(a, 0, aTrunc, 0, 100);
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(aTrunc) + " ... ");
+        throw new ArithmeticException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(Arrays.copyOf(a, 100)) + " ... ");
       }
 
     }
@@ -1337,11 +1331,11 @@ public class ArrayMath {
   public static void standardize(double[] a) {
     double m = mean(a);
     if (Double.isNaN(m)) {
-      throw new RuntimeException("Can't standardize array whose mean is NaN");
+      throw new ArithmeticException("Can't standardize array whose mean is NaN");
     }
     double s = stdev(a);
     if (s == 0.0 || Double.isNaN(s)) {
-      throw new RuntimeException("Can't standardize array whose standard deviation is 0.0 or NaN");
+      throw new ArithmeticException("Can't standardize array whose standard deviation is 0.0 or NaN");
     }
     addInPlace(a, -m); // subtract mean
     multiplyInPlace(a, 1.0/s); // divide by standard deviation
@@ -1350,14 +1344,14 @@ public class ArrayMath {
   public static double L2Norm(double[] a) {
     double result = 0.0;
     for(double d: a) {
-      result += Math.pow(d,2);
+      result += d * d;
     }
     return Math.sqrt(result);
   }
   public static float L2Norm(float[] a) {
     double result = 0;
     for(float d: a) {
-      result += Math.pow(d,2);
+      result += d * d;
     }
     return (float) Math.sqrt(result);
   }
@@ -1478,23 +1472,13 @@ public class ArrayMath {
   }
 
   public static void setToLogDeterministic(float[] a, int i) {
-    for (int j = 0; j < a.length; j++) {
-      if (j == i) {
-        a[j] = 0.0F;
-      } else {
-        a[j] = Float.NEGATIVE_INFINITY;
-      }
-    }
+    Arrays.fill(a, Float.NEGATIVE_INFINITY);
+    a[i] = 0.f;
   }
 
   public static void setToLogDeterministic(double[] a, int i) {
-    for (int j = 0; j < a.length; j++) {
-      if (j == i) {
-        a[j] = 0.0;
-      } else {
-        a[j] = Double.NEGATIVE_INFINITY;
-      }
-    }
+    Arrays.fill(a, Double.NEGATIVE_INFINITY);
+    a[i] = 0.;
   }
 
   // SAMPLE ANALYSIS
@@ -1509,15 +1493,10 @@ public class ArrayMath {
   }
 
   public static double median(double[] a) {
-    double[] b = new double[a.length];
-    System.arraycopy(a, 0, b, 0, b.length);
+    double[] b = a.clone();
     Arrays.sort(b);
-    int mid = b.length / 2;
-    if (b.length % 2 == 0) {
-      return (b[mid - 1] + b[mid]) / 2.0;
-    } else {
-      return b[mid];
-    }
+    int mid = b.length >>> 1;
+    return (b.length & 0x1) == 0 ? (b[mid - 1] + b[mid]) * 0.5 : b[mid];
   }
 
   /**
@@ -1526,8 +1505,7 @@ public class ArrayMath {
    */
   public static double safeMean(double[] v) {
     double[] u = filterNaNAndInfinite(v);
-    if (numRows(u) == 0) return 0.0;
-    return mean(u);
+    return numRows(u) == 0 ? 0 : mean(u);
   }
 
   public static double sumSquaredError(double[] a) {
@@ -1563,8 +1541,7 @@ public class ArrayMath {
    */
   public static double safeStdev(double[] v) {
     double[] u = filterNaNAndInfinite(v);
-    if (numRows(u) < 2) return 1.0;
-    return stdev(u);
+    return numRows(u) < 2 ? 1.0 : stdev(u);
   }
 
   public static double standardErrorOfMean(double[] a) {
@@ -1640,7 +1617,6 @@ public class ArrayMath {
    * x and y, then compute innerProduct(x,y)/(x.length-1).
    */
   public static double pearsonCorrelation(double[] x, double[] y) {
-    double result;
     double sum_sq_x = 0, sum_sq_y = 0;
     double mean_x = x[0], mean_y = y[0];
     double sum_coproduct = 0;
@@ -1658,10 +1634,7 @@ public class ArrayMath {
     double pop_sd_y = Math.sqrt(sum_sq_y/y.length);
     double cov_x_y = sum_coproduct / x.length;
     double denom = pop_sd_x*pop_sd_y;
-    if(denom == 0.0)
-      return 0.0;
-    result = cov_x_y/denom;
-    return result;
+    return denom == 0. ? 0. : cov_x_y/denom;
   }
 
   /**
@@ -1773,14 +1746,10 @@ public class ArrayMath {
   // PRINTING FUNCTIONS
 
   public static String toBinaryString(byte[] b) {
-    StringBuilder s = new StringBuilder();
+    StringBuilder s = new StringBuilder(b.length * 9);
     for (byte by : b) {
       for (int j = 7; j >= 0; j--) {
-        if ((by & (1 << j)) > 0) {
-          s.append('1');
-        } else {
-          s.append('0');
-        }
+        s.append((by & (1 << j)) > 0 ? '1' : '0');
       }
       s.append(' ');
     }
@@ -1794,27 +1763,12 @@ public class ArrayMath {
   public static String toString(double[] a, NumberFormat nf) {
     if (a == null) return null;
     if (a.length == 0) return "[]";
-    StringBuilder b = new StringBuilder();
-    b.append('[');
+    StringBuilder b = new StringBuilder(1000).append('[');
     for (int i = 0; i < a.length - 1; i++) {
-      String s;
-      if (nf == null) {
-        s = String.valueOf(a[i]);
-      } else {
-        s = nf.format(a[i]);
-      }
-      b.append(s);
-      b.append(", ");
+      b.append(nf == null? String.valueOf(a[i]) : nf.format(a[i])).append(", ");
     }
-    String s;
-    if (nf == null) {
-      s = String.valueOf(a[a.length - 1]);
-    } else {
-      s = nf.format(a[a.length - 1]);
-    }
-    b.append(s);
-    b.append(']');
-    return b.toString();
+    b.append(nf == null ? String.valueOf(a[a.length - 1]): nf.format(a[a.length - 1]));
+    return b.append(']').toString();
   }
 
   public static String toString(float[] a) {
@@ -1824,27 +1778,12 @@ public class ArrayMath {
   public static String toString(float[] a, NumberFormat nf) {
     if (a == null) return null;
     if (a.length == 0) return "[]";
-    StringBuilder b = new StringBuilder();
-    b.append('[');
+    StringBuilder b = new StringBuilder(1000).append('[');
     for (int i = 0; i < a.length - 1; i++) {
-      String s;
-      if (nf == null) {
-        s = String.valueOf(a[i]);
-      } else {
-        s = nf.format(a[i]);
-      }
-      b.append(s);
-      b.append(", ");
+      b.append(nf == null ? String.valueOf(a[i]) : nf.format(a[i])).append(", ");
     }
-    String s;
-    if (nf == null) {
-      s = String.valueOf(a[a.length - 1]);
-    } else {
-      s = nf.format(a[a.length - 1]);
-    }
-    b.append(s);
-    b.append(']');
-    return b.toString();
+    b.append(nf == null ? String.valueOf(a[a.length - 1]): nf.format(a[a.length - 1]));
+    return b.append(']').toString();
   }
 
   public static String toString(int[] a) {
@@ -1854,27 +1793,12 @@ public class ArrayMath {
   public static String toString(int[] a, NumberFormat nf) {
     if (a == null) return null;
     if (a.length == 0) return "[]";
-    StringBuilder b = new StringBuilder();
-    b.append('[');
+    StringBuilder b = new StringBuilder(1000).append('[');
     for (int i = 0; i < a.length - 1; i++) {
-      String s;
-      if (nf == null) {
-        s = String.valueOf(a[i]);
-      } else {
-        s = nf.format(a[i]);
-      }
-      b.append(s);
-      b.append(", ");
+      b.append(nf == null ? String.valueOf(a[i]) : nf.format(a[i])).append(", ");
     }
-    String s;
-    if (nf == null) {
-      s = String.valueOf(a[a.length - 1]);
-    } else {
-      s = nf.format(a[a.length - 1]);
-    }
-    b.append(s);
-    b.append(']');
-    return b.toString();
+    b.append(nf == null ? String.valueOf(a[a.length - 1]) : nf.format(a[a.length - 1]));
+    return b.append(']').toString();
   }
 
   public static String toString(byte[] a) {
@@ -2123,8 +2047,7 @@ public class ArrayMath {
   public static int[][] deepCopy(int[][] counts) {
     int[][] result = new int[counts.length][];
     for (int i=0; i<counts.length; i++) {
-      result[i] = new int[counts[i].length];
-      System.arraycopy(counts[i], 0, result[i], 0, counts[i].length);
+      result[i] = counts[i].clone();
     }
     return result;
   }
@@ -2152,10 +2075,8 @@ public class ArrayMath {
 
   public static void assertFinite(double[] vector, String vectorName) throws InvalidElementException {
     for(int i=0; i<vector.length; i++){
-      if (Double.isNaN(vector[i])) {
-        throw new InvalidElementException("NaN found in " + vectorName + " element " + i);
-      } else if (Double.isInfinite(vector[i])) {
-        throw new InvalidElementException("Infinity found in " + vectorName + " element " + i);
+      if (Double.isNaN(vector[i]) || Double.isInfinite(vector[i])) {
+        throw new InvalidElementException(vectorName + " element " + i + " is " + vector[i]);
       }
     }
   }
