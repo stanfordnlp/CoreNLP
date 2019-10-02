@@ -627,9 +627,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
                 System.err.printf("fLabel=%s, yP = %d, fCount:%f = ((jj == 0 && fLabel[0] == yP)=%b || (jj == 1 && k == kk))=%b\n", Arrays.toString(fLabel),yP, fCount,(jj == 0 && fLabel[0] == yP) , (jj == 1 && k == kk));
               PtYYpPrime = PtYYp * (condE - EForADoc.get(fIndex)[kk]);
             } else {
-              double E = 0;
-              if (EForADocPosAtI.containsKey(fIndex))
-                E = EForADocPosAtI.get(fIndex)[kk];
+              double E = EForADocPosAtI.containsKey(fIndex) ? EForADocPosAtI.get(fIndex)[kk] : 0;
               condE = fCount;
               PtYYpPrime = PtYYp * (condE - E);
             }
@@ -711,8 +709,9 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         weightSquare[i] = new double[weights[i].length];
     }
     for (int i = 0; i < weights.length; i++) {
-      for (int j=0; j < weights[i].length; j++) {
-        double w = weights[i][j];
+      double[] weights_i = weights[i];
+      for (int j=0; j < weights_i.length; j++) {
+        final double w = weights_i[j];
         weightSquare[i][j] = w * w;
       }
     }
