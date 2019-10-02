@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.Normalizer;
 import java.util.*;
+import java.util.stream.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -1668,6 +1669,62 @@ public class StringUtils  {
   public static boolean isCapitalized(String s) {
     return (Character.isUpperCase(s.charAt(0)));
   }
+
+  public static String toTitleCase(String s) {
+    StringBuilder sb = new StringBuilder();
+    int off = 0;
+    int len = s.length();
+    char prevChar = ' ';
+    while (off < len) {
+      char currChar = (char) s.codePointAt(off);
+      if (Character.isWhitespace(prevChar) && !Character.isWhitespace(currChar)) {
+        sb.append(Character.toUpperCase(currChar));
+      } else {
+        sb.append(Character.toLowerCase(currChar));
+      }
+      prevChar = currChar;
+      off += Character.charCount(currChar);
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Check if every word in a string begins with an uppercase and the rest is lower case (e.g. Title Case)
+   *
+   * @param s a string
+   * @return true if the string is Title case
+   *         false otherwise
+   */
+  public static boolean isTitleCase(String s) {
+    String[] words = s.split("\\s+");
+    for (String w : words) {
+      if (!(Character.isUpperCase(w.charAt(0)) && (w.substring(1).toLowerCase().equals(w.substring(1))))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Check if every non whitespace character is upper case (e.g. TITLE CASE)
+   *
+   * @param s a string
+   * @return true if the string is Title case
+   *         false otherwise
+   */
+  public static boolean isAllUpperCase(String s) {
+    int off = 0;
+    int len = s.length();
+    while (off < len) {
+      char currChar = (char) s.codePointAt(off);
+      if (!Character.isUpperCase(currChar) && !Character.isWhitespace(currChar)) {
+        return false;
+      }
+      off += Character.charCount(currChar);
+    }
+    return true;
+  }
+
 
   public static String searchAndReplace(String text, String from, String to) {
     from = escapeString(from, new char[]{'.', '[', ']', '\\'}, '\\'); // special chars in regex
