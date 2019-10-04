@@ -138,15 +138,15 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
   private transient CallbackFunction iterCallbackFunction = null;
 
-  public enum eState {
+  private enum eState {
     TERMINATE_MAXEVALS, TERMINATE_RELATIVENORM, TERMINATE_GRADNORM, TERMINATE_AVERAGEIMPROVE, CONTINUE, TERMINATE_EVALIMPROVE, TERMINATE_MAXITR
   }
 
-  public enum eLineSearch {
+  private enum eLineSearch {
     BACKTRACK, MINPACK
   }
 
-  public enum eScaling {
+  private enum eScaling {
     DIAGONAL, SCALAR
   }
 
@@ -516,18 +516,24 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
    * The QNInfo class is used to store information about the Quasi Newton
    * update. it holds all the s,y pairs, updates the diagonal and scales
    * everything as needed.
+   * <br>
+   * This is kept as an abstract class as experimentally the optimizer
+   * does a slightly better job of optimizing this than it does a
+   * switch statement containing whichever branch is currently unused
+   * (SCALAR vs DIAGONAL).  2019-10-03 experiments showed about a 1%
+   * speedup.  Thanks to 
+   * Erich Schubert &lt;schubert@informatik.uni-heidelberg.de&gt;
    */
-  class QNInfo {
+  abstract class QNInfo {
     // Diagonal Options
     // Line search Options
     // Memory stuff
-    private double[][] s = null;
-    private double[][] y = null;
-    private double[] rho = null;
-    private double gamma;
+    protected double[][] s = null;
+    protected double[][] y = null;
+    protected double[] rho = null;
+    protected double gamma;
     public double[] d = null;
-    private int mem = 20, used = 0;
-    public eScaling scaleOpt = eScaling.SCALAR;
+    protected int mem = 20, used = 0;
 
     QNInfo(int size) {
       mem = size > 0 ? size : 20;
@@ -574,15 +580,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       --used;
     }
 
-    void useDiagonalScaling() {
-      this.scaleOpt = eScaling.DIAGONAL;
-    }
-
-    void useScalarScaling() {
-      this.scaleOpt = eScaling.SCALAR;
-    }
-
-    /*
+    /**
      * Free up that memory.
      */
     void free() {
@@ -617,29 +615,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       }
     }
 
-    double[] applyInitialHessian(double[] x, StringBuilder sb) {
-      switch (scaleOpt) {
-      case SCALAR:
-        sb.append('I');
-        ArrayMath.multiplyInPlace(x, gamma);
-        break;
-      case DIAGONAL:
-        sb.append('D');
-        if (d != null) {
-          // Check sizes
-          if (x.length != d.length) {
-            throw new IllegalArgumentException("Vector of incorrect size passed to applyInitialHessian in QNInfo class");
-          }
-          // Scale element-wise
-          for (int i = 0; i < x.length; i++) {
-            x[i] /= d[i];
-          }
-        }
-        break;
-      }
-
-      return x;
-    }
+    abstract double[] applyInitialHessian(double[] x, StringBuilder sb);
 
     /*
      * The update function is used to update the hessian approximation used by
@@ -655,10 +631,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     int update(double[] newX, double[] x, double[] newGrad,
         double[] grad, double step) throws SurpriseConvergence {
       // todo: add OutOfMemory error.
-      double[] newS, newY;
-      double sy, yy, sg;
 
       // allocate arrays for new s,y pairs (or reuse if the list is already full)
+      double[] newS, newY;
       if (used == mem) {
         newS = s[0];
         newY = y[0];
@@ -669,9 +644,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       }
 
       // Here we construct the new pairs, and check for positive definiteness.
-      sy = 0;
-      yy = 0;
-      sg = 0;
+      double sy = 0, yy = 0, sg = 0;
       for (int i = 0; i < x.length; i++) {
         double nSi = newS[i] = newX[i] - x[i];
         double nYi = newY[i] = newGrad[i] - grad[i];
@@ -685,116 +658,145 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       return update(newS, newY, yy, sy, sg, step);
     }
 
-    private class NegativeCurvature extends Exception {
+    abstract int update(double[] newS, double[] newY, double yy, double sy, double sg, double step);
+  } // end class QNInfo
 
-      private static final long serialVersionUID = 4676562552506850519L;
-
-      public NegativeCurvature() {
-      }
+  class ScalarQNInfo extends QNInfo {
+    ScalarQNInfo(int size) {
+      super(size);
     }
 
-    private class ZeroGradient extends Exception {
-
-      private static final long serialVersionUID = -4001834044987928521L;
-
-      public ZeroGradient() {
-      }
+    ScalarQNInfo(List<double[]> sList, List<double[]> yList) {
+      super(sList, yList);
     }
 
-    int update(double[] newS, double[] newY, double yy, double sy,
-        double sg, double step) {
+    double[] applyInitialHessian(double[] x, StringBuilder sb) {
+      sb.append('I');
+      ArrayMath.multiplyInPlace(x, gamma);
+      return x;
+    }
 
-      // Initialize diagonal to the identity
-      if (scaleOpt == eScaling.DIAGONAL && d == null) {
-        d = new double[newS.length];
-        for (int i = 0; i < d.length; i++) {
-          d[i] = 1.0;
-        }
-      }
-
-      try {
-
-        if (sy < 0) {
-          throw new NegativeCurvature();
-        }
-
-        if (yy == 0.0) {
-          throw new ZeroGradient();
-        }
-
-        switch (scaleOpt) {
-        /*
-         * SCALAR: The standard L-BFGS initial approximation which is just a
-         * scaled identity.
-         */
-        case SCALAR:
-          gamma = sy / yy;
-          break;
-        /*
-         * DIAGONAL: A diagonal scaling matrix is used as the initial
-         * approximation. The updating method used is used thanks to Andrew
-         * Bradley of the ICME dept.
-         */
-        case DIAGONAL:
-
-          double sDs;
-          // Gamma is designed to scale such that a step length of one is
-          // generally accepted.
-          gamma = sy / (step * (sy - sg));
-          sDs = 0.0;
-          for (int i = 0; i < d.length; i++) {
-            d[i] = gamma * d[i];
-            sDs += newS[i] * d[i] * newS[i];
-          }
-          // This diagonal update was introduced by Andrew Bradley
-          for (int i = 0; i < d.length; i++) {
-            d[i] = (1 - d[i] * newS[i] * newS[i] / sDs) * d[i] + newY[i]
-                * newY[i] / sy;
-          }
-          // Here we make sure that the diagonal is alright
-          double minD = ArrayMath.min(d);
-          double maxD = ArrayMath.max(d);
-
-          // If things have gone bad, just fill with the SCALAR approx.
-          if (minD <= 0 || Double.isInfinite(maxD) || maxD / minD > 1e12) {
-            log.warn("QNInfo:update() : PROBLEM WITH DIAGONAL UPDATE");
-            double fill = yy / sy;
-            for (int i = 0; i < d.length; i++) {
-              d[i] = fill;
-            }
-          }
-
-        }
-
-        // If s is already of size mem, remove the oldest vector and free it up.
-
-        if (used == mem) {
-          removeFirst();
-        }
-
-        // Actually add the pair.
-        s[used] = newS;
-        y[used] = newY;
-        rho[used] = 1 / sy;
-        ++used;
-      } catch (NegativeCurvature nc) {
+    int update(double[] newS, double[] newY, double yy, double sy, double sg, double step) {
+      if(sy < 0) {
         // NOTE: if applying QNMinimizer to a non convex problem, we would still
         // like to update the matrix
         // or we could get stuck in a series of skipped updates.
-        if (!quiet)
+        if(!quiet)
           log.info(" Negative curvature detected, update skipped ");
-      } catch (ZeroGradient zg) {
-        if (!quiet)
-          log.info(" Either convergence, or floating point errors combined with extremely linear region ");
+        return used;
       }
+      if(yy == 0.0) {
+        if(!quiet)
+          log.info(" Either convergence, or floating point errors combined with extremely linear region ");
+        return used;
+      }
+
+      gamma = sy / yy;
+
+      // If s is already of size mem, remove the oldest vector and free it up.
+      if(used == mem)
+        removeFirst();
+
+      // Actually add the pair.
+      s[used] = newS;
+      y[used] = newY;
+      rho[used] = 1 / sy;
+      ++used;
+
+      return used;
+    }
+  } // end class ScalarQNInfo
+
+  class DiagonalQNInfo extends QNInfo {
+    DiagonalQNInfo(int size) {
+      super(size);
+    }
+
+    DiagonalQNInfo(List<double[]> sList, List<double[]> yList) {
+      super(sList, yList);
+    }
+
+    double[] applyInitialHessian(double[] x, StringBuilder sb) {
+      sb.append('D');
+      if(d != null) {
+        // Check sizes
+        if(x.length != d.length)
+          throw new IllegalArgumentException("Vector of incorrect size passed to applyInitialHessian in QNInfo class");
+        // Scale element-wise
+        for(int i = 0; i < x.length; i++)
+          x[i] /= d[i];
+      }
+      return x;
+    }
+
+    int update(double[] newS, double[] newY, double yy, double sy, double sg, double step) {
+      if(sy < 0) {
+        // NOTE: if applying QNMinimizer to a non convex problem, we would still
+        // like to update the matrix
+        // or we could get stuck in a series of skipped updates.
+        if(!quiet)
+          log.info(" Negative curvature detected, update skipped ");
+        return used;
+      }
+      if(yy == 0.0) {
+        if(!quiet)
+          log.info(" Either convergence, or floating point errors combined with extremely linear region ");
+        return used;
+      }
+
+      // Initialize diagonal to the identity
+      if(d == null) {
+        d = new double[newS.length];
+        Arrays.fill(d, 1.0);
+      }
+
+      // Gamma is designed to scale such that a step length of one is
+      // generally accepted.
+      gamma = sy / (step * (sy - sg));
+      double sDs = 0.0;
+      for(int i = 0; i < d.length; i++) {
+        final double newSi = newS[i];
+        sDs += newSi * (d[i] *= gamma) * newSi;
+      }
+      // This diagonal update was introduced by Andrew Bradley
+      for(int i = 0; i < d.length; i++) {
+        final double di = d[i], newSi = newS[i], newYi = newY[i];
+        d[i] = (1 - di * newSi * newSi / sDs) * di + newYi * newYi / sy;
+      }
+      // Here we make sure that the diagonal is alright
+      double minD = d[0], maxD = minD;
+      for(int i = 1; i < d.length; i++) {
+        final double v = d[i];
+        minD = v < minD ? v : minD;
+        maxD = v > maxD ? v : maxD;
+      }
+
+      // If things have gone bad, just fill with the SCALAR approx.
+      if(minD <= 0 || Double.isInfinite(maxD) || maxD / minD > 1e12) {
+        log.warn("QNInfo:update() : PROBLEM WITH DIAGONAL UPDATE");
+        Arrays.fill(d, yy / sy);
+      }
+
+      // If s is already of size mem, remove the oldest vector and free it up.
+      if(used == mem)
+        removeFirst();
+
+      // Actually add the pair.
+      s[used] = newS;
+      y[used] = newY;
+      rho[used] = 1 / sy;
+      ++used;
 
       return used;
     } // end update
-
-  } // end class QNInfo
+  } // end class DiagonalQNInfo
 
   public void setHistory(List<double[]> s, List<double[]> y) {
-    presetInfo = new QNInfo(s, y);
+    presetInfo = newQNInfo(s, y);
+  }
+
+  public QNInfo newQNInfo(List<double[]> s, List<double[]> y) {
+    return scaleOpt == eScaling.SCALAR ? new ScalarQNInfo(s, y) : new DiagonalQNInfo(s, y);
   }
 
   /**
@@ -812,8 +814,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     double[] as = new double[mmm];
 
     for (int i = mmm - 1; i >= 0; i--) {
-      as[i] = qn.getRho(i) * ArrayMath.innerProduct(qn.getS(i), dir);
-      plusAndConstMult(dir, qn.getY(i), -as[i], dir);
+      double v = as[i] = qn.getRho(i) * ArrayMath.innerProduct(qn.getS(i), dir);
+      plusAndConstMult(dir, qn.getY(i), -v, dir);
     }
 
     // multiply by hessian approximation
@@ -880,7 +882,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     }
 
     if (qn == null && presetInfo == null) {
-      qn = new QNInfo(mem);
+      qn = scaleOpt == eScaling.SCALAR ? new ScalarQNInfo(mem) : new DiagonalQNInfo(mem);
       noHistory = true;
     } else if (presetInfo != null) {
       qn = presetInfo;
@@ -892,8 +894,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     its = 0;
     fevals = 0;
     success = false;
-
-    qn.scaleOpt = scaleOpt;
 
     // initialize weights
     double[] x = initial;
