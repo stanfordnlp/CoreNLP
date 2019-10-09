@@ -393,6 +393,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       keysToSerialize.remove(CorefMentionIndexesAnnotation.class);
     }
 
+    // handle MWT stuff
+    if (keySet.contains(IsMultiWordTokenAnnotation.class)) {
+      builder.setIsMWT(getAndRegister(coreLabel, keysToSerialize, IsMultiWordTokenAnnotation.class));
+    }
+    if (keySet.contains(IsFirstWordOfMWTAnnotation.class)) {
+      builder.setIsFirstMWT(getAndRegister(coreLabel, keysToSerialize, IsFirstWordOfMWTAnnotation.class));
+    }
+    if (keySet.contains(MWTTokenTextAnnotation.class)) {
+      builder.setMwtText(getAndRegister(coreLabel, keysToSerialize, MWTTokenTextAnnotation.class));
+    }
+
     // Return
     return builder;
   }
@@ -1401,6 +1412,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         }
       }
       word.set(NamedEntityTagProbsAnnotation.class, nerLabelProbs);
+    }
+
+    // MWT info
+    if (proto.hasMwtText()) {
+      word.set(MWTTokenTextAnnotation.class, proto.getMwtText());
+    }
+    if (proto.hasIsMWT()) {
+      word.set(IsMultiWordTokenAnnotation.class, proto.getIsMWT());
+    }
+    if (proto.hasIsFirstMWT()) {
+      word.set(IsFirstWordOfMWTAnnotation.class, proto.getIsFirstMWT());
     }
 
     // Return
