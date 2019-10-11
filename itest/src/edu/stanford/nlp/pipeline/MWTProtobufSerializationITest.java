@@ -1,7 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import junit.framework.TestCase;
 
