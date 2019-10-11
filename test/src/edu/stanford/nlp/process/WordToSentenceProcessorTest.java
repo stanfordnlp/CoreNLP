@@ -17,8 +17,8 @@ import junit.framework.TestCase;
 
 public class WordToSentenceProcessorTest extends TestCase {
 
-  private static final Annotator ptb = new TokenizerAnnotator(false, "en");
-  private static final Annotator ptbNL = new TokenizerAnnotator(false, "en", "invertible,ptb3Escaping=true,tokenizeNLs=true");
+  private static final Annotator ud = new TokenizerAnnotator(false, "en");
+  private static final Annotator udNL = new TokenizerAnnotator(false, "en", "invertible,tokenizeNLs=true");
   private static final Annotator wsNL = new TokenizerAnnotator(false,
           PropertiesUtils.asProperties("tokenize.whitespace", "true", "invertible", "true", "tokenizeNLs", "true"));
 
@@ -31,14 +31,14 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
                                  String testSentence, String ... gold) {
-    checkResult(wts, ptb, testSentence, gold);
+    checkResult(wts, ud, testSentence, gold);
   }
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
                                   Annotator tokenizer,
                                  String testSentence, String ... gold) {
     Annotation annotation = new Annotation(testSentence);
-    ptbNL.annotate(annotation);
+    udNL.annotate(annotation);
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     List<List<CoreLabel>> sentences = wts.process(tokens);
 
@@ -208,7 +208,7 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   public void testExclamationPoint() {
     Annotation annotation = new Annotation("Foo!!");
-    ptb.annotate(annotation);
+    ud.annotate(annotation);
     List list = annotation.get(CoreAnnotations.TokensAnnotation.class);
     assertEquals("Wrong double bang", "[Foo, !!]", list.toString());
   }
