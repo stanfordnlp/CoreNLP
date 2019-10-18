@@ -61,7 +61,7 @@ public class TrueCaseAnnotatorITest extends TestCase {
     String text4 = "\"GOOD MORNING AMERICA FROM MCVEY!\"";
     String text5 = "\"good morning america from mcvey!\"";
     String text6 = "\"Good Morning America From McVey!\"";
-    String[] ans4 = { "``", "Good", "Morning", "America", "from", "McVey", "!", "''" };
+    String[] ans4 = { "\"", "Good", "Morning", "America", "from", "McVey", "!", "\"" };
 
     Properties props = PropertiesUtils.asProperties("annotators", "tokenize, ssplit, truecase");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
