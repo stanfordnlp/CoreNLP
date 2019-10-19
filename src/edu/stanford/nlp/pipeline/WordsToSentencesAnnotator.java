@@ -356,6 +356,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
         CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.ValueAnnotation.class,
         CoreAnnotations.CharacterOffsetBeginAnnotation.class,
         CoreAnnotations.CharacterOffsetEndAnnotation.class,
         CoreAnnotations.IsNewlineAnnotation.class,
