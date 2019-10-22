@@ -67,6 +67,7 @@ public class EntityMentionsAnnotator implements Annotator {
     // defaults
     chunkIdentifier = new LabeledChunkIdentifier();
     doAcronyms = false;
+    entityMentionsLanguage = LanguageInfo.getLanguageFromString("en");
   }
 
   // note: used in annotate.properties
