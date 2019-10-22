@@ -1443,6 +1443,9 @@ public class ArrayMath {
     return d.length - 1; // in case the "double-math" didn't total to exactly 1.0
   }
 
+  /** we will multiply by this constant instead of divide by log(2) */
+  private static final double LN_TO_LOG2 = 1. / Math.log(2);
+
   public static double klDivergence(double[] from, double[] to) {
     double kl = 0.0;
     double tot = sum(from);
@@ -1455,7 +1458,7 @@ public class ArrayMath {
       double num = from[i] / tot;
       double num2 = to[i] / tot2;
       // System.out.println("num is " + num + " num2 is " + num2);
-      kl += num * (Math.log(num / num2) / Math.log(2.0));
+      kl += num * Math.log(num / num2) * LN_TO_LOG2;
     }
     return kl;
   }

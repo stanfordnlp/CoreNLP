@@ -1674,9 +1674,9 @@ public class Counters  {
     C result = (C) c.getFactory().create();
     for (E key : c.keySet()) {
       double count = c.getCount(key);
-      double noise = -Math.log(1.0 - random.nextDouble()); // inverse of CDF for
-                                                           // exponential
-                                                           // distribution
+      // inverse of CDF for exponential distribution
+      // (1.0 - random) to avoid taking log(0) (probably?)
+      double noise = -Math.log(1.0 - random.nextDouble());
       // log.info("noise=" + noise);
       double perturbedCount = count + noise * p;
       result.setCount(key, perturbedCount);

@@ -52,6 +52,9 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   final static Redwood.RedwoodChannels logger = Redwood.channels(Dataset.class);
 
+  /** we will multiply by this constant instead of divide by log(2) */
+  private static final double LN_TO_LOG2 = 1. / Math.log(2);
+
   public Dataset() {
     this(10);
   }
@@ -658,7 +661,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     for (int i = 0; i < labelIndex.size(); i++) {
       double labelCount = labelCounter.getCount(labelIndex.get(i));
       double p = labelCount / size();
-      entropy -= p * (Math.log(p) / Math.log(2));
+      entropy -= p * Math.log(p) * LN_TO_LOG2;
     }
 
     double[] ig = new double[featureIndex.size()];
@@ -693,11 +696,11 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
         double pNot = notFeatureLabelCount / notFeatureCount;
 
         if (featureLabelCount != 0) {
-          sumFeature += p * (Math.log(p) / Math.log(2));
+          sumFeature += p * Math.log(p) * LN_TO_LOG2;
         }
 
         if (notFeatureLabelCount != 0) {
-          sumNotFeature += pNot * (Math.log(pNot) / Math.log(2));
+          sumNotFeature += pNot * Math.log(pNot) * LN_TO_LOG2;
         }
         //System.out.println(pNot+" "+(Math.log(pNot)/Math.log(2)));
 
