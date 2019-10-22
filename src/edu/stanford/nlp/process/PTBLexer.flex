@@ -671,7 +671,7 @@ TWITTER_NAME = [@\uFF20]([A-Za-z_][a-zA-Z_0-9]*|50cent)
 TWITTER_HASHTAG = [#\uFF03]{LETTER}({LETTER}|{DIGIT}|_)*({LETTER}|{DIGIT})
 TWITTER = {TWITTER_NAME}|{TWITTER_HASHTAG}
 
-ISO8601DATETIME = [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[x0-9]{2}:[0-9]{2}Z?
+ISO8601DATETIME = [0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[x0-9]{2}:[0-9]{2}Z?)?
 DEGREES = °[CF]
 
 /* --- This block becomes ABBREV1 and is usually followed by lower case words. --- */
@@ -1070,6 +1070,7 @@ RM/{NUM}        { String txt = yytext();
 {ACRO}/{SPACENL}        { return getNext(); }
 {TBSPEC2}/{SPACENL}     { return getNext(); }
 {ISO8601DATETIME}       { return getNext(); }
+//{ISO8601DATE}           { return getNext(); }
 {DEGREES}               { return getNext(); }
 <YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<()])      { return getNext(); }
 <YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<()])      { return getNext(); }
