@@ -167,17 +167,16 @@ import edu.stanford.nlp.util.logging.Redwood;
         splitForwardSlash = ! val;
       } else if ("ud".equals(key)) {
         // todo: should we deal with value? But may be null.
-        invertible = true; // this helps for straight quote sentence splitting
-        normalizeSpace = true;
-        normalizeAmpersandEntity = true;
-        normalizeFractions = true;
-        normalizeParentheses = false;
-        normalizeOtherBrackets = false;
-        quoteStyle = LexerUtils.QuotesEnum.NOT_CP1252;
-        ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
-        ptb3Dashes = false;
-        splitHyphenated=true;
-        splitForwardSlash=true;
+        normalizeSpace = val;
+        normalizeAmpersandEntity = val;
+        normalizeFractions = val;
+        normalizeParentheses = ! val;
+        normalizeOtherBrackets = ! val;
+        quoteStyle = val ? LexerUtils.QuotesEnum.NOT_CP1252 : LexerUtils.QuotesEnum.ORIGINAL;
+        ellipsisStyle = val ? LexerUtils.EllipsesEnum.NOT_CP1252 : LexerUtils.EllipsesEnum.ORIGINAL;
+        ptb3Dashes = ! val;
+        splitHyphenated=val;
+        splitForwardSlash=val;
       } else if ("americanize".equals(key)) {
         americanize = val;
       } else if ("normalizeSpace".equals(key)) {
