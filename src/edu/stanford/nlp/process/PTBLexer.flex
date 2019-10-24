@@ -166,7 +166,6 @@ import edu.stanford.nlp.util.logging.Redwood;
         splitHyphenated = ! val;
         splitForwardSlash = ! val;
       } else if ("ud".equals(key)) {
-        // todo: should we deal with value? But may be null.
         normalizeSpace = val;
         normalizeAmpersandEntity = val;
         normalizeFractions = val;
