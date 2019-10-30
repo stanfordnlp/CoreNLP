@@ -42,6 +42,9 @@ public class OutputSubtrees {
   @ArgumentParser.Option(name="remap_labels", gloss="Remap labels: for sentiment, for example, write '1=0,2=-1,3=1,4=1' to make it binary.  Remapping , or = currently not supported.", required=false)
   private static String REMAP_LABELS; // = null;
 
+  @ArgumentParser.Option(name="assert_binary", gloss="Barf on non-binary trees", required=false)
+  private static boolean ASSERT_BINARY = false;  
+
   public static void main(String[] args) {
     // Parse the arguments
     Properties props = StringUtils.argsToProperties(args, new HashMap<String, Integer>() {{
@@ -68,7 +71,12 @@ public class OutputSubtrees {
 
     MemoryTreebank treebank = new MemoryTreebank("utf-8");
     treebank.loadPath(INPUT, null);
+    int treeNum = 0;
     for (Tree tree : treebank) {
+      ++treeNum;
+      if (ASSERT_BINARY && !tree.isBinary()) {
+        throw new RuntimeException("Tree " + treeNum + " is not properly binary");
+      }
       //System.out.println(tree);
       //System.out.println("--------------");
       Iterable<Tree> subtrees = (ROOT_ONLY) ? Collections.singletonList(tree) : tree;

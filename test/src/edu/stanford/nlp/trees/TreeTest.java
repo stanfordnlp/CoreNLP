@@ -102,4 +102,20 @@ public class TreeTest extends TestCase {
                      "    (. ?)))" + separator);
     assertEquals(answer, t.pennString());
   }
+
+  public void checkBinary(String treeString, boolean expected) {
+    Tree tree = Tree.valueOf(treeString);
+    boolean answer = tree.isBinary();
+    assertEquals("Got " + answer + " instead of " + expected + " for " + treeString,
+                 expected, answer);
+  }
+
+  public void testIsBinary() {
+    checkBinary("(5)", true);
+    checkBinary("(1 5)", true);
+    checkBinary("(1 (2 5) (3 4))", true);
+    checkBinary("(1 (2 5))", false);
+    checkBinary("(1 (2 3) (4 5) (6 7))", false);
+    checkBinary("(1 (2 3) (4 (5 6) (6 7)))", true);
+  }
 }
