@@ -36,6 +36,9 @@ echo $OUTPUT_DIR/fiveclass/test-phrases.txt
 java edu.stanford.nlp.trees.OutputSubtrees -input $INPUT_DIR/fiveclass/test.txt > $OUTPUT_DIR/fiveclass/test-phrases.txt
 
 
+echo $OUTPUT_DIR/fiveclass/train-roots.txt
+java edu.stanford.nlp.trees.OutputSubtrees -input $INPUT_DIR/fiveclass/train.txt -root_only > $OUTPUT_DIR/fiveclass/train-roots.txt
+
 echo $OUTPUT_DIR/fiveclass/dev-roots.txt
 java edu.stanford.nlp.trees.OutputSubtrees -input $INPUT_DIR/fiveclass/dev.txt  -root_only > $OUTPUT_DIR/fiveclass/dev-roots.txt
 
