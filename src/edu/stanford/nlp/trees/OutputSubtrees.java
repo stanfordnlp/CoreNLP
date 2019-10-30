@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.StringUtils;
  * One specific use of this is to output the sentiment treebank
  * as a bunch of lines with no tree structure.  This is useful
  * for then building a phrase/sentence classifier using that
- * dataset.
+ * dataset.  See scripts/sentiment/convert_sentiment.sh
  *
  * @author John Bauer
  */
