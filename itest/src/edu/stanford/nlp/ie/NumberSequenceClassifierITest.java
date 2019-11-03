@@ -21,6 +21,7 @@ public class NumberSequenceClassifierITest {
   private static StanfordCoreNLP makeNumericPipeline() {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize, ssplit, pos, number, qen");
+    props.setProperty("tokenize.options", "splitHyphenated=false");
     props.setProperty("customAnnotatorClass.number",
         "edu.stanford.nlp.pipeline.NumberAnnotator");
     props.setProperty("customAnnotatorClass.qen",
