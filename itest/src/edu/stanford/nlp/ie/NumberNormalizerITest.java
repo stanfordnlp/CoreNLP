@@ -28,7 +28,7 @@ public class NumberNormalizerITest {
       System.err.println("Setting up pipeline in @BeforeClasss");
     }
     pipeline = new AnnotationPipeline();
-    pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+    pipeline.addAnnotator(new TokenizerAnnotator(false, "en", "invertible,splitHyphenated=false"));
     pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     pipeline.addAnnotator(new POSTaggerAnnotator(DefaultPaths.DEFAULT_POS_MODEL, false));
   }
