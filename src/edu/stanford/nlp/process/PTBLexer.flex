@@ -274,7 +274,7 @@ import edu.stanford.nlp.util.logging.Redwood;
    * This is like "new LDC treebank" tokenization except that we do not escape parentheses except on
    * s-expression tree input/output.
    */
-  private boolean invertible = true;
+  private boolean invertible;
   private boolean tokenizeNLs;
   private boolean tokenizePerLine;
   private boolean americanize = false;
