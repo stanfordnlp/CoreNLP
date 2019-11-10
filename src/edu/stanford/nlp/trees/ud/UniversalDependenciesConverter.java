@@ -100,7 +100,12 @@ public class UniversalDependenciesConverter {
     public Pair<SemanticGraph, SemanticGraph> next() {
       Tree t = treeIterator.next();
       currentTree = t;
-      return new Pair<>(convertTreeToBasic(t), null);
+      try {
+        return new Pair<>(convertTreeToBasic(t), null);
+      } catch (Exception e) {
+        System.err.println("Error converting following tree: "+t.pennString());
+        return new Pair<>(null, null);
+      }
     }
 
     public Tree getCurrentTree() {
@@ -236,30 +241,32 @@ public class UniversalDependenciesConverter {
       Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
       SemanticGraph sg = sgs.first();
 
-      if (treeFileName != null) {
-        //add UPOS tags
-        Tree tree = ((TreeToSemanticGraphIterator) sgIterator).getCurrentTree();
-        Tree uposTree = UniversalPOSMapper.mapTree(tree);
-        List<Label> uposLabels = uposTree.preTerminalYield();
-        for (IndexedWord token: sg.vertexListSorted()) {
-          int idx = token.index() - 1;
-          String uposTag = uposLabels.get(idx).value();
-          token.set(CoreAnnotations.CoarseTagAnnotation.class, uposTag);
+      if (sgs.first() != null) {
+        if (treeFileName != null) {
+          //add UPOS tags
+          Tree tree = ((TreeToSemanticGraphIterator) sgIterator).getCurrentTree();
+          Tree uposTree = UniversalPOSMapper.mapTree(tree);
+          List<Label> uposLabels = uposTree.preTerminalYield();
+          for (IndexedWord token : sg.vertexListSorted()) {
+            int idx = token.index() - 1;
+            String uposTag = uposLabels.get(idx).value();
+            token.set(CoreAnnotations.CoarseTagAnnotation.class, uposTag);
+          }
+        } else {
+          addLemmata(sg);
+          if (USE_NAME) {
+            addNERTags(sg);
+          }
         }
-      } else {
-        addLemmata(sg);
-        if (USE_NAME) {
-          addNERTags(sg);
-        }
-      }
 
-      SemanticGraph enhanced = null;
-      if (outputRepresentation.equalsIgnoreCase("enhanced")) {
-        enhanced = convertBasicToEnhanced(sg);
-      } else if (outputRepresentation.equalsIgnoreCase("enhanced++")) {
-        enhanced = convertBasicToEnhancedPlusPlus(sg);
+        SemanticGraph enhanced = null;
+        if (outputRepresentation.equalsIgnoreCase("enhanced")) {
+          enhanced = convertBasicToEnhanced(sg);
+        } else if (outputRepresentation.equalsIgnoreCase("enhanced++")) {
+          enhanced = convertBasicToEnhancedPlusPlus(sg);
+        }
+        System.out.print(writer.printSemanticGraph(sg, enhanced));
       }
-      System.out.print(writer.printSemanticGraph(sg, enhanced));
     }
 
   }
