@@ -53,7 +53,7 @@ permalink: '/annotators.html'
 | [relation](relation.html) | RelationExtractorAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse` |
 | [natlog](natlog.html) | NaturalLogicAnnotator | `tokenize, ssplit, pos, lemma, depparse` (Can also use `parse`) |
 | [entitylink](entitylink.html) | WikiDictAnnotator | `tokenize, ssplit, ner` |
-| [kbp](kbp.html) | KBPAnnotator | `tokenize,ssplit,pos,lemma,parse,coref` (Can also use `depparse` ; `coref` optional) |
+| [kbp](kbp.html) | KBPAnnotator | `tokenize, ssplit, pos, lemma, parse, ner, coref` (Can also use `depparse` ; `coref` optional) |
 | [quote](quote.html) | QuoteAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse, coref` |
 
 ## Sub-Annotators
