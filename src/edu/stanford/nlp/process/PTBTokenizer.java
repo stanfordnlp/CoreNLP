@@ -195,14 +195,14 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    *          {@link Word}
    */
   public static PTBTokenizer<Word> newPTBTokenizer(Reader r) {
-    return new PTBTokenizer<>(r, new WordTokenFactory(), "");
+    return new PTBTokenizer<>(r, new WordTokenFactory(), "invertible=false");
   }
 
 
   /**
    * Constructs a new PTBTokenizer that makes CoreLabel tokens.
    * It optionally returns carriage returns
-   * as their own token. CRs come back as Words whose text is
+   * as their own token. CRs come back as CoreLabels whose text is
    * the value of {@code AbstractTokenizer.NEWLINE_TOKEN}.
    *
    * @param r The Reader to read tokens from
@@ -539,21 +539,20 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   }
 
 
-  /** @return A PTBTokenizerFactory that vends Word tokens. */
+  /** This is a historical constructor that returns Word tokens.
+   *  Note that Word tokens don't support the extra fields to make an invertible tokenizer.
+   *
+   *  @return A PTBTokenizerFactory that vends Word tokens.
+   */
   public static TokenizerFactory<Word> factory() {
     return PTBTokenizerFactory.newTokenizerFactory();
   }
 
-  /** @return A PTBTokenizerFactory that vends Word tokens. */
-  public static TokenizerFactory<Word> factory(String options) {
-    return PTBTokenizerFactory.newWordTokenizerFactory(options);
-  }
 
   /** @return A PTBTokenizerFactory that vends CoreLabel tokens. */
   public static TokenizerFactory<CoreLabel> factory(boolean tokenizeNLs, boolean invertible) {
     return PTBTokenizerFactory.newPTBTokenizerFactory(tokenizeNLs, invertible);
   }
-
 
   /** @return A PTBTokenizerFactory that vends CoreLabel tokens with default tokenization. */
   public static TokenizerFactory<CoreLabel> coreLabelFactory() {
@@ -575,7 +574,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    */
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory, String options) {
     return new PTBTokenizerFactory<>(factory, options);
-
   }
 
 
@@ -604,7 +602,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
      * @return A TokenizerFactory that returns Word objects
      */
     public static TokenizerFactory<Word> newTokenizerFactory() {
-      return newPTBTokenizerFactory(new WordTokenFactory(), "");
+      return newPTBTokenizerFactory(new WordTokenFactory(), "invertible=false");
     }
 
     /**
@@ -618,7 +616,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
      * @return A TokenizerFactory that returns Word objects
      */
     public static PTBTokenizerFactory<Word> newWordTokenizerFactory(String options) {
-      return new PTBTokenizerFactory<>(new WordTokenFactory(), options);
+      return new PTBTokenizerFactory<>(new WordTokenFactory(), "invertible=false," + options);
     }
 
     /**
