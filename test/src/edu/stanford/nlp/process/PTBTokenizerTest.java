@@ -428,7 +428,7 @@ public class PTBTokenizerTest {
 
   @Test
   public void testUntok() {
-    assert(untokInputs.length == untokOutputs.length);
+    assertEquals(untokInputs.length, untokOutputs.length);
     for (int i = 0; i < untokInputs.length; i++) {
       assertEquals("untok gave the wrong result", untokOutputs[i], PTBTokenizer.ptb2Text(untokInputs[i]));
     }
