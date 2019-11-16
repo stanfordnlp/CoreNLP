@@ -162,7 +162,7 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeOtherBrackets = val;
         quoteStyle = val ? LexerUtils.QuotesEnum.LATEX : LexerUtils.QuotesEnum.ORIGINAL;
         ellipsisStyle = val ? LexerUtils.EllipsesEnum.PTB3 : LexerUtils.EllipsesEnum.ORIGINAL;
-        ptb3Dashes = val;
+        dashesStyle = val ? LexerUtils.DashesEnum.PTB3 : LexerUtils.DashesEnum.ORIGINAL;
         splitHyphenated = ! val;
         splitForwardSlash = ! val;
       } else if ("ud".equals(key)) {
@@ -173,7 +173,7 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeOtherBrackets = ! val;
         quoteStyle = val ? LexerUtils.QuotesEnum.NOT_CP1252 : LexerUtils.QuotesEnum.ORIGINAL;
         ellipsisStyle = val ? LexerUtils.EllipsesEnum.NOT_CP1252 : LexerUtils.EllipsesEnum.ORIGINAL;
-        ptb3Dashes = ! val;
+        dashesStyle = val ? LexerUtils.DashesEnum.NOT_CP1252: LexerUtils.DashesEnum.ORIGINAL;
         splitHyphenated=val;
         splitForwardSlash=val;
       } else if ("americanize".equals(key)) {
@@ -208,8 +208,12 @@ import edu.stanford.nlp.util.logging.Redwood;
         } catch (IllegalArgumentException iae) {
           throw new IllegalArgumentException ("Not a valid ellipses style: " + value);
         }
-      } else if ("ptb3Dashes".equals(key)) {
-        ptb3Dashes = val;
+      } else if ("dashes".equals(key)) {
+        try {
+          dashesStyle = LexerUtils.DashesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException iae) {
+          throw new IllegalArgumentException ("Not a valid dashes style: " + value);
+        }
       } else if ("escapeForwardSlashAsterisk".equals(key)) {
         escapeForwardSlashAsterisk = val;
       } else if ("untokenizable".equals(key)) {
@@ -286,7 +290,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean normalizeOtherBrackets = false;
   private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.NOT_CP1252;
   private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
-  private boolean ptb3Dashes = false;
+  private LexerUtils.DashesEnum dashesStyle = LexerUtils.DashesEnum.NOT_CP1252;
   private boolean escapeForwardSlashAsterisk = false; // this is true in Penn Treebank 3 but we don't do it now
   private boolean strictTreebank3 = false;
   private boolean splitAssimilations = true;
@@ -355,7 +359,7 @@ import edu.stanford.nlp.util.logging.Redwood;
       p = FORWARD_SLASH;
     }
     if (p != null) {
-      int firstHyphen = LexerUtils.indexOfRegex(p, in);
+      int firstHyphen = StringUtils.indexOfRegex(p, in);
       if (firstHyphen > 0) {
         yypushback(in.length() - firstHyphen);
       }
@@ -749,9 +753,8 @@ PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{1,4}[\- \u00A0])?[0-9]{2,4}[\- 
 FAKEDUCKFEET = <<|>>
 LESSTHAN = <|&lt;
 GREATERTHAN = >|&gt;
-COREHYPHEN = [-\u058A\u2010\u2011]
-HYPHEN = {COREHYPHEN}|\-
-HYPHENS = {COREHYPHEN}+
+HYPHEN = [-\u058A\u2010\u2011]
+HYPHENS = {HYPHEN}+
 LDOTS = \.\.\.+|[\u0085\u2026]
 SPACEDLDOTS = \.[ \u00A0](\.[ \u00A0])+\.
 ATS = @+
@@ -850,12 +853,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {SGML2} to recognize " + origTxt + " as " + txt); }
                           return getNext(txt, origTxt);
                         }
-{SPMDASH}               { // todo: extract handleDash method
-                          if (ptb3Dashes) {
-                            return getNext(ptbmdash, yytext()); }
-                          else {
-                            return getNext();
-                          }
+{SPMDASH}               { final String origTxt = yytext();
+                          String tok = LexerUtils.handleDashes(origTxt, dashesStyle);
+                          if (DEBUG) { logger.info("Used {SPMDASH} to recognize " + origTxt + " as " + tok); }
+                          return getNext(tok, origTxt);
                         }
 {SPAMP}                 { final String origTxt = yytext();
                           String tok;
@@ -1163,12 +1164,15 @@ RM/{NUM}        { String txt = yytext();
                     return getNext();
                   }
                 }
-{HYPHENS}       { if (yylength() >= 3 && yylength() <= 4 && ptb3Dashes) {
-                    return getNext(ptbmdash, yytext());
-                  } else {
-                    return getNext();
+{HYPHENS}       { final String origTxt = yytext();
+                  String tok = origTxt;
+                  if (yylength() <= 4) {
+                     tok = LexerUtils.handleDashes(origTxt, dashesStyle);
                   }
+                  if (DEBUG) { logger.info("Used {SPMDASH} to recognize " + origTxt + " as " + tok); }
+                  return getNext(tok, origTxt);
                 }
+
 <YyNotTokenizePerLine>{LDOTS}/\.{SPACENLS}[:letter:]    {
                   /* attempt to treat fourth ellipsis as period if followed by space and letter. */
                   String tok = yytext();

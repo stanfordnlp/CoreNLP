@@ -114,20 +114,23 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank.
  *     Default is true.
  * <li>quotes: [From CoreNLP 4.0] Select a style of mapping quotes. An enum with possible values (case insensitive):
- *     latex, unicode, ascii,not_cp1252, original. "ascii" maps all quote characters to the traditional ' and ".
+ *     latex, unicode, ascii, not_cp1252, original. "ascii" maps all quote characters to the traditional ' and ".
  *     "latex" maps quotes to ``, `, ', '', as in Latex and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
  *     "unicode" maps quotes to the range U+2018 to U+201D, the preferred unicode encoding of single and double quotes.
  *     "original" leaves all quotes as they were. "not_cp1252" only remaps invalid cp1252 quotes to Unicode.
- *     The default is "latex". </li>
+ *     The default is "not_cp1252". </li>
  * <li>ellipses: [From CoreNLP 4.0] Select a style for mapping ellipses (3 dots).  An enum with possible values
  *     (case insensitive): unicode, ptb3, not_cp1252, original. "ptb3" maps ellipses to three dots (...), the
- *     old PTB3 WSJ coding of an ellipsis. "unicode" maps three dot and optional space sequences to
+ *     old PTB3 WSJ coding of an ellipsis. "unicode" maps three dot and space three dot sequences to
  *     U+2026, the Unicode ellipsis character. "not_cp1252" only remaps invalid cp1252 ellipses to unicode.
- *     "original" uses all ellipses as they were. The default is ptb3. </li>
- * <li>ptb3Dashes: Whether to turn various dash characters into "--",
- *     the dominant encoding of dashes in the PTB3 WSJ. Default is true.
- * <li>splitAssimilations: true to tokenize "gonna", false to tokenize
- *                        "gon na".  Default is true.
+ *     "original" leaves all ellipses as they were. The default is "not_cp1252". </li>
+ * <li>dashes: [From CoreNLP 4.0] Select a style for mapping dashes. An enum with possible values
+ *     (case insensitive): unicode, ptb3, not_cp1252, original. "ptb3" maps dashes to "--", the
+ *     most prevalent old PTB3 WSJ coding of a dash (though some are just "-" HYPHEN-MINUS).
+ *     "unicode" maps "-", "--", and "---" HYPHEN-MINUS sequences and CP1252 dashes to Unicode en and em dashes.
+ *     "not_cp1252" only remaps invalid cp1252 dashes to unicode.
+ *     "original" leaves all dashes as they were. The default is "not_cp1252". </li>
+ * <li>splitAssimilations: true to tokenize "gonna", false to tokenize "gon na".  Default is true. </li>
  * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
  *     of / and * as the old PTB3 WSJ does for some reason (something to do
  *     with Lisp readers??). Default is false. This flag is no longer set

@@ -309,7 +309,7 @@ public class PTBTokenizerTest {
           { "Sambucus", "nigra", "subsp.", "canadensis", "and", "Canis", "spp.", "missing" },
           { "Jim", "Jackon", "&", "Co.", "LLC", "replied", "." },
           { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
-          { "\u2010", "-", "___" },
+          { "--", "-", "___" },
           { "whenever", "one", "goes", "`", "tisk", "tisk", "'", "at", "something" },
           { "She", "hates", "Alex", "."},
           { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},

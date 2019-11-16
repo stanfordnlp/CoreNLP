@@ -16,7 +16,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.Normalizer;
 import java.util.*;
-import java.util.stream.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -2553,7 +2552,7 @@ public class StringUtils  {
     int start = 0; int end = chars.length;
     if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded array: " + encoded); }
     if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
-    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
+    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracke in encoded array: " + encoded); }
     // (finite state automaton)
     for (int i=start; i<end; i++) {
       if (chars[i] == '\r') {
@@ -2784,6 +2783,18 @@ public class StringUtils  {
       }
     }
     return sb.toString();
+  }
+
+  /** @return index of pattern (i.e., char position of start of pattern) in s or -1, if not found. */
+  public static int indexOfRegex(Pattern pattern, String s) {
+    Matcher matcher = pattern.matcher(s);
+    return matcher.find() ? matcher.start() : -1;
+  }
+
+  /** @return index of pattern in s or -1, if not found, starting from index. */
+  public static int indexOfRegex(Pattern pattern, String s, int index) {
+    Matcher matcher = pattern.matcher(s);
+    return matcher.find(index) ? matcher.start() : -1;
   }
 
 }
