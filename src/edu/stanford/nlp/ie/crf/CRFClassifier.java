@@ -1554,7 +1554,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     long elapsedMs = timer.stop();
     log.info("Time to convert docs to feature indices: " + Timing.toSecondsString(elapsedMs) + " seconds");
-    log.info("Current memory used: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+    log.info("Current memory used: " + MemoryMonitor.getUsedMemoryString());
 
     if (flags.serializeClassIndexTo != null) {
       timer.start();
@@ -1572,7 +1572,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       Triple<int[][][][], int[][], double[][][][]> dataAndLabelsAndFeatureVals = documentsToDataAndLabels(docs);
       elapsedMs = timer.stop();
       log.info("Time to convert docs to data/labels: " + Timing.toSecondsString(elapsedMs) + " seconds");
-      log.info("Current memory used: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+      log.info("Current memory used: " + MemoryMonitor.getUsedMemoryString());
 
       Evaluator[] evaluators = null;
       if (flags.evaluateIters > 0 || flags.terminateOnEvalImprovement) {
