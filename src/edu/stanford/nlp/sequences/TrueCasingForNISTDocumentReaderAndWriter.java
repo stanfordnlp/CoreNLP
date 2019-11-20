@@ -114,16 +114,17 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
     private static final Pattern allLower = Pattern.compile("[^A-Z]*?[a-z]+[^A-Z]*?");
     private static final Pattern allUpper = Pattern.compile("[^a-z]*?[A-Z]+[^a-z]*?");
     private static final Pattern startUpper = Pattern.compile("[A-Z].*");
+    // TODO: add classes for iPod, O'Bryant, l'Aviron, E-Group ?
 
     @Override
     public List<CoreLabel> apply(String line) {
-      List<CoreLabel> doc = new ArrayList<>();
       int pos = 0;
 
       //line = line.replaceAll(" +"," ");
       //log.info("pichuan: processing line = "+line);
 
       String[] toks = line.split(" ");
+      List<CoreLabel> doc = new ArrayList<>(toks.length);
       for (String word : toks) {
         CoreLabel wi = new CoreLabel();
         Matcher lowerMatcher = allLower.matcher(word);
@@ -159,7 +160,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
         }
 
         wi.setWord(word.toLowerCase());
-        wi.set(CoreAnnotations.PositionAnnotation.class, String.valueOf(pos));
+        wi.set(CoreAnnotations.PositionAnnotation.class, String.valueOf(pos).intern());
         doc.add(wi);
         pos++;
       }
