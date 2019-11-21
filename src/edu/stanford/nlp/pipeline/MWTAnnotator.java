@@ -154,10 +154,8 @@ public class MWTAnnotator implements Annotator {
             newToken.setValue(word);
             newToken.setOriginalText(word);
             newToken.setIsNewline(false);
-            if (token.keySet().contains(CoreAnnotations.ParentAnnotation.class)) {
-              newToken.set(CoreAnnotations.ParentAnnotation.class,
-                  token.get(CoreAnnotations.ParentAnnotation.class));
-            }
+            newToken.set(CoreAnnotations.ParentAnnotation.class,
+                token.get(CoreAnnotations.ParentAnnotation.class));
             newToken.set(CoreAnnotations.TokenBeginAnnotation.class, finalDocumentTokens.size());
             newToken.set(CoreAnnotations.TokenEndAnnotation.class, finalDocumentTokens.size() + 1);
             // the char offsets, before, and after should match the original token

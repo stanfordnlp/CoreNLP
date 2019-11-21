@@ -1,5 +1,6 @@
 package edu.stanford.nlp.process;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** This class contains various static utility methods invoked by our JFlex NL lexers.
@@ -29,8 +30,6 @@ public class LexerUtils {
   public enum QuotesEnum { UNICODE, LATEX, ASCII, NOT_CP1252, ORIGINAL }
 
   public enum EllipsesEnum { UNICODE, PTB3, NOT_CP1252, ORIGINAL }
-
-  public enum DashesEnum { UNICODE, PTB3, NOT_CP1252, ORIGINAL }
 
 
   /** Change precomposed fraction characters to spelled out letter forms.
@@ -262,32 +261,16 @@ public class LexerUtils {
     }
   }
 
-  public static String handleDashes(final String tok, DashesEnum dashesStyle) {
-    switch (dashesStyle) {
-      case UNICODE:
-        if ("-".equals(tok) || "\u0096".equals(tok) || "&ndash;".equals(tok)) { // hyphen-minus OR cp1252 en dash
-          return "–"; // en dash
-        } else {
-          return "—"; // em dash
-        }
-      case PTB3:
-        if ("-".equals(tok)) {
-          return "-"; // keep an ASCII hyphen-minus as hyphen-minus
-        } else {
-          return "--"; // two hyphen-minus ascii dashes
-        }
-      case NOT_CP1252:
-        if (tok.equals("\u0096")) {
-          return "–"; // en dash
-        } else if (tok.equals("\u0097")) {
-          return "—"; // em dash
-        } else {
-          return tok;
-        }
-      case ORIGINAL:
-      default:
-        return tok;
-    }
+  /** @return index of pattern in s or -1, if not found. */
+  public static int indexOfRegex(Pattern pattern, String s) {
+    Matcher matcher = pattern.matcher(s);
+    return matcher.find() ? matcher.start() : -1;
+  }
+
+  /** @return index of pattern in s or -1, if not found, starting from index. */
+  public static int indexOfRegex(Pattern pattern, String s, int index) {
+    Matcher matcher = pattern.matcher(s);
+    return matcher.find(index) ? matcher.start() : -1;
   }
 
 }

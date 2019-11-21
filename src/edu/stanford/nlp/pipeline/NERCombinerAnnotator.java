@@ -17,7 +17,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Function;
 
 
 /**
@@ -54,10 +53,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   private final boolean applyNumericClassifiers;
   private LanguageInfo.HumanLanguage language = LanguageInfo.HumanLanguage.ENGLISH;
 
-  /**
-   * Apply NER-specific tokenization before running NER modules (e.g. merge together tokens split by hyphen)
-   */
-  private boolean useNERSpecificTokenization = true;
+  /** Optional token processor to run before and after classification **/
+  private CoreLabelProcessor tokenProcessor;
+  private boolean processTokens = false;
 
   private static final String spanishNumberRegexRules =
       "edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_number_sp.tag";
@@ -139,8 +137,18 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this.language =
         LanguageInfo.getLanguageFromString(PropertiesUtils.getString(properties, "ner.language", "en"));
 
-    // set whether or not to apply NER-specific tokenization (e.g. merge tokens separated by hyphens)
-    useNERSpecificTokenization = PropertiesUtils.getBool(properties, "ner.useNERSpecificTokenization", true);
+    // processor for modifying tokenization before submission to CRFClassifier
+    // the German properties file specifies this, to allow for merging on hyphens
+    // any NER pipeline could customize how tokenization is changed for the statistical model
+    String tokenProcessorClass = properties.getProperty("ner.tokenProcessor", "");
+    try {
+      if (!tokenProcessorClass.equals("")) {
+        tokenProcessor = ReflectionLoading.loadByReflection(tokenProcessorClass);
+        processTokens = true;
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Loading: "+tokenProcessorClass+" failed with: "+e.getMessage());
+    }
 
     // in case of Spanish, use the Spanish number regexner annotator
     if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
@@ -313,201 +321,78 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     return maxTime;
   }
 
-  /** Check that after() is not null and the empty string **/
-  public static Function<CoreLabel, Boolean> afterIsEmpty = tok ->
-      tok.containsKey(CoreAnnotations.AfterAnnotation.class) && tok.after().equals("");
-
-
-  /**
-   * Helper method for creating NER-specific tokenization
-   **/
-  public static void mergeTokens(CoreLabel token, CoreLabel nextToken) {
-    // NOTE: right now the merged tokens get the part-of-speech tag of the first token
-    token.setWord(token.word() + nextToken.word());
-    token.setAfter(nextToken.after());
-    token.setEndPosition(nextToken.endPosition());
-    token.setValue(token.word()+"-"+token.sentIndex());
-  }
-
-
-  /**
-   * Create a copy of an Annotation with NER specific tokenization (e.g. merge hyphen split tokens into one token)
-   * @param originalAnnotation
-   * @return Annotation with NER specific tokenization
-   */
-  public static Annotation annotationWithNERTokenization(Annotation originalAnnotation) {
-    Annotation copyAnnotation = new Annotation();
-    // set document text
-    copyAnnotation.set(CoreAnnotations.TextAnnotation.class, originalAnnotation.get(CoreAnnotations.TextAnnotation.class));
-    // create new sentences with NER-specific tokenization
-    copyAnnotation.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
-    for (CoreMap sentence : originalAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-      List<CoreLabel> originalTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      List<CoreLabel> copyTokens = new ArrayList<CoreLabel>();
-      for (CoreLabel currToken : originalTokens) {
-        CoreLabel processedToken = new CoreLabel(currToken);
-        CoreLabel lastProcessedToken =
-            copyTokens.size() > 0 ? copyTokens.get(copyTokens.size() - 1) : null;
-        if (lastProcessedToken != null && afterIsEmpty.apply(lastProcessedToken) && currToken.word().equals("-")) {
-          mergeTokens(lastProcessedToken, currToken);
-        } else if (lastProcessedToken != null && lastProcessedToken.word().endsWith("-") &&
-            afterIsEmpty.apply(lastProcessedToken)) {
-          mergeTokens(lastProcessedToken, currToken);
-        } else {
-          copyTokens.add(processedToken);
-        }
-      }
-      Annotation copySentence = new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class));
-      copySentence.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-          sentence.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-      copySentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
-          sentence.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-      copySentence.set(CoreAnnotations.SentenceIndexAnnotation.class,
-          sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
-      copySentence.set(CoreAnnotations.TokensAnnotation.class, copyTokens);
-      copyAnnotation.get(CoreAnnotations.SentencesAnnotation.class).add(copySentence);
-    }
-    copyAnnotation.set(CoreAnnotations.TokensAnnotation.class, new ArrayList<>());
-    int globalTokenIndex = 0;
-    for (CoreMap sentence : copyAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-      for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-        token.set(CoreAnnotations.TokenBeginAnnotation.class, globalTokenIndex);
-        token.set(CoreAnnotations.TokenEndAnnotation.class, globalTokenIndex+1);
-        copyAnnotation.get(CoreAnnotations.TokensAnnotation.class).add(token);
-        globalTokenIndex++;
-      }
-      sentence.set(CoreAnnotations.TokenBeginAnnotation.class,
-          sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).get(CoreAnnotations.TokenBeginAnnotation.class));
-      sentence.set(CoreAnnotations.TokenEndAnnotation.class,
-          sentence.get(CoreAnnotations.TokensAnnotation.class).get(sentence.get(
-              CoreAnnotations.TokensAnnotation.class).size()-1).get(CoreAnnotations.TokenEndAnnotation.class));
-    }
-    return copyAnnotation;
-  }
-
-  /**
-   * Copy NER annotations from the NER-tokenized annotation.  nerTokenizedAnnotation should have the same text
-   * as originalAnnotation,
-   * @param nerTokenizedAnnotation
-   * @param originalAnnotation
-   */
-
-  public static void transferNERAnnotationsToAnnotation(Annotation nerTokenizedAnnotation, Annotation originalAnnotation) {
-    int nerTokenizedIdx = 0;
-    int originalIdx = 0;
-    CoreLabel nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);
-    while (originalIdx < originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).size()) {
-      CoreLabel origToken = originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(originalIdx);
-      if (origToken.endPosition() > nerTokenizedToken.endPosition()) {
-        nerTokenizedIdx++;
-        nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);
-      }
-      // set NER
-      if (nerTokenizedToken.get(CoreAnnotations.NamedEntityTagAnnotation.class) != null)
-        origToken.setNER(nerTokenizedToken.ner());
-      // set Normalized NER
-      if (nerTokenizedToken.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) != null)
-        origToken.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
-          nerTokenizedToken.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
-      // set NER probabilities
-      if (nerTokenizedToken.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class) != null)
-        origToken.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class,
-            nerTokenizedToken.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class));
-      // set fine grained
-      if (nerTokenizedToken.get(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class) != null)
-        origToken.set(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class,
-            nerTokenizedToken.get(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class));
-      // set coarse
-      if (nerTokenizedToken.get(CoreAnnotations.CoarseNamedEntityTagAnnotation.class) != null)
-        origToken.set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class,
-            nerTokenizedToken.get(CoreAnnotations.CoarseNamedEntityTagAnnotation.class));
-      // set timex
-      if (nerTokenizedToken.get(TimeAnnotations.TimexAnnotation.class) != null)
-        origToken.set(TimeAnnotations.TimexAnnotation.class,
-            nerTokenizedToken.get(TimeAnnotations.TimexAnnotation.class));
-      // move on to next original token
-      originalIdx++;
-    }
-  }
-
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
       log.info("Adding NER Combiner annotation ... ");
     }
 
-    // potentially make a copy of the annotation with NER-specific tokenization
-    Annotation nerAnnotation;
-    if (useNERSpecificTokenization)
-      nerAnnotation = annotationWithNERTokenization(annotation);
-    else
-      nerAnnotation = annotation;
-
     // set the doc date if using a doc date annotator
     if (setDocDate)
-      docDateAnnotator.annotate(nerAnnotation);
+      docDateAnnotator.annotate(annotation);
 
-    super.annotate(nerAnnotation);
-    this.ner.finalizeAnnotation(nerAnnotation);
+    super.annotate(annotation);
+    this.ner.finalizeAnnotation(annotation);
 
     if (VERBOSE) {
       log.info("done.");
     }
     // if Spanish, run the regexner with Spanish number rules
     if (LanguageInfo.HumanLanguage.SPANISH.equals(language) && this.applyNumericClassifiers)
-      spanishNumberAnnotator.annotate(nerAnnotation);
-
+      spanishNumberAnnotator.annotate(annotation);
     // perform safety clean up
     // MONEY and NUMBER ner tagged items should not have Timex values
-    for (CoreLabel token : nerAnnotation.get(CoreAnnotations.TokensAnnotation.class)) {
+    for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
       if (token.ner().equals("MONEY") || token.ner().equals("NUMBER"))
         token.remove(TimeAnnotations.TimexAnnotation.class);
     }
-
     // if fine grained ner is requested, run that
     if (!statisticalOnly && (this.applyFineGrained || this.applyAdditionalRules || this.applyTokensRegexRules)) {
       // run the fine grained NER
       if (this.applyFineGrained)
-        fineGrainedNERAnnotator.annotate(nerAnnotation);
+        fineGrainedNERAnnotator.annotate(annotation);
       // run the custom rules specified
       if (this.applyAdditionalRules)
-        additionalRulesNERAnnotator.annotate(nerAnnotation);
+        additionalRulesNERAnnotator.annotate(annotation);
       // run tokens regex
       if (this.applyTokensRegexRules)
-        tokensRegexAnnotator.annotate(nerAnnotation);
+        tokensRegexAnnotator.annotate(annotation);
       // set the FineGrainedNamedEntityTagAnnotation.class
-      for (CoreLabel token : nerAnnotation.get(CoreAnnotations.TokensAnnotation.class)) {
+      for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
         String fineGrainedTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
         token.set(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class, fineGrainedTag);
       }
     }
 
     // set confidence for anything not already set to n.e. tag, -1.0
-    for (CoreLabel token : nerAnnotation.get(CoreAnnotations.TokensAnnotation.class)) {
+    for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
       if (token.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class) == null) {
         Map<String,Double> labelToProb = Collections.singletonMap(token.ner(), -1.0);
         token.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, labelToProb);
       }
     }
 
-    // transfer annotations from NER-tokenized Annotation to the actual Annotation
-    if (useNERSpecificTokenization)
-      transferNERAnnotationsToAnnotation(nerAnnotation, annotation);
-
     // if entity mentions should be built, run that
     if (this.buildEntityMentions) {
       entityMentionsAnnotator.annotate(annotation);
     }
-
   }
 
   @Override
   public void doOneSentence(Annotation annotation, CoreMap sentence) {
-    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> originalTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> classifierInputTokens;
+    // do any pre-classification token processing
+    // example: merge words with hyphens for German NER to match German NER training data
+    //          this will improve German NER performance
+    if (processTokens)
+      classifierInputTokens = tokenProcessor.process(originalTokens);
+    else
+      classifierInputTokens = originalTokens;
     List<CoreLabel> output; // only used if try assignment works.
-    if (tokens.size() <= this.maxSentenceLength) {
+    if (classifierInputTokens.size() <= this.maxSentenceLength) {
       try {
-        output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
+        output = this.ner.classifySentenceWithGlobalInformation(classifierInputTokens, annotation, sentence);
       } catch (RuntimeInterruptedException e) {
         // If we get interrupted, set the NER labels to the background
         // symbol if they are not already set, then exit.
@@ -519,22 +404,26 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (output == null) {
       doOneFailedSentence(annotation, sentence);
     } else {
-      for (int i = 0, sz = tokens.size(); i < sz; ++i) {
+      if (processTokens)
+        // restore tokens to match original tokenization scheme before processing
+        // example: split words with hyphens for German NER to match CoNLL 2018 standard
+        output = tokenProcessor.restore(originalTokens, output);
+      for (int i = 0, sz = originalTokens.size(); i < sz; ++i) {
         // add the named entity tag to each token
         String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
         String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
         Map<String,Double> neTagProbMap = output.get(i).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
-        tokens.get(i).setNER(neTag);
-        tokens.get(i).set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, neTagProbMap);
-        tokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
-        if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
-        NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
+        originalTokens.get(i).setNER(neTag);
+        originalTokens.get(i).set(CoreAnnotations.NamedEntityTagProbsAnnotation.class, neTagProbMap);
+        originalTokens.get(i).set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class, neTag);
+        if (normNeTag != null) originalTokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
+        NumberSequenceClassifier.transferAnnotations(output.get(i), originalTokens.get(i));
       }
 
       if (VERBOSE) {
         boolean first = true;
         StringBuilder sb = new StringBuilder("NERCombinerAnnotator output: [");
-        for (CoreLabel w : tokens) {
+        for (CoreLabel w : originalTokens) {
           if (first) {
             first = false;
           } else {

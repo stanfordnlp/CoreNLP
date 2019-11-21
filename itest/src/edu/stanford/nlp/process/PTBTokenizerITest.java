@@ -24,7 +24,7 @@ public class PTBTokenizerITest extends TestCase {
   private static void compareResults(BufferedReader testReader,
                              List<String> goldResults) {
     PTBTokenizer<CoreLabel> tokenizer =
-            new PTBTokenizer<>(testReader, new CoreLabelTokenFactory(), "ptb3Escaping=true");
+            new PTBTokenizer<>(testReader, new CoreLabelTokenFactory(), "");
     List<String> testResults = new ArrayList<>();
     while (tokenizer.hasNext()) {
       CoreLabel w = tokenizer.next();

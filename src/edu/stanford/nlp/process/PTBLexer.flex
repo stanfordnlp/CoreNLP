@@ -162,20 +162,22 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeOtherBrackets = val;
         quoteStyle = val ? LexerUtils.QuotesEnum.LATEX : LexerUtils.QuotesEnum.ORIGINAL;
         ellipsisStyle = val ? LexerUtils.EllipsesEnum.PTB3 : LexerUtils.EllipsesEnum.ORIGINAL;
-        dashesStyle = val ? LexerUtils.DashesEnum.PTB3 : LexerUtils.DashesEnum.ORIGINAL;
+        ptb3Dashes = val;
         splitHyphenated = ! val;
         splitForwardSlash = ! val;
       } else if ("ud".equals(key)) {
-        normalizeSpace = val;
-        normalizeAmpersandEntity = val;
-        normalizeFractions = val;
-        normalizeParentheses = ! val;
-        normalizeOtherBrackets = ! val;
-        quoteStyle = val ? LexerUtils.QuotesEnum.NOT_CP1252 : LexerUtils.QuotesEnum.ORIGINAL;
-        ellipsisStyle = val ? LexerUtils.EllipsesEnum.NOT_CP1252 : LexerUtils.EllipsesEnum.ORIGINAL;
-        dashesStyle = val ? LexerUtils.DashesEnum.NOT_CP1252: LexerUtils.DashesEnum.ORIGINAL;
-        splitHyphenated=val;
-        splitForwardSlash=val;
+        // todo: should we deal with value? But may be null.
+        invertible = true; // this helps for straight quote sentence splitting
+        normalizeSpace = true;
+        normalizeAmpersandEntity = true;
+        normalizeFractions = true;
+        normalizeParentheses = false;
+        normalizeOtherBrackets = false;
+        quoteStyle = LexerUtils.QuotesEnum.NOT_CP1252;
+        ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
+        ptb3Dashes = false;
+        splitHyphenated=true;
+        splitForwardSlash=true;
       } else if ("americanize".equals(key)) {
         americanize = val;
       } else if ("normalizeSpace".equals(key)) {
@@ -208,12 +210,8 @@ import edu.stanford.nlp.util.logging.Redwood;
         } catch (IllegalArgumentException iae) {
           throw new IllegalArgumentException ("Not a valid ellipses style: " + value);
         }
-      } else if ("dashes".equals(key)) {
-        try {
-          dashesStyle = LexerUtils.DashesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException iae) {
-          throw new IllegalArgumentException ("Not a valid dashes style: " + value);
-        }
+      } else if ("ptb3Dashes".equals(key)) {
+        ptb3Dashes = val;
       } else if ("escapeForwardSlashAsterisk".equals(key)) {
         escapeForwardSlashAsterisk = val;
       } else if ("untokenizable".equals(key)) {
@@ -278,7 +276,7 @@ import edu.stanford.nlp.util.logging.Redwood;
    * This is like "new LDC treebank" tokenization except that we do not escape parentheses except on
    * s-expression tree input/output.
    */
-  private boolean invertible = true;
+  private boolean invertible;
   private boolean tokenizeNLs;
   private boolean tokenizePerLine;
   private boolean americanize = false;
@@ -290,7 +288,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean normalizeOtherBrackets = false;
   private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.NOT_CP1252;
   private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
-  private LexerUtils.DashesEnum dashesStyle = LexerUtils.DashesEnum.NOT_CP1252;
+  private boolean ptb3Dashes = false;
   private boolean escapeForwardSlashAsterisk = false; // this is true in Penn Treebank 3 but we don't do it now
   private boolean strictTreebank3 = false;
   private boolean splitAssimilations = true;
@@ -359,7 +357,7 @@ import edu.stanford.nlp.util.logging.Redwood;
       p = FORWARD_SLASH;
     }
     if (p != null) {
-      int firstHyphen = StringUtils.indexOfRegex(p, in);
+      int firstHyphen = LexerUtils.indexOfRegex(p, in);
       if (firstHyphen > 0) {
         yypushback(in.length() - firstHyphen);
       }
@@ -673,7 +671,7 @@ TWITTER_NAME = [@\uFF20]([A-Za-z_][a-zA-Z_0-9]*|50cent)
 TWITTER_HASHTAG = [#\uFF03]{LETTER}({LETTER}|{DIGIT}|_)*({LETTER}|{DIGIT})
 TWITTER = {TWITTER_NAME}|{TWITTER_HASHTAG}
 
-ISO8601DATETIME = [0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[x0-9]{2}:[0-9]{2}Z?)?
+ISO8601DATETIME = [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[x0-9]{2}:[0-9]{2}Z?
 DEGREES = °[CF]
 
 /* --- This block becomes ABBREV1 and is usually followed by lower case words. --- */
@@ -717,8 +715,7 @@ ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K
 ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 /* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. St[ae] does Saint, Santa, suite, etc. */
 /* "Rt." occurs both in "Rt. Rev." (capitalized following) and in abbreviation at end of Hungarian company (lower follows). */
-/* Added "Amb" for Ambassador. Don't have "Ambs" as occurs as family name. */
-ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Rt|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc|Amb
+ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Rt|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
 /* Exhs?. is used for law case exhibits. ass't = assistant */
 ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz|Exhs?|ass't
 
@@ -753,8 +750,9 @@ PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{1,4}[\- \u00A0])?[0-9]{2,4}[\- 
 FAKEDUCKFEET = <<|>>
 LESSTHAN = <|&lt;
 GREATERTHAN = >|&gt;
-HYPHEN = [-\u058A\u2010\u2011]
-HYPHENS = {HYPHEN}+
+COREHYPHEN = [-\u058A\u2010\u2011]
+HYPHEN = {COREHYPHEN}|\-
+HYPHENS = {COREHYPHEN}+
 LDOTS = \.\.\.+|[\u0085\u2026]
 SPACEDLDOTS = \.[ \u00A0](\.[ \u00A0])+\.
 ATS = @+
@@ -853,10 +851,12 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {SGML2} to recognize " + origTxt + " as " + txt); }
                           return getNext(txt, origTxt);
                         }
-{SPMDASH}               { final String origTxt = yytext();
-                          String tok = LexerUtils.handleDashes(origTxt, dashesStyle);
-                          if (DEBUG) { logger.info("Used {SPMDASH} to recognize " + origTxt + " as " + tok); }
-                          return getNext(tok, origTxt);
+{SPMDASH}               { // todo: extract handleDash method
+                          if (ptb3Dashes) {
+                            return getNext(ptbmdash, yytext()); }
+                          else {
+                            return getNext();
+                          }
                         }
 {SPAMP}                 { final String origTxt = yytext();
                           String tok;
@@ -1070,7 +1070,6 @@ RM/{NUM}        { String txt = yytext();
 {ACRO}/{SPACENL}        { return getNext(); }
 {TBSPEC2}/{SPACENL}     { return getNext(); }
 {ISO8601DATETIME}       { return getNext(); }
-//{ISO8601DATE}           { return getNext(); }
 {DEGREES}               { return getNext(); }
 <YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<()])      { return getNext(); }
 <YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<()])      { return getNext(); }
@@ -1164,15 +1163,12 @@ RM/{NUM}        { String txt = yytext();
                     return getNext();
                   }
                 }
-{HYPHENS}       { final String origTxt = yytext();
-                  String tok = origTxt;
-                  if (yylength() <= 4) {
-                     tok = LexerUtils.handleDashes(origTxt, dashesStyle);
+{HYPHENS}       { if (yylength() >= 3 && yylength() <= 4 && ptb3Dashes) {
+                    return getNext(ptbmdash, yytext());
+                  } else {
+                    return getNext();
                   }
-                  if (DEBUG) { logger.info("Used {SPMDASH} to recognize " + origTxt + " as " + tok); }
-                  return getNext(tok, origTxt);
                 }
-
 <YyNotTokenizePerLine>{LDOTS}/\.{SPACENLS}[:letter:]    {
                   /* attempt to treat fourth ellipsis as period if followed by space and letter. */
                   String tok = yytext();

@@ -16,8 +16,6 @@ public class LogPrior implements Serializable {
 
   public enum LogPriorType { NULL, QUADRATIC, HUBER, QUARTIC, COSH, ADAPT, MULTIPLE_QUADRATIC }
 
-  private static final double LOG2 = Math.log(2);
-  
   public static LogPriorType getType(String name) {
     if (name.equalsIgnoreCase("null")) { return LogPriorType.NULL; }
     else if (name.equalsIgnoreCase("quadratic")) { return LogPriorType.QUADRATIC; }
@@ -300,7 +298,7 @@ public class LogPrior implements Serializable {
         double norm = ArrayMath.norm_1(x) / sigmaSq;
         double d;
         if (norm > 30.0) {
-          val = norm - LOG2;
+          val = norm - Math.log(2);
           d = 1.0 / sigmaSq;
         } else {
           val = Math.log(Math.cosh(norm));

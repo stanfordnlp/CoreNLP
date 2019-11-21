@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,7 +24,7 @@ import edu.stanford.nlp.util.StringUtils;
  * One specific use of this is to output the sentiment treebank
  * as a bunch of lines with no tree structure.  This is useful
  * for then building a phrase/sentence classifier using that
- * dataset.  See scripts/sentiment/convert_sentiment.sh
+ * dataset.
  *
  * @author John Bauer
  */
@@ -39,17 +38,10 @@ public class OutputSubtrees {
   @ArgumentParser.Option(name="ignore_labels", gloss="Labels to ignore as a WS-separated list.", required=false)
   private static String IGNORE_LABELS; // = null;
 
-  @ArgumentParser.Option(name="remap_labels", gloss="Remap labels: for sentiment, for example, write '1=0,2=-1,3=1,4=1' to make it binary.  Remapping , or = currently not supported.", required=false)
-  private static String REMAP_LABELS; // = null;
-
-  @ArgumentParser.Option(name="assert_binary", gloss="Barf on non-binary trees", required=false)
-  private static boolean ASSERT_BINARY = false;  
-
   public static void main(String[] args) {
     // Parse the arguments
     Properties props = StringUtils.argsToProperties(args, new HashMap<String, Integer>() {{
           put("ignore_labels", 1);
-          put("remap_labels", 1);
         }});
     ArgumentParser.fillOptions(new Class[]{ArgumentParser.class, OutputSubtrees.class}, props);
 
@@ -61,22 +53,9 @@ public class OutputSubtrees {
       ignored = Collections.emptySet();
     }
 
-    Map<String, String> remap;
-    if (REMAP_LABELS != null) {
-      remap = StringUtils.mapStringToMap(REMAP_LABELS);
-      System.err.println("Remapping labels as follows: " + remap);
-    } else {
-      remap = Collections.emptyMap();
-    }
-
     MemoryTreebank treebank = new MemoryTreebank("utf-8");
     treebank.loadPath(INPUT, null);
-    int treeNum = 0;
     for (Tree tree : treebank) {
-      ++treeNum;
-      if (ASSERT_BINARY && !tree.isBinary()) {
-        throw new RuntimeException("Tree " + treeNum + " is not properly binary");
-      }
       //System.out.println(tree);
       //System.out.println("--------------");
       Iterable<Tree> subtrees = (ROOT_ONLY) ? Collections.singletonList(tree) : tree;
@@ -90,9 +69,6 @@ public class OutputSubtrees {
         String text = SentenceUtils.listToString(labels);
         if (ignored.contains(value)) {
           continue;
-        }
-        if (remap.containsKey(value)) {
-          value = remap.get(value);
         }
 
         System.out.println(value + "   " + text);

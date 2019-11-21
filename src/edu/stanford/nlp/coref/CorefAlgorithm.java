@@ -5,13 +5,14 @@ import java.util.Properties;
 import edu.stanford.nlp.coref.CorefProperties.CorefAlgorithmType;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
+import edu.stanford.nlp.coref.fastneural.FastNeuralCorefAlgorithm;
 import edu.stanford.nlp.coref.hybrid.HybridCorefSystem;
 import edu.stanford.nlp.coref.neural.NeuralCorefAlgorithm;
 import edu.stanford.nlp.coref.statistical.ClusteringCorefAlgorithm;
 import edu.stanford.nlp.coref.statistical.StatisticalCorefAlgorithm;
 
 /**
- * A CorefAlgorithms makes coreference decisions on the provided {@link Document} after
+ * A CorefAlgorithms make coreference decisions on the provided {@link Document} after
  * mention detection has been performed.
  *
  * @author Kevin Clark
@@ -28,6 +29,8 @@ public interface CorefAlgorithm {
       return new StatisticalCorefAlgorithm(props, dictionaries);
     } else if (algorithm == CorefAlgorithmType.NEURAL) {
       return new NeuralCorefAlgorithm(props, dictionaries);
+    } else if (algorithm == CorefAlgorithmType.FASTNEURAL) {
+      return new FastNeuralCorefAlgorithm(props, dictionaries);
     } else {
       try {
         return new HybridCorefSystem(props, dictionaries);

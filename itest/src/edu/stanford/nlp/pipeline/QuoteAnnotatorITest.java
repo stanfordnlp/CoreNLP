@@ -386,7 +386,7 @@ public class QuoteAnnotatorITest extends TestCase {
         " 'I am the second paragraph.\n\n" +
         "'I am the second to last.\n\n" +
         "'see there's more here.'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertInnerAnnotationValues(quotes.get(0), 0, 0, 3, 3, 28);
+    assertInnerAnnotationValues(quotes.get(0), 0, 0, 2, 3, 28);
   }
 
   public void testMultiLineQuoteDouble() {

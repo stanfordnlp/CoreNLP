@@ -80,9 +80,9 @@ public class CRFFeatureExporter<IN extends CoreMap>  {
       sb.append(delimiter);
       sb.append(token.get(CoreAnnotations.AnswerAnnotation.class));
 
-      CRFDatum<Collection<String>,CRFLabel> d = classifier.makeDatum(document, j, classifier.featureFactories);
+      CRFDatum<List<String>,CRFLabel> d = classifier.makeDatum(document, j, classifier.featureFactories);
 
-      List<Collection<String>> features = d.asFeatures();
+      List<List<String>> features = d.asFeatures();
       for (Collection<String> cliqueFeatures : features) {
         List<String> sortedFeatures = new ArrayList<>(cliqueFeatures);
         Collections.sort(sortedFeatures);

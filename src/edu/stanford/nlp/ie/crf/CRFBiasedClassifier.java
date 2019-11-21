@@ -57,19 +57,23 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
   public CRFBiasedClassifier(SeqClassifierFlags flags) {super(flags); }
 
   @Override
-  public CRFDatum<Collection<String>, CRFLabel> makeDatum(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories) {
+  public CRFDatum<List<String>, CRFLabel> makeDatum(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories) {
 
     pad.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
     PaddedList<IN> pInfo = new PaddedList<>(info, pad);
 
-    List<Collection<String>> features = new ArrayList<>();
+    List<List<String>> features = new ArrayList<>();
+    Collection<Clique> done = Generics.newHashSet();
     for (int i = 0; i < windowSize; i++) {
       List<String> featuresC = new ArrayList<>();
-      FeatureFactory.eachClique(i, 0, c -> {
+      List<Clique> windowCliques = FeatureFactory.getCliques(i, 0);
+      windowCliques.removeAll(done);
+      done.addAll(windowCliques);
+      for (Clique c : windowCliques) {
         for (FeatureFactory<IN> featureFactory : featureFactories) {
           featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c));
         }
-      });
+      }
       if (testTime && i==0) {
         // this feature is only present at test time and only appears
         // in cliques of size 1 (i.e., cliques with window=0)

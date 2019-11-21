@@ -226,31 +226,23 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
 
   private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
 
-  /** At present this only tries to avoid adding a straight single/double quote to a sentence when it doesn't plausibly
-   *  go there and should go with the next sentence.  It does this by checking for odd number of that quote type.
+  /** At present this only tries to avoid adding a straight quote to a sentence when it doesn't plausibly
+   *  go there and should go with the next sentence.
    *
    *  @param lastSentence The last sentence to which you might want to add the word
-   *  @return Whether it's plausible to add because there was an open quote
+   *  @return Where it's plausible to add because there was an open quote
    */
   private boolean plausibleToAdd(List<IN> lastSentence, String word) {
-    if (!word.equals("\"") && !word.equals("\'")) {
+    if ( ! word.equals("\"")) {
       return true;
     }
-    int singleQuoteCount = 0;
-    int doubleQuoteCount = 0;
     for (IN lastWord : lastSentence) {
       String lastStr = ((Label) lastWord).value();
-      if (lastStr.equals("\'"))
-        singleQuoteCount += 1;
-      if (lastStr.equals("\""))
-        doubleQuoteCount += 1;
+      if (asciiDoubleQuote.matcher(lastStr).matches()) {
+        return true;
+      }
     }
-    if (word.equals("\"") && (doubleQuoteCount % 2 != 0))
-      return true;
-    else if (word.equals("\'") && (singleQuoteCount % 2 != 0))
-      return true;
-    else
-      return false;
+    return false;
   }
 
   /**

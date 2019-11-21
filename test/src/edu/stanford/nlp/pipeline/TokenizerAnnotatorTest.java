@@ -91,7 +91,6 @@ public class TokenizerAnnotatorTest extends TestCase {
         "anti-disestablishmentariansm for breakfast at the o-kay choral infront of some explor-o-toriums.";
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize");
-    props.setProperty("tokenize.options", "ptb3Escaping=true");
     Annotation ann = new Annotation(test);
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(ann);
@@ -119,7 +118,7 @@ public class TokenizerAnnotatorTest extends TestCase {
     String newWords4 = "We won 13-2 . It went public in mid-1983 . He was prime minister 1983-1989 and / or an 11-year-old man .";
 
 
-    Properties props = PropertiesUtils.asProperties("annotators", "tokenize", "tokenize.options", "ptb3Escaping=true");
+    Properties props = PropertiesUtils.asProperties("annotators", "tokenize");
     Annotation ann = new Annotation(test);
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(ann);

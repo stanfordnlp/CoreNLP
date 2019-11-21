@@ -271,14 +271,4 @@ public class StringUtilsTest {
     Assert.assertEquals("\\\\\\\"here\\u0000goes\\b\\u000B", StringUtils.escapeJsonString("\\\"here\u0000goes\b\u000B"));
   }
 
-  private static final Pattern p = Pattern.compile("foo[dl]");
-  private static final Pattern HYPHENS_DASHES = Pattern.compile("[-\u2010-\u2015]");
-
-  @Test
-  public void testIndexOfRegex() {
-    Assert.assertEquals(10, StringUtils.indexOfRegex(p, "Fred is a fool for food"));
-    Assert.assertEquals(2, StringUtils.indexOfRegex(HYPHENS_DASHES, "18-11"));
-    Assert.assertEquals(5, StringUtils.indexOfRegex(HYPHENS_DASHES, "Asian-American"));
-  }
-
 }

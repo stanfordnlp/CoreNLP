@@ -73,14 +73,15 @@ public class CRFDatum<FEAT,LAB> implements Serializable {
    */
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(10000).append("CRFDatum[\n") //
-    .append("    label=").append(label).append('\n');
+    StringBuilder sb = new StringBuilder("CRFDatum[\n");
+    sb.append("    label=").append(label).append('\n');
     for (int i = 0, sz = features.size(); i < sz; i++) {
-      sb.append("    features(").append(i).append("):").append(features.get(i)) //
-      .append(", val=").append(Arrays.toString(featureVals.get(i))) //
-      .append('\n');
+      sb.append("    features(").append(i).append("):").append(features.get(i));
+      sb.append(", val=").append(Arrays.toString(featureVals.get(i)));
+      sb.append('\n');
     }
-    return sb.append(']').toString();
+    sb.append(']');
+    return sb.toString();
   }
 
 
@@ -95,8 +96,12 @@ public class CRFDatum<FEAT,LAB> implements Serializable {
    */
   @Override
   public boolean equals(Object o) {
-	// FIXME: what about labels, featureVals?
-    return o instanceof Datum && features.equals(((Datum<?, ?>) o).asFeatures());
+    if (!(o instanceof Datum)) {
+      return (false);
+    }
+
+    Datum<?, ?> d = (Datum<?, ?>) o;
+    return features.equals(d.asFeatures());
   }
 
   @Override
