@@ -54,8 +54,8 @@ public class SentenceTest {
   @Test
   public void testWeirdTokens() {
     Sentence sent = new Sentence("United States of America (USA) it's a country.");
-    assertEquals("-LRB-", sent.word(4));
-    assertEquals("-RRB-", sent.word(6));
+    assertEquals("(", sent.word(4));
+    assertEquals(")", sent.word(6));
     assertEquals("'s", sent.word(8));
   }
 

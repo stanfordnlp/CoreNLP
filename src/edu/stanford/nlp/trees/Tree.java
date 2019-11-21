@@ -157,6 +157,23 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return !(kids == null || kids.length == 0 || (kids.length == 1 && kids[0].isLeaf()));
   }
 
+  /**
+   * Returns whether this node is the root of a possibly binary tree.
+   * This happens if the tree and all of its descendants are either
+   * nodes with exactly two children, or are preterminals or leaves.
+   */
+  public boolean isBinary() {
+    if (isLeaf() || isPreTerminal()) {
+      return true;
+    }
+
+    Tree[] kids = children();
+    if (kids.length != 2) {
+      return false;
+    }
+
+    return (kids[0].isBinary() && kids[1].isBinary());
+  }
 
   /**
    * Implements equality for Tree's.  Two Tree objects are equal if they

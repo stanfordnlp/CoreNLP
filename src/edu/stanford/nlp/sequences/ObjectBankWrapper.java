@@ -118,7 +118,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     int position = 0;
     for (IN fl : doc) {
       // position in document
-      fl.set(CoreAnnotations.PositionAnnotation.class, Integer.toString((position++)));
+      fl.set(CoreAnnotations.PositionAnnotation.class, Integer.toString((position++)).intern());
 
       // word shape
       if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) && ! flags.useShapeStrings) {
@@ -129,7 +129,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
           word = flags.wordFunction.apply(word);
         }
         if ( ! word.isEmpty() && Character.isLowerCase(word.codePointAt(0))) {
-          knownLCWords.add(word);
+          knownLCWords.add(intern(word));
         }
 
         String s = intern(WordShapeClassifier.wordShape(word, flags.wordShape, knownLCWords));

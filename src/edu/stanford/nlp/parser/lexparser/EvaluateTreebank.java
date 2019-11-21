@@ -107,6 +107,9 @@ public class EvaluateTreebank  {
    */
   protected final Function<List<? extends HasWord>, List<TaggedWord>> tagger;
 
+  /** we will multiply by this constant instead of divide by log(2) */
+  private static final double LN_TO_LOG2 = 1. / Math.log(2);
+
   public EvaluateTreebank(LexicalizedParser parser) {
     this(parser.getOp(), parser.lex, parser);
   }
@@ -391,7 +394,7 @@ public class EvaluateTreebank  {
           double denom = ArrayMath.logSum(logScores);
           for (double logScore : logScores) {
             double logPr = logScore - denom;
-            entropy += Math.exp(logPr) * (logPr / Math.log(2));
+            entropy += Math.exp(logPr) * logPr * LN_TO_LOG2;
           }
           entropy *= -1; //Convert to bits
           pwStats.printf("%f\t%d\t%d\n", entropy,trees.size(),sentence.size());

@@ -245,16 +245,16 @@ public class CRFClassifierITest {
                   { "  \"anaesthetic  Smith is\"  ",
                           "  \"/Oanaesthetic/O  Smith/PERSON is/O\"/O  ",
                           "  \"anaesthetic  <PERSON>Smith</PERSON> is\"  ",
-                          "<wi num=\"0\" entity=\"O\">&dquot;</wi>\n" +
+                          "<wi num=\"0\" entity=\"O\">&quot;</wi>\n" +
                                   "<wi num=\"1\" entity=\"O\">anaesthetic</wi>\n" +
                                   "<wi num=\"2\" entity=\"PERSON\">Smith</wi>\n" +
                                   "<wi num=\"3\" entity=\"O\">is</wi>\n" +
-                                  "<wi num=\"4\" entity=\"O\">&dquot;</wi>\n",
-                          "  <wi num=\"0\" entity=\"O\">``</wi>" +
+                                  "<wi num=\"4\" entity=\"O\">&quot;</wi>\n",
+                          "  <wi num=\"0\" entity=\"O\">&quot;</wi>" +
                                   "<wi num=\"1\" entity=\"O\">anaesthetic</wi>  " +
                                   "<wi num=\"2\" entity=\"PERSON\">Smith</wi> " +
                                   "<wi num=\"3\" entity=\"O\">is</wi>" +
-                                  "<wi num=\"4\" entity=\"O\">&apos;&apos;</wi>  ",
+                                  "<wi num=\"4\" entity=\"O\">&quot;</wi>  ",
                           "\"/O anaesthetic/O Smith/PERSON is/O \"/O \n",
                           "\" anaesthetic <PERSON>Smith</PERSON> is \" \n",
 

@@ -92,7 +92,7 @@ public class SGDToQNMinimizer implements Minimizer<DiffFunction>, Serializable  
 
     double[] x = sgd.minimize(dfunction, functionTolerance, initial, this.SGDPasses);
 
-    QNMinimizer.QNInfo qnInfo = qn.new QNInfo(sgd.sList , sgd.yList);
+    QNMinimizer.QNInfo qnInfo = qn.newQNInfo(sgd.sList , sgd.yList);
     qnInfo.d = sgd.diag;
 
     qn.minimize(dfunction, functionTolerance, x, this.QNPasses, qnInfo);

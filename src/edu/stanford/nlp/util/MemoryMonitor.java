@@ -68,7 +68,25 @@ public class MemoryMonitor  {
     if (accurate) {
       System.gc();
     }
+    return getUsedMemoryStatic(r);
+  }
+
+  public static int getUsedMemoryStatic() {
+    return getUsedMemoryStatic(Runtime.getRuntime());
+  }
+
+  public static int getUsedMemoryStatic(Runtime r) {
     return (int) ((r.totalMemory() - r.freeMemory()) / 1024);
+  }
+
+  public static String getUsedMemoryString() {
+    int usedK = getUsedMemoryStatic();
+    if (usedK < 1024) {
+      return String.valueOf(usedK) + "k";
+    } else {
+      int usedM = usedK / 1024;
+      return String.valueOf(usedM) + "m";
+    }
   }
 
   public int getSystemFreeMemory(boolean accurate) {

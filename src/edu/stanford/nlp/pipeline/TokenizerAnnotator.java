@@ -42,7 +42,7 @@ public class TokenizerAnnotator implements Annotator  {
     Arabic     ("ar", null, ""),
     Chinese    ("zh", null, ""),
     Spanish    ("es", "SpanishTokenizer", "invertible,splitAll=false"),
-    English    ("en", "PTBTokenizer", "invertible,ptb3Escaping=true"),
+    English    ("en", "PTBTokenizer", "invertible"),
     German     ("de", null, "invertible,ptb3Escaping=false,splitHyphenated=true"),
     French     ("fr", "FrenchTokenizer", "invertible,splitCompounds=false,splitContractions=false,quotes=ORIGINAL"),
     Whitespace (null, "WhitespaceTokenizer", "");
@@ -241,6 +241,9 @@ public class TokenizerAnnotator implements Annotator  {
     VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
     TokenizerType type = TokenizerType.getTokenizerType(props);
     factory = initFactory(type, props, options);
+    if (VERBOSE) {
+      log.info("Initialized tokenizer factory: " + factory);
+    }
   }
 
   /**
@@ -350,6 +353,10 @@ public class TokenizerAnnotator implements Annotator  {
    */
   @Override
   public void annotate(Annotation annotation) {
+    if (VERBOSE) {
+      log.info("Beginning tokenization");
+    }
+
     // for Arabic and Chinese use a segmenter instead
     if (useSegmenter) {
       segmenterAnnotator.annotate(annotation);

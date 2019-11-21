@@ -45,9 +45,9 @@ public class EntityMentionsAnnotator implements Annotator {
    */
   private final boolean doAcronyms;
 
-  private boolean matchTokenText = false;
+  private static final boolean matchTokenText = false;
 
-  private LanguageInfo.HumanLanguage entityMentionsLanguage;
+  private final LanguageInfo.HumanLanguage entityMentionsLanguage;
 
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
@@ -67,6 +67,7 @@ public class EntityMentionsAnnotator implements Annotator {
     // defaults
     chunkIdentifier = new LabeledChunkIdentifier();
     doAcronyms = false;
+    entityMentionsLanguage = LanguageInfo.getLanguageFromString("en");
   }
 
   // note: used in annotate.properties
