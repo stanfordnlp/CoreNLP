@@ -470,6 +470,31 @@ public class StringUtils  {
   }
 
   /**
+   * Split the text into pieces based on newlines.  Include the newline tokens in the pieces.
+   *
+   * @param s String to splits
+   */
+  public static List<String> splitLinesKeepNewlines(String s) {
+    List<String> pieces = StringUtils.splitKeepDelimiter(s, "\\R");
+
+    // The delimeter regex trick seems to split \r \n into two
+    // separate matches.  We want to treat them as the same newline
+    List<String> newPieces = new ArrayList<>();
+    for (int i = 0; i < pieces.size(); ++i) {
+      if (i < pieces.size() - 1 &&
+          pieces.get(i).equals("\r") &&
+          pieces.get(i + 1).equals("\n")) {
+        newPieces.add("\r\n");
+        i = i + 1;
+      } else {
+        newPieces.add(pieces.get(i));
+      }
+    }
+
+    return newPieces;
+  }
+  
+  /**
    * Splits the given string using the given regex as delimiters.
    * This method is the same as the String.split() method (except it throws
    * the results in a List),

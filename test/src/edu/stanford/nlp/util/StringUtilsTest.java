@@ -306,4 +306,13 @@ public class StringUtilsTest {
     Assert.assertEquals(Arrays.asList("asdf", "\n", "\n", "sdf"), StringUtils.splitKeepDelimiter("asdf\n\nsdf", "\\R"));
     Assert.assertEquals(Arrays.asList("\n", "asdf", "\n", "sdf"), StringUtils.splitKeepDelimiter("\nasdf\nsdf", "\\R"));
   }
+
+  @Test
+  public void testSplitLinesKeepNewlines() {
+    Assert.assertEquals(Arrays.asList("asdf", "\n", "sdf"), StringUtils.splitLinesKeepNewlines("asdf\nsdf"));
+    Assert.assertEquals(Arrays.asList("asdf", "\n", "sdf", "\n"), StringUtils.splitLinesKeepNewlines("asdf\nsdf\n"));
+    Assert.assertEquals(Arrays.asList("asdf", "\r\n", "sdf", "\n"), StringUtils.splitLinesKeepNewlines("asdf\r\nsdf\n"));
+    Assert.assertEquals(Arrays.asList("asdf", "\r\n", "sdf", "\r\n", "\r\n"), StringUtils.splitLinesKeepNewlines("asdf\r\nsdf\r\n\r\n"));
+  }
+  
 }
