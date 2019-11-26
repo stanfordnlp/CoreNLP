@@ -1,5 +1,6 @@
 package edu.stanford.nlp.coref.neural;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,7 +20,8 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
  * Extracts word-embedding features from mentions.
  * @author Kevin Clark
  */
-public class EmbeddingExtractor {
+public class EmbeddingExtractor implements Serializable {
+  private static final long serialVersionUID = -663338564691488202L;
   private final boolean conll;
   private final Embedding staticWordEmbeddings;
   private final Embedding tunedWordEmbeddings;
@@ -44,6 +46,18 @@ public class EmbeddingExtractor {
       }
     }
     return getAverageEmbedding(words);
+  }
+
+  public SimpleMatrix getMentionEmbeddingsForFast(Mention m) {
+    return NeuralUtils.concatenate(
+        getWordEmbedding(m.sentenceWords, m.headIndex),
+        getWordEmbedding(m.sentenceWords, m.startIndex),
+        getWordEmbedding(m.sentenceWords, m.endIndex - 1),
+        getWordEmbedding(m.sentenceWords, m.startIndex - 1),
+        getWordEmbedding(m.sentenceWords, m.endIndex),
+        getWordEmbedding(m.sentenceWords, m.startIndex - 2),
+        getWordEmbedding(m.sentenceWords, m.endIndex + 1)
+    );
   }
 
   public SimpleMatrix getMentionEmbeddings(Mention m, SimpleMatrix docEmbedding) {
@@ -87,6 +101,9 @@ public class EmbeddingExtractor {
 
   public SimpleMatrix getWordEmbedding(String word) {
     word = normalizeWord(word);
+    if (staticWordEmbeddings == null) {
+      return tunedWordEmbeddings.get(word);
+    }
     return tunedWordEmbeddings.containsWord(word) ? tunedWordEmbeddings.get(word) :
       staticWordEmbeddings.get(word);
   }
