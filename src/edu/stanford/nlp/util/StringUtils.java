@@ -444,6 +444,9 @@ public class StringUtils  {
 
   /**
    * Splits on whitespace (\\s+).
+   * <br>
+   * Note that this follows Java split style, meaning leading spaces
+   * will result in an empty string and trailing spaces will be cut off.
    * @param s String to split
    * @return List<String> of split strings
    */

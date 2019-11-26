@@ -20,10 +20,9 @@ public class CorefProperties {
 
   //---------- Coreference Algorithms ----------
 
-  public enum CorefAlgorithmType {CLUSTERING, STATISTICAL, NEURAL, FASTNEURAL, HYBRID}
+  public enum CorefAlgorithmType {CLUSTERING, STATISTICAL, NEURAL, HYBRID}
 
   public static CorefAlgorithmType algorithm(Properties props) {
-    // TODO: change default to "fastneural"
     String type = PropertiesUtils.getString(props, "coref.algorithm",
         getLanguage(props) == Locale.ENGLISH ? "statistical" : "neural");
     return CorefAlgorithmType.valueOf(type.toUpperCase());
@@ -45,8 +44,7 @@ public class CorefProperties {
 
   public static boolean useConstituencyParse(Properties props) {
     return PropertiesUtils.getBool(props, "coref.useConstituencyParse",
-        (algorithm(props) != CorefAlgorithmType.STATISTICAL &&
-        algorithm(props) != CorefAlgorithmType.FASTNEURAL)|| conll(props));
+        algorithm(props) != CorefAlgorithmType.STATISTICAL || conll(props));
   }
 
   public static boolean verbose(Properties props) {
@@ -174,6 +172,7 @@ public class CorefProperties {
   private static String getLanguageStr(Properties props) {
     return getLanguage(props).getDisplayName().toLowerCase();
   }
+
 
   public static HeadFinder getHeadFinder(Properties props) {
     Locale lang = getLanguage(props);

@@ -281,4 +281,20 @@ public class StringUtilsTest {
     Assert.assertEquals(5, StringUtils.indexOfRegex(HYPHENS_DASHES, "Asian-American"));
   }
 
+  @Test
+  public void testSplit() {
+    Assert.assertEquals(Arrays.asList("1", "2"), StringUtils.split("1 2"));
+    Assert.assertEquals(Arrays.asList("1"), StringUtils.split("1"));
+    Assert.assertEquals(Arrays.asList("1", "2", "3"), StringUtils.split("1 2 3"));
+    Assert.assertEquals(Arrays.asList("1", "2", "3"), StringUtils.split("1     2     3"));
+    // java split semantics cut off the trailing entities for split(..., 0)
+    Assert.assertEquals(Arrays.asList("", "1", "2", "3"), StringUtils.split("   1     2     3   "));
+  }
+
+  @Test
+  public void testSplitRegex() {
+    Assert.assertEquals(Arrays.asList("a", "dfa"), StringUtils.split("asdfa", "s"));
+    // java split semantics cut off the trailing entities for split(..., 0)
+    Assert.assertEquals(Arrays.asList("", "sdf"), StringUtils.split("asdfa", "a"));
+  }
 }
