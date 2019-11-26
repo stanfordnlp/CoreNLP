@@ -466,7 +466,7 @@ public class StringUtils  {
    * @return List<String> of split strings
    */
   public static List<String> splitKeepDelimiter(String s, String separator) {
-    return split(s, String.format("((?<=(%1$s))|(?=(%1$s)))", separator));
+    return split(s, String.format("((?<=(?:%1$s))|(?=(?:%1$s)))", separator));
   }
 
   /**
