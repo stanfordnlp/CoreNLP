@@ -453,6 +453,21 @@ public class StringUtils  {
   public static List<String> split(String s) {
     return split(s, "\\s+");
   }
+  
+  /**
+   * Splits on the given delimiter and returns the delimiters as well.
+   * <br>
+   * For expressions where the expression appears inside itself this may not work.
+   * <br>
+   * See http://stackoverflow.com/a/2206432
+   *
+   * @param s String to split
+   * @param separator Delimiter to use for splitting
+   * @return List<String> of split strings
+   */
+  public static List<String> splitKeepDelimiter(String s, String separator) {
+    return split(s, String.format("((?<=(%1$s))|(?=(%1$s)))", separator));
+  }
 
   /**
    * Splits the given string using the given regex as delimiters.

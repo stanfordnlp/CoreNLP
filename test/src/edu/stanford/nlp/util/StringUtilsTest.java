@@ -297,4 +297,13 @@ public class StringUtilsTest {
     // java split semantics cut off the trailing entities for split(..., 0)
     Assert.assertEquals(Arrays.asList("", "sdf"), StringUtils.split("asdfa", "a"));
   }
+
+  @Test
+  public void testSplitKeepDelimiter() {
+    Assert.assertEquals(Arrays.asList("a", "s", "dfa"), StringUtils.splitKeepDelimiter("asdfa", "s"));
+    // java split semantics cut off the trailing entities for split(..., 0)
+    Assert.assertEquals(Arrays.asList("asdf", "\n", "sdf"), StringUtils.splitKeepDelimiter("asdf\nsdf", "\\R"));
+    Assert.assertEquals(Arrays.asList("asdf", "\n", "\n", "sdf"), StringUtils.splitKeepDelimiter("asdf\n\nsdf", "\\R"));
+    Assert.assertEquals(Arrays.asList("\n", "asdf", "\n", "sdf"), StringUtils.splitKeepDelimiter("\nasdf\nsdf", "\\R"));
+  }
 }
