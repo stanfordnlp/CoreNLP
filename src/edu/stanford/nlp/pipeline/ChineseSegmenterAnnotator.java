@@ -44,7 +44,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   private static final String DEFAULT_SIGHAN_CORPORA_DICT =
           "/u/nlp/data/chinese-segmenter/stanford-seg-2010/releasedata/";
 
-  private static final String separator = "(?:\r|\r?\n|" + System.lineSeparator() + ')';
+  private static final String separator = "\\R";
   private static final Pattern separatorPattern = Pattern.compile(separator);
 
 
@@ -324,8 +324,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       }
 
       // Run the segmenter on each line so that we don't get tokens that cross line boundaries
-      // Neat trick to keep delimiters from: http://stackoverflow.com/a/2206432
-      String[] lines = text.split(String.format("((?<=%1$s)|(?=%1$s))", separator));
+      List<String> lines = StringUtils.splitLinesKeepNewlines(text);
 
       words = new ArrayList<>();
       for (String line : lines) {
