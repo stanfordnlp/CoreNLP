@@ -37,6 +37,9 @@ public class ParserAnnotatorITest extends TestCase {
   private static AnnotationPipeline threaded3Pipeline = null;
   private static AnnotationPipeline threaded4Pipeline = null;
 
+  /** this one will flatten all the trees */
+  private static AnnotationPipeline flatPipeline = null;
+
   public void setUp() throws Exception {
     synchronized(ParserAnnotatorITest.class) {
       if (pipeline != null)
@@ -80,6 +83,11 @@ public class ParserAnnotatorITest extends TestCase {
 
       props.setProperty("parse.nthreads", "3");
       threaded3Pipeline = new StanfordCoreNLP(props);
+
+      props = new Properties();
+      props.setProperty("parse.maxheight", "1");      
+      props.setProperty("annotators", "tokenize, ssplit, parse");
+      flatPipeline = new StanfordCoreNLP(props);
     }
   }
 
@@ -202,6 +210,16 @@ public class ParserAnnotatorITest extends TestCase {
   }
 
 
+  /**
+   * Tests that if you get parses which are too tall, the annotator flattens them
+   */
+  public void testFlatten() {
+    Annotation document = new Annotation(TEXT);
+    flatPipeline.annotate(document);
+    verifyAnswers(document, TAGGED_XPARSES);
+  }
+
+
   private void assertParseOK(ParserAnnotator parser) {
     AnnotationPipeline pipeline = new AnnotationPipeline();
     pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
@@ -259,6 +277,12 @@ public class ParserAnnotatorITest extends TestCase {
       "(ROOT (S (NP (NP (NNP Jack) (POS 's)) (NN father)) (VP (VBZ has) (RB n't) (VP (VBN played) (NP (NN golf)) (PP (IN since) (ADVP (NP (CD 20) (NNS years)) (RB ago))))) (. .)))",
 
       "(ROOT (S (NP (PRP I)) (VP (VBP 'm) (VP (VBG going) (PP (TO to) (NP (DT the) (NN bookstore))) (S (VP (TO to) (VP (VB return) (NP (NP (DT a) (NN book)) (SBAR (S (NP (NP (NNP Jack)) (CC and) (NP (PRP$ his) (NNS friends))) (VP (VBD bought) (NP (PRP me))))))))))) (. .)))"
+  };
+
+  static final String[] TAGGED_XPARSES = {
+    "(X (PRP I) (VBD saw) (PRP him) (VBG ordering) (PRP them) (TO to) (NN saw) (. .))",
+    "(X (NNP Jack) (POS 's) (NN father) (VBZ has) (RB n't) (VBN played) (NN golf) (IN since) (CD 20) (NNS years) (RB ago) (. .))",
+    "(X (PRP I) (VBP 'm) (VBG going) (TO to) (DT the) (NN bookstore) (TO to) (VB return) (DT a) (NN book) (NNP Jack) (CC and) (PRP$ his) (NNS friends) (VBD bought) (PRP me) (. .))"
   };
 
   static final String[] XPARSES = {

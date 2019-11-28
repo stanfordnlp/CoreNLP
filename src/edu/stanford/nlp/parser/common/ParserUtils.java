@@ -4,11 +4,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.TreeFactory;
 
 
@@ -43,6 +45,17 @@ public class ParserUtils {
     }
     return treeFactory.newTreeNode("X", lst2);
   }
+
+  /**
+   * Turn any trees which are taller than maxHeight into x trees
+   */
+  public static List<Tree> flattenTallTrees(int maxHeight, List<Tree> trees) {
+    if (maxHeight <= 0) {
+      return trees;
+    }
+    return trees.stream().map(tree -> (Trees.height(tree) > maxHeight) ? xTree(tree.taggedYield()) : tree).collect(Collectors.toList());
+  }
+
 
   public static void printOutOfMemory(PrintWriter pw) {
     pw.println();
