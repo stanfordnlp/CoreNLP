@@ -311,7 +311,8 @@ LATINPUNC = [\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u
 PUNC = ({ARPUNC}|{LATINPUNC})+
 DIGIT = [:digit:]|[\u0660-\u0669\u06F0-\u06F9]
 DIGITS = {DIGIT}+
-NUMBER = ({DIGITS}[_\-,\+/\\\.\u066B\u066C\u060C\u060D]*)+
+/* If a number ends with +, ., etc, chop that off instead of keeping it. */
+NUMBER = {DIGITS}([_\-,\+/\\\.\u066B\u066C\u060C\u060D]+{DIGITS}+)*
 
 /* Sometimes _ is used for tatweel \u0640, so include it in this set */
 ARCHAR = [_\u060E-\u061A\u0621-\u065E\u066E-\u06D3\u06D5-\u06EF\u06FA-\u06FF]
@@ -348,7 +349,6 @@ PAREN = -LRB-|-RRB-
 {EMAIL}     |
 {ARNUMWORD} |
 {NUMBER}    |
-{DIGITS}    |
 {PUNC}      { return getNext(false); }
 
 {NULLPRONSEG}  { if (removeProMarker) {
