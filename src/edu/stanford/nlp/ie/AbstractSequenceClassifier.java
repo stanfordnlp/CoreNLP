@@ -683,7 +683,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     stringPrintWriter.close();
     String segmented = stringWriter.toString();
 
-    return Arrays.asList(segmented.split("\\s"));
+    if (segmented.length() == 0) {
+      return Collections.emptyList();
+    } else {
+      return Arrays.asList(segmented.split("\\s"));
+    }
   }
 
   /*
