@@ -633,6 +633,7 @@ public class SemgrexTest extends TestCase {
       word.setLemma(word.word());
     }
     runTest("{lemma:ate}", graph, "ate");
+    runTest("{lemma:Bill}", graph, "Bill");
 
     Tree tree = Tree.valueOf("(ROOT (S (NP (PRP I)) (VP (VBP love) (NP (DT the) (NN display))) (. .)))");
     graph = SemanticGraphFactory.generateCCProcessedDependencies(tree);
@@ -682,6 +683,60 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  public void testAttributeConjunction() {
+    // A possible user submitted error: https://github.com/stanfordnlp/CoreNLP/issues/552
+    // A match with both POS and word labeled should have both attributes on the same node
+    String pattern = "{$} > {pos:JJS;word:most}";
+    // check that the compiled pattern is the same as the input pattern    
+    comparePatternToString(pattern);
+    SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+
+    // root is "foo", has 3 children with various relations
+    SemanticGraph graph = SemanticGraph.valueOf("[foo obj> most subj> bar dep> asdf]");
+    // with no POS, should have no matches
+    runTest(semgrex, graph);
+    // index 1 is "most".  should match at the root
+    graph.getNodeByIndex(1).setTag("JJS");
+    runTest(semgrex, graph, "foo");
+    // sanity check: should stop matching with the child set differently
+    graph.getNodeByIndex(1).setTag("NN");
+    runTest(semgrex, graph);
+    // 1st word "most", 2nd word "_JJS".  Should not match
+    graph.getNodeByIndex(2).setTag("JJS");
+    runTest(semgrex, graph);
+    // should now match at the root, as the second word is now "most_JJS"
+    graph.getNodeByIndex(2).setWord("most");
+    runTest(semgrex, graph, "foo");
+  }
+
+  public void testNegatedAttribute() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
+    runTest("{word:/^(?!Bill).*$/}", graph,
+            "ate", "muffins", "blueberry");
+    graph.getNodeByIndex(0).setTag("NN");
+    graph.getNodeByIndex(1).setTag("NN");
+    graph.getNodeByIndex(2).setTag("JJS");
+    graph.getNodeByIndex(3).setTag("NN");
+
+    // find the JJS
+    runTest("{pos:JJS}", graph,
+            "muffins/JJS");
+    // find any JJS with the text "muffins"
+    runTest("{pos:JJS;word:muffins}", graph,
+            "muffins/JJS");
+    // find any JJS which is not "Bill"
+    runTest("{pos:JJS;word:/^(?!Bill).*$/}", graph,
+            "muffins/JJS");
+    // find any JJS which is not "muffins": should be empty
+    runTest("{pos:JJS;word:/^(?!muffins).*$/}", graph);      
+    // find any not NN which is "muffins"
+    runTest("{pos:/^(?!NN).*$/;word:muffins}", graph,
+            "muffins/JJS");
+    // find any not JJS which is not "Bill"
+    runTest("{pos:/^(?!JJS).*$/;word:/^(?!Bill).*$/}", graph,
+            "ate/NN", "blueberry/NN");
+  }
+  
   public static void outputResults(String pattern, String graph,
                                    String ... ignored) {
     outputResults(SemgrexPattern.compile(pattern),
@@ -720,6 +775,7 @@ public class SemgrexTest extends TestCase {
     }
   }
 
+  /** Verify that the semgrex pattern gets compiled without being changed */
   public static void comparePatternToString(String pattern) {
     SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
     String tostring = semgrex.toString();
