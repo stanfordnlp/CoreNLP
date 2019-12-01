@@ -709,6 +709,7 @@ public class SemgrexTest extends TestCase {
     runTest(semgrex, graph, "foo");
   }
 
+  /** Test some variations on negated attributes using negative lookahead regex */
   public void testNegatedAttribute() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     runTest("{word:/^(?!Bill).*$/}", graph,
