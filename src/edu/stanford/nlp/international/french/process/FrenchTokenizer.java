@@ -201,8 +201,6 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * A factory for French tokenizer instances.
    *
    * @author Spence Green
-   *
-   * @param <T>
    */
   public static class FrenchTokenizerFactory<T extends HasWord> implements TokenizerFactory<T>, Serializable  {
 
