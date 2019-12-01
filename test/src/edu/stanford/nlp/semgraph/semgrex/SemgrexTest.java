@@ -737,6 +737,23 @@ public class SemgrexTest extends TestCase {
     runTest("{pos:/^(?!JJS).*$/;word:/^(?!Bill).*$/}", graph,
             "ate/NN", "blueberry/NN");
   }
+
+  public void testTwoWordConstraints() {
+    // Another part of issue 552:
+    // "{$} > { word:She; word:hello }"
+    // it shouldn't find anything because of conflicting constraints
+    // originally it did because the attributes were stored in a map,
+    // which meant word:hello clobbered word:She
+    // We fix this issue by making such a state throw an exception.
+    SemanticGraph graph = SemanticGraph.valueOf("[said subj>She obj>hello]");
+    String pattern = "{$} > {word:She;word:hello}";
+    try {
+      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+      throw new RuntimeException("This was supposed to fail horribly");
+    } catch (SemgrexParseException e) {
+      // yay
+    }
+  }
   
   public static void outputResults(String pattern, String graph,
                                    String ... ignored) {
