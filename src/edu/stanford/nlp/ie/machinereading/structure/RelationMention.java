@@ -223,7 +223,7 @@ public class RelationMention extends ExtractionObject {
   		}
   		if(newArg != null){
   			newArgs.add(newArg);
-  			logger.info("Replacing relation argument: [" + goldEnt + "] with predicted mention [" + newArg + "]");
+  			logger.fine("Replacing relation argument: [" + goldEnt + "] with predicted mention [" + newArg + "]");
   		} else {
   			/*
   			logger.info("Failed to match relation argument: " + goldEnt);

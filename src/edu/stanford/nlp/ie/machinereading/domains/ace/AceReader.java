@@ -346,7 +346,7 @@ public class AceReader extends GenericDataSetReader  {
       ExtractionObject o = entityMap.get(arg.getId());
       if(o == null){
         logger.severe("READER ERROR: Failed to find event argument with id " + arg.getId());
-        logger.severe("This happens because a few event mentions illegally span multiple sentences. Will ignore this mention.");
+        logger.fine("This happens because a few event mentions illegally span multiple sentences. Will ignore this mention.");
         return null;
       }
       convertedArgs.add(o);
@@ -387,7 +387,7 @@ public class AceReader extends GenericDataSetReader  {
       ExtractionObject o = entityMap.get(arg.getContent().getId());
       if(o == null){
         logger.severe("READER ERROR: Failed to find relation argument with id " + arg.getContent().getId());
-        logger.severe("This happens because a few relation mentions illegally span multiple sentences. Will ignore this mention.");
+        logger.fine("This happens because a few relation mentions illegally span multiple sentences. Will ignore this mention.");
         return null;
       }
       convertedArgs.add(o);
@@ -398,7 +398,7 @@ public class AceReader extends GenericDataSetReader  {
 
     if(argNames.size() != 2 || ! argNames.get(0).equalsIgnoreCase("arg-1") || ! argNames.get(1).equalsIgnoreCase("arg-2")){
       logger.severe("READER ERROR: Invalid succession of arguments in relation mention: " + argNames);
-      logger.severe("ACE relations must have two arguments. Will ignore this mention.");
+      logger.fine("ACE relations must have two arguments. Will ignore this mention.");
       return null;
     }
 
@@ -436,12 +436,12 @@ public class AceReader extends GenericDataSetReader  {
     int extEnd = ext.getTokenEnd() - tokenOffset + 1;
     if (extStart < 0) {
       logger.severe("READER ERROR: Invalid extent start " + extStart + " for entity mention " + entityMention.getId() + " in document " + docId + " in sentence " + sentence);
-      logger.severe("This may happen due to incorrect EOS detection. Adjusting entity extent.");
+      logger.finest("This may happen due to incorrect EOS detection. Adjusting entity extent.");
       extStart = 0;
     }
     if (extEnd > sentence.get(CoreAnnotations.TokensAnnotation.class).size()) {
       logger.severe("READER ERROR: Invalid extent end " + extEnd + " for entity mention " + entityMention.getId() + " in document " + docId + " in sentence " + sentence);
-      logger.severe("This may happen due to incorrect EOS detection. Adjusting entity extent.");
+      logger.finest("This may happen due to incorrect EOS detection. Adjusting entity extent.");
       extEnd = sentence.get(CoreAnnotations.TokensAnnotation.class).size();
     }
 
@@ -449,12 +449,12 @@ public class AceReader extends GenericDataSetReader  {
     int headEnd = head.getTokenEnd() - tokenOffset + 1;
     if (headStart < 0) {
       logger.severe("READER ERROR: Invalid head start " + headStart + " for entity mention " + entityMention.getId() + " in document " + docId + " in sentence " + sentence);
-      logger.severe("This may happen due to incorrect EOS detection. Adjusting entity head span.");
+      logger.finest("This may happen due to incorrect EOS detection. Adjusting entity head span.");
       headStart = 0;
     }
     if(headEnd > sentence.get(CoreAnnotations.TokensAnnotation.class).size()){
       logger.severe("READER ERROR: Invalid head end " + headEnd + " for entity mention " + entityMention.getId() + " in document " + docId + " in sentence " + sentence);
-      logger.severe("This may happen due to incorrect EOS detection. Adjusting entity head span.");
+      logger.finest("This may happen due to incorrect EOS detection. Adjusting entity head span.");
       headEnd = sentence.get(CoreAnnotations.TokensAnnotation.class).size();
     }
 

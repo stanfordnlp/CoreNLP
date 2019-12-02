@@ -393,7 +393,7 @@ public class AceDocument extends AceElement  {
     //
     String trueCasedFileName = prefix + ORIG_EXT + ".truecase";
     if((new File(trueCasedFileName).exists())){
-    	mLog.severe("Using truecased file: " + trueCasedFileName);
+    	mLog.fine("Using truecased file: " + trueCasedFileName);
     	doc.readRawBytes(trueCasedFileName);
     } else {
     	doc.readRawBytes(prefix + ORIG_EXT);
@@ -561,7 +561,7 @@ public class AceDocument extends AceElement  {
     //
     String trueCasedFileName = prefix + ORIG_EXT + ".truecase";
     if((new File(trueCasedFileName).exists())){
-    	mLog.severe("Using truecased file: " + trueCasedFileName);
+    	mLog.fine("Using truecased file: " + trueCasedFileName);
     	doc.readRawBytes(trueCasedFileName);
     } else {
     	doc.readRawBytes(prefix + ORIG_EXT);

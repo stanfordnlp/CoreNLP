@@ -727,7 +727,7 @@ public class Document implements Serializable {
             }
           }
         } else {
-          SieveCoreferenceSystem.logger.warning("Cannot find node in dependency for word " + word);
+          SieveCoreferenceSystem.logger.info("Cannot find node in dependency for word " + word);
         }
       }
     }

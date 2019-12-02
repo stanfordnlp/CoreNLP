@@ -34,7 +34,7 @@ public class JavaUtilLoggingHandler extends OutputHandler {
         break;
       case STDOUT:
       case STDERR:
-        impl.info(line);
+        impl.fine(line);
         break;
       case FORCE:
         throw new IllegalStateException("Should not reach this switch case");

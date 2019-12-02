@@ -125,19 +125,19 @@ public class JavaUtilLoggingAdaptor {
       // topLogger.addHandler(new ConsoleHandler());
       Logger logger = Logger.getLogger(JavaUtilLoggingAdaptor.class.getName());
       topLogger.info("Starting test");
-      logger.log(Level.INFO, "Hello from the class logger");
+      logger.log(Level.FINE, "Hello from the class logger");
 
       Redwood.log("Hello from Redwood!");
       Redwood.rootHandler().addChild(
         RedirectOutputHandler.fromJavaUtilLogging(topLogger));
       Redwood.log("Hello from Redwood -> Java!");
       Redwood.log("Hello from Redwood -> Java again!");
-      logger.log(Level.INFO, "Hello again from the class logger");
+      logger.log(Level.FINE, "Hello again from the class logger");
       Redwood.startTrack("a track");
       Redwood.log("Inside a track");
-      logger.log(Level.INFO, "Hello a third time from the class logger");
+      logger.log(Level.FINE, "Hello a third time from the class logger");
       Redwood.endTrack("a track");
-      logger.log(Level.INFO, "Hello a fourth time from the class logger");
+      logger.log(Level.FINE, "Hello a fourth time from the class logger");
     }
   }
 

@@ -272,7 +272,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
       if (start < 0 || start >= m.originalSpan.size()) {
         SieveCoreferenceSystem.logger.warning("Invalid index for head " + start + "=" + m.headIndex + "-" + m.startIndex
                 + ": originalSpan=[" + StringUtils.joinWords(m.originalSpan, " ") + "], head=" + m.headWord);
-        SieveCoreferenceSystem.logger.warning("Setting head string to entire mention");
+        SieveCoreferenceSystem.logger.fine("Setting head string to entire mention");
         m.headIndex = m.startIndex;
         m.headWord = m.originalSpan.size() > 0 ? m.originalSpan.get(0) : sent.get(m.startIndex);
         m.headString = m.originalSpan.toString();

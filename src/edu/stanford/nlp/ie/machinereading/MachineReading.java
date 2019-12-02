@@ -272,7 +272,7 @@ public class MachineReading  {
         MachineReadingProperties.logger.severe("Reading auxiliary dataset from " + MachineReadingProperties.auxDataPath + "...");
         aux = loadOrMakeSerializedSentences(MachineReadingProperties.auxDataPath, auxReader, new File(
                 MachineReadingProperties.serializedAuxTrainingSentencesPath));
-        MachineReadingProperties.logger.severe("Done reading auxiliary dataset.");
+        MachineReadingProperties.logger.info("Done reading auxiliary dataset.");
       }
     }
 
@@ -355,7 +355,7 @@ public class MachineReading  {
     for (ResultsPrinter rp : printers){
       String msg = rp.printResults(gold, pred);
       retMsg.add(msg);
-      MachineReadingProperties.logger.severe("Overall " + taskName + " results, using printer " + rp.getClass() + ":\n" + msg);
+      MachineReadingProperties.logger.info("Overall " + taskName + " results, using printer " + rp.getClass() + ":\n" + msg);
     }
     return retMsg;
   }

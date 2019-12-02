@@ -227,7 +227,7 @@ public class GenericDataSetReader  {
       headPos = label.get(CoreAnnotations.BeginIndexAnnotation.class);
     } else {
       logger.fine("WARNING: failed to find syntactic head for entity: " + ent + " in tree: " + tree);
-      logger.fine("Fallback strategy: will set head to last token in mention: " + tokens.get(headPos));
+      logger.finest("Fallback strategy: will set head to last token in mention: " + tokens.get(headPos));
     }
     ent.setHeadTokenPosition(headPos);
 
@@ -430,7 +430,7 @@ public class GenericDataSetReader  {
   }
 
   private Tree funkyFindLeafWithApproximateSpan(Tree root, String token, int index, int approximateness) {
-    logger.fine("Looking for " + token + " at pos " + index + " plus upto " + approximateness + " in tree: " + root.pennString());
+    logger.finest("Looking for " + token + " at pos " + index + " plus upto " + approximateness + " in tree: " + root.pennString());
     List<Tree> leaves = root.getLeaves();
     for (Tree leaf : leaves) {
       CoreLabel label = CoreLabel.class.cast(leaf.label());
@@ -444,7 +444,7 @@ public class GenericDataSetReader  {
     // but it does happen (VERY RARELY) on some weird web text that includes SGML tags with spaces
     // TODO: does this mean that somehow tokenization is different for the parser? check this by throwing an Exception in KBP
     logger.severe("GenericDataSetReader: WARNING: Failed to find head token");
-    logger.severe("  when looking for " + token + " at pos " + index + " plus upto " + approximateness + " in tree: " + root.pennString());
+    logger.finest("  when looking for " + token + " at pos " + index + " plus upto " + approximateness + " in tree: " + root.pennString());
     return null;
   }
 

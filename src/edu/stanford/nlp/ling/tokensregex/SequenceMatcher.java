@@ -1132,7 +1132,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
             }
           }
         } else {
-          logger.warning("Cannot set matchEnd=" + end + ": Capture group " + captureGroupId + " is null");
+          logger.info("Cannot set matchEnd=" + end + ": Capture group " + captureGroupId + " is null");
         }
       }
     }

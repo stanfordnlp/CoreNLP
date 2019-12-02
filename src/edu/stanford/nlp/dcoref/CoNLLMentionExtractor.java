@@ -125,7 +125,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
           sentence.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, deps);
         } catch(Exception e) {
-          logger.log(Level.WARNING, "Exception caught during extraction of Stanford dependencies. Will ignore and continue...", e);
+          logger.log(Level.SEVERE, "Exception caught during extraction of Stanford dependencies. Will ignore and continue...", e);
         }
       }
     }

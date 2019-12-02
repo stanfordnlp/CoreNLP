@@ -81,14 +81,14 @@ public abstract class CorefScorer {
     if (printF1First) {
       String str = "F1 = "+F1+", P = "+P+" ("+(int) precisionNumSum+"/"+(int) precisionDenSum+"), R = "+R+" ("+(int) recallNumSum+"/"+(int) recallDenSum+")";
       if(scoreType == ScoreType.Pairwise){
-        logger.fine("Pairwise "+str);
+        logger.finest("Pairwise "+str);
       } else if(scoreType == ScoreType.BCubed){
-        logger.fine("B cubed  "+str);
+        logger.finest("B cubed  "+str);
       } else {
-        logger.fine("MUC      "+str);
+        logger.finest("MUC      "+str);
       }
     } else {
-      logger.fine("& "+PP+" & "+RR + " & "+F1F1);
+      logger.finest("& "+PP+" & "+RR + " & "+F1F1);
     }
   }
 

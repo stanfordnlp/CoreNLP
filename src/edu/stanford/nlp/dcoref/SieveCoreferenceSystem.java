@@ -423,12 +423,12 @@ public class SieveCoreferenceSystem  {
       conllMentionEvalErrFile = conllOutput +"-"+timeStamp+ ".eval.err.txt";
       conllMentionCorefEvalFile = conllOutput +"-"+timeStamp+ ".coref.eval.txt";
       conllMentionCorefEvalErrFile = conllOutput +"-"+timeStamp+ ".coref.eval.err.txt";
-      logger.info("CONLL MENTION GOLD FILE: " + conllOutputMentionGoldFile);
-      logger.info("CONLL MENTION PREDICTED FILE: " + conllOutputMentionPredictedFile);
-      logger.info("CONLL MENTION EVAL FILE: " + conllMentionEvalFile);
+      logger.fine("CONLL MENTION GOLD FILE: " + conllOutputMentionGoldFile);
+      logger.fine("CONLL MENTION PREDICTED FILE: " + conllOutputMentionPredictedFile);
+      logger.fine("CONLL MENTION EVAL FILE: " + conllMentionEvalFile);
       if (!Constants.SKIP_COREF) {
         logger.info("CONLL MENTION PREDICTED WITH COREF FILE: " + conllOutputMentionCorefPredictedFile);
-        logger.info("CONLL MENTION WITH COREF EVAL FILE: " + conllMentionCorefEvalFile);
+        logger.fine("CONLL MENTION WITH COREF EVAL FILE: " + conllMentionCorefEvalFile);
       }
       writerGold = new PrintWriter(new FileOutputStream(conllOutputMentionGoldFile));
       writerPredicted = new PrintWriter(new FileOutputStream(conllOutputMentionPredictedFile));
@@ -502,13 +502,13 @@ public class SieveCoreferenceSystem  {
         //        runConllEval(corefSystem.conllMentionEvalScript, conllOutputMentionGoldFile, conllOutputMentionPredictedFile, conllMentionEvalFile, conllMentionEvalErrFile);
 
         String summary = getConllEvalSummary(corefSystem.conllMentionEvalScript, conllOutputMentionGoldFile, conllOutputMentionPredictedFile);
-        logger.info("\nCONLL EVAL SUMMARY (Before COREF)");
+        logger.fine("\nCONLL EVAL SUMMARY (Before COREF)");
         printScoreSummary(summary, logger, false);
 
         if (!Constants.SKIP_COREF) {
           //          runConllEval(corefSystem.conllMentionEvalScript, conllOutputMentionGoldFile, conllOutputMentionCorefPredictedFile, conllMentionCorefEvalFile, conllMentionCorefEvalErrFile);
           summary = getConllEvalSummary(corefSystem.conllMentionEvalScript, conllOutputMentionGoldFile, conllOutputMentionCorefPredictedFile);
-          logger.info("\nCONLL EVAL SUMMARY (After COREF)");
+          logger.fine("\nCONLL EVAL SUMMARY (After COREF)");
           printScoreSummary(summary, logger, true);
           printFinalConllScore(summary);
           if (corefSystem.optimizeConllScore) {
@@ -561,7 +561,7 @@ public class SieveCoreferenceSystem  {
     String outStr = outSos.toString();
     String errStr = errSos.toString();
     logger.info("Finished distributed coref: " + runDistCmd + ", props=" + propsFile);
-    logger.info("Output: " + outStr);
+    logger.fine("Output: " + outStr);
     if (errStr.length() > 0) {
       logger.info("Error: " + errStr);
     }
@@ -1216,18 +1216,18 @@ public class SieveCoreferenceSystem  {
   }
 
   private void printSieveScore(Document document, DeterministicCorefSieve sieve) {
-    logger.fine("===========================================");
-    logger.fine("pass"+currentSieve+": "+ sieve.flagsToString());
+    logger.finest("===========================================");
+    logger.finest("pass"+currentSieve+": "+ sieve.flagsToString());
     scoreMUC.get(currentSieve).printF1(logger);
     scoreBcubed.get(currentSieve).printF1(logger);
     scorePairwise.get(currentSieve).printF1(logger);
-    logger.fine("# of Clusters: "+document.corefClusters.size() + ",\t# of additional links: "+additionalLinksCount
+    logger.finest("# of Clusters: "+document.corefClusters.size() + ",\t# of additional links: "+additionalLinksCount
         +",\t# of additional correct links: "+additionalCorrectLinksCount
         +",\tprecision of new links: "+1.0*additionalCorrectLinksCount/additionalLinksCount);
-    logger.fine("# of total additional links: "+linksCountInPass.get(currentSieve).second()
+    logger.finest("# of total additional links: "+linksCountInPass.get(currentSieve).second()
         +",\t# of total additional correct links: "+linksCountInPass.get(currentSieve).first()
         +",\taccumulated precision of this pass: "+1.0*linksCountInPass.get(currentSieve).first()/linksCountInPass.get(currentSieve).second());
-    logger.fine("--------------------------------------");
+    logger.finest("--------------------------------------");
   }
   /** Print coref link info */
   private static void printLink(Logger logger, String header, IntTuple src, IntTuple dst, List<List<Mention>> orderedMentionsBySentence) {
@@ -1248,7 +1248,7 @@ public class SieveCoreferenceSystem  {
       sb.append(arg);
       sb.append('\t');
     }
-    logger.fine(sb.toString());
+    logger.finest(sb.toString());
   }
 
   /** print a coref link information including context and parse tree */
@@ -1481,7 +1481,7 @@ public class SieveCoreferenceSystem  {
           sb.append(line).append("\n");
         }
       }
-      logger.info(sb.toString());
+      logger.finest(sb.toString());
     }
   }
   /** Print average F1 of MUC, B^3, CEAF_E */
@@ -1494,7 +1494,7 @@ public class SieveCoreferenceSystem  {
       F1s[i++] = Double.parseDouble(f1Matcher.group(1));
     }
     double finalScore = (F1s[0]+F1s[1]+F1s[3])/3;
-    logger.info("Final conll score ((muc+bcub+ceafe)/3) = " + (new DecimalFormat("#.##")).format(finalScore));
+    logger.fine("Final conll score ((muc+bcub+ceafe)/3) = " + (new DecimalFormat("#.##")).format(finalScore));
   }
 
   private static double getFinalConllScore(String summary, String metricType, String scoreType) {
