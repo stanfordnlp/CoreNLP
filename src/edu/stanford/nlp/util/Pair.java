@@ -259,6 +259,9 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
    * <code>ClassCastException</code>
    * @author jonathanberant
+   *
+   * @param <T1>
+   * @param <T2>
    */
   public static class ByFirstReversePairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
 
@@ -275,6 +278,9 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
    * <code>ClassCastException</code>
    * @author jonathanberant
+   *
+   * @param <T1>
+   * @param <T2>
    */
   public static class BySecondPairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
 
@@ -291,6 +297,9 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
    * <code>ClassCastException</code>
    * @author jonathanberant
+   *
+   * @param <T1>
+   * @param <T2>
    */
   public static class BySecondReversePairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
 

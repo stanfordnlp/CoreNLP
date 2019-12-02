@@ -9,10 +9,6 @@ package edu.stanford.nlp.semgraph.semgrex;
  * @author John Bauer
  */
 public class SemgrexParseException extends RuntimeException {
-  public SemgrexParseException(String message) {
-    super(message);
-  }
-
   public SemgrexParseException(String message, Throwable cause) {
     super(message, cause);
   }

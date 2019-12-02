@@ -151,7 +151,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  * [a-zA-Z]([a-zA-Z0-9_-])* but also may include letters from other alphabets.)
  * If you want to use other symbols, you can do so by using a regular
  * expression instead of a literal string.
- * <br>
  * A disjunctive list of literal strings can be given separated by '|'.
  * The special string '__' (two underscores) can be used to match any
  * node.  (WARNING!!  Use of the '__' node description may seriously
@@ -166,7 +165,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * as in Perl/tgrep, not as {@code matches()};
  * you need to use {@code ^} or {@code $} to constrain matches to
  * the ends of strings.
- * <br>
+ *
  * <b>Chains of relations have a special non-associative semantics:</b>
  * In a chain of relations A op B op C ...,
  * all relations are relative to the first node in
@@ -186,19 +185,19 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code A} if {@code B} follows {@code A} and there
  * is no node {@code C} such that {@code B} follows
  * {@code C} and {@code C} follows {@code A}.
- * <br>
+ *
  * Node {@code A} dominates {@code B} through an unbroken
  * chain of unary local trees only if {@code A} is also
  * unary. {@code (A (B))} is a valid example that matches
  * {@code A <<: B}
- * <br>
+ *
  * When specifying that nodes are dominated via an unbroken chain of
  * nodes matching a description {@code C}, the description
  * {@code C} cannot be a full Tregex expression, but only an
  * expression specifying the name of the node.  Negation of this
  * description is allowed.
- * <br>
- * {@code ==} has the same precedence as the other relations, so the expression
+ *
+ * == has the same precedence as the other relations, so the expression
  * {@code A << B == A << C} associates as
  * {@code (((A << B) == A) << C)}, not as
  * {@code ((A << B) == (A << C))}.  (Both expressions are
@@ -235,18 +234,17 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * As another example, {@code (VP < VV | < NP % NP) }
  * can be written explicitly as {@code (VP [< VV | [< NP & % NP] ] ) }
- * <br>
+ *
  *
  * Relations can be negated with the '!' operator, in which case the
  * expression will match only if there is no node satisfying the relation.
  * For example {@code (NP !< NNP) } matches only NPs not dominating
- * an NNP.  Label descriptions can also be negated with {@code '!'}: 
- * {@code (NP < !NNP|NNS)} matches NPs dominating some node
- * that is not an NNP or an NNS.
- * <br>
+ * an NNP.  Label descriptions can also be negated with '!': (NP < !NNP|NNS) matches
+ * NPs dominating some node that is not an NNP or an NNS.
+
  * Relations can be made optional with the '?' operator.  This way the
- * expression will match even if the optional relation is not satisfied.
- * This is useful when used together with node naming (see below).
+ * expression will match even if the optional relation is not satisfied.  This is useful when used together
+ *  with node naming (see below).
  *
  * <h3>Basic Categories</h3>
  *

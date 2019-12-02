@@ -41,13 +41,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * The root of the graph can be marked by the $ sign, that is {@code {$}}
  * represents the root node.
  * <p>
- * A node description can be negated with '!'. {@code !{lemma:boy}} matches any token that isn't "boy".
- * <br>
- * Another way to negate a node description is with a negative
- * lookahead regex, although this starts to look a little ugly.
- * For example, {@code {lemma:/^{?!boy}.*$/} } will also match any
- * token with a lemma that isn't "boy".  Note, however, that if you
- * use this style, there needs to be some lemma attached to the token.
+ * A node description can be negated with '!'. !{lemma:boy} matches any token that isn't "boy"
  *
  * <h3>Relations</h3>
  *

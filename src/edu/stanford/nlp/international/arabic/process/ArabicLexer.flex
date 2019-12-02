@@ -306,19 +306,12 @@ CR = \r|\r?\n|\u2028|\u2029|\u000B|\u000C|\u0085
 SPACE = [ \t\u00A0\u2000-\u200A\u202F\u3000]
 SPACES = {SPACE}+
 ELLIPSIS = \.\.\.\.*
-ARPUNC = [\u0600-\u060B\u060D\u061B-\u061F\u066A-\u066D\u06D4]
-LATINPUNC = [\u0022-\u002B\u002D\u002F\u003A-\u003E\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u2010-\u2027\u2030-\u205E\u20A0-\u20B5\u2E2E]
+ARPUNC = [\u0600-\u060D\u061B-\u061F\u066A-\u066D\u06D4]
+LATINPUNC = [\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u2010-\u2027\u2030-\u205E\u20A0-\u20B5\u2E2E]
 PUNC = ({ARPUNC}|{LATINPUNC})+
 DIGIT = [:digit:]|[\u0660-\u0669\u06F0-\u06F9]
 DIGITS = {DIGIT}+
-/* If a number ends with +, ., etc, chop that off instead of keeping it. */
-NUMBER = {DIGITS}([_\-,\+/\\\.\u066B\u066C\u060C\u060D]+{DIGITS}+)*
-
-/* Some of these single punctuations get their own token, although note that ... is covered earlier by ELLIPSIS */
-PERIOD = \.
-COMMA = ,|\u060C
-/* !?!?!?!?! */
-EXCLAM = [!?]+
+NUMBER = ({DIGITS}[_\-,\+/\\\.\u066B\u066C\u060C\u060D]*)+
 
 /* Sometimes _ is used for tatweel \u0640, so include it in this set */
 ARCHAR = [_\u060E-\u061A\u0621-\u065E\u066E-\u06D3\u06D5-\u06EF\u06FA-\u06FF]
@@ -355,9 +348,7 @@ PAREN = -LRB-|-RRB-
 {EMAIL}     |
 {ARNUMWORD} |
 {NUMBER}    |
-{PERIOD}    |
-{COMMA}     |
-{EXCLAM}    |
+{DIGITS}    |
 {PUNC}      { return getNext(false); }
 
 {NULLPRONSEG}  { if (removeProMarker) {

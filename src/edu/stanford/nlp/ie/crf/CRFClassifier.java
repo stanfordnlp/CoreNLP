@@ -581,16 +581,15 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // element in data[i][j][k][m] is the index of the mth feature occurring in
     // position k of the jth clique of the ith document
     // int[][][][] data = new int[documentsSize][][][];
-    int numDocs = documents.size();
-    List<int[][][]> data = new ArrayList<>(numDocs);
-    List<double[][][]> featureVal = flags.useEmbedding ? new ArrayList<>(numDocs) : null;
+    List<int[][][]> data = new ArrayList<>();
+    List<double[][][]> featureVal = new ArrayList<>();
 
     // first index is the number of the document
     // second index is the position in the document
     // element in labels[i][j] is the index of the correct label (if it exists)
     // at position j in document i
     // int[][] labels = new int[documentsSize][];
-    List<int[]> labels = new ArrayList<>(numDocs);
+    List<int[]> labels = new ArrayList<>();
 
     int numDatums = 0;
 
@@ -601,10 +600,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       if (flags.useEmbedding)
         featureVal.add(docTriple.third());
       numDatums += doc.size();
-    }
-
-    if (labels.size() != numDocs || data.size() != numDocs) {
-      throw new AssertionError("Inexplicable miscalculation in the size of some arrays");
     }
 
     log.info("numClasses: " + classIndex.size() + ' ' + classIndex);
@@ -635,7 +630,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   public List<Triple<int[][][], int[], double[][][]>> documentsToDataAndLabelsList(Collection<List<IN>> documents) {
     int numDatums = 0;
 
-    List<Triple<int[][][], int[], double[][][]>> docList = new ArrayList<>(documents.size());
+    List<Triple<int[][][], int[], double[][][]>> docList = new ArrayList<>();
     for (List<IN> doc : documents) {
       Triple<int[][][], int[], double[][][]> docTriple = documentToDataAndLabels(doc);
       docList.add(docTriple);
@@ -1559,7 +1554,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     long elapsedMs = timer.stop();
     log.info("Time to convert docs to feature indices: " + Timing.toSecondsString(elapsedMs) + " seconds");
-    log.info("Current memory used: " + MemoryMonitor.getUsedMemoryString());
 
     if (flags.serializeClassIndexTo != null) {
       timer.start();
@@ -1577,7 +1571,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       Triple<int[][][][], int[][], double[][][][]> dataAndLabelsAndFeatureVals = documentsToDataAndLabels(docs);
       elapsedMs = timer.stop();
       log.info("Time to convert docs to data/labels: " + Timing.toSecondsString(elapsedMs) + " seconds");
-      log.info("Current memory used: " + MemoryMonitor.getUsedMemoryString());
 
       Evaluator[] evaluators = null;
       if (flags.evaluateIters > 0 || flags.terminateOnEvalImprovement) {
@@ -1586,10 +1579,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           evaluatorList.add(new MemoryEvaluator());
         if (flags.evaluateTrain) {
           CRFClassifierEvaluator<IN> crfEvaluator = new CRFClassifierEvaluator<>("Train set", this);
+          List<Triple<int[][][], int[], double[][][]>> trainDataAndLabels = new ArrayList<>();
           int[][][][] data = dataAndLabelsAndFeatureVals.first();
           int[][] labels = dataAndLabelsAndFeatureVals.second();
           double[][][][] featureVal = dataAndLabelsAndFeatureVals.third();
-          List<Triple<int[][][], int[], double[][][]>> trainDataAndLabels = new ArrayList<>(data.length);
           for (int j = 0; j < data.length; j++) {
             Triple<int[][][], int[], double[][][]> p = new Triple<>(data[j], labels[j], featureVal[j]);
             trainDataAndLabels.add(p);

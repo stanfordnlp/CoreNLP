@@ -105,16 +105,10 @@ public class NodePattern extends SemgrexPattern  {
 //      }
       descString += (key + ':' + value);
     }
-    if (root) {
-      if (!descString.equals("{"))
-        descString += ";";
+    if (root)
       descString += "$";
-    }
-    if (empty) {
-      if (!descString.equals("{"))
-        descString += ";";
+    else if (empty)
       descString += "#";
-    }
     descString += '}';
 
     this.name = name;
@@ -128,15 +122,9 @@ public class NodePattern extends SemgrexPattern  {
   @SuppressWarnings("unchecked")
   public boolean nodeAttrMatch(IndexedWord node, final SemanticGraph sg, boolean ignoreCase) {
     // System.out.println(node.word());
-    if (isRoot) {
-      // System.out.println("checking root");
-      // if negDesc and we are a root, we can't possibly satisfy the expression, so return false
-      // similarly if !negDesc and we are not a root
-      // otherwise we fall through so any possible node attributes are matched
-      if (negDesc == sg.getRoots().contains(node)) {
-        return false;
-      }
-    }
+    if (isRoot)
+      return (negDesc ? !sg.getRoots().contains(node) : sg.getRoots().contains(node));
+    // System.out.println("not root");
     if (isEmpty)
       return (negDesc ? !node.equals(IndexedWord.NO_WORD) : node.equals(IndexedWord.NO_WORD));
 

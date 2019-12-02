@@ -23,20 +23,7 @@ public class Trees {
 
   private Trees() {}
 
-  /**
-   * Recursively calculate the max height of the given tree
-   */
-  public static int height(Tree t) {
-    if (t.isLeaf()) {
-      return 1;
-    }
-    int maxHeight = 0;
-    for (Tree child : t.children()) {
-      maxHeight = Math.max(maxHeight, height(child));
-    }
-    return maxHeight + 1;
-  }
-  
+
   /**
    * Returns the positional index of the left edge of a tree <i>t</i>
    * within a given root, as defined by the size of the yield of all

@@ -12,8 +12,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 /**
- * Outputs document back into text format, with tags added if available.
- * If tags are not available, they are quietly ignored.
+ * Outputs document back into text format, with verbs and nouns tagged as such (_V or _N) and also lemmatized.
  * Created by michaelf on 7/15/15.
  */
 public class TaggedTextOutputter extends AnnotationOutputter{
@@ -23,7 +22,6 @@ public class TaggedTextOutputter extends AnnotationOutputter{
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
     PrintWriter os = new PrintWriter(IOUtils.encodedOutputStreamWriter(target, options.encoding));
     print(doc, os, options);
-    os.flush();
   }
 
 
@@ -33,17 +31,14 @@ public class TaggedTextOutputter extends AnnotationOutputter{
       for (CoreMap sentence : sentences) {
         StringBuilder sentenceToWrite = new StringBuilder();
         for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-          if (sentenceToWrite.length() > 0) {
-            sentenceToWrite.append(" ");
-          }
-          sentenceToWrite.append(token.value());
-          String tag = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-          if (tag != null) {
-            sentenceToWrite.append("_" + tag);
-          }
+          sentenceToWrite.append(" ");
+          sentenceToWrite.append(token.lemma().toLowerCase());
+          if (token.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("V")) //verb
+            sentenceToWrite.append("_V");
+          else if (token.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("N")) //noun
+            sentenceToWrite.append("_N");
         }
-        pw.print(sentenceToWrite);
-        pw.print(System.lineSeparator());
+        pw.print(sentenceToWrite); //omit first space
       }
     }
   }

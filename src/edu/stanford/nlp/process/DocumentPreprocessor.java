@@ -54,7 +54,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  */
 public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
 
-  // todo [cdm 2017]: This class is used in all our parsers, but we should probably work to move over to WordToSetenceProcessor, which has been used in CoreNLP and has been developed more.
+  // todo [cdm 2017]: This class is used in all our parsers, but we should probably work to move over to WordToSentenceProcessor, which has been used in CoreNLP and has been developed more.
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(DocumentPreprocessor.class);

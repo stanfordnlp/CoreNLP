@@ -633,7 +633,6 @@ public class SemgrexTest extends TestCase {
       word.setLemma(word.word());
     }
     runTest("{lemma:ate}", graph, "ate");
-    runTest("{lemma:Bill}", graph, "Bill");
 
     Tree tree = Tree.valueOf("(ROOT (S (NP (PRP I)) (VP (VBP love) (NP (DT the) (NN display))) (. .)))");
     graph = SemanticGraphFactory.generateCCProcessedDependencies(tree);
@@ -683,115 +682,6 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
-  public void testAttributeConjunction() {
-    // A possible user submitted error: https://github.com/stanfordnlp/CoreNLP/issues/552
-    // A match with both POS and word labeled should have both attributes on the same node
-    String pattern = "{$} > {pos:JJS;word:most}";
-    // check that the compiled pattern is the same as the input pattern    
-    comparePatternToString(pattern);
-    SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-
-    // root is "foo", has 3 children with various relations
-    SemanticGraph graph = SemanticGraph.valueOf("[foo obj> most subj> bar dep> asdf]");
-    // with no POS, should have no matches
-    runTest(semgrex, graph);
-    // index 1 is "most".  should match at the root
-    graph.getNodeByIndex(1).setTag("JJS");
-    runTest(semgrex, graph, "foo");
-    // sanity check: should stop matching with the child set differently
-    graph.getNodeByIndex(1).setTag("NN");
-    runTest(semgrex, graph);
-    // 1st word "most", 2nd word "_JJS".  Should not match
-    graph.getNodeByIndex(2).setTag("JJS");
-    runTest(semgrex, graph);
-    // should now match at the root, as the second word is now "most_JJS"
-    graph.getNodeByIndex(2).setWord("most");
-    runTest(semgrex, graph, "foo");
-  }
-
-  /** Test some variations on negated attributes using negative lookahead regex */
-  public void testNegatedAttribute() {
-    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    runTest("{word:/^(?!Bill).*$/}", graph,
-            "ate", "muffins", "blueberry");
-    graph.getNodeByIndex(0).setTag("NN");
-    graph.getNodeByIndex(1).setTag("NN");
-    graph.getNodeByIndex(2).setTag("JJS");
-    graph.getNodeByIndex(3).setTag("NN");
-
-    // find the JJS
-    runTest("{pos:JJS}", graph,
-            "muffins/JJS");
-    // find any JJS with the text "muffins"
-    runTest("{pos:JJS;word:muffins}", graph,
-            "muffins/JJS");
-    // find any JJS which is not "Bill"
-    runTest("{pos:JJS;word:/^(?!Bill).*$/}", graph,
-            "muffins/JJS");
-    // find any JJS which is not "muffins": should be empty
-    runTest("{pos:JJS;word:/^(?!muffins).*$/}", graph);      
-    // find any not NN which is "muffins"
-    runTest("{pos:/^(?!NN).*$/;word:muffins}", graph,
-            "muffins/JJS");
-    // find any not JJS which is not "Bill"
-    runTest("{pos:/^(?!JJS).*$/;word:/^(?!Bill).*$/}", graph,
-            "ate/NN", "blueberry/NN");
-  }
-
-  public void testTwoWordConstraints() {
-    // Another part of issue 552:
-    // "{$} > { word:She; word:hello }"
-    // it shouldn't find anything because of conflicting constraints
-    // originally it did because the attributes were stored in a map,
-    // which meant word:hello clobbered word:She
-    // We fix this issue by making such a state throw an exception.
-    SemanticGraph graph = SemanticGraph.valueOf("[said subj>She obj>hello]");
-    String pattern = "{$} > {word:She;word:hello}";
-    try {
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This was supposed to fail horribly");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
-  }
-
-  public void testRoot() {
-    // A few various tests that the $ node attribute works
-    runTest("{$} > {word:Bill}",
-            "[ate subj>Bill obj>[muffins compound>Bill]]",
-            "ate");
-    runTest("{} > {word:Bill}",
-            "[ate subj>Bill obj>[muffins compound>Bill]]",
-            "ate", "muffins");
-
-    // Combine $ with some word attributes
-    runTest("{word:ate;$} > {word:Bill}",
-            "[ate subj>Bill obj>[muffins compound>Bill]]",
-            "ate");
-    runTest("{word:zzz;$} > {word:Bill}",
-            "[ate subj>Bill obj>[muffins compound>Bill]]");
-
-    // Another verification that $ works with other attributes
-    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    graph.getNodeByIndex(0).setTag("NN");
-    graph.getNodeByIndex(1).setTag("NN");
-    graph.getNodeByIndex(2).setTag("JJS");
-    graph.getNodeByIndex(3).setTag("NN");
-    runTest("{tag:NN}", graph,
-            "ate/NN", "Bill/NN", "blueberry/NN");
-    runTest("{tag:NN;$}", graph,
-            "ate/NN");
-
-    // It shouldn't matter if $ is first or last
-    SemgrexPattern dollarFirst = SemgrexPattern.compile("{$;tag:NN}");
-    SemgrexPattern dollarLast = SemgrexPattern.compile("{$;tag:NN}");
-    assertEquals(dollarFirst, dollarLast);
-    runTest(dollarFirst, graph,
-            "ate/NN");
-    runTest(dollarLast, graph,
-            "ate/NN");
-  }
-  
   public static void outputResults(String pattern, String graph,
                                    String ... ignored) {
     outputResults(SemgrexPattern.compile(pattern),
@@ -830,7 +720,6 @@ public class SemgrexTest extends TestCase {
     }
   }
 
-  /** Verify that the semgrex pattern gets compiled without being changed */
   public static void comparePatternToString(String pattern) {
     SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
     String tostring = semgrex.toString();

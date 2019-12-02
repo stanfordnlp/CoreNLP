@@ -241,9 +241,6 @@ public class TokenizerAnnotator implements Annotator  {
     VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
     TokenizerType type = TokenizerType.getTokenizerType(props);
     factory = initFactory(type, props, options);
-    if (VERBOSE) {
-      log.info("Initialized tokenizer factory: " + factory);
-    }
   }
 
   /**
@@ -353,10 +350,6 @@ public class TokenizerAnnotator implements Annotator  {
    */
   @Override
   public void annotate(Annotation annotation) {
-    if (VERBOSE) {
-      log.info("Beginning tokenization");
-    }
-
     // for Arabic and Chinese use a segmenter instead
     if (useSegmenter) {
       segmenterAnnotator.annotate(annotation);

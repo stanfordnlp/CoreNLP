@@ -227,27 +227,29 @@ SemgrexPattern Child(GraphRelation r) : {
 	  return child; }
 }
 
-void AddAttribute(NodeAttributes attributes) : {
-	Token attr = null;
-	Token value = null;
-} {
-        ((attr = <IDENTIFIER> ":" (value = <IDENTIFIER> | value = <REGEX>) )
-         { if (attr != null && value != null) attributes.setAttribute(attr.image, value.image); } )
-	|
-	( attr = <ROOT> { attributes.setRoot(true); } )
-	|
-	( attr = <EMPTY> { attributes.setEmpty(true); } )
-}
-
 NodePattern Description(GraphRelation r) : {
 	Token name = null;
 	boolean link = false;
-        NodeAttributes attributes = new NodeAttributes();
+	boolean isRoot = false;
+	boolean isEmpty = false;
+	Token attr = null;
+	Token value = null;
+	Map<String, String> attributes = Generics.newHashMap();
 	NodePattern pat;
 } {
 
-	( "{" ( AddAttribute(attributes) 
-                (";" AddAttribute(attributes))* )? "}"
+	( "{" ( (  ( (attr = <IDENTIFIER> ":" (value = <IDENTIFIER> | value = <REGEX>) )
+	 { if (attr != null && value != null) attributes.put(attr.image, value.image); } )
+
+			 (";" ((attr = <IDENTIFIER> ":" (value = <IDENTIFIER> | value = <REGEX>)) {
+		if (attr != null && value != null) attributes.put(attr.image, value.image); }) )* "}")
+	|
+	(( attr = <ROOT> "}") {
+	isRoot = true; } )
+	|
+	(( attr = <EMPTY> "}") {
+	isEmpty = true; } )
+	| ( "}") )
 
 	(( ("=" { link = true; }) name = <IDENTIFIER> )
             {
@@ -262,7 +264,7 @@ NodePattern Description(GraphRelation r) : {
             }
 	  )?
 	)
-  	{ pat = new NodePattern(r, underNodeNegation, attributes.attributes(), attributes.root(), attributes.empty(), name != null ? name.image : null);
+  	{ pat = new NodePattern(r, underNodeNegation, attributes, isRoot, isEmpty, name != null ? name.image : null);
 	   if (link) pat.makeLink();
 	  return pat;
 	}
