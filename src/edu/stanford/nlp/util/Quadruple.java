@@ -11,11 +11,6 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * A quadruple of ordered objects.
  * 
  * @author Spence Green
- *
- * @param <T1>
- * @param <T2>
- * @param <T3>
- * @param <T4>
  */
 public class Quadruple<T1,T2,T3,T4> implements Comparable<Quadruple<T1,T2,T3,T4>>, Serializable, PrettyLoggable {
 

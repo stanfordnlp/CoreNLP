@@ -20,7 +20,7 @@ class SemgrexParser implements SemgrexParserConstants {
   final public SemgrexPattern Root() throws ParseException {
   SemgrexPattern node;
   Token reverse = null;
-  List<SemgrexPattern> children = new ArrayList<>();
+  List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ALIGNRELN:
       reverse = jj_consume_token(ALIGNRELN);
@@ -82,7 +82,7 @@ class SemgrexParser implements SemgrexParserConstants {
         ;
       }
                 if (child != null) {
-                List<SemgrexPattern> newChildren = new ArrayList<>();
+                List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
                 newChildren.addAll(result.getChildren());
                 newChildren.add(child);
                 result.setChild(new CoordinationPattern(false, newChildren, true));
@@ -119,7 +119,7 @@ class SemgrexParser implements SemgrexParserConstants {
 
   final public SemgrexPattern RelationDisj() throws ParseException {
         SemgrexPattern child;
-        List<SemgrexPattern> children = new ArrayList<>();
+        List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
     child = RelationConj();
                                      children.add(child);
     label_2:
@@ -146,7 +146,7 @@ class SemgrexParser implements SemgrexParserConstants {
 
   final public SemgrexPattern RelationConj() throws ParseException {
         SemgrexPattern child;
-        List<SemgrexPattern> children = new ArrayList<>();
+        List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
     child = ModRelation();
                                      children.add(child);
     label_3:
@@ -344,7 +344,7 @@ class SemgrexParser implements SemgrexParserConstants {
 
   final public SemgrexPattern NodeDisj(GraphRelation r) throws ParseException {
         SemgrexPattern child;
-        List<SemgrexPattern> children = new ArrayList<>();
+        List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
     jj_consume_token(19);
     child = NodeConj(r);
                                         children.add(child);
@@ -372,7 +372,7 @@ class SemgrexParser implements SemgrexParserConstants {
 
   final public SemgrexPattern NodeConj(GraphRelation r) throws ParseException {
         SemgrexPattern child;
-        List<SemgrexPattern> children = new ArrayList<>();
+        List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
     child = ModNode(r);
                                  children.add(child);
     label_5:
@@ -448,16 +448,9 @@ class SemgrexParser implements SemgrexParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public NodePattern Description(GraphRelation r) throws ParseException {
-        Token name = null;
-        boolean link = false;
-        boolean isRoot = false;
-        boolean isEmpty = false;
+  final public void AddAttribute(NodeAttributes attributes) throws ParseException {
         Token attr = null;
         Token value = null;
-        Map<String, String> attributes = Generics.newHashMap();
-        NodePattern pat;
-    jj_consume_token(23);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case IDENTIFIER:
       attr = jj_consume_token(IDENTIFIER);
@@ -474,7 +467,34 @@ class SemgrexParser implements SemgrexParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-           if (attr != null && value != null) attributes.put(attr.image, value.image);
+           if (attr != null && value != null) attributes.setAttribute(attr.image, value.image);
+      break;
+    case ROOT:
+      attr = jj_consume_token(ROOT);
+                          attributes.setRoot(true);
+      break;
+    case EMPTY:
+      attr = jj_consume_token(EMPTY);
+                           attributes.setEmpty(true);
+      break;
+    default:
+      jj_la1[23] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  final public NodePattern Description(GraphRelation r) throws ParseException {
+        Token name = null;
+        boolean link = false;
+        NodeAttributes attributes = new NodeAttributes();
+        NodePattern pat;
+    jj_consume_token(23);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case IDENTIFIER:
+    case EMPTY:
+    case ROOT:
+      AddAttribute(attributes);
       label_6:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -482,46 +502,18 @@ class SemgrexParser implements SemgrexParserConstants {
           ;
           break;
         default:
-          jj_la1[23] = jj_gen;
+          jj_la1[24] = jj_gen;
           break label_6;
         }
         jj_consume_token(24);
-        attr = jj_consume_token(IDENTIFIER);
-        jj_consume_token(12);
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case IDENTIFIER:
-          value = jj_consume_token(IDENTIFIER);
-          break;
-        case REGEX:
-          value = jj_consume_token(REGEX);
-          break;
-        default:
-          jj_la1[24] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
-                if (attr != null && value != null) attributes.put(attr.image, value.image);
+        AddAttribute(attributes);
       }
-      jj_consume_token(25);
-      break;
-    case ROOT:
-      attr = jj_consume_token(ROOT);
-      jj_consume_token(25);
-        isRoot = true;
-      break;
-    case EMPTY:
-      attr = jj_consume_token(EMPTY);
-      jj_consume_token(25);
-        isEmpty = true;
-      break;
-    case 25:
-      jj_consume_token(25);
       break;
     default:
       jj_la1[25] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+      ;
     }
+    jj_consume_token(25);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 22:
       jj_consume_token(22);
@@ -540,7 +532,7 @@ class SemgrexParser implements SemgrexParserConstants {
       jj_la1[26] = jj_gen;
       ;
     }
-          pat = new NodePattern(r, underNodeNegation, attributes, isRoot, isEmpty, name != null ? name.image : null);
+          pat = new NodePattern(r, underNodeNegation, attributes.attributes(), attributes.root(), attributes.empty(), name != null ? name.image : null);
            if (link) pat.makeLink();
           {if (true) return pat;}
     throw new Error("Missing return statement in function");
@@ -561,7 +553,7 @@ class SemgrexParser implements SemgrexParserConstants {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x1000,0x8a2020,0xe0070,0xe0070,0x8a2000,0x8000,0xf0070,0x10000,0xe0070,0x80070,0x200000,0x40,0x440,0x440,0x400000,0x70,0x8a2000,0x8000,0x8b0000,0x10000,0x8a0000,0x880000,0x440,0x1000000,0x440,0x2000340,0x400000,};
+      jj_la1_0 = new int[] {0x1000,0x8a2020,0xe0070,0xe0070,0x8a2000,0x8000,0xf0070,0x10000,0xe0070,0x80070,0x200000,0x40,0x440,0x440,0x400000,0x70,0x8a2000,0x8000,0x8b0000,0x10000,0x8a0000,0x880000,0x440,0x340,0x1000000,0x340,0x400000,};
    }
 
   /** Constructor with InputStream. */
@@ -671,7 +663,7 @@ class SemgrexParser implements SemgrexParserConstants {
       return (jj_ntk = jj_nt.kind);
   }
 
-  private java.util.List<int[]> jj_expentries = new java.util.ArrayList<>();
+  private java.util.List<int[]> jj_expentries = new java.util.ArrayList<int[]>();
   private int[] jj_expentry;
   private int jj_kind = -1;
 

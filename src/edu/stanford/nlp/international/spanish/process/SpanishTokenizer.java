@@ -255,8 +255,6 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * A factory for Spanish tokenizer instances.
    *
    * @author Spence Green
-   *
-   * @param <T>
    */
   public static class SpanishTokenizerFactory<T extends HasWord> implements TokenizerFactory<T>  { // Serializable
 
