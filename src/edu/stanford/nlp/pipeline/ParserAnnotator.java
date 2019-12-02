@@ -72,6 +72,10 @@ public class ParserAnnotator extends SentenceAnnotator  {
   private final boolean noSquash;
   private final GrammaticalStructure.Extras extraDependencies;
 
+  // around this height, protobuf might potentially barf
+  private final static int DEFAULT_MAX_HEIGHT = 80;
+  private final int maxHeight;
+  
   public ParserAnnotator(boolean verbose, int maxSent) {
     this(System.getProperty("parse.model", LexicalizedParser.DEFAULT_PARSER_LOC), verbose, maxSent, StringUtils.EMPTY_STRING_ARRAY);
   }
@@ -107,6 +111,7 @@ public class ParserAnnotator extends SentenceAnnotator  {
     this.saveBinaryTrees = false;
     this.noSquash = false;
     this.extraDependencies = GrammaticalStructure.Extras.NONE;
+    this.maxHeight = DEFAULT_MAX_HEIGHT;
   }
 
 
@@ -120,6 +125,7 @@ public class ParserAnnotator extends SentenceAnnotator  {
     String[] flags = convertFlagsToArray(props.getProperty(annotatorName + ".flags"));
     this.parser = loadModel(model, VERBOSE, flags);
     this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", -1);
+    this.maxHeight = PropertiesUtils.getInt(props, annotatorName + ".maxheight", DEFAULT_MAX_HEIGHT);
 
     String treeMapClass = props.getProperty(annotatorName + ".treemap");
     if (treeMapClass == null) {
@@ -174,6 +180,8 @@ public class ParserAnnotator extends SentenceAnnotator  {
             props.getProperty(annotatorName + ".flags", ""));
     os.append(annotatorName + ".maxlen:" +
             props.getProperty(annotatorName + ".maxlen", "-1"));
+    os.append(annotatorName + ".maxheight:" +
+            props.getProperty(annotatorName + ".maxheight", Integer.toString(DEFAULT_MAX_HEIGHT)));
     os.append(annotatorName + ".treemap:" +
             props.getProperty(annotatorName + ".treemap", ""));
     os.append(annotatorName + ".maxtime:" +
@@ -278,7 +286,7 @@ public class ParserAnnotator extends SentenceAnnotator  {
       }
     }
 
-    List<Tree> trees = Generics.newArrayList(1);
+    List<Tree> trees = new ArrayList<>();
     trees.add(tree);
     finishSentence(sentence, trees);
   }
@@ -292,6 +300,10 @@ public class ParserAnnotator extends SentenceAnnotator  {
         mappedTrees.add(mappedTree);
       }
       trees = mappedTrees;
+    }
+
+    if (maxHeight > 0) {
+      trees = ParserUtils.flattenTallTrees(maxHeight, trees);
     }
 
     ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, extraDependencies);

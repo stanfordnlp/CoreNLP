@@ -444,13 +444,56 @@ public class StringUtils  {
 
   /**
    * Splits on whitespace (\\s+).
+   * <br>
+   * Note that this follows Java split style, meaning leading spaces
+   * will result in an empty string and trailing spaces will be cut off.
    * @param s String to split
    * @return List<String> of split strings
    */
   public static List<String> split(String s) {
     return split(s, "\\s+");
   }
+  
+  /**
+   * Splits on the given delimiter and returns the delimiters as well.
+   * <br>
+   * For expressions where the expression appears inside itself this may not work.
+   * <br>
+   * See http://stackoverflow.com/a/2206432
+   *
+   * @param s String to split
+   * @param separator Delimiter to use for splitting
+   * @return List<String> of split strings
+   */
+  public static List<String> splitKeepDelimiter(String s, String separator) {
+    return split(s, String.format("((?<=(?:%1$s))|(?=(?:%1$s)))", separator));
+  }
 
+  /**
+   * Split the text into pieces based on newlines.  Include the newline tokens in the pieces.
+   *
+   * @param s String to splits
+   */
+  public static List<String> splitLinesKeepNewlines(String s) {
+    List<String> pieces = StringUtils.splitKeepDelimiter(s, "\\R");
+
+    // The delimeter regex trick seems to split \r \n into two
+    // separate matches.  We want to treat them as the same newline
+    List<String> newPieces = new ArrayList<>();
+    for (int i = 0; i < pieces.size(); ++i) {
+      if (i < pieces.size() - 1 &&
+          pieces.get(i).equals("\r") &&
+          pieces.get(i + 1).equals("\n")) {
+        newPieces.add("\r\n");
+        i = i + 1;
+      } else {
+        newPieces.add(pieces.get(i));
+      }
+    }
+
+    return newPieces;
+  }
+  
   /**
    * Splits the given string using the given regex as delimiters.
    * This method is the same as the String.split() method (except it throws

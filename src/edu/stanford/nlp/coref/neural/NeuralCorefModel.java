@@ -10,10 +10,7 @@ import org.ejml.simple.SimpleMatrix;
 // TODO: remove when ejml is upgraded
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.stream.Collectors;
-import edu.stanford.nlp.neural.ConvertModels;
-import edu.stanford.nlp.util.ErasureUtils;
 
 /**
  * Stores the weights and implements the matrix operations used by a {@link NeuralCorefAlgorithm}

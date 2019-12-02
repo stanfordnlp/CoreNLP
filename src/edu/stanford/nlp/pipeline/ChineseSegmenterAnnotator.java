@@ -44,7 +44,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   private static final String DEFAULT_SIGHAN_CORPORA_DICT =
           "/u/nlp/data/chinese-segmenter/stanford-seg-2010/releasedata/";
 
-  private static final String separator = "(?:\r|\r?\n|" + System.lineSeparator() + ')';
+  private static final String separator = "\\R";
   private static final Pattern separatorPattern = Pattern.compile(separator);
 
 
@@ -148,6 +148,9 @@ public class ChineseSegmenterAnnotator implements Annotator  {
    *                    {@code SegmenterCoreAnnotations.CharactersAnnotation.class} key
    */
   private void splitCharacters(CoreMap annotation) {
+    // TODO: this should be more system-agnostic in terms of processing newlines.
+    // A later effect (advancePos) skips \r for Windows.
+    // However, what about systems that don't use either \n or \r\n as the newline?
     String origText = annotation.get(CoreAnnotations.TextAnnotation.class);
     boolean seg = true; // false only while inside an XML entity
     List<CoreLabel> charTokens = new ArrayList<>();
@@ -280,8 +283,18 @@ public class ChineseSegmenterAnnotator implements Annotator  {
    *  @return The position of the next thing in sentChars to look at
    */
   private static int advancePos(List<CoreLabel> sentChars, int pos, String w) {
+    // splitCharacters only keeps \n, no \r, so just ignore all \r
+    if (w.equals("\r")) {
+      w = "\n";
+    } else {
+      w = w.replaceAll("\r", "");
+    }
     StringBuilder sb = new StringBuilder();
     while ( ! w.equals(sb.toString())) {
+      if (pos >= sentChars.size()) {
+        throw new RuntimeException("Ate the whole text without matching.  Expected is '" + w +
+                                   "', ate '" + sb.toString() + "'");
+      }
       sb.append(sentChars.get(pos).get(CoreAnnotations.ChineseCharAnnotation.class));
       pos++;
     }
@@ -324,8 +337,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       }
 
       // Run the segmenter on each line so that we don't get tokens that cross line boundaries
-      // Neat trick to keep delimiters from: http://stackoverflow.com/a/2206432
-      String[] lines = text.split(String.format("((?<=%1$s)|(?=%1$s))", separator));
+      List<String> lines = StringUtils.splitLinesKeepNewlines(text);
 
       words = new ArrayList<>();
       for (String line : lines) {

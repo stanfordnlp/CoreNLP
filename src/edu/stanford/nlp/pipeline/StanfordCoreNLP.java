@@ -85,7 +85,7 @@ import java.util.regex.Pattern;
 
 public class StanfordCoreNLP extends AnnotationPipeline  {
 
-  public enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED, CUSTOM }
+  public enum OutputFormat { TEXT, TAGGED, XML, JSON, CONLL, CONLLU, SERIALIZED, CUSTOM }
 
   private static String getDefaultExtension(OutputFormat outputFormat) {
     switch (outputFormat) {
@@ -94,6 +94,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       case CONLL: return ".conll";
       case CONLLU: return ".conllu";
       case TEXT: return ".out";
+      case TAGGED: return ".tag";
       case SERIALIZED: return ".ser.gz";
       case CUSTOM: return ".out";
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
@@ -880,7 +881,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     os.println("\t             output is generated for every input file as file.outputExtension");
     os.println("\t\"outputDirectory\" - where to put output (defaults to the current directory)");
     os.println("\t\"outputExtension\" - extension to use for the output file (defaults to \".xml\" for XML, \".ser.gz\" for serialized).  Don't forget the dot!");
-    os.println("\t\"outputFormat\" - \"text\"  (default), \"json\", \"conll\", \"conllu\", \"serialized\", \"xml\" or \"custom\"");
+    os.println("\t\"outputFormat\" - \"text\"  (default), \"tagged\", \"json\", \"conll\", \"conllu\", \"serialized\", \"xml\" or \"custom\"");
     os.println("\t\"customOutputter\" - specify a class to a custom outputter instead of a pre-defined output format");
     os.println("\t\"serializer\" - Class of annotation serializer to use when outputFormat is \"serialized\".  By default, uses ProtobufAnnotationSerializer.");
     os.println("\t\"replaceExtension\" - flag to chop off the last extension before adding outputExtension to file");
@@ -1007,6 +1008,9 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         break;
       case TEXT:
         new TextOutputter().print(annotation, fos, outputOptions);
+        break;
+      case TAGGED:
+        new TaggedTextOutputter().print(annotation, fos, outputOptions);
         break;
       case SERIALIZED:
         final String serializerClass = properties.getProperty("serializer", ProtobufAnnotationSerializer.class.getName());

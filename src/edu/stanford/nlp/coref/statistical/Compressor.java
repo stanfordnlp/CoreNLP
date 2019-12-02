@@ -19,9 +19,7 @@ public class Compressor<K> implements Serializable {
 
   private static final long serialVersionUID = 364548642855692442L;
 
-  @SuppressWarnings("serial")
   private final Map<K, Integer> index;
-  @SuppressWarnings("serial")
   private final Map<Integer, K> inverse;
 
   public Compressor() {
@@ -55,6 +53,10 @@ public class Compressor<K> implements Serializable {
       c.incrementCount(inverse.get(cvf.keys.get(i)), cvf.values.get(i));
     }
     return c;
+  }
+
+  public Map<K, Integer> getIndex() {
+    return this.index;
   }
 
 }

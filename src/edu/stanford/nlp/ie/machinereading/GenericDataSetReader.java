@@ -372,8 +372,9 @@ public class GenericDataSetReader  {
 
     int approximateness = 0;
     List<CoreLabel> extentTokens = new ArrayList<>();
-    extentTokens.add(initCoreLabel("It"));
-    extentTokens.add(initCoreLabel("was"));
+    // Add tags in case we are using the SRParser, which needs tags to operate
+    extentTokens.add(initCoreLabel("It", "PRP"));
+    extentTokens.add(initCoreLabel("was", "VBD"));
     final int ADDED_WORDS = 2;
     for (int i = ent.getExtentTokenStart(); i < ent.getExtentTokenEnd(); i++) {
       // Add everything except separated dashes! The separated dashes mess with the parser too badly.
@@ -384,7 +385,7 @@ public class GenericDataSetReader  {
         approximateness++;
       }
     }
-    extentTokens.add(initCoreLabel("."));
+    extentTokens.add(initCoreLabel(".", "."));
 
     // constrain the parse to the part we're interested in.
     // Starting from ADDED_WORDS comes from skipping "It was".
@@ -494,6 +495,9 @@ public class GenericDataSetReader  {
     return realHead;
   }
 
+  /**
+   * Makes a fake corelabel with just the given token for annotations
+   */
   private static CoreLabel initCoreLabel(String token) {
     CoreLabel label = new CoreLabel();
     label.setWord(token);
@@ -501,6 +505,15 @@ public class GenericDataSetReader  {
     label.set(CoreAnnotations.TextAnnotation.class, token);
     label.set(CoreAnnotations.ValueAnnotation.class, token);
 
+    return label;
+  }
+
+  /**
+   * Makes a fake corelabel with the given token and tag for annotations
+   */
+  private static CoreLabel initCoreLabel(String token, String tag) {
+    CoreLabel label = initCoreLabel(token);
+    label.set(CoreAnnotations.PartOfSpeechAnnotation.class, tag);
     return label;
   }
 

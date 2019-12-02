@@ -281,4 +281,38 @@ public class StringUtilsTest {
     Assert.assertEquals(5, StringUtils.indexOfRegex(HYPHENS_DASHES, "Asian-American"));
   }
 
+  @Test
+  public void testSplit() {
+    Assert.assertEquals(Arrays.asList("1", "2"), StringUtils.split("1 2"));
+    Assert.assertEquals(Arrays.asList("1"), StringUtils.split("1"));
+    Assert.assertEquals(Arrays.asList("1", "2", "3"), StringUtils.split("1 2 3"));
+    Assert.assertEquals(Arrays.asList("1", "2", "3"), StringUtils.split("1     2     3"));
+    // java split semantics cut off the trailing entities for split(..., 0)
+    Assert.assertEquals(Arrays.asList("", "1", "2", "3"), StringUtils.split("   1     2     3   "));
+  }
+
+  @Test
+  public void testSplitRegex() {
+    Assert.assertEquals(Arrays.asList("a", "dfa"), StringUtils.split("asdfa", "s"));
+    // java split semantics cut off the trailing entities for split(..., 0)
+    Assert.assertEquals(Arrays.asList("", "sdf"), StringUtils.split("asdfa", "a"));
+  }
+
+  @Test
+  public void testSplitKeepDelimiter() {
+    Assert.assertEquals(Arrays.asList("a", "s", "dfa"), StringUtils.splitKeepDelimiter("asdfa", "s"));
+    // java split semantics cut off the trailing entities for split(..., 0)
+    Assert.assertEquals(Arrays.asList("asdf", "\n", "sdf"), StringUtils.splitKeepDelimiter("asdf\nsdf", "\\R"));
+    Assert.assertEquals(Arrays.asList("asdf", "\n", "\n", "sdf"), StringUtils.splitKeepDelimiter("asdf\n\nsdf", "\\R"));
+    Assert.assertEquals(Arrays.asList("\n", "asdf", "\n", "sdf"), StringUtils.splitKeepDelimiter("\nasdf\nsdf", "\\R"));
+  }
+
+  @Test
+  public void testSplitLinesKeepNewlines() {
+    Assert.assertEquals(Arrays.asList("asdf", "\n", "sdf"), StringUtils.splitLinesKeepNewlines("asdf\nsdf"));
+    Assert.assertEquals(Arrays.asList("asdf", "\n", "sdf", "\n"), StringUtils.splitLinesKeepNewlines("asdf\nsdf\n"));
+    Assert.assertEquals(Arrays.asList("asdf", "\r\n", "sdf", "\n"), StringUtils.splitLinesKeepNewlines("asdf\r\nsdf\n"));
+    Assert.assertEquals(Arrays.asList("asdf", "\r\n", "sdf", "\r\n", "\r\n"), StringUtils.splitLinesKeepNewlines("asdf\r\nsdf\r\n\r\n"));
+  }
+  
 }

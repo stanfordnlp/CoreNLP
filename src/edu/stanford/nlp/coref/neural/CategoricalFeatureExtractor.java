@@ -106,7 +106,7 @@ public class CategoricalFeatureExtractor {
     );
   }
 
-  private static SimpleMatrix encodeDistance(int d) {
+  public static SimpleMatrix encodeDistance(int d) {
     SimpleMatrix m = new SimpleMatrix(11, 1);
     if (d < 5) {
       m.set(d, 1);
