@@ -444,7 +444,6 @@ public class SemgrexTest extends TestCase {
 
     runTest("{}=a >> {word:E}", graph, "A", "B", "C", "D");
     SemgrexPattern pattern = SemgrexPattern.compile("{}=a >> {word:E} : {}=a >> {word:B}");
-    System.out.println("--------------");
     runTest("{}=a >> {word:E} : {}=a >> {word:B}", graph, "A");
   }
 
