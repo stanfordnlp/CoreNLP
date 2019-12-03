@@ -26,7 +26,7 @@ public class IntTaggedWord implements Serializable, Comparable<IntTaggedWord> {
   public static final int STOP_TAG_INT = -2;
 
   public static final String ANY = ".*.";
-  public static final String STOP = "STOP";
+  public static final String STOP = "!!!STOP!!!";
 
   public final int word;
   public final short tag;
@@ -131,7 +131,7 @@ public class IntTaggedWord implements Serializable, Comparable<IntTaggedWord> {
 
   /**
    * Creates an IntTaggedWord given by the String representation
-   * of the form &lt;word&gt;|&lt;tag*gt;
+   * of the form &lt;word&gt;|&lt;tag&gt;
    */
   public IntTaggedWord(String s, char splitChar,
                        Index<String> wordIndex, Index<String> tagIndex) {
