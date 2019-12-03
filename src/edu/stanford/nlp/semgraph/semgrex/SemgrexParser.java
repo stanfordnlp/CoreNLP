@@ -18,6 +18,7 @@ class SemgrexParser implements SemgrexParserConstants {
   private Set<String> knownVariables = Generics.newHashSet();
 
   final public SemgrexPattern Root() throws ParseException {
+  // Root pattern for the semgrex parser.  Doesn't necessarily represent matching the root.
   SemgrexPattern node;
   Token reverse = null;
   List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
@@ -56,7 +57,7 @@ class SemgrexParser implements SemgrexParserConstants {
     }
     if (children.size() <= 1)
       {if (true) return node;}
-    {if (true) return new CoordinationPattern(true, children, true);}
+    {if (true) return new CoordinationPattern(true, children, true, true);}
     throw new Error("Missing return statement in function");
   }
 
@@ -85,7 +86,7 @@ class SemgrexParser implements SemgrexParserConstants {
                 List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
                 newChildren.addAll(result.getChildren());
                 newChildren.add(child);
-                result.setChild(new CoordinationPattern(false, newChildren, true));
+                result.setChild(new CoordinationPattern(false, newChildren, true, false));
         }
         {if (true) return result;}
       break;
@@ -139,7 +140,7 @@ class SemgrexParser implements SemgrexParserConstants {
           if (children.size() == 1) {
                 {if (true) return child;}
           } else {
-                {if (true) return new CoordinationPattern(false, children, false);}
+                {if (true) return new CoordinationPattern(false, children, false, false);}
       }
     throw new Error("Missing return statement in function");
   }
@@ -179,7 +180,7 @@ class SemgrexParser implements SemgrexParserConstants {
           if (children.size() == 1) {
                 {if (true) return child;}
           } else {
-                {if (true) return new CoordinationPattern(false, children, true);}
+                {if (true) return new CoordinationPattern(false, children, true, false);}
       }
     throw new Error("Missing return statement in function");
   }
@@ -366,7 +367,7 @@ class SemgrexParser implements SemgrexParserConstants {
           if (children.size() == 1)
                 {if (true) return child;}
           else
-                {if (true) return new CoordinationPattern(true, children, false);}
+                {if (true) return new CoordinationPattern(true, children, false, false);}
     throw new Error("Missing return statement in function");
   }
 
@@ -402,7 +403,7 @@ class SemgrexParser implements SemgrexParserConstants {
           if (children.size() == 1)
                 {if (true) return child;}
           else
-                {if (true) return new CoordinationPattern(true, children, true);}
+                {if (true) return new CoordinationPattern(true, children, true, false);}
     throw new Error("Missing return statement in function");
   }
 

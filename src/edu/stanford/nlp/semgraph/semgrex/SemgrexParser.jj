@@ -47,6 +47,7 @@ TOKEN:
 }
 
 SemgrexPattern Root() : {
+  // Root pattern for the semgrex parser.  Doesn't necessarily represent matching the root.
   SemgrexPattern node;
   Token reverse = null;
   List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
@@ -63,7 +64,7 @@ SemgrexPattern Root() : {
   {
     if (children.size() <= 1)
       return node;
-    return new CoordinationPattern(true, children, true);
+    return new CoordinationPattern(true, children, true, true);
   }
 
 }
@@ -78,7 +79,7 @@ SemgrexPattern SubNode(GraphRelation r) : {
 		List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
 		newChildren.addAll(result.getChildren());
 		newChildren.add(child);
-		result.setChild(new CoordinationPattern(false, newChildren, true));
+		result.setChild(new CoordinationPattern(false, newChildren, true, false));
 	}
 	return result;
     }
@@ -96,7 +97,7 @@ SemgrexPattern RelationDisj() : {
  	{ if (children.size() == 1) {
 		return child;
 	  } else {
-		return new CoordinationPattern(false, children, false);
+		return new CoordinationPattern(false, children, false, false);
       }
     }
 }
@@ -110,7 +111,7 @@ SemgrexPattern RelationConj() : {
  	{ if (children.size() == 1) {
 		return child;
 	  } else {
-		return new CoordinationPattern(false, children, true);
+		return new CoordinationPattern(false, children, true, false);
       }
     }
 }
@@ -187,7 +188,7 @@ SemgrexPattern NodeDisj(GraphRelation r) : {
  	{ if (children.size() == 1)
 		return child;
 	  else
-		return new CoordinationPattern(true, children, false);
+		return new CoordinationPattern(true, children, false, false);
      })
 }
 
@@ -200,7 +201,7 @@ SemgrexPattern NodeConj(GraphRelation r) : {
  	{ if (children.size() == 1)
 		return child;
 	  else
-		return new CoordinationPattern(true, children, true);
+		return new CoordinationPattern(true, children, true, false);
   }
 }
 

@@ -443,6 +443,8 @@ public class SemgrexTest extends TestCase {
     SemanticGraph graph = makeComplicatedGraph();
 
     runTest("{}=a >> {word:E}", graph, "A", "B", "C", "D");
+    SemgrexPattern pattern = SemgrexPattern.compile("{}=a >> {word:E} : {}=a >> {word:B}");
+    System.out.println("--------------");
     runTest("{}=a >> {word:E} : {}=a >> {word:B}", graph, "A");
   }
 
@@ -791,7 +793,32 @@ public class SemgrexTest extends TestCase {
     runTest(dollarLast, graph,
             "ate/NN");
   }
-  
+
+  public void testDoubleEquals() {
+    // Tests a relation with double equals on it.
+    // Note that this also tests the () printing when outputting
+    // semgrex patterns as a side effect
+    String pattern = "({$} == { pos:/VB.*/ }) > ({ pos:NN } == !{ word:Doug })";
+    SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+    runTest(semgrex,
+            "[ate/VBD subj>Bill/NN obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    // This is technically the same expression as above, as the parser will
+    // ask for a root node with two relations: == _/VB and > !Doug/NN
+    String pattern2 = "{$} == {pos:/VB.*/} > ({pos:NN} == !{word:Doug})";
+    SemgrexPattern semgrex2 = SemgrexPattern.compile(pattern2);
+    assertEquals(semgrex.toString(), semgrex2.toString());
+    runTest(pattern2,
+            "[ate/VBD subj>Bill/NN obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest(pattern2,
+            "[ate/VBD subj>Doug/NN obj>[muffins compound>blueberry]]");
+    runTest(pattern2,
+            "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]");
+    runTest(pattern2,
+            "[ate/NN subj>Bill/NN obj>[muffins compound>blueberry]]");
+  }
+
   public static void outputResults(String pattern, String graph,
                                    String ... ignored) {
     outputResults(SemgrexPattern.compile(pattern),
@@ -849,6 +876,11 @@ public class SemgrexTest extends TestCase {
                              String... expectedMatches) {
     comparePatternToString(pattern);
     runTest(SemgrexPattern.compile(pattern), graph, expectedMatches);
+  }
+
+  public static void runTest(SemgrexPattern pattern, String graph,
+                             String... expectedMatches) {
+    runTest(pattern, SemanticGraph.valueOf(graph), expectedMatches);
   }
 
   public static void runTest(SemgrexPattern pattern, SemanticGraph graph,

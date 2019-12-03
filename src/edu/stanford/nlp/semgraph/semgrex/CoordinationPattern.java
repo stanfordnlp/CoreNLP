@@ -12,24 +12,28 @@ public class CoordinationPattern extends SemgrexPattern  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(CoordinationPattern.class);
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = -3122330899634961002L;
   private boolean isConj;
   private boolean isNodeCoord;
+  /**
+   * Represents whether this is the root coordination.  If so, the
+   * children have a higher operation priority, as the : operator is
+   * the lowest precedence possible.
+   */
+  private boolean isRoot;
   private List<SemgrexPattern> children;
 
   /* if isConj is true, then it is an "AND" ; if it is false, it is an "OR".*/
   /* if isNodeCoord is true, then it is a node coordination conj; if it is false, then
            * 	it is a relation coordination conj. */
-  public CoordinationPattern(boolean isNodeCoord, List<SemgrexPattern> children, boolean isConj) {
+  public CoordinationPattern(boolean isNodeCoord, List<SemgrexPattern> children, boolean isConj, boolean isRoot) {
     if (children.size() < 2) {
       throw new RuntimeException("Coordination node must have at least 2 children.");
     }
     this.children = children;
     this.isConj = isConj;
     this.isNodeCoord = isNodeCoord;
+    this.isRoot = isRoot;
   }
 
   public boolean isNodeCoord() { return isNodeCoord; }
@@ -43,17 +47,6 @@ public class CoordinationPattern extends SemgrexPattern  {
       }
     } else {
 
-    }
-  }
-
-  public void addRelnToNodeCoord(SemgrexPattern child) {
-    if (isNodeCoord) {
-      for (SemgrexPattern c : children) {
-        List<SemgrexPattern> newChildren = new ArrayList<>();
-        newChildren.addAll(c.getChildren());
-        newChildren.add(child);
-        c.setChild(new CoordinationPattern(false, newChildren, true));
-      }
     }
   }
 
@@ -87,13 +80,15 @@ public class CoordinationPattern extends SemgrexPattern  {
     StringBuilder sb = new StringBuilder();
     if (isConj) {
       for (SemgrexPattern node : children) {
-        sb.append(node.toString());
+        // if the children have children, they will need () to represent that
+        // exception: if this was a : operation, then no () needed
+        sb.append(node.toString(isRoot));
       }
     } else {
       sb.append('[');
       for (Iterator<SemgrexPattern> iter = children.iterator(); iter.hasNext();) {
         SemgrexPattern node = iter.next();
-        sb.append(node.toString());
+        sb.append(node.toString(isRoot));
         if (iter.hasNext()) {
           sb.append(" |");
         }
