@@ -346,6 +346,8 @@ public abstract class SemgrexPattern implements Serializable  {
   // -----------------------------------------------------------
 
   /**
+   * The goal is to return a string which will be compiled to the same pattern
+   *
    * @return A single-line string representation of the pattern
    */
   @Override

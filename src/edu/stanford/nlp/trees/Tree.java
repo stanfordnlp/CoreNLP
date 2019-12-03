@@ -882,19 +882,19 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   /**
    * Display a node, implementing Penn Treebank style layout
    */
-  private void display(int indent, boolean parentLabelNull, boolean firstSibling, boolean leftSiblingPreTerminal, boolean topLevel,
-                       Function<Label,String> labelFormatter, PrintWriter pw) {
+  private void display(int indent, boolean parentLabelNull, boolean firstSibling, boolean leftSiblingPreTerminal, boolean topLevel, Function<Label,String> labelFormatter, PrintWriter pw) {
     // the condition for staying on the same line in Penn Treebank
-    boolean suppressIndent = (parentLabelNull && firstSibling) || (firstSibling && isPreTerminal()) ||
-            (leftSiblingPreTerminal && isPreTerminal() && (label() == null || !label().value().startsWith("CC")));
+    boolean suppressIndent = (parentLabelNull || (firstSibling && isPreTerminal()) || (leftSiblingPreTerminal && isPreTerminal() && (label() == null || !label().value().startsWith("CC"))));
     if (suppressIndent) {
       pw.print(" ");
+      // pw.flush();
     } else {
       if (!topLevel) {
         pw.println();
       }
       for (int i = 0; i < indent; i++) {
         pw.print("  ");
+        // pw.flush();
       }
     }
     if (isLeaf() || isPreTerminal()) {
@@ -905,6 +905,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     }
     pw.print("(");
     pw.print(labelFormatter.apply(label()));
+    // pw.flush();
     boolean parentIsNull = label() == null || label().value() == null;
     displayChildren(children(), indent + 1, parentIsNull, labelFormatter, pw);
     pw.print(")");

@@ -244,8 +244,6 @@ public class LexerUtils {
     }
   }
 
-  private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ ]");
-
   public static String handleEllipsis(final String tok, EllipsesEnum ellipsesStyle) {
     switch (ellipsesStyle) {
       case UNICODE:
@@ -256,13 +254,11 @@ public class LexerUtils {
         if (tok.equals("\u0085")) {
           return unicodeEllipsisStr;
         } else {
-          // token could be spaced ellipsis
-          return SINGLE_SPACE_PATTERN.matcher(tok).replaceAll("\u00A0"); // change to non-breaking space
+          return tok;
         }
       case ORIGINAL:
       default:
-        // token could be spaced ellipsis
-        return SINGLE_SPACE_PATTERN.matcher(tok).replaceAll("\u00A0"); // change to non-breaking space
+        return tok;
     }
   }
 
