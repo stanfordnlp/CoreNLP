@@ -818,6 +818,94 @@ public class SemgrexTest extends TestCase {
             "[ate/NN subj>Bill/NN obj>[muffins compound>blueberry]]");
   }
 
+  /** Various bracketing tests: | and &amp; */
+  public void testBrackets() {
+    runTest("{word:ate} [ > {word:Bill} | > {word:muffins}]",
+            "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest("{word:ate} [ > {word:Bill} | > {word:muffins}]",
+            "[ate/VBD subj>foo/NNP obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest("{word:ate} [ > {word:Bill} | > {word:muffins}]",
+            "[ate/VBD subj>Bill/NNP obj>[bar compound>blueberry]]",
+            "ate/VBD");
+    runTest("{word:ate} [ > {word:Bill} | > {word:muffins}]",
+            "[ate/VBD subj>foo/NNP obj>[bar compound>blueberry]]");
+
+    // These should be equivalent expressions
+    String pattern = "{word:ate} > [{word:Bill} | {word:muffins}]";
+    String pattern2 = "{word:ate} [ > {word:Bill} | > {word:muffins}]";
+    SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+    SemgrexPattern semgrex2 = SemgrexPattern.compile(pattern2);
+    assertEquals(semgrex.toString(), semgrex2.toString());
+
+    runTest(semgrex,
+            "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest(semgrex,
+            "[ate/VBD subj>foo/NNP obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest(semgrex,
+            "[ate/VBD subj>Bill/NNP obj>[bar compound>blueberry]]",
+            "ate/VBD");
+    runTest(semgrex,
+            "[ate/VBD subj>foo/NNP obj>[bar compound>blueberry]]");
+
+    // These should be equivalent expressions
+    pattern = "{word:ate} > [{word:Bill} & {word:muffins}]";
+    pattern2 = "{word:ate} [ > {word:Bill} & > {word:muffins}]";
+    String pattern3 = "{word:ate} > {word:Bill} > {word:muffins}";
+    semgrex = SemgrexPattern.compile(pattern);
+    semgrex2 = SemgrexPattern.compile(pattern2);
+    SemgrexPattern semgrex3 = SemgrexPattern.compile(pattern2);
+    assertEquals(semgrex.toString(), semgrex3.toString());
+    assertEquals(semgrex2.toString(), semgrex3.toString());
+
+    runTest(semgrex,
+            "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest(semgrex,
+            "[ate/VBD subj>foo/NNP obj>[muffins compound>blueberry]]");
+    runTest(semgrex,
+            "[ate/VBD subj>Bill/NNP obj>[bar compound>blueberry]]");
+    runTest(semgrex,
+            "[ate/VBD subj>foo/NNP obj>[bar compound>blueberry]]");
+
+    runTest(semgrex2,
+            "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest(semgrex2,
+            "[ate/VBD subj>foo/NNP obj>[muffins compound>blueberry]]");
+    runTest(semgrex2,
+            "[ate/VBD subj>Bill/NNP obj>[bar compound>blueberry]]");
+    runTest(semgrex2,
+            "[ate/VBD subj>foo/NNP obj>[bar compound>blueberry]]");
+
+    runTest(pattern3,
+            "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest(pattern3,
+            "[ate/VBD subj>foo/NNP obj>[muffins compound>blueberry]]");
+    runTest(pattern3,
+            "[ate/VBD subj>Bill/NNP obj>[bar compound>blueberry]]");
+    runTest(pattern3,
+            "[ate/VBD subj>foo/NNP obj>[bar compound>blueberry]]");
+
+    // An OR pattern leading to some nesting
+    pattern = "{word:ate} [ > {word:Bill} | > ({word:muffins} > {word:blueberry})]";
+    runTest(pattern,
+            "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest(pattern,
+            "[ate/VBD subj>Billz/NNP obj>[muffins compound>blueberry]]",
+            "ate/VBD");
+    runTest(pattern,
+            "[ate/VBD subj>Bill/NNP obj>[muffins compound>strawberry]]",
+            "ate/VBD");
+    runTest(pattern,
+            "[ate/VBD subj>Billz/NNP obj>[muffins compound>strawberry]]");
+  }
+
   public static void outputResults(String pattern, String graph,
                                    String ... ignored) {
     outputResults(SemgrexPattern.compile(pattern),
