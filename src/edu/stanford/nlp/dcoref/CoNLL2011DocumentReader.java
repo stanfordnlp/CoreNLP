@@ -971,7 +971,7 @@ public class CoNLL2011DocumentReader  {
       System.exit(-1);
     }
     PrintWriter fout = new PrintWriter(outfile);
-    logger.finest("Writing to " + outfile);
+    logger.info("Writing to " + outfile);
     String ext = props.getProperty("ext");
     Options options;
     if (ext != null) {
