@@ -785,7 +785,7 @@ public class SemgrexTest extends TestCase {
 
     // It shouldn't matter if $ is first or last
     SemgrexPattern dollarFirst = SemgrexPattern.compile("{$;tag:NN}");
-    SemgrexPattern dollarLast = SemgrexPattern.compile("{$;tag:NN}");
+    SemgrexPattern dollarLast = SemgrexPattern.compile("{tag:NN;$}");
     assertEquals(dollarFirst, dollarLast);
     runTest(dollarFirst, graph,
             "ate/NN");
