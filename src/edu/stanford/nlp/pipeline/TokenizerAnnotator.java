@@ -150,17 +150,18 @@ public class TokenizerAnnotator implements Annotator  {
     String extraOptions = null;
     boolean keepNewline = Boolean.parseBoolean(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false")); // ssplit.eolonly
 
-    String hasSsplit = properties.getProperty("annotators");
-    if (hasSsplit != null && hasSsplit.contains(StanfordCoreNLP.STANFORD_SSPLIT)) { // ssplit
-      // Only possibly put in *NL* if not all one (the Boolean method treats null as false)
-      if ( ! Boolean.parseBoolean(properties.getProperty("ssplit.isOneSentence"))) {
-        // Set to { NEVER, ALWAYS, TWO_CONSECUTIVE } based on  ssplit.newlineIsSentenceBreak
-        String nlsbString = properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
-            StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
-        WordToSentenceProcessor.NewlineIsSentenceBreak nlsb = WordToSentenceProcessor.stringToNewlineIsSentenceBreak(nlsbString);
-        if (nlsb != WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER) {
-          keepNewline = true;
-        }
+    // Only possibly put in *NL* if not never (the Boolean method treats null as false)
+    // We used to also check for ssplit annotator being present, but
+    // that was wrong in the case where a tokenizer model was
+    // preloaded (such as in the case of segmenters) and we didn't
+    // want to need to reload the model when the ssplit was later added.
+    if (!Boolean.parseBoolean(properties.getProperty("ssplit.isOneSentence"))) {
+      // Set to { NEVER, ALWAYS, TWO_CONSECUTIVE } based on  ssplit.newlineIsSentenceBreak
+      String nlsbString = properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
+                                                 StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
+      WordToSentenceProcessor.NewlineIsSentenceBreak nlsb = WordToSentenceProcessor.stringToNewlineIsSentenceBreak(nlsbString);
+      if (nlsb != WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER) {
+        keepNewline = true;
       }
     }
     if (keepNewline) {
