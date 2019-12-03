@@ -200,15 +200,26 @@ public class Treebanks  {
 
     final PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, encoding), true);
 
-    if (i + 1 < args.length ) {
-      treebank.loadPath(args[i], new NumberRangesFileFilter(args[i+1], true));
-    } else if (i < args.length) {
-      treebank.loadPath(args[i], suffix, true);
-    } else {
+    if (i >= args.length) {
       printUsage();
       return;
     }
-    // log.info("Loaded " + treebank.size() + " trees from " + args[i]);
+    while (i < args.length) {
+      if (i + 1 < args.length) {
+        try {
+          treebank.loadPath(args[i], new NumberRangesFileFilter(args[i + 1], true));
+          i += 2;
+        } catch (IllegalArgumentException iae) {
+          // next thing wasn't a number range
+          treebank.loadPath(args[i], suffix, true);
+          i++;
+        }
+      } else {
+        treebank.loadPath(args[i], suffix, true);
+        i++;
+      }
+      // log.info("Loaded " + treebank.size() + " trees from " + args[i]);
+    }
 
     if (annotationOptions != null) {
       // todo Not yet implemented
