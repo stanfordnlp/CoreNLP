@@ -10,9 +10,7 @@ import edu.stanford.nlp.ling.StringLabel;
 
 import java.io.*;
 import java.text.NumberFormat;
-import java.util.AbstractCollection;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -316,6 +314,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
     Tree nonUnaryEg = null;
     ClassicCounter<Tree> nonUnaries = new ClassicCounter<>();
     ClassicCounter<String> roots = new ClassicCounter<>();
+    Map<String,Tree> rootEgs = new HashMap<>();
     ClassicCounter<String> starts = new ClassicCounter<>();
     ClassicCounter<String> puncts = new ClassicCounter<>();
     int numUnenclosedLeaves = 0;
@@ -336,6 +335,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
     Tree rootRewritesAsTaggedWordEg = null;
     for (Tree t : this) {
       roots.incrementCount(t.value());
+      rootEgs.put(t.value(), t);
       numTrees++;
       int leng = t.yield().size();
       if (leng <= 40) {
@@ -425,6 +425,10 @@ public abstract class Treebank extends AbstractCollection<Tree> {
         pw.println("  The root category is: " + root);
       } else {
         pw.println("  Warning! " + roots.size() + " different roots in treebank: " + Counters.toString(roots, nf));
+        pw.println("  Examples:");
+        for (Tree t : rootEgs.values()) {
+          pw.println("  " + t);
+        }
       }
       if (numNonUnaryRoots > 0) {
         pw.print("  Warning! " + numNonUnaryRoots + " trees without unary initial rewrite.  ");

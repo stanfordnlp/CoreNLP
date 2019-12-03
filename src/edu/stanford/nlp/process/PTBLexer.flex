@@ -623,7 +623,7 @@ APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
 /* HTHING recognizes hyphenated words, including ones with various kinds of numbers in them. And with underscores. */
 HTHING = [\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD]*([-_]([\p{Alpha}\p{Digit}\u00AD]+(\.[:digit:]+)?|{ACRO2}\.))+
 /* from the CLEAR (biomedical?) treebank documentation */
-/* we're going to split on most hypens except a few */
+/* we're going to split on most hyphens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
 /*
 Hyphenated words that are allowed to be kept together match these patterns.
