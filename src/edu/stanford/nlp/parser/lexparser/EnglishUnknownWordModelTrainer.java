@@ -48,7 +48,7 @@ public class EnglishUnknownWordModelTrainer
   }
 
   /**
-   * Trains this UWM on the Collection of trees.
+   * Trains this UWM on the tagged word tw at position loc with weighting weight.
    */
   public void train(TaggedWord tw, int loc, double weight) {
     IntTaggedWord iTW =
