@@ -757,7 +757,42 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   } // end static class FileHandler
 
+  private int maybeAlterStanfordTimeout(HttpExchange httpExchange, int timeoutMilliseconds) {
+    if ( ! stanford) {
+      return timeoutMilliseconds;
+    }
+    try {
+      // Check for too long a timeout from an unauthorized source
+      if (timeoutMilliseconds > 15000) {
+        // If two conditions:
+        //   (1) The server is running on corenlp.run (i.e., corenlp.stanford.edu)
+        //   (2) The request is not coming from a *.stanford.edu" email address
+        // Then force the timeout to be 15 seconds
+        if ("corenlp.stanford.edu".equals(InetAddress.getLocalHost().getHostName()) &&
+            ! httpExchange.getRemoteAddress().getHostName().toLowerCase().endsWith("stanford.edu")) {
+          timeoutMilliseconds = 15000;
+        }
+      }
+      return timeoutMilliseconds;
+    } catch (UnknownHostException uhe) {
+      return timeoutMilliseconds;
+    }
+  }
 
+  protected int getTimeout(Properties props, HttpExchange httpExchange) {
+    int timeoutMilliseconds;
+    try {
+      timeoutMilliseconds = Integer.parseInt(props.getProperty("timeout",
+                                                               Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
+      timeoutMilliseconds = maybeAlterStanfordTimeout(httpExchange, timeoutMilliseconds);
+      
+    } catch (NumberFormatException e) {
+      timeoutMilliseconds = StanfordCoreNLPServer.this.timeoutMilliseconds;
+    }
+    return timeoutMilliseconds;
+  }
+
+  
   /**
    * The main handler for taking an annotation request, and annotating it.
    */
@@ -884,15 +919,7 @@ public class StanfordCoreNLPServer implements Runnable {
           return ann;
         });
         Annotation completedAnnotation;
-        int timeoutMilliseconds;
-        try {
-          timeoutMilliseconds = Integer.parseInt(props.getProperty("timeout",
-                                                 Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
-          timeoutMilliseconds = maybeAlterStanfordTimeout(httpExchange, timeoutMilliseconds);
-
-        } catch (NumberFormatException e) {
-          timeoutMilliseconds = StanfordCoreNLPServer.this.timeoutMilliseconds;
-        }
+        int timeoutMilliseconds = getTimeout(props, httpExchange);
         completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
         completedAnnotationFuture = null;  // No longer any need for the future
 
@@ -934,28 +961,6 @@ public class StanfordCoreNLPServer implements Runnable {
         if (completedAnnotationFuture != null) {  // just in case...
           completedAnnotationFuture.cancel(true);
         }
-      }
-    }
-
-    private int maybeAlterStanfordTimeout(HttpExchange httpExchange, int timeoutMilliseconds) {
-      if ( ! stanford) {
-        return timeoutMilliseconds;
-      }
-      try {
-        // Check for too long a timeout from an unauthorized source
-        if (timeoutMilliseconds > 15000) {
-          // If two conditions:
-          //   (1) The server is running on corenlp.run (i.e., corenlp.stanford.edu)
-          //   (2) The request is not coming from a *.stanford.edu" email address
-          // Then force the timeout to be 15 seconds
-          if ("corenlp.stanford.edu".equals(InetAddress.getLocalHost().getHostName()) &&
-                  ! httpExchange.getRemoteAddress().getHostName().toLowerCase().endsWith("stanford.edu")) {
-            timeoutMilliseconds = 15000;
-          }
-        }
-        return timeoutMilliseconds;
-      } catch (UnknownHostException uhe) {
-        return timeoutMilliseconds;
       }
     }
 
@@ -1072,10 +1077,13 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Send response
       try {
-        int tokensRegexTimeOut = (lastPipeline.get() == null) ? 75 : 5;
-        Pair<String, Annotation> response = future.get(tokensRegexTimeOut, TimeUnit.SECONDS);
-        byte[] content = response.first.getBytes();
+        int timeout = getTimeout(props, httpExchange);
+        if (lastPipeline.get() == null) {
+          timeout = timeout + 60000; // add 60 seconds for loading a pipeline if needed
+        }
+        Pair<String, Annotation> response = future.get(timeout, TimeUnit.MILLISECONDS);
         Annotation completedAnnotation = response.second;
+        byte[] content = response.first.getBytes();
         sendAndGetResponse(httpExchange, content);
         if (completedAnnotation != null && ! StringUtils.isNullOrEmpty(props.getProperty("annotators"))) {
           callback.accept(new FinishedRequest(props, completedAnnotation, params.get("pattern"), null));
@@ -1199,8 +1207,11 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Send response
       try {
-        int semgrexTimeOut = (lastPipeline.get() == null) ? 75 : 5;
-        Pair<String, Annotation> pair = response.get(semgrexTimeOut, TimeUnit.SECONDS);
+        int timeout = getTimeout(props, httpExchange);
+        if (lastPipeline.get() == null) {
+          timeout = timeout + 60000; // add 60 seconds for loading a pipeline if needed
+        }
+        Pair<String, Annotation> pair = response.get(timeout, TimeUnit.MILLISECONDS);
         Annotation completedAnnotation = pair.second;
         byte[] content = pair.first.getBytes();
         sendAndGetResponse(httpExchange, content);
@@ -1307,8 +1318,11 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Send response
       try {
-        int tregexTimeOut = (lastPipeline.get() == null) ? 75 : 5 ;
-        Pair<String, Annotation> pair = response.get(tregexTimeOut, TimeUnit.SECONDS);
+        int timeout = getTimeout(props, httpExchange);
+        if (lastPipeline.get() == null) {
+          timeout = timeout + 60000; // add 60 seconds for loading a pipeline if needed
+        }
+        Pair<String, Annotation> pair = response.get(timeout, TimeUnit.MILLISECONDS);
         Annotation completedAnnotation = pair.second;
         byte[] content = pair.first.getBytes();
         sendAndGetResponse(httpExchange, content);
