@@ -857,7 +857,7 @@ public class SemgrexTest extends TestCase {
     String pattern3 = "{word:ate} > {word:Bill} > {word:muffins}";
     semgrex = SemgrexPattern.compile(pattern);
     semgrex2 = SemgrexPattern.compile(pattern2);
-    SemgrexPattern semgrex3 = SemgrexPattern.compile(pattern2);
+    SemgrexPattern semgrex3 = SemgrexPattern.compile(pattern3);
     assertEquals(semgrex.toString(), semgrex3.toString());
     assertEquals(semgrex2.toString(), semgrex3.toString());
 
