@@ -1,6 +1,6 @@
 
 serializeTo=truecasing.full.qn.ser.gz
-trainFileList=/scr/nlp/data/gale/NIST09/truecaser/crf/noUN.input
+trainFileList=train.1_5M.truecase.txt
 testFile=/scr/nlp/data/gale/AE-MT-eval-data/mt06/cased/ref0
 
 maxLeft=1

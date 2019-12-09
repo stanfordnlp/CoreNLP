@@ -1,11 +1,10 @@
 
 serializeTo=truecasing.fast.qn.ser.gz
-trainFileList=/scr/nlp/data/gale/NIST09/truecaser/crf/noUN.input
-testFile=/scr/nlp/data/gale/AE-MT-eval-data/mt06/cased/ref0
+trainFileList=train.4_5M.truecase.txt
+#testFile=/scr/nlp/data/gale/AE-MT-eval-data/mt06/cased/ref0
+testFile=test.truecase.txt
 
 map=word=0,answer=1
-
-wordFunction = edu.stanford.nlp.process.LowercaseFunction
 
 useClassFeature=true
 useWord=true
