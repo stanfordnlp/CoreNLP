@@ -11,19 +11,21 @@ interface SemgrexParserConstants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int RELATION = 4;
+  int WHITESPACE = 1;
   /** RegularExpression Id. */
-  int ALIGNRELN = 5;
+  int RELATION = 2;
   /** RegularExpression Id. */
-  int IDENTIFIER = 6;
+  int ALIGNRELN = 3;
   /** RegularExpression Id. */
-  int NUMBER = 7;
+  int IDENTIFIER = 4;
   /** RegularExpression Id. */
-  int EMPTY = 8;
+  int NUMBER = 5;
   /** RegularExpression Id. */
-  int ROOT = 9;
+  int EMPTY = 6;
   /** RegularExpression Id. */
-  int REGEX = 10;
+  int ROOT = 7;
+  /** RegularExpression Id. */
+  int REGEX = 8;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -31,9 +33,7 @@ interface SemgrexParserConstants {
   /** Literal token values. */
   String[] tokenImage = {
     "<EOF>",
-    "\" \"",
-    "\"\\r\"",
-    "\"\\t\"",
+    "<WHITESPACE>",
     "<RELATION>",
     "\"@\"",
     "<IDENTIFIER>",

@@ -10,8 +10,11 @@ package edu.stanford.nlp.semgraph.semgrex;
 // all generated classes are in this package
 
 //imports
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 class SemgrexParser {
 
@@ -24,15 +27,39 @@ class SemgrexParser {
   // lets us make sure we don't name new nodes under a negation
   private Set<String> knownVariables = Generics.newHashSet();
 
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SemgrexParser.class);
+  private boolean deprecatedAmp = false;
+  private static boolean warnedAmp = false;
+  private boolean deprecatedNodeConj = false;
+  private static boolean warnedNodeConj = false;
+
+  private String fullExpression(Token startToken) {
+    StringBuilder result = new StringBuilder();
+    for (Token p = startToken; p != null; p = p.next) {
+      if (p.specialToken != null) {
+        result.append(p.specialToken.image);
+      }
+      result.append(p.image);
+    }
+    return result.toString();
+  }
+
+  private void warnDeprecated(String warning, Token startToken) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    (new RuntimeException()).printStackTrace(pw);
+    String trace = sw.toString();
+    trace = trace.substring(trace.lastIndexOf("SemgrexParser"));
+    trace = trace.substring(trace.indexOf("at "));
+    log.warn(warning + "\n    " + fullExpression(startToken) + "\n    Current stack: " + trace);
+  }
 }
 
 PARSER_END(SemgrexParser)
 
-SKIP:
+SPECIAL_TOKEN:
 {
-	" "
-|	"\r"
-|	"\t"
+	< WHITESPACE: (" " | "\r" | "\t")+ >
 }
 
 TOKEN:
@@ -51,8 +78,13 @@ SemgrexPattern Root() : {
   SemgrexPattern node;
   Token reverse = null;
   List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+  Token startToken = null;
   // a local variable
 } {
+  {
+    // start from 1 since we haven't parsed anything yet
+    startToken = getToken(1);
+  }
   (
     (reverse = <ALIGNRELN> node = SubNode(GraphRelation.ALIGNED_ROOT) "\n")
     |
@@ -62,9 +94,21 @@ SemgrexPattern Root() : {
     )
   )
   {
-    if (children.size() <= 1)
-      return node;
-    return new CoordinationPattern(true, children, true, true);
+    if (children.size() > 1)
+      node = new CoordinationPattern(true, children, true, true);
+    if (deprecatedAmp) {
+      if (!warnedAmp) {
+        warnDeprecated("Use of & in semgrex patterns is deprecated and will be removed in a future release.  It is equivalent to the same expression without the &.  Offending expression: ", startToken);
+        warnedAmp = true;
+      }
+    }
+    if (deprecatedNodeConj) {
+      if (!warnedNodeConj) {
+        warnDeprecated("Use of node conjugation (expressions such as '< [foo bar]' or '< [foo & bar]') is deprecated and will be removed in a future release.  The issue is that expressions such as '[foo bar] < zzz' may intuitively mean that foo < zzz, bar < zzz, zzz the same for both cases, but that is not the way the parser interprets this expression.  Changing the functionality might break existing expressions, and anyway this can be rewritten in various ways such as 'zzz > foo > bar' or 'foo < zzz=a : bar < zzz=a'.  Offending expression: ", startToken);
+        warnedNodeConj = true;
+      }
+    }
+    return node;
   }
 
 }
@@ -107,7 +151,7 @@ SemgrexPattern RelationConj() : {
 	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
 } {
     (	  (child = ModRelation() ) { children.add(child); }
-	( ( ("&")? child = ModRelation() ) { children.add(child); } )* )
+	( ( ("&" { deprecatedAmp = true; } )? child = ModRelation() ) { children.add(child); } )* )
  	{ if (children.size() == 1) {
 		return child;
 	  } else {
@@ -197,7 +241,7 @@ SemgrexPattern NodeConj(GraphRelation r) : {
 	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
 } {
     (	 (child = ModNode(r) ) { children.add(child); }
-	( ( ("&")? child = ModNode(r) ) { children.add(child); } )* )
+	( ( ("&")? child = ModNode(r) ) { children.add(child); deprecatedNodeConj = true; } )* )
  	{ if (children.size() == 1)
 		return child;
 	  else
