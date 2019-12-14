@@ -58,9 +58,9 @@ public class OpenIEDemo {
       // Print the triples
       for (RelationTriple triple : triples) {
         System.out.println(triple.confidence + "\t" +
-            triple.subjectLemmaGloss() + "\t" +
-            triple.relationLemmaGloss() + "\t" +
-            triple.objectLemmaGloss());
+            triple.subjectGloss() + "\t" +
+            triple.relationGloss() + "\t" +
+            triple.objectGloss());
       }
 
       // Alternately, to only run e.g., the clause splitter:
