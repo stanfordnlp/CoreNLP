@@ -7,6 +7,11 @@ truecasing.4_5M.fast.caseless.qn.ser.gz is another model, but works on caseless 
 
 1.5M...ser.gz are smaller models if needed
 
+MixDisambiguation.list came from... somewhere.  
+Most likely it was generated with
+projects/core/src/edu/stanford/nlp/truecaser/MixDisambiguation.java
+but the question then is, what data was used?
+
 the fast models mean they have been retrained after pruning (a CRF training feature)
 the full model does not have this feature and is huge
 
