@@ -176,6 +176,28 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   /**
+   * Returns whether this node is the root of a possibly binarized
+   * tree.  This is slightly different from "binary" in that nodes
+   * with 1 or 2 children are allowed.  The name is chosen because the
+   * TreeBinarizer produces trees which look like this.
+   */
+  public boolean isBinarized() {
+    if (isLeaf() || isPreTerminal()) {
+      return true;
+    }
+
+    Tree[] kids = children();
+    if (kids.length > 2) {
+      return false;
+    }
+    if (!kids[0].isBinarized())
+      return false;
+    if (kids.length == 2 && !kids[1].isBinarized())
+      return false;
+    return true;
+  }
+
+  /**
    * Implements equality for Tree's.  Two Tree objects are equal if they
    * have equal {@link #value}s, the same number of children, and their children
    * are pairwise equal.

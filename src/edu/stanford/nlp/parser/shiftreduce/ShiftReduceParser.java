@@ -309,6 +309,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     HeadFinder binaryHeadFinder = new BinaryHeadFinder(op.tlpParams.headFinder());
     List<Tree> binarizedTrees = Generics.newArrayList();
     for (Tree tree : treebank) {
+      if (!tree.isBinarized()) {
+        log.warn("Found a tree which was not properly binarized.  So-called binarized tree is as follows:\n" +
+                 tree.pennString());
+        continue;
+      }
       Trees.convertToCoreLabels(tree);
       tree.percolateHeadAnnotations(binaryHeadFinder);
       // Index from 1.  Tools downstream expect index from 1, so for
