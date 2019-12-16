@@ -26,7 +26,8 @@ public class TrueCaseAnnotatorITest {
 
   @Test
   public void testTrueCaser() {
-    Assert.assertEquals("Different number of truecasings done", 12, 
+    // Results used to be higher, but the new UD2.0 style tokenization throws off names like Al-___
+    Assert.assertEquals("Different number of truecasings done", 25,
                         runTest("edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.sgm"));
   }
 

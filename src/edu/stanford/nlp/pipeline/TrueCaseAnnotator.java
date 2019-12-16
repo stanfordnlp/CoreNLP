@@ -88,6 +88,13 @@ public class TrueCaseAnnotator implements Annotator  {
     }
 
     // Load map containing mixed-case words:
+    // TODO:
+    // this file has some weirdness in it
+    // for example, 4 different interpretations of el-:
+    //   EL-Dafla, el-Ela, El-Ein, EL-ALY
+    // it is also out of date in that it doesn't have iPhone, iMac
+    // and on top of all that, it doesn't support hyphenated words any
+    //   more because of the new tokenization
     mixedCaseMap = loadMixedCaseMap(mixedCaseFileName);
   }
 
