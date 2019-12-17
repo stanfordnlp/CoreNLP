@@ -29,14 +29,6 @@ public class TreeFunctions {
   private TreeFunctions() {
   }
 
-  private static String pennEscapeParentheses(String s) {
-    if (s.equals("("))
-      return "-LRB-";
-    else if (s.equals(")"))
-      return "-RRB-";
-    else
-      return s;
-  }
 
   private static class LabeledTreeToStringLabeledTreeFunction implements Function<Tree, Tree> {
 
@@ -47,7 +39,7 @@ public class TreeFunctions {
         return null;
       }
       if (t.isLeaf()) {
-        return tf.newLeaf(new StringLabel(pennEscapeParentheses(t.label().value())));
+        return tf.newLeaf(new StringLabel(t.label().value()));
       }
       if (t.isPreTerminal()) {
         return tf.newTreeNode(new StringLabel(t.label().value()), Collections.singletonList(helper(t.children()[0])));
