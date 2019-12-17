@@ -27,9 +27,9 @@ import edu.stanford.nlp.ling.HasWord;
  * {@code TreeNormalizers} and forgetting to include the
  * unescaping.
  * <br>
- * Also removed are -LRB- and -RRB-.  A corresponding re-escaping in
- * the writers prints that back out.  This way, tools such as the
- * parser see () instead of -LRB- -RRB-.
+ * Also removed are -LRB- and -RRB- as leaves.  A corresponding
+ * re-escaping in the writers prints that back out.  This way, tools
+ * such as the parser see () instead of -LRB- -RRB-.
  *
  * @author Christopher Manning
  * @author Roger Levy
@@ -202,8 +202,7 @@ public class PennTreeReader implements TreeReader  {
           if (label != null) {
             label = STAR_PATTERN.matcher(label).replaceAll("*");
             label = SLASH_PATTERN.matcher(label).replaceAll("/");
-            label = LRB_PATTERN.matcher(label).replaceAll("(");
-            label = RRB_PATTERN.matcher(label).replaceAll(")");
+            // do not convert -LRB- or -RRB- tags internal to the tree
           }
 
           Tree newTree = treeFactory.newTreeNode(label, null); // dtrs are added below

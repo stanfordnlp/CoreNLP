@@ -38,7 +38,7 @@ public class PennTreeReaderTest extends TestCase {
     PennTreeReader treeReader = new PennTreeReader(reader);
     Tree tree = treeReader.readTree();
     assertTrue(tree != null);
-    assertEquals("(", tree.label().value());
+    assertEquals("-LRB-", tree.label().value());
     assertEquals(")", tree.children()[0].label().value());
 
     assertEquals(tree.toString(), treeText);

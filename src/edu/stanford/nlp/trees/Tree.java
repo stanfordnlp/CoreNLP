@@ -707,8 +707,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     } else {
       sb.append('(');
       if (label() != null) {
+        // don't update text here - we want to keep -LRB- as a tag, for example
         String text = labelFormatter.apply(label());
-        sb.append(updateBrackets(text));
+        sb.append(text);
       }
       Tree[] kids = children();
       if (kids != null) {
