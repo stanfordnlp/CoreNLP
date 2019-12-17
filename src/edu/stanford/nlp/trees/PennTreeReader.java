@@ -17,7 +17,7 @@ import edu.stanford.nlp.ling.HasWord;
  * files. The reader is implemented as a push-down automaton (PDA) that parses the Lisp-style
  * format in which the trees are stored. This reader is compatible with both PTB
  * and PATB trees.
- * <p>
+ * <br>
  * One small detail to note is that the {@code PennTreeReader}
  * silently replaces \* with * and \/ with /.  Two possible designs
  * for this were to make the {@code PennTreeReader} always do
@@ -26,6 +26,10 @@ import edu.stanford.nlp.ling.HasWord;
  * to avoid the problem of people making new
  * {@code TreeNormalizers} and forgetting to include the
  * unescaping.
+ * <br>
+ * Also removed are -LRB- and -RRB-.  A corresponding re-escaping in
+ * the writers prints that back out.  This way, tools such as the
+ * parser see () instead of -LRB- -RRB-.
  *
  * @author Christopher Manning
  * @author Roger Levy
@@ -172,6 +176,8 @@ public class PennTreeReader implements TreeReader  {
 
   private static final Pattern STAR_PATTERN = Pattern.compile("\\\\\\*");
   private static final Pattern SLASH_PATTERN = Pattern.compile("\\\\/");
+  private static final Pattern LRB_PATTERN = Pattern.compile("-LRB-");
+  private static final Pattern RRB_PATTERN = Pattern.compile("-RRB-");
 
 
   private Tree getTreeFromInputStream() throws NoSuchElementException {
@@ -196,6 +202,8 @@ public class PennTreeReader implements TreeReader  {
           if (label != null) {
             label = STAR_PATTERN.matcher(label).replaceAll("*");
             label = SLASH_PATTERN.matcher(label).replaceAll("/");
+            label = LRB_PATTERN.matcher(label).replaceAll("(");
+            label = RRB_PATTERN.matcher(label).replaceAll(")");
           }
 
           Tree newTree = treeFactory.newTreeNode(label, null); // dtrs are added below
@@ -236,6 +244,8 @@ public class PennTreeReader implements TreeReader  {
           String terminal = (treeNormalizer == null) ? token : treeNormalizer.normalizeTerminal(token);
           terminal = STAR_PATTERN.matcher(terminal).replaceAll("*");
           terminal = SLASH_PATTERN.matcher(terminal).replaceAll("/");
+          terminal = LRB_PATTERN.matcher(terminal).replaceAll("(");
+          terminal = RRB_PATTERN.matcher(terminal).replaceAll(")");
           Tree leaf = treeFactory.newLeaf(terminal);
           if (leaf.label() instanceof HasIndex) {
             HasIndex hi = (HasIndex) leaf.label();

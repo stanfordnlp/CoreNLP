@@ -13,20 +13,33 @@ import java.io.StringReader;
  */
 public class PennTreeReaderTest extends TestCase {
   public void testRead() throws IOException {
-    String treeText = "(1 (2 This)) (3 (4 is) (5 a)) (6 (\\* small) (7 \\/test))";
+    String treeText = "(1 (2 This)) (3 (4 is) (5 a)) (6 (\\* small) (7 \\/test)) (-LRB- -RRB-) (asdf-LRB-asdf asdf-RRB-asdf)";
     StringReader reader = new StringReader(treeText);
     PennTreeReader treeReader = new PennTreeReader(reader);
 
     String[] expected = { "(1 (2 This))",
                           "(3 (4 is) (5 a))",
-                          "(6 (* small) (7 /test))" };
+                          "(6 (* small) (7 /test))",
+                          "(-LRB- -RRB-)",
+                          "(asdf-LRB-asdf asdf-RRB-asdf)" };
 
     for (int i = 0; i < expected.length; ++i) {
       Tree tree = treeReader.readTree();
       assertTrue(tree != null);
+      System.out.println(tree);
       assertEquals(expected[i], tree.toString());
     }
     Tree tree = treeReader.readTree();
     assertFalse(tree != null);
+  }
+
+  public void testParens() throws IOException {
+    String treeText = "(-LRB- -RRB-)";
+    StringReader reader = new StringReader(treeText);
+    PennTreeReader treeReader = new PennTreeReader(reader);
+    Tree tree = treeReader.readTree();
+    assertTrue(tree != null);
+    assertEquals("(", tree.label().value());
+    assertEquals(")", tree.children()[0].label().value());
   }
 }
