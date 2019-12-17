@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasIndex;
@@ -673,6 +674,19 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return toStringBuilder(sb, label -> (label.value() == null) ? "": label.value());
   }
 
+
+  private static final Pattern LRB_PATTERN = Pattern.compile("[(]");
+  private static final Pattern RRB_PATTERN = Pattern.compile("[)]");
+
+  public static String updateBrackets(String text) {
+    if (text == null) {
+      return text;
+    }
+    text = LRB_PATTERN.matcher(text).replaceAll("-LRB-");
+    text = RRB_PATTERN.matcher(text).replaceAll("-RRB-");
+    return text;
+  }
+
   /**
    * Appends the printed form of a parse tree (as a bracketed String)
    * to a {@code StringBuilder}.
@@ -686,13 +700,15 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   public StringBuilder toStringBuilder(StringBuilder sb, Function<Label,String> labelFormatter) {
     if (isLeaf()) {
       if (label() != null) {
-        sb.append(labelFormatter.apply(label()));
+        String text = labelFormatter.apply(label());
+        sb.append(updateBrackets(text));
       }
       return sb;
     } else {
       sb.append('(');
       if (label() != null) {
-        sb.append(labelFormatter.apply(label()));
+        String text = labelFormatter.apply(label());
+        sb.append(updateBrackets(text));
       }
       Tree[] kids = children();
       if (kids != null) {

@@ -26,7 +26,6 @@ public class PennTreeReaderTest extends TestCase {
     for (int i = 0; i < expected.length; ++i) {
       Tree tree = treeReader.readTree();
       assertTrue(tree != null);
-      System.out.println(tree);
       assertEquals(expected[i], tree.toString());
     }
     Tree tree = treeReader.readTree();
@@ -41,5 +40,10 @@ public class PennTreeReaderTest extends TestCase {
     assertTrue(tree != null);
     assertEquals("(", tree.label().value());
     assertEquals(")", tree.children()[0].label().value());
+
+    assertEquals(tree.toString(), treeText);
+    assertEquals(tree.pennString(), treeText + "\n");
+
+    assertTrue(treeReader.readTree() == null);
   }
 }
