@@ -55,19 +55,25 @@
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-queryparser</artifactId>
-      <version>7.5.0</version>
+      <version>4.10.3</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-analyzers-common</artifactId>
-      <version>7.5.0</version>
+      <version>4.10.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queries</artifactId>
+      <version>4.10.3</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>
-      <version>7.5.0</version>
+      <version>4.10.3</version>
     </dependency>
 
     <dependency>
@@ -89,21 +95,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.ejml</groupId>
-      <artifactId>ejml-core</artifactId>
-      <version>0.38</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.ejml</groupId>
-      <artifactId>ejml-ddense</artifactId>
-      <version>0.38</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.ejml</groupId>
-      <artifactId>ejml-simple</artifactId>
-      <version>0.38</version>
+      <groupId>com.googlecode.efficient-java-matrix-library</groupId>
+      <artifactId>ejml</artifactId>
+      <version>0.23</version>
     </dependency>
 
     <dependency>
