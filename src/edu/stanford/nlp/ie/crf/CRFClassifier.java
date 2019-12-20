@@ -906,7 +906,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       labelIndex.add(l);
       label = Arrays.copyOf(label, window);
       for (int j = 0; j < label.length; j++) {
-        if (label[j]++ < numClasses) break;
+        label[j]++;
+        if (label[j] < numClasses) break;
         label[j] = 0;
         if (j == label.length - 1) break OUTER;
       }
