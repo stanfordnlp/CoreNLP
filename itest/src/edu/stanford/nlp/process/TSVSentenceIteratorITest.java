@@ -44,8 +44,8 @@ public class TSVSentenceIteratorITest {
                     "3424",
                     "d2-s1-a1",
                     "0",
-                    "{Chess,is,not,a,predominantly,physical,sport,\"\",\"\",yet,neither,are,shooting,and,curling,-LRB-,which,\"\",\"\",in,fact,\"\",\"\",has,been,nicknamed,``,chess,on,ice,'',5,-RRB-,.}",
-                    "{chess,be,not,a,predominantly,physical,sport,\"\",\"\",yet,neither,be,shooting,and,curling,-lrb-,which,\"\",\"\",in,fact,\"\",\"\",have,be,nickname,``,chess,on,ice,'',5,-rrb-,.}",
+                    "{Chess,is,not,a,predominantly,physical,sport,\"\",\"\",yet,neither,are,shooting,and,curling,-LRB-,which,\"\",\"\",in,fact,\"\",\"\",has,been,nicknamed,``,chess,on,ice,'',5,),.}",
+                    "{chess,be,not,a,predominantly,physical,sport,\"\",\"\",yet,neither,be,shooting,and,curling,-lrb-,which,\"\",\"\",in,fact,\"\",\"\",have,be,nickname,``,chess,on,ice,'',5,),.}",
                     "{NN,VBZ,RB,DT,RB,JJ,NN,\"\",\"\",RB,DT,VBP,JJ,CC,NN,-LRB-,WDT,\"\",\"\",IN,NN,\"\",\"\",VBZ,VBN,VBN,``,NN,IN,NN,'',LS,-RRB-,.}",
                     "{O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,NUMBER,O,O}",
                     "{0,6,9,13,15,29,38,43,45,49,57,61,70,74,82,83,88,90,93,97,99,103,108,118,119,125,128,131,132,133,134}",
@@ -73,10 +73,10 @@ public class TSVSentenceIteratorITest {
     Assert.assertEquals(0, sentence.sentenceIndex());
     Assert.assertEquals("Chess is not a predominantly physical sport, yet neither are shooting and curling (which, in fact, has been nicknamed “chess on ice”5)." , sentence.text());
     Assert.assertArrayEquals(new String[]{
-            "Chess","is","not","a","predominantly","physical","sport",",","yet","neither","are","shooting","and","curling","-LRB-","which",",","in","fact",",","has","been","nicknamed","``","chess","on","ice","''","5","-RRB-","."
+            "Chess","is","not","a","predominantly","physical","sport",",","yet","neither","are","shooting","and","curling","-LRB-","which",",","in","fact",",","has","been","nicknamed","``","chess","on","ice","''","5",")","."
     }, sentence.words().toArray());
     Assert.assertArrayEquals(new String[]{
-            "chess","be","not","a","predominantly","physical","sport",",","yet","neither","be","shooting","and","curling","-lrb-","which",",","in","fact",",","have","be","nickname","``","chess","on","ice","''","5","-rrb-","."
+            "chess","be","not","a","predominantly","physical","sport",",","yet","neither","be","shooting","and","curling","-lrb-","which",",","in","fact",",","have","be","nickname","``","chess","on","ice","''","5",")","."
     }, sentence.lemmas().toArray());
     Assert.assertArrayEquals(new String[]{
             "NN","VBZ","RB","DT","RB","JJ","NN",",","RB","DT","VBP","JJ","CC","NN","-LRB-","WDT",",","IN","NN",",","VBZ","VBN","VBN","``","NN","IN","NN","''","LS","-RRB-","."
@@ -101,6 +101,11 @@ public class TSVSentenceIteratorITest {
     // System.err.println(Arrays.asList(out));
     // System.err.println(Arrays.asList(TSVUtils.parseArray(in).toArray()));
     Assert.assertArrayEquals(out, TSVUtils.parseArray(in).toArray());
+
+    String in2 = "{Chess,is,not,a,predominantly,physical,sport,\"\",\"\",yet,neither,are,shooting,and,curling,(,which,\"\",\"\",in,fact,\"\",\"\",has,been,nicknamed,``,chess,on,ice,'',5,),.}";
+    String[] out2 = {"Chess","is","not","a","predominantly","physical","sport",",","yet","neither","are","shooting","and","curling","(","which",",","in","fact",",","has","been","nicknamed","``","chess","on","ice","''","5",")","."};
+
+    Assert.assertArrayEquals(out2, TSVUtils.parseArray(in2).toArray());
   }
 
   @Test
