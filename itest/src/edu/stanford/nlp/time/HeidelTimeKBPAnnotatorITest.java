@@ -2,6 +2,7 @@ package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.io.*;
+import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.util.*;
 import java.util.*;
 import junit.framework.TestCase;
@@ -27,6 +28,7 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
   public void testHeidelTimeKBPAnnotatorITest() {
     String testFileContents = IOUtils.stringFromFile(WORKING_DIR+"/example-sentences.txt");
     CoreDocument testDocument = new CoreDocument(testFileContents);
+    testDocument.annotation().set(CoreAnnotations.DocDateAnnotation.class, "2020-01-06");
     pipeline.annotate(testDocument);
     Set<String> outputResults = new HashSet<>();
     for (CoreEntityMention em : testDocument.entityMentions())
