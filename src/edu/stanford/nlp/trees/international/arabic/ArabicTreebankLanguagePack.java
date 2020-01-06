@@ -28,7 +28,8 @@ public class ArabicTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final String[] pennPunctTags = {"PUNC"};
 
-  private static final String[] pennPunctWords = {".","\"",",","-LRB-","-RRB-","-",":","/","?","_","*","%","!",">","-PLUS-","...",";","..","&","=","ر","'","\\","`","......"};
+  // new tokenizers should return (), old tokenizers return -LRB- -RRB-.  so we anticipate both
+  private static final String[] pennPunctWords = {".","\"",",","-LRB-","-RRB-","(",")","-",":","/","?","_","*","%","!",">","-PLUS-","...",";","..","&","=","ر","'","\\","`","......"};
 
   private static final String[] pennSFPunctTags = {"PUNC"};
 

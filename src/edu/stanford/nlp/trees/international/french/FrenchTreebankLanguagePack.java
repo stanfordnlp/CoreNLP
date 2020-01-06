@@ -29,7 +29,8 @@ public class FrenchTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final String[] frenchSFPunctTags = {"PUNC"};
 
-  private static final String[] frenchPunctWords = {"=","*","/","\\","]","[","\"","''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";", "&quot;"};
+  // new tokenizers should return (), old tokenizers return -LRB- -RRB-.  so we anticipate both
+  private static final String[] frenchPunctWords = {"=","*","/","\\","]","[","\"","''", "'", "``", "`", "-LRB-", "-RRB-", "(", ")", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";", "&quot;"};
 
   private static final String[] frenchSFPunctWords = {".", "!", "?"};
 
