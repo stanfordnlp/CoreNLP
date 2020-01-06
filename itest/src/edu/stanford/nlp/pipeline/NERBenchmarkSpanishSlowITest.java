@@ -6,9 +6,9 @@ public class NERBenchmarkSpanishSlowITest  extends NERBenchmarkTestCase {
   @Override
   public void languageSpecificSetUp() {
     language = "spanish";
-    workingDir = "/u/nlp/data/ner/spanish/4class";
-    devGoldFile = "ancora.dev.conll";
-    testGoldFile = "ancora.test.conll";
+    workingDir = "/u/nlp/data/ner/spanish/test";
+    devGoldFile = "ancora-dev-4class.tsv";
+    testGoldFile = "ancora-test-4class.tsv";
     expectedDevScore = 84.94;
     expectedTestScore = 84.59;
   }
