@@ -207,6 +207,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     this.nThreads = nThreads;
     this.maxSentenceLength = maxSentenceLength;
     this.applyNumericClassifiers = true;
+    this.useNERSpecificTokenization = false;
     Properties nerProperties = new Properties();
     nerProperties.setProperty("ner.applyFineGrained", Boolean.toString(fineGrained));
     nerProperties.setProperty("ner.buildEntityMentions", Boolean.toString(entityMentions));
