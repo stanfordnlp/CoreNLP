@@ -28,7 +28,8 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final String[] collinsPunctTags = {"''", "``", ".", ":", ","};
 
-  private static final String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
+  // new tokenizers should return (), old tokenizers return -LRB- -RRB-.  so we anticipate both
+  private static final String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "(", ")", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
 
   private static final String[] pennSFPunctWords = {".", "!", "?"};
 
