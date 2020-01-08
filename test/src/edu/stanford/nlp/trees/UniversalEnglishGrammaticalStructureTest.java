@@ -731,7 +731,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "cc(carnival-6, or-5)\n" +
            "conj(royal-4, carnival-6)\n" +
            "obj(specify-2, ship-7)\n" +
-           "discourse(specify-2, -LRB-:-8)\n"},
+           "discourse(specify-2, (:-8)\n"},
          {TestType.BASIC,
           "(NP (DT those) (RRC (ADVP-TMP (RB still)) (PP-LOC (IN under) (NP (NNP GASB) (NNS rules)))))",
           "root(ROOT-0, those-1)\n" +
