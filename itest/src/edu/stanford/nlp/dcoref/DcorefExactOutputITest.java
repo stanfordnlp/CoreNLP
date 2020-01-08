@@ -143,8 +143,6 @@ public class DcorefExactOutputITest {
   }
 
   private static void compareResults(Map<Integer, List<ExpectedMention>> expected, Map<Integer, CorefChain> chains) {
-    Assert.assertEquals("Unexpected difference in number of chains", expected.size(), chains.size());
-
     // Note that we don't insist on the chain ID numbers being the same
     for (Map.Entry<Integer, List<ExpectedMention>> mapEntry : expected.entrySet()) {
       boolean found = false;
@@ -169,6 +167,8 @@ public class DcorefExactOutputITest {
       }
       Assert.assertTrue("Dcoref produced chain " + chain + " which was not in the expected results", found);
     }
+
+    Assert.assertEquals("Unexpected difference in number of chains", expected.size(), chains.size());
   }
 
   @Test
