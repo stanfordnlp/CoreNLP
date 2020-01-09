@@ -190,9 +190,10 @@ public class EnglishGrammaticalRelations {
   // match "not", "n't", "nt" (for informal writing), or "never" as _complete_ string
   private static final String NOT_PAT = "/^(?i:n[o']?t|never)$/";
 
-  private static final String WESTERN_SMILEY = "/^(?:[<>]?[:;=8][\\-o\\*']?(?:-RRB-|-LRB-|[DPdpO\\/\\\\\\:}{@\\|\\[\\]])|(?:-RRB-|-LRB-|[DPdpO\\/\\\\\\:}{@\\|\\[\\]])[\\-o\\*']?[:;=8][<>]?)$/";
+  // The smiley expressions allow for () or LRB/RRB
+  private static final String WESTERN_SMILEY = "/^(?:[<>]?[:;=8][\\-o\\*']?(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])|(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])[\\-o\\*']?[:;=8][<>]?)$/";
 
-  private static final String ASIAN_SMILEY = "/(?!^--$)^(?:-LRB-)?[\\-\\^x=~<>'][_.]?[\\-\\^x=~<>'](?:-RRB-)?$/";
+  private static final String ASIAN_SMILEY = "/(?!^--$)^(?:-LRB-|[(])?[\\-\\^x=~<>'][_.]?[\\-\\^x=~<>'](?:-RRB-|[)])?$/";
 
   /**
    * The "conjunct" grammatical relation.  A conjunct is the relation between
