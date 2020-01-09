@@ -299,6 +299,7 @@ public class PTBTokenizerTest {
           "Xanadu Pvt. Ltd. replied.",
           " \u2010 - ___ ",
           "whenever one goes 'tisk tisk' at something",
+          "¯\\_(ツ)_/¯",
           "She hates Alex.",
           "An offering of 10 million common shares, via Alex. Brown &amp; Sons.",
   };
@@ -311,6 +312,7 @@ public class PTBTokenizerTest {
           { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
           { "--", "-", "___" },
           { "whenever", "one", "goes", "`", "tisk", "tisk", "'", "at", "something" },
+          { "¯\\_-LRB-ツ-RRB-_/¯" },
           { "She", "hates", "Alex", "."},
           { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},
   };
@@ -323,18 +325,7 @@ public class PTBTokenizerTest {
           { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
           { "\u2010", "-", "___" },
           { "whenever", "one", "goes", "'", "tisk", "tisk", "'", "at", "something" },
-          { "She", "hates", "Alex", "."},
-          { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},
-  };
-
-  private final String[][] moreGoldParens = {
-          { "Joseph", "Someone", "(", "fl.", "2050", "–", "75", ")", "liked", "the", "noble", "gases", ",",
-                  "viz.", "helium", ",", "neon", ",", "argon", ",", "xenon", ",", "krypton", "and", "radon", "." },
-          { "Sambucus", "nigra", "subsp.", "canadensis", "and", "Canis", "spp.", "missing" },
-          { "Jim", "Jackon", "&", "Co.", "LLC", "replied", "." },
-          { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
-          { "\u2010", "-", "___" },
-          { "whenever", "one", "goes", "'", "tisk", "tisk", "'", "at", "something" },
+          { "¯\\_(ツ)_/¯" },
           { "She", "hates", "Alex", "."},
           { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},
   };
@@ -595,7 +586,7 @@ public class PTBTokenizerTest {
   @Test
   public void testPTBTokenizerTokenizeParens() {
     TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
-    runOnTwoArrays(tokFactory, moreInputs, moreGoldParens);
+    runOnTwoArrays(tokFactory, moreInputs, moreGoldUD);
     runAgainstOrig(tokFactory, moreInputs);
   }
 
