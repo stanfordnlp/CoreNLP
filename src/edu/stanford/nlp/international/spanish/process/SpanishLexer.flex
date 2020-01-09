@@ -70,8 +70,12 @@ import edu.stanford.nlp.util.logging.Redwood;
    *     old PTB3 WSJ coding of an ellipsis. "unicode" maps three dot and optional space sequences to
    *     U+2026, the Unicode ellipsis character. "not_cp1252" only remaps invalid cp1252 ellipses to unicode.
    *     "original" uses all ellipses as they were. The default is ptb3. </li>
-   * <li>ptb3Dashes: Whether to turn various dash characters into "--",
-   *     the dominant encoding of dashes in the PTB3 WSJ
+   * <li>dashes: [From CoreNLP 4.0] Select a style for mapping dashes. An enum with possible values
+   *     (case insensitive): unicode, ptb3, not_cp1252, original. "ptb3" maps dashes to "--", the
+   *     most prevalent old PTB3 WSJ coding of a dash (though some are just "-" HYPHEN-MINUS).
+   *     "unicode" maps "-", "--", and "---" HYPHEN-MINUS sequences and CP1252 dashes to Unicode en and em dashes.
+   *     "not_cp1252" only remaps invalid cp1252 dashes to unicode.
+   *     "original" leaves all dashes as they were. The default is "not_cp1252". </li>
    * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
    *     of / and * as the old PTB3 WSJ does for some reason (something to do
    *     with Lisp readers??).
@@ -120,8 +124,7 @@ import edu.stanford.nlp.util.logging.Redwood;
         normalizeParentheses = val;
         normalizeOtherBrackets = val;
         ellipsisStyle = val ? LexerUtils.EllipsesEnum.PTB3 : LexerUtils.EllipsesEnum.ORIGINAL;
-        asciiDash = val;
-        ptb3Dashes = val;
+        dashesStyle = val ? LexerUtils.DashesEnum.PTB3 : LexerUtils.DashesEnum.ORIGINAL;
         quoteStyle = val ? LexerUtils.QuotesEnum.ASCII : LexerUtils.QuotesEnum.ORIGINAL;
       } else if ("quotes".equals(key)) {
         quoteStyle = LexerUtils.QuotesEnum.valueOf(key.trim().toLowerCase(Locale.ROOT));
@@ -139,10 +142,12 @@ import edu.stanford.nlp.util.logging.Redwood;
         } catch (IllegalArgumentException iae) {
           throw new IllegalArgumentException ("Not a valid ellipses style: " + value);
         }
-      } else if ("asciiDash".equals(key)) {
-          asciiDash = val;
-      } else if ("ptb3Dashes".equals(key)) {
-        ptb3Dashes = val;
+      } else if ("dashes".equals(key)) {
+        try {
+          dashesStyle = LexerUtils.DashesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException iae) {
+          throw new IllegalArgumentException ("Not a valid dashes style: " + value);
+        }
       } else if ("escapeForwardSlashAsterisk".equals(key)) {
         escapeForwardSlashAsterisk = val;
       } else if ("untokenizable".equals(key)) {
@@ -208,8 +213,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean normalizeOtherBrackets;
   private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.PTB3;
   private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.ASCII;
-  private boolean asciiDash;
-  private boolean ptb3Dashes;
+  private LexerUtils.DashesEnum dashesStyle = LexerUtils.DashesEnum.NOT_CP1252;
   private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3;
 
@@ -229,12 +233,11 @@ import edu.stanford.nlp.util.logging.Redwood;
    */
 
   /* Using Ancora style brackets and parens */
-  public static final String openparen = "=LRB=";
-  public static final String closeparen = "=RRB=";
-  public static final String openbrace = "=LCB=";
-  public static final String closebrace = "=RCB=";
+  public static final String openparen = "-LRB-";
+  public static final String closeparen = "-RRB-";
+  public static final String openbrace = "-LCB-";
+  public static final String closebrace = "-RCB-";
 
-  public static final String ptbmdash = "--";
   public static final String NEWLINE_TOKEN = "*NL*";
   public static final String COMPOUND_ANNOTATION = "comp";
   public static final String VB_PRON_ANNOTATION = "vb_pn_attached";
@@ -242,19 +245,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   private static final Pattern NO_BREAK_SPACE = Pattern.compile("\u00A0");
 
-  private static final Pattern LEFT_PAREN_PATTERN = Pattern.compile("\\(");
-  private static final Pattern RIGHT_PAREN_PATTERN = Pattern.compile("\\)");
-
-  private static final Pattern dashes = Pattern.compile("[_\u058A\u2010\u2011]");
-
-  private static String asciiDash(String in) {
-    return dashes.matcher(in).replaceAll("-");
-  }
-
-  private String handleDash(String in) {
-      if (asciiDash) return asciiDash(in);
-      else return in;
-  }
 
   private static String convertToEl(String l) {
     if (Character.isLowerCase(l.charAt(0))) {
@@ -511,17 +501,15 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 
 %%
 
-{SGML}			{ if (!noSGML) {
-             	 return getNext();
-					    }
+{SGML}       { if (!noSGML) {
+                 return getNext();
+               }
             }
-{SPMDASH}		{ if (ptb3Dashes) {
-                return getNext(ptbmdash, yytext()); }
-              else {
-                return getNext();
-              }
-            }
-
+{SPMDASH}               { final String origTxt = yytext();
+                          String tok = LexerUtils.handleDashes(origTxt, dashesStyle);
+                          if (DEBUG) { logger.info("Used {SPMDASH} to recognize " + origTxt + " as " + tok); }
+                          return getNext(tok, origTxt);
+                        }
 {ORDINAL}/{SPACE}       { return getNext(); }
 {SPAMP}			{ return getNormalizedAmpNext(); }
 {SPPUNC} |
@@ -535,10 +523,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           return getNext(origTxt, origTxt, VB_PRON_ANNOTATION);}
 
 {COMPOUND_NOSPLIT}      { final String origTxt = yytext();
-                          return getNext(LexerUtils.handleQuotes(handleDash(origTxt), false, quoteStyle), origTxt);
+                          return getNext(LexerUtils.handleQuotes(LexerUtils.handleDashes(origTxt, dashesStyle), false, quoteStyle), origTxt);
                         }
 {COMPOUND}              { final String origTxt = yytext();
-                          return getNext(LexerUtils.handleQuotes(handleDash(origTxt), false, quoteStyle), origTxt, COMPOUND_ANNOTATION);
+                          return getNext(LexerUtils.handleQuotes(LexerUtils.handleDashes(origTxt, dashesStyle), false, quoteStyle), origTxt, COMPOUND_ANNOTATION);
                         }
 
 {NUM}/{UNIT}            { return getNext(); }
@@ -614,25 +602,20 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           return getNext(LexerUtils.handleQuotes(origTxt, false, quoteStyle), origTxt);
 			      }
 
-{PHONE}    { String txt = yytext();
-			       if (normalizeParentheses) {
-                              txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
-                              txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
-			       }
-			       return getNext(txt, yytext());
-			    }
-\x7F		{ if (invertible) {
-            prevWordAfter.append(yytext());
-          }
-        }
+{PHONE}         { String txt = yytext();
+		  String origTxt = txt;
+		  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
+                  return getNext(txt, yytext());
+		}
+\x7F            { if (invertible) {
+                    prevWordAfter.append(yytext());
+                   }
+                }
 {LESSTHAN}      { return getNext("<", yytext()); }
 {GREATERTHAN}   { return getNext(">", yytext()); }
 {SMILEY}/[^\p{Alpha}\p{Digit}] { String txt = yytext();
                   String origText = txt;
-                  if (normalizeParentheses) {
-                    txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
-                    txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
-                  }
+		  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
                   return getNext(txt, origText);
                 }
 {EMOJI}         { String txt = yytext();
@@ -675,13 +658,14 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                     return getNext();
                   }
                 }
-{HYPHENS}	{ if (yylength() >= 3 && yylength() <= 4 && ptb3Dashes) {
-	            return getNext(ptbmdash, yytext());
-            } else {
-              String origTxt = yytext();
-              return getNext(handleDash(origTxt), origTxt);
-		        }
-		      }
+{HYPHENS}       { final String origTxt = yytext();
+                  String tok = origTxt;
+                  if (yylength() <= 4) {
+                     tok = LexerUtils.handleDashes(origTxt, dashesStyle);
+                  }
+                  if (DEBUG) { logger.info("Used {SPMDASH} to recognize " + origTxt + " as " + tok); }
+                  return getNext(tok, origTxt);
+                }
 {LDOTS}|{SPACEDLDOTS}    { String tok = yytext();
                            String norm = LexerUtils.handleEllipsis(tok, ellipsisStyle);
                            if (DEBUG) { logger.info("Used {LDOTS} to recognize " + tok + " as " + norm); }

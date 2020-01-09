@@ -176,8 +176,8 @@ public class PennTreeReader implements TreeReader  {
 
   private static final Pattern STAR_PATTERN = Pattern.compile("\\\\\\*");
   private static final Pattern SLASH_PATTERN = Pattern.compile("\\\\/");
-  private static final Pattern LRB_PATTERN = Pattern.compile("-LRB-|=LRB=");
-  private static final Pattern RRB_PATTERN = Pattern.compile("-RRB-|=RRB=");
+  private static final Pattern LRB_PATTERN = Pattern.compile("-LRB-");
+  private static final Pattern RRB_PATTERN = Pattern.compile("-RRB-");
 
 
   private Tree getTreeFromInputStream() throws NoSuchElementException {

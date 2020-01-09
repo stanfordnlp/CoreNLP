@@ -13490,11 +13490,9 @@ class FrenchLexer {
           case 69: break;
           case 35: 
             { String txt = yytext();
-              if (normalizeParentheses) {
-                txt = txt.replaceAll("\\(", openparen);
-                txt = txt.replaceAll("\\)", closeparen);
-              }
-              return getNext(txt, yytext());
+	      String origTxt = txt;
+	      txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
+              return getNext(txt, origTxt);
             }
           case 70: break;
           default:

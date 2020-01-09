@@ -538,11 +538,9 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
                         }
 
 {PHONE}     { String txt = yytext();
-              if (normalizeParentheses) {
-                txt = txt.replaceAll("\\(", openparen);
-                txt = txt.replaceAll("\\)", closeparen);
-              }
-              return getNext(txt, yytext());
+	      String origTxt = txt;
+	      txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
+              return getNext(txt, origTxt);
             }
 {SPACE_SEP_NUM}     { return getNext(yytext(),yytext()); }
 0x7f            { if (invertible) {

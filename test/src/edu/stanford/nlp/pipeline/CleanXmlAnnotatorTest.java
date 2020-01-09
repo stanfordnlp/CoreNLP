@@ -308,7 +308,7 @@ public class CleanXmlAnnotatorTest {
             "ssplit.tokenPatternsToDiscard", "\\n,\\*NL\\*",
             "ssplit.boundaryMultiTokenRegex",
             "/\\*NL\\*/ /\\p{Lu}[-\\p{L}]+/+ /,/ ( /[-\\p{L}]+/+ /,/ )? " +
-                    "/[1-3]?[0-9]/ /\\p{Ll}{3,5}/ /=LRB=/ /\\p{Lu}\\p{L}+/ /=RRB=/ /--/",
+                    "/[1-3]?[0-9]/ /\\p{Ll}{3,5}/ /-LRB-/ /\\p{Lu}\\p{L}+/ /-RRB-/ /--/",
             "clean.xmltags", "headline|text|post",
             "clean.singlesentencetags", "HEADLINE|AUTHOR",
             "clean.sentenceendingtags", "TEXT|POST|QUOTE",
@@ -360,7 +360,7 @@ public class CleanXmlAnnotatorTest {
                     "el restaurador salva mas de lo que se cree .\n" +
                     "si toy equibocado con la info que alguien me corrija\n" },
             { "UnknownCnR", "2009-09-09T00:00:00", "http://www.sendspace.com/file/54pxbl\n" +
-                    "Con este registro podras activarlo ;=RRB=\n" },
+                    "Con este registro podras activarlo ;-RRB-\n" },
             { "mysecondskin", "2009-09-11T00:00:00", "gracias pero de verdad esa solucion no sirve\n" },
     };
 

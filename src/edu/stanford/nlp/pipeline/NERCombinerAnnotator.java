@@ -6,12 +6,10 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
-import edu.stanford.nlp.process.CoreLabelProcessor;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.TimeExpression;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -332,11 +330,12 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
 
   /**
-   * Create a copy of an Annotation with NER specific tokenization (e.g. merge hyphen split tokens into one token)
-   * @param originalAnnotation
+   * Create a copy of an Annotation with NER specific tokenization (e.g. merge hyphen split tokens into one token).
+   *
+   * @param originalAnnotation The original annotation
    * @return Annotation with NER specific tokenization
    */
-  public static Annotation annotationWithNERTokenization(Annotation originalAnnotation) {
+  private static Annotation annotationWithNERTokenization(Annotation originalAnnotation) {
     Annotation copyAnnotation = new Annotation();
     // set document text
     copyAnnotation.set(CoreAnnotations.TextAnnotation.class, originalAnnotation.get(CoreAnnotations.TextAnnotation.class));
@@ -344,7 +343,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     copyAnnotation.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
     for (CoreMap sentence : originalAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
       List<CoreLabel> originalTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      List<CoreLabel> copyTokens = new ArrayList<CoreLabel>();
+      List<CoreLabel> copyTokens = new ArrayList<>();
       for (CoreLabel currToken : originalTokens) {
         CoreLabel processedToken = new CoreLabel(currToken);
         CoreLabel lastProcessedToken =

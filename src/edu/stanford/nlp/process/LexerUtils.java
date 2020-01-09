@@ -266,6 +266,7 @@ public class LexerUtils {
     }
   }
 
+  // Other things to consider handling: [_\u058A\u2010\u2011]
   public static String handleDashes(final String tok, DashesEnum dashesStyle) {
     switch (dashesStyle) {
       case UNICODE:
@@ -292,6 +293,21 @@ public class LexerUtils {
       default:
         return tok;
     }
+  }
+
+  private static final Pattern LEFT_PAREN_PATTERN = Pattern.compile("\\(");
+  private static final Pattern RIGHT_PAREN_PATTERN = Pattern.compile("\\)");
+  private static final String PENN_LEFT_PAREN = "-LRB-";
+  private static final String PENN_RIGHT_PAREN = "-RRB-";
+
+
+  public static String pennNormalizeParens(String input, boolean normalizeParentheses) {
+    String output = input;
+    if (normalizeParentheses) {
+      output = LEFT_PAREN_PATTERN.matcher(output).replaceAll(PENN_LEFT_PAREN);
+      output = RIGHT_PAREN_PATTERN.matcher(output).replaceAll(PENN_RIGHT_PAREN);
+    }
+    return output;
   }
 
 }

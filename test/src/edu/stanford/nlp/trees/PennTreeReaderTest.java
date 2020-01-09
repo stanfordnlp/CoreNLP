@@ -13,7 +13,7 @@ import java.io.StringReader;
  */
 public class PennTreeReaderTest extends TestCase {
   public void testRead() throws IOException {
-    String treeText = "(1 (2 This)) (3 (4 is) (5 a)) (6 (\\* small) (7 \\/test)) (-LRB- -RRB-) (-LRB- =RRB=) (-LRB- =LRB=-LRB-) (asdf-LRB-asdf asdf-RRB-asdf)";
+    String treeText = "(1 (2 This)) (3 (4 is) (5 a)) (6 (\\* small) (7 \\/test)) (-LRB- -RRB-) (asdf-LRB-asdf asdf-RRB-asdf)";
     StringReader reader = new StringReader(treeText);
     PennTreeReader treeReader = new PennTreeReader(reader);
 
@@ -21,8 +21,6 @@ public class PennTreeReaderTest extends TestCase {
                           "(3 (4 is) (5 a))",
                           "(6 (* small) (7 /test))",
                           "(-LRB- -RRB-)",
-                          "(-LRB- -RRB-)", // test =RRB= for ancora / spanish trees
-                          "(-LRB- -LRB--LRB-)",
                           "(asdf-LRB-asdf asdf-RRB-asdf)" };
 
     for (int i = 0; i < expected.length; ++i) {

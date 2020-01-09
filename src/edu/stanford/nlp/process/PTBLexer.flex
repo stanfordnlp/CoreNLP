@@ -333,12 +333,9 @@ import edu.stanford.nlp.util.logging.Redwood;
   public static final String closeparen = "-RRB-";
   public static final String openbrace = "-LCB-";
   public static final String closebrace = "-RCB-";
-  public static final String ptbmdash = "--";
 
   /* This pattern now also include newlines, since we sometimes allow them in SGML tokens.... */
   private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ \r\n]");
-  private static final Pattern LEFT_PAREN_PATTERN = Pattern.compile("\\(");
-  private static final Pattern RIGHT_PAREN_PATTERN = Pattern.compile("\\)");
   private static final Pattern HYPHENS = Pattern.compile("[-\u2010-\u2011]");
   private static final Pattern FORWARD_SLASH = Pattern.compile("/");
   private static final Pattern HYPHENS_FORWARD_SLASH = Pattern.compile("[-\u2010-\u2011/]");
@@ -1080,15 +1077,13 @@ RM/{NUM}        { String txt = yytext();
                           return getNext(norm, origTok);
                         }
 {PHONE}                 { String txt = yytext();
-                          if (normalizeSpace) {
-                            txt = txt.replace(' ', '\u00A0'); // change space to non-breaking space
+                          String norm = txt;
+			  if (normalizeSpace) {
+                            norm = norm.replace(' ', '\u00A0'); // change space to non-breaking space
                           }
-                          if (normalizeParentheses) {
-                            txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
-                            txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
-                          }
-                          if (DEBUG) { logger.info("Used {PHONE} to recognize " + yytext() + " as " + txt); }
-                          return getNext(txt, yytext());
+			  norm = LexerUtils.pennNormalizeParens(norm, normalizeParentheses);
+                          if (DEBUG) { logger.info("Used {PHONE} to recognize " + txt + " as " + norm); }
+                          return getNext(norm, txt);
                         }
 {DBLQUOT}/[\p{Alpha}\p{Digit}$]  { String tok = yytext();
                                    String norm = LexerUtils.handleQuotes(tok, true, quoteStyle);
@@ -1107,19 +1102,13 @@ RM/{NUM}        { String txt = yytext();
                         } }
 {SMILEY}/[^\p{Alpha}\p{Digit}] { String txt = yytext();
                   String origText = txt;
-                  if (normalizeParentheses) {
-                    txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
-                    txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
-                  }
+		  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
                   if (DEBUG) { logger.info("Used {SMILEY} to recognize " + origText + " as " + txt); }
                   return getNext(txt, origText);
                 }
 {ASIANSMILEY}   { String txt = yytext();
                   String origText = txt;
-                  if (normalizeParentheses) {
-                    txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
-                    txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
-                  }
+		  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
                   return getNext(txt, origText);
                 }
 {EMOJI}         { String txt = yytext();

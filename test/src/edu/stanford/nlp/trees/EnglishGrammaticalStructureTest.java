@@ -398,7 +398,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
             "cc(royal-4, or-5)\n" +
             "conj(royal-4, carnival-6)\n" +
             "dobj(specify-2, ship-7)\n" +
-            "discourse(specify-2, -LRB-:-8)\n",
+            "discourse(specify-2, (:-8)\n",
         "root(ROOT-0, those-1)\n" +
                 "advmod(under-3, still-2)\n" +
                 "rcmod(those-1, under-3)\n" +
