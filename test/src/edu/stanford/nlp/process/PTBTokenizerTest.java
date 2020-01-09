@@ -327,6 +327,18 @@ public class PTBTokenizerTest {
           { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},
   };
 
+  private final String[][] moreGoldParens = {
+          { "Joseph", "Someone", "(", "fl.", "2050", "–", "75", ")", "liked", "the", "noble", "gases", ",",
+                  "viz.", "helium", ",", "neon", ",", "argon", ",", "xenon", ",", "krypton", "and", "radon", "." },
+          { "Sambucus", "nigra", "subsp.", "canadensis", "and", "Canis", "spp.", "missing" },
+          { "Jim", "Jackon", "&", "Co.", "LLC", "replied", "." },
+          { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
+          { "\u2010", "-", "___" },
+          { "whenever", "one", "goes", "'", "tisk", "tisk", "'", "at", "something" },
+          { "She", "hates", "Alex", "."},
+          { "An", "offering", "of", "10", "million", "common", "shares", ",", "via", "Alex.", "Brown", "&", "Sons", "."},
+  };
+
   @Test
   public void testPTBTokenizerCoreLabel() {
     TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("ptb3Escaping");
@@ -578,6 +590,13 @@ public class PTBTokenizerTest {
             "splitHyphenated=true,splitForwardSlash,ellipses=unicode,invertible");
     runOnTwoArrays(tokFactory, ptbInputs, ptbGoldSplitHyphenated);
     runAgainstOrig(tokFactory, ptbInputs);
+  }
+
+  @Test
+  public void testPTBTokenizerTokenizeParens() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("invertible");
+    runOnTwoArrays(tokFactory, moreInputs, moreGoldParens);
+    runAgainstOrig(tokFactory, moreInputs);
   }
 
 
