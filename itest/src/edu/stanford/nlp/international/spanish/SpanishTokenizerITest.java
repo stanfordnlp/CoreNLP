@@ -51,6 +51,37 @@ public class SpanishTokenizerITest extends TestCase {
 
   private final String[][] spanishGold = {
       { "Esta", "es", "una", "oración", "." },
+      { "¡", "Dímelo", "!" },
+      { "Hazlo", "." },
+      { "Este", "es", "un", "címbalo", "." },
+      { "Metelo", "." },
+      { "Sentémonos", "." },
+      { "Escribámosela", "." },
+      { "No", "comamos", "allí", "." },
+      { "Comamosla", "." },
+      { "sub-20" },
+      { "un", "teléfono", "(", "902.400.345", ")", "." },
+      { "Port-au-Prince" },
+      { "McLaren", "/", "Mercedes" },
+      { "10/12" },
+      { "4X4" },
+      { "3G" },
+      { "3g" },
+      { "sp3" },
+      { "12", "km" },
+      { "12", "km", "/", "h" },
+      { "Los", "hombres", "sentados", "están", "muy", "guapos", "." },
+      { "Hizo", "abrirlos", "." },
+      { "salos", ")", "(", "1", "de" },
+
+      { "13a" },
+      { "5", "a" },
+      { "1", "a" },
+      { "5", "a", "el" },
+  };
+
+  private final String[][] ancoraSpanishGold = {
+      { "Esta", "es", "una", "oración", "." },
       { "¡", "Di", "me", "lo", "!" },
       { "Haz", "lo", "." },
       { "Este", "es", "un", "címbalo", "." },
@@ -60,7 +91,7 @@ public class SpanishTokenizerITest extends TestCase {
       { "No", "comamos", "allí", "." },
       { "Comamos", "la", "." },
       { "sub-20" },
-      { "un", "teléfono", "=LRB=", "902.400.345", "=RRB=", "." },
+      { "un", "teléfono", "-LRB-", "902.400.345", "-RRB-", "." },
       { "Port", "-", "au", "-", "Prince" },
       { "McLaren", "/", "Mercedes" },
       { "10/12" },
@@ -72,7 +103,7 @@ public class SpanishTokenizerITest extends TestCase {
       { "12", "km", "/", "h" },
       { "Los", "hombres", "sentados", "están", "muy", "guapos", "." },
       { "Hizo", "abrir", "los", "." },
-      { "salos", "=RRB=", "=LRB=", "1", "de" },
+      { "salos", "-RRB-", "-LRB-", "1", "de" },
 
       { "13a" },
       { "5", "a" },
@@ -104,7 +135,7 @@ public class SpanishTokenizerITest extends TestCase {
      tf.setOptions("");
      tf.setOptions("tokenizeNLs");
 
-     runSpanish(tf, spanishInputs, spanishGold);
+     runSpanish(tf, spanishInputs, ancoraSpanishGold);
    }
 
   /** Makes a Spanish tokenizer with the options that CoreNLP uses. Results actually no different.... */
@@ -112,7 +143,7 @@ public class SpanishTokenizerITest extends TestCase {
     assert spanishInputs.length == spanishGold.length;
     final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.coreLabelFactory();
     tf.setOptions("");
-    tf.setOptions("invertible,ptb3Escaping=true,splitAll=true");
+    tf.setOptions("invertible,splitAll=false");
 
     runSpanish(tf, spanishInputs, spanishGold);
   }

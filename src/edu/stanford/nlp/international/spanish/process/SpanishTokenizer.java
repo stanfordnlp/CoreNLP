@@ -64,7 +64,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   private SpanishVerbStripper verbStripper;
 
   // Produces the tokenization for parsing used by AnCora (fixed) */
-  public static final String ANCORA_OPTIONS = "ellipses=ptb3,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
+  public static final String ANCORA_OPTIONS = "ellipses=ptb3,normalizeParentheses=true,splitAll=true";
 
   /**
    * Constructor.
