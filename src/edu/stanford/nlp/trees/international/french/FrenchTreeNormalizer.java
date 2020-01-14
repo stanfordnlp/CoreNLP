@@ -57,12 +57,6 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer  {
   public String normalizeTerminal(String terminal) {
     if(terminal == null) return terminal;
 
-    // PTB escaping
-    if(terminal.equals(")"))
-      return "-RRB-";
-    else if(terminal.equals("("))
-      return "-LRB-";
-
     return super.normalizeTerminal(terminal).intern();
   }
 
