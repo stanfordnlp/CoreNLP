@@ -69,6 +69,11 @@ public final class SplitCanditoTrees  {
    * Output Morfette training files instead of PTB-style trees
    */
   private static final boolean MORFETTE_OUTPUT = false;
+
+  /**
+   * return -LRB- instead of (, -RRB- instead of )
+   */
+  private static final boolean ESCAPE_PARENS = true;
   
   
   // Statistics
@@ -167,9 +172,9 @@ public final class SplitCanditoTrees  {
       if (lemma == null) {
         // No lemma, so just add the surface form
         lemma = coreLabel.word();
-      } else if (lemma.equals("(")) {
+      } else if (ESCAPE_PARENS && lemma.equals("(")) {
         lemma = "-LRB-";
-      } else if (lemma.equals(")")) {
+      } else if (ESCAPE_PARENS && lemma.equals(")")) {
         lemma = "-RRB-";
       }
 
