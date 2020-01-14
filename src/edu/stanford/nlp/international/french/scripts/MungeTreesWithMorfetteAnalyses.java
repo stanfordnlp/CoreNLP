@@ -164,7 +164,7 @@ public final class MungeTreesWithMorfetteAnalyses  {
   private static String getLemma(String rawToken, String lemma) {
     boolean isUpper = Character.isUpperCase(rawToken.charAt(0));
     boolean isAllUpper = pAllUpper.matcher(rawToken).matches();
-    boolean isParen = rawToken.equals("-RRB-") || rawToken.equals("-LRB-");
+    boolean isParen = rawToken.equals("-RRB-") || rawToken.equals("-LRB-") || rawToken.equals("(") || rawToken.equals(")");
     boolean isPunc = pIsPunct.matcher(rawToken).matches();
     if (isParen || isPunc || isAllUpper) {
       return rawToken;
