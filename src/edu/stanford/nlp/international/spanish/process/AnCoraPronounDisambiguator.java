@@ -284,8 +284,16 @@ public class AnCoraPronounDisambiguator  {
             new Pair<>("dejar", "podemos dejarnos adormecer"), PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
             new Pair<>("engañar", "engañarnos"), PersonalPronounType.OBJECT);
+    // we'll next level the brute force decisions and use brute force
+    // to ignore the problem of which version () might be used
     bruteForceDecisions.put(
             new Pair<>("estira", "=LRB= al menos estirate a los japoneses HDP !!! =RRB="),
+      PersonalPronounType.REFLEXIVE);
+    bruteForceDecisions.put(
+            new Pair<>("estira", "-LRB- al menos estirate a los japoneses HDP !!! -RRB-"),
+      PersonalPronounType.REFLEXIVE);
+    bruteForceDecisions.put(
+            new Pair<>("estira", "( al menos estirate a los japoneses HDP !!! )"),
       PersonalPronounType.REFLEXIVE);
     bruteForceDecisions.put(
             new Pair<>("explica", "explicame como hago"), PersonalPronounType.OBJECT);
