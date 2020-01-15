@@ -56,6 +56,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    * Apply NER-specific tokenization before running NER modules (e.g. merge together tokens split by hyphen)
    */
   private boolean useNERSpecificTokenization = true;
+  private static HashSet<String> nerSpecificTokenizationExceptions =
+      new HashSet<>(Arrays.asList("based", "area", "registered", "headquartered", "native", "born"));
 
   private static final String spanishNumberRegexRules =
       "edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_number_sp.tag";
@@ -344,14 +346,21 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     for (CoreMap sentence : originalAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
       List<CoreLabel> originalTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> copyTokens = new ArrayList<>();
+      int nextTokenIndex = 0;
       for (CoreLabel currToken : originalTokens) {
+        nextTokenIndex++;
         CoreLabel processedToken = new CoreLabel(currToken);
         CoreLabel lastProcessedToken =
             copyTokens.size() > 0 ? copyTokens.get(copyTokens.size() - 1) : null;
         if (lastProcessedToken != null && afterIsEmpty.apply(lastProcessedToken) && currToken.word().equals("-")) {
-          mergeTokens(lastProcessedToken, currToken);
+          // only merge if there is another token to the right, and it's not something
+          // like "based" or "area"...handle corner case of Chicago-area
+          if (nextTokenIndex < originalTokens.size() &&
+              !nerSpecificTokenizationExceptions.contains(originalTokens.get(nextTokenIndex).word())) {
+            mergeTokens(lastProcessedToken, currToken);
+          }
         } else if (lastProcessedToken != null && lastProcessedToken.word().endsWith("-") &&
-            afterIsEmpty.apply(lastProcessedToken)) {
+            afterIsEmpty.apply(lastProcessedToken) && !nerSpecificTokenizationExceptions.contains(currToken.word())) {
           mergeTokens(lastProcessedToken, currToken);
         } else {
           copyTokens.add(processedToken);
