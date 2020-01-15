@@ -197,7 +197,7 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   private static final String[] douHao = {"、"};
   private static final String[] quoteMark = {"“", "”", "‘", "’", "《", "》", "『", "』", "〈", "〉",
           "「", "」", "＂", "＜", "＞", "'", "`", "＇", "｀", "｢", "｣"};
-  private static final String[] parenthesis = {"（", "）", "［", "］", "｛", "｝", "-LRB-", "-RRB-", "【", "】",
+  private static final String[] parenthesis = {"（", "）", "［", "］", "｛", "｝", "-LRB-", "-RRB-", "(", ")", "【", "】",
           "〔", "〖", "〘", "〚", "｟", "〕", "〗", "〙", "〛", "｠" };  // ( and ) still must be escaped
   private static final String[] colon = {"：", "；", "∶", ":"};
   private static final String[] dash = {"…", "―", "——", "———", "————", "—", "——", "———",
@@ -209,8 +209,8 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   // Note that these next four should contain only things in quoteMark and parenthesis.  All such things are there but straight quotes
   private static final String[] leftQuoteMark = {"“", "‘", "《", "『", "〈", "「", "＜", "`", "｀", "｢"};
   private static final String[] rightQuoteMark = {"”", "’", "》", "』", "〉", "」", "＞", "＇", "｣"};
-  private static final String[] leftParenthesis = {"（", "-LRB-", "［", "｛", "【", "〔", "〖", "〘", "〚", "｟"};
-  private static final String[] rightParenthesis = {"）", "-RRB-", "］", "｝", "】", "〕", "〗", "〙", "〛", "｠"};
+  private static final String[] leftParenthesis = {"（", "-LRB-", "(", "［", "｛", "【", "〔", "〖", "〘", "〚", "｟"};
+  private static final String[] rightParenthesis = {"）", "-RRB-", ")", "］", "｝", "】", "〕", "〗", "〙", "〛", "｠"};
 // "〔", "〖", "〘", "〚", "｟", "〕", "〗", "〙", "〛", "｠"
 
   private static final String[] punctWords;
