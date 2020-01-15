@@ -31,7 +31,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final String[] punctWords = {
     "¡", "!", ",", "[", "]", ":", "\"", "-", "/", "¿", "?", "{", "}", ".",
-    "=LRB=", "=RRB=", "(", ")", "«", "»", "…", "...", "%", ";", "_", "+", "=", "&", "@"
+    "=LRB=", "=RRB=", "-LRB-", "-RRB-", "(", ")", "«", "»", "…", "...", "%", ";", "_", "+", "=", "&", "@"
   };
 
   private static final String[] sentenceFinalPunctWords = {
