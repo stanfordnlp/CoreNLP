@@ -615,8 +615,13 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
         return "-comma";
       else if (punc.equals(":") || punc.equals(";"))
         return "-colon";
+      // include both ( and LRB in case different tokenization settings are used
+      else if (punc.equals("("))
+        return "-lrb";
       else if (punc.equals("-LRB-"))
         return "-lrb";
+      else if (punc.equals(")"))
+        return "-rrb";
       else if (punc.equals("-RRB-"))
         return "-rrb";
       else if (punc.equals("-PLUS-"))
