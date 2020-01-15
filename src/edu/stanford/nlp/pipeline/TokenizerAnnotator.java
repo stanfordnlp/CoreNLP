@@ -41,7 +41,7 @@ public class TokenizerAnnotator implements Annotator  {
     Unspecified(null, null, "invertible,ptb3Escaping=true"),
     Arabic     ("ar", null, ""),
     Chinese    ("zh", null, ""),
-    Spanish    ("es", "SpanishTokenizer", "invertible,splitAll=false"),
+    Spanish    ("es", "SpanishTokenizer", SpanishTokenizer.DEFAULT_OPTIONS),
     English    ("en", "PTBTokenizer", "invertible"),
     German     ("de", null, "invertible,ptb3Escaping=false,splitHyphenated=true"),
     French     ("fr", "FrenchTokenizer", "invertible,splitCompounds=false,splitContractions=false,quotes=ORIGINAL"),

@@ -303,7 +303,6 @@ public class CleanXmlAnnotatorTest {
     Properties props = PropertiesUtils.asProperties(
             "annotators", "tokenize,cleanxml,ssplit",
             "tokenize.language", "es",
-            "tokenize.options", "tokenizeNLs,ptb3Escaping=true",
             "ssplit.newlineIsSentenceBreak", "two",
             "ssplit.tokenPatternsToDiscard", "\\n,\\*NL\\*",
             "ssplit.boundaryMultiTokenRegex",
@@ -360,7 +359,7 @@ public class CleanXmlAnnotatorTest {
                     "el restaurador salva mas de lo que se cree .\n" +
                     "si toy equibocado con la info que alguien me corrija\n" },
             { "UnknownCnR", "2009-09-09T00:00:00", "http://www.sendspace.com/file/54pxbl\n" +
-                    "Con este registro podras activarlo ;-RRB-\n" },
+                    "Con este registro podras activarlo ;)\n" },
             { "mysecondskin", "2009-09-11T00:00:00", "gracias pero de verdad esa solucion no sirve\n" },
     };
 

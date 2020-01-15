@@ -66,6 +66,8 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   // Produces the tokenization for parsing used by AnCora (fixed) */
   public static final String ANCORA_OPTIONS = "ellipses=ptb3,normalizeParentheses=true,splitAll=true";
 
+  public static final String DEFAULT_OPTIONS = "invertible,splitAll=false";
+
   /**
    * Constructor.
    *
