@@ -177,7 +177,7 @@ public class NERBenchmarkSlowITest extends TestCase {
     props.setProperty("ner.applyNumericClassifiers", "false");
     StanfordCoreNLP englishPipeline = new StanfordCoreNLP(props);
     runNERTest("CoNLL 2003 English Test", englishPipeline, NER_BENCHMARK_WORKING_DIR, conllTestPath,
-        90.24);
+        90.19);
   }
 
   public void testEnglishNEROnOntoNotesDev() throws IOException {
