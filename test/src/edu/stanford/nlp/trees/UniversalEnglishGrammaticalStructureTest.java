@@ -722,6 +722,30 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "nsubj(American-11, texture-9)\n" +
            "cop(American-11, is-10)\n" +
            "root(ROOT-0, American-11)\n"},
+        {TestType.BASIC,   // test the fallthrough relation when 's gets labeled VBZ
+          "( (S (SBAR-ADV (IN Although) (S (VP (VBN set) (PP-LOC (IN in) (NP (NNP Japan)))))) (, ,) (NP-SBJ-2 (NP (DT the) (NN novel) (VBZ 's)) (NN texture)) (VP (VBZ is) (ADJP (JJ American))) (. .)))",
+          "mark(set-2, Although-1)\n" +
+           "advcl(American-11, set-2)\n" +
+           "case(Japan-4, in-3)\n" +
+           "obl(set-2, Japan-4)\n" +
+           "det(novel-7, the-6)\n" +
+           "nmod:poss(texture-9, novel-7)\n" +
+           "case(novel-7, 's-8)\n" +
+           "nsubj(American-11, texture-9)\n" +
+           "cop(American-11, is-10)\n" +
+           "root(ROOT-0, American-11)\n"},
+        {TestType.BASIC,   // should also work when ’s gets labeled VBZ
+          "( (S (SBAR-ADV (IN Although) (S (VP (VBN set) (PP-LOC (IN in) (NP (NNP Japan)))))) (, ,) (NP-SBJ-2 (NP (DT the) (NN novel) (VBZ ’s)) (NN texture)) (VP (VBZ is) (ADJP (JJ American))) (. .)))",
+          "mark(set-2, Although-1)\n" +
+           "advcl(American-11, set-2)\n" +
+           "case(Japan-4, in-3)\n" +
+           "obl(set-2, Japan-4)\n" +
+           "det(novel-7, the-6)\n" +
+           "nmod:poss(texture-9, novel-7)\n" +
+           "case(novel-7, ’s-8)\n" +
+           "nsubj(American-11, texture-9)\n" +
+           "cop(American-11, is-10)\n" +
+           "root(ROOT-0, American-11)\n"},
          {TestType.BASIC,
           "( (S-IMP (INTJ (UH please)) (NP-SBJ (-NONE- *PRO*)) (VP (VB specify) (NP (WDT which) (NML (NNP royal) (CC or) (NNP carnival)) (NN ship))) (NFP -LRB-:)))",
           "discourse(specify-2, please-1)\n" +
@@ -756,6 +780,44 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "case(Inc.-17, of-13)\n" +
            "nmod:poss(Inc.-17, Sotheby-14)\n" +
            "case(Sotheby-14, 's-15)\n" +
+           "compound(Inc.-17, Holdings-16)\n" +
+           "nmod(umbrella-12, Inc.-17)\n"},
+         {TestType.BASIC, // tests a common mislabeling of 's
+          "(NP (NP (DT the) (NN auction) (NN house)) (RRC (RRC (VP (VBN founded) (NP (-NONE- *)) (PP-LOC (IN in) (NP (NNP London))) (NP-TMP (CD 1744)))) (CC and) (RRC (ADVP-TMP (RB now)) (PP (IN under) (NP (NP (DT the) (NN umbrella)) (PP (IN of) (NP (NP (NNP Sotheby) (VBZ 's)) (NNPS Holdings) (NNP Inc.))))))))",
+          "det(house-3, the-1)\n" +
+           "compound(house-3, auction-2)\n" +
+           "root(ROOT-0, house-3)\n" +
+           "acl:relcl(house-3, founded-4)\n" +
+           "case(London-6, in-5)\n" +
+           "obl(founded-4, London-6)\n" +
+           "obl:tmod(founded-4, 1744-7)\n" +
+           "cc(umbrella-12, and-8)\n" +
+           "advmod(umbrella-12, now-9)\n" +
+           "case(umbrella-12, under-10)\n" +
+           "det(umbrella-12, the-11)\n" +
+           "conj(founded-4, umbrella-12)\n" +
+           "case(Inc.-17, of-13)\n" +
+           "nmod:poss(Inc.-17, Sotheby-14)\n" +
+           "case(Sotheby-14, 's-15)\n" +
+           "compound(Inc.-17, Holdings-16)\n" +
+           "nmod(umbrella-12, Inc.-17)\n"},
+         {TestType.BASIC, // tests a common mislabeling of ’s
+          "(NP (NP (DT the) (NN auction) (NN house)) (RRC (RRC (VP (VBN founded) (NP (-NONE- *)) (PP-LOC (IN in) (NP (NNP London))) (NP-TMP (CD 1744)))) (CC and) (RRC (ADVP-TMP (RB now)) (PP (IN under) (NP (NP (DT the) (NN umbrella)) (PP (IN of) (NP (NP (NNP Sotheby) (VBZ ’s)) (NNPS Holdings) (NNP Inc.))))))))",
+          "det(house-3, the-1)\n" +
+           "compound(house-3, auction-2)\n" +
+           "root(ROOT-0, house-3)\n" +
+           "acl:relcl(house-3, founded-4)\n" +
+           "case(London-6, in-5)\n" +
+           "obl(founded-4, London-6)\n" +
+           "obl:tmod(founded-4, 1744-7)\n" +
+           "cc(umbrella-12, and-8)\n" +
+           "advmod(umbrella-12, now-9)\n" +
+           "case(umbrella-12, under-10)\n" +
+           "det(umbrella-12, the-11)\n" +
+           "conj(founded-4, umbrella-12)\n" +
+           "case(Inc.-17, of-13)\n" +
+           "nmod:poss(Inc.-17, Sotheby-14)\n" +
+           "case(Sotheby-14, ’s-15)\n" +
            "compound(Inc.-17, Holdings-16)\n" +
            "nmod(umbrella-12, Inc.-17)\n"},
          // tough movement example

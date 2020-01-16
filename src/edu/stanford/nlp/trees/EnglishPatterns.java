@@ -17,19 +17,21 @@ import java.util.regex.Pattern;
 public class EnglishPatterns {
 
   public static final String[] copularVerbs = {
-          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase"};
+          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "’m", "m",
+          "'re", "’re", "'s", "’s", "s", "`s", "art", "ar", "wase"};
 
   public static final String[] beGetVerbs = {
-          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase",
+          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "’m", "m",
+          "'re", "’re", "'s", "’s", "s", "`s", "art", "ar", "wase",
           "get", "getting", "gets", "got", "gotten" };
 
   /* A few times the apostrophe is missing on "'s", so we have "s" */
   /* Tricky auxiliaries: "a", "na" is from "(gon|wan)na", "ve" from "Weve", etc.  "of" as non-standard for "have" */
   /* "as" is "has" with missing first letter. "to" is rendered "the" once in EWT. */
   public static final String[] auxiliaries = {
-          "will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "'ll", "ll", "-ll", "cold",
-          "has", "have", "had", "having", "'ve", "ve", "v", "of", "hav", "hvae", "as",
-          "get", "gets", "getting", "got", "gotten", "do", "does", "did", "'d", "d", "du",
+          "will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "'ll", "’ll", "ll", "-ll", "cold",
+          "has", "have", "had", "having", "'ve", "’ve", "ve", "v", "of", "hav", "hvae", "as",
+          "get", "gets", "getting", "got", "gotten", "do", "does", "did", "'d", "’d", "d", "du",
           "to", "2", "na", "a", "ot", "ta", "the", "too" };
 
   public static final String timeWordRegex =
@@ -49,10 +51,10 @@ public class EnglishPatterns {
       "/^(?i:" +StringUtils.join(beGetVerbs, "|") + ")$/";
 
   public static final String beAuxiliaryRegex =
-        "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/";
+        "/^(?i:am|is|are|r|be|being|'s|’s|'re|’re|'m|’m|was|were|been|s|ai|m|art|ar|wase)$/";
 
   public static final String haveRegex =
-          "/^(?i:have|had|has|having|'ve|ve|v|'d|d|hvae|hav|as)$/";
+          "/^(?i:have|had|has|having|'ve|’ve|ve|v|'d|’d|d|hvae|hav|as)$/";
 
   // private static final String stopKeepRegex = "/^(?i:stop|stops|stopped|stopping|keep|keeps|kept|keeping)$/";
 
@@ -66,7 +68,7 @@ public class EnglishPatterns {
   // A list of verbs with an xcomp as an argument
   // which don't require a NP before the xcomp.
   public static final String xcompNoObjVerbRegex =
-      "/^(?i:advis|afford|allow|am$|appear|are$|ask|attempt|avoid|be$|bec[oa]m|beg[ia]n|believ|call|caus[ei]|ceas[ei]|choos[ei]|chose|claim|consider|continu|convinc|decid|decline|end|enjoy|expect|feel|felt|find|forb[ia]d|forc[ei]|forg[eo]t|found|going|gon|g[eo]t|happen|hat[ei]|ha[vds]|help|hesitat|hop[ei]|intend|instruct|invit|['i]s$|keep|kept|learn|leav[ei]|left|let|lik[ei]|look|lov[ei]|made|mak[ei]|manag|nam[ei]|need|offer|order|plan|pretend|proceed|promis|prov[ei]|rate|recommend|refus|regret|remember|requir|sa[iy]|seem|sound|start|stop|suggest|suppos|tell|tend|threaten|told|tr[yi]|turn|used|wan|was$|willing|wish)/";
+      "/^(?i:advis|afford|allow|am$|appear|are$|ask|attempt|avoid|be$|bec[oa]m|beg[ia]n|believ|call|caus[ei]|ceas[ei]|choos[ei]|chose|claim|consider|continu|convinc|decid|decline|end|enjoy|expect|feel|felt|find|forb[ia]d|forc[ei]|forg[eo]t|found|going|gon|g[eo]t|happen|hat[ei]|ha[vds]|help|hesitat|hop[ei]|intend|instruct|invit|['’i]s$|keep|kept|learn|leav[ei]|left|let|lik[ei]|look|lov[ei]|made|mak[ei]|manag|nam[ei]|need|offer|order|plan|pretend|proceed|promis|prov[ei]|rate|recommend|refus|regret|remember|requir|sa[iy]|seem|sound|start|stop|suggest|suppos|tell|tend|threaten|told|tr[yi]|turn|used|wan|was$|willing|wish)/";
 
   /** A list of verbs where the answer to a question involving that
    *  verb would be a ccomp.  For example, "I know when the train is
@@ -99,7 +101,7 @@ public class EnglishPatterns {
   public static final String NP_V_S_INF_VERBS_REGEX = "(?i:acquiesce|submit|bow|defer|accede|succumb|yield|capitulate|despise|disdain|dislike|regret|like|love|enjoy|fear|hate|pledge|proceed|begin|start|commence|recommence|resume|undertake|ally|collaborate|collude|conspire|discriminate|legislate|partner|protest|rebel|retaliate|scheme|sin|befriend|continue|broadcast|cable|e-mail|fax|modem|netmail|phone|radio|relay|satellite|semaphore|sign|signal|telecast|telegraph|telephone|telex|wire|wireless|ache|crave|fall|hanker|hope|hunger|itch|long|lust|pine|pray|thirst|wish|yearn|dangle|hanker|lust|thirst|yearn|babble|bark|bawl|bellow|bleat|blubber|boom|bray|burble|bluster|cackle|call|carol|chant|chatter|chirp|chortle|chuckle|cluck|coo|croak|croon|crow|cry|drawl|drone|gabble|gasp|gibber|groan|growl|grumble|grunt|hiss|holler|hoot|howl|jabber|keen|lilt|lisp|mewl|moan|mumble|murmur|mutter|nasal|natter|pant|prattle|purr|quaver|rage|rant|rasp|roar|rumble|scream|screech|shout|shriek|sibilate|simper|sigh|sing|smatter|smile|snap|snarl|snivel|snuffle|splutter|squall|squawk|squeak|squeal|stammer|stemmer|stutter|thunder|tisk|trill|trumpet|twang|twitter|vociferate|wail|warble|wheeze|whimper|whine|whisper|whistle|witter|whoop|yammer|yap|yell|yelp|yodel|blare|gurgle|hum|neglect|fail|forego|forgo|flub|overleap|manage|omit|seem|appear|prove|manage|fail|flub|try|attempt|intend|enjoy|expect|wish|hope|intend|mean|plan|propose|think|aim|dream|imagine|yen)";
 
   // match "not", "n't", "nt" (for informal writing), or "never" as _complete_ string
-  public static final String NOT_PAT_WORD = "^(?i:n[o']?t|never)$";
+  public static final String NOT_PAT_WORD = "^(?i:n[o'’]?t|never)$";
 
   public static final String NOT_PAT = "/" + NOT_PAT_WORD + "/";
 
@@ -111,9 +113,9 @@ public class EnglishPatterns {
   public static final String FW_ETC_PAT_target = "(ADVP|NP=target <1 (FW < /^(?i:(etc|ect))$/))";
 
   // The smiley expressions allow for () or LRB/RRB
-  public static final String WESTERN_SMILEY = "/^(?:[<>]?[:;=8][\\-o\\*']?(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])|(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])[\\-o\\*']?[:;=8][<>]?)$/";
+  public static final String WESTERN_SMILEY = "/^(?:[<>]?[:;=8][\\-o\\*'’]?(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])|(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])[\\-o\\*'’]?[:;=8][<>]?)$/";
 
-  public static final String ASIAN_SMILEY = "/(?!^--$)^(?:-LRB-|[(])?[\\-\\^x=~<>'][_.]?[\\-\\^x=~<>'](?:-RRB-|[)])?$/";
+  public static final String ASIAN_SMILEY = "/(?!^--$)^(?:-LRB-|[(])?[\\-\\^x=~<>'’][_.]?[\\-\\^x=~<>'’](?:-RRB-|[)])?$/";
 
   private EnglishPatterns() {} // static constants
 
