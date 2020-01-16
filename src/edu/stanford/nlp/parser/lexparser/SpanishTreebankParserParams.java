@@ -33,7 +33,7 @@ import java.util.List;
 public class SpanishTreebankParserParams extends TregexPoweredTreebankParserParams  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(SpanishTreebankParserParams.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishTreebankParserParams.class);
 
   private static final long serialVersionUID = -8734165273482119424L;
 
@@ -290,8 +290,8 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
    * method do not have to worry about them. The Options class handles routing options. TreebankParserParams that extend
    * this class should call super when overriding this method.
    *
-   * @param args Command-line arguments, still including leading dashes
-   * @param i index in array to start processing from
+   * @param args
+   * @param i
    */
   @Override
   public int setOptionFlag(String[] args, int i) {
@@ -301,7 +301,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
         setHeadFinder(hf);
 
         optionsString.append("HeadFinder: " + args[i + 1] + "\n");
-      } catch (ReflectiveOperationException|SecurityException e) {
+      } catch (Exception e) {
         log.info(e);
         log.info(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
       }

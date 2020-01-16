@@ -66,7 +66,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   // Produces the tokenization for parsing used by AnCora (fixed) */
   public static final String ANCORA_OPTIONS = "ellipses=ptb3,normalizeParentheses=true,splitAll=true";
 
-  public static final String DEFAULT_OPTIONS = "invertible,splitAll=false";
+  public static final String DEFAULT_OPTIONS = "invertible,ellipses=ptb3,splitAll=true";
 
   /**
    * Constructor.
@@ -250,7 +250,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   }
 
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory) {
-    return new SpanishTokenizerFactory<>(factory, ANCORA_OPTIONS);
+    return new SpanishTokenizerFactory<>(factory, DEFAULT_OPTIONS);
   }
 
   /**
@@ -270,7 +270,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     protected boolean splitContractionOption = false;
 
     public static TokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory() {
-      return new SpanishTokenizerFactory<>(new CoreLabelTokenFactory());
+      return new SpanishTokenizerFactory<>(new CoreLabelTokenFactory(), DEFAULT_OPTIONS);
     }
 
 
