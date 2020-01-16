@@ -153,7 +153,7 @@ public class NERBenchmarkSlowITest extends TestCase {
   }
 
   public void testEnglishNEROnCoNLLDev() throws IOException {
-    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/conll.4class.testa";
+    String conllTestPath = "/u/nlp/data/ner/english/conll.4class.testa";
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
@@ -167,7 +167,7 @@ public class NERBenchmarkSlowITest extends TestCase {
   }
 
   public void testEnglishNEROnCoNLLTest() throws IOException {
-    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/conll.4class.testb";
+    String conllTestPath = "/u/nlp/data/ner/english/conll.4class.testb";
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
@@ -181,7 +181,7 @@ public class NERBenchmarkSlowITest extends TestCase {
   }
 
   public void testEnglishNEROnOntoNotesDev() throws IOException {
-    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes.3class.dev";
+    String conllTestPath = "/u/nlp/data/ner/english/ontonotes.3class.dev";
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
@@ -195,7 +195,7 @@ public class NERBenchmarkSlowITest extends TestCase {
   }
 
   public void testEnglishNEROnOntoNotesTest() throws IOException {
-    String conllTestPath = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes.3class.test";
+    String conllTestPath = "/u/nlp/data/ner/english/ontonotes.3class.test";
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
