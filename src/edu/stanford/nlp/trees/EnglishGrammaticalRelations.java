@@ -187,9 +187,6 @@ public class EnglishGrammaticalRelations {
   private static final String FW_ETC_PAT = "(ADVP|NP <1 (FW < /^(?i:etc)$/))";
   private static final String FW_ETC_PAT_target = "(ADVP|NP=target <1 (FW < /^(?i:etc)$/))";
 
-  // match "not", "n't", "nt" (for informal writing), or "never" as _complete_ string
-  private static final String NOT_PAT = "/^(?i:n[o']?t|never)$/";
-
   // The smiley expressions allow for () or LRB/RRB
   private static final String WESTERN_SMILEY = "/^(?:[<>]?[:;=8][\\-o\\*']?(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])|(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])[\\-o\\*']?[:;=8][<>]?)$/";
 
