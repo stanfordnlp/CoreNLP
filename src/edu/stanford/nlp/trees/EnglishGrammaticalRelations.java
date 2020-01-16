@@ -181,17 +181,6 @@ public class EnglishGrammaticalRelations {
         "SINV <# (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))");
 
 
-  private static final String ETC_PAT = "(FW < /^(?i:etc)$/)";
-  private static final String ETC_PAT_target = "(FW=target < /^(?i:etc)$/)";
-
-  private static final String FW_ETC_PAT = "(ADVP|NP <1 (FW < /^(?i:etc)$/))";
-  private static final String FW_ETC_PAT_target = "(ADVP|NP=target <1 (FW < /^(?i:etc)$/))";
-
-  // The smiley expressions allow for () or LRB/RRB
-  private static final String WESTERN_SMILEY = "/^(?:[<>]?[:;=8][\\-o\\*']?(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])|(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])[\\-o\\*']?[:;=8][<>]?)$/";
-
-  private static final String ASIAN_SMILEY = "/(?!^--$)^(?:-LRB-|[(])?[\\-\\^x=~<>'][_.]?[\\-\\^x=~<>'](?:-RRB-|[)])?$/";
-
   /**
    * The "conjunct" grammatical relation.  A conjunct is the relation between
    * two elements connected by a conjunction word.  We treat conjunctions

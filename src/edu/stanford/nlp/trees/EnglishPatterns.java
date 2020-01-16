@@ -103,6 +103,18 @@ public class EnglishPatterns {
 
   public static final String NOT_PAT = "/" + NOT_PAT_WORD + "/";
 
+  // ect seems to be a common misspelling for etc in the PTB
+  public static final String ETC_PAT = "(FW < /^(?i:(etc|ect))$/)";
+  public static final String ETC_PAT_target = "(FW=target < /^(?i:(etc|ect))$/)";
+
+  public static final String FW_ETC_PAT = "(ADVP|NP <1 (FW < /^(?i:(etc|ect))$/))";
+  public static final String FW_ETC_PAT_target = "(ADVP|NP=target <1 (FW < /^(?i:(etc|ect))$/))";
+
+  // The smiley expressions allow for () or LRB/RRB
+  public static final String WESTERN_SMILEY = "/^(?:[<>]?[:;=8][\\-o\\*']?(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])|(?:-RRB-|-LRB-|[()DPdpO\\/\\\\\\:}{@\\|\\[\\]])[\\-o\\*']?[:;=8][<>]?)$/";
+
+  public static final String ASIAN_SMILEY = "/(?!^--$)^(?:-LRB-|[(])?[\\-\\^x=~<>'][_.]?[\\-\\^x=~<>'](?:-RRB-|[)])?$/";
+
   private EnglishPatterns() {} // static constants
 
 }
