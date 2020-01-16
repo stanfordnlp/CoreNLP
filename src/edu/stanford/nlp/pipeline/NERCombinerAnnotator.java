@@ -57,7 +57,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    */
   private boolean useNERSpecificTokenization = true;
   private static HashSet<String> nerSpecificTokenizationExceptions =
-      new HashSet<>(Arrays.asList("based", "area", "registered", "headquartered", "native", "born", "raised", "backed", "controlled", "owned"));
+      new HashSet<>(Arrays.asList("based", "area", "registered", "headquartered", "native", "born", "raised", 
+                                  "backed", "controlled", "owned", "resident", "trained", "educated"));
 
   private static final String spanishNumberRegexRules =
       "edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_number_sp.tag";
