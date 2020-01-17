@@ -23,7 +23,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 
 public class SegDemo {
 
-  private static final String basedir = System.getProperty("SegDemo", "data");
+  private static final String basedir = System.getProperty("basedir", "data");
+  private static final String MODEL = System.getProperty("model", basedir + "/ctb.gz");
 
   public static void main(String[] args) throws Exception {
     System.setOut(new PrintStream(System.out, true, "utf-8"));
@@ -41,7 +42,7 @@ public class SegDemo {
     props.setProperty("sighanPostProcessing", "true");
 
     CRFClassifier<CoreLabel> segmenter = new CRFClassifier<>(props);
-    segmenter.loadClassifierNoExceptions(basedir + "/ctb.gz", props);
+    segmenter.loadClassifierNoExceptions(MODEL, props);
     for (String filename : args) {
       segmenter.classifyAndWriteAnswers(filename);
     }
