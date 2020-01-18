@@ -1,13 +1,18 @@
 package edu.stanford.nlp.international.spanish.pipeline;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.spanish.SpanishSplitTreeNormalizer;
 import edu.stanford.nlp.util.Pair;
-import junit.framework.TestCase;
 
-
-public class AnCoraProcessorITest extends TestCase {
+/**
+ * @author Jon Gauthier
+ */
+public class AnCoraProcessorITest {
 
   private static final TreeReaderFactory treeReaderFactory = new LabeledScoredTreeReaderFactory(
         new SpanishSplitTreeNormalizer());
@@ -21,7 +26,7 @@ public class AnCoraProcessorITest extends TestCase {
   private Tree t3;
   private Tree t3First, t3Intermediate, t3Second, t3Third;
 
-  @Override
+  @Before
   public void setUp() {
     t1 = readTree("(ROOT\n" +
                     "  (sentence\n" +
@@ -650,20 +655,23 @@ public class AnCoraProcessorITest extends TestCase {
                                "    (fp .)))\n");
   }
 
+  @Test
   public void testFindSplitPoint() {
     Tree splitPoint = AnCoraProcessor.findSplitPoint(t1);
-    assertNotNull(splitPoint);
-    assertEquals(splitPoint.toString(), "(fp .)");
-    assertEquals("Hay tres ciclistas que están por encima de los demás . Son Armstrong , " +
-                   "Pantani y Ulrich ,",
-                 SentenceUtils.listToString(splitPoint.parent(t1).yield()));
+    Assert.assertNotNull(splitPoint);
+    Assert.assertEquals(splitPoint.toString(), "(fp .)");
+    Assert.assertEquals("Hay tres ciclistas que están por encima de los demás . Son Armstrong , " +
+                    "Pantani y Ulrich ,",
+            SentenceUtils.listToString(splitPoint.parent(t1).yield()));
   }
 
+  @Test
   public void testSplitTrivial() {
     Tree temp = t1.deepCopy();
-    assertEquals(new Pair<Tree, Tree>(t1, null), AnCoraProcessor.split(temp, null));
+    Assert.assertEquals(new Pair<Tree, Tree>(t1, null), AnCoraProcessor.split(temp, null));
   }
 
+  @Test
   public void testSplit() {
     Tree temp = t1.deepCopy();
     Tree splitPoint = AnCoraProcessor.findSplitPoint(temp);
@@ -671,10 +679,11 @@ public class AnCoraProcessorITest extends TestCase {
     Pair<Tree, Tree> split = AnCoraProcessor.split(temp, splitPoint);
 
     // Easier debugging if we separate these assertions
-    assertEquals(expectedSplit.first(), split.first());
-    assertEquals(expectedSplit.second(), split.second());
+    Assert.assertEquals(expectedSplit.first(), split.first());
+    Assert.assertEquals(expectedSplit.second(), split.second());
   }
 
+  @Test
   public void testSplitThreeSentences() {
     // Split into 1, 2+3, then split 2+3 into 2, 3
     Tree temp = t2.deepCopy();
@@ -682,35 +691,36 @@ public class AnCoraProcessorITest extends TestCase {
     Pair<Tree, Tree> expectedSplit = new Pair<>(t2First, t2Intermediate);
     Pair<Tree, Tree> split = AnCoraProcessor.split(temp, splitPoint);
 
-    assertEquals(expectedSplit.first(), split.first());
-    assertEquals(expectedSplit.second(), split.second());
+    Assert.assertEquals(expectedSplit.first(), split.first());
+    Assert.assertEquals(expectedSplit.second(), split.second());
 
     temp = t2Intermediate.deepCopy();
     splitPoint = AnCoraProcessor.findSplitPoint(temp);
     expectedSplit = new Pair<>(t2Second, t2Third);
     split = AnCoraProcessor.split(temp, splitPoint);
 
-    assertEquals(expectedSplit.first(), split.first());
-    assertEquals(expectedSplit.second(), split.second());
+    Assert.assertEquals(expectedSplit.first(), split.first());
+    Assert.assertEquals(expectedSplit.second(), split.second());
   }
 
   // Some AnCora trees hold periods underneath "conj" constituents.. I guess this makes some sense
+  @Test
   public void testSplitThreeSentencesWithConj() {
     Tree temp = t3.deepCopy();
     Tree splitPoint = AnCoraProcessor.findSplitPoint(temp);
     Pair<Tree, Tree> expectedSplit = new Pair<>(t3First, t3Intermediate);
     Pair<Tree, Tree> split = AnCoraProcessor.split(temp, splitPoint);
 
-    assertEquals(expectedSplit.first(), split.first());
-    assertEquals(expectedSplit.second(), split.second());
+    Assert.assertEquals(expectedSplit.first(), split.first());
+    Assert.assertEquals(expectedSplit.second(), split.second());
 
     temp = t3Intermediate.deepCopy();
     splitPoint = AnCoraProcessor.findSplitPoint(temp);
     expectedSplit = new Pair<>(t3Second, t3Third);
     split = AnCoraProcessor.split(temp, splitPoint);
 
-    assertEquals(expectedSplit.first(), split.first());
-    assertEquals(expectedSplit.second(), split.second());
+    Assert.assertEquals(expectedSplit.first(), split.first());
+    Assert.assertEquals(expectedSplit.second(), split.second());
   }
 
   private static Tree readTree(String treeString) {
