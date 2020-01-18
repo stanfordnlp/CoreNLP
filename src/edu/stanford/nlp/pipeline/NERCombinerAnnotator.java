@@ -339,9 +339,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    * @return Annotation with NER specific tokenization
    */
   private static Annotation annotationWithNERTokenization(Annotation originalAnnotation) {
-    Annotation copyAnnotation = new Annotation();
-    // set document text
-    copyAnnotation.set(CoreAnnotations.TextAnnotation.class, originalAnnotation.get(CoreAnnotations.TextAnnotation.class));
+    // start to make copy with same document text
+    Annotation copyAnnotation = new Annotation(originalAnnotation.get(CoreAnnotations.TextAnnotation.class));
     // create new sentences with NER-specific tokenization
     copyAnnotation.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
     for (CoreMap sentence : originalAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {

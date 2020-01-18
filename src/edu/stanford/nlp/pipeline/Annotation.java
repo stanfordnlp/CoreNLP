@@ -112,7 +112,7 @@ public class Annotation extends ArrayCoreMap {
   }
 
   // ==================
-  // Old Deprecated API
+  // Old Deprecated API. This shouldn't be used. It's currently only used in old RTE code.
   // ==================
 
   @Deprecated

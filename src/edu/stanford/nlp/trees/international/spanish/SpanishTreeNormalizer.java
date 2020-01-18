@@ -577,7 +577,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
         if (newLeaf.label() instanceof HasWord)
           ((HasWord) newLeaf.label()).setWord(word);
 
-        Tree newNode = tf.newTreeNode(MW_TAG, Arrays.asList(newLeaf));
+        Tree newNode = tf.newTreeNode(MW_TAG, Collections.singletonList(newLeaf));
         if (newNode.label() instanceof HasTag)
           ((HasTag) newNode.label()).setTag(MW_TAG);
 
