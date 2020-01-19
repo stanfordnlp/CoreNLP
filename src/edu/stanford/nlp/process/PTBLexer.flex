@@ -261,7 +261,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 
   /** Turn on to find out how things were tokenized. */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels logger = Redwood.channels(PTBLexer.class);
@@ -577,7 +577,7 @@ NOT_SPACENL_ONE_CHAR = [^ \t\u00A0\u2000-\u200A\u3000\r\n\u2028\u2029\u000B\u000
 SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 DIGIT = [:digit:]|[\u07C0-\u07C9]
-DATE = {DIGIT}{1,2}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{2,4}
+DATE = {DIGIT}{1,2}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{2,4}|{DIGIT}{4}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{1,2}
 /* Note that NUM also includes times like 12:55. One can start with a . or , but not a : */
 NUM = {DIGIT}*([.,\u066B\u066C]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)*
 /* Now don't allow bracketed negative numbers!  They have too many uses (e.g.,
@@ -865,7 +865,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {SPAMP} to recognize " + origTxt + " as " + tok); }
                           return getNext(tok, origTxt);
                          }
-{SPPUNC}                { return getNext(); }
+{SPPUNC}                { String tok = yytext();
+                          if (DEBUG) { logger.info("Used {SPPUNC} to recognize " + tok); }
+                          return getNext(tok, tok);
+                        }
 {WORD}/{REDAUX}         { final String origTxt = yytext();
                           String tok = LexerUtils.removeSoftHyphens(origTxt);
                           if (americanize) {
@@ -923,7 +926,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {EMAIL} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
-{TWITTER}               { return getNext(); }
+{TWITTER}               { String tok = yytext();
+                          if (DEBUG) { logger.info("Used {TWITTER} to recognize " + tok); }
+                          return getNext(tok, tok);
+                        }
 {REDAUX}/[^\p{Alpha}'’]   { String tok = yytext();
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {REDAUX} to recognize " + tok + " as " + norm +
@@ -948,29 +954,38 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                         }
 /* Malaysian currency */
 RM/{NUM}        { String txt = yytext();
+                  if (DEBUG) { logger.info("Used Malaysian currency to recognize " + txt); }
                   return getNext(txt, txt);
                 }
-{NUMBER}                { String txt = yytext();
-                          handleHyphenatedNumber(txt);
-                          if (DEBUG) { logger.info("Used {NUMBER} to recognize " + yytext() + " as " + removeFromNumber(yytext())); }
-                          return getNext(removeFromNumber(yytext()), yytext()); }
-{SUBSUPNUM}             { return getNext(); }
+{NUMBER}        { String txt = yytext();
+                  handleHyphenatedNumber(txt);
+                  if (DEBUG) { logger.info("Used {NUMBER} to recognize " + yytext() + " as " + removeFromNumber(yytext())); }
+                  return getNext(removeFromNumber(yytext()), yytext());
+                }
+{SUBSUPNUM}     { String txt = yytext();
+                  if (DEBUG) { logger.info("Used {SUBSUPNUM} to recognize " + txt); }
+                  return getNext(txt, txt);
+                }
 {FRAC}          { String txt = yytext();
                   // if we are in strictTreebank3 mode, we need to reject everything after a space or non-breaking space...
                   if (strictTreebank3) {
                     int spaceIndex = indexOfSpace(txt);
                     if (spaceIndex >= 0) {
                       yypushback(txt.length() - spaceIndex);
-                      return getNext();
+                      txt = yytext();
+                      if (DEBUG) { logger.info("Used {FRAC} (strictTreebank3) to recognize " + txt); }
+                      return getNext(txt, txt);
                     }
                   }
+                  String origTxt = txt;
                   if (escapeForwardSlashAsterisk) {
                     txt = LexerUtils.escapeChar(txt, '/');
                   }
                   if (normalizeSpace) {
                     txt = txt.replace(' ', '\u00A0'); // change space to non-breaking space
                   }
-                  return getNext(txt, yytext());
+                  if (DEBUG) { logger.info("Used {FRAC} to recognize " + origTxt + " as " + txt); }
+                  return getNext(txt, origTxt);
                 }
 {FRAC2}         { String txt = yytext();
                   String norm = LexerUtils.normalizeFractions(normalizeFractions, escapeForwardSlashAsterisk, txt);
