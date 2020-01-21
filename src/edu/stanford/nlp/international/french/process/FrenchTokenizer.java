@@ -66,6 +66,10 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   public static final String FTB_OPTIONS = "ellipses=ptb3,normalizeParentheses=true,ptb3Dashes=false," +
     SPLIT_CONTRACTIONS_OPTION + "=true," + SPLIT_COMPOUNDS_OPTION + "=true";
 
+  // Official pipeline default settings for French
+  public static final String DEFAULT_OPTIONS =
+      "invertible,splitCompounds=false,splitContractions=false,quotes=ORIGINAL";
+
   /**
    * Constructor.
    *
@@ -212,7 +216,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     protected boolean splitContractionOption = true;
 
     public static TokenizerFactory<CoreLabel> newTokenizerFactory() {
-      return new FrenchTokenizerFactory<>(new CoreLabelTokenFactory());
+      return new FrenchTokenizerFactory<>(new CoreLabelTokenFactory(), DEFAULT_OPTIONS);
     }
 
     /**

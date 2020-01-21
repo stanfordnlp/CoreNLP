@@ -44,7 +44,7 @@ public class TokenizerAnnotator implements Annotator  {
     Spanish    ("es", "SpanishTokenizer", SpanishTokenizer.DEFAULT_OPTIONS),
     English    ("en", "PTBTokenizer", "invertible"),
     German     ("de", null, "invertible,ptb3Escaping=false,splitHyphenated=true"),
-    French     ("fr", "FrenchTokenizer", "invertible,splitCompounds=false,splitContractions=false,quotes=ORIGINAL"),
+    French     ("fr", "FrenchTokenizer", FrenchTokenizer.DEFAULT_OPTIONS),
     Whitespace (null, "WhitespaceTokenizer", "");
 
     private final String abbreviation;
