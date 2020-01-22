@@ -30,6 +30,7 @@ package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.util.ScoredObject;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreLabel;
@@ -197,8 +198,7 @@ public class LexicalizedParserITest extends TestCase {
 
     ParserQuery pq = englishParser.parserQuery();
 
-    ParserConstraint constraint =
-      new ParserConstraint(0, 2, "SBAR|SBAR[^a-zA-Z].*");
+    ParserConstraint constraint = new ParserConstraint(0, 2, "INTJ");
     List<ParserConstraint> constraints = new ArrayList<>();
     constraints.add(constraint);
     pq.setConstraints(constraints);
@@ -216,8 +216,8 @@ public class LexicalizedParserITest extends TestCase {
     // original output any more
     assertFalse("Tree should not match the original tree any more",
                 expectedOutput.equals(actualOutput));
-    assertTrue("Tree should be forced to contain SBAR",
-            actualOutput.contains("SBAR"));
+    assertTrue("Tree should be forced to contain INTJ",
+            actualOutput.contains("INTJ"));
 
     //System.out.println(pq.getBestParse());
   }
