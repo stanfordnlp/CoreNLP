@@ -16,7 +16,7 @@ public class CoNLLUReaderITest extends TestCase {
 
   public String exampleDocument = "Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un " +
       "descuido de fábrica.\nDe allí las rebajas.\n";
-  public String examplePath = "/u/nlp/data/stanford-corenlp/test/data/conllu/es-example.conllu";
+  public String examplePath = "/u/nlp/data/stanford-corenlp-testing/data/conllu/es-example.conllu";
   public StanfordCoreNLP pipeline;
   public Annotation goldDocument;
   public Annotation readInDocument;
