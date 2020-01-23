@@ -74,13 +74,15 @@ public class ParserAnnotatorITest extends TestCase {
       props.setProperty("parse.nthreads", "3");
       props.setProperty("annotators", "tokenize, ssplit, parse");
       threaded3TimeoutPipeline = new StanfordCoreNLP(props);
-
+      
       props.setProperty("parse.nthreads", "4");
       threaded4TimeoutPipeline = new StanfordCoreNLP(props);
 
+      props.setProperty("annotators", "tokenize, ssplit, pos, parse");
       props.setProperty("parse.maxtime", "-1");
       threaded4Pipeline = new StanfordCoreNLP(props);
 
+      props.setProperty("annotators", "tokenize, ssplit, pos, parse");
       props.setProperty("parse.nthreads", "3");
       threaded3Pipeline = new StanfordCoreNLP(props);
 
@@ -145,12 +147,20 @@ public class ParserAnnotatorITest extends TestCase {
 
     verifyAnswers(document, XPARSES);
 
+    props.setProperty("annotators", "tokenize, ssplit, pos, parse");
     props.setProperty("parse.maxlen", "8");
     pipeline = new StanfordCoreNLP(props);
     document = new Annotation(TEXT);
     pipeline.annotate(document);
 
     assertEquals(ANSWER[0], document.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
+
+    props.setProperty("annotators", "tokenize, ssplit, parse");
+    props.setProperty("parse.maxlen", "8");
+    pipeline = new StanfordCoreNLP(props);
+    document = new Annotation(TEXT);
+    pipeline.annotate(document);
+
     assertEquals(XPARSES[1], document.get(CoreAnnotations.SentencesAnnotation.class).get(1).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
     assertEquals(XPARSES[2], document.get(CoreAnnotations.SentencesAnnotation.class).get(2).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
   }
@@ -167,7 +177,7 @@ public class ParserAnnotatorITest extends TestCase {
     parserOnlyPipeline.annotate(annotation);
     assertEquals(expectedResult, sentence.get(TreeCoreAnnotations.TreeAnnotation.class).toString());
 
-    ParserConstraint constraint = new ParserConstraint(0, 2, "SBAR|SBAR[^a-zA-Z].*");
+    ParserConstraint constraint = new ParserConstraint(0, 2, "INTJ");
     List<ParserConstraint> constraints = new ArrayList<>();
     constraints.add(constraint);
     sentence.set(ConstraintAnnotation.class, constraints);
@@ -176,8 +186,8 @@ public class ParserAnnotatorITest extends TestCase {
     String result = sentence.get(TreeCoreAnnotations.TreeAnnotation.class).toString();
     assertFalse("Tree should not match the original tree any more",
                 expectedResult.equals(result));
-    assertTrue("Tree should be forced to contain SBAR",
-               result.indexOf("SBAR") >= 0);
+    assertTrue("Tree should be forced to contain INTJ",
+               result.indexOf("INTJ") >= 0);
   }
 
   /**
@@ -272,18 +282,19 @@ public class ParserAnnotatorITest extends TestCase {
 
   static final String[] ANSWER = {
       // TODO: this is actually the wrong parse!
-      "(ROOT (S (NP (PRP I)) (VP (VBD saw) (S (NP (PRP him)) (VP (VBG ordering) (NP (PRP them)) (PP (TO to) (NP (NN saw)))))) (. .)))",
+      "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (PRP him)) (S (VP (VBG ordering) (NP (PRP them)) (S (VP (TO to) (VP (VB saw))))))) (. .)))",
 
       "(ROOT (S (NP (NP (NNP Jack) (POS 's)) (NN father)) (VP (VBZ has) (RB n't) (VP (VBN played) (NP (NN golf)) (PP (IN since) (ADVP (NP (CD 20) (NNS years)) (RB ago))))) (. .)))",
 
-      "(ROOT (S (NP (PRP I)) (VP (VBP 'm) (VP (VBG going) (PP (TO to) (NP (DT the) (NN bookstore))) (S (VP (TO to) (VP (VB return) (NP (NP (DT a) (NN book)) (SBAR (S (NP (NP (NNP Jack)) (CC and) (NP (PRP$ his) (NNS friends))) (VP (VBD bought) (NP (PRP me))))))))))) (. .)))"
+      "(ROOT (S (S (NP (PRP I)) (VP (VBP 'm) (VP (VBG going) (PP (IN to) (NP (DT the) (NN bookstore))) (S (VP (TO to) (VP (VB return) (NP (NP (DT a) (NN book)) (NP (NNP Jack))))))))) (CC and) (S (NP (PRP$ his) (NNS friends)) (VP (VBD bought) (NP (PRP me)))) (. .)))"
   };
 
   static final String[] TAGGED_XPARSES = {
-    "(X (PRP I) (VBD saw) (PRP him) (VBG ordering) (PRP them) (TO to) (NN saw) (. .))",
-    "(X (NNP Jack) (POS 's) (NN father) (VBZ has) (RB n't) (VBN played) (NN golf) (IN since) (CD 20) (NNS years) (RB ago) (. .))",
-    "(X (PRP I) (VBP 'm) (VBG going) (TO to) (DT the) (NN bookstore) (TO to) (VB return) (DT a) (NN book) (NNP Jack) (CC and) (PRP$ his) (NNS friends) (VBD bought) (PRP me) (. .))"
+      "(X (PRP I) (VBD saw) (PRP him) (VBG ordering) (PRP them) (IN to) (NN saw) (. .))",
+      "(X (NNP Jack) (POS 's) (NN father) (VBZ has) (RB n't) (VBN played) (NN golf) (IN since) (CD 20) (NNS years) (RB ago) (. .))",
+      "(X (PRP I) (VBP 'm) (VBG going) (IN to) (DT the) (NN bookstore) (TO to) (VB return) (DT a) (NN book) (NN Jack) (CC and) (PRP$ his) (NNS friends) (VBD bought) (PRP me) (. .))"
   };
+
 
   static final String[] XPARSES = {
     "(X (XX I) (XX saw) (XX him) (XX ordering) (XX them) (XX to) (XX saw) (XX .))",
