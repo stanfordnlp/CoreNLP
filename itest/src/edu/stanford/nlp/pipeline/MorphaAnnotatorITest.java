@@ -91,24 +91,24 @@ public class MorphaAnnotatorITest {
     checkResult(words);
   }
 
-  private static final String text = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
+  private static final String text = "I saw him ordering a saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
 
   private static final String[] answer = {
-          "I", "see", "he", "order", "they", "to", "saw", ".", "Jack", "'s",
+          "I", "see", "he", "order", "a", "saw", ".", "Jack", "'s",
           "father", "have", "not", "play", "golf", "since", "20", "year", "ago",
           ".", "I", "be", "go", "to", "the", "bookstore", "to", "return", "a",
           "book", "Jack", "and", "he", "friend", "buy", "I", "."
   };
 
   private static final String[] tokenizedText = {
-          "I", "saw", "him", "ordering", "them", "to", "saw", ".", "Jack", "'s",
+          "I", "saw", "him", "ordering", "a", "saw", ".", "Jack", "'s",
           "father", "has", "n't", "played", "golf", "since", "20", "years", "ago",
           ".", "I", "'m", "going", "to", "the", "bookstore", "to", "return", "a",
           "book", "Jack", "and", "his", "friends", "bought", "me", "."
   };
 
   private static final String[] tokenizedTags = {
-          "PRP", "VBD", "PRP", "VBG", "PRP", "TO", "NN", ".", "NNP", "POS",
+          "PRP", "VBD", "PRP", "VBG", "DT", "NN", ".", "NNP", "POS",
           "NN", "VBZ", "RB", "VBN", "NN", "IN", "CD", "NNS", "RB",
           ".", "PRP", "VBP", "VBG", "TO", "DT", "NN", "TO", "VB", "DT",
           "NN", "NNP", "CC", "PRP$", "NNS", "VBD", "PRP", "."
