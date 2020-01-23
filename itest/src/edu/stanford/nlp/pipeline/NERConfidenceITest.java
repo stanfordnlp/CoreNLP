@@ -35,15 +35,15 @@ public class NERConfidenceITest {
     // token index = 0 text: ABCDEFG ner label: PERSON ner confidence: 0.7986500069491159
     assertEquals("ABCDEFG",tokens.get(0).word());
     assertEquals("PERSON", tokens.get(0).ner());
-    assertEquals(0.7986500069491159, tokens.get(0).nerConfidence().get("PERSON").doubleValue(), .001);
+    assertEquals(0.7303923784928416, tokens.get(0).nerConfidence().get("PERSON").doubleValue(), .001);
     // token index = 4 text: Krypton ner label: LOCATION ner confidence: 0.6698305229562858
     assertEquals("Krypton",tokens.get(4).word());
     assertEquals("LOCATION", tokens.get(4).ner());
-    assertEquals(0.6698305229562858, tokens.get(4).nerConfidence().get("LOCATION").doubleValue(), .001);
+    assertEquals(0.6638043455561479, tokens.get(4).nerConfidence().get("LOCATION").doubleValue(), .001);
     // token index = 7 text: 2012 ner label: DATE ner confidence: 0.9733532843140376
     assertEquals("2012",tokens.get(7).word());
     assertEquals("DATE", tokens.get(7).ner());
-    assertEquals(0.9733532843140376, tokens.get(7).nerConfidence().get("DATE").doubleValue(), .001);
+    assertEquals(0.9756507027537803, tokens.get(7).nerConfidence().get("DATE").doubleValue(), .001);
     // token index = 8 text: . ner label: O ner confidence: O=0.9999996795616342
     assertEquals(".",tokens.get(8).word());
     assertEquals("O", tokens.get(8).ner());
@@ -62,49 +62,49 @@ public class NERConfidenceITest {
     List<CoreMap> entityMentions = ann.get(CoreAnnotations.MentionsAnnotation.class);
     assertEquals("ABCDEFG Smith", entityMentions.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("PERSON", entityMentions.get(0).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    assertEquals(0.7986500069491159,
+    assertEquals(0.7303923784928416,
         entityMentions.get(0).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class).get("PERSON").doubleValue(),
         .001);
     // Krypton
     assertEquals("Krypton", entityMentions.get(1).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("LOCATION", entityMentions.get(1).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    assertEquals(0.6698305229562858,
+    assertEquals(0.6638043455561479,
         entityMentions.get(1).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class).get("LOCATION").doubleValue(),
         .001);
     // June 2012
     assertEquals("June 2012", entityMentions.get(2).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("DATE", entityMentions.get(2).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    assertEquals(0.9733532843140376,
+    assertEquals(0.9756507027537803,
         entityMentions.get(2).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class).get("DATE").doubleValue(),
         .001);
     // Tom Johnson
     assertEquals("Tom Johnson", entityMentions.get(3).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("PERSON", entityMentions.get(3).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    assertEquals(0.9971518907102458,
+    assertEquals(0.9973978964285446,
         entityMentions.get(3).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class).get("PERSON").doubleValue(),
         .001);
     // $500
     assertEquals("$500", entityMentions.get(4).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("MONEY", entityMentions.get(4).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    assertEquals(0.9978595519414504,
+    assertEquals(0.9976584316476499,
         entityMentions.get(4).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class).get("MONEY").doubleValue(),
         .001);
     // Joe Smith
     assertEquals("Joe Smith", entityMentions.get(5).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("PERSON", entityMentions.get(5).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    assertEquals(0.9998883592998197,
+    assertEquals(0.9994082742139784,
         entityMentions.get(5).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class).get("PERSON").doubleValue(),
         .001);
     // California
     assertEquals("California", entityMentions.get(6).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("STATE_OR_PROVINCE", entityMentions.get(6).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    assertEquals(0.9999100454498762,
+    assertEquals(0.9992931870292338,
         entityMentions.get(6).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class).get("LOCATION").doubleValue(),
         .001);
     // EU
     assertEquals("EU", entityMentions.get(7).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("ORGANIZATION", entityMentions.get(7).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    assertEquals(0.7744041644052911,
+    assertEquals(0.7634907668729419,
         entityMentions.get(7).get(CoreAnnotations.NamedEntityTagProbsAnnotation.class).get("ORGANIZATION").doubleValue(),
         .001);
   }
