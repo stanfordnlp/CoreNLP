@@ -5,6 +5,8 @@ import junit.framework.TestCase;
 import edu.stanford.nlp.ie.util.*;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.io.*;
@@ -124,6 +126,14 @@ public class KBPAnnotatorBenchmark extends TestCase {
         totalWrongFoundRelations += foundRelationStrings.size();
       }
       System.out.println();
+      List<CoreMap> sentences = currAnnotation.get(CoreAnnotations.SentencesAnnotation.class);
+      System.out.println(sentences.get(0).get(CoreAnnotations.TextAnnotation.class)+"\n");
+      System.out.println("Constituency parse: ");
+      System.out.println(sentences.get(0).get(TreeCoreAnnotations.TreeAnnotation.class).pennString());
+      System.out.println("Dependency parse: ");
+      System.out.println(sentences.get(0).get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class).toList());
+      
+      System.out.println("");
       System.out.println("correct: "+intersectionOfFoundAndGold.size());
       System.out.println("wrong: "+(foundRelationStrings.size()-intersectionOfFoundAndGold.size()));
       System.out.println();
