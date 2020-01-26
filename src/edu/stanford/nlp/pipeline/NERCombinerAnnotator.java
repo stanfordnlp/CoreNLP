@@ -358,6 +358,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
           if (nextTokenIndex < originalTokens.size() &&
               !nerSpecificTokenizationExceptions.contains(originalTokens.get(nextTokenIndex).word())) {
             mergeTokens(lastProcessedToken, currToken);
+          } else {
+            copyTokens.add(processedToken);
           }
         } else if (lastProcessedToken != null && lastProcessedToken.word().endsWith("-") &&
             afterIsEmpty.apply(lastProcessedToken) && !nerSpecificTokenizationExceptions.contains(currToken.word())) {
