@@ -74,7 +74,7 @@ public class ParserAnnotatorITest extends TestCase {
       props.setProperty("parse.nthreads", "3");
       props.setProperty("annotators", "tokenize, ssplit, parse");
       threaded3TimeoutPipeline = new StanfordCoreNLP(props);
-      
+
       props.setProperty("parse.nthreads", "4");
       threaded4TimeoutPipeline = new StanfordCoreNLP(props);
 
