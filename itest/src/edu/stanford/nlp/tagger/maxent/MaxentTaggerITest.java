@@ -164,7 +164,7 @@ public class MaxentTaggerITest extends TestCase {
                      "<tagger>\n  <text>\n    This tests the xml input.\n  </text>  \n  This should not be tagged.  \n  <text>\n    This should be tagged.\n  </text>\n  <text>\n    The dog's barking kept the\n neighbors up all night.\n  </text>\n</tagging>",
                      "This_DT tests_VBZ the_DT xml_NN input_NN ._.",
                      "This_DT should_MD be_VB tagged_VBN ._.",
-                     "The_DT dog_NN 's_POS barking_VBG kept_VBD the_DT neighbors_NNS up_IN all_DT night_NN ._.");
+                     "The_DT dog_NN 's_POS barking_VBG kept_VBD the_DT neighbors_NNS up_RB all_DT night_NN ._.");
   }
 
   public void testRunTaggerXML2Tags() {
@@ -172,7 +172,7 @@ public class MaxentTaggerITest extends TestCase {
                      "<tagger>\n  <foo>\n    This tests the xml input.\n  </foo>  \n  This should not be tagged.  \n  <bar>\n    This should be tagged.\n  </bar>\n  <foo>\n    The dog's barking kept the\n neighbors up all night.\n  </foo>\n</tagging>",
                      "This_DT tests_VBZ the_DT xml_NN input_NN ._.",
                      "This_DT should_MD be_VB tagged_VBN ._.",
-                     "The_DT dog_NN 's_POS barking_VBG kept_VBD the_DT neighbors_NNS up_IN all_DT night_NN ._.");
+                     "The_DT dog_NN 's_POS barking_VBG kept_VBD the_DT neighbors_NNS up_RB all_DT night_NN ._.");
   }
 
   public void testRunTaggerManyTags() {
@@ -180,7 +180,7 @@ public class MaxentTaggerITest extends TestCase {
                      "<tagger>\n  <text1>\n    This tests the xml input.\n  </text1>  \n  This should not be tagged.  \n  <text2>\n    This should be tagged.\n  </text2>\n  <text3>\n    The dog's barking kept the\n neighbors up all night.\n  </text3>\n</tagging>",
                      "This_DT tests_VBZ the_DT xml_NN input_NN ._.",
                      "This_DT should_MD be_VB tagged_VBN ._.",
-                     "The_DT dog_NN 's_POS barking_VBG kept_VBD the_DT neighbors_NNS up_IN all_DT night_NN ._.");
+                     "The_DT dog_NN 's_POS barking_VBG kept_VBD the_DT neighbors_NNS up_RB all_DT night_NN ._.");
   }
 
   private static void runTagFromXMLTest(String input,
@@ -222,7 +222,7 @@ public class MaxentTaggerITest extends TestCase {
   public void testTagFromXMLEscaping() {
     String input = "<tagger><foo>A simple math formula is 5 &lt; 6</foo> which is the same as 6 &gt; 5</tagger>";
     // the JJR tag here is wrong, but that's a tagger training data issue.
-    String output = "<tagger> <foo> A_DT simple_JJ math_NN formula_NN is_VBZ 5_CD &lt;_JJR 6_CD </foo> which is the same as 6 &gt; 5</tagger>";
+    String output = "<tagger> <foo> A_DT simple_JJ math_NN formula_NN is_VBZ 5_CD &lt;_SYM 6_CD </foo> which is the same as 6 &gt; 5</tagger>";
     runTagFromXMLTest(input, output, "foo", "bar");
   }
 
@@ -247,7 +247,7 @@ public class MaxentTaggerITest extends TestCase {
     tagger.tagCoreLabels(words);
 
     String[] expectedTags = {"PRP", "VBP", "PRP", "MD",
-                             "VB", "TO", "NNP", "."};
+                             "VB", "IN", "NNP", "."};
 
     assertEquals(expectedTags.length, words.size());
     for (int i = 0; i < expectedTags.length; ++i) {
