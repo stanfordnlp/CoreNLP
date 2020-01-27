@@ -413,29 +413,18 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         nerTokenizedIdx++;
         nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);
       }
-      // set NER
-      if (nerTokenizedToken.get(CoreAnnotations.NamedEntityTagAnnotation.class) != null)
-        origToken.setNER(nerTokenizedToken.ner());
-      // set Normalized NER
-      if (nerTokenizedToken.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) != null)
-        origToken.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
-          nerTokenizedToken.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
-      // set NER probabilities
-      if (nerTokenizedToken.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class) != null)
-        origToken.set(CoreAnnotations.NamedEntityTagProbsAnnotation.class,
-            nerTokenizedToken.get(CoreAnnotations.NamedEntityTagProbsAnnotation.class));
-      // set fine grained
-      if (nerTokenizedToken.get(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class) != null)
-        origToken.set(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class,
-            nerTokenizedToken.get(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class));
-      // set coarse
-      if (nerTokenizedToken.get(CoreAnnotations.CoarseNamedEntityTagAnnotation.class) != null)
-        origToken.set(CoreAnnotations.CoarseNamedEntityTagAnnotation.class,
-            nerTokenizedToken.get(CoreAnnotations.CoarseNamedEntityTagAnnotation.class));
-      // set timex
-      if (nerTokenizedToken.get(TimeAnnotations.TimexAnnotation.class) != null)
-        origToken.set(TimeAnnotations.TimexAnnotation.class,
-            nerTokenizedToken.get(TimeAnnotations.TimexAnnotation.class));
+      // list of all NER related keys
+      List<Class> nerKeys = Arrays.asList(CoreAnnotations.NamedEntityTagAnnotation.class,
+          CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
+          CoreAnnotations.NamedEntityTagProbsAnnotation.class,
+          CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class,
+          CoreAnnotations.CoarseNamedEntityTagAnnotation.class, TimeAnnotations.TimexAnnotation.class,
+          CoreAnnotations.NumericValueAnnotation.class, CoreAnnotations.NumericTypeAnnotation.class,
+          CoreAnnotations.NumericCompositeValueAnnotation.class, CoreAnnotations.NumericCompositeTypeAnnotation.class);
+      for (Class c : nerKeys) {
+        if (nerTokenizedToken.get(c) != null)
+          origToken.set(c, nerTokenizedToken.get(c));
+      }
       // move on to next original token
       originalIdx++;
     }
