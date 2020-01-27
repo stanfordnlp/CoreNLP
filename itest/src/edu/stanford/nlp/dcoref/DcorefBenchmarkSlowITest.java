@@ -149,7 +149,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     setLowHighExpected(lowResults, highResults, expectedResults, MUC_TP, 6245, 6255, 6250);
     setLowHighExpected(lowResults, highResults, expectedResults, MUC_F1, 60.65, 60.7, 60.66);
 
-    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_TP, 12440, 12451.87, 12451.87);
+    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_TP, 12440, 12450.0, 12452.25);
     setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_F1, 70.75, 70.85, 70.80);
 
     setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_TP, 10915, 10930, 10920);
@@ -158,7 +158,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_TP, 3830, 3840, 3831.36);
     setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_F1, 47.4, 47.5, 47.45);
 
-    setLowHighExpected(lowResults, highResults, expectedResults, BLANC_F1, 75.35, 75.42, 75.38);
+    setLowHighExpected(lowResults, highResults, expectedResults, BLANC_F1, 75.35, 75.44, 75.38);
 
     setLowHighExpected(lowResults, highResults, expectedResults, CONLL_SCORE, 59.6, 59.7, 59.64);
 
