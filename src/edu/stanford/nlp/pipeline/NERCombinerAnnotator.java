@@ -460,6 +460,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // perform safety clean up
     // MONEY and NUMBER ner tagged items should not have Timex values
     for (CoreLabel token : nerAnnotation.get(CoreAnnotations.TokensAnnotation.class)) {
+      if (token == null || token.ner() == null)
+        continue;
       if (token.ner().equals("MONEY") || token.ner().equals("NUMBER"))
         token.remove(TimeAnnotations.TimexAnnotation.class);
     }
