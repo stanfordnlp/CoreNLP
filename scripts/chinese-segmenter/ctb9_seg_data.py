@@ -7,6 +7,13 @@ There is no suggested dev split and the test split is quite small, actually.
 
 The results of using this script and some models can be found
 in /u/nlp/data/chinese/ctb9, at least as of 2020-01-16.
+
+Models can be built with the make script hopefully still located in
+projects/core/scripts/chinese-segmenter/Makefile
+
+A model can be tested with a command line such as:
+
+java edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier /u/nlp/data/chinese/ctb9/seg/ctb9.train.chris6.ser.gz  -testFile /u/nlp/data/chinese/ctb9/seg/ctb9.test.txt -serDictionary /u/nlp/data/chinese/ctb9/seg/dict-chris6.ser.gz > seg9.out 2>&1
 """
 
 import glob
@@ -133,6 +140,9 @@ def read_file(filename):
 
 
 TEST_FILES = [1018, 1020, 1036, 1044, 1060, 1061, 1072, 1118, 1119, 1132, 1141, 1142, 1148]
+# TODO: can extract this list directly from 
+# /u/scr/corpora/ldc/2016/LDC2016T13/ctb9.0/docs/ctb9.0-file-list.txt
+# there's also dev file names there
 def is_test_file(filenum):
     if filenum in TEST_FILES:
         return True
