@@ -30,7 +30,7 @@ public class NERPipelineEndToEndSlowITest extends TestCase {
     List<List<String>> expectedNERLabels = new ArrayList<>();
     List<String> currSentence = new ArrayList<>();
     for (String expectedLine : expectedLines) {
-      if (expectedLine.strip().equals("")) {
+      if (expectedLine.trim().equals("")) {
         if (currSentence.size() > 0) {
           expectedNERLabels.add(currSentence);
           currSentence = new ArrayList<>();
