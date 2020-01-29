@@ -41,7 +41,7 @@ import java.io.Reader;
 
   private LexedTokenFactory<?> tokenFactory;
 
-  static final String NEWLINE = "\n";
+  static final String NEWLINE = AbstractTokenizer.NEWLINE_TOKEN;
 %}
 
 /* Carriage return/line feed; the IBM special; Unicode line and paragraph separator. */

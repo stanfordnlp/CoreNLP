@@ -250,7 +250,7 @@ class WhitespaceLexer {
 
   private LexedTokenFactory<?> tokenFactory;
 
-  static final String NEWLINE = "\n";
+  static final String NEWLINE = AbstractTokenizer.NEWLINE_TOKEN;
 
 
   /**
