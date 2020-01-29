@@ -29,6 +29,8 @@ public class PreTokenizedSentenceSplitITest extends TestCase {
         doc.sentences().get(0).tokens().stream().map(t -> t.word()).collect(Collectors.toList()));
     assertEquals(expectedTokens.get(1),
         doc.sentences().get(1).tokens().stream().map(t -> t.word()).collect(Collectors.toList()));
+    assertEquals(doc.tokens().get(4).before(), "");
+    assertEquals(doc.tokens().get(4).after(), "\n");
   }
 
 }
