@@ -1,8 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.util.StringUtils;
 
 import junit.framework.TestCase;
 
@@ -24,24 +22,29 @@ public class NERTokenizationSlowITest extends TestCase {
 
   public StanfordCoreNLP nerTokenizationPipeline;
   public StanfordCoreNLP standardTokenizationPipeline;
+  public StanfordCoreNLP preTokenizedPipeline;
 
 
   @Override
   public void setUp() {
     // set up the pipeline with NER tokenization
     Properties props = new Properties();
+    props.setProperty("ssplit.isOneSentence", "true");
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     nerTokenizationPipeline = new StanfordCoreNLP(props);
     // set up the pipeline with NER tokenization deactivated
     props.setProperty("ner.useNERSpecificTokenization", "false");
     standardTokenizationPipeline = new StanfordCoreNLP(props);
+    // set up pipeline for pre-tokenized text
+    props.setProperty("tokenize.whitespace", "true");
+    preTokenizedPipeline = new StanfordCoreNLP(props);
   }
 
-  /** Verify both pipelines are the same on sentences without hyphen **/
+  /** Verify pipelines using NER tokenization and not are the same on sentences without hyphen **/
   public void testNonHyphenSentences() {
 
     List<String> nonHyphenContainingSentences = IOUtils.linesFromFile(String.format("%s/%s", DATA_PATH,
-        "en_ewt_sentences_no_hyphen.txt"));
+        "ner-tokenization-no-hyphen-large.txt"));
 
     for (String sentence : nonHyphenContainingSentences) {
       CoreDocument nerTokenizationDoc = new CoreDocument(sentence);
@@ -52,5 +55,21 @@ public class NERTokenizationSlowITest extends TestCase {
     }
   }
 
+  /** Verify using NER tokenization gets expected results on sentences with hyphens **/
+  public void testHyphenSentences() {
+
+    List<String> hyphenContainingSentences = IOUtils.linesFromFile(String.format("%s/%s", DATA_PATH,
+        "ner-tokenization-w-hyphen-small.txt"));
+
+    List<String> hyphenContainingSentencesPreTokenized = IOUtils.linesFromFile(String.format("%s/%s", DATA_PATH,
+        "ner-tokenization-w-hyphen-pretokenized-small.txt"));
+
+    for (int i = 0 ; i < hyphenContainingSentences.size() ; i++) {
+      CoreDocument doc = new CoreDocument(nerTokenizationPipeline.process(hyphenContainingSentences.get(i)));
+      CoreDocument preTokenizedDoc = new CoreDocument(preTokenizedPipeline.process(hyphenContainingSentencesPreTokenized.get(i)));
+      assertEquals(doc.entityMentions().stream().map(em -> em.text()).collect(Collectors.toList()),
+          preTokenizedDoc.entityMentions().stream().map(em -> em.text()).collect(Collectors.toList()));
+    }
+  }
 
 }
