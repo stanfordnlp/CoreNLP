@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.ArraySet;
@@ -47,7 +48,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
         if (System.lineSeparator().equals("\n")) {
           // this constructor will keep empty lines as empty sentences
           WordToSentenceProcessor<CoreLabel> wts1 =
-                  new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{"\n"}));
+                  new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{"\n", AbstractTokenizer.NEWLINE_TOKEN}));
           this.countLineNumbers = true;
           this.wts = wts1;
         } else {
@@ -55,7 +56,8 @@ public class WordsToSentencesAnnotator implements Annotator  {
           // the system separator
           // this constructor will keep empty lines as empty sentences
           WordToSentenceProcessor<CoreLabel> wts1 =
-                  new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{System.lineSeparator(), "\n"}));
+                  new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{System.lineSeparator(), "\n",
+                      AbstractTokenizer.NEWLINE_TOKEN}));
           this.countLineNumbers = true;
           this.wts = wts1;
         }
