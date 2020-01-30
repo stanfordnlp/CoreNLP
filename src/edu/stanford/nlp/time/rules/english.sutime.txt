@@ -683,7 +683,7 @@
 	result: TemporalCompose(ADD_MODIFIER, $date[0].temporal, "LATE" ) }
 
   { name: "composite-date-expression-2b",
-	pattern: ( /the/? (?$date [ { temporal::IS_TIMEX_DATE } ]) (/'/ /s/ | /'s/ )? (?$mod /beginning|end/) ),
+	pattern: ( /the/? (?$date [ { temporal::IS_TIMEX_DATE } ]) (/'/ /s/ | /'s/ | /’/ /s/ | /’s/ )? (?$mod /beginning|end/) ),
 	result: TemporalCompose(ADD_MODIFIER, $date[0].temporal, GetTag($mod[0], "Modifier") ) }
 
   { name: "composite-date-expression-3",
@@ -837,7 +837,7 @@
 	 (( [ $hasTemporal ] ) /,|of|in/? ( [ { temporal::IS_TIMEX_DATE } | { temporal::IS_TIMEX_TIME } ] ) |
       ( [ { temporal::IS_TIMEX_DATE } ] ) /at/  ( [ { temporal::IS_TIMEX_TIME } ] ) |
       ( [ { temporal::IS_TIMEX_TIME } | { temporal::IS_TIMEX_DURATION } ] ) /on/  ( [ { temporal::IS_TIMEX_DATE } ] | [ { temporal::IS_TIMEX_SET } ]) |
-      ( [ { temporal::IS_TIMEX_DATE } | { temporal::IS_TIMEX_TIME } ] ) (/'s/ | /'/ /s/) ( [ $hasTemporal ] )) ),
+      ( [ { temporal::IS_TIMEX_DATE } | { temporal::IS_TIMEX_TIME } ] ) (/'s/ | /'/ /s/ | /’s/ | /’/ /s/) ( [ $hasTemporal ] )) ),
 	result: TemporalCompose(INTERSECT, $1[0].temporal, $1[-1].temporal)
   }
 
@@ -965,13 +965,13 @@
   {  pattern: ( [ $hasTemporal ] []{0,2} [ { tag:/VBD/ } | /have/ ] ),
      action: VTag( $0[0].temporal.value, "resolveTo", RESOLVE_TO_PAST )
   }
-  {  pattern: ( (/would/ | /could/ | /should/ | /will/ | /going/ /to/ | /'/ /ll/ | /'ll/ )
+  {  pattern: ( (/would/ | /could/ | /should/ | /will/ | /going/ /to/ | /'/ /ll/ | /'ll/ | /’/ /ll/ | /’ll/ )
                 []{0,2} [ $hasTemporal ]
               ),
      action: VTag( $0[-1].temporal.value, "resolveTo", RESOLVE_TO_FUTURE )
   }
   {  pattern: ( [ $hasTemporal ] []{0,2}
-                (/would/ | /could/ | /should/ | /will/ | /going/ /to/ | /'/ /ll/ | /'ll/ ) ),
+                (/would/ | /could/ | /should/ | /will/ | /going/ /to/ | /'/ /ll/ | /'ll/ | /’/ /ll/ | /’ll/ ) ),
      action: VTag( $0[0].temporal.value, "resolveTo", RESOLVE_TO_FUTURE )
   }
 
