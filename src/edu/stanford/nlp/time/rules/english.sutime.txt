@@ -408,8 +408,9 @@
   { ( /the/? ( /$Decades/ ) )
        => IsoDate( Concat("XX", DECADES_MAP[Lowercase($0[0].word)]) , NIL, NIL)
   }
-  { (/the/?  /'/ /\d\d/ ) => IsoDate( Format( "XX%02d", $0[-1].numcompvalue), NIL, NIL) }
+  { (/the/?  /'|’/ /\d\d/ ) => IsoDate( Format( "XX%02d", $0[-1].numcompvalue), NIL, NIL) }
   { (/the/?  /'/ /\d0s/ | /the/? /'\d0s/ ) => IsoDate( Replace($0[-1].word, /'?(\d)0s/, "XX$1X"), NIL, NIL) }
+  { (/the/?  /’/ /\d0s/ | /the/? /’\d0s/ ) => IsoDate( Replace($0[-1].word, /’?(\d)0s/, "XX$1X"), NIL, NIL) }
   { (/the/? /\d\d\d0s/) => IsoDate( Replace($0[-1].word, /(\d\d\d)0s/, "$1X"), NIL, NIL) }
   { (/the/? /\d\d00s/) => IsoDate( Replace($0[-1].word, /(\d\d)00s/, "$1XX"), NIL, NIL) }
   { (/the/? /mid-\d\d\d0s/) => IsoDate( Replace($0[-1].word, /mid-(\d\d\d)0s/, "$1X"), NIL, NIL) }
