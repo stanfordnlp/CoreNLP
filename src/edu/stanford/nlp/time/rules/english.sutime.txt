@@ -493,7 +493,7 @@
   { text: /(\d\d?)p\.?m\.?/ => TemporalCompose(INTERSECT, IsoTime($1,"0",NIL), PM) }
 
   { ( /the/ /hour/ /of/ ([ $INT & { numcompvalue<=24 } ]) )=> IsoTime($1[0].numcompvalue, 0, NIL) }
-  { ( (?: /the/ /hour/ /of/?)? ([ $INT & { numcompvalue<=24 } ]) /o'?clock/ ) => IsoTime($1[0].numcompvalue, 0, NIL) }
+  { ( (?: /the/ /hour/ /of/?)? ([ $INT & { numcompvalue<=24 } ]) /o(’|')?clock/ ) => IsoTime($1[0].numcompvalue, 0, NIL) }
 
   # Year
   { ( /the/? /year/ ($POSSIBLE_YEAR) )
@@ -828,7 +828,7 @@
   }
 
   { name: "temporal-composite-timezone2",
-    pattern: ( (?$time [ { temporal::IS_TIMEX_TIME } ]) "-LRB-" (?$timezone [ {{ tags["TIMEZONE"] }} ]) "-RRB-" ),
+    pattern: ( (?$time [ { temporal::IS_TIMEX_TIME } ]) "(" (?$timezone [ {{ tags["TIMEZONE"] }} ]) ")" ),
     result: TemporalCompose(INTERSECT, $time[0].temporal, $timezone[0].temporal)
   }
 
