@@ -1,7 +1,7 @@
   ENV.defaults["stage"] = 1
   ENV.defaults["ruleType"] = "tokens"
 
-  $POSS = "( /'s/ | /'/ /s/ )"
+  $POSS = "( /(’|')s/ | /(’|')/ /s/ )"
   { (/new/ /year/ $POSS? /eve/ ) => IsoDate(NIL, 12, 31) }
   { (/new/ /year/ $POSS? /day/? ) => IsoDate(NIL, 1, 1) }
   { (/inauguration/ /day/ ) => IsoDate(NIL, 1, 20) }
