@@ -26,9 +26,9 @@ public class WhitespaceTokenizerTest extends TestCase {
   };
 
   public static final String[][] RESULTS_EOL = {
-    {"This", "is", "a", "test", ".", "\n",
+    {"This", "is", "a", "test", ".", "*NL*",
      "This", "is", "a", "second", "line", "."},
-    {"A", "\n", "B", "\n", "\n", "C"},
+    {"A", "*NL*", "B", "*NL*", "*NL*", "C"},
     {"A.", "B"},
     { "皇后", "後世", "and", "(800)\u00A0326-1456" },
   };
