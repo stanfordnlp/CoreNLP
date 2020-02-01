@@ -128,8 +128,10 @@ public class KBPAnnotatorBenchmark extends TestCase {
       System.out.println();
       List<CoreMap> sentences = currAnnotation.get(CoreAnnotations.SentencesAnnotation.class);
       System.out.println(sentences.get(0).get(CoreAnnotations.TextAnnotation.class)+"\n");
-      System.out.println("Constituency parse: ");
-      System.out.println(sentences.get(0).get(TreeCoreAnnotations.TreeAnnotation.class).pennString());
+      if (sentences.get(0).get(TreeCoreAnnotations.TreeAnnotation.class) != null) {
+        System.out.println("Constituency parse: ");
+        System.out.println(sentences.get(0).get(TreeCoreAnnotations.TreeAnnotation.class).pennString());
+      }
       System.out.println("Dependency parse: ");
       System.out.println(sentences.get(0).get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class).toList());
       
