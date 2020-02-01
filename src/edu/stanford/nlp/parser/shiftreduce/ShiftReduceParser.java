@@ -78,7 +78,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 /**
  * A shift-reduce constituency parser.
  * Overview and description available at
- * import edu.stanford.nlp.util.logging.Redwood;
+ * https://nlp.stanford.edu/software/srparser.shtml
  *
  * @author John Bauer
  */
