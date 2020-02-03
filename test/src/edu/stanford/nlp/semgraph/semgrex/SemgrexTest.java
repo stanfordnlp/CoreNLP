@@ -756,6 +756,51 @@ public class SemgrexTest extends TestCase {
     }
   }
 
+  /**
+   * Verify that this is working for a KBP query which wasn't working
+   * for some reason... at least it wasn't the semgrex
+   */
+  public void testNERAttribute() {
+    SemanticGraph graph = SemanticGraph.valueOf("[Young appos>[director nmod:of>Association]]]");
+    graph.getNodeByIndex(0).setNER("PERSON");
+    graph.getNodeByIndex(1).setNER("TITLE");
+    graph.getNodeByIndex(2).setNER("ORGANIZATION");
+
+    SemgrexPattern pattern = SemgrexPattern.compile("{}=entity  >appos ({ner:/TITLE/}  >/(nmod:|obl:|prep_)of/ {ner:/ORGANIZATION|LOCATION|COUNTRY|STATE_OR_PROVINCE|CITY|NATIONALITY/}=slot)");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("Young", matcher.getNode("entity").toString());
+    assertEquals("Association", matcher.getNode("slot").toString());
+
+    assertFalse(matcher.find());
+
+    graph = SemanticGraph.valueOf("[Young appos>[director nmod:of>Association] appos>[group nmod:of>utilities]]");
+    graph.getNodeByIndex(0).setNER("PERSON");
+    graph.getNodeByIndex(1).setNER("TITLE");
+    graph.getNodeByIndex(2).setNER("ORGANIZATION");
+    graph.getNodeByIndex(3).setNER("O");
+    graph.getNodeByIndex(4).setNER("O");
+
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("Young", matcher.getNode("entity").toString());
+    assertEquals("Association", matcher.getNode("slot").toString());
+    assertFalse(matcher.find());
+
+    graph = SemanticGraph.valueOf("[Young appos>[group nmod:of>utilities] appos>[director nmod:of>Association]]");
+    graph.getNodeByIndex(0).setNER("PERSON");
+    graph.getNodeByIndex(1).setNER("O");
+    graph.getNodeByIndex(2).setNER("O");
+    graph.getNodeByIndex(3).setNER("TITLE");
+    graph.getNodeByIndex(4).setNER("ORGANIZATION");
+
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("Young", matcher.getNode("entity").toString());
+    assertEquals("Association", matcher.getNode("slot").toString());
+    assertFalse(matcher.find());
+  }
+
   public void testRoot() {
     // A few various tests that the $ node attribute works
     runTest("{$} > {word:Bill}",
