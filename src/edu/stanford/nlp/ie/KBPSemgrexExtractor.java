@@ -71,9 +71,9 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
           rel.validNamedEntityLabels.contains(input.objectType)) {
         Collection<SemgrexPattern> rulesForRel = rules.get(rel);
         CoreMap sentence = input.sentence.asCoreMap(Sentence::nerTags, Sentence::dependencyGraph);
-        boolean matches = (matches(sentence, rel, rulesForRel, input,
+        boolean matches = (matches(sentence, rulesForRel, input,
                                    sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)) ||
-                           matches(sentence, rel, rulesForRel, input,
+                           matches(sentence, rulesForRel, input,
                                    sentence.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class)));
         if (matches) {
           //logger.log("MATCH for " + rel +  ".  sentence:" + sentence + " with rules for  " + rel);
