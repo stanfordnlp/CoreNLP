@@ -3,6 +3,7 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
@@ -464,6 +465,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
           log.info("Trying to annotate locally...");
           StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
           corenlp.annotate(annotation);
+        } else {
+          annotation.set(CoreAnnotations.ExceptionAnnotation.class, t);
         }
       } finally {
         callback.accept(annotation);
