@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 
 /**
  * A bunch of tests of the question to statement translator, taken from the
- * webquestions training set (http://www-nlp.stanford.edu/software/sempre/).
+ * webquestions training set (https://nlp.stanford.edu/software/sempre/).
  *
  * @author Gabor Angeli
  */
@@ -35,7 +35,7 @@ public class QuestionToStatementTranslatorITest {
    *
    * @return A sentence corresponding to the text.
    */
-  public static List<CoreLabel> parseSentence(String text) {
+  private static List<CoreLabel> parseSentence(String text) {
     return Arrays.stream(text.split("\\s+")).map(w -> {
       CoreLabel token = new CoreLabel();
       if (w.contains("/")) {
