@@ -690,6 +690,15 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     return annotation;
   }
 
+  /**
+   * Runs the entire pipeline on the content of the given text passed in.
+   * @param text The text to process
+   * @return An Annotation object containing the output of all annotators
+   */
+  public CoreDocument processToCoreDocument(String text) {
+    return new CoreDocument(process(text));
+  }
+
   //
   // output and formatting methods (including XML-specific methods)
   //
