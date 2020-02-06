@@ -46,11 +46,13 @@ public class SpanishXMLTreeReader implements TreeReader  {
   private static Redwood.RedwoodChannels log = Redwood.channels(SpanishXMLTreeReader.class);
 
   private InputStream stream;
-  private final TreeNormalizer treeNormalizer;
+  private final SpanishTreeNormalizer treeNormalizer;
   private final TreeFactory treeFactory;
 
   private boolean simplifiedTagset;
   private boolean detailedAnnotations;
+  private boolean expandElisions;
+  private boolean expandConmigo;
 
   private static final String NODE_SENT = "sentence";
 
@@ -103,6 +105,8 @@ public class SpanishXMLTreeReader implements TreeReader  {
 
     this.simplifiedTagset = simplifiedTagset;
     this.detailedAnnotations = detailedAnnotations;
+    this.expandElisions = expandElisions;
+    this.expandConmigo = expandConmigo;
 
     stream = new ReaderInputStream(in, tlp.getEncoding());
     treeFactory = new LabeledScoredTreeFactory();
@@ -145,7 +149,7 @@ public class SpanishXMLTreeReader implements TreeReader  {
       t = getTreeFromXML(sentRoot);
 
       if(t != null) {
-        t = treeNormalizer.normalizeWholeTree(t, treeFactory);
+        t = treeNormalizer.normalizeWholeTree(t, treeFactory, expandElisions, expandConmigo);
 
         if(t.label() instanceof CoreLabel)
           ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class,
