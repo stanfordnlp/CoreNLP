@@ -6,6 +6,7 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.spanish.*;
+import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.*;
@@ -16,6 +17,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Predicate;
+import java.util.stream.*;
 
 /**
  * A tool which accepts raw AnCora-3.0 Spanish XML files and produces
@@ -59,6 +61,9 @@ public class AnCoraProcessor  {
 
   private final TwoDimensionalCounter<String, String> unigramTagger;
 
+  private final boolean expandElisions;
+  private final boolean expandConmigo;
+
   @SuppressWarnings("unchecked")
   public AnCoraProcessor(List<File> inputFiles, Properties options)
     throws IOException, ClassNotFoundException {
@@ -73,6 +78,8 @@ public class AnCoraProcessor  {
     } else {
       unigramTagger = new TwoDimensionalCounter<>();
     }
+    expandElisions = PropertiesUtils.getBool(options, "expandElisions", false);
+    expandConmigo = PropertiesUtils.getBool(options, "expandConmigo", false);
   }
 
   public List<Tree> process() throws
@@ -98,7 +105,7 @@ public class AnCoraProcessor  {
     boolean ner = PropertiesUtils.getBool(options, "ner", false);
     final String encoding = new SpanishTreebankLanguagePack().getEncoding();
 
-    final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, false);
+    final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, false, expandElisions, expandConmigo);
 
     List<Tree> trees = new ArrayList<>();
     for (File file : inputFiles) {
@@ -332,7 +339,7 @@ public class AnCoraProcessor  {
   private class MultiWordProcessor implements ThreadsafeProcessor<Collection<Tree>,
     Collection<Tree>> {
 
-    private final TreeNormalizer tn;
+    private final SpanishTreeNormalizer tn;
     private final Factory<TreeNormalizer> tnf;
     private final TreeFactory tf;
 
@@ -343,7 +350,7 @@ public class AnCoraProcessor  {
     public MultiWordProcessor(Factory<TreeNormalizer> tnf, TreeFactory tf,
                               boolean ner) {
       this.tnf = tnf;
-      this.tn = tnf.create();
+      this.tn = (SpanishTreeNormalizer) tnf.create();
       this.tf = tf;
       this.ner = ner;
     }
@@ -363,7 +370,7 @@ public class AnCoraProcessor  {
         // Now "decompress" further the expanded trees formed by multiword token splitting
         t = expander.expandPhrases(t, tn, tf);
 
-        t = tn.normalizeWholeTree(t, tf);
+        t = tn.normalizeWholeTree(t, tf, expandElisions, expandConmigo);
 
         ret.add(t);
       }
@@ -421,20 +428,140 @@ public class AnCoraProcessor  {
     return ret;
   }
 
+  public static HashSet<String> auxTagConversion = new HashSet<>(Arrays.asList("vsip000,es", "vaip000,ha",
+      "vaip000,han", "vsis000,fue", "vsn0000,ser","vsip000,son", "vmip000,está", "vaii000,había",
+      "vsp0000,sido", "vmip000,puede", "vaip000,hay", "vsii000,era", "vsif000,será", "van0000,haber",
+      "vmip000,están", "vsip000,Es", "vsis000,fueron", "vssp000,sea", "vmip000,debe","vmic000,podría",
+      "vsic000,sería", "vmii000,estaba", "vasp000,haya", "vaii000,habían", "vaip000,hemos",
+      "vaip000,he", "vsii000,eran", "vsg0000,siendo", "vmn0000,poder", "vmip000,deben"));
+
+  public static HashSet<String> potentialAUXWords =
+      new HashSet<>(Arrays.asList("es", "ha", "han", "fue", "ser", "son", "está", "había", "sido", "puede", "hay",
+          "era", "será", "haber", "están", "Es", "fueron", "sea", "debe", "pueden", "podría",
+          "sería", "estaba", "haya", "habían", "hemos", "he", "eran", "siendo", "poder", "deben"));
+
+  public static void convertTreeTagsToUD(Tree tree) {
+    for (Tree t : tree.getChildrenAsList()) {
+      if (t.isPreTerminal()) {
+        if (t.label().value().startsWith("a")) {
+          t.setLabel(CoreLabel.wordFromString("ADJ"));
+        } else if (t.label().value().startsWith("d")) {
+          t.setLabel(CoreLabel.wordFromString("DET"));
+        } else if (t.label().value().startsWith("f")) {
+          if (t.getChild(0).label().value().matches("[^0-9]+"))
+            t.setLabel(CoreLabel.wordFromString("PUNCT"));
+          else if (t.getChild(0).label().value().matches("[0-9]+"))
+            t.setLabel(CoreLabel.wordFromString("NUM"));
+          else
+            System.err.println(t.label().value() + "\t" + t.getChild(0).label().value());
+        } else if (t.label().value().equals("i")) {
+          t.setLabel(CoreLabel.wordFromString("INTJ"));
+        } else if (t.label().value().startsWith("n")) {
+          if (t.label().value().equals("np00000") &&
+              t.getChild(0).label().value().substring(0,1).matches("^[A-Z]"))
+            t.setLabel(CoreLabel.wordFromString("PROPN"));
+          else
+            t.setLabel(CoreLabel.wordFromString("NOUN"));
+        } else if (t.label().value().startsWith("p")) {
+          t.setLabel(CoreLabel.wordFromString("PRON"));
+        } else if (t.label().value().startsWith("r")) {
+          t.setLabel(CoreLabel.wordFromString("ADV"));
+        } else if (t.label().value().startsWith("s")){
+          t.setLabel(CoreLabel.wordFromString("ADP"));
+        } else if (t.label().value().startsWith("v")) {
+          String ancoraTag = t.label().value();
+          String word = t.getChild(0).label().value();
+          if (potentialAUXWords.contains(word) && auxTagConversion.contains(String.format("%s,%s", ancoraTag, word))) {
+            t.setLabel(CoreLabel.wordFromString("AUX"));
+          } else
+            t.setLabel(CoreLabel.wordFromString("VERB"));
+        } else if (t.label().value().startsWith("z")) {
+          if (t.getChild(0).label().value().matches("[A-Z][A-Z0-9]+"))
+            t.setLabel(CoreLabel.wordFromString("PROPN"));
+          else if (t.getChild(0).label().value().matches("[A-Z0-9]+[A-Z]"))
+            t.setLabel(CoreLabel.wordFromString("PROPN"));
+          else if (t.getChild(0).label().value().matches("[^0-9]+"))
+            t.setLabel(CoreLabel.wordFromString("NOUN"));
+          else if (t.getChild(0).label().value().matches("[0-9\\.\\,º:]+"))
+            t.setLabel(CoreLabel.wordFromString("NUM"));
+          else if (t.getChild(0).label().value().matches("m\\.[0-9]+(\\:)?"))
+            t.setLabel(CoreLabel.wordFromString("NUM"));
+          else if (t.getChild(0).label().value().matches("[0-9]+cc"))
+            t.setLabel(CoreLabel.wordFromString("NUM"));
+          else
+            System.err.println(t.label().value() + "\t" + t.getChild(0).label().value());
+        } else if (t.label().value().equals("cc")) {
+          t.setLabel(CoreLabel.wordFromString("CCONJ"));
+        } else if (t.label().value().equals("cs")) {
+          t.setLabel(CoreLabel.wordFromString("SCONJ"));
+        } else if (t.label().value().equals("w")) {
+          if (t.getChild(0).label().value().matches("[^0-9]+"))
+            t.setLabel(CoreLabel.wordFromString("NOUN"));
+          else if (t.getChild(0).label().value().matches("[0-9]{4}|[0-9]+\\'"))
+            t.setLabel(CoreLabel.wordFromString("NOUN"));
+          else if (t.getChild(0).label().value().matches("[0-9\\.\\,]+"))
+            t.setLabel(CoreLabel.wordFromString("NUM"));
+          else if (t.getChild(0).label().value().matches("m\\.[0-9]+"))
+            t.setLabel(CoreLabel.wordFromString("NOUN"));
+          else
+            System.err.println(t.label().value() + "\t" + t.getChild(0).label().value());
+        } else {
+          System.err.println(t.label().value() + "\t" + t.getChild(0).label().value());
+        }
+      } else {
+        convertTreeTagsToUD(t);
+      }
+    }
+  }
+
+  // helper to get tags from a tree
+  public static void getTagsFromTree(List<Tree> tags, Tree tree) {
+    if (tree.isPreTerminal()) {
+      tags.add(tree);
+    } else {
+      for (Tree t : tree.children()) {
+        getTagsFromTree(tags, t);
+      }
+    }
+  }
+
+  /** Generate tags with the provided model **/
+  public static void generateTagsForTree(StanfordCoreNLP pipeline, Tree tree) {
+    // get words
+    List<Tree> leaves = tree.getLeaves();
+    String sentenceWords = leaves.stream().map(t -> t.label().value()).collect(Collectors.joining(" "));
+    // get tag nodes
+    List<Tree> tags = new ArrayList<Tree>();
+    getTagsFromTree(tags, tree);
+    // tag
+    CoreDocument annotatedWords = pipeline.processToCoreDocument(sentenceWords);
+    // update tree
+    for (int idx = 0 ; idx < tags.size() ; idx++) {
+      tags.get(idx).setLabel(CoreLabel.wordFromString(annotatedWords.tokens().get(idx).tag()));
+    }
+  }
+
   private static final String usage =
-    String.format("Usage: java %s [OPTIONS] file(s)%n%n", AnCoraProcessor.class.getName()) +
-      "Options:\n" +
-      "    -unigramTagger <tagger_path>: Path to a serialized `TwoDimensionalCounter` which\n" +
-      "        should be used for unigram tagging in multi-word token expansion. If this option\n" +
-      "        is not provided, a unigram tagger will be built from the provided corpus data.\n" +
-      "        (This option is useful if you are processing splits of the corpus separately but\n" +
-      "        want each step to benefit from a complete tagger.)\n" +
-      "    -ner: Add NER-specific information to trees\n";
+    String.format(
+        "Usage: java %s [OPTIONS] file(s)%n%n", AnCoraProcessor.class.getName()) +
+        "Options:\n" +
+        "    -unigramTagger <tagger_path>: Path to a serialized `TwoDimensionalCounter` which\n" +
+        "        should be used for unigram tagging in multi-word token expansion. If this option\n" +
+        "        is not provided, a unigram tagger will be built from the provided corpus data.\n" +
+        "        (This option is useful if you are processing splits of the corpus separately but\n" +
+        "        want each step to benefit from a complete tagger.)\n" +
+        "    -ner: Add NER-specific information to trees\n" +
+        "    -generateTags: build tags with this model\n"+
+        "    -expandElisions: MWT expand words like del, al\n"+
+        "    -expandConmigo: MWT expand words like conmigo, contigo\n"+
+        "    -convertToUD: Convert part-of-speech tags to UD\n";
 
   private static final Map<String, Integer> argOptionDefs = new HashMap<>();
   static {
     argOptionDefs.put("unigramTagger", 1);
     argOptionDefs.put("ner", 0);
+    argOptionDefs.put("convertToUD", 0);
+    argOptionDefs.put("generateTags", 0);
   }
 
   public static void main(String[] args)
@@ -451,6 +578,29 @@ public class AnCoraProcessor  {
     AnCoraProcessor processor = new AnCoraProcessor(fileList, options);
     List<Tree> trees = processor.process();
 
+    // potentially convert tags to UD with rules
+    boolean convertToUD = PropertiesUtils.getBool(options, "convertToUD");
+    if (convertToUD) {
+      for (Tree t : trees)
+        convertTreeTagsToUD(t);
+    }
+
+    // potentially generate tags
+    boolean generateTags = PropertiesUtils.getBool(options, "generateTags");
+    String partOfSpeechModel = options.getProperty("generateTagsModel",
+        "edu/stanford/nlp/models/pos-tagger/spanish/spanish-ud.tagger");
+    if (generateTags && partOfSpeechModel != "") {
+      Properties props = new Properties();
+      props.setProperty("annotators", "tokenize,ssplit,pos");
+      props.setProperty("tokenize.whitespace", "true");
+      props.setProperty("ssplit.isOneSentence", "true");
+      props.setProperty("pos.model", partOfSpeechModel);
+      StanfordCoreNLP spanishPartOfSpeechPipeline = new StanfordCoreNLP(props);
+      for (Tree t : trees)
+        generateTagsForTree(spanishPartOfSpeechPipeline,t);
+    }
+
+    // print out final trees
     for (Tree t : trees)
       System.out.println(t);
   }

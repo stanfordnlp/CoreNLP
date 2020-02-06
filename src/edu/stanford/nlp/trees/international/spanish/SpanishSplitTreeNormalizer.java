@@ -24,8 +24,8 @@ public class SpanishSplitTreeNormalizer extends SpanishTreeNormalizer {
   private static final long serialVersionUID = -3237606914912983720L;
 
   @Override
-  public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
-    tree = super.normalizeWholeTree(tree, tf);
+  public Tree normalizeWholeTree(Tree tree, TreeFactory tf, boolean expandElisions, boolean expandConmigo) {
+    tree = super.normalizeWholeTree(tree, tf, expandElisions, expandConmigo);
     tree = Tsurgeon.processPattern(nonsensicalClauseRewrite, eraseClause, tree);
     return tree;
   }

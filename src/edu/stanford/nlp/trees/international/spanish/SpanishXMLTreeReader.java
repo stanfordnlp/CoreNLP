@@ -90,10 +90,15 @@ public class SpanishXMLTreeReader implements TreeReader  {
    * @param detailedAnnotations Retain detailed tree node annotations. These
    *          annotations on parse tree constituents may be useful for
    *          e.g. training a parser.
+   * @param expandElisions MWT Expand words like del, al
+   * @param expandConmigo MWT Expand words like conmigo, contigo
+   *
+   *
    */
   public SpanishXMLTreeReader(String filename, Reader in, boolean simplifiedTagset,
                               boolean aggressiveNormalization,
-                              boolean retainNER, boolean detailedAnnotations) {
+                              boolean retainNER, boolean detailedAnnotations, boolean expandElisions,
+                              boolean expandConmigo) {
     TreebankLanguagePack tlp = new SpanishTreebankLanguagePack();
 
     this.simplifiedTagset = simplifiedTagset;
@@ -480,12 +485,14 @@ public class SpanishXMLTreeReader implements TreeReader  {
     final boolean plainPrint = PropertiesUtils.getBool(options, "plain", false);
     final boolean ner = PropertiesUtils.getBool(options, "ner", false);
     final boolean detailedAnnotations = PropertiesUtils.getBool(options, "detailedAnnotations", false);
+    final boolean expandElisions = PropertiesUtils.getBool(options, "expandElisions", false);
+    final boolean expandConmigo = PropertiesUtils.getBool(options, "expandConmigo", false);
 
     String[] remainingArgs = options.getProperty("").split(" ");
     List<File> fileList = new ArrayList<>();
     for (String remainingArg : remainingArgs) fileList.add(new File(remainingArg));
 
-    final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, detailedAnnotations);
+    final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, detailedAnnotations, expandElisions, expandConmigo);
     ExecutorService pool =
       Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 

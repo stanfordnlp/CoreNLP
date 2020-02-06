@@ -195,6 +195,10 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
+    return normalizeWholeTree(tree, tf, false, false);
+  }
+
+  public Tree normalizeWholeTree(Tree tree, TreeFactory tf, boolean expandElisions, boolean expandConmigo) {
     // Begin with some basic transformations
     tree = tree.prune(emptyFilter).spliceOut(aOverAFilter)
       .transform(constituentRenamer);
@@ -227,8 +231,10 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     }
 
     // More tregex-powered fixes
-    tree = expandElisions(tree);
-    tree = expandConmigo(tree);
+    if (expandElisions)
+      tree = expandElisions(tree);
+    if (expandConmigo)
+      tree = expandConmigo(tree);
     tree = expandCliticPronouns(tree);
 
     // Make sure the tree has a top-level unary rewrite; the root
