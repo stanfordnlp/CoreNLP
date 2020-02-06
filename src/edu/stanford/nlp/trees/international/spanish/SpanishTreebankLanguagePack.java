@@ -22,11 +22,11 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
   private static final String[] punctTags = {
     "faa", "fat", "fc", "fca", "fct", "fd", "fe", "fg", "fh", "fia", "fit",
     "fla", "flt", "fp", "fpa", "fpt", "fra", "frc", "fs", "ft", "fx", "fz",
-    "f0"
+    "f0", "PUNCT"
   };
 
   private static final String[] sentenceFinalPunctTags = {
-    "fat", "fit", "fp", "fs"
+    "fat", "fit", "fp", "fs", "PUNCT"
   };
 
   private static final String[] punctWords = {
