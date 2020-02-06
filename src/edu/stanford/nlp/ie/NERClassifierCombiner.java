@@ -196,12 +196,14 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     String prefix = (name == null) ? "ner." : name.isEmpty() ? "" : name + '.';
     String modelNames = properties.getProperty(prefix + "model");
     if (modelNames == null) {
-      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' +
-              DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+      modelNames = (DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' +
+                    DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' +
+                    DefaultPaths.DEFAULT_NER_CONLL_MODEL);
     }
-    // but modelNames can still be empty string is set explicitly to be empty!
+    // but modelNames can still be empty string if set explicitly to be empty!
     String[] models;
-    if ( ! modelNames.isEmpty()) {
+    modelNames = modelNames.trim();
+    if (!modelNames.isEmpty()) {
       models  = modelNames.split(",");
     } else {
       // Allow for no real NER model - can just use numeric classifiers or SUTime

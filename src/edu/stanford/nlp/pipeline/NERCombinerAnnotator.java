@@ -86,6 +86,8 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
 
   public NERCombinerAnnotator(Properties properties) throws IOException {
+    // TODO: this is basically the same as the block in ie.NERClassifierCombiner.  Refactor
+
     // if rulesOnly is set, just run the rules-based NER
     rulesOnly = PropertiesUtils.getBool(properties, "ner.rulesOnly", false);
     // if statisticalOnly is set, just run statistical models
@@ -98,6 +100,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       if (modelNames == null) {
         modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
       }
+      modelNames = modelNames.trim();
       if (!modelNames.isEmpty()) {
         models.addAll(Arrays.asList(modelNames.split(",")));
       }
