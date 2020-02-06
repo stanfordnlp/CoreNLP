@@ -1,6 +1,8 @@
 package edu.stanford.nlp.naturalli;
-import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
-import edu.stanford.nlp.util.logging.Redwood;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -9,6 +11,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.naturalli.NaturalLogicAnnotations.*;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.SentenceAnnotator;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -16,12 +19,9 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.naturalli.NaturalLogicAnnotations.*;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * An annotator marking operators with their scope.
@@ -45,7 +45,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
   /**
    * A regex for arcs that we pretend are subject arcs.
    */
-  private static final String GEN_SUBJ = "/nsubj(:pass)?/";
+  private static final String GEN_SUBJ = "/nsubj(:?pass)?/";
   /**
    * A regex for arcs that we pretend are object arcs.
    */
@@ -66,7 +66,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
   /**
    * A Semgrex fragment for matching a negating quantifier.
    */
-  private static final String NEG_QUANTIFIER = "{lemma:/(no)|(neither)|(no one)|(nobody)|(not)|(but)|(except)|(n't)/}=quantifier";
+  private static final String NEG_QUANTIFIER = "{lemma:/(no)|(neither)|(no one)|(nobody)|(not)|(but)|(except)|(n['’]t)/}=quantifier";
 
   /**
    * A Semgrex pattern for matching a negating quantifier in a dependency graph.
@@ -263,19 +263,21 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     if (toExclude.second <= span.first || toExclude.first >= span.second) {
       // Case: toExclude is outside of the span anyways
       return span;
-    } else if (toExclude.first <= span.first && toExclude.second > span.first) {
+    } else if (toExclude.first <= span.first /* && toExclude.second > span.first */) {
       // Case: overlap on the front
       return Pair.makePair(toExclude.second, span.second);
-    } else if (toExclude.first < span.second && toExclude.second >= span.second) {
+    } else if (/*toExclude.first < span.second && */ toExclude.second >= span.second) {
       // Case: overlap on the front
       return Pair.makePair(span.first, toExclude.first);
-    } else if (toExclude.first > span.first && toExclude.second < span.second) {
+    } else /* if (toExclude.first > span.first && toExclude.second < span.second) */ {
       // Case: toExclude is within the span
       return span;
+    /*
     } else {
       throw new IllegalStateException("This case should be impossible");
+    */
     }
-  }
+   }
 
   /**
    * Compute the span for a given matched pattern.
@@ -384,6 +386,9 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
    * @param tree dependency tree to be processed.
    */
   private void addNegationToDependencyGraph(SemanticGraph tree) {
+    // cdm: this code does work, checked 2020-02-05
+    // System.out.println("addNegationToDependencyGraph");
+    // System.out.println(tree);
     SemanticGraph sg = tree.makeSoftCopy();
     SemgrexMatcher matcher = NEG_PATTERN.matcher(sg);
     while (matcher.find()) {
@@ -391,6 +396,8 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
       IndexedWord dep = matcher.getNode("quantifier");
       tree.getEdge(gov, dep).setRelation(UniversalEnglishGrammaticalRelations.NEGATION_MODIFIER);
     }
+    // System.out.println("becomes");
+    // System.out.println(tree);
   }
 
   /**

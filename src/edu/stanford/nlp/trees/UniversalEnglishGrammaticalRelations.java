@@ -1089,6 +1089,7 @@ public class UniversalEnglishGrammaticalRelations {
   /**
    * The "negation modifier" grammatical relation.  The negation modifier
    * is the relation between a negation word and the word it modifies.
+   * <i>This is not a UD relation, but is retained for certain internal usages in Natural Logic.</i>
    * <br>
    * Examples: <br>
    * "Bill is not a scientist" &rarr;
