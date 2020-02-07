@@ -855,6 +855,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     os.println("\t\"ner.model\" - paths for the ner models.  By default, the English 3 class, 7 class, and 4 class models are used.");
     os.println("\t\"ner.useSUTime\" - Whether or not to use sutime (English specific)");
     os.println("\t\"ner.applyNumericClassifiers\" - whether or not to use any numeric classifiers (English specific)");
+    os.println("\t\"ner.applyFineGrained\" - whether or not to apply fine grained regex NER annotation (English specific)");
 
     os.println();
     os.println("\tIf annotator \"truecase\" is defined:");
