@@ -574,7 +574,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   public Set<Class<? extends CoreAnnotation>> requires() {
     // TODO: we could check the models to see which ones use lemmas
     // and which ones use pos tags
-    if (ner.usesSUTime() || ner.appliesNumericClassifiers()) {
+    if (ner.usesSUTime() || ner.appliesNumericClassifiers() || applyFineGrained) {
       return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
           CoreAnnotations.TextAnnotation.class,
           CoreAnnotations.TokensAnnotation.class,
