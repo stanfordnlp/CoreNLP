@@ -171,6 +171,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // set up doc date finding if specified
     setUpDocDateAnnotator(properties);
 
+    log.info("Using numeric classifiers: " + applyNumericClassifiers);
+    log.info("Using SUTime: " + useSUTime);
+    log.info("Using fine grained: " + this.applyFineGrained);
+
     VERBOSE = verbose;
     this.ner = nerCombiner;
   }

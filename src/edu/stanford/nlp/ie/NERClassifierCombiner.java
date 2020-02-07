@@ -115,8 +115,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     } else {
       this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
     }
-    log.info("Using numeric classifiers: " + this.applyNumericClassifiers);
-    log.info("Using SUTime: " + this.useSUTime);
   }
 
   @SafeVarargs
