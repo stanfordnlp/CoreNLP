@@ -28,6 +28,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -297,18 +298,64 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     return binarized;
   }
 
+  /**
+   * If an internal node goes directly to a preterminal, that is an illegal tree.
+   * Otherwise, accept the tree.
+   * <br>
+   * Example:
+   * <pre>(ROOT (sentence (S (morfema.pronominal (PRON Se)) -----(sn (spec (PRON los)) grup.nom)----- (grup.verb (PROPN trago')) (sn (spec (PROPN la)) (grup.nom (DET tierra)))) (NOUN ....) (S (sadv (grup.adv (PROPN ya))) (neg (ADV no)) (grup.verb (ADV viven)) (sp (prep (VERB en)) (sn (grup.nom (ADP Cuba)))) (PROPN ...)) (conj (PUNCT y)) (S (sp (prep (CCONJ a)) (sn (grup.nom (ADP nadie)))) (sn (grup.nom (PRON le))) (grup.verb (PRON importa)) (sn (spec (VERB la)) (grup.nom (S (relatiu (DET que)) (grup.verb (PRON esten) (gerundi (VERB pasando))))))) (VERB ....)))</pre>
+   */
+  public static boolean checkTreeBranching(Tree tree) {
+    if (tree == null) {
+      return false;
+    }
+    if (tree.isLeaf() || tree.isPreTerminal()) {
+      return true;
+    }
+    for (Tree child : tree.children()) {
+      if (!checkTreeBranching(child)) {
+        return false;
+      }
+      if (child.isLeaf()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Returns false if the tree is obviously unacceptable for the sr parser training.
+   * <br>
+   * Currently that only means trees where internal nodes go directly to leaves instead of preterminals.
+   */
+  public static boolean isLegalTree(Tree tree) {
+    return checkTreeBranching(tree);
+  }
+
   public static List<Tree> binarizeTreebank(Treebank treebank, Options op) {
+    List<Tree> filteredTrees = new ArrayList<>();
+    for (Tree tree : treebank) {
+      if (isLegalTree(tree)) {
+        filteredTrees.add(tree);
+      } else {
+        log.error("Found an illegal tree, skipping: " + tree);
+      }
+    }
+
     TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack());
     BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
     CompositeTreeTransformer transformer = new CompositeTreeTransformer();
     transformer.addTransformer(binarizer);
     transformer.addTransformer(basicTransformer);
 
-    treebank = treebank.transform(transformer);
+    List<Tree> transformedTrees = new ArrayList<>();
+    for (Tree tree : filteredTrees) {
+      transformedTrees.add(transformer.transformTree(tree));
+    }
 
     HeadFinder binaryHeadFinder = new BinaryHeadFinder(op.tlpParams.headFinder());
-    List<Tree> binarizedTrees = Generics.newArrayList();
-    for (Tree tree : treebank) {
+    List<Tree> binarizedTrees = new ArrayList<>();
+    for (Tree tree : transformedTrees) {
       if (!tree.isBinarized()) {
         log.warn("Found a tree which was not properly binarized.  So-called binarized tree is as follows:\n" +
                  tree.pennString());
