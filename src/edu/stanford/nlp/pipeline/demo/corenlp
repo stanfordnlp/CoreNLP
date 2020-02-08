@@ -31,8 +31,6 @@ do_start()
 {
   if [ -e "$CORENLP_DIR/corenlp.shutdown" ]; then
     echo "CoreNLP server is already running!"
-    # echo "If you are sure this is a mistake, delete the file:"
-    # echo "$CORENLP_DIR/corenlp.shutdown"
     echo "Force restarting"
     do_restart
   else
