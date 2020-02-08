@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 
 /**
  * A location for general implementations of Filter&lt;Tree&gt;.  For
- * example, we provide a tree which filters trees so they are only
+ * example, we provide a filter which filters trees so they are only
  * accepted if it has a child with a label that matches a particular
  * regex.
  *
