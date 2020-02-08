@@ -77,7 +77,7 @@ public class CreateTransitionSequence {
       CoreLabel leftHead = leftLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class);
       CoreLabel rightHead = rightLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class);
       if (head == null || leftHead == null || rightHead == null) {
-        throw new IllegalArgumentException("Expected tree labels to have their heads assigned");
+        throw new IllegalArgumentException("Expected tree labels to have their heads assigned.  Failed at: " + tree);
       }
       if (head == leftHead) {
         transitions.add(new BinaryTransition(tree.label().value(), BinaryTransition.Side.LEFT));
