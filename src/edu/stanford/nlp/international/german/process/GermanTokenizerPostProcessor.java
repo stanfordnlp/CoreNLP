@@ -31,6 +31,10 @@ public class GermanTokenizerPostProcessor extends CoreLabelProcessor {
       "Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember",
       "Jahrhundert"));
 
+  public HashSet<String> germanAbbreviations = new HashSet<>(Arrays.asList(
+      "bzw", "jap", "usw", "ca"));
+
+
   /**
    * merge the contents of two tokens
    **/
@@ -62,7 +66,10 @@ public class GermanTokenizerPostProcessor extends CoreLabelProcessor {
       // perform hyphen to number merge (e.g. "1989-" "1990" -> "1989-1990")
       boolean hyphenToNumberMerge = lastProcessedToken.word().matches("[0-9]+-") &&
           currToken.word().matches("[0-9]+");
-      if (emptyAfter && (ordinalMerge || numberToHyphenMerge || hyphenToNumberMerge)) {
+      // perform period to abbreviation (usw . -> usw.)
+      boolean abbreviationMerge = germanAbbreviations.contains(lastProcessedToken.word())
+          && currToken.word().equals(".");
+      if (emptyAfter && (ordinalMerge || numberToHyphenMerge || hyphenToNumberMerge || abbreviationMerge)) {
         mergeTokens(lastProcessedToken, currToken);
       } else {
         processedTokens.add(currToken);
