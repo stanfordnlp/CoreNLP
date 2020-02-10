@@ -42,6 +42,11 @@ public class GermanTokenizerPostProcessorITest extends TestCase {
     List<String> numberRangeExampleGoldTokens = Arrays.asList("Das", "Artepitheton", "bolusii", "ehrt", "den",
         "südafrikanischen", "Bankier", "Harry", "Bolus", "(", "1834-1911", ")", ".");
     testExample(numberRangeExample, numberRangeExampleGoldTokens);
+    // test abbreviations
+    String abbreviationExample = "Zusätzlich hatte ich eine Terasse bzw. Balkon.";
+    List<String> abbreviationExampleGoldTokens = Arrays.asList("Zusätzlich", "hatte", "ich", "eine", "Terasse",
+        "bzw.", "Balkon", ".");
+    testExample(abbreviationExample,abbreviationExampleGoldTokens);
   }
 
 }
