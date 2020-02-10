@@ -856,6 +856,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     os.println("\t\"ner.useSUTime\" - Whether or not to use sutime (English specific)");
     os.println("\t\"ner.applyNumericClassifiers\" - whether or not to use any numeric classifiers (English specific)");
     os.println("\t\"ner.applyFineGrained\" - whether or not to apply fine grained regex NER annotation (English specific)");
+    os.println("\t\"ner.additional.tokensregex.rules\" - additional tokensregex rules to use for NER recognition");
+    os.println("\t\"ner.additional.regexner.mapping\" - additional regex rules to use for NER recognition");
 
     os.println();
     os.println("\tIf annotator \"truecase\" is defined:");
