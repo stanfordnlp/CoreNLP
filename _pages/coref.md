@@ -45,7 +45,7 @@ java -Xmx5g -cp stanford-corenlp-3.9.2.jar:stanford-chinese-corenlp-models-3.9.2
 Alternatively, the properties can be set manually. For example, to run the neural system on English:
 
 ```bash
-java -Xmx5g -cp stanford-corenlp-3.9.2.jar:stanford-corenlp-3.9.2-models.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,mention,coref -coref.algorithm neural -file example_file.txt
+java -Xmx5g -cp stanford-corenlp-3.9.2.jar:stanford-corenlp-3.9.2-models.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,coref -coref.algorithm neural -file example_file.txt
 ```
 
 See [below](#more-details) for further options.
