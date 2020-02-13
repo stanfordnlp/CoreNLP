@@ -1,6 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.Set;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -17,6 +17,8 @@ import edu.stanford.nlp.util.Sets;
  */
 public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
+  public static Set<String> tagsToIgnore = new HashSet<String>(Arrays.asList("#"));
+
   private static void testTagSet4(String[] lexParsers,
                                   String[] maxentTaggers,
                                   String[] srParsers,
@@ -25,13 +27,16 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
     String refTaggerName = maxentTaggers[0];
     MaxentTagger refTagger = new MaxentTagger(refTaggerName);
     Set<String> tagSet = refTagger.tagSet();
+    tagSet.removeAll(tagsToIgnore);
 
     for (String name : maxentTaggers) {
       MaxentTagger tagger = new MaxentTagger(name);
+      Set<String> maxentTagSet = tagger.tagSet();
+      maxentTagSet.removeAll(tagsToIgnore);
       assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
-                   "left - right: " + Sets.diff(tagSet, tagger.tagSet()) +
-                   "; right - left: " + Sets.diff(tagger.tagSet(), tagSet) + "\n",
-                   tagSet, tagger.tagSet());
+                   "left - right: " + Sets.diff(tagSet, maxentTagSet) +
+                   "; right - left: " + Sets.diff(maxentTagSet, tagSet) + "\n",
+                   tagSet, maxentTagSet);
     }
     for (String name : lexParsers) {
       LexicalizedParser lp = LexicalizedParser.loadModel(name);
