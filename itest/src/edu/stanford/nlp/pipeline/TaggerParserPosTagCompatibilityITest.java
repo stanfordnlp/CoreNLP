@@ -31,7 +31,7 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
     for (String name : maxentTaggers) {
       MaxentTagger tagger = new MaxentTagger(name);
-      Set<String> maxentTagSet = tagger.tagSet();
+      Set<String> maxentTagSet = new HashSet<>(tagger.tagSet());
       maxentTagSet.removeAll(tagsToIgnore);
       assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
                    "left - right: " + Sets.diff(tagSet, maxentTagSet) +
@@ -40,27 +40,32 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
     }
     for (String name : lexParsers) {
       LexicalizedParser lp = LexicalizedParser.loadModel(name);
+      Set<String> lexParserTagSet =
+          new HashSet<>(lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
+      lexParserTagSet.removeAll(tagsToIgnore);
       assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
-                   "left - right: " + Sets.diff(tagSet, lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction())) +
-                   "; right - left: " + Sets.diff(lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()), tagSet) + "\n",
-                   tagSet, lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
+                   "left - right: " + Sets.diff(tagSet, lexParserTagSet) +
+                   "; right - left: " + Sets.diff(lexParserTagSet, tagSet) + "\n",
+                   tagSet, lexParserTagSet);
     }
 
     for (String name : srParsers) {
       ShiftReduceParser srp = ShiftReduceParser.loadModel(name);
-
+      Set<String> srParserTagSet = new HashSet<>(srp.tagSet());
+      srParserTagSet.removeAll(tagsToIgnore);
       assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
-                   "left - right: " + Sets.diff(tagSet, srp.tagSet()) +
-                   "; right - left: " + Sets.diff(srp.tagSet(), tagSet) + "\n",
+                   "left - right: " + Sets.diff(tagSet, srParserTagSet) +
+                   "; right - left: " + Sets.diff(srParserTagSet, tagSet) + "\n",
                    tagSet, srp.tagSet());
     }
 
     for (String name : nnDepParsers) {
       DependencyParser dp = DependencyParser.loadFromModelFile(name);
-
+      Set<String> nnDepParserTagSet = new HashSet<String>(dp.getPosSet());
+      nnDepParserTagSet.removeAll(tagsToIgnore);
       assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
-                   "left - right: " + Sets.diff(tagSet, dp.getPosSet()) +
-                   "; right - left: " + Sets.diff(dp.getPosSet(), tagSet) + "\n",
+                   "left - right: " + Sets.diff(tagSet, nnDepParserTagSet) +
+                   "; right - left: " + Sets.diff(nnDepParserTagSet, tagSet) + "\n",
                    tagSet, dp.getPosSet());
     }
 
