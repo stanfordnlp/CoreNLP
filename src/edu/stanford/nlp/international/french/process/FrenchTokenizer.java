@@ -157,11 +157,12 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
   /**
    * Splits a contraction marked by the lexer.
-   *
-   * au => a + u =&gt; à + le
-   * aux => a + ux =&gt; à + les
-   * des => de + s =&gt; de + les
-   * du => d + u =&gt; de + le
+   * <br>
+   * au =&gt; a + u =&gt; à + le
+   * aux =&gt; a + ux =&gt; à + les
+   * du =&gt; d + u =&gt; de + le
+   * <br>
+   * des is handled by a special classifier in corenlp.  TODO: handle it here as well
    */
   private CoreLabel processContraction(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
