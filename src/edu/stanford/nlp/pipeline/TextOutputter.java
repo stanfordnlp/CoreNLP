@@ -241,7 +241,8 @@ public class TextOutputter extends AnnotationOutputter {
             chain.getRepresentativeMention();
         boolean outputHeading = false;
         for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
-          if (mention == representative)
+          if (mention == representative &&
+              (!options.printSingletons || chain.getMentionsInTextualOrder().size() > 1))
             continue;
           if (!outputHeading) {
             outputHeading = true;
