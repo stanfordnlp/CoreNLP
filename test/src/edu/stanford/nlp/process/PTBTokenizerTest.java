@@ -577,6 +577,8 @@ public class PTBTokenizerTest {
 
   @Test
   public void testPTBTokenizerTokenizeSplitHyphens() {
+    // Note that by turning off the ptb3 escaping option, this winds
+    // up testing the () tokenization as well
     TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory(
             "splitHyphenated=true,splitForwardSlash,ellipses=unicode,invertible");
     runOnTwoArrays(tokFactory, ptbInputs, ptbGoldSplitHyphenated);
