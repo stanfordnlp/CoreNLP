@@ -607,7 +607,7 @@ public class PTBTokenizerTest {
   }
 
 
-  private static <T extends Label> void runOnTwoArrays(TokenizerFactory<T> tokFactory, String[] inputs, String[][] desired) {
+  public static <T extends Label> void runOnTwoArrays(TokenizerFactory<T> tokFactory, String[] inputs, String[][] desired) {
     assertEquals("Test data arrays don't match in length", inputs.length, desired.length);
     for (int sent = 0; sent < inputs.length; sent++) {
       // System.err.println("Testing " + inputs[sent]);
