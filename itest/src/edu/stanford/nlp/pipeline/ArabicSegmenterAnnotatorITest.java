@@ -25,11 +25,8 @@ public class ArabicSegmenterAnnotatorITest extends TestCase {
     pipeline = new StanfordCoreNLP(props);
   }
 
-  public void testPipeline() {
-    String query = "وما هي كلمتُك المفضلة للدراسة؟";
-    String[] expectedWords = {"و", "ما", "هي", "كلمة", "ك", "المفضلة", "ل", "الدراسة", "?"};
-    int[] expectedStartPositions = {0, 1, 4, 7, 12, 14, 22, 23, 29};
-    int[] expectedEndPositions = {1, 3, 6, 11, 13, 21, 23, 29, 30};
+  public void runTest(String query, String[] expectedWords,
+                      int[] expectedStartPositions, int[] expectedEndPositions) {
     Annotation annotation = new Annotation(query);
     pipeline.annotate(annotation);
 
@@ -40,5 +37,22 @@ public class ArabicSegmenterAnnotatorITest extends TestCase {
       assertEquals(expectedStartPositions[i], tokens.get(i).beginPosition());
       assertEquals(expectedEndPositions[i], tokens.get(i).endPosition());
     }
+  }
+
+  public void testPipeline() {
+    String query = "وما هي كلمتُك المفضلة للدراسة؟";
+    String[] expectedWords = {"و", "ما", "هي", "كلمة", "ك", "المفضلة", "ل", "الدراسة", "?"};
+    int[] expectedStartPositions = {0, 1, 4, 7, 12, 14, 22, 23, 29};
+    int[] expectedEndPositions = {1, 3, 6, 11, 13, 21, 23, 29, 30};
+    runTest(query, expectedWords, expectedStartPositions, expectedEndPositions);
+  }
+
+  public void testParens() {
+    // the Arabic segmenter shouldn't convert parents to -LRB- -RRB-
+    String query = "( )";
+    String[] expectedWords = {"(", ")"};
+    int[] expectedStartPositions = {0, 2};
+    int[] expectedEndPositions = {1, 3};
+    runTest(query, expectedWords, expectedStartPositions, expectedEndPositions);
   }
 }
