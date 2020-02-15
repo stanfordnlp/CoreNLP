@@ -37,12 +37,6 @@ public class ChineseSegmenterAnnotatorITest {
         new int[]{0, 1, 3, 5, 7, 8},
         new int[]{1, 3, 5, 7, 8, 9});
 
-    // All of the tools should now produce () instead of -LRB- -RRB-
-    testOne("你马上回来(北京)吗？",
-            new String[]{"你", "马上", "回来", "(", "北京", ")", "吗", "？"},
-            new int[]{0, 1, 3, 5, 6, 8, 9, 10},
-            new int[]{1, 3, 5, 6, 8, 9, 10, 11});
-
     // Properly handle XML tags
     testOne("<post id=\"something\" anything>这是一个测试</post>",
         new String[]{"<post id=\"something\" anything>", "这", "是", "一", "个", "测试", "</post>"},
