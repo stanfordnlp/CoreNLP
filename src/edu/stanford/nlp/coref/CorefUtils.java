@@ -14,6 +14,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Useful utilities for coreference resolution.
@@ -136,5 +137,14 @@ public class CorefUtils {
       }
     }
     return words;
+  }
+
+  public static void printHumanReadableCoref(Document document) {
+    for (CorefCluster c : document.corefClusters.values()) {
+      for (Mention corefMention : c.corefMentions) {
+        Redwood.log(document.docInfo.get("DOC_ID") + "\t" + c.clusterID + "\t" +
+            corefMention.originalSpan.get(0).beginPosition() + "\t" + corefMention.toString()+"\n");
+      }
+    }
   }
 }
