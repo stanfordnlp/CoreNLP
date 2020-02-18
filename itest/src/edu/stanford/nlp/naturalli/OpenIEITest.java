@@ -189,7 +189,7 @@ public class OpenIEITest {
       add("He\tworked as\trights attorney");
       add("He\ttaught\tconstitutional law");
       add("He\ttaught\tlaw");
-      add("He\ttaught law at\tUniversity of Chicago");
+      add("He\ttaught law at\tUniversity of Chicago Law School");
       // currently this one isn't found because the underlying parse
       // is missing a tmod
       // add("He\ttaught law at_time\tLaw School");
