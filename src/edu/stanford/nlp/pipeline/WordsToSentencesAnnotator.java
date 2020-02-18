@@ -322,17 +322,16 @@ public class WordsToSentencesAnnotator implements Annotator  {
         currToken.set(CoreAnnotations.TokenEndAnnotation.class, tokenIndex + 1);
         tokenIndex++;
         // fix before text for this token
-        if (prevToken != null && prevToken.isNewline()) {
-          String currTokenBeforeText = currToken.get(CoreAnnotations.BeforeAnnotation.class);
-          String prevTokenText = prevToken.get(CoreAnnotations.OriginalTextAnnotation.class);
-          currToken.set(CoreAnnotations.BeforeAnnotation.class, prevTokenText+currTokenBeforeText);
+        if (prevToken != null && prevToken.isNewline() &&
+            currToken.get(CoreAnnotations.BeforeAnnotation.class) != null) {
+          String prevNewlineTokenText = prevToken.get(CoreAnnotations.OriginalTextAnnotation.class);
+          currToken.set(CoreAnnotations.BeforeAnnotation.class, prevNewlineTokenText);
         }
       } else {
         String newlineText = currToken.get(CoreAnnotations.OriginalTextAnnotation.class);
         // fix after text for last token
-        if (prevToken != null) {
-          String prevTokenAfterText = prevToken.get(CoreAnnotations.AfterAnnotation.class);
-          prevToken.set(CoreAnnotations.AfterAnnotation.class, prevTokenAfterText + newlineText);
+        if (prevToken != null && prevToken.get(CoreAnnotations.AfterAnnotation.class) != null) {
+          prevToken.set(CoreAnnotations.AfterAnnotation.class, newlineText);
         }
       }
       prevToken = currToken;
