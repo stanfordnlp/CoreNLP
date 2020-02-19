@@ -36,7 +36,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
   public void testEnglishCaselessWSJDevPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
             "tagSeparator=_,/u/nlp/data/pos-tagger/models-4.0.0/data/wsj-caseless/dev/wsj-caseless-dev.txt",
-            95.90);
+            95.80);
   }
 
   public void testEnglishCaselessWSJTestPOS() throws IOException {
