@@ -61,7 +61,7 @@ public class ShiftReduceParserITest extends TestCase {
     pq.setConstraints(constraints);
     assertTrue(pq.parse(sentence));
     result = pq.getBestParse();
-    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (ADJP (NP (NNP Carolina) (NNPS Reapers)))) (. .)))", result.toString());
+    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (ADJP (NP (NP (NNP Carolina) (NNPS Reapers))))) (. .)))", result.toString());
 
     constraint = new ParserConstraint(1, 3, "VP");
     constraints = Collections.singletonList(constraint);
@@ -69,6 +69,6 @@ public class ShiftReduceParserITest extends TestCase {
     pq.setConstraints(constraints);
     assertTrue(pq.parse(sentence));
     result = pq.getBestParse();
-    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina))) (NNPS Reapers) (. .)))", result.toString()); 
+    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina))) (NP (NNPS Reapers)) (. .)))", result.toString());
   }
 }
