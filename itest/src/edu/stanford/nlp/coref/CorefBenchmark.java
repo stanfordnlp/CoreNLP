@@ -44,6 +44,7 @@ public class CorefBenchmark extends TestCase {
     String[] corefArgs = { "-props", PROPERTIES_PATH};
     props = StringUtils.argsToProperties(corefArgs);
     props.setProperty("coref.conllOutputPath", WORK_DIR_FILE.getAbsolutePath()+"/");
+    props.setProperty("coref.verbose", "true");
 
     // build CorefSystem
     corefSystem = new CorefSystem(props);
