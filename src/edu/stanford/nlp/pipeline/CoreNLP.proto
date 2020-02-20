@@ -208,7 +208,7 @@ message Token {
   optional uint64 numericValue = 70;
   optional string numericType = 71;
   optional uint64 numericCompositeValue = 72;
-  optional string numericCompositveType = 73;
+  optional string numericCompositeType = 73;
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
