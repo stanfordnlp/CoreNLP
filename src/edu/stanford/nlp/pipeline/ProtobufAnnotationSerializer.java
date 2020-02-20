@@ -267,10 +267,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     keysToSerialize.remove(ParagraphAnnotation.class);
     // Remove items populated by number normalizer
     keysToSerialize.remove(NumericCompositeObjectAnnotation.class);
-    keysToSerialize.remove(NumericCompositeTypeAnnotation.class);
-    keysToSerialize.remove(NumericCompositeValueAnnotation.class);
-    keysToSerialize.remove(NumericTypeAnnotation.class);
-    keysToSerialize.remove(NumericValueAnnotation.class);
+    //keysToSerialize.remove(NumericCompositeTypeAnnotation.class);
+    //keysToSerialize.remove(NumericCompositeValueAnnotation.class);
+    //keysToSerialize.remove(NumericTypeAnnotation.class);
+    //keysToSerialize.remove(NumericValueAnnotation.class);
     // Remove items which were never supposed to be there in the first place
     keysToSerialize.remove(ForcedSentenceUntilEndAnnotation.class);
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
@@ -402,6 +402,20 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (keySet.contains(MWTTokenTextAnnotation.class)) {
       builder.setMwtText(getAndRegister(coreLabel, keysToSerialize, MWTTokenTextAnnotation.class));
+    }
+
+    // handle numeric stuff
+    if (keySet.contains(NumericValueAnnotation.class)) {
+      builder.setNumericValue((Long) getAndRegister(coreLabel, keysToSerialize, NumericValueAnnotation.class));
+    }
+    if (keySet.contains(NumericTypeAnnotation.class)) {
+      builder.setNumericType(getAndRegister(coreLabel, keysToSerialize, NumericTypeAnnotation.class));
+    }
+    if (keySet.contains(NumericCompositeValueAnnotation.class)) {
+      builder.setNumericCompositeValue((Long) getAndRegister(coreLabel, keysToSerialize, NumericCompositeValueAnnotation.class));
+    }
+    if (keySet.contains(NumericCompositeTypeAnnotation.class)) {
+      builder.setNumericCompositeType(getAndRegister(coreLabel, keysToSerialize, NumericCompositeTypeAnnotation.class));
     }
 
     // Return
@@ -1423,6 +1437,20 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (proto.hasIsFirstMWT()) {
       word.set(IsFirstWordOfMWTAnnotation.class, proto.getIsFirstMWT());
+    }
+
+    // Numeric info
+    if (proto.hasNumericValue()) {
+      word.set(NumericValueAnnotation.class, proto.getNumericValue());
+    }
+    if (proto.hasNumericType()) {
+      word.set(NumericTypeAnnotation.class, proto.getNumericType());
+    }
+    if (proto.hasNumericCompositeValue()) {
+      word.set(NumericCompositeValueAnnotation.class, proto.getNumericCompositeValue());
+    }
+    if (proto.hasNumericCompositeType()) {
+      word.set(NumericCompositeTypeAnnotation.class, proto.getNumericCompositeType());
     }
 
     // Return
