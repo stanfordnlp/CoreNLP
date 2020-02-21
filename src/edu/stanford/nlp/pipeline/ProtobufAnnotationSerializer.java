@@ -406,13 +406,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // handle numeric stuff
     if (keySet.contains(NumericValueAnnotation.class)) {
-      builder.setNumericValue((Long) getAndRegister(coreLabel, keysToSerialize, NumericValueAnnotation.class));
+      builder.setNumericValue(getAndRegister(coreLabel, keysToSerialize, NumericValueAnnotation.class).longValue());
     }
     if (keySet.contains(NumericTypeAnnotation.class)) {
       builder.setNumericType(getAndRegister(coreLabel, keysToSerialize, NumericTypeAnnotation.class));
     }
     if (keySet.contains(NumericCompositeValueAnnotation.class)) {
-      builder.setNumericCompositeValue((Long) getAndRegister(coreLabel, keysToSerialize, NumericCompositeValueAnnotation.class));
+      builder.setNumericCompositeValue(getAndRegister(coreLabel, keysToSerialize, NumericCompositeValueAnnotation.class).longValue());
     }
     if (keySet.contains(NumericCompositeTypeAnnotation.class)) {
       builder.setNumericCompositeType(getAndRegister(coreLabel, keysToSerialize, NumericCompositeTypeAnnotation.class));
