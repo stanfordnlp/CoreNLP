@@ -161,6 +161,10 @@ These are previous generation Python interfaces to Stanford CoreNLP, using a sub
 
 * [Apache Thrift server for Stanford CoreNLP](https://github.com/EducationalTestingService/stanford-thrift) by Diane Napolitano. (Written in Java, but usable from many languages.)
 
+### XQuery
+
+* [exist-stanford-nlp](https://github.com/lcahlander/exist-stanford-nlp) by Loren Cahlander
+
 ### ZeroMQ/ØMQ servers
 
 * [stanford-0mq](https://github.com/dmnapolitano/stanford-0mq) by Diane Napolitano. An implementation of a server for Stanford's CoreNLP suite using Ømq and a basic client/server/JSON requests configuration. Last commit: Oct 2015.
