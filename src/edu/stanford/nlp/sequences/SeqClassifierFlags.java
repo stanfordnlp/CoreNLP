@@ -2655,6 +2655,11 @@ public class SeqClassifierFlags implements Serializable  {
     stringRep = sb.toString();
   } // end setProperties()
 
+  public static Map<String, Integer> flagsToNumArgs() {
+    Map<String, Integer> numArgs = new HashMap<String, Integer>();
+    numArgs.put("maxDocSize", 1);
+    return numArgs;
+  }
 
   // Thang Sep13: refactor to be used for multiple factories.
   private static String getFeatureFactory(String val){
