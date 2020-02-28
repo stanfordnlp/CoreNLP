@@ -1272,9 +1272,13 @@ public class SequencePattern<T> implements Serializable {
      */
     protected void add(State nextState) {
       if (next == null) {
-        next = new LinkedHashSet<>();
+        next = Collections.singleton(nextState);
+      } else if (next.size() == 1) {
+        next = new LinkedHashSet<>(next);
+        next.add(nextState);
+      } else {
+        next.add(nextState);
       }
-      next.add(nextState);
     }
 
     public <T> Object value(int bid, SequenceMatcher.MatchedStates<T> matchedStates) {
