@@ -746,7 +746,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
         types[i] = split[annotationCols[i]].trim();
       }
 
-      Set<String> overwritableTypes = Generics.newHashSet();
+      final Set<String> overwritableTypes;
       double priority = 0.0;
 
       if (iOverwrite >= 0 && split.length > iOverwrite) {
@@ -754,7 +754,16 @@ public class TokensRegexNERAnnotator implements Annotator  {
           logger.warn("Number in types column for " + Arrays.toString(key) +
                   " is probably priority: " + split[iOverwrite]);
         }
-        overwritableTypes.addAll(Arrays.asList(COMMA_DELIMITERS_PATTERN.split(split[iOverwrite].trim())));
+        String[] tempOTs = COMMA_DELIMITERS_PATTERN.split(split[iOverwrite].trim());
+        if (tempOTs.length == 0) {
+          overwritableTypes = Collections.emptySet();
+        } else if (tempOTs.length == 1) {
+          overwritableTypes = Collections.singleton(tempOTs[0]);
+        } else {
+          overwritableTypes = new HashSet<>(Arrays.asList(tempOTs));
+        }
+      } else {
+        overwritableTypes = Collections.emptySet();
       }
       if (iPriority >= 0 && split.length > iPriority) {
         try {
