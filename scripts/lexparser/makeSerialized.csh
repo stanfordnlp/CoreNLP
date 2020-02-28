@@ -29,6 +29,8 @@ if ( ! $?JAVANLP_HOME) then
 endif
 
 set wsjptb=/afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj
+# maybe use /scr/corpora/ldc/1999/LDC99T42/parsed/mrg/wsj instad
+
 # now ctb6
 set ctb=/afs/ir/data/linguistic-data/Chinese-Treebank/6/data/utf8/bracketed
 # now ctb7!
