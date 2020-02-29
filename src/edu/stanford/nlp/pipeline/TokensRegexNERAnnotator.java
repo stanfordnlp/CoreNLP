@@ -373,13 +373,16 @@ public class TokensRegexNERAnnotator implements Annotator  {
         // TODO: posTagPatterns...
         pattern = TokenSequencePattern.compile(env, entry.tokensRegex);
       } else {
-        List<SequencePattern.PatternExpr> nodePatterns = new ArrayList<>();
+        List<SequencePattern.PatternExpr> nodePatterns = new ArrayList<>(entry.regex.length);
         for (String p:entry.regex) {
           CoreMapNodePattern c = CoreMapNodePattern.valueOf(p, patternFlags);
           if (posTagPattern != null) {
             c.add(CoreAnnotations.PartOfSpeechAnnotation.class, posTagPattern);
           }
           nodePatterns.add(new SequencePattern.NodePatternExpr(c));
+        }
+        if (nodePatterns.size() == 1) {
+          nodePatterns = Collections.singletonList(nodePatterns.get(0));
         }
         pattern = TokenSequencePattern.compile(new SequencePattern.SequencePatternExpr(nodePatterns));
       }
