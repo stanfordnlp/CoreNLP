@@ -176,39 +176,17 @@ public class Dictionary  {
     }
   }
 
-  private void read(DataInputStream rf, String filename) throws IOException {
+  private void readTags(DataInputStream rf, String filename) throws IOException {
     // Object[] arr=dict.keySet().toArray();
 
     int maxNumTags = 0;
     int len = rf.readInt();
     if (VERBOSE) {
-      log.info("Reading Dictionary of " + len + " words from " + filename + '.');
-    }
-
-    for (int i = 0; i < len; i++) {
-      String word = rf.readUTF();
-      TagCount count = TagCount.readTagCount(rf);
-      int numTags = count.numTags();
-      if (numTags > maxNumTags) {
-        maxNumTags = numTags;
+      if (filename == null) {
+        log.info("Reading Dictionary of " + len + " words.");
+      } else {
+        log.info("Reading Dictionary of " + len + " words from " + filename + '.');
       }
-      this.dict.put(word, count);
-      if (VERBOSE) {
-        log.info("  " + word + " [idx=" + i + "]: " + count);
-      }
-    }
-    if (VERBOSE) {
-      log.info("Read dictionary of " + len + " words; max tags for word was " + maxNumTags + '.');
-    }
-  }
-
-  private void readTags(DataInputStream rf) throws IOException {
-    // Object[] arr=dict.keySet().toArray();
-
-    int maxNumTags = 0;
-    int len = rf.readInt();
-    if (VERBOSE) {
-      log.info("Reading Dictionary of " + len + " words.");
     }
 
     for (int i = 0; i < len; i++) {
@@ -231,7 +209,7 @@ public class Dictionary  {
   protected void read(String filename) {
     try {
       DataInputStream rf = IOUtils.getDataInputStream(filename);
-      read(rf, filename);
+      readTags(rf, filename);
 
       int len1 = rf.readInt();
       for (int i = 0; i < len1; i++) {
@@ -249,7 +227,7 @@ public class Dictionary  {
 
   protected void read(DataInputStream file) {
     try {
-      readTags(file);
+      readTags(file, null);
 
       int len1 = file.readInt();
       for (int i = 0; i < len1; i++) {
