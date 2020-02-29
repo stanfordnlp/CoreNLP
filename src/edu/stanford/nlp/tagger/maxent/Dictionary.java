@@ -176,17 +176,13 @@ public class Dictionary  {
     }
   }
 
-  private void readTags(DataInputStream rf, String filename) throws IOException {
+  private void readTags(DataInputStream rf) throws IOException {
     // Object[] arr=dict.keySet().toArray();
 
     int maxNumTags = 0;
     int len = rf.readInt();
     if (VERBOSE) {
-      if (filename == null) {
-        log.info("Reading Dictionary of " + len + " words.");
-      } else {
-        log.info("Reading Dictionary of " + len + " words from " + filename + '.');
-      }
+      log.info("Dictionary has " + len + " words.");
     }
 
     for (int i = 0; i < len; i++) {
@@ -206,19 +202,28 @@ public class Dictionary  {
     }
   }
 
+  private void readVerbs(DataInputStream rf) throws IOException {
+    int len = rf.readInt();
+    if (VERBOSE) {
+      log.info("Reading " + len + " part taking verbs");
+    }
+    for (int i = 0; i < len; i++) {
+      int iO = rf.readInt();
+      CountWrapper tC = new CountWrapper();
+      tC.read(rf);
+
+      this.partTakingVerbs.put(iO, tC);
+    }
+  }
+
   protected void read(String filename) {
     try {
       DataInputStream rf = IOUtils.getDataInputStream(filename);
-      readTags(rf, filename);
-
-      int len1 = rf.readInt();
-      for (int i = 0; i < len1; i++) {
-        int iO = rf.readInt();
-        CountWrapper tC = new CountWrapper();
-        tC.read(rf);
-
-        this.partTakingVerbs.put(iO, tC);
+      if (VERBOSE) {
+        log.info("Reading tagger dictionary from " + filename);
       }
+      readTags(rf);
+      readVerbs(rf);
       rf.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -227,16 +232,11 @@ public class Dictionary  {
 
   protected void read(DataInputStream file) {
     try {
-      readTags(file, null);
-
-      int len1 = file.readInt();
-      for (int i = 0; i < len1; i++) {
-        int iO = file.readInt();
-        CountWrapper tC = new CountWrapper();
-        tC.read(file);
-
-        this.partTakingVerbs.put(iO, tC);
+      if (VERBOSE) {
+        log.info("Reading tagger dictionary");
       }
+      readTags(file);
+      readVerbs(file);
     } catch (IOException e) {
       e.printStackTrace();
     }
