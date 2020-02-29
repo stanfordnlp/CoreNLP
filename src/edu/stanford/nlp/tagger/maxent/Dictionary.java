@@ -10,6 +10,7 @@ package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Interner;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
@@ -185,9 +186,10 @@ public class Dictionary  {
       log.info("Dictionary has " + len + " words.");
     }
 
+    Interner<String> interner = new Interner<>();
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
-      TagCount count = TagCount.readTagCount(rf);
+      TagCount count = TagCount.readTagCount(rf, interner);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {
         maxNumTags = numTags;
