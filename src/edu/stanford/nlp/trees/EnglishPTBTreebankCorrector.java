@@ -858,6 +858,11 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
 
     // there are a bunch of lowercase either which are also mislabeled,
     // but with RB for either X or Y
+    // TODO: there are also some trees with ADVP < RB < either
+    // with a deeper nested structure leading to a CC.
+    // "either structured in ways that create unnecessary burdens..."
+    // "either receive a percentage of cash flow, a percentage of ..."
+    // "either look for greater equity participation..."
     ("either > (RB=bad $++ CC)\n" +
      "relabel bad CC\n" +
      '\n') +
