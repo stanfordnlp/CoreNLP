@@ -16,7 +16,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 /** Correct some of the errors in the LDC99T42 Penn Treebank 3.
  *  You can use this class from {@link edu.stanford.nlp.trees.Treebanks} via a command like: <p>
- *  {@code java edu.stanford.nlp.trees.Treebanks -pennPrint LDC99T42-Treebank3/parsed/mrg/wsj 200-2199 > train-fixed}
+ *  {@code java edu.stanford.nlp.trees.Treebanks -correct -pennPrint LDC99T42-Treebank3/parsed/mrg/wsj 200-2199 > train-fixed}
  */
 public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
 
