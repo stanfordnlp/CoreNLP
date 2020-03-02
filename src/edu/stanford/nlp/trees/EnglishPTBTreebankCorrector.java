@@ -850,6 +850,10 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     "relabel bad VBP\n" +
             '\n') +
 
+    ("/CC|NNP/=bad < Either !$++ CC\n" +
+     "relabel bad DT\n" +
+     '\n') +
+
     /* ----------------------------
        tregex3 -f -w '@VP < NN' | & less
 
