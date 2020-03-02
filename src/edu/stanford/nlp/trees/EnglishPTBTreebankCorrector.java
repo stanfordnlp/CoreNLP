@@ -850,8 +850,16 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     "relabel bad VBP\n" +
             '\n') +
 
+    // a few trees start with "Either way", etc but get labeled as if they
+    // were Either X or Y, or in one case, labeled completely randomly
     ("/CC|NNP/=bad < Either !$++ CC\n" +
      "relabel bad DT\n" +
+     '\n') +
+
+    // there are a bunch of lowercase either which are also mislabeled,
+    // but with RB for either X or Y
+    ("either > (RB=bad $++ CC)\n" +
+     "relabel bad CC\n" +
      '\n') +
 
     /* ----------------------------
