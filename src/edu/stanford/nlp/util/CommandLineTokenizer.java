@@ -38,16 +38,16 @@ public class CommandLineTokenizer {
 
     /**
      * Goofy internal utility to avoid duplicated code.  If the specified
-     * StringBuffer is not empty, its contents are appended to the resulting
-     * array (temporarily stored in the specified ArrayList).  The StringBuffer
+     * StringBuilder is not empty, its contents are appended to the resulting
+     * array (temporarily stored in the specified ArrayList).  The StringBuilder
      * is then emptied in order to begin storing the next argument.
      * @param resultBuffer the List temporarily storing the resulting
      * argument array.
-     * @param buf the StringBuffer storing the current argument.
+     * @param buf the StringBuilder storing the current argument.
      */
     private static void appendToBuffer(
         List<String> resultBuffer,
-        StringBuffer buf) {
+        StringBuilder buf) {
         if (buf.length() > 0) {
             resultBuffer.add(buf.toString());
             buf.setLength(0);
@@ -70,7 +70,7 @@ public class CommandLineTokenizer {
         if (commandLine != null) {
             int z = commandLine.length();
             boolean insideQuotes = false;
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
 
             for (int i = 0; i < z; ++i) {
                 char c = commandLine.charAt(i);

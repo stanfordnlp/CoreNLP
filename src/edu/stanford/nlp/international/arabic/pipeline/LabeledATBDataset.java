@@ -20,7 +20,7 @@ public class LabeledATBDataset extends ATBArabicDataset  {
       else
         treebank.loadPath(path,splitFilter);
 
-      toStringBuffer.append(String.format(" Loaded %d trees from %s\n", treebank.size() - prevSize, path.getPath()));
+      toStringBuilder.append(String.format(" Loaded %d trees from %s\n", treebank.size() - prevSize, path.getPath()));
     }
 
     PrintWriter outfile = null;
@@ -37,7 +37,7 @@ public class LabeledATBDataset extends ATBArabicDataset  {
 
       if(makeFlatFile) {
         outputFileList.add(flatFileName);
-        toStringBuffer.append(" Made flat files\n");
+        toStringBuilder.append(" Made flat files\n");
       }
 
     } catch (UnsupportedEncodingException e) {

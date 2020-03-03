@@ -563,7 +563,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
   }
 
   String sentToString(CoreMap sentence) {
-    StringBuffer os = new StringBuffer();
+    StringBuilder os = new StringBuilder();
     List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
     if(tokens != null){
       boolean first = true;

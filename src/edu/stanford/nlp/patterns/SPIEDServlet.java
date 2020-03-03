@@ -217,7 +217,7 @@ public class SPIEDServlet extends HttpServlet {
   doGet(request, response);
 //    logger.info("POST SPIED query from " + request.getRemoteAddr());
 //
-//    //StringBuffer jb = new StringBuffer();
+//    //StringBuilder jb = new StringBuilder();
 //    String line = "";
 //    response.setContentType("text/json; charset=UTF-8");
 //    PrintWriter out = response.getWriter();

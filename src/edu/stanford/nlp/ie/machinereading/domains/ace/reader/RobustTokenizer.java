@@ -362,12 +362,12 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word>  {
   private static <T extends WordToken> String concatenate(List<T> tokens,
       int start,
       int end) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder builder = new StringBuilder();
 
     for(; start < end; start ++){
-      buffer.append(((WordToken) tokens.get(start)).getWord());
+      builder.append(((WordToken) tokens.get(start)).getWord());
     }
-    return buffer.toString();
+    return builder.toString();
   }
 
   private static <T extends WordToken> int countNewLines(List<T> tokens,
@@ -447,7 +447,7 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word>  {
     // replace illegal characters with SPACE
     //
     /*
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     for(int i = 0; i < originalString.length(); i ++){
     	int c = (int) originalString.charAt(i);
     	//
@@ -577,16 +577,16 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word>  {
    */
   public String tokenizeText() throws java.io.IOException{
     List<WordToken> tokenList = tokenizeToWordTokens();
-    StringBuffer strBuffer = new StringBuffer();
+    StringBuilder builder = new StringBuilder();
     Iterator<WordToken> iter = tokenList.iterator();
     if (iter.hasNext()){
-      strBuffer.append(iter.next());
+    	builder.append(iter.next());
     }
     while(iter.hasNext()){
-      strBuffer.append(" ");
-      strBuffer.append(iter.next());
+    	builder.append(" ");
+    	builder.append(iter.next());
     }
-    return strBuffer.toString().replaceAll("\\s\\s+", " ");                
+    return builder.toString().replaceAll("\\s\\s+", " ");                
   }
 
   public static class AbbreviationMap {
@@ -1076,15 +1076,15 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word>  {
     }
 
     public String toString() {
-      StringBuffer buffer = new StringBuffer();
-      buffer.append("[");
-      buffer.append(mWord);
-      buffer.append(", ");
-      buffer.append(mStart);
-      buffer.append(", ");
-      buffer.append(mEnd);
-      buffer.append("]");
-      return buffer.toString();
+      StringBuilder builder = new StringBuilder();
+      builder.append("[");
+      builder.append(mWord);
+      builder.append(", ");
+      builder.append(mStart);
+      builder.append(", ");
+      builder.append(mEnd);
+      builder.append("]");
+      return builder.toString();
     }
 
     public int getStart() { return mStart; }
@@ -1136,11 +1136,11 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word>  {
     // read the whole file in a buffer
     // XXX: for sure there are more efficient ways of reading a file...
     int ch;
-    StringBuffer buffer = new StringBuffer();
-    while((ch = is.read()) != -1) buffer.append((char) ch);
+    StringBuilder builder = new StringBuilder();
+    while((ch = is.read()) != -1) builder.append((char) ch);
     
     // create the tokenizer object
-    RobustTokenizer<Word> t = new RobustTokenizer<>(buffer.toString());
+    RobustTokenizer<Word> t = new RobustTokenizer<>(builder.toString());
 
     List<Word> tokens = t.tokenize();
     for (Word token : tokens) {

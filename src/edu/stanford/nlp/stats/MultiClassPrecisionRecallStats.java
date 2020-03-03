@@ -229,7 +229,7 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
    * Returns a String summarizing F1 that will print nicely.
    */
   public String getDescription(int numDigits) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("--- PR Stats ---").append("\n");
     for (L label : labelIndex) {
       if (label == null || label.equals(negLabel)) { continue; }

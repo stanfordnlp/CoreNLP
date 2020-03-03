@@ -41,7 +41,7 @@ public class TransformXML<T>  {
   public static class SAXInterface<T> extends DefaultHandler {
 
     protected List<String> elementsToBeTransformed;
-    protected StringBuffer textToBeTransformed;
+    protected StringBuilder textToBeTransformed;
     protected PrintWriter outWriter = new PrintWriter(System.out, true);
     protected Function<String,T> function;
 
@@ -56,7 +56,7 @@ public class TransformXML<T>  {
       elementsToBeTransformed = new ArrayList<>();
       depth = 0;
       openingTag = null;
-      textToBeTransformed = new StringBuffer();
+      textToBeTransformed = new StringBuilder();
     }
 
     /**
@@ -74,7 +74,7 @@ public class TransformXML<T>  {
       // If we're not already in an element to be transformed, first
       // echo the previous text...
       outWriter.print(XMLUtils.escapeXML(textToBeTransformed.toString()));
-      textToBeTransformed = new StringBuffer();
+      textToBeTransformed = new StringBuilder();
       
       // ... then echo the new tag to outStream 
       outWriter.print('<');
@@ -146,7 +146,7 @@ public class TransformXML<T>  {
             String text = textToBeTransformed.toString().trim();
             // factored out so subclasses can handle the text differently
             processText(text);
-            textToBeTransformed = new StringBuffer();
+            textToBeTransformed = new StringBuilder();
             outWriter.print("</" + openingTag + ">\n");
           }
         }

@@ -14,11 +14,10 @@ public class AceElement {
 
   public String getId() { return mId; }
 
-  // todo [cdm 2014]: Change this to using StringBuilder or Appendable or similar
-  public static void appendOffset(StringBuffer buffer,
+  public static void appendOffset(StringBuilder builder,
 				  int offset) {
     for(int i = 0; i < offset; i ++){
-      buffer.append(' ');
+      builder.append(' ');
     }
   }
 
