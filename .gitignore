@@ -6,3 +6,6 @@
 *.so
 .DS_Store
 .settings/**
+/target/
+.classpath
+.project
