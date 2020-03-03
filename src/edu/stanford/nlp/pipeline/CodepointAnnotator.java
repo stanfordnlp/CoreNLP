@@ -13,6 +13,12 @@ import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.logging.Redwood;
 
 
+/**
+ * Annotator to add codepoint counts to tokens
+ * <br>
+ * In general this will be the same as the character offsets, but
+ * certain fancy characters such as 𝒚̂𝒊 will change that.
+ */
 public class CodepointAnnotator implements Annotator {
 
   /** A logger for this class */
