@@ -959,6 +959,37 @@ public class CoreAnnotations {
   }
 
   /**
+   * Some codepoints count as more than one character.  For example,
+   * mathematical symbols.  This can cause serious problems in other
+   * languages such as Python which see those characters as one
+   * character wide.
+   * <br>
+   * This annotation is how many codepoints to the beginning of the text.
+   */
+  public static class CodepointOffsetBeginAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+  /**
+   * Some codepoints count as more than one character.  For example,
+   * mathematical symbols.  This can cause serious problems in other
+   * languages such as Python which see those characters as one
+   * character wide.
+   * <br>
+   * This annotation is how many codepoints to the end of the text.
+   */
+  public static class CodepointOffsetEndAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+
+  /**
    * Key for relative value of a word - used in RTE
    */
   public static class CostMagnificationAnnotation implements CoreAnnotation<Double> {
