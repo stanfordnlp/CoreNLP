@@ -422,6 +422,11 @@ public class XMLOutputter extends AnnotationOutputter  {
       setSingleElement(wordInfo, "CharacterOffsetEnd", curNS, Integer.toString(token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class)));
     }
 
+    if (token.containsKey(CoreAnnotations.CodepointOffsetBeginAnnotation.class) && token.containsKey(CoreAnnotations.CodepointOffsetEndAnnotation.class)) {
+      setSingleElement(wordInfo, "CodepointOffsetBegin", curNS, Integer.toString(token.get(CoreAnnotations.CodepointOffsetBeginAnnotation.class)));
+      setSingleElement(wordInfo, "CodepointOffsetEnd", curNS, Integer.toString(token.get(CoreAnnotations.CodepointOffsetEndAnnotation.class)));
+    }
+
     if (token.containsKey(CoreAnnotations.PartOfSpeechAnnotation.class)) {
       setSingleElement(wordInfo, "POS", curNS, token.get(CoreAnnotations.PartOfSpeechAnnotation.class));
     }
