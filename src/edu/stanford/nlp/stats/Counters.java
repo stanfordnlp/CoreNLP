@@ -1869,9 +1869,8 @@ public class Counters  {
     try {
       Constructor<T1> m1 = t1.getConstructor(String.class);
       Constructor<T2> m2 = t2.getConstructor(String.class);
-      BufferedReader in = IOUtils.readerFromString(filename);// new
-                                                             // BufferedReader(new
-                                                             // FileReader(filename));
+      // instead of new BufferedReader(new FileReader(filename));
+      BufferedReader in = IOUtils.readerFromString(filename);
       for (String line; (line = in.readLine()) != null;) {
         String[] tuple = line.trim().split("\t");
         String outer = tuple[0];
@@ -1890,9 +1889,8 @@ public class Counters  {
     try {
       Constructor<T1> m1 = t1.getConstructor(String.class);
       Constructor<T2> m2 = t2.getConstructor(String.class);
-      BufferedReader in = IOUtils.readerFromString(filename);// new
-                                                             // BufferedReader(new
-                                                             // FileReader(filename));
+      // new BufferedReader(new FileReader(filename));
+      BufferedReader in = IOUtils.readerFromString(filename);
       for (String line; (line = in.readLine()) != null;) {
         String[] tuple = line.trim().split("\t");
         String outer = tuple[0];
