@@ -1,6 +1,6 @@
 trainFile = /u/nlp/data/german/ner/2016/deu.io.f15.utf8.train
 testFile = /u/nlp/data/german/ner/2016/deu.io.f15.utf8.testa
-serializeTo = german.hgc_175m_600.crf.ser.gz
+serializeTo = german.distsim.crf.ser.gz
 
 type=crf
 
