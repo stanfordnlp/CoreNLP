@@ -109,7 +109,7 @@ public class Units {
 
   public static List<Unit> loadUnits(String filename) throws IOException {
     Pattern commaPattern = Pattern.compile("\\s*,\\s*");
-    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    BufferedReader br = IOUtils.readerFromString(filename);
     String headerString = br.readLine();
     String[] header = commaPattern.split(headerString);
     Map<String,Integer> headerIndex = new HashMap<>();

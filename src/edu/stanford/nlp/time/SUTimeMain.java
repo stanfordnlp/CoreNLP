@@ -332,7 +332,7 @@ public class SUTimeMain  {
 
   // Process CSV file with just timebank sentences with time expressions
   public static void processTimebankCsv(AnnotationPipeline pipeline, String in, String out, String eval) throws IOException {
-    BufferedReader br = IOUtils.getBufferedFileReader(in);
+    BufferedReader br = IOUtils.readerFromString(in);
     PrintWriter pw = (out != null)? IOUtils.getPrintWriter(out):new PrintWriter(System.out);
     String line;
 //    boolean dataStarted = false;
@@ -647,7 +647,7 @@ public class SUTimeMain  {
 
   private static Map<String,List<TimexAttributes>> readTimexAttrExts(String extentsFile, String attrsFile) throws IOException {
     Map<String,List<TimexAttributes>> timexMap = Generics.newHashMap();
-    BufferedReader extBr = IOUtils.getBufferedFileReader(extentsFile);
+    BufferedReader extBr = IOUtils.readerFromString(extentsFile);
     String line;
     String lastDocId = null;
     TimexAttributes lastTimex = null;
@@ -676,7 +676,7 @@ public class SUTimeMain  {
     }
     extBr.close();
 
-    BufferedReader attrBr = IOUtils.getBufferedFileReader(attrsFile);
+    BufferedReader attrBr = IOUtils.readerFromString(attrsFile);
     while ((line = attrBr.readLine()) != null) {
       if (line.trim().length() == 0) continue;
       // Simple tab delimited file
@@ -714,7 +714,7 @@ public class SUTimeMain  {
   public static void processTempEval2Tab(AnnotationPipeline pipeline, String in, String out, Map<String,String> docDates) throws IOException
   {
     Map<String,List<TimexAttributes>> timexMap = readTimexAttrExts(in  + "/timex-extents.tab", in  + "/timex-attributes.tab");
-    BufferedReader br = IOUtils.getBufferedFileReader(in  + "/base-segmentation.tab");
+    BufferedReader br = IOUtils.readerFromString(in  + "/base-segmentation.tab");
     PrintWriter debugPw = IOUtils.getPrintWriter(out + "/timex-debug.out");
     PrintWriter attrPw = IOUtils.getPrintWriter(out + "/timex-attrs.res.tab");
     PrintWriter extPw = IOUtils.getPrintWriter(out + "/timex-extents.res.tab");
