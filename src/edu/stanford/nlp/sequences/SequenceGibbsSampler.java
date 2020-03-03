@@ -107,7 +107,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder  {
   public int[] findBestUsingAnnealing(SequenceModel model, CoolingSchedule schedule, int[] initialSequence) {
     if (verbose>0) log.info("Doing annealing");
     listener.setInitialSequence(initialSequence);
-    List result = new ArrayList();
+    List<int[]> result = new ArrayList<>();
     // so we don't change the initial, or the one we just stored
     int[] sequence = copy(initialSequence);
     int[] best = null;

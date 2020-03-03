@@ -653,7 +653,7 @@ public class KBPAnnotator implements Annotator {
           }
         }
       }
-      finalTriplesList = new ArrayList(relationStringsToTriples.values());
+      finalTriplesList = new ArrayList<>(relationStringsToTriples.values());
       // Set triples
       annotation.get(CoreAnnotations.SentencesAnnotation.class).get(sentenceI).set(
           CoreAnnotations.KBPTriplesAnnotation.class, finalTriplesList);

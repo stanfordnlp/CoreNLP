@@ -695,7 +695,7 @@ public class TransducerGraph implements Cloneable  {
    * for testing only. doubles combined by addition.
    */
   public List sampleUniformPathFromGraph() {
-    List list = new ArrayList();
+    List<Object> list = new ArrayList<>();
     Object node = this.getStartNode();
     Set endNodes = this.getEndNodes();
     while (!endNodes.contains(node)) {
@@ -737,9 +737,9 @@ public class TransducerGraph implements Cloneable  {
   /**
    * For testing only.
    */
-  public List<Double> getPathOutputs(List<List> pathList) {
+  public List<Double> getPathOutputs(List<List<String>> pathList) {
     List<Double> outputList = new ArrayList<>();
-    for (List path : pathList) {
+    for (List<String> path : pathList) {
       outputList.add(Double.valueOf(getOutputOfPathInGraph(path)));
     }
     return outputList;
@@ -839,12 +839,12 @@ public class TransducerGraph implements Cloneable  {
    * // generate a bunch of paths through the graph with the input alphabet
    * // and create new nodes for each one.
    */
-  public static TransducerGraph createRandomGraph(int numPaths, int pathLengthMean, double pathLengthVariance, int numInputs, List pathList) {
+  public static TransducerGraph createRandomGraph(int numPaths, int pathLengthMean, double pathLengthVariance, int numInputs, List<List<String>> pathList) {
     // compute the path length. Draw from a normal distribution
     int pathLength = (int) (r.nextGaussian() * pathLengthVariance + pathLengthMean);
     for (int i = 0; i < numPaths; i++) {
       // make a path
-      List path = new ArrayList();
+      List<String> path = new ArrayList();
       for (int j = 0; j < pathLength; j++) {
         String input = Integer.toString(r.nextInt(numInputs));
         path.add(input);

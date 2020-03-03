@@ -176,10 +176,10 @@ public class SisterAnnotationStats implements TreeVisitor {
 
     /** topScores contains all enriched categories, to be sorted
      * later */
-    ArrayList topScores = new ArrayList();
+    List<Pair> topScores = new ArrayList<>();
 
     for (Object o : nodeRules.keySet()) {
-      ArrayList answers = new ArrayList();
+      List<Pair<String, Double>> answers = new ArrayList<>();
       String label = (String) o;
       ClassicCounter cntr = (ClassicCounter) nodeRules.get(label);
       double support = (cntr.totalCount());
@@ -212,8 +212,8 @@ public class SisterAnnotationStats implements TreeVisitor {
 
         String annotatedLabel = label + "=l=" + sis;
         System.out.println("KL(" + annotatedLabel + "||" + label + ") = " + nf.format(kl) + "\t" + "support(" + sis + ") = " + support2);
-        answers.add(new Pair(annotatedLabel, new Double(kl * support2)));
-        topScores.add(new Pair(annotatedLabel, new Double(kl * support2)));
+        answers.add(new Pair<>(annotatedLabel, new Double(kl * support2)));
+        topScores.add(new Pair<>(annotatedLabel, new Double(kl * support2)));
       }
 
       for (Object o3 : ((HashMap) rightRules.get(label)).keySet()) {
