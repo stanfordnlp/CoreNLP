@@ -141,7 +141,7 @@ public class PhraseTable implements Serializable
   {
     Timing timer = new Timing();
     timer.doing("Reading phrases: " + filename);
-    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    BufferedReader br = IOUtils.readerFromString(filename);
     String line;
     while ((line = br.readLine()) != null) {
       if (checkTag) {
@@ -182,7 +182,7 @@ public class PhraseTable implements Serializable
   {
     Timing timer = new Timing();
     timer.doing("Reading phrases: " + filename);
-    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    BufferedReader br = IOUtils.readerFromString(filename);
     String line;
     int lineno = 0;
     while ((line = br.readLine()) != null) {
@@ -220,7 +220,7 @@ public class PhraseTable implements Serializable
     }
     Timing timer = new Timing();
     timer.doing("Reading phrases: " + filename);
-    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    BufferedReader br = IOUtils.readerFromString(filename);
     String line;
     while ((line = br.readLine()) != null) {
       String[] columns = tabPattern.split(line);
