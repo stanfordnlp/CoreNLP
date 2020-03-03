@@ -102,12 +102,12 @@ public abstract class Constituent implements Labeled, Scored, Label {
    */
   @Override
   public String toString() {
-    StringBuffer sb;
+    StringBuilder sb;
     Label lab = label();
     if (lab != null) {
-      sb = new StringBuffer(lab.toString());
+      sb = new StringBuilder(lab.toString());
     } else {
-      sb = new StringBuffer();
+      sb = new StringBuilder();
     }
     sb.append("(").append(start()).append(",").append(end()).append(")");
     return sb.toString();

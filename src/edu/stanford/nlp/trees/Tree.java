@@ -656,7 +656,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
   /**
    * Most instances of {@code Tree} will take a lot more than
-   * than the default {@code StringBuffer} size of 16 to print
+   * than the default {@code StringBuilder} size of 16 to print
    * as an indented list of the whole tree, so we enlarge the default.
    */
   private static final int initialPrintStringBuilderSize = 500;

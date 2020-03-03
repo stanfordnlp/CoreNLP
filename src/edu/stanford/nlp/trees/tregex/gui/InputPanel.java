@@ -913,7 +913,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       //JPanel helpPanel = new JPanel();
       JEditorPane helpText = new JEditorPane();
       helpText.setContentType("text/html");
-      // StringBuffer s = new StringBuffer();
+      // StringBuilder s = new StringBuilder();
       // s.append(htmlHelp);
       helpText.setText(htmlHelp);
       helpText.setEditable(false);
@@ -937,7 +937,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       tsurgeonHelpFrame = new JFrame("TSurgeon Help...");
       JEditorPane helpText = new JEditorPane();
       helpText.setContentType("text/html");
-      // StringBuffer s = new StringBuffer();
+      // StringBuilder s = new StringBuilder();
       // s.append(htmlTsurgeonHelp);
       helpText.setText(htmlTsurgeonHelp);
       helpText.setEditable(false);

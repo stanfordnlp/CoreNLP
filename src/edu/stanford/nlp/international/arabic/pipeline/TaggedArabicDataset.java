@@ -42,7 +42,7 @@ public class TaggedArabicDataset extends ATBArabicDataset  {
       } else {
         treebank.loadPath(path,splitFilter);
       }
-      toStringBuffer.append(String.format(" Loaded %d trees from %s\n", treebank.size() - prevSize, path.getPath()));
+      toStringBuilder.append(String.format(" Loaded %d trees from %s\n", treebank.size() - prevSize, path.getPath()));
       prevSize = treebank.size();
     }
 

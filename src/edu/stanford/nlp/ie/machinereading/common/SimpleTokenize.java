@@ -1,9 +1,9 @@
 
 package edu.stanford.nlp.ie.machinereading.common; 
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Simple string tokenization
@@ -52,19 +52,19 @@ public class SimpleTokenize  {
   }
 
   /**
-   * Replaces all occurences of \" with "
+   * Replaces all occurrences of \" with "
    */
   private static String normalizeQuotes(String str) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder builder = new StringBuilder();
     for (int i = 0; i < str.length(); i++) {
       // do not include \ if followed by "
       if (str.charAt(i) == '\\' && i < str.length() - 1 && str.charAt(i + 1) == '\"') {
         continue;
       } else {
-        buffer.append(str.charAt(i));
+        builder.append(str.charAt(i));
       }
     }
-    return buffer.toString();
+    return builder.toString();
   }
 
   /**
@@ -121,15 +121,15 @@ public class SimpleTokenize  {
    * \
    */
   public static String quotify(String str) {
-    StringBuffer buffer = new StringBuffer();
-    buffer.append('\"');
+    StringBuilder builder = new StringBuilder();
+    builder.append('\"');
     for (int i = 0; i < str.length(); i++) {
       if (str.charAt(i) == '\"')
-        buffer.append('\\');
-      buffer.append(str.charAt(i));
+        builder.append('\\');
+      builder.append(str.charAt(i));
     }
-    buffer.append('\"');
-    return buffer.toString();
+    builder.append('\"');
+    return builder.toString();
   }
 
   /** Implements a simple test */

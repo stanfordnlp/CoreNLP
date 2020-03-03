@@ -37,11 +37,11 @@ public class IBMMTArabicDataset implements Dataset  {
 
   protected final Set<String> configuredOptions;
   protected final Set<String> requiredOptions;
-  protected final StringBuilder toStringBuffer;
+  protected final StringBuilder toStringBuilder;
 
   public IBMMTArabicDataset() {
     configuredOptions = Generics.newHashSet();
-    toStringBuffer = new StringBuilder();
+    toStringBuilder = new StringBuilder();
     pathsToData = new ArrayList<>();
 
     escaper = new IBMArabicEscaper(true);
@@ -77,7 +77,7 @@ public class IBMMTArabicDataset implements Dataset  {
           outfile.println(SentenceUtils.listToString(sent));
         }
 
-        toStringBuffer.append(String.format(" Read %d input lines from %s",infile.getLineNumber(),path.getPath()));
+        toStringBuilder.append(String.format(" Read %d input lines from %s",infile.getLineNumber(),path.getPath()));
       }
 
       infile.close();
@@ -106,7 +106,7 @@ public class IBMMTArabicDataset implements Dataset  {
 
   @Override
   public String toString() {
-    return toStringBuffer.toString();
+    return toStringBuilder.toString();
   }
 
   public boolean setOptions(Properties opts) {
@@ -128,7 +128,7 @@ public class IBMMTArabicDataset implements Dataset  {
       } else if(opt.equals(ConfigParser.paramName)) {
         Matcher inThisFilename = fileNameNormalizer.matcher(value.trim());
         outFileName = inThisFilename.replaceAll("-");
-        toStringBuffer.append(String.format("Dataset Name: %s\n",value.trim()));
+        toStringBuilder.append(String.format("Dataset Name: %s\n",value.trim()));
       }
     }
 

@@ -369,7 +369,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
 
   static class MyHTMLParser extends HTMLEditorKit.ParserCallback {
 
-    protected StringBuffer textBuffer;
+    protected StringBuilder textBuffer;
     protected List<String> sentences;
     protected String title;
     protected boolean isTitle;
@@ -406,7 +406,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
 
 
         sentences.add(text);
-        textBuffer = new StringBuffer(500);
+        textBuffer = new StringBuilder(500);
       }
     }
 
@@ -457,7 +457,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
       text = text.replaceAll("/>", ">");
       text = text.replaceAll("<\\?","<");
       StringReader r = new StringReader(text);
-      textBuffer = new StringBuffer(200);
+      textBuffer = new StringBuilder(200);
       sentences = new ArrayList<>();
       new ParserDelegator().parse(r, this, true);
       return sentences;

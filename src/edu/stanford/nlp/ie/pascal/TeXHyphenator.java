@@ -68,7 +68,7 @@ public class TeXHyphenator  {
   private Node head = new Node();
 
   public static String toString(int[]i) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for (int anI : i) {
       sb.append(anI);
     }
@@ -180,7 +180,7 @@ public class TeXHyphenator  {
       char[] chars = arg.toLowerCase().toCharArray();
       boolean[] breakPoints = hyphenator.findBreakPoints(chars);
       System.out.println(arg);
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       for (boolean breakPoint : breakPoints) {
         if (breakPoint) {
           sb.append("^");

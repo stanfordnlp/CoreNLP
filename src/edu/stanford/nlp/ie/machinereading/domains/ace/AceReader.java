@@ -238,7 +238,7 @@ public class AceReader extends GenericDataSetReader  {
     /*
     for (int sentenceIndex = 0; sentenceIndex < aceDocument.getSentenceCount(); sentenceIndex++) {
       List<AceToken> tokens = aceDocument.getSentence(sentenceIndex);
-      StringBuffer b = new StringBuffer();
+      StringBuilder b = new StringBuilder();
       for(AceToken t: tokens) b.append(t.getLiteral() + " " );
       logger.info("SENTENCE: " + b.toString());
     }

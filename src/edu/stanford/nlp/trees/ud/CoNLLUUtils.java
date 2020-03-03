@@ -36,7 +36,7 @@ public class CoNLLUUtils {
      * @return The feature string.
      */
     public static String toFeatureString(HashMap<String,String> features) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         boolean first = true;
         if (features != null) {
             List<String> sortedKeys = new ArrayList<>(features.keySet());
@@ -93,7 +93,7 @@ public class CoNLLUUtils {
      * @return The extra dependencies string.
      */
     public static String toExtraDepsString(HashMap<String,String> extraDeps) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         boolean first = true;
         if (extraDeps != null) {
             List<String> sortedKeys = new ArrayList<>(extraDeps.keySet());

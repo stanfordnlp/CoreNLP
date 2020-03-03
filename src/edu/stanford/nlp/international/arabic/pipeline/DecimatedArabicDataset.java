@@ -38,7 +38,7 @@ public class DecimatedArabicDataset extends ATBArabicDataset  {
       int prevSize = treebank.size();
       treebank.loadPath(path,treeFileExtension,false);
 
-      toStringBuffer.append(String.format(" Loaded %d trees from %s\n", treebank.size() - prevSize, path.getPath()));
+      toStringBuilder.append(String.format(" Loaded %d trees from %s\n", treebank.size() - prevSize, path.getPath()));
       prevSize = treebank.size();
     }
 
