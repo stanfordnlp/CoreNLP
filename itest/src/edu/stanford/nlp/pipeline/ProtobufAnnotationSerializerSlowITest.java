@@ -472,6 +472,10 @@ public class ProtobufAnnotationSerializerSlowITest {
     testAnnotators("tokenize,ssplit,pos,lemma,ner,entitymentions,gender");
   }
 
+  @Test
+  public void testCodePoint() {
+    testAnnotators("tokenize,codepoint");
+  }
 
   @Test
   public void testDocDate() {
