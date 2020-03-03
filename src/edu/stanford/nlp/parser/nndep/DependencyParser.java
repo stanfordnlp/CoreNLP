@@ -218,7 +218,7 @@ public class DependencyParser  {
   private static final int STACK_NUMBER = 6;
 
   private int[] getFeatureArray(Configuration c) {
-    int[] feature = new int[config.numTokens];  // positions 0-17 hold fWord, 18-35 hold fPos, 36-47 hold fLabel
+    int[] feature = new int[Config.numTokens];  // positions 0-17 hold fWord, 18-35 hold fPos, 36-47 hold fLabel
 
     for (int j = 2; j >= 0; --j) {
       int index = c.getStack(j);
@@ -271,7 +271,7 @@ public class DependencyParser  {
 
   public Dataset genTrainExamples(List<CoreMap> sents, List<DependencyTree> trees) {
     int numTrans = system.numTransitions();
-    Dataset ret = new Dataset(config.numTokens, numTrans);
+    Dataset ret = new Dataset(Config.numTokens, numTrans);
 
     Counter<Integer> tokPosCount = new IntCounter<>();
     log.info(Config.SEPARATOR);
@@ -796,7 +796,7 @@ public class DependencyParser  {
    */
   private void setupClassifierForTraining(List<CoreMap> trainSents, List<DependencyTree> trainTrees, String embedFile, String preModel) {
     double[][] E = new double[knownWords.size() + knownPos.size() + knownLabels.size()][config.embeddingSize];
-    double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
+    double[][] W1 = new double[config.hiddenSize][config.embeddingSize * Config.numTokens];
     double[] b1 = new double[config.hiddenSize];
     double[][] W2 = new double[system.numTransitions()][config.hiddenSize];
 
@@ -890,7 +890,7 @@ public class DependencyParser  {
             }
           }
 
-          boolean copyLayer1 = hSize == config.hiddenSize && config.embeddingSize == eSize && config.numTokens == nTokens;
+          boolean copyLayer1 = hSize == config.hiddenSize && config.embeddingSize == eSize && Config.numTokens == nTokens;
           if (copyLayer1) {
             log.info("Copying parameters W1 && b1...");
           }

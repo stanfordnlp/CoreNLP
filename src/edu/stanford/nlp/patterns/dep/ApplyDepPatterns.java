@@ -219,7 +219,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
     };
 
     extract.getSemGrexPatternNodes(graph, tokens, outputPhrases, outputIndices,
-            pattern, findSubTrees, extractedPhrases, constVars.matchLowerCaseContext, matchingWordRestriction);
+            pattern, findSubTrees, extractedPhrases, ConstantsAndVariables.matchLowerCaseContext, matchingWordRestriction);
 
 
     /*

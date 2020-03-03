@@ -483,7 +483,7 @@ public class ColumnDataClassifier  {
 
   /** Split according to whether we are using tsv file (default) or csv files. */
   private String[] splitLineToFields(String line) {
-    if (globalFlags.csvInput) {
+    if (Flags.csvInput) {
       String[] strings = StringUtils.splitOnCharWithQuoting(line, ',', '"', '"');
       for (int i = 0; i < strings.length; ++i) {
         if (strings[i].startsWith("\"") && strings[i].endsWith("\""))
@@ -580,7 +580,7 @@ public class ColumnDataClassifier  {
       printedText = strs[globalFlags.displayedColumn];
     }
     String results;
-    if (globalFlags.displayAllAnswers) {
+    if (Flags.displayAllAnswers) {
       // sort the labels by probability
       TreeSet<Pair<Double,String>> sortedLabels = new TreeSet<>();
       for (String key : cntr.keySet()) {
@@ -693,15 +693,15 @@ public class ColumnDataClassifier  {
     // usually suppress item level printing in crossvalidation
     if ( ! (globalFlags.crossValidationFolds > 0 && ! globalFlags.printCrossValidationDecisions)) {
       String message = "";
-      if (globalFlags.csvOutput != null) {
-        message += formatCsv(globalFlags.csvOutput, storedHeader.split("\t"), null);
+      if (Flags.csvOutput != null) {
+        message += formatCsv(Flags.csvOutput, storedHeader.split("\t"), null);
       } else {
         message += "Output format: ";
         if (globalFlags.displayedColumn >= 0) {
           message += "dataColumn" + globalFlags.displayedColumn + '\t';
         }
         message += "goldAnswer\t";
-        if (globalFlags.displayAllAnswers) {
+        if (Flags.displayAllAnswers) {
           logger.info(message + "[P(class) class]+ {sorted by probability}");
         } else {
           logger.info(message + "classifierAnswer\tP(clAnswer)\tP(goldAnswer)");
@@ -780,8 +780,8 @@ public class ColumnDataClassifier  {
       }
     }
     if ( ! (globalFlags.crossValidationFolds > 0 && ! globalFlags.printCrossValidationDecisions)) {
-      if (globalFlags.csvOutput != null) {
-        System.out.print(formatCsv(globalFlags.csvOutput, example, answer));
+      if (Flags.csvOutput != null) {
+        System.out.print(formatCsv(Flags.csvOutput, example, answer));
       } else {
         writeAnswer(example, answer, dist);
       }
@@ -1891,14 +1891,14 @@ public class ColumnDataClassifier  {
       } else if (key.equals("shuffleSeed")) {
         myFlags[col].shuffleSeed = Long.parseLong(val);
       } else if (key.equals("csvInput")) {
-        myFlags[col].csvInput = Boolean.parseBoolean(val);
+        Flags.csvInput = Boolean.parseBoolean(val);
       } else if (key.equals("inputFormat")) {
         if (val.equalsIgnoreCase("header")) {
-          myFlags[col].inputFormat = InputFormat.HEADER;
+          Flags.inputFormat = InputFormat.HEADER;
         } else if (val.equalsIgnoreCase("comments")) {
-          myFlags[col].inputFormat = InputFormat.COMMENTS;
+          Flags.inputFormat = InputFormat.COMMENTS;
         } else if (val.equalsIgnoreCase("plain")) {
-          myFlags[col].inputFormat = InputFormat.PLAIN;
+          Flags.inputFormat = InputFormat.PLAIN;
         } else {
           logger.info("Unknown inputFormat: " + val);
         }
@@ -1911,7 +1911,7 @@ public class ColumnDataClassifier  {
       } else if (key.equals("showTokenization")) {
         myFlags[col].showTokenization = Boolean.parseBoolean(val);
       } else if (key.equals("csvOutput")) {
-        myFlags[col].csvOutput = val;
+        Flags.csvOutput = val;
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         logger.info("Unknown property: |" + key + '|');
       }

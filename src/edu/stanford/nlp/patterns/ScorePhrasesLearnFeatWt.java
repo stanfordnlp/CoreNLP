@@ -58,7 +58,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         CandidatePhrase p = CandidatePhrase.createOrGet(word);
 
         //save the vector if it occurs in the rawFreq, seed set, stop words, english words
-        if (Data.rawFreq.containsKey(p) || constvar.getStopWords().contains(p) || constvar.getEnglishWords().contains(word) || constvar.hasSeedWordOrOtherSem(p)) {
+        if (Data.rawFreq.containsKey(p) || ConstantsAndVariables.getStopWords().contains(p) || constvar.getEnglishWords().contains(word) || constvar.hasSeedWordOrOtherSem(p)) {
           double[] d = new double[tok.length - 1];
           for (int i = 1; i < tok.length; i++) {
             d[i - 1] = Double.valueOf(tok[i]);
@@ -827,7 +827,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Map<String, Collection<CandidatePhrase>> allPossiblePhrases = new HashMap<>();
     Collection<CandidatePhrase> negPhrases = new HashSet<>();
     //negPhrases.addAll(constVars.getOtherSemanticClassesWords());
-    negPhrases.addAll(constVars.getStopWords());
+    negPhrases.addAll(ConstantsAndVariables.getStopWords());
     negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
     negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));
     allPossiblePhrases.put("NEGATIVE", negPhrases);

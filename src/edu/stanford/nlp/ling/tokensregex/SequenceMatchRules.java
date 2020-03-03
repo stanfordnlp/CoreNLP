@@ -395,7 +395,7 @@ public class SequenceMatchRules {
   }
 
   public static AnnotationExtractRule createMultiTokenPatternRule(Env env, AnnotationExtractRule template, List<TokenSequencePattern> patterns) {
-    return MULTI_TOKEN_PATTERN_EXTRACT_RULE_CREATOR.create(env, template, patterns);
+    return MultiTokenPatternExtractRuleCreator.create(env, template, patterns);
   }
 
 

@@ -89,12 +89,12 @@ public class CoNLLUDocumentReader implements
     }
 
     private IndexedWord getToken(List<IndexedWord> sortedTokens, int index) {
-      return this.getToken(sortedTokens, (double) index);
+      return getToken(sortedTokens, (double) index);
     }
 
 
     private IndexedWord getToken(List<IndexedWord> sortedTokens, double pseudoIndex) {
-      return this.getToken(sortedTokens, pseudoIndex, 0);
+      return getToken(sortedTokens, pseudoIndex, 0);
     }
 
 

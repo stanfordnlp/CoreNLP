@@ -547,7 +547,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
         if (segmenter.flags.answerFile == null) {
           segmenter.evaluate(pwOut);
         } else {
-          segmenter.evaluateRawText(pwOut);
+          evaluateRawText(pwOut);
         }
 
       } else {

@@ -325,9 +325,9 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     //Function to use to how to add CoreLabels to index
     Function<CoreLabel, Map<String, String>> transformCoreLabelToString = l -> {
       Map<String, String> add = new HashMap<>();
-      for (Class gn: constVars.getGeneralizeClasses().values()) {
+      for (Class gn: ConstantsAndVariables.getGeneralizeClasses().values()) {
         Object b  = l.get(gn);
-        if (b != null && !b.toString().equals(constVars.backgroundSymbol)) {
+        if (b != null && !b.toString().equals(ConstantsAndVariables.backgroundSymbol)) {
           add.put(Token.getKeyForClass(gn),b.toString());
         }
       }
@@ -532,11 +532,11 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         if(longestMatchingLabel  != null){
 
           if(!"OTHERSEM".equals(longestMatchingLabel))
-             l.set(PatternsAnnotations.OtherSemanticLabel.class, constVars.backgroundSymbol);
+             l.set(PatternsAnnotations.OtherSemanticLabel.class, ConstantsAndVariables.backgroundSymbol);
 
           for(Entry<String, Class<? extends Key<String>>> en: constVars.getAnswerClass().entrySet()) {
             if (!en.getKey().equals(longestMatchingLabel)){
-              l.set(en.getValue(), constVars.backgroundSymbol);
+              l.set(en.getValue(), ConstantsAndVariables.backgroundSymbol);
             }
             else
               l.set(en.getValue(), en.getKey());
@@ -956,7 +956,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     List<Future<Pair<Map<String, DataInstance>, Counter<CandidatePhrase>>>> list = new ArrayList<>();
     Counter<CandidatePhrase> matchedPhrasesCounter = new ClassicCounter<>();
     for (List<String> keys: threadedSentIds) {
-      Callable<Pair<Map<String, DataInstance>, Counter<CandidatePhrase>>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.fuzzyMatch, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords(),
+      Callable<Pair<Map<String, DataInstance>, Counter<CandidatePhrase>>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.fuzzyMatch, constVars.minLen4FuzzyForPattern, ConstantsAndVariables.backgroundSymbol, constVars.getEnglishWords(),
         stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels, constVars.patternType, constVars.ignoreCaseSeedMatch);
       Pair<Map<String, DataInstance>, Counter<CandidatePhrase>> sentsi  = executor.submit(task).get();
       sents.putAll(sentsi.first());
@@ -1957,7 +1957,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       }
       for (Entry<CandidatePhrase, String[]> phEn : identifiedWordsTokens.entrySet()) {
         String[] ph = phEn.getValue();
-        List<Integer> ints = ArrayUtils.getSubListIndex(ph, sent, o -> constVars.matchLowerCaseContext ? ((String) o.first()).equalsIgnoreCase((String)o.second()): o.first().equals(o.second()));
+        List<Integer> ints = ArrayUtils.getSubListIndex(ph, sent, o -> ConstantsAndVariables.matchLowerCaseContext ? ((String) o.first()).equalsIgnoreCase((String)o.second()): o.first().equals(o.second()));
         if (ints == null)
           continue;
 
@@ -2786,18 +2786,18 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
           if (l.get(anscl.getValue()).equals(label)) {
             l2.set(CoreAnnotations.AnswerAnnotation.class, label);
           } else
-            l2.set(CoreAnnotations.AnswerAnnotation.class, constVars.backgroundSymbol);
+            l2.set(CoreAnnotations.AnswerAnnotation.class, ConstantsAndVariables.backgroundSymbol);
 
           // If the gold label is not the label we are calculating the scores
           // for, set it to the background symbol
           if (!l.get(CoreAnnotations.GoldAnswerAnnotation.class).equals(label)) {
-            l2.set(CoreAnnotations.GoldAnswerAnnotation.class, constVars.backgroundSymbol);
+            l2.set(CoreAnnotations.GoldAnswerAnnotation.class, ConstantsAndVariables.backgroundSymbol);
           } else
             l2.set(CoreAnnotations.GoldAnswerAnnotation.class, label);
           doceval.add(l2);
         }
 
-        countResults(doceval, entityTP, entityFP, entityFN, constVars.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
+        countResults(doceval, entityTP, entityFP, entityFN, ConstantsAndVariables.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
             CoreAnnotations.AnswerAnnotation.class, evalPerEntity); //
       }
       System.out.println("False Positives: " + Counters.toSortedString(wordFP, wordFP.size(), "%s:%.2f", ";"));
@@ -2892,7 +2892,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
   public Set<String> getNonBackgroundLabels(CoreLabel l){
     Set<String> labels = new HashSet<>();
     for(Map.Entry<String, Class<? extends Key<String>>> en: constVars.getAnswerClass().entrySet()){
-      if(!l.get(en.getValue()).equals(constVars.backgroundSymbol)){
+      if(!l.get(en.getValue()).equals(ConstantsAndVariables.backgroundSymbol)){
         labels.add(en.getKey());
       }
     }

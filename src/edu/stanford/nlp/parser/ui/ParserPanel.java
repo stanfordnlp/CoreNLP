@@ -384,7 +384,7 @@ public class ParserPanel extends JPanel  {
         DocumentProcessor<Word, Word, Object, Word> noTags = new StripTagsProcessor<>();
         doc = noTags.processDocument(docPre);
       } else {
-        doc = new BasicDocument<>(this.getTokenizerFactory()).init(new InputStreamReader(new FileInputStream(filename), encoding));
+        doc = new BasicDocument<>(getTokenizerFactory()).init(new InputStreamReader(new FileInputStream(filename), encoding));
       }
     } catch (Exception e) {
       JOptionPane.showMessageDialog(this, "Could not load file " + filename + "\n" + e, null, JOptionPane.ERROR_MESSAGE);

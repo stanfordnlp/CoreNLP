@@ -597,7 +597,7 @@ public class ScorePhrases<E extends Pattern>  {
           terms.addAll(en, wordsPatExtracted.getCounter(en));
         }
       }
-      removeKeys(terms, constVars.getStopWords());
+      removeKeys(terms, ConstantsAndVariables.getStopWords());
 
       Counter<CandidatePhrase> phraseScores = phraseScorer.scorePhrases(label,
           terms, wordsPatExtracted, allSelectedPatterns,

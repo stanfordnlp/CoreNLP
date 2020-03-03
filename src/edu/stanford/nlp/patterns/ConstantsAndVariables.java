@@ -830,10 +830,10 @@ public class ConstantsAndVariables implements Serializable {
       this.seedLabelDictionary.put(label, new HashSet<>());
     }
     this.answerClass = answerClass;
-    this.generalizeClasses = generalizeClasses;
-    if(this.generalizeClasses == null)
-      this.generalizeClasses = new HashMap<>();
-    this.generalizeClasses.putAll(answerClass);
+    ConstantsAndVariables.generalizeClasses = generalizeClasses;
+    if(ConstantsAndVariables.generalizeClasses == null)
+      ConstantsAndVariables.generalizeClasses = new HashMap<>();
+    ConstantsAndVariables.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -848,10 +848,10 @@ public class ConstantsAndVariables implements Serializable {
 
     this.labels = labelDictionary.keySet();
     this.answerClass = answerClass;
-    this.generalizeClasses = generalizeClasses;
-    if(this.generalizeClasses == null)
-      this.generalizeClasses = new HashMap<>();
-    this.generalizeClasses.putAll(answerClass);
+    ConstantsAndVariables.generalizeClasses = generalizeClasses;
+    if(ConstantsAndVariables.generalizeClasses == null)
+      ConstantsAndVariables.generalizeClasses = new HashMap<>();
+    ConstantsAndVariables.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -862,8 +862,8 @@ public class ConstantsAndVariables implements Serializable {
       this.seedLabelDictionary.put(label, new HashSet<>());
     }
     this.answerClass = answerClass;
-    this.generalizeClasses = new HashMap<>();
-    this.generalizeClasses.putAll(answerClass);
+    generalizeClasses = new HashMap<>();
+    generalizeClasses.putAll(answerClass);
     setUp(props);
   }
 
@@ -873,8 +873,8 @@ public class ConstantsAndVariables implements Serializable {
     this.seedLabelDictionary.put(label, new HashSet<>());
     this.answerClass = new HashMap<>();
     this.answerClass.put(label, answerClass);
-    this.generalizeClasses = new HashMap<>();
-    this.generalizeClasses.putAll(this.answerClass);
+    generalizeClasses = new HashMap<>();
+    generalizeClasses.putAll(this.answerClass);
     setUp(props);
   }
 
@@ -885,10 +885,10 @@ public class ConstantsAndVariables implements Serializable {
       this.seedLabelDictionary.put(label, new HashSet<>());
     }
     this.answerClass = answerClass;
-    this.generalizeClasses = generalizeClasses;
-    if(this.generalizeClasses == null)
-      this.generalizeClasses = new HashMap<>();
-    this.generalizeClasses.putAll(answerClass);
+    ConstantsAndVariables.generalizeClasses = generalizeClasses;
+    if(ConstantsAndVariables.generalizeClasses == null)
+      ConstantsAndVariables.generalizeClasses = new HashMap<>();
+    ConstantsAndVariables.generalizeClasses.putAll(answerClass);
     setUp(props);
   }
 

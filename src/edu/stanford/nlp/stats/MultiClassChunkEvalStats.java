@@ -109,8 +109,8 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
       labelIndex.add(getTypeLabel(correct));
     }
     if (inCorrect) {
-       boolean prevCorrectEnded = chunker.isEndOfChunk(prevCorrect, correct);
-       boolean prevGuessEnded = chunker.isEndOfChunk(prevGuess, guess);
+       boolean prevCorrectEnded = LabeledChunkIdentifier.isEndOfChunk(prevCorrect, correct);
+       boolean prevGuessEnded = LabeledChunkIdentifier.isEndOfChunk(prevGuess, guess);
        if (prevCorrectEnded && prevGuessEnded && prevGuess.typeMatches(prevCorrect)) {
          inCorrect=false;
          correctGuesses.incrementCount(getTypeLabel(prevCorrect));

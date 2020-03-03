@@ -206,9 +206,9 @@ public class Classifier  {
                             .toArray();
 
         int offset = 0;
-        for (int j = 0; j < config.numTokens; ++j) {
+        for (int j = 0; j < Config.numTokens; ++j) {
           int tok = feature.get(j);
-          int index = tok * config.numTokens + j;
+          int index = tok * Config.numTokens + j;
 
           if (preMap.containsKey(index)) {
             // Unit activations for this input feature value have been
@@ -278,9 +278,9 @@ public class Classifier  {
         }
 
         offset = 0;
-        for (int j = 0; j < config.numTokens; ++j) {
+        for (int j = 0; j < Config.numTokens; ++j) {
           int tok = feature.get(j);
-          int index = tok * config.numTokens + j;
+          int index = tok * Config.numTokens + j;
           if (preMap.containsKey(index)) {
             int id = preMap.get(index);
             for (int nodeIndex : ls)
@@ -398,8 +398,8 @@ public class Classifier  {
     private void backpropSaved(Set<Integer> featuresSeen) {
       for (int x : featuresSeen) {
         int mapX = preMap.get(x);
-        int tok = x / config.numTokens;
-        int offset = (x % config.numTokens) * config.embeddingSize;
+        int tok = x / Config.numTokens;
+        int offset = (x % Config.numTokens) * config.embeddingSize;
         for (int j = 0; j < config.hiddenSize; ++j) {
           double delta = gradSaved[mapX][j];
           for (int k = 0; k < config.embeddingSize; ++k) {
@@ -477,9 +477,9 @@ public class Classifier  {
     for (Example ex : examples) {
       List<Integer> feature = ex.getFeature();
 
-      for (int j = 0; j < config.numTokens; j++) {
+      for (int j = 0; j < Config.numTokens; j++) {
         int tok = feature.get(j);
-        int index = tok * config.numTokens + j;
+        int index = tok * Config.numTokens + j;
         if (preMap.containsKey(index))
           featureIDs.add(index);
       }
@@ -660,7 +660,7 @@ public class Classifier  {
     // actually hurt training performance! (See experiments with
     // "smallMap.")
     saved = new double[preMap.size()][config.hiddenSize];
-    final int numTokens = config.numTokens;
+    final int numTokens = Config.numTokens;
     final int embeddingSize = config.embeddingSize;
 
     for (int x : toPreCompute) {
@@ -684,7 +684,7 @@ public class Classifier  {
    */
   private double[] computeScores(int[] feature, Map<Integer, Integer> preMap) {
     final double[] hidden = new double[config.hiddenSize];
-    final int numTokens = config.numTokens;
+    final int numTokens = Config.numTokens;
     final int embeddingSize = config.embeddingSize;
 
     int offset = 0;

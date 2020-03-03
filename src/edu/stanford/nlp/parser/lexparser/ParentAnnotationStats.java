@@ -494,8 +494,8 @@ public class ParentAnnotationStats implements TreeVisitor  {
     ParentAnnotationStats pas = new ParentAnnotationStats(tlp, doTags);
     t.apply(pas);
     Set<String> splitters = Generics.newHashSet();
-    pas.getSplitters(phrasalCutOff, pas.nodeRules, pas.pRules, pas.gPRules, splitters);
-    pas.getSplitters(tagCutOff, pas.tagNodeRules, pas.tagPRules, pas.tagGPRules, splitters);
+    getSplitters(phrasalCutOff, pas.nodeRules, pas.pRules, pas.gPRules, splitters);
+    getSplitters(tagCutOff, pas.tagNodeRules, pas.tagPRules, pas.tagGPRules, splitters);
     return splitters;
   }
 

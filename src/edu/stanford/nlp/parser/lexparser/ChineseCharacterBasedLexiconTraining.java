@@ -363,8 +363,8 @@ public class ChineseCharacterBasedLexiconTraining  {
           ourBrackets = proc.allBrackets(tree);
           goldBrackets = proc.allBrackets(gold);
           if (goodPOS) {
-            ourBrackets.addAll(proc.commonWordTagTypeBrackets(tree, gold));
-            goldBrackets.addAll(proc.commonWordTagTypeBrackets(gold, tree));
+            ourBrackets.addAll(TreeToBracketProcessor.commonWordTagTypeBrackets(tree, gold));
+            goldBrackets.addAll(TreeToBracketProcessor.commonWordTagTypeBrackets(gold, tree));
           }
 
           basicEval.eval(ourBrackets, goldBrackets);
@@ -376,8 +376,8 @@ public class ChineseCharacterBasedLexiconTraining  {
           ourBrackets = proc.allBrackets(collinsTree);
           goldBrackets = proc.allBrackets(collinsGold);
           if (goodPOS) {
-            ourBrackets.addAll(proc.commonWordTagTypeBrackets(collinsTree, collinsGold));
-            goldBrackets.addAll(proc.commonWordTagTypeBrackets(collinsGold, collinsTree));
+            ourBrackets.addAll(TreeToBracketProcessor.commonWordTagTypeBrackets(collinsTree, collinsGold));
+            goldBrackets.addAll(TreeToBracketProcessor.commonWordTagTypeBrackets(collinsGold, collinsTree));
           }
 
           collinsEval.eval(ourBrackets, goldBrackets);

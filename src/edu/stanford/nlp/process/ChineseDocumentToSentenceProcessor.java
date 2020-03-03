@@ -141,17 +141,15 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
     // log.info("Here are the properties:");
     // props.list(System.err);
     boolean alwaysAddS = props.containsKey("alwaysAddS");
-    ChineseDocumentToSentenceProcessor cp;
     if (! props.containsKey("file")) {
       log.info("usage: java ChineseDocumentToSentenceProcessor [-segmentIBM] -file filename [-encoding encoding]");
       return;
     }
-    cp = new ChineseDocumentToSentenceProcessor();
     if (props.containsKey("encoding")) {
-      log.info("WARNING: for now the default encoding is "+cp.encoding+". It's not changeable for now");
+      log.info("WARNING: for now the default encoding is "+encoding+". It's not changeable for now");
     }
     String input = IOUtils.slurpFileNoExceptions(props.getProperty("file"),
-                                                     cp.encoding);
+                                                     encoding);
     // String input = StringUtils.slurpGBURLNoExceptions(new URL(props.getProperty("file")));
 
     if (props.containsKey("segmentIBM")) {
@@ -161,7 +159,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
       if (parseInside == null) parseInside = "";
 
       Pattern p1, p2, p3, p4;
-      PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, cp.encoding), true);
+      PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, encoding), true);
       StringBuilder buff = new StringBuilder();
       StringBuilder sgmlbuff = new StringBuilder();
       String lastSgml = "";
@@ -235,8 +233,8 @@ public class ChineseDocumentToSentenceProcessor implements Serializable  {
       log.info("Split " + splitItems + " segments, adding " +
                          numAdded + " sentences.");
     } else {
-      List<String> sent = cp.fromHTML(input);
-      PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.err, cp.encoding), true);
+      List<String> sent = fromHTML(input);
+      PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.err, encoding), true);
 
       for (String a : sent) {
         pw.println(a);

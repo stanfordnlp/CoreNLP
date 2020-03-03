@@ -98,7 +98,7 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
     try {
       IOUtils.ensureDir(new File(dir));
       String f = dir+"/allpatterns.ser";
-      IOUtils.writeObjectToFile(this.patternsForEachToken, f);
+      IOUtils.writeObjectToFile(patternsForEachToken, f);
       Redwood.log(Redwood.DBG, "Saving the patterns to " + f);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -113,11 +113,11 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
   }
 
   public boolean containsSentId(String sentId) {
-    return this.patternsForEachToken.containsKey(sentId);
+    return patternsForEachToken.containsKey(sentId);
   }
 
   @Override
   public int size(){
-    return this.patternsForEachToken.size();
+    return patternsForEachToken.size();
   };
 }

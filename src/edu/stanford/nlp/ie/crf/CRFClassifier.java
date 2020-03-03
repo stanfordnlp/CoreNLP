@@ -1247,7 +1247,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       System.arraycopy(initialSequence, 0, sequence, 0, sequence.length);
     }
 
-    sampler.verbose = 0;
+    SequenceGibbsSampler.verbose = 0;
 
     if (flags.annealingType.equalsIgnoreCase("linear")) {
       sequence = sampler.findBestUsingAnnealing(model, CoolingSchedule.getLinearSchedule(1.0, flags.numSamples),

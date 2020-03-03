@@ -103,14 +103,14 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
   @Override
   public Tree transformTree(Tree t) {
     if (trainOptions.printTreeTransformations > 0) {
-      trainOptions.printTrainTree(null, "ORIGINAL TREE:", t);
+      TrainOptions.printTrainTree(null, "ORIGINAL TREE:", t);
     }
     Tree trTree = annotator.transformTree(t);
     if (trainOptions.selectivePostSplit) {
       trTree = postSplitter.transformTree(trTree);
     }
     if (trainOptions.printTreeTransformations > 0) {
-      trainOptions.printTrainTree(trainOptions.printAnnotatedPW, "ANNOTATED TREE:", trTree);
+      TrainOptions.printTrainTree(trainOptions.printAnnotatedPW, "ANNOTATED TREE:", trTree);
     }
     if (trainOptions.printAnnotatedRuleCounts) {
       Tree tr2 = trTree.deepCopy(new LabeledScoredTreeFactory(), new StringLabelFactory());
@@ -132,7 +132,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
 
     Tree binarizedTree = binarizer.transformTree(trTree);
     if (trainOptions.printTreeTransformations > 0) {
-      trainOptions.printTrainTree(trainOptions.printBinarizedPW, "BINARIZED TREE:", binarizedTree);
+      TrainOptions.printTrainTree(trainOptions.printBinarizedPW, "BINARIZED TREE:", binarizedTree);
       trainOptions.printTreeTransformations--;
     }
     if (forceCNF) {

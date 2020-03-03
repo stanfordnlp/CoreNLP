@@ -132,7 +132,7 @@ public class CreatePatterns<E> {
         if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY))
           tempPatternsForTokens.put(id, new HashMap<>());
 
-        Map<Integer, Set<E>> p  = (Map) PatternFactory.getPatternsAroundTokens(constVars.patternType, sent, constVars.getStopWords());
+        Map<Integer, Set<E>> p  = (Map) PatternFactory.getPatternsAroundTokens(constVars.patternType, sent, ConstantsAndVariables.getStopWords());
         //to save number of commits to the database
         if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)){
           tempPatternsForTokens.put(id, p);

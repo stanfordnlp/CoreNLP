@@ -102,7 +102,7 @@ public class FilePanel extends JPanel {
    * with trees unable to be read, clearFiles indicates if all current files should be removed from the panel.
    */
   public void setTreeReaderFactory(TreeReaderFactory trf) {
-    treeModel.setTRF(trf);
+    FileTreeModel.setTRF(trf);
   }
 
   public void loadFiles(EnumMap<TregexGUI.FilterType, String> filters, File[] files) {
@@ -120,7 +120,7 @@ public class FilePanel extends JPanel {
    * Removes all files from the panel
    */
   public void clearAll() {
-    TreeReaderFactory oldTrf = treeModel.getTRF();//Preserve the current TRF when we refresh the tree file list
+    TreeReaderFactory oldTrf = FileTreeModel.getTRF();//Preserve the current TRF when we refresh the tree file list
     FileTreeNode root = new FileTreeNode();
     treeModel = new FileTreeModel(root);
     setTreeReaderFactory(oldTrf);

@@ -149,7 +149,7 @@ public class CacheParseHypotheses  {
     public Pair<Tree, byte[]> process(Tree tree) {
       List<Tree> topParses = DVParser.getTopParsesForOneTree(parser, dvKBest, tree, transformer);
       // this block is a test to make sure the conversion code is working...
-      List<Tree> converted = cacher.convertToTrees(cacher.convertToBytes(topParses));
+      List<Tree> converted = convertToTrees(cacher.convertToBytes(topParses));
       List<Tree> simplified = CollectionUtils.transformAsList(topParses, cacher.treeBasicCategories);
       simplified = CollectionUtils.filterAsList(simplified, cacher.treeFilter);
       if (simplified.size() != topParses.size()) {
