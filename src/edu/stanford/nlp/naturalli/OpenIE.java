@@ -740,7 +740,7 @@ public class OpenIE implements Annotator  {
       System.exit(1);
     }
     // Copy properties that are missing the 'openie' prefix
-    new HashSet<>(props.keySet()).stream().filter(key -> !key.toString().startsWith("openie.")).forEach(key -> props.setProperty("openie." + key.toString(), props.getProperty(key.toString())));
+    new HashMap<>(props).entrySet().stream().filter(entry -> !entry.getKey().toString().startsWith("openie.")).forEach(entry -> props.setProperty("openie." + entry.getKey(), entry.getValue().toString()));
 
     // Create the pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);

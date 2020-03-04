@@ -284,10 +284,10 @@ public class TreebankStats  {
       System.out.println("======================================================");
       System.out.println(">>> " + corpusName);
       System.out.println(" trees:\t\t" + numTrees);
-      System.out.println(" words:\t\t" + words.keySet().size());
+      System.out.println(" words:\t\t" + words.size());
       System.out.println(" tokens:\t" + (int) words.totalCount());
       System.out.println(" tags:\t\t" + posTags.size());
-      System.out.println(" phrasal types:\t" + phrasalBranchingNum2.keySet().size());
+      System.out.println(" phrasal types:\t" + phrasalBranchingNum2.size());
       System.out.println(" phrasal nodes:\t" + (int) phrasalBranchingNum2.totalCount());
       System.out.println(" OOV rate:\t" + nf.format(OOVRate * 100.0) + "%");
       System.out.println("======================================================");
@@ -362,7 +362,7 @@ public class TreebankStats  {
 
       oovWords = Generics.newHashSet(words.keySet());
       oovWords.removeAll(trainVocab);
-      OOVRate = (double) oovWords.size() / (double) words.keySet().size();
+      OOVRate = (double) oovWords.size() / (double) words.size();
     }
 
     //Corpus wide

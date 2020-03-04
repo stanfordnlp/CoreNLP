@@ -1,12 +1,19 @@
 package edu.stanford.nlp.neural;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.math.ArrayMath;
-
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
+
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.math.ArrayMath;
 
 /**
  * A serializer for reading / writing word vectors.
@@ -138,7 +145,7 @@ public class VectorMap extends HashMap<String, float[]>{
     // Write the size of the dataset
     dataOut.writeInt(this.size());
 
-    for (Map.Entry<String, float[]> entry : this.entrySet()) {
+    for (Entry<String, float[]> entry : this.entrySet()) {
       // Write the length of the key
       byte[] key = entry.getKey().getBytes();
       keyIntType.write(dataOut, key.length);
@@ -237,7 +244,7 @@ public class VectorMap extends HashMap<String, float[]>{
       try {
         Map<String, float[]> otherMap = (Map<String, float[]>) other;
         // Key sets have the same size
-        if (this.keySet().size() != otherMap.keySet().size()) {
+        if (this.size() != otherMap.size()) {
           return false;
         }
         // Entries are the same

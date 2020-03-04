@@ -4,10 +4,11 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -106,11 +107,10 @@ public class DcorefExactOutputITest {
     FileWriter fout = new FileWriter(filename);
     BufferedWriter bout = new BufferedWriter(fout);
 
-    List<Integer> keys = new ArrayList<>(chains.keySet());
-    Collections.sort(keys);
+    Map<Integer, CorefChain> sorted = new TreeMap<>(chains);
 
-    for (Integer key : keys) {
-      saveKey(bout, key, chains.get(key));
+    for (Entry<Integer, CorefChain> entry : sorted.entrySet()) {
+      saveKey(bout, entry.getKey(), entry.getValue());
     }
 
     bout.flush();
@@ -144,7 +144,7 @@ public class DcorefExactOutputITest {
 
   private static void compareResults(Map<Integer, List<ExpectedMention>> expected, Map<Integer, CorefChain> chains) {
     // Note that we don't insist on the chain ID numbers being the same
-    for (Map.Entry<Integer, List<ExpectedMention>> mapEntry : expected.entrySet()) {
+    for (Entry<Integer, List<ExpectedMention>> mapEntry : expected.entrySet()) {
       boolean found = false;
       List<ExpectedMention> expectedChain = mapEntry.getValue();
       for (CorefChain chain : chains.values()) {
@@ -156,7 +156,7 @@ public class DcorefExactOutputITest {
       Assert.assertTrue("Could not find expected coref chain " + mapEntry.getKey() + ' ' + expectedChain + " in the results", found);
     }
 
-    for (Map.Entry<Integer, CorefChain> integerCorefChainEntry : chains.entrySet()) {
+    for (Entry<Integer, CorefChain> integerCorefChainEntry : chains.entrySet()) {
       boolean found = false;
       CorefChain chain = integerCorefChainEntry.getValue();
       for (List<ExpectedMention> expectedChain : expected.values()) {

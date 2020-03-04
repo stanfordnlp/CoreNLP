@@ -155,16 +155,16 @@ public class TreebankFactoredLexiconStats  {
     System.out.println("Language: " + language.toString());
     System.out.printf("#trees:\t%d%n", numTrees);
     System.out.printf("#tokens:\t%d%n", (int) wordCounter.totalCount());
-    System.out.printf("#words:\t%d%n", wordCounter.keySet().size());
-    System.out.printf("#tags:\t%d%n", tagCounter.keySet().size());
-    System.out.printf("#wordTagPairs:\t%d%n", wordTagCounter.keySet().size());
-    System.out.printf("#lemmas:\t%d%n", lemmaCounter.keySet().size());
-    System.out.printf("#lemmaTagPairs:\t%d%n", lemmaTagCounter.keySet().size());
-    System.out.printf("#feattags:\t%d%n", reducedTagCounter.keySet().size());
-    System.out.printf("#feattag+lemmas:\t%d%n", reducedTagLemmaCounter.keySet().size());
-    System.out.printf("#richtags:\t%d%n", richTagCounter.keySet().size());
-    System.out.printf("#richtag+lemma:\t%d%n", morphCounter.keySet().size());
-    System.out.printf("#richtag+lemmaTagPairs:\t%d%n", morphTagCounter.keySet().size());
+    System.out.printf("#words:\t%d%n", wordCounter.size());
+    System.out.printf("#tags:\t%d%n", tagCounter.size());
+    System.out.printf("#wordTagPairs:\t%d%n", wordTagCounter.size());
+    System.out.printf("#lemmas:\t%d%n", lemmaCounter.size());
+    System.out.printf("#lemmaTagPairs:\t%d%n", lemmaTagCounter.size());
+    System.out.printf("#feattags:\t%d%n", reducedTagCounter.size());
+    System.out.printf("#feattag+lemmas:\t%d%n", reducedTagLemmaCounter.size());
+    System.out.printf("#richtags:\t%d%n", richTagCounter.size());
+    System.out.printf("#richtag+lemma:\t%d%n", morphCounter.size());
+    System.out.printf("#richtag+lemmaTagPairs:\t%d%n", morphTagCounter.size());
 
     // Extra
     System.out.println("==================");

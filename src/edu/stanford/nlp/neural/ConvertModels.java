@@ -8,15 +8,14 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Function;
 
 import org.ejml.simple.SimpleMatrix;
 
-import edu.stanford.nlp.neural.SimpleTensor;
 import edu.stanford.nlp.parser.dvparser.DVModel;
 import edu.stanford.nlp.parser.dvparser.DVModelReranker;
-import edu.stanford.nlp.parser.dvparser.DVParser;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.sentiment.RNNOptions;
 import edu.stanford.nlp.sentiment.SentimentModel;
@@ -105,8 +104,8 @@ public class ConvertModels {
 
   public static <K, V, V2> Map<K, V2> transformMap(Map<K, V> in, Function<V, V2> function) {
     Map<K, V2> transformed = Generics.newTreeMap();
-    for (K k : in.keySet()) {
-      transformed.put(k, function.apply(in.get(k)));
+    for (Entry<K, V> entry : in.entrySet()) {
+      transformed.put(entry.getKey(), function.apply(entry.getValue()));
     }
     return transformed;
   }

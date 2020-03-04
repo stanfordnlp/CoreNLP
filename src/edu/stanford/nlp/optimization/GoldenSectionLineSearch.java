@@ -1,13 +1,14 @@
 package edu.stanford.nlp.optimization;
 
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Map;
-import java.util.Arrays;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.function.DoubleUnaryOperator;
+
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * A class to do golden section line search.  Should it implement Minimizer?  Prob. not.
@@ -161,10 +162,8 @@ public class GoldenSectionLineSearch implements LineSearcher  {
    * dump the {@code <x,y>} pairs it computed found
    */
   public void dumpMemory() {
-    Double[] keys = memory.keySet().toArray(new Double[memory.keySet().size()]);
-    Arrays.sort(keys);
-    for (Double key : keys) {
-      log.info(key + "\t" + memory.get(key));
+    for (Entry<Double, Double> entry : new TreeMap<>(memory).entrySet()) {
+      log.info(entry.getKey() + "\t" + entry.getValue());
     }
   }
 

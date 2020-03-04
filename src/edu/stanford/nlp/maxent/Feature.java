@@ -7,12 +7,13 @@
 
 package edu.stanford.nlp.maxent;
 
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
-
-import java.io.PrintStream;
-import java.util.Map;
 
 
 /**
@@ -65,13 +66,16 @@ public class Feature {
         }
       }//if
     }// for
-    Integer[] keys = setNonZeros.keySet().toArray(new Integer[setNonZeros.keySet().size()]);
-    indexedValues = new int[keys.length];
-    valuesI = new double[keys.length];
-    for (int j = 0; j < keys.length; j++) {
-      indexedValues[j] = keys[j].intValue();
-      valuesI[j] = setNonZeros.get(keys[j]).doubleValue();
-    } // for
+    
+    indexedValues = new int[setNonZeros.size()];
+    valuesI = new double[indexedValues.length];
+    
+    int i = 0;
+    for (Entry<Integer, Double> entry: setNonZeros.entrySet()) {
+      indexedValues[i] = entry.getKey();
+      valuesI[i] = entry.getValue();
+      i++;
+    }
     domain = e;
   }
 
