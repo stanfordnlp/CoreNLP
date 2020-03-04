@@ -253,7 +253,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
     System.out.println(minimizer.minimizeFA(fa));
     System.out.println("Starting...");
     Timing.startTime();
-    TransducerGraph randomFA = TransducerGraph.createRandomGraph(100, 10, 1.0, 10, new ArrayList());
+    TransducerGraph randomFA = TransducerGraph.createRandomGraph(100, 10, 1.0, 10, new ArrayList<>());
     TransducerGraph minimizedRandomFA = minimizer.minimizeFA(randomFA);
     System.out.println(randomFA);
     System.out.println(minimizedRandomFA);

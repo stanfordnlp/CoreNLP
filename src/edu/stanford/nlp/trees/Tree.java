@@ -1913,7 +1913,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     }
     Tree[] kids = children();
     // NB: The below list may not be of type Tree but TreeGraphNode, so we leave it untyped
-    List newKids = new ArrayList(kids.length);
+    List<Tree> newKids = new ArrayList<>(kids.length);
     for (Tree kid : kids) {
       newKids.add(kid.deepCopy(tf, lf));
     }

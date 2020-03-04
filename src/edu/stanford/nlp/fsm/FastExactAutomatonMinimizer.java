@@ -1,9 +1,19 @@
 package edu.stanford.nlp.fsm;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import edu.stanford.nlp.fsm.TransducerGraph.Arc;
 import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.util.Maps;
-
-import java.util.*;
 
 /**
  * Minimization in n log n a la Hopcroft.
@@ -187,7 +197,7 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
   }
 
   protected Collection getInverseImages(Split split) {
-    List inverseImages = new ArrayList();
+    List<Object> inverseImages = new ArrayList<>();
     Object symbol = split.getSymbol();
     Block block = split.getBlock();
     for (Object member : split.getMembers()) {
@@ -204,14 +214,14 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
     return inverseImages;
   }
 
-  protected Collection getInverseArcs(Object member, Object symbol) {
+  protected Collection<Arc> getInverseArcs(Object member, Object symbol) {
     if (member != SINK_NODE) {
       return getUnminimizedFA().getArcsByTargetAndInput(member, symbol);
     }
     return getUnminimizedFA().getArcsByInput(symbol);
   }
 
-  protected Collection getInverseArcs(Object member) {
+  protected Collection<Arc> getInverseArcs(Object member) {
     if (member != SINK_NODE) {
       return getUnminimizedFA().getArcsByTarget(member);
     }
@@ -267,9 +277,9 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
     System.out.println(minimizer.minimizeFA(fa));
     */
     System.out.println("Starting minimizer test...");
-    List pathList = new ArrayList();
+    List<List<String>> pathList = new ArrayList<>();
     TransducerGraph randomFA = TransducerGraph.createRandomGraph(5000, 5, 1.0, 5, pathList);
-    List outputs = randomFA.getPathOutputs(pathList);
+    List<Double> outputs = randomFA.getPathOutputs(pathList);
 
     TransducerGraph.GraphProcessor quasiDeterminizer = new QuasiDeterminizer();
     AutomatonMinimizer minimizer = new FastExactAutomatonMinimizer();
@@ -283,7 +293,7 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
     System.out.println("Minimized from " + randomFA.getNodes().size() + " to " + result.getNodes().size());
     result = new TransducerGraph(result, ntsp);  // pull out strings from sets returned by minimizer
     result = new TransducerGraph(result, isp); // split outputs from inputs
-    List minOutputs = result.getPathOutputs(pathList);
+    List<Double> minOutputs = result.getPathOutputs(pathList);
     System.out.println("Equal? " + outputs.equals(minOutputs));
 
     /*
