@@ -1,18 +1,4 @@
 package edu.stanford.nlp.parser.lexparser;
-import edu.stanford.nlp.util.logging.Redwood;
-
-import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.io.NumberRangesFileFilter;
-import edu.stanford.nlp.io.EncodingPrintWriter;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.trees.DiskTreebank;
-import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.util.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -20,10 +6,34 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import edu.stanford.nlp.io.EncodingPrintWriter;
+import edu.stanford.nlp.io.NumberRangesFileFilter;
+import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.trees.DiskTreebank;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -411,9 +421,9 @@ public class BaseLexicon implements Lexicon  {
         ++loc;
         continue;
       }
-      for (String tag : counts.keySet()) {
-        TaggedWord newTW = new TaggedWord(tw.word(), tag);
-        train(newTW, loc, weight * counts.getCount(tag) / totalCount);
+      for (Map.Entry<String, Double> entry : counts.entrySet()) {
+        TaggedWord newTW = new TaggedWord(tw.word(), entry.getKey());
+        train(newTW, loc, weight * entry.getValue() / totalCount);
       }
       ++loc;
     }
@@ -787,11 +797,11 @@ public class BaseLexicon implements Lexicon  {
   public void writeData(Writer w) throws IOException {
     PrintWriter out = new PrintWriter(w);
 
-    for (IntTaggedWord itw : seenCounter.keySet()) {
-      out.println(itw.toLexicalEntry(wordIndex, tagIndex) + " SEEN " + seenCounter.getCount(itw));
+    for (Map.Entry<IntTaggedWord, Double> entry : seenCounter.entrySet()) {
+      out.println(entry.getKey().toLexicalEntry(wordIndex, tagIndex) + " SEEN " + entry.getValue());
     }
-    for (IntTaggedWord itw : getUnknownWordModel().unSeenCounter().keySet()) {
-      out.println(itw.toLexicalEntry(wordIndex, tagIndex) + " UNSEEN " + getUnknownWordModel().unSeenCounter().getCount(itw));
+    for (Map.Entry<IntTaggedWord, Double> entry : getUnknownWordModel().unSeenCounter().entrySet()) {
+      out.println(entry.getKey().toLexicalEntry(wordIndex, tagIndex) + " UNSEEN " + entry.getValue());
     }
     for (int i = 0; i < smooth.length; i++) {
       out.println("smooth[" + i + "] = " + smooth[i]);
