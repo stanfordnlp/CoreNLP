@@ -1,8 +1,6 @@
 package edu.stanford.nlp.parser.dvparser;
-import edu.stanford.nlp.util.logging.Redwood;
-
-import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Collection;
@@ -11,10 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import org.ejml.simple.SimpleMatrix;
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
@@ -24,12 +23,12 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.UnaryGrammar;
 import edu.stanford.nlp.parser.lexparser.UnaryRule;
 import edu.stanford.nlp.trees.Tree;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.TwoDimensionalSet;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 public class DVModel implements Serializable  {
@@ -462,8 +461,9 @@ public class DVModel implements Serializable  {
     //Map<String, SimpleMatrix> rawWordVectors = NeuralUtils.readRawWordVectors(op.lexOptions.wordVectorFile, op.lexOptions.numHid);
     Embedding rawWordVectors = new Embedding(op.lexOptions.wordVectorFile, op.lexOptions.numHid);
 
-    for (String word : rawWordVectors.keySet()) {
-      SimpleMatrix vector = rawWordVectors.get(word);
+    for (Map.Entry<String, SimpleMatrix> entry : rawWordVectors.entrySet()) {
+      String word = entry.getKey();
+      SimpleMatrix vector = entry.getValue();
 
       if (op.wordFunction != null) {
         word = op.wordFunction.apply(word);

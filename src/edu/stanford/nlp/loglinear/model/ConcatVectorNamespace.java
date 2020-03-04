@@ -35,9 +35,9 @@ public class ConcatVectorNamespace {
    */
   public ConcatVector newWeightsVector() {
     ConcatVector vector = new ConcatVector(featureToIndex.size());
-    for (String s : sparseFeatureIndex.keySet()) {
-      int size = sparseFeatureIndex.get(s).size();
-      vector.setDenseComponent(ensureFeature(s), new double[size]);
+    for (Map.Entry<String, Map<String, Integer>> entry : sparseFeatureIndex.entrySet()) {
+      int size = entry.getValue().size();
+      vector.setDenseComponent(ensureFeature(entry.getKey()), new double[size]);
     }
     return vector;
   }
@@ -115,10 +115,11 @@ public class ConcatVectorNamespace {
    * @param bw     the output stream to write to
    */
   public void debugVector(ConcatVector vector, BufferedWriter bw) throws IOException {
-    for (String key : featureToIndex.keySet()) {
+    for (Map.Entry<String, Integer> entry : featureToIndex.entrySet()) {
+      String key = entry.getKey();
       bw.write(key);
       bw.write(":\n");
-      int i = featureToIndex.get(key);
+      int i = entry.getValue();
       if (vector.isComponentSparse(i)) {
         debugFeatureValue(key, vector.getSparseIndex(i), vector, bw);
       } else {

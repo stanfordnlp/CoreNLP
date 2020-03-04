@@ -91,8 +91,8 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     }
 
     BigDecimal score = new BigDecimal(0);
-    for (Tree node : scores.keySet()) {
-      score = score.add(new BigDecimal(scores.get(node)));
+    for (Double value : scores.values()) {
+      score = score.add(new BigDecimal(value));
       //log.info(score.toString());
     }
     return score.doubleValue();

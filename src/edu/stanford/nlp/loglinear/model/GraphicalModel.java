@@ -1,12 +1,18 @@
 package edu.stanford.nlp.loglinear.model;
 
-import edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+
+import edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto;
 
 /**
  * Created on 8/7/15.
@@ -325,9 +331,9 @@ public class GraphicalModel {
 
   private static GraphicalModelProto.MetaData.Builder getProtoMetaDataBuilder(Map<String, String> metaData) {
     GraphicalModelProto.MetaData.Builder builder = GraphicalModelProto.MetaData.newBuilder();
-    for (String key : metaData.keySet()) {
-      builder.addKey(key);
-      builder.addValue(metaData.get(key));
+    for (Map.Entry<String, String> entry : metaData.entrySet()) {
+      builder.addKey(entry.getKey());
+      builder.addValue(entry.getValue());
     }
     return builder;
   }
