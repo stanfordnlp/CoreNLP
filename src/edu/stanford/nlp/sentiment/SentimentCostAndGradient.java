@@ -215,7 +215,12 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       Tree trainingTree = tree.deepCopy();
       // this will attach the error vectors and the node vectors
       // to each node in the tree
-      forwardPropagateTree(trainingTree);
+      try {
+        forwardPropagateTree(trainingTree);
+      } catch(ForwardPropagationException e) {
+        log.error("Illegal tree: " + trainingTree);
+        throw e;
+      }
       forwardPropTrees.add(trainingTree);
     }
 
@@ -494,16 +499,14 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       // calculate the classification for this word/tag.  In fact, the
       // recursion should not have gotten here (unless there are
       // degenerate trees of just one leaf)
-      log.info("SentimentCostAndGradient: warning: We reached leaves in forwardPropagate: " + tree);
-      throw new AssertionError("We should not have reached leaves in forwardPropagate");
+      throw new ForwardPropagationException("We should not have reached leaves in forwardPropagate");
     } else if (tree.isPreTerminal()) {
       classification = model.getUnaryClassification(tree.label().value());
       String word = tree.children()[0].label().value();
       SimpleMatrix wordVector = model.getWordVector(word);
       nodeVector = NeuralUtils.elementwiseApplyTanh(wordVector);
     } else if (tree.children().length == 1) {
-      log.info("SentimentCostAndGradient: warning: Non-preterminal nodes of size 1: " + tree);
-      throw new AssertionError("Non-preterminal nodes of size 1 should have already been collapsed");
+      throw new ForwardPropagationException("Non-preterminal nodes of size 1 should have already been collapsed");
     } else if (tree.children().length == 2) {
       forwardPropagateTree(tree.children()[0]);
       forwardPropagateTree(tree.children()[1]);

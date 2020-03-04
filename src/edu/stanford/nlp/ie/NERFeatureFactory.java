@@ -52,6 +52,7 @@ import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Interner;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -576,6 +577,11 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       return;
     }
     Timing timing = new Timing();
+    // should work better than String.intern()
+    // interning the strings like this means they should be serialized
+    // in an interned manner, saving disk space and also memory when
+    // loading them back in
+    Interner<String> interner = new Interner<>();
     lexicon = Generics.newHashMap(10000);
     boolean terryKoo = "terryKoo".equals(flags.distSimFileFormat);
     Pattern p = Pattern.compile(terryKoo ? "\\t" : "\\s+");
@@ -602,7 +608,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       if (flags.numberEquivalenceDistSim) {
         word = WordShapeClassifier.wordShape(word, WordShapeClassifier.WORDSHAPEDIGITS);
       }
-      lexicon.put(word, wordClass);
+      lexicon.put(word, interner.intern(wordClass));
     }
     timing.done(log, "Loading distsim lexicon from " + flags.distSimLexicon);
   }

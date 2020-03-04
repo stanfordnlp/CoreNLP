@@ -267,10 +267,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     keysToSerialize.remove(ParagraphAnnotation.class);
     // Remove items populated by number normalizer
     keysToSerialize.remove(NumericCompositeObjectAnnotation.class);
-    keysToSerialize.remove(NumericCompositeTypeAnnotation.class);
-    keysToSerialize.remove(NumericCompositeValueAnnotation.class);
-    keysToSerialize.remove(NumericTypeAnnotation.class);
-    keysToSerialize.remove(NumericValueAnnotation.class);
+    //keysToSerialize.remove(NumericCompositeTypeAnnotation.class);
+    //keysToSerialize.remove(NumericCompositeValueAnnotation.class);
+    //keysToSerialize.remove(NumericTypeAnnotation.class);
+    //keysToSerialize.remove(NumericValueAnnotation.class);
     // Remove items which were never supposed to be there in the first place
     keysToSerialize.remove(ForcedSentenceUntilEndAnnotation.class);
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
@@ -312,6 +312,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (keySet.contains(CharacterOffsetBeginAnnotation.class)) { builder.setBeginChar(coreLabel.beginPosition()); keysToSerialize.remove(CharacterOffsetBeginAnnotation.class); }
     if (keySet.contains(CharacterOffsetEndAnnotation.class)) { builder.setEndChar(coreLabel.endPosition()); keysToSerialize.remove(CharacterOffsetEndAnnotation.class); }
+    if (keySet.contains(CodepointOffsetBeginAnnotation.class)) {
+      builder.setCodepointOffsetBegin(coreLabel.get(CoreAnnotations.CodepointOffsetBeginAnnotation.class));
+      keysToSerialize.remove(CodepointOffsetBeginAnnotation.class);
+    }
+    if (keySet.contains(CodepointOffsetEndAnnotation.class)) {
+      builder.setCodepointOffsetEnd(coreLabel.get(CoreAnnotations.CodepointOffsetEndAnnotation.class));
+      keysToSerialize.remove(CodepointOffsetEndAnnotation.class);
+    }
     if (keySet.contains(LemmaAnnotation.class)) { builder.setLemma(coreLabel.lemma()); keysToSerialize.remove(LemmaAnnotation.class); }
     if (keySet.contains(UtteranceAnnotation.class)) { builder.setUtterance(getAndRegister(coreLabel, keysToSerialize, UtteranceAnnotation.class)); }
     if (keySet.contains(SpeakerAnnotation.class)) { builder.setSpeaker(getAndRegister(coreLabel, keysToSerialize, SpeakerAnnotation.class)); }
@@ -402,6 +410,20 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (keySet.contains(MWTTokenTextAnnotation.class)) {
       builder.setMwtText(getAndRegister(coreLabel, keysToSerialize, MWTTokenTextAnnotation.class));
+    }
+
+    // handle numeric stuff
+    if (keySet.contains(NumericValueAnnotation.class)) {
+      builder.setNumericValue(getAndRegister(coreLabel, keysToSerialize, NumericValueAnnotation.class).longValue());
+    }
+    if (keySet.contains(NumericTypeAnnotation.class)) {
+      builder.setNumericType(getAndRegister(coreLabel, keysToSerialize, NumericTypeAnnotation.class));
+    }
+    if (keySet.contains(NumericCompositeValueAnnotation.class)) {
+      builder.setNumericCompositeValue(getAndRegister(coreLabel, keysToSerialize, NumericCompositeValueAnnotation.class).longValue());
+    }
+    if (keySet.contains(NumericCompositeTypeAnnotation.class)) {
+      builder.setNumericCompositeType(getAndRegister(coreLabel, keysToSerialize, NumericCompositeTypeAnnotation.class));
     }
 
     // Return
@@ -1339,6 +1361,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasLemma()) { word.setLemma(proto.getLemma()); }
     if (proto.hasBeginChar()) { word.setBeginPosition(proto.getBeginChar()); }
     if (proto.hasEndChar()) { word.setEndPosition(proto.getEndChar()); }
+    if (proto.hasCodepointOffsetBegin()) { word.set(CoreAnnotations.CodepointOffsetBeginAnnotation.class, proto.getCodepointOffsetBegin()); }
+    if (proto.hasCodepointOffsetEnd()) { word.set(CoreAnnotations.CodepointOffsetEndAnnotation.class, proto.getCodepointOffsetEnd()); }
     if (proto.hasSpeaker()) { word.set(SpeakerAnnotation.class, proto.getSpeaker()); }
     if (proto.hasUtterance()) { word.set(UtteranceAnnotation.class, proto.getUtterance()); }
     if (proto.hasBeginIndex()) { word.set(BeginIndexAnnotation.class, proto.getBeginIndex()); }
@@ -1423,6 +1447,20 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (proto.hasIsFirstMWT()) {
       word.set(IsFirstWordOfMWTAnnotation.class, proto.getIsFirstMWT());
+    }
+
+    // Numeric info
+    if (proto.hasNumericValue()) {
+      word.set(NumericValueAnnotation.class, proto.getNumericValue());
+    }
+    if (proto.hasNumericType()) {
+      word.set(NumericTypeAnnotation.class, proto.getNumericType());
+    }
+    if (proto.hasNumericCompositeValue()) {
+      word.set(NumericCompositeValueAnnotation.class, proto.getNumericCompositeValue());
+    }
+    if (proto.hasNumericCompositeType()) {
+      word.set(NumericCompositeTypeAnnotation.class, proto.getNumericCompositeType());
     }
 
     // Return

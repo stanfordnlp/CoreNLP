@@ -2909,7 +2909,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   public static void main(String[] args) throws Exception {
     StringUtils.logInvocationString(log, args);
 
-    Properties props = StringUtils.argsToProperties(args);
+    Properties props = StringUtils.argsToProperties(args, SeqClassifierFlags.flagsToNumArgs());
     SeqClassifierFlags flags = new SeqClassifierFlags(props);
     CRFClassifier<CoreLabel> crf = chooseCRFClassifier(flags);
     String testFile = flags.testFile;

@@ -258,7 +258,7 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   }
 
   public double score(String filename, String delimiter, String boundary) throws IOException {
-    return score(IOUtils.getBufferedFileReader(filename), delimiter, boundary);
+    return score(IOUtils.readerFromString(filename), delimiter, boundary);
   }
 
   public double score(BufferedReader br, String delimiter) throws IOException

@@ -1,11 +1,11 @@
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.util.Scored;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+
+import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.util.Scored;
 
 /**
  * A <code>Constituent</code> object defines a generic edge in a graph.
@@ -285,8 +285,7 @@ public abstract class Constituent implements Labeled, Scored, Label {
    *
    * @return The subpart of the sentence
    */
-  // TODO: genericize this!
-  public String toSentenceString(ArrayList s) {
+  public String toSentenceString(List<?> s) {
     StringBuilder sb = new StringBuilder();
     for (int wordNum = start(), end = end(); wordNum <= end; wordNum++) {
       sb.append(s.get(wordNum));

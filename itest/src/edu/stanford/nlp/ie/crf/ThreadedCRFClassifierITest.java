@@ -15,7 +15,7 @@ public class ThreadedCRFClassifierITest extends TestCase {
   Properties props;
 
   private static final String german1 =
-    "edu/stanford/nlp/models/ner/german.conll.germeval2014.hgc_175m_600.crf.ser.gz";
+    "edu/stanford/nlp/models/ner/german.distsim.crf.ser.gz";
   /** -- We're no longer supporting this one
   private String german2 =
     "/u/nlp/data/ner/goodClassifiers/german.dewac_175m_600.crf.ser.gz";

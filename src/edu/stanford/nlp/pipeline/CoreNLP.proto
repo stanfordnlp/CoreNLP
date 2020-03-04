@@ -204,6 +204,15 @@ message Token {
   optional bool isFirstMWT = 68;
   optional string mwtText = 69;
 
+  // number info
+  optional uint64 numericValue = 70;
+  optional string numericType = 71;
+  optional uint64 numericCompositeValue = 72;
+  optional string numericCompositeType = 73;
+
+  optional uint32 codepointOffsetBegin   = 74;
+  optional uint32 codepointOffsetEnd     = 75;
+
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
   //       uint32 sentenceIndex  @see Sentence#sentenceIndex
