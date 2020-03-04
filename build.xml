@@ -569,7 +569,7 @@
       <zipfileset prefix="WEB-INF/data/models"
                   file="/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz"/>
       <zipfileset prefix="WEB-INF/data/models"
-                  file="/u/nlp/data/ner/goodClassifiers/german.hgc_175m_600.crf.ser.gz"/>
+                  file="/u/nlp/data/ner/goodClassifiers/german.distsim.crf.ser.gz"/>
       <zipfileset prefix="WEB-INF/data/models"
                   file="/u/nlp/data/ner/goodClassifiers/chinese.misc.distsim.crf.ser.gz"/>
       <zipfileset file="${data.path}/webapps/favicon.ico"/>

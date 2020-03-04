@@ -1,6 +1,6 @@
 trainFileList = /u/nlp/data/ner/german/german-ner.train.conll,/u/nlp/data/ner/german/german-ner-extra-eval.train.conll
 testFile = /u/nlp/data/ner/german/german-ner.dev.conll
-serializeTo = /u/nlp/data/ner/german/models/german.hgc_175m_600.crf.ser.gz
+serializeTo = /u/nlp/data/ner/german/models/german.distsim.crf.ser.gz
 
 type=crf
 
