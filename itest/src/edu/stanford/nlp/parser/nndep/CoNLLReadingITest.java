@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 
 public class CoNLLReadingITest extends TestCase {
 
-    String exampleCoNLLXPath = "/u/nlp/data/stanford-corenlp-testing/data/conllu/fr_gsd-ud-train.conllu.clean";
+    String exampleCoNLLXPath = "/u/nlp/data/stanford-corenlp/test/data/conllu/fr_gsd-ud-train.conllu.clean";
     String exampleCoNLLUPath = "";
 
     public static void loadConllFileOriginal(String inFile, List<CoreMap> sents, List<DependencyTree> trees, boolean unlabeled, boolean cPOS)

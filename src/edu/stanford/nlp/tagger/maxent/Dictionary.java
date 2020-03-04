@@ -10,7 +10,6 @@ package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Interner;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
@@ -177,19 +176,18 @@ public class Dictionary  {
     }
   }
 
-  private void readTags(DataInputStream rf) throws IOException {
+  private void read(DataInputStream rf, String filename) throws IOException {
     // Object[] arr=dict.keySet().toArray();
 
     int maxNumTags = 0;
     int len = rf.readInt();
     if (VERBOSE) {
-      log.info("Dictionary has " + len + " words.");
+      log.info("Reading Dictionary of " + len + " words from " + filename + '.');
     }
 
-    Interner<String> interner = new Interner<>();
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
-      TagCount count = TagCount.readTagCount(rf, interner);
+      TagCount count = TagCount.readTagCount(rf);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {
         maxNumTags = numTags;
@@ -204,28 +202,45 @@ public class Dictionary  {
     }
   }
 
-  private void readVerbs(DataInputStream rf) throws IOException {
+  private void readTags(DataInputStream rf) throws IOException {
+    // Object[] arr=dict.keySet().toArray();
+
+    int maxNumTags = 0;
     int len = rf.readInt();
     if (VERBOSE) {
-      log.info("Reading " + len + " part taking verbs");
+      log.info("Reading Dictionary of " + len + " words.");
     }
-    for (int i = 0; i < len; i++) {
-      int iO = rf.readInt();
-      CountWrapper tC = new CountWrapper();
-      tC.read(rf);
 
-      this.partTakingVerbs.put(iO, tC);
+    for (int i = 0; i < len; i++) {
+      String word = rf.readUTF();
+      TagCount count = TagCount.readTagCount(rf);
+      int numTags = count.numTags();
+      if (numTags > maxNumTags) {
+        maxNumTags = numTags;
+      }
+      this.dict.put(word, count);
+      if (VERBOSE) {
+        log.info("  " + word + " [idx=" + i + "]: " + count);
+      }
+    }
+    if (VERBOSE) {
+      log.info("Read dictionary of " + len + " words; max tags for word was " + maxNumTags + '.');
     }
   }
 
   protected void read(String filename) {
     try {
       DataInputStream rf = IOUtils.getDataInputStream(filename);
-      if (VERBOSE) {
-        log.info("Reading tagger dictionary from " + filename);
+      read(rf, filename);
+
+      int len1 = rf.readInt();
+      for (int i = 0; i < len1; i++) {
+        int iO = rf.readInt();
+        CountWrapper tC = new CountWrapper();
+        tC.read(rf);
+
+        this.partTakingVerbs.put(iO, tC);
       }
-      readTags(rf);
-      readVerbs(rf);
       rf.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -234,11 +249,16 @@ public class Dictionary  {
 
   protected void read(DataInputStream file) {
     try {
-      if (VERBOSE) {
-        log.info("Reading tagger dictionary");
-      }
       readTags(file);
-      readVerbs(file);
+
+      int len1 = file.readInt();
+      for (int i = 0; i < len1; i++) {
+        int iO = file.readInt();
+        CountWrapper tC = new CountWrapper();
+        tC.read(file);
+
+        this.partTakingVerbs.put(iO, tC);
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }

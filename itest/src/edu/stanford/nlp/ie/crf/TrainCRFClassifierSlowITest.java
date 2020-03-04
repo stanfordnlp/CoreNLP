@@ -23,12 +23,12 @@ public class TrainCRFClassifierSlowITest {
     StanfordRedwoodConfiguration.apply(PropertiesUtils.asProperties(
             "log.file", crfTrainingWorkingDir + "/german-crf.results"));
     // delete the model if present
-    File originalModelFile = new File(crfTrainingWorkingDir, "german.distsim.crf.ser.gz");
+    File originalModelFile = new File(crfTrainingWorkingDir, "german.hgc_175m_600.crf.ser.gz");
     originalModelFile.delete();
     // train the new model
     CRFClassifier.main(new String[] {
-            "-props", "edu/stanford/nlp/models/ner/german.distsim.prop",
-            "-serializeTo", crfTrainingWorkingDir+"/german.distsim.crf.ser.gz"
+            "-props", "edu/stanford/nlp/models/ner/german-2018.hgc_175m_600.prop",
+            "-serializeTo", crfTrainingWorkingDir+"/german.hgc_175m_600.crf.ser.gz"
     });
     List<String> germanTrainingResults = IOUtils.linesFromFile(crfTrainingWorkingDir + "/german-crf.results");
     String lastLineOfResults = germanTrainingResults.get(germanTrainingResults.size() - 1);

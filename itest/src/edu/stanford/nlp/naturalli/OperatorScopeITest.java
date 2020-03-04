@@ -4,7 +4,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-//import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.StringUtils;
 import org.junit.*;
 
@@ -39,7 +38,6 @@ public class OperatorScopeITest {
   private Optional<OperatorSpec>[] annotate(String text) {
     Annotation ann = new Annotation(text);
     pipeline.annotate(ann);
-    //System.out.println(ann.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(TreeCoreAnnotations.TreeAnnotation.class));
     List<CoreLabel> tokens = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(CoreAnnotations.TokensAnnotation.class);
     Optional<OperatorSpec>[] scopes = new Optional[tokens.size()];
     Arrays.fill(scopes, Optional.empty());
@@ -322,7 +320,7 @@ public class OperatorScopeITest {
     checkScope("{ Every } [ customer who owns a computer ] [ has a service contract for it ]");
     checkScope("{ Every } [ department ] [ rents a line from BT ]");
     checkScope("{ Every } [ executive who had a laptop computer ] [ brought it to take notes at the meeting ]");
-    checkScope("{ Every } [ four - legged mammal ] [ is a four - legged animal ]");
+    checkScope("{ Every } [ four-legged mammal ] [ is a four-legged animal ]");
     checkScope("{ Every } [ individual who has the right to live anywhere in Europe ] [ can travel freely within Europe ]");
     checkScope("{ Every } [ individual who has the right to live in Europe ] [ can travel freely within Europe ]");
     checkScope("{ Every } [ inhabitant of Cambridge ] [ voted for a Labour MP ]");
@@ -420,21 +418,21 @@ public class OperatorScopeITest {
   public void fracasSentencesWithThe() {
     checkScope("{ The } [ Ancient Greeks ] [ were all noted philosophers ]");
     checkScope("{ The } [ Ancient Greeks ] [ were noted philosophers ]");
-    checkScope("{ The } [ ITEL - XZ ] [ is fast ]");
-    checkScope("{ The } [ ITEL - ZX ] [ is an ITEL computer ]");
-    checkScope("{ The } [ ITEL - ZX ] [ is slower than 500 MIPS ]");
-    checkScope("{ The } [ PC - 6082 ] [ is as fast as the ITEL-XZ ]");
-    checkScope("{ The } [ PC - 6082 ] [ is fast ]");
-    checkScope("{ The } [ PC - 6082 ] [ is faster than 500 MIPS ]");
-    checkScope("{ The } [ PC - 6082 ] [ is faster than any ITEL computer ]");
-    checkScope("{ The } [ PC - 6082 ] [ is faster than every ITEL computer ]");
-    checkScope("{ The } [ PC - 6082 ] [ is faster than some ITEL computer ]");
-    checkScope("{ The } [ PC - 6082 ] [ is faster than the ITEL - XZ ]");
-    checkScope("{ The } [ PC - 6082 ] [ is faster than the ITEL - ZX ]");
-    checkScope("{ The } [ PC - 6082 ] [ is faster than the ITEL - ZX and the ITEL - ZY ]");
-    checkScope("{ The } [ PC - 6082 ] [ is faster than the ITEL - ZX or the ITEL - ZY ]");
-    checkScope("{ The } [ PC - 6082 ] [ is slow ]");
-    checkScope("{ The } [ PC - 6082 ] [ is slower than the ITEL - XZ ]");
+    checkScope("{ The } [ ITEL-XZ ] [ is fast ]");
+    checkScope("{ The } [ ITEL-ZX ] [ is an ITEL computer ]");
+    checkScope("{ The } [ ITEL-ZX ] [ is slower than 500 MIPS ]");
+    checkScope("{ The } [ PC-6082 ] [ is as fast as the ITEL-XZ ]");
+    checkScope("{ The } [ PC-6082 ] [ is fast ]");
+    checkScope("{ The } [ PC-6082 ] [ is faster than 500 MIPS ]");
+    checkScope("{ The } [ PC-6082 ] [ is faster than any ITEL computer ]");
+    checkScope("{ The } [ PC-6082 ] [ is faster than every ITEL computer ]");
+    checkScope("{ The } [ PC-6082 ] [ is faster than some ITEL computer ]");
+    checkScope("{ The } [ PC-6082 ] [ is faster than the ITEL-XZ ]");
+    checkScope("{ The } [ PC-6082 ] [ is faster than the ITEL-ZX ]");
+    checkScope("{ The } [ PC-6082 ] [ is faster than the ITEL-ZX and the ITEL-ZY ]");
+    checkScope("{ The } [ PC-6082 ] [ is faster than the ITEL-ZX or the ITEL-ZY ]");
+    checkScope("{ The } [ PC-6082 ] [ is slow ]");
+    checkScope("{ The } [ PC-6082 ] [ is slower than the ITEL-XZ ]");
     checkScope("{ The } [ chairman of the department ] [ is a person ]");
     checkScope("{ The } [ chairman ] [ read out every item on the agenda ]");
     checkScope("{ The } [ chairman ] [ read out the items on the agenda ]");
@@ -492,8 +490,7 @@ public class OperatorScopeITest {
     checkScope("[ { APCOM } ] [ has been paying mortgage interest for a total of 15 years or more ]");
     checkScope("[ { APCOM } ] [ lost some orders ]");
     checkScope("[ { APCOM } ] [ lost ten orders ]");
-    checkScope("[ { APCOM } ] [ signed the contract ]");
-    checkScope("[ { APCOM } ] [ signed the contract ] Friday");
+    checkScope("[ { APCOM } ] [ signed the contract Friday , 13th ]");
     checkScope("[ { APCOM } ] [ sold exactly 2500 computers ]");
     checkScope("[ { APCOM } ] [ won some orders ]");
     checkScope("[ { APCOM } ] [ won ten orders ]");
@@ -525,11 +522,11 @@ public class OperatorScopeITest {
     checkScope("[ { Bill } ] [ will speak to Mary ]");
     checkScope("[ { Bill } ] [ wrote a report ]");
 
-    checkScope("[ { Dumbo } ] [ is a four - legged animal ]");
+    checkScope("[ { Dumbo } ] [ is a four-legged animal ]");
     checkScope("[ { Dumbo } ] [ is a large animal ]");
     checkScope("[ { Dumbo } ] [ is a small animal ]");
     checkScope("[ { Dumbo } ] [ is a small elephant ]");
-    checkScope("[ { Dumbo } ] [ is four - legged ]");
+    checkScope("[ { Dumbo } ] [ is four-legged ]");
     checkScope("[ { Dumbo } ] [ is larger than Mickey ]");
 
     checkScope("[ { GFI } ] [ owns several computers ]");
@@ -550,7 +547,7 @@ public class OperatorScopeITest {
     checkScope("[ { ITEL } ] [ has developed a new editor since 1992 ]");
     checkScope("[ { ITEL } ] [ has expanded since 1992 ]");
     checkScope("[ { ITEL } ] [ has made a loss since 1992 ]");
-    checkScope("[ { ITEL } ] [ has sent most of the reports which Smith needs ]");
+    checkScope("[ { ITEL } ] [ has sent most of the reports Smith needs ]");
     checkScope("[ { ITEL } ] [ made a loss in 1993 ]");
     checkScope("[ { ITEL } ] [ maintains all the computers that GFI owns ]");
     checkScope("[ { ITEL } ] [ maintains them ]");
@@ -607,10 +604,8 @@ public class OperatorScopeITest {
     checkScope("[ { John } ] [ said Bill had been hurt ]");
     checkScope("[ { John } ] [ said Bill had hurt himself ]");
     checkScope("[ { John } ] [ said Bill wrote a report ]");
-    // FIXME this should work even if the parse changed some, right?
-    //checkScope("[ { John } ] [ said Mary wrote a report , and Bill did too ]");  // interesting example
-    // TODO(gabor) fix me (bad scope)
-    //checkScope("[ { John } ] [ said that Mary wrote a report ] , and that Bill did too");
+    checkScope("[ { John } ] [ said Mary wrote a report ] , and Bill did too");  // interesting example
+//    checkScope("[ { John } ] [ said that Mary wrote a report ] , and that Bill did too");  // TODO(gabor) fix me (bad scope)
     checkScope("[ { John } ] [ spoke to Mary ]");
     checkScope("[ { John } ] [ spoke to Mary at four o'clock ]");
     checkScope("[ { John } ] [ spoke to Mary on Friday ]");
@@ -623,11 +618,9 @@ public class OperatorScopeITest {
     checkScope("[ { John } ] [ wants to know how many women work part time ]");
     checkScope("[ { John } ] [ wants to know which men work part time ]");
     checkScope("[ { John } ] [ went to Paris by car ]");
-    // FIXME should this encompass "and Bill by train"?
-    // checkScope("[ { John } ] [ went to Paris by car , and Bill by train ]");
+    checkScope("[ { John } ] [ went to Paris by car , and Bill by train ]");
     checkScope("[ { John } ] [ went to Paris by car , and Bill by train to Berlin ]");
-    // FIXME should this encompass "and Bill to Berlin"?
-    // checkScope("[ { John } ] [ went to Paris by car , and Bill to Berlin ]");
+    checkScope("[ { John } ] [ went to Paris by car , and Bill to Berlin ]");
     checkScope("[ { John } ] [ wrote a report ]");
 //    checkScope("[ { John } ] [ wrote a report ] , and Bill said Peter did too ]");  // TODO(gabor) fix me
 

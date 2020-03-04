@@ -84,26 +84,6 @@ public class ProtobufAnnotationSerializerSlowITest {
         }
       }
     }
-
-    // handle issue with NumericValue and NumericCompositeValue
-    // force all values to be long
-    for (int i = 0 ; i < doc.get(CoreAnnotations.TokensAnnotation.class).size() ; i++) {
-      CoreLabel docToken = doc.get(CoreAnnotations.TokensAnnotation.class).get(i);
-      CoreLabel readDocToken = readDoc.get(CoreAnnotations.TokensAnnotation.class).get(i);
-      if (docToken.containsKey(CoreAnnotations.NumericValueAnnotation.class)) {
-        long docLongValue = docToken.get(CoreAnnotations.NumericValueAnnotation.class).longValue();
-        docToken.set(CoreAnnotations.NumericValueAnnotation.class, docLongValue);
-        long readDocLongValue = readDocToken.get(CoreAnnotations.NumericValueAnnotation.class).longValue();
-        readDocToken.set(CoreAnnotations.NumericValueAnnotation.class, readDocLongValue);
-      }
-      if (docToken.containsKey(CoreAnnotations.NumericCompositeValueAnnotation.class)) {
-        long docLongValue = docToken.get(CoreAnnotations.NumericCompositeValueAnnotation.class).longValue();
-        docToken.set(CoreAnnotations.NumericCompositeValueAnnotation.class, docLongValue);
-        long readDocLongValue = readDocToken.get(CoreAnnotations.NumericCompositeValueAnnotation.class).longValue();
-        readDocToken.set(CoreAnnotations.NumericCompositeValueAnnotation.class, readDocLongValue);
-      }
-    }
-
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (int i = 0; i < doc.get(CoreAnnotations.SentencesAnnotation.class).size(); ++i) {
         // Set docid and sentence index
@@ -472,10 +452,6 @@ public class ProtobufAnnotationSerializerSlowITest {
     testAnnotators("tokenize,ssplit,pos,lemma,ner,entitymentions,gender");
   }
 
-  @Test
-  public void testCodePoint() {
-    testAnnotators("tokenize,codepoint");
-  }
 
   @Test
   public void testDocDate() {

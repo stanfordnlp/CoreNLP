@@ -25,8 +25,6 @@ public abstract class CollectionFactory<T> implements Serializable {
 
   public abstract Collection<T> newEmptyCollection();
 
-  public abstract Collection<T> newSingletonCollection(T t);
-
 
   /** Return a factory for making ArrayList Collections.
    *  This method allows type safety in calling code.
@@ -65,11 +63,6 @@ public abstract class CollectionFactory<T> implements Serializable {
     public Collection<T> newEmptyCollection() {
       return Collections.emptyList();
     }
-
-    @Override
-    public Collection<T> newSingletonCollection(T t) {
-      return Collections.singletonList(t);
-    }
   }
 
   public static class SizedArrayListFactory<T> extends CollectionFactory<T> {
@@ -90,11 +83,6 @@ public abstract class CollectionFactory<T> implements Serializable {
     public Collection<T> newEmptyCollection() {
       return Collections.emptyList();
     }
-
-    @Override
-    public Collection<T> newSingletonCollection(T t) {
-      return Collections.singletonList(t);
-    }
   }
 
   public static class LinkedListFactory<T> extends CollectionFactory<T> {
@@ -108,11 +96,6 @@ public abstract class CollectionFactory<T> implements Serializable {
     @Override
     public Collection<T> newEmptyCollection() {
       return Collections.emptyList();
-    }
-
-    @Override
-    public Collection<T> newSingletonCollection(T t) {
-      return Collections.singletonList(t);
     }
   }
 
@@ -129,11 +112,6 @@ public abstract class CollectionFactory<T> implements Serializable {
     public Collection<T> newEmptyCollection() {
       return Collections.emptySet();
     }
-
-    @Override
-    public Collection<T> newSingletonCollection(T t) {
-      return Collections.singleton(t);
-    }
   }
 
   public static class TreeSetFactory<T> extends CollectionFactory<T> {
@@ -147,11 +125,6 @@ public abstract class CollectionFactory<T> implements Serializable {
     @Override
     public Collection<T> newEmptyCollection() {
       return Collections.emptySet();
-    }
-
-    @Override
-    public Collection<T> newSingletonCollection(T t) {
-      return Collections.singleton(t);
     }
   }
 

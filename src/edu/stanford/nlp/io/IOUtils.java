@@ -1594,7 +1594,7 @@ public class IOUtils  {
    * @throws IOException
    */
   public static Set<String> readColumnSet(String infile, int field) throws IOException {
-    BufferedReader br = IOUtils.readerFromString(infile);
+    BufferedReader br = IOUtils.getBufferedFileReader(infile);
 
     Set<String> set = Generics.newHashSet();
     for (String line; (line = br.readLine()) != null; ) {
@@ -1620,7 +1620,7 @@ public class IOUtils  {
   {
     Pattern delimiterPattern = Pattern.compile(delimiter);
     List<C> list = new ArrayList<>();
-    BufferedReader br = IOUtils.readerFromString(filename);
+    BufferedReader br = IOUtils.getBufferedFileReader(filename);
     for (String line; (line = br.readLine()) != null; ) {
       line = line.trim();
       if (line.length() > 0) {
@@ -1635,7 +1635,7 @@ public class IOUtils  {
   public static Map<String,String> readMap(String filename) throws IOException {
     Map<String,String> map = Generics.newHashMap();
     try {
-      BufferedReader br = IOUtils.readerFromString(filename);
+      BufferedReader br = IOUtils.getBufferedFileReader(filename);
 
       for (String line; (line = br.readLine()) != null; ) {
         String[] fields = tab.split(line,2);

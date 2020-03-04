@@ -287,8 +287,10 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
     ClassicCounter<Integer> c = new ClassicCounter<>();
     for (Tree gold : tb) {
       StringBuilder goldChars = new StringBuilder();
-      for (Label aGoldYield : gold.yield()) {
-        goldChars.append(aGoldYield);
+      ArrayList goldYield = gold.yield();
+      for (Object aGoldYield : goldYield) {
+        Word word = (Word) aGoldYield;
+        goldChars.append(word);
       }
       List<HasWord> ourWords = segment(goldChars.toString());
       for (HasWord ourWord : ourWords) {

@@ -103,7 +103,6 @@ public class TextOutputter extends AnnotationOutputter {
         String[] tokenAnnotations = {
                 "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag",
                 "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag",
-                "CodepointOffsetBegin", "CodepointOffsetEnd",
                 "Timex", "TrueCase", "TrueCaseText", "SentimentClass", "WikipediaEntity" };
 
         pw.println();
@@ -224,16 +223,7 @@ public class TextOutputter extends AnnotationOutputter {
       for (CoreLabel token : tokens) {
         int tokenCharBegin = token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
         int tokenCharEnd = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-        String extra = "";
-        Integer codepoint = token.get(CoreAnnotations.CodepointOffsetBeginAnnotation.class);
-        if (codepoint != null) {
-          extra = extra + " CodepointOffsetBegin=" + codepoint;
-        }
-        codepoint = token.get(CoreAnnotations.CodepointOffsetEndAnnotation.class);
-        if (codepoint != null) {
-          extra = extra + " CodepointOffsetEnd=" + codepoint;
-        }
-        pw.println("[Text="+token.word()+" CharacterOffsetBegin="+tokenCharBegin+" CharacterOffsetEnd="+tokenCharEnd+extra+']');
+        pw.println("[Text="+token.word()+" CharacterOffsetBegin="+tokenCharBegin+" CharacterOffsetEnd="+tokenCharEnd+ ']');
       }
     }
 

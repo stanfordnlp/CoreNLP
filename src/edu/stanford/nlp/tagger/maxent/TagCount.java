@@ -11,7 +11,6 @@ package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Interner;
 
 import java.io.IOException;
 import java.util.Map;
@@ -81,7 +80,7 @@ class TagCount {
   /** A TagCount object's fields are read from the file. They are read from
    *  the current position and the file is not closed afterwards.
    */
-  public static TagCount readTagCount(DataInputStream rf, Interner<String> interner) {
+  public static TagCount readTagCount(DataInputStream rf) {
     try {
       TagCount tc = new TagCount();
       int numTags = rf.readInt();
@@ -91,10 +90,7 @@ class TagCount {
 	String tag = rf.readUTF();
         int count = rf.readInt();
 
-	if (tag.equals(NULL_SYMBOL)) 
-          tag = null;
-        else
-          tag = interner.intern(tag);
+	if (tag.equals(NULL_SYMBOL)) tag = null;
 	tc.map.put(tag, count);
       }
 

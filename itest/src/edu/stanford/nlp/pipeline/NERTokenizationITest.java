@@ -47,7 +47,7 @@ public class NERTokenizationITest extends TestCase {
     List<String> docs = new ArrayList<>();
     List<List<String>> words = new ArrayList<>();
     List<List<String>> labels = new ArrayList<>();
-    List<List<CoreLabel>> goldTokens = new ArrayList<>();
+    List<List<CoreLabel>> goldTokens = new ArrayList();
     // basic example
     docs.add("Barack Obama was born in Hawaii.");
     words.add(Arrays.asList("Barack", "Obama", "was", "born", "in", "Hawaii", "."));
@@ -87,7 +87,7 @@ public class NERTokenizationITest extends TestCase {
     List<String> docs = new ArrayList<>();
     List<List<String>> words = new ArrayList<>();
     List<List<String>> labels = new ArrayList<>();
-    List<List<CoreLabel>> goldTokens = new ArrayList<>();
+    List<List<CoreLabel>> goldTokens = new ArrayList();
     // basic example
     docs.add("Barack Obama was born in Hawaii.");
     words.add(Arrays.asList("Barack", "Obama", "was", "born", "in", "Hawaii", "."));
@@ -128,7 +128,7 @@ public class NERTokenizationITest extends TestCase {
     List<String> docs = new ArrayList<>();
     List<List<String>> words = new ArrayList<>();
     List<List<String>> labels = new ArrayList<>();
-    List<List<CoreLabel>> goldTokens = new ArrayList<>();
+    List<List<CoreLabel>> goldTokens = new ArrayList();
     // basic example
     docs.add("Barack Obama was born in Hawaii.");
     words.add(Arrays.asList("Barack", "Obama", "was", "born", "in", "Hawaii", "."));
@@ -167,7 +167,7 @@ public class NERTokenizationITest extends TestCase {
     List<String> docs = new ArrayList<>();
     List<List<String>> words = new ArrayList<>();
     List<List<String>> labels = new ArrayList<>();
-    List<List<CoreLabel>> goldTokens = new ArrayList<>();
+    List<List<CoreLabel>> goldTokens = new ArrayList();
     // basic example with "-"
     docs.add("She traveled to Port-au-Prince over the summer with Jane Smith.");
     words.add(Arrays.asList("She", "traveled", "to", "Port", "-", "au", "-", "Prince", "over", "the", "summer", "with",
@@ -198,7 +198,7 @@ public class NERTokenizationITest extends TestCase {
     List<String> docs = new ArrayList<>();
     List<List<String>> words = new ArrayList<>();
     List<List<String>> labels = new ArrayList<>();
-    List<List<CoreLabel>> goldTokens = new ArrayList<>();
+    List<List<CoreLabel>> goldTokens = new ArrayList();
     // basic example with "-"
     docs.add("Die Microsoft-Aktie sank daraufhin an der Wall Street um über vier Dollar auf 89,87 Dollar.");
     words.add(Arrays.asList("Die", "Microsoft", "-", "Aktie", "sank", "daraufhin", "an", "der", "Wall", "Street",

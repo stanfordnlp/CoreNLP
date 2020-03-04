@@ -76,31 +76,20 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    */
   public void add(K key, V value) {
     if (treatCollectionsAsImmutable) {
-      final Collection<V> newC;
+      Collection<V> newC = cf.newCollection();
       Collection<V> c = map.get(key);
-      if (c != null && c.size() > 0) {
-        newC = cf.newCollection();
+      if (c != null) {
         newC.addAll(c);
-        newC.add(value);
-      } else {
-        newC = cf.newSingletonCollection(value);
       }
+      newC.add(value);
       map.put(key, newC); // replacing the old collection
     } else {
       Collection<V> c = map.get(key);
       if (c == null) {
-        c = cf.newSingletonCollection(value);
+        c = cf.newCollection();
         map.put(key, c);
-      } else if (c.size() == 1) {
-        // old collection is a singleton, so needs to be re-created
-        Collection<V> newC = cf.newCollection();
-        newC.add(c.iterator().next());
-        newC.add(value);
-        map.put(key, newC);
-      } else {
-        // modifying the old collection
-        c.add(value);
       }
+      c.add(value); // modifying the old collection
     }
   }
 
@@ -108,13 +97,6 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    * Adds the values to the Collection mapped to by the key.
    */
   public void addAll(K key, Collection<V> values) {
-    if (values.size() == 0) {
-      return;
-    }
-    if (values.size() == 1) {
-      add(key, values.iterator().next());
-      return;
-    }
     if (treatCollectionsAsImmutable) {
       Collection<V> newC = cf.newCollection();
       Collection<V> c = map.get(key);
@@ -157,7 +139,27 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   public void addAll(CollectionValuedMap<K, V> cvm) {
     for (Entry<K, Collection<V>> entry : cvm.entrySet()) {
-      addAll(entry.getKey(), entry.getValue());
+      K key = entry.getKey();
+      Collection<V> currentCollection = get(key);
+      Collection<V> newValues = entry.getValue();
+      if (treatCollectionsAsImmutable) {
+        Collection<V> newCollection = cf.newCollection();
+        if (currentCollection != null) {
+          newCollection.addAll(currentCollection);
+        }
+        newCollection.addAll(newValues);
+        map.put(key, newCollection); // replacing the old collection
+      } else {
+        boolean needToAdd = false;
+        if (currentCollection == emptyValue) {
+          currentCollection = cf.newCollection();
+          needToAdd = true;
+        }
+        currentCollection.addAll(newValues); // modifying the old collection
+        if (needToAdd) {
+          map.put(key, currentCollection);
+        }
+      }
     }
   }
 

@@ -155,7 +155,7 @@ public class CharniakScoredParsesReaderWriter {
     int lastSentenceId = -1;
 
     private ScoredParsesIterator(String filename) throws IOException {
-      this(filename, IOUtils.readerFromString(filename));
+      this(filename, IOUtils.getBufferedFileReader(filename));
     }
 
 
