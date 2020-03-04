@@ -51,11 +51,15 @@ public class TreePrintTest extends TestCase {
       "          (VP (TO to)\n" +
       "            (VP (VB be)\n" +
       "              (VP (VBG vomiting)))))))))\n\n";
+    expected = expected.replace("\n", System.lineSeparator());
+
     String out = printTree(test, "penn");
     assertEquals(expected, out);
 
     test = Tree.valueOf("(-LRB- -RRB-)");
     expected = "(-LRB- -RRB-)\n\n";
+    expected = expected.replace("\n", System.lineSeparator());
+
     out = printTree(test, "penn");
     assertEquals(expected, out);
   }
