@@ -1,17 +1,22 @@
 package edu.stanford.nlp.io;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
+
+import org.junit.Test;
 
 import junit.framework.TestCase;
 
 /**
  * @author Christopher Manning
  */
-public class IOUtilsITest extends TestCase {
+public class IOUtilsITest {
 
   /**
    * Tests that slurpFile can get files from within the classpath
    */
+  @Test
   public void testSlurpFile() {
     String contents;
     try {

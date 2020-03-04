@@ -4,15 +4,16 @@ import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.util.StringUtils;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.*;
-import junit.framework.TestCase;
 import org.junit.Test;
 
 /** The purpose of this test is to check all flavors of coreference work
  *  when integrated with the CorefAnnotator.
  */
 
-public class CorefAnnotatorSanityITest extends TestCase {
+public class CorefAnnotatorSanityITest {
 
   public StanfordCoreNLP pipeline;
 

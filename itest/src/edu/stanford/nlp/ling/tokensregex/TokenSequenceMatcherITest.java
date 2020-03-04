@@ -1,29 +1,41 @@
 package edu.stanford.nlp.ling.tokensregex;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.*;
-import edu.stanford.nlp.process.CoreLabelTokenFactory;
-import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.Timing;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Timer;
 import java.util.regex.Pattern;
 
-public class TokenSequenceMatcherITest extends TestCase {
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.AnnotationPipeline;
+import edu.stanford.nlp.pipeline.NumberAnnotator;
+import edu.stanford.nlp.pipeline.POSTaggerAnnotator;
+import edu.stanford.nlp.pipeline.TokenizerAnnotator;
+import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Timing;
+
+public class TokenSequenceMatcherITest {
 
   private static AnnotationPipeline pipeline = null;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     synchronized(TokenSequenceMatcherITest.class) {
       if (pipeline == null) {
@@ -68,6 +80,8 @@ public class TokenSequenceMatcherITest extends TestCase {
   }
 
   private static final String testText = "the number were one, two and fifty.";
+
+  @Test
   public void testTokenSequenceMatcherValue() throws IOException {
     CoreMap doc = createDocument(testText);
 
@@ -95,6 +109,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherBeginEnd() throws IOException {
     CoreMap doc = createDocument(testText);
 
@@ -140,6 +155,8 @@ public class TokenSequenceMatcherITest extends TestCase {
   }
 
   private static final String testText1 = "Mellitus was the first Bishop of London, the third Archbishop of Canterbury, and a member of the Gregorian mission  sent to England to convert the Anglo-Saxons. He arrived in 601 AD, and was consecrated as Bishop of London in 604.";
+
+  @Test
   public void testTokenSequenceMatcher1() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -229,6 +246,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcher2() throws IOException {
     CoreMap doc = createDocument(testText1);
     TokenSequencePattern p = TokenSequencePattern.compile(
@@ -293,6 +311,7 @@ public class TokenSequenceMatcherITest extends TestCase {
 
   }
 
+  @Test
   public void testTokenSequenceMatcher3() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -374,6 +393,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherConj() throws IOException {
     CoreMap doc = createDocument(testText1);
     TokenSequencePattern p = TokenSequencePattern.compile(
@@ -480,6 +500,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherConj2() throws IOException {
     String content = "The cat is sleeping on the floor.";
     String greedyPattern = "(?: ([]* cat []*) & ([]* sleeping []*))";
@@ -505,6 +526,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("The cat is sleeping", matcher2.group());
   }
 
+  @Test
   public void testTokenSequenceMatcherConjAll() throws IOException {
     CoreMap doc = createDocument(testText1);
     TokenSequencePattern p = TokenSequencePattern.compile(
@@ -560,6 +582,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherAll() throws IOException {
     CoreMap doc = createDocument(testText1);
     TokenSequencePattern p = TokenSequencePattern.compile(
@@ -658,6 +681,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherAll2() throws IOException {
     String text = "DATE1 PROD1 PRICE1 PROD2 PRICE2 PROD3 PRICE3 DATE2 PROD4 PRICE4 PROD5 PRICE5 PROD6 PRICE6";
     CoreMap doc = createDocument(text);
@@ -707,6 +731,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherNonOverlapping() throws IOException {
     String text = "DATE1 PROD1 PRICE1 PROD2 PRICE2 PROD3 PRICE3 DATE2 PROD4 PRICE4 PROD5 PRICE5 PROD6 PRICE6";
     CoreMap doc = createDocument(text);
@@ -730,6 +755,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcher4() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -775,6 +801,7 @@ public class TokenSequenceMatcherITest extends TestCase {
 
   }
 
+  @Test
   public void testTokenSequenceMatcher5() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -834,6 +861,7 @@ public class TokenSequenceMatcherITest extends TestCase {
 
   }
 
+  @Test
   public void testTokenSequenceMatcher6() throws IOException {
     CoreMap doc = createDocument(testText1);
     TokenSequencePattern p = TokenSequencePattern.compile("[ /.*/ ] [ /.*/ ] [/of/] [/.*/]");
@@ -888,6 +916,7 @@ public class TokenSequenceMatcherITest extends TestCase {
 
   }
 
+  @Test
   public void testTokenSequenceMatcher7() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -952,6 +981,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcher8() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -986,6 +1016,7 @@ public class TokenSequenceMatcherITest extends TestCase {
 
   }
 
+  @Test
   public void testTokenSequenceMatcher9() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -1017,6 +1048,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals(6, m.end("$contextnext"));
   }
 
+  @Test
   public void testTokenSequenceMatcher10() throws IOException {
     CoreMap doc = createDocument("the number is five or 5 or 5.0 or but not 5x or -5 or 5L.");
 
@@ -1058,6 +1090,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceOptimizeOrString() throws IOException {
     CoreMap doc = createDocument("atropine we need to have many many words here but we don't sweating");
 
@@ -1089,6 +1122,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     timing.stop("testTokenSequenceOptimizeOrString no match");
   }
 
+  @Test
   public void testMultiplePatterns() throws IOException {
     TokenSequencePattern p1 = TokenSequencePattern.compile("(?$dt \"atropine\") []{0,15} " +
         "(?$se  \"social\" \"avoidant\" \"behaviour\"|\"dysuria\"|\"hyperglycaemia\"| \"mental\" \"disorder\"|\"vertigo\"|\"flutter\"| \"chest\" \"pain\"| \"elevated\" \"blood\" \"pressure\"|\"mania\"| \"rash\" \"erythematous\"|\"manic\"| \"papular\" \"rash\"|\"death\"| \"atrial\" \"arrhythmia\"| \"dry\" \"eyes\"| \"loss\" \"of\" \"libido\"| \"rash\" \"papular\"|\"hypersensitivity\"| \"blood\" \"pressure\" \"increased\"|\"dyspepsia\"| \"accommodation\" \"disorder\"| \"reflexes\" \"increased\"|\"lesions\"|\"asthenia\"| \"gastrointestinal\" \"pain\"|\"excitement\"| \"breast\" \"feeding\"|\"hypokalaemia\"| \"cerebellar\" \"syndrome\"|\"nervousness\"| \"pulmonary\" \"oedema\"| \"inspiratory\" \"stridor\"| \"taste\" \"altered\"|\"paranoia\"| \"psychotic\" \"disorder\"| \"open\" \"angle\" \"glaucoma\"|\"photophobia\"| \"dry\" \"eye\"|\"osteoarthritis\"| \"keratoconjunctivitis\" \"sicca\"| \"haemoglobin\" \"increased\"| \"ventricular\" \"extrasystoles\"|\"hallucinations\"|\"conjunctivitis\"|\"paralysis\"| \"qrs\" \"complex\"|\"anxiety\"| \"conjunctival\" \"disorder\"|\"coma\"|\"strabismus\"|\"thirst\"|\"para\"| \"sicca\" \"syndrome\"| \"atrioventricular\" \"dissociation\"|\"desquamation\"|\"crusting\"| \"abdominal\" \"distension\"|\"blindness\"|\"hypotension\"|\"dermatitis\"| \"sinus\" \"tachycardia\"| \"abdominal\" \"distention\"| \"lacrimation\" \"decreased\"|\"sicca\"| \"paralytic\" \"ileus\"| \"urinary\" \"hesitation\"|\"withdrawn\"| \"erectile\" \"dysfunction\"|\"keratoconjunctivitis\"|\"anaphylaxis\"| \"psychiatric\" \"disorders\"| \"altered\" \"taste\"|\"somnolence\"|\"extrasystoles\"|\"ageusia\"| \"intraocular\" \"pressure\" \"increased\"| \"left\" \"ventricular\" \"failure\"|\"impotence\"|\"drowsiness\"|\"conjunctiva\"| \"delayed\" \"gastric\" \"emptying\"| \"gastrointestinal\" \"sounds\" \"abnormal\"| \"qt\" \"prolonged\"| \"supraventricular\" \"tachycardia\"|\"weakness\"|\"hypertonia\"| \"confusional\" \"state\"|\"anhidrosis\"|\"myopia\"|\"dyspnoea\"| \"speech\" \"impairment\" \"nos\"| \"rash\" \"maculo\" \"papular\"|\"petechiae\"|\"tachypnea\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"gastrooesophageal\" \"reflux\" \"disease\"|\"hypokalemia\"| \"left\" \"heart\" \"failure\"| \"myocardial\" \"infarction\"| \"site\" \"reaction\"| \"ventricular\" \"fibrillation\"|\"fibrillation\"| \"maculopapular\" \"rash\"| \"impaired\" \"gastric\" \"emptying\"|\"amnesia\"| \"labored\" \"respirations\"| \"decreased\" \"lacrimation\"|\"mydriasis\"|\"headache\"| \"dry\" \"mouth\"|\"scab\"| \"cardiac\" \"syncope\"| \"visual\" \"acuity\" \"reduced\"|\"tension\"| \"blurred\" \"vision\"| \"bloated\" \"feeling\"| \"labored\" \"breathing\"| \"stridor\" \"inspiratory\"| \"skin\" \"exfoliation\"| \"memory\" \"loss\"|\"syncope\"| \"rash\" \"scarlatiniform\"|\"hyperpyrexia\"| \"cardiac\" \"flutter\"|\"heartburn\"| \"bowel\" \"sounds\" \"decreased\"|\"blepharitis\"|\"tachycardia\"| \"excessive\" \"thirst\"|\"confusion\"| \"rash\" \"macular\"| \"taste\" \"loss\"| \"respiratory\" \"failure\"|\"hesitancy\"|\"dysmetria\"|\"disorientation\"| \"decreased\" \"hemoglobin\"| \"atrial\" \"fibrillation\"| \"urinary\" \"retention\"| \"dry\" \"skin\"|\"dehydration\"|\"hyponatraemia\"|\"dysgeusia\"|\"disorder\"| \"increased\" \"intraocular\" \"pressure\"| \"speech\" \"disorder\"| \"feeling\" \"abnormal\"|\"pain\"| \"anaphylactic\" \"shock\"|\"hallucination\"| \"abdominal\" \"pain\"| \"junctional\" \"tachycardia\"| \"bun\" \"increased\"| \"ventricular\" \"flutter\"| \"scarlatiniform\" \"rash\"|\"agitation\"| \"feeling\" \"hot\"|\"hyponatremia\"| \"decreased\" \"bowel\" \"sounds\"|\"cyanosis\"|\"dysarthria\"| \"heat\" \"intolerance\"|\"hyperglycemia\"|\"reflux\"| \"angle\" \"closure\" \"glaucoma\"| \"electrocardiogram\" \"qt\" \"prolonged\"| \"vision\" \"blurred\"| \"blood\" \"urea\" \"increased\"|\"dizziness\"|\"arrhythmia\"|\"erythema\"|\"vomiting\"| \"difficulty\" \"in\" \"micturition\"|\"infarction\"|\"laryngospasm\"|\"hypoglycaemia\"|\"hypoglycemia\"| \"elevated\" \"hemoglobin\"| \"skin\" \"warm\"| \"ventricular\" \"arrhythmia\"|\"dissociation\"| \"warm\" \"skin\"| \"follicular\" \"conjunctivitis\"|\"urticaria\"|\"fatigue\"| \"cardiac\" \"fibrillation\"| \"decreased\" \"sweating\"| \"decreased\" \"visual\" \"acuity\"|\"lethargy\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"nodal\" \"rhythm\"|\"borborygmi\"|\"hyperreflexia\"| \"respiratory\" \"depression\"|\"diarrhea\"|\"leukocytosis\"| \"speech\" \"disturbance\"|\"ataxia\"|\"cycloplegia\"|\"tachypnoea\"|\"eczema\"| \"supraventricular\" \"extrasystoles\"|\"ileus\"| \"cardiac\" \"arrest\"| \"ventricular\" \"tachycardia\"|\"laryngitis\"|\"delirium\"|\"lactation\"|\"glaucoma\"|\"obstruction\"|\"hypohidrosis\"|\"parity\"|\"palpitations\"| \"temperature\" \"intolerance\"|\"constipation\"|\"cyclophoria\"| \"acute\" \"coronary\" \"syndrome\"| \"arrhythmia\" \"supraventricular\"|\"arrest\"|\"lesion\"|\"nausea\"| \"sweating\" \"decreased\"|\"keratitis\"|\"dyskinesia\"| \"pulmonary\" \"function\" \"test\" \"decreased\"|\"stridor\"|\"swelling\"|\"dysphagia\"| \"haemoglobin\" \"decreased\"|\"diarrhoea\"| \"ileus\" \"paralytic\"|\"clonus\"|\"insomnia\"| \"electrocardiogram\" \"qrs\" \"complex\"| \"nasal\" \"congestion\"| \"nasal\" \"dryness\"|\"sweating\"|\"rash\"| \"nodal\" \"arrhythmia\"|\"irritability\"|\"hyperhidrosis\"| \"ventricular\" \"failure\")");
@@ -1108,6 +1142,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(expectedIter.hasNext());
   }
 
+  @Test
   public void testTokenSequenceMatcherPosNNP() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -1187,6 +1222,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("London", m.group(3));
   }
 
+  @Test
   public void testTokenSequenceMatcherNumber() throws IOException {
     CoreMap doc = createDocument("It happened on January 3, 2002");
 
@@ -1311,6 +1347,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherNested() throws IOException {
     CoreMap doc = createDocument("A A A B B B B B B C C");
 
@@ -1326,6 +1363,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherAAs() throws IOException {
     StringBuilder s = new StringBuilder();
  //   Timing timing = new Timing();
@@ -1342,7 +1380,9 @@ public class TokenSequenceMatcherITest extends TestCase {
     }
   }
 
-  public void _testTokenSequenceFindsWildcard() throws IOException {
+  @Test
+  @Ignore
+  public void testTokenSequenceFindsWildcard() throws IOException {
     CoreMap doc = createDocument("word1 word2");
 
     // Test sequence with groups
@@ -1376,6 +1416,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatchesWildcard() throws IOException {
     CoreMap doc = createDocument("word1 word2");
 
@@ -1398,6 +1439,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertTrue(matches);
   }
 
+  @Test
   public void testTokenSequenceMatcherABs() throws IOException {
     CoreMap doc = createDocument("A A A A A A A B A A B A C A E A A A A A A A A A A A B A A A");
 
@@ -1488,6 +1530,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherMultiNodePattern() throws IOException {
     CoreMap doc = createDocument("blah four-years blah blah four - years");
 
@@ -1568,6 +1611,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherMultiNodePattern2() throws IOException {
     CoreMap doc = createDocument("Replace the lamp with model wss.32dc55c3e945384dbc5e533ab711fd24");
 
@@ -1594,6 +1638,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  @Test
   public void testTokenSequenceMatcherBackRef() throws IOException {
     CoreMap doc = createDocument("A A A A A A A B A A B A C A E A A A A A A A A A A A B A A A");
 
@@ -1613,6 +1658,7 @@ public class TokenSequenceMatcherITest extends TestCase {
 
   }
 
+  @Test
   public void testMultiPatternMatcher() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -1629,6 +1675,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("as Bishop of London in", matched.get(3).group());
   }
 
+  @Test
   public void testStringPatternMatchCaseInsensitive() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -1648,6 +1695,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(m.find());
   }
 
+  @Test
   public void testStringMatchCaseInsensitive() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -1668,6 +1716,7 @@ public class TokenSequenceMatcherITest extends TestCase {
   }
 
   //just to test if a pattern is compiling or not
+  @Test
   public void testCompile() {
     String s = "(?$se \"matching\" \"this\"|\"don't\")";
     CoreMap doc = createDocument("does this do matching this");
@@ -1678,6 +1727,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     //assertEquals(m.group(), "matching this");
   }
 
+  @Test
   public void testBindingCompile(){
     Env env = TokenSequencePattern.getNewEnv();
     env.bind("wordname",CoreAnnotations.TextAnnotation.class);
@@ -1686,12 +1736,14 @@ public class TokenSequenceMatcherITest extends TestCase {
   }
 
 // // This does not work!!!
+//  @Test
 //  public void testNoBindingCompile(){
 //    Env env = TokenSequencePattern.getNewEnv();
 //    String s = "[" + CoreAnnotations.TextAnnotation.class.getName()+":\"name\"]{1,2}";
 //    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
 //  }
 
+  @Test
   public void testCaseInsensitive1(){
     Env env = TokenSequencePattern.getNewEnv();
     env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
@@ -1704,6 +1756,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertTrue(match);
   }
 
+  @Test
   public void testCaseInsensitive2(){
     Env env = TokenSequencePattern.getNewEnv();
     env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);

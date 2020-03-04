@@ -1,11 +1,15 @@
 package edu.stanford.nlp.parser.lexparser;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+
+import org.junit.Test;
 
 import edu.stanford.nlp.io.IOUtils;
 import junit.framework.TestCase;
@@ -14,7 +18,7 @@ import junit.framework.TestCase;
  *
  *  @author Christopher Manning
  */
-public class LexicalizedParserCharacterEncodingITest extends TestCase {
+public class LexicalizedParserCharacterEncodingITest {
 
   private static final String input = "café";
 
@@ -31,14 +35,17 @@ public class LexicalizedParserCharacterEncodingITest extends TestCase {
   };
 
 
+  @Test
   public void testCharEncodingUtf8() throws IOException {
     tryCharEncoding("utf-8", utf8Bytes);
   }
 
+  @Test
   public void testCharEncodingIso8859() throws IOException {
     tryCharEncoding("iso-8859-1", iso8859Bytes);
   }
 
+  @Test
   public void testCharEncodingGB18030() throws IOException {
     tryCharEncoding("gb18030", gb18030Bytes);
   }

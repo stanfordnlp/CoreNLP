@@ -4,15 +4,19 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.util.Pair;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.*;
-import junit.framework.TestCase;
 
+import org.junit.Test;
 
-public class CoreWrapperITest extends TestCase {
+public class CoreWrapperITest {
 
+  @Test
   public void testPipeline() throws Exception {
     // set up pipeline
     Properties props = new Properties();

@@ -1,28 +1,37 @@
 package edu.stanford.nlp.ie;
 
-import junit.framework.TestCase;
-import java.io.*;
-import java.lang.ProcessBuilder;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import static org.junit.Assert.assertEquals;
 
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ie.NERClassifierCombiner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.AnnotationPipeline;
+import edu.stanford.nlp.pipeline.DefaultPaths;
+import edu.stanford.nlp.pipeline.NERCombinerAnnotator;
+import edu.stanford.nlp.pipeline.TokenizerAnnotator;
+import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
 import edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.logging.Redwood;
-import edu.stanford.nlp.util.CoreMap;
 
 
 /**
@@ -32,7 +41,7 @@ import edu.stanford.nlp.util.CoreMap;
  *
  * @author Mihail Eric
  */
-public class NERBenchmarkSlowITest extends TestCase{
+public class NERBenchmarkSlowITest {
     private static Redwood.RedwoodChannels log = Redwood.channels(NERBenchmarkSlowITest.class);
     // Conll paths
     private static final String CONLL_BASE_DIR = "/u/nlp/data/ner/conll/";
@@ -87,7 +96,7 @@ public class NERBenchmarkSlowITest extends TestCase{
 
     //TODO: Consider using NERFromConllAnnotator format
 
-    @Override
+    @Before
     public void setUp() throws Exception{
         if(conllNERAnnotator == null || ontoNERAnnotator == null){
             // Default properties are fine but need to provide a properties object in factory method
@@ -397,6 +406,7 @@ public class NERBenchmarkSlowITest extends TestCase{
         return parsedF1;
     }
 
+    @Test
     public void testConLLDev() {
         try{
             log.log("Evaluating on CoNLL Dev");
@@ -421,6 +431,7 @@ public class NERBenchmarkSlowITest extends TestCase{
         }
     }
 
+    @Test
     public void testConLLTest() {
         try{
             log.log("Evaluating on CoNLL Test");
@@ -445,6 +456,7 @@ public class NERBenchmarkSlowITest extends TestCase{
         }
     }
 
+    @Test
     public void testOntoDev() {
         try{
             HashMap<String, Double> parsedF1 = evalOnto("dev");
@@ -465,6 +477,7 @@ public class NERBenchmarkSlowITest extends TestCase{
         }
     }
 
+    @Test
     public void testOntoTest() {
         try{
             HashMap<String, Double> parsedF1 = evalOnto("test");

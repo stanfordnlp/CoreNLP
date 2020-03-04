@@ -1,5 +1,7 @@
 package edu.stanford.nlp.dcoref;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,12 +12,12 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import edu.stanford.nlp.util.StringUtils;
 
 
-public class DcorefSlowITest extends TestCase {
+public class DcorefSlowITest {
 
   protected void makePropsFile(String path, String workDir, String scorer) throws IOException {
     PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(path)));
@@ -34,12 +36,14 @@ public class DcorefSlowITest extends TestCase {
     pw.close();
   }
 
+  @Test
   public void testDcorefCoNLLResultV4() throws Exception {
     double finalScore = runDcoref("/u/scr/nlp/data/conll-2011/scorer/v4/scorer.pl");
     System.out.printf("Final Score (CoNLL 2011, scorer v4): (MUC+B^3+ceafe)/3 = %.2f%n", finalScore);
     assertEquals(59.3, finalScore, 0.3); // 2016-07: 59.45
   }
 
+  @Test
   public void testDcorefCoNLLResultV801() throws Exception {
     double finalScore = runDcoref("/u/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl");
     System.out.printf("Final Score (CoNLL 2011, scorer v8): (MUC+B^3+ceafe)/3 = %.2f%n", finalScore);

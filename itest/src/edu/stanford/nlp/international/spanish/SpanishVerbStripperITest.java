@@ -1,17 +1,19 @@
 package edu.stanford.nlp.international.spanish;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
-
-import edu.stanford.nlp.util.Pair;
+import org.junit.Test;
 
 /**
  * @author Jon Gauthier
  * @author Christopher Manning
  */
-public class SpanishVerbStripperITest extends TestCase {
+public class SpanishVerbStripperITest {
 
   private final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
 
@@ -53,6 +55,7 @@ public class SpanishVerbStripperITest extends TestCase {
     }
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testSeparatePronouns() {
 
@@ -91,6 +94,7 @@ public class SpanishVerbStripperITest extends TestCase {
 
   }
 
+  @Test
   public void testStripVerb() {
     assertEquals("decir", verbStripper.stripVerb("decirme"));
     assertEquals("decir", verbStripper.stripVerb("decirnos"));

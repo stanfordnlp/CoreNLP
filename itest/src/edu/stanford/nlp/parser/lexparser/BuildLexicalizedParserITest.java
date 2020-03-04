@@ -27,13 +27,15 @@
 
 package edu.stanford.nlp.parser.lexparser;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Formatter;
+
+import org.junit.Test;
 
 import edu.stanford.nlp.io.TeeStream;
 import edu.stanford.nlp.util.StringUtils;
@@ -45,7 +47,7 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author John Bauer
  */
-public class BuildLexicalizedParserITest extends TestCase {
+public class BuildLexicalizedParserITest {
 
 
   // This is the example command line run by the
@@ -227,6 +229,7 @@ public class BuildLexicalizedParserITest extends TestCase {
    * This tests that building and running a simple English parser
    * model works correctly.
    */
+  @Test
   public void testBuildEnglishParser()
     throws IOException
   {
@@ -241,6 +244,7 @@ public class BuildLexicalizedParserITest extends TestCase {
     }
   }
 
+  @Test
   public void testBuildChineseParser()
     throws IOException
   {
@@ -250,6 +254,7 @@ public class BuildLexicalizedParserITest extends TestCase {
     }
   }
 
+  @Test
   public void testBuildGermanParser()
     throws IOException
   {
@@ -259,6 +264,7 @@ public class BuildLexicalizedParserITest extends TestCase {
     }
   }
 
+  @Test
   public void testBuildFrenchParser()
     throws IOException
   {
@@ -268,6 +274,7 @@ public class BuildLexicalizedParserITest extends TestCase {
     }
   }
 
+  @Test
   public void testBuildArabicParser()
     throws IOException
   {
@@ -276,7 +283,4 @@ public class BuildLexicalizedParserITest extends TestCase {
       buildAndTest(test);
     }
   }
-
-
-
 }
