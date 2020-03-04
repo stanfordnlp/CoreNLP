@@ -103,6 +103,6 @@ public class CommandLineTokenizer {
         }
 
         String[] result = new String[resultBuffer.size()];
-        return ((String[]) resultBuffer.toArray(result));
+        return resultBuffer.toArray(result);
     }
 }
