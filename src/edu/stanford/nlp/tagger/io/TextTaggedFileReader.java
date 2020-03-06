@@ -21,7 +21,7 @@ public class TextTaggedFileReader implements TaggedFileReader {
   private List<TaggedWord> next;
 
   public TextTaggedFileReader(TaggedFileRecord record) {
-    filename = record.file;
+    filename = record.filename();
     try {
       reader = new BufferedReader(new InputStreamReader
                                   (new FileInputStream(filename), 

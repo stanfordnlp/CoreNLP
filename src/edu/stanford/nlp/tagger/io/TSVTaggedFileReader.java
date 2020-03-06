@@ -22,7 +22,7 @@ public class TSVTaggedFileReader implements TaggedFileReader {
   private static final int DEFAULT_TAG_COLUMN = 1;
 
   public TSVTaggedFileReader(TaggedFileRecord record) {
-    filename = record.file;
+    filename = record.filename();
     try {
       reader = new BufferedReader(new InputStreamReader
                                   (new FileInputStream(filename),
