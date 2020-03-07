@@ -38,3 +38,11 @@ or issue a pull request on our
 | Name | Language | Description | Group | Version | Requires | Download |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Russian CoreNLP | Russian | POS and Parsing for Russian.  More info [here](https://github.com/MANASLU8/CoreNLP) | ITMO University | 1.0.0 | latest code on GitHub | [stanford-russian-corenlp-models.jar](https://drive.google.com/file/d/1_0oU8BOiYCqHvItSsz0BjJnSNp8PRWlC/view?usp=sharing) |
+
+
+
+
+| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |
