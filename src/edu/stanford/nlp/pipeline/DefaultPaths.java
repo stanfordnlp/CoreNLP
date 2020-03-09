@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
  */
 public class DefaultPaths {
 
-  public static final String DEFAULT_POS_MODEL = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
+  public static final String DEFAULT_POS_MODEL = "edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger";
 
   public static final String DEFAULT_PARSER_MODEL = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
 

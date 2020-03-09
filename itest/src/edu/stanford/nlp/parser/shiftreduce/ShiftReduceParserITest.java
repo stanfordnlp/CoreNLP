@@ -20,7 +20,7 @@ public class ShiftReduceParserITest extends TestCase {
     synchronized(ShiftReduceParserITest.class) {
       if (englishParser == null) {
         englishParser = ShiftReduceParser.loadModel("edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-        englishTagger = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger");
+        englishTagger = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger");
       }
     }
   }

@@ -73,8 +73,8 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
 
   private static final String[] englishTaggers = {
-    "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger",
-    "edu/stanford/nlp/models/pos-tagger/english-bidirectional/english-bidirectional-distsim.tagger",
+    "edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger",
+    "edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger",
     "edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
   };
 
@@ -101,10 +101,10 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
 
   private static final String[] germanTaggers = {
-    "edu/stanford/nlp/models/pos-tagger/german/german-fast.tagger",
-    "edu/stanford/nlp/models/pos-tagger/german/german-fast-caseless.tagger",
-    // "edu/stanford/nlp/models/pos-tagger/german/german-dewac.tagger", // No longer supported; always worse than hgc
-    "edu/stanford/nlp/models/pos-tagger/german/german-hgc.tagger"
+    "edu/stanford/nlp/models/pos-tagger/german-fast.tagger",
+    "edu/stanford/nlp/models/pos-tagger/german-fast-caseless.tagger",
+    // "edu/stanford/nlp/models/pos-tagger/german-dewac.tagger", // No longer supported; always worse than hgc
+    "edu/stanford/nlp/models/pos-tagger/german-hgc.tagger"
   };
 
   private static final String[] germanParsers = {
@@ -127,7 +127,7 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
   }
 
   private static final String[] germanUDTaggers = {
-    "edu/stanford/nlp/models/pos-tagger/german/german-ud.tagger",
+    "edu/stanford/nlp/models/pos-tagger/german-ud.tagger",
   };
 
   private static final String[] germanUDParsers = {
@@ -145,7 +145,7 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
 
   private static final String[] chineseTaggers = {
-    "edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger",
+    "edu/stanford/nlp/models/pos-tagger/chinese-distsim.tagger",
   };
 
   private static final String[] chineseParsers = {
@@ -173,8 +173,8 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
 
   private static final String[] spanishTaggers = {
-    "edu/stanford/nlp/models/pos-tagger/spanish/spanish.tagger",
-    "edu/stanford/nlp/models/pos-tagger/spanish/spanish-distsim.tagger",
+    "edu/stanford/nlp/models/pos-tagger/spanish.tagger",
+    "edu/stanford/nlp/models/pos-tagger/spanish-distsim.tagger",
   };
 
   private static final String[] spanishParsers = {
@@ -196,7 +196,7 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
 
   private static final String[] frenchTaggers = {
-    "edu/stanford/nlp/models/pos-tagger/french/french.tagger",
+    "edu/stanford/nlp/models/pos-tagger/french.tagger",
   };
 
   private static final String[] frenchParsers = {
@@ -218,8 +218,8 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
 
   private static final String[] arabicTaggers = {
-    "edu/stanford/nlp/models/pos-tagger/arabic/arabic-train.tagger",
-    "edu/stanford/nlp/models/pos-tagger/arabic/arabic.tagger",
+    "edu/stanford/nlp/models/pos-tagger/arabic-train.tagger",
+    "edu/stanford/nlp/models/pos-tagger/arabic.tagger",
   };
 
   private static final String[] arabicParsers = {

@@ -73,11 +73,11 @@ import java.text.DecimalFormat;
  *
  * <ul>
  * <li> A bi-directional dependency network tagger in
- *      {@code edu/stanford/nlp/models/pos-tagger/english-left3words/english-bidirectional-distsim.tagger}.
+ *      {@code edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger}.
  *      Its accuracy was 97.32% on Penn Treebank WSJ secs. 22-24.</li>
  * <li> A model using only left second-order sequence information and similar but less
  *      unknown words and lexical features as the previous model in
- *      {@code edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger}
+ *      {@code edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger}
  *      This tagger runs a lot faster, and is recommended for general use.
  *      Its accuracy was 96.92% on Penn Treebank WSJ secs. 22-24.</li>
  * </ul>
@@ -247,7 +247,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   public static final String DEFAULT_NLP_GROUP_MODEL_PATH =
     new File(TAGGER_HOME, "english-left3words-distsim.tagger").getPath();
   public static final String DEFAULT_JAR_PATH =
-    "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
+    "edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger";
   public static final String DEFAULT_DISTRIBUTION_PATH =
     "models/english-left3words-distsim.tagger";
 
@@ -313,7 +313,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    *        {@code /u/nlp/data/pos-tagger/wsj3t0-18-left3words/left3words-wsj-0-18.tagger}.
    *        However, if it starts with "https?://" it will be interpreted as a URL.
    *        One can also load models directly from the classpath, as in loading from
-   *        {@code edu/stanford/nlp/models/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger}.
+   *        {@code edu/stanford/nlp/models/pos-tagger/bidirectional-distsim-wsj-0-18.tagger}.
    * @param config TaggerConfig based on command-line arguments
    * @param printLoading Whether to print a message saying what model file is being loaded and how long it took when finished.
    * @throws RuntimeIOException if I/O errors or serialization errors
