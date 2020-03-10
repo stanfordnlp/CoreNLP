@@ -40,6 +40,7 @@ public class Treebanks  {
     log.info("\t-pennPrint\t-encoding enc\t-tlp class\t-sentenceLengths");
     log.info("\t-summary\t-decimate\t-yield\t-correct\t-punct");
     log.info("\t-oneLine\t-words\t-taggedWords\t-annotate options");
+    log.info("\t-filter <class>: class implements Predicate<Tree>, this filters trees which return false");
   }
 
   /**
