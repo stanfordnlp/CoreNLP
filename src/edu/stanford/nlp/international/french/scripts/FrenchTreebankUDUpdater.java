@@ -13,23 +13,33 @@ public class FrenchTreebankUDUpdater {
 
   public static HashMap<String,String> wordToSplit = new HashMap<>();
 
-  public static HashSet<String> mwtWords;
-
   public static HashSet<String> acceptableMWTPostSplitTags;
 
   public static HashSet<String> acceptableHyphenMergeTags;
 
+  public static String taggerPath = "edu/stanford/nlp/models/pos-tagger/french-ud.tagger";
+
   static {
+    // Note in the French GSD UD data the standard is to go lower case regardless if the
+    // MWT is capitalized
     wordToSplit.put("au", "à,le");
     wordToSplit.put("aux", "à,les");
+    wordToSplit.put("auxquelles", "à,lesquelles");
+    wordToSplit.put("auxquels", "à,lesquels");
+    wordToSplit.put("auquel", "à,lequel");
     wordToSplit.put("des", "de,les");
+    wordToSplit.put("desquelles", "de,lesquelles");
     wordToSplit.put("du", "de,le");
-    wordToSplit.put("Au", "À,le");
-    wordToSplit.put("Aux", "À,les");
-    wordToSplit.put("Des", "De,les");
-    wordToSplit.put("Du", "De,le");
-
-    mwtWords = new HashSet<>(Arrays.asList("Au", "au", "Aux", "aux", "Des", "des", "Du", "du"));
+    wordToSplit.put("duquel", "de,lequel");
+    wordToSplit.put("Au", "à,le");
+    wordToSplit.put("Aux", "à,les");
+    wordToSplit.put("Auxquelles", "à,lesquelles");
+    wordToSplit.put("Auxquels", "à,lesquels");
+    wordToSplit.put("Auquel", "à,lequel");
+    wordToSplit.put("Des", "de,les");
+    wordToSplit.put("Desquelles", "de,lesquelles");
+    wordToSplit.put("Du", "de,le");
+    wordToSplit.put("Duquel", "de,lequel");
 
     acceptableMWTPostSplitTags = new HashSet<>(Arrays.asList("N", "ADV", "ADJ", "DET", "V", "NC"));
 
@@ -149,6 +159,7 @@ public class FrenchTreebankUDUpdater {
     TreeFactory tf = new LabeledScoredTreeFactory();
     Reader r = new BufferedReader(new InputStreamReader(new FileInputStream(args[0]), "UTF-8"));
     TreeReader tr = new PennTreeReader(r, tf);
+    TreebankTagUpdater tagUpdater = new TreebankTagUpdater(taggerPath);
     /** iterate through trees **/
     Tree fullTree = tr.readTree();
     while (fullTree != null) {
@@ -180,11 +191,7 @@ public class FrenchTreebankUDUpdater {
         fixNPWithHyphen(matchTree);
       }
 
-      // mwt splits
-      TregexPattern mwtWordPattern = TregexPattern.compile("(P < /(A|a)u|(A|a)ux|(D|d)es|(D|d)u/)");
-      TregexMatcher mwtMatcher;
-
-      pattern = TregexPattern.compile("/PP|MWP|MWADV|NP|MWN/ < (P < /(A|a)u|(A|a)ux|(D|d)es|(D|d)u/)");
+      pattern = TregexPattern.compile("/PP|MWP|MWADV|NP|MWN/ < (P < /^((A|a)u|(A|a)ux|(D|d)es|(D|d)u)$/)");
       matcher = pattern.matcher(fullTree);
       while (matcher.find()) {
         Tree matchTree = matcher.getMatch();
@@ -194,7 +201,7 @@ public class FrenchTreebankUDUpdater {
           // handle basic
           if (childrenList.get(i).isPreTerminal() &&
               childrenList.get(i).value().equals("P") &&
-              mwtWords.contains(childrenList.get(i).getLeaves().get(0).value()) &&
+              wordToSplit.keySet().contains(childrenList.get(i).getLeaves().get(0).value()) &&
               childrenList.get(i+1).isPreTerminal() &&
               acceptableMWTPostSplitTags.contains(childrenList.get(i+1).value())) {
             System.err.println("---");
@@ -212,7 +219,7 @@ public class FrenchTreebankUDUpdater {
             System.err.println(matchTree);
           } else if (childrenList.get(i).isPreTerminal() &&
               childrenList.get(i).value().equals("P") &&
-              mwtWords.contains(childrenList.get(i).getLeaves().get(0).value()) && childrenList.get(i+1).value().equals("NP")) {
+              wordToSplit.keySet().contains(childrenList.get(i).getLeaves().get(0).value()) && childrenList.get(i+1).value().equals("NP")) {
             String mwtWord = childrenList.get(i).getLeaves().get(0).value();
             Tree npNode = childrenList.get(i+1);
             // add DET to NP
@@ -241,7 +248,7 @@ public class FrenchTreebankUDUpdater {
             List<Tree> mwpChildren = mwpNode.getChildrenAsList();
             Tree lastMWPWord = mwpChildren.get(mwpChildren.size()-1);
             if (mwpChildren.get(mwpChildren.size()-1).isPreTerminal() &&
-                mwtWords.contains(lastMWPWord.getLeaves().get(0).value())) {
+                wordToSplit.keySet().contains(lastMWPWord.getLeaves().get(0).value())) {
               String mwtWord = lastMWPWord.getLeaves().get(0).value();
               Tree npNode = childrenList.get(i+1);
               // add DET to NP
@@ -256,7 +263,35 @@ public class FrenchTreebankUDUpdater {
         }
       }
 
+      // handles auxquelles
+      pattern = TregexPattern.compile(
+          "PP < (NP < (PROREL < /^(A|a)uxquelles$|^(A|a)uxquels$|^(D|d)esquelles$|(D|d)uquel/))");
+      matcher = pattern.matcher(fullTree);
+      while (matcher.find()) {
+        Tree matchTree = matcher.getMatch();
+        if (matchTree.getChildrenAsList().size() == 1) {
+          Tree npTree = matchTree.getChildrenAsList().get(0);
+          if (npTree.getChildrenAsList().size() == 1) {
+            Tree prorelTree = npTree.getChildrenAsList().get(0);
+            String mwtWord = prorelTree.getLeaves().get(0).value();
+            System.err.println(mwtWord);
+            if (wordToSplit.keySet().contains(mwtWord)) {
+              System.err.println("---");
+              System.err.println("SPLITTING PROREL");
+              System.err.println(matchTree);
+              // add P node
+              Tree newPNode = createTagAndWordNode("P", wordToSplit.get(mwtWord).split(",")[0]);
+              matchTree.addChild(0, newPNode);
+              // change PROREL node
+              prorelTree.getLeaves().get(0).setValue(wordToSplit.get(mwtWord).split(",")[1]);
+              System.err.println(matchTree);
+            }
+          }
+        }
+      }
+
       // print updated tree
+      tagUpdater.tagTree(fullTree);
       System.out.println(fullTree);
 
       // update to next tree

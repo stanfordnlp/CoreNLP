@@ -17,6 +17,7 @@ public class FrenchTreebankTokenReport {
       "/^(A|a)ux$/",
       "/^(D|d)u$/",
       "/^(D|d)es$/",
+      "/^(A|a)uxquelles$/",
       "---",
       "P < /^(A|a)u$/",
       "P < /^(A|a)ux$/",
