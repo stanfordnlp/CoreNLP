@@ -561,7 +561,7 @@ public class AnCoraProcessor  {
     // potentially generate tags
     boolean generateTags = PropertiesUtils.getBool(options, "generateTags");
     String partOfSpeechModel = options.getProperty("generateTagsModel",
-        "edu/stanford/nlp/models/pos-tagger/spanish.tagger");
+        "edu/stanford/nlp/models/pos-tagger/spanish-ud.tagger");
     if (generateTags && partOfSpeechModel != "") {
       TreebankTagUpdater spanishTagger = new TreebankTagUpdater(partOfSpeechModel);
       for (Tree t : trees)
