@@ -513,34 +513,7 @@ public class AnCoraProcessor  {
       }
     }
   }
-
-  // helper to get tags from a tree
-  public static void getTagsFromTree(List<Tree> tags, Tree tree) {
-    if (tree.isPreTerminal()) {
-      tags.add(tree);
-    } else {
-      for (Tree t : tree.children()) {
-        getTagsFromTree(tags, t);
-      }
-    }
-  }
-
-  /** Generate tags with the provided model **/
-  public static void generateTagsForTree(StanfordCoreNLP pipeline, Tree tree) {
-    // get words
-    List<Tree> leaves = tree.getLeaves();
-    String sentenceWords = leaves.stream().map(t -> t.label().value()).collect(Collectors.joining(" "));
-    // get tag nodes
-    List<Tree> tags = new ArrayList<Tree>();
-    getTagsFromTree(tags, tree);
-    // tag
-    CoreDocument annotatedWords = pipeline.processToCoreDocument(sentenceWords);
-    // update tree
-    for (int idx = 0 ; idx < tags.size() ; idx++) {
-      tags.get(idx).setLabel(CoreLabel.wordFromString(annotatedWords.tokens().get(idx).tag()));
-    }
-  }
-
+  
   private static final String usage =
     String.format(
         "Usage: java %s [OPTIONS] file(s)%n%n", AnCoraProcessor.class.getName()) +
@@ -590,14 +563,9 @@ public class AnCoraProcessor  {
     String partOfSpeechModel = options.getProperty("generateTagsModel",
         "edu/stanford/nlp/models/pos-tagger/spanish/spanish-ud.tagger");
     if (generateTags && partOfSpeechModel != "") {
-      Properties props = new Properties();
-      props.setProperty("annotators", "tokenize,ssplit,pos");
-      props.setProperty("tokenize.whitespace", "true");
-      props.setProperty("ssplit.isOneSentence", "true");
-      props.setProperty("pos.model", partOfSpeechModel);
-      StanfordCoreNLP spanishPartOfSpeechPipeline = new StanfordCoreNLP(props);
+      TreebankTagUpdater spanishTagger = new TreebankTagUpdater(partOfSpeechModel);
       for (Tree t : trees)
-        generateTagsForTree(spanishPartOfSpeechPipeline,t);
+        spanishTagger.tagTree(t);
     }
 
     // print out final trees
