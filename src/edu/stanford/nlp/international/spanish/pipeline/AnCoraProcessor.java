@@ -513,7 +513,7 @@ public class AnCoraProcessor  {
       }
     }
   }
-  
+
   private static final String usage =
     String.format(
         "Usage: java %s [OPTIONS] file(s)%n%n", AnCoraProcessor.class.getName()) +
@@ -561,7 +561,7 @@ public class AnCoraProcessor  {
     // potentially generate tags
     boolean generateTags = PropertiesUtils.getBool(options, "generateTags");
     String partOfSpeechModel = options.getProperty("generateTagsModel",
-        "edu/stanford/nlp/models/pos-tagger/spanish/spanish-ud.tagger");
+        "edu/stanford/nlp/models/pos-tagger/spanish.tagger");
     if (generateTags && partOfSpeechModel != "") {
       TreebankTagUpdater spanishTagger = new TreebankTagUpdater(partOfSpeechModel);
       for (Tree t : trees)
