@@ -1,7 +1,11 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees.treebank;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.stanford.nlp.trees.FilteringTreebank;
+import edu.stanford.nlp.trees.MemoryTreebank;
+import edu.stanford.nlp.trees.Tree;
 
 import junit.framework.TestCase;
 
