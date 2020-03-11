@@ -2,6 +2,7 @@ package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Interner;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -55,6 +56,11 @@ public class Distsim implements Serializable {
       }
     }
 
+    // should work better than String.intern()
+    // interning the strings like this means they should be serialized
+    // in an interned manner, saving disk space and also memory when
+    // loading them back in
+    Interner<String> interner = new Interner<>();
     lexicon = Generics.newHashMap();
     // todo [cdm 2016]: Note that this loads file with default file encoding rather than specifying it
     for (String word : ObjectBank.getLineIterator(new File(filename))) {
@@ -63,7 +69,7 @@ public class Distsim implements Serializable {
       if ( ! casedDistSim) {
         w = w.toLowerCase();
       }
-      lexicon.put(w, bits[1]);
+      lexicon.put(w, interner.intern(bits[1]));
     }
 
     unk = lexicon.getOrDefault("<unk>", "null");
